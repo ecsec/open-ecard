@@ -21,22 +21,4 @@
 		<module>richclient-bundle</module>
 	</modules>
 
-	<profiles>
-		<profile>
-			<id>android</id>
-			<activation>
-				<!-- activate android when sdk path is defined -->
-				<!--
-				<property>
-					<name>env.ANDROID_HOME</name>
-				</property>
-				-->
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<modules>
-				<module>android</module>
-			</modules>
-		</profile>
-	</profiles>
-
 </project>

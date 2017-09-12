@@ -63,7 +63,7 @@
 		<maven.min.version>3.3.3</maven.min.version>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
-		<android.api.version>19</android.api.version>
+		<android.api.version>17</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
@@ -426,11 +426,14 @@
 					<version>1.8</version>
 				</plugin>
 				<plugin>
-					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+					<groupId>com.simpligility.maven.plugins</groupId>
 					<artifactId>android-maven-plugin</artifactId>
-					<version>4.0.0-rc.2</version>
+					<version>4.5.0-jarfix</version>
+					<extensions>true</extensions>
 					<configuration>
-						<extractDuplicates>true</extractDuplicates>
+						<sdk>
+							<platform>${android.api.version}</platform>
+						</sdk>
 					</configuration>
 				</plugin>
 				<plugin>

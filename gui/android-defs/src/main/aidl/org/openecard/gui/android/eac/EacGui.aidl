@@ -32,7 +32,7 @@ interface EacGui {
 	 * Gets the server data according to the CertificateDescription data structure.
 	 */
 	ServerData getServerData();
-	void selectAttributes(in List<BoxItem> readAccessAttr, in List<BoxItem> writeAccessAttr);
+	void selectAttributes(in List<BoxItem> readAccessAttr/*, in List<BoxItem> writeAccessAttr*/);
 	boolean needsCAN();
 	void enterPin(String can, String pin);
 

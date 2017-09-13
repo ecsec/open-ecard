@@ -41,7 +41,7 @@ public class ServerData extends AbstractParcelable<ServerData> {
 
     public ServerData(@Nonnull String subject, @Nonnull String subjectUrl, @Nonnull TermsOfUsage termsOfUsage,
 	    @Nonnull String validity, @Nonnull String issuer, @Nonnull String issuerUrl,
-	    @Nonnull List<BoxItem> readAccessAttributes, @Nonnull List<BoxItem> writeAccessAttributes) {
+	    @Nonnull List<BoxItem> readAccessAttributes/*, @Nonnull List<BoxItem> writeAccessAttributes*/) {
 	this.subject = subject;
 	this.subjectUrl = subjectUrl;
 	this.termsOfUsage = termsOfUsage;
@@ -49,7 +49,7 @@ public class ServerData extends AbstractParcelable<ServerData> {
 	this.issuer = issuer;
 	this.issuerUrl = issuerUrl;
 	this.readAccessAttributes = readAccessAttributes;
-	this.writeAccessAttributes = writeAccessAttributes;
+	//this.writeAccessAttributes = writeAccessAttributes;
     }
 
     private ServerData(Parcel src) {
@@ -58,23 +58,23 @@ public class ServerData extends AbstractParcelable<ServerData> {
 
 
     @Serialize
-    private String subject;
+    protected String subject;
     @Serialize
-    private String subjectUrl;
+    protected String subjectUrl;
     @Serialize
-    private TermsOfUsage termsOfUsage;
+    protected TermsOfUsage termsOfUsage;
     // Format: "from $date to $date"
     @Serialize
-    private String validity;
+    protected String validity;
     @Serialize
-    private String issuer;
+    protected String issuer;
     @Serialize
-    private String issuerUrl;
+    protected String issuerUrl;
 
     @Serialize
-    private List<BoxItem> readAccessAttributes;
-    @Serialize
-    private List<BoxItem> writeAccessAttributes;
+    protected List<BoxItem> readAccessAttributes;
+//    @Serialize
+//    protected List<BoxItem> writeAccessAttributes;
 
 
     public String getSubject() {
@@ -105,8 +105,8 @@ public class ServerData extends AbstractParcelable<ServerData> {
 	return readAccessAttributes;
     }
 
-    public List<BoxItem> getWriteAccessAttributes() {
-	return writeAccessAttributes;
-    }
+//    public List<BoxItem> getWriteAccessAttributes() {
+//	return writeAccessAttributes;
+//    }
 
 }

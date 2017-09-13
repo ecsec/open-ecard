@@ -53,9 +53,9 @@ public class TermsOfUsage extends AbstractParcelable<TermsOfUsage> {
      * One of {@code application/pdf}, {@code text/html}, or {@code text/plain}
      */
     @Serialize
-    private String mimeType;
+    protected String mimeType;
     @Serialize
-    private byte[] data;
+    protected byte[] data;
 
     public String getMimeType() {
 	return mimeType;

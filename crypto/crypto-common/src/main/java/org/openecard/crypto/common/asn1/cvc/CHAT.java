@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,7 +27,6 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.annotation.concurrent.Immutable;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.TagClass;
@@ -49,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class CHAT {
 
-    private static final Logger _logger = LoggerFactory.getLogger(CHAT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CHAT.class);
 
     private final String oid;
     private final Role role;
@@ -88,7 +87,8 @@ public final class CHAT {
     public enum DataGroup {
 	DG01, DG02, DG03, DG04, DG05, DG06, DG07,
 	DG08, DG09, DG10, DG11, DG12, DG13, DG14,
-	DG15, DG16, DG17, DG18, DG19, DG20, DG21;
+	DG15, DG16, DG17, DG18, DG19, DG20, DG21,
+	DG22;
     }
 
     /**
@@ -165,10 +165,10 @@ public final class CHAT {
     private void initMaps() {
 	// eID rights
 	DataGroup[] dataGroups = DataGroup.values();
-	for (int i = 16; i < 21; i++) {
+	for (int i = 16; i < 22; i++) {
 	    writeAccess.put(dataGroups[i], false);
 	}
-	for (int i = 0; i < 21; i++) {
+	for (int i = 0; i < 22; i++) {
 	    readAccess.put(dataGroups[i], false);
 	}
 	// Special eID functions
@@ -238,7 +238,7 @@ public final class CHAT {
      */
     private void parseWriteAccess(byte[] discretionaryData) {
 	Iterator<DataGroup> it = writeAccess.keySet().iterator();
-	for (int i = 2; i < 6; i++) {
+	for (int i = 2; i < 8; i++) {
 	    DataGroup item = it.next();
 	    writeAccess.put(item, ByteUtils.isBitSet(i, discretionaryData));
 	}
@@ -251,7 +251,7 @@ public final class CHAT {
      */
     private void parseReadAccess(byte[] discretionaryData) {
 	Iterator<DataGroup> it = readAccess.keySet().iterator();
-	for (int i = 31; i > 11; i--) {
+	for (int i = 31; i > 10; i--) {
 	    DataGroup item = it.next();
 	    readAccess.put(item, ByteUtils.isBitSet(i, discretionaryData));
 	}
@@ -526,18 +526,18 @@ public final class CHAT {
 		break;
 	}
 
-	// Decode write access in bit 2 to 6.
+	// Decode write access in bit 2 to 8.
 	Iterator<DataGroup> it1 = writeAccess.keySet().iterator();
-	for (int i = 2; i < 6; i++) {
+	for (int i = 2; i < 8; i++) {
 	    DataGroup item = it1.next();
 	    if (writeAccess.get(item)) {
 		ByteUtils.setBit(i, data);
 	    }
 	}
 
-	// Decode read access in bit 11 to 31.
+	// Decode read access in bit 10 to 31.
 	Iterator<DataGroup> it2 = readAccess.keySet().iterator();
-	for (int i = 31; i > 11; i--) {
+	for (int i = 31; i > 10; i--) {
 	    DataGroup item = it2.next();
 	    if (readAccess.get(item)) {
 		ByteUtils.setBit(i, data);
@@ -602,7 +602,7 @@ public final class CHAT {
 	try {
 	    return ByteUtils.toHexString(toByteArray(), true);
 	} catch (TLVException ex) {
-	    _logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    return null;
 	}
     }
@@ -612,7 +612,7 @@ public final class CHAT {
 	try {
 	    return ByteUtils.toHexString(toByteArray());
 	} catch (TLVException ex) {
-	    _logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    return null;
 	}
     }

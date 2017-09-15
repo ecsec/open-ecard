@@ -83,6 +83,11 @@
 			<artifactId>genericcryptography</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>chipgateway</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

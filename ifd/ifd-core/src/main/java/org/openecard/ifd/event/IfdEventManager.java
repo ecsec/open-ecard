@@ -25,8 +25,6 @@ package org.openecard.ifd.event;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.Wait;
@@ -109,18 +107,6 @@ public class IfdEventManager {
     public synchronized void terminate() {
 	watcher.cancel(true);
 	threadPool.shutdownNow();
-    }
-
-    @Nonnull
-    protected List<IFDStatusType> ifdStatus() throws WSException {
-	GetStatus status = new GetStatus();
-	status.setContextHandle(ctx);
-	GetStatusResponse statusResponse = env.getIFD().getStatus(status);
-	List<IFDStatusType> result;
-
-	WSHelper.checkResult(statusResponse);
-	result = statusResponse.getIFDStatus();
-	return result;
     }
 
     @Nonnull

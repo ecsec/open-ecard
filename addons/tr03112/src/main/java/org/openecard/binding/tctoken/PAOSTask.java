@@ -34,6 +34,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.util.HandlerUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSConnectionException;
@@ -77,7 +78,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    // Create StartPAOS message
 	    StartPAOS sp = new StartPAOS();
 	    sp.setProfile(ECardConstants.Profile.ECARD_1_1);
-	    sp.getConnectionHandle().add(connectionHandle);
+	    sp.getConnectionHandle().add(getHandleForServer());
 	    sp.setSessionIdentifier(tlsHandler.getSessionId());
 
 	    StartPAOS.UserAgent ua = new StartPAOS.UserAgent();
@@ -100,4 +101,12 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    TCTokenHandler.killUserConsent();
 	}
     }
+
+    private ConnectionHandleType getHandleForServer() {
+	ConnectionHandleType result = HandlerUtils.copyHandle(connectionHandle);
+	// this is our own extension and servers might not understand it
+	result.setSlotInfo(null);
+	return result;
+    }
+
 }

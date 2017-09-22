@@ -187,7 +187,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.15</version>
+					<version>1.16</version>
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
@@ -211,7 +211,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.13</version>
+					<version>1.14</version>
 					<configuration>
 						<licenseFile>LICENSE.Open-eCard</licenseFile>
 						<generateBundle>true</generateBundle>
@@ -221,7 +221,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.2</version>
+					<version>3.7.0</version>
 					<configuration>
 						<source>1.7</source>
 						<target>1.7</target>
@@ -272,12 +272,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20</version>
+					<version>2.20.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.20</version>
+							<version>2.20.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -288,12 +288,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.20</version>
+					<version>2.20.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.20</version>
+							<version>2.20.1</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -312,12 +312,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.0.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>2.20</version>
+					<version>2.20.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -449,7 +449,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -587,7 +587,7 @@
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.33</version>
+				<version>1.34</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -598,7 +598,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.6</version>
+				<version>4.4.7</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.android</groupId>
@@ -608,12 +608,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.0</version>
+				<version>2.9.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
-				<version>0.6.0</version>
+				<version>0.6.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
@@ -624,13 +624,13 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>4.4.0</version>
+				<version>4.5.0</version>
 				<classifier>signed</classifier>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna-platform</artifactId>
-				<version>4.4.0</version>
+				<version>4.5.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

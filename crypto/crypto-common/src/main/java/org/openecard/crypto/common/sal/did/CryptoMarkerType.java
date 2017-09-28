@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.xml.bind.JAXBElement;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -131,8 +132,7 @@ public class CryptoMarkerType extends AbstractMarkerType {
 			Node n = nodeList.item(i);
 			switch (n.getLocalName()) {
 			    case "KeyRef":
-				KeyRefType keyRef = new KeyRefType();
-				keyRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
+				KeyRefType keyRef = getCryptoKeyRef(n);
 				cryptoKeyInfo.setKeyRef(keyRef);
 				break;
 			    case "KeySize":
@@ -292,6 +292,26 @@ public class CryptoMarkerType extends AbstractMarkerType {
      */
     public StateInfo getStateInfo() {
 	throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Nullable
+    private KeyRefType getCryptoKeyRef(Node parentRef) {
+	boolean refPresent = false;
+	KeyRefType keyRef = new KeyRefType();
+	NodeList children = parentRef.getChildNodes();
+	for (int i = 0; i < children.getLength(); i++) {
+	    Node n = children.item(i);
+	    switch (n.getLocalName()) {
+		case "KeyRef":
+		    refPresent = true;
+		    keyRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
+		    break;
+		case "Protected":
+		    keyRef.setProtected(Boolean.valueOf(n.getTextContent()));
+	    }
+	}
+
+	return refPresent ? keyRef : null;
     }
 
 }

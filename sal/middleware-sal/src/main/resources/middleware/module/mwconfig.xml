@@ -8,6 +8,7 @@
 		<LibSpec>
 			<LibName>opensc-pkcs11</LibName>
 			<SearchPath>/usr/lib/pkcs11</SearchPath>
+			<SearchPath>C:\Windows\System32\</SearchPath>
 		</LibSpec>
 		<LibSpec os="Linux">
 			<LibName>opensc-pkcs11.so</LibName>

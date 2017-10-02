@@ -20,29 +20,46 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.android.eac.types;
+package org.openecard.gui.android.eac;
+
+import android.content.Context;
+import java.util.Arrays;
+import java.util.List;
+import mockit.Expectations;
+import mockit.Mocked;
+import org.openecard.gui.definition.Step;
+import org.openecard.gui.definition.UserConsentDescription;
+import org.testng.annotations.Test;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public enum PinStatus {
+public class EacGuiImplTest {
 
-    PIN,
-    CAN,
-    BLOCKED;
+    @Mocked
+    Context androidCtx;
+    @Mocked
+    UserConsentDescription ucd;
+    @Mocked
+    EacGuiService anyEacGuiService;
 
-    public boolean isBlocked() {
-	return BLOCKED == this;
+    @Test
+    public void testPinOkFirstTime() {
+	new Expectations(EacGuiImpl.class) {{
+	    anyEacGuiService.getServiceImpl(); result = new EacGuiImpl();
+	    ucd.getDialogType(); result = "EAC";
+	    ucd.getSteps(); result = createInitialSteps();
+	}};
+
+	EacNavigator nav = new EacNavigator(androidCtx, ucd);
     }
 
-    public boolean isOperational() {
-	return ! isBlocked();
-    }
+    private List<Step> createInitialSteps() {
+	Step step1 = new Step("PROTOCOL_EAC_GUI_STEP_CVC");
 
-    public boolean needsCan() {
-	return CAN == this;
+	return Arrays.asList(step1);
     }
 
 }

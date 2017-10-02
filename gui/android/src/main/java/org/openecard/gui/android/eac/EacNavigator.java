@@ -51,6 +51,8 @@ public class EacNavigator implements UserConsentNavigator {
     private EacGuiImpl guiService = null;
     private int idx = -1;
 
+    private boolean pinFirstTime = true;
+
 
     public EacNavigator(Context androidCtx, UserConsentDescription ucd) throws UnsupportedOperationException {
 	this.androidCtx = androidCtx;
@@ -62,7 +64,6 @@ public class EacNavigator implements UserConsentNavigator {
 	    // get GUI service
 	    androidCtx.startService(createGuiIntent());
 	    this.guiService = EacGuiService.getServiceImpl();
-	    this.guiService.setNavigator(this);
 	} else {
 	    throw new UnsupportedOperationException("Unsupported Dialog type requested.");
 	}
@@ -100,10 +101,20 @@ public class EacNavigator implements UserConsentNavigator {
 	    } catch (InterruptedException ex) {
 		return new AndroidResult(chatStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
 	    }
+	} else if (idx == 2) {
+	    idx++;
+	    Step pinStep = steps.get(2);
+	    try {
+		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
+	    } catch (InterruptedException ex) {
+		return new AndroidResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+	    }
+	} else {
+	    Step s = steps.get(idx);
+	    idx++;
+	    return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
 	}
-
-
-	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -130,7 +141,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public void setRunningAction(Future<?> action) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	// don't care about the action
     }
 
     @Override

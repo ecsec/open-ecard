@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -132,6 +132,7 @@ public class PINStep extends Step {
 
     protected void addCANEntry() {
 	PasswordField canField = new PasswordField(CAN_FIELD);
+	canField.setID("CAN");
 	canField.setDescription(langPace.translationForKey("can"));
 	canField.setMaxLength(6);
 	canField.setMinLength(6);

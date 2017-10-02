@@ -33,7 +33,7 @@ import java.lang.reflect.Constructor;
  * @author Tobias Wich
  * @param <T>
  */
-public class ParcelableCreator <T> implements Parcelable.Creator<T> {
+public class ParcelableCreator <T extends Parcelable> implements Parcelable.Creator<T> {
 
     private final Class<T> clazz;
     private final Constructor<T> ctor;

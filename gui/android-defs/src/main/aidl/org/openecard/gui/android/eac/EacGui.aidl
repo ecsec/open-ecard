@@ -32,8 +32,30 @@ interface EacGui {
 	 * Gets the server data according to the CertificateDescription data structure.
 	 */
 	ServerData getServerData();
-	void selectAttributes(in List<BoxItem> readAccessAttr/*, in List<BoxItem> writeAccessAttr*/);
-	boolean needsCAN();
-	void enterPin(String can, String pin);
+
+	/**
+	 * Sends the selection made by the user back to the service.
+	 * The selection should be made based on the values received in the ServerInfo. The values must not be null.
+	 */
+	void selectAttributes(in List<BoxItem> readAccessAttr, in List<BoxItem> writeAccessAttr);
+
+	/**
+	 * Get status of the PIN on the card.
+	 * This method uses the name value of the PinStatus enum type. The enum type has values to check whether CAN must be
+	 * entered or whether the PIN is operational.
+	 */
+	String getPinStatus();
+
+	/**
+	 * Enter the PIN and if needed also the CAN.
+	 * In case the CAN is not needed, the parameter may be null.
+	 * @return rue if PIN is accepted, false otherwise.
+	 */
+	boolean enterPin(String can, String pin);
+
+	/**
+	 * Cancel EAC process.
+	 */
+	void cancel();
 
 }

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich
  * @param <T>
  */
-public abstract class AbstractParcelable <T> implements Parcelable {
+public abstract class AbstractParcelable <T extends AbstractParcelable> implements Parcelable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractParcelable.class);
 

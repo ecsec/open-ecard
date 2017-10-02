@@ -276,6 +276,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // define GUI depending on the PIN status
 	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
+	    uc.setDialogType("EAC");
 	    if (pinUsable) {
 		// create GUI and init executor
 		CardMonitor cardMon = new CardMonitor();

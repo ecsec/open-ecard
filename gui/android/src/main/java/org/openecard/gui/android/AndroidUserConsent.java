@@ -48,6 +48,8 @@ public class AndroidUserConsent implements UserConsent {
 	String dialogType = uc.getDialogType();
 	if ("EAC".equals(dialogType)) {
 	    return new EacNavigator(androidCtx, uc);
+	} else if ("insert_card_dialog".equals(dialogType)) {
+	    return new InsertCardNavigator(uc);
 	} else {
 	    throw new UnsupportedOperationException("Not supported yet.");
 	}

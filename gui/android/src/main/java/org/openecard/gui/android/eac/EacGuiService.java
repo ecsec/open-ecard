@@ -33,9 +33,22 @@ import android.os.IBinder;
  */
 public class EacGuiService extends Service {
 
+    private static EacGuiImpl serviceImpl;
+
+    @Override
+    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
+	EacGuiService.serviceImpl = new EacGuiImpl();
+	return super.onStartCommand(intent, flags, startId);
+    }
+
+    public static synchronized EacGuiImpl getServiceImpl() {
+	return serviceImpl;
+    }
+
+
     @Override
     public IBinder onBind(Intent intent) {
-	return null;
+	return serviceImpl;
     }
 
 }

@@ -133,7 +133,7 @@ public class InsertCardDialog {
      * @return A {@link UserConsentDescription} which may be executed by the {@link ExecutionEngine}.
      */
     private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title", AppVersion.getName()));
+	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title", AppVersion.getName()), "insert_card_dialog");
 
 	// create step
 	Step s = new Step(STEP_ID, lang.translationForKey("step.title"));

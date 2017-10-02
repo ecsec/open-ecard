@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,7 +44,7 @@ import org.openecard.sal.protocol.eac.EACData;
  */
 public class CHATStep extends Step {
 
-    private static final I18n lang = I18n.getTranslation("eac");
+    private static final I18n LANG = I18n.getTranslation("eac");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CHAT";
     // GUI translation constants
@@ -64,8 +64,8 @@ public class CHATStep extends Step {
     public CHATStep(EACData eacData) {
 	super(STEP_ID);
 	this.eacData = eacData;
-	setTitle(lang.translationForKey(TITLE));
-	setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	setTitle(LANG.translationForKey(TITLE));
+	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
@@ -73,27 +73,28 @@ public class CHATStep extends Step {
 
     public static Step createDummy() {
 	Step s = new Step(STEP_ID);
-	s.setTitle(lang.translationForKey(TITLE));
-	s.setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	s.setTitle(LANG.translationForKey(TITLE));
+	s.setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 	return s;
     }
 
     private void addElements() {
 	Text decription = new Text();
-	String decriptionText = lang.translationForKey(DESCRIPTION, eacData.certificateDescription.getSubjectName());
+	String decriptionText = LANG.translationForKey(DESCRIPTION, eacData.certificateDescription.getSubjectName());
 	decription.setText(decriptionText);
 	getInputInfoUnits().add(decription);
 
 	// process read access and special functions
 	Checkbox readAccessCheckBox = new Checkbox(READ_CHAT_BOXES);
+	readAccessCheckBox.setID("ReadAccess");
 	boolean displayReadAccessCheckBox = false;
-	readAccessCheckBox.setGroupText(lang.translationForKey(READ_ACCESS_DESC));
+	readAccessCheckBox.setGroupText(LANG.translationForKey(READ_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
 	Map<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
 	Map<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
 	Map<CHAT.SpecialFunction, Boolean> optionalSpecialFunctions = eacData.optionalCHAT.getSpecialFunctions();
 
-	// iterate over all 21 eID application data groups
+	// iterate over all 22 eID application data groups
 	for (CHAT.DataGroup dataGroup : requiredReadAccess.keySet()) {
 	    if (TR03119RightsFilter.isTr03119ConformReadRight(dataGroup)) {
 		if (requiredReadAccess.get(dataGroup)) {
@@ -143,8 +144,9 @@ public class CHATStep extends Step {
 
 	// process write access
 	Checkbox writeAccessCheckBox = new Checkbox(WRITE_CHAT_BOXES);
+	writeAccessCheckBox.setID("WriteAccess");
 	boolean displayWriteAccessCheckBox = false;
-	writeAccessCheckBox.setGroupText(lang.translationForKey(WRITE_ACCESS_DESC));
+	writeAccessCheckBox.setGroupText(LANG.translationForKey(WRITE_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();
 	Map<CHAT.DataGroup, Boolean> optionalWriteAccess = eacData.optionalCHAT.getWriteAccess();
 
@@ -168,8 +170,8 @@ public class CHATStep extends Step {
 	}
 
 	ToggleText requestedDataDescription = new ToggleText();
-	requestedDataDescription.setTitle(lang.translationForKey(NOTE));
-	requestedDataDescription.setText(lang.translationForKey(NOTE_CONTENT));
+	requestedDataDescription.setTitle(LANG.translationForKey(NOTE));
+	requestedDataDescription.setText(LANG.translationForKey(NOTE_CONTENT));
 	requestedDataDescription.setCollapsed(!true);
 	getInputInfoUnits().add(requestedDataDescription);
     }
@@ -180,7 +182,7 @@ public class CHATStep extends Step {
 	item.setName(value.name());
 	item.setChecked(checked);
 	item.setDisabled(disabled);
-	item.setText(lang.translationForKey(value.name(), textData));
+	item.setText(LANG.translationForKey(value.name(), textData));
 
 	return item;
     }

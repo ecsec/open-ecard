@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,9 +23,10 @@
 package org.openecard.crypto.tls.verify;
 
 import java.util.regex.Pattern;
-import org.openecard.crypto.tls.proxy.ProxySettings;
+import org.openecard.crypto.tls.proxy.ProxySettingsLoader;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 
 /**
  *
@@ -35,28 +36,28 @@ public class HostTest {
 
     @Test
     public void testPatternCreation() {
-	Assert.assertEquals(ProxySettings.parseExclusionHosts("").size(), 0);
-	Assert.assertEquals(ProxySettings.parseExclusionHosts("foo;").size(), 1);
-	Assert.assertEquals(ProxySettings.parseExclusionHosts("foo;bar;").size(), 2);
-	Assert.assertEquals(ProxySettings.parseExclusionHosts("foo;bar;;").size(), 2);
-	Assert.assertEquals(ProxySettings.parseExclusionHosts(";foo;bar;").size(), 2);
+	Assert.assertEquals(ProxySettingsLoader.parseExclusionHosts("").size(), 0);
+	Assert.assertEquals(ProxySettingsLoader.parseExclusionHosts("foo;").size(), 1);
+	Assert.assertEquals(ProxySettingsLoader.parseExclusionHosts("foo;bar;").size(), 2);
+	Assert.assertEquals(ProxySettingsLoader.parseExclusionHosts("foo;bar;;").size(), 2);
+	Assert.assertEquals(ProxySettingsLoader.parseExclusionHosts(";foo;bar;").size(), 2);
     }
 
     @Test
     public void testPatternMatch() {
-	Pattern p = ProxySettings.parseExclusionHosts("*.example.com").get(0);
+	Pattern p = ProxySettingsLoader.parseExclusionHosts("*.example.com").get(0);
 	Assert.assertTrue(p.matcher("foo.example.com").matches());
 	Assert.assertTrue(p.matcher("foo.example.com:80").matches());
 	Assert.assertFalse(p.matcher("example.com").matches());
 	Assert.assertFalse(p.matcher("example.com:80").matches());
-	p = ProxySettings.parseExclusionHosts("*.example.com:80").get(0);
+	p = ProxySettingsLoader.parseExclusionHosts("*.example.com:80").get(0);
 	Assert.assertFalse(p.matcher("foo.example.com").matches());
 	Assert.assertFalse(p.matcher("foo.example.com:443").matches());
 	Assert.assertTrue(p.matcher("foo.example.com:80").matches());
-	p = ProxySettings.parseExclusionHosts("*.example.com:*").get(0);
+	p = ProxySettingsLoader.parseExclusionHosts("*.example.com:*").get(0);
 	Assert.assertTrue(p.matcher("foo.example.com:443").matches());
 	Assert.assertTrue(p.matcher("foo.example.com:80").matches());
-	p = ProxySettings.parseExclusionHosts("*").get(0);
+	p = ProxySettingsLoader.parseExclusionHosts("*").get(0);
 	Assert.assertTrue(p.matcher("foo.example.com:443").matches());
     }
 

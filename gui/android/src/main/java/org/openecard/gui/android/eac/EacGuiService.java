@@ -23,8 +23,10 @@
 package org.openecard.gui.android.eac;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import org.openecard.common.util.Promise;
 
 
 /**
@@ -33,22 +35,43 @@ import android.os.IBinder;
  */
 public class EacGuiService extends Service {
 
-    private static EacGuiImpl serviceImpl;
+    private static Promise<EacGuiImpl> serviceImpl;
+
+    public static void prepare(Context androidCtx) {
+	// clean promise
+	serviceImpl = new Promise<>();
+
+	// start service
+	androidCtx.startService(createGuiIntent());
+    }
+
+    public static void shutdown(Context androidCtx) {
+	serviceImpl = null;
+	androidCtx.stopService(createGuiIntent());
+    }
+
+    public static synchronized Promise<EacGuiImpl> getServiceImpl() {
+	return serviceImpl;
+    }
+
+    private static Intent createGuiIntent() {
+	Intent i = new Intent(EacGuiService.class.getName());
+	return i;
+    }
 
     @Override
     public synchronized int onStartCommand(Intent intent, int flags, int startId) {
-	EacGuiService.serviceImpl = new EacGuiImpl();
+	serviceImpl.deliver(new EacGuiImpl());
 	return super.onStartCommand(intent, flags, startId);
     }
 
-    public static synchronized EacGuiImpl getServiceImpl() {
-	return serviceImpl;
-    }
-
-
     @Override
     public IBinder onBind(Intent intent) {
-	return serviceImpl;
+	try {
+	    return serviceImpl.deref();
+	} catch (InterruptedException ex) {
+	    throw new RuntimeException("Waiting for EacGuiImpl interrupted.");
+	}
     }
 
 }

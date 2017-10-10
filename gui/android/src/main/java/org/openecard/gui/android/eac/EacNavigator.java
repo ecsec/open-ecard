@@ -62,16 +62,15 @@ public class EacNavigator implements UserConsentNavigator {
 	String dialogType = ucd.getDialogType();
 	if ("EAC".equals(dialogType)) {
 	    // get GUI service
-	    androidCtx.startService(createGuiIntent());
-	    this.guiService = EacGuiService.getServiceImpl();
+	    EacGuiService.prepare(androidCtx);
+	    try {
+		this.guiService = EacGuiService.getServiceImpl().deref();
+	    } catch (InterruptedException ex) {
+		throw new RuntimeException("Waiting for UI implementation timed out.");
+	    }
 	} else {
 	    throw new UnsupportedOperationException("Unsupported Dialog type requested.");
 	}
-    }
-
-    private Intent createGuiIntent() {
-	Intent i = new Intent(EacGuiService.class.getName());
-	return i;
     }
 
 
@@ -146,7 +145,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public void close() {
-	androidCtx.stopService(createGuiIntent());
+	EacGuiService.shutdown(androidCtx);
     }
 
 }

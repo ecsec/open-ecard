@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2016 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -85,12 +85,17 @@ public class AddonManager {
      * @param userConsent
      * @param cardStates
      * @param view
+     * @param registry
      * @throws WSMarshallerException
      */
-    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view)
-	    throws WSMarshallerException {
+    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view,
+	    CombiningRegistry registry) throws WSMarshallerException {
 
-	this.registry = new CombiningRegistry(this);
+	if (registry == null) {
+	    this.registry = new ClasspathAndFileRegistry(this);
+	} else {
+	    this.registry = registry;
+	}
 	this.protectedRegistry = getProtectedRegistry(registry);
 	this.env = env;
 	this.userConsent = userConsent;
@@ -105,6 +110,11 @@ public class AddonManager {
 		loadLoadOnStartAddons();
 	    }
 	}, "Init-Addons").start();
+    }
+
+    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view)
+	    throws WSMarshallerException {
+	this(env, userConsent, cardStates, view, null);
     }
 
     /**
@@ -201,18 +211,21 @@ public class AddonManager {
      * @return Protected registry instance.
      */
     private static AddonRegistry getProtectedRegistry(AddonRegistry registry) {
-	ClassLoader cl = AddonManager.class.getClassLoader();
-	Class<?>[] interfaces = new Class<?>[] { AddonRegistry.class };
-	InvocationHandler handler = new FacadeInvocationHandler(registry);
-	Object o = Proxy.newProxyInstance(cl, interfaces, handler);
-	return (AddonRegistry) o;
+	if (registry != null) {
+	    ClassLoader cl = AddonManager.class.getClassLoader();
+	    Class<?>[] interfaces = new Class<?>[] { AddonRegistry.class };
+	    InvocationHandler handler = new FacadeInvocationHandler(registry);
+	    Object o = Proxy.newProxyInstance(cl, interfaces, handler);
+	    return (AddonRegistry) o;
+	}
+	return null;
     }
 
     /**
      * Get the CombiningRigistry.
      *
      * @return A {@link AddonRegistry} object which provides access just to the interface methods of the
-     * {@link CombiningRegistry}.
+     * {@link ClasspathAndFileRegistry}.
      */
     public AddonRegistry getRegistry() {
 	return protectedRegistry;
@@ -420,7 +433,10 @@ public class AddonManager {
      */
     public void uninstallAddon(@Nonnull AddonSpecification addonSpec) {
 	// unloading is done by the PluginDirectoryAlterationListener
-	registry.getFileRegistry().uninstallAddon(addonSpec);
+	FileRegistry fileRegistry = registry.getFileRegistry();
+	if (fileRegistry != null) {
+	    fileRegistry.uninstallAddon(addonSpec);
+	}
     }
 
 }

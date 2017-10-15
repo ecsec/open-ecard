@@ -45,10 +45,12 @@ public class NFCCard implements SCIOCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    private final NFCCardTerminal nfcCardTerminal;
     protected IsoDep isodep;
-    
-    NFCCard(IsoDep tag) {
+
+    public NFCCard(IsoDep tag, NFCCardTerminal terminal) {
 	isodep = tag;
+	nfcCardTerminal = terminal;
     }
 
     @Override
@@ -64,6 +66,7 @@ public class NFCCard implements SCIOCard {
     @Override
     public void disconnect(boolean arg0) throws SCIOException {
 	try {
+	    nfcCardChannel.close();
 	    isodep.close();
 	} catch (IOException e) {
 	    // TODO: check if the error code can be chosen more specifically
@@ -125,14 +128,21 @@ public class NFCCard implements SCIOCard {
     }
 
     @Override
-    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
+    public byte[] transmitControlCommand(int controlCode, byte[] command) throws SCIOException {
 	LOG.warn("transmitControlCommand not supported");
 	return new byte[0];
+	/*try {
+	    return isodep.transceive(command);
+	} catch (IOException ex) {
+	    String msg = String.format("Failed to transmit control command to the terminal '%s'.", nfcCardTerminal.getName());
+	    LOG.warn(msg);
+	    throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex);
+	}*/
     }
 
     @Override
     public SCIOTerminal getTerminal() {
-        return null;
+        return nfcCardTerminal;
     }
 
 }

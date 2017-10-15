@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NFCCardChannel implements SCIOChannel {
 
-    private static final Logger logger = LoggerFactory.getLogger(NFCCardChannel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
     private final NFCCard card;
     private int lengthOfLastAPDU;
 
@@ -51,7 +52,6 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public void close() throws SCIOException {
-	logger.warn("close not supported");
 	// we only have one channel and this will be open as long as we are connected to the tag
     }
 
@@ -69,6 +69,7 @@ public class NFCCardChannel implements SCIOChannel {
     public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
 	try {
 	    lengthOfLastAPDU = apdu.toByteArray().length;
+	    LOG.info("Send: {}", ByteUtils.toHexString(apdu.toByteArray(), true));
 	    return new CardResponseAPDU(card.isodep.transceive(apdu.toByteArray()));
 	} catch (IOException e) {
 	    // TODO: check if the error code can be chosen more specifically
@@ -97,12 +98,14 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public boolean isBasicChannel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return true;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean isLogicalChannel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return true;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

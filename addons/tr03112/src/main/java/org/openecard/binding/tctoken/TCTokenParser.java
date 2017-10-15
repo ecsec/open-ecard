@@ -49,7 +49,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
  */
 public class TCTokenParser {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCTokenParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TCTokenParser.class);
     private final I18n lang = I18n.getTranslation("tr03112");
     private SAXParserFactory saxFactory;
     private TCTokenSAXHandler saxHandler;
@@ -66,9 +66,10 @@ public class TCTokenParser {
 	try {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 	} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
+	    // Android doesn't support the corresponding xml feature
 	    // TODO: translate when exception changes
-	    throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
+	    //throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
 	}
     }
 
@@ -102,7 +103,7 @@ public class TCTokenParser {
 
 	    return tokens;
 	} catch (ParserConfigurationException | SAXException | IOException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    throw new InvalidTCTokenException(MALFORMED_TOKEN, ex);
 	}
     }

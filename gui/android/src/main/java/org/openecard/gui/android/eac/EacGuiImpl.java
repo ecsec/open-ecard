@@ -145,10 +145,10 @@ public class EacGuiImpl extends EacGui.Stub {
 		validity = tt.getText();
 	    } else if ("IssuerName".equals(next.getID()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
-		subject = tt.getText();
+		issuer = tt.getText();
 	    } else if ("IssuerURL".equals(next.getID()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
-		subjectUrl = tt.getText();
+		issuerUrl = tt.getText();
 	    }
 	}
 

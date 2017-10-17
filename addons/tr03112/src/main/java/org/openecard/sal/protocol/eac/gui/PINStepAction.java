@@ -62,7 +62,7 @@ public class PINStepAction extends StepAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINStepAction.class);
     
-    private static final byte[] DEAKTIVATED = new byte[] {(byte) 0x62, (byte) 0x83};
+    private static final byte[] DEACTIVATED = new byte[] {(byte) 0x62, (byte) 0x83};
     private static final byte[] RC3 = new byte[] {(byte) 0x90, (byte) 0x00};
     private static final byte[] RC1 = new byte[] {(byte) 0x63, (byte) 0xC1};
     private static final byte[] RC2 = new byte[] {(byte) 0x63, (byte) 0xC2};
@@ -114,7 +114,7 @@ public class PINStepAction extends StepAction {
 	    } else {
 		step.addNativeCANNotice();
 	    }
-	} else if (Arrays.equals(status, DEAKTIVATED)) {
+	} else if (Arrays.equals(status, DEACTIVATED)) {
 	    retryCounter = -1;
 	}
 

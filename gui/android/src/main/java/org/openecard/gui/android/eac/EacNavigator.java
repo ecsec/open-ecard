@@ -23,7 +23,6 @@
 package org.openecard.gui.android.eac;
 
 import android.content.Context;
-import android.content.Intent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,8 +49,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     private EacGuiImpl guiService = null;
     private int idx = -1;
-
-    private boolean pinFirstTime = true;
+    private boolean pinFirstUse = true;
 
 
     public EacNavigator(Context androidCtx, UserConsentDescription ucd) throws UnsupportedOperationException {
@@ -89,7 +87,7 @@ public class EacNavigator implements UserConsentNavigator {
 	if (idx == -1) {
 	    idx++;
 	    return new AndroidResult(steps.get(idx), ResultStatus.OK, Collections.EMPTY_LIST);
-	} else if (idx == 1) {
+	} else if (idx == 0) {
 	    idx++;
 	    Step cvcStep = steps.get(0);
 	    Step chatStep = steps.get(1);
@@ -100,7 +98,13 @@ public class EacNavigator implements UserConsentNavigator {
 	    } catch (InterruptedException ex) {
 		return new AndroidResult(chatStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
 	    }
-	} else if (idx == 2) {
+	} else if (idx == 1) {
+	    if (pinFirstUse) {
+		pinFirstUse = false;
+	    } else {
+		this.guiService.setPinCorrect(false);
+	    }
+
 	    idx++;
 	    Step pinStep = steps.get(2);
 	    try {
@@ -108,6 +112,21 @@ public class EacNavigator implements UserConsentNavigator {
 		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
 	    } catch (InterruptedException ex) {
 		return new AndroidResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+	    }
+	} else if (idx == 2) {
+	    idx++;
+	    Step s = steps.get(idx);
+	    if ("PROTOCOL_GUI_STEP_PROCESSING".equals(s.getID())) {
+		this.guiService.setPinCorrect(true);
+		return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
+	    } else {
+		this.guiService.setPinCorrect(false);
+		try {
+		    this.guiService.getPinResult(s);
+		    return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
+		} catch (InterruptedException ex) {
+		    return new AndroidResult(s, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+		}
 	    }
 	} else {
 	    Step s = steps.get(idx);

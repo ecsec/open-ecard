@@ -94,7 +94,12 @@ public class EacGuiImpl extends EacGui.Stub {
     @Override
     public String getPinStatus() throws RemoteException {
 	try {
-	    return pinStatus.deref();
+	    String status = pinStatus.deref();
+
+	    // renew pin status promise
+	    this.pinStatus = new Promise<>();
+
+	    return status;
 	} catch (InterruptedException ex) {
 	    throw new RemoteException("Waiting for PIN status interrupted.");
 	}

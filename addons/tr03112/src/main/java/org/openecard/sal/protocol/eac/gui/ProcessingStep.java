@@ -37,7 +37,7 @@ public class ProcessingStep extends Step {
 
     private static final I18n lang = I18n.getTranslation("eac");
     // step id
-    public static final String STEP_ID = "PROTOCOL_GUI_STEP_INIT";
+    public static final String STEP_ID = "PROTOCOL_GUI_STEP_PROCESSING";
     // GUI translation constants
     private static final String TITLE = "step_processing_title";
     private static final String STEP_DESCRIPTION = "step_processing_step_description";

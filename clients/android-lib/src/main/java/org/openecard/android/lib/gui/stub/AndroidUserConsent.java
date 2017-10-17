@@ -37,26 +37,27 @@ import org.slf4j.LoggerFactory;
  */
 public class AndroidUserConsent implements UserConsent {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AndroidUserConsent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AndroidUserConsent.class);
 
-	private AppContext ctx;
+    private final AppContext ctx;
 
-	public AndroidUserConsent(AppContext ctx) {
-		this.ctx = ctx;
-	}
+    public AndroidUserConsent(AppContext ctx) {
+	this.ctx = ctx;
+    }
 
-	@Override
-	public UserConsentNavigator obtainNavigator(UserConsentDescription userConsentDescription) {
-		return null;
-	}
+    @Override
+    public UserConsentNavigator obtainNavigator(UserConsentDescription userConsentDescription) {
+	return null;
+    }
 
-	@Override
-	public FileDialog obtainFileDialog() {
-		return null;
-	}
+    @Override
+    public FileDialog obtainFileDialog() {
+	return null;
+    }
 
-	@Override
-	public MessageDialog obtainMessageDialog() {
-		return new AndroidMessageDialog();
-	}
+    @Override
+    public MessageDialog obtainMessageDialog() {
+	return new AndroidMessageDialog();
+    }
+
 }

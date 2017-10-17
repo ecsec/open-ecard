@@ -28,9 +28,9 @@ package org.openecard.android.lib.async.tasks;
  */
 public interface ShutdownTaskResult {
 
-	/**
-	 * @param response see {@link ShutdownTaskResponse}.
-	 */
-	void setResultOfShutdownTask(ShutdownTaskResponse response);
+    /**
+     * @param response see {@link ShutdownTaskResponse}.
+     */
+    void setResultOfShutdownTask(ShutdownTaskResponse response);
 
 }

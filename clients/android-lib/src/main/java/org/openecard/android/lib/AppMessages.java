@@ -30,27 +30,17 @@ package org.openecard.android.lib;
  */
 public interface AppMessages {
 
-	String APP_RESPONSE_OK = "Initialization successfully finished.";
-
+    String APP_RESPONSE_OK = "Initialization successfully finished.";
     String APP_CONTEXT_STD_MSG = "Initialization of App context failed.";
-
     String APP_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
-
     String APP_CONTEXT_ALREADY_INITIALIZED = "AppContext already initialized.";
-
     String APP_CONTEXT_NFC_NOT_AVAILABLE = "NFC not available.";
-
-	String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
-
+    String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
     String APP_CONTEXT_UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
-
     String APP_CONTEXT_ESTABLISH_CONTEXT_FAIL = "Establish IFD context failed.";
-
     String APP_CONTEXT_CARD_REC_FAILED = "Unable to initialize card recognition.";
-    
     String APP_CONTEXT_ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
+    String APP_TERMINATE_SUCCESS = "Successfully terminated.";
+    String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
 
-	String APP_TERMINATE_SUCCESS = "Successfully terminated.";
-
-	String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
 }

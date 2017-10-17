@@ -34,47 +34,49 @@ import android.os.Parcelable;
  */
 public class AppResponse implements Parcelable {
 
-	private String message;
-	private int statusCode;
+    private final String message;
+    private final int statusCode;
 
-	public AppResponse(Parcel in) {
-		this.statusCode = in.readInt();
-		this.message = in.readString();
-	}
+    public AppResponse(Parcel in) {
+	this.statusCode = in.readInt();
+	this.message = in.readString();
+    }
 
-	public AppResponse(int statusCode, String message) {
-		this.statusCode = statusCode;
-		this.message = message;
+    public AppResponse(int statusCode, String message) {
+	this.statusCode = statusCode;
+	this.message = message;
+    }
+
+    @Override
+    public int describeContents() {
+	return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+	parcel.writeInt(statusCode);
+	parcel.writeString(message);
+    }
+
+    public String getMessage() {
+	return message;
+    }
+
+    public int getStatusCode() {
+	return statusCode;
+    }
+
+    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
+    public static final Parcelable.Creator<AppResponse> CREATOR = new Parcelable.Creator<AppResponse>() {
+	@Override
+	public AppResponse createFromParcel(Parcel in) {
+	    return new AppResponse(in);
 	}
 
 	@Override
-	public int describeContents() {
-		return 0;
+	public AppResponse[] newArray(int size) {
+	    return new AppResponse[size];
 	}
-
-	@Override
-	public void writeToParcel(Parcel parcel, int i) {
-		parcel.writeInt(statusCode);
-		parcel.writeString(message);
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public int getStatusCode() {
-		return statusCode;
-	}
-
-	// this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-	public static final Parcelable.Creator<AppResponse> CREATOR = new Parcelable.Creator<AppResponse>() {
-		public AppResponse createFromParcel(Parcel in) {
-			return new AppResponse(in);
-		}
-
-		public AppResponse[] newArray(int size) {
-			return new AppResponse[size];
-		}
-	};
+    };
 
 }

@@ -30,14 +30,14 @@ import org.openecard.android.lib.AppResponse;
  */
 public abstract class TaskResponse {
 
-	private AppResponse response;
+    private final AppResponse response;
 
-	public TaskResponse(AppResponse response) {
-		this.response = response;
-	}
+    public TaskResponse(AppResponse response) {
+	this.response = response;
+    }
 
-	public AppResponse getResponse() {
-		return response;
-	}
+    public AppResponse getResponse() {
+	return response;
+    }
 
 }

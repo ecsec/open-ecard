@@ -33,27 +33,28 @@ import org.openecard.gui.android.eac.EacGuiService;
  */
 public abstract class EacActivity extends NfcActivity {
 
-	protected static final int REQUEST_CODE_START = 1;
-	protected static final int REQUEST_CODE_TERMINATE = 2;
+    protected static final int REQUEST_CODE_START = 1;
+    protected static final int REQUEST_CODE_TERMINATE = 2;
 
-	protected Intent createGuiIntent() {
-		return new Intent(ctx, EacGuiService.class);
+    protected Intent createGuiIntent() {
+	return new Intent(ctx, EacGuiService.class);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	if ((requestCode == REQUEST_CODE_START || requestCode == REQUEST_CODE_TERMINATE) && resultCode == RESULT_OK) {
+	    AppResponse response = data.getParcelableExtra(AppConstants.INTENT_KEY_FOR_RESPONSE);
+	    handleAppResponse(response);
 	}
+    }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if ((requestCode == REQUEST_CODE_START || requestCode == REQUEST_CODE_TERMINATE)  && resultCode == RESULT_OK) {
-			AppResponse response = data.getParcelableExtra(AppConstants.INTENT_KEY_FOR_RESPONSE);
-			handleAppResponse(response);
-		}
-	}
-
-	/**
-	 * Handle responses from the Open eCard App in the Activity. Implement {@see AppResponseStatusCodes} to
-	 * get the available status codes.
-	 *
-	 * @param response of an API call.
-	 */
-	public abstract void handleAppResponse(AppResponse response);
+    /**
+     * Handle responses from the Open eCard App in the Activity. Implement {
+     *
+     * @see AppResponseStatusCodes} to get the available status codes.
+     *
+     * @param response of an API call.
+     */
+    public abstract void handleAppResponse(AppResponse response);
 
 }

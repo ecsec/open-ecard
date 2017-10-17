@@ -98,258 +98,266 @@ public class AppContext extends Application implements EventCallback, AppContext
     private boolean initialized = false;
     // true if NFC is available
     private boolean nfcAvailable = false;
-	// true if NFC is enabled (look in android settings)
-	private boolean nfcEnabled = false;
+    // true if NFC is enabled (look in android settings)
+    private boolean nfcEnabled = false;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
 
 
-    /*#########################################################
-     *                    Get-/Setter Methods
-     *#########################################################*/
+    ///
+    /// Get-/Setter Methods
+    ///
 
     public boolean isNFCAvailable() {
-        return nfcAvailable;
+	return nfcAvailable;
     }
 
     public boolean isNFCEnabled() {
-		return nfcEnabled;
-	}
+	return nfcEnabled;
+    }
 
     public boolean isInitialized() {
-        return initialized;
+	return initialized;
     }
 
     public IFD getIFD() {
-        return ifd;
+	return ifd;
     }
 
     public SelectorSAL getSAL() {
-        return sal;
+	return sal;
     }
 
     public EventDispatcher getEventDispatcher() {
-        return eventDispatcher;
+	return eventDispatcher;
     }
 
-    public byte [] getContextHandle() {
-        return contextHandle;
+    public byte[] getContextHandle() {
+	return contextHandle;
     }
 
     public TinyManagement getTinyManagement() {
-        return management;
+	return management;
     }
 
     public TerminalFactory getTerminalFactory() {
-        return terminalFactory;
+	return terminalFactory;
     }
 
     public Dispatcher getDispatcher() {
-        return dispatcher;
+	return dispatcher;
     }
 
     public CardRecognitionImpl getRecognition() {
-        return recognition;
+	return recognition;
     }
 
     public CardStateMap getCardStates() {
-        return cardStates;
+	return cardStates;
     }
 
     public ClientEnv getEnv() {
-        return env;
+	return env;
     }
 
     public UserConsent getGUI() {
-        return gui;
+	return gui;
     }
 
     public AddonManager getManager() {
-        return manager;
+	return manager;
     }
 
 
-    /*#########################################################
-     *             Initialization & Shutdown
-     *#########################################################*/
+    ///
+    /// Initialization & Shutdown
+    ///
 
     public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
-        String errorMsg = APP_CONTEXT_STD_MSG;
+	String errorMsg = APP_CONTEXT_STD_MSG;
 
-        if (initialized) {
-            throw new UnableToInitialize(APP_CONTEXT_ALREADY_INITIALIZED);
-        }
+	if (initialized) {
+	    throw new UnableToInitialize(APP_CONTEXT_ALREADY_INITIALIZED);
+	}
 
-        // initialize gui
-		gui = new AndroidUserConsent(this);
+	// initialize gui
+	gui = new AndroidUserConsent(this);
 
-        // set up nfc and android marshaller
-        IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);
-        WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, WSDEF_MARSHALLER_VALUE);
-        NFCFactory.setContext(this);
+	// set up nfc and android marshaller
+	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);
+	WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, WSDEF_MARSHALLER_VALUE);
+	NFCFactory.setContext(this);
 
-        try {
-			nfcAvailable = NFCFactory.isNFCAvailable();
-			nfcEnabled = NFCFactory.isNFCEnabled();
-			if (! nfcAvailable) {
-				throw new NfcUnavailable();
-			} else if (! nfcEnabled) {
-				throw new NfcDisabled();
-			}
-            terminalFactory = IFDTerminalFactory.getInstance();
-            LOG.info("Terminal factory initialized.");
-        } catch (IFDException ex) {
-            errorMsg = APP_CONTEXT_UNABLE_TO_INITIALIZE_TF;
-            throw new UnableToInitialize(errorMsg, ex);
-        }
+	try {
+	    nfcAvailable = NFCFactory.isNFCAvailable();
+	    nfcEnabled = NFCFactory.isNFCEnabled();
+	    if (!nfcAvailable) {
+		throw new NfcUnavailable();
+	    } else if (!nfcEnabled) {
+		throw new NfcDisabled();
+	    }
+	    terminalFactory = IFDTerminalFactory.getInstance();
+	    LOG.info("Terminal factory initialized.");
+	} catch (IFDException ex) {
+	    errorMsg = APP_CONTEXT_UNABLE_TO_INITIALIZE_TF;
+	    throw new UnableToInitialize(errorMsg, ex);
+	}
 
-        try {
-            // set up client environment
-            env = new ClientEnv();
+	try {
+	    // set up client environment
+	    env = new ClientEnv();
 
-            // set up dispatcher
-            dispatcher = new MessageDispatcher(env);
-            env.setDispatcher(dispatcher);
-            LOG.info("Message Dispatcher initialized.");
+	    // set up dispatcher
+	    dispatcher = new MessageDispatcher(env);
+	    env.setDispatcher(dispatcher);
+	    LOG.info("Message Dispatcher initialized.");
 
-            // set up management
-            management = new TinyManagement(env);
-            env.setManagement(management);
-            LOG.info("Management initialized.");
+	    // set up management
+	    management = new TinyManagement(env);
+	    env.setManagement(management);
+	    LOG.info("Management initialized.");
 
-            // set up event dispatcher
-            eventDispatcher = new EventDispatcherImpl();
-            env.setEventDispatcher(eventDispatcher);
-            LOG.info("Event Dispatcher initialized.");
+	    // set up event dispatcher
+	    eventDispatcher = new EventDispatcherImpl();
+	    env.setEventDispatcher(eventDispatcher);
+	    LOG.info("Event Dispatcher initialized.");
 
-            // set up SALStateCallback
-            cardStates = new CardStateMap();
-            SALStateCallback salCallback = new SALStateCallback(env, cardStates);
-            eventDispatcher.add(salCallback);
+	    // set up SALStateCallback
+	    cardStates = new CardStateMap();
+	    SALStateCallback salCallback = new SALStateCallback(env, cardStates);
+	    eventDispatcher.add(salCallback);
 
-            // set up ifd
-            ifd = new IFD();
-            ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-            ifd.setGUI(gui);
-            ifd.setEnvironment(env);
-            env.setIFD(ifd);
-            LOG.info("IFD initialized.");
+	    // set up ifd
+	    ifd = new IFD();
+	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	    ifd.setGUI(gui);
+	    ifd.setEnvironment(env);
+	    env.setIFD(ifd);
+	    LOG.info("IFD initialized.");
 
-            // set up card recognition
-            try {
-                recognition = new CardRecognitionImpl(env);
-                recognition.setGUI(gui);
-                env.setRecognition(recognition);
-                LOG.info("CardRecognition initialized.");
-            } catch (Exception ex) {
-                errorMsg = APP_CONTEXT_CARD_REC_FAILED;
-                throw ex;
-            }
+	    // set up card recognition
+	    try {
+		recognition = new CardRecognitionImpl(env);
+		recognition.setGUI(gui);
+		env.setRecognition(recognition);
+		LOG.info("CardRecognition initialized.");
+	    } catch (Exception ex) {
+		errorMsg = APP_CONTEXT_CARD_REC_FAILED;
+		throw ex;
+	    }
 
-            // set up SAL
-			TinySAL mainSAL = new TinySAL(env, cardStates);
-			mainSAL.setGUI(gui);
+	    // set up SAL
+	    TinySAL mainSAL = new TinySAL(env, cardStates);
+	    mainSAL.setGUI(gui);
 
-			sal = new SelectorSAL(mainSAL, env);
-            env.setSAL(sal);
-			env.setCIFProvider(sal);
-            LOG.info("SAL initialized.");
+	    sal = new SelectorSAL(mainSAL, env);
+	    env.setSAL(sal);
+	    env.setCIFProvider(sal);
+	    LOG.info("SAL initialized.");
 
-            // set up addon manager
-            try {
-                manager = new AddonManager(env, gui, cardStates, new StubViewController(), new ClasspathRegistry());
-                mainSAL.setAddonManager(manager);
-            } catch (Exception ex) {
-                errorMsg = APP_CONTEXT_ADD_ON_INIT_FAILED;
-                throw ex;
-            }
+	    // set up addon manager
+	    try {
+		manager = new AddonManager(env, gui, cardStates, new StubViewController(), new ClasspathRegistry());
+		mainSAL.setAddonManager(manager);
+	    } catch (Exception ex) {
+		errorMsg = APP_CONTEXT_ADD_ON_INIT_FAILED;
+		throw ex;
+	    }
 
-            // Initialize the Event Dispatcher
-            eventDispatcher.add(this, EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
-                    EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED);
+	    // Initialize the Event Dispatcher
+	    eventDispatcher.add(this, EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
+		    EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED);
 
-            // start event dispatcher
-            eventDispatcher.start();
-            LOG.info("Event dispatcher started.");
+	    // start event dispatcher
+	    eventDispatcher.start();
+	    LOG.info("Event dispatcher started.");
 
-            // initialize SAL
-            try {
-                WSHelper.checkResult(sal.initialize(new Initialize()));
-            } catch (WSHelper.WSException ex) {
-                errorMsg = ex.getMessage();
-                throw ex;
-            }
+	    // initialize SAL
+	    try {
+		WSHelper.checkResult(sal.initialize(new Initialize()));
+	    } catch (WSHelper.WSException ex) {
+		errorMsg = ex.getMessage();
+		throw ex;
+	    }
 
-            // establish context
-            try {
-                EstablishContext establishContext = new EstablishContext();
-                EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
-                WSHelper.checkResult(establishContextResponse);
-                contextHandle = establishContextResponse.getContextHandle();
-                LOG.info("ContextHandle: {}", ByteUtils.toHexString(contextHandle));
-            } catch (WSHelper.WSException ex) {
-                errorMsg = APP_CONTEXT_ESTABLISH_CONTEXT_FAIL;
-                throw ex;
-            }
+	    // establish context
+	    try {
+		EstablishContext establishContext = new EstablishContext();
+		EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+		WSHelper.checkResult(establishContextResponse);
+		contextHandle = establishContextResponse.getContextHandle();
+		LOG.info("ContextHandle: {}", ByteUtils.toHexString(contextHandle));
+	    } catch (WSHelper.WSException ex) {
+		errorMsg = APP_CONTEXT_ESTABLISH_CONTEXT_FAIL;
+		throw ex;
+	    }
 
-            // set up intent binding
-            IntentBinding.getInstance().setAddonManager(manager);
+	    // set up intent binding
+	    IntentBinding.getInstance().setAddonManager(manager);
 
-            initialized = true;
-        } catch (Exception ex) {
-            LOG.error(errorMsg, ex);
-            throw new UnableToInitialize(errorMsg, ex);
-        }
+	    initialized = true;
+	} catch (Exception ex) {
+	    LOG.error(errorMsg, ex);
+	    throw new UnableToInitialize(errorMsg, ex);
+	}
     }
 
     public String shutdown() {
-		initialized = false;
-		try {
-			if (ifd != null && contextHandle != null) {
-				ReleaseContext releaseContext = new ReleaseContext();
-				releaseContext.setContextHandle(contextHandle);
-				ifd.releaseContext(releaseContext);
-			}
-			if (eventDispatcher != null) {
-				eventDispatcher.terminate();
-			}
-			if (manager != null) {
-				manager.shutdown();
-			}
-			if (sal != null) {
-				Terminate terminate = new Terminate();
-				sal.terminate(terminate);
-			}
-			return SUCCESS;
-		} catch (Exception ex) {
-			LOG.error("Failed to terminate Open eCard instances...", ex);
-			return FAILURE;
-		}
+	initialized = false;
+	try {
+	    if (ifd != null && contextHandle != null) {
+		ReleaseContext releaseContext = new ReleaseContext();
+		releaseContext.setContextHandle(contextHandle);
+		ifd.releaseContext(releaseContext);
+	    }
+	    if (eventDispatcher != null) {
+		eventDispatcher.terminate();
+	    }
+	    if (manager != null) {
+		manager.shutdown();
+	    }
+	    if (sal != null) {
+		Terminate terminate = new Terminate();
+		sal.terminate(terminate);
+	    }
+	    return SUCCESS;
+	} catch (Exception ex) {
+	    LOG.error("Failed to terminate Open eCard instances...", ex);
+	    return FAILURE;
 	}
+    }
 
-    /*#########################################################
-     *                Recognize events
-     *#########################################################*/
+    ///
+    /// Recognize events
+    ///
 
     @Override
     public void signalEvent(EventType eventType, EventObject o) {
-        LOG.info("Event recognized: " + eventType.name());
-        ConnectionHandleType ch = o.getHandle();
-        if (eventType.equals(EventType.CARD_RECOGNIZED)) {
-			LOG.info("Card recognized.");
-            if (ch != null && ch.getRecognitionInfo() != null) {
-                String cardType = ch.getRecognitionInfo().getCardType();
-                LOG.info("CardType: " + cardType);
-            }
-        } else if (eventType.equals(EventType.CARD_INSERTED)) {
-			LOG.info("Card inserted.");
-		} else if (eventType.equals(EventType.CARD_REMOVED)) {
-            LOG.info("Card removed.");
-        } else if (eventType.equals(EventType.TERMINAL_ADDED)) {
-            LOG.info("Terminal added.");
-        } else if (eventType.equals(EventType.TERMINAL_REMOVED)) {
-            LOG.info("Terminal removed.");
-        }
+	LOG.info("Event recognized: " + eventType.name());
+	ConnectionHandleType ch = o.getHandle();
+	switch (eventType) {
+	    case CARD_RECOGNIZED:
+		LOG.info("Card recognized.");
+		if (ch != null && ch.getRecognitionInfo() != null) {
+		    String cardType = ch.getRecognitionInfo().getCardType();
+		    LOG.info("CardType: " + cardType);
+		}
+		break;
+	    case CARD_INSERTED:
+		LOG.info("Card inserted.");
+		break;
+	    case CARD_REMOVED:
+		LOG.info("Card removed.");
+		break;
+	    case TERMINAL_ADDED:
+		LOG.info("Terminal added.");
+		break;
+	    case TERMINAL_REMOVED:
+		LOG.info("Terminal removed.");
+		break;
+	    default:
+		break;
+	}
     }
 
 }

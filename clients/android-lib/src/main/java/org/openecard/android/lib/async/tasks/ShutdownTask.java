@@ -37,36 +37,36 @@ import org.openecard.android.lib.AppResponseStatusCodes;
 public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> implements AppConstants, AppMessages,
 		AppResponseStatusCodes {
 
-	private final AppContext ctx;
-	private final ShutdownTaskResult calling;
+    private final AppContext ctx;
+    private final ShutdownTaskResult calling;
 
-	public ShutdownTask(AppContext ctx, ShutdownTaskResult calling) {
-		if (calling instanceof ContextWrapper) {
-			this.ctx = ctx;
-			this.calling = calling;
-		} else {
-			throw new IllegalArgumentException("ShutdownTaskResult has to be implemented by a ContextWrapper.");
-		}
+    public ShutdownTask(AppContext ctx, ShutdownTaskResult calling) {
+	if (calling instanceof ContextWrapper) {
+	    this.ctx = ctx;
+	    this.calling = calling;
+	} else {
+	    throw new IllegalArgumentException("ShutdownTaskResult has to be implemented by a ContextWrapper.");
 	}
+    }
 
-	@Override
-	protected ShutdownTaskResponse doInBackground(Void... voids) {
-		String resultCode = ctx.shutdown();
-		AppResponse response = null;
-		switch (resultCode) {
-			case SUCCESS:
-				response = new AppResponse(OK, APP_TERMINATE_SUCCESS);
-				break;
-			case FAILURE:
-				response = new AppResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);
-				break;
-		}
-		return new ShutdownTaskResponse(response);
+    @Override
+    protected ShutdownTaskResponse doInBackground(Void... voids) {
+	String resultCode = ctx.shutdown();
+	AppResponse response = null;
+	switch (resultCode) {
+	    case SUCCESS:
+		response = new AppResponse(OK, APP_TERMINATE_SUCCESS);
+		break;
+	    case FAILURE:
+		response = new AppResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);
+		break;
 	}
+	return new ShutdownTaskResponse(response);
+    }
 
-	@Override
-	protected void onPostExecute(ShutdownTaskResponse response) {
-		calling.setResultOfShutdownTask(response);
-	}
+    @Override
+    protected void onPostExecute(ShutdownTaskResponse response) {
+	calling.setResultOfShutdownTask(response);
+    }
 
 }

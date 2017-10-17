@@ -28,34 +28,34 @@ package org.openecard.android.lib;
  */
 public interface AppResponseStatusCodes {
 
-	/**
-	 * indicates that nfc is not available on the corresponding device.
-	 */
-	int NFC_NOT_AVAILABLE = 100;
+    /**
+     * indicates that nfc is not available on the corresponding device.
+     */
+    int NFC_NOT_AVAILABLE = 100;
 
-	/**
-	 * indicates that nfc is not enabled, please move to the device settings.
-	 */
-	int NFC_NOT_ENABLED = 101;
+    /**
+     * indicates that nfc is not enabled, please move to the device settings.
+     */
+    int NFC_NOT_ENABLED = 101;
 
-	/**
-	 * indicates that the initialization was successfully finished.
-	 */
-	int OK = 200;
+    /**
+     * indicates that the initialization was successfully finished.
+     */
+    int OK = 200;
 
-	/**
-	 * indicates that the corresponding device does not support the required API level.
-	 */
-	int NOT_REQUIRED_API_LEVEL = 102;
+    /**
+     * indicates that the corresponding device does not support the required API level.
+     */
+    int NOT_REQUIRED_API_LEVEL = 102;
 
-	/**
-	 * indicates other internal errors.
-	 */
-	int INTERNAL_ERROR = 500;
+    /**
+     * indicates other internal errors.
+     */
+    int INTERNAL_ERROR = 500;
 
-	/**
-	 * indicates that shutdown of app failed.
-	 */
-	int SHUTDOWN_FAILED = 501;
+    /**
+     * indicates that shutdown of app failed.
+     */
+    int SHUTDOWN_FAILED = 501;
 
 }

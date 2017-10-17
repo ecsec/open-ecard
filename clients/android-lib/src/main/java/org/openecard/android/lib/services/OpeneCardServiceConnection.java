@@ -42,96 +42,96 @@ import org.slf4j.LoggerFactory;
  */
 public class OpeneCardServiceConnection implements ServiceConnection {
 
-	private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceConnection.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceConnection.class);
 
-	private final ServiceConnectionResponseHandler responseHandler;
-	private final Context ctx;
+    private final ServiceConnectionResponseHandler responseHandler;
+    private final Context ctx;
 
-	private OpeneCardService mService;
-	private boolean alreadyStarted;
+    private OpeneCardService mService;
+    private boolean alreadyStarted;
 
-	public OpeneCardServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
-		this.ctx = ctx;
-		this.responseHandler = responseHandler;
+    public OpeneCardServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
+	this.ctx = ctx;
+	this.responseHandler = responseHandler;
+    }
+
+    ///
+    /// Service connect and disconnect
+    ///
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder service) {
+	LOG.info("Service binded!");
+	mService = OpeneCardService.Stub.asInterface(service);
+	try {
+	    AppResponse response = mService.start();
+	    responseHandler.handleResponse(response);
+	} catch (RemoteException ex) {
+	    responseHandler.handleResponse(buildErrorResponse(ex));
 	}
+    }
 
-	/*#########################################################
-     *			Service connect and disconnect
-     *#########################################################*/
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+	mService = null;
+	responseHandler.handleResponse(disconnectResponse);
+    }
 
-	@Override
-	public void onServiceConnected(ComponentName componentName, IBinder service) {
-		LOG.info("Service binded!");
-		mService = OpeneCardService.Stub.asInterface(service);
-		try {
-			AppResponse response = mService.start();
-			responseHandler.handleResponse(response);
-		} catch (RemoteException ex) {
-			responseHandler.handleResponse(buildErrorResponse(ex));
-		}
+    ///
+    /// Build App responses
+    ///
+
+    private AppResponse disconnectResponse;
+
+    private AppResponse buildErrorResponse(Exception ex) {
+	return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+    }
+
+    private AppResponse buildDisconnectResponse(Exception ex) {
+	return ex == null ? new AppResponse(AppResponseStatusCodes.OK, AppMessages.APP_TERMINATE_SUCCESS)
+		: new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+    }
+
+    ///
+    /// Public methods
+    ///
+
+    public void startService() {
+	if (!alreadyStarted) {
+	    Intent i = createOpeneCardIntent();
+	    LOG.info("Starting service…");
+	    ctx.startService(i);
+	    LOG.info("Binding service…");
+	    ctx.bindService(i, this, AppContext.BIND_AUTO_CREATE);
+	    alreadyStarted = true;
+	} else {
+	    throw new IllegalStateException("Service already started...");
 	}
+    }
 
-	@Override
-	public void onServiceDisconnected(ComponentName componentName) {
-		mService = null;
-		responseHandler.handleResponse(disconnectResponse);
+    public void stopService() {
+	if (alreadyStarted) {
+	    try {
+		Intent i = createOpeneCardIntent();
+		mService.stop();
+		alreadyStarted = false;
+		disconnectResponse = buildDisconnectResponse(null);
+		ctx.stopService(i);
+		ctx.unbindService(this);
+	    } catch (RemoteException ex) {
+		disconnectResponse = buildDisconnectResponse(ex);
+	    }
+	} else {
+	    throw new IllegalStateException("Service already stopped...");
 	}
+    }
 
-	/*#########################################################
-     *				Build App responses
- 	*#########################################################*/
+    public boolean isServiceAlreadyStarted() {
+	return alreadyStarted;
+    }
 
-	private AppResponse disconnectResponse;
-
-	private AppResponse buildErrorResponse(Exception ex) {
-		return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
-	}
-
-	private AppResponse buildDisconnectResponse(Exception ex) {
-		return ex == null ? new AppResponse(AppResponseStatusCodes.OK, AppMessages.APP_TERMINATE_SUCCESS)
-				: new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
-	}
-
-	/*#########################################################
-	 *             		Public methods
-     *#########################################################*/
-
-	public void startService() {
-		if (! alreadyStarted) {
-			Intent i = createOpeneCardIntent();
-			LOG.info("Starting service…");
-			ctx.startService(i);
-			LOG.info("Binding service…");
-			ctx.bindService(i, this, AppContext.BIND_AUTO_CREATE);
-			alreadyStarted = true;
-		} else {
-			throw new IllegalStateException("Service already started...");
-		}
-	}
-
-	public void stopService() {
-		if (alreadyStarted) {
-			try {
-				Intent i = createOpeneCardIntent();
-				mService.stop();
-				alreadyStarted = false;
-				disconnectResponse = buildDisconnectResponse(null);
-				ctx.stopService(i);
-				ctx.unbindService(this);
-			} catch (RemoteException ex) {
-				disconnectResponse = buildDisconnectResponse(ex);
-			}
-		} else {
-			throw new IllegalStateException("Service already stopped...");
-		}
-	}
-
-	public boolean isServiceAlreadyStarted() {
-		return alreadyStarted;
-	}
-
-	private Intent createOpeneCardIntent() {
-		return new Intent(ctx, OpeneCardServiceImpl.class);
-	}
+    private Intent createOpeneCardIntent() {
+	return new Intent(ctx, OpeneCardServiceImpl.class);
+    }
 
 }

@@ -27,16 +27,16 @@ package org.openecard.android.lib.ex;
  * Is thrown if apdu extended length is not supported by the corresponding smartphone device.
  *
  * @author Mike Prechtl
- * @see <a href="https://www.openecard.org/en/ecard-api-framework/extended-length-problem/>click</a>
+ * @see <a href="https://www.openecard.org/en/ecard-api-framework/extended-length-problem">click</a>
  */
 public class ApduExtLengthNotSupported extends Exception {
 
-	public ApduExtLengthNotSupported(String message) {
-		super(message);
-	}
+    public ApduExtLengthNotSupported(String message) {
+	super(message);
+    }
 
-	public ApduExtLengthNotSupported(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ApduExtLengthNotSupported(String message, Throwable cause) {
+	super(message, cause);
+    }
 
 }

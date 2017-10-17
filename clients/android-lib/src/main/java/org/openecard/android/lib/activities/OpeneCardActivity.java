@@ -32,16 +32,16 @@ import org.openecard.android.lib.AppContext;
  */
 public class OpeneCardActivity extends Activity {
 
-	protected AppContext ctx;
+    protected AppContext ctx;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		ctx = (AppContext) getApplicationContext();
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	ctx = (AppContext) getApplicationContext();
+    }
 
-	protected AppContext getOpeneCardContext() {
-		return ctx;
-	}
+    protected AppContext getOpeneCardContext() {
+	return ctx;
+    }
 
 }

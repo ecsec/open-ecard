@@ -38,25 +38,25 @@ import org.openecard.android.lib.R;
  */
 public class ShutdownActivity extends Activity implements AppConstants, ShutdownTaskResult {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.oe_activity_shutdown);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.oe_activity_shutdown);
+    }
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		ShutdownTask task = new ShutdownTask((AppContext) getApplicationContext(), this);
-		task.execute();
-	}
+    @Override
+    protected void onStart() {
+	super.onStart();
+	ShutdownTask task = new ShutdownTask((AppContext) getApplicationContext(), this);
+	task.execute();
+    }
 
-	@Override
-	public void setResultOfShutdownTask(ShutdownTaskResponse response) {
-		Intent resultIntent = new Intent();
-		resultIntent.putExtra(INTENT_KEY_FOR_RESPONSE, response.getResponse());
-		setResult(RESULT_OK, resultIntent);
-		finish();
-	}
+    @Override
+    public void setResultOfShutdownTask(ShutdownTaskResponse response) {
+	Intent resultIntent = new Intent();
+	resultIntent.putExtra(INTENT_KEY_FOR_RESPONSE, response.getResponse());
+	setResult(RESULT_OK, resultIntent);
+	finish();
+    }
 
 }

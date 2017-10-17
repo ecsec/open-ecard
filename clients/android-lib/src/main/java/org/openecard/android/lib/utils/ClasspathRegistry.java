@@ -39,66 +39,66 @@ public class ClasspathRegistry implements org.openecard.addon.CombiningRegistry 
     private final org.openecard.addon.ClasspathRegistry classpathRegistry;
 
     public ClasspathRegistry() throws WSMarshallerException {
-        classpathRegistry = new org.openecard.addon.ClasspathRegistry();
+	classpathRegistry = new org.openecard.addon.ClasspathRegistry();
     }
 
     @Override
     public org.openecard.addon.ClasspathRegistry getClasspathRegistry() {
-        return classpathRegistry;
+	return classpathRegistry;
     }
 
     public FileRegistry getFileRegistry() {
-        return null;
+	return null;
     }
 
     @Override
     public Set<AddonSpecification> listAddons() {
-        return classpathRegistry.listAddons();
+	return classpathRegistry.listAddons();
     }
 
     @Override
     public AddonSpecification search(String id) {
-        return classpathRegistry.search(id);
+	return classpathRegistry.search(id);
     }
 
     @Override
     public Set<AddonSpecification> searchByName(String name) {
-        return classpathRegistry.searchByName(name);
+	return classpathRegistry.searchByName(name);
     }
 
     @Override
     public Set<AddonSpecification> searchIFDProtocol(String uri) {
-        return classpathRegistry.searchIFDProtocol(uri);
+	return classpathRegistry.searchIFDProtocol(uri);
     }
 
     @Override
     public Set<AddonSpecification> searchSALProtocol(String uri) {
-        return classpathRegistry.searchSALProtocol(uri);
+	return classpathRegistry.searchSALProtocol(uri);
     }
 
     @Override
     public ClassLoader downloadAddon(AddonSpecification addonSpec) throws AddonException {
-        AddonSpecification desc = classpathRegistry.search(addonSpec.getId());
-        if (desc != null) {
-            return classpathRegistry.downloadAddon(addonSpec);
-        } else {
-            return null;
-        }
+	AddonSpecification desc = classpathRegistry.search(addonSpec.getId());
+	if (desc != null) {
+	    return classpathRegistry.downloadAddon(addonSpec);
+	} else {
+	    return null;
+	}
     }
 
     @Override
     public Set<AddonSpecification> searchByResourceName(String resourceName) {
-        return classpathRegistry.searchByResourceName(resourceName);
+	return classpathRegistry.searchByResourceName(resourceName);
     }
 
     @Override
     public Set<AddonSpecification> searchByActionId(String actionId) {
-        return classpathRegistry.searchByActionId(actionId);
+	return classpathRegistry.searchByActionId(actionId);
     }
 
     @Override
     public Set<AddonSpecification> listInstalledAddons() {
-        return classpathRegistry.listInstalledAddons();
+	return classpathRegistry.listInstalledAddons();
     }
 
 }

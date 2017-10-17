@@ -47,59 +47,59 @@ import org.slf4j.LoggerFactory;
 public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implements AppConstants, AppMessages,
 		AppResponseStatusCodes {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StartTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StartTask.class);
 
-	private final StartTaskResult calling;
-	private final boolean isRequiredAPIUsed;
+    private final StartTaskResult calling;
+    private final boolean isRequiredAPIUsed;
 
-	public StartTask(StartTaskResult calling) {
-		if (calling instanceof ContextWrapper) {
-			this.calling = calling;
-			this.isRequiredAPIUsed = Build.VERSION.SDK_INT >= REQUIRED_API;
-		} else {
-			throw new IllegalArgumentException("StartTaskResult has to be implemented by a ContextWrapper.");
-		}
+    public StartTask(StartTaskResult calling) {
+	if (calling instanceof ContextWrapper) {
+	    this.calling = calling;
+	    this.isRequiredAPIUsed = Build.VERSION.SDK_INT >= REQUIRED_API;
+	} else {
+	    throw new IllegalArgumentException("StartTaskResult has to be implemented by a ContextWrapper.");
 	}
+    }
 
-	@Override
-	protected StartTaskResponse doInBackground(Void... voids) {
-		AppContext ctx = null;
-		AppResponse response;
-		try {
-			ctx = getAppContext();
-			NfcUtils.getInstance().setAppContext(ctx); // set app context in nfc utils
-			// build response whether the initialization of app context was successful or failed.
-			if (isRequiredAPIUsed) {
-				response = new AppResponse(OK, APP_RESPONSE_OK);
-			} else {
-				response = new AppResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
-			}
-		} catch (UnableToInitialize ex) {
-			response = new AppResponse(INTERNAL_ERROR, ex.getMessage());
-		} catch (NfcDisabled ex) {
-			response = new AppResponse(NFC_NOT_ENABLED, ex.getMessage());
-		} catch (NfcUnavailable ex) {
-			response = new AppResponse(NFC_NOT_AVAILABLE, ex.getMessage());
-		}
-		return new StartTaskResponse(ctx, response);
+    @Override
+    protected StartTaskResponse doInBackground(Void... voids) {
+	AppContext ctx = null;
+	AppResponse response;
+	try {
+	    ctx = getAppContext();
+	    NfcUtils.getInstance().setAppContext(ctx); // set app context in nfc utils
+	    // build response whether the initialization of app context was successful or failed.
+	    if (isRequiredAPIUsed) {
+		response = new AppResponse(OK, APP_RESPONSE_OK);
+	    } else {
+		response = new AppResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
+	    }
+	} catch (UnableToInitialize ex) {
+	    response = new AppResponse(INTERNAL_ERROR, ex.getMessage());
+	} catch (NfcDisabled ex) {
+	    response = new AppResponse(NFC_NOT_ENABLED, ex.getMessage());
+	} catch (NfcUnavailable ex) {
+	    response = new AppResponse(NFC_NOT_AVAILABLE, ex.getMessage());
 	}
+	return new StartTaskResponse(ctx, response);
+    }
 
-	private AppContext getAppContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
-		AppContext ctx = null;
-		if (isRequiredAPIUsed) {
-			ctx = (AppContext) ((ContextWrapper) calling).getApplicationContext();
-			if (! ctx.isInitialized()) {
-				ctx.initialize();
-			}
-		} else {
-			LOG.warn(APP_API_LEVEL_21_NOT_SUPPORTED);
-		}
-		return ctx;
+    private AppContext getAppContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
+	AppContext ctx = null;
+	if (isRequiredAPIUsed) {
+	    ctx = (AppContext) ((ContextWrapper) calling).getApplicationContext();
+	    if (!ctx.isInitialized()) {
+		ctx.initialize();
+	    }
+	} else {
+	    LOG.warn(APP_API_LEVEL_21_NOT_SUPPORTED);
 	}
+	return ctx;
+    }
 
-	@Override
-	protected void onPostExecute(StartTaskResponse result) {
-		calling.setResultOfStartTask(result);
-	}
+    @Override
+    protected void onPostExecute(StartTaskResponse result) {
+	calling.setResultOfStartTask(result);
+    }
 
 }

@@ -33,19 +33,19 @@ import android.support.v4.app.NotificationCompat;
  */
 public class NotificationUtils {
 
-	private static final String STD_NOTIFICATION_TITLE = "Open eCard";
+    private static final String STD_NOTIFICATION_TITLE = "Open eCard";
 
-	public static void showNotification(Activity activity, Context context, String title, String message) {
-		NotificationCompat.Builder mBuilder =
-				new NotificationCompat.Builder(context)
-						.setContentTitle(title)
-						.setContentText(message);
-		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = new Intent(context, activity.getClass());
-	}
+    public static void showNotification(Activity activity, Context context, String title, String message) {
+	NotificationCompat.Builder mBuilder
+		= new NotificationCompat.Builder(context)
+			.setContentTitle(title)
+			.setContentText(message);
+	// Creates an explicit intent for an Activity in your app
+	Intent resultIntent = new Intent(context, activity.getClass());
+    }
 
-	public static void showNotification(Activity activity, Context context, String message) {
-		showNotification(activity, context, STD_NOTIFICATION_TITLE, message);
-	}
+    public static void showNotification(Activity activity, Context context, String message) {
+	showNotification(activity, context, STD_NOTIFICATION_TITLE, message);
+    }
 
 }

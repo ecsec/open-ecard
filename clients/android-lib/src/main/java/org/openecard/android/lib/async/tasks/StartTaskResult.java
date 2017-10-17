@@ -30,9 +30,9 @@ package org.openecard.android.lib.async.tasks;
  */
 public interface StartTaskResult {
 
-	/**
-	 * @param response see {@link StartTaskResponse}.
-	 */
-	void setResultOfStartTask(StartTaskResponse response);
+    /**
+     * @param response see {@link StartTaskResponse}.
+     */
+    void setResultOfStartTask(StartTaskResponse response);
 
 }

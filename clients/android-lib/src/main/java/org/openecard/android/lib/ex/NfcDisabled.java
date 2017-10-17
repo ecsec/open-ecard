@@ -32,22 +32,22 @@ import org.openecard.android.lib.AppMessages;
  */
 public class NfcDisabled extends Exception implements AppMessages {
 
-	private static final String STD_ERROR_MESSAGE = APP_CONTEXT_NFC_NOT_ENABLED;
+    private static final String STD_ERROR_MESSAGE = APP_CONTEXT_NFC_NOT_ENABLED;
 
-	public NfcDisabled() {
-		super(STD_ERROR_MESSAGE);
-	}
+    public NfcDisabled() {
+	super(STD_ERROR_MESSAGE);
+    }
 
-	public NfcDisabled(String message) {
-		super(message);
-	}
+    public NfcDisabled(String message) {
+	super(message);
+    }
 
-	public NfcDisabled(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public NfcDisabled(String message, Throwable cause) {
+	super(message, cause);
+    }
 
-	public NfcDisabled(Throwable cause) {
-		super(STD_ERROR_MESSAGE, cause);
-	}
+    public NfcDisabled(Throwable cause) {
+	super(STD_ERROR_MESSAGE, cause);
+    }
 
 }

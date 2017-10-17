@@ -37,24 +37,24 @@ import java.util.List;
  */
 public class SetTagTask extends AsyncTask<Void, Void, Void> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SetTagTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SetTagTask.class);
 
-	private final Tag tagFromIntent;
+    private final Tag tagFromIntent;
 
-	public SetTagTask(Tag tag) {
-		this.tagFromIntent = tag;
+    public SetTagTask(Tag tag) {
+	this.tagFromIntent = tag;
+    }
+
+    @Override
+    protected Void doInBackground(Void... voids) {
+	List<String> terminalNames = NFCFactory.getTerminalNames();
+	if (!terminalNames.isEmpty()) {
+	    // the corresponding device should support one nfc terminal (the integrated one)
+	    NFCFactory.setNFCTag(tagFromIntent);
+	} else {
+	    LOG.warn("No terminal connected...");
 	}
-
-	@Override
-	protected Void doInBackground(Void... voids) {
-		List<String> terminalNames = NFCFactory.getTerminalNames();
-		if (! terminalNames.isEmpty()) {
-			// the corresponding device should support one nfc terminal (the integrated one)
-			NFCFactory.setNFCTag(tagFromIntent);
-		} else {
-			LOG.warn("No terminal connected...");
-		}
-		return null;
-	}
+	return null;
+    }
 
 }

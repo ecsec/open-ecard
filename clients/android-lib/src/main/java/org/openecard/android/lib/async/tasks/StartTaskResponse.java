@@ -34,15 +34,15 @@ import org.openecard.android.lib.AppResponse;
  */
 public class StartTaskResponse extends TaskResponse {
 
-	private AppContext ctx;
+    private final AppContext ctx;
 
-	public StartTaskResponse(AppContext ctx, AppResponse response) {
-		super(response);
-		this.ctx = ctx;
-	}
+    public StartTaskResponse(AppContext ctx, AppResponse response) {
+	super(response);
+	this.ctx = ctx;
+    }
 
-	public AppContext getCtx() {
-		return ctx;
-	}
+    public AppContext getCtx() {
+	return ctx;
+    }
 
 }

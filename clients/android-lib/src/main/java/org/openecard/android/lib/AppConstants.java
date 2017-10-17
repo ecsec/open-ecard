@@ -30,12 +30,9 @@ package org.openecard.android.lib;
  */
 public interface AppConstants {
 
-	int REQUIRED_API = 21;
-
-	String INTENT_KEY_FOR_RESPONSE = "response";
-
-	String SUCCESS = "success";
-
-	String FAILURE = "failure";
+    int REQUIRED_API = 21;
+    String INTENT_KEY_FOR_RESPONSE = "response";
+    String SUCCESS = "success";
+    String FAILURE = "failure";
 
 }

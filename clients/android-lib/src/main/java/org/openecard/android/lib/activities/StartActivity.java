@@ -38,28 +38,28 @@ import org.openecard.android.lib.R;
  */
 public class StartActivity extends Activity implements AppConstants, StartTaskResult {
 
-	protected AppContext ctx;
+    protected AppContext ctx;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.oe_activity_start);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.oe_activity_start);
+    }
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		StartTask ctxTask = new StartTask(this);
-		ctxTask.execute();
-	}
+    @Override
+    protected void onStart() {
+	super.onStart();
+	StartTask ctxTask = new StartTask(this);
+	ctxTask.execute();
+    }
 
-	@Override
-	public void setResultOfStartTask(StartTaskResponse response) {
-		this.ctx = response.getCtx();
-		Intent resultIntent = new Intent();
-		resultIntent.putExtra(INTENT_KEY_FOR_RESPONSE, response.getResponse());
-		setResult(RESULT_OK, resultIntent);
-		finish();
-	}
+    @Override
+    public void setResultOfStartTask(StartTaskResponse response) {
+	this.ctx = response.getCtx();
+	Intent resultIntent = new Intent();
+	resultIntent.putExtra(INTENT_KEY_FOR_RESPONSE, response.getResponse());
+	setResult(RESULT_OK, resultIntent);
+	finish();
+    }
 
 }

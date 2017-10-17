@@ -32,8 +32,8 @@ import org.openecard.android.lib.AppResponse;
  */
 public class ShutdownTaskResponse extends TaskResponse {
 
-	public ShutdownTaskResponse(AppResponse response) {
-		super(response);
-	}
+    public ShutdownTaskResponse(AppResponse response) {
+	super(response);
+    }
 
 }

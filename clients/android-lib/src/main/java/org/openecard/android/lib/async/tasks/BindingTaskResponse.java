@@ -30,14 +30,14 @@ import org.openecard.addon.bind.BindingResult;
  */
 public class BindingTaskResponse {
 
-	private final BindingResult result;
+    private final BindingResult result;
 
-	public BindingTaskResponse(BindingResult result) {
-		this.result = result;
-	}
+    public BindingTaskResponse(BindingResult result) {
+	this.result = result;
+    }
 
-	public BindingResult getBindingResult() {
-		return result;
-	}
+    public BindingResult getBindingResult() {
+	return result;
+    }
 
 }

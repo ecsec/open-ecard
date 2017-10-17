@@ -36,54 +36,55 @@ import org.openecard.android.lib.async.tasks.BindingTaskResult;
  */
 public class IntentBinding implements IntentBindingConstants {
 
-	private BindingTaskResult calling;
+    private BindingTaskResult calling;
     private AddonManager addonManager;
     private AddonSelector addonSelector;
 
     private static IntentBinding instance;
 
-    private IntentBinding() { }
+    private IntentBinding() {
+    }
 
     public static IntentBinding getInstance() {
-        synchronized (IntentBinding.class) {
-            if (instance == null) {
-                instance = new IntentBinding();
-            }
-        }
-        return instance;
+	synchronized (IntentBinding.class) {
+	    if (instance == null) {
+		instance = new IntentBinding();
+	    }
+	}
+	return instance;
     }
 
     public void setAddonManager(AddonManager addonManager) {
-        this.addonManager = addonManager;
-        this.addonSelector = new AddonSelector(addonManager);
+	this.addonManager = addonManager;
+	this.addonSelector = new AddonSelector(addonManager);
     }
 
     public void setContextWrapper(BindingTaskResult calling) {
-		if (calling instanceof ContextWrapper) {
-			this.calling = calling;
-		} else {
-			throw new IllegalArgumentException("BindingTaskResult has to be implemented by a ContextWrapper.");
-		}
+	if (calling instanceof ContextWrapper) {
+	    this.calling = calling;
+	} else {
+	    throw new IllegalArgumentException("BindingTaskResult has to be implemented by a ContextWrapper.");
 	}
+    }
 
-	public AddonManager getAddonManager() {
-		return addonManager;
+    public AddonManager getAddonManager() {
+	return addonManager;
+    }
+
+    public AddonSelector getAddonSelector() {
+	return addonSelector;
+    }
+
+    public BindingTaskResult getContextWrapper() {
+	return calling;
+    }
+
+    public void handleRequest(String uri) throws Exception {
+	if (calling == null) {
+	    throw new IllegalStateException("Please provide a ContextWrapper.");
 	}
-
-	public AddonSelector getAddonSelector() {
-		return addonSelector;
-	}
-
-	public BindingTaskResult getContextWrapper() {
-		return calling;
-	}
-
-	public void handleRequest(String uri) throws Exception {
-		if (calling == null) {
-			throw new IllegalStateException("Please provide a ContextWrapper.");
-		}
-		BindingTask bindingTask = new BindingTask(this, uri);
-		bindingTask.execute();
+	BindingTask bindingTask = new BindingTask(this, uri);
+	bindingTask.execute();
     }
 
 }

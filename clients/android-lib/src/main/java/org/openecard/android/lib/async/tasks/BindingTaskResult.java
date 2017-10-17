@@ -28,9 +28,9 @@ package org.openecard.android.lib.async.tasks;
  */
 public interface BindingTaskResult {
 
-	/**
-	 * @param response see {@link BindingTaskResponse}.
-	 */
-	void setResultOfBindingTask(BindingTaskResponse response);
+    /**
+     * @param response see {@link BindingTaskResponse}.
+     */
+    void setResultOfBindingTask(BindingTaskResponse response);
 
 }

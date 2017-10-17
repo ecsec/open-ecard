@@ -31,11 +31,8 @@ package org.openecard.android.lib;
 interface AppContextConstants {
 
     String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
-
     String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
-
     String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
-
     String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.android.AndroidMarshaller";
 
 }

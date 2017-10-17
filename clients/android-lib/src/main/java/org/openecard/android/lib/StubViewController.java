@@ -36,14 +36,14 @@ class StubViewController implements ViewController {
 
     @Override
     public void showSettingsUI() {
-        LOG.info("Show Settings UI.");
-        // do nothing
+	LOG.info("Show Settings UI.");
+	// do nothing
     }
 
     @Override
     public void showDefaultViewUI() {
-        LOG.info("Show Default View UI.");
-        // do nothing
+	LOG.info("Show Default View UI.");
+	// do nothing
     }
 
 }

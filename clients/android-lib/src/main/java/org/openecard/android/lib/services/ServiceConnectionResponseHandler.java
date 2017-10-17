@@ -30,12 +30,12 @@ import org.openecard.android.lib.AppResponse;
  */
 public interface ServiceConnectionResponseHandler {
 
-	/**
-	 * Activity which starts the Open eCard process should implement this interface to handle the Response of the
-	 * initialization and termination.
-	 *
-	 * @param response which indicates if the process was successful or not.
-	 */
-	void handleResponse(AppResponse response);
+    /**
+     * Activity which starts the Open eCard process should implement this interface to handle the Response of the
+     * initialization and termination.
+     *
+     * @param response which indicates if the process was successful or not.
+     */
+    void handleResponse(AppResponse response);
 
 }

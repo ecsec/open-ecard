@@ -35,70 +35,71 @@ import org.slf4j.LoggerFactory;
  */
 public class AndroidMessageDialog implements MessageDialog {
 
-	private static final Logger LOG = LoggerFactory.getLogger(AndroidMessageDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AndroidMessageDialog.class);
 
-	private MessageDialogResult createMessageDialog(String message, String title) {
-		LOG.info("Title: " + title + " - Message: " + message);
-		return new MessageDialogResult(message);
-	}
+    private MessageDialogResult createMessageDialog(String message, String title) {
+	LOG.info("Title: " + title + " - Message: " + message);
+	return new MessageDialogResult(message);
+    }
 
-	@Override
-	public MessageDialogResult showMessageDialog(String message, String title) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showMessageDialog(String message, String title) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType, byte[] iconData) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showMessageDialog(String message, String title, DialogType messageType, byte[] iconData) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showConfirmDialog(String message, String title) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showConfirmDialog(String message, String title) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType, byte[] iconData) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showConfirmDialog(String message, String title, OptionType optionType, DialogType messageType, byte[] iconData) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showInputDialog(String message, String title) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showInputDialog(String message, String title) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showInputDialog(String message, String title, String initialValue) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showInputDialog(String message, String title, String initialValue) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, String initialValue) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, String initialValue) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData, int initialSelectionIndex, String... selectionValues) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showInputDialog(String message, String title, DialogType messageType, byte[] iconData, int initialSelectionIndex, String... selectionValues) {
+	return createMessageDialog(message, title);
+    }
 
-	@Override
-	public MessageDialogResult showOptionDialog(String message, String title, OptionType optionType, DialogType messageType, byte[] iconData, String... options) {
-		return createMessageDialog(message, title);
-	}
+    @Override
+    public MessageDialogResult showOptionDialog(String message, String title, OptionType optionType, DialogType messageType, byte[] iconData, String... options) {
+	return createMessageDialog(message, title);
+    }
+
 }

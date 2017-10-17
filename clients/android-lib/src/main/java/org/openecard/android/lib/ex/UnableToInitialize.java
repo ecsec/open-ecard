@@ -31,11 +31,11 @@ package org.openecard.android.lib.ex;
 public class UnableToInitialize extends Exception {
 
     public UnableToInitialize(String message) {
-        super(message);
+	super(message);
     }
 
     public UnableToInitialize(String message, Throwable cause) {
-        super(message, cause);
+	super(message, cause);
     }
 
 }

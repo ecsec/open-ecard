@@ -46,70 +46,70 @@ import java.util.concurrent.ExecutionException;
  */
 public class OpeneCardServiceImpl extends Service implements StartTaskResult, ShutdownTaskResult {
 
-	private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceImpl.class);
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    @Override
+    public void onCreate() {
+	super.onCreate();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+	return mBinder;
+    }
+
+    @Override
+    public void setResultOfShutdownTask(ShutdownTaskResponse response) {
+	// do nothing
+    }
+
+    @Override
+    public void setResultOfStartTask(StartTaskResponse response) {
+	// do nothing
+    }
+
+    private final OpeneCardService.Stub mBinder = new OpeneCardServiceImplStub(this);
+
+    ///
+    /// Service Implementation
+    ///
+
+    private class OpeneCardServiceImplStub extends OpeneCardService.Stub {
+
+	private final Service service;
+
+	private OpeneCardServiceImplStub(Service service) {
+	    this.service = service;
 	}
 
 	@Override
-	public IBinder onBind(Intent intent) {
-		return mBinder;
+	public AppResponse start() throws RemoteException {
+	    LOG.info("Start Open eCard Service...");
+	    StartTask task = new StartTask((StartTaskResult) service);
+	    try {
+		StartTaskResponse response = task.execute().get();
+		return response.getResponse();
+	    } catch (ExecutionException | InterruptedException ex) {
+		LOG.warn(ex.getMessage(), ex);
+		return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+	    }
 	}
 
 	@Override
-	public void setResultOfShutdownTask(ShutdownTaskResponse response) {
-		// do nothing
+	public AppResponse stop() throws RemoteException {
+	    LOG.info("Stop Open eCard Service...");
+	    AppContext ctx = (AppContext) service.getApplicationContext();
+	    ShutdownTask task = new ShutdownTask(ctx, (ShutdownTaskResult) service);
+	    try {
+		ShutdownTaskResponse response = task.execute().get();
+		stopSelf();
+		return response.getResponse();
+	    } catch (ExecutionException | InterruptedException ex) {
+		LOG.warn(ex.getMessage(), ex);
+		stopSelf();
+		return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+	    }
 	}
-
-	@Override
-	public void setResultOfStartTask(StartTaskResponse response) {
-		// do nothing
-	}
-
-	private final OpeneCardService.Stub mBinder = new OpeneCardServiceImplStub(this);
-
-	/*#########################################################
-     *             Service Implementation
-     *#########################################################*/
-
-	private class OpeneCardServiceImplStub extends OpeneCardService.Stub {
-
-		private final Service service;
-
-		OpeneCardServiceImplStub(Service service) {
-			this.service = service;
-		}
-
-		@Override
-		public AppResponse start() throws RemoteException {
-			LOG.info("Start Open eCard Service...");
-			StartTask task = new StartTask((StartTaskResult) service);
-			try {
-				StartTaskResponse response = task.execute().get();
-				return response.getResponse();
-			} catch (ExecutionException | InterruptedException ex) {
-				LOG.warn(ex.getMessage(), ex);
-				return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
-			}
-		}
-
-		@Override
-		public AppResponse stop() throws RemoteException {
-			LOG.info("Stop Open eCard Service...");
-			AppContext ctx = (AppContext) service.getApplicationContext();
-			ShutdownTask task = new ShutdownTask(ctx, (ShutdownTaskResult) service);
-			try {
-				ShutdownTaskResponse response = task.execute().get();
-				stopSelf();
-				return response.getResponse();
-			} catch (ExecutionException | InterruptedException ex) {
-				LOG.warn(ex.getMessage(), ex);
-				stopSelf();
-				return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
-			}
-		}
-	}
+    }
 
 }

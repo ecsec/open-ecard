@@ -36,37 +36,37 @@ import org.slf4j.LoggerFactory;
  */
 public class NfcActivity extends OpeneCardActivity {
 
-	private static final Logger LOG = LoggerFactory.getLogger(NfcActivity.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NfcActivity.class);
 
-	@Override
-	public synchronized void onResume() {
-		super.onResume();
-		NfcUtils.getInstance().enableNFCDispatch(this);
-	}
+    @Override
+    public synchronized void onResume() {
+	super.onResume();
+	NfcUtils.getInstance().enableNFCDispatch(this);
+    }
 
-	@Override
-	public synchronized void onPause() {
-		super.onPause();
-		try {
-			NfcUtils.getInstance().disableNFCDispatch(this);
-		} catch (Exception e) {
-			LOG.info(e.getMessage(), e);
-		}
+    @Override
+    public synchronized void onPause() {
+	super.onPause();
+	try {
+	    NfcUtils.getInstance().disableNFCDispatch(this);
+	} catch (Exception e) {
+	    LOG.info(e.getMessage(), e);
 	}
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-	}
+    @Override
+    protected void onDestroy() {
+	super.onDestroy();
+    }
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		try {
-			NfcUtils.getInstance().retrievedNFCTag(intent);
-		} catch (ApduExtLengthNotSupported ex) {
-			LOG.error(ex.getMessage());
-		}
+    @Override
+    protected void onNewIntent(Intent intent) {
+	super.onNewIntent(intent);
+	try {
+	    NfcUtils.getInstance().retrievedNFCTag(intent);
+	} catch (ApduExtLengthNotSupported ex) {
+	    LOG.error(ex.getMessage());
 	}
+    }
 
 }

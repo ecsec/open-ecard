@@ -52,7 +52,7 @@ public class ServerData extends AbstractParcelable<ServerData> {
 	this.writeAccessAttributes = writeAccessAttributes;
     }
 
-    private ServerData(Parcel src) {
+    public ServerData(Parcel src) {
 	readFromParcel(src);
     }
 

@@ -13,7 +13,7 @@
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>android-lib</artifactId>
 	<packaging>aar</packaging>
-	<name>Android Lib</name>
+	<name>Android Client Lib</name>
 
 
 	<build>

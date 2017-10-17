@@ -38,11 +38,17 @@ public class AndroidResult implements StepResult {
     private final Step step;
     private final ResultStatus status;
     private final List<OutputInfoUnit> outputUnits;
+    private final Step replacement;
 
     public AndroidResult(Step step, ResultStatus status, List<OutputInfoUnit> outputUnits) {
+	this(step, status, outputUnits, null);
+    }
+
+    public AndroidResult(Step step, ResultStatus status, List<OutputInfoUnit> outputUnits, Step replacement) {
 	this.step = step;
 	this.status = status;
 	this.outputUnits = outputUnits;
+	this.replacement = replacement;
     }
 
     @Override
@@ -87,7 +93,7 @@ public class AndroidResult implements StepResult {
 
     @Override
     public Step getReplacement() {
-	return step;
+	return replacement;
     }
 
 }

@@ -65,16 +65,16 @@ public class OpeneCardServiceConnection implements ServiceConnection {
 	mService = OpeneCardService.Stub.asInterface(service);
 	try {
 	    AppResponse response = mService.start();
-	    responseHandler.handleResponse(response);
+	    responseHandler.handleServiceConnectionResponse(response);
 	} catch (RemoteException ex) {
-	    responseHandler.handleResponse(buildErrorResponse(ex));
+	    responseHandler.handleServiceConnectionResponse(buildErrorResponse(ex));
 	}
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
 	mService = null;
-	responseHandler.handleResponse(disconnectResponse);
+	responseHandler.handleServiceConnectionResponse(disconnectResponse);
     }
 
     ///

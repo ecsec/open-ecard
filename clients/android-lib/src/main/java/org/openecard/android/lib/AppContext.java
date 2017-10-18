@@ -23,7 +23,6 @@
 package org.openecard.android.lib;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import org.openecard.addon.AddonManager;
 import org.openecard.android.lib.intent.binding.IntentBinding;
@@ -94,7 +93,6 @@ public class AppContext extends Application implements EventCallback, AppContext
     private TinyManagement management;
 
     private UserConsent gui;
-    private Context context;
 
     // true if already initialized
     private boolean initialized = false;
@@ -297,8 +295,8 @@ public class AppContext extends Application implements EventCallback, AppContext
 	    // set up intent binding
 	    IntentBinding.getInstance().setAddonManager(manager);
 
-	    Intent eacGuiServiceIntent = new Intent(context, EacGuiService.class);
-	    context.startService(eacGuiServiceIntent);
+	    Intent eacGuiServiceIntent = new Intent(this, EacGuiService.class);
+	    startService(eacGuiServiceIntent);
 
 	    initialized = true;
 	} catch (Exception ex) {
@@ -326,8 +324,8 @@ public class AppContext extends Application implements EventCallback, AppContext
 		sal.terminate(terminate);
 	    }
 
-	    Intent eacGuiServiceIntent = new Intent(context, EacGuiService.class);
-	    context.stopService(eacGuiServiceIntent);
+	    Intent eacGuiServiceIntent = new Intent(this, EacGuiService.class);
+	    stopService(eacGuiServiceIntent);
 
 	    return SUCCESS;
 	} catch (Exception ex) {

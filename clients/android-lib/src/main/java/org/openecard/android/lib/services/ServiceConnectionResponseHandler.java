@@ -36,6 +36,6 @@ public interface ServiceConnectionResponseHandler {
      *
      * @param response which indicates if the process was successful or not.
      */
-    void handleResponse(AppResponse response);
+    void handleServiceConnectionResponse(AppResponse response);
 
 }

@@ -42,5 +42,6 @@ public interface AppMessages {
     String APP_CONTEXT_ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
     String APP_TERMINATE_SUCCESS = "Successfully terminated.";
     String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
+    String APP_EAC_SERVICE_CONNECTED = "Successfully connected to Eac Gui Service.";
 
 }

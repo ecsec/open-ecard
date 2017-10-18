@@ -23,18 +23,43 @@
 package org.openecard.android.lib.activities;
 
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.net.Uri;
 import org.openecard.android.lib.AppConstants;
 import org.openecard.android.lib.AppResponse;
+import org.openecard.android.lib.async.tasks.BindingTaskResult;
+import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.gui.android.eac.EacGuiService;
 
 
 /**
  * @author Mike Prechtl
  */
-public abstract class EacActivity extends NfcActivity {
+public abstract class EacActivity extends NfcActivity implements BindingTaskResult {
 
     protected static final int REQUEST_CODE_START = 1;
     protected static final int REQUEST_CODE_TERMINATE = 2;
+
+    private volatile boolean alreadyBinded = false;
+
+    protected String getBindingURI() {
+	Uri data = getIntent().getData();
+        return data.toString();
+    }
+
+    protected synchronized void bindEacService(ServiceConnection eacConnection) {
+	if (! alreadyBinded) {
+	    IntentBinding binding = IntentBinding.getInstance();
+	    binding.setContextWrapper(this);
+	    bindService(createGuiIntent(), eacConnection, BIND_AUTO_CREATE);
+	    this.alreadyBinded = true;
+	}
+    }
+
+    protected synchronized void handleRequest(String uri) throws Exception {
+	IntentBinding binding = IntentBinding.getInstance();
+	binding.handleRequest(uri);
+    }
 
     protected Intent createGuiIntent() {
 	return new Intent(ctx, EacGuiService.class);

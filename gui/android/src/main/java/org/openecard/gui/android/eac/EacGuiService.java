@@ -23,7 +23,6 @@
 package org.openecard.gui.android.eac;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import org.openecard.common.util.Promise;
@@ -37,31 +36,22 @@ public class EacGuiService extends Service {
 
     private static Promise<EacGuiImpl> serviceImpl;
 
-    public static void prepare(Context androidCtx) {
+    public static void prepare() {
 	// clean promise
 	serviceImpl = new Promise<>();
-
-	// start service
-	androidCtx.startService(createGuiIntent());
     }
 
-    public static void shutdown(Context androidCtx) {
-	serviceImpl = null;
-	androidCtx.stopService(createGuiIntent());
+    public static void setGuiImpl(EacGuiImpl impl) {
+	serviceImpl.deliver(impl);
     }
 
-    public static synchronized Promise<EacGuiImpl> getServiceImpl() {
+    static synchronized Promise<EacGuiImpl> getServiceImpl() {
 	return serviceImpl;
-    }
-
-    private static Intent createGuiIntent() {
-	Intent i = new Intent(EacGuiService.class.getName());
-	return i;
     }
 
     @Override
     public synchronized int onStartCommand(Intent intent, int flags, int startId) {
-	serviceImpl.deliver(new EacGuiImpl());
+	prepare();
 	return super.onStartCommand(intent, flags, startId);
     }
 

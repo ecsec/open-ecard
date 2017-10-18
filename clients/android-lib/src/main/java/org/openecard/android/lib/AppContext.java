@@ -24,6 +24,7 @@ package org.openecard.android.lib;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import org.openecard.addon.AddonManager;
 import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.utils.ClasspathRegistry;
@@ -65,6 +66,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import org.openecard.gui.android.eac.EacGuiService;
 
 
 /**
@@ -295,6 +297,9 @@ public class AppContext extends Application implements EventCallback, AppContext
 	    // set up intent binding
 	    IntentBinding.getInstance().setAddonManager(manager);
 
+	    Intent eacGuiServiceIntent = new Intent(context, EacGuiService.class);
+	    context.startService(eacGuiServiceIntent);
+
 	    initialized = true;
 	} catch (Exception ex) {
 	    LOG.error(errorMsg, ex);
@@ -320,6 +325,10 @@ public class AppContext extends Application implements EventCallback, AppContext
 		Terminate terminate = new Terminate();
 		sal.terminate(terminate);
 	    }
+
+	    Intent eacGuiServiceIntent = new Intent(context, EacGuiService.class);
+	    context.stopService(eacGuiServiceIntent);
+
 	    return SUCCESS;
 	} catch (Exception ex) {
 	    LOG.error("Failed to terminate Open eCard instances...", ex);

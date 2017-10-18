@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.openecard.common.util.Promise;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.openecard.gui.definition.BoxItem;
@@ -58,22 +57,16 @@ public class EacGuiImplTest {
     @Mocked
     UserConsentDescription ucd;
     @Mocked
-    EacGuiService anyEacGuiService;
-    @Mocked
     EacGui.Stub stub;
 
     @Test
     public void testPinOkFirstTime() throws InterruptedException, RemoteException {
-	final EacGuiImpl anyGuiImpl = new EacGuiImpl();
 	new Expectations() {{
-	    anyEacGuiService.prepare(androidCtx);
-	    Promise<EacGuiImpl> p = new Promise<>();
-	    p.deliver(anyGuiImpl);
-	    anyEacGuiService.getServiceImpl(); result = p;
 	    ucd.getDialogType(); result = "EAC";
 	    ucd.getSteps(); result = createInitialSteps();
 	}};
 
+	EacGuiService.prepare();
 	Thread t = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
@@ -84,6 +77,7 @@ public class EacGuiImplTest {
 	}, "GUI-Executor");
 	t.start();
 
+	final EacGuiImpl anyGuiImpl = EacGuiService.getServiceImpl().deref();
 	// use the Binders API to access the values
 	ServerData sd = anyGuiImpl.getServerData();
 	assertEquals(sd.getSubject(), "Test Subject");

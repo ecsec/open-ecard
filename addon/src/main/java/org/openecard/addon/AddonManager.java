@@ -96,7 +96,7 @@ public class AddonManager {
 	} else {
 	    this.registry = registry;
 	}
-	this.protectedRegistry = getProtectedRegistry(registry);
+	this.protectedRegistry = getProtectedRegistry(this.registry);
 	this.env = env;
 	this.userConsent = userConsent;
 	this.cardStates = cardStates;

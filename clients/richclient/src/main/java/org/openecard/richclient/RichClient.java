@@ -235,12 +235,12 @@ public final class RichClient {
 	    // perform GC to bring down originally allocated memory
 	    new Timer().schedule(new GCTask(), 5000);
 
-	} catch (Exception e) {
-	    LOG.error(e.getMessage(), e);
+	} catch (Exception ex) {
+	    LOG.error(ex.getMessage(), ex);
 
 	    if (message == null || message.isEmpty()) {
 		// Add exception message if no custom message is set
-		message = e.getMessage();
+		message = ex.getMessage();
 	    }
 
 	    // Show dialog to the user and shut down the client
@@ -248,7 +248,7 @@ public final class RichClient {
 	    gui.obtainMessageDialog().showMessageDialog(msg, AppVersion.getName(), DialogType.ERROR_MESSAGE);
 	    teardown();
 	} catch (Throwable ex) {
-	    LOG.error("Unexpected error occurred. Exiting client.");
+	    LOG.error("Unexpected error occurred. Exiting client.", ex);
 	    System.exit(1);
 	}
     }

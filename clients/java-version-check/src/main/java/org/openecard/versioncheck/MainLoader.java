@@ -154,11 +154,8 @@ public class MainLoader {
     }
 
     public static boolean checkJavaVersion(float versionReference) {
-	String fullVersion = System.getProperty("java.version");
-	String[] javaVersionElements = fullVersion.split("\\.|_|-b|\\+");
-	String major1 = javaVersionElements[0];
-	String major2 = javaVersionElements.length < 2 ? "0" : javaVersionElements[1];
-	float javaVersion = Float.valueOf(major1 + "." + major2 + "f");
+	String fullVersion = System.getProperty("java.specification.version", "1.0");
+	float javaVersion = Float.valueOf(fullVersion);
 	// check if version is bigger or equal than reference value
 	return javaVersion >= versionReference;
     }

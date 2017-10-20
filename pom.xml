@@ -574,7 +574,7 @@
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.34</version>
+				<version>1.35</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -585,7 +585,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.7</version>
+				<version>4.4.8</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.android</groupId>
@@ -600,7 +600,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.1</version>
+				<version>2.9.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
@@ -610,7 +610,7 @@
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
-				<version>1.0.3</version>
+				<version>1.0.4</version>
 			</dependency>
 			<!-- Java Native Access -->
 			<dependency>

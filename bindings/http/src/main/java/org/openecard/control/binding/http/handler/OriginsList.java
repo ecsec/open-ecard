@@ -63,7 +63,7 @@ public class OriginsList {
 
 	try {
 	    // read bundled whitelist
-	    InputStream bundledWl = FileUtils.resolveResourceAsStream(OriginsList.class, "origins.list");
+	    InputStream bundledWl = FileUtils.resolveResourceAsStream(OriginsList.class, "/binding/origins.whitelist");
 	    readWhitelist(wl, bundledWl);
 
 	    // read user supplied whitelist

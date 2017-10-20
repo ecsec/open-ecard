@@ -25,9 +25,13 @@ package org.openecard.ifd.event;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
+import iso.std.iso_iec._24727.tech.schema.GetStatus;
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
+import iso.std.iso_iec._24727.tech.schema.ListIFDs;
+import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Environment;
@@ -75,10 +80,40 @@ public class IfdEventRunner implements Runnable {
 	this.builder = builder;
 	this.cm = cm;
 	this.ctxHandle = ctxHandle;
-	this.initialState = new ArrayList<>(evtManager.ifdStatus());
+	this.initialState = new ArrayList<>(ifdStatus());
 	this.currentState = new ArrayList<>();
     }
 
+
+    @Nonnull
+    private List<IFDStatusType> ifdStatus() throws WSException {
+	LOG.debug("Requesting terminal names.");
+	ListIFDs listReq = new ListIFDs();
+	listReq.setContextHandle(ctxHandle);
+	ListIFDsResponse ifds = env.getIFD().listIFDs(listReq);
+	WSHelper.checkResult(ifds);
+
+	LOG.debug("Requesting status for all terminals found.");
+	ArrayList<IFDStatusType> result = new ArrayList<>();
+	for (String ifd : ifds.getIFDName()) {
+	    GetStatus status = new GetStatus();
+	    status.setContextHandle(ctxHandle);
+	    status.setIFDName(ifd);
+	    GetStatusResponse statusResponse = env.getIFD().getStatus(status);
+
+	    try {
+		WSHelper.checkResult(statusResponse);
+		result.addAll(statusResponse.getIFDStatus());
+	    } catch (WSException ex) {
+		String msg = "Failed to request status from terminal, assuming no card present.";
+		LOG.error(msg, ex);
+		IFDStatusType is = new IFDStatusType();
+		is.setIFDName(ifd);
+		result.add(is);
+	    }
+	}
+	return result;
+    }
 
     @Override
     public void run() {

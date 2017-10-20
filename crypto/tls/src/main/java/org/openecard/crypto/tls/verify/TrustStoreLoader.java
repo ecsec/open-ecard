@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2016 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,7 +44,6 @@ import java.util.zip.ZipInputStream;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,10 +127,7 @@ public class TrustStoreLoader {
     }
 
     protected boolean useInternalStore() {
-	String useSysStr = OpenecardProperties.getProperty("tls.truststore.use-system");
-	// if not set, this should evaluate to true
-	boolean useSys = Boolean.valueOf(useSysStr);
-	return ! useSys;
+	return false;
     }
 
     protected KeyStore loadInternalStore() {

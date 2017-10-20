@@ -23,7 +23,10 @@
 package org.openecard.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import mockit.Expectations;
+import mockit.Mocked;
 import org.openecard.common.ClientEnv;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
 import org.openecard.recognition.CardRecognitionImpl;
@@ -39,6 +42,9 @@ public class CardInfoWrapperTest {
 
     private static final byte[] rootApplication = StringUtils.toByteArray("3F00");
 
+    @Mocked
+    public CIFProvider cifp;
+
     /**
      * Simple test for CardInfoWrapper-class. After getting the CardInfoWrapper for the npa we
      * check if the get-methods return the expected values.
@@ -47,7 +53,12 @@ public class CardInfoWrapperTest {
      */
     @Test
     public void test() throws Exception {
+	new Expectations() {{
+	    cifp.getCardInfo(anyString); result = null;
+	}};
+
 	Environment env = new ClientEnv();
+	env.setCIFProvider(cifp);
 	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);

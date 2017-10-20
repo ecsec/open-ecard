@@ -25,8 +25,11 @@ package org.openecard.common.sal.anytype;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import java.math.BigInteger;
+import mockit.Expectations;
+import mockit.Mocked;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.util.StringUtils;
@@ -45,6 +48,9 @@ public class PinCompareMarkerTypeTest {
     private static final String cardType = "http://ws.gematik.de/egk/1.0.0";
     private static final String didName = "PIN.home";
 
+    @Mocked
+    public CIFProvider cifp;
+
     /**
      * Simple test for PinCompareMarkerType. After getting the PinCompareMarker for the PIN.home DID in the the root
      * application we check if the get-methods return the expected values.
@@ -53,7 +59,12 @@ public class PinCompareMarkerTypeTest {
      */
     @Test
     public void testPinCompareMarkerType() throws Exception {
+	new Expectations() {{
+	    cifp.getCardInfo(anyString); result = null;
+	}};
+
 	Environment env = new ClientEnv();
+	env.setCIFProvider(cifp);
 	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo(cardType);
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);

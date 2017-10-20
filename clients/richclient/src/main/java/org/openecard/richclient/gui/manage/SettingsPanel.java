@@ -86,7 +86,7 @@ public abstract class SettingsPanel extends JPanel {
      *
      * @param item The group to add to the panel.
      */
-    protected void addSettingsGroup(SettingsGroup item) {
+    protected final void addSettingsGroup(SettingsGroup item) {
 	GridBagConstraints c = new GridBagConstraints();
 	c.fill = GridBagConstraints.HORIZONTAL;
 	c.gridwidth = GridBagConstraints.REMAINDER;

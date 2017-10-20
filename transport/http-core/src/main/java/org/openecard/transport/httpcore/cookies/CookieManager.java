@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.transport.httpcore.cookies;
 
+import java.net.HttpCookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,8 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
@@ -50,21 +49,15 @@ import org.slf4j.LoggerFactory;
  * and 50 cookies per domain.
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class CookieManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(CookieManager.class);
-    private static final Pattern cookiePat = Pattern.compile("(?<name>.+?)=(?<value>.+?)"
-	    + "((; Path=(?<path>.+?))|"
-	    + "(; Domain=(?<domain>.+?))|"
-	    + "(; (?<httponly>HttpOnly))|"
-	    + "(; (?<secure>Secure))|"
-	    + "(; Expires=(?<expires>.+?))|"
-	    + "(; Max-[Aa]ge=(?<maxage>\\d+?)))*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Logger LOG = LoggerFactory.getLogger(CookieManager.class);
 
     private final int maxCookiesPerDomain = 50;
     private final int maxCookies = 3000;
-    private final Map<String, List<Cookie>> cookieMap;
+    private final Map<String, List<HttpCookie>> cookieMap;
 
     private int currentCookieCount = 0;
 
@@ -84,7 +77,7 @@ public class CookieManager {
      *
      * @param cookieMap {@link Map} implementation to use for the cookie storage.
      */
-    public CookieManager(@Nonnull Map<String, List<Cookie>> cookieMap) {
+    public CookieManager(@Nonnull Map<String, List<HttpCookie>> cookieMap) {
 	this.cookieMap = cookieMap;
     }
 
@@ -92,105 +85,54 @@ public class CookieManager {
      * Adds a cookie to the manager instance.
      *
      * @param domain Address of the caller which want to set the cookie.
-     * @param cookieHeaderValue Content of the header Set-Cookie.
+     * @param cookieHeaderValue The Set-Cookie header.
      * @throws CookieException If the cookie can't be added to the storage.
      */
     public void addCookie(@Nonnull String domain, @Nonnull String cookieHeaderValue) throws CookieException {
-	// initial check
-	if (currentCookieCount == maxCookies) {
+	List<HttpCookie> cookies = HttpCookie.parse(cookieHeaderValue);
+	if ((cookies.size() + currentCookieCount) <= maxCookies) {
+	    for (HttpCookie cookie : cookies) {
+		try {
+		    String domainKey = createDomainKey(domain, cookie);
+		    addCookie(domainKey, cookie);
+		} catch(MalformedURLException ex) {
+		    String msg = "Invalid value (%s) in the \"domain\" parameter received.";
+		    msg = String.format(msg, domain);
+		    LOG.error(msg, ex);
+		    throw new CookieException(msg, ex);
+		}
+	    }
+
+	} else {
 	    String msg = "The cookie storage is full.";
-	    logger.error(msg);
+	    LOG.error(msg);
 	    throw new CookieException(msg);
 	}
+    }
 
-	Cookie cookie = createCookie(cookieHeaderValue);
-
-	String domainKey = null;
-	try {
-	    domainKey = createDomainKey(domain, cookie);
-	} catch(MalformedURLException ex) {
-	    String msg = "Invalid value (%s) in the \"domain\" parameter received.";
-	    msg = String.format(msg, domain);
-	    logger.error(msg, ex);
-	    throw new CookieException(msg, ex);
-	}
-
+    private void addCookie(@Nonnull String domainKey, HttpCookie cookie) throws CookieException {
 	if (! update(domainKey, cookie)) {
 
-	    List<Cookie> cookies = cookieMap.get(domainKey);
+	    List<HttpCookie> cookies = cookieMap.get(domainKey);
 	    if (cookies == null) {
 		cookies = new ArrayList<>();
 	    }
 
 	    if (cookies.size() == maxCookiesPerDomain) {
 		String msg = "Maximal number of cookies per domain reached.";
-		logger.error(msg);
+		LOG.error(msg);
 		throw new CookieException(msg);
 	    }
 
-	    if (logger.isDebugEnabled()) {
-		String msg = "Setting cookie %s for key %s.";
-		msg = String.format(msg, cookieHeaderValue, domainKey);
-		logger.debug(msg);
+	    if (LOG.isDebugEnabled()) {
+		String msg = "Setting cookie %s for domain %s.";
+		msg = String.format(msg, cookie, domainKey);
+		LOG.debug(msg);
 	    }
 	    cookies.add(cookie);
 	    cookieMap.put(domainKey, cookies);
 	    currentCookieCount++;
 	}
-    }
-
-    /**
-     * Creates a {@link Cookie} from the given Set-Cookie header value.
-     *
-     * @param cookieHeaderValue The header value containing the cookie information.
-     * @return The created {@link Cookie} object.
-     * @throws CookieException If cookie header value is invalid.
-     */
-    @Nonnull
-    private Cookie createCookie(@Nonnull String cookieHeaderValue) throws CookieException {
-	Matcher matcher = cookiePat.matcher(cookieHeaderValue);
-	boolean matches = matcher.matches();
-	Cookie cookie;
-
-	if (matches) {
-	    cookie = new Cookie(matcher.group("name"), matcher.group("value"));
-	    String secure = matcher.group("secure");
-	    String httpOnly = matcher.group("httponly");
-	    String maxage = matcher.group("maxage");
-	    String domain = matcher.group("domain");
-	    String path = matcher.group("path");
-	    String expires = matcher.group("expires");
-
-	    if (secure != null) {
-		cookie.setSecure(true);
-	    }
-
-	    if (httpOnly != null) {
-		cookie.setHttpOnly(true);
-	    }
-
-	    if (maxage != null) {
-		cookie.setMaxAge(maxage);
-	    }
-
-	    if (domain != null) {
-		cookie.setDomain(domain);
-	    }
-
-	    if (path != null) {
-		cookie.setPath(path);
-	    }
-
-	    if (expires != null) {
-		cookie.setExpires(expires);
-	    }
-	} else {
-	    String msg = "The cookie \"%s\" is invalid and will not be stored.";
-	    msg = String.format(msg, cookieHeaderValue);
-	    throw new CookieException(msg);
-	}
-
-	return cookie;
     }
 
     /**
@@ -217,10 +159,10 @@ public class CookieManager {
 	    throw new CookieException(msg, ex);
 	}
 
-	List<Cookie> cookies = cookieMap.get(url.getHost());
+	List<HttpCookie> cookies = cookieMap.get(url.getHost());
 	if (cookies != null && ! cookies.isEmpty()) {
 	    for (int i = 0; i < cookies.size(); i++) {
-		Cookie c = cookies.get(i);
+		HttpCookie c = cookies.get(i);
 		if (c.getName().equals(name)) {
 		    cookies.remove(i);
 		    currentCookieCount--;
@@ -242,22 +184,22 @@ public class CookieManager {
     public String getCookieHeaderValue(@Nonnull String domain) throws CookieException {
 	try {
 	    Set<String> keySet = cookieMap.keySet();
-	    List<Cookie> domainCookies;
-	    List<Cookie> usableCookies = new ArrayList<>();
+	    List<HttpCookie> domainCookies;
+	    List<HttpCookie> usableCookies = new ArrayList<>();
 	    URL domAsURL = new URL(domain);
 
 	    for (String key : keySet) {
 		if (domAsURL.getHost().endsWith(key)) {
 		    domainCookies = cookieMap.get(key);
-		    ArrayList<Cookie> cleanList = new ArrayList<>();
+		    ArrayList<HttpCookie> cleanList = new ArrayList<>();
 		    if (domainCookies != null && domainCookies.size() > 0) {
-			for (Cookie c : domainCookies) {
+			for (HttpCookie c : domainCookies) {
 			    // according to RFC 6265 it is not allowed to return the cookie to a subdomain or so in case
 			    // there is no Domain attribute in the cookie. This mean if we got a cookie from example.com it
 			    // is not allowed to return the cookie to www.example.com or foo.example.com just to example.com.
-			    if (c.getDomain().isEmpty()) {
+			    if (c.getDomain() == null || c.getDomain().isEmpty()) {
 				if (key.equals(domAsURL.getHost())) {
-				    if (c.getPath().isEmpty()) {
+				    if (c.getPath() == null || c.getPath().isEmpty()) {
 					usableCookies.add(c);
 					cleanList.add(c);
 				    } else {
@@ -268,7 +210,7 @@ public class CookieManager {
 				    }
 				}
 			    } else {
-				if (c.getPath().isEmpty() || domAsURL.getPath().startsWith(c.getPath())) {
+				if (c.getPath() == null || c.getPath().isEmpty() || domAsURL.getPath().startsWith(c.getPath())) {
 				    usableCookies.add(c);
 				    cleanList.add(c);
 				}
@@ -276,14 +218,14 @@ public class CookieManager {
 			}
 		    }
 
-		    for (Cookie c : cleanList) {
+		    for (HttpCookie c : cleanList) {
 			clean(key, c);
 		    }
 		}
 	    }
 
 	    StringBuilder headerValue = new StringBuilder();
-	    for (Cookie c : usableCookies) {
+	    for (HttpCookie c : usableCookies) {
 		headerValue.append(c.getName());
 		headerValue.append("=");
 		headerValue.append(c.getValue());
@@ -298,7 +240,7 @@ public class CookieManager {
 	} catch(MalformedURLException ex) {
 	    String msg = "The given value (%s) of the \"domain\" parameter is not valid URL.";
 	    msg = String.format(msg, domain);
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new CookieException(msg, ex);
 	}
 	
@@ -315,11 +257,11 @@ public class CookieManager {
      * @throws MalformedURLException if the domain parameter is no valid URI.
      */
     @Nonnull
-    private String createDomainKey(@Nonnull String domain, @Nonnull Cookie cookie) throws MalformedURLException {
+    private String createDomainKey(@Nonnull String domain, @Nonnull HttpCookie cookie) throws MalformedURLException {
 	// just to check whether we have a valid url.
 	URL url = new URL(domain);
 	String domainAttr = cookie.getDomain();
-	if (! domainAttr.isEmpty()) {
+	if (! (domainAttr == null || domainAttr.isEmpty())) {
 	    if (domainAttr.startsWith(".")) {
 		domainAttr = domainAttr.substring(1);
 	    }
@@ -337,9 +279,9 @@ public class CookieManager {
      * @param key Domain key which identifies the list of cookies containing {@code c}.
      * @param c {@link Cookie} object to delete.
      */
-    private void clean(@Nonnull String key, @Nonnull Cookie c) {
-	if (c.isExpired()) {
-	    List<Cookie> domainCookies = cookieMap.get(key);
+    private void clean(@Nonnull String key, @Nonnull HttpCookie c) {
+	if (c.hasExpired()) {
+	    List<HttpCookie> domainCookies = cookieMap.get(key);
 	    domainCookies.remove(c);
 	    currentCookieCount--;
 	    if (domainCookies.isEmpty()) {
@@ -351,24 +293,22 @@ public class CookieManager {
     /**
      * Updates the cookie.
      * <br>
-     * <br>
      * This means expiration time update.
      *
      * @param domainKey The key which addresses the cookie, may be a full server address or just a domain.
      * @param cookie The new cookie which may replace an old one.
      * @return {@code TRUE} if an update was performed else {@code FALSE}.
      */
-    private boolean update(String domainKey, Cookie cookie) {
-	List<Cookie> cookies = cookieMap.get(domainKey);
+    private boolean update(String domainKey, HttpCookie cookie) {
+	List<HttpCookie> cookies = cookieMap.get(domainKey);
 	if (cookies == null || cookies.isEmpty()) {
 	    return false;
 	}
 
-	for (Cookie c : cookies) {
+	for (HttpCookie c : cookies) {
 	    if (c.equals(cookie)) {
-		cookie.setCreationTime(c.getCreationTime());
 		clean(domainKey, c);
-		if (! cookie.isExpired()) {
+		if (! cookie.hasExpired()) {
 		    cookies.add(cookie);
 		}
 		return true;

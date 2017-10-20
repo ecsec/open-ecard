@@ -355,7 +355,7 @@ public class ResourceContext {
 	    if (header.getName().toLowerCase().equals("set-cookie")) {
 		try {
 		    if (cManager != null) {
-			cManager.addCookie(url.toString(), header.getValue());
+			cManager.addCookie(url.toString(), "set-cookie: " + header.getValue());
 		    }
 		} catch(CookieException ex) {
 		    String msg = "Received invalid cookie from: %s. The cookie is not stored.";

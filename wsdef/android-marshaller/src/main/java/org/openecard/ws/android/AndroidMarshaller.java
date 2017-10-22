@@ -1524,10 +1524,24 @@ public class AndroidMarshaller implements WSMarshaller {
 		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
 			didAuthenticate.setAuthenticationProtocolData(this.parseDIDAuthenticationDataType(parser));
 		    }
-
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDAuthenticate")));
 	    return didAuthenticate;
+	} else if (parser.getName().equals("DIDAuthenticateResponse")) {
+	    DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Result")) {
+			response.setResult(this.parseResult(parser));
+		    } if (parser.getName().equals("AuthenticationProtocolData")) {
+			response.setAuthenticationProtocolData(this.parseDIDAuthenticationDataType(parser));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDAuthenticateResponse")));
+	    return response;
 	}
 
 	else if (parser.getName().equals("StartPAOSResponse")) {

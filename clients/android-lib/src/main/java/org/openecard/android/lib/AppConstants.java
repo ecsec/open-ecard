@@ -34,5 +34,6 @@ public interface AppConstants {
     String INTENT_KEY_FOR_RESPONSE = "response";
     String SUCCESS = "success";
     String FAILURE = "failure";
+    String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
 }

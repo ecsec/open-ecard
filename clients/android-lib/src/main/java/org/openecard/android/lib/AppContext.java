@@ -102,6 +102,10 @@ public class AppContext extends Application implements EventCallback, AppContext
     private boolean nfcEnabled = false;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
+    // true if card is available and usable
+    private boolean isCardAvailable = false;
+    // card type of the usable card
+    private String cardType;
 
 
     ///
@@ -116,8 +120,16 @@ public class AppContext extends Application implements EventCallback, AppContext
 	return nfcEnabled;
     }
 
+    public synchronized boolean isCardAvailable() {
+	return isCardAvailable;
+    }
+
     public boolean isInitialized() {
 	return initialized;
+    }
+
+    public synchronized String getCardType() {
+	return cardType != null ? cardType : "";
     }
 
     public IFD getIFD() {
@@ -295,9 +307,6 @@ public class AppContext extends Application implements EventCallback, AppContext
 	    // set up intent binding
 	    IntentBinding.getInstance().setAddonManager(manager);
 
-	    Intent eacGuiServiceIntent = new Intent(this, EacGuiService.class);
-	    startService(eacGuiServiceIntent);
-
 	    initialized = true;
 	} catch (Exception ex) {
 	    LOG.error(errorMsg, ex);
@@ -324,9 +333,6 @@ public class AppContext extends Application implements EventCallback, AppContext
 		sal.terminate(terminate);
 	    }
 
-	    Intent eacGuiServiceIntent = new Intent(this, EacGuiService.class);
-	    stopService(eacGuiServiceIntent);
-
 	    return SUCCESS;
 	} catch (Exception ex) {
 	    LOG.error("Failed to terminate Open eCard instances...", ex);
@@ -346,7 +352,10 @@ public class AppContext extends Application implements EventCallback, AppContext
 	    case CARD_RECOGNIZED:
 		LOG.info("Card recognized.");
 		if (ch != null && ch.getRecognitionInfo() != null) {
-		    String cardType = ch.getRecognitionInfo().getCardType();
+		    synchronized (AppContext.class) {
+			cardType = ch.getRecognitionInfo().getCardType();
+			isCardAvailable = true;
+		    }
 		    LOG.info("CardType: " + cardType);
 		}
 		break;
@@ -355,6 +364,10 @@ public class AppContext extends Application implements EventCallback, AppContext
 		break;
 	    case CARD_REMOVED:
 		LOG.info("Card removed.");
+		synchronized (AppContext.class) {
+		    cardType = null;
+		    isCardAvailable = false;
+		}
 		break;
 	    case TERMINAL_ADDED:
 		LOG.info("Terminal added.");

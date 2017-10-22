@@ -41,7 +41,17 @@ public interface AppResponseStatusCodes {
     /**
      * indicates that the initialization was successfully finished.
      */
-    int OK = 200;
+    int INIT_SUCCESS = 200;
+
+    /**
+     * indicates that eac service started and is binded.
+     */
+    int EAC_SERVICE_CONNECTED = 201;
+
+    /**
+     * indicates that eac service started and is binded.
+     */
+    int EAC_SERVICE_DISCONNECTED = 203;
 
     /**
      * indicates that the corresponding device does not support the required API level.

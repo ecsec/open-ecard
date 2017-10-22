@@ -55,7 +55,7 @@ public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> im
 	AppResponse response = null;
 	switch (resultCode) {
 	    case SUCCESS:
-		response = new AppResponse(OK, APP_TERMINATE_SUCCESS);
+		response = new AppResponse(INIT_SUCCESS, APP_TERMINATE_SUCCESS);
 		break;
 	    case FAILURE:
 		response = new AppResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);

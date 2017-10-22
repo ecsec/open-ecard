@@ -70,7 +70,7 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implemen
 	    NfcUtils.getInstance().setAppContext(ctx); // set app context in nfc utils
 	    // build response whether the initialization of app context was successful or failed.
 	    if (isRequiredAPIUsed) {
-		response = new AppResponse(OK, APP_RESPONSE_OK);
+		response = new AppResponse(INIT_SUCCESS, APP_RESPONSE_OK);
 	    } else {
 		response = new AppResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
 	    }

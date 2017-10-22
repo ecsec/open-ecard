@@ -48,7 +48,7 @@ public class OpeneCardServiceConnection implements ServiceConnection {
     private final Context ctx;
 
     private OpeneCardService mService;
-    private boolean alreadyStarted;
+    private boolean alreadyStarted = false;
 
     public OpeneCardServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
 	this.ctx = ctx;
@@ -88,7 +88,7 @@ public class OpeneCardServiceConnection implements ServiceConnection {
     }
 
     private AppResponse buildDisconnectResponse(Exception ex) {
-	return ex == null ? new AppResponse(AppResponseStatusCodes.OK, AppMessages.APP_TERMINATE_SUCCESS)
+	return ex == null ? new AppResponse(AppResponseStatusCodes.INIT_SUCCESS, AppMessages.APP_TERMINATE_SUCCESS)
 		: new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
     }
 
@@ -96,8 +96,8 @@ public class OpeneCardServiceConnection implements ServiceConnection {
     /// Public methods
     ///
 
-    public void startService() {
-	if (!alreadyStarted) {
+    public synchronized void startService() {
+	if (! alreadyStarted) {
 	    Intent i = createOpeneCardIntent();
 	    LOG.info("Starting service…");
 	    ctx.startService(i);
@@ -109,7 +109,7 @@ public class OpeneCardServiceConnection implements ServiceConnection {
 	}
     }
 
-    public void stopService() {
+    public synchronized void stopService() {
 	if (alreadyStarted) {
 	    try {
 		Intent i = createOpeneCardIntent();
@@ -126,7 +126,7 @@ public class OpeneCardServiceConnection implements ServiceConnection {
 	}
     }
 
-    public boolean isServiceAlreadyStarted() {
+    public synchronized boolean isServiceAlreadyStarted() {
 	return alreadyStarted;
     }
 

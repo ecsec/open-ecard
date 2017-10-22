@@ -23,6 +23,7 @@
 package org.openecard.android.lib.activities;
 
 import android.content.Intent;
+import android.os.Bundle;
 import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
 import org.openecard.android.lib.utils.NfcUtils;
 import org.slf4j.Logger;
@@ -37,6 +38,12 @@ import org.slf4j.LoggerFactory;
 public class NfcActivity extends OpeneCardActivity {
 
     private static final Logger LOG = LoggerFactory.getLogger(NfcActivity.class);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	NfcUtils.getInstance().setAppContext(getOpeneCardContext());
+    }
 
     @Override
     public synchronized void onResume() {

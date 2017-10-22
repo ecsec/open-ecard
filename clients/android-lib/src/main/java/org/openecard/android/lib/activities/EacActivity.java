@@ -23,22 +23,25 @@
 package org.openecard.android.lib.activities;
 
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.Uri;
-import org.openecard.android.lib.AppConstants;
-import org.openecard.android.lib.AppResponse;
+import org.openecard.android.lib.async.tasks.WaitForEacGuiTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
+import org.openecard.android.lib.async.tasks.WaitForCardRecognizedTask;
+import org.openecard.android.lib.ex.BindingTaskStillRunning;
+import org.openecard.android.lib.ex.CardNotPresent;
+import org.openecard.android.lib.ex.ContextNotInitialized;
 import org.openecard.android.lib.intent.binding.IntentBinding;
-import org.openecard.gui.android.eac.EacGuiService;
+import org.openecard.android.lib.services.EacServiceConnection;
+import org.openecard.android.lib.services.ServiceConnectionResponseHandler;
+import org.openecard.gui.android.eac.EacGui;
 
 
 /**
  * @author Mike Prechtl
  */
-public abstract class EacActivity extends NfcActivity implements BindingTaskResult {
+public abstract class EacActivity extends NfcActivity implements BindingTaskResult, ServiceConnectionResponseHandler {
 
-    protected static final int REQUEST_CODE_START = 1;
-    protected static final int REQUEST_CODE_TERMINATE = 2;
+    private EacServiceConnection mEacGuiConnection;
 
     private volatile boolean alreadyBinded = false;
 
@@ -47,39 +50,57 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
         return data.toString();
     }
 
-    protected synchronized void bindEacService(ServiceConnection eacConnection) {
+    @Override
+    public synchronized void onResume() {
+	super.onResume();
 	if (! alreadyBinded) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setContextWrapper(this);
-	    bindService(createGuiIntent(), eacConnection, BIND_AUTO_CREATE);
+
+	    mEacGuiConnection = new EacServiceConnection(this, getApplicationContext());
+	    mEacGuiConnection.startService();
+
 	    this.alreadyBinded = true;
 	}
     }
 
-    protected synchronized void handleRequest(String uri) throws Exception {
+    @Override
+    protected void onDestroy() {
+	super.onDestroy();
+	if (alreadyBinded) {
+	    mEacGuiConnection.stopService();
+	}
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+	super.onNewIntent(intent);
+	WaitForCardRecognizedTask task = new WaitForCardRecognizedTask(this);
+	task.execute();
+    }
+
+    protected synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning,
+	    CardNotPresent {
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.handleRequest(uri);
     }
 
-    protected Intent createGuiIntent() {
-	return new Intent(ctx, EacGuiService.class);
+    protected synchronized void cancelRequest() {
+	IntentBinding binding = IntentBinding.getInstance();
+	binding.cancelRequest();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	if ((requestCode == REQUEST_CODE_START || requestCode == REQUEST_CODE_TERMINATE) && resultCode == RESULT_OK) {
-	    AppResponse response = data.getParcelableExtra(AppConstants.INTENT_KEY_FOR_RESPONSE);
-	    handleAppResponse(response);
+    protected synchronized EacGui getEacGui() {
+	if (mEacGuiConnection == null) {
+	    throw new IllegalStateException("There is no Eac Gui Connection available.");
 	}
+	return mEacGuiConnection.getEacGui();
     }
 
-    /**
-     * Handle responses from the Open eCard App in the Activity. Implement {
-     *
-     * @see AppResponseStatusCodes} to get the available status codes.
-     *
-     * @param response of an API call.
-     */
-    public abstract void handleAppResponse(AppResponse response);
+    public synchronized EacServiceConnection getServiceConnection() {
+	return mEacGuiConnection;
+    }
+
+    public abstract void cardRecognized();
 
 }

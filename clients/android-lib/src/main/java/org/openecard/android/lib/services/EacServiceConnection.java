@@ -23,14 +23,16 @@
 package org.openecard.android.lib.services;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import org.openecard.android.lib.AppMessages;
 import org.openecard.android.lib.AppResponse;
 import org.openecard.android.lib.AppResponseStatusCodes;
-import org.openecard.common.util.Promise;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
+import org.openecard.gui.android.eac.EacGuiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,37 +46,84 @@ public class EacServiceConnection implements ServiceConnection {
     private static final Logger LOG = LoggerFactory.getLogger(EacServiceConnection.class);
 
     private final ServiceConnectionResponseHandler responseHandler;
+    private final Context ctx;
 
-    private Promise<EacGui> eacServiceImpl = new Promise<>();
+    private EacGui eacService;
+    private boolean alreadyStarted = false;
 
-    public EacServiceConnection(ServiceConnectionResponseHandler responseHandler) {
+    public EacServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
+	this.ctx = ctx;
 	this.responseHandler = responseHandler;
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
 	LOG.info("EAC Gui Service binded!");
-	EacGui eacService = EacGuiImpl.Stub.asInterface(service);
-	eacServiceImpl.deliver(eacService);
+	eacService = EacGuiImpl.Stub.asInterface(service);
 	responseHandler.handleServiceConnectionResponse(buildServiceConnectedResponse());
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
 	LOG.info("EAC Gui Service unbinded.");
-	eacServiceImpl = new Promise<>();
+	responseHandler.handleServiceConnectionResponse(disconnectResponse);
     }
 
     public EacGui getEacGui() {
-	try {
-	    return eacServiceImpl.deref();
-	} catch (InterruptedException ex) {
-	    throw new RuntimeException("Waiting for EacGui interrupted.", ex);
+	return eacService;
+    }
+
+
+    ///
+    /// Build App responses
+    ///
+
+    private AppResponse disconnectResponse;
+
+    private AppResponse buildServiceConnectedResponse() {
+	return new AppResponse(AppResponseStatusCodes.EAC_SERVICE_CONNECTED, AppMessages.APP_EAC_SERVICE_CONNECTED);
+    }
+
+    private AppResponse buildDisconnectResponse() {
+	return new AppResponse(AppResponseStatusCodes.EAC_SERVICE_DISCONNECTED, AppMessages.APP_EAC_SERVICE_DISCONNECTED);
+    }
+
+
+    ///
+    /// Public methods
+    ///
+
+    public synchronized void startService() {
+	if (! alreadyStarted) {
+	    Intent i = createEacGuiIntent();
+	    LOG.info("Starting Eac Gui service…");
+	    ctx.startService(i);
+	    LOG.info("Binding service…"); // TODO here Problem with bind Service
+	    //ctx.bindService(i, this, Context.BIND_AUTO_CREATE);
+	    alreadyStarted = true;
+	} else {
+	    throw new IllegalStateException("Service already started...");
 	}
     }
 
-    private AppResponse buildServiceConnectedResponse() {
-	return new AppResponse(AppResponseStatusCodes.OK, AppMessages.APP_EAC_SERVICE_CONNECTED);
+    public synchronized void stopService() {
+	if (alreadyStarted) {
+	    Intent i = createEacGuiIntent();
+	    alreadyStarted = false;
+	    disconnectResponse = buildDisconnectResponse();
+	    ctx.stopService(i);
+	    ctx.unbindService(this);
+	} else {
+	    throw new IllegalStateException("Service already stopped...");
+	}
+    }
+
+    public synchronized boolean isServiceAlreadyStarted() {
+	return alreadyStarted;
+    }
+
+    private Intent createEacGuiIntent() {
+	return new Intent(ctx, EacGuiService.class);
     }
 
 }

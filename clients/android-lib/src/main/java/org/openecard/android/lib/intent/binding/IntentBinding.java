@@ -23,10 +23,19 @@
 package org.openecard.android.lib.intent.binding;
 
 import android.content.ContextWrapper;
+import android.os.AsyncTask;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonSelector;
+import org.openecard.android.lib.AppConstants;
+import org.openecard.android.lib.AppContext;
+import org.openecard.android.lib.AppMessages;
+import org.openecard.android.lib.activities.EacActivity;
 import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
+import org.openecard.android.lib.async.tasks.WaitForEacGuiTask;
+import org.openecard.android.lib.ex.BindingTaskStillRunning;
+import org.openecard.android.lib.ex.CardNotPresent;
+import org.openecard.android.lib.ex.ContextNotInitialized;
 
 
 /**
@@ -41,6 +50,8 @@ public class IntentBinding implements IntentBindingConstants {
     private AddonSelector addonSelector;
 
     private static IntentBinding instance;
+
+    private BindingTask bindingTask;
 
     private IntentBinding() {
     }
@@ -60,10 +71,10 @@ public class IntentBinding implements IntentBindingConstants {
     }
 
     public void setContextWrapper(BindingTaskResult calling) {
-	if (calling instanceof ContextWrapper) {
+	if (calling instanceof ContextWrapper && calling instanceof EacActivity) {
 	    this.calling = calling;
 	} else {
-	    throw new IllegalArgumentException("BindingTaskResult has to be implemented by a ContextWrapper.");
+	    throw new IllegalArgumentException("BindingTaskResult has to be implemented by an EacActivity.");
 	}
     }
 
@@ -79,12 +90,39 @@ public class IntentBinding implements IntentBindingConstants {
 	return calling;
     }
 
-    public void handleRequest(String uri) throws Exception {
+    public EacActivity getEacActivity() {
+	return (EacActivity) calling;
+    }
+
+    public synchronized void handleRequest(String uri) throws ContextNotInitialized, CardNotPresent,
+	    BindingTaskStillRunning {
 	if (calling == null) {
-	    throw new IllegalStateException("Please provide a ContextWrapper.");
+	    throw new IllegalStateException(AppMessages.PLEASE_PROVIDE_CONTEXT_WRAPPER);
 	}
-	BindingTask bindingTask = new BindingTask(this, uri);
-	bindingTask.execute();
+
+	AppContext ctx = (AppContext) getEacActivity().getApplicationContext();
+	if (ctx == null || ! ctx.isInitialized()) {
+	    throw new ContextNotInitialized(AppMessages.PLEASE_START_OPENECARD_SERVICE);
+	}
+
+	if (! ctx.isCardAvailable() || ! ctx.getCardType().equals(AppConstants.NPA_CARD_TYPE)) {
+	    throw new CardNotPresent(AppMessages.CARD_NOT_PRESENT);
+	}
+
+	if (bindingTask == null || bindingTask.getStatus().equals(AsyncTask.Status.FINISHED)) {
+	    bindingTask = new BindingTask(this, uri);
+	    bindingTask.execute();
+	} else {
+	    throw new BindingTaskStillRunning(AppMessages.BINDING_TASK_STILL_RUNNING);
+	}
+    }
+
+    public synchronized void cancelRequest() {
+	if (bindingTask != null && (bindingTask.getStatus().equals(AsyncTask.Status.RUNNING)
+		|| bindingTask.getStatus().equals(AsyncTask.Status.PENDING))) {
+	    bindingTask.cancel(true);
+	    bindingTask = null;
+	}
     }
 
 }

@@ -3,6 +3,7 @@
           package="org.openecard.android.lib">
 
     <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:name=".AppContext"
@@ -13,6 +14,22 @@
         <activity android:name=".activities.StartActivity"/>
 
         <activity android:name=".activities.ShutdownActivity"/>
+
+	<activity
+	    android:name=".activities.NFCActivity"
+	    android:clearTaskOnLaunch="true"
+	    android:configChanges="orientation|screenSize" />
+
+	<activity
+            android:name=".activities.EacActivity"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize">
+	    <intent-filter>
+		<action android:name="android.nfc.action.TAG_DISCOVERED" />
+
+		<category android:name="android.intent.category.DEFAULT" />
+	    </intent-filter>
+	</activity>
 
         <service
             android:name=".services.OpeneCardServiceImpl"

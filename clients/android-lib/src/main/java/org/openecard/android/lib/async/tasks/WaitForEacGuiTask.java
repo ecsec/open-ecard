@@ -50,7 +50,6 @@ public class WaitForEacGuiTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-	LOG.info("HEREEEE #1");
 	Promise<EacGuiImpl> eacGui = EacGuiService.getServiceImpl();
 	while (eacGui == null || eacGui.derefNonblocking() == null) {
 	    LOG.debug("Wait for Eac Gui...");

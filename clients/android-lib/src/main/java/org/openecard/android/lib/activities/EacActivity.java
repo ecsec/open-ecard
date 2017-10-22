@@ -22,9 +22,9 @@
 
 package org.openecard.android.lib.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import org.openecard.android.lib.async.tasks.WaitForEacGuiTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.async.tasks.WaitForCardRecognizedTask;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
@@ -34,6 +34,7 @@ import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.services.EacServiceConnection;
 import org.openecard.android.lib.services.ServiceConnectionResponseHandler;
 import org.openecard.gui.android.eac.EacGui;
+import org.openecard.gui.android.eac.EacGuiService;
 
 
 /**
@@ -95,6 +96,11 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
 	    throw new IllegalStateException("There is no Eac Gui Connection available.");
 	}
 	return mEacGuiConnection.getEacGui();
+    }
+
+    public synchronized void bindEacGui() {
+	EacServiceConnection con = getServiceConnection();
+	bindService(new Intent(getApplicationContext(), EacGuiService.class), con, Context.BIND_AUTO_CREATE);
     }
 
     public synchronized EacServiceConnection getServiceConnection() {

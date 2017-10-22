@@ -45,7 +45,7 @@ public class EacGuiService extends Service {
 	serviceImpl.deliver(impl);
     }
 
-    static synchronized Promise<EacGuiImpl> getServiceImpl() {
+    public static synchronized Promise<EacGuiImpl> getServiceImpl() {
 	return serviceImpl;
     }
 

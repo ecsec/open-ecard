@@ -31,6 +31,7 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.AndroidResult;
+import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
@@ -105,6 +106,7 @@ public class EacNavigator implements UserConsentNavigator {
 	    Step pinStep = steps.get(2);
 	    try {
 		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
 	    } catch (InterruptedException ex) {
 		return new AndroidResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
@@ -161,6 +163,16 @@ public class EacNavigator implements UserConsentNavigator {
     @Override
     public void close() {
 	EacGuiService.prepare();
+    }
+
+    private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
+	for (InputInfoUnit infoInUnit : inInfo) {
+	    for (OutputInfoUnit infoOutUnit : outInfo) {
+		if (infoInUnit.getID().equals(infoOutUnit.getID())) {
+		    infoOutUnit.copyContentFrom(infoInUnit);
+		}
+	    }
+	}
     }
 
 }

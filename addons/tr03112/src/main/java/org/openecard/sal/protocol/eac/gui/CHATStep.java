@@ -86,7 +86,6 @@ public class CHATStep extends Step {
 
 	// process read access and special functions
 	Checkbox readAccessCheckBox = new Checkbox(READ_CHAT_BOXES);
-	readAccessCheckBox.setID("ReadAccess");
 	boolean displayReadAccessCheckBox = false;
 	readAccessCheckBox.setGroupText(LANG.translationForKey(READ_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
@@ -144,7 +143,6 @@ public class CHATStep extends Step {
 
 	// process write access
 	Checkbox writeAccessCheckBox = new Checkbox(WRITE_CHAT_BOXES);
-	writeAccessCheckBox.setID("WriteAccess");
 	boolean displayWriteAccessCheckBox = false;
 	writeAccessCheckBox.setGroupText(LANG.translationForKey(WRITE_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();

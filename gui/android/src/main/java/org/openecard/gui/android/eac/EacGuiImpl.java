@@ -161,14 +161,14 @@ public class EacGuiImpl extends EacGui.Stub {
 	ArrayList<BoxItem> writeAccess = new ArrayList<>();
 
 	for (InputInfoUnit next : step2.getInputInfoUnits()) {
-	    if ("ReadAccess".equals(next.getID()) && next instanceof Checkbox) {
+	    if ("ReadCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {
 		Checkbox cb = (Checkbox) next;
 		this.readAccessBox = cb;
 		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {
 		    BoxItem bi = new BoxItem(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
 		    readAccess.add(bi);
 		}
-	    } else if ("WriteAccess".equals(next.getID()) && next instanceof Checkbox) {
+	    } else if ("WriteCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {
 		Checkbox cb = (Checkbox) next;
 		this.writeAccessBox = cb;
 		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {

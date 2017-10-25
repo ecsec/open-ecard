@@ -27,8 +27,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import org.openecard.android.lib.intent.binding.IntentBinding;
-import org.openecard.common.util.Promise;
-import org.openecard.gui.android.eac.EacGuiImpl;
 import org.openecard.gui.android.eac.EacGuiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,16 +48,6 @@ public class WaitForEacGuiTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-	Promise<EacGuiImpl> eacGui = EacGuiService.getServiceImpl();
-	while (eacGui == null || eacGui.derefNonblocking() == null) {
-	    LOG.debug("Wait for Eac Gui...");
-	    try {
-		Thread.sleep(500);
-	    } catch (InterruptedException ex) {
-		LOG.error("Waiting for card insertion interrupted.", ex);
-	    }
-	    eacGui = EacGuiService.getServiceImpl();
-	}
 	LOG.info("Bind Eac Gui Service...");
 	Context ctx = binding.getEacActivity().getApplicationContext();
 	ServiceConnection con = binding.getEacActivity().getServiceConnection();

@@ -169,7 +169,7 @@ public class EacNavigator implements UserConsentNavigator {
 	for (InputInfoUnit infoInUnit : inInfo) {
 	    for (OutputInfoUnit infoOutUnit : outInfo) {
 		if (infoInUnit.getID().equals(infoOutUnit.getID())) {
-		    infoOutUnit.copyContentFrom(infoInUnit);
+		    infoInUnit.copyContentFrom(infoOutUnit);
 		}
 	    }
 	}

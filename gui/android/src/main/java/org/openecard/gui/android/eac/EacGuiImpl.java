@@ -255,10 +255,12 @@ public class EacGuiImpl extends EacGui.Stub {
 		PasswordField pw = new PasswordField(nextIn.getID());
 		pw.copyContentFrom(nextIn);
 		pw.setValue(pinValue.toCharArray());
+		result.add(pw);
 	    } else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
 		PasswordField pw = new PasswordField(nextIn.getID());
 		pw.copyContentFrom(nextIn);
 		pw.setValue(canValue.toCharArray());
+		result.add(pw);
 	    }
 	}
 

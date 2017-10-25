@@ -131,7 +131,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -290,7 +289,53 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	    }
 
+	    if (establishChannel.getProfile() != null) {
+		Element emProfile = document.createElement(ISO + "Profile");
+		emProfile.appendChild(document.createTextNode(establishChannel.getProfile()));
+		rootElement.appendChild(emProfile);
+	    }
+
+	    if (establishChannel.getRequestID() != null) {
+		Element emRequest = document.createElement(ISO + "RequestID");
+		emRequest.appendChild(document.createElement(establishChannel.getRequestID()));
+		rootElement.appendChild(emRequest);
+	    }
+
 	    rootElement.appendChild(emAuthProtData);
+	} else if (o instanceof EstablishChannelResponse) {
+	    EstablishChannelResponse response = (EstablishChannelResponse) o;
+	    rootElement = document.createElement(ISO + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+
+	    if (response.getProfile() != null) {
+		Element emProfile = document.createElement(ISO + "Profile");
+		emProfile.appendChild(document.createTextNode(response.getProfile()));
+		rootElement.appendChild(emProfile);
+	    }
+
+	    if (response.getRequestID() != null) {
+		Element emRequest = document.createElement(ISO + "RequestID");
+		emRequest.appendChild(document.createElement(response.getRequestID()));
+		rootElement.appendChild(emRequest);
+	    }
+
+	    if (response.getResult() != null) {
+		Element emResult = marshalResult(response.getResult(), document);
+		rootElement.appendChild(emResult);
+	    }
+
+	    if (response.getAuthenticationProtocolData() != null) {
+		Element emAuthProtData = document.createElement(ISO + "AuthenticationProtocolData");
+		emAuthProtData.setAttribute("Protocol", response.getAuthenticationProtocolData().getProtocol());
+
+		for (Element e : response.getAuthenticationProtocolData().getAny()) {
+		    Element eClone = document.createElement(ISO + e.getLocalName());
+		    eClone.setTextContent(e.getTextContent());
+		    eClone.setAttribute("xmlns", "urn:iso:std:iso-iec:24727:tech:schema");
+		    emAuthProtData.appendChild(eClone);
+
+		}
+	    }
 	} else if (o instanceof DIDAuthenticate) {
 	    DIDAuthenticate auth = (DIDAuthenticate) o;
 	    rootElement = document.createElement(ISO + o.getClass().getSimpleName());
@@ -1498,7 +1543,11 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("Result")) {
+		    if (parser.getName().equals("Profile")) {
+			establishChannelResponse.setProfile(parser.nextText());
+		    } else if (parser.getName().equals("RequestID")) {
+			establishChannelResponse.setRequestID(parser.nextText());
+		    } else if (parser.getName().equals("Result")) {
 			establishChannelResponse.setResult(this.parseResult(parser));
 		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
 			establishChannelResponse.setAuthenticationProtocolData(this.parseDIDAuthenticationDataType(parser));
@@ -2226,6 +2275,27 @@ public class AndroidMarshaller implements WSMarshaller {
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("AddonSpecification")));
 	    return addonBundleDescription;
+	} else if (parser.getName().equals("EstablishChannel")) {
+	    EstablishChannel result = new EstablishChannel();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("SlotHandle")) {
+			result.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
+			result.setAuthenticationProtocolData(parseDIDAuthenticationDataType(parser));
+		    } else if (parser.getName().equals("Profile")) {
+			result.setProfile(parser.nextText());
+		    } else if (parser.getName().equals("RequestID")) {
+			result.setRequestID(parser.nextText());
+		    } else {
+			throw new IOException("Unmarshalling of " + parser.getName() + " in EstablishChannel not supported.");
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishChannel")));
+	    return result;
 	} else {
 	    throw new IOException("Unmarshalling of " + parser.getName() + " is not yet supported.");
 	}
@@ -2950,11 +3020,12 @@ public class AndroidMarshaller implements WSMarshaller {
     private DIDAuthenticationDataType parseDIDAuthenticationDataType(XmlPullParser parser) throws XmlPullParserException, IOException {
 	Document document = documentBuilder.newDocument();
 	DIDAuthenticationDataType didAuthenticationDataType;
-	if (parser.getAttributeValue("http://www.w3.org/2001/XMLSchema-instance", "type").contains("EAC1InputType")) {
+	String attrValue = parser.getAttributeValue("http://www.w3.org/2001/XMLSchema-instance", "type");
+	if (attrValue != null && attrValue.contains("EAC1InputType")) {
 	    didAuthenticationDataType = new EAC1InputType();
-	} else if (parser.getAttributeValue("http://www.w3.org/2001/XMLSchema-instance", "type").contains("EAC2InputType")) {
+	} else if (attrValue != null && attrValue.contains("EAC2InputType")) {
 	    didAuthenticationDataType = new EAC2InputType();
-	} else if (parser.getAttributeValue("http://www.w3.org/2001/XMLSchema-instance", "type").contains("EACAdditionalInputType")) {
+	} else if (attrValue != null && attrValue.contains("EACAdditionalInputType")) {
 	    didAuthenticationDataType = new EACAdditionalInputType();
 	} else {
 	    didAuthenticationDataType = new DIDAuthenticationDataType();

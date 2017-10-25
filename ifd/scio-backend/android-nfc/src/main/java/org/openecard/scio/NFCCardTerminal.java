@@ -96,6 +96,7 @@ public class NFCCardTerminal implements SCIOTerminal {
     public synchronized void setTag(IsoDep tag) throws SCIOException {
 	LOG.debug("Set nfc tag on terminal '" + getName() + "'");
 	if (tag.isExtendedLengthApduSupported()) {
+	    LOG.debug("Max Transceive Length: " + tag.getMaxTransceiveLength() + " Bytes.");
 	    LOG.debug("Extended Length APDU is supported.");
 	    this.nfcCard = new NFCCard(tag, this);
 	    notifyCardPresent();

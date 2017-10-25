@@ -129,15 +129,13 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public byte[] transmitControlCommand(int controlCode, byte[] command) throws SCIOException {
-	LOG.warn("transmitControlCommand not supported");
-	return new byte[0];
-	/*try {
-	    return isodep.transceive(command);
-	} catch (IOException ex) {
-	    String msg = String.format("Failed to transmit control command to the terminal '%s'.", nfcCardTerminal.getName());
-	    LOG.warn(msg);
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex);
-	}*/
+	if (controlCode == (0x42000000 + 3400)) {
+	    // GET_FEATURE_REQUEST_CTLCODE
+	    return new byte[0];
+	} else {
+	    String msg = "Control command not supported.";
+	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_INVALID_PARAMETER);
+	}
     }
 
     @Override

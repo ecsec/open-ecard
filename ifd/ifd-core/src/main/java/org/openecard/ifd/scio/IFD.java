@@ -279,9 +279,17 @@ public class IFD implements org.openecard.ws.IFD {
 	}
 
 	try {
+	    TerminalInfo info;
 	    String ifdName = parameters.getIFDName();
-	    SCIOTerminal term = cm.getTerminals().getTerminal(ifdName);
-	    TerminalInfo info = new TerminalInfo(cm, term);
+	    try {
+		SingleThreadChannel channel = cm.getMasterChannel(ifdName);
+		info = new TerminalInfo(cm, channel);
+	    } catch (NoSuchTerminal ex) {
+		// continue without a channel
+		SCIOTerminal term = cm.getTerminals().getTerminal(ifdName);
+		info = new TerminalInfo(cm, term);
+	    }
+	    
 	    IFDCapabilitiesType cap = new IFDCapabilitiesType();
 
 	    // slot capability
@@ -389,9 +397,17 @@ public class IFD implements org.openecard.ws.IFD {
 	// request status for each ifd
 	ArrayList<IFDStatusType> status = new ArrayList<>(ifds.size());
 	for (SCIOTerminal ifd : ifds) {
-	    TerminalInfo termInfo = new TerminalInfo(cm, ifd);
+
+	    TerminalInfo info;
 	    try {
-		IFDStatusType s = termInfo.getStatus();
+		SingleThreadChannel channel = cm.getMasterChannel(ifd.getName());
+		info = new TerminalInfo(cm, channel);
+	    } catch (NoSuchTerminal ex) {
+		// continue without a channel
+		info = new TerminalInfo(cm, ifd);
+	    }
+	    try {
+		IFDStatusType s = info.getStatus();
 		status.add(s);
 	    } catch (SCIOException ex) {
 		if (ex.getCode() != SCIOErrorCode.SCARD_W_UNPOWERED_CARD &&

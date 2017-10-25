@@ -610,7 +610,7 @@
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
-				<version>1.0.4</version>
+				<version>1.0.3</version>
 			</dependency>
 			<!-- Java Native Access -->
 			<dependency>

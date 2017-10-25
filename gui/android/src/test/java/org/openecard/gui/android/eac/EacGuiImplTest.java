@@ -98,7 +98,7 @@ public class EacGuiImplTest {
 	step1.getInputInfoUnits().add(sub);
 
 	final Step step2 = new Step("PROTOCOL_EAC_GUI_STEP_CHAT", "CHAT");
-	Checkbox readBox = new Checkbox("ReadAccess");
+	Checkbox readBox = new Checkbox("ReadCHATCheckBoxes");
 	readBox.getBoxItems().add(makeBoxItem("DG04", false, false));
 	readBox.getBoxItems().add(makeBoxItem("RESTRICTED_IDENTIFICATION", true, true));
 

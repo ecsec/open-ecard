@@ -269,6 +269,28 @@ public class AndroidMarshaller implements WSMarshaller {
 	    emSlotHandle.appendChild(document.createTextNode(ByteUtils.toHexString(destroyChannel.getSlotHandle())));
 	    rootElement.appendChild(emSlotHandle);
 
+	} else if (o instanceof DestroyChannelResponse) {
+	    DestroyChannelResponse response = (DestroyChannelResponse) o;
+	    rootElement = document.createElement(ISO + o.getClass().getSimpleName());
+	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
+
+	    if (response.getProfile() != null) {
+		Element emProfile = document.createElement(ISO + "Profile");
+		emProfile.appendChild(document.createTextNode(response.getProfile()));
+		rootElement.appendChild(emProfile);
+	    }
+
+	    if (response.getRequestID() != null) {
+		Element emRequest = document.createElement(ISO + "RequestID");
+		emRequest.appendChild(document.createElement(response.getRequestID()));
+		rootElement.appendChild(emRequest);
+	    }
+
+	    if (response.getResult() != null) {
+		Element emResult = marshalResult(response.getResult(), document);
+		rootElement.appendChild(emResult);
+	    }
+
 	} else if (o instanceof EstablishChannel) {
 	    EstablishChannel establishChannel = (EstablishChannel) o;
 	    rootElement = document.createElement(ISO + o.getClass().getSimpleName());
@@ -1528,12 +1550,30 @@ public class AndroidMarshaller implements WSMarshaller {
 		parser.next();
 		eventType = parser.getEventType();
 		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("Result")) {
+		    if (parser.getName().equals("Profile")) {
+			destroyChannelResponse.setProfile(parser.nextText());
+		    } else if (parser.getName().equals("RequestID")) {
+			destroyChannelResponse.setRequestID(parser.nextText());
+		    } else if (parser.getName().equals("Result")) {
 			destroyChannelResponse.setResult(this.parseResult(parser));
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DestroyChannelResponse")));
 	    return destroyChannelResponse;
+	}
+	else if (parser.getName().equals("DestroyChannel")) {
+	    DestroyChannel destroyChannel = new DestroyChannel();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("SlotHandle")) {
+			destroyChannel.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DestroyChannel")));
+	    return destroyChannel;
 	}
 
 	else if (parser.getName().equals("EstablishChannelResponse")) {

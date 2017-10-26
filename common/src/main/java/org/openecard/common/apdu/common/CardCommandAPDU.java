@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CardCommandAPDU extends CardAPDU {
 
-    private static final Logger logger = LoggerFactory.getLogger(CardCommandAPDU.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardCommandAPDU.class);
 
     private final byte[] header = new byte[4];
     private int le = -1;
@@ -417,15 +417,13 @@ public class CardCommandAPDU extends CardAPDU {
 		    data = new byte[lc];
 		    bais.read(data);
 
-		    if (bais.available() == 1 || bais.available() == 3) {
-			tmp = bais.read();
-			if (tmp != 0) {
-			    // Case 4 |CLA|INS|P1|P2|LC|DATA|LE|
-			    le = (tmp & 0xFF);
-			} else {
-			    // Case 4.2 |CLA|INS|P1|P2|LC|DATA|EXTLE|
-			    le = ((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF);
-			}
+		    if (bais.available() == 1) {
+			// Case 4 |CLA|INS|P1|P2|LC|DATA|LE|
+			setLE((byte) bais.read());
+		    } else if (bais.available() == 3) {
+			// Case 4.2 |CLA|INS|P1|P2|LC|DATA|EXTLE|
+			bais.read(); // throw away first byte
+			setLE((short) (((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF)));
 		    } else if (bais.available() == 2 || bais.available() > 3) {
 			throw new IllegalArgumentException("Malformed APDU.");
 		    }
@@ -436,7 +434,7 @@ public class CardCommandAPDU extends CardAPDU {
 		throw new IllegalArgumentException("Malformed APDU.");
 	    }
 	} catch (Exception e) {
-	    logger.error("Exception", e);
+	    LOG.error("Exception", e);
 	}
     }
 
@@ -587,7 +585,7 @@ public class CardCommandAPDU extends CardAPDU {
 		}
 	    }
 	} catch (IOException ex) {
-	    logger.error("Failed to create APDU in memory.", ex);
+	    LOG.error("Failed to create APDU in memory.", ex);
 	}
 
 	return baos.toByteArray();

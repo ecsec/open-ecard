@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * NFC implementation of smartcardio's cardChannel interface.
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class NFCCardChannel implements SCIOChannel {
 
@@ -67,10 +68,15 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
+	return transmit(apdu.toByteArray());
+    }
+
+    @Override
+    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
 	try {
-	    lengthOfLastAPDU = apdu.toByteArray().length;
-	    LOG.info("Send: {}", ByteUtils.toHexString(apdu.toByteArray(), true));
-	    return new CardResponseAPDU(card.isodep.transceive(apdu.toByteArray()));
+	    lengthOfLastAPDU = apdu.length;
+	    LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
+	    return new CardResponseAPDU(card.isodep.transceive(apdu));
 	} catch (IOException e) {
 	    // TODO: check if the error code can be chosen more specifically
 	    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
@@ -78,14 +84,8 @@ public class NFCCardChannel implements SCIOChannel {
     }
 
     @Override
-    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
-	return transmit(new CardCommandAPDU(apdu));
-    }
-
-    @Override
     public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException {
-	CardCommandAPDU cca = new CardCommandAPDU(command.array());
-	CardResponseAPDU cra = transmit(cca);
+	CardResponseAPDU cra = transmit(command.array());
 	byte[] data = cra.toByteArray();
 	response.put(data);
 

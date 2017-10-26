@@ -44,8 +44,7 @@ public class ProcessingStep extends Step {
     private static final String DESCRIPTION = "step_processing_description";
 
     public ProcessingStep() {
-	super(STEP_ID);
-	setTitle(lang.translationForKey(TITLE));
+	super(STEP_ID, lang.translationForKey(TITLE));
 	setDescription(lang.translationForKey(STEP_DESCRIPTION));
 	setInstantReturn(true);
 	setReversible(false);

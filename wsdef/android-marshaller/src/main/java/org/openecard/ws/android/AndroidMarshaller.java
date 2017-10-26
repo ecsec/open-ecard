@@ -2048,7 +2048,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			result.setRequestID(parser.nextText());
 		    }
 		}
-	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("SlotInfo")));
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationDisconnect")));
 	    return result;
 	} else if (parser.getName().equals("CardApplicationDisconnectResponse")) {
 	    CardApplicationDisconnectResponse result = new CardApplicationDisconnectResponse();
@@ -2065,7 +2065,7 @@ public class AndroidMarshaller implements WSMarshaller {
 			result.setResult(this.parseResult(parser));
 		    }
 		}
-	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("SlotInfo")));
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationDisconnectResponse")));
 	    return result;
 	} else if (parser.getName().equals("GetRecognitionTreeResponse")) {
 	    GetRecognitionTreeResponse resp = new GetRecognitionTreeResponse();

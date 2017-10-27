@@ -98,7 +98,7 @@ public class EacServiceConnection implements ServiceConnection {
 	    Intent i = createEacGuiIntent();
 	    LOG.info("Starting Eac Gui service…");
 	    ctx.startService(i);
-	    LOG.info("Binding service…"); // TODO here Problem with bind Service
+	    //LOG.info("Binding service…");
 	    //ctx.bindService(i, this, Context.BIND_AUTO_CREATE);
 	    alreadyStarted = true;
 	} else {
@@ -112,7 +112,7 @@ public class EacServiceConnection implements ServiceConnection {
 	    alreadyStarted = false;
 	    disconnectResponse = buildDisconnectResponse();
 	    ctx.stopService(i);
-	    ctx.unbindService(this);
+	    //ctx.unbindService(this);
 	} else {
 	    throw new IllegalStateException("Service already stopped...");
 	}

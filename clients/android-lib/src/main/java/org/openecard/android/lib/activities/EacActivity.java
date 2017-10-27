@@ -70,6 +70,8 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
 	super.onDestroy();
 	if (alreadyBinded) {
 	    mEacGuiConnection.stopService();
+	    unbindEacGui();
+	    alreadyBinded = false;
 	}
     }
 
@@ -101,6 +103,10 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     public synchronized void bindEacGui() {
 	EacServiceConnection con = getServiceConnection();
 	bindService(new Intent(getApplicationContext(), EacGuiService.class), con, Context.BIND_AUTO_CREATE);
+    }
+
+    public synchronized void unbindEacGui() {
+	unbindService(getServiceConnection());
     }
 
     public synchronized EacServiceConnection getServiceConnection() {

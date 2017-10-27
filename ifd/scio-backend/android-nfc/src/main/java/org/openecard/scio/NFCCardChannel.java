@@ -77,6 +77,7 @@ public class NFCCardChannel implements SCIOChannel {
 	    try {
 		lengthOfLastAPDU = apdu.length;
 		LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
+		card.isodep.setTimeout(card.getTimeoutForTransceive());
 		return new CardResponseAPDU(card.isodep.transceive(apdu));
 	    } catch (IOException e) {
 		// TODO: check if the error code can be chosen more specifically

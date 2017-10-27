@@ -113,7 +113,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	isoDepTag.setTimeout(timeout);
 	try {
 	    // standard nfc terminal
-	    NFCCardTerminal.getInstance().setTag(isoDepTag);
+	    NFCCardTerminal.getInstance().setTag(isoDepTag, timeout);
 	} catch (SCIOException ex) {
 	    LOG.warn(ex.getMessage(), ex);
 	}

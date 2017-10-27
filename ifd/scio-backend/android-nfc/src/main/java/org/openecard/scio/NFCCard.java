@@ -46,11 +46,17 @@ public class NFCCard implements SCIOCard {
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
     private final NFCCardTerminal nfcCardTerminal;
+    private final int timeoutForTransceive;
     protected IsoDep isodep;
 
-    public NFCCard(IsoDep tag, NFCCardTerminal terminal) {
+    public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) {
 	isodep = tag;
+	timeoutForTransceive = timeout;
 	nfcCardTerminal = terminal;
+    }
+
+    public int getTimeoutForTransceive() {
+	return timeoutForTransceive;
     }
 
     @Override

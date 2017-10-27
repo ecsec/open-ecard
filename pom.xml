@@ -18,6 +18,12 @@
 		<url>http://www.openecard.org</url>
 	</organization>
 
+	<scm>
+		<connection>scm:git:https://github.com/ecsec/open-ecard.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/ecsec/open-ecard.git</developerConnection>
+		<url>https://github.com/ecsec/open-ecard</url>
+		<tag>1.2.4</tag>
+	</scm>
 	<ciManagement>
 		<system>Jenkins CI</system>
 		<url>https://ci.openecard.org</url>

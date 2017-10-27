@@ -32,10 +32,10 @@ import org.openecard.android.lib.AppMessages;
 import org.openecard.android.lib.activities.EacActivity;
 import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
-import org.openecard.android.lib.async.tasks.WaitForEacGuiTask;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.CardNotPresent;
 import org.openecard.android.lib.ex.ContextNotInitialized;
+import org.openecard.scio.NFCCardTerminal;
 
 
 /**
@@ -105,7 +105,8 @@ public class IntentBinding implements IntentBindingConstants {
 	    throw new ContextNotInitialized(AppMessages.PLEASE_START_OPENECARD_SERVICE);
 	}
 
-	if (! ctx.isCardAvailable() || ! ctx.getCardType().equals(AppConstants.NPA_CARD_TYPE)) {
+	if (! ctx.isCardAvailable() || ! ctx.getCardType().equals(AppConstants.NPA_CARD_TYPE)
+		|| ! NFCCardTerminal.getInstance().isCardConnected()) {
 	    throw new CardNotPresent(AppMessages.CARD_NOT_PRESENT);
 	}
 

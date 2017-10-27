@@ -25,6 +25,7 @@ package org.openecard.android.lib.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.async.tasks.WaitForCardRecognizedTask;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
@@ -43,6 +44,7 @@ import org.openecard.gui.android.eac.EacGuiService;
 public abstract class EacActivity extends NfcActivity implements BindingTaskResult, ServiceConnectionResponseHandler {
 
     private EacServiceConnection mEacGuiConnection;
+    private WaitForCardRecognizedTask waitTask;
 
     private volatile boolean alreadyBinded = false;
 
@@ -52,8 +54,8 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     }
 
     @Override
-    public synchronized void onResume() {
-	super.onResume();
+    protected void onStart() {
+	super.onStart();
 	if (! alreadyBinded) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setContextWrapper(this);
@@ -62,6 +64,17 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
 	    mEacGuiConnection.startService();
 
 	    this.alreadyBinded = true;
+	}
+    }
+
+    @Override
+    protected void onStop() {
+	super.onStop();
+	IntentBinding binding = IntentBinding.getInstance();
+	binding.cancelRequest();
+	if (waitTask != null && (waitTask.getStatus().equals(AsyncTask.Status.PENDING)
+		|| waitTask.getStatus().equals(AsyncTask.Status.RUNNING))) {
+	    waitTask.cancel(true);
 	}
     }
 
@@ -78,8 +91,8 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     @Override
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
-	WaitForCardRecognizedTask task = new WaitForCardRecognizedTask(this);
-	task.execute();
+	waitTask = new WaitForCardRecognizedTask(this);
+	waitTask.execute();
     }
 
     protected synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning,

@@ -73,13 +73,17 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
-	try {
-	    lengthOfLastAPDU = apdu.length;
-	    LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
-	    return new CardResponseAPDU(card.isodep.transceive(apdu));
-	} catch (IOException e) {
-	    // TODO: check if the error code can be chosen more specifically
-	    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+	if (card != null && card.isodep != null && card.isodep.isConnected()) {
+	    try {
+		lengthOfLastAPDU = apdu.length;
+		LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
+		return new CardResponseAPDU(card.isodep.transceive(apdu));
+	    } catch (IOException e) {
+		// TODO: check if the error code can be chosen more specifically
+		throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+	    }
+	} else {
+	    throw new SCIOException("Transmit failed, cause card removed.", SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	}
     }
 

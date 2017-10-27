@@ -39,6 +39,8 @@ public class SetTagTask extends AsyncTask<Void, Void, Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetTagTask.class);
 
+    private static final int STD_TIMEOUT = 2000;
+
     private final Tag tagFromIntent;
 
     public SetTagTask(Tag tag) {
@@ -50,7 +52,7 @@ public class SetTagTask extends AsyncTask<Void, Void, Void> {
 	List<String> terminalNames = NFCFactory.getTerminalNames();
 	if (!terminalNames.isEmpty()) {
 	    // the corresponding device should support one nfc terminal (the integrated one)
-	    NFCFactory.setNFCTag(tagFromIntent);
+	    NFCFactory.setNFCTag(tagFromIntent, STD_TIMEOUT);
 	} else {
 	    LOG.warn("No terminal connected...");
 	}

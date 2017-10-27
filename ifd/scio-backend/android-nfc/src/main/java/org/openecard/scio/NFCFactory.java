@@ -98,13 +98,19 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	return terminalNames;
     }
 
+    public static void setNFCTag(Tag tag) {
+	setNFCTag(tag, IsoDep.get(tag).getTimeout());
+    }
+
     /**
      * Set the nfc tag in the nfc card terminal.
      *
      * @param tag
+     * @param timeout current timeout for transceive(byte[]) in milliseconds.
      */
-    public static void setNFCTag(Tag tag) {
+    public static void setNFCTag(Tag tag, int timeout) {
 	IsoDep isoDepTag = IsoDep.get(tag);
+	isoDepTag.setTimeout(timeout);
 	try {
 	    // standard nfc terminal
 	    NFCCardTerminal.getInstance().setTag(isoDepTag);

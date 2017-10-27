@@ -23,7 +23,6 @@
 package org.openecard.android.lib;
 
 import android.app.Application;
-import android.content.Intent;
 import org.openecard.addon.AddonManager;
 import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.utils.ClasspathRegistry;
@@ -65,7 +64,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
-import org.openecard.gui.android.eac.EacGuiService;
 
 
 /**

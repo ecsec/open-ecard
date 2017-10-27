@@ -282,7 +282,20 @@
 					<configuration>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<tagNameFormat>@{project.version}</tagNameFormat>
+						<localCheckout>true</localCheckout>
+						<goals>deploy</goals>
+						<!--providerImplementations>
+							<git>maven-scm-provider-gitexe</git>
+						</providerImplementations-->
 					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.9.5</version>
+							<classifier>submodule</classifier>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

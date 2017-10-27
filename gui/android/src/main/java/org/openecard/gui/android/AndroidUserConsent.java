@@ -28,6 +28,7 @@ import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.stub.MessageDialogStub;
 import org.openecard.gui.definition.UserConsentDescription;
 
 
@@ -62,7 +63,7 @@ public class AndroidUserConsent implements UserConsent {
 
     @Override
     public MessageDialog obtainMessageDialog() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return new MessageDialogStub(); // return stub object
     }
 
 }

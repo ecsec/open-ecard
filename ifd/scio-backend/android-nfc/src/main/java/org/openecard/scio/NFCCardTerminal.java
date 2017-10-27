@@ -112,7 +112,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	} catch (SCIOException ex) {
 	    LOG.error("Disconnect failed.", ex);
 	}
-	this.nfcCard.isodep = null;
 	this.nfcCard = null;
 	notifyCardAbsent();
     }

@@ -73,7 +73,11 @@ public class NFCCard implements SCIOCard {
     public void disconnect(boolean arg0) throws SCIOException {
 	try {
 	    nfcCardChannel.close();
-	    isodep.close();
+	    // maybe isodep is already null, for example if isodep is lost or disconnected
+	    if (isodep != null) {
+		isodep.close();
+		isodep = null;
+	    }
 	} catch (IOException e) {
 	    // TODO: check if the error code can be chosen more specifically
 	    throw new SCIOException("Disconnect failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);

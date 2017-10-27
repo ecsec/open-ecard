@@ -39,7 +39,7 @@ public class SetTagTask extends AsyncTask<Void, Void, Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetTagTask.class);
 
-    private static final int STD_TIMEOUT = 2000;
+    private static final int STD_TIMEOUT = 5000;
 
     private final Tag tagFromIntent;
 

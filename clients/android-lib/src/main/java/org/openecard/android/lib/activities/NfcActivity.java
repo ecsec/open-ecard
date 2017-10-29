@@ -22,8 +22,10 @@
 
 package org.openecard.android.lib.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import org.openecard.android.lib.AppContext;
 import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
 import org.openecard.android.lib.utils.NfcUtils;
 import org.slf4j.Logger;
@@ -35,14 +37,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mike Prechtl
  */
-public class NfcActivity extends OpeneCardActivity {
+public class NfcActivity extends Activity {
 
     private static final Logger LOG = LoggerFactory.getLogger(NfcActivity.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	NfcUtils.getInstance().setAppContext(getOpeneCardContext());
+	NfcUtils.getInstance().setAppContext((AppContext) getApplicationContext());
     }
 
     @Override

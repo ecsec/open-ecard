@@ -29,7 +29,6 @@ import android.os.AsyncTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.async.tasks.WaitForCardRecognizedTask;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
-import org.openecard.android.lib.ex.CardNotPresent;
 import org.openecard.android.lib.ex.ContextNotInitialized;
 import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.services.EacServiceConnection;
@@ -91,12 +90,9 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     @Override
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
-	waitTask = new WaitForCardRecognizedTask(this);
-	waitTask.execute();
     }
 
-    protected synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning,
-	    CardNotPresent {
+    protected synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.handleRequest(uri);
     }

@@ -26,16 +26,13 @@ import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonSelector;
-import org.openecard.android.lib.AppConstants;
 import org.openecard.android.lib.AppContext;
 import org.openecard.android.lib.AppMessages;
 import org.openecard.android.lib.activities.EacActivity;
 import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
-import org.openecard.android.lib.ex.CardNotPresent;
 import org.openecard.android.lib.ex.ContextNotInitialized;
-import org.openecard.scio.NFCCardTerminal;
 
 
 /**
@@ -94,8 +91,7 @@ public class IntentBinding implements IntentBindingConstants {
 	return (EacActivity) calling;
     }
 
-    public synchronized void handleRequest(String uri) throws ContextNotInitialized, CardNotPresent,
-	    BindingTaskStillRunning {
+    public synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
 	if (calling == null) {
 	    throw new IllegalStateException(AppMessages.PLEASE_PROVIDE_CONTEXT_WRAPPER);
 	}
@@ -103,11 +99,6 @@ public class IntentBinding implements IntentBindingConstants {
 	AppContext ctx = (AppContext) getEacActivity().getApplicationContext();
 	if (ctx == null || ! ctx.isInitialized()) {
 	    throw new ContextNotInitialized(AppMessages.PLEASE_START_OPENECARD_SERVICE);
-	}
-
-	if (! ctx.isCardAvailable() || ! ctx.getCardType().equals(AppConstants.NPA_CARD_TYPE)
-		|| ! NFCCardTerminal.getInstance().isCardConnected()) {
-	    throw new CardNotPresent(AppMessages.CARD_NOT_PRESENT);
 	}
 
 	if (bindingTask == null || bindingTask.getStatus().equals(AsyncTask.Status.FINISHED)) {

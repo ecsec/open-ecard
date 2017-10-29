@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.openecard.android.lib">
+	  package="org.openecard.android.lib">
 
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:name=".AppContext"
-        android:allowBackup="true"
-        android:label="@string/app_name"
-        android:supportsRtl="true">
+	android:name=".AppContext"
+	android:allowBackup="true"
+	android:label="@string/app_name"
+	android:supportsRtl="true">
 
-        <activity android:name=".activities.StartActivity"/>
+	<activity
+	    android:name=".activities.StartActivity"
+	    android:theme="@android:style/Theme.NoDisplay" />
 
-        <activity android:name=".activities.ShutdownActivity"/>
+	<activity
+	    android:name=".activities.ShutdownActivity"
+	    android:theme="@android:style/Theme.NoDisplay" />
 
 	<activity
 	    android:name=".activities.NFCActivity"
@@ -21,9 +25,9 @@
 	    android:configChanges="orientation|screenSize" />
 
 	<activity
-            android:name=".activities.EacActivity"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize">
+	    android:name=".activities.EacActivity"
+	    android:clearTaskOnLaunch="true"
+	    android:configChanges="orientation|screenSize">
 	    <intent-filter>
 		<action android:name="android.nfc.action.TAG_DISCOVERED" />
 
@@ -31,15 +35,15 @@
 	    </intent-filter>
 	</activity>
 
-        <service
-            android:name=".services.OpeneCardServiceImpl"
-            android:exported="true"
-            android:label="Open eCard Service"/>
+	<service
+	    android:name=".services.OpeneCardServiceImpl"
+	    android:exported="true"
+	    android:label="Open eCard Service"/>
 
-        <service
-            android:name="org.openecard.gui.android.eac.EacGuiService"
-            android:exported="true"
-            android:label="EAC Gui Service"/>
+	<service
+	    android:name="org.openecard.gui.android.eac.EacGuiService"
+	    android:exported="true"
+	    android:label="EAC Gui Service"/>
 
     </application>
 

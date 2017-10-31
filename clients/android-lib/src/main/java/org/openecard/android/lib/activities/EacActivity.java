@@ -22,9 +22,10 @@
 
 package org.openecard.android.lib.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import org.openecard.addon.bind.AuxDataKeys;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.ContextNotInitialized;
@@ -32,7 +33,6 @@ import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.services.EacServiceConnection;
 import org.openecard.android.lib.services.ServiceConnectionResponseHandler;
 import org.openecard.gui.android.eac.EacGui;
-import org.openecard.gui.android.eac.EacGuiService;
 
 
 /**
@@ -55,10 +55,6 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
 	if (! alreadyBinded) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setContextWrapper(this);
-
-	    mEacGuiConnection = new EacServiceConnection(this, getApplicationContext());
-	    mEacGuiConnection.startService();
-
 	    this.alreadyBinded = true;
 	}
     }
@@ -74,8 +70,6 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     protected void onDestroy() {
 	super.onDestroy();
 	if (alreadyBinded) {
-	    mEacGuiConnection.stopService();
-	    unbindEacGui();
 	    alreadyBinded = false;
 	}
     }
@@ -103,18 +97,24 @@ public abstract class EacActivity extends NfcActivity implements BindingTaskResu
     }
 
     public synchronized void bindEacGui() {
-	EacServiceConnection con = getServiceConnection();
-	bindService(new Intent(getApplicationContext(), EacGuiService.class), con, Context.BIND_AUTO_CREATE);
+	mEacGuiConnection = new EacServiceConnection(this, getApplicationContext());
+	mEacGuiConnection.startService();
     }
 
     public synchronized void unbindEacGui() {
-	unbindService(getServiceConnection());
+	mEacGuiConnection.stopService();
     }
 
     public synchronized EacServiceConnection getServiceConnection() {
 	return mEacGuiConnection;
     }
 
-    public abstract void cardRecognized();
+    protected void sendResultBasedOnBindingResult(BindingResult result) {
+	String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
+	if (location != null) {
+	    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
+	    startActivity(i);
+	}
+    }
 
 }

@@ -30,8 +30,8 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.provider.Settings;
 import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.async.tasks.SetTagTask;
 import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
+import org.openecard.scio.NFCFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +94,7 @@ public class NfcUtils {
 	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
 	    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
-		SetTagTask task = new SetTagTask(tagFromIntent);
-		task.execute();
+		NFCFactory.setNFCTag(tagFromIntent, 5000);
 	    } else {
 		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
 	    }

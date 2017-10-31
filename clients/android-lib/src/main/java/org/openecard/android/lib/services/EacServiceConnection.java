@@ -96,10 +96,10 @@ public class EacServiceConnection implements ServiceConnection {
     public synchronized void startService() {
 	if (! alreadyStarted) {
 	    Intent i = createEacGuiIntent();
-	    LOG.info("Starting Eac Gui service…");
+	    LOG.info("Starting Eac Gui service...");
 	    ctx.startService(i);
-	    //LOG.info("Binding service…");
-	    //ctx.bindService(i, this, Context.BIND_AUTO_CREATE);
+	    LOG.info("Binding Eac Gui service...");
+	    ctx.bindService(i, this, 0);
 	    alreadyStarted = true;
 	} else {
 	    throw new IllegalStateException("Service already started...");
@@ -112,7 +112,8 @@ public class EacServiceConnection implements ServiceConnection {
 	    alreadyStarted = false;
 	    disconnectResponse = buildDisconnectResponse();
 	    ctx.stopService(i);
-	    //ctx.unbindService(this);
+	    LOG.info("Unbinding Eac Gui service...");
+	    ctx.unbindService(this);
 	} else {
 	    throw new IllegalStateException("Service already stopped...");
 	}

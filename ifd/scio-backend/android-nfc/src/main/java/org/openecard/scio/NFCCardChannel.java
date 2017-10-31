@@ -84,7 +84,8 @@ public class NFCCardChannel implements SCIOChannel {
 		throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
 	    }
 	} else {
-	    throw new SCIOException("Transmit failed, cause card removed.", SCIOErrorCode.SCARD_W_REMOVED_CARD);
+	    throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
+		    SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	}
     }
 

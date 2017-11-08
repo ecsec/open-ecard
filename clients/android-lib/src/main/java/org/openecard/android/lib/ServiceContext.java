@@ -67,13 +67,13 @@ import iso.std.iso_iec._24727.tech.schema.Terminate;
 
 
 /**
- * Provide the access to the ifd, sal, ... This class initializes the whole app.
+ * Provide the access to the ifd, sal, ... This class initializes the whole Open eCard Context.
  *
  * @author Mike Prechtl
  */
-public class AppContext extends Application implements EventCallback, AppContextConstants, AppMessages, AppConstants {
+public class ServiceContext extends Application implements EventCallback, ServiceContextConstants, ServiceMessages, ServiceConstants {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AppContext.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceContext.class);
 
     private ClientEnv env;
 
@@ -104,6 +104,24 @@ public class AppContext extends Application implements EventCallback, AppContext
     private boolean isCardAvailable = false;
     // card type of the usable card
     private String cardType;
+
+    private static ServiceContext ctx;
+
+    @Override
+    public void onCreate() {
+	super.onCreate();
+	ctx = this;
+    }
+
+    @Override
+    public void onTerminate() {
+	super.onTerminate();
+	ctx = null;
+    }
+
+    public synchronized static ServiceContext getServiceContext() {
+	return ctx;
+    }
 
 
     ///
@@ -350,7 +368,7 @@ public class AppContext extends Application implements EventCallback, AppContext
 	    case CARD_RECOGNIZED:
 		LOG.info("Card recognized.");
 		if (ch != null && ch.getRecognitionInfo() != null) {
-		    synchronized (AppContext.class) {
+		    synchronized (ServiceContext.class) {
 			cardType = ch.getRecognitionInfo().getCardType();
 			isCardAvailable = true;
 		    }
@@ -362,7 +380,7 @@ public class AppContext extends Application implements EventCallback, AppContext
 		break;
 	    case CARD_REMOVED:
 		LOG.info("Card removed.");
-		synchronized (AppContext.class) {
+		synchronized (ServiceContext.class) {
 		    cardType = null;
 		    isCardAvailable = false;
 		}

@@ -24,23 +24,24 @@ package org.openecard.android.lib.async.tasks;
 
 import android.content.ContextWrapper;
 import android.os.AsyncTask;
-import org.openecard.android.lib.AppConstants;
-import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.AppMessages;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
+import org.openecard.android.lib.ServiceContext;
+import org.openecard.android.lib.ServiceResponse;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
+import org.openecard.android.lib.ServiceMessages;
+import org.openecard.android.lib.ServiceConstants;
+import org.openecard.android.lib.ServiceWarningResponse;
 
 
 /**
  * @author Mike Prechtl
  */
-public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> implements AppConstants, AppMessages,
-		AppResponseStatusCodes {
+public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> implements ServiceConstants, ServiceMessages,
+		ServiceResponseStatusCodes {
 
-    private final AppContext ctx;
+    private final ServiceContext ctx;
     private final ShutdownTaskResult calling;
 
-    public ShutdownTask(AppContext ctx, ShutdownTaskResult calling) {
+    public ShutdownTask(ServiceContext ctx, ShutdownTaskResult calling) {
 	if (calling instanceof ContextWrapper) {
 	    this.ctx = ctx;
 	    this.calling = calling;
@@ -52,13 +53,13 @@ public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> im
     @Override
     protected ShutdownTaskResponse doInBackground(Void... voids) {
 	String resultCode = ctx.shutdown();
-	AppResponse response = null;
+	ServiceResponse response = null;
 	switch (resultCode) {
 	    case SUCCESS:
-		response = new AppResponse(INIT_SUCCESS, APP_TERMINATE_SUCCESS);
+		response = new ServiceResponse(SHUTDOWN_SUCCESS, APP_TERMINATE_SUCCESS);
 		break;
 	    case FAILURE:
-		response = new AppResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);
+		response = new ServiceWarningResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);
 		break;
 	}
 	return new ShutdownTaskResponse(response);

@@ -22,7 +22,7 @@
 
 package org.openecard.android.lib.async.tasks;
 
-import org.openecard.android.lib.AppResponse;
+import org.openecard.android.lib.ServiceResponse;
 
 
 /**
@@ -30,13 +30,13 @@ import org.openecard.android.lib.AppResponse;
  */
 public abstract class TaskResponse {
 
-    private final AppResponse response;
+    private final ServiceResponse response;
 
-    public TaskResponse(AppResponse response) {
+    public TaskResponse(ServiceResponse response) {
 	this.response = response;
     }
 
-    public AppResponse getResponse() {
+    public ServiceResponse getResponse() {
 	return response;
     }
 

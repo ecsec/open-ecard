@@ -22,13 +22,13 @@
 
 package org.openecard.android.lib;
 
-import org.openecard.android.lib.AppResponse;
+import org.openecard.android.lib.ServiceResponse;
 
 
 interface OpeneCardService {
 
-    AppResponse start();
+    ServiceResponse start();
 
-    AppResponse stop();
+    ServiceResponse stop();
 
 }

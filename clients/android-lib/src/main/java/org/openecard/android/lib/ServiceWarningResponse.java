@@ -20,29 +20,23 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.lib.async.tasks;
+package org.openecard.android.lib;
 
-import org.openecard.android.lib.ServiceContext;
-import org.openecard.android.lib.ServiceResponse;
+import android.os.Parcel;
 
 
 /**
- * Contains the app context of the initialization process {@link StartTask} and a response which represents the
- * state of the initialization, for example if the initialization was successful, then a positive response is created.
  *
  * @author Mike Prechtl
  */
-public class StartTaskResponse extends TaskResponse {
+public class ServiceWarningResponse extends ServiceResponse {
 
-    private final ServiceContext ctx;
-
-    public StartTaskResponse(ServiceContext ctx, ServiceResponse response) {
-	super(response);
-	this.ctx = ctx;
+    public ServiceWarningResponse(Parcel in) {
+	super(in);
     }
 
-    public ServiceContext getCtx() {
-	return ctx;
+    public ServiceWarningResponse(int statusCode, String message) {
+	super(ServiceResponseLevel.WARNING, statusCode, message);
     }
 
 }

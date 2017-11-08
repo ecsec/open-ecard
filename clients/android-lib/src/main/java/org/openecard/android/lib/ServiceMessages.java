@@ -28,7 +28,7 @@ package org.openecard.android.lib;
  *
  * @author Mike Prechtl
  */
-public interface AppMessages {
+public interface ServiceMessages {
 
     String APP_RESPONSE_OK = "Initialization successfully finished.";
     String APP_CONTEXT_STD_MSG = "Initialization of App context failed.";

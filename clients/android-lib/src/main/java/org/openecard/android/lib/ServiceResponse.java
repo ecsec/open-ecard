@@ -28,21 +28,32 @@ import android.os.Parcelable;
 
 /**
  * Represents the response which is sent from the core library to the android app. The response codes which are used are
- * available in {@link AppResponseStatusCodes}, the messages are available in {@link AppMessages}.
+ * available in {@link ServiceResponseStatusCodes}, the messages are available in {@link ServiceMessages}.
  *
  * @author Mike Prechtl
  */
-public class AppResponse implements Parcelable {
+public class ServiceResponse implements Parcelable {
 
+    private final ServiceResponseLevel level;
     private final String message;
     private final int statusCode;
 
-    public AppResponse(Parcel in) {
+    // TODO aufspalten in AppErrorResponse AppWarningResponse
+
+    public ServiceResponse(Parcel in) {
+	this.level = ServiceResponseLevel.valueOf(in.readString());
 	this.statusCode = in.readInt();
 	this.message = in.readString();
     }
 
-    public AppResponse(int statusCode, String message) {
+    public ServiceResponse(int statusCode, String message) {
+	this.level = ServiceResponseLevel.INFO;
+	this.statusCode = statusCode;
+	this.message = message;
+    }
+
+    public ServiceResponse(ServiceResponseLevel level, int statusCode, String message) {
+	this.level = level;
 	this.statusCode = statusCode;
 	this.message = message;
     }
@@ -54,6 +65,7 @@ public class AppResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+	parcel.writeString(level.name());
 	parcel.writeInt(statusCode);
 	parcel.writeString(message);
     }
@@ -66,16 +78,20 @@ public class AppResponse implements Parcelable {
 	return statusCode;
     }
 
+    public ServiceResponseLevel getResponseLevel() {
+	return level;
+    }
+
     // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-    public static final Parcelable.Creator<AppResponse> CREATOR = new Parcelable.Creator<AppResponse>() {
+    public static final Parcelable.Creator<ServiceResponse> CREATOR = new Parcelable.Creator<ServiceResponse>() {
 	@Override
-	public AppResponse createFromParcel(Parcel in) {
-	    return new AppResponse(in);
+	public ServiceResponse createFromParcel(Parcel in) {
+	    return new ServiceResponse(in);
 	}
 
 	@Override
-	public AppResponse[] newArray(int size) {
-	    return new AppResponse[size];
+	public ServiceResponse[] newArray(int size) {
+	    return new ServiceResponse[size];
 	}
     };
 

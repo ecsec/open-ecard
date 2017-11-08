@@ -24,11 +24,11 @@ package org.openecard.android.lib;
 
 
 /**
- * Contains app constants.
+ * Contains constants for the Open eCard Service.
  *
  * @author Mike Prechtl
  */
-interface AppContextConstants {
+interface ServiceContextConstants {
 
     String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
     String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";

@@ -27,100 +27,167 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import org.openecard.android.lib.AppMessages;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
+import android.os.RemoteException;
+import java.util.HashMap;
+import java.util.List;
+import org.openecard.android.lib.ServiceErrorResponse;
+import org.openecard.android.lib.ServiceResponse;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
 import org.openecard.gui.android.eac.EacGuiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
+import org.openecard.android.lib.ServiceMessages;
+import org.openecard.android.lib.ServiceWarningResponse;
+import org.openecard.gui.android.eac.types.BoxItem;
+import org.openecard.gui.android.eac.types.ServerData;
 
 
 /**
  *
  * @author Mike Prechtl
  */
-public class EacServiceConnection implements ServiceConnection {
+public class EacServiceConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(EacServiceConnection.class);
 
-    private final ServiceConnectionResponseHandler responseHandler;
+    private static final HashMap<EacServiceConnectionHandler, EacServiceConnection> CONNECTIONS = new HashMap<>();
+
+    private final EacServiceConnectionHandler responseHandler;
     private final Context ctx;
 
     private EacGui eacService;
-    private boolean alreadyStarted = false;
+    private boolean alreadyConnected = false;
 
-    public EacServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
+    public EacServiceConnection(EacServiceConnectionHandler responseHandler, Context ctx) {
 	this.ctx = ctx;
 	this.responseHandler = responseHandler;
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-	LOG.info("EAC Gui Service binded!");
-	eacService = EacGuiImpl.Stub.asInterface(service);
-	responseHandler.handleServiceConnectionResponse(buildServiceConnectedResponse());
+    public static EacServiceConnection createConnection(EacServiceConnectionHandler responseHandler, Context ctx) {
+	EacServiceConnection connection;
+	synchronized (EacServiceConnection.class) {
+	    if (CONNECTIONS.containsKey(responseHandler)) {
+		connection = CONNECTIONS.get(responseHandler);
+	    } else {
+		connection = new EacServiceConnection(responseHandler, ctx);
+		CONNECTIONS.put(responseHandler, connection);
+	    }
+	}
+	return connection;
     }
 
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-	LOG.info("EAC Gui Service unbinded.");
-	responseHandler.handleServiceConnectionResponse(disconnectResponse);
-    }
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+	@Override
+	public void onServiceConnected(ComponentName componentName, IBinder service) {
+	    LOG.info("EAC Gui Service binded!");
+	    eacService = EacGuiImpl.Stub.asInterface(service);
+	    try {
+		ServerData serverData = eacService.getServerData();
+		responseHandler.onConnectionSuccess();
+		responseHandler.onServerDataPresent(serverData);
+	    } catch (RemoteException ex) {
+		responseHandler.onConnectionFailure(buildErrorResponse(ex));
+	    }
+	}
 
-    public EacGui getEacGui() {
+	@Override
+	public void onServiceDisconnected(ComponentName componentName) {
+	    eacService = null;
+	    switch (disconnectResponse.getResponseLevel()) {
+		case INFO:
+		    responseHandler.onDisconnectionSuccess();
+		    break;
+		case WARNING:
+		    responseHandler.onDisconnectionFailure((ServiceWarningResponse) disconnectResponse);
+		    break;
+		case ERROR:
+		    responseHandler.onDisconnectionFailure((ServiceErrorResponse) disconnectResponse);
+		    break;
+		default:
+		    break;
+	    }
+	}
+    };
+
+    /*public EacGui getEacGui() {
 	return eacService;
-    }
+    }*/
 
 
     ///
     /// Build App responses
     ///
 
-    private AppResponse disconnectResponse;
+    private ServiceResponse disconnectResponse;
 
-    private AppResponse buildServiceConnectedResponse() {
-	return new AppResponse(AppResponseStatusCodes.EAC_SERVICE_CONNECTED, AppMessages.APP_EAC_SERVICE_CONNECTED);
+    private ServiceResponse buildDisconnectResponse() {
+	return new ServiceResponse(ServiceResponseStatusCodes.EAC_SERVICE_DISCONNECTED, ServiceMessages.APP_EAC_SERVICE_DISCONNECTED);
     }
 
-    private AppResponse buildDisconnectResponse() {
-	return new AppResponse(AppResponseStatusCodes.EAC_SERVICE_DISCONNECTED, AppMessages.APP_EAC_SERVICE_DISCONNECTED);
+    private ServiceErrorResponse buildErrorResponse(Exception e) {
+	return new ServiceErrorResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, e.getMessage());
     }
-
 
     ///
     /// Public methods
     ///
 
     public synchronized void startService() {
-	if (! alreadyStarted) {
+	if (! alreadyConnected) {
 	    Intent i = createEacGuiIntent();
 	    LOG.info("Starting Eac Gui service...");
 	    ctx.startService(i);
 	    LOG.info("Binding Eac Gui service...");
-	    ctx.bindService(i, this, 0);
-	    alreadyStarted = true;
+	    ctx.bindService(i, serviceConnection, 0);
+	    alreadyConnected = true;
 	} else {
 	    throw new IllegalStateException("Service already started...");
 	}
     }
 
     public synchronized void stopService() {
-	if (alreadyStarted) {
+	if (alreadyConnected) {
 	    Intent i = createEacGuiIntent();
-	    alreadyStarted = false;
+	    alreadyConnected = false;
 	    disconnectResponse = buildDisconnectResponse();
 	    ctx.stopService(i);
 	    LOG.info("Unbinding Eac Gui service...");
-	    ctx.unbindService(this);
-	} else {
-	    throw new IllegalStateException("Service already stopped...");
+	    ctx.unbindService(serviceConnection);
+	} // else do nothing, because the service hasn't been started yet, maybe because the user canceled the request.
+    }
+
+    public synchronized void selectAttributes(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
+	try {
+	    eacService.selectAttributes(readAccessAttributes, writeAccessAttributes);
+	    String status = eacService.getPinStatus();
+	    if (status.equals("PIN")) {
+		responseHandler.onPINIsRequired();
+	    } else {
+		String msg = String.format("PIN Status '{0}' isn't supported yet.", status);
+		throw new UnsupportedOperationException(msg);
+	    }
+	} catch (RemoteException ex) {
+	    responseHandler.onRemoteError(buildErrorResponse(ex));
 	}
     }
 
-    public synchronized boolean isServiceAlreadyStarted() {
-	return alreadyStarted;
+    public synchronized void enterPIN(String pin) {
+	try {
+	    boolean pinCorrect = eacService.enterPin(null, pin);
+	    if (pinCorrect) {
+		responseHandler.onPINInputSuccess();
+	    } else {
+		responseHandler.onPINInputFailure();
+	    }
+	} catch (RemoteException ex) {
+	    responseHandler.onRemoteError(buildErrorResponse(ex));
+	}
+    }
+
+    public synchronized boolean isConnected() {
+	return alreadyConnected;
     }
 
     private Intent createEacGuiIntent() {

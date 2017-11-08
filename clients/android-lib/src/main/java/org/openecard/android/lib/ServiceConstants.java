@@ -22,4 +22,18 @@
 
 package org.openecard.android.lib;
 
-parcelable AppResponse;
+
+/**
+ * Contains constants for the whole Open eCard Service.
+ *
+ * @author Mike Prechtl
+ */
+public interface ServiceConstants {
+
+    int REQUIRED_API = 21;
+    String INTENT_KEY_FOR_RESPONSE = "response";
+    String SUCCESS = "success";
+    String FAILURE = "failure";
+    String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+
+}

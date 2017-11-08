@@ -22,98 +22,97 @@
 
 package org.openecard.android.lib.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.android.lib.async.tasks.BindingTaskResponse;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.ContextNotInitialized;
 import org.openecard.android.lib.intent.binding.IntentBinding;
-import org.openecard.android.lib.services.EacServiceConnection;
-import org.openecard.android.lib.services.ServiceConnectionResponseHandler;
-import org.openecard.gui.android.eac.EacGui;
 
 
 /**
  * @author Mike Prechtl
  */
-public abstract class EacActivity extends NfcActivity implements BindingTaskResult, ServiceConnectionResponseHandler {
+public class EacActivity extends NfcActivity implements BindingTaskResult {
 
-    private EacServiceConnection mEacGuiConnection;
+    private final Activity callingActivity;
 
-    private volatile boolean alreadyBinded = false;
+    private volatile boolean alreadyInitialized = false;
 
-    protected String getBindingURI() {
-	Uri data = getIntent().getData();
+    public EacActivity(Activity activity) {
+	super(activity);
+	this.callingActivity = activity;
+    }
+
+    public String getBindingURI(Intent i) {
+	Uri data = i.getData();
         return data.toString();
     }
 
     @Override
-    protected void onStart() {
-	super.onStart();
-	if (! alreadyBinded) {
-	    IntentBinding binding = IntentBinding.getInstance();
-	    binding.setContextWrapper(this);
-	    this.alreadyBinded = true;
-	}
+    public void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
     }
 
     @Override
-    protected void onStop() {
-	super.onStop();
+    public synchronized void onResume() {
+	super.onResume();
+    }
+
+    @Override
+    public synchronized void onPause() {
+	super.onPause();
+    }
+
+    public void onStart() {
+	if (! alreadyInitialized) {
+	    IntentBinding binding = IntentBinding.getInstance();
+	    binding.setContextWrapper(this);
+	    this.alreadyInitialized = true;
+	}
+    }
+
+    public void onStop() {
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
     }
 
-    @Override
-    protected void onDestroy() {
-	super.onDestroy();
-	if (alreadyBinded) {
-	    alreadyBinded = false;
+    public void onDestroy() {
+	if (alreadyInitialized) {
+	    alreadyInitialized = false;
 	}
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    public void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
     }
 
-    protected synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
+    public synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.handleRequest(uri);
     }
 
-    protected synchronized void cancelRequest() {
+    public synchronized void cancelRequest() {
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
     }
 
-    protected synchronized EacGui getEacGui() {
-	if (mEacGuiConnection == null) {
-	    throw new IllegalStateException("There is no Eac Gui Connection available.");
-	}
-	return mEacGuiConnection.getEacGui();
+    @Override
+    public void setResultOfBindingTask(BindingTaskResponse response) {
+	redirectToResultLocation(response.getBindingResult());
     }
 
-    public synchronized void bindEacGui() {
-	mEacGuiConnection = new EacServiceConnection(this, getApplicationContext());
-	mEacGuiConnection.startService();
-    }
-
-    public synchronized void unbindEacGui() {
-	mEacGuiConnection.stopService();
-    }
-
-    public synchronized EacServiceConnection getServiceConnection() {
-	return mEacGuiConnection;
-    }
-
-    protected void sendResultBasedOnBindingResult(BindingResult result) {
+    public void redirectToResultLocation(BindingResult result) {
 	String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
 	if (location != null) {
 	    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-	    startActivity(i);
+	    callingActivity.startActivity(i);
 	}
     }
 

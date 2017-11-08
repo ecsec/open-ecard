@@ -28,68 +28,78 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.AppMessages;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
+import java.util.HashMap;
+import org.openecard.android.lib.ServiceContext;
+import org.openecard.android.lib.ServiceResponse;
 import org.openecard.android.lib.OpeneCardService;
+import org.openecard.android.lib.ServiceErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
+import org.openecard.android.lib.ServiceWarningResponse;
 
 
 /**
  * @author Mike Prechtl
  */
-public class OpeneCardServiceConnection implements ServiceConnection {
+public class OpeneCardServiceConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceConnection.class);
 
-    private final ServiceConnectionResponseHandler responseHandler;
+    private static final HashMap<OpeneCardConnectionHandler, OpeneCardServiceConnection> CONNECTIONS = new HashMap<>();
+
+    private final OpeneCardConnectionHandler responseHandler;
     private final Context ctx;
 
     private OpeneCardService mService;
-    private boolean alreadyStarted = false;
+    private boolean isConnected = false;
+    private boolean isServiceBinded = false;
 
-    public OpeneCardServiceConnection(ServiceConnectionResponseHandler responseHandler, Context ctx) {
+    private OpeneCardServiceConnection(OpeneCardConnectionHandler responseHandler, Context ctx) {
 	this.ctx = ctx;
 	this.responseHandler = responseHandler;
+    }
+
+    public static OpeneCardServiceConnection createConnection(OpeneCardConnectionHandler responseHandler, Context ctx) {
+	OpeneCardServiceConnection connection;
+	synchronized (OpeneCardServiceConnection.class) {
+	    if (CONNECTIONS.containsKey(responseHandler)) {
+		connection = CONNECTIONS.get(responseHandler);
+	    } else {
+		connection = new OpeneCardServiceConnection(responseHandler, ctx);
+		CONNECTIONS.put(responseHandler, connection);
+	    }
+	}
+	return connection;
     }
 
     ///
     /// Service connect and disconnect
     ///
 
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder service) {
-	LOG.info("Service binded!");
-	mService = OpeneCardService.Stub.asInterface(service);
-	try {
-	    AppResponse response = mService.start();
-	    responseHandler.handleServiceConnectionResponse(response);
-	} catch (RemoteException ex) {
-	    responseHandler.handleServiceConnectionResponse(buildErrorResponse(ex));
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+	@Override
+	public void onServiceConnected(ComponentName componentName, IBinder service) {
+	    LOG.info("Service binded!");
+	    mService = OpeneCardService.Stub.asInterface(service);
+	    startOpeneCardService();
+	    isServiceBinded = true;
 	}
-    }
 
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-	mService = null;
-	responseHandler.handleServiceConnectionResponse(disconnectResponse);
-    }
+	@Override
+	public void onServiceDisconnected(ComponentName componentName) {
+	    mService = null;
+	    stopOpeneCardService();
+	    isServiceBinded = false;
+	}
+    };
 
     ///
     /// Build App responses
     ///
 
-    private AppResponse disconnectResponse;
-
-    private AppResponse buildErrorResponse(Exception ex) {
-	return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
-    }
-
-    private AppResponse buildDisconnectResponse(Exception ex) {
-	return ex == null ? new AppResponse(AppResponseStatusCodes.INIT_SUCCESS, AppMessages.APP_TERMINATE_SUCCESS)
-		: new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+    private ServiceErrorResponse buildErrorResponse(Exception ex) {
+	return new ServiceErrorResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
     }
 
     ///
@@ -97,41 +107,79 @@ public class OpeneCardServiceConnection implements ServiceConnection {
     ///
 
     public synchronized void startService() {
-	if (! alreadyStarted) {
+	if (isServiceBinded && ! isConnected) {
+	    startOpeneCardService();
+	} else if (! isServiceBinded) {
 	    Intent i = createOpeneCardIntent();
 	    LOG.info("Starting service…");
 	    ctx.startService(i);
 	    LOG.info("Binding service…");
-	    ctx.bindService(i, this, AppContext.BIND_AUTO_CREATE);
-	    alreadyStarted = true;
-	} else {
-	    throw new IllegalStateException("Service already started...");
+	    ctx.bindService(i, serviceConnection, ServiceContext.BIND_AUTO_CREATE);
 	}
     }
 
     public synchronized void stopService() {
-	if (alreadyStarted) {
-	    try {
-		Intent i = createOpeneCardIntent();
-		mService.stop();
-		alreadyStarted = false;
-		disconnectResponse = buildDisconnectResponse(null);
-		ctx.stopService(i);
-		ctx.unbindService(this);
-	    } catch (RemoteException ex) {
-		disconnectResponse = buildDisconnectResponse(ex);
-	    }
+	if (isServiceBinded) {
+	    Intent i = createOpeneCardIntent();
+	    ctx.stopService(i);
+	    ctx.unbindService(serviceConnection);
 	} else {
 	    throw new IllegalStateException("Service already stopped...");
 	}
     }
 
-    public synchronized boolean isServiceAlreadyStarted() {
-	return alreadyStarted;
+    public synchronized boolean isConnected() {
+	return isConnected;
     }
 
     private Intent createOpeneCardIntent() {
 	return new Intent(ctx, OpeneCardServiceImpl.class);
+    }
+
+    private void startOpeneCardService() {
+	try {
+	    ServiceResponse response = mService.start();
+	    isConnected = false;
+	    switch (response.getResponseLevel()) {
+		case INFO:
+		    isConnected = true;
+		    responseHandler.onConnectionSuccess();
+		    break;
+		case WARNING:
+		    responseHandler.onConnectionFailure((ServiceWarningResponse) response);
+		    break;
+		case ERROR:
+		    responseHandler.onConnectionFailure((ServiceErrorResponse) response);
+		    break;
+		default:
+		    break;
+	    }
+	} catch (RemoteException ex) {
+	    responseHandler.onConnectionFailure(buildErrorResponse(ex));
+	}
+    }
+
+    private void stopOpeneCardService() {
+	try {
+	    ServiceResponse disconnectResponse = mService.stop();
+	    isConnected = true;
+	    switch (disconnectResponse.getResponseLevel()) {
+		case INFO:
+		    isConnected = false;
+		    responseHandler.onDisconnectionSuccess();
+		    break;
+		case WARNING:
+		    responseHandler.onDisconnectionFailure((ServiceWarningResponse) disconnectResponse);
+		    break;
+		case ERROR:
+		    responseHandler.onDisconnectionFailure((ServiceErrorResponse) disconnectResponse);
+		    break;
+		default:
+		    break;
+	    }
+	} catch (RemoteException ex) {
+	    responseHandler.onDisconnectionFailure(buildErrorResponse(ex));
+	}
     }
 
 }

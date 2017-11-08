@@ -22,7 +22,7 @@
 
 package org.openecard.android.lib.gui.stub;
 
-import org.openecard.android.lib.AppContext;
+import org.openecard.android.lib.ServiceContext;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
@@ -39,9 +39,9 @@ public class AndroidUserConsent implements UserConsent {
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidUserConsent.class);
 
-    private final AppContext ctx;
+    private final ServiceContext ctx;
 
-    public AndroidUserConsent(AppContext ctx) {
+    public AndroidUserConsent(ServiceContext ctx) {
 	this.ctx = ctx;
     }
 

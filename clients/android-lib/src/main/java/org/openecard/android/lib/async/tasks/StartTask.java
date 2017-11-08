@@ -25,27 +25,29 @@ package org.openecard.android.lib.async.tasks;
 import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import android.os.Build;
-import org.openecard.android.lib.AppConstants;
-import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.AppMessages;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
+import org.openecard.android.lib.ServiceContext;
+import org.openecard.android.lib.ServiceResponse;
 import org.openecard.android.lib.ex.NfcDisabled;
 import org.openecard.android.lib.ex.NfcUnavailable;
 import org.openecard.android.lib.ex.UnableToInitialize;
 import org.openecard.android.lib.utils.NfcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
+import org.openecard.android.lib.ServiceMessages;
+import org.openecard.android.lib.ServiceConstants;
+import org.openecard.android.lib.ServiceErrorResponse;
+import org.openecard.android.lib.ServiceWarningResponse;
 
 
 /**
  * This async task will create the app context. The ifd, addon manager, sal, ... will be initialized in the app context
- * (see {@link AppContext})
+ * (see {@link ServiceContext})
  *
  * @author Mike Prechtl
  */
-public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implements AppConstants, AppMessages,
-		AppResponseStatusCodes {
+public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implements ServiceConstants, ServiceMessages,
+		ServiceResponseStatusCodes {
 
     private static final Logger LOG = LoggerFactory.getLogger(StartTask.class);
 
@@ -63,31 +65,31 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implemen
 
     @Override
     protected StartTaskResponse doInBackground(Void... voids) {
-	AppContext ctx = null;
-	AppResponse response;
+	ServiceContext ctx = null;
+	ServiceResponse response;
 	try {
-	    ctx = getAppContext();
-	    NfcUtils.getInstance().setAppContext(ctx); // set app context in nfc utils
+	    ctx = getServiceContext();
+	    NfcUtils.getInstance().setServiceContext(ctx); // set app context in nfc utils
 	    // build response whether the initialization of app context was successful or failed.
 	    if (isRequiredAPIUsed) {
-		response = new AppResponse(INIT_SUCCESS, APP_RESPONSE_OK);
+		response = new ServiceResponse(INIT_SUCCESS, APP_RESPONSE_OK);
 	    } else {
-		response = new AppResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
+		response = new ServiceErrorResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
 	    }
 	} catch (UnableToInitialize ex) {
-	    response = new AppResponse(INTERNAL_ERROR, ex.getMessage());
+	    response = new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
 	} catch (NfcDisabled ex) {
-	    response = new AppResponse(NFC_NOT_ENABLED, ex.getMessage());
+	    response = new ServiceWarningResponse(NFC_NOT_ENABLED, ex.getMessage());
 	} catch (NfcUnavailable ex) {
-	    response = new AppResponse(NFC_NOT_AVAILABLE, ex.getMessage());
+	    response = new ServiceErrorResponse(NFC_NOT_AVAILABLE, ex.getMessage());
 	}
 	return new StartTaskResponse(ctx, response);
     }
 
-    private AppContext getAppContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
-	AppContext ctx = null;
+    private ServiceContext getServiceContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
+	ServiceContext ctx = null;
 	if (isRequiredAPIUsed) {
-	    ctx = (AppContext) ((ContextWrapper) calling).getApplicationContext();
+	    ctx = (ServiceContext) ((ContextWrapper) calling).getApplicationContext();
 	    if (!ctx.isInitialized()) {
 		ctx.initialize();
 	    }

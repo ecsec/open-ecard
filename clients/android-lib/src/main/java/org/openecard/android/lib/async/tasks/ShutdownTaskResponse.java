@@ -22,7 +22,7 @@
 
 package org.openecard.android.lib.async.tasks;
 
-import org.openecard.android.lib.AppResponse;
+import org.openecard.android.lib.ServiceResponse;
 
 
 /**
@@ -32,7 +32,7 @@ import org.openecard.android.lib.AppResponse;
  */
 public class ShutdownTaskResponse extends TaskResponse {
 
-    public ShutdownTaskResponse(AppResponse response) {
+    public ShutdownTaskResponse(ServiceResponse response) {
 	super(response);
     }
 

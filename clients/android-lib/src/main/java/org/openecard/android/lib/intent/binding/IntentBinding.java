@@ -26,13 +26,13 @@ import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonSelector;
-import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.AppMessages;
+import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.activities.EacActivity;
 import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.ContextNotInitialized;
+import org.openecard.android.lib.ServiceMessages;
 
 
 /**
@@ -68,7 +68,7 @@ public class IntentBinding implements IntentBindingConstants {
     }
 
     public void setContextWrapper(BindingTaskResult calling) {
-	if (calling instanceof ContextWrapper && calling instanceof EacActivity) {
+	if (calling instanceof EacActivity) {
 	    this.calling = calling;
 	} else {
 	    throw new IllegalArgumentException("BindingTaskResult has to be implemented by an EacActivity.");
@@ -87,25 +87,21 @@ public class IntentBinding implements IntentBindingConstants {
 	return calling;
     }
 
-    public EacActivity getEacActivity() {
-	return (EacActivity) calling;
-    }
-
     public synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
 	if (calling == null) {
-	    throw new IllegalStateException(AppMessages.PLEASE_PROVIDE_CONTEXT_WRAPPER);
+	    throw new IllegalStateException(ServiceMessages.PLEASE_PROVIDE_CONTEXT_WRAPPER);
 	}
 
-	AppContext ctx = (AppContext) getEacActivity().getApplicationContext();
+	ServiceContext ctx = ServiceContext.getServiceContext();
 	if (ctx == null || ! ctx.isInitialized()) {
-	    throw new ContextNotInitialized(AppMessages.PLEASE_START_OPENECARD_SERVICE);
+	    throw new ContextNotInitialized(ServiceMessages.PLEASE_START_OPENECARD_SERVICE);
 	}
 
 	if (bindingTask == null || bindingTask.getStatus().equals(AsyncTask.Status.FINISHED)) {
 	    bindingTask = new BindingTask(this, uri);
 	    bindingTask.execute();
 	} else {
-	    throw new BindingTaskStillRunning(AppMessages.BINDING_TASK_STILL_RUNNING);
+	    throw new BindingTaskStillRunning(ServiceMessages.BINDING_TASK_STILL_RUNNING);
 	}
     }
 

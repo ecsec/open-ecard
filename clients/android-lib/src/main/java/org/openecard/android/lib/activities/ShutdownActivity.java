@@ -25,18 +25,18 @@ package org.openecard.android.lib.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import org.openecard.android.lib.AppConstants;
-import org.openecard.android.lib.AppContext;
+import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.async.tasks.ShutdownTask;
 import org.openecard.android.lib.async.tasks.ShutdownTaskResponse;
 import org.openecard.android.lib.async.tasks.ShutdownTaskResult;
 import org.openecard.android.lib.R;
+import org.openecard.android.lib.ServiceConstants;
 
 
 /**
  * @author Mike Prechtl
  */
-public class ShutdownActivity extends Activity implements AppConstants, ShutdownTaskResult {
+public class ShutdownActivity extends Activity implements ServiceConstants, ShutdownTaskResult {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class ShutdownActivity extends Activity implements AppConstants, Shutdown
     @Override
     protected void onStart() {
 	super.onStart();
-	ShutdownTask task = new ShutdownTask((AppContext) getApplicationContext(), this);
+	ShutdownTask task = new ShutdownTask((ServiceContext) getApplicationContext(), this);
 	task.execute();
     }
 

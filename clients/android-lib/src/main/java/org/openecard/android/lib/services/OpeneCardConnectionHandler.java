@@ -20,29 +20,15 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.lib.async.tasks;
-
-import org.openecard.android.lib.ServiceContext;
-import org.openecard.android.lib.ServiceResponse;
+package org.openecard.android.lib.services;
 
 
 /**
- * Contains the app context of the initialization process {@link StartTask} and a response which represents the
- * state of the initialization, for example if the initialization was successful, then a positive response is created.
+ * Activity which starts the Open eCard process should implement this interface to handle errors which can occur when
+ * the connection to the Open eCard service is established.
  *
  * @author Mike Prechtl
  */
-public class StartTaskResponse extends TaskResponse {
-
-    private final ServiceContext ctx;
-
-    public StartTaskResponse(ServiceContext ctx, ServiceResponse response) {
-	super(response);
-	this.ctx = ctx;
-    }
-
-    public ServiceContext getCtx() {
-	return ctx;
-    }
+public interface OpeneCardConnectionHandler extends ServiceConnectionHandler {
 
 }

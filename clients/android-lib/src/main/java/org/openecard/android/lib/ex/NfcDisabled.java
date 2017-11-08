@@ -22,7 +22,7 @@
 
 package org.openecard.android.lib.ex;
 
-import org.openecard.android.lib.AppMessages;
+import org.openecard.android.lib.ServiceMessages;
 
 
 /**
@@ -30,7 +30,7 @@ import org.openecard.android.lib.AppMessages;
  *
  * @author Mike Prechtl
  */
-public class NfcDisabled extends Exception implements AppMessages {
+public class NfcDisabled extends Exception implements ServiceMessages {
 
     private static final String STD_ERROR_MESSAGE = APP_CONTEXT_NFC_NOT_ENABLED;
 

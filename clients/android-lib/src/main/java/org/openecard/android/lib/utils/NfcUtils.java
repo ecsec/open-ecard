@@ -29,7 +29,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.provider.Settings;
-import org.openecard.android.lib.AppContext;
+import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
 import org.openecard.scio.NFCFactory;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class NfcUtils {
 
     private static NfcUtils nfcUtils;
 
-    private AppContext ctx;
+    private ServiceContext ctx;
     private boolean isNFCAvailable = false;
     private boolean isNFCEnabled = false;
 
@@ -60,7 +60,7 @@ public class NfcUtils {
 	return nfcUtils;
     }
 
-    public void setAppContext(AppContext ctx) {
+    public void setServiceContext(ServiceContext ctx) {
 	this.ctx = ctx;
 	if (ctx != null) {
 	    this.isNFCEnabled = ctx.isNFCEnabled();
@@ -103,7 +103,7 @@ public class NfcUtils {
 
     private boolean isContextInitialized() {
 	if (ctx == null) {
-	    throw new IllegalStateException("Please provide an AppContext.");
+	    throw new IllegalStateException("Please provide a ServiceContext instance.");
 	} else {
 	    return ctx.isInitialized();
 	}

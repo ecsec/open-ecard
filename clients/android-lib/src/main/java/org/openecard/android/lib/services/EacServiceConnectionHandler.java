@@ -20,29 +20,32 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.lib.async.tasks;
+package org.openecard.android.lib.services;
 
-import org.openecard.android.lib.ServiceContext;
-import org.openecard.android.lib.ServiceResponse;
+import org.openecard.android.lib.ServiceErrorResponse;
+import org.openecard.gui.android.eac.types.ServerData;
 
 
 /**
- * Contains the app context of the initialization process {@link StartTask} and a response which represents the
- * state of the initialization, for example if the initialization was successful, then a positive response is created.
  *
  * @author Mike Prechtl
  */
-public class StartTaskResponse extends TaskResponse {
+public interface EacServiceConnectionHandler extends ServiceConnectionHandler {
 
-    private final ServiceContext ctx;
+    void onServerDataPresent(ServerData data);
 
-    public StartTaskResponse(ServiceContext ctx, ServiceResponse response) {
-	super(response);
-	this.ctx = ctx;
-    }
+    void onPINIsRequired();
 
-    public ServiceContext getCtx() {
-	return ctx;
-    }
+    void onPINInputSuccess();
+
+    void onPINInputFailure();
+
+    /**
+     * If the communication with the eac service is interrupted or an error occurs, then more detals are delivered
+     * over this method.
+     *
+     * @param response
+     */
+    void onRemoteError(ServiceErrorResponse response);
 
 }

@@ -22,50 +22,21 @@
 
 package org.openecard.android.lib;
 
+import android.os.Parcel;
+
 
 /**
+ *
  * @author Mike Prechtl
  */
-public interface AppResponseStatusCodes {
+public class ServiceErrorResponse extends ServiceResponse {
 
-    /**
-     * indicates that nfc is not available on the corresponding device.
-     */
-    int NFC_NOT_AVAILABLE = 100;
+    public ServiceErrorResponse(Parcel in) {
+	super(in);
+    }
 
-    /**
-     * indicates that nfc is not enabled, please move to the device settings.
-     */
-    int NFC_NOT_ENABLED = 101;
-
-    /**
-     * indicates that the initialization was successfully finished.
-     */
-    int INIT_SUCCESS = 200;
-
-    /**
-     * indicates that eac service started and is binded.
-     */
-    int EAC_SERVICE_CONNECTED = 201;
-
-    /**
-     * indicates that eac service started and is binded.
-     */
-    int EAC_SERVICE_DISCONNECTED = 203;
-
-    /**
-     * indicates that the corresponding device does not support the required API level.
-     */
-    int NOT_REQUIRED_API_LEVEL = 102;
-
-    /**
-     * indicates other internal errors.
-     */
-    int INTERNAL_ERROR = 500;
-
-    /**
-     * indicates that shutdown of app failed.
-     */
-    int SHUTDOWN_FAILED = 501;
+    public ServiceErrorResponse(int statusCode, String message) {
+	super(ServiceResponseLevel.ERROR, statusCode, message);
+    }
 
 }

@@ -22,30 +22,29 @@
 
 package org.openecard.android.lib.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import org.openecard.android.lib.AppConstants;
-import org.openecard.android.lib.AppContext;
+import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.async.tasks.StartTaskResponse;
 import org.openecard.android.lib.async.tasks.StartTaskResult;
 import org.openecard.android.lib.async.tasks.StartTask;
+import org.openecard.android.lib.ServiceConstants;
 
 
 /**
  * @author Mike Prechtl
  */
-public class StartActivity extends NfcActivity implements AppConstants, StartTaskResult {
+public class StartActivity extends Activity implements ServiceConstants, StartTaskResult {
 
-    protected AppContext ctx;
+    protected ServiceContext ctx;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
     }
 
-    @Override
     protected void onStart() {
-	super.onStart();
 	StartTask ctxTask = new StartTask(this);
 	ctxTask.execute();
     }

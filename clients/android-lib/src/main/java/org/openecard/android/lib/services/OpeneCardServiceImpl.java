@@ -26,9 +26,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
-import org.openecard.android.lib.AppContext;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
+import org.openecard.android.lib.ServiceContext;
+import org.openecard.android.lib.ServiceResponse;
 import org.openecard.android.lib.OpeneCardService;
 import org.openecard.android.lib.async.tasks.ShutdownTask;
 import org.openecard.android.lib.async.tasks.ShutdownTaskResponse;
@@ -39,6 +38,7 @@ import org.openecard.android.lib.async.tasks.StartTaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutionException;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
 
 
 /**
@@ -83,7 +83,7 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 	}
 
 	@Override
-	public AppResponse start() throws RemoteException {
+	public ServiceResponse start() throws RemoteException {
 	    LOG.info("Start Open eCard Service...");
 	    StartTask task = new StartTask((StartTaskResult) service);
 	    try {
@@ -91,14 +91,14 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 		return response.getResponse();
 	    } catch (ExecutionException | InterruptedException ex) {
 		LOG.warn(ex.getMessage(), ex);
-		return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+		return new ServiceResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
 	    }
 	}
 
 	@Override
-	public AppResponse stop() throws RemoteException {
+	public ServiceResponse stop() throws RemoteException {
 	    LOG.info("Stop Open eCard Service...");
-	    AppContext ctx = (AppContext) service.getApplicationContext();
+	    ServiceContext ctx = (ServiceContext) service.getApplicationContext();
 	    ShutdownTask task = new ShutdownTask(ctx, (ShutdownTaskResult) service);
 	    try {
 		ShutdownTaskResponse response = task.execute().get();
@@ -107,7 +107,7 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 	    } catch (ExecutionException | InterruptedException ex) {
 		LOG.warn(ex.getMessage(), ex);
 		stopSelf();
-		return new AppResponse(AppResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+		return new ServiceResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
 	    }
 	}
     }

@@ -20,22 +20,15 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.lib.services;
-
-import org.openecard.android.lib.AppResponse;
+package org.openecard.android.lib;
 
 
 /**
+ *
  * @author Mike Prechtl
  */
-public interface ServiceConnectionResponseHandler {
+public enum ServiceResponseLevel {
 
-    /**
-     * Activity which starts the Open eCard process should implement this interface to handle the Response of the
-     * initialization and termination.
-     *
-     * @param response which indicates if the process was successful or not.
-     */
-    void handleServiceConnectionResponse(AppResponse response);
+    INFO, WARNING, ERROR
 
 }

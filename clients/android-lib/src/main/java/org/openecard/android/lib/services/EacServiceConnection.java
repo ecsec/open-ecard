@@ -173,9 +173,9 @@ public class EacServiceConnection {
 	}
     }
 
-    public synchronized void enterPIN(String pin) {
+    public synchronized void enterPIN(String can, String pin) {
 	try {
-	    boolean pinCorrect = eacService.enterPin(null, pin);
+	    boolean pinCorrect = eacService.enterPin(can, pin);
 	    if (pinCorrect) {
 		responseHandler.onPINInputSuccess();
 	    } else {

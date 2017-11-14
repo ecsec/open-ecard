@@ -23,12 +23,6 @@
 			<groupId>org.openecard.gui</groupId>
 			<artifactId>android-defs</artifactId>
 			<version>${project.version}</version>
-			<type>aar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>android-defs</artifactId>
-			<version>${project.version}</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>

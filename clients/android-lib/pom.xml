@@ -135,6 +135,13 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Problem with WebMethod Annotation -->
+		<dependency>
+			<groupId>javax.jws</groupId>
+			<artifactId>jsr181-api</artifactId>
+			<version>1.0-MR1</version>
+		</dependency>
+
 		<!-- Android Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -16,14 +16,6 @@
 	android:supportsRtl="true">
 
 	<activity
-	    android:name=".activities.StartActivity"
-	    android:theme="@android:style/Theme.NoDisplay" />
-
-	<activity
-	    android:name=".activities.ShutdownActivity"
-	    android:theme="@android:style/Theme.NoDisplay" />
-
-	<activity
 	    android:name=".activities.NFCActivity"
 	    android:clearTaskOnLaunch="true"
 	    android:configChanges="orientation|screenSize" />

@@ -22,6 +22,7 @@
 
 package org.openecard.scio;
 
+import android.nfc.tech.IsoDep;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -73,19 +74,21 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
-	if (card != null && card.isodep != null && card.isodep.isConnected()) {
-	    try {
-		lengthOfLastAPDU = apdu.length;
-		LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
-		card.isodep.setTimeout(card.getTimeoutForTransceive());
-		return new CardResponseAPDU(card.isodep.transceive(apdu));
-	    } catch (IOException e) {
-		// TODO: check if the error code can be chosen more specifically
-		throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+	synchronized (card) {
+	    if (card != null && card.isodep != null && card.isodep.isConnected()) {
+		try {
+		    lengthOfLastAPDU = apdu.length;
+		    LOG.info("Send: {}", ByteUtils.toHexString(apdu, true));
+		    card.isodep.setTimeout(card.getTimeoutForTransceive());
+		    return new CardResponseAPDU(card.isodep.transceive(apdu));
+		} catch (IOException e) {
+		    // TODO: check if the error code can be chosen more specifically
+		    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+		}
+	    } else {
+		throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
+			SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	    }
-	} else {
-	    throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
-		    SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	}
     }
 

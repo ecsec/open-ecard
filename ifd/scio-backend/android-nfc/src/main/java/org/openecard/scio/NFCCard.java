@@ -74,9 +74,11 @@ public class NFCCard implements SCIOCard {
 	try {
 	    nfcCardChannel.close();
 	    // maybe isodep is already null, for example if isodep is lost or disconnected
-	    if (isodep != null) {
-		isodep.close();
-		isodep = null;
+	    synchronized(this) {
+		if (isodep != null) {
+		    isodep.close();
+		    isodep = null;
+		}
 	    }
 	} catch (IOException e) {
 	    // TODO: check if the error code can be chosen more specifically

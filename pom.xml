@@ -600,7 +600,7 @@
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.35</version>
+				<version>1.36.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -624,6 +624,12 @@
 				<version>r7</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.jws</groupId>
+				<artifactId>jsr181-api</artifactId>
+				<version>1.0-MR1</version>
+			</dependency>
+
+			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
 				<version>2.9.2</version>
@@ -631,7 +637,7 @@
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
-				<version>0.6.1</version>
+				<version>0.6.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>

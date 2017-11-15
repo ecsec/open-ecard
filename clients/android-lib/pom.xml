@@ -139,7 +139,6 @@
 		<dependency>
 			<groupId>javax.jws</groupId>
 			<artifactId>jsr181-api</artifactId>
-			<version>1.0-MR1</version>
 		</dependency>
 
 		<!-- Android Logging -->

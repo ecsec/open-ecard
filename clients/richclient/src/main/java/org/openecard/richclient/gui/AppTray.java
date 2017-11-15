@@ -46,6 +46,7 @@ import org.openecard.addon.AddonManager;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
@@ -141,7 +142,7 @@ public class AppTray {
      */
     public void shutdown() {
 	if (trayAvailable) {
-	    if (! isMacOSX()) {
+	    if (! SysUtils.isMacOSX()) {
 		String desc = lang.translationForKey("tray.message.shutdown", AppVersion.getName());
 		trayIcon.displayMessage(AppVersion.getName(), desc, TrayIcon.MessageType.INFO);
 	    }
@@ -187,9 +188,9 @@ public class AppTray {
     private Image getTrayIconImage(String name) {
 	Dimension dim = tray.getTrayIconSize();
 
-	if (isLinux()) {
+	if (SysUtils.isUnix()) {
 	    return getImageLinux(name, dim);
-	} else if (isMacOSX()) {
+	} else if (SysUtils.isMacOSX()) {
 	    return getImageMacOSX(name, dim);
 	} else {
 	    return getImageDefault(name, dim);
@@ -222,10 +223,6 @@ public class AppTray {
 	}
     }
 
-    private boolean isMacOSX() {
-	return System.getProperty("os.name").contains("OS X");
-    }
-
     private boolean isMacMenuBarDarkMode() {
 	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
 	final FutureTask<Integer> f = new FutureTask<>(new Callable<Integer>() {
@@ -255,14 +252,6 @@ public class AppTray {
 	    f.cancel(true); // make sure the thread is dead
 	    return false;
 	}
-    }
-
-    private boolean isLinux() {
-	if (isLinux == null) {
-	    String os = System.getProperty("os.name").toLowerCase();
-	    isLinux = os.contains("nux");
-	}
-	return isLinux;
     }
 
     private boolean isKde() {
@@ -298,7 +287,7 @@ public class AppTray {
 	return SystemTray.isSupported()
 		&& ! isPlasma()
 		&& ! isGnome()
-		&& ! isMacOSX();
+		&& ! SysUtils.isMacOSX();
     }
 
     private void setupFrame() {

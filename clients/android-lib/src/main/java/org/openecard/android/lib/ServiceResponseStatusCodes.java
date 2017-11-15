@@ -44,7 +44,7 @@ public interface ServiceResponseStatusCodes {
     int INIT_SUCCESS = 200;
 
     /**
-     * indicates that shutdown of app failed.
+     * indicates that the app was successfully terminated.
      */
     int SHUTDOWN_SUCCESS = 200;
 

@@ -84,7 +84,7 @@ public class BindingTask extends AsyncTask<Void, Void, BindingResult> implements
     @Override
     protected void onPostExecute(BindingResult bindingResult) {
 	BindingTaskResponse response = new BindingTaskResponse(bindingResult);
-	binding.getContextWrapper().setResultOfBindingTask(response);
+	binding.getBindingResultReceiver().setResultOfBindingTask(response);
     }
 
 }

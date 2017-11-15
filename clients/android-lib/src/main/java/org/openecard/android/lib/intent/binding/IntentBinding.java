@@ -22,12 +22,10 @@
 
 package org.openecard.android.lib.intent.binding;
 
-import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonSelector;
 import org.openecard.android.lib.ServiceContext;
-import org.openecard.android.lib.activities.EacActivity;
 import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
@@ -67,12 +65,8 @@ public class IntentBinding implements IntentBindingConstants {
 	this.addonSelector = new AddonSelector(addonManager);
     }
 
-    public void setContextWrapper(BindingTaskResult calling) {
-	if (calling instanceof EacActivity) {
-	    this.calling = calling;
-	} else {
-	    throw new IllegalArgumentException("BindingTaskResult has to be implemented by an EacActivity.");
-	}
+    public void setBindingResultReceiver(BindingTaskResult calling) {
+	this.calling = calling;
     }
 
     public AddonManager getAddonManager() {
@@ -83,13 +77,13 @@ public class IntentBinding implements IntentBindingConstants {
 	return addonSelector;
     }
 
-    public BindingTaskResult getContextWrapper() {
+    public BindingTaskResult getBindingResultReceiver() {
 	return calling;
     }
 
     public synchronized void handleRequest(String uri) throws ContextNotInitialized, BindingTaskStillRunning {
 	if (calling == null) {
-	    throw new IllegalStateException(ServiceMessages.PLEASE_PROVIDE_CONTEXT_WRAPPER);
+	    throw new IllegalStateException(ServiceMessages.PLEASE_PROVIDE_BINDING_RESULT_RECEIVER);
 	}
 
 	ServiceContext ctx = ServiceContext.getServiceContext();

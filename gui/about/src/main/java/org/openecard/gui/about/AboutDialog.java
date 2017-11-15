@@ -31,7 +31,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -56,6 +58,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.common.I18n;
 import org.openecard.common.AppVersion;
 import org.openecard.common.util.StringUtils;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogoBgWhite;
 import org.slf4j.Logger;
@@ -208,6 +211,7 @@ public class AboutDialog extends JFrame {
 
     private JPanel createTabContent(String resourceName) {
 	HTMLEditorKit kit = new HTMLEditorKit();
+	kit.setAutoFormSubmission(false); // don't follow form link, use hyperlink handler instead
 	HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
 
 	JEditorPane editorPane = new JEditorPane();
@@ -241,21 +245,43 @@ public class AboutDialog extends JFrame {
     private void openUrl(HyperlinkEvent event) {
 	EventType type = event.getEventType();
 	if (type == EventType.ACTIVATED) {
-	    String url = event.getURL().toExternalForm();
 	    try {
+		URL url = event.getURL();
+		String urlStr = url.toExternalForm();
+		urlStr = SysUtils.expandSysProps(urlStr);
+		url = new URL(urlStr);
+
 		boolean browserOpened = false;
-		URI uri = new URI(url);
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-		    try {
-			Desktop.getDesktop().browse(uri);
-			browserOpened = true;
-		    } catch (IOException ex) {
-			// failed to open browser
-			LOG.debug(ex.getMessage(), ex);
+		if (Desktop.isDesktopSupported()) {
+		    URI uri = new URI(urlStr);
+		    if ("file".equals(url.getProtocol()) && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+			try {
+			    Desktop.getDesktop().open(new File(uri));
+			    browserOpened = true;
+			} catch (IOException ex) {
+			    // failed to open browser
+			    LOG.debug(ex.getMessage(), ex);
+			}
+		    } else if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+			try {
+			    Desktop.getDesktop().browse(uri);
+			    browserOpened = true;
+			} catch (IOException ex) {
+			    // failed to open browser
+			    LOG.debug(ex.getMessage(), ex);
+			}
 		    }
 		}
 		if (! browserOpened) {
-		    ProcessBuilder pb = new ProcessBuilder("xdg-open", uri.toString());
+		    String openTool;
+		    if (SysUtils.isUnix()) {
+			openTool = "xdg-open";
+		    } else if (SysUtils.isWin()) {
+			openTool = "start";
+		    } else {
+			openTool = "open";
+		    }
+		    ProcessBuilder pb = new ProcessBuilder(openTool, urlStr);
 		    try {
 			pb.start();
 		    } catch (IOException ex) {
@@ -263,7 +289,7 @@ public class AboutDialog extends JFrame {
 			LOG.debug(ex.getMessage(), ex);
 		    }
 		}
-	    } catch (URISyntaxException ex) {
+	    } catch (URISyntaxException | MalformedURLException ex) {
 		// wrong syntax
 		LOG.debug(ex.getMessage(), ex);
 	    }

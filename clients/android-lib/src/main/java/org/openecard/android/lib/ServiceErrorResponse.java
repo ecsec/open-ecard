@@ -26,6 +26,8 @@ import android.os.Parcel;
 
 
 /**
+ * Represents a service response, like {@link ServiceResponse}, but with the ServiceResponseLevel
+ * 'Error' {@link ServiceResponseLevel}.  The response levels are part of an enum: {@link ServiceResponseLevel}.
  *
  * @author Mike Prechtl
  */

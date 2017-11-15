@@ -86,11 +86,13 @@ public class IntentBinding implements IntentBindingConstants {
 	    throw new IllegalStateException(ServiceMessages.PLEASE_PROVIDE_BINDING_RESULT_RECEIVER);
 	}
 
+	// check if service context is initialized
 	ServiceContext ctx = ServiceContext.getServiceContext();
 	if (ctx == null || ! ctx.isInitialized()) {
 	    throw new ContextNotInitialized(ServiceMessages.PLEASE_START_OPENECARD_SERVICE);
 	}
 
+	// execute binding task async
 	if (bindingTask == null || bindingTask.getStatus().equals(AsyncTask.Status.FINISHED)) {
 	    bindingTask = new BindingTask(this, uri);
 	    bindingTask.execute();
@@ -100,6 +102,7 @@ public class IntentBinding implements IntentBindingConstants {
     }
 
     public synchronized void cancelRequest() {
+	// if a binding task is already running, then interrupt it
 	if (bindingTask != null && (bindingTask.getStatus().equals(AsyncTask.Status.RUNNING)
 		|| bindingTask.getStatus().equals(AsyncTask.Status.PENDING))) {
 	    bindingTask.cancel(true);

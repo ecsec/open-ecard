@@ -45,6 +45,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * This class provides the basic functionality as specified in the technical guideline and the
+ * initialisation of the Eac UI interface service. By extending the class, the UI can be added
+ * (see BindingActivity in <a href="https://github.com/ecsec/open-ecard-android">ecsec/open-ecard-android</a>).
  *
  * @author Mike Prechtl
  */
@@ -60,6 +63,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
+	// set Open eCard Service Context
 	NfcUtils.getInstance().setServiceContext(ServiceContext.getServiceContext());
     }
 
@@ -67,6 +71,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected synchronized void onResume() {
 	super.onResume();
 
+	// enable dispatch with nfc tag
 	NfcUtils.getInstance().enableNFCDispatch(this);
     }
 
@@ -75,6 +80,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	super.onPause();
 
 	try {
+	    // disable dispatch with nfc tag
 	    NfcUtils.getInstance().disableNFCDispatch(this);
 	} catch (Exception e) {
 	    LOG.info(e.getMessage(), e);
@@ -85,12 +91,14 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected void onStart() {
 	super.onStart();
 
+	// initialize intent binding
 	if (! alreadyInitialized) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setBindingResultReceiver(this);
 	    this.alreadyInitialized = true;
 	}
 
+	// start TR procedure according to [BSI-TR-03124-1]
 	HandleRequestAsync task = new HandleRequestAsync();
 	task.execute(getBindingURI(getIntent()));
     }
@@ -112,8 +120,10 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
 	try {
+	    // extract nfc tag
 	    NfcUtils.getInstance().retrievedNFCTag(intent);
 	    if (! alreadyConnected) {
+		// start and bind eac gui service
 		Intent i = createEacGuiIntent();
 		Context ctx = getApplicationContext();
 		LOG.info("Starting Eac Gui service...");
@@ -130,9 +140,11 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     @Override
     protected void onStop() {
 	super.onStop();
+	// cancel request if app is closed or minimized
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
 	if (alreadyConnected) {
+	    // unbind eac gui service
 	    Intent i = createEacGuiIntent();
 	    Context ctx = getApplicationContext();
 	    alreadyConnected = false;
@@ -158,24 +170,47 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     public void redirectToResultLocation(BindingResult result) {
 	String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
 	if (location != null) {
+	    // redirct to result location
 	    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
 	    startActivity(i);
 	}
     }
 
+    /**
+     * Extracts the binding uri from the intent.
+     *
+     * @param i the corresponding intent.
+     * @return
+     */
     protected String getBindingURI(Intent i) {
 	Uri data = i.getData();
         return data.toString();
     }
 
+    /**
+     * Creates an intent to start the Eac Gui Service.
+     *
+     * @return
+     */
     protected Intent createEacGuiIntent() {
 	return new Intent(getApplicationContext(), EacGuiService.class);
     }
 
+    /**
+     * Returns true if the activity is already connected to the Eac Gui Service, otherwise false is returned.
+     *
+     * @return
+     */
     protected boolean isConnectedToEacService() {
 	return alreadyConnected;
     }
 
+    /**
+     * Implement this method to provide an instance of a service connection. The service connection is needed to
+     * connect to the Eac Gui Service.
+     *
+     * @return
+     */
     public abstract ServiceConnection getServiceConnection();
 
 }

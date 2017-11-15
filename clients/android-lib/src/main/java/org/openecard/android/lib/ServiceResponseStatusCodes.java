@@ -24,6 +24,8 @@ package org.openecard.android.lib;
 
 
 /**
+ * This class contains status codes which are used in service responses.
+ *
  * @author Mike Prechtl
  */
 public interface ServiceResponseStatusCodes {
@@ -54,7 +56,7 @@ public interface ServiceResponseStatusCodes {
     int EAC_SERVICE_CONNECTED = 201;
 
     /**
-     * indicates that eac service started and is binded.
+     * indicates that eac service is unbinded.
      */
     int EAC_SERVICE_DISCONNECTED = 203;
 
@@ -70,7 +72,7 @@ public interface ServiceResponseStatusCodes {
 
 
     /**
-     * indicates that shutdown of app failed.
+     * indicates that the shutdown of the app failed.
      */
     int SHUTDOWN_FAILED = 501;
 

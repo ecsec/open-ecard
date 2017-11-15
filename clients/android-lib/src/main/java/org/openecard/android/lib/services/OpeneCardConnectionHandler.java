@@ -24,7 +24,7 @@ package org.openecard.android.lib.services;
 
 
 /**
- * Activity which starts the Open eCard process should implement this interface to handle errors which can occur when
+ * An Activity which starts the Open eCard process should implement this interface to handle errors which can occur when
  * the connection to the Open eCard service is established.
  *
  * @author Mike Prechtl

@@ -32,16 +32,45 @@ import org.openecard.android.lib.ServiceWarningResponse;
  */
 public interface ServiceConnectionHandler {
 
+    /**
+     * This method indicates that establishing a connection to the service was successful.
+     */
     void onConnectionSuccess();
 
+    /**
+     * This method indicates that establishing a connection to the service failed. The response contains
+     * more information why it failed.
+     *
+     * @param response which contains more information to the failure.
+     */
     void onConnectionFailure(ServiceErrorResponse response);
 
+    /**
+     * This method indicates that establishing a connection to the service failed. The response contains more
+     * information why it failed. Warning responses can be fixed, for example by enabling nfc.
+     *
+     * @param response which contains more information to the failure.
+     */
     void onConnectionFailure(ServiceWarningResponse response);
 
+    /**
+     * This method indicates that disconnecting from the service was successful.
+     */
     void onDisconnectionSuccess();
 
+    /**
+     * This method indicates that disconnecting from the service failed. The response contains more information.
+     *
+     * @param response which contains more information to the failure.
+     */
     void onDisconnectionFailure(ServiceErrorResponse response);
 
+    /**
+     * This method indicates that disconnecting from the service failed. The response contains more information.
+     * Warning responses can be fixed.
+     *
+     * @param response which contains more information to the failure.
+     */
     void onDisconnectionFailure(ServiceWarningResponse response);
 
 }

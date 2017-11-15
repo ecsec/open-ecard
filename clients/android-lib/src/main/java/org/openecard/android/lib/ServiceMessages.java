@@ -24,7 +24,7 @@ package org.openecard.android.lib;
 
 
 /**
- * Contains standard messages.
+ * Contains standard messages which are used in service responses.
  *
  * @author Mike Prechtl
  */

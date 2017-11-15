@@ -24,7 +24,7 @@ package org.openecard.android.lib.ex;
 
 
 /**
- * Exception which is thrown if the AppContext is not initialized.
+ * Exception which is thrown if the context of the Open eCard service is not initialized.
  *
  * @author Mike Prechtl
  */

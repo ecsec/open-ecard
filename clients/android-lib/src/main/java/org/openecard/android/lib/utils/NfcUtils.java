@@ -69,6 +69,11 @@ public class NfcUtils {
 	LOG.debug("NFC available: " + isNFCAvailable + " - NFC enabled: " + isNFCEnabled);
     }
 
+    /**
+     * This method opens the nfc settings on the corresponding device. Now, the user can enable nfc.
+     * 
+     * @param activity
+     */
     public void goToNFCSettings(Activity activity) {
 	Intent intent = new Intent(Settings.ACTION_NFC_SETTINGS);
 	activity.startActivityForResult(intent, 0);
@@ -79,6 +84,7 @@ public class NfcUtils {
 	    LOG.debug("Enable NFC foreground dispatch...");
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
+	    // enable dispatch of messages with nfc tag
 	    NfcAdapter.getDefaultAdapter(ctx).enableForegroundDispatch(activity, pendingIntent, null, null);
 	}
     }
@@ -86,14 +92,17 @@ public class NfcUtils {
     public void disableNFCDispatch(Activity activity) {
 	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
 	    LOG.debug("Disable NFC foreground dispatch...");
+	    // disable dispatch of messages with nfc tag
 	    NfcAdapter.getDefaultAdapter(ctx).disableForegroundDispatch(activity);
 	}
     }
 
     public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
+	// indicates that a nfc tag is there
 	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
 	    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
+		// set nfc tag with timeout of five seconds
 		NFCFactory.setNFCTag(tagFromIntent, 5000);
 	    } else {
 		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");

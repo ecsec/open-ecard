@@ -24,7 +24,8 @@ package org.openecard.android.lib.async.tasks;
 
 
 /**
- * This interface have to be implemented by the activity which starts the initialization of the app context.
+ * This interface have to be implemented by the context wrapper which starts the initialization of the Open eCard
+ * service context.
  *
  * @author Mike Prechtl
  */

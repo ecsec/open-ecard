@@ -27,7 +27,7 @@ import org.openecard.android.lib.ServiceResponse;
 
 
 /**
- * Contains the app context of the initialization process {@link StartTask} and a response which represents the
+ * Contains the service context of the initialization process {@link StartTask} and a response which represents the
  * state of the initialization, for example if the initialization was successful, then a positive response is created.
  *
  * @author Mike Prechtl

@@ -46,7 +46,7 @@ public interface ServiceMessages {
     String APP_EAC_SERVICE_DISCONNECTED = "Successfully disconnected from Eac Gui Service.";
     String BINDING_TASK_STILL_RUNNING = "There is already a running Binding Task. Maybe you have to cancel it.";
     String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
-    String PLEASE_PROVIDE_CONTEXT_WRAPPER = "Please provide a ContextWrapper.";
+    String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";
     String CARD_NOT_PRESENT = "No NPA identity card present.";
 
 }

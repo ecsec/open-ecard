@@ -45,10 +45,6 @@ public class EacGuiService extends Service {
 	serviceImpl.deliver(impl);
     }
 
-    static synchronized Promise<EacGuiImpl> getServiceImpl() {
-	return serviceImpl;
-    }
-
     @Override
     public synchronized int onStartCommand(Intent intent, int flags, int startId) {
 	prepare();

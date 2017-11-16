@@ -24,10 +24,13 @@ package org.openecard.gui.android.eac;
 
 import android.content.Context;
 import android.os.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.Mocked;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.android.eac.types.ServerData;
@@ -60,24 +63,55 @@ public class EacGuiImplTest {
     EacGui.Stub stub;
 
     @Test
-    public void testPinOkFirstTime() throws InterruptedException, RemoteException {
+    public void testGivenCorrectValuesThenCreateFromShouldBeCorrect() {
+	final List<Step> expectedSteps = createInitialSteps();
 	new Expectations() {{
 	    ucd.getDialogType(); result = "EAC";
-	    ucd.getSteps(); result = createInitialSteps();
+	    ucd.getSteps(); result = expectedSteps;
 	}};
-
 	EacGuiService.prepare();
+	
+	final EacNavigator result = EacNavigator.createFrom(androidCtx, ucd);
+	
+	assertNotNull(result);
+	assertTrue(result.hasNext());
+    }
+    
+    @Test
+    public void testGivenCorrectValuesThenCreateFromShouldStoreNewGui() {
+	final List<Step> expectedSteps = createInitialSteps();
+	EacGuiService.prepare();
+
+	new Expectations() {{
+	    ucd.getDialogType(); result = "EAC";
+	    ucd.getSteps(); result = expectedSteps;
+	    
+	    EacGuiService singleton;
+	    {
+		EacGuiService.setGuiImpl((EacGuiImpl)any);
+	    }
+	}};
+	
+	EacGuiService.prepare();
+	EacNavigator.createFrom(androidCtx, ucd);
+    }
+    
+    @Test
+    public void testPinOkFirstTime() throws InterruptedException, RemoteException {
+	EacGuiService.prepare();
+	
+	final EacGuiImpl anyGuiImpl = new EacGuiImpl();
+	
 	Thread t = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		EacNavigator nav = new EacNavigator(androidCtx, ucd);
+		EacNavigator nav = new EacNavigator(anyGuiImpl, new ArrayList<>(createInitialSteps()));
 		ExecutionEngine exe = new ExecutionEngine(nav);
 		exe.process();
 	    }
 	}, "GUI-Executor");
 	t.start();
 
-	final EacGuiImpl anyGuiImpl = EacGuiService.getServiceImpl().deref();
 	// use the Binders API to access the values
 	ServerData sd = anyGuiImpl.getServerData();
 	assertEquals(sd.getSubject(), "Test Subject");

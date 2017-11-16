@@ -48,7 +48,7 @@ public class AndroidUserConsent implements UserConsent {
     public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
 	String dialogType = uc.getDialogType();
 	if ("EAC".equals(dialogType)) {
-	    return new EacNavigator(androidCtx, uc);
+	    return EacNavigator.createFrom(androidCtx, uc);
 	} else if ("insert_card_dialog".equals(dialogType)) {
 	    return new InsertCardNavigator(uc);
 	} else {

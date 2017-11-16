@@ -43,32 +43,33 @@ import org.openecard.gui.definition.UserConsentDescription;
  */
 public class EacNavigator implements UserConsentNavigator {
 
-    private final Context androidCtx;
-
-    private final UserConsentDescription ucd;
-    private final ArrayList<Step> steps;
+    private final List<Step> steps;
 
     private EacGuiImpl guiService = null;
     private int idx = -1;
     private boolean pinFirstUse = true;
 
 
-    public EacNavigator(Context androidCtx, UserConsentDescription ucd) throws UnsupportedOperationException {
-	this.androidCtx = androidCtx;
-	this.ucd = ucd;
-	this.steps = new ArrayList<>(ucd.getSteps());
-
+    public EacNavigator(EacGuiImpl guiService, List<Step> steps) {
+	this.guiService = guiService;
+	this.steps = steps;
+    }
+    
+    public static EacNavigator createFrom(Context androidCtx, UserConsentDescription ucd) throws UnsupportedOperationException {
+	ArrayList<Step> steps = new ArrayList<>(ucd.getSteps());
+	EacGuiImpl guiService;
+	
 	String dialogType = ucd.getDialogType();
 	if ("EAC".equals(dialogType)) {
 	    // get GUI service
-	    this.guiService = new EacGuiImpl();
-	    EacGuiService.setGuiImpl(this.guiService);
+	    guiService = new EacGuiImpl();
+	    EacGuiService.setGuiImpl(guiService);
 	} else {
 	    throw new UnsupportedOperationException("Unsupported Dialog type requested.");
 	}
+	return new EacNavigator(guiService, steps);
     }
-
-
+    
     @Override
     public boolean hasNext() {
 	return idx < (steps.size() - 1);

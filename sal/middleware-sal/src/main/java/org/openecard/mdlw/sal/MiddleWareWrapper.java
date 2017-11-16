@@ -22,6 +22,7 @@
 
 package org.openecard.mdlw.sal;
 
+import com.sun.jna.Library;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.mdlw.sal.struct.CkInfo;
 import org.openecard.mdlw.sal.struct.CkAttribute;
@@ -44,6 +45,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nullable;
 import org.openecard.common.ThreadTerminateException;
+import org.openecard.common.util.SysUtils;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.mdlw.sal.exceptions.InvalidArgumentsException;
 import org.openecard.mdlw.sal.exceptions.AuthenticationException;
@@ -107,6 +109,13 @@ public class MiddleWareWrapper {
 
 	HashMap<String, Object> options = new HashMap<>();
 	options.put("lib-index", libIdx++);
+	if (SysUtils.isUnix()) {
+	    // RTLD_LOCAL | RTLD_NOW
+	    options.put(Library.OPTION_OPEN_FLAGS, 0x2);
+	} else if (SysUtils.isMacOSX()) {
+	    // RTLD_LOCAL | RTLD_NOW
+	    options.put(Library.OPTION_OPEN_FLAGS, 0x6);
+	}
 
 	lib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
 

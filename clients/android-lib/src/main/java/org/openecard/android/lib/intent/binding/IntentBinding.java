@@ -38,7 +38,7 @@ import org.openecard.android.lib.ServiceMessages;
  *
  * @author Mike Prechtl
  */
-public class IntentBinding implements IntentBindingConstants {
+public class IntentBinding {
 
     private BindingTaskResult calling;
     private AddonManager addonManager;

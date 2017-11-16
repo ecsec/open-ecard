@@ -28,11 +28,11 @@ package org.openecard.android.lib;
  *
  * @author Mike Prechtl
  */
-interface ServiceContextConstants {
+public class ServiceContextConstants {
 
-    String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
-    String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
-    String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
-    String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.android.AndroidMarshaller";
+    public static final String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
+    public static final String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
+    public static final String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
+    public static final String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.android.AndroidMarshaller";
 
 }

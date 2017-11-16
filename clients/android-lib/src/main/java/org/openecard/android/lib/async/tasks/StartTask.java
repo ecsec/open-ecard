@@ -25,6 +25,7 @@ package org.openecard.android.lib.async.tasks;
 import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import android.os.Build;
+import static org.openecard.android.lib.ServiceConstants.*;
 import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.ServiceResponse;
 import org.openecard.android.lib.ex.NfcDisabled;
@@ -33,10 +34,9 @@ import org.openecard.android.lib.ex.UnableToInitialize;
 import org.openecard.android.lib.utils.NfcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.openecard.android.lib.ServiceResponseStatusCodes;
-import org.openecard.android.lib.ServiceMessages;
-import org.openecard.android.lib.ServiceConstants;
 import org.openecard.android.lib.ServiceErrorResponse;
+import static org.openecard.android.lib.ServiceMessages.*;
+import static org.openecard.android.lib.ServiceResponseStatusCodes.*;
 import org.openecard.android.lib.ServiceWarningResponse;
 
 
@@ -46,8 +46,7 @@ import org.openecard.android.lib.ServiceWarningResponse;
  *
  * @author Mike Prechtl
  */
-public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> implements ServiceConstants, ServiceMessages,
-		ServiceResponseStatusCodes {
+public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 
     private static final Logger LOG = LoggerFactory.getLogger(StartTask.class);
 

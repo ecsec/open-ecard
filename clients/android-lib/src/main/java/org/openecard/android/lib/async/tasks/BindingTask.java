@@ -27,7 +27,7 @@ import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.lib.intent.binding.IntentBinding;
-import org.openecard.android.lib.intent.binding.IntentBindingConstants;
+import static org.openecard.android.lib.intent.binding.IntentBindingConstants.*;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import java.util.Map;
 /**
  * @author Mike Prechtl
  */
-public class BindingTask extends AsyncTask<Void, Void, BindingResult> implements IntentBindingConstants {
+public class BindingTask extends AsyncTask<Void, Void, BindingResult> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BindingTask.class);
 

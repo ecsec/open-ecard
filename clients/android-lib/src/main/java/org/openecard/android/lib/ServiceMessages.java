@@ -28,25 +28,25 @@ package org.openecard.android.lib;
  *
  * @author Mike Prechtl
  */
-public interface ServiceMessages {
+public class ServiceMessages {
 
-    String APP_RESPONSE_OK = "Initialization successfully finished.";
-    String APP_CONTEXT_STD_MSG = "Initialization of App context failed.";
-    String APP_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
-    String APP_CONTEXT_ALREADY_INITIALIZED = "AppContext already initialized.";
-    String APP_CONTEXT_NFC_NOT_AVAILABLE = "NFC not available.";
-    String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
-    String APP_CONTEXT_UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
-    String APP_CONTEXT_ESTABLISH_CONTEXT_FAIL = "Establish IFD context failed.";
-    String APP_CONTEXT_CARD_REC_FAILED = "Unable to initialize card recognition.";
-    String APP_CONTEXT_ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
-    String APP_TERMINATE_SUCCESS = "Successfully terminated.";
-    String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
-    String APP_EAC_SERVICE_CONNECTED = "Successfully connected to Eac Gui Service.";
-    String APP_EAC_SERVICE_DISCONNECTED = "Successfully disconnected from Eac Gui Service.";
-    String BINDING_TASK_STILL_RUNNING = "There is already a running Binding Task. Maybe you have to cancel it.";
-    String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
-    String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";
-    String CARD_NOT_PRESENT = "No NPA identity card present.";
+    public static final String APP_RESPONSE_OK = "Initialization successfully finished.";
+    public static final String APP_CONTEXT_STD_MSG = "Initialization of App context failed.";
+    public static final String APP_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
+    public static final String APP_CONTEXT_ALREADY_INITIALIZED = "AppContext already initialized.";
+    public static final String APP_CONTEXT_NFC_NOT_AVAILABLE = "NFC not available.";
+    public static final String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
+    public static final String APP_CONTEXT_UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
+    public static final String APP_CONTEXT_ESTABLISH_CONTEXT_FAIL = "Establish IFD context failed.";
+    public static final String APP_CONTEXT_CARD_REC_FAILED = "Unable to initialize card recognition.";
+    public static final String APP_CONTEXT_ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
+    public static final String APP_TERMINATE_SUCCESS = "Successfully terminated.";
+    public static final String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
+    public static final String APP_EAC_SERVICE_CONNECTED = "Successfully connected to Eac Gui Service.";
+    public static final String APP_EAC_SERVICE_DISCONNECTED = "Successfully disconnected from Eac Gui Service.";
+    public static final String BINDING_TASK_STILL_RUNNING = "There is already a running Binding Task. Maybe you have to cancel it.";
+    public static final String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
+    public static final String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";
+    public static final String CARD_NOT_PRESENT = "No NPA identity card present.";
 
 }

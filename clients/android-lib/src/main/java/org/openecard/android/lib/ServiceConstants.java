@@ -28,12 +28,12 @@ package org.openecard.android.lib;
  *
  * @author Mike Prechtl
  */
-public interface ServiceConstants {
+public class ServiceConstants {
 
-    int REQUIRED_API = 21;
-    String INTENT_KEY_FOR_RESPONSE = "response";
-    String SUCCESS = "success";
-    String FAILURE = "failure";
-    String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+    public static final int REQUIRED_API = 21;
+    public static final String INTENT_KEY_FOR_RESPONSE = "response";
+    public static final String SUCCESS = "success";
+    public static final String FAILURE = "failure";
+    public static final String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
 }

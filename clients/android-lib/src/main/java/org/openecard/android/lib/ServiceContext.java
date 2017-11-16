@@ -29,6 +29,9 @@ import org.openecard.android.lib.utils.ClasspathRegistry;
 import org.openecard.android.lib.ex.NfcDisabled;
 import org.openecard.android.lib.ex.NfcUnavailable;
 import org.openecard.android.lib.ex.UnableToInitialize;
+import static org.openecard.android.lib.ServiceConstants.*;
+import static org.openecard.android.lib.ServiceContextConstants.*;
+import static org.openecard.android.lib.ServiceMessages.*;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -71,7 +74,7 @@ import iso.std.iso_iec._24727.tech.schema.Terminate;
  *
  * @author Mike Prechtl
  */
-public class ServiceContext extends Application implements EventCallback, ServiceContextConstants, ServiceMessages, ServiceConstants {
+public class ServiceContext extends Application implements EventCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceContext.class);
 

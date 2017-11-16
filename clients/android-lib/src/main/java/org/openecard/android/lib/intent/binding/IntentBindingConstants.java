@@ -28,9 +28,9 @@ package org.openecard.android.lib.intent.binding;
  *
  * @author Mike Prechtl
  */
-public interface IntentBindingConstants {
+public class IntentBindingConstants {
 
-    String ADDON_INIT_FAILED = "Addon initialization failed.";
-    String ADDON_NOT_FOUND = "Addon not found.";
+    public static final String ADDON_INIT_FAILED = "Addon initialization failed.";
+    public static final String ADDON_NOT_FOUND = "Addon not found.";
 
 }

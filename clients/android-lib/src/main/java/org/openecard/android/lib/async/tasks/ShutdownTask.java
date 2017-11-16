@@ -25,18 +25,17 @@ package org.openecard.android.lib.async.tasks;
 import android.content.ContextWrapper;
 import android.os.AsyncTask;
 import org.openecard.android.lib.ServiceContext;
+import static org.openecard.android.lib.ServiceMessages.*;
 import org.openecard.android.lib.ServiceResponse;
-import org.openecard.android.lib.ServiceResponseStatusCodes;
-import org.openecard.android.lib.ServiceMessages;
-import org.openecard.android.lib.ServiceConstants;
+import static org.openecard.android.lib.ServiceConstants.*;
+import static org.openecard.android.lib.ServiceResponseStatusCodes.*;
 import org.openecard.android.lib.ServiceWarningResponse;
 
 
 /**
  * @author Mike Prechtl
  */
-public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> implements ServiceConstants, ServiceMessages,
-		ServiceResponseStatusCodes {
+public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> {
 
     private final ServiceContext ctx;
     private final ShutdownTaskResult calling;

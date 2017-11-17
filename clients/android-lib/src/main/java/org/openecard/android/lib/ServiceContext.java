@@ -93,7 +93,8 @@ public class ServiceContext extends Application implements EventCallback, Servic
     private Dispatcher dispatcher;
     private TerminalFactory terminalFactory;
     private TinyManagement management;
-
+    private Runnable guiStarter;
+    
     private UserConsent gui;
 
     // true if already initialized
@@ -200,6 +201,14 @@ public class ServiceContext extends Application implements EventCallback, Servic
 	return manager;
     }
 
+    public Runnable getEacStarter() {
+	return guiStarter;
+    }
+    
+    public void setEacStarter(Runnable guiStarter) {
+	this.guiStarter = guiStarter;
+    }
+
 
     ///
     /// Initialization & Shutdown
@@ -214,7 +223,16 @@ public class ServiceContext extends Application implements EventCallback, Servic
 
 	// initialize gui
 	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<>();
-	factories.add(new EacNavigatorFactory());
+	Runnable delegatingRunnable = new Runnable() {
+	    @Override
+	    public void run() {
+		Runnable runner = getEacStarter();
+		if(runner != null) {
+		    runner.run();
+		}
+	    }
+	}
+	factories.add(new EacNavigatorFactory(delegatingRunnable));
 	factories.add(new InsertCardNavigatorFactory());
 	gui = new AndroidUserConsent(this, factories);
 

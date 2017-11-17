@@ -31,8 +31,10 @@ import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
 import org.openecard.gui.android.eac.EacGuiService;
+import org.openecard.gui.android.eac.EacNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
@@ -49,6 +51,23 @@ public class EacNavigatorFactoryTest {
     UserConsentDescription ucd;
     @Mocked
     EacGui.Stub stub;
+    @Mocked
+    Runnable guiStarter;
+    
+    @Test
+    public void testGivenCorrectValuesThenCreateFromShouldCreateCorrectInstance() {
+	final List<Step> expectedSteps = createInitialSteps();
+	new Expectations() {{
+	    ucd.getDialogType(); result = "EAC";
+	    ucd.getSteps(); result = expectedSteps;
+	}};
+	EacGuiService.prepare();
+	
+	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
+	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
+	
+	assertEquals(result.getClass(), EacNavigator.class);
+    }
     
     @Test
     public void testGivenCorrectValuesThenCreateFromShouldBeCorrect() {
@@ -59,7 +78,7 @@ public class EacNavigatorFactoryTest {
 	}};
 	EacGuiService.prepare();
 	
-	EacNavigatorFactory sut = new EacNavigatorFactory();
+	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
 	
 	assertNotNull(result);
@@ -83,7 +102,23 @@ public class EacNavigatorFactoryTest {
 	
 	EacGuiService.prepare();
 	
-	EacNavigatorFactory sut = new EacNavigatorFactory();
+	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
+	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
+	
+    }
+    
+    @Test
+    public void testGivenCorrectValuesThenCreateFromShouldRunEacRunnable() {
+	final List<Step> expectedSteps = createInitialSteps();
+	EacGuiService.prepare();
+
+	new Expectations() {{
+	    ucd.getDialogType(); result = "EAC";
+	    ucd.getSteps(); result = expectedSteps;
+	    guiStarter.run();
+	}};
+	
+	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
 	
     }

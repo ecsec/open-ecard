@@ -55,7 +55,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationActivity.class);
 
-    private boolean alreadyConnected = false;
+    private boolean eacAlreadyConnected = false;
 
     private volatile boolean alreadyInitialized = false;
 
@@ -95,6 +95,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	if (! alreadyInitialized) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setBindingResultReceiver(this);
+	    ServiceContext.getServiceContext().setEacStarter(this.guiStarter);
 	    this.alreadyInitialized = true;
 	}
 
@@ -116,13 +117,10 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
-	try {
-	    // extract nfc tag
-	    NfcUtils.getInstance().retrievedNFCTag(intent);
-	    if (! alreadyConnected) {
+    private Runnable guiStarter = new Runnable() {
+	@Override
+	public void run() {
+	    if (! eacAlreadyConnected) {
 		// start and bind eac gui service
 		Intent i = createEacGuiIntent();
 		Context ctx = getApplicationContext();
@@ -130,12 +128,23 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 		ctx.startService(i);
 		LOG.info("Binding Eac Gui service...");
 		ctx.bindService(i, getServiceConnection(), 0);
-		alreadyConnected = true;
+		eacAlreadyConnected = true;
 	    }
+	}
+    };
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+	super.onNewIntent(intent);
+	try {
+	    // extract nfc tag
+	    NfcUtils.getInstance().retrievedNFCTag(intent);
+	    
 	} catch (ApduExtLengthNotSupported ex) {
 	    LOG.error(ex.getMessage());
 	}
     }
+  
 
     @Override
     protected void onStop() {
@@ -143,17 +152,17 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	// cancel request if app is closed or minimized
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
-	if (alreadyConnected) {
+	if (eacAlreadyConnected) {
 	    // unbind eac gui service
 	    Intent i = createEacGuiIntent();
 	    Context ctx = getApplicationContext();
-	    alreadyConnected = false;
+	    eacAlreadyConnected = false;
 	    ctx.stopService(i);
 	    LOG.info("Unbinding Eac Gui service...");
 	    ctx.unbindService(getServiceConnection());
 	} // else do nothing, because the service hasn't been started yet, maybe because the user canceled the request.
     }
-
+    
     @Override
     protected void onDestroy() {
 	super.onDestroy();
@@ -202,7 +211,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      * @return
      */
     protected boolean isConnectedToEacService() {
-	return alreadyConnected;
+	return eacAlreadyConnected;
     }
 
     /**

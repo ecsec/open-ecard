@@ -37,6 +37,12 @@ import org.openecard.gui.definition.UserConsentDescription;
  */
 public class EacNavigatorFactory implements UserConsentNavigatorFactory{
 
+    private final Runnable eacGuiStarter;
+
+    public EacNavigatorFactory(Runnable eacGuiStarter) {
+	this.eacGuiStarter = eacGuiStarter;
+    }
+    
     @Override
     public boolean canCreateFrom(UserConsentDescription uc, Context androidCtx) {
 	return "EAC".equals(uc.getDialogType());
@@ -53,6 +59,7 @@ public class EacNavigatorFactory implements UserConsentNavigatorFactory{
 	
 	guiService = new EacGuiImpl();
 	EacGuiService.setGuiImpl(guiService);
+	eacGuiStarter.run();
 	
 	return new EacNavigator(guiService, steps);
     

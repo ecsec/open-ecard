@@ -64,6 +64,10 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.util.ArrayList;
+import org.openecard.gui.android.EacNavigatorFactory;
+import org.openecard.gui.android.InsertCardNavigatorFactory;
+import org.openecard.gui.android.UserConsentNavigatorFactory;
 
 
 /**
@@ -209,7 +213,11 @@ public class ServiceContext extends Application implements EventCallback, Servic
 	}
 
 	// initialize gui
-	gui = new AndroidUserConsent(this);
+	
+	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<UserConsentNavigatorFactory>();
+	factories.add(new EacNavigatorFactory());
+	factories.add(new InsertCardNavigatorFactory());
+	gui = new AndroidUserConsent(this, factories);
 
 	// set up nfc and android marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);

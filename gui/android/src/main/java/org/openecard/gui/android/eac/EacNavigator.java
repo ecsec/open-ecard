@@ -55,21 +55,6 @@ public class EacNavigator implements UserConsentNavigator {
 	this.steps = steps;
     }
     
-    public static EacNavigator createFrom(Context androidCtx, UserConsentDescription ucd) throws UnsupportedOperationException {
-	ArrayList<Step> steps = new ArrayList<>(ucd.getSteps());
-	EacGuiImpl guiService;
-	
-	String dialogType = ucd.getDialogType();
-	if ("EAC".equals(dialogType)) {
-	    // get GUI service
-	    guiService = new EacGuiImpl();
-	    EacGuiService.setGuiImpl(guiService);
-	} else {
-	    throw new UnsupportedOperationException("Unsupported Dialog type requested.");
-	}
-	return new EacNavigator(guiService, steps);
-    }
-    
     @Override
     public boolean hasNext() {
 	return idx < (steps.size() - 1);

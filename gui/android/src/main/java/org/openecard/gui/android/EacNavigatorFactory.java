@@ -23,8 +23,12 @@
 package org.openecard.gui.android;
 
 import android.content.Context;
+import java.util.ArrayList;
 import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.eac.EacGuiImpl;
+import org.openecard.gui.android.eac.EacGuiService;
 import org.openecard.gui.android.eac.EacNavigator;
+import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 
 /**
@@ -43,7 +47,15 @@ public class EacNavigatorFactory implements UserConsentNavigatorFactory{
 	if (!this.canCreateFrom(uc, androidCtx)) {
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
-	return EacNavigator.createFrom(androidCtx, uc);
+	
+	ArrayList<Step> steps = new ArrayList<>(uc.getSteps());
+	EacGuiImpl guiService;
+	
+	guiService = new EacGuiImpl();
+	EacGuiService.setGuiImpl(guiService);
+	
+	return new EacNavigator(guiService, steps);
+    
     }
     
 }

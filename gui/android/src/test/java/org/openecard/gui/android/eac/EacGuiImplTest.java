@@ -63,40 +63,6 @@ public class EacGuiImplTest {
     EacGui.Stub stub;
 
     @Test
-    public void testGivenCorrectValuesThenCreateFromShouldBeCorrect() {
-	final List<Step> expectedSteps = createInitialSteps();
-	new Expectations() {{
-	    ucd.getDialogType(); result = "EAC";
-	    ucd.getSteps(); result = expectedSteps;
-	}};
-	EacGuiService.prepare();
-	
-	final EacNavigator result = EacNavigator.createFrom(androidCtx, ucd);
-	
-	assertNotNull(result);
-	assertTrue(result.hasNext());
-    }
-    
-    @Test
-    public void testGivenCorrectValuesThenCreateFromShouldStoreNewGui() {
-	final List<Step> expectedSteps = createInitialSteps();
-	EacGuiService.prepare();
-
-	new Expectations() {{
-	    ucd.getDialogType(); result = "EAC";
-	    ucd.getSteps(); result = expectedSteps;
-	    
-	    EacGuiService singleton;
-	    {
-		EacGuiService.setGuiImpl((EacGuiImpl)any);
-	    }
-	}};
-	
-	EacGuiService.prepare();
-	EacNavigator.createFrom(androidCtx, ucd);
-    }
-    
-    @Test
     public void testPinOkFirstTime() throws InterruptedException, RemoteException {
 	EacGuiService.prepare();
 	

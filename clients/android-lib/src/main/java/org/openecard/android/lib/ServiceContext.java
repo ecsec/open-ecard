@@ -213,8 +213,7 @@ public class ServiceContext extends Application implements EventCallback, Servic
 	}
 
 	// initialize gui
-	
-	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<UserConsentNavigatorFactory>();
+	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<>();
 	factories.add(new EacNavigatorFactory());
 	factories.add(new InsertCardNavigatorFactory());
 	gui = new AndroidUserConsent(this, factories);

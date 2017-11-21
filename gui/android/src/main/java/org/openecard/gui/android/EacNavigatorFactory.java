@@ -22,51 +22,47 @@
 
 package org.openecard.gui.android;
 
-import org.openecard.gui.android.eac.EacNavigator;
 import android.content.Context;
-import java.util.List;
-import org.openecard.gui.FileDialog;
-import org.openecard.gui.MessageDialog;
-import org.openecard.gui.UserConsent;
+import java.util.ArrayList;
 import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.android.stub.MessageDialogStub;
+import org.openecard.gui.android.eac.EacGuiImpl;
+import org.openecard.gui.android.eac.EacGuiService;
+import org.openecard.gui.android.eac.EacNavigator;
+import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
-
 
 /**
  *
- * @author Tobias Wich
+ * @author Neil Crossley
  */
-public class AndroidUserConsent implements UserConsent {
+public class EacNavigatorFactory implements UserConsentNavigatorFactory{
 
-    private final Context androidCtx;
-    private final List<UserConsentNavigatorFactory> factories;
+    private final Runnable eacGuiStarter;
 
-    public AndroidUserConsent(Context androidCtx, List<UserConsentNavigatorFactory> factories) {
-	this.androidCtx = androidCtx;
-	this.factories = factories;
+    public EacNavigatorFactory(Runnable eacGuiStarter) {
+	this.eacGuiStarter = eacGuiStarter;
+    }
+    
+    @Override
+    public boolean canCreateFrom(UserConsentDescription uc, Context androidCtx) {
+	return "EAC".equals(uc.getDialogType());
     }
 
     @Override
-    public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
-	
-	for (UserConsentNavigatorFactory factory : factories) {
-	    if(factory.canCreateFrom(uc, androidCtx))
-	    {
-		return factory.createFrom(uc, androidCtx);
-	    }
+    public UserConsentNavigator createFrom(UserConsentDescription uc, Context androidCtx) {
+	if (!this.canCreateFrom(uc, androidCtx)) {
+	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
-	throw new UnsupportedOperationException("Not supported yet.");
+	
+	ArrayList<Step> steps = new ArrayList<>(uc.getSteps());
+	EacGuiImpl guiService;
+	
+	guiService = new EacGuiImpl();
+	EacGuiService.setGuiImpl(guiService);
+	eacGuiStarter.run();
+	
+	return new EacNavigator(guiService, steps);
+    
     }
-
-    @Override
-    public FileDialog obtainFileDialog() {
-	throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public MessageDialog obtainMessageDialog() {
-	return new MessageDialogStub(); // return stub object
-    }
-
+    
 }

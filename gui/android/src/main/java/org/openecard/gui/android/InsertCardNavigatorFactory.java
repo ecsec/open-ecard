@@ -20,44 +20,29 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.android.eac;
+package org.openecard.gui.android;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
-import org.openecard.common.util.Promise;
-
+import android.content.Context;
+import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.definition.UserConsentDescription;
 
 /**
  *
- * @author Tobias Wich
+ * @author Neil Crossley
  */
-public class EacGuiService extends Service {
+public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory {
 
-    private static Promise<EacGuiImpl> serviceImpl;
-
-    public static void prepare() {
-	// clean promise
-	serviceImpl = new Promise<>();
-    }
-
-    public static void setGuiImpl(EacGuiImpl impl) {
-	serviceImpl.deliver(impl);
+    @Override
+    public boolean canCreateFrom(UserConsentDescription uc, Context androidCtx) {
+	return "insert_card_dialog".equals(uc.getDialogType());
     }
 
     @Override
-    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
-	prepare();
-	return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-	try {
-	    return serviceImpl.deref();
-	} catch (InterruptedException ex) {
-	    throw new RuntimeException("Waiting for EacGuiImpl interrupted.");
+    public UserConsentNavigator createFrom(UserConsentDescription uc, Context androidCtx) {
+	if (!this.canCreateFrom(uc, androidCtx)) {
+	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
+	return new InsertCardNavigator(uc);
     }
-
+    
 }

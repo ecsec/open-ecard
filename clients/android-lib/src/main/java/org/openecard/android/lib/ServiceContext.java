@@ -67,6 +67,10 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.util.ArrayList;
+import org.openecard.gui.android.EacNavigatorFactory;
+import org.openecard.gui.android.InsertCardNavigatorFactory;
+import org.openecard.gui.android.UserConsentNavigatorFactory;
 
 
 /**
@@ -92,7 +96,8 @@ public class ServiceContext extends Application implements EventCallback {
     private Dispatcher dispatcher;
     private TerminalFactory terminalFactory;
     private TinyManagement management;
-
+    private Runnable guiStarter;
+    
     private UserConsent gui;
 
     // true if already initialized
@@ -199,6 +204,14 @@ public class ServiceContext extends Application implements EventCallback {
 	return manager;
     }
 
+    public Runnable getEacStarter() {
+	return guiStarter;
+    }
+    
+    public void setEacStarter(Runnable guiStarter) {
+	this.guiStarter = guiStarter;
+    }
+
 
     ///
     /// Initialization & Shutdown
@@ -212,7 +225,22 @@ public class ServiceContext extends Application implements EventCallback {
 	}
 
 	// initialize gui
-	gui = new AndroidUserConsent(this);
+	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<>();
+	Runnable delegatingRunnable = new Runnable() {
+	    @Override
+	    public void run() {
+		Runnable runner = getEacStarter();
+		if(runner == null) {
+		    LOG.error("The Eac GUI starter was not initialized as required!");
+		}
+		else {
+		    runner.run();
+		}
+	    }
+	};
+	factories.add(new EacNavigatorFactory(delegatingRunnable));
+	factories.add(new InsertCardNavigatorFactory());
+	gui = new AndroidUserConsent(this, factories);
 
 	// set up nfc and android marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);

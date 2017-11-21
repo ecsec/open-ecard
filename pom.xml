@@ -600,7 +600,7 @@
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.36.1</version>
+				<version>1.36.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>

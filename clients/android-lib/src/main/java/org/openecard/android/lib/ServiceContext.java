@@ -227,11 +227,14 @@ public class ServiceContext extends Application implements EventCallback, Servic
 	    @Override
 	    public void run() {
 		Runnable runner = getEacStarter();
-		if(runner != null) {
+		if(runner == null) {
+		    LOG.error("The Eac GUI starter was not initialized as required!");
+		}
+		else {
 		    runner.run();
 		}
 	    }
-	}
+	};
 	factories.add(new EacNavigatorFactory(delegatingRunnable));
 	factories.add(new InsertCardNavigatorFactory());
 	gui = new AndroidUserConsent(this, factories);

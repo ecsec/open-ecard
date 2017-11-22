@@ -24,7 +24,6 @@ package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
@@ -71,19 +70,7 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public void disconnect(boolean arg0) throws SCIOException {
-	try {
-	    nfcCardChannel.close();
-	    // maybe isodep is already null, for example if isodep is lost or disconnected
-	    synchronized(this) {
-		if (isodep != null) {
-		    isodep.close();
-		    isodep = null;
-		}
-	    }
-	} catch (IOException e) {
-	    // TODO: check if the error code can be chosen more specifically
-	    throw new SCIOException("Disconnect failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
-	}
+	nfcCardChannel.close();
     }
 
     @Override

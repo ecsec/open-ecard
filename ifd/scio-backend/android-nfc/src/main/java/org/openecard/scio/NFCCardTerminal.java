@@ -109,6 +109,7 @@ public class NFCCardTerminal implements SCIOTerminal {
     public synchronized void removeTag() {
 	try {
 	    nfcCard.disconnect(true);
+	    nfcCard.isodep = null;
 	} catch (SCIOException ex) {
 	    LOG.error("Disconnect failed.", ex);
 	}
@@ -137,7 +138,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	}
 	try {
 	    if (! nfcCard.isodep.isConnected()) {
-		nfcCard.isodep.setTimeout(3000);
 		nfcCard.isodep.connect();
 
 		// start thread which is monitoring the availability of the card

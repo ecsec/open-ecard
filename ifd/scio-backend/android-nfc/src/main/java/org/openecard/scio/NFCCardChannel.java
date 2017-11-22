@@ -22,7 +22,6 @@
 
 package org.openecard.scio;
 
-import android.nfc.tech.IsoDep;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -82,6 +81,8 @@ public class NFCCardChannel implements SCIOChannel {
 		    card.isodep.setTimeout(card.getTimeoutForTransceive());
 		    return new CardResponseAPDU(card.isodep.transceive(apdu));
 		} catch (IOException e) {
+		    // Tag isn't available, so remove nfc tag from terminal
+		    ((NFCCardTerminal) card.getTerminal()).removeTag();
 		    // TODO: check if the error code can be chosen more specifically
 		    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
 		}

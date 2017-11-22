@@ -22,7 +22,6 @@
 
 package org.openecard.gui.android.eac;
 
-import android.content.Context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,9 +49,9 @@ public class EacNavigator implements UserConsentNavigator {
     private boolean pinFirstUse = true;
 
 
-    public EacNavigator(EacGuiImpl guiService, List<Step> steps) {
+    public EacNavigator(EacGuiImpl guiService, UserConsentDescription uc) {
 	this.guiService = guiService;
-	this.steps = steps;
+	this.steps = new ArrayList<>(uc.getSteps());
     }
     
     @Override

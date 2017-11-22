@@ -24,13 +24,9 @@ package org.openecard.gui.android.eac;
 
 import android.content.Context;
 import android.os.RemoteException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import mockit.Expectations;
-import mockit.Mock;
-import mockit.MockUp;
 import mockit.Mocked;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.android.eac.types.ServerData;
@@ -56,11 +52,9 @@ import org.testng.annotations.Test;
 public class EacGuiImplTest {
 
     @Mocked
-    Context androidCtx;
+    private Context androidCtx;
     @Mocked
-    UserConsentDescription ucd;
-    @Mocked
-    EacGui.Stub stub;
+    private EacGui.Stub stub;
 
     @Test
     public void testPinOkFirstTime() throws InterruptedException, RemoteException {
@@ -71,7 +65,9 @@ public class EacGuiImplTest {
 	Thread t = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		EacNavigator nav = new EacNavigator(anyGuiImpl, new ArrayList<>(createInitialSteps()));
+		UserConsentDescription uc = new UserConsentDescription("Test");
+		uc.getSteps().addAll(createInitialSteps());
+		EacNavigator nav = new EacNavigator(anyGuiImpl, uc);
 		ExecutionEngine exe = new ExecutionEngine(nav);
 		exe.process();
 	    }

@@ -22,7 +22,6 @@
 package org.openecard.gui.android.eac;
 
 import android.app.Service;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.IBinder;
 import java.util.concurrent.Callable;
@@ -32,18 +31,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 
 /**

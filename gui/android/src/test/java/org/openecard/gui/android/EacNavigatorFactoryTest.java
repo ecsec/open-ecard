@@ -37,6 +37,8 @@ import org.openecard.gui.definition.UserConsentDescription;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -54,6 +56,16 @@ public class EacNavigatorFactoryTest {
     @Mocked
     Runnable guiStarter;
     
+    @BeforeTest
+    public void setUpSuite() {
+	EacGuiService.prepare();
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+	EacGuiService.prepare();
+    }
+    
     @Test
     public void testGivenCorrectValuesThenCreateFromShouldCreateCorrectInstance() {
 	final List<Step> expectedSteps = createInitialSteps();
@@ -61,7 +73,6 @@ public class EacNavigatorFactoryTest {
 	    ucd.getDialogType(); result = "EAC";
 	    ucd.getSteps(); result = expectedSteps;
 	}};
-	EacGuiService.prepare();
 	
 	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
@@ -75,8 +86,8 @@ public class EacNavigatorFactoryTest {
 	new Expectations() {{
 	    ucd.getDialogType(); result = "EAC";
 	    ucd.getSteps(); result = expectedSteps;
+	    
 	}};
-	EacGuiService.prepare();
 	
 	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
@@ -88,7 +99,6 @@ public class EacNavigatorFactoryTest {
     @Test
     public void testGivenCorrectValuesThenCreateFromShouldStoreNewGui() {
 	final List<Step> expectedSteps = createInitialSteps();
-	EacGuiService.prepare();
 
 	new Expectations() {{
 	    ucd.getDialogType(); result = "EAC";
@@ -99,9 +109,8 @@ public class EacNavigatorFactoryTest {
 		EacGuiService.setGuiImpl((EacGuiImpl)any);
 	    }
 	}};
-	
 	EacGuiService.prepare();
-	
+		
 	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);
 	
@@ -110,7 +119,6 @@ public class EacNavigatorFactoryTest {
     @Test
     public void testGivenCorrectValuesThenCreateFromShouldRunEacRunnable() {
 	final List<Step> expectedSteps = createInitialSteps();
-	EacGuiService.prepare();
 
 	new Expectations() {{
 	    ucd.getDialogType(); result = "EAC";

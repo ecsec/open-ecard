@@ -42,6 +42,9 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import static org.testng.Assert.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 
@@ -56,6 +59,16 @@ public class EacGuiImplTest {
     @Mocked
     private EacGui.Stub stub;
 
+    @BeforeTest
+    public void setUpSuite() {
+	EacGuiService.prepare();
+    }
+    
+    @AfterMethod
+    public void tearDown() {
+	EacGuiService.prepare();
+    }
+    
     @Test
     public void testPinOkFirstTime() throws InterruptedException, RemoteException {
 	EacGuiService.prepare();

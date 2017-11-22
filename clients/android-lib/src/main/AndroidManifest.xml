@@ -16,20 +16,9 @@
 	android:supportsRtl="true">
 
 	<activity
-	    android:name=".activities.NFCActivity"
+	    android:name=".activities.AbstractActivationActivity"
 	    android:clearTaskOnLaunch="true"
 	    android:configChanges="orientation|screenSize" />
-
-	<activity
-	    android:name=".activities.EacActivity"
-	    android:clearTaskOnLaunch="true"
-	    android:configChanges="orientation|screenSize">
-	    <intent-filter>
-		<action android:name="android.nfc.action.TAG_DISCOVERED" />
-
-		<category android:name="android.intent.category.DEFAULT" />
-	    </intent-filter>
-	</activity>
 
 	<service
 	    android:name=".services.OpeneCardServiceImpl"

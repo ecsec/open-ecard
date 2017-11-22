@@ -27,6 +27,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import org.openecard.addon.bind.AuxDataKeys;
@@ -132,19 +135,19 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	    }
 	}
     };
-    
+
     @Override
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
 	try {
 	    // extract nfc tag
 	    NfcUtils.getInstance().retrievedNFCTag(intent);
-	    
+
 	} catch (ApduExtLengthNotSupported ex) {
 	    LOG.error(ex.getMessage());
 	}
     }
-  
+
 
     @Override
     protected void onStop() {
@@ -162,7 +165,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	    ctx.unbindService(getServiceConnection());
 	} // else do nothing, because the service hasn't been started yet, maybe because the user canceled the request.
     }
-    
+
     @Override
     protected void onDestroy() {
 	super.onDestroy();
@@ -212,6 +215,18 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      */
     protected boolean isConnectedToEacService() {
 	return eacAlreadyConnected;
+    }
+
+    /**
+     * This method proves if extended length APDU commands are supported. If extended length is supported, then
+     * true is returned, otherwise false. This method should be used when a nfc tag comes over an intent.
+     *
+     * @param intent
+     * @return
+     */
+    protected boolean isExtendedLengthSupported(Intent intent) {
+	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	return tagFromIntent != null ? IsoDep.get(tagFromIntent).isExtendedLengthApduSupported() : false;
     }
 
     /**

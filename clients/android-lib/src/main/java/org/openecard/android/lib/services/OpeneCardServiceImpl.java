@@ -38,6 +38,7 @@ import org.openecard.android.lib.async.tasks.StartTaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutionException;
+import org.openecard.android.lib.ServiceErrorResponse;
 import org.openecard.android.lib.ServiceResponseStatusCodes;
 
 
@@ -91,7 +92,7 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 		return response.getResponse();
 	    } catch (ExecutionException | InterruptedException ex) {
 		LOG.warn(ex.getMessage(), ex);
-		return new ServiceResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+		return new ServiceErrorResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
 	    }
 	}
 
@@ -107,7 +108,7 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 	    } catch (ExecutionException | InterruptedException ex) {
 		LOG.warn(ex.getMessage(), ex);
 		stopSelf();
-		return new ServiceResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
+		return new ServiceErrorResponse(ServiceResponseStatusCodes.INTERNAL_ERROR, ex.getMessage());
 	    }
 	}
     }

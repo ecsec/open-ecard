@@ -66,7 +66,7 @@ public class TCTokenParser {
 	try {
 	    saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 	} catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException ex) {
-	    LOG.error(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
 	    // Android doesn't support the corresponding xml feature
 	    // TODO: translate when exception changes
 	    //throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);

@@ -66,6 +66,14 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult next() {
+	// if cancel call has been issued, abort the whole process
+	if (this.guiService.isCancelled()) {
+	    // prevent index out of bounds
+	    int i = idx == -1 ? 0 : idx > steps.size() ? steps.size() - 1 : idx;
+	    return new AndroidResult(steps.get(i), ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	}
+
+	// handle step display
 	if (idx == -1) {
 	    idx++;
 	    return new AndroidResult(steps.get(idx), ResultStatus.OK, Collections.EMPTY_LIST);

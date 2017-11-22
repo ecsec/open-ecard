@@ -64,6 +64,8 @@ public class EacGuiImpl extends EacGui.Stub {
     private Checkbox readAccessBox;
     private Checkbox writeAccessBox;
 
+    private boolean isCancelled = false;
+
     public EacGuiImpl() {
     }
 
@@ -120,13 +122,30 @@ public class EacGuiImpl extends EacGui.Stub {
 
     @Override
     public void cancel() throws RemoteException {
-	throw new UnsupportedOperationException("Not supported yet.");
+	isCancelled = true;
+	cancelPromise(serverData);
+	cancelPromise(userReadSelection);
+	cancelPromise(userWriteSelection);
+	cancelPromise(userPin);
+	cancelPromise(userCan);
+	cancelPromise(pinCorrect);
+	cancelPromise(pinStatus);
+    }
+
+    private void cancelPromise(@Nullable Promise<?> p) {
+	if (p != null) {
+	    p.cancel();
+	}
     }
 
 
     ///
     /// Functions for the UserConsent interface implementation
     ///
+
+    public boolean isCancelled() {
+	return isCancelled;
+    }
 
     public void loadValuesFromSteps(Step step1, Step step2) {
 	String subject = "", subjectUrl = "";

@@ -38,6 +38,7 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import org.testng.annotations.AfterMethod;
@@ -80,18 +81,9 @@ public class EacGuiServiceTest {
     
     @Test
     public void GivenNoGuiImplSetThenBindingWaitsForever(@Tested final EacGuiService sut, @Mocked final Intent input)  {
-	ExecutorService exec = Executors.newSingleThreadExecutor();
-	Future<Integer> future = exec.submit(new Callable<Integer>(){
-	    @Override
-	    public Integer call() throws Exception {
-		sut.onBind(input);
-
-		return 0;
-	    }
-	});
-	exec.shutdown();
+	Future<IBinder> future = callBindAsync(sut, input);
 	try {
-	    //wait 5 seconds for the task to complete.
+	    //wait 1 seconds for the task to complete.
 	    future.get(1000, TimeUnit.MILLISECONDS);
 	    
 	    Assert.fail("The call to onBind(...) is supposed to wait forever and not terminate.");
@@ -99,6 +91,28 @@ public class EacGuiServiceTest {
 	catch (InterruptedException | ExecutionException | TimeoutException e) {
 	    // Pass
 	}
+    }
+
+    @Test
+    public void BindingWaitsForGuiAssignment(@Tested final EacGuiService sut, @Mocked final Intent inputIntent, @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException  {
 	
+	Future<IBinder> future = callBindAsync(sut, inputIntent);
+	TimeUnit.MILLISECONDS.sleep(2);
+	EacGuiService.setGuiImpl(inputGui);
+	IBinder result = future.get();
+	
+	assertEquals(result, inputGui);
+    }
+
+    private Future<IBinder> callBindAsync(final EacGuiService sut, final Intent input) {
+	ExecutorService exec = Executors.newSingleThreadExecutor();
+	Future<IBinder> future = exec.submit(new Callable<IBinder>(){
+	    @Override
+	    public IBinder call() throws Exception {
+		return sut.onBind(input);
+	    }
+	});
+	exec.shutdown();
+	return future;
     }
 }

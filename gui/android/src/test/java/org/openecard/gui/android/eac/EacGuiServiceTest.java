@@ -44,62 +44,63 @@ import org.testng.annotations.BeforeTest;
  * @author Neil Crossley
  */
 public class EacGuiServiceTest {
-    
+
     @Mocked
     EacGui.Stub stub;
-    
+
     @Mocked
     Service service;
-    
+
     @BeforeTest
     public void setUpSuite() {
 	EacGuiService.prepare();
     }
-    
+
     @AfterMethod
     public void tearDown() {
 	EacGuiService.prepare();
     }
-    
+
     @Test
-    public void canDeliverCorrectGui(@Mocked EacGuiImpl input) {
+    public void canAssignGuiSuccessfully(@Mocked EacGuiImpl input) {
 	EacGuiService.setGuiImpl(input);
     }
-    
+
     @Test(expectedExceptions = {IllegalStateException.class})
-    public void canDeliverGuiMultipleTimes(@Mocked EacGuiImpl input1, @Mocked EacGuiImpl input2) throws IllegalStateException {
+    public void cannotDeliverGuiMultipleTimes(@Mocked EacGuiImpl input1, @Mocked EacGuiImpl input2) throws IllegalStateException {
 	EacGuiService.setGuiImpl(input1);
 	EacGuiService.setGuiImpl(input2);
     }
-    
+
     @Test
-    public void GivenNoGuiImplSetThenBindingWaitsForever(@Tested final EacGuiService sut, @Mocked final Intent input)  {
+    public void givenGuiIsNotAssignedThenBindingWaitsForever(@Tested final EacGuiService sut, @Mocked final Intent input) {
 	Future<IBinder> future = callBindAsync(sut, input);
 	try {
 	    //wait 1 seconds for the task to complete.
 	    future.get(1000, TimeUnit.MILLISECONDS);
-	    
+
 	    Assert.fail("The call to onBind(...) is supposed to wait forever and not terminate.");
-	}
-	catch (InterruptedException | ExecutionException | TimeoutException e) {
+	} catch (InterruptedException | ExecutionException | TimeoutException e) {
 	    // Pass
 	}
     }
 
     @Test
-    public void BindingWaitsForGuiAssignment(@Tested final EacGuiService sut, @Mocked final Intent inputIntent, @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException  {
-	
+    public void givenBindingStartsBeforeGuiAssignmentThenBindingWaitsForGuiAssignment(@Tested final EacGuiService sut,
+	    @Mocked final Intent inputIntent,
+	    @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException {
+
 	Future<IBinder> future = callBindAsync(sut, inputIntent);
 	TimeUnit.MILLISECONDS.sleep(2);
 	EacGuiService.setGuiImpl(inputGui);
 	IBinder result = future.get();
-	
+
 	assertEquals(result, inputGui);
     }
 
     private Future<IBinder> callBindAsync(final EacGuiService sut, final Intent input) {
 	ExecutorService exec = Executors.newSingleThreadExecutor();
-	Future<IBinder> future = exec.submit(new Callable<IBinder>(){
+	Future<IBinder> future = exec.submit(new Callable<IBinder>() {
 	    @Override
 	    public IBinder call() throws Exception {
 		return sut.onBind(input);

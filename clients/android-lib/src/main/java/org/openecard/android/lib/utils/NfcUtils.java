@@ -24,11 +24,16 @@ package org.openecard.android.lib.utils;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.nfc.tech.TagTechnology;
 import android.provider.Settings;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.openecard.android.lib.ServiceContext;
 import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
 import org.openecard.scio.NFCFactory;
@@ -116,6 +121,95 @@ public class NfcUtils {
 	} else {
 	    return ctx.isInitialized();
 	}
+    }
+
+
+    public static boolean supportsExtendedLength(Context context) {
+	NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
+	if (nfcAdapter != null) {
+	    Object tagObj = getTagObject(nfcAdapter);
+	    if (tagObj != null) {
+		Boolean extSup = isExtendedLengthSupported(tagObj);
+		if (extSup != null) {
+		    return extSup;
+		}
+		Integer maxLen = getMaxTransceiveLength(tagObj);
+		if (maxLen != null) {
+		    return maxLen > 370; // This is roughly the size of the biggest APDU observed in EAC
+		}
+		LOG.info("maxLen = {} ; extSup = {}", maxLen, extSup);
+	    }
+	} else {
+	    LOG.warn("NfcAdapter is not available.");
+	}
+
+	return false;
+    }
+
+    private static Object getTagObject(NfcAdapter nfcAdapter) {
+	try {
+	    Method getTagFun = nfcAdapter.getClass().getMethod("getTagService");
+	    Object tagObj = getTagFun.invoke(nfcAdapter);
+	    return tagObj;
+	} catch (NoSuchMethodException ex) {
+	    LOG.error("Error requesting TagService retrieval method.", ex);
+	} catch (SecurityException | IllegalAccessException ex) {
+	    LOG.error("Requesting TagService object is not allowed.");
+	} catch (InvocationTargetException ex) {
+	    LOG.error("Error requesting TagService object.", ex);
+	}
+
+	return null;
+    }
+
+    private static Integer getMaxTransceiveLength(Object tagObj) {
+	int tech = 3; // taken from Android source and used as fallback if lookup fails
+	try {
+	    Field isoDep = TagTechnology.class.getDeclaredField("ISO_DEP");
+	    tech = isoDep.getInt(null);
+	} catch (NoSuchFieldException ex) {
+	    LOG.error("Error requesting ISO_DEP field.", ex);
+	} catch (SecurityException | IllegalAccessException ex) {
+	    LOG.error("Requesting ISO_DEP tech constant is not allowed.");
+	} catch (NullPointerException | IllegalArgumentException ex) {
+	    LOG.error("Invalid parameters for requesting ISO_DEP tech constant.", ex);
+	}
+
+	try {
+	    Method tlenFun = tagObj.getClass().getMethod("getMaxTransceiveLength", int.class);
+	    Object lenObj = tlenFun.invoke(tagObj, tech);
+	    LOG.debug("Transceive Length == {}", lenObj);
+	    if (lenObj instanceof Integer) {
+		return (Integer) lenObj;
+	    }
+	} catch (NoSuchMethodException ex) {
+	    LOG.debug("Error requesting max transceive length retrieval method.", ex);
+	} catch (SecurityException | IllegalAccessException ex) {
+	    LOG.debug("Requesting max transceive length is not allowed.");
+	} catch (InvocationTargetException ex) {
+	    LOG.debug("Error requesting max transceive length.", ex);
+	}
+
+	return null;
+    }
+
+    private static Boolean isExtendedLengthSupported(Object tagObj) {
+	try {
+	    Method extSupFun = tagObj.getClass().getMethod("getExtendedLengthApdusSupported");
+	    Object extSupObj = extSupFun.invoke(tagObj);
+	    LOG.debug("Extended Length Support == {}", extSupObj);
+	    if (extSupObj instanceof Boolean) {
+		return (Boolean) extSupObj;
+	    }
+	} catch (NoSuchMethodException ex) {
+	    LOG.debug("Error requesting extended length support retrieval method.", ex);
+	} catch (SecurityException | IllegalAccessException ex) {
+	    LOG.debug("Requesting extended length support is not allowed.");
+	} catch (InvocationTargetException ex) {
+	    LOG.debug("Error requesting extended length support.", ex);
+	}
+
+	return null;
     }
 
 }

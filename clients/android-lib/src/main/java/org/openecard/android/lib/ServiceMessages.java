@@ -30,21 +30,21 @@ package org.openecard.android.lib;
  */
 public class ServiceMessages {
 
-    public static final String APP_RESPONSE_OK = "Initialization successfully finished.";
-    public static final String APP_CONTEXT_STD_MSG = "Initialization of App context failed.";
-    public static final String APP_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
-    public static final String APP_CONTEXT_ALREADY_INITIALIZED = "AppContext already initialized.";
-    public static final String APP_CONTEXT_NFC_NOT_AVAILABLE = "NFC not available.";
-    public static final String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
+    public static final String SERVICE_RESPONSE_OK = "Initialization successfully finished.";
+    public static final String SERVICE_RESPONSE_FAILED = "Initialization of App context failed.";
+    public static final String BELOW_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
+    public static final String SERVICE_ALREADY_INITIALIZED = "AppContext already initialized.";
+    public static final String NFC_NOT_AVAILABLE_FAIL = "NFC not available.";
+    public static final String NFC_NOT_ENABLED_FAIL = "NFC not enabled.";
     public static final String NFC_NO_EXTENDED_LENGTH_SUPPORT = "Your smartphone device doesn't support NFC with extended length.";
-    public static final String APP_CONTEXT_UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
-    public static final String APP_CONTEXT_ESTABLISH_CONTEXT_FAIL = "Establish IFD context failed.";
-    public static final String APP_CONTEXT_CARD_REC_FAILED = "Unable to initialize card recognition.";
-    public static final String APP_CONTEXT_ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
-    public static final String APP_TERMINATE_SUCCESS = "Successfully terminated.";
-    public static final String APP_TERMINATE_FAILURE = "Terminate failed, see LOG.";
-    public static final String APP_EAC_SERVICE_CONNECTED = "Successfully connected to Eac Gui Service.";
-    public static final String APP_EAC_SERVICE_DISCONNECTED = "Successfully disconnected from Eac Gui Service.";
+    public static final String UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
+    public static final String ESTABLISH_IFD_CONTEXT_FAILED = "Establish IFD context failed.";
+    public static final String CARD_REC_INIT_FAILED = "Unable to initialize card recognition.";
+    public static final String ADD_ON_INIT_FAILED = "Registering of core add-ons failed.";
+    public static final String SERVICE_TERMINATE_SUCCESS = "Successfully terminated.";
+    public static final String SERVICE_TERMINATE_FAILURE = "Terminate failed, see LOG.";
+    public static final String EAC_SERVICE_CONNECTED = "Successfully connected to Eac Gui Service.";
+    public static final String EAC_SERVICE_DISCONNECTED = "Successfully disconnected from Eac Gui Service.";
     public static final String BINDING_TASK_STILL_RUNNING = "There is already a running Binding Task. Maybe you have to cancel it.";
     public static final String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
     public static final String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";

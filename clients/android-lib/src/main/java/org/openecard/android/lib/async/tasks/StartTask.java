@@ -72,9 +72,9 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 	    NfcUtils.getInstance().setServiceContext(ctx); // set app context in nfc utils
 	    // build response whether the initialization of app context was successful or failed.
 	    if (isRequiredAPIUsed) {
-		response = new ServiceResponse(INIT_SUCCESS, APP_RESPONSE_OK);
+		response = new ServiceResponse(INIT_SUCCESS, SERVICE_RESPONSE_OK);
 	    } else {
-		response = new ServiceErrorResponse(NOT_REQUIRED_API_LEVEL, APP_API_LEVEL_21_NOT_SUPPORTED);
+		response = new ServiceErrorResponse(NOT_REQUIRED_API_LEVEL, BELOW_API_LEVEL_21_NOT_SUPPORTED);
 	    }
 	} catch (UnableToInitialize ex) {
 	    response = new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
@@ -97,7 +97,7 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 		ctx.initialize();
 	    }
 	} else {
-	    LOG.warn(APP_API_LEVEL_21_NOT_SUPPORTED);
+	    LOG.warn(BELOW_API_LEVEL_21_NOT_SUPPORTED);
 	}
 	return ctx;
     }

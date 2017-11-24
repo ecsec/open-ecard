@@ -223,10 +223,10 @@ public class ServiceContext extends Application implements EventCallback {
     ///
 
     public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
-	String errorMsg = APP_CONTEXT_STD_MSG;
+	String errorMsg = SERVICE_RESPONSE_FAILED;
 
 	if (initialized) {
-	    throw new UnableToInitialize(APP_CONTEXT_ALREADY_INITIALIZED);
+	    throw new UnableToInitialize(SERVICE_ALREADY_INITIALIZED);
 	}
 
 	// initialize gui
@@ -267,7 +267,7 @@ public class ServiceContext extends Application implements EventCallback {
 	    terminalFactory = IFDTerminalFactory.getInstance();
 	    LOG.info("Terminal factory initialized.");
 	} catch (IFDException ex) {
-	    errorMsg = APP_CONTEXT_UNABLE_TO_INITIALIZE_TF;
+	    errorMsg = UNABLE_TO_INITIALIZE_TF;
 	    throw new UnableToInitialize(errorMsg, ex);
 	}
 
@@ -310,7 +310,7 @@ public class ServiceContext extends Application implements EventCallback {
 		env.setRecognition(recognition);
 		LOG.info("CardRecognition initialized.");
 	    } catch (Exception ex) {
-		errorMsg = APP_CONTEXT_CARD_REC_FAILED;
+		errorMsg = CARD_REC_INIT_FAILED;
 		throw ex;
 	    }
 
@@ -328,7 +328,7 @@ public class ServiceContext extends Application implements EventCallback {
 		manager = new AddonManager(env, gui, cardStates, new StubViewController(), new ClasspathRegistry());
 		mainSAL.setAddonManager(manager);
 	    } catch (Exception ex) {
-		errorMsg = APP_CONTEXT_ADD_ON_INIT_FAILED;
+		errorMsg = ADD_ON_INIT_FAILED;
 		throw ex;
 	    }
 
@@ -356,7 +356,7 @@ public class ServiceContext extends Application implements EventCallback {
 		contextHandle = establishContextResponse.getContextHandle();
 		LOG.info("ContextHandle: {}", ByteUtils.toHexString(contextHandle));
 	    } catch (WSHelper.WSException ex) {
-		errorMsg = APP_CONTEXT_ESTABLISH_CONTEXT_FAIL;
+		errorMsg = ESTABLISH_IFD_CONTEXT_FAILED;
 		throw ex;
 	    }
 

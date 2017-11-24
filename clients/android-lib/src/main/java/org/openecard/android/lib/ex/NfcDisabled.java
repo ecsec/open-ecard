@@ -32,7 +32,7 @@ import static org.openecard.android.lib.ServiceMessages.*;
  */
 public class NfcDisabled extends Exception {
 
-    private static final String STD_ERROR_MESSAGE = APP_CONTEXT_NFC_NOT_ENABLED;
+    private static final String STD_ERROR_MESSAGE = NFC_NOT_ENABLED_FAIL;
 
     public NfcDisabled() {
 	super(STD_ERROR_MESSAGE);

@@ -55,10 +55,10 @@ public class ShutdownTask extends AsyncTask<Void, Void, ShutdownTaskResponse> {
 	ServiceResponse response = null;
 	switch (resultCode) {
 	    case SUCCESS:
-		response = new ServiceResponse(SHUTDOWN_SUCCESS, APP_TERMINATE_SUCCESS);
+		response = new ServiceResponse(SHUTDOWN_SUCCESS, SERVICE_TERMINATE_SUCCESS);
 		break;
 	    case FAILURE:
-		response = new ServiceWarningResponse(SHUTDOWN_FAILED, APP_TERMINATE_FAILURE);
+		response = new ServiceWarningResponse(SHUTDOWN_FAILED, SERVICE_TERMINATE_FAILURE);
 		break;
 	}
 	return new ShutdownTaskResponse(response);

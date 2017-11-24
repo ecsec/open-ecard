@@ -53,7 +53,7 @@ public class EacNavigator implements UserConsentNavigator {
 	this.guiService = guiService;
 	this.steps = new ArrayList<>(uc.getSteps());
     }
-    
+
     @Override
     public boolean hasNext() {
 	return idx < (steps.size() - 1);
@@ -86,7 +86,7 @@ public class EacNavigator implements UserConsentNavigator {
 		List<OutputInfoUnit> outInfo = this.guiService.getSelection();
 		return new AndroidResult(chatStep, ResultStatus.OK, outInfo);
 	    } catch (InterruptedException ex) {
-		return new AndroidResult(chatStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+		return new AndroidResult(chatStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	    }
 	} else if (idx == 1) {
 	    if (pinFirstUse) {
@@ -102,7 +102,7 @@ public class EacNavigator implements UserConsentNavigator {
 		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
 	    } catch (InterruptedException ex) {
-		return new AndroidResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	    }
 	} else if (idx == 2) {
 	    idx++;
@@ -116,7 +116,7 @@ public class EacNavigator implements UserConsentNavigator {
 		    this.guiService.getPinResult(s);
 		    return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
 		} catch (InterruptedException ex) {
-		    return new AndroidResult(s, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+		    return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 		}
 	    }
 	} else {

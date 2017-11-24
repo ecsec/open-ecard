@@ -61,6 +61,8 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     private boolean eacAlreadyConnected = false;
 
     private volatile boolean alreadyInitialized = false;
+    // if someone returns to the App, but Binding uri was already used.
+    private volatile boolean bindingUriAlreadyUsed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,9 +104,15 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	    this.alreadyInitialized = true;
 	}
 
-	// start TR procedure according to [BSI-TR-03124-1]
-	HandleRequestAsync task = new HandleRequestAsync();
-	task.execute(getBindingURI(getIntent()));
+	String bindingUri = getBindingURI(getIntent());
+	if (bindingUri != null && ! bindingUriAlreadyUsed) {
+	    // start TR procedure according to [BSI-TR-03124-1]
+	    HandleRequestAsync task = new HandleRequestAsync();
+	    task.execute(bindingUri);
+	    bindingUriAlreadyUsed = true;
+	} else {
+	    finish();
+	}
     }
 
     private class HandleRequestAsync extends AsyncTask<String, Void, Void> {
@@ -196,7 +204,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      */
     protected String getBindingURI(Intent i) {
 	Uri data = i.getData();
-        return data.toString();
+	return data != null ? data.toString() : null;
     }
 
     /**

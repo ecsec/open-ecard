@@ -41,6 +41,11 @@ public class ServiceResponseStatusCodes {
     public static final int NFC_NOT_ENABLED = 101;
 
     /**
+     * indicates that the corresponding smartphone device doesn't support nfc with extended length.
+     */
+    public static final int NFC_NO_EXTENDED_LENGTH = 103;
+
+    /**
      * indicates that the initialization was successfully finished.
      */
     public static final int INIT_SUCCESS = 200;
@@ -69,7 +74,6 @@ public class ServiceResponseStatusCodes {
      * indicates other internal errors.
      */
     public static final int INTERNAL_ERROR = 500;
-
 
     /**
      * indicates that the shutdown of the app failed.

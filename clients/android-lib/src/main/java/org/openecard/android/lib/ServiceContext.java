@@ -67,7 +67,10 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
+import org.openecard.android.lib.utils.NfcUtils;
 import org.openecard.gui.android.EacNavigatorFactory;
 import org.openecard.gui.android.InsertCardNavigatorFactory;
 import org.openecard.gui.android.UserConsentNavigatorFactory;
@@ -97,7 +100,7 @@ public class ServiceContext extends Application implements EventCallback {
     private TerminalFactory terminalFactory;
     private TinyManagement management;
     private Runnable guiStarter;
-    
+
     private UserConsent gui;
 
     // true if already initialized
@@ -106,6 +109,8 @@ public class ServiceContext extends Application implements EventCallback {
     private boolean nfcAvailable = false;
     // true if NFC is enabled (look in android settings)
     private boolean nfcEnabled = false;
+    // true if NFC supports extended length of apdus
+    private boolean nfcExtendedLengthSupport = false;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
     // true if card is available and usable
@@ -207,7 +212,7 @@ public class ServiceContext extends Application implements EventCallback {
     public Runnable getEacStarter() {
 	return guiStarter;
     }
-    
+
     public void setEacStarter(Runnable guiStarter) {
 	this.guiStarter = guiStarter;
     }
@@ -217,7 +222,7 @@ public class ServiceContext extends Application implements EventCallback {
     /// Initialization & Shutdown
     ///
 
-    public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
+    public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	String errorMsg = APP_CONTEXT_STD_MSG;
 
 	if (initialized) {
@@ -225,7 +230,6 @@ public class ServiceContext extends Application implements EventCallback {
 	}
 
 	// initialize gui
-	ArrayList<UserConsentNavigatorFactory> factories = new ArrayList<>();
 	Runnable delegatingRunnable = new Runnable() {
 	    @Override
 	    public void run() {
@@ -238,8 +242,10 @@ public class ServiceContext extends Application implements EventCallback {
 		}
 	    }
 	};
-	factories.add(new EacNavigatorFactory(delegatingRunnable));
-	factories.add(new InsertCardNavigatorFactory());
+	List<UserConsentNavigatorFactory> factories = Arrays.asList(
+		new EacNavigatorFactory(delegatingRunnable),
+		new InsertCardNavigatorFactory());
+
 	gui = new AndroidUserConsent(this, factories);
 
 	// set up nfc and android marshaller
@@ -250,10 +256,13 @@ public class ServiceContext extends Application implements EventCallback {
 	try {
 	    nfcAvailable = NFCFactory.isNFCAvailable();
 	    nfcEnabled = NFCFactory.isNFCEnabled();
-	    if (!nfcAvailable) {
+	    nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(this);
+	    if (! nfcAvailable) {
 		throw new NfcUnavailable();
-	    } else if (!nfcEnabled) {
+	    } else if (! nfcEnabled) {
 		throw new NfcDisabled();
+	    } else if (! nfcExtendedLengthSupport) {
+		throw new ApduExtLengthNotSupported(NFC_NO_EXTENDED_LENGTH_SUPPORT);
 	    }
 	    terminalFactory = IFDTerminalFactory.getInstance();
 	    LOG.info("Terminal factory initialized.");

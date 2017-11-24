@@ -36,6 +36,7 @@ public class ServiceMessages {
     public static final String APP_CONTEXT_ALREADY_INITIALIZED = "AppContext already initialized.";
     public static final String APP_CONTEXT_NFC_NOT_AVAILABLE = "NFC not available.";
     public static final String APP_CONTEXT_NFC_NOT_ENABLED = "NFC not enabled.";
+    public static final String NFC_NO_EXTENDED_LENGTH_SUPPORT = "Your smartphone device doesn't support NFC with extended length.";
     public static final String APP_CONTEXT_UNABLE_TO_INITIALIZE_TF = "Unable to initialize terminal factory.";
     public static final String APP_CONTEXT_ESTABLISH_CONTEXT_FAIL = "Establish IFD context failed.";
     public static final String APP_CONTEXT_CARD_REC_FAILED = "Unable to initialize card recognition.";

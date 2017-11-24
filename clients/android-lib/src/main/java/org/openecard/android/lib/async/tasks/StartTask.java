@@ -38,6 +38,7 @@ import org.openecard.android.lib.ServiceErrorResponse;
 import static org.openecard.android.lib.ServiceMessages.*;
 import static org.openecard.android.lib.ServiceResponseStatusCodes.*;
 import org.openecard.android.lib.ServiceWarningResponse;
+import org.openecard.android.lib.ex.ApduExtLengthNotSupported;
 
 
 /**
@@ -81,15 +82,18 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 	    response = new ServiceWarningResponse(NFC_NOT_ENABLED, ex.getMessage());
 	} catch (NfcUnavailable ex) {
 	    response = new ServiceErrorResponse(NFC_NOT_AVAILABLE, ex.getMessage());
+	} catch (ApduExtLengthNotSupported ex) {
+	    response = new ServiceErrorResponse(NFC_NO_EXTENDED_LENGTH, ex.getMessage());
 	}
 	return new StartTaskResponse(ctx, response);
     }
 
-    private ServiceContext getServiceContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled {
+    private ServiceContext getServiceContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled,
+	    ApduExtLengthNotSupported {
 	ServiceContext ctx = null;
 	if (isRequiredAPIUsed) {
 	    ctx = (ServiceContext) ((ContextWrapper) calling).getApplicationContext();
-	    if (!ctx.isInitialized()) {
+	    if (! ctx.isInitialized()) {
 		ctx.initialize();
 	    }
 	} else {

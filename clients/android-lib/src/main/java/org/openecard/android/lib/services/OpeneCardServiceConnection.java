@@ -114,7 +114,7 @@ public class OpeneCardServiceConnection {
 	    LOG.info("Starting service…");
 	    ctx.startService(i);
 	    LOG.info("Binding service…");
-	    ctx.bindService(i, serviceConnection, ServiceContext.BIND_AUTO_CREATE);
+	    ctx.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
 	}
     }
 
@@ -137,6 +137,7 @@ public class OpeneCardServiceConnection {
     }
 
     private void startOpeneCardService() {
+	ServiceContext.getServiceContext().setApplicationContext(ctx);
 	try {
 	    ServiceResponse response = mService.start();
 	    isConnected = false;

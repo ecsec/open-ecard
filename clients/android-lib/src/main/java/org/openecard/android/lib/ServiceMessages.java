@@ -34,6 +34,7 @@ public class ServiceMessages {
     public static final String SERVICE_RESPONSE_FAILED = "Initialization of App context failed.";
     public static final String BELOW_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
     public static final String SERVICE_ALREADY_INITIALIZED = "AppContext already initialized.";
+    public static final String NO_APPLICATION_CONTEXT = "Please provide an Application Context.";
     public static final String NFC_NOT_AVAILABLE_FAIL = "NFC not available.";
     public static final String NFC_NOT_ENABLED_FAIL = "NFC not enabled.";
     public static final String NFC_NO_EXTENDED_LENGTH_SUPPORT = "Your smartphone device doesn't support NFC with extended length.";

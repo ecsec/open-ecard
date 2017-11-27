@@ -125,7 +125,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     }
 
-    private Runnable guiStarter = new Runnable() {
+    private final Runnable guiStarter = new Runnable() {
 	@Override
 	public void run() {
 	    if (! eacAlreadyConnected) {
@@ -147,7 +147,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	try {
 	    // extract nfc tag
 	    NfcUtils.getInstance().retrievedNFCTag(intent);
-
 	} catch (ApduExtLengthNotSupported ex) {
 	    LOG.error(ex.getMessage());
 	}
@@ -181,7 +180,20 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 
     @Override
     public void setResultOfBindingTask(BindingTaskResponse response) {
-	redirectToResultLocation(response.getBindingResult());
+	BindingResult result = response.getBindingResult();
+	switch (result.getResultCode()) {
+	    case OK:
+		authenticationSuccess(result);
+		break;
+	    case REDIRECT:
+		authenticationSuccess(result);
+		redirectToResultLocation(result);
+		break;
+	    default:
+		authenticationFailure(response.getBindingResult());
+		break;
+	}
+
     }
 
     public void redirectToResultLocation(BindingResult result) {
@@ -223,11 +235,37 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     }
 
     /**
+     * Returns true if the app is already connected to the Open eCard Service, otherwise false is returned. Before you
+     * can connect to the Eac Gui Service, a connection to the Open eCard Service must be established. You have to check
+     * if you are connected to the Open eCard Service in the sub class in the onStart()-method. You can handle the check
+     * by using this method or on your own, too.
+     *
+     * @return
+     */
+    protected boolean isConnectedToOpeneCardService() {
+	return ServiceContext.getServiceContext().isInitialized();
+    }
+
+    /**
      * Implement this method to provide an instance of a service connection. The service connection is needed to
      * connect to the Eac Gui Service.
      *
      * @return
      */
     public abstract ServiceConnection getServiceConnection();
+
+    /**
+     * Implement this method to recognize a successful authentication in the Sub-Activity.
+     *
+     * @param result
+     */
+    public abstract void authenticationSuccess(BindingResult result);
+
+    /**
+     * Implement this method to recognize a failed authentication in the Sub-Activity
+     *
+     * @param result
+     */
+    public abstract void authenticationFailure(BindingResult result);
 
 }

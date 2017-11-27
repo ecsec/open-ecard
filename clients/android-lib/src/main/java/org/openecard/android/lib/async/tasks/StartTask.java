@@ -92,7 +92,7 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 	    ApduExtLengthNotSupported {
 	ServiceContext ctx = null;
 	if (isRequiredAPIUsed) {
-	    ctx = (ServiceContext) ((ContextWrapper) calling).getApplicationContext();
+	    ctx = ServiceContext.getServiceContext();
 	    if (! ctx.isInitialized()) {
 		ctx.initialize();
 	    }

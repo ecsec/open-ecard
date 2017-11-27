@@ -76,7 +76,7 @@ public class NfcUtils {
 
     /**
      * This method opens the nfc settings on the corresponding device. Now, the user can enable nfc.
-     * 
+     *
      * @param activity
      */
     public void goToNFCSettings(Activity activity) {
@@ -90,7 +90,8 @@ public class NfcUtils {
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
 	    // enable dispatch of messages with nfc tag
-	    NfcAdapter.getDefaultAdapter(ctx).enableForegroundDispatch(activity, pendingIntent, null, null);
+	    Context appCtx = ctx.getApplicationContext();
+	    NfcAdapter.getDefaultAdapter(appCtx).enableForegroundDispatch(activity, pendingIntent, null, null);
 	}
     }
 
@@ -98,7 +99,8 @@ public class NfcUtils {
 	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
 	    LOG.debug("Disable NFC foreground dispatch...");
 	    // disable dispatch of messages with nfc tag
-	    NfcAdapter.getDefaultAdapter(ctx).disableForegroundDispatch(activity);
+	    Context appCtx = ctx.getApplicationContext();
+	    NfcAdapter.getDefaultAdapter(appCtx).disableForegroundDispatch(activity);
 	}
     }
 

@@ -22,7 +22,7 @@
 
 package org.openecard.android.lib;
 
-import android.app.Application;
+import android.content.Context;
 import org.openecard.addon.AddonManager;
 import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.utils.ClasspathRegistry;
@@ -81,7 +81,7 @@ import org.openecard.gui.android.UserConsentNavigatorFactory;
  *
  * @author Mike Prechtl
  */
-public class ServiceContext extends Application implements EventCallback {
+public class ServiceContext implements EventCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServiceContext.class);
 
@@ -118,21 +118,20 @@ public class ServiceContext extends Application implements EventCallback {
     // card type of the usable card
     private String cardType;
 
+    private Context appCtx;
+
     private static ServiceContext ctx;
 
-    @Override
-    public void onCreate() {
-	super.onCreate();
-	ctx = this;
+    private ServiceContext() {
+
     }
 
-    @Override
-    public void onTerminate() {
-	super.onTerminate();
-	ctx = null;
-    }
-
-    public synchronized static ServiceContext getServiceContext() {
+    public static ServiceContext getServiceContext() {
+	synchronized(ServiceContext.class) {
+	    if (ctx == null) {
+		ctx = new ServiceContext();
+	    }
+	}
 	return ctx;
     }
 
@@ -213,8 +212,16 @@ public class ServiceContext extends Application implements EventCallback {
 	return guiStarter;
     }
 
+    public Context getApplicationContext() {
+	return appCtx;
+    }
+
     public void setEacStarter(Runnable guiStarter) {
 	this.guiStarter = guiStarter;
+    }
+
+    public void setApplicationContext(Context ctx) {
+	this.appCtx = ctx;
     }
 
 
@@ -227,6 +234,10 @@ public class ServiceContext extends Application implements EventCallback {
 
 	if (initialized) {
 	    throw new UnableToInitialize(SERVICE_ALREADY_INITIALIZED);
+	}
+
+	if (appCtx == null) {
+	    throw new IllegalStateException(NO_APPLICATION_CONTEXT);
 	}
 
 	// initialize gui
@@ -246,17 +257,17 @@ public class ServiceContext extends Application implements EventCallback {
 		new EacNavigatorFactory(delegatingRunnable),
 		new InsertCardNavigatorFactory());
 
-	gui = new AndroidUserConsent(this, factories);
+	gui = new AndroidUserConsent(appCtx, factories);
 
 	// set up nfc and android marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);
 	WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, WSDEF_MARSHALLER_VALUE);
-	NFCFactory.setContext(this);
+	NFCFactory.setContext(appCtx);
 
 	try {
 	    nfcAvailable = NFCFactory.isNFCAvailable();
 	    nfcEnabled = NFCFactory.isNFCEnabled();
-	    nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(this);
+	    nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(appCtx);
 	    if (! nfcAvailable) {
 		throw new NfcUnavailable();
 	    } else if (! nfcEnabled) {

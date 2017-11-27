@@ -65,12 +65,11 @@ public class EacGuiImplTest {
     
     @AfterMethod
     public void tearDown() {
-	EacGuiService.prepare();
+	EacGuiService.close();
     }
     
     @Test
     public void testPinOkFirstTime() throws InterruptedException, RemoteException {
-	EacGuiService.prepare();
 	
 	final EacGuiImpl anyGuiImpl = new EacGuiImpl();
 	

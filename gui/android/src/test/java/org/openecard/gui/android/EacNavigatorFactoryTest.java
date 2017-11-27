@@ -63,7 +63,7 @@ public class EacNavigatorFactoryTest {
     
     @AfterMethod
     public void tearDown() {
-	EacGuiService.prepare();
+	EacGuiService.close();
     }
     
     @Test

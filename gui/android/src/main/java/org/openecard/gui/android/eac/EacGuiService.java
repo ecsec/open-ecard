@@ -37,12 +37,22 @@ public class EacGuiService extends Service {
     private static Promise<EacGuiImpl> serviceImpl;
     
     static {
-	prepare();
+	initialise();
     }
 
     public static void prepare() {
+	if(serviceImpl.isDelivered()) {
+	    initialise();
+	}
+    }
+    
+    private static void initialise() {
 	// clean promise
 	serviceImpl = new Promise<>();
+    }
+    
+    public static void close() {
+	initialise();
     }
 
     public static void setGuiImpl(EacGuiImpl impl) {

@@ -35,6 +35,7 @@ import mockit.Mocked;
 import mockit.Tested;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeTest;
@@ -58,7 +59,7 @@ public class EacGuiServiceTest {
 
     @AfterMethod
     public void tearDown() {
-	EacGuiService.prepare();
+	EacGuiService.close();
     }
 
     @Test
@@ -76,7 +77,7 @@ public class EacGuiServiceTest {
     public void givenGuiIsNotAssignedThenBindingWaitsForever(@Tested final EacGuiService sut, @Mocked final Intent input) {
 	Future<IBinder> future = callBindAsync(sut, input);
 	try {
-	    //wait 1 seconds for the task to complete.
+	    //wait 1 second for the task to complete.
 	    future.get(1000, TimeUnit.MILLISECONDS);
 
 	    Assert.fail("The call to onBind(...) is supposed to wait forever and not terminate.");
@@ -88,14 +89,81 @@ public class EacGuiServiceTest {
     @Test
     public void givenBindingStartsBeforeGuiAssignmentThenBindingWaitsForGuiAssignment(@Tested final EacGuiService sut,
 	    @Mocked final Intent inputIntent,
-	    @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException {
+	    @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException, TimeoutException {
 
 	Future<IBinder> future = callBindAsync(sut, inputIntent);
 	TimeUnit.MILLISECONDS.sleep(2);
 	EacGuiService.setGuiImpl(inputGui);
-	IBinder result = future.get();
+	IBinder result = getValueImmediately(future);
 
 	assertEquals(result, inputGui);
+    }
+    
+    @Test
+    public void givenGuiIsAssignedThenCanBindMultipleTimes(
+	    @Tested final EacGuiService sut,
+	    @Mocked final Intent inputIntent,
+	    @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException, TimeoutException {
+	
+	EacGuiService.setGuiImpl(inputGui);
+	
+	IBinder result1 = getValueImmediately(sut, inputIntent);
+	IBinder result2 = getValueImmediately(sut, inputIntent);
+	IBinder result3 = getValueImmediately(sut, inputIntent);
+
+	assertEquals(inputGui, result1);
+	assertEquals(inputGui, result2);
+	assertEquals(inputGui, result3);
+    }
+
+    @Test
+    public void givenClientIsWaitingWhenGuiIsPreparedAndAssignedThenClientResolves(
+	    @Tested final EacGuiService sut,
+	    @Mocked final Intent inputIntent,
+	    @Mocked EacGuiImpl inputGui) throws InterruptedException, ExecutionException, TimeoutException {
+	
+	Future<IBinder> waitingClient = callBindAsync(sut, inputIntent);
+	startWaiting(waitingClient);
+	
+	EacGuiService.prepare();
+	EacGuiService.setGuiImpl(inputGui);
+	
+	IBinder result = getValueImmediately(waitingClient);
+
+	assertEquals(inputGui, result);
+    }
+
+    private IBinder getValueImmediately(final EacGuiService sut, final Intent inputIntent) throws TimeoutException, InterruptedException, ExecutionException {
+	Future<IBinder> future = callBindAsync(sut, inputIntent);
+	IBinder result = getValueImmediately(future);
+	return result;
+    }
+    
+    private void startWaiting(Future<IBinder> future) throws InterruptedException, ExecutionException {
+	try {
+	    IBinder result = future.get(1, TimeUnit.MILLISECONDS);
+	    assertNull(result, "If futures should suddenly resolve timeouts without throwing exceptions, we still don't expect a return value!");
+	} catch (TimeoutException ex) {
+	    // This is expected
+	}
+    }
+    
+    /**
+     * Call this utility function when a future is not expected to block.
+     * 
+     * If the code contains bugs, calling future.get() may block forever, 
+     * halting the test suite. This method ensures that accessing the future 
+     * will fail fast instead.
+     * @param future The future that may block forever.
+     * @return The binder.
+     * @throws ExecutionException An unexpected exception.
+     * @throws InterruptedException An unexpected exception.
+     * @throws TimeoutException Thrown only if directly accessing the future 
+     *	    blocks unexpectedly.
+     */
+    private IBinder getValueImmediately(Future<IBinder> future) throws ExecutionException, InterruptedException, TimeoutException {
+	IBinder result1 = future.get(1, TimeUnit.MILLISECONDS);
+	return result1;
     }
 
     private Future<IBinder> callBindAsync(final EacGuiService sut, final Intent input) {

@@ -23,7 +23,10 @@
 package org.openecard.android.lib.activities;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import static android.content.Context.BIND_AUTO_CREATE;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -39,6 +42,9 @@ import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.ContextNotInitialized;
 import org.openecard.android.lib.intent.binding.IntentBinding;
 import org.openecard.android.lib.utils.NfcUtils;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.EventCallback;
 import org.openecard.gui.android.eac.EacGuiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +60,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractActivationActivity extends Activity implements BindingTaskResult {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationActivity.class);
+
+    private Dialog cardRemoveDialog;
+
+    private Context appCtx;
+    private ServiceConnection eacServiceCon;
 
     private boolean eacAlreadyConnected = false;
 
@@ -93,6 +104,13 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected void onStart() {
 	super.onStart();
 
+	// add callback to this abstract activity when card is removed
+	ServiceContext.getServiceContext().getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+
+	// set up application context and service connection
+	appCtx = getApplicationContext();
+	eacServiceCon = getServiceConnection();
+
 	// initialize intent binding
 	if (! alreadyInitialized) {
 	    IntentBinding binding = IntentBinding.getInstance();
@@ -131,11 +149,10 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	    if (! eacAlreadyConnected) {
 		// start and bind eac gui service
 		Intent i = createEacGuiIntent();
-		Context ctx = getApplicationContext();
-		LOG.info("Starting Eac Gui service...");
-		ctx.startService(i);
 		LOG.info("Binding Eac Gui service...");
-		ctx.bindService(i, getServiceConnection(), 0);
+		appCtx.bindService(i, eacServiceCon, BIND_AUTO_CREATE);
+		LOG.info("Starting Eac Gui service...");
+		appCtx.startService(i);
 		eacAlreadyConnected = true;
 	    }
 	}
@@ -156,17 +173,21 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     @Override
     protected void onStop() {
 	super.onStop();
+
+	// remove callback which is set onStart
+	ServiceContext.getServiceContext().getEventDispatcher().del(eventReceiver);
+
 	// cancel request if app is closed or minimized
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
 	if (eacAlreadyConnected) {
 	    // unbind eac gui service
 	    Intent i = createEacGuiIntent();
-	    Context ctx = getApplicationContext();
 	    eacAlreadyConnected = false;
-	    ctx.stopService(i);
+	    LOG.info("Stop Eac Gui service...");
+	    appCtx.stopService(i);
 	    LOG.info("Unbinding Eac Gui service...");
-	    ctx.unbindService(getServiceConnection());
+	    appCtx.unbindService(eacServiceCon);
 	} // else do nothing, because the service hasn't been started yet, maybe because the user canceled the request.
     }
 
@@ -178,22 +199,48 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     }
 
+    private final EventCallback eventReceiver = new EventCallback() {
+
+	@Override
+	public void signalEvent(EventType eventType, EventObject eventData) {
+	    if (eventType.equals(EventType.CARD_REMOVED)) {
+		if (cardRemoveDialog != null && cardRemoveDialog.isShowing()) {
+		    cardRemoveDialog.dismiss();
+		}
+	    } else {
+		throw new IllegalStateException("Recognized an unsupported Event: " + eventType.name());
+	    }
+	}
+    };
+
     @Override
     public void setResultOfBindingTask(BindingTaskResponse response) {
-	BindingResult result = response.getBindingResult();
+	final BindingResult result = response.getBindingResult();
 	switch (result.getResultCode()) {
 	    case OK:
 		authenticationSuccess(result);
 		break;
 	    case REDIRECT:
-		authenticationSuccess(result);
-		redirectToResultLocation(result);
+		// show card remove dialog before the redirect occurs
+		cardRemoveDialog = showCardRemoveDialog();
+		cardRemoveDialog.setCanceledOnTouchOutside(false);
+		cardRemoveDialog.setCancelable(false);
+		// if card remove dialog is not shown, then show it
+		if (! cardRemoveDialog.isShowing()) {
+		    cardRemoveDialog.show();
+		}
+		// redirect to the termination uri when the card remove dialog is closed
+		cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		    @Override
+		    public void onDismiss(DialogInterface dialog) {
+			redirectToResultLocation(result);
+		    }
+		});
 		break;
 	    default:
-		authenticationFailure(response.getBindingResult());
+		authenticationFailure(result);
 		break;
 	}
-
     }
 
     public void redirectToResultLocation(BindingResult result) {
@@ -222,7 +269,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      * @return
      */
     protected Intent createEacGuiIntent() {
-	return new Intent(getApplicationContext(), EacGuiService.class);
+	return new Intent(appCtx, EacGuiService.class);
     }
 
     /**
@@ -255,17 +302,28 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     public abstract ServiceConnection getServiceConnection();
 
     /**
-     * Implement this method to recognize a successful authentication in the Sub-Activity.
+     * Implement this method to recognize a successful authentication in the Sub-Activity. You can handle the following
+     * steps on your own, for example show that the authentication was successful and then close the Activity.
      *
-     * @param result
+     * @param result which contains additional information to the authentication.
      */
     public abstract void authenticationSuccess(BindingResult result);
 
     /**
-     * Implement this method to recognize a failed authentication in the Sub-Activity
+     * Implement this method to recognize a failed authentication in the Sub-Activity. You can handle the following
+     * steps on your own, for example show that the authentication failed and then close the Activity with finish().
      *
-     * @param result
+     * @param result  which contains additional information to the authentication.
      */
     public abstract void authenticationFailure(BindingResult result);
+
+    /**
+     * Implement this method to show the card remove dialog. If the authentication process ends, the card should be
+     * removed. To enable this, a card remove dialog is shown to the user. The dialog should contain only a hint for
+     * the user. The dialog can not be removed by the user with a button click, only by the app when the card is removed.
+     *
+     * @return
+     */
+    public abstract Dialog showCardRemoveDialog();
 
 }

@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Task which checks if the received nfc tag is still available.
+ * Task which checks if the received nfc tag is still available. If the nfc tag is no longer available, then the nfc
+ * tag is removed and the card object is removed from the NFCCardTerminal, see
+ * {@link org.openecard.scio.NFCCardTerminal#removeTag()}.
  *
  * @author Mike Prechtl
  */
@@ -47,6 +49,7 @@ public class NFCCardMonitoring implements Runnable {
 	    try {
 		Thread.sleep(250);
 		if (! terminal.isCardConnected()) {
+		    // remove tag if card is no longer available/connected to terminal
 		    terminal.removeTag();
 		    break;
 		}

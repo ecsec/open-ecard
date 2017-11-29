@@ -24,10 +24,6 @@ package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nonnull;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -50,39 +46,17 @@ public class NFCCardTerminal implements SCIOTerminal {
     public static final String STD_TERMINAL_NAME = "Integrated NFC";
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminal.class);
-    private static final HashMap<String, NFCCardTerminal> TERMINALS = new HashMap<>();
+
     private NFCCard nfcCard;
 
     private final String terminalName;
     private final Object cardPresent;
     private final Object cardAbsent;
 
-    private NFCCardTerminal(String name) {
+    public NFCCardTerminal(String name) {
 	this.terminalName = name;
 	this.cardAbsent = new Object();
 	this.cardPresent = new Object();
-    }
-
-    /**
-     * Returns the NFCCardTerminal-Instance.
-     *
-     * @param name of the card terminal
-     * @return The NFCCardTerminal-Instance
-     */
-    public static synchronized NFCCardTerminal getInstance(@Nonnull String name) {
-	if (! TERMINALS.containsKey(name)) {
-	    NFCCardTerminal terminal = new NFCCardTerminal(name);
-	    TERMINALS.put(name, terminal);
-	}
-	return TERMINALS.get(name);
-    }
-
-    public static synchronized NFCCardTerminal getInstance() {
-	return getInstance(STD_TERMINAL_NAME);
-    }
-
-    public static synchronized Map<String, NFCCardTerminal> getTerminals() {
-	return Collections.unmodifiableMap(TERMINALS);
     }
 
     public int getLengthOfLastAPDU() {
@@ -91,6 +65,20 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     public int getMaxTransceiveLength() {
 	return nfcCard.isodep.getMaxTransceiveLength();
+    }
+
+    @Override
+    public String getName() {
+	return terminalName;
+    }
+
+    public synchronized boolean isCardConnected() {
+	return nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected();
+    }
+
+    @Override
+    public synchronized boolean isCardPresent() throws SCIOException {
+	return nfcCard != null && nfcCard.isodep != null;
     }
 
     public synchronized void setTag(IsoDep tag, int timeout) throws SCIOException {
@@ -107,13 +95,15 @@ public class NFCCardTerminal implements SCIOTerminal {
     }
 
     public synchronized void removeTag() {
-	try {
-	    nfcCard.disconnect(true);
-	    nfcCard.isodep = null;
-	} catch (SCIOException ex) {
-	    LOG.error("Disconnect failed.", ex);
+	if (nfcCard != null) { // maybe nfc tag is already removed
+	    try {
+		nfcCard.disconnect(true);
+		nfcCard.isodep = null;
+	    } catch (SCIOException ex) {
+		LOG.error("Disconnect failed.", ex);
+	    }
+	    this.nfcCard = null;
 	}
-	this.nfcCard = null;
 	notifyCardAbsent();
     }
 
@@ -152,20 +142,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD, e);
 	}
 	return nfcCard;
-    }
-
-    @Override
-    public String getName() {
-	return terminalName;
-    }
-
-    public synchronized boolean isCardConnected() {
-	return nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected();
-    }
-
-    @Override
-    public synchronized boolean isCardPresent() throws SCIOException {
-	return nfcCard != null && nfcCard.isodep != null;
     }
 
     @Override

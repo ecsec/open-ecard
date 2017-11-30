@@ -61,7 +61,10 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult current() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	// reduce index by one and call next which increases idx by one
+	// --> (-1 + 1 = 0)
+	idx--;
+	return next();
     }
 
     @Override

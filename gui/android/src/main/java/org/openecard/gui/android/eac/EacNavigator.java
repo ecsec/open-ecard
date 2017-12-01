@@ -155,7 +155,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public void close() {
-	EacGuiService.prepare();
+	
     }
 
     private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {

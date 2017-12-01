@@ -35,19 +35,28 @@ import org.openecard.common.util.Promise;
 public class EacGuiService extends Service {
 
     private static Promise<EacGuiImpl> serviceImpl;
-
-    public static void prepare() {
+    
+    private static void initialise() {
 	// clean promise
 	serviceImpl = new Promise<>();
     }
-
+    
+    @Override
+    public void onCreate() {
+	initialise();
+    }
+    
+    @Override
+    public void onDestroy() {
+	serviceImpl.cancel();
+    }
+    
     public static void setGuiImpl(EacGuiImpl impl) {
 	serviceImpl.deliver(impl);
     }
 
     @Override
     public synchronized int onStartCommand(Intent intent, int flags, int startId) {
-	prepare();
 	return super.onStartCommand(intent, flags, startId);
     }
 

@@ -36,10 +36,6 @@ public class EacGuiService extends Service {
 
     private static Promise<EacGuiImpl> serviceImpl;
     
-    static {
-	initialise();
-    }
-
     public static void prepare() {
 	if(serviceImpl.isDelivered()) {
 	    initialise();
@@ -51,10 +47,16 @@ public class EacGuiService extends Service {
 	serviceImpl = new Promise<>();
     }
     
-    public static void close() {
+    @Override
+    public void onCreate() {
 	initialise();
     }
-
+    
+    @Override
+    public void onDestroy() {
+	serviceImpl.cancel();
+    }
+    
     public static void setGuiImpl(EacGuiImpl impl) {
 	serviceImpl.deliver(impl);
     }

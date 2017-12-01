@@ -22,11 +22,14 @@
 
 package org.openecard.gui.android;
 
+import android.app.Service;
 import android.content.Context;
 import java.util.Arrays;
 import java.util.List;
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Mocked;
+import mockit.Tested;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
@@ -38,6 +41,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -56,14 +60,25 @@ public class EacNavigatorFactoryTest {
     @Mocked
     Runnable guiStarter;
     
-    @BeforeTest
+    @Mocked
+    Service service;
+    
+    @Tested(availableDuringSetup = true)
+    EacGuiService guiService;
+    
+    @BeforeMethod
     public void setUpSuite() {
-	EacGuiService.prepare();
+	this.guiService.onCreate();
     }
     
     @AfterMethod
     public void tearDown() {
-	EacGuiService.close();
+	this.guiService.onDestroy();
+    }
+    
+    private void reset() {
+	this.guiService.onDestroy();
+	this.guiService.onCreate();
     }
     
     @Test
@@ -109,7 +124,7 @@ public class EacNavigatorFactoryTest {
 		EacGuiService.setGuiImpl((EacGuiImpl)any);
 	    }
 	}};
-	EacGuiService.prepare();
+	this.reset();
 		
 	EacNavigatorFactory sut = new EacNavigatorFactory(guiStarter);
 	final UserConsentNavigator result = sut.createFrom(ucd, androidCtx);

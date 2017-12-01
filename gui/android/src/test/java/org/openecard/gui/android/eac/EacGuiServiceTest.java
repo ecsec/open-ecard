@@ -31,14 +31,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeTest;
 
 /**
  *
@@ -51,15 +52,19 @@ public class EacGuiServiceTest {
 
     @Mocked
     Service service;
-
-    @BeforeTest
+    
+    
+    @Tested(availableDuringSetup = true)
+    EacGuiService guiService;
+    
+    @BeforeMethod
     public void setUpSuite() {
-	EacGuiService.prepare();
+	this.guiService.onCreate();
     }
-
+    
     @AfterMethod
     public void tearDown() {
-	EacGuiService.close();
+	this.guiService.onDestroy();
     }
 
     @Test
@@ -125,7 +130,6 @@ public class EacGuiServiceTest {
 	Future<IBinder> waitingClient = callBindAsync(sut, inputIntent);
 	startWaiting(waitingClient);
 	
-	EacGuiService.prepare();
 	EacGuiService.setGuiImpl(inputGui);
 	
 	IBinder result = getValueImmediately(waitingClient);

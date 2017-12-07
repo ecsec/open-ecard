@@ -22,7 +22,6 @@
 
 package org.openecard.gui.android.eac;
 
-import android.os.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class EacGuiImpl extends EacGui.Stub {
+public class EacGuiImpl implements EacGui {
 
     private static final Logger LOG = LoggerFactory.getLogger(EacGuiImpl.class);
 
@@ -59,7 +58,7 @@ public class EacGuiImpl extends EacGui.Stub {
     private Promise<String> userPin = new Promise<>();
     private Promise<String> userCan = new Promise<>();
     private Promise<Boolean> pinCorrect = new Promise<>();
-    private Promise<String> pinStatus = new Promise<>();
+    private Promise<PinStatus> pinStatus = new Promise<>();
 
     private Checkbox readAccessBox;
     private Checkbox writeAccessBox;
@@ -74,17 +73,16 @@ public class EacGuiImpl extends EacGui.Stub {
     ///
 
     @Override
-    public ServerData getServerData() throws RemoteException {
+    public ServerData getServerData() throws InterruptedException {
 	try {
 	    return serverData.deref();
 	} catch (InterruptedException ex) {
-	    throw new RemoteException("Waiting for ServerData cancelled by thread termination.");
+	    throw new InterruptedException("Waiting for ServerData cancelled by thread termination.");
 	}
     }
 
     @Override
-    public void selectAttributes(List<BoxItem> readAccessAttr, List<BoxItem> writeAccessAttr)
-	    throws RemoteException {
+    public void selectAttributes(List<BoxItem> readAccessAttr, List<BoxItem> writeAccessAttr) {
 	try {
 	    userReadSelection.deliver(readAccessAttr);
 	    userWriteSelection.deliver(writeAccessAttr);
@@ -94,21 +92,21 @@ public class EacGuiImpl extends EacGui.Stub {
     }
 
     @Override
-    public String getPinStatus() throws RemoteException {
+    public PinStatus getPinStatus() throws InterruptedException {
 	try {
-	    String status = pinStatus.deref();
+	    PinStatus status = pinStatus.deref();
 
 	    // renew pin status promise
 	    this.pinStatus = new Promise<>();
 
 	    return status;
 	} catch (InterruptedException ex) {
-	    throw new RemoteException("Waiting for PIN status interrupted.");
+	    throw new InterruptedException("Waiting for PIN status interrupted.");
 	}
     }
 
     @Override
-    public boolean enterPin(String can, String pin) throws RemoteException {
+    public boolean enterPin(String can, String pin) throws InterruptedException {
 	userPin.deliver(pin);
 	userCan.deliver(can);
 
@@ -116,12 +114,12 @@ public class EacGuiImpl extends EacGui.Stub {
 	try {
 	    return pinCorrect.deref();
 	} catch (InterruptedException ex) {
-	    throw new RemoteException("Waiting for PIN result interrupted.");
+	    throw new InterruptedException("Waiting for PIN result interrupted.");
 	}
     }
 
     @Override
-    public void cancel() throws RemoteException {
+    public void cancel() {
 	isCancelled = true;
 	cancelPromise(serverData);
 	cancelPromise(userReadSelection);
@@ -254,11 +252,11 @@ public class EacGuiImpl extends EacGui.Stub {
 	}
 	// set flags according to field values
 	if (hasPin && ! hasCan) {
-	    this.pinStatus.deliver(PinStatus.PIN.name());
+	    this.pinStatus.deliver(PinStatus.PIN);
 	} else if (hasPin && hasCan) {
-	    this.pinStatus.deliver(PinStatus.CAN.name());
+	    this.pinStatus.deliver(PinStatus.CAN);
 	} else {
-	    this.pinStatus.deliver(PinStatus.BLOCKED.name());
+	    this.pinStatus.deliver(PinStatus.BLOCKED);
 	    // return directly as there will be no pin entry
 	    return Collections.EMPTY_LIST;
 	}

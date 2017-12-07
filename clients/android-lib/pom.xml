@@ -127,13 +127,6 @@
 			<artifactId>android</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>android-defs</artifactId>
-			<version>${project.version}</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- Problem with WebMethod Annotation -->
 		<dependency>

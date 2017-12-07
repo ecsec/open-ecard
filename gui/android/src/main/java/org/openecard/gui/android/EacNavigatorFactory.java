@@ -22,10 +22,10 @@
 
 package org.openecard.gui.android;
 
-import android.content.Context;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
-import org.openecard.gui.android.eac.EacGuiService;
 import org.openecard.gui.android.eac.EacNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
@@ -34,32 +34,28 @@ import org.openecard.gui.definition.UserConsentDescription;
  *
  * @author Neil Crossley
  */
-public class EacNavigatorFactory implements UserConsentNavigatorFactory{
+public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacGui> {
 
-    private final Runnable guiServiceStarter;
+    private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver = new GuiIfaceReceiver<>();
 
-    public EacNavigatorFactory(Runnable guiServiceStarter) {
-	this.guiServiceStarter = guiServiceStarter;
-    }
-    
     @Override
-    public boolean canCreateFrom(UserConsentDescription uc, Context androidCtx) {
+    public boolean canCreateFrom(UserConsentDescription uc) {
 	return "EAC".equals(uc.getDialogType());
     }
 
     @Override
-    public UserConsentNavigator createFrom(UserConsentDescription uc, Context androidCtx) {
-	if (! this.canCreateFrom(uc, androidCtx)) {
+    public UserConsentNavigator createFrom(UserConsentDescription uc) {
+	if (! this.canCreateFrom(uc)) {
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
 
-	// start service
-	guiServiceStarter.run();
-
-	EacGuiImpl guiService = new EacGuiImpl();
-	EacGuiService.setGuiImpl(guiService);
-
-	return new EacNavigator(guiService, uc);
+	ifaceReceiver.setUiInterface(new EacGuiImpl());
+	return new EacNavigator(uc, ifaceReceiver);
     }
-    
+
+    @Override
+    public Promise<? extends EacGui> getIfacePromise() {
+	return ifaceReceiver.getUiInterface();
+    }
+
 }

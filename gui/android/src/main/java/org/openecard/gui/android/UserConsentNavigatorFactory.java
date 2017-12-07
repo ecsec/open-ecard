@@ -22,17 +22,22 @@
 
 package org.openecard.gui.android;
 
-import android.content.Context;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+
 
 /**
  *
  * @author Neil Crossley
+ * @param <T> Type of the UI interaction interface.
  */
-public interface UserConsentNavigatorFactory {
+public interface UserConsentNavigatorFactory <T> {
     
-    boolean canCreateFrom(UserConsentDescription uc, Context androidCtx);
+    boolean canCreateFrom(UserConsentDescription uc);
     
-    UserConsentNavigator createFrom(UserConsentDescription uc, Context androidCtx);
+    UserConsentNavigator createFrom(UserConsentDescription uc);
+
+    Promise<? extends T> getIfacePromise();
+
 }

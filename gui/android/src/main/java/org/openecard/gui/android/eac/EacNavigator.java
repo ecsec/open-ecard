@@ -30,6 +30,7 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.AndroidResult;
+import org.openecard.gui.android.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
@@ -43,15 +44,17 @@ import org.openecard.gui.definition.UserConsentDescription;
 public class EacNavigator implements UserConsentNavigator {
 
     private final List<Step> steps;
+    private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver;
+    private final EacGuiImpl guiService;
 
-    private EacGuiImpl guiService = null;
     private int idx = -1;
     private boolean pinFirstUse = true;
 
 
-    public EacNavigator(EacGuiImpl guiService, UserConsentDescription uc) {
-	this.guiService = guiService;
+    public EacNavigator(UserConsentDescription uc, GuiIfaceReceiver<EacGuiImpl> ifaceReceiver) {
 	this.steps = new ArrayList<>(uc.getSteps());
+	this.ifaceReceiver = ifaceReceiver;
+	this.guiService = ifaceReceiver.getUiInterface().derefNonblocking();
     }
 
     @Override
@@ -158,7 +161,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public void close() {
-	EacGuiService.terminate();
+	ifaceReceiver.terminate();
     }
 
     private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {

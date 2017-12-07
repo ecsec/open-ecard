@@ -20,7 +20,46 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.android.eac.types;
+package org.openecard.gui.android;
+
+import javax.annotation.Nonnull;
+import org.openecard.common.util.Promise;
 
 
-parcelable TermsOfUsage;
+/**
+ *
+ * @author Tobias Wich
+ * @param <T> Type of the UI interface.
+ */
+public class GuiIfaceReceiver <T> {
+
+    private Promise<T> uiInterface;
+
+    public GuiIfaceReceiver() {
+	// always be prepared
+	initialise();
+    }
+
+    public final synchronized void initialise() {
+	// clean promise
+	uiInterface = new Promise<>();
+    }
+
+    public final synchronized void terminate() {
+	// invalidate promise
+	if (uiInterface != null) {
+	    uiInterface.cancel();
+	}
+	// and reinitialise
+	initialise();
+    }
+
+    public Promise<T> getUiInterface() {
+	return uiInterface;
+    }
+
+    public void setUiInterface(@Nonnull T uiInterface) {
+	this.uiInterface.deliver(uiInterface);
+    }
+
+}

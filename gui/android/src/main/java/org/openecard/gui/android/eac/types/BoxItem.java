@@ -22,22 +22,18 @@
 
 package org.openecard.gui.android.eac.types;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.gui.android.AbstractParcelable;
-import org.openecard.gui.android.ParcelableCreator;
-import org.openecard.gui.android.Serialize;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class BoxItem extends AbstractParcelable<BoxItem> {
+public class BoxItem implements Serializable {
 
-    public static final Parcelable.Creator<BoxItem> CREATOR = new ParcelableCreator<>(BoxItem.class);
+    private static final long serialVersionUID = 1L;
 
     public BoxItem(@Nonnull String name, boolean selected, boolean disabled, @Nullable String additionalText) {
 	this.name = name;
@@ -45,11 +41,6 @@ public class BoxItem extends AbstractParcelable<BoxItem> {
 	this.disabled = disabled;
 	this.additionalText = additionalText;
     }
-
-    public BoxItem(Parcel src) {
-	readFromParcel(src);
-    }
-
 
     /**
      * Enum name of the Access Right.
@@ -92,22 +83,18 @@ public class BoxItem extends AbstractParcelable<BoxItem> {
      * @see CHAT.SpecialFunction
      * @see BSI TR-03110-4 (v2.21) Sec. 2.2.3.2
      */
-    @Serialize
     protected String name;
     /**
      * Indicates the selection state of the item.
      */
-    @Serialize
     protected boolean selected;
     /**
      * Indicates that this item may not be changed, meaning the attribute is required.
      */
-    @Serialize
     protected boolean disabled;
     /**
      * Additional data such as verification age.
      */
-    @Serialize
     @Nullable
     protected String additionalText;
 

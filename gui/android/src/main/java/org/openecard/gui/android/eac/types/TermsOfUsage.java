@@ -22,39 +22,29 @@
 
 package org.openecard.gui.android.eac.types;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nonnull;
-import org.openecard.gui.android.AbstractParcelable;
-import org.openecard.gui.android.ParcelableCreator;
-import org.openecard.gui.android.Serialize;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class TermsOfUsage extends AbstractParcelable<TermsOfUsage> {
+public class TermsOfUsage implements Serializable {
 
-    public static final Parcelable.Creator<TermsOfUsage> CREATOR = new ParcelableCreator<>(TermsOfUsage.class);
+    private static final long serialVersionUID = 1L;
 
     public TermsOfUsage(@Nonnull String mimeType, @Nonnull byte[] data) {
 	this.mimeType = mimeType;
 	this.data = data;
     }
 
-    public TermsOfUsage(Parcel src) {
-	readFromParcel(src);
-    }
-
 
     /**
      * One of {@code application/pdf}, {@code text/html}, or {@code text/plain}
      */
-    @Serialize
     protected String mimeType;
-    @Serialize
     protected byte[] data;
 
     public String getMimeType() {

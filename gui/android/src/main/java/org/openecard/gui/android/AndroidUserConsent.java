@@ -22,8 +22,6 @@
 
 package org.openecard.gui.android;
 
-import org.openecard.gui.android.eac.EacNavigator;
-import android.content.Context;
 import java.util.List;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
@@ -39,11 +37,9 @@ import org.openecard.gui.definition.UserConsentDescription;
  */
 public class AndroidUserConsent implements UserConsent {
 
-    private final Context androidCtx;
-    private final List<UserConsentNavigatorFactory> factories;
+    private final List<UserConsentNavigatorFactory<?>> factories;
 
-    public AndroidUserConsent(Context androidCtx, List<UserConsentNavigatorFactory> factories) {
-	this.androidCtx = androidCtx;
+    public AndroidUserConsent(List<UserConsentNavigatorFactory<?>> factories) {
 	this.factories = factories;
     }
 
@@ -51,12 +47,13 @@ public class AndroidUserConsent implements UserConsent {
     public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
 	
 	for (UserConsentNavigatorFactory factory : factories) {
-	    if(factory.canCreateFrom(uc, androidCtx))
-	    {
-		return factory.createFrom(uc, androidCtx);
+	    if(factory.canCreateFrom(uc)) {
+		UserConsentNavigator nav = factory.createFrom(uc);
+		return nav;
 	    }
 	}
-	throw new UnsupportedOperationException("Not supported yet.");
+
+	throw new UnsupportedOperationException("Unsupported UserConsent type.");
     }
 
     @Override

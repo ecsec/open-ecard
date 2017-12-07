@@ -22,27 +22,35 @@
 
 package org.openecard.gui.android;
 
-import android.content.Context;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+
 
 /**
  *
  * @author Neil Crossley
  */
-public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory {
+public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<Object> {
+
+    private final GuiIfaceReceiver<Object> ifaceReceiver = new GuiIfaceReceiver<>();
 
     @Override
-    public boolean canCreateFrom(UserConsentDescription uc, Context androidCtx) {
+    public boolean canCreateFrom(UserConsentDescription uc) {
 	return "insert_card_dialog".equals(uc.getDialogType());
     }
 
     @Override
-    public UserConsentNavigator createFrom(UserConsentDescription uc, Context androidCtx) {
-	if (!this.canCreateFrom(uc, androidCtx)) {
+    public UserConsentNavigator createFrom(UserConsentDescription uc) {
+	if (! this.canCreateFrom(uc)) {
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
-	return new InsertCardNavigator(uc);
+	return new InsertCardNavigator(uc, ifaceReceiver);
+    }
+
+    @Override
+    public Promise<? extends Object> getIfacePromise() {
+	return ifaceReceiver.getUiInterface();
     }
     
 }

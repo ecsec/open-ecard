@@ -24,11 +24,8 @@ package org.openecard.android.lib.activities;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
-import static android.content.Context.BIND_AUTO_CREATE;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,7 +42,9 @@ import org.openecard.android.lib.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
-import org.openecard.gui.android.eac.EacGuiService;
+import org.openecard.common.util.Promise;
+import org.openecard.gui.android.EacNavigatorFactory;
+import org.openecard.gui.android.eac.EacGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,10 +62,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 
     private Dialog cardRemoveDialog;
 
-    private Context appCtx;
-    private ServiceConnection eacServiceCon;
-
-    private boolean eacAlreadyConnected = false;
+    private EacNavigatorFactory eacNavFactory;
 
     private volatile boolean alreadyInitialized = false;
     // if someone returns to the App, but Binding uri was already used.
@@ -105,17 +101,14 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	super.onStart();
 
 	// add callback to this abstract activity when card is removed
-	ServiceContext.getServiceContext().getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
-
-	// set up application context and service connection
-	appCtx = getApplicationContext();
-	eacServiceCon = getServiceConnection();
+	ServiceContext sctx = ServiceContext.getServiceContext();
+	sctx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+	eacNavFactory = sctx.getEacNavigatorFactory();
 
 	// initialize intent binding
 	if (! alreadyInitialized) {
 	    IntentBinding binding = IntentBinding.getInstance();
 	    binding.setBindingResultReceiver(this);
-	    ServiceContext.getServiceContext().setEacStarter(this.guiStarter);
 	    this.alreadyInitialized = true;
 	}
 
@@ -143,21 +136,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     }
 
-    private final Runnable guiStarter = new Runnable() {
-	@Override
-	public void run() {
-	    if (! eacAlreadyConnected) {
-		// start and bind eac gui service
-		Intent i = createEacGuiIntent();
-		LOG.info("Binding Eac Gui service...");
-		appCtx.bindService(i, eacServiceCon, BIND_AUTO_CREATE);
-		LOG.info("Starting Eac Gui service...");
-		appCtx.startService(i);
-		eacAlreadyConnected = true;
-	    }
-	}
-    };
-
     @Override
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
@@ -180,15 +158,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	// cancel request if app is closed or minimized
 	IntentBinding binding = IntentBinding.getInstance();
 	binding.cancelRequest();
-	if (eacAlreadyConnected) {
-	    // unbind eac gui service
-	    Intent i = createEacGuiIntent();
-	    eacAlreadyConnected = false;
-	    LOG.info("Stop Eac Gui service...");
-	    appCtx.stopService(i);
-	    LOG.info("Unbinding Eac Gui service...");
-	    appCtx.unbindService(eacServiceCon);
-	} // else do nothing, because the service hasn't been started yet, maybe because the user canceled the request.
     }
 
     @Override
@@ -264,21 +233,12 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     }
 
     /**
-     * Creates an intent to start the Eac Gui Service.
-     *
-     * @return
-     */
-    protected Intent createEacGuiIntent() {
-	return new Intent(appCtx, EacGuiService.class);
-    }
-
-    /**
      * Returns true if the activity is already connected to the Eac Gui Service, otherwise false is returned.
      *
      * @return
      */
-    protected boolean isConnectedToEacService() {
-	return eacAlreadyConnected;
+    protected Promise<? extends EacGui> getEacIface() {
+	return eacNavFactory.getIfacePromise();
     }
 
     /**
@@ -292,14 +252,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected boolean isConnectedToOpeneCardService() {
 	return ServiceContext.getServiceContext().isInitialized();
     }
-
-    /**
-     * Implement this method to provide an instance of a service connection. The service connection is needed to
-     * connect to the Eac Gui Service.
-     *
-     * @return
-     */
-    public abstract ServiceConnection getServiceConnection();
 
     /**
      * Implement this method to recognize a successful authentication in the Sub-Activity. You can handle the following

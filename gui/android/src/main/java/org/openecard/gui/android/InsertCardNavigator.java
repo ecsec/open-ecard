@@ -38,10 +38,13 @@ import org.openecard.gui.definition.UserConsentDescription;
 public class InsertCardNavigator implements UserConsentNavigator {
 
     private final UserConsentDescription uc;
+    private final GuiIfaceReceiver<Object> ifaceReceiver;
+
     private int idx = -1;
 
-    public InsertCardNavigator(UserConsentDescription uc) {
+    public InsertCardNavigator(UserConsentDescription uc, GuiIfaceReceiver<Object> ifaceReceiver) {
 	this.uc = uc;
+	this.ifaceReceiver = ifaceReceiver;
     }
 
 
@@ -90,6 +93,7 @@ public class InsertCardNavigator implements UserConsentNavigator {
     @Override
     public void close() {
 	// nothing to do as there is no UI
+	ifaceReceiver.terminate();
     }
 
 }

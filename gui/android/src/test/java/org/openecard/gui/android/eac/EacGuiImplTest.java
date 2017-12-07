@@ -22,15 +22,12 @@
 
 package org.openecard.gui.android.eac;
 
-import android.app.Service;
-import android.content.Context;
-import android.os.RemoteException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import mockit.Mocked;
-import mockit.Tested;
 import org.openecard.gui.StepResult;
+import org.openecard.gui.android.GuiIfaceReceiver;
+import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
@@ -44,9 +41,6 @@ import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import static org.testng.Assert.*;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 
@@ -56,43 +50,19 @@ import org.testng.annotations.Test;
  */
 public class EacGuiImplTest {
 
-    @Mocked
-    private Context androidCtx;
-    @Mocked
-    private EacGui.Stub stub;
-
-    @Mocked
-    Service service;
-    
-    @Tested(availableDuringSetup = true)
-    EacGuiService guiService;
-    
-    @BeforeMethod
-    public void setUpSuite() {
-	this.guiService.onCreate();
-    }
-    
-    @AfterMethod
-    public void tearDown() {
-	this.guiService.onDestroy();
-    }
-    
-    private void reset() {
-	this.guiService.onDestroy();
-	this.guiService.onCreate();
-    }
-    
     @Test
-    public void testPinOkFirstTime() throws InterruptedException, RemoteException {
-	
+    public void testPinOkFirstTime() throws InterruptedException {
+
+	final GuiIfaceReceiver<EacGuiImpl> guiRec = new GuiIfaceReceiver<>();
 	final EacGuiImpl anyGuiImpl = new EacGuiImpl();
+	guiRec.setUiInterface(anyGuiImpl);
 	
 	Thread t = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
 		UserConsentDescription uc = new UserConsentDescription("Test");
 		uc.getSteps().addAll(createInitialSteps());
-		EacNavigator nav = new EacNavigator(anyGuiImpl, uc);
+		EacNavigator nav = new EacNavigator(uc, guiRec);
 		ExecutionEngine exe = new ExecutionEngine(nav);
 		exe.process();
 	    }
@@ -103,7 +73,7 @@ public class EacGuiImplTest {
 	ServerData sd = anyGuiImpl.getServerData();
 	assertEquals(sd.getSubject(), "Test Subject");
 	anyGuiImpl.selectAttributes(sd.getReadAccessAttributes(), sd.getWriteAccessAttributes());
-	assertEquals(anyGuiImpl.getPinStatus(), "PIN");
+	assertEquals(anyGuiImpl.getPinStatus(), PinStatus.PIN);
 	assertTrue(anyGuiImpl.enterPin(null, "123456"));
 
 	// wait for executor to finish

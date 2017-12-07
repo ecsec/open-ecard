@@ -22,22 +22,18 @@
 
 package org.openecard.gui.android.eac.types;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.gui.android.AbstractParcelable;
-import org.openecard.gui.android.ParcelableCreator;
-import org.openecard.gui.android.Serialize;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class ServerData extends AbstractParcelable<ServerData> {
+public class ServerData implements Serializable {
 
-    public static final Parcelable.Creator<ServerData> CREATOR = new ParcelableCreator<>(ServerData.class);
+    private static final long serialVersionUID = 1L;
 
     public ServerData(@Nonnull String subject, @Nonnull String subjectUrl, @Nonnull TermsOfUsage termsOfUsage,
 	    @Nonnull String validity, @Nonnull String issuer, @Nonnull String issuerUrl,
@@ -52,28 +48,16 @@ public class ServerData extends AbstractParcelable<ServerData> {
 	this.writeAccessAttributes = writeAccessAttributes;
     }
 
-    public ServerData(Parcel src) {
-	readFromParcel(src);
-    }
 
-
-    @Serialize
     protected String subject;
-    @Serialize
     protected String subjectUrl;
-    @Serialize
     protected TermsOfUsage termsOfUsage;
     // Format: "from $date to $date"
-    @Serialize
     protected String validity;
-    @Serialize
     protected String issuer;
-    @Serialize
     protected String issuerUrl;
 
-    @Serialize
     protected List<BoxItem> readAccessAttributes;
-    @Serialize
     protected List<BoxItem> writeAccessAttributes;
 
 

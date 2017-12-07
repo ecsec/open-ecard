@@ -18,23 +18,8 @@
 		<module>graphics</module>
 		<module>gui-common</module>
 		<module>swing</module>
+		<module>android</module>
 	</modules>
-
-	<profiles>
-		<profile>
-			<id>android</id>
-			<activation>
-				<!-- activate android when sdk path is defined -->
-				<property>
-					<name>env.ANDROID_HOME</name>
-				</property>
-			</activation>
-			<modules>
-				<module>android</module>
-				<module>android-defs</module>
-			</modules>
-		</profile>
-	</profiles>
 
 	<dependencies>
 		<dependency>

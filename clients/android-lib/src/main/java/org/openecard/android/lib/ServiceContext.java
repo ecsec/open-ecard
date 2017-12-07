@@ -101,7 +101,8 @@ public class ServiceContext implements EventCallback {
     private TinyManagement management;
     private Runnable guiStarter;
 
-    private UserConsent gui;
+    private AndroidUserConsent gui;
+    private EacNavigatorFactory eacNavFac;
 
     // true if already initialized
     private boolean initialized = false;
@@ -204,6 +205,10 @@ public class ServiceContext implements EventCallback {
 	return gui;
     }
 
+    public EacNavigatorFactory getEacNavigatorFactory() {
+	return eacNavFac;
+    }
+
     public AddonManager getManager() {
 	return manager;
     }
@@ -253,11 +258,13 @@ public class ServiceContext implements EventCallback {
 		}
 	    }
 	};
-	List<UserConsentNavigatorFactory> factories = Arrays.asList(
-		new EacNavigatorFactory(delegatingRunnable),
+
+	eacNavFac = new EacNavigatorFactory();
+	List<UserConsentNavigatorFactory<?>> factories = Arrays.asList(
+		eacNavFac,
 		new InsertCardNavigatorFactory());
 
-	gui = new AndroidUserConsent(appCtx, factories);
+	gui = new AndroidUserConsent(factories);
 
 	// set up nfc and android marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);

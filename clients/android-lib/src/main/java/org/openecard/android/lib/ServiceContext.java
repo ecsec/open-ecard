@@ -213,16 +213,8 @@ public class ServiceContext implements EventCallback {
 	return manager;
     }
 
-    public Runnable getEacStarter() {
-	return guiStarter;
-    }
-
     public Context getApplicationContext() {
 	return appCtx;
-    }
-
-    public void setEacStarter(Runnable guiStarter) {
-	this.guiStarter = guiStarter;
     }
 
     public void setApplicationContext(Context ctx) {
@@ -246,19 +238,6 @@ public class ServiceContext implements EventCallback {
 	}
 
 	// initialize gui
-	Runnable delegatingRunnable = new Runnable() {
-	    @Override
-	    public void run() {
-		Runnable runner = getEacStarter();
-		if(runner == null) {
-		    LOG.error("The Eac GUI starter was not initialized as required!");
-		}
-		else {
-		    runner.run();
-		}
-	    }
-	};
-
 	eacNavFac = new EacNavigatorFactory();
 	List<UserConsentNavigatorFactory<?>> factories = Arrays.asList(
 		eacNavFac,

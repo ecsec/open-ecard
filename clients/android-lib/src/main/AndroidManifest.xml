@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	  package="org.openecard.android.lib">
+	  package="org.openecard.android">
 
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -15,19 +15,14 @@
 	android:supportsRtl="true">
 
 	<activity
-	    android:name=".activities.AbstractActivationActivity"
+	    android:name=".activation.AbstractActivationActivity"
 	    android:clearTaskOnLaunch="true"
 	    android:configChanges="orientation|screenSize" />
 
 	<service
-	    android:name=".services.OpeneCardServiceImpl"
+	    android:name=".system.OpeneCardServiceImpl"
 	    android:exported="true"
 	    android:label="Open eCard Service"/>
-
-	<service
-	    android:name="org.openecard.gui.android.eac.EacGuiService"
-	    android:exported="true"
-	    android:label="EAC Gui Service"/>
 
     </application>
 

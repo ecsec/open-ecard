@@ -55,8 +55,6 @@ public abstract class AbstractActivationActivity extends Activity {
     private EacGui eacGui;
 
     private volatile boolean alreadyInitialized = false;
-    // if someone returns to the App, but Binding uri was already used.
-    private volatile boolean eIDUrlUsed = false;
 
     @Override
     protected synchronized void onResume() {
@@ -88,7 +86,7 @@ public abstract class AbstractActivationActivity extends Activity {
 
 	Uri data = getIntent().getData();
 	final String eIDUrl = data.toString();
-	if (eIDUrl != null && ! eIDUrlUsed) {
+	if (eIDUrl != null) {
 	    waitForEacGui();
 	    // start TR procedure according to [BSI-TR-03124-1]
 	    new Thread(new Runnable() {
@@ -100,7 +98,6 @@ public abstract class AbstractActivationActivity extends Activity {
 		}
 	    }, "ActivationThread").start();
 	    // when app is closed or minimized the authentication process is interrupted and have to start again
-	    eIDUrlUsed = true;
 	} else {
 	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
 		    "Authentication process already finished."));

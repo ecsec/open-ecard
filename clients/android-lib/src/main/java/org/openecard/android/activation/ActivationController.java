@@ -57,7 +57,7 @@ public class ActivationController {
 
     public ActivationResult activate(String url) {
 	// ensure that service context is initialized
-	OpeneCardContext sctx = OpeneCardContext.getServiceContext();
+	OpeneCardContext sctx = OpeneCardContext.getContext();
 	try {
 	    ensureInitialized(sctx);
 	} catch (InitializationException ex) {

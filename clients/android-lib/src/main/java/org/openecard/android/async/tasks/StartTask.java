@@ -92,7 +92,7 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 	    ApduExtLengthNotSupported {
 	OpeneCardContext ctx = null;
 	if (isRequiredAPIUsed) {
-	    ctx = OpeneCardContext.getServiceContext();
+	    ctx = OpeneCardContext.getContext();
 	    if (! ctx.isInitialized()) {
 		ctx.initialize();
 	    }

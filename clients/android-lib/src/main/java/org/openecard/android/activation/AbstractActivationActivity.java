@@ -27,7 +27,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.system.OpeneCardContext;
@@ -68,14 +67,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     private volatile boolean bindingUriAlreadyUsed = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-
-	// set Open eCard Service Context
-	NfcUtils.getInstance().setServiceContext(OpeneCardContext.getServiceContext());
-    }
-
-    @Override
     protected synchronized void onResume() {
 	super.onResume();
 
@@ -100,7 +91,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	super.onStart();
 
 	// add callback to this abstract activity when card is removed
-	OpeneCardContext sctx = OpeneCardContext.getServiceContext();
+	OpeneCardContext sctx = OpeneCardContext.getContext();
 	sctx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
 	eacNavFactory = sctx.getEacNavigatorFactory();
 
@@ -150,7 +141,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	super.onStop();
 
 	// remove callback which is set onStart
-	OpeneCardContext.getServiceContext().getEventDispatcher().del(eventReceiver);
+	OpeneCardContext.getContext().getEventDispatcher().del(eventReceiver);
     }
 
     @Override
@@ -181,27 +172,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		authenticationSuccess(result);
-		// show card remove dialog before the redirect occurs
-		// dialog is shown on ui thread
-		runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			cardRemoveDialog = showCardRemoveDialog();
-			cardRemoveDialog.setCanceledOnTouchOutside(false);
-			cardRemoveDialog.setCancelable(false);
-			// if card remove dialog is not shown, then show it
-			if (! cardRemoveDialog.isShowing()) {
-			    cardRemoveDialog.show();
-			}
-			// redirect to the termination uri when the card remove dialog is closed
-			cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			    @Override
-			    public void onDismiss(DialogInterface dialog) {
-				redirectToResultLocation(result);
-			    }
-			});
-		    }
-		});
 		break;
 	    default:
 		authenticationFailure(result);
@@ -234,33 +204,39 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      *
      * @return
      */
-    protected Promise<? extends EacGui> getEacIface() {
+    protected Promise<? extends EacGui> waitForEacGui() {
 	return eacNavFactory.getIfacePromise();
-    }
-
-    // TODO
-    public abstract void onEacIfaceSet(EacGui eacGui);
-
-    /**
-     * Returns true if the app is already connected to the Open eCard Service, otherwise false is returned. Before you
-     * can connect to the Eac Gui Service, a connection to the Open eCard Service must be established. You have to check
-     * if you are connected to the Open eCard Service in the sub class in the onStart()-method. You can handle the check
-     * by using this method or on your own, too.
-     *
-     * @return
-     */
-    protected boolean isConnectedToOpeneCardService() {
-	return OpeneCardContext.getServiceContext().isInitialized();
     }
 
     /**
      * Implement this method to recognize a successful authentication in the Sub-Activity. You can handle the following
-     * steps on your own, for example show that the authentication was successful and then close the Activity.
+     * steps on your own by overriding this method, for example show that the authentication was successful
+     * and then redirect to the redirect location.
      *
      * @param result which contains additional information to the authentication.
      */
-    public void authenticationSuccess(BindingResult result) {
-
+    public void authenticationSuccess(final BindingResult result) {
+	// show card remove dialog before the redirect occurs
+	// dialog is shown on ui thread
+	runOnUiThread(new Runnable() {
+	    @Override
+	    public void run() {
+		cardRemoveDialog = showCardRemoveDialog();
+		cardRemoveDialog.setCanceledOnTouchOutside(false);
+		cardRemoveDialog.setCancelable(false);
+		// if card remove dialog is not shown, then show it
+		if (! cardRemoveDialog.isShowing()) {
+		    cardRemoveDialog.show();
+		}
+		// redirect to the termination uri when the card remove dialog is closed
+		cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		    @Override
+		    public void onDismiss(DialogInterface dialog) {
+			redirectToResultLocation(result);
+		    }
+		});
+	    }
+	});
     }
 
     /**
@@ -279,5 +255,13 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      * @return
      */
     public abstract Dialog showCardRemoveDialog();
+
+    /**
+     * This method is called if the Eac Gui is available. If this method is called you can access the server data and
+     * start the authentication process.
+     *
+     * @param eacGui
+     */
+    public abstract void onEacIfaceSet(EacGui eacGui);
 
 }

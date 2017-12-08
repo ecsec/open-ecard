@@ -98,7 +98,7 @@ public class IntentBinding {
 	}
 
 	// check if service context is initialized
-	OpeneCardContext ctx = OpeneCardContext.getServiceContext();
+	OpeneCardContext ctx = OpeneCardContext.getContext();
 	if (ctx == null || ! ctx.isInitialized()) {
 	    throw new ContextNotInitialized(ServiceMessages.PLEASE_START_OPENECARD_SERVICE);
 	}

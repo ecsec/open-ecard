@@ -34,8 +34,8 @@ import android.provider.Settings;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.system.OpeneCardContext;
 import org.openecard.scio.NFCFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +52,6 @@ public class NfcUtils {
 
     private static NfcUtils nfcUtils;
 
-    private OpeneCardContext ctx;
-    private boolean isNFCAvailable = false;
-    private boolean isNFCEnabled = false;
-
     public static NfcUtils getInstance() {
 	synchronized (NfcUtils.class) {
 	    if (nfcUtils == null) {
@@ -63,15 +59,6 @@ public class NfcUtils {
 	    }
 	}
 	return nfcUtils;
-    }
-
-    public void setServiceContext(OpeneCardContext ctx) {
-	this.ctx = ctx;
-	if (ctx != null) {
-	    this.isNFCEnabled = ctx.isNFCEnabled();
-	    this.isNFCAvailable = ctx.isNFCAvailable();
-	}
-	LOG.debug("NFC available: " + isNFCAvailable + " - NFC enabled: " + isNFCEnabled);
     }
 
     /**
@@ -85,28 +72,30 @@ public class NfcUtils {
     }
 
     public void enableNFCDispatch(Activity activity) {
-	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
+	OpeneCardContext octx = OpeneCardContext.getContext();
+	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
 	    LOG.debug("Enable NFC foreground dispatch...");
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
 	    // enable dispatch of messages with nfc tag
-	    Context appCtx = ctx.getApplicationContext();
+	    Context appCtx = octx.getApplicationContext();
 	    NfcAdapter.getDefaultAdapter(appCtx).enableForegroundDispatch(activity, pendingIntent, null, null);
 	}
     }
 
     public void disableNFCDispatch(Activity activity) {
-	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
+	OpeneCardContext octx = OpeneCardContext.getContext();
+	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
 	    LOG.debug("Disable NFC foreground dispatch...");
 	    // disable dispatch of messages with nfc tag
-	    Context appCtx = ctx.getApplicationContext();
+	    Context appCtx = octx.getApplicationContext();
 	    NfcAdapter.getDefaultAdapter(appCtx).disableForegroundDispatch(activity);
 	}
     }
 
     public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
 	// indicates that a nfc tag is there
-	if (isNFCAvailable && isNFCEnabled && isContextInitialized()) {
+	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
 	    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
 		// set nfc tag with timeout of five seconds
@@ -118,11 +107,17 @@ public class NfcUtils {
     }
 
     private boolean isContextInitialized() {
-	if (ctx == null) {
+	OpeneCardContext octx = OpeneCardContext.getContext();
+	if (octx == null) {
 	    throw new IllegalStateException("Please provide a ServiceContext instance.");
 	} else {
-	    return ctx.isInitialized();
+	    return octx.isInitialized();
 	}
+    }
+
+    private boolean isNfcAvailableAndEnabled() {
+	OpeneCardContext octx = OpeneCardContext.getContext();
+	return octx.isNFCAvailable() && octx.isNFCEnabled();
     }
 
 

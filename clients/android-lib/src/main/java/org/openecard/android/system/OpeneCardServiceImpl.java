@@ -97,7 +97,7 @@ public class OpeneCardServiceImpl extends Service implements StartTaskResult, Sh
 	@Override
 	public ServiceResponse stop() throws RemoteException {
 	    LOG.info("Stop Open eCard Service...");
-	    OpeneCardContext ctx = OpeneCardContext.getServiceContext();
+	    OpeneCardContext ctx = OpeneCardContext.getContext();
 	    ShutdownTask task = new ShutdownTask(ctx, (ShutdownTaskResult) service);
 	    try {
 		ShutdownTaskResponse response = task.execute().get();

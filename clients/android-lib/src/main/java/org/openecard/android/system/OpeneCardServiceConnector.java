@@ -135,7 +135,7 @@ public class OpeneCardServiceConnector {
     }
 
     private void startOpeneCardService() {
-	OpeneCardContext.getServiceContext().setApplicationContext(ctx);
+	OpeneCardContext.getContext().setApplicationContext(ctx);
 	try {
 	    ServiceResponse response = mService.start();
 	    isConnected = false;

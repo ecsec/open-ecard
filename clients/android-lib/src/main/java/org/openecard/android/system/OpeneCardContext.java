@@ -128,7 +128,7 @@ public class OpeneCardContext implements EventCallback {
 
     }
 
-    public static OpeneCardContext getServiceContext() {
+    public static OpeneCardContext getContext() {
 	synchronized(OpeneCardContext.class) {
 	    if (ctx == null) {
 		ctx = new OpeneCardContext();

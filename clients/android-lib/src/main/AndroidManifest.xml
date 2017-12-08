@@ -20,7 +20,7 @@
 	    android:configChanges="orientation|screenSize" />
 
 	<service
-	    android:name=".system.OpeneCardServiceImpl"
+	    android:name=".system.OpeneCardService"
 	    android:exported="true"
 	    android:label="Open eCard Service"/>
 

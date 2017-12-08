@@ -101,7 +101,8 @@ public abstract class AbstractActivationActivity extends Activity {
 	    // when app is closed or minimized the authentication process is interrupted and have to start again
 	    eIDUrlUsed = true;
 	} else {
-	    finish();
+	    onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
+		    "Authentication process already finished."));
 	}
     }
 
@@ -150,10 +151,10 @@ public abstract class AbstractActivationActivity extends Activity {
     private void handleActivationResult(ActivationResult result) {
 	switch (result.getResultCode()) {
 	    case REDIRECT:
-		authenticationSuccess(result);
+		onAuthenticationSuccess(result);
 		break;
 	    default:
-		authenticationFailure(result);
+		onAuthenticationFailure(result);
 		break;
 	}
     }
@@ -185,7 +186,7 @@ public abstract class AbstractActivationActivity extends Activity {
      *
      * @param result which contains additional information to the authentication.
      */
-    public void authenticationSuccess(final ActivationResult result) {
+    public void onAuthenticationSuccess(final ActivationResult result) {
 	// show card remove dialog before the redirect occurs
 	// dialog is shown on ui thread
 	runOnUiThread(new Runnable() {
@@ -220,7 +221,7 @@ public abstract class AbstractActivationActivity extends Activity {
      *
      * @param result  which contains additional information to the authentication.
      */
-    public abstract void authenticationFailure(ActivationResult result);
+    public abstract void onAuthenticationFailure(ActivationResult result);
 
     /**
      * Implement this method to show the card remove dialog. If the authentication process ends, the card should be

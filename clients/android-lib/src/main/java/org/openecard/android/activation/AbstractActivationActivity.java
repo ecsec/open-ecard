@@ -52,6 +52,8 @@ public abstract class AbstractActivationActivity extends Activity {
 
     private Dialog cardRemoveDialog;
 
+    private EacGui eacGui;
+
     private volatile boolean alreadyInitialized = false;
     // if someone returns to the App, but Binding uri was already used.
     private volatile boolean eIDUrlUsed = false;
@@ -84,11 +86,10 @@ public abstract class AbstractActivationActivity extends Activity {
 	OpeneCardContext octx = OpeneCardContext.getContext();
 	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
 
-	waitForEacGui();
-
 	Uri data = getIntent().getData();
 	final String eIDUrl = data.toString();
 	if (eIDUrl != null && ! eIDUrlUsed) {
+	    waitForEacGui();
 	    // start TR procedure according to [BSI-TR-03124-1]
 	    new Thread(new Runnable() {
 		@Override
@@ -101,7 +102,7 @@ public abstract class AbstractActivationActivity extends Activity {
 	    // when app is closed or minimized the authentication process is interrupted and have to start again
 	    eIDUrlUsed = true;
 	} else {
-	    onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
+	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
 		    "Authentication process already finished."));
 	}
     }
@@ -148,13 +149,18 @@ public abstract class AbstractActivationActivity extends Activity {
 	}
     };
 
-    private void handleActivationResult(ActivationResult result) {
+    private void handleActivationResult(final ActivationResult result) {
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		onAuthenticationSuccess(result);
 		break;
 	    default:
-		onAuthenticationFailure(result);
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			onAuthenticationFailure(result);
+		    }
+		});
 		break;
 	}
     }
@@ -170,7 +176,7 @@ public abstract class AbstractActivationActivity extends Activity {
 		OpeneCardContext octx = OpeneCardContext.getContext();
 		EacNavigatorFactory eacNavFactory = octx.getEacNavigatorFactory();
 		try {
-		    EacGui eacGui = eacNavFactory.getIfacePromise().deref();
+		    eacGui = eacNavFactory.getIfacePromise().deref();
 		    onEacIfaceSet(eacGui);
 		} catch (InterruptedException ex) {
 		    LOG.error("Waiting for Eac Gui was interrupted.", ex);
@@ -218,6 +224,7 @@ public abstract class AbstractActivationActivity extends Activity {
     /**
      * Implement this method to recognize a failed authentication in the Sub-Activity. You can handle the following
      * steps on your own, for example show that the authentication failed and then close the Activity with finish().
+     * This method is already running on the UI thread.
      *
      * @param result  which contains additional information to the authentication.
      */

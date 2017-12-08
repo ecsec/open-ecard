@@ -22,7 +22,6 @@
 
 package org.openecard.android.system;
 
-import org.openecard.android.ServiceResponse;
 import org.openecard.android.ServiceResponseStatusCodes;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,7 +29,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import org.openecard.android.OpeneCardService;
+import org.openecard.android.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class OpeneCardServiceConnector {
 
     private final Context ctx;
 
-    private OpeneCardService mService;
+    private org.openecard.android.OpeneCardService mService;
     private boolean isConnected = false;
     private boolean isServiceBinded = false;
 
@@ -77,7 +76,7 @@ public class OpeneCardServiceConnector {
 	@Override
 	public void onServiceConnected(ComponentName componentName, IBinder service) {
 	    LOG.info("Service binded!");
-	    mService = OpeneCardService.Stub.asInterface(service);
+	    mService = org.openecard.android.OpeneCardService.Stub.asInterface(service);
 	    startOpeneCardService();
 	    isServiceBinded = true;
 	}
@@ -85,8 +84,6 @@ public class OpeneCardServiceConnector {
 	@Override
 	public void onServiceDisconnected(ComponentName componentName) {
 	    mService = null;
-	    stopOpeneCardService();
-	    isServiceBinded = false;
 	}
     };
 
@@ -111,7 +108,7 @@ public class OpeneCardServiceConnector {
 	    ctx.startService(i);
 	    LOG.info("Binding service…");
 	    ctx.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-	} else if (isServiceBinded && isConnected) {
+	} else {
 	    connectionHandler.onConnectionSuccess();
 	}
     }
@@ -119,7 +116,10 @@ public class OpeneCardServiceConnector {
     public synchronized void stopService() {
 	if (isServiceBinded) {
 	    Intent i = createOpeneCardIntent();
+	    stopOpeneCardService();
+	    isServiceBinded = false;
 	    ctx.stopService(i);
+	    LOG.info("Stopping Open eCard service…");
 	    ctx.unbindService(serviceConnection);
 	} else {
 	    throw new IllegalStateException("Service already stopped...");

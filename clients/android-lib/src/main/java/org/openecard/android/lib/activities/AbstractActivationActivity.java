@@ -27,7 +27,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
@@ -112,27 +111,25 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	    this.alreadyInitialized = true;
 	}
 
-	String bindingUri = getBindingURI(getIntent());
+	final String bindingUri = getBindingURI(getIntent());
 	if (bindingUri != null && ! bindingUriAlreadyUsed) {
 	    // start TR procedure according to [BSI-TR-03124-1]
-	    HandleRequestAsync task = new HandleRequestAsync();
-	    task.execute(bindingUri);
+	    //HandleRequestAsync task = new HandleRequestAsync();
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    IntentBinding binding = IntentBinding.getInstance();
+		    try {
+			binding.handleRequest(bindingUri);
+		    } catch (ContextNotInitialized | BindingTaskStillRunning e) {
+			LOG.error(e.getMessage(), e);
+		    }
+		}
+	    }, "ActivationThread").start();
+	    //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, bindingUri);
 	    bindingUriAlreadyUsed = true;
 	} else {
 	    finish();
-	}
-    }
-
-    private class HandleRequestAsync extends AsyncTask<String, Void, Void> {
-	@Override
-	protected Void doInBackground(String... uri) {
-	    IntentBinding binding = IntentBinding.getInstance();
-	    try {
-		binding.handleRequest(uri[0]);
-	    } catch (ContextNotInitialized | BindingTaskStillRunning e) {
-		LOG.error(e.getMessage(), e);
-	    }
-	    return null;
 	}
     }
 
@@ -154,10 +151,6 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 
 	// remove callback which is set onStart
 	ServiceContext.getServiceContext().getEventDispatcher().del(eventReceiver);
-
-	// cancel request if app is closed or minimized
-	IntentBinding binding = IntentBinding.getInstance();
-	binding.cancelRequest();
     }
 
     @Override
@@ -191,18 +184,24 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 		break;
 	    case REDIRECT:
 		// show card remove dialog before the redirect occurs
-		cardRemoveDialog = showCardRemoveDialog();
-		cardRemoveDialog.setCanceledOnTouchOutside(false);
-		cardRemoveDialog.setCancelable(false);
-		// if card remove dialog is not shown, then show it
-		if (! cardRemoveDialog.isShowing()) {
-		    cardRemoveDialog.show();
-		}
-		// redirect to the termination uri when the card remove dialog is closed
-		cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		// dialog is shown on ui thread
+		runOnUiThread(new Runnable() {
 		    @Override
-		    public void onDismiss(DialogInterface dialog) {
-			redirectToResultLocation(result);
+		    public void run() {
+			cardRemoveDialog = showCardRemoveDialog();
+			cardRemoveDialog.setCanceledOnTouchOutside(false);
+			cardRemoveDialog.setCancelable(false);
+			// if card remove dialog is not shown, then show it
+			if (! cardRemoveDialog.isShowing()) {
+			    cardRemoveDialog.show();
+			}
+			// redirect to the termination uri when the card remove dialog is closed
+			cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			    @Override
+			    public void onDismiss(DialogInterface dialog) {
+				redirectToResultLocation(result);
+			    }
+			});
 		    }
 		});
 		break;
@@ -240,6 +239,9 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
     protected Promise<? extends EacGui> getEacIface() {
 	return eacNavFactory.getIfacePromise();
     }
+
+    // TODO
+    public abstract void onEacIfaceSet(EacGui eacGui);
 
     /**
      * Returns true if the app is already connected to the Open eCard Service, otherwise false is returned. Before you

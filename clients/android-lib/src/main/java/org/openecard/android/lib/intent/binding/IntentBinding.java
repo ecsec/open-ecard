@@ -22,15 +22,26 @@
 
 package org.openecard.android.lib.intent.binding;
 
-import android.os.AsyncTask;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import org.openecard.addon.AddonManager;
+import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
+import org.openecard.addon.bind.AppPluginAction;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.lib.ServiceContext;
-import org.openecard.android.lib.async.tasks.BindingTask;
 import org.openecard.android.lib.async.tasks.BindingTaskResult;
 import org.openecard.android.lib.ex.BindingTaskStillRunning;
 import org.openecard.android.lib.ex.ContextNotInitialized;
 import org.openecard.android.lib.ServiceMessages;
+import org.openecard.android.lib.async.tasks.BindingTaskResponse;
+import static org.openecard.android.lib.intent.binding.IntentBindingConstants.ADDON_INIT_FAILED;
+import static org.openecard.android.lib.intent.binding.IntentBindingConstants.ADDON_NOT_FOUND;
+import org.openecard.common.util.HttpRequestLineUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,13 +51,13 @@ import org.openecard.android.lib.ServiceMessages;
  */
 public class IntentBinding {
 
+    private static final Logger LOG = LoggerFactory.getLogger(IntentBinding.class);
+
     private BindingTaskResult calling;
     private AddonManager addonManager;
     private AddonSelector addonSelector;
 
     private static IntentBinding instance;
-
-    private BindingTask bindingTask;
 
     private IntentBinding() {
     }
@@ -93,20 +104,30 @@ public class IntentBinding {
 	}
 
 	// execute binding task async
-	if (bindingTask == null || bindingTask.getStatus().equals(AsyncTask.Status.FINISHED)) {
-	    bindingTask = new BindingTask(this, uri);
-	    bindingTask.execute();
-	} else {
-	    throw new BindingTaskStillRunning(ServiceMessages.BINDING_TASK_STILL_RUNNING);
-	}
-    }
+	URI requestURI = URI.create(uri);
+	String path = requestURI.getPath();
+	String resourceName = path.substring(1, path.length()); // remove leading '/'
 
-    public synchronized void cancelRequest() {
-	// if a binding task is already running, then interrupt it
-	if (bindingTask != null && (bindingTask.getStatus().equals(AsyncTask.Status.RUNNING)
-		|| bindingTask.getStatus().equals(AsyncTask.Status.PENDING))) {
-	    bindingTask.cancel(true);
-	    bindingTask = null;
+	// find suitable addon
+	try {
+	    AppPluginAction action = getAddonSelector().getAppPluginAction(resourceName);
+	    if (getAddonManager() == null) {
+		throw new IllegalStateException(ADDON_INIT_FAILED);
+	    } else {
+		String rawQuery = requestURI.getRawQuery();
+		Map<String, String> queries = new HashMap<>(0);
+		if (rawQuery != null) {
+		    queries = HttpRequestLineUtils.transform(rawQuery);
+		}
+		BindingResult result = action.execute(null, queries, null, null);
+		getBindingResultReceiver().setResultOfBindingTask(new BindingTaskResponse(result));
+	    }
+	} catch (AddonNotFoundException ex) {
+	    LOG.info(ADDON_NOT_FOUND, ex);
+	} catch (UnsupportedEncodingException ex) {
+	    LOG.warn("Unsupported encoding.", ex);
+	} catch (Exception ex) {
+	    LOG.warn(ex.getMessage(), ex);
 	}
     }
 

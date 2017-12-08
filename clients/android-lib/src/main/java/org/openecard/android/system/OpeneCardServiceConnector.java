@@ -131,7 +131,7 @@ public class OpeneCardServiceConnector {
     }
 
     private Intent createOpeneCardIntent() {
-	return new Intent(ctx, OpeneCardServiceImpl.class);
+	return new Intent(ctx, OpeneCardService.class);
     }
 
     private void startOpeneCardService() {

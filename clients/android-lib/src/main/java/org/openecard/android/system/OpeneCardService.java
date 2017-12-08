@@ -30,21 +30,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.openecard.android.ServiceConstants.FAILURE;
-import static org.openecard.android.ServiceConstants.REQUIRED_API;
-import static org.openecard.android.ServiceConstants.SUCCESS;
-import static org.openecard.android.ServiceMessages.BELOW_API_LEVEL_21_NOT_SUPPORTED;
-import static org.openecard.android.ServiceMessages.SERVICE_RESPONSE_OK;
-import static org.openecard.android.ServiceMessages.SERVICE_TERMINATE_FAILURE;
-import static org.openecard.android.ServiceMessages.SERVICE_TERMINATE_SUCCESS;
-import static org.openecard.android.ServiceResponseStatusCodes.INIT_SUCCESS;
-import static org.openecard.android.ServiceResponseStatusCodes.INTERNAL_ERROR;
-import static org.openecard.android.ServiceResponseStatusCodes.NFC_NOT_AVAILABLE;
-import static org.openecard.android.ServiceResponseStatusCodes.NFC_NOT_ENABLED;
-import static org.openecard.android.ServiceResponseStatusCodes.NFC_NO_EXTENDED_LENGTH;
-import static org.openecard.android.ServiceResponseStatusCodes.NOT_REQUIRED_API_LEVEL;
-import static org.openecard.android.ServiceResponseStatusCodes.SHUTDOWN_FAILED;
-import static org.openecard.android.ServiceResponseStatusCodes.SHUTDOWN_SUCCESS;
+import static org.openecard.android.ServiceConstants.*;
+import static org.openecard.android.ServiceMessages.*;
+import static org.openecard.android.ServiceResponseStatusCodes.*;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
@@ -123,7 +111,7 @@ public class OpeneCardService extends Service {
     }
 
     private OpeneCardContext initializeContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
-	OpeneCardContext octx = OpeneCardContext.getContext();;
+	OpeneCardContext octx = OpeneCardContext.getContext();
 	if (isRequiredAPIUsed) {
 	    if (! octx.isInitialized()) {
 		octx.initialize();

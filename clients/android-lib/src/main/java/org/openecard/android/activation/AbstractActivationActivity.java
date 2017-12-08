@@ -27,20 +27,12 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import org.openecard.addon.bind.AuxDataKeys;
-import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.system.OpeneCardContext;
-import org.openecard.android.async.tasks.BindingTaskResponse;
-import org.openecard.android.async.tasks.BindingTaskResult;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.ex.BindingTaskStillRunning;
-import org.openecard.android.ex.ContextNotInitialized;
-import org.openecard.android.intent.binding.IntentBinding;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
-import org.openecard.common.util.Promise;
 import org.openecard.gui.android.EacNavigatorFactory;
 import org.openecard.gui.android.eac.EacGui;
 import org.slf4j.Logger;
@@ -54,17 +46,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mike Prechtl
  */
-public abstract class AbstractActivationActivity extends Activity implements BindingTaskResult {
+public abstract class AbstractActivationActivity extends Activity {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationActivity.class);
 
     private Dialog cardRemoveDialog;
 
-    private EacNavigatorFactory eacNavFactory;
-
     private volatile boolean alreadyInitialized = false;
     // if someone returns to the App, but Binding uri was already used.
-    private volatile boolean bindingUriAlreadyUsed = false;
+    private volatile boolean eIDUrlUsed = false;
 
     @Override
     protected synchronized void onResume() {
@@ -91,34 +81,25 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	super.onStart();
 
 	// add callback to this abstract activity when card is removed
-	OpeneCardContext sctx = OpeneCardContext.getContext();
-	sctx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
-	eacNavFactory = sctx.getEacNavigatorFactory();
+	OpeneCardContext octx = OpeneCardContext.getContext();
+	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
 
-	// initialize intent binding
-	if (! alreadyInitialized) {
-	    IntentBinding binding = IntentBinding.getInstance();
-	    binding.setBindingResultReceiver(this);
-	    this.alreadyInitialized = true;
-	}
+	waitForEacGui();
 
-	final String bindingUri = getBindingURI(getIntent());
-	if (bindingUri != null && ! bindingUriAlreadyUsed) {
+	Uri data = getIntent().getData();
+	final String eIDUrl = data.toString();
+	if (eIDUrl != null && ! eIDUrlUsed) {
 	    // start TR procedure according to [BSI-TR-03124-1]
-	    //HandleRequestAsync task = new HandleRequestAsync();
 	    new Thread(new Runnable() {
 		@Override
 		public void run() {
-		    IntentBinding binding = IntentBinding.getInstance();
-		    try {
-			binding.handleRequest(bindingUri);
-		    } catch (ContextNotInitialized | BindingTaskStillRunning e) {
-			LOG.error(e.getMessage(), e);
-		    }
+		    ActivationController ac = new ActivationController();
+		    ActivationResult result = ac.activate(eIDUrl);
+		    handleActivationResult(result);
 		}
 	    }, "ActivationThread").start();
-	    //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, bindingUri);
-	    bindingUriAlreadyUsed = true;
+	    // when app is closed or minimized the authentication process is interrupted and have to start again
+	    eIDUrlUsed = true;
 	} else {
 	    finish();
 	}
@@ -166,9 +147,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     };
 
-    @Override
-    public void setResultOfBindingTask(BindingTaskResponse response) {
-	final BindingResult result = response.getBindingResult();
+    private void handleActivationResult(ActivationResult result) {
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		authenticationSuccess(result);
@@ -179,33 +158,24 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 	}
     }
 
-    public void redirectToResultLocation(BindingResult result) {
-	String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
-	if (location != null) {
-	    // redirct to result location
-	    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-	    startActivity(i);
-	}
-    }
-
     /**
-     * Extracts the binding uri from the intent.
+     * This method starts a thread which is waiting for the Eac Gui. If the Eac Gui is
      *
-     * @param i the corresponding intent.
-     * @return
      */
-    protected String getBindingURI(Intent i) {
-	Uri data = i.getData();
-	return data != null ? data.toString() : null;
-    }
-
-    /**
-     * Returns true if the activity is already connected to the Eac Gui Service, otherwise false is returned.
-     *
-     * @return
-     */
-    protected Promise<? extends EacGui> waitForEacGui() {
-	return eacNavFactory.getIfacePromise();
+    private void waitForEacGui() {
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		OpeneCardContext octx = OpeneCardContext.getContext();
+		EacNavigatorFactory eacNavFactory = octx.getEacNavigatorFactory();
+		try {
+		    EacGui eacGui = eacNavFactory.getIfacePromise().deref();
+		    onEacIfaceSet(eacGui);
+		} catch (InterruptedException ex) {
+		    LOG.error("Waiting for Eac Gui was interrupted.", ex);
+		}
+	    }
+	}, "WaitForEacGuiThread").start();
     }
 
     /**
@@ -215,7 +185,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      *
      * @param result which contains additional information to the authentication.
      */
-    public void authenticationSuccess(final BindingResult result) {
+    public void authenticationSuccess(final ActivationResult result) {
 	// show card remove dialog before the redirect occurs
 	// dialog is shown on ui thread
 	runOnUiThread(new Runnable() {
@@ -232,7 +202,12 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
 		cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 		    @Override
 		    public void onDismiss(DialogInterface dialog) {
-			redirectToResultLocation(result);
+			String location = result.getRedirectUrl();
+			if (location != null) {
+			    // redirct to result location
+			    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
+			    startActivity(i);
+			}
 		    }
 		});
 	    }
@@ -245,7 +220,7 @@ public abstract class AbstractActivationActivity extends Activity implements Bin
      *
      * @param result  which contains additional information to the authentication.
      */
-    public abstract void authenticationFailure(BindingResult result);
+    public abstract void authenticationFailure(ActivationResult result);
 
     /**
      * Implement this method to show the card remove dialog. If the authentication process ends, the card should be

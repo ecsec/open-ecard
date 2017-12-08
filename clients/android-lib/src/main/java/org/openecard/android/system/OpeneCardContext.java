@@ -24,7 +24,6 @@ package org.openecard.android.system;
 
 import android.content.Context;
 import org.openecard.addon.AddonManager;
-import org.openecard.android.intent.binding.IntentBinding;
 import org.openecard.android.utils.ClasspathRegistry;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
@@ -100,7 +99,6 @@ public class OpeneCardContext implements EventCallback {
     private Dispatcher dispatcher;
     private TerminalFactory terminalFactory;
     private TinyManagement management;
-    private Runnable guiStarter;
 
     private AndroidUserConsent gui;
     private EacNavigatorFactory eacNavFac;
@@ -365,9 +363,6 @@ public class OpeneCardContext implements EventCallback {
 		errorMsg = ESTABLISH_IFD_CONTEXT_FAILED;
 		throw ex;
 	    }
-
-	    // set up intent binding
-	    IntentBinding.getInstance().setAddonManager(manager);
 
 	    initialized = true;
 	} catch (Exception ex) {

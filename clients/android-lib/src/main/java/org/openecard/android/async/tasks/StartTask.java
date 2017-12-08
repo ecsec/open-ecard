@@ -32,7 +32,6 @@ import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
 import org.openecard.android.ex.UnableToInitialize;
-import org.openecard.android.utils.NfcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openecard.android.system.ServiceErrorResponse;
@@ -69,7 +68,6 @@ public class StartTask extends AsyncTask<Void, Void, StartTaskResponse> {
 	ServiceResponse response;
 	try {
 	    ctx = getServiceContext();
-	    NfcUtils.getInstance().setServiceContext(ctx); // set app context in nfc utils
 	    // build response whether the initialization of app context was successful or failed.
 	    if (isRequiredAPIUsed) {
 		response = new ServiceResponse(INIT_SUCCESS, SERVICE_RESPONSE_OK);

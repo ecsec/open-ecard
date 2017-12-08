@@ -38,11 +38,8 @@ import org.openecard.android.ex.InitializationException;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
 import org.openecard.android.ex.UnableToInitialize;
-import static org.openecard.android.intent.binding.IntentBindingConstants.ADDON_INIT_FAILED;
-import static org.openecard.android.intent.binding.IntentBindingConstants.ADDON_NOT_FOUND;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.common.util.HttpRequestLineUtils;
-import org.openecard.gui.android.EacNavigatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +61,6 @@ public class ActivationController {
 	    return new ActivationResult(INTERNAL_ERROR, ex.getMessage());
 	}
 
-	EacNavigatorFactory eacNavFactory = sctx.getEacNavigatorFactory();
-
 	// create request uri and extract query strings
 	URI requestURI = URI.create(url);
 	String path = requestURI.getPath();
@@ -77,7 +72,7 @@ public class ActivationController {
 	AddonSelector selector = new AddonSelector(manager);
 	try {
 	    if (manager == null || selector == null) {
-		throw new IllegalStateException(ADDON_INIT_FAILED);
+		throw new IllegalStateException("Addon initialization failed.");
 	    } else {
 		AppPluginAction action = selector.getAppPluginAction(resourceName);
 
@@ -91,7 +86,7 @@ public class ActivationController {
 	    }
 	} catch (AddonNotFoundException ex) {
 	    failureMessage = ex.getMessage();
-	    LOG.info(ADDON_NOT_FOUND, ex);
+	    LOG.info("Addon not found.", ex);
 	} catch (UnsupportedEncodingException ex) {
 	    failureMessage = "Unsupported encoding.";
 	    LOG.warn(failureMessage, ex);
@@ -116,10 +111,7 @@ public class ActivationController {
     private ActivationResult createActivationResult(BindingResult result) {
 	ActivationResult activationResult;
 	switch (result.getResultCode()) {
-	    case OK:
-		activationResult = new ActivationResult(OK);
-		break;
-	    case REDIRECT:
+	     case REDIRECT:
 		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
 		activationResult = new ActivationResult(location, REDIRECT);
 		break;

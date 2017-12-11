@@ -54,9 +54,9 @@ public class ActivationController {
 
     public ActivationResult activate(String url) {
 	// ensure that service context is initialized
-	OpeneCardContext sctx = OpeneCardContext.getContext();
+	OpeneCardContext sctx;
 	try {
-	    ensureInitialized(sctx);
+	    sctx = ensureInitialized();
 	} catch (InitializationException ex) {
 	    return new ActivationResult(INTERNAL_ERROR, ex.getMessage());
 	}
@@ -98,7 +98,8 @@ public class ActivationController {
 	return new ActivationResult(INTERRUPTED, failureMessage);
     }
 
-    public void ensureInitialized(OpeneCardContext sctx) throws InitializationException {
+    public OpeneCardContext ensureInitialized() throws InitializationException {
+	OpeneCardContext sctx = OpeneCardContext.getContext();
 	if (! sctx.isInitialized()) {
 	    try {
 		sctx.initialize();
@@ -106,6 +107,7 @@ public class ActivationController {
 		throw new InitializationException(ex);
 	    }
 	}
+	return sctx;
     }
 
     private ActivationResult createActivationResult(BindingResult result) {

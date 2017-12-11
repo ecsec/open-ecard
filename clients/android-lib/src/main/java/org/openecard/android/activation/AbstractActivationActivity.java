@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.net.Uri;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.ex.InitializationException;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
@@ -80,27 +81,34 @@ public abstract class AbstractActivationActivity extends Activity {
     protected void onStart() {
 	super.onStart();
 
-	// add callback to this abstract activity when card is removed
-	OpeneCardContext octx = OpeneCardContext.getContext();
-	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+	try {
+	    final ActivationController ac = new ActivationController();
+	    OpeneCardContext octx = ac.ensureInitialized();
 
-	Uri data = getIntent().getData();
-	final String eIDUrl = data.toString();
-	if (eIDUrl != null) {
-	    waitForEacGui();
-	    // start TR procedure according to [BSI-TR-03124-1]
-	    new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    ActivationController ac = new ActivationController();
-		    ActivationResult result = ac.activate(eIDUrl);
-		    handleActivationResult(result);
-		}
-	    }, "ActivationThread").start();
-	    // when app is closed or minimized the authentication process is interrupted and have to start again
-	} else {
+	    // add callback to this abstract activity when card is removed
+	    OpeneCardContext.getContext();
+	    octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+
+	    Uri data = getIntent().getData();
+	    final String eIDUrl = data.toString();
+	    if (eIDUrl != null) {
+		waitForEacGui();
+		// start TR procedure according to [BSI-TR-03124-1]
+		new Thread(new Runnable() {
+		    @Override
+		    public void run() {
+			ActivationResult result = ac.activate(eIDUrl);
+			handleActivationResult(result);
+		    }
+		}, "ActivationThread").start();
+		// when app is closed or minimized the authentication process is interrupted and have to start again
+	    } else {
+		handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
+			"Authentication process already finished."));
+	    }
+	} catch (InitializationException ex) {
 	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
-		    "Authentication process already finished."));
+		    "eID core failed to initialize."));
 	}
     }
 

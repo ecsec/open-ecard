@@ -137,8 +137,9 @@ public abstract class AbstractActivationActivity extends Activity {
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    if (eventType.equals(EventType.CARD_REMOVED)) {
-		if (cardRemoveDialog != null && cardRemoveDialog.isShowing()) {
-		    cardRemoveDialog.dismiss();
+		Dialog d = cardRemoveDialog;
+		if (d != null && d.isShowing()) {
+		    d.dismiss();
 		}
 	    } else {
 		throw new IllegalStateException("Recognized an unsupported Event: " + eventType.name());
@@ -195,25 +196,37 @@ public abstract class AbstractActivationActivity extends Activity {
 	runOnUiThread(new Runnable() {
 	    @Override
 	    public void run() {
-		cardRemoveDialog = showCardRemoveDialog();
-		cardRemoveDialog.setCanceledOnTouchOutside(false);
-		cardRemoveDialog.setCancelable(false);
-		// if card remove dialog is not shown, then show it
-		if (! cardRemoveDialog.isShowing()) {
-		    cardRemoveDialog.show();
-		}
-		// redirect to the termination uri when the card remove dialog is closed
-		cardRemoveDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-		    @Override
-		    public void onDismiss(DialogInterface dialog) {
-			String location = result.getRedirectUrl();
-			if (location != null) {
-			    // redirct to result location
-			    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-			    startActivity(i);
-			}
+		final String location = result.getRedirectUrl();
+		Dialog d = showCardRemoveDialog();
+		if (d != null) {
+		    cardRemoveDialog = d;
+		    d.setCanceledOnTouchOutside(false);
+		    d.setCancelable(false);
+		    // if card remove dialog is not shown, then show it
+		    if (! d.isShowing()) {
+			d.show();
 		    }
-		});
+		    // redirect to the termination uri when the card remove dialog is closed
+		    d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+			    // clean dialog field
+			    cardRemoveDialog = null;
+			    // perform redirect
+			    if (location != null) {
+				// redirect to result location
+				Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
+				startActivity(i);
+			    }
+			}
+		    });
+		} else {
+		    if (location != null) {
+			// redirect to result location
+			Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
+			startActivity(i);
+		    }
+		}
 	    }
 	});
     }

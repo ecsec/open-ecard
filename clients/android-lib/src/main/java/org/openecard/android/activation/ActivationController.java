@@ -98,7 +98,7 @@ public class ActivationController {
 	return new ActivationResult(INTERRUPTED, failureMessage);
     }
 
-    private void ensureInitialized(OpeneCardContext sctx) throws InitializationException {
+    public void ensureInitialized(OpeneCardContext sctx) throws InitializationException {
 	if (! sctx.isInitialized()) {
 	    try {
 		sctx.initialize();

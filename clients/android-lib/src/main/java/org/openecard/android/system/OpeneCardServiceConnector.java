@@ -43,7 +43,7 @@ public class OpeneCardServiceConnector {
 
     private ConnectionHandler connectionHandler;
 
-    public static OpeneCardServiceConnector connection;
+    private static OpeneCardServiceConnector connection;
 
     private final Context ctx;
 

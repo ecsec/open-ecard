@@ -22,6 +22,7 @@
 
 package org.openecard.common.util;
 
+import java.io.File;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +51,22 @@ public class SysUtils {
     public static boolean isUnix() {
 	String os = getName();
 	return os.contains("nux") || os.contains("nix") || os.contains("aix");
+    }
+
+    public static boolean isDebianOrDerivate() {
+	return new File("/etc/debian_version").exists();
+    }
+
+    public static boolean isRedhatOrDerivate() {
+	return new File("/etc/redhat-release").exists();
+    }
+
+    public static boolean isArchLinuxOrDerivate() {
+	return new File("/etc/arch-release").exists();
+    }
+
+    public static boolean isSuSEOrDerivate() {
+	return new File("/etc/SuSE-release").exists();
     }
 
 

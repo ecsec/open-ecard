@@ -35,7 +35,7 @@ import static org.openecard.common.Version.UNKNOWN_VERSION;
  *
  * @author Tobias Wich
  */
-public class SemanticVersion {
+public class SemanticVersion implements Comparable<SemanticVersion> {
 
     private final String version;
     private final int major;
@@ -54,7 +54,7 @@ public class SemanticVersion {
 
     private static String cleanVersionString(@Nullable String in) {
 	if (in == null) {
-	    return Version.UNKNOWN_VERSION;
+	    return UNKNOWN_VERSION;
 	} else {
 	    return in;
 	}
@@ -131,51 +131,12 @@ public class SemanticVersion {
      * @return
      */
     public boolean isNewer(@Nonnull SemanticVersion v) {
-	// check if both are unknown or equal
+	// special handling when both are UNKNOWN, then nothing is newer
 	if (UNKNOWN_VERSION.equals(getVersionString()) && UNKNOWN_VERSION.equals(v.getVersionString())) {
 	    return false;
-	} else if (getVersionString().equals(v.getVersionString())) {
-	    return false;
 	}
 
-	// see if any of the versions is unknown
-	if (UNKNOWN_VERSION.equals(getVersionString())) {
-	    return false;
-	} else if (UNKNOWN_VERSION.equals(v.getVersionString())) {
-	    return true;
-	}
-
-	// compare major
-	if (getMajor() > v.getMajor()) {
-	    return true;
-	} else if (getMajor() < v.getMajor()) {
-	    return false;
-	}
-
-	// compare minor
-	if (getMinor() > v.getMinor()) {
-	    return true;
-	} else if (getMinor() < v.getMinor()) {
-	    return false;
-	}
-
-	// compare patch
-	if (getPatch() > v.getPatch()) {
-	    return true;
-	} else if (getPatch() < v.getPatch()) {
-	    return false;
-	}
-
-	// compare build
-	if (getBuildId() == null && v.getBuildId() == null) {
-	    return false;
-	} else if (getBuildId() == null && v.getBuildId() != null) {
-	    return true;
-	} else if (getBuildId() != null && v.getBuildId() == null) {
-	    return false;
-	} else {
-	    return getBuildId().compareTo(v.getBuildId()) < 0;
-	}
+	return this.compareTo(v) > 0;
     }
 
     public boolean isOlder(@Nonnull SemanticVersion v) {
@@ -183,7 +144,42 @@ public class SemanticVersion {
     }
 
     public boolean isSame(@Nonnull SemanticVersion v) {
-	return ! this.isNewer(v) && ! v.isNewer(this);
+	return this.compareTo(v) == 0;
+    }
+
+    @Override
+    public int compareTo(SemanticVersion o) {
+	// special handling of the UNKOWN value which is always the smaller version
+	// check if both are unknown
+	if (UNKNOWN_VERSION.equals(getVersionString()) && UNKNOWN_VERSION.equals(o.getVersionString())) {
+	    return 0;
+	}
+	// see if any of the versions is unknown
+	if (UNKNOWN_VERSION.equals(this.getVersionString())) {
+	    return -1;
+	} else if (UNKNOWN_VERSION.equals(o.getVersionString())) {
+	    return 1;
+	}
+
+	if (this.getMajor() != o.getMajor()) {
+	    return Integer.compare(this.getMajor(), o.getMajor());
+	}
+	if (this.getMinor() != o.getMinor()) {
+	    return Integer.compare(this.getMinor(), o.getMinor());
+	}
+	if (this.getPatch() != o.getPatch()) {
+	    return Integer.compare(this.getPatch(), o.getPatch());
+	}
+
+	if (this.getBuildId() == null && o.getBuildId() == null) {
+	    return 0;
+	} else if (this.getBuildId() != null && o.getBuildId() == null) {
+	    return -1;
+	} else if (this.getBuildId() == null && o.getBuildId() != null) {
+	    return 1;
+	} else {
+	    return this.getBuildId().compareTo(o.getBuildId());
+	}
     }
 
 }

@@ -134,7 +134,17 @@ public class VersionUpdateChecker {
 	VersionUpdate major = getMajorUpgrade();
 	VersionUpdate minor = getMinorUpgrade();
 	VersionUpdate sec = getSecurityUpgrade();
-	return major != null || minor != null || sec != null;
+
+	return major != null || minor != null || sec != null || ! isCurrentMaintained();
+    }
+
+    public boolean isCurrentMaintained() {
+	VersionUpdate cur = getCurrentVersion();
+	if (cur != null) {
+	    return cur.getStatus() == VersionUpdate.Status.MAINTAINED;
+	}
+	// version not in list means not maintained
+	return false;
     }
 
     @Nullable
@@ -202,6 +212,17 @@ public class VersionUpdateChecker {
 	}
 
 	// no newer version available
+	return null;
+    }
+
+    @Nullable
+    public VersionUpdate getCurrentVersion() {
+	for (VersionUpdate next : updates) {
+	    if (installedVersion.isSame(next.getVersion())) {
+		return next;
+	    }
+	}
+
 	return null;
     }
 

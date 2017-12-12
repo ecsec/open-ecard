@@ -71,6 +71,12 @@
 			<groupId>org.openecard</groupId>
 			<artifactId>common</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.json</groupId>
+					<artifactId>json</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard</groupId>

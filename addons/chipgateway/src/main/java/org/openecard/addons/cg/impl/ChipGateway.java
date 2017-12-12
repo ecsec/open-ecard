@@ -81,8 +81,8 @@ import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.SecurityConditionUnsatisfiable;
+import org.openecard.common.SemanticVersion;
 import org.openecard.common.ThreadTerminateException;
-import org.openecard.common.Version;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteComparator;
@@ -834,8 +834,8 @@ public class ChipGateway {
     }
 
     private boolean isUpdateNecessary(String minimumVersion) {
-	Version requiredVersion = new Version(null, minimumVersion, null, null);
-	Version appVersion = new Version(null, AppVersion.getVersion(), null, null);
+	SemanticVersion requiredVersion = new SemanticVersion(minimumVersion);
+	SemanticVersion appVersion = AppVersion.getVersion();
 	return appVersion.isOlder(requiredVersion);
     }
 

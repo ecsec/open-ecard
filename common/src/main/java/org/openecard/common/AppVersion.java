@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -101,12 +101,22 @@ public class AppVersion {
     }
 
     /**
+     * Gets the version of the application.
+     *
+     * @return The version of the application.
+     */
+    public static SemanticVersion getVersion() {
+	return INST.getVersion();
+    }
+
+    /**
      * Get complete version string with major, minor and patch version separated by dots.
      * If available, the build ID is appended with a dash as seperator.
+     *
      * @return AppVersion string or the string UNKNOWN if version is invalid or unavailable.
      */
-    public static String getVersion() {
-	return INST.getVersion();
+    public static String getVersionString() {
+	return INST.getVersion().getVersionString();
     }
 
     /**
@@ -114,7 +124,7 @@ public class AppVersion {
      * @return Major version number or 0 if version is invalid or unavailable.
      */
     public static int getMajor() {
-	return INST.getMajor();
+	return INST.getVersion().getMajor();
     }
 
     /**
@@ -122,7 +132,7 @@ public class AppVersion {
      * @return Major version number or 0 if version is invalid or unavailable.
      */
     public static int getMinor() {
-	return INST.getMinor();
+	return INST.getVersion().getMinor();
     }
 
     /**
@@ -130,7 +140,7 @@ public class AppVersion {
      * @return Major version number or 0 if version is invalid or unavailable.
      */
     public static int getPatch() {
-	return INST.getPatch();
+	return INST.getVersion().getPatch();
     }
 
     /**
@@ -138,7 +148,7 @@ public class AppVersion {
      * @return Build ID without suffix or null when no build suffix is used.
      */
     public static String getBuildId() {
-	return INST.getBuildId();
+	return INST.getVersion().getBuildId();
     }
 
     /**

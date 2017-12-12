@@ -43,7 +43,7 @@ public class AppVersionTest {
 	String name = AppVersion.getName();
 	Assert.assertEquals(name, refName);
 
-	String version = AppVersion.getVersion();
+	String version = AppVersion.getVersionString();
 	int major = AppVersion.getMajor();
 	int minor = AppVersion.getMinor();
 	int patch = AppVersion.getPatch();
@@ -62,17 +62,17 @@ public class AppVersionTest {
 	Version new2 = new Version(null, "1.1.0", null, null);
 	Version snap = new Version(null, "1.1.0-rc1", null, null);
 
-	Assert.assertTrue(old.isOlder(new1));
-	Assert.assertFalse(new1.isOlder(old));
+	Assert.assertTrue(old.getVersion().isOlder(new1.getVersion()));
+	Assert.assertFalse(new1.getVersion().isOlder(old.getVersion()));
 
-	Assert.assertFalse(new1.isNewer(new2));
-	Assert.assertFalse(new2.isNewer(new1));
-	Assert.assertFalse(new1.isOlder(new2));
-	Assert.assertFalse(new2.isOlder(new1));
-	Assert.assertTrue(new1.isSame(new2));
+	Assert.assertFalse(new1.getVersion().isNewer(new2.getVersion()));
+	Assert.assertFalse(new2.getVersion().isNewer(new1.getVersion()));
+	Assert.assertFalse(new1.getVersion().isOlder(new2.getVersion()));
+	Assert.assertFalse(new2.getVersion().isOlder(new1.getVersion()));
+	Assert.assertTrue(new1.getVersion().isSame(new2.getVersion()));
 
-	Assert.assertFalse(new1.isSame(snap));
-	Assert.assertTrue(new1.isNewer(snap));
+	Assert.assertFalse(new1.getVersion().isSame(snap.getVersion()));
+	Assert.assertTrue(new1.getVersion().isNewer(snap.getVersion()));
     }
 
 }

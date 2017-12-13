@@ -20,11 +20,10 @@
  *
  ***************************************************************************/
 
-package org.openecard.android;
+package org.openecard.android.system;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import org.openecard.android.system.ServiceResponseLevel;
 
 
 /**

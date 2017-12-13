@@ -23,13 +23,18 @@
 package org.openecard.android.system;
 
 import android.app.Activity;
-import org.openecard.android.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Client class for the Android Service initializing the Open eCard Stack.
+ * <p>This class provides asynchronous methods to initialize the stack. Once the stack is initialized, the context
+ * object is handed over in the callback functions of the provided callback handler. The handler functions are run in
+ * the activity's UI thread.</p>
+ * The class automatically adjusts its inner state when the Open eCard Stack is stopped from the outside.
  *
+ * @author Tobias Wich
  * @author Mike Prechtl
  */
 public class OpeneCardServiceClientHandler {
@@ -38,9 +43,9 @@ public class OpeneCardServiceClientHandler {
 
     private final Activity activity;
     private final OpeneCardServiceClient client;
-    private final ConnectionHandler connectionHandler;
+    private final OpeneCardServiceHandler connectionHandler;
 
-    public OpeneCardServiceClientHandler(Activity activity, ConnectionHandler handler) {
+    public OpeneCardServiceClientHandler(Activity activity, OpeneCardServiceHandler handler) {
 	this.activity = activity;
 	this.client = new OpeneCardServiceClient(activity);
 	this.connectionHandler = handler;
@@ -50,6 +55,9 @@ public class OpeneCardServiceClientHandler {
     /// Public methods
     ///
 
+    /**
+     * Starts the service asynchronously and calls the appropriate callback functions once it is finished.
+     */
     public void startService() {
 	new Thread(new Runnable() {
 	    @Override
@@ -65,6 +73,9 @@ public class OpeneCardServiceClientHandler {
 	}, "OeC Service Start").start();
     }
 
+    /**
+     * Stops the service asynchronously and calls the appropriate callback functions once it is finished.
+     */
     public void stopService() {
 	new Thread(new Runnable() {
 	    @Override
@@ -80,6 +91,12 @@ public class OpeneCardServiceClientHandler {
 	}, "OeC Service Stop").start();
     }
 
+    /**
+     * Returns whether the Open eCard Stack is initialized or not.
+     * This value can also change when the service managing the stack is stopped from the outside.
+     *
+     * @return {@code true} if the stack is initialized, {@code false} otherwise.
+     */
     public boolean isInitialized() {
 	return client.isInitialized();
     }

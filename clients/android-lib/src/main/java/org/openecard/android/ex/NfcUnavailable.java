@@ -22,7 +22,7 @@
 
 package org.openecard.android.ex;
 
-import static org.openecard.android.ServiceMessages.*;
+import static org.openecard.android.system.ServiceMessages.*;
 
 
 /**

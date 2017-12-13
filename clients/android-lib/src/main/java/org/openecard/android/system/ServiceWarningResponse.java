@@ -23,7 +23,6 @@
 package org.openecard.android.system;
 
 import android.os.Parcel;
-import org.openecard.android.ServiceResponse;
 import org.openecard.android.system.ServiceResponseLevel;
 
 

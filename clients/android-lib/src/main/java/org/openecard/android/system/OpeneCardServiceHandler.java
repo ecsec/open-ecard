@@ -27,7 +27,7 @@ package org.openecard.android.system;
  *
  * @author Mike Prechtl
  */
-public interface ConnectionHandler {
+public interface OpeneCardServiceHandler {
 
     /**
      * This method indicates that establishing a connection to the service was successful.

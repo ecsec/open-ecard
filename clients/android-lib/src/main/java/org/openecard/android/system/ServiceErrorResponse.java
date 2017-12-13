@@ -22,7 +22,6 @@
 
 package org.openecard.android.system;
 
-import org.openecard.android.ServiceResponse;
 import android.os.Parcel;
 
 

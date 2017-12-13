@@ -22,19 +22,17 @@
 
 package org.openecard.android.system;
 
-import org.openecard.android.ServiceResponse;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import javax.annotation.Nullable;
-import org.openecard.android.OpeneCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.android.system.ServiceConstants.*;
-import static org.openecard.android.ServiceMessages.*;
-import static org.openecard.android.ServiceResponseStatusCodes.*;
+import static org.openecard.android.system.ServiceMessages.*;
+import static org.openecard.android.system.ServiceResponseStatusCodes.*;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
@@ -42,7 +40,10 @@ import org.openecard.android.ex.UnableToInitialize;
 
 
 /**
+ * Implementation of the Android service managing the Open eCard Stack.
+ *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public class OpeneCardServiceImpl extends Service {
 

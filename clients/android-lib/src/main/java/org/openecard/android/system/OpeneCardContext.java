@@ -29,8 +29,7 @@ import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
 import org.openecard.android.ex.UnableToInitialize;
 import static org.openecard.android.system.ServiceConstants.*;
-import static org.openecard.android.ServiceContextConstants.*;
-import static org.openecard.android.ServiceMessages.*;
+import static org.openecard.android.system.ServiceMessages.*;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -77,13 +76,22 @@ import org.openecard.gui.definition.ViewController;
 
 
 /**
- * Provide the access to the ifd, sal, ... This class initializes the whole Open eCard Context.
+ * Context object containing references to all internal objects of the Open eCard Stack.
+ * This object can be obtained by either {@link OpeneCardServiceClient} or {@link OpeneCardServiceClientHandler}.
+ * Instances of this class must not be used after the the Open eCard stack has been stopped.
  *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public class OpeneCardContext implements EventCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardContext.class);
+
+    public static final String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
+    public static final String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
+    public static final String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
+    public static final String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.android.AndroidMarshaller";
+
 
     private ClientEnv env;
 

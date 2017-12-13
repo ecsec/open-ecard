@@ -91,11 +91,13 @@ public class NfcUtils {
     public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
 	// indicates that a nfc tag is there
 	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
-	    // set nfc tag with timeout of five seconds
-	    NFCFactory.setNFCTag(tagFromIntent, 5000);
-	} else {
-	    throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
+	if (tagFromIntent != null) {
+	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
+		// set nfc tag with timeout of five seconds
+		NFCFactory.setNFCTag(tagFromIntent, 5000);
+	    } else {
+		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
+	    }
 	}
     }
 

@@ -40,8 +40,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Low level functionality to perform the activation procedure according to BSI TR-03124-1.
  *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public class ActivationController {
 
@@ -49,10 +51,23 @@ public class ActivationController {
 
     private final OpeneCardContext sctx;
 
+    /**
+     * Creates an instance of the controller bound to the currently initialized Open eCard Stack.
+     * The Open eCard Stack is represented by the context object.
+     *
+     * @param sctx
+     */
     public ActivationController(OpeneCardContext sctx) {
 	this.sctx = sctx;
     }
 
+    /**
+     * Performs an activation according to BSI TR-03124-1, but does not perform the return to web session part.
+     * A result containing the outcome of the
+     *
+     * @param url
+     * @return
+     */
     public ActivationResult activate(String url) {
 	// create request uri and extract query strings
 	URI requestURI = URI.create(url);

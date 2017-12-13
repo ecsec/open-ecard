@@ -27,7 +27,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import org.openecard.android.ServiceResponse;
+import javax.annotation.Nullable;
+import org.openecard.android.system.ServiceResponse;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.system.OpeneCardServiceClient;
@@ -43,11 +44,14 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class provides the basic functionality as specified in the technical guideline and the
- * initialisation of the Eac UI interface service. By extending the class, the UI can be added
- * (see BindingActivity in <a href="https://github.com/ecsec/open-ecard-android">ecsec/open-ecard-android</a>).
+ * This class provides the basic eID activation functionality as specified in BSI TR-03124-1.
+ * <p>It takes care of performing the Intent handling, initializing the Open eCard Stack (Service) and provides
+ * the EacGui interface which is needed to implement the UI.</p>
+ * <p>An example implementation can be found in the CustomActivationActivity in
+ * <a href="https://github.com/ecsec/open-ecard-android">ecsec/open-ecard-android</a>).</p>
  *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public abstract class AbstractActivationActivity extends Activity implements ActivationImplementationInterface {
 
@@ -58,6 +62,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     private EacGui eacGui;
 
     private OpeneCardContext octx;
+    private Class<?> returnClass;
 
     @Override
     protected synchronized void onResume() {
@@ -106,8 +111,11 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	// add callback to this abstract activity when card is removed
 	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
 
-	Uri data = getIntent().getData();
+	Intent actIntent = getIntent();
+	Uri data = actIntent.getData();
+	returnClass = forClassName(actIntent.getStringExtra(RETURN_CLASS));
 	final String eIDUrl = data.toString();
+
 	if (eIDUrl != null) {
 	    waitForEacGui();
 	    // startService TR procedure according to [BSI-TR-03124-1]
@@ -125,15 +133,33 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	}
     }
 
+    private Class<?> forClassName(@Nullable String className) {
+	if (className != null) {
+	    try {
+		return getClassLoader().loadClass(className);
+	    } catch (ClassNotFoundException ex) {
+		LOG.error("Invalid return class named in activation intent.", ex);
+	    }
+	}
+
+	return null;
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
-	try {
-	    // extract nfc tag
-	    NfcUtils.getInstance().retrievedNFCTag(intent);
-	} catch (ApduExtLengthNotSupported ex) {
-	    LOG.error(ex.getMessage());
+	checkNfcTag(intent);
+    }
+
+    private void checkNfcTag(Intent intent) {
+	if (this.octx != null) {
+	    try {
+		// extract nfc tag
+		NfcUtils.getInstance().retrievedNFCTag(intent);
+	    } catch (ApduExtLengthNotSupported ex) {
+		LOG.error(ex.getMessage());
+	    }
 	}
     }
 
@@ -146,6 +172,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	if (octx != null) {
 	    octx.getEventDispatcher().del(eventReceiver);
 	}
+	returnClass = null;
 	octx = null;
     }
 
@@ -232,18 +259,27 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		    // perform redirect
 		    if (location != null) {
 			// redirect to result location
-			Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-			startActivity(i);
+			startActivity(createRedirectIntent(location));
 		    }
 		}
 	    });
 	} else {
 	    if (location != null) {
 		// redirect to result location
-		Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-		startActivity(i);
+		startActivity(createRedirectIntent(location));
 	    }
 	}
+    }
+
+    private Intent createRedirectIntent(String location) {
+	Intent i;
+	Uri redirectUri = Uri.parse(location);
+	if (returnClass != null) {
+	    i = new Intent(Intent.ACTION_VIEW, redirectUri, this, returnClass);
+	} else {
+	    i = new Intent(Intent.ACTION_VIEW, redirectUri);
+	}
+	return i;
     }
 
 }

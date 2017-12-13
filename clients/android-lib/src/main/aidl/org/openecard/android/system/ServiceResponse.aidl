@@ -20,19 +20,6 @@
  *
  ***************************************************************************/
 
-package org.openecard.android;
+package org.openecard.android.system;
 
-
-/**
- * Contains constants for the Open eCard Service.
- *
- * @author Mike Prechtl
- */
-public class ServiceContextConstants {
-
-    public static final String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
-    public static final String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
-    public static final String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
-    public static final String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.android.AndroidMarshaller";
-
-}
+parcelable ServiceResponse;

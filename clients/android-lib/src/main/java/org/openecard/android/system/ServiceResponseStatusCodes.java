@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android;
+package org.openecard.android.system;
 
 
 /**

@@ -20,9 +20,9 @@
  *
  ***************************************************************************/
 
-package org.openecard.android;
+package org.openecard.android.system;
 
-import org.openecard.android.ServiceResponse;
+import org.openecard.android.system.ServiceResponse;
 
 
 interface OpeneCardService {

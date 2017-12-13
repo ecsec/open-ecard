@@ -28,17 +28,20 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import org.openecard.android.OpeneCardService;
-import org.openecard.android.ServiceResponse;
-import static org.openecard.android.ServiceResponseStatusCodes.INTERNAL_ERROR;
+import static org.openecard.android.system.ServiceResponseStatusCodes.INTERNAL_ERROR;
 import org.openecard.common.util.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
+ * Client class for the Android Service initializing the Open eCard Stack.
+ * <p>This class provides synchronous methods to initialize the stack. Once the stack is initialized, the context object
+ * can be obtained.</p>
+ * The class automatically adjusts its inner state when the Open eCard Stack is stopped from the outside.
  *
  * @author Tobias Wich
+ * @author Mike Prechtl
  */
 public class OpeneCardServiceClient {
 
@@ -70,6 +73,11 @@ public class OpeneCardServiceClient {
 	}
     };
 
+    /**
+     * Synchronously start the Open eCard Stack.
+     *
+     * @return The result of the start function.
+     */
     public ServiceResponse startService() {
 	try {
 	    if (! isInitialized) {
@@ -85,6 +93,12 @@ public class OpeneCardServiceClient {
 	}
     }
 
+    /**
+     * Synchronously stop the Open eCard Stack.
+     *
+     * @return The result of the stop function.
+     * @throws IllegalStateException Thrown in case the service is already stopped.
+     */
     public ServiceResponse stopService() throws IllegalStateException {
 	try {
 	    if (! isInitialized) {
@@ -98,12 +112,25 @@ public class OpeneCardServiceClient {
 	}
     }
 
+    /**
+     * Returns whether the Open eCard Stack is initialized or not.
+     * This value can also change when the service managing the stack is stopped from the outside.
+     *
+     * @return {@code true} if the stack is initialized, {@code false} otherwise.
+     */
     public boolean isInitialized() {
 	return isInitialized;
     }
 
+    /**
+     * Gets the context object when the Open eCard Stack is intialized.
+     * 
+     * @return The context object.
+     * @throws IllegalStateException Thrown in case the stack is not initialized.
+     * @see {@link #isInitialized()} for information when this method may be called.
+     */
     public OpeneCardContext getContext() throws IllegalStateException {
-	if (isInitialized) {
+	if (isInitialized()) {
 	    return OpeneCardServiceImpl.getContext();
 	} else {
 	    throw new IllegalStateException("Requested unitialized Context object.");

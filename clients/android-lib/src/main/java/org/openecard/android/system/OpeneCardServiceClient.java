@@ -1,0 +1,117 @@
+/****************************************************************************
+ * Copyright (C) 2017 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
+package org.openecard.android.system;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
+import org.openecard.android.OpeneCardService;
+import org.openecard.android.ServiceResponse;
+import static org.openecard.android.ServiceResponseStatusCodes.INTERNAL_ERROR;
+import org.openecard.common.util.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ *
+ * @author Tobias Wich
+ */
+public class OpeneCardServiceClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceClient.class);
+
+    private final Context appCtx;
+    private Promise<OpeneCardService> oecService;
+    private boolean isInitialized;
+
+    public OpeneCardServiceClient(Context appCtx) {
+	this.appCtx = appCtx;
+	oecService = new Promise<>();
+	isInitialized = false;
+    }
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+	@Override
+	public void onServiceConnected(ComponentName componentName, IBinder service) {
+	    LOG.info("Open eCard Service bound.");
+	    OpeneCardService s = OpeneCardService.Stub.asInterface(service);
+	    oecService.deliver(s);
+	    isInitialized = true;
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName componentName) {
+	    oecService = new Promise<>();
+	    isInitialized = false;
+	}
+    };
+
+    public ServiceResponse startService() {
+	try {
+	    if (! isInitialized) {
+		Intent i = createOpeneCardIntent();
+		appCtx.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+	    }
+
+	    // wait until service is connected, then call startService
+	    OpeneCardService s = oecService.deref();
+	    return s.startService();
+	} catch (InterruptedException | RemoteException ex) {
+	    return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+	}
+    }
+
+    public ServiceResponse stopService() throws IllegalStateException {
+	try {
+	    if (! isInitialized) {
+		throw new IllegalStateException("Trying to stop uninitialized service.");
+	    }
+
+	    OpeneCardService s = oecService.deref();
+	    return s.stopService();
+	} catch (InterruptedException | RemoteException ex) {
+	    return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+	}
+    }
+
+    public boolean isInitialized() {
+	return isInitialized;
+    }
+
+    public OpeneCardContext getContext() throws IllegalStateException {
+	if (isInitialized) {
+	    return OpeneCardServiceImpl.getContext();
+	} else {
+	    throw new IllegalStateException("Requested unitialized Context object.");
+	}
+    }
+
+    private Intent createOpeneCardIntent() {
+	return new Intent(appCtx, OpeneCardServiceImpl.class);
+    }
+
+}

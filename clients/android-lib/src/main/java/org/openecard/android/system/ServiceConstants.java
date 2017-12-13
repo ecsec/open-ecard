@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android;
+package org.openecard.android.system;
 
 
 /**
@@ -31,9 +31,7 @@ package org.openecard.android;
 public class ServiceConstants {
 
     public static final int REQUIRED_API = 21;
-    public static final String INTENT_KEY_FOR_RESPONSE = "response";
     public static final String SUCCESS = "success";
     public static final String FAILURE = "failure";
-    public static final String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
 }

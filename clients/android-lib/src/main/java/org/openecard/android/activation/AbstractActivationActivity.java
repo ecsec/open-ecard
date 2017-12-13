@@ -27,9 +27,11 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import org.openecard.android.ServiceResponse;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.ex.InitializationException;
+import org.openecard.android.system.OpeneCardServiceClient;
+import static org.openecard.android.system.ServiceResponseLevel.INFO;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
@@ -47,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Mike Prechtl
  */
-public abstract class AbstractActivationActivity extends Activity {
+public abstract class AbstractActivationActivity extends Activity implements ActivationImplementationInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationActivity.class);
 
@@ -55,7 +57,7 @@ public abstract class AbstractActivationActivity extends Activity {
 
     private EacGui eacGui;
 
-    private volatile boolean alreadyInitialized = false;
+    private OpeneCardContext octx;
 
     @Override
     protected synchronized void onResume() {
@@ -81,36 +83,48 @@ public abstract class AbstractActivationActivity extends Activity {
     protected void onStart() {
 	super.onStart();
 
-	try {
-	    final ActivationController ac = new ActivationController();
-	    OpeneCardContext octx = ac.ensureInitialized();
-
-	    // add callback to this abstract activity when card is removed
-	    OpeneCardContext.getContext();
-	    octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
-
-	    Uri data = getIntent().getData();
-	    final String eIDUrl = data.toString();
-	    if (eIDUrl != null) {
-		waitForEacGui();
-		// start TR procedure according to [BSI-TR-03124-1]
-		new Thread(new Runnable() {
-		    @Override
-		    public void run() {
-			ActivationResult result = ac.activate(eIDUrl);
-			handleActivationResult(result);
-		    }
-		}, "ActivationThread").start();
-		// when app is closed or minimized the authentication process is interrupted and have to start again
-	    } else {
-		handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
-			"Authentication process already finished."));
+	final OpeneCardServiceClient client = new OpeneCardServiceClient(this);
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		ServiceResponse r = client.startService();
+		switch (r.getResponseLevel()) {
+		    case INFO:
+			onOecInitSuccess(client.getContext());
+			break;
+		    default:
+			onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR, r.getMessage()));
+		}
 	    }
-	} catch (InitializationException ex) {
+	}, "Oec Service Initializer").start();
+    }
+
+    private void onOecInitSuccess(OpeneCardContext ctx) {
+	this.octx = ctx;
+	final ActivationController ac = new ActivationController(octx);
+
+	// add callback to this abstract activity when card is removed
+	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+
+	Uri data = getIntent().getData();
+	final String eIDUrl = data.toString();
+	if (eIDUrl != null) {
+	    waitForEacGui();
+	    // startService TR procedure according to [BSI-TR-03124-1]
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    ActivationResult result = ac.activate(eIDUrl);
+		    handleActivationResult(result);
+		}
+	    }, "OeC Activation Process").start();
+	    // when app is closed or minimized the authentication process is interrupted and have to startService again
+	} else {
 	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
-		    "eID core failed to initialize."));
+		    "Authentication process already finished."));
 	}
     }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -129,19 +143,13 @@ public abstract class AbstractActivationActivity extends Activity {
 	super.onStop();
 
 	// remove callback which is set onStart
-	OpeneCardContext.getContext().getEventDispatcher().del(eventReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-	super.onDestroy();
-	if (alreadyInitialized) {
-	    alreadyInitialized = false;
+	if (octx != null) {
+	    octx.getEventDispatcher().del(eventReceiver);
 	}
+	octx = null;
     }
 
     private final EventCallback eventReceiver = new EventCallback() {
-
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    if (eventType.equals(EventType.CARD_REMOVED)) {
@@ -158,7 +166,12 @@ public abstract class AbstractActivationActivity extends Activity {
     private void handleActivationResult(final ActivationResult result) {
 	switch (result.getResultCode()) {
 	    case REDIRECT:
-		onAuthenticationSuccess(result);
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			onAuthenticationSuccess(result);
+		    }
+		});
 		break;
 	    default:
 		runOnUiThread(new Runnable() {
@@ -179,7 +192,6 @@ public abstract class AbstractActivationActivity extends Activity {
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		OpeneCardContext octx = OpeneCardContext.getContext();
 		EacNavigatorFactory eacNavFactory = octx.getEacNavigatorFactory();
 		try {
 		    eacGui = eacNavFactory.getIfacePromise().deref();
@@ -198,71 +210,40 @@ public abstract class AbstractActivationActivity extends Activity {
      *
      * @param result which contains additional information to the authentication.
      */
+    @Override
     public void onAuthenticationSuccess(final ActivationResult result) {
 	// show card remove dialog before the redirect occurs
-	// dialog is shown on ui thread
-	runOnUiThread(new Runnable() {
-	    @Override
-	    public void run() {
-		final String location = result.getRedirectUrl();
-		Dialog d = showCardRemoveDialog();
-		if (d != null) {
-		    cardRemoveDialog = d;
-		    d.setCanceledOnTouchOutside(false);
-		    d.setCancelable(false);
-		    // if card remove dialog is not shown, then show it
-		    if (! d.isShowing()) {
-			d.show();
-		    }
-		    // redirect to the termination uri when the card remove dialog is closed
-		    d.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-			    // clean dialog field
-			    cardRemoveDialog = null;
-			    // perform redirect
-			    if (location != null) {
-				// redirect to result location
-				Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
-				startActivity(i);
-			    }
-			}
-		    });
-		} else {
+	final String location = result.getRedirectUrl();
+	Dialog d = showCardRemoveDialog();
+	if (d != null) {
+	    cardRemoveDialog = d;
+	    d.setCanceledOnTouchOutside(false);
+	    d.setCancelable(false);
+	    // if card remove dialog is not shown, then show it
+	    if (! d.isShowing()) {
+		d.show();
+	    }
+	    // redirect to the termination uri when the card remove dialog is closed
+	    d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		@Override
+		public void onDismiss(DialogInterface dialog) {
+		    // clean dialog field
+		    cardRemoveDialog = null;
+		    // perform redirect
 		    if (location != null) {
 			// redirect to result location
 			Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
 			startActivity(i);
 		    }
 		}
+	    });
+	} else {
+	    if (location != null) {
+		// redirect to result location
+		Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(location));
+		startActivity(i);
 	    }
-	});
+	}
     }
-
-    /**
-     * Implement this method to recognize a failed authentication in the Sub-Activity. You can handle the following
-     * steps on your own, for example show that the authentication failed and then close the Activity with finish().
-     * This method is already running on the UI thread.
-     *
-     * @param result  which contains additional information to the authentication.
-     */
-    public abstract void onAuthenticationFailure(ActivationResult result);
-
-    /**
-     * Implement this method to show the card remove dialog. If the authentication process ends, the card should be
-     * removed. To enable this, a card remove dialog is shown to the user. The dialog should contain only a hint for
-     * the user. The dialog can not be removed by the user with a button click, only by the app when the card is removed.
-     *
-     * @return
-     */
-    public abstract Dialog showCardRemoveDialog();
-
-    /**
-     * This method is called if the Eac Gui is available. If this method is called you can access the server data and
-     * start the authentication process.
-     *
-     * @param eacGui
-     */
-    public abstract void onEacIfaceSet(EacGui eacGui);
 
 }

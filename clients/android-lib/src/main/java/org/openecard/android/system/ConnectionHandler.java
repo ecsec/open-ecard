@@ -31,8 +31,9 @@ public interface ConnectionHandler {
 
     /**
      * This method indicates that establishing a connection to the service was successful.
+     * @param ctx The initialized Open eCard context.
      */
-    void onConnectionSuccess();
+    void onConnectionSuccess(OpeneCardContext ctx);
 
     /**
      * This method indicates that establishing a connection to the service failed. The response contains

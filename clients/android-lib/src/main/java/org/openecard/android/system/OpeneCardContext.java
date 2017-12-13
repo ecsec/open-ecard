@@ -28,7 +28,7 @@ import org.openecard.android.utils.ClasspathRegistry;
 import org.openecard.android.ex.NfcDisabled;
 import org.openecard.android.ex.NfcUnavailable;
 import org.openecard.android.ex.UnableToInitialize;
-import static org.openecard.android.ServiceConstants.*;
+import static org.openecard.android.system.ServiceConstants.*;
 import static org.openecard.android.ServiceContextConstants.*;
 import static org.openecard.android.ServiceMessages.*;
 import org.openecard.common.ClientEnv;
@@ -118,106 +118,11 @@ public class OpeneCardContext implements EventCallback {
     // card type of the usable card
     private String cardType;
 
-    private Context appCtx;
+    private final Context appCtx;
 
-    private static OpeneCardContext ctx;
-
-    private OpeneCardContext() {
-
-    }
-
-    public static OpeneCardContext getContext() {
-	synchronized(OpeneCardContext.class) {
-	    if (ctx == null) {
-		ctx = new OpeneCardContext();
-	    }
-	}
-	return ctx;
-    }
-
-
-    ///
-    /// Get-/Setter Methods
-    ///
-
-    public boolean isNFCAvailable() {
-	return nfcAvailable;
-    }
-
-    public boolean isNFCEnabled() {
-	return nfcEnabled;
-    }
-
-    public synchronized boolean isCardAvailable() {
-	return isCardAvailable;
-    }
-
-    public boolean isInitialized() {
-	return initialized;
-    }
-
-    public synchronized String getCardType() {
-	return cardType != null ? cardType : "";
-    }
-
-    public IFD getIFD() {
-	return ifd;
-    }
-
-    public SelectorSAL getSAL() {
-	return sal;
-    }
-
-    public EventDispatcher getEventDispatcher() {
-	return eventDispatcher;
-    }
-
-    public byte[] getContextHandle() {
-	return contextHandle;
-    }
-
-    public TinyManagement getTinyManagement() {
-	return management;
-    }
-
-    public TerminalFactory getTerminalFactory() {
-	return terminalFactory;
-    }
-
-    public Dispatcher getDispatcher() {
-	return dispatcher;
-    }
-
-    public CardRecognitionImpl getRecognition() {
-	return recognition;
-    }
-
-    public CardStateMap getCardStates() {
-	return cardStates;
-    }
-
-    public ClientEnv getEnv() {
-	return env;
-    }
-
-    public UserConsent getGUI() {
-	return gui;
-    }
-
-    public EacNavigatorFactory getEacNavigatorFactory() {
-	return eacNavFac;
-    }
-
-    public AddonManager getManager() {
-	return manager;
-    }
-
-    public Context getApplicationContext() {
-	return appCtx;
-    }
-
-    public void setApplicationContext(Context ctx) {
-	this.appCtx = ctx;
+    // package private so that only this package can use it
+    OpeneCardContext(Context appCtx) {
+	this.appCtx = appCtx;
     }
 
 
@@ -225,7 +130,7 @@ public class OpeneCardContext implements EventCallback {
     /// Initialization & Shutdown
     ///
 
-    public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
+    void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	String errorMsg = SERVICE_RESPONSE_FAILED;
 
 	if (initialized) {
@@ -371,7 +276,7 @@ public class OpeneCardContext implements EventCallback {
 	}
     }
 
-    public String shutdown() {
+    String shutdown() {
 	initialized = false;
 	try {
 	    if (ifd != null && contextHandle != null) {
@@ -435,6 +340,84 @@ public class OpeneCardContext implements EventCallback {
 	    default:
 		break;
 	}
+    }
+
+
+
+    ///
+    /// Get-/Setter Methods
+    ///
+
+    public boolean isNFCAvailable() {
+	return nfcAvailable;
+    }
+
+    public boolean isNFCEnabled() {
+	return nfcEnabled;
+    }
+
+    public synchronized boolean isCardAvailable() {
+	return isCardAvailable;
+    }
+
+    public boolean isInitialized() {
+	return initialized;
+    }
+
+    public synchronized String getCardType() {
+	return cardType != null ? cardType : "";
+    }
+
+    public IFD getIFD() {
+	return ifd;
+    }
+
+    public SelectorSAL getSAL() {
+	return sal;
+    }
+
+    public EventDispatcher getEventDispatcher() {
+	return eventDispatcher;
+    }
+
+    public byte[] getContextHandle() {
+	return contextHandle;
+    }
+
+    public TinyManagement getTinyManagement() {
+	return management;
+    }
+
+    public TerminalFactory getTerminalFactory() {
+	return terminalFactory;
+    }
+
+    public Dispatcher getDispatcher() {
+	return dispatcher;
+    }
+
+    public CardRecognitionImpl getRecognition() {
+	return recognition;
+    }
+
+    public CardStateMap getCardStates() {
+	return cardStates;
+    }
+
+    public ClientEnv getEnv() {
+	return env;
+    }
+
+    public UserConsent getGUI() {
+	return gui;
+    }
+
+    public EacNavigatorFactory getEacNavigatorFactory() {
+	return eacNavFac;
+    }
+
+    public AddonManager getManager() {
+	return manager;
     }
 
 }

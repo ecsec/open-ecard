@@ -47,6 +47,7 @@ public class ClasspathRegistry implements org.openecard.addon.CombiningRegistry 
 	return classpathRegistry;
     }
 
+    @Override
     public FileRegistry getFileRegistry() {
 	return null;
     }

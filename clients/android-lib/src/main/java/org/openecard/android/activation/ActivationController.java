@@ -33,11 +33,6 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import static org.openecard.android.activation.ActivationResultCode.*;
-import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.ex.InitializationException;
-import org.openecard.android.ex.NfcDisabled;
-import org.openecard.android.ex.NfcUnavailable;
-import org.openecard.android.ex.UnableToInitialize;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.slf4j.Logger;
@@ -52,15 +47,13 @@ public class ActivationController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActivationController.class);
 
-    public ActivationResult activate(String url) {
-	// ensure that service context is initialized
-	OpeneCardContext sctx;
-	try {
-	    sctx = ensureInitialized();
-	} catch (InitializationException ex) {
-	    return new ActivationResult(INTERNAL_ERROR, ex.getMessage());
-	}
+    private final OpeneCardContext sctx;
 
+    public ActivationController(OpeneCardContext sctx) {
+	this.sctx = sctx;
+    }
+
+    public ActivationResult activate(String url) {
 	// create request uri and extract query strings
 	URI requestURI = URI.create(url);
 	String path = requestURI.getPath();
@@ -96,18 +89,6 @@ public class ActivationController {
 	}
 
 	return new ActivationResult(INTERRUPTED, failureMessage);
-    }
-
-    public OpeneCardContext ensureInitialized() throws InitializationException {
-	OpeneCardContext sctx = OpeneCardContext.getContext();
-	if (! sctx.isInitialized()) {
-	    try {
-		sctx.initialize();
-	    } catch (UnableToInitialize | NfcUnavailable | NfcDisabled | ApduExtLengthNotSupported ex) {
-		throw new InitializationException(ex);
-	    }
-	}
-	return sctx;
     }
 
     private ActivationResult createActivationResult(BindingResult result) {

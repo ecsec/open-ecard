@@ -27,8 +27,8 @@ import org.openecard.android.ServiceResponse;
 
 interface OpeneCardService {
 
-    ServiceResponse start();
+    ServiceResponse startService();
 
-    ServiceResponse stop();
+    ServiceResponse stopService();
 
 }

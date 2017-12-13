@@ -35,7 +35,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.scio.NFCFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,52 +71,37 @@ public class NfcUtils {
     }
 
     public void enableNFCDispatch(Activity activity) {
-	OpeneCardContext octx = OpeneCardContext.getContext();
-	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
+	if (isNfcAvailableAndEnabled(activity)) {
 	    LOG.debug("Enable NFC foreground dispatch...");
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
 	    // enable dispatch of messages with nfc tag
-	    Context appCtx = octx.getApplicationContext();
-	    NfcAdapter.getDefaultAdapter(appCtx).enableForegroundDispatch(activity, pendingIntent, null, null);
+	    NfcAdapter.getDefaultAdapter(activity).enableForegroundDispatch(activity, pendingIntent, null, null);
 	}
     }
 
     public void disableNFCDispatch(Activity activity) {
-	OpeneCardContext octx = OpeneCardContext.getContext();
-	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
+	if (isNfcAvailableAndEnabled(activity)) {
 	    LOG.debug("Disable NFC foreground dispatch...");
 	    // disable dispatch of messages with nfc tag
-	    Context appCtx = octx.getApplicationContext();
-	    NfcAdapter.getDefaultAdapter(appCtx).disableForegroundDispatch(activity);
+	    NfcAdapter.getDefaultAdapter(activity).disableForegroundDispatch(activity);
 	}
     }
 
     public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
 	// indicates that a nfc tag is there
-	if (isContextInitialized() && isNfcAvailableAndEnabled()) {
-	    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
-		// set nfc tag with timeout of five seconds
-		NFCFactory.setNFCTag(tagFromIntent, 5000);
-	    } else {
-		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
-	    }
-	}
-    }
-
-    private boolean isContextInitialized() {
-	OpeneCardContext octx = OpeneCardContext.getContext();
-	if (octx == null) {
-	    throw new IllegalStateException("Please provide a ServiceContext instance.");
+	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
+	    // set nfc tag with timeout of five seconds
+	    NFCFactory.setNFCTag(tagFromIntent, 5000);
 	} else {
-	    return octx.isInitialized();
+	    throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
 	}
     }
 
-    private boolean isNfcAvailableAndEnabled() {
-	OpeneCardContext octx = OpeneCardContext.getContext();
-	return octx.isNFCAvailable() && octx.isNFCEnabled();
+    private boolean isNfcAvailableAndEnabled(Context ctx) {
+	NFCFactory.setContext(ctx);
+	return NFCFactory.isNFCAvailable() && NFCFactory.isNFCEnabled();
     }
 
 

@@ -121,7 +121,7 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     @Override
     public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
-	if (this.nfcCard.isodep == null) {
+	if (nfcCard == null || nfcCard.isodep == null) {
 	    String msg = "No tag present.";
 	    LOG.warn(msg);
 	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);

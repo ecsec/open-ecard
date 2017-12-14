@@ -43,15 +43,24 @@ import org.slf4j.LoggerFactory;
 public class NFCCard implements SCIOCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
+
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
     private final NFCCardTerminal nfcCardTerminal;
     private final int timeoutForTransceive;
+    private final byte[] histBytes;
+
     protected IsoDep isodep;
 
     public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) {
 	isodep = tag;
 	timeoutForTransceive = timeout;
 	nfcCardTerminal = terminal;
+
+	byte[] histBytesTmp = isodep.getHistoricalBytes();
+	if (histBytesTmp == null) {
+	    histBytesTmp = isodep.getHiLayerResponse();
+	}
+	this.histBytes = histBytesTmp;
     }
 
     public int getTimeoutForTransceive() {
@@ -76,10 +85,6 @@ public class NFCCard implements SCIOCard {
     @Override
     public SCIOATR getATR() {
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
-	byte[] histBytes = isodep.getHistoricalBytes();
-	if (histBytes == null) {
-	    histBytes = isodep.getHiLayerResponse();
-	}
 	if (histBytes == null) {
 	    return new SCIOATR(new byte[0]);
 	} else {

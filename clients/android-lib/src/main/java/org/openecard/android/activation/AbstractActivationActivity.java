@@ -59,6 +59,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 
     private Dialog cardRemoveDialog;
 
+    private Thread authThread;
     private EacGui eacGui;
 
     private OpeneCardContext octx;
@@ -119,13 +120,14 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	if (eIDUrl != null) {
 	    waitForEacGui();
 	    // startService TR procedure according to [BSI-TR-03124-1]
-	    new Thread(new Runnable() {
+	    authThread = new Thread(new Runnable() {
 		@Override
 		public void run() {
 		    ActivationResult result = ac.activate(eIDUrl);
 		    handleActivationResult(result);
 		}
-	    }, "OeC Activation Process").start();
+	    }, "OeC Activation Process");
+	    authThread.start();
 	    // when app is closed or minimized the authentication process is interrupted and have to startService again
 	} else {
 	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
@@ -184,13 +186,37 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		if (d != null && d.isShowing()) {
 		    d.dismiss();
 		}
+
+		Thread at = authThread;
+		if (at != null) {
+		    try {
+			LOG.info("Stopping Authentication thread ...");
+			at.interrupt();
+			at.join();
+			LOG.info("Authentication thread has stopped.");
+
+			// cancel task and handle event
+			String msg = "";
+			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+			handleActivationResult(r);
+		    } catch (InterruptedException ex) {
+			LOG.error("Waiting for Authentication thread interrupted.");
+		    }
+		}
 	    } else {
-		throw new IllegalStateException("Recognized an unsupported Event: " + eventType.name());
+		LOG.debug("Received an unsupported Event: " + eventType.name());
 	    }
 	}
     };
 
-    private void handleActivationResult(final ActivationResult result) {
+    private synchronized void handleActivationResult(final ActivationResult result) {
+	// only this first invocation must be processed, in order to prevent double finish when cancelling the auth job
+	if (authThread == null) {
+	    return;
+	} else {
+	    authThread = null;
+	}
+
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		runOnUiThread(new Runnable() {

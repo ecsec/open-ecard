@@ -191,23 +191,6 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		    if (d != null && d.isShowing()) {
 			d.dismiss();
 		    }
-
-		    Thread at = authThread;
-		    if (at != null) {
-			try {
-			    LOG.info("Stopping Authentication thread ...");
-			    at.interrupt();
-			    at.join();
-			    LOG.info("Authentication thread has stopped.");
-
-			    // cancel task and handle event
-			    String msg = "";
-			    ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
-			    handleActivationResult(r);
-			} catch (InterruptedException ex) {
-			    LOG.error("Waiting for Authentication thread interrupted.");
-			}
-		    }
 		    break;
 		case CARD_RECOGNIZED:
 		    Set<String> supportedCards = getSupportedCards();
@@ -287,6 +270,26 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     public void onCardInserted(String cardType) {
 	// default implementation does nothing
 	LOG.info("Card recognized event received in activity: cardType={}", cardType);
+    }
+
+    @Override
+    public void cancelAuthentication() {
+	Thread at = authThread;
+	if (at != null) {
+	    try {
+		LOG.info("Stopping Authentication thread ...");
+		at.interrupt();
+		at.join();
+		LOG.info("Authentication thread has stopped.");
+
+		// cancel task and handle event
+		String msg = "";
+		ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+		handleActivationResult(r);
+	    } catch (InterruptedException ex) {
+		LOG.error("Waiting for Authentication thread interrupted.");
+	    }
+	}
     }
 
 

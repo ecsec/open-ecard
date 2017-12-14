@@ -24,7 +24,6 @@ package org.openecard.android.activation;
 
 import android.app.Dialog;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.gui.android.eac.EacGui;
 
@@ -112,5 +111,11 @@ public interface ActivationImplementationInterface {
      */
     @Nullable
     Dialog showCardRemoveDialog();
+
+    /**
+     * Cancels the running authentication if there is one running.
+     * This method is safe to call even though there is no running authentication.
+     */
+    void cancelAuthentication();
 
 }

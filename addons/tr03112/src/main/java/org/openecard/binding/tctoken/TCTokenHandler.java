@@ -341,6 +341,7 @@ public class TCTokenHandler {
 	    }
 
 	    String errorMsg = innerException.getLocalizedMessage();
+	    errorMsg = errorMsg == null ? "" : errorMsg; // fix NPE when null is returned instead of a message
 	    switch (errorMsg) {
 		case "The target server failed to respond":
 		    errorMsg = LANG_TR.translationForKey(NO_RESPONSE_FROM_SERVER);

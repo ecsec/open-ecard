@@ -198,7 +198,7 @@ public class TCTokenHandler {
 		    // send StartPAOS
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
-		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui);
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui, evManager);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();

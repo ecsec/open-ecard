@@ -260,13 +260,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC1}); // pin suspended 1 try left CAN
 											// needs to be entered
 	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC0}); // pin blocked 0 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x62, (byte) 0x83}); // pin deaktivated
+	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x62, (byte) 0x83}); // pin deactivated
 
 	    Transmit transmit = new Transmit();
 	    transmit.setSlotHandle(slotHandle);
 	    transmit.getInputAPDUInfo().add(input);
 
 	    TransmitResponse pinCheckResponse = (TransmitResponse) dispatcher.safeDeliver(transmit);
+	    WSHelper.checkResult(pinCheckResponse);
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
 	    CardResponseAPDU outputApdu = new CardResponseAPDU(output);
 	    byte[] status = outputApdu.getStatusBytes();

@@ -27,6 +27,10 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.openecard.android.system.ServiceResponse;
 import org.openecard.android.system.OpeneCardContext;
@@ -110,7 +114,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	final ActivationController ac = new ActivationController(octx);
 
 	// add callback to this abstract activity when card is removed
-	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED);
+	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
 
 	Intent actIntent = getIntent();
 	Uri data = actIntent.getData();
@@ -181,30 +185,45 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     private final EventCallback eventReceiver = new EventCallback() {
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
-	    if (eventType.equals(EventType.CARD_REMOVED)) {
-		Dialog d = cardRemoveDialog;
-		if (d != null && d.isShowing()) {
-		    d.dismiss();
-		}
-
-		Thread at = authThread;
-		if (at != null) {
-		    try {
-			LOG.info("Stopping Authentication thread ...");
-			at.interrupt();
-			at.join();
-			LOG.info("Authentication thread has stopped.");
-
-			// cancel task and handle event
-			String msg = "";
-			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
-			handleActivationResult(r);
-		    } catch (InterruptedException ex) {
-			LOG.error("Waiting for Authentication thread interrupted.");
+	    switch (eventType) {
+		case CARD_REMOVED:
+		    Dialog d = cardRemoveDialog;
+		    if (d != null && d.isShowing()) {
+			d.dismiss();
 		    }
-		}
-	    } else {
-		LOG.debug("Received an unsupported Event: " + eventType.name());
+
+		    Thread at = authThread;
+		    if (at != null) {
+			try {
+			    LOG.info("Stopping Authentication thread ...");
+			    at.interrupt();
+			    at.join();
+			    LOG.info("Authentication thread has stopped.");
+
+			    // cancel task and handle event
+			    String msg = "";
+			    ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+			    handleActivationResult(r);
+			} catch (InterruptedException ex) {
+			    LOG.error("Waiting for Authentication thread interrupted.");
+			}
+		    }
+		    break;
+		case CARD_RECOGNIZED:
+		    Set<String> supportedCards = getSupportedCards();
+		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
+		    if (supportedCards == null || supportedCards.contains(type)) {
+			AbstractActivationActivity.this.runOnUiThread(new Runnable() {
+			    @Override
+			    public void run() {
+				onCardInserted(type);
+			    }
+			});
+		    }
+		    break;
+		default:
+		    LOG.debug("Received an unsupported Event: " + eventType.name());
+		    break;
 	    }
 	}
     };
@@ -255,6 +274,21 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	    }
 	}, "WaitForEacGuiThread").start();
     }
+
+    private static final Set<String> SUPPORTED_CARDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	    "http://bsi.bund.de/cif/npa.xml"
+    )));
+    @Override
+    public Set<String> getSupportedCards() {
+	return SUPPORTED_CARDS;
+    }
+
+    @Override
+    public void onCardInserted(String cardType) {
+	// default implementation does nothing
+	LOG.info("Card recognized event received in activity: cardType={}", cardType);
+    }
+
 
     /**
      * Implement this method to recognize a successful authentication in the Sub-Activity. You can handle the following

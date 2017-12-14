@@ -23,6 +23,8 @@
 package org.openecard.android.activation;
 
 import android.app.Dialog;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.gui.android.eac.EacGui;
 
@@ -42,6 +44,25 @@ public interface ActivationImplementationInterface {
      */
     public static final String RETURN_CLASS = "org.openecard.android.activation.return-class";
 
+
+    /**
+     * Gets a set of card types supported by this activity.
+     * This list is used to determine whether {@link #onCardInserted()} is called or not when a card is recognized by
+     * the system. In case all cards should be matched, {@code null} can be returned by this method.
+     *
+     * @return The set of supported cards, or {@code null} in case all cards are supported.
+     */
+    Set<String> getSupportedCards();
+
+    /**
+     * Callback for card insert events.
+     * By implementing this method, it is possible to notify the user (via the UI) that the card has been inserted and
+     * the EAC process is running. Without this callback the Activity can not distinguish between 'insert card' and
+     * 'please wait for the server'.
+     *
+     * @param cardType Type of the card which has been inserted into the terminal.
+     */
+    void onCardInserted(String cardType);
 
     /**
      * This method is called when the EacGui is available to the activity.

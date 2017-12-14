@@ -64,6 +64,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     private Dialog cardRemoveDialog;
 
     private Thread authThread;
+    private boolean cardPresent;
     private EacGui eacGui;
 
     private OpeneCardContext octx;
@@ -114,7 +115,8 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	final ActivationController ac = new ActivationController(octx);
 
 	// add callback to this abstract activity when card is removed
-	octx.getEventDispatcher().add(eventReceiver, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
+	octx.getEventDispatcher().add(insertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
+	octx.getEventDispatcher().add(cardDetectHandler, EventType.CARD_RECOGNIZED);
 
 	Intent actIntent = getIntent();
 	Uri data = actIntent.getData();
@@ -176,22 +178,36 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 
 	// remove callback which is set onStart
 	if (octx != null) {
-	    octx.getEventDispatcher().del(eventReceiver);
+	    octx.getEventDispatcher().del(insertionHandler);
 	}
 	returnClass = null;
 	octx = null;
     }
 
-    private final EventCallback eventReceiver = new EventCallback() {
+    private final EventCallback insertionHandler = new EventCallback() {
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    switch (eventType) {
 		case CARD_REMOVED:
+		    cardPresent = false;
 		    Dialog d = cardRemoveDialog;
 		    if (d != null && d.isShowing()) {
 			d.dismiss();
 		    }
 		    break;
+		case CARD_INSERTED:
+		    cardPresent = true;
+		default:
+		    LOG.debug("Received an unsupported Event: " + eventType.name());
+		    break;
+	    }
+	}
+    };
+
+    private final EventCallback cardDetectHandler = new EventCallback() {
+	@Override
+	public void signalEvent(EventType eventType, EventObject eventData) {
+	    switch (eventType) {
 		case CARD_RECOGNIZED:
 		    Set<String> supportedCards = getSupportedCards();
 		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
@@ -202,6 +218,11 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 				onCardInserted(type);
 			    }
 			});
+
+			// remove handler when the correct card is present
+			if (octx != null) {
+			    octx.getEventDispatcher().del(this);
+			}
 		    }
 		    break;
 		default:
@@ -293,44 +314,45 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     }
 
 
-    /**
-     * Implement this method to recognize a successful authentication in the Sub-Activity. You can handle the following
-     * steps on your own by overriding this method, for example show that the authentication was successful
-     * and then redirect to the redirect location.
-     *
-     * @param result which contains additional information to the authentication.
-     */
     @Override
     public void onAuthenticationSuccess(final ActivationResult result) {
 	// show card remove dialog before the redirect occurs
 	final String location = result.getRedirectUrl();
-	Dialog d = showCardRemoveDialog();
-	if (d != null) {
-	    cardRemoveDialog = d;
-	    d.setCanceledOnTouchOutside(false);
-	    d.setCancelable(false);
-	    // if card remove dialog is not shown, then show it
-	    if (! d.isShowing()) {
-		d.show();
-	    }
-	    // redirect to the termination uri when the card remove dialog is closed
-	    d.setOnDismissListener(new DialogInterface.OnDismissListener() {
-		@Override
-		public void onDismiss(DialogInterface dialog) {
-		    // clean dialog field
-		    cardRemoveDialog = null;
-		    // perform redirect
-		    if (location != null) {
-			// redirect to result location
-			startActivity(createRedirectIntent(location));
-		    }
+
+	// only display if a card is available
+	if (cardPresent) {
+	    Dialog d = showCardRemoveDialog();
+	    if (d != null) {
+		cardRemoveDialog = d;
+		d.setCanceledOnTouchOutside(false);
+		d.setCancelable(false);
+		// if card remove dialog is not shown, then show it
+		if (! d.isShowing()) {
+		    d.show();
 		}
-	    });
-	} else {
-	    if (location != null) {
-		// redirect to result location
-		startActivity(createRedirectIntent(location));
+		// redirect to the termination uri when the card remove dialog is closed
+		d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		    @Override
+		    public void onDismiss(DialogInterface dialog) {
+			// clean dialog field
+			cardRemoveDialog = null;
+			// perform redirect
+			if (location != null) {
+			    // redirect to result location
+			    startActivity(createRedirectIntent(location));
+			}
+		    }
+		});
+
+		// return as the redirect is handled in the DismissListener
+		return;
 	    }
+	}
+
+	// no dialog shown, just redirect
+	if (location != null) {
+	    // redirect to result location
+	    startActivity(createRedirectIntent(location));
 	}
     }
 

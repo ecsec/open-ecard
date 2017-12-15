@@ -113,12 +113,6 @@ public class OpeneCardContext implements EventCallback {
 
     // true if already initialized
     private boolean initialized = false;
-    // true if NFC is available
-    private boolean nfcAvailable = false;
-    // true if NFC is enabled (look in android settings)
-    private boolean nfcEnabled = false;
-    // true if NFC supports extended length of apdus
-    private boolean nfcExtendedLengthSupport = false;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
     // true if card is available and usable
@@ -163,9 +157,9 @@ public class OpeneCardContext implements EventCallback {
 	NFCFactory.setContext(appCtx);
 
 	try {
-	    nfcAvailable = NFCFactory.isNFCAvailable();
-	    nfcEnabled = NFCFactory.isNFCEnabled();
-	    nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(appCtx);
+	    boolean nfcAvailable = NFCFactory.isNFCAvailable();
+	    boolean nfcEnabled = NFCFactory.isNFCEnabled();
+	    boolean nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(appCtx);
 	    if (! nfcAvailable) {
 		throw new NfcUnavailable();
 	    } else if (! nfcEnabled) {
@@ -355,26 +349,6 @@ public class OpeneCardContext implements EventCallback {
     ///
     /// Get-/Setter Methods
     ///
-
-    public boolean isNFCAvailable() {
-	return nfcAvailable;
-    }
-
-    public boolean isNFCEnabled() {
-	return nfcEnabled;
-    }
-
-    public synchronized boolean isCardAvailable() {
-	return isCardAvailable;
-    }
-
-    public boolean isInitialized() {
-	return initialized;
-    }
-
-    public synchronized String getCardType() {
-	return cardType != null ? cardType : "";
-    }
 
     public IFD getIFD() {
 	return ifd;

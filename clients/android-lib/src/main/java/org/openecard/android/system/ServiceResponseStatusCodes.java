@@ -56,16 +56,6 @@ public class ServiceResponseStatusCodes {
     public static final int SHUTDOWN_SUCCESS = 200;
 
     /**
-     * indicates that eac service started and is binded.
-     */
-    public static final int EAC_SERVICE_CONNECTED = 201;
-
-    /**
-     * indicates that eac service is unbinded.
-     */
-    public static final int EAC_SERVICE_DISCONNECTED = 203;
-
-    /**
      * indicates that the corresponding device does not support the required API level.
      */
     public static final int NOT_REQUIRED_API_LEVEL = 102;

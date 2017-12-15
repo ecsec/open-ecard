@@ -176,6 +176,9 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     protected void onStop() {
 	super.onStop();
 
+	// make sure nothing is running anymore
+	cancelAuthenticationInt(false);
+
 	// remove callback which is set onStart
 	if (octx != null) {
 	    octx.getEventDispatcher().del(insertionHandler);
@@ -295,6 +298,10 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 
     @Override
     public void cancelAuthentication() {
+	cancelAuthenticationInt(true);
+    }
+
+    private void cancelAuthenticationInt(boolean showFailure) {
 	Thread at = authThread;
 	if (at != null) {
 	    try {
@@ -304,9 +311,11 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		LOG.info("Authentication thread has stopped.");
 
 		// cancel task and handle event
-		String msg = "";
-		ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
-		handleActivationResult(r);
+		if (showFailure) {
+		    String msg = "";
+		    ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+		    handleActivationResult(r);
+		}
 	    } catch (InterruptedException ex) {
 		LOG.error("Waiting for Authentication thread interrupted.");
 	    }

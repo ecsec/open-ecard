@@ -1,18 +1,18 @@
 package org.openecard.mdlw.sal.cryptoki;
 
 import com.sun.jna.Callback;
+import com.sun.jna.FromNativeContext;
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
-import com.sun.jna.NativeLong;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 import com.sun.jna.Structure;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
+
 
 /**
  * JNA Wrapper for library <b>cryptoki</b><br>
@@ -1581,26 +1581,9 @@ public interface CryptokiLibrary extends Library {
      * @param ppFunctionList
      *            receives pointer to<br>
      *            function list<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:49</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GetFunctionList(cryptoki.CryptokiLibrary.CK_FUNCTION_LIST_PTR_PTR)}
-     *             and {@link #C_GetFunctionList(com.sun.jna.Pointer)} instead
-     */
-    @Deprecated
-    NativeLong C_GetFunctionList(Pointer ppFunctionList);
-
-    /**
-     * C_GetFunctionList returns the function list.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR)</code>
-     * <br>
-     * 
-     * @param ppFunctionList
-     *            receives pointer to<br>
-     *            function list<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:49</i>
      */
-    NativeLong C_GetFunctionList(CryptokiLibrary.CK_FUNCTION_LIST_PTR_PTR ppFunctionList);
+    NativeLong C_GetFunctionList(PointerByReference ppFunctionList);
 
     /**
      * C_GetSlotList obtains a list of slots in the system.<br>
@@ -1696,30 +1679,6 @@ public interface CryptokiLibrary extends Library {
      *            length in bytes of the PIN<br>
      * @param pLabel
      *            32-byte token label (blank padded)<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:124</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_InitToken(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer)}
-     *             and
-     *             {@link #C_InitToken(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_InitToken(NativeLong slotID, Pointer pPin, NativeLong ulPinLen, Pointer pLabel);
-
-    /**
-     * C_InitToken initializes a token.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_InitToken(CK_SLOT_ID, CK_UTF8CHAR_PTR, CK_UNativeLong, CK_UTF8CHAR_PTR)</code>
-     * <br>
-     * 
-     * @param slotID
-     *            ID of the token's slot<br>
-     * @param pPin
-     *            the SO's initial PIN<br>
-     * @param ulPinLen
-     *            length in bytes of the PIN<br>
-     * @param pLabel
-     *            32-byte token label (blank padded)<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:124</i>
      */
     NativeLong C_InitToken(NativeLong slotID, ByteBuffer pPin, NativeLong ulPinLen, ByteBuffer pLabel);
@@ -1736,58 +1695,9 @@ public interface CryptokiLibrary extends Library {
      *            the normal user's PIN<br>
      * @param ulPinLen
      *            length in bytes of the PIN<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:136</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_InitPIN(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_InitPIN(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_InitPIN(NativeLong hSession, Pointer pPin, NativeLong ulPinLen);
-
-    /**
-     * C_InitPIN initializes the normal user's PIN.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_InitPIN(CK_SESSION_HANDLE, CK_UTF8CHAR_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pPin
-     *            the normal user's PIN<br>
-     * @param ulPinLen
-     *            length in bytes of the PIN<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:136</i>
      */
     NativeLong C_InitPIN(NativeLong hSession, ByteBuffer pPin, NativeLong ulPinLen);
-
-    /**
-     * C_SetPIN modifies the PIN of the user who is logged in.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SetPIN(CK_SESSION_HANDLE, CK_UTF8CHAR_PTR, CK_UNativeLong, CK_UTF8CHAR_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pOldPin
-     *            the old PIN<br>
-     * @param ulOldLen
-     *            length of the old PIN<br>
-     * @param pNewPin
-     *            the new PIN<br>
-     * @param ulNewLen
-     *            length of the new PIN<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:147</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SetPIN(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_SetPIN(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SetPIN(NativeLong hSession, Pointer pOldPin, NativeLong ulOldLen, Pointer pNewPin,
-            NativeLong ulNewLen);
 
     /**
      * C_SetPIN modifies the PIN of the user who is logged in.<br>
@@ -1884,61 +1794,9 @@ public interface CryptokiLibrary extends Library {
      *            gets state<br>
      * @param pulOperationStateLen
      *            gets state length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:210</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GetOperationState(NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_GetOperationState(NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_GetOperationState(NativeLong hSession, Pointer pOperationState,
-            NativeLongByReference pulOperationStateLen);
-
-    /**
-     * C_GetOperationState obtains the state of the cryptographic operation<br>
-     * in a session.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GetOperationState(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pOperationState
-     *            gets state<br>
-     * @param pulOperationStateLen
-     *            gets state length<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:210</i>
      */
     NativeLong C_GetOperationState(NativeLong hSession, ByteBuffer pOperationState, LongBuffer pulOperationStateLen);
-
-    /**
-     * C_SetOperationState restores the state of the cryptographic<br>
-     * operation in a session.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SetOperationState(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE, CK_OBJECT_HANDLE)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pOperationState
-     *            holds state<br>
-     * @param ulOperationStateLen
-     *            holds state length<br>
-     * @param hEncryptionKey
-     *            en/decryption key<br>
-     * @param hAuthenticationKey
-     *            sign/verify key<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:223</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SetOperationState(NativeLong, java.nio.ByteBuffer, NativeLong, NativeLong, NativeLong)}
-     *             and
-     *             {@link #C_SetOperationState(NativeLong, com.sun.jna.Pointer, NativeLong, NativeLong, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SetOperationState(NativeLong hSession, Pointer pOperationState, NativeLong ulOperationStateLen,
-            NativeLong hEncryptionKey, NativeLong hAuthenticationKey);
 
     /**
      * C_SetOperationState restores the state of the cryptographic<br>
@@ -1961,30 +1819,6 @@ public interface CryptokiLibrary extends Library {
      */
     NativeLong C_SetOperationState(NativeLong hSession, ByteBuffer pOperationState, NativeLong ulOperationStateLen,
             NativeLong hEncryptionKey, NativeLong hAuthenticationKey);
-
-    /**
-     * C_Login logs a user into a token.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_Login(CK_SESSION_HANDLE, CK_USER_TYPE, CK_UTF8CHAR_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param userType
-     *            the user type<br>
-     * @param pPin
-     *            the user's PIN<br>
-     * @param ulPinLen
-     *            the length of the PIN<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:236</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_Login(NativeLong, NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_Login(NativeLong, NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_Login(NativeLong hSession, NativeLong userType, Pointer pPin, NativeLong ulPinLen);
 
     /**
      * C_Login logs a user into a token.<br>
@@ -2030,62 +1864,9 @@ public interface CryptokiLibrary extends Library {
      *            attributes in template<br>
      * @param phObject
      *            gets new object's handle.<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:260</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_CreateObject(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_CreateObject(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_CreateObject(NativeLong hSession, CK_ATTRIBUTE pTemplate, NativeLong ulCount,
-            NativeLongByReference phObject);
-
-    /**
-     * C_CreateObject creates a new object.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_CreateObject(CK_SESSION_HANDLE, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pTemplate
-     *            the object's template<br>
-     * @param ulCount
-     *            attributes in template<br>
-     * @param phObject
-     *            gets new object's handle.<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:260</i>
      */
     NativeLong C_CreateObject(NativeLong hSession, CK_ATTRIBUTE pTemplate, NativeLong ulCount, LongBuffer phObject);
-
-    /**
-     * C_CopyObject copies an object, creating a new object for the<br>
-     * copy.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_CopyObject(CK_SESSION_HANDLE, CK_OBJECT_HANDLE, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param hObject
-     *            the object's handle<br>
-     * @param pTemplate
-     *            template for new object<br>
-     * @param ulCount
-     *            attributes in template<br>
-     * @param phNewObject
-     *            receives handle of copy<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:274</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_CopyObject(NativeLong, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_CopyObject(NativeLong, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_CopyObject(NativeLong hSession, NativeLong hObject, CK_ATTRIBUTE pTemplate, NativeLong ulCount,
-            NativeLongByReference phNewObject);
 
     /**
      * C_CopyObject copies an object, creating a new object for the<br>
@@ -2122,28 +1903,6 @@ public interface CryptokiLibrary extends Library {
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:287</i>
      */
     NativeLong C_DestroyObject(NativeLong hSession, NativeLong hObject);
-
-    /**
-     * C_GetObjectSize gets the size of an object in bytes.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GetObjectSize(CK_SESSION_HANDLE, CK_OBJECT_HANDLE, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param hObject
-     *            the object's handle<br>
-     * @param pulSize
-     *            receives size of object<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:297</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GetObjectSize(NativeLong, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_GetObjectSize(NativeLong, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_GetObjectSize(NativeLong hSession, NativeLong hObject, NativeLongByReference pulSize);
 
     /**
      * C_GetObjectSize gets the size of an object in bytes.<br>
@@ -2282,33 +2041,6 @@ public interface CryptokiLibrary extends Library {
      *            gets ciphertext<br>
      * @param pulEncryptedDataLen
      *            gets c-text size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:389</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_Encrypt(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_Encrypt(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_Encrypt(NativeLong hSession, Pointer pData, NativeLong ulDataLen, Pointer pEncryptedData,
-            NativeLongByReference pulEncryptedDataLen);
-
-    /**
-     * C_Encrypt encrypts single-part data.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_Encrypt(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pData
-     *            the plaintext data<br>
-     * @param ulDataLen
-     *            bytes of plaintext<br>
-     * @param pEncryptedData
-     *            gets ciphertext<br>
-     * @param pulEncryptedDataLen
-     *            gets c-text size<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:389</i>
      */
     NativeLong C_Encrypt(NativeLong hSession, ByteBuffer pData, NativeLong ulDataLen, ByteBuffer pEncryptedData,
@@ -2331,62 +2063,10 @@ public interface CryptokiLibrary extends Library {
      *            gets ciphertext<br>
      * @param pulEncryptedPartLen
      *            gets c-text size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:404</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_EncryptUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_EncryptUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_EncryptUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen, Pointer pEncryptedPart,
-            NativeLongByReference pulEncryptedPartLen);
-
-    /**
-     * C_EncryptUpdate continues a multiple-part encryption<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_EncryptUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pPart
-     *            the plaintext data<br>
-     * @param ulPartLen
-     *            plaintext data len<br>
-     * @param pEncryptedPart
-     *            gets ciphertext<br>
-     * @param pulEncryptedPartLen
-     *            gets c-text size<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:404</i>
      */
     NativeLong C_EncryptUpdate(NativeLong hSession, ByteBuffer pPart, NativeLong ulPartLen, ByteBuffer pEncryptedPart,
             LongBuffer pulEncryptedPartLen);
-
-    /**
-     * C_EncryptFinal finishes a multiple-part encryption<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_EncryptFinal(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session handle<br>
-     * @param pLastEncryptedPart
-     *            last c-text<br>
-     * @param pulLastEncryptedPartLen
-     *            gets last size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:419</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_EncryptFinal(NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_EncryptFinal(NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_EncryptFinal(NativeLong hSession, Pointer pLastEncryptedPart,
-            NativeLongByReference pulLastEncryptedPartLen);
 
     /**
      * C_EncryptFinal finishes a multiple-part encryption<br>
@@ -2437,33 +2117,6 @@ public interface CryptokiLibrary extends Library {
      *            gets plaintext<br>
      * @param pulDataLen
      *            gets p-text size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:441</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_Decrypt(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_Decrypt(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_Decrypt(NativeLong hSession, Pointer pEncryptedData, NativeLong ulEncryptedDataLen, Pointer pData,
-            NativeLongByReference pulDataLen);
-
-    /**
-     * C_Decrypt decrypts encrypted data in a single part.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_Decrypt(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pEncryptedData
-     *            ciphertext<br>
-     * @param ulEncryptedDataLen
-     *            ciphertext length<br>
-     * @param pData
-     *            gets plaintext<br>
-     * @param pulDataLen
-     *            gets p-text size<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:441</i>
      */
     NativeLong C_Decrypt(NativeLong hSession, ByteBuffer pEncryptedData, NativeLong ulEncryptedDataLen,
@@ -2486,61 +2139,10 @@ public interface CryptokiLibrary extends Library {
      *            gets plaintext<br>
      * @param pulPartLen
      *            p-text size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:456</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DecryptUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DecryptUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DecryptUpdate(NativeLong hSession, Pointer pEncryptedPart, NativeLong ulEncryptedPartLen,
-            Pointer pPart, NativeLongByReference pulPartLen);
-
-    /**
-     * C_DecryptUpdate continues a multiple-part decryption<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DecryptUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pEncryptedPart
-     *            encrypted data<br>
-     * @param ulEncryptedPartLen
-     *            input length<br>
-     * @param pPart
-     *            gets plaintext<br>
-     * @param pulPartLen
-     *            p-text size<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:456</i>
      */
     NativeLong C_DecryptUpdate(NativeLong hSession, ByteBuffer pEncryptedPart, NativeLong ulEncryptedPartLen,
             ByteBuffer pPart, LongBuffer pulPartLen);
-
-    /**
-     * C_DecryptFinal finishes a multiple-part decryption<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DecryptFinal(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pLastPart
-     *            gets plaintext<br>
-     * @param pulLastPartLen
-     *            p-text size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:471</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DecryptFinal(NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DecryptFinal(NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DecryptFinal(NativeLong hSession, Pointer pLastPart, NativeLongByReference pulLastPartLen);
 
     /**
      * C_DecryptFinal finishes a multiple-part decryption<br>
@@ -2589,60 +2191,10 @@ public interface CryptokiLibrary extends Library {
      *            gets the message digest<br>
      * @param pulDigestLen
      *            gets digest length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:495</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_Digest(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_Digest(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_Digest(NativeLong hSession, Pointer pData, NativeLong ulDataLen, Pointer pDigest,
-            NativeLongByReference pulDigestLen);
-
-    /**
-     * C_Digest digests data in a single part.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_Digest(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pData
-     *            data to be digested<br>
-     * @param ulDataLen
-     *            bytes of data to digest<br>
-     * @param pDigest
-     *            gets the message digest<br>
-     * @param pulDigestLen
-     *            gets digest length<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:495</i>
      */
     NativeLong C_Digest(NativeLong hSession, ByteBuffer pData, NativeLong ulDataLen, ByteBuffer pDigest,
             LongBuffer pulDigestLen);
-
-    /**
-     * C_DigestUpdate continues a multiple-part message-digesting<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DigestUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pPart
-     *            data to be digested<br>
-     * @param ulPartLen
-     *            bytes of data to be digested<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:510</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DigestUpdate(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_DigestUpdate(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DigestUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen);
 
     /**
      * C_DigestUpdate continues a multiple-part message-digesting<br>
@@ -2676,29 +2228,6 @@ public interface CryptokiLibrary extends Library {
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:524</i>
      */
     NativeLong C_DigestKey(NativeLong hSession, NativeLong hKey);
-
-    /**
-     * C_DigestFinal finishes a multiple-part message-digesting<br>
-     * operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DigestFinal(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pDigest
-     *            gets the message digest<br>
-     * @param pulDigestLen
-     *            gets byte count of digest<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:536</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DigestFinal(NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DigestFinal(NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DigestFinal(NativeLong hSession, Pointer pDigest, NativeLongByReference pulDigestLen);
 
     /**
      * C_DigestFinal finishes a multiple-part message-digesting<br>
@@ -2773,56 +2302,9 @@ public interface CryptokiLibrary extends Library {
      *            the data to sign<br>
      * @param ulPartLen
      *            count of bytes to sign<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:584</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SignUpdate(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_SignUpdate(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SignUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen);
-
-    /**
-     * C_SignUpdate continues a multiple-part signature operation,<br>
-     * where the signature is (will be) an appendix to the data,<br>
-     * and plaintext cannot be recovered from the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SignUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pPart
-     *            the data to sign<br>
-     * @param ulPartLen
-     *            count of bytes to sign<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:584</i>
      */
     NativeLong C_SignUpdate(NativeLong hSession, ByteBuffer pPart, NativeLong ulPartLen);
-
-    /**
-     * C_SignFinal finishes a multiple-part signature operation,<br>
-     * returning the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SignFinal(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pSignature
-     *            gets the signature<br>
-     * @param pulSignatureLen
-     *            gets signature length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:597</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SignFinal(NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_SignFinal(NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SignFinal(NativeLong hSession, Pointer pSignature, NativeLongByReference pulSignatureLen);
 
     /**
      * C_SignFinal finishes a multiple-part signature operation,<br>
@@ -2857,34 +2339,6 @@ public interface CryptokiLibrary extends Library {
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:610</i>
      */
     NativeLong C_SignRecoverInit(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hKey);
-
-    /**
-     * C_SignRecover signs data in a single operation, where the<br>
-     * data can be recovered from the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SignRecover(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pData
-     *            the data to sign<br>
-     * @param ulDataLen
-     *            count of bytes to sign<br>
-     * @param pSignature
-     *            gets the signature<br>
-     * @param pulSignatureLen
-     *            gets signature length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:623</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SignRecover(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_SignRecover(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SignRecover(NativeLong hSession, Pointer pData, NativeLong ulDataLen, Pointer pSignature,
-            NativeLongByReference pulSignatureLen);
 
     /**
      * C_SignRecover signs data in a single operation, where the<br>
@@ -2944,35 +2398,6 @@ public interface CryptokiLibrary extends Library {
      *            signature<br>
      * @param ulSignatureLen
      *            signature length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:656</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_Verify(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_Verify(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_Verify(NativeLong hSession, Pointer pData, NativeLong ulDataLen, Pointer pSignature,
-            NativeLong ulSignatureLen);
-
-    /**
-     * C_Verify verifies a signature in a single-part operation,<br>
-     * where the signature is an appendix to the data, and plaintext<br>
-     * cannot be recovered from the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_Verify(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pData
-     *            signed data<br>
-     * @param ulDataLen
-     *            length of signed data<br>
-     * @param pSignature
-     *            signature<br>
-     * @param ulSignatureLen
-     *            signature length<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:656</i>
      */
     NativeLong C_Verify(NativeLong hSession, ByteBuffer pData, NativeLong ulDataLen, ByteBuffer pSignature,
@@ -2992,56 +2417,9 @@ public interface CryptokiLibrary extends Library {
      *            signed data<br>
      * @param ulPartLen
      *            length of signed data<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:672</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_VerifyUpdate(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_VerifyUpdate(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_VerifyUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen);
-
-    /**
-     * C_VerifyUpdate continues a multiple-part verification<br>
-     * operation, where the signature is an appendix to the data,<br>
-     * and plaintext cannot be recovered from the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_VerifyUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pPart
-     *            signed data<br>
-     * @param ulPartLen
-     *            length of signed data<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:672</i>
      */
     NativeLong C_VerifyUpdate(NativeLong hSession, ByteBuffer pPart, NativeLong ulPartLen);
-
-    /**
-     * C_VerifyFinal finishes a multiple-part verification<br>
-     * operation, checking the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_VerifyFinal(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pSignature
-     *            signature to verify<br>
-     * @param ulSignatureLen
-     *            signature length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:685</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_VerifyFinal(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_VerifyFinal(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_VerifyFinal(NativeLong hSession, Pointer pSignature, NativeLong ulSignatureLen);
 
     /**
      * C_VerifyFinal finishes a multiple-part verification<br>
@@ -3094,66 +2472,10 @@ public interface CryptokiLibrary extends Library {
      *            gets signed data<br>
      * @param pulDataLen
      *            gets signed data len<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:711</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_VerifyRecover(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_VerifyRecover(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_VerifyRecover(NativeLong hSession, Pointer pSignature, NativeLong ulSignatureLen, Pointer pData,
-            NativeLongByReference pulDataLen);
-
-    /**
-     * C_VerifyRecover verifies a signature in a single-part<br>
-     * operation, where the data is recovered from the signature.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_VerifyRecover(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pSignature
-     *            signature to verify<br>
-     * @param ulSignatureLen
-     *            signature length<br>
-     * @param pData
-     *            gets signed data<br>
-     * @param pulDataLen
-     *            gets signed data len<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:711</i>
      */
     NativeLong C_VerifyRecover(NativeLong hSession, ByteBuffer pSignature, NativeLong ulSignatureLen, ByteBuffer pData,
             LongBuffer pulDataLen);
-
-    /**
-     * C_DigestEncryptUpdate continues a multiple-part digesting<br>
-     * and encryption operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DigestEncryptUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pPart
-     *            the plaintext data<br>
-     * @param ulPartLen
-     *            plaintext length<br>
-     * @param pEncryptedPart
-     *            gets ciphertext<br>
-     * @param pulEncryptedPartLen
-     *            gets c-text length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:729</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DigestEncryptUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DigestEncryptUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DigestEncryptUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen, Pointer pEncryptedPart,
-            NativeLongByReference pulEncryptedPartLen);
 
     /**
      * C_DigestEncryptUpdate continues a multiple-part digesting<br>
@@ -3194,66 +2516,10 @@ public interface CryptokiLibrary extends Library {
      *            gets plaintext<br>
      * @param pulPartLen
      *            gets plaintext len<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:744</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DecryptDigestUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DecryptDigestUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DecryptDigestUpdate(NativeLong hSession, Pointer pEncryptedPart, NativeLong ulEncryptedPartLen,
-            Pointer pPart, NativeLongByReference pulPartLen);
-
-    /**
-     * C_DecryptDigestUpdate continues a multiple-part decryption and<br>
-     * digesting operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DecryptDigestUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pEncryptedPart
-     *            ciphertext<br>
-     * @param ulEncryptedPartLen
-     *            ciphertext length<br>
-     * @param pPart
-     *            gets plaintext<br>
-     * @param pulPartLen
-     *            gets plaintext len<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:744</i>
      */
     NativeLong C_DecryptDigestUpdate(NativeLong hSession, ByteBuffer pEncryptedPart, NativeLong ulEncryptedPartLen,
             ByteBuffer pPart, LongBuffer pulPartLen);
-
-    /**
-     * C_SignEncryptUpdate continues a multiple-part signing and<br>
-     * encryption operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SignEncryptUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pPart
-     *            the plaintext data<br>
-     * @param ulPartLen
-     *            plaintext length<br>
-     * @param pEncryptedPart
-     *            gets ciphertext<br>
-     * @param pulEncryptedPartLen
-     *            gets c-text length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:759</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SignEncryptUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_SignEncryptUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SignEncryptUpdate(NativeLong hSession, Pointer pPart, NativeLong ulPartLen, Pointer pEncryptedPart,
-            NativeLongByReference pulEncryptedPartLen);
 
     /**
      * C_SignEncryptUpdate continues a multiple-part signing and<br>
@@ -3294,34 +2560,6 @@ public interface CryptokiLibrary extends Library {
      *            gets plaintext<br>
      * @param pulPartLen
      *            gets p-text length<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:774</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DecryptVerifyUpdate(NativeLong, java.nio.ByteBuffer, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DecryptVerifyUpdate(NativeLong, com.sun.jna.Pointer, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DecryptVerifyUpdate(NativeLong hSession, Pointer pEncryptedPart, NativeLong ulEncryptedPartLen,
-            Pointer pPart, NativeLongByReference pulPartLen);
-
-    /**
-     * C_DecryptVerifyUpdate continues a multiple-part decryption and<br>
-     * verify operation.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DecryptVerifyUpdate(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pEncryptedPart
-     *            ciphertext<br>
-     * @param ulEncryptedPartLen
-     *            ciphertext length<br>
-     * @param pPart
-     *            gets plaintext<br>
-     * @param pulPartLen
-     *            gets p-text length<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:774</i>
      */
     NativeLong C_DecryptVerifyUpdate(NativeLong hSession, ByteBuffer pEncryptedPart, NativeLong ulEncryptedPartLen,
@@ -3344,74 +2582,10 @@ public interface CryptokiLibrary extends Library {
      *            # of attrs in template<br>
      * @param phKey
      *            gets handle of new key<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:792</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GenerateKey(NativeLong, org.openecard.sal.mdlw.cryptoki.CK_MECHANISM, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_GenerateKey(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_MECHANISM, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_GenerateKey(NativeLong hSession, CK_MECHANISM pMechanism, CK_ATTRIBUTE pTemplate, NativeLong ulCount,
-            NativeLongByReference phKey);
-
-    /**
-     * C_GenerateKey generates a secret key, creating a new key<br>
-     * object.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GenerateKey(CK_SESSION_HANDLE, CK_MECHANISM_PTR, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pMechanism
-     *            key generation mech.<br>
-     * @param pTemplate
-     *            template for new key<br>
-     * @param ulCount
-     *            # of attrs in template<br>
-     * @param phKey
-     *            gets handle of new key<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:792</i>
      */
     NativeLong C_GenerateKey(NativeLong hSession, CK_MECHANISM pMechanism, CK_ATTRIBUTE pTemplate, NativeLong ulCount,
             LongBuffer phKey);
-
-    /**
-     * C_GenerateKeyPair generates a public-key/private-key pair,<br>
-     * creating new key objects.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GenerateKeyPair(CK_SESSION_HANDLE, CK_MECHANISM_PTR, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session handle<br>
-     * @param pMechanism
-     *            key-gen mech.<br>
-     * @param pPublicKeyTemplate
-     *            template for pub. key<br>
-     * @param ulPublicKeyAttributeCount
-     *            # pub. attrs.<br>
-     * @param pPrivateKeyTemplate
-     *            template for priv. key<br>
-     * @param ulPrivateKeyAttributeCount
-     *            # priv. attrs.<br>
-     * @param phPublicKey
-     *            gets pub. key handle<br>
-     * @param phPrivateKey
-     *            gets priv. key handle<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:807</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GenerateKeyPair(NativeLong, org.openecard.sal.mdlw.cryptoki.CK_MECHANISM, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_GenerateKeyPair(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_MECHANISM, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_GenerateKeyPair(NativeLong hSession, CK_MECHANISM pMechanism, CK_ATTRIBUTE pPublicKeyTemplate,
-            NativeLong ulPublicKeyAttributeCount, CK_ATTRIBUTE pPrivateKeyTemplate,
-            NativeLong ulPrivateKeyAttributeCount, NativeLongByReference phPublicKey,
-            NativeLongByReference phPrivateKey);
 
     /**
      * C_GenerateKeyPair generates a public-key/private-key pair,<br>
@@ -3460,74 +2634,10 @@ public interface CryptokiLibrary extends Library {
      *            gets wrapped key<br>
      * @param pulWrappedKeyLen
      *            gets wrapped key size<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:823</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_WrapKey(NativeLong, org.openecard.sal.mdlw.cryptoki.CK_MECHANISM, NativeLong, NativeLong, java.nio.ByteBuffer, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_WrapKey(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_MECHANISM, NativeLong, NativeLong, com.sun.jna.Pointer, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_WrapKey(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hWrappingKey, NativeLong hKey,
-            Pointer pWrappedKey, NativeLongByReference pulWrappedKeyLen);
-
-    /**
-     * C_WrapKey wraps (i.e., encrypts) a key.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_WrapKey(CK_SESSION_HANDLE, CK_MECHANISM_PTR, CK_OBJECT_HANDLE, CK_OBJECT_HANDLE, CK_BYTE_PTR, CK_UNativeLong_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pMechanism
-     *            the wrapping mechanism<br>
-     * @param hWrappingKey
-     *            wrapping key<br>
-     * @param hKey
-     *            key to be wrapped<br>
-     * @param pWrappedKey
-     *            gets wrapped key<br>
-     * @param pulWrappedKeyLen
-     *            gets wrapped key size<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:823</i>
      */
     NativeLong C_WrapKey(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hWrappingKey, NativeLong hKey,
             ByteBuffer pWrappedKey, LongBuffer pulWrappedKeyLen);
-
-    /**
-     * C_UnwrapKey unwraps (decrypts) a wrapped key, creating a new<br>
-     * key object.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_UnwrapKey(CK_SESSION_HANDLE, CK_MECHANISM_PTR, CK_OBJECT_HANDLE, CK_BYTE_PTR, CK_UNativeLong, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pMechanism
-     *            unwrapping mech.<br>
-     * @param hUnwrappingKey
-     *            unwrapping key<br>
-     * @param pWrappedKey
-     *            the wrapped key<br>
-     * @param ulWrappedKeyLen
-     *            wrapped key len<br>
-     * @param pTemplate
-     *            new key template<br>
-     * @param ulAttributeCount
-     *            template length<br>
-     * @param phKey
-     *            gets new handle<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:839</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_UnwrapKey(NativeLong, org.openecard.sal.mdlw.cryptoki.CK_MECHANISM, NativeLong, java.nio.ByteBuffer, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_UnwrapKey(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_MECHANISM, NativeLong, com.sun.jna.Pointer, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_UnwrapKey(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hUnwrappingKey, Pointer pWrappedKey,
-            NativeLong ulWrappedKeyLen, CK_ATTRIBUTE pTemplate, NativeLong ulAttributeCount,
-            NativeLongByReference phKey);
 
     /**
      * C_UnwrapKey unwraps (decrypts) a wrapped key, creating a new<br>
@@ -3577,36 +2687,6 @@ public interface CryptokiLibrary extends Library {
      *            template length<br>
      * @param phKey
      *            gets new handle<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:857</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_DeriveKey(NativeLong, org.openecard.sal.mdlw.cryptoki.CK_MECHANISM, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, java.nio.LongBuffer)}
-     *             and
-     *             {@link #C_DeriveKey(NativeLong, org.openecard.sal.mdlw.cryptoki. CK_MECHANISM, NativeLong, org.openecard.sal.mdlw.cryptoki. CK_ATTRIBUTE, NativeLong, com.sun.jna.ptr.NativeLongByReference)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_DeriveKey(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hBaseKey, CK_ATTRIBUTE pTemplate,
-            NativeLong ulAttributeCount, NativeLongByReference phKey);
-
-    /**
-     * C_DeriveKey derives a key from a base key, creating a new key<br>
-     * object.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_DeriveKey(CK_SESSION_HANDLE, CK_MECHANISM_PTR, CK_OBJECT_HANDLE, CK_ATTRIBUTE_PTR, CK_UNativeLong, CK_OBJECT_HANDLE_PTR)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            session's handle<br>
-     * @param pMechanism
-     *            key deriv. mech.<br>
-     * @param hBaseKey
-     *            base key<br>
-     * @param pTemplate
-     *            new key template<br>
-     * @param ulAttributeCount
-     *            template length<br>
-     * @param phKey
-     *            gets new handle<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:857</i>
      */
     NativeLong C_DeriveKey(NativeLong hSession, CK_MECHANISM pMechanism, NativeLong hBaseKey, CK_ATTRIBUTE pTemplate,
@@ -3625,54 +2705,9 @@ public interface CryptokiLibrary extends Library {
      *            the seed material<br>
      * @param ulSeedLen
      *            length of seed material<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:876</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_SeedRandom(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_SeedRandom(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_SeedRandom(NativeLong hSession, Pointer pSeed, NativeLong ulSeedLen);
-
-    /**
-     * C_SeedRandom mixes additional seed material into the token's<br>
-     * random number generator.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_SeedRandom(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param pSeed
-     *            the seed material<br>
-     * @param ulSeedLen
-     *            length of seed material<br>
      *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:876</i>
      */
     NativeLong C_SeedRandom(NativeLong hSession, ByteBuffer pSeed, NativeLong ulSeedLen);
-
-    /**
-     * C_GenerateRandom generates random data.<br>
-     * Original signature :
-     * <code>__attribute__((dllimport)) CK_RV C_GenerateRandom(CK_SESSION_HANDLE, CK_BYTE_PTR, CK_UNativeLong)</code>
-     * <br>
-     * 
-     * @param hSession
-     *            the session's handle<br>
-     * @param RandomData
-     *            receives the random data<br>
-     * @param ulRandomLen
-     *            # of bytes to generate<br>
-     *            <i>native declaration : pkcs11_v2.40/pkcs11f.h:887</i><br>
-     * @deprecated use the safer methods
-     *             {@link #C_GenerateRandom(NativeLong, java.nio.ByteBuffer, NativeLong)}
-     *             and
-     *             {@link #C_GenerateRandom(NativeLong, com.sun.jna.Pointer, NativeLong)}
-     *             instead
-     */
-    @Deprecated
-    NativeLong C_GenerateRandom(NativeLong hSession, Pointer RandomData, NativeLong ulRandomLen);
 
     /**
      * C_GenerateRandom generates random data.<br>
@@ -3734,13 +2769,4 @@ public interface CryptokiLibrary extends Library {
      */
     NativeLong C_WaitForSlotEvent(NativeLong flags, NativeLongByReference pSlot, Pointer pRserved);
 
-    public static class CK_FUNCTION_LIST_PTR_PTR extends PointerType {
-        public CK_FUNCTION_LIST_PTR_PTR(Pointer address) {
-            super(address);
-        }
-
-        public CK_FUNCTION_LIST_PTR_PTR() {
-            super();
-        }
-    };
 }

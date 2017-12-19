@@ -2,7 +2,6 @@ package org.openecard.mdlw.sal.cryptoki;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 /**

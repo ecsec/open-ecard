@@ -63,6 +63,7 @@ import org.openecard.mdlw.sal.cryptoki.CK_SESSION_INFO;
 import org.openecard.mdlw.sal.cryptoki.CK_SLOT_INFO;
 import org.openecard.mdlw.sal.cryptoki.CK_TOKEN_INFO;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibraryWrapper;
 import org.openecard.mdlw.sal.exceptions.AlreadyInitializedException;
 import org.openecard.mdlw.sal.exceptions.CancellationException;
 import org.openecard.mdlw.sal.exceptions.CryptographicException;
@@ -81,12 +82,13 @@ public class MiddleWareWrapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(MiddleWareWrapper.class);
 
+    private final NativeLibrary nl;
     private final CryptokiLibrary lib;
     private static int libIdx = 0;
 
     private final Semaphore threadLock;
 
-    public MiddleWareWrapper(MiddlewareSALConfig mwSALConfig) throws UnsatisfiedLinkError {
+    public MiddleWareWrapper(MiddlewareSALConfig mwSALConfig) throws UnsatisfiedLinkError, CryptokiException {
         String libName = mwSALConfig.getLibName();
 	LOG.info("Loading Middleware {}: Library={}", mwSALConfig.getMiddlewareName(), libName);
 
@@ -117,9 +119,24 @@ public class MiddleWareWrapper {
 	    options.put(Library.OPTION_OPEN_FLAGS, 0x6);
 	}
 
-	lib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
+	CryptokiLibrary tmpLib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
+	nl = NativeLibrary.getInstance(libName, options);
 
 	threadLock = new Semaphore(1, true);
+
+	// determine whether we have to use the function pointers from C_GetFunctionList
+	boolean hasInitialize = true;
+	try {
+	    nl.getFunction("C_Initialize");
+	} catch (UnsatisfiedLinkError ex) {
+	    hasInitialize = false;
+	}
+
+	if (! hasInitialize) {
+	    LOG.info("Middleware module does not have a C_Initialize function. Falling back to C_GetFunctionList.");
+	    tmpLib = new CryptokiLibraryWrapper(tmpLib);
+	}
+	lib = tmpLib;
     }
 
     private LockedObject lockInternal() throws InterruptedException {
@@ -147,6 +164,8 @@ public class MiddleWareWrapper {
     }
 
     public void initialize() throws CryptokiException {
+
+
 	try {
 	    CK_C_INITIALIZE_ARGS arg = new CK_C_INITIALIZE_ARGS();
 	    arg.setFlags(CryptokiLibrary.CKF_OS_LOCKING_OK);
@@ -514,7 +533,7 @@ public class MiddleWareWrapper {
         }
     }
 
-    private static void check(String fname, NativeLong result) throws CryptokiException {
+    public static void check(String fname, NativeLong result) throws CryptokiException {
 	check(fname, result, (long) CryptokiLibrary.CKR_OK);
     }
 

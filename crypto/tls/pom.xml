@@ -29,17 +29,6 @@
 		<dependency>
 			<groupId>com.github.markusbernhardt</groupId>
 			<artifactId>proxy-vole</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>net.java.dev.jna</groupId>
-					<artifactId>jna</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<classifier>signed</classifier>
 		</dependency>
 	</dependencies>
 

@@ -52,7 +52,7 @@
 			<X32SearchPath>C:\Program Files (x86)\Gemalto\Classic Client\BIN</X32SearchPath>
 			<X64SearchPath>C:\Program Files\Gemalto\Classic Client\BIN</X64SearchPath>
 		</LibSpec>
-		
+
         <CardConfig>
             <CardSpec>
                 <MiddlewareName>Gemalto S.A._Classic V3</MiddlewareName>
@@ -90,5 +90,35 @@
         </CardConfig>
 
     </MiddlewareSpec>
+
+
+    <MiddlewareSpec required="false" disabled="false">
+
+        <MiddlewareName>NexusPersonal</MiddlewareName>
+
+		<LibSpec>
+			<LibName>P11</LibName>
+			<SearchPath>/usr/lib/personal</SearchPath>
+		</LibSpec>
+
+        <CardConfig>
+            <CardSpec>
+                <MiddlewareName>D-TRUST GmbH (C)_G&amp;&amp;D STARCOS 3.4</MiddlewareName>
+                <iso:ObjectIdentifier>https://www.ihk.de/cif/ChamberCard</iso:ObjectIdentifier>
+                <iso:CardTypeName xml:lang="en">IHK-ChamberCard</iso:CardTypeName>
+                <iso:CardTypeName xml:lang="de">IHK-ChamberCard</iso:CardTypeName>
+                <iso:Version>
+                    <iso:Major>1</iso:Major>
+                    <iso:Minor>0</iso:Minor>
+                    <iso:SubMinor>0</iso:SubMinor>
+                </iso:Version>
+                <iso:Status>Final</iso:Status>
+                <iso:Date>2017-12-21</iso:Date>
+				<ATR>3BD818FF81B1FE451F038064041AB403810561</ATR>
+                <CardImage>ihk-card.jpg</CardImage>
+            </CardSpec>
+        </CardConfig>
+
+	</MiddlewareSpec>
 
 </MiddlewareConfig>

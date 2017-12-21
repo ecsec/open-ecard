@@ -158,8 +158,8 @@ public class MwCertificate {
      * @throws CryptokiException
      */
     private Boolean loadAttrValTrusted() throws CryptokiException {
-        CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_TRUSTED);
-	return AttributeUtils.getBool(raw);
+        CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_TRUSTED);
+	return raw != null ? AttributeUtils.getBool(raw) : null;
     }
 
     /**
@@ -193,18 +193,7 @@ public class MwCertificate {
      */
     private Calendar loadAttrValStartDate() throws CryptokiException {
         CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_START_DATE);
-	int dataLen = raw != null ? raw.getLength().intValue() : 0;
-	if (dataLen > 0) {
-	    assert(raw != null);
-	    CK_DATE d = new CK_DATE(raw.getData());
-	    GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-	    cal.set(Integer.parseInt(new String(d.getYear())),
-		    Integer.parseInt(new String(d.getMonth())) - 1, // 0 based
-		    Integer.parseInt(new String(d.getDay())));
-	    return cal;
-	} else {
-	    return null;
-	}
+	return convertCalendar(raw);
     }
 
     /**
@@ -215,6 +204,10 @@ public class MwCertificate {
      */
     private Calendar loadAttrValEndDate() throws CryptokiException {
         CkAttribute raw = getAttributeChecked(CryptokiLibrary.CKA_END_DATE);
+	return convertCalendar(raw);
+    }
+
+    private Calendar convertCalendar(CkAttribute raw) {
 	int dataLen = raw != null ? raw.getLength().intValue() : 0;
 	if (dataLen > 0) {
 	    assert(raw != null);
@@ -312,6 +305,7 @@ public class MwCertificate {
      * 
      * @return Boolean
      */
+    @Nullable
     public Boolean getTrusted() {
         return trusted;
     }
@@ -350,6 +344,7 @@ public class MwCertificate {
      * 
      * @return CK_DATE
      */
+    @Nullable
     public Calendar getEndDate() {
         return endDate;
     }

@@ -506,7 +506,7 @@ public interface CryptokiLibrary extends Library {
     /** <i>native declaration : pkcs11_v2.40/pkcs11t.h</i> */
     public static final int CKA_SUPPORTED_CMS_ATTRIBUTES = (int) 0x00000503;
     /** <i>native declaration : pkcs11_v2.40/pkcs11t.h</i> */
-    public static final int CKA_ALLOWED_MECHANISMS = (int) (0x40000000 | 0x00000600);
+    public static final int CKA_ALLOWED_MECHANISMS = (int) (CKF_ARRAY_ATTRIBUTE | 0x00000600);
     /** <i>native declaration : pkcs11_v2.40/pkcs11t.h</i> */
     public static final int CKA_VENDOR_DEFINED = (int) 0x80000000;
     /** <i>native declaration : pkcs11_v2.40/pkcs11t.h</i> */

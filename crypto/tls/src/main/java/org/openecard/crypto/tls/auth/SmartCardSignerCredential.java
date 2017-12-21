@@ -23,13 +23,17 @@
 package org.openecard.crypto.tls.auth;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.DERNull;
 import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.openecard.bouncycastle.asn1.x509.DigestInfo;
+import org.openecard.bouncycastle.tls.HashAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.tls.TlsUtils;
 import org.openecard.bouncycastle.tls.crypto.TlsSigner;
@@ -65,19 +69,40 @@ public class SmartCardSignerCredential implements TlsSigner {
 
     @Override
     public byte[] generateRawSignature(SignatureAndHashAlgorithm algorithm, byte[] hash) throws IOException {
-	if (algorithm != null && isRawSignature()) {
-	    // TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
-	    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
-	    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), hash);
-	    hash = digestInfo.getEncoded(ASN1Encoding.DER);
-	    LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
+	return genSig(algorithm, hash, true);
+    }
+
+    private byte[] genSig(SignatureAndHashAlgorithm algorithm, byte[] sigData, boolean isRaw)
+	    throws IOException {
+	SignatureAlgorithms didAlg = getDidAlgorithm();
+	LOG.debug("Using DID with algorithm={}.", didAlg.getJcaAlg());
+
+	if (algorithm != null) {
+	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(algorithm.getSignature()),
+		    HashAlgorithm.getText(algorithm.getHash()));
+	    LOG.debug("Preforming TLS 1.2 signature for algorithm={}.", reqAlgStr);
+
+	    if (isRaw && isRawRSA(didAlg)) {
+		// TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
+		ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
+		DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), sigData);
+		sigData = digestInfo.getEncoded(ASN1Encoding.DER);
+		LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
+	    }
+	} else {
+	    LOG.debug("Performing pre-TLS 1.2 signature.");
 	}
 
-	LOG.debug("Signing hash={}.", ByteUtils.toHexString(hash));
+	if (isRaw) {
+	    LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
+	} else {
+	    LOG.debug("Hashed Signature of data blob.");
+	}
+
 	try {
 	    did.authenticateMissing();
-	    byte[] sigData = did.sign(hash);
-	    return sigData;
+	    byte[] signature = did.sign(sigData);
+	    return signature;
 	} catch (WSHelper.WSException ex) {
 	    String msg = "Failed to create signature because of an unknown error.";
 	    LOG.warn(msg, ex);
@@ -93,19 +118,48 @@ public class SmartCardSignerCredential implements TlsSigner {
 	}
     }
 
-    private boolean isRawSignature() {
+    private boolean isRawSignature(SignatureAlgorithms alg) {
+	return isRawRSA(alg) || isRawECDSA(alg);
+    }
+
+    private boolean isRawRSA(SignatureAlgorithms alg) {
+	return alg == SignatureAlgorithms.CKM_RSA_PKCS;
+    }
+    private boolean isRawECDSA(SignatureAlgorithms alg) {
+	return alg == SignatureAlgorithms.CKM_ECDSA;
+    }
+
+
+    private SignatureAlgorithms getDidAlgorithm() {
 	try {
 	    AlgorithmInfoType algInfo = did.getGenericCryptoMarker().getAlgorithmInfo();
 	    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
-	    return alg == SignatureAlgorithms.CKM_RSA_PKCS;
+	    return alg;
 	} catch (UnsupportedAlgorithmException | WSHelper.WSException ex) {
 	    throw new RuntimeException("Error evaluating algorithm", ex);
 	}
     }
 
     @Override
-    public TlsStreamSigner getStreamSigner(SignatureAndHashAlgorithm algorithm) throws IOException {
-	return null;
+    public TlsStreamSigner getStreamSigner(final SignatureAndHashAlgorithm algorithm) throws IOException {
+	if (! isRawSignature(getDidAlgorithm())) {
+	    // create stream signer for use with real data, not the hash of it
+	    return new TlsStreamSigner() {
+		private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+		@Override
+		public OutputStream getOutputStream() throws IOException {
+		    return buffer;
+		}
+
+		@Override
+		public byte[] getSignature() throws IOException {
+		    return genSig(algorithm, buffer.toByteArray(), false);
+		}
+	    };
+	} else {
+	    return null;
+	}
     }
 
 }

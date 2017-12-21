@@ -56,6 +56,7 @@ import java.util.List;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.NoCertificateChainException;
@@ -143,25 +144,10 @@ public class CIFCreator {
 		}
 
 		// determine available algorithms
-		List<MwMechanism> allMechanisms = session.getSlot().getMechanismList();
-		for (MwMechanism mechanism : allMechanisms) {
-		    try {
-			if (! mechanism.isSignatureAlgorithm()) {
-			    // skipping non signature mechanism
-			    continue;
-			}
-
-			SignatureAlgorithms sigalg = mechanism.getSignatureAlgorithm();
-			LOG.debug("Card signature algorithm: {}", sigalg);
-			// only use algorithms matching the key type
-			long keyType = sigalg.getKeyType().getPkcs11Mechanism();
-			if (keyType == pubKey.getKeyType()) {
-			    LOG.debug("Allowing signature algorithm: {}", sigalg);
-			    DIDInfoType did = createCryptoDID(mwCerts, sigalg);
-			    didInfos.add(did);
-			}
-		    } catch (UnsupportedAlgorithmException ex) {
-		    }
+		List<SignatureAlgorithms> sigalgs = getSigAlgs(pubKey);
+		for (SignatureAlgorithms sigalg : sigalgs) {
+		    DIDInfoType did = createCryptoDID(mwCerts, sigalg);
+		    didInfos.add(did);
 		}
 	    } catch (NoCertificateChainException ex) {
 		LOG.warn("Could not create a certificate chain for requested key.", ex);
@@ -426,6 +412,58 @@ public class CIFCreator {
 	    certFactory = CertificateFactory.getInstance("X.509");
 	}
 	return certFactory;
+    }
+
+    private List<SignatureAlgorithms> getSigAlgs(MwPublicKey pubKey) {
+	ArrayList<SignatureAlgorithms> sigAlgs = new ArrayList<>();
+
+	long[] mechanisms = pubKey.getAllowedMechanisms();
+	if (mechanisms.length == 0) {
+	    // no mechanisms available, ask what the card has to offer and assume this is also what the key offers
+	    try {
+		List<MwMechanism> allMechanisms = session.getSlot().getMechanismList();
+		for (MwMechanism mechanism : allMechanisms) {
+		    try {
+			if (! mechanism.isSignatureAlgorithm()) {
+			    // skipping non signature mechanism
+			    continue;
+			}
+
+			SignatureAlgorithms sigAlg = mechanism.getSignatureAlgorithm();
+			LOG.debug("Card signature algorithm: {}", sigAlg);
+			// only use algorithms matching the key type
+			long keyType = sigAlg.getKeyType().getPkcs11Mechanism();
+			if (keyType == pubKey.getKeyType()) {
+			    LOG.debug("Allowing signature algorithm: {}", sigAlg);
+			    sigAlgs.add(sigAlg);
+			}
+		    } catch (UnsupportedAlgorithmException ex) {
+			LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);
+		    }
+		}
+	    } catch (CryptokiException ex) {
+		LOG.error("Failed to read mechanisms from card.", ex);
+	    }
+
+	    // too bad we have nothing
+	    if (sigAlgs.isEmpty()) {
+		LOG.error("Could not find any suitable algorithms for DID.");
+	    }
+	} else {
+	    // convert each of the mechanisms
+	    for (long m : mechanisms) {
+		try {
+		    SignatureAlgorithms sigAlg = SignatureAlgorithms.fromMechanismId(m);
+		    LOG.debug("Key signature algorithm: {}", sigAlg);
+		    sigAlgs.add(sigAlg);
+		} catch (UnsupportedAlgorithmException ex) {
+		    String mStr = String.format("%#08X", m);
+		    LOG.error("Skipping unknown signature algorithm ({}).", mStr);
+		}
+	    }
+	}
+
+	return sigAlgs;
     }
 
 }

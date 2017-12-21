@@ -63,7 +63,8 @@ public class MwAbstractKey {
 	} catch (CryptokiException ex) {
 	    switch ((int) ex.getErrorCode()) {
 		case CryptokiLibrary.CKR_ATTRIBUTE_TYPE_INVALID:
-		    LOG.debug("Error retrieving attribute value, but ignoring it.", ex);
+		    String ts = String.format("%#08X", type);
+		    LOG.debug("Error retrieving attribute value (type={}), but ignoring it: {}", ts, ex.getMessage());
 		    return null;
 	    }
 

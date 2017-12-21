@@ -236,6 +236,7 @@ class MwEventRunner implements Runnable {
 	String ifdName = slot.getSlotInfo().getSlotDescription();
 
 	String cardType = String.format("%s_%s", token.getManufacturerID(), token.getModel());
+	LOG.info("Middleware card type: {}", cardType);
 	cardType = mwModule.getMiddlewareSALConfig().mapMiddlewareType(cardType);
 	if (cardType != null) {
 	    boolean protectedAuthPath = token.containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);

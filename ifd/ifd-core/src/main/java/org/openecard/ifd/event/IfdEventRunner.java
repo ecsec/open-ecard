@@ -47,6 +47,7 @@ import org.openecard.common.interfaces.Environment;
 import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
@@ -220,6 +221,7 @@ public class IfdEventRunner implements Runnable {
 		    newSlot.setATRorATS(slot.getATRorATS());
 		    // create event
 		    LOG.debug("Found a card insert event ({}).", ifdName);
+		    LOG.info("Card with ATR={} inserted.", ByteUtils.toHexString(slot.getATRorATS()));
 		    ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot, slotCapabilities);
 		    env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(handle));
 		    try {

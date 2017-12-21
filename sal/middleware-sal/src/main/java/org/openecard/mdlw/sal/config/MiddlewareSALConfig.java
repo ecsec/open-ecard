@@ -199,9 +199,11 @@ public class MiddlewareSALConfig {
     public boolean isATRKnown(@Nullable byte[] atr) {
 	if (atr != null) {
 	    for (CardSpecType spec : mwSpec.getCardConfig().getCardSpecs()) {
-		boolean matches = compareATR(atr, spec.getAtr(), spec.getMask());
-		if (matches) {
-		    return true;
+		for (byte[] nextAtr : spec.getAtr()) {
+		    boolean matches = compareATR(atr, nextAtr, spec.getMask());
+		    if (matches) {
+			return true;
+		    }
 		}
 	    }
 	}

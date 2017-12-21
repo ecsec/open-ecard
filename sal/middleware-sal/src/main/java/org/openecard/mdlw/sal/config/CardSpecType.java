@@ -23,6 +23,7 @@
 package org.openecard.mdlw.sal.config;
 
 import iso.std.iso_iec._24727.tech.schema.CardTypeType;
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -77,7 +78,7 @@ public class CardSpecType {
     @XmlElement(name = "ATR", type = String.class)
     @XmlJavaTypeAdapter(HexBinaryAdapter.class)
     @XmlSchemaType(name = "hexBinary")
-    private byte[] atr;
+    private List<byte[]> atr;
 
     @XmlElement(name = "Mask", type = String.class)
     @XmlJavaTypeAdapter(HexBinaryAdapter.class)
@@ -135,11 +136,10 @@ public class CardSpecType {
 	this.date = date;
     }
 
-    public void setAtr(byte[] atr) {
-	this.atr = atr;
-    }
-
-    public byte[] getAtr() {
+    public List<byte[]> getAtr() {
+	if (atr == null) {
+	    atr = new ArrayList<>();
+	}
 	return atr;
     }
 

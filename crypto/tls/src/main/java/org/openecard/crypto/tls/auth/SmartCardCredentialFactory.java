@@ -30,6 +30,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -98,66 +99,93 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	ArrayList<TlsCredentialedSigner> credentials = new ArrayList<>();
 	TlsCryptoParameters tlsCrypto = new TlsCryptoParameters(context);
 
+	LOG.debug("Selecting a suitable DID for the following requested algorithms:");
+	ArrayList<SignatureAndHashAlgorithm> crSigAlgs = getCrSigAlgs(cr);
+	removeUnsupportedAlgs(crSigAlgs);
+	for (SignatureAndHashAlgorithm reqAlg : crSigAlgs) {
+	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(reqAlg.getSignature()),
+		    HashAlgorithm.getText(reqAlg.getHash()));
+	    LOG.debug("  {}", reqAlgStr);
+	}
+
 	try {
 	    DidInfos didInfos = tokenCache.getInfo(null, handle);
 	    List<DidInfo> infos = didInfos.getCryptoDidInfos();
 
-	    for (DidInfo info : infos) {
-		try {
-		    // filter out dids having secret certificates
-		    if (filterAlwaysReadable && isCertNeedsPin(info)) {
-			continue;
-		    }
+	    printCerts(infos);
 
-		    TlsCredentialedSigner cred;
-		    List<X509Certificate> chain = info.getRelatedCertificateChain();
+	    // remove unsuitable DIDs
+	    LOG.info("Sorting out DIDs not able to handle the TLS request.");
+	    infos = removeSecretCertDids(infos);
+	    infos = removeNonAuthDids(infos);
+	    infos = removeUnsupportedAlgs(infos);
+	    infos = removeUnsupportedCerts(cr, infos);
 
-		    if (LOG.isDebugEnabled()) {
-			for (X509Certificate cert : chain) {
-			    StringWriter out = new StringWriter();
-			    PemWriter pw = new PemWriter(out);
-			    pw.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
-			    pw.close();
-			    LOG.debug("Certificate for DID {}\n{}", info.getDidName(), out);
-			    LOG.debug("Certificate details\n{}", cert);
-			}
-		    }
+	    //infos = nonRawFirst(infos);
 
-		    Certificate clientCert = convertCert(context.getCrypto(), chain);
+	    LOG.info("Creating signer instances for the TLS Client Certificate signature.");
 
-		    if (! (matchesCertReq(cr, chain) && isAuthCert(info, chain))) {
-			continue;
-		    }
+	    // TLS < 1.2
+	    if (crSigAlgs.isEmpty()) {
+		LOG.info("Looking for a raw RSA DID.");
 
-		    if (cr.getSupportedSignatureAlgorithms() == null) {
-			// TLS < 1.2
+		for (DidInfo info : infos) {
+		    try {
+			LOG.debug("Checking DID= {}.", info.getDidName());
+
+			TlsCredentialedSigner cred;
+			List<X509Certificate> chain = info.getRelatedCertificateChain();
+			Certificate clientCert = convertCert(context.getCrypto(), chain);
+
 			if (isRawRSA(info)) {
 			    LOG.debug("Adding raw RSA signer.");
 			    TlsSigner signer = new SmartCardSignerCredential(info);
 			    cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, null);
 			    credentials.add(cred);
 			}
-		    } else {
-			// TLS >= 1.2
-			for (Object algObj : cr.getSupportedSignatureAlgorithms()) {
-			    SignatureAndHashAlgorithm reqAlg = (SignatureAndHashAlgorithm) algObj;
+		    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
+			LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
+		    } catch (UnsupportedAlgorithmException ex) {
+			LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
+		    } catch (WSHelper.WSException ex) {
+			LOG.error("Unknown error accessing DID " + info.getDidName() + ".", ex);
+		    }
+		}
+
+	    } else {
+		// TLS >= 1.2
+		LOG.info("Looking for most specific DIDs.");
+
+		// looping over the servers alg list preserves its ordering
+		for (SignatureAndHashAlgorithm reqAlg : crSigAlgs) {
+		    for (DidInfo info : infos) {
+			LOG.debug("Checking DID= {}.", info.getDidName());
+
+			try {
 			    AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
 			    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
 
+			    TlsCredentialedSigner cred;
+			    List<X509Certificate> chain = info.getRelatedCertificateChain();
+			    Certificate clientCert = convertCert(context.getCrypto(), chain);
+
+			    // find one DID for this problem, then continue with the next algorithm
 			    if (matchesAlg(reqAlg, alg)) {
 				LOG.debug("Adding {} signer.", alg.getJcaAlg());
 				TlsSigner signer = new SmartCardSignerCredential(info);
 				cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg);
 				credentials.add(cred);
+				//break;
+				return credentials;
 			    }
+			} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
+			    LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
+			} catch (UnsupportedAlgorithmException ex) {
+			    LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
+			} catch (WSHelper.WSException ex) {
+			    LOG.error("Unknown error accessing DID " + info.getDidName() + ".", ex);
 			}
 		    }
-		} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
-		    LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
-		} catch (UnsupportedAlgorithmException ex) {
-		    LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
-		} catch (WSHelper.WSException ex) {
-		    LOG.error("Unknown error accessing DID " + info.getDidName() + ".", ex);
 		}
 	    }
 	} catch (NoSuchDid | WSHelper.WSException ex) {
@@ -225,24 +253,6 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 
     private boolean matchesAlg(SignatureAndHashAlgorithm reqAlg, SignatureAlgorithms alg) {
-	// only use PKCS#1 1.5 and ECDSA, not PKCS#1 2.0
-	switch (alg) {
-	    //case CKM_ECDSA:
-	    case CKM_ECDSA_SHA1:
-	    case CKM_ECDSA_SHA224:
-	    case CKM_ECDSA_SHA256:
-	    case CKM_ECDSA_SHA384:
-	    case CKM_ECDSA_SHA512:
-	    case CKM_RSA_PKCS:
-	    case CKM_SHA1_RSA_PKCS:
-	    case CKM_SHA224_RSA_PKCS:
-	    case CKM_SHA256_RSA_PKCS:
-	    case CKM_SHA384_RSA_PKCS:
-	    case CKM_SHA512_RSA_PKCS:
-		break;
-	    default: return false;
-	}
-
 	try {
 	    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
 
@@ -254,8 +264,8 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 			case HashAlgorithm.sha1:
 			case HashAlgorithm.sha224:
 			case HashAlgorithm.sha256:
-			//case HashAlgorithm.sha384:
-			//case HashAlgorithm.sha512:
+			case HashAlgorithm.sha384:
+			case HashAlgorithm.sha512:
 			    return true;
 		    }
 		}
@@ -308,6 +318,185 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	    CertificateEncodingException {
 	TlsCertificate cert = crypto.createCertificate(chain.get(0).getEncoded());
 	return new Certificate(new TlsCertificate[]{ cert });
+    }
+
+    private List<DidInfo> nonRawFirst(List<DidInfo> infos) {
+	ArrayList<DidInfo> result = new ArrayList<>();
+
+	// first add all the non raw RSA DIDs
+	for (DidInfo info : infos) {
+	    try {
+		if (! isRawRSA(info)) {
+		    result.add(info);
+		}
+	    } catch (UnsupportedAlgorithmException | WSHelper.WSException ex) {
+		LOG.error("Invalid DID or error accessing the DID.", ex);
+	    }
+	}
+	// then add all raw RSA DIDs
+	for (DidInfo info : infos) {
+	    try {
+		if (isRawRSA(info)) {
+		    result.add(info);
+		}
+	    } catch (UnsupportedAlgorithmException | WSHelper.WSException ex) {
+		LOG.error("Invalid DID or error accessing the DID.", ex);
+	    }
+	}
+
+	return result;
+    }
+
+    private List<DidInfo> removeNonAuthDids(List<DidInfo> infos) {
+	ArrayList<DidInfo> result = new ArrayList<>();
+
+	for (DidInfo next : infos) {
+	    try {
+		List<X509Certificate> certs = next.getRelatedCertificateChain();
+		if (! certs.isEmpty()) {
+		    boolean isAuthCert = isAuthCert(next, certs);
+		    if (isAuthCert) {
+			result.add(next);
+		    }
+		}
+	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException ex) {
+		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+	    }
+	}
+
+	return result;
+    }
+
+    private ArrayList<SignatureAndHashAlgorithm> getCrSigAlgs(CertificateRequest cr) {
+	ArrayList<SignatureAndHashAlgorithm> result = new ArrayList<>();
+	if (cr.getSupportedSignatureAlgorithms() != null) {
+	    for (Object next : cr.getSupportedSignatureAlgorithms()) {
+		result.add((SignatureAndHashAlgorithm) next);
+	    }
+	}
+	return result;
+    }
+
+    private List<DidInfo> removeUnsupportedCerts(CertificateRequest cr, List<DidInfo> infos) {
+	ArrayList<DidInfo> result = new ArrayList<>();
+
+	for (DidInfo next : infos) {
+	    try {
+		List<X509Certificate> chain = next.getRelatedCertificateChain();
+		if (matchesCertReq(cr, chain)) {
+		    result.add(next);
+		}
+	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException ex) {
+		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+	    }
+	}
+
+	return result;
+    }
+
+    private List<DidInfo> removeSecretCertDids(List<DidInfo> infos) {
+	ArrayList<DidInfo> result = new ArrayList<>();
+
+	for (DidInfo next : infos) {
+	    try {
+		// filter out dids having secret certificates
+		if (! (filterAlwaysReadable && isCertNeedsPin(next))) {
+		    result.add(next);
+		}
+	    } catch (SecurityConditionUnsatisfiable ex) {
+		LOG.error("Failed to get ACL for certificates of DID " + next.getDidName() + ".", ex);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+	    }
+	}
+
+	return result;
+    }
+
+    private void printCerts(List<DidInfo> infos) {
+	for (DidInfo next : infos) {
+	    try {
+		List<X509Certificate> chain = next.getRelatedCertificateChain();
+
+		if (LOG.isDebugEnabled()) {
+		    for (X509Certificate cert : chain) {
+			StringWriter out = new StringWriter();
+			PemWriter pw = new PemWriter(out);
+			pw.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
+			pw.close();
+			LOG.debug("Certificate for DID {}\n{}", next.getDidName(), out);
+			LOG.debug("Certificate details\n{}", cert);
+		    }
+		}
+	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
+		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+	    }
+	}
+    }
+
+    private List<DidInfo> removeUnsupportedAlgs(List<DidInfo> infos) {
+	ArrayList<DidInfo> result = new ArrayList<>();
+
+	for (DidInfo next : infos) {
+	    try {
+		AlgorithmInfoType algInfo = next.getGenericCryptoMarker().getAlgorithmInfo();
+		String algStr = algInfo.getAlgorithmIdentifier().getAlgorithm();
+		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algStr);
+
+		switch (alg) {
+//		    case CKM_ECDSA: // TODO: not sure if that really works, find a card and test
+//		    case CKM_ECDSA_SHA1: // too weak
+		    case CKM_ECDSA_SHA256:
+		    case CKM_ECDSA_SHA384:
+		    case CKM_ECDSA_SHA512:
+		    case CKM_RSA_PKCS:
+//		    case CKM_SHA1_RSA_PKCS: // too weak
+		    case CKM_SHA256_RSA_PKCS:
+		    case CKM_SHA384_RSA_PKCS:
+		    case CKM_SHA512_RSA_PKCS:
+			result.add(next);
+		}
+	    } catch (UnsupportedAlgorithmException ex) {
+		LOG.error("Unsupported algorithm used in CIF. Skipping DID " + next.getDidName() + ".", ex);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+	    }
+	}
+
+	return result;
+    }
+
+    private void removeUnsupportedAlgs(ArrayList<SignatureAndHashAlgorithm> crSigAlgs) {
+	Iterator<SignatureAndHashAlgorithm> it = crSigAlgs.iterator();
+	while (it.hasNext()) {
+	    SignatureAndHashAlgorithm alg = it.next();
+	    switch (alg.getSignature()) {
+		// allowed sig algs
+		case SignatureAlgorithm.ecdsa:
+		case SignatureAlgorithm.rsa:
+		    break;
+		default:
+		    it.remove();
+		    continue;
+	    }
+	    switch (alg.getHash()) {
+		// allowed hash algs
+		case HashAlgorithm.sha512:
+		case HashAlgorithm.sha384:
+		case HashAlgorithm.sha256:
+		//case HashAlgorithm.sha1: // too weak
+		    break;
+		default:
+		    it.remove();
+		    continue;
+	    }
+	}
     }
 
 }

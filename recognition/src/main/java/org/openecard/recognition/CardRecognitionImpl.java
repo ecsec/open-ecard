@@ -204,6 +204,15 @@ public class CardRecognitionImpl implements CardRecognition {
     @Override
     public CardInfoType getCardInfo(String type) {
         CardInfoType cif = env.getCIFProvider().getCardInfo(type);
+	if (cif == null) {
+	    cif = getCardInfoFromRepo(type);
+	}
+	return cif;
+    }
+
+    @Override
+    public CardInfoType getCardInfoFromRepo(String type) {
+        CardInfoType cif = null;
         // only do something when a repo is specified
 	if (cif == null && cifRepo != null) {
 	    GetCardInfoOrACD req = new GetCardInfoOrACD();

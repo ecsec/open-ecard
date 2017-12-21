@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2016 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -181,7 +181,7 @@ public class SelectorSAL implements SAL, CIFProvider {
 	if (type != null && sal instanceof CIFProvider) {
 	    return ((CIFProvider) sal).getCardInfo(type, cardType);
 	} else {
-	    return recognition.getCardInfo(cardType);
+	    return recognition.getCardInfoFromRepo(cardType);
 	}
     }
 

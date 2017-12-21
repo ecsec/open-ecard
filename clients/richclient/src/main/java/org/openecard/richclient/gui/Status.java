@@ -297,7 +297,7 @@ public class Status implements EventCallback {
 	    return lang.translationForKey("status.unknowncard");
 	} else {
 	    // read CardTypeName from CardInfo file
-	    CardInfoType cif = env.getRecognition().getCardInfo(cardType);
+	    CardInfoType cif = env.getCIFProvider().getCardInfo(cardType);
 	    String cardTypeName = cardType;
 
 	    if (cif != null) {

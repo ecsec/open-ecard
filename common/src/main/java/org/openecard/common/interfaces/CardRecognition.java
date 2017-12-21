@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,9 @@ public interface CardRecognition {
 
     List<CardInfoType> getCardInfos();
 
+    // TODO: get rid of these functions, they should be in the SAL propably
     CardInfoType getCardInfo(String type);
+    CardInfoType getCardInfoFromRepo(String type);
 
     String getTranslatedCardName(String cardType);
 

@@ -60,14 +60,14 @@ public class FMD {
      */
     public FMD(TLV tlv) throws TLVException, UnsupportedEncodingException {
 	this.tlv = tlv;
-	TLV child = tlv.getChild();
-	if (child.getTagNumWithClass() != 0x64) {
+	if (tlv.getTagNumWithClass() != 0x64) {
 	    throw new TLVException("Data doesn't represent an FCP.");
 	}
 
 	if (tlv.getValue().length == 0) {
 	    content = false;
 	} else {
+	    TLV child = tlv.getChild();
 
 	    if (child.getTagNumWithClass() == 0x61) {
 		Parser p = new Parser(child);

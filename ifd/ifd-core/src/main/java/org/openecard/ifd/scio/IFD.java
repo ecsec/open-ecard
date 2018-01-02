@@ -282,7 +282,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    TerminalInfo info;
 	    String ifdName = parameters.getIFDName();
 	    try {
-		SingleThreadChannel channel = cm.getMasterChannel(ifdName);
+		SingleThreadChannel channel = cm.openMasterChannel(ifdName);
 		info = new TerminalInfo(cm, channel);
 	    } catch (NoSuchTerminal ex) {
 		// continue without a channel
@@ -400,9 +400,9 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    TerminalInfo info;
 	    try {
-		SingleThreadChannel channel = cm.getMasterChannel(ifd.getName());
+		SingleThreadChannel channel = cm.openMasterChannel(ifd.getName());
 		info = new TerminalInfo(cm, channel);
-	    } catch (NoSuchTerminal ex) {
+	    } catch (NoSuchTerminal | SCIOException ex) {
 		// continue without a channel
 		info = new TerminalInfo(cm, ifd);
 	    }
@@ -687,6 +687,10 @@ public class IFD implements org.openecard.ws.IFD {
 	    } else {
 		try {
 		    String name = parameters.getIFDName();
+
+		    // make sure the slot is connected before attemting to get a slave channel
+		    cm.openMasterChannel(name);
+
 		    byte[] slotHandle = cm.openSlaveChannel(name).p1;
 		    SingleThreadChannel ch = cm.getSlaveChannel(slotHandle);
 

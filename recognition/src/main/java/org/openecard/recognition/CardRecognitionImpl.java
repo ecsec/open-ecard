@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -70,6 +70,7 @@ import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.FileUtils;
+import org.openecard.common.util.IntegerUtils;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
@@ -608,6 +609,9 @@ public class CardRecognitionImpl implements CardRecognition {
 	    offsetBytes = new byte[] {(byte) 0x00, (byte) 0x00};
 	}
 	int offset = ByteUtils.toInteger(offsetBytes);
+	if (lengthBytes == null) {
+	    lengthBytes = IntegerUtils.toByteArray(valueBytes.length);
+	}
 	int length = ByteUtils.toInteger(lengthBytes);
 	if (maskBytes == null) {
 	    maskBytes = new byte[valueBytes.length];

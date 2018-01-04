@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.sal.protocol.genericcryptography;
 
+import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType;
 import iso.std.iso_iec._24727.tech.schema.CardCallTemplateType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
@@ -33,6 +34,8 @@ import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +43,7 @@ import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.bouncycastle.util.Arrays;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.GetResponse;
@@ -62,6 +66,9 @@ import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.HashAlgorithms;
+import org.openecard.crypto.common.SignatureAlgorithms;
+import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOComputeDigitalSignature;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOHash;
 import org.slf4j.Logger;
@@ -132,6 +139,9 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 
+	    // calculate hash out of card if necessary
+	    message = calcExtHash(message, cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier(), hashInfo);
+
 	    if (cryptoMarker.getSignatureGenerationInfo() != null) {
 		response = performSignature(cryptoMarker, keyReference, algorithmIdentifier, message, slotHandle,
 			hashRef, hashInfo);
@@ -152,6 +162,38 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	}
 
 	return response;
+    }
+
+    private byte[] calcExtHash(byte[] message, AlgorithmIdentifierType algInfo, HashGenerationInfoType hashInfo)
+	    throws WSHelper.WSException {
+	if (hashInfo == HashGenerationInfoType.NOT_ON_CARD) {
+	    try {
+		SignatureAlgorithms sigAlg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithm());
+		HashAlgorithms hashAlg = sigAlg.getHashAlg();
+		// perform hash if there is an algorithm specified
+		if (hashAlg != null) {
+		    LOG.info("Calculating off-card hash for message.");
+		    String hashAlgStr = hashAlg.getJcaAlg();
+		    LOG.debug("Using algorithm={}.", hashAlgStr);
+
+		    MessageDigest d = MessageDigest.getInstance(hashAlgStr);
+		    d.update(message);
+		    byte[] hash = d.digest();
+		    return hash;
+		}
+	    } catch (NoSuchAlgorithmException ex) {
+		throw WSHelper.createException(
+			WSHelper.makeResultError(ECardConstants.Minor.Ident.Algorithm.HASH_NOT_SUPPORTED,
+				"The crypto library does not support the requested hash algorithm."));
+	    } catch (UnsupportedAlgorithmException ex) {
+		throw WSHelper.createException(
+			WSHelper.makeResultError(ECardConstants.Minor.Ident.Algorithm.SIG_NOT_SUPPORTED,
+				"The signature algorithm specified in the CIF is not supported."));
+	    }
+	}
+
+	LOG.debug("Using signature message as is without external hash calculation.");
+	return message;
     }
 
     /**

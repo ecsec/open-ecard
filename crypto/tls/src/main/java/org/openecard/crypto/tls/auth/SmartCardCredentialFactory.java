@@ -463,7 +463,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algStr);
 
 		switch (alg) {
-//		    case CKM_ECDSA: // TODO: not sure if that really works, find a card and test
+		    case CKM_ECDSA:
 //		    case CKM_ECDSA_SHA1: // too weak
 		    case CKM_ECDSA_SHA256:
 		    case CKM_ECDSA_SHA384:

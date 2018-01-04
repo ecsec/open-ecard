@@ -257,7 +257,34 @@
 				</iso:Body>
 				<iso:Trailer>9000</iso:Trailer>
 				<iso:Conclusion>
-					<iso:RecognizedCardType>http://cif.id.ee/eidV3.5</iso:RecognizedCardType>
+					<iso:CardCall>
+						<iso:CommandAPDU>00CA010003</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+							<iso:Body>
+								<iso:MatchingData>
+									<!-- Version is 03.05.0X -->
+									<iso:MatchingValue>030500</iso:MatchingValue>
+									<iso:Mask>FFFFF0</iso:Mask>
+								</iso:MatchingData>
+							</iso:Body>
+							<iso:Trailer>9000</iso:Trailer>
+							<iso:Conclusion>
+								<iso:RecognizedCardType>http://cif.id.ee/eidV3.5.8+</iso:RecognizedCardType>
+							</iso:Conclusion>
+						</iso:ResponseAPDU>
+						<iso:ResponseAPDU>
+							<iso:Body>
+								<iso:MatchingData>
+									<!-- Version is 03.05 -->
+									<iso:MatchingValue>0305</iso:MatchingValue>
+								</iso:MatchingData>
+							</iso:Body>
+							<iso:Trailer>9000</iso:Trailer>
+							<iso:Conclusion>
+								<iso:RecognizedCardType>http://cif.id.ee/eidV3.5</iso:RecognizedCardType>
+							</iso:Conclusion>
+						</iso:ResponseAPDU>
+					</iso:CardCall>
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
 		</iso:CardCall>

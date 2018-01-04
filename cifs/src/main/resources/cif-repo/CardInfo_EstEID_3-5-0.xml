@@ -19,24 +19,37 @@
 	<iso:Date>2012-11-12</iso:Date>
     </iso:CardType>
 
-    <iso:CardIdentification>
-	<iso:CharacteristicFeature>
-	    <!-- select MF the AID should be unique -->
-	    <iso:CardCall>
-	    <iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
-	    <iso:ResponseAPDU>
-		<iso:Body>
-		    <iso:MatchingData>
-			<iso:Offset>00</iso:Offset>
-			<iso:Length>00</iso:Length>
-			<iso:MatchingValue/>
-		    </iso:MatchingData>
-		</iso:Body>
-		<iso:Trailer>9000</iso:Trailer>
-	    </iso:ResponseAPDU>
-	</iso:CardCall>
-	</iso:CharacteristicFeature>
-    </iso:CardIdentification>
+	<iso:CardIdentification>
+		<iso:CharacteristicFeature>
+			<!-- select MF the AID should be unique -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<iso:Offset>00</iso:Offset>
+							<iso:Length>00</iso:Length>
+							<iso:MatchingValue/>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<!-- Read version from EstEID file via GET DATA -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00CA010003</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<!-- Version is 03.05 -->
+							<iso:MatchingValue>0305</iso:MatchingValue>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+	</iso:CardIdentification>
 
     <iso:ApplicationCapabilities>
 	<!-- for version 3 and higher cards -->

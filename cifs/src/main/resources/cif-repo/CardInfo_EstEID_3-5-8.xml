@@ -35,6 +35,20 @@
 					<iso:Trailer>9000</iso:Trailer>
 				</iso:ResponseAPDU>
 			</iso:CardCall>
+			<!-- Read version from EstEID file via GET DATA -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00CA010003</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<!-- Version is 03.05.0X -->
+							<iso:MatchingValue>030500</iso:MatchingValue>
+							<iso:Mask>FFFF0F</iso:Mask>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
 		</iso:CharacteristicFeature>
 	</iso:CardIdentification>
 

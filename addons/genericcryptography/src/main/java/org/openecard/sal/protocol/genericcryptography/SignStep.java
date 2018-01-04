@@ -32,8 +32,10 @@ import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType.APICommand;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -42,6 +44,10 @@ import java.util.List;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1Integer;
+import org.openecard.bouncycastle.asn1.DERSequence;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
@@ -353,6 +359,18 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    return response;
 	}
 
+	// fix output format
+	String outForm = cryptoMarker.getLegacyOutputFormat();
+	if (outForm != null) {
+	    switch (outForm) {
+		case "rawRS":
+		    signedMessage = encodeRawRS(signedMessage);
+		    break;
+		default:
+		    LOG.warn("Unsupport outputFormat={} specified in LegacySignatureGenerationInfo.", outForm);
+	    }
+	}
+
 	response.setSignature(signedMessage);
 	return response;
     }
@@ -386,6 +404,29 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	Object result = dispatcher.safeDeliver(callObj);
 
 	// TODO: match against APIResponse objects
+    }
+
+    private byte[] encodeRawRS(byte[] signature) throws WSHelper.WSException {
+	try {
+	    LOG.info("Reencoding raw RS parameters as ECDSA signature.");
+	    int n = signature.length / 2;
+	    byte[] bytes = new byte[n];
+	    System.arraycopy(signature, 0, bytes, 0, n);
+	    BigInteger r = new BigInteger(1, bytes);
+	    System.arraycopy(signature, n, bytes, 0, n);
+	    BigInteger s = new BigInteger(1, bytes);
+
+	    ASN1EncodableVector v = new ASN1EncodableVector();
+
+	    v.add(new ASN1Integer(r));
+	    v.add(new ASN1Integer(s));
+
+	    return new DERSequence(v).getEncoded(ASN1Encoding.DER);
+	} catch (IOException ex) {
+	    throw WSHelper.createException(WSHelper.makeResultError(
+		    ECardConstants.Minor.App.INT_ERROR,
+		    "Failed to reencode raw RS parameters as ECDSA signature."));
+	}
     }
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -80,7 +80,7 @@ public class SmartCardSignerCredential implements TlsSigner {
 	if (algorithm != null) {
 	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(algorithm.getSignature()),
 		    HashAlgorithm.getText(algorithm.getHash()));
-	    LOG.debug("Preforming TLS 1.2 signature for algorithm={}.", reqAlgStr);
+	    LOG.debug("Performing TLS 1.2 signature for algorithm={}.", reqAlgStr);
 
 	    if (isRaw && isRawRSA(didAlg)) {
 		// TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature

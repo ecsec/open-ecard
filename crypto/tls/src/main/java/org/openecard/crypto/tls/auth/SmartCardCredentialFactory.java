@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -159,7 +159,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		// looping over the servers alg list preserves its ordering
 		for (SignatureAndHashAlgorithm reqAlg : crSigAlgs) {
 		    for (DidInfo info : infos) {
-			LOG.debug("Checking DID= {}.", info.getDidName());
+			LOG.debug("Checking DID={}.", info.getDidName());
 
 			try {
 			    AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
@@ -256,20 +256,24 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	try {
 	    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
 
+	    // RAW signature
 	    if (bcAlg == null) {
-		// RAW RSA
-		if (reqAlg.getSignature() == SignatureAlgorithm.rsa) {
-		    // Only allow a certain set of Hash algs. Some hashes are too large for the cards.
-		    switch (reqAlg.getHash()) {
-			case HashAlgorithm.sha1:
-			case HashAlgorithm.sha224:
-			case HashAlgorithm.sha256:
-			case HashAlgorithm.sha384:
-			case HashAlgorithm.sha512:
-			    return true;
-		    }
+		// filter out unmatching signature type
+		if (alg.getKeyType() != convertSigType(reqAlg.getSignature())) {
+		    return false;
 		}
-		return false;
+
+		// Only allow a certain set of Hash algs. Some hashes are too large for the cards.
+		switch (reqAlg.getHash()) {
+		    case HashAlgorithm.sha1:
+		    case HashAlgorithm.sha224:
+		    case HashAlgorithm.sha256:
+		    case HashAlgorithm.sha384:
+		    case HashAlgorithm.sha512:
+			return true;
+		    default:
+			return false;
+		}
 	    } else {
 		// match everything else
 		return reqAlg.equals(bcAlg);
@@ -312,6 +316,15 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	}
 
 	return new SignatureAndHashAlgorithm(hash, sig);
+    }
+
+    @Nullable
+    private KeyTypes convertSigType(short sigType) {
+	switch (sigType) {
+	    case SignatureAlgorithm.rsa: return KeyTypes.CKK_RSA;
+	    case SignatureAlgorithm.ecdsa: return KeyTypes.CKK_EC;
+	    default: return null;
+	}
     }
 
     private Certificate convertCert(TlsCrypto crypto, List<X509Certificate> chain) throws IOException,

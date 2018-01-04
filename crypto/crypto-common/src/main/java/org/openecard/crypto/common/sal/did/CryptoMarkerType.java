@@ -64,11 +64,12 @@ public class CryptoMarkerType extends AbstractMarkerType {
     private WSMarshaller m;
     private String legacyKeyName = null;
     private AlgorithmInfoType algorithmInfo = null;
-    private HashGenerationInfoType hashGenerationInfo = null;
+    private HashGenerationInfoType hashGenerationInfo = HashGenerationInfoType.NOT_ON_CARD;
     private List<CertificateRefType> certificateRefs = null;
     private CryptoKeyInfoType cryptoKeyInfo = null;
     private String[] signatureGenerationInfo = null;
     private List<Object> legacySignatureGenerationInfo = null;
+    private String legacyOutputFormat = null;
 
     /**
      * The constructor gets an {@link DIDAbstractMarkerType} object and parses the object to a CryptoMarkerType object.
@@ -146,6 +147,12 @@ public class CryptoMarkerType extends AbstractMarkerType {
 		    break;
 		case "LegacySignatureGenerationInfo":
 		{
+		    // get outputFormat attribute
+		    if (elem.hasAttribute("outputFormat")) {
+			legacyOutputFormat = elem.getAttribute("outputFormat");
+		    }
+
+		    // get commands
 		    NodeList nodeList = elem.getChildNodes();
 		    legacySignatureGenerationInfo = new ArrayList<>();
 		    for (int i = 0; i < nodeList.getLength(); i++) {
@@ -223,11 +230,22 @@ public class CryptoMarkerType extends AbstractMarkerType {
      * @return A list of {@link CardCallTemplateType} objects which contain specific APDUs to generate a signature with
      *   the currently used card. If no such information is available {@code null} is returned.
      */
+    @Nullable
     public List<Object> getLegacySignatureGenerationInfo() {
 	if (legacySignatureGenerationInfo == null) {
 	    return null;
 	}
 	return Collections.unmodifiableList(legacySignatureGenerationInfo);
+    }
+
+    /**
+     * Gets the value of the outputForm attribute in LegacySignatureGenerationInfo if one is present.
+     *
+     * @return The value of the attribute, {@code null} otherwise.
+     */
+    @Nullable
+    public String getLegacyOutputFormat() {
+	return legacyOutputFormat;
     }
 
     /**

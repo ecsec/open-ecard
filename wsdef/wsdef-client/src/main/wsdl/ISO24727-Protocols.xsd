@@ -1558,6 +1558,21 @@ An example for which this is useful looks like this:
 				</complexType>
 			</element>
 		</choice>
+		<attribute name="outputFormat" type="anyURI" use="optional">
+			<annotation>
+				<documentation>
+					Specifies the format of the output value, indicating that further transformations may be needed to
+					obtain the final signature value.<br/>
+					The following values are currently defined:
+					<ul>
+						<li>
+							<tt>rawRS</tt>: The output represents the raw concatenation of R and S. The ASN.1 structure
+							is missing.
+						</li>
+					</ul>
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 
 

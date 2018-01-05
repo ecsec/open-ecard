@@ -43,7 +43,7 @@
 						<iso:MatchingData>
 							<!-- Version is 03.05.0X -->
 							<iso:MatchingValue>030500</iso:MatchingValue>
-							<iso:Mask>FFFF0F</iso:Mask>
+							<iso:Mask>FFFF00</iso:Mask>
 						</iso:MatchingData>
 					</iso:Body>
 					<iso:Trailer>9000</iso:Trailer>

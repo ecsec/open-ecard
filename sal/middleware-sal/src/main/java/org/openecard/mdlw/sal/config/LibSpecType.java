@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,6 +47,9 @@ public class LibSpecType {
     @XmlAttribute(name="os")
     private String os;
 
+    @XmlAttribute(name="arch")
+    private String arch;
+
     @XmlElement(name = "LibName", required = true)
     private String libName;
 
@@ -65,6 +68,14 @@ public class LibSpecType {
 
     public void setOperatingSystem(String os) {
 	this.os = os;
+    }
+
+    public String getArch() {
+	return arch;
+    }
+
+    public void setArch(String arch) {
+	this.arch = arch;
     }
 
     public String getLibName() {

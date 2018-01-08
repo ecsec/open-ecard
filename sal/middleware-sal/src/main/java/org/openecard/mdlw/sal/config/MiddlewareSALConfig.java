@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -105,21 +105,37 @@ public class MiddlewareSALConfig {
     }
 
     @Nonnull
-    protected LibSpecType getLibSpec() {
-	LibSpecType defaultSpec = null;
+    protected LibSpecType getLibSpec() throws NullPointerException {
+	LibSpecType defaultSpec = null, fullMatch = null, nameMatch = null, archMatch = null;
 	String osName = System.getProperty("os.name", "");
+	String arch = System.getProperty("os.arch", "");
+
 	for (LibSpecType spec : mwSpec.getLibSpec()) {
-	    if (spec.getOperatingSystem() == null) {
+	    String specOs = spec.getOperatingSystem();
+	    String specArch = spec.getArch();
+
+	    if (specOs == null && specArch == null) {
 		defaultSpec = spec;
-	    } else if (osName.startsWith(spec.getOperatingSystem())) {
-		return spec;
+	    } else if (specOs != null && osName.startsWith(specOs) && specArch != null && arch.equals(specArch)) {
+		fullMatch = spec;
+	    } else if (specOs != null && osName.startsWith(specOs) && specArch == null) {
+		nameMatch = spec;
+	    } else if (specOs == null && specArch != null && arch.equals(specArch)) {
+		archMatch = spec;
 	    }
 	}
 
-	if (defaultSpec == null) {
+	if (fullMatch != null) {
+	    return fullMatch;
+	} else if (nameMatch != null) {
+	    return nameMatch;
+	} else if (archMatch != null) {
+	    return archMatch;
+	} else if (defaultSpec != null) {
+	    return defaultSpec;
+	} else {
 	    throw new NullPointerException("No default LibSpec defined in the XML config.");
 	}
-	return defaultSpec;
     }
 
     /**

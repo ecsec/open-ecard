@@ -100,6 +100,14 @@
 			<LibName>P11</LibName>
 			<SearchPath>/usr/lib/personal</SearchPath>
 		</LibSpec>
+		<LibSpec os="Windows" arch="x86">
+			<LibName>personal</LibName>
+			<SearchPath>C:\Program Files\Personal\bin</SearchPath>
+		</LibSpec>
+		<LibSpec os="Windows" arch="amd64">
+			<LibName>personal64</LibName>
+			<SearchPath>C:\Program Files (x86)\Personal\bin64</SearchPath>
+		</LibSpec>
 
         <CardConfig>
             <CardSpec>

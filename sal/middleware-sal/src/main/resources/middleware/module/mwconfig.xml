@@ -108,6 +108,9 @@
 			<LibName>personal64</LibName>
 			<SearchPath>C:\Program Files (x86)\Personal\bin64</SearchPath>
 		</LibSpec>
+		<LibSpec os="Mac OS">
+			<LibName>/Applications/Personal.app/Contents/PlugIns/CSPBundleNexus.bundle/Contents/Frameworks/tokenapi.framework/tokenapi</LibName>
+		</LibSpec>
 
         <CardConfig>
             <CardSpec>

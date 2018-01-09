@@ -72,13 +72,27 @@ public class MwMechanism {
 	}
     }
 
-//    /**
-//     * Returns the Mechanism Flags
-//     * @return long
-//     */
-//    public long getFlags() {
-//        return orig.getFlags().longValue();
-//    }
+    public long getType() {
+	return type;
+    }
+
+    /**
+     * Returns the Mechanism Flags
+     * @return long
+     */
+    public long getFlags() {
+	if (orig != null) {
+	    long flags = orig.getFlags().longValue();
+	    return flags;
+	} else {
+	    return 0;
+	}
+    }
+
+    public boolean hasFlags(long reqFlags) {
+	long flags = getFlags();
+	return (flags & reqFlags) == reqFlags;
+    }
 
     @Override
     public String toString() {

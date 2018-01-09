@@ -357,7 +357,7 @@ public class Status implements EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, EventObject eventData) {
+    public synchronized void signalEvent(EventType eventType, EventObject eventData) {
 	LOG.debug("Event: {}", eventType);
 
 	ConnectionHandleType ch = eventData.getHandle();

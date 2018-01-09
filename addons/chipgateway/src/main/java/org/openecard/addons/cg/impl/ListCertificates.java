@@ -31,6 +31,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -102,7 +103,7 @@ public class ListCertificates {
 
 	    // get certificates for each crypto did
 	    for (DidInfo nextDid : cryptoDids) {
-		List<X509Certificate> certChain = nextDid.getRelatedCertificateChain();
+		List<X509Certificate> certChain = getCertChain(nextDid);
 		if (! certChain.isEmpty() && matchesFilter(certChain)) {
 		    AlgorithmInfoType algInfo = nextDid.getGenericCryptoMarker().getAlgorithmInfo();
 		    try {
@@ -315,6 +316,17 @@ public class ListCertificates {
 	String oid = isoAlgInfo.getAlgorithmIdentifier().getAlgorithm();
 	String jcaAlg = AllowedSignatureAlgorithms.algIdtoJcaName(oid);
 	return jcaAlg;
+    }
+
+    private List<X509Certificate> getCertChain(DidInfo nextDid) throws WSHelper.WSException,
+	    SecurityConditionUnsatisfiable, NoSuchDid {
+	try {
+	    return nextDid.getRelatedCertificateChain();
+	} catch (CertificateException ex) {
+	    LOG.warn("DID {} did not contain any certificates.", nextDid.getDidName());
+	    LOG.debug("Cause:", ex);
+	    return Collections.emptyList();
+	}
     }
 
 }

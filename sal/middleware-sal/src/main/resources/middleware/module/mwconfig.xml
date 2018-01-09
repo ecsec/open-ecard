@@ -103,9 +103,11 @@
 		<LibSpec os="Windows" arch="x86">
 			<LibName>personal</LibName>
 			<SearchPath>C:\Program Files\Personal\bin</SearchPath>
+			<SearchPath>C:\Program Files (x86)\Personal\bin</SearchPath>
 		</LibSpec>
 		<LibSpec os="Windows" arch="amd64">
 			<LibName>personal64</LibName>
+			<SearchPath>C:\Program Files\Personal\bin64</SearchPath>
 			<SearchPath>C:\Program Files (x86)\Personal\bin64</SearchPath>
 		</LibSpec>
 		<LibSpec os="Mac OS">

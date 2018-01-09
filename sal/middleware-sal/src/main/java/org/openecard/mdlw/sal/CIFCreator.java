@@ -56,6 +56,7 @@ import java.util.List;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.NoCertificateChainException;
@@ -422,22 +423,27 @@ public class CIFCreator {
 	    try {
 		List<MwMechanism> allMechanisms = session.getSlot().getMechanismList();
 		for (MwMechanism mechanism : allMechanisms) {
-		    try {
-			if (! mechanism.isSignatureAlgorithm()) {
-			    // skipping non signature mechanism
-			    continue;
-			}
+		    if (! mechanism.isSignatureAlgorithm()) {
+			// skipping non signature mechanism
+			continue;
+		    }
+		    if (! mechanism.hasFlags(CryptokiLibrary.CKF_SIGN)) {
+			// sign function does not work with that
+			continue;
+		    }
 
-			SignatureAlgorithms sigAlg = mechanism.getSignatureAlgorithm();
-			LOG.debug("Card signature algorithm: {}", sigAlg);
-			// only use algorithms matching the key type
-			long keyType = sigAlg.getKeyType().getPkcs11Mechanism();
-			if (keyType == pubKey.getKeyType()) {
-			    LOG.debug("Allowing signature algorithm: {}", sigAlg);
-			    sigAlgs.add(sigAlg);
+		    addMechanism(pubKey, mechanism, sigAlgs);
+		}
+
+		// make a final attempt and see if CKA_RSA is in the list
+		// this is usually supported despite the middleware doesn't claim it
+		if (sigAlgs.isEmpty()) {
+		    LOG.info("Trying to add raw RSA algorithm.");
+		    for (MwMechanism mechanism : allMechanisms) {
+			if (mechanism.getType() == CryptokiLibrary.CKM_RSA_PKCS) {
+			    addMechanism(pubKey, mechanism, sigAlgs);
+			    break; // no need to search longer if we have found it
 			}
-		    } catch (UnsupportedAlgorithmException ex) {
-			LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);
 		    }
 		}
 	    } catch (CryptokiException ex) {
@@ -463,6 +469,21 @@ public class CIFCreator {
 	}
 
 	return sigAlgs;
+    }
+
+    private void addMechanism(MwPublicKey pubKey, MwMechanism mechanism, ArrayList<SignatureAlgorithms> sigAlgs) {
+	try {
+	    SignatureAlgorithms sigAlg = mechanism.getSignatureAlgorithm();
+	    LOG.debug("Card signature algorithm: {}", sigAlg);
+	    // only use algorithms matching the key type
+	    long keyType = sigAlg.getKeyType().getPkcs11Mechanism();
+	    if (keyType == pubKey.getKeyType()) {
+		LOG.debug("Allowing signature algorithm: {}", sigAlg);
+		sigAlgs.add(sigAlg);
+	    }
+	} catch (UnsupportedAlgorithmException ex) {
+	    LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);
+	}
     }
 
 }

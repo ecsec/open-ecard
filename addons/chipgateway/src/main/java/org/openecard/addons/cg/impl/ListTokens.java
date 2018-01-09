@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -121,7 +121,12 @@ public class ListTokens {
 	TreeSet<CardApplicationPathType> paths = new TreeSet<>(new Comparator<CardApplicationPathType>() {
 	    @Override
 	    public int compare(CardApplicationPathType o1, CardApplicationPathType o2) {
-		return o1.getIFDName().compareTo(o2.getIFDName());
+		int cmp1 = o1.getIFDName().compareTo(o2.getIFDName());
+		if (cmp1 == 0) {
+		    return o1.getSlotIndex().compareTo(o2.getSlotIndex());
+		} else {
+		    return cmp1;
+		}
 	    }
 	});
 	paths.addAll(pathRes.getCardAppPathResultSet().getCardApplicationPathResult());

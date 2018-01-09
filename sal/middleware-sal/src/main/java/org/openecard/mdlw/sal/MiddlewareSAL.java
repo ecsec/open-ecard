@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2016 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -117,6 +117,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -277,7 +278,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    // connect card, so that we have a session
 	    MwSession session;
 	    if (needsConnect) {
-		MwSlot slot = getMatchingSlot(handle.getIFDName());
+		MwSlot slot = getMatchingSlot(handle.getIFDName(), handle.getSlotIndex());
 		if (slot != null) {
 		    session = slot.openSession();
 		} else {
@@ -353,11 +354,12 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     }
 
     @Nullable
-    private MwSlot getMatchingSlot(String ifdName) throws CryptokiException {
+    private MwSlot getMatchingSlot(String ifdName, BigInteger idx) throws CryptokiException {
 	for (MwSlot slot : mwModule.getSlotList(true)) {
 	    // IFD name must match
 	    String slotIfdName = slot.getSlotInfo().getSlotDescription();
-	    if (slotIfdName.equals(ifdName)) {
+	    long slotId = slot.getSlotInfo().getSlotID();
+	    if (slotIfdName.equals(ifdName) && idx != null && slotId == idx.longValue()) {
 		return slot;
 	    }
 	}
@@ -388,7 +390,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
                     ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
             // find matching slot and associate it with the slotHandle
-	    MwSlot slot = getMatchingSlot(handle.getIFDName());
+	    MwSlot slot = getMatchingSlot(handle.getIFDName(), handle.getSlotIndex());
             if (slot != null) {
 		// open session
 		MwSession session = slot.openSession();

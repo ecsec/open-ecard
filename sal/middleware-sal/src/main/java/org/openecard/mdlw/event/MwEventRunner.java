@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -171,7 +171,7 @@ class MwEventRunner implements Runnable {
     }
 
     private void sendTerminalAdded(MwSlot slot) {
-	//Add Terminal to cache if not pressent
+	//Add Terminal to cache if not present
 	if (slots.get(slot.getSlotInfo().getSlotID()) == null) {
 	    SlotInfo sl = new SlotInfo();
 	    sl.ifdName = slot.getSlotInfo().getSlotDescription();
@@ -179,12 +179,13 @@ class MwEventRunner implements Runnable {
 
 	    slots.put(slot.getSlotInfo().getSlotID(), sl);
 	} else {
-	    return; //Event already sended
+	    return; //Event already sent
 	}
 	String ifdName = slot.getSlotInfo().getSlotDescription();
+	long slotId = slot.getSlotInfo().getSlotID();
 	// send terminal added
-	LOG.debug("Sending TERMINAL_ADDED event, ifdName={}.", ifdName);
-	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName);
+	LOG.debug("Sending TERMINAL_ADDED event, ifdName={} id={}.", ifdName, slotId);
+	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName, slotId);
 	MwEventObject addedEvent = new MwEventObject(insertHandle, slot);
 	notify(EventType.TERMINAL_ADDED, addedEvent);
     }
@@ -199,8 +200,8 @@ class MwEventRunner implements Runnable {
 
 	String ifdName = slots.get(slotId).ifdName;
 
-	LOG.debug("Sending TERMINAL_REMOVED event, ifdName={}.", ifdName);
-	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName);
+	LOG.debug("Sending TERMINAL_REMOVED event, ifdName={} id={}.", ifdName, slotId);
+	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName, slotId);
 	MwEventObject addedEvent = new MwEventObject(insertHandle, null);
 	notify(EventType.TERMINAL_REMOVED, addedEvent);
 
@@ -215,9 +216,9 @@ class MwEventRunner implements Runnable {
 	if (slots.get(slot.getSlotInfo().getSlotID()).isCardPresent) {
 	    return; //Event already sended
 	}
-	String ifdName = slot.getSlotInfo().getSlotDescription();
+	CkSlot ckSlot = slot.getSlotInfo();
 	// send card inserted
-	ConnectionHandleType insertHandle = makeUnknownCardHandle(ifdName);
+	ConnectionHandleType insertHandle = makeUnknownCardHandle(ckSlot.getSlotDescription(), ckSlot.getSlotID());
 	MwEventObject insertEvent = new MwEventObject(insertHandle, slot);
 
 	notify(EventType.CARD_INSERTED, insertEvent);
@@ -233,14 +234,15 @@ class MwEventRunner implements Runnable {
 
 	MwToken token = slot.getTokenInfo();
 
-	String ifdName = slot.getSlotInfo().getSlotDescription();
+	CkSlot ckSlot = slot.getSlotInfo();
 
 	String cardType = String.format("%s_%s", token.getManufacturerID(), token.getModel());
 	LOG.info("Middleware card type: {}", cardType);
 	cardType = mwModule.getMiddlewareSALConfig().mapMiddlewareType(cardType);
 	if (cardType != null) {
 	    boolean protectedAuthPath = token.containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
-	    ConnectionHandleType recHandle = makeKnownCardHandle(ifdName, cardType, protectedAuthPath);
+	    ConnectionHandleType recHandle = makeKnownCardHandle(ckSlot.getSlotDescription(), ckSlot.getSlotID(),
+		    cardType, protectedAuthPath);
 	    MwEventObject recEvent = new MwEventObject(recHandle, slot);
 	    notify(EventType.CARD_RECOGNIZED, recEvent);
 
@@ -255,9 +257,8 @@ class MwEventRunner implements Runnable {
 	if (slotInfo == null || ! slotInfo.isCardPresent) {
 	    return; //Event already sent
 	}
-	String ifdName = slot.getSlotInfo().getSlotDescription();
 
-	ConnectionHandleType handle = makeConnectionHandle(ifdName);
+	ConnectionHandleType handle = makeConnectionHandle(slotInfo.ifdName, slotInfo.slotId);
 	MwEventObject remEvent = new MwEventObject(handle, slot);
 	notify(EventType.CARD_REMOVED, remEvent);
 
@@ -267,12 +268,11 @@ class MwEventRunner implements Runnable {
     }
 
     private void sendCardRemoved(SlotInfo sl) {
-	if (!slots.get(sl.slotId).isCardPresent) {
+	if (! slots.get(sl.slotId).isCardPresent) {
 	    return; //Event already sended
 	}
-	String ifdName = sl.ifdName;
 
-	ConnectionHandleType handle = makeConnectionHandle(ifdName);
+	ConnectionHandleType handle = makeConnectionHandle(sl.ifdName, sl.slotId);
 	MwEventObject remEvent = new MwEventObject(handle, null);
 	notify(EventType.CARD_REMOVED, remEvent);
 
@@ -281,30 +281,30 @@ class MwEventRunner implements Runnable {
 	slots.get(sl.slotId).isCardRecognized = false;
     }
 
-    private ConnectionHandleType makeConnectionHandle(String ifdName) {
+    private ConnectionHandleType makeConnectionHandle(String ifdName, long slotIdx) {
 	ConnectionHandleType h = builder.setIfdName(ifdName)
-		.setSlotIdx(BigInteger.ZERO)
+		.setSlotIdx(BigInteger.valueOf(slotIdx))
 		.buildConnectionHandle();
 	return h;
     }
 
-    private ConnectionHandleType makeUnknownCardHandle(String ifdName) {
+    private ConnectionHandleType makeUnknownCardHandle(String ifdName, long slotIdx) {
 	ConnectionHandleType h = builder
 		.setIfdName(ifdName)
-		.setSlotIdx(BigInteger.ZERO)
+		.setSlotIdx(BigInteger.valueOf(slotIdx))
 		.setCardType(ECardConstants.UNKNOWN_CARD)
 		.buildConnectionHandle();
 	return h;
     }
 
-    private ConnectionHandleType makeKnownCardHandle(String ifdName, String cardType, boolean isProtectedAuthPath) {
+    private ConnectionHandleType makeKnownCardHandle(String ifdName, long slotIdx, String cardType, boolean isProtectedAuthPath) {
 	ConnectionHandleType.RecognitionInfo rInfo = new ConnectionHandleType.RecognitionInfo();
 	rInfo.setCardType(cardType);
 	rInfo.setCaptureTime(dataFactory.newXMLGregorianCalendar(new GregorianCalendar()));
 
 	ConnectionHandleType h = builder
 		.setIfdName(ifdName)
-		.setSlotIdx(BigInteger.ZERO)
+		.setSlotIdx(BigInteger.valueOf(slotIdx))
 		.setRecognitionInfo(rInfo)
 		.setProtectedAuthPath(isProtectedAuthPath)
 		.buildConnectionHandle();

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -282,7 +282,7 @@ public class DidInfos {
 	if (result == null) {
 	    List<String> names = getDataSetNames(application);
 	    for (String next : names) {
-		if (next.equals(name)) {
+		if (name.equals(next)) {
 		    result = new DataSetInfo(this, application, name);
 		    appCache.put(name, result);
 		    return result;

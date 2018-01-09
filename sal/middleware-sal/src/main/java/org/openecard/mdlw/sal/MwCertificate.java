@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,8 @@
 
 package org.openecard.mdlw.sal;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -30,7 +32,9 @@ import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.cryptoki.CK_DATE;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import javax.annotation.Nullable;
+import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.util.Arrays;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +54,6 @@ public class MwCertificate {
     private final MwSession session;
 
     private final byte[] value;
-    private final String label;
     private final byte[] id;
     private final byte[] subject;
     private final byte[] issuer;
@@ -60,6 +63,7 @@ public class MwCertificate {
     private final byte[] checkValue;
     private final Calendar startDate;
     private final Calendar endDate;
+    private final String label;
 
     /**
      * Creates a MwCertificate Object from the given Objecthandle.
@@ -74,7 +78,6 @@ public class MwCertificate {
         this.mw = mw;
         this.session = mwSession;
         this.value = loadAttrValValue();
-        this.label = loadAttrValLabel();
         this.id = loadAttrValID();
 	this.subject = loadByteArray(CryptokiLibrary.CKA_SUBJECT);
 	this.issuer = loadByteArray(CryptokiLibrary.CKA_ISSUER);
@@ -84,6 +87,7 @@ public class MwCertificate {
         this.checkValue = loadAttrValCheckValue();
         this.startDate = loadAttrValStartDate();
         this.endDate = loadAttrValEndDate();
+        this.label = loadAttrValLabel();
     }
 
     @Nullable
@@ -126,7 +130,22 @@ public class MwCertificate {
      */
     private String loadAttrValLabel() throws CryptokiException {
         CkAttribute raw = mw.getAttributeValue(session.getSessionId(), objectHandle, CryptokiLibrary.CKA_LABEL);
-	return AttributeUtils.getString(raw);
+	String labelStr = AttributeUtils.getString(raw);
+
+	// find replacement if needed
+	if (labelStr == null && subject != null) {
+	    labelStr = new X500Principal(subject).getName(X500Principal.RFC2253);
+	}
+	if (labelStr == null && value != null) {
+	    try {
+		byte[] hash = MessageDigest.getInstance("SHA-1").digest(value);
+		labelStr = ByteUtils.toHexString(hash);
+	    } catch (NoSuchAlgorithmException ex) {
+		// SHA-1 is a standard name and must be present
+	    }
+	}
+
+	return labelStr;
     }
 
     /**

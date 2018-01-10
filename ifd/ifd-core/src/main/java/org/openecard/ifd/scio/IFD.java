@@ -760,20 +760,24 @@ public class IFD implements org.openecard.ws.IFD {
 		SCIOCard card = ch.getChannel().getCard();
 		ActionType action = parameters.getAction();
 		if (ActionType.RESET == action) {
+		    String ifdName = card.getTerminal().getName();
+		    SingleThreadChannel master = cm.getMasterChannel(ifdName);
+
 		    HandlerBuilder builder = HandlerBuilder.create();
 		    ConnectionHandleType cHandleIn = builder.setCardType(ECardConstants.UNKNOWN_CARD)
 			    .setCardIdentifier(card.getATR().getBytes())
 			    .setContextHandle(ctxHandle)
-			    .setIfdName(card.getTerminal().getName())
+			    .setIfdName(ifdName)
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
 		    builder = HandlerBuilder.create();
 		    ConnectionHandleType cHandleRm = builder.setContextHandle(ctxHandle)
-			    .setIfdName(card.getTerminal().getName())
+			    .setIfdName(ifdName)
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
+
+		    master.reconnect();
 		    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
-		    card.disconnect(true);
 		}
 		// TODO: take care of other actions (probably over ControlIFD)
 		// the default is to not disconnect the card, because all existing connections would be broken

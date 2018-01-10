@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,8 +23,12 @@
 package org.openecard.gui.swing;
 
 import java.awt.Container;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.gui.swing.common.GUIDefaults;
 
 
@@ -34,6 +38,9 @@ import org.openecard.gui.swing.common.GUIDefaults;
  */
 public class SwingDialogWrapper {
 
+    private static final String FULLSCREEN_USER_CONSENT = "display_fullscreen_uc";
+
+    private GraphicsDevice screenDevice;
     private JFrame dialog;
     private String title;
 
@@ -89,6 +96,27 @@ public class SwingDialogWrapper {
      * This function is executed after the root panel has been set up with the contents of the user consent.
      */
     public void show() {
+	screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	DisplayMode fsMode = null;
+	if (screenDevice.isFullScreenSupported() && needsFullscreen()) {
+	    // check if resolution should be changed
+	    if (screenDevice.isDisplayChangeSupported() && isChangeResolution()) {
+		fsMode = getBestFullscreenMode();
+	    }
+
+	    // change mode if it is supported
+	    if (fsMode != null) {
+		dialog.setUndecorated(true);
+		screenDevice.setFullScreenWindow(dialog);
+		screenDevice.setDisplayMode(fsMode);
+	    } else {
+		dialog.setUndecorated(true);
+		screenDevice.setFullScreenWindow(dialog);
+	    }
+	} else {
+	    dialog.setUndecorated(false);
+	}
+
 	dialog.setVisible(true);
 	dialog.toFront();
 	dialog.requestFocus();
@@ -100,10 +128,29 @@ public class SwingDialogWrapper {
      */
     public void hide() {
 	dialog.setVisible(false);
+	screenDevice.setFullScreenWindow(null);
     }
 
     public SwingDialogWrapper derive() {
 	return new SwingDialogWrapper(this);
+    }
+
+    private boolean needsFullscreen() {
+	String fsStr = OpenecardProperties.getProperty(FULLSCREEN_USER_CONSENT);
+	return Boolean.parseBoolean(fsStr);
+    }
+
+    private boolean isChangeResolution() {
+	return false;
+    }
+
+    private DisplayMode getBestFullscreenMode() {
+	int i = 0;
+	for (DisplayMode mode : screenDevice.getDisplayModes()) {
+	    System.out.printf("Mode-%d: %dx%d@%d %dHz%n", i++, mode.getWidth(), mode.getHeight(), mode.getBitDepth(), mode.getRefreshRate());
+	}
+
+	return screenDevice.getDisplayModes()[0];
     }
 
 }

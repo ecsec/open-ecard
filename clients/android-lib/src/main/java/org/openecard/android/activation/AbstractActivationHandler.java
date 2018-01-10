@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,11 +32,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.openecard.android.system.ServiceResponse;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.system.OpeneCardServiceClient;
-import static org.openecard.android.system.ServiceResponseLevel.INFO;
+import org.openecard.android.system.ServiceResponse;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
@@ -54,12 +53,34 @@ import org.slf4j.LoggerFactory;
  * <p>An example implementation can be found in the CustomActivationActivity in
  * <a href="https://github.com/ecsec/open-ecard-android">ecsec/open-ecard-android</a>).</p>
  *
+ * <p>The parent activity must call the following handler functions in order to use the implementation in the wrapper.
+ * <ul>
+ * <li>{@code onStart()}</li>
+ * <li>{@code onStop()}</li>
+ * <li>{@code onPause()}</li>
+ * <li>{@code onResume()}</li>
+ * <li>{@code onNewIntent(Intent)}</li>
+ * </ul>
+ * Such an implementation looks as follows:
+ * <pre>{@code
+ private final AbstractActivationHandler activationImpl;
+
+ protected void onStart() {
+     super.onStart();
+     activationImpl.onStart();
+ }
+ }</pre>
+ * </p>
+ *
  * @author Mike Prechtl
  * @author Tobias Wich
+ * @param <T> Type of the parent activity, so it is convenient to access functions and fields from this class.
  */
-public abstract class AbstractActivationActivity extends Activity implements ActivationImplementationInterface {
+public abstract class AbstractActivationHandler <T extends Activity> implements ActivationImplementationInterface {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationActivity.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationHandler.class);
+
+    protected final T parent;
 
     private Dialog cardRemoveDialog;
 
@@ -70,31 +91,28 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     private OpeneCardContext octx;
     private Class<?> returnClass;
 
-    @Override
-    protected synchronized void onResume() {
-	super.onResume();
 
-	// enable dispatch with nfc tag
-	NfcUtils.getInstance().enableNFCDispatch(this);
+    public AbstractActivationHandler(T parent) {
+	this.parent = parent;
     }
 
-    @Override
-    protected synchronized void onPause() {
-	super.onPause();
 
+    public synchronized void onResume() {
+	// enable dispatch with nfc tag
+	NfcUtils.getInstance().enableNFCDispatch(parent);
+    }
+
+    public synchronized void onPause() {
 	try {
 	    // disable dispatch with nfc tag
-	    NfcUtils.getInstance().disableNFCDispatch(this);
+	    NfcUtils.getInstance().disableNFCDispatch(parent);
 	} catch (Exception e) {
 	    LOG.info(e.getMessage(), e);
 	}
     }
 
-    @Override
-    protected void onStart() {
-	super.onStart();
-
-	final OpeneCardServiceClient client = new OpeneCardServiceClient(this);
+    public void onStart() {
+	final OpeneCardServiceClient client = new OpeneCardServiceClient(parent);
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
@@ -118,7 +136,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	octx.getEventDispatcher().add(insertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	octx.getEventDispatcher().add(cardDetectHandler, EventType.CARD_RECOGNIZED);
 
-	Intent actIntent = getIntent();
+	Intent actIntent = parent.getIntent();
 	Uri data = actIntent.getData();
 	returnClass = forClassName(actIntent.getStringExtra(RETURN_CLASS));
 	final String eIDUrl = data.toString();
@@ -144,7 +162,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     private Class<?> forClassName(@Nullable String className) {
 	if (className != null) {
 	    try {
-		return getClassLoader().loadClass(className);
+		return parent.getClassLoader().loadClass(className);
 	    } catch (ClassNotFoundException ex) {
 		LOG.error("Invalid return class named in activation intent.", ex);
 	    }
@@ -154,9 +172,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     }
 
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
+    public void onNewIntent(Intent intent) {
 	checkNfcTag(intent);
     }
 
@@ -172,10 +188,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
     }
 
 
-    @Override
-    protected void onStop() {
-	super.onStop();
-
+    public void onStop() {
 	// make sure nothing is running anymore
 	cancelAuthenticationInt(false);
 
@@ -215,7 +228,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		    Set<String> supportedCards = getSupportedCards();
 		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
 		    if (supportedCards == null || supportedCards.contains(type)) {
-			AbstractActivationActivity.this.runOnUiThread(new Runnable() {
+			parent.runOnUiThread(new Runnable() {
 			    @Override
 			    public void run() {
 				onCardInserted(type);
@@ -245,7 +258,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 
 	switch (result.getResultCode()) {
 	    case REDIRECT:
-		runOnUiThread(new Runnable() {
+		parent.runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			onAuthenticationSuccess(result);
@@ -253,7 +266,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 		});
 		break;
 	    default:
-		runOnUiThread(new Runnable() {
+		parent.runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			onAuthenticationFailure(result);
@@ -348,7 +361,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 			// perform redirect
 			if (location != null) {
 			    // redirect to result location
-			    startActivity(createRedirectIntent(location));
+			    parent.startActivity(createRedirectIntent(location));
 			}
 		    }
 		});
@@ -361,7 +374,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	// no dialog shown, just redirect
 	if (location != null) {
 	    // redirect to result location
-	    startActivity(createRedirectIntent(location));
+	    parent.startActivity(createRedirectIntent(location));
 	}
     }
 
@@ -369,7 +382,7 @@ public abstract class AbstractActivationActivity extends Activity implements Act
 	Intent i;
 	Uri redirectUri = Uri.parse(location);
 	if (returnClass != null) {
-	    i = new Intent(Intent.ACTION_VIEW, redirectUri, this, returnClass);
+	    i = new Intent(Intent.ACTION_VIEW, redirectUri, parent, returnClass);
 	} else {
 	    i = new Intent(Intent.ACTION_VIEW, redirectUri);
 	}

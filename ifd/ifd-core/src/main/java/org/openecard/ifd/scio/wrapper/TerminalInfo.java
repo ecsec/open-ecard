@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.PACECapabilities;
+import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
@@ -128,10 +129,14 @@ public class TerminalInfo {
 	    stype.setATRorATS(atr.getBytes());
 	} else if (cardPresent) {
 	    // not connected, but card is present
-	    SingleThreadChannel ch = new SingleThreadChannel(term, true);
-	    SCIOATR atr = ch.getChannel().getCard().getATR();
-	    stype.setATRorATS(atr.getBytes());
-	    ch.shutdown();
+	    try {
+		SingleThreadChannel ch = cm.openMasterChannel(getName());
+		SCIOATR atr = ch.getChannel().getCard().getATR();
+		stype.setATRorATS(atr.getBytes());
+	    } catch (NoSuchTerminal ex) {
+		String msg = "Failed to connect card as terminal disappeared.";
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_UNKNOWN_READER, ex);
+	    }
 	}
 	// ifd status completely constructed
 	return status;

@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.CertificateRefType;
 import iso.std.iso_iec._24727.tech.schema.CryptoKeyInfoType;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.KeyRefType;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -108,7 +109,8 @@ public class CryptoMarkerTypeTest {
 	assertEquals(cryptoMarkerNew.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm(),
 		"http://ws.openecard.org/alg/rsa");
 	assertNull(cryptoMarkerNew.getLegacyKeyName());
-	assertNull(cryptoMarkerNew.getHashGenerationInfo());
+	assertNotNull(cryptoMarkerNew.getHashGenerationInfo());
+	assertEquals(cryptoMarkerNew.getHashGenerationInfo(), HashGenerationInfoType.NOT_ON_CARD);
 	assertEquals(cryptoMarkerNew.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");
 	// assertEquals(cryptoMarker.getStateInfo(), "");
 	assertEquals(cryptoMarker.getProtocol(), ECardConstants.Protocol.GENERIC_CRYPTO);

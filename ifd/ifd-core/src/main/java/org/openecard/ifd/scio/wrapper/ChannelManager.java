@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2016 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -87,7 +87,7 @@ public class ChannelManager {
 	    return baseChannels.get(ifdName);
 	}
 	SCIOTerminal t = getTerminals().getTerminal(ifdName);
-	SingleThreadChannel ch = new SingleThreadChannel(t, true);
+	SingleThreadChannel ch = new SingleThreadChannel(t);
 	baseChannels.put(ifdName, ch);
 	ifdNameToHandles.put(ifdName, new TreeSet<>(new ByteArrayComparator()));
 	return ch;
@@ -96,8 +96,7 @@ public class ChannelManager {
     public synchronized Pair<byte[], SingleThreadChannel> openSlaveChannel(@Nonnull String ifdName)
 	    throws NoSuchTerminal, SCIOException {
 	SingleThreadChannel baseCh = getMasterChannel(ifdName);
-	SCIOTerminal term = baseCh.getChannel().getCard().getTerminal();
-	SingleThreadChannel slaveCh = new SingleThreadChannel(term, true);
+	SingleThreadChannel slaveCh = new SingleThreadChannel(baseCh, true);
 	byte[] slotHandle = createSlotHandle();
 	handledChannels.put(slotHandle, slaveCh);
 	ifdNameToHandles.get(ifdName).add(slotHandle);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2017 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -68,14 +68,42 @@ public class SingleThreadChannel implements IfdChannel {
     private Protocol smProtocol = null;
 
     /**
-     * Creates an instance and launches a command submission thread.
+     * Creates a master instance and launches a command submission thread.
+     * This function connects the terminal with whatever protocol that works.
      *
-     * @param term Terminal whose channel is to be bound to the thread
+     * @param term Terminal whose channel is to be bound to the thread.
+     * @throws SCIOException Thrown in case the channel could not be established.
+     */
+    public SingleThreadChannel(SCIOTerminal term) throws SCIOException {
+	this.exec = createExecutor();
+
+	SCIOCard card = connectCard(term);
+	this.channel = card.getBasicChannel();
+    }
+
+    /**
+     * Creates a slave instance and launches a command submission thread.
+     *
+     * @param master Master (basic) channel from which the other channel instance is to be derived.
      * @param isBasic {@code true} if a basic channel shall be opened, {@code false} if a logical channel shall be opened.
      * @throws SCIOException Thrown in case the channel could not be established.
      */
-    public SingleThreadChannel(SCIOTerminal term, boolean isBasic) throws SCIOException {
-	this.exec = Executors.newSingleThreadExecutor(new ThreadFactory() {
+    public SingleThreadChannel(SingleThreadChannel master, boolean isBasic)
+	    throws SCIOException {
+	this.exec = createExecutor();
+
+	SCIOCard baseCard = master.channel.getCard();
+	// connect with protocol that worked for the base card
+	SCIOCard card = baseCard.getTerminal().connect(baseCard.getProtocol());
+	if (isBasic) {
+	    this.channel = card.getBasicChannel();
+	} else {
+	    this.channel = card.openLogicalChannel();
+	}
+    }
+
+    private ExecutorService createExecutor() {
+	return Executors.newSingleThreadExecutor(new ThreadFactory() {
 	    @Override
 	    public Thread newThread(Runnable r) {
 		int num = SingleThreadChannel.this.channel.getChannelNumber();
@@ -86,13 +114,6 @@ public class SingleThreadChannel implements IfdChannel {
 		return t;
 	    }
 	});
-
-	SCIOCard card = connectCard(term);
-	if (isBasic) {
-	    this.channel = card.getBasicChannel();
-	} else {
-	    this.channel = card.openLogicalChannel();
-	}
     }
 
     @Override

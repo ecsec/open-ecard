@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -248,10 +248,7 @@ public class TCTokenRequest {
 	    ArrayList<String> types2 = new ArrayList<>();
 	    types2.addAll(namesAndType.values());
 	    CardMonitorTask task = new CardMonitorTask(types2, step);
-	    List<EventType> events = new ArrayList<>();
-	    events.add(EventType.CARD_REMOVED);
-	    events.add(EventType.CARD_RECOGNIZED);
-	    ctx.getEventDispatcher().add(task, (EventType[]) events.toArray());
+	    ctx.getEventDispatcher().add(task, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
 	    step.setBackgroundTask(task);
 	    CardSelectionAction action = new CardSelectionAction(step, usableCards, types2, ctx);
 	    step.setAction(action);

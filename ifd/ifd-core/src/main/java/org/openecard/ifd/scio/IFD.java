@@ -776,8 +776,21 @@ public class IFD implements org.openecard.ws.IFD {
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
 
-		    master.reconnect();
-		    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+		    try {
+			master.reconnect();
+			evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+		    } catch (IllegalStateException ex) {
+			LOG.warn("Card reconnect failed, trying to establish new card connection.", ex);
+			cm.closeMasterChannel(ifdName);
+			LOG.debug("Master channel closed successfully.");
+			try {
+			    cm.getMasterChannel(ifdName);
+			    LOG.debug("New card connection established successfully.");
+			    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+			} catch (NoSuchTerminal ex2) {
+			    LOG.error("No terminal present anymore.", ex);
+			}
+		    }
 		}
 		// TODO: take care of other actions (probably over ControlIFD)
 		// the default is to not disconnect the card, because all existing connections would be broken

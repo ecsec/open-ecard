@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -277,10 +277,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // define GUI depending on the PIN status
 	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
+	    final CardMonitor cardMon;
 	    uc.setDialogType("EAC");
 	    if (pinUsable) {
 		// create GUI and init executor
-		CardMonitor cardMon = new CardMonitor();
+		cardMon = new CardMonitor();
 		CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
 		eventDispatcher.add(cardMon, filter);
 		CVCStep cvcStep = new CVCStep(eacData);
@@ -295,6 +296,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		procStep.setAction(procStepAction);
 		uc.getSteps().add(procStep);
 	    } else {
+		cardMon = null;
 		// ErrorStep is currently not used and needs to be reworked in 1.3.X
 		// disable the step here completely to avoid flashing of the step ui.
 //		String pin = langPace.translationForKey("pin");
@@ -311,22 +313,28 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    Thread guiThread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-		    // get context here because it is thread local
-		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-		    if (!uc.getSteps().isEmpty()) {
-			UserConsentNavigator navigator = gui.obtainNavigator(uc);
-			dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
-			ExecutionEngine exec = new ExecutionEngine(navigator);
-			ResultStatus guiResult = exec.process();
+		    try {
+			// get context here because it is thread local
+			DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+			if (! uc.getSteps().isEmpty()) {
+			    UserConsentNavigator navigator = gui.obtainNavigator(uc);
+			    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
+			    ExecutionEngine exec = new ExecutionEngine(navigator);
+			    ResultStatus guiResult = exec.process();
 
-			dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
+			    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
 
-			if (guiResult == ResultStatus.CANCEL) {
-			    Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
-			    if (!pPaceSuccessful.isDelivered()) {
-				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
-					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+			    if (guiResult == ResultStatus.CANCEL) {
+				Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
+				if (!pPaceSuccessful.isDelivered()) {
+				    pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+					    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+				}
 			    }
+			}
+		    } finally {
+			if (cardMon != null) {
+			    eventDispatcher.del(cardMon);
 			}
 		    }
 		}

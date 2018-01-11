@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -127,13 +127,13 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 		    switch (event.getState()) {
 			case CARD_INSERTED:
 			    try {
-				SingleThreadChannel ch = new SingleThreadChannel(watcher.getTerminals().getTerminal(name), true);
+				SingleThreadChannel ch = cm.openMasterChannel(name);
 				slot.setCardAvailable(true);
 				slot.setATRorATS(ch.getChannel().getCard().getATR().getBytes());
-				ch.shutdown();
 			    } catch (NoSuchTerminal | SCIOException ex) {
 				LOG.error("Failed to open master channel for terminal '" + name + "'.", ex);
 				slot.setCardAvailable(false);
+				cm.closeMasterChannel(name);
 			    }
 			    break;
 			case CARD_REMOVED:

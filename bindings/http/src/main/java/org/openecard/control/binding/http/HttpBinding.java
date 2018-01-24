@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,9 +47,7 @@ import org.openecard.control.binding.http.interceptor.StatusLineResponseIntercep
  */
 public class HttpBinding {
 
-    /** Uses the default port 24727 according to BSI-TR-03112 */
-    public static final int DEFAULT_PORT = 24727;
-    private final int port;
+    private int port;
     private final DocumentRoot documentRoot;
     private List<HttpRequestInterceptor> reqInterceptors;
     private List<HttpResponseInterceptor> respInterceptors;
@@ -58,15 +56,6 @@ public class HttpBinding {
 
     public void setAddonManager(AddonManager addonManager) {
 	this.addonManager = addonManager;
-    }
-
-    /**
-     * Creates a new HTTPBinding using a random port.
-     * @throws IOException If the document root cannot be read
-     * @throws Exception
-     */
-    public HttpBinding() throws IOException, Exception {
-	this(DEFAULT_PORT);
     }
 
     /**
@@ -83,7 +72,7 @@ public class HttpBinding {
     /**
      * Creates a new HTTPBinding using the given port and document root.
      *
-     * @param port Port
+     * @param port Port used for the binding. If the port is 0, then chose a port randomly.
      * @param documentRootPath Path of the document root
      * @param listFile
      * @throws IOException If the document root cannot be read

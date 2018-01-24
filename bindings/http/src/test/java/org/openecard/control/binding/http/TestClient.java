@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -136,7 +136,7 @@ public final class TestClient {
 	AddonManager manager = new AddonManager(env, gui, cardStates, null);
 	sal.setAddonManager(manager);
 
-	HttpBinding binding = new HttpBinding(HttpBinding.DEFAULT_PORT);
+	HttpBinding binding = new HttpBinding(24727);
 	binding.setAddonManager(manager);
 	binding.start();
     }

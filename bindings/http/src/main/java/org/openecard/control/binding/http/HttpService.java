@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -72,9 +72,9 @@ public class HttpService implements Runnable {
      */
     public HttpService(int port, HttpRequestHandler handler, List<HttpRequestInterceptor> reqInterceptors,
 	    List<HttpResponseInterceptor> respInterceptors) throws Exception {
-	thread = new Thread(this, "Open-eCard Localhost-Binding-" + port);
 	server = new ServerSocket(port, BACKLOG, InetAddress.getByName("127.0.0.1"));
-	LOG.debug("Starting HTTPBinding on port {}", server.getLocalPort());
+	LOG.debug("Starting HTTP Binding on port {}", getPort());
+	thread = new Thread(this, "Open-eCard Localhost-Binding-" + getPort());
 
 	// Reuse strategy
 	ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
@@ -163,7 +163,7 @@ public class HttpService implements Runnable {
      *
      * @return Port
      */
-    public int getPort() {
+    public final int getPort() {
 	return server.getLocalPort();
     }
 

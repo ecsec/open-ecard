@@ -339,12 +339,11 @@ public class ChipGateway {
 	    HttpRequestHelper.setDefaultHeader(req, tlsHandler.getServerAddress());
 	    req.setHeader("Accept", "application/json");
 
-	    ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
+	    ContentType reqContentType = ContentType.create("application/json", "UTF-8");
 	    if (LOG_HTTP_MESSAGES) {
 		HttpUtils.dumpHttpRequest(LOG, "before adding content", req);
 	    }
 	    StringEntity reqMsg = new StringEntity(msg, reqContentType);
-	    reqMsg.setContentType("application/json");
 	    req.setEntity(reqMsg);
 	    req.setHeader(reqMsg.getContentType());
 	    req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));

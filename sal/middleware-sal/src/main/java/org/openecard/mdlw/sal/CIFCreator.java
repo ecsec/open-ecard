@@ -43,11 +43,15 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
+import iso.std.iso_iec._24727.tech.schema.KeyRefType;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import iso.std.iso_iec._24727.tech.schema.PathType;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -58,6 +62,7 @@ import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
+import org.openecard.mdlw.sal.didfactory.PinMarkerBuilder;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.NoCertificateChainException;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -88,24 +93,64 @@ public class CIFCreator {
     public CardInfoType addTokenInfo() throws WSMarshallerException, CryptokiException {
 	LOG.debug("Adding information to CardInfo file for card type {}.", cif.getCardType().getObjectIdentifier());
 
-	DIDInfoType pinDid = getPinDID();
+	PIN_NAME = "USER_PIN";
+	DIDInfoType pinDid = createPinDID();
 	List<DIDInfoType> cryptoDids = getSignatureCryptoDIDs();
 	List<DataSetInfoType> datasets = getCertificateDatasets();
 
 	CardApplicationType app = cif.getApplicationCapabilities().getCardApplication().get(0);
-	//app.getDIDInfo().add(pinDid);
+	app.getDIDInfo().add(pinDid);
 	app.getDIDInfo().addAll(cryptoDids);
 	app.getDataSetInfo().addAll(datasets);
 
 	return cif;
     }
 
-    private DIDInfoType getPinDID() {
-	PIN_NAME = "USER_PIN";
+    private DIDInfoType createPinDID() throws WSMarshallerException {
+	LOG.debug("Creating PinCompare DID object.");
+	DIDInfoType di = new DIDInfoType();
 
-	// TODO: create PIN DID on the fly and add it in addTokenInfo function
+	// create differential identity
+	DifferentialIdentityType did = new DifferentialIdentityType();
+	di.setDifferentialIdentity(did);
+	String didName = PIN_NAME;
+	did.setDIDName(didName);
+	did.setDIDProtocol("urn:oid:1.3.162.15480.3.0.9");
+	did.setDIDScope(DIDScopeType.GLOBAL);
 
-	return null;
+	// create pin compare marker
+	PinMarkerBuilder markerBuilder = new PinMarkerBuilder();
+	KeyRefType kr = new KeyRefType();
+	kr.setKeyRef(new byte[] { 0x01 }); // value is irrelevant
+	markerBuilder.setPinRef(kr);
+	try {
+	    PasswordAttributesType pw = new PasswordAttributesType();
+	    MwToken tok = session.getSlot().getTokenInfo();
+	    long minPinLen = tok.getUlMinPinLen();
+	    long maxPinLen = tok.getUlMinPinLen();
+	    pw.setMinLength(BigInteger.valueOf(minPinLen));
+	    pw.setMaxLength(BigInteger.valueOf(maxPinLen));
+	    markerBuilder.setPwAttributes(pw);
+	} catch (CryptokiException | NullPointerException ex) {
+	    LOG.warn("Unable to read min and max PIN length from middleware.");
+	}
+
+	// wrap pin compare marker and add to parent
+	PinCompareMarkerType marker = markerBuilder.build();
+	DIDMarkerType markerWrapper = new DIDMarkerType();
+	markerWrapper.setPinCompareMarker(marker);
+	did.setDIDMarker(markerWrapper);
+
+	// create acl
+	AccessControlListType acl = new AccessControlListType();
+	di.setDIDACL(acl);
+	List<AccessRuleType> rules = acl.getAccessRule();
+	rules.add(createRuleTrue(AuthorizationServiceActionName.ACL_LIST));
+	rules.add(createRuleTrue(DifferentialIdentityServiceActionName.DID_LIST));
+	rules.add(createRuleTrue(DifferentialIdentityServiceActionName.DID_GET));
+	rules.add(createRuleTrue(DifferentialIdentityServiceActionName.DID_AUTHENTICATE));
+
+	return di;
     }
 
     private List<DIDInfoType> getSignatureCryptoDIDs() throws WSMarshallerException, CryptokiException {

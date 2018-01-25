@@ -61,9 +61,9 @@ public class MwAbstractKey {
 	try {
 	    return mw.getAttributeValue(session.getSessionId(), objectHandle, type);
 	} catch (CryptokiException ex) {
+	    String ts = String.format("%#010x", type);
 	    switch ((int) ex.getErrorCode()) {
 		case CryptokiLibrary.CKR_ATTRIBUTE_TYPE_INVALID:
-		    String ts = String.format("%#08X", type);
 		    LOG.debug("Error retrieving attribute value (type={}), but ignoring it: {}", ts, ex.getMessage());
 		    return null;
 		case CryptokiLibrary.CKR_FUNCTION_FAILED:

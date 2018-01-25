@@ -97,7 +97,7 @@ public class MwCertificate {
 	} catch (CryptokiException ex) {
 	    switch ((int) ex.getErrorCode()) {
 		case CryptokiLibrary.CKR_ATTRIBUTE_TYPE_INVALID:
-		    String ts = String.format("%#08X", type);
+		    String ts = String.format("%#010x", type);
 		    LOG.debug("Error retrieving attribute value (type={}), but ignoring it: {}", ts, ex.getMessage());
 		    return null;
 	    }

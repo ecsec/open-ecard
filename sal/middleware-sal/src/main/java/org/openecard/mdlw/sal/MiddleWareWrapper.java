@@ -524,7 +524,7 @@ public class MiddleWareWrapper {
 	if (LOG.isDebugEnabled()) {
 	    long resultValue = result.longValue();
 	    String constantName = CryptokiException.getErrorConstantName(resultValue);
-	    LOG.debug("Return code for {}: {} -> {}", fname, String.format("%#08X", resultValue), constantName);
+	    LOG.debug("Return code for {}: {} -> {}", fname, String.format("%#010x", resultValue), constantName);
 	}
 
 

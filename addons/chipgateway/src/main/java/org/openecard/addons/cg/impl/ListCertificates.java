@@ -103,6 +103,7 @@ public class ListCertificates {
 
 	    // get certificates for each crypto did
 	    for (DidInfo nextDid : cryptoDids) {
+		LOG.debug("Reading certificates from DID={}.", nextDid.getDidName());
 		List<X509Certificate> certChain = getCertChain(nextDid);
 		if (! certChain.isEmpty() && matchesFilter(certChain)) {
 		    AlgorithmInfoType algInfo = nextDid.getGenericCryptoMarker().getAlgorithmInfo();

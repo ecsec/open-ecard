@@ -509,7 +509,7 @@ public class CIFCreator {
 		    LOG.debug("Key signature algorithm: {}", sigAlg);
 		    sigAlgs.add(sigAlg);
 		} catch (UnsupportedAlgorithmException ex) {
-		    String mStr = String.format("%#08X", m);
+		    String mStr = String.format("%#010x", m);
 		    LOG.error("Skipping unknown signature algorithm ({}).", mStr);
 		}
 	    }

@@ -22,6 +22,8 @@
 
 package org.openecard.mdlw.sal;
 
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 import org.openecard.mdlw.sal.struct.CkAttribute;
@@ -64,15 +66,16 @@ public class AttributeUtils {
 	}
     }
 
+    private static long getLongFromPointer(Pointer p, int offset) {
+	NativeLong nl = p.getNativeLong(offset);
+	return nl.longValue();
+    }
+
     @Nullable
     public static long getLong(CkAttribute raw) {
 	int dataLen = raw.getLength().intValue();
 	if (dataLen > 0) {
-	    if (dataLen == 4) {
-		return raw.getData().getInt(0);
-	    } else {
-		return raw.getData().getLong(0);
-	    }
+	    return getLongFromPointer(raw.getData(), 0);
 	} else {
 	    return -1;
 	}
@@ -81,11 +84,11 @@ public class AttributeUtils {
     @Nullable
     public static long[] getLongs(CkAttribute raw) {
 	int dataLen = raw.getLength().intValue();
-	if (dataLen > 0) {
-	    return raw.getData().getLongArray(0, dataLen / 8);
-	} else {
-	    return new long[0];
+	long[] result = new long[dataLen / NativeLong.SIZE];
+	for (int i=0, o=0; o < dataLen; i++, o += NativeLong.SIZE) {
+	    result[i] = getLongFromPointer(raw.getData(), o);
 	}
+	return result;
     }
 
 }

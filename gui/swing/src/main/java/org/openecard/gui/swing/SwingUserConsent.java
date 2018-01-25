@@ -103,19 +103,7 @@ public class SwingUserConsent implements UserConsent {
 
 	final SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar);
 	navBar.registerEvents(navigator);
-
-	dialogWrapper.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-		.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "process-next-button");
-	dialogWrapper.getRootPane().getActionMap()
-		.put("process-next-button", new AbstractAction() {
-	    @Override
-	    public void actionPerformed(ActionEvent event) {
-		if (navBar.isNextButtonAccessible()) {
-		    ActionEvent e = new ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT);
-		    navigator.actionPerformed(e);
-		}
-	    }
-	});
+	navBar.setDefaultButton(dialogWrapper.getRootPane());
 
 	dialogWrapper.getDialog().addWindowListener(new WindowAdapter() {
 	    @Override

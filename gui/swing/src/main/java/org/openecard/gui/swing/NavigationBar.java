@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.executor.DummyAction;
@@ -81,6 +82,10 @@ public class NavigationBar extends JPanel {
 	backButton.addActionListener(eventSink);
 	nextButton.addActionListener(eventSink);
 	cancelButton.addActionListener(eventSink);
+    }
+
+    public void setDefaultButton(JRootPane rootPane) {
+	rootPane.setDefaultButton(nextButton);
     }
 
     private void initializeComponents() {

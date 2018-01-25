@@ -66,6 +66,9 @@ public class MwAbstractKey {
 		    String ts = String.format("%#08X", type);
 		    LOG.debug("Error retrieving attribute value (type={}), but ignoring it: {}", ts, ex.getMessage());
 		    return null;
+		case CryptokiLibrary.CKR_FUNCTION_FAILED:
+		    LOG.warn("Error retrieving attribute value (type={}), but ignoring it: {}", ts, ex.getMessage());
+		    return null;
 	    }
 
 	    throw ex;

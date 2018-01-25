@@ -196,6 +196,8 @@ public class CIFCreator {
 		}
 	    } catch (NoCertificateChainException ex) {
 		LOG.warn("Could not create a certificate chain for requested key.", ex);
+	    } catch (CryptokiException ex) {
+		LOG.warn("Failed to read DID data from middleware, skipping this key entry.", ex);
 	    }
 	}
 

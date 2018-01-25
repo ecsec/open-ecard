@@ -182,4 +182,9 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
 	}
     }
 
+    @Override
+    public String toString() {
+	return version;
+    }
+
 }

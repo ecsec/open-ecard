@@ -756,8 +756,10 @@ public class AndroidMarshaller implements WSMarshaller {
 		}
 		Element emResult = marshalResult(response.getResult(), document);
 		rootElement.appendChild(emResult);
-		Element emIFDCaps = marshalIFDCapabilities(response.getIFDCapabilities(), document);
-		rootElement.appendChild(emIFDCaps);
+		if (response.getIFDCapabilities() != null) {
+		    Element emIFDCaps = marshalIFDCapabilities(response.getIFDCapabilities(), document);
+		    rootElement.appendChild(emIFDCaps);
+		}
 	    } catch (Exception ex) {
 		LOG.error(ex.getMessage(), ex);
 	    }

@@ -24,6 +24,7 @@ package org.openecard.addons.cg.impl;
 
 import org.openecard.crypto.common.sal.did.TokenCache;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import org.openecard.common.util.StringUtils;
 import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.crypto.common.sal.did.DidInfo;
 import org.openecard.crypto.common.sal.did.DidInfos;
 import org.openecard.crypto.common.sal.did.NoSuchDid;
@@ -97,13 +99,15 @@ public class Signer {
 	    didInfo.connectApplication();
 	    didInfo.authenticateMissing();
 
-	    String algUri = didInfo.getGenericCryptoMarker().getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+	    CryptoMarkerType cryptoMarker = didInfo.getGenericCryptoMarker();
+	    String algUri = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    try {
 		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algUri);
 
 		// calculate hash if needed
 		byte[] digest = data;
-		if (alg.getHashAlg() != null) {
+		if (alg.getHashAlg() != null && (cryptoMarker.getHashGenerationInfo() == null ||
+			cryptoMarker.getHashGenerationInfo() == HashGenerationInfoType.NOT_ON_CARD)) {
 		    digest = didInfo.hash(digest);
 		}
 

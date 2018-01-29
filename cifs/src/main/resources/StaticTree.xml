@@ -262,6 +262,19 @@
 						<iso:ResponseAPDU>
 							<iso:Body>
 								<iso:MatchingData>
+									<!-- Version is 03.05.00-07 (The only version having the scheme from 3.5.8+ cards) -->
+									<iso:MatchingValue>030500</iso:MatchingValue>
+									<iso:Mask>FFFFF8</iso:Mask>
+								</iso:MatchingData>
+							</iso:Body>
+							<iso:Trailer>9000</iso:Trailer>
+							<iso:Conclusion>
+								<iso:RecognizedCardType>http://cif.id.ee/eidV3.5</iso:RecognizedCardType>
+							</iso:Conclusion>
+						</iso:ResponseAPDU>
+						<iso:ResponseAPDU>
+							<iso:Body>
+								<iso:MatchingData>
 									<!-- Version is 03.05.0X -->
 									<iso:MatchingValue>030500</iso:MatchingValue>
 									<iso:Mask>FFFF00</iso:Mask>

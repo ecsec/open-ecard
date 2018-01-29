@@ -46,7 +46,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.common.sal.anytype.PINCompareMarkerType;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.util.PINUtils;

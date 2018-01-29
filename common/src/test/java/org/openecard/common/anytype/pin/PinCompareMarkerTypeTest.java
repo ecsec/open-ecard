@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,20 +20,16 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.sal.anytype;
+package org.openecard.common.anytype.pin;
 
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import java.io.InputStream;
 import java.math.BigInteger;
-import mockit.Expectations;
-import mockit.Mocked;
-import org.openecard.common.ClientEnv;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.interfaces.CIFProvider;
-import org.openecard.common.interfaces.Environment;
-import org.openecard.common.sal.state.cif.CardInfoWrapper;
-import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -41,15 +37,9 @@ import static org.testng.Assert.*;
 /**
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class PinCompareMarkerTypeTest {
-
-    private static final byte[] rootApplication = StringUtils.toByteArray("D2760001448000");
-    private static final String cardType = "http://ws.gematik.de/egk/1.0.0";
-    private static final String didName = "PIN.home";
-
-    @Mocked
-    public CIFProvider cifp;
 
     /**
      * Simple test for PinCompareMarkerType. After getting the PinCompareMarker for the PIN.home DID in the the root
@@ -59,19 +49,12 @@ public class PinCompareMarkerTypeTest {
      */
     @Test
     public void testPinCompareMarkerType() throws Exception {
-	new Expectations() {{
-	    cifp.getCardInfo(anyString); result = null;
-	}};
+	JAXBContext ctx = JAXBContext.newInstance(PinCompareMarkerType.class);
+	Unmarshaller um = ctx.createUnmarshaller();
+	InputStream res = getClass().getResourceAsStream("/anytype/pin/egk_pin_home_marker.xml");
+	JAXBElement<PinCompareMarkerType> elem = um.unmarshal(new StreamSource(res), PinCompareMarkerType.class);
 
-	Environment env = new ClientEnv();
-	env.setCIFProvider(cifp);
-	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
-	CardInfoType cardInfo = recognition.getCardInfo(cardType);
-	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
-
-	DIDInfoType didInfoWrapper = cardInfoWrapper.getDIDInfo(didName, rootApplication);
-	PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(
-		 didInfoWrapper.getDifferentialIdentity().getDIDMarker().getPinCompareMarker());
+	PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(elem.getValue());
 	assertEquals(pinCompareMarker.getPINRef().getKeyRef(), new byte[] { 0x02 });
 	assertNull(pinCompareMarker.getPINValue());
 	assertEquals(pinCompareMarker.getPasswordAttributes().getMaxLength(), new BigInteger("8"));

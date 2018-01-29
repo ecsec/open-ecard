@@ -50,23 +50,22 @@ import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import mockit.Mocked;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.UserConsent;
-import org.openecard.gui.swing.SwingDialogWrapper;
-import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -95,13 +94,16 @@ public class PINCompareProtocolTest {
     byte[] appIdentifier_ROOT = StringUtils.toByteArray("D2760001448000");
     byte[] appIdentifier_ESIGN = StringUtils.toByteArray("A000000167455349474E");
 
+    @Mocked
+    private UserConsent uc;
+
     @BeforeClass
-    public static void setUp() throws Exception {
+    public void setUp() throws Exception {
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
 	env.setDispatcher(d);
 	IFD ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setGUI(uc);
 	env.setIFD(ifd);
 	states = new CardStateMap();
 
@@ -148,7 +150,6 @@ public class PINCompareProtocolTest {
 	instance = new TinySAL(env, states);
 
 	// init AddonManager
-	UserConsent uc = new SwingUserConsent(new SwingDialogWrapper());
 	AddonManager manager = new AddonManager(env, uc, states, null);
 	instance.setAddonManager(manager);
     }

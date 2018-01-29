@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.sal.anytype;
+package org.openecard.common.anytype.pin;
 
 import iso.std.iso_iec._24727.tech.schema.KeyRefType;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
@@ -37,6 +37,7 @@ import org.w3c.dom.NodeList;
 /**
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class PINCompareMarkerType {
 
@@ -46,11 +47,11 @@ public class PINCompareMarkerType {
     private String protocol;
 
     public PINCompareMarkerType(iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType didAbstractMarkerType) {
-	if(!(didAbstractMarkerType instanceof iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType)){
+	protocol = didAbstractMarkerType.getProtocol();
+
+	if (! protocol.equals("urn:oid:1.3.162.15480.3.0.9")) {
 	    throw new IllegalArgumentException();
 	}
-
-	protocol = didAbstractMarkerType.getProtocol();
 
 	for (Element e : didAbstractMarkerType.getAny()) {
 	    if (e.getLocalName().equals("PinRef")) {
@@ -60,7 +61,9 @@ public class PINCompareMarkerType {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
 
-		    if (n.getLocalName().equals("KeyRef")) {
+		    if (n.getNodeType() != Node.ELEMENT_NODE) {
+			continue;
+		    } else if (n.getLocalName().equals("KeyRef")) {
 			pinRef.setKeyRef(StringUtils.toByteArray(n.getTextContent()));
 		    } else if (n.getLocalName().equals("Protected")) {
 			pinRef.setProtected(Boolean.parseBoolean(n.getTextContent()));
@@ -75,7 +78,9 @@ public class PINCompareMarkerType {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 		    Node n = nodeList.item(i);
 
-		    if (n.getLocalName().equals("pwdFlags")) {
+		    if (n.getNodeType() != Node.ELEMENT_NODE) {
+			continue;
+		    } else if (n.getLocalName().equals("pwdFlags")) {
 			passwordAttributes.getPwdFlags().addAll(Arrays.asList(n.getTextContent().split(" ")));
 		    } else if (n.getLocalName().equals("pwdType")) {
 			passwordAttributes.setPwdType(PasswordTypeType.fromValue(n.getTextContent()));

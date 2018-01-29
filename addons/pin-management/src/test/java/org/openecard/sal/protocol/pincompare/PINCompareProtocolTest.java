@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -69,12 +69,11 @@ import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
 
 
 /**
@@ -83,21 +82,18 @@ import static org.testng.Assert.*;
  */
 public class PINCompareProtocolTest {
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
+    private static final boolean TESTS_ENABLED = false;
 
-    private static ClientEnv env;
-    private static TinySAL instance;
-    private static CardStateMap states;
+    private ClientEnv env;
+    private TinySAL instance;
+    private CardStateMap states;
     byte[] appIdentifier_ROOT = StringUtils.toByteArray("D2760001448000");
     byte[] appIdentifier_ESIGN = StringUtils.toByteArray("A000000167455349474E");
 
     @Mocked
     private UserConsent uc;
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() throws Exception {
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
@@ -154,7 +150,7 @@ public class PINCompareProtocolTest {
 	instance.setAddonManager(manager);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDAuthenticate() throws ParserConfigurationException {
 
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -212,17 +208,17 @@ public class PINCompareProtocolTest {
 	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDCreate() {
 	// TODO
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDUpdate() {
 	// TODO
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDGet() {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -291,7 +287,7 @@ public class PINCompareProtocolTest {
      * This Test ensures that all functions unsupported by this protocol relay the correct error message when
      * called.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testUnsupportedFunctions() {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();

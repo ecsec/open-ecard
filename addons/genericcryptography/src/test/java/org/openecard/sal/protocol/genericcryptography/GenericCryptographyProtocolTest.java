@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -103,11 +103,11 @@ import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 
 /**
@@ -117,29 +117,18 @@ import static org.testng.Assert.assertTrue;
 public class GenericCryptographyProtocolTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericCryptographyProtocolTest.class);
+    private static final boolean TESTS_ENABLED = false;
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
-
-    private static ClientEnv env;
-    private static TinySAL instance;
-    private static CardStateMap states;
+    private String plaintext;
+    private ClientEnv env;
+    private TinySAL instance;
+    private CardStateMap states;
     byte[] cardApplication = StringUtils.toByteArray("A000000167455349474E");
     byte[] cardApplication_ROOT = StringUtils.toByteArray("D2760001448000");
-    private static IFD ifd;
-    private static final String plaintext;
+    private IFD ifd;
 
-    static {
-	try {
-	    plaintext = loadFile("plaintext.txt");
-	} catch (IOException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
-
-    private static String loadFile(String resourcePath) throws IOException {
+    @BeforeClass
+    private void loadFile(String resourcePath) throws IOException {
 	InputStream in = GenericCryptographyProtocolTest.class.getClassLoader().getResourceAsStream(resourcePath);
 	StringWriter w = new StringWriter();
 	BufferedReader r = new BufferedReader(new InputStreamReader(in, Charset.forName("utf-8")));
@@ -148,11 +137,12 @@ public class GenericCryptographyProtocolTest {
 	    w.write(nextLine);
 	    w.write(String.format("%n")); // platform dependent newline character
 	}
-	return w.toString();
+
+	plaintext = w.toString();
     }
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeMethod
+    public void setUp() throws Exception {
 
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
@@ -206,7 +196,7 @@ public class GenericCryptographyProtocolTest {
 	instance.setAddonManager(manager);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDGet() throws ParserConfigurationException {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -250,7 +240,7 @@ public class GenericCryptographyProtocolTest {
      * @throws Exception
      *             when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testSign() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -326,18 +316,21 @@ public class GenericCryptographyProtocolTest {
 	}
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDCreate() {
 	// TODO write test as soon as implemented
 	DIDCreateResponse resp = instance.didCreate(new DIDCreate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDUpdate() {
 	// TODO write test as soon as implemented
 	DIDUpdateResponse resp = instance.didUpdate(new DIDUpdate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testEncipher() {
 	// TODO write test as soon as implemented
 	EncipherResponse resp = instance.encipher(new Encipher());
@@ -353,7 +346,7 @@ public class GenericCryptographyProtocolTest {
      *
      * @throws Exception when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDecipher() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -477,12 +470,14 @@ public class GenericCryptographyProtocolTest {
 
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testGetRandom() {
 	// TODO write test as soon as implemented
 	GetRandomResponse resp = instance.getRandom(new GetRandom());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testHash() {
 	// TODO write test as soon as implemented
 	HashResponse resp = instance.hash(new Hash());
@@ -498,7 +493,7 @@ public class GenericCryptographyProtocolTest {
      * @throws Exception
      *             when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifySignature() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -589,18 +584,21 @@ public class GenericCryptographyProtocolTest {
 	}
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifyCertificate() {
 	// TODO write test as soon as implemented
 	VerifyCertificateResponse resp = instance.verifyCertificate(new VerifyCertificate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDAuthenticate() {
 	// TODO write test as soon as implemented
 	DIDAuthenticateResponse resp = instance.didAuthenticate(new DIDAuthenticate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationStartSession() {
 	// TODO expected result /resultminor/sal#inappropriateProtocolForAction
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -140,6 +140,7 @@ import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
 
 
 /**
@@ -149,24 +150,22 @@ import static org.testng.Assert.*;
  */
 public class TinySALTest {
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
+    private static final boolean TESTS_ENABLED = false;
 
-    private static ClientEnv env;
-    private static TinySAL instance;
-    private static CardStateMap states;
-    private static byte[] contextHandle = null;
+    private ClientEnv env;
+    private TinySAL instance;
+    private CardStateMap states;
+    private byte[] contextHandle = null;
     byte[] appIdentifier_ESIGN = Hex.decode("A000000167455349474E");
     byte[] appIdentifier_ROOT = Hex.decode("D2760001448000");
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeMethod()
+    public void setUp() throws Exception {
 	env = new ClientEnv();
 	Dispatcher dispatcher = new MessageDispatcher(env);
 	env.setDispatcher(dispatcher);
 	IFD ifd = new IFD();
+	ifd.setEnvironment(env);
 	env.setIFD(ifd);
 	states = new CardStateMap();
 
@@ -214,7 +213,7 @@ public class TinySALTest {
     /**
      * Test of initialize method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testInitialize() {
 	System.out.println("initialize");
 	Initialize parameters = new Initialize();
@@ -225,7 +224,7 @@ public class TinySALTest {
     /**
      * Test of terminate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testTerminate() {
 	System.out.println("terminate");
 	Terminate parameters = new Terminate();
@@ -236,7 +235,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationPath method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationPath() {
 	System.out.println("cardApplicationPath");
 	// test normal case
@@ -279,7 +278,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationConnect method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationConnect() {
 	System.out.println("cardApplicationConnect");
 	// test normal case
@@ -317,7 +316,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDisconnect method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationDisconnect() {
 	System.out.println("cardApplicationDisconnect");
 	// test normal case
@@ -372,7 +371,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationStartSession method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationStartSession() {
 	System.out.println("cardApplicationStartSession");
 	CardApplicationStartSession parameters = new CardApplicationStartSession();
@@ -383,7 +382,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationEndSession method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationEndSession() {
 	System.out.println("cardApplicationEndSession");
 	CardApplicationEndSession parameters = new CardApplicationEndSession();
@@ -394,7 +393,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationList() {
 	System.out.println("cardApplicationList");
 	// get path to root
@@ -438,7 +437,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationCreate method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationCreate() {
 	System.out.println("cardApplicationCreate");
 
@@ -495,7 +494,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationDelete method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationDelete() {
 	System.out.println("cardApplicationDelete");
 
@@ -549,7 +548,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceList method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationServiceList() {
 	System.out.println("cardApplicationServiceList");
 	CardApplicationServiceList parameters = new CardApplicationServiceList();
@@ -584,7 +583,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceCreate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationServiceCreate() {
 	System.out.println("cardApplicationServiceCreate");
 	CardApplicationServiceCreate parameters = new CardApplicationServiceCreate();
@@ -595,7 +594,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceLoad method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationServiceLoad() {
 	System.out.println("cardApplicationServiceLoad");
 	CardApplicationServiceLoad parameters = new CardApplicationServiceLoad();
@@ -606,7 +605,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationServiceDelete() {
 	System.out.println("cardApplicationServiceDelete");
 	CardApplicationServiceDelete parameters = new CardApplicationServiceDelete();
@@ -617,7 +616,7 @@ public class TinySALTest {
     /**
      * Test of cardApplicationServiceDescribe method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationServiceDescribe() {
 	System.out.println("cardApplicationServiceDescribe");
 	CardApplicationServiceDescribe parameters = new CardApplicationServiceDescribe();
@@ -650,7 +649,7 @@ public class TinySALTest {
     /**
      * Test of executeAction method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testExecuteAction() {
 	System.out.println("executeAction");
 	ExecuteAction parameters = new ExecuteAction();
@@ -661,7 +660,7 @@ public class TinySALTest {
     /**
      * Test of dataSetList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDataSetList() {
 	System.out.println("dataSetList");
 
@@ -709,7 +708,7 @@ public class TinySALTest {
     /**
      * Test of dataSetCreate method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDataSetCreate() {
 	System.out.println("dataSetCreate");
 
@@ -763,7 +762,7 @@ public class TinySALTest {
     /**
      * Test of dataSetSelect method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDataSetSelect() {
 	System.out.println("dataSetSelect");
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -819,7 +818,7 @@ public class TinySALTest {
     /**
      * Test of dataSetDelete method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDataSetDelete() {
 	System.out.println("dataSetDelete");
 
@@ -870,7 +869,7 @@ public class TinySALTest {
     /**
      * Test of dsiList method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDsiList() {
 	System.out.println("dsiList");
 
@@ -909,7 +908,7 @@ public class TinySALTest {
     /**
      * Test of dsiCreate method, of class TinySAL.
      */
-    @Test(enabled = false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDsiCreate() {
 	System.out.println("dsiCreate");
 
@@ -977,7 +976,7 @@ public class TinySALTest {
     /**
      * Test of dsiDelete method, of class TinySAL.
      */
-    @Test(enabled=false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDsiDelete() {
 	System.out.println("dsiDelete");
 
@@ -1040,7 +1039,7 @@ public class TinySALTest {
     /**
      * Test of dsiWrite method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDsiWrite() {
 	System.out.println("dsiWrite");
 	DSIWrite parameters = new DSIWrite();
@@ -1051,7 +1050,7 @@ public class TinySALTest {
     /**
      * Test of dsiRead method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDsiRead() {
 	System.out.println("dsiRead");
 	// test normal case
@@ -1124,7 +1123,7 @@ public class TinySALTest {
     /**
      * Test of encipher method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testEncipher() {
 	System.out.println("encipher");
 	Encipher parameters = new Encipher();
@@ -1135,7 +1134,7 @@ public class TinySALTest {
     /**
      * Test of decipher method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDecipher() {
 	System.out.println("decipher");
 	Decipher parameters = new Decipher();
@@ -1146,7 +1145,7 @@ public class TinySALTest {
     /**
      * Test of getRandom method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testGetRandom() {
 	System.out.println("getRandom");
 	GetRandom parameters = new GetRandom();
@@ -1157,7 +1156,7 @@ public class TinySALTest {
     /**
      * Test of hash method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testHash() {
 	System.out.println("hash");
 	Hash parameters = new Hash();
@@ -1168,7 +1167,7 @@ public class TinySALTest {
     /**
      * Test of sign method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testSign() {
 	System.out.println("sign");
 	Sign parameters = new Sign();
@@ -1179,7 +1178,7 @@ public class TinySALTest {
     /**
      * Test of verifySignature method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifySignature() {
 	System.out.println("verifySignature");
 	VerifySignature parameters = new VerifySignature();
@@ -1190,7 +1189,7 @@ public class TinySALTest {
     /**
      * Test of verifyCertificate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifyCertificate() {
 	System.out.println("verifyCertificate");
 	VerifyCertificate parameters = new VerifyCertificate();
@@ -1201,7 +1200,7 @@ public class TinySALTest {
     /**
      * Test of didList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDidList() {
 	System.out.println("didList");
 
@@ -1279,7 +1278,7 @@ public class TinySALTest {
     /**
      * Test of didCreate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDidCreate() {
 	System.out.println("didCreate");
 	DIDCreate parameters = new DIDCreate();
@@ -1290,7 +1289,7 @@ public class TinySALTest {
     /**
      * Test of didGet method, of class TinySAL.
      */
-    @Test(enabled = false)
+    @Test(enabled = TESTS_ENABLED)
     public void testDidGet() {
 	System.out.println("didGet");
 
@@ -1335,7 +1334,7 @@ public class TinySALTest {
     /**
      * Test of didUpdate method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDidUpdate() {
 	System.out.println("didUpdate");
 	DIDUpdate parameters = new DIDUpdate();
@@ -1346,7 +1345,7 @@ public class TinySALTest {
     /**
      * Test of didDelete method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDidDelete() {
 	System.out.println("didDelete");
 	DIDDelete parameters = new DIDDelete();
@@ -1359,7 +1358,7 @@ public class TinySALTest {
      *
      * @throws ParserConfigurationException
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDidAuthenticate() throws ParserConfigurationException {
 	System.out.println("didAuthenticate");
 	DIDAuthenticate parameters = new DIDAuthenticate();
@@ -1370,7 +1369,7 @@ public class TinySALTest {
     /**
      * Test of aclList method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testAclList() {
 	System.out.println("aclList");
 	// get path to esign
@@ -1440,7 +1439,7 @@ public class TinySALTest {
     /**
      * Test of aclModify method, of class TinySAL.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testAclModify() {
 	System.out.println("aclModify");
 	ACLModify parameters = new ACLModify();

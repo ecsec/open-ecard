@@ -24,6 +24,7 @@ package org.openecard.mdlw.sal;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.mdlw.sal.enums.Flag;
@@ -39,6 +40,7 @@ public class TestGui {
     @Mocked MwSession session;
     @Mocked MwSlot slot;
     @Mocked MwToken token;
+    @Mocked PINCompareMarkerType marker;
 
     @Test
     public void testPinEntry() throws Exception {
@@ -50,7 +52,7 @@ public class TestGui {
 	    session.login(UserType.User, null);
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, false, session);
+	PinEntryDialog d = new PinEntryDialog(uc, false, marker, session);
 	d.show();
     }
 
@@ -64,7 +66,7 @@ public class TestGui {
 	    session.loginExternal(UserType.User);
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, true, session);
+	PinEntryDialog d = new PinEntryDialog(uc, true, marker, session);
 	d.show();
     }
 
@@ -79,7 +81,7 @@ public class TestGui {
 	    session.login(UserType.User, null);
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, false, session);
+	PinEntryDialog d = new PinEntryDialog(uc, false, marker, session);
 	d.show();
     }
 
@@ -94,7 +96,7 @@ public class TestGui {
 	    session.loginExternal(UserType.User);
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, true, session);
+	PinEntryDialog d = new PinEntryDialog(uc, true, marker, session);
 	d.show();
     }
 
@@ -111,7 +113,7 @@ public class TestGui {
 	    result = null;
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, false, session);
+	PinEntryDialog d = new PinEntryDialog(uc, false, marker, session);
 	d.show();
     }
 
@@ -126,7 +128,7 @@ public class TestGui {
 	    session.login(UserType.User, null);
 	}};
 
-	PinEntryDialog d = new PinEntryDialog(uc, false, session);
+	PinEntryDialog d = new PinEntryDialog(uc, false, marker, session);
 	d.show();
     }
 

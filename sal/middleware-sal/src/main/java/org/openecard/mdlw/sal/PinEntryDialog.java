@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.mdlw.sal;
 
 import org.openecard.common.I18n;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -41,12 +42,15 @@ public class PinEntryDialog {
 
     private final UserConsent gui;
     private final boolean protectedAuthPath;
+    private final PINCompareMarkerType pinMarker;
     private final MwSession session;
     private PinEntryStep pinStep;
 
-    public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, MwSession session) {
+    public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, PINCompareMarkerType pinMarker,
+	    MwSession session) {
 	this.gui = gui;
 	this.protectedAuthPath = protectedAuthPath;
+	this.pinMarker = pinMarker;
 	this.session = session;
     }
 
@@ -60,7 +64,7 @@ public class PinEntryDialog {
     private UserConsentDescription createUserConsentDescription() throws CryptokiException {
 	String title = LANG.translationForKey("action.changepin.userconsent.pinstep.title");
 	UserConsentDescription uc = new UserConsentDescription(title, "pin_entry_dialog");
-	pinStep = new PinEntryStep(protectedAuthPath, session);
+	pinStep = new PinEntryStep(protectedAuthPath, pinMarker, session);
 	uc.getSteps().add(pinStep);
 
 	return uc;

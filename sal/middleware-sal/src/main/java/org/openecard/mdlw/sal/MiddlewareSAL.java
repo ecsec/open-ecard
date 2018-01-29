@@ -131,6 +131,7 @@ import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateOutputType;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
@@ -828,6 +829,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
                 String msg = String.format("DID %s does not exist.", didName);
                 throw new NamedEntityNotFoundException(msg);
             }
+	    PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(didStruct.getDIDMarker());
 
             String protocolURI = didAuthenticationData.getProtocol();
             if (! "urn:oid:1.3.162.15480.3.0.9".equals(protocolURI)) {
@@ -860,7 +862,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    session.loginExternal(UserType.User);
 		    pinAuthenticated = true;
 		} else {
-		    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, session);
+		    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, pinCompareMarker, session);
 		    dialog.show();
 		    pinAuthenticated = dialog.isPinAuthenticated();
 		    pinBlocked = dialog.isPinBlocked();

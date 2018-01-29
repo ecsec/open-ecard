@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,10 @@
 
 package org.openecard.mdlw.sal;
 
+import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
 import javax.annotation.Nonnull;
 import org.openecard.common.I18n;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
@@ -48,6 +50,7 @@ public class PinEntryStep extends Step {
     protected static final String PIN_FIELD = "PIN_FIELD";
 
     private final boolean protectedAuthPath;
+    private final PINCompareMarkerType pinMarker;
     private final MwSession session;
     private PinState pinState;
     private boolean lastTryFailed = false;
@@ -55,10 +58,12 @@ public class PinEntryStep extends Step {
     private boolean pinBlocked = false;
     private boolean unkownError = false;
 
-    public PinEntryStep(boolean protectedAuthPath, @Nonnull MwSession session) throws CryptokiException {
+    public PinEntryStep(boolean protectedAuthPath, @Nonnull PINCompareMarkerType pinMarker, @Nonnull MwSession session)
+	    throws CryptokiException {
 	super(STEP_ID);
 
 	this.protectedAuthPath = protectedAuthPath;
+	this.pinMarker = pinMarker;
 	this.session = session;
 
 	setAction(new PinEntryStepAction(this));
@@ -157,8 +162,18 @@ public class PinEntryStep extends Step {
 
 	PasswordField pass = new PasswordField(PIN_FIELD);
 	pass.setDescription("PIN");
-	// TODO: set length restrictions based on DID description
-	pass.setMinLength(4);
+
+	// set length restrictions based on DID description. No info means no value set
+	PasswordAttributesType pwAttr = pinMarker.getPasswordAttributes();
+	if (pwAttr != null) {
+	    if (pwAttr.getMinLength() != null) {
+		pass.setMinLength(pwAttr.getMinLength().intValue());
+	    }
+	    if (pwAttr.getMaxLength() != null) {
+		pass.setMaxLength(pwAttr.getMaxLength().intValue());
+	    }
+	}
+
 	getInputInfoUnits().add(pass);
 
 	if (pinState == PinState.PIN_FINAL_TRY) {

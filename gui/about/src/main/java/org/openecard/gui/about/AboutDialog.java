@@ -89,6 +89,20 @@ public class AboutDialog extends JFrame {
     private final HashMap<String, Integer> tabIndices = new HashMap<>();
     private JTabbedPane tabbedPane;
 
+    static {
+	try {
+	    // create user.home.url property
+	    String userHome = System.getProperty("user.home");
+	    File f = new File(userHome);
+	    // strip file:// as this must be written in the html file
+	    String userHomeUrl = f.toURI().toString().substring(5);
+	    LOG.debug("user.home.url = {}", userHomeUrl);
+	    System.setProperty("user.home.url", userHomeUrl);
+	} catch (SecurityException ex) {
+	    LOG.error("Failed to calculate property 'user.home.url'.", ex);
+	}
+    }
+
     /**
      * Creates a new instance of this class.
      */

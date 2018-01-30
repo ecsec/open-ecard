@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -64,9 +64,11 @@ public class SwingMessageDialog implements MessageDialog {
 	msg = formatMessage(msg);
 	ImageIcon icon = iconData != null ? new ImageIcon(iconData) : null;
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.DEFAULT_OPTION, icon);
-	JDialog dialog = jop.createDialog(title);
+	final JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	return new MessageDialogResult(ReturnType.OK);
     }
 
@@ -94,6 +96,7 @@ public class SwingMessageDialog implements MessageDialog {
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
 	dialog.setVisible(true);
+	dialog.toFront();
 
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
@@ -122,6 +125,8 @@ public class SwingMessageDialog implements MessageDialog {
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getInputValue();
 	if (returnValue == null) {
 	    return new MessageDialogResult((String) null);
@@ -150,6 +155,8 @@ public class SwingMessageDialog implements MessageDialog {
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getInputValue();
 	if ("uninitializedValue".equals(returnValue) && ! optionsList.contains("uninitializedValue")) {
 	    return new MessageDialogResult(ReturnType.CANCEL);
@@ -169,11 +176,13 @@ public class SwingMessageDialog implements MessageDialog {
 	if (iconData != null) {
 	    icon = new ImageIcon(iconData);
 	}
-	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon,
-		options);
+	JOptionPane jop;
+	jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon, options);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
 	    return new MessageDialogResult(ReturnType.CANCEL);

@@ -30,7 +30,7 @@ import javax.swing.Icon;
  * This class has been automatically generated using svg2java
  *
  */
-public class OecLogoBlackBgTransparent implements Icon {
+public class OecLogoBlack implements Icon {
 
 	private float origAlpha = 1.0f;
 
@@ -214,7 +214,7 @@ public class OecLogoBlackBgTransparent implements Icon {
 	/**
 	 * Creates a new transcoded SVG image.
 	 */
-	public OecLogoBlackBgTransparent() {
+	public OecLogoBlack() {
         this.width = getOrigWidth();
         this.height = getOrigHeight();
 	}

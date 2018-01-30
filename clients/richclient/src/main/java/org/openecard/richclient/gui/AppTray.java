@@ -48,9 +48,9 @@ import org.openecard.common.I18n;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
-import org.openecard.gui.graphics.OecLogoBgTransparent;
-import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
-import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
+import org.openecard.gui.graphics.OecLogo;
+import org.openecard.gui.graphics.OecLogoBlack;
+import org.openecard.gui.graphics.OecLogoWhite;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,16 +201,16 @@ public class AppTray {
 	if (name.equals(ICON_LOADER)) {
 	    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgTransparent.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
     }
 
     private Image getImageMacOSX(String name, Dimension dim) {
 	Class<? extends Icon> c;
 	if (isMacMenuBarDarkMode()) {
-	    c = OecLogoWhiteBgTransparent.class;
+	    c = OecLogoWhite.class;
 	} else {
-	    c = OecLogoBlackBgTransparent.class;
+	    c = OecLogoBlack.class;
 	}
 	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
     }
@@ -219,7 +219,7 @@ public class AppTray {
 	if (name.equals(ICON_LOADER)) {
 	    return GuiUtils.getImage("loader_icon_default_256.gif");
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgTransparent.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
     }
 
@@ -295,9 +295,9 @@ public class AppTray {
 
 	frame = new InfoFrame(lang.translationForKey("tray.title", AppVersion.getName()));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgTransparent.class, 256, 256));
+	frame.setIconImage(GraphicsUtil.createImage(OecLogo.class, 256, 256));
 
-	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgTransparent.class, 256, 256));
+	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogo.class, 256, 256));
 	JLabel label = new JLabel(logo);
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));

@@ -60,7 +60,7 @@ import org.openecard.common.AppVersion;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
-import org.openecard.gui.graphics.OecLogoBgTransparent;
+import org.openecard.gui.graphics.OecLogo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +151,7 @@ public class AboutDialog extends JFrame {
     }
 
     private void setupUI() {
-	Image logo = GraphicsUtil.createImage(OecLogoBgTransparent.class, 147, 147);
+	Image logo = GraphicsUtil.createImage(OecLogo.class, 147, 147);
 
 	setSize(730, 480);
 	// use null layout with absolute positioning

@@ -60,7 +60,7 @@ import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
-import org.openecard.gui.graphics.OecLogoBgTransparent;
+import org.openecard.gui.graphics.OecLogo;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup;
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
@@ -149,7 +149,7 @@ public class ManagementDialog extends JFrame {
 	cpReg = manager.getBuiltinRegistry();
 	fileReg = manager.getExternalRegistry();
 
-	Image logo = GraphicsUtil.createImage(OecLogoBgTransparent.class, 147, 147);
+	Image logo = GraphicsUtil.createImage(OecLogo.class, 147, 147);
 	setIconImage(logo);
 	setTitle(lang.translationForKey("addon.title", AppVersion.getName()));
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

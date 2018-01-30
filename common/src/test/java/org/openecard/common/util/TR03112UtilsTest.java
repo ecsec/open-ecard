@@ -76,11 +76,11 @@ public class TR03112UtilsTest {
 
 	ArrayList<byte[]> listOfHashes = new ArrayList<>();
 	listOfHashes.add(correctHash);
-	boolean result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes);
+	boolean result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes, null);
 	Assert.assertTrue(result);
 	listOfHashes.clear();
 	listOfHashes.add(incorrectHash);
-	result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes);
+	result = TR03112Utils.isInCommCertificates(tlsCert, listOfHashes, null);
 	Assert.assertFalse(result);
     }
 

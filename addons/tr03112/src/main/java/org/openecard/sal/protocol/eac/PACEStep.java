@@ -504,7 +504,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
 	TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
 	if (certificate != null) {
-	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates());
+	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eService");
 	} else {
 	    LOG.error("No eService TLS Certificate set in Dynamic Context.");
 	    return false;
@@ -517,8 +517,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	if (certificates != null) {
 	    for (Pair<URL, TlsServerCertificate> cert : certificates) {
 		if (cert instanceof Pair) {
+		    URL u = cert.p1;
+		    String host = u.getProtocol() + "://" + u.getHost() + (u.getPort() == -1 ? "" : (":" + u.getPort()));
 		    TlsServerCertificate bcCert = cert.p2;
-		    if (!TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {
+		    if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates(), host)) {
 			return false;
 		    }
 		}

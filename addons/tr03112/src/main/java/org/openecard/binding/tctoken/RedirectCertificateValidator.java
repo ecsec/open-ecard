@@ -70,8 +70,9 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		CertificateDescription desc = (CertificateDescription) descPromise.derefNonblocking();
 		certDescExists = desc != null;
 
+		String host = url.getProtocol() + "://" + url.getHost() + (url.getPort() == -1 ? "" : (":" + url.getPort()));
 		// check points certificate (but just in case we have a certificate description)
-		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
+		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates(), host)) {
 		    LOG.error("The retrieved server certificate is NOT contained in the CommCertificates of "
 			    +	"the CertificateDescription extension of the eService certificate.");
 		    throw new ValidationError(INVALID_REDIRECT);

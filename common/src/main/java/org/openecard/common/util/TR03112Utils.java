@@ -27,6 +27,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,9 +92,13 @@ public class TR03112Utils {
      * @param serverCertificate the retrieved server certificate
      * @param commCertificates List of hashes of the communication certificates as obtained from the
      *     CertificateDescription
+     * @param serverDesc Description of the server for which the certificate is checked. May be a hostname or just a
+     *   verbose description such as eService.
      * @return {@code true} if the hash is contained; {@code false} otherwise
      */
-    public static boolean isInCommCertificates(TlsServerCertificate serverCertificate, List<byte[]> commCertificates) {
+    public static boolean isInCommCertificates(TlsServerCertificate serverCertificate, List<byte[]> commCertificates,
+	    @Nullable String serverDesc) {
+	LOG.info("Checking certificate hash of {} against list of communication certificates.", serverDesc);
 	try {
 	    // calculate hash of first certificate in chain
 	    MessageDigest md = MessageDigest.getInstance(SHA256);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.executor.DummyAction;
 import org.openecard.gui.swing.common.GUIConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NavigationBar extends JPanel {
 
-    private static final Logger logger = LoggerFactory.getLogger(NavigationBar.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NavigationBar.class);
     private static final long serialVersionUID = 1L;
 
     private final I18n lang = I18n.getTranslation("gui");
@@ -162,13 +161,6 @@ public class NavigationBar extends JPanel {
 	} else {
 	    nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_NEXT));
 	}
-
-	// Hide cancel if this is the last step and there is no action to perform
-	if (nextIdx == (numSteps - 1) && nextStep.getAction() instanceof DummyAction) {
-	    cancelButton.setVisible(false);
-	} else {
-	    cancelButton.setVisible(true);
-	}
     }
 
     @Override
@@ -193,11 +185,7 @@ public class NavigationBar extends JPanel {
      * cases {@code FALSE} is returned.
      */
     boolean isNextButtonAccessible() {
-	if (nextButton.isEnabled() && ! nextButton.hasFocus()) {
-	    return true;
-	}
-	
-	return false;
+	return nextButton.isEnabled() && ! nextButton.hasFocus();
     }
 
 }

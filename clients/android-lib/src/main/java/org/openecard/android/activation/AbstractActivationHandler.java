@@ -196,8 +196,12 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	if (octx != null) {
 	    octx.getEventDispatcher().del(insertionHandler);
 	}
+
+	// clear member variables
 	returnClass = null;
 	octx = null;
+	cardRemoveDialog = null;
+	eacGui = null;
     }
 
     private final EventCallback insertionHandler = new EventCallback() {
@@ -331,6 +335,9 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 		}
 	    } catch (InterruptedException ex) {
 		LOG.error("Waiting for Authentication thread interrupted.");
+	    } finally {
+		// make sure it is really null after this method is finished
+		authThread = null;
 	    }
 	}
     }

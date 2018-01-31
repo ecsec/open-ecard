@@ -45,6 +45,12 @@ public class TR03112Utils {
     private static final String SHA256 = "SHA-256";
 
     /**
+     * This switch enables the developer mode described in TR-03124-1.
+     * When enabled the Communication Certificate checks do not fail but issue a warning instead.
+     */
+    public static boolean DEVELOPER_MODE = false;
+
+    /**
      * Check if the two given URLs comply the Same-Origin-Policy.
      * 
      * @param url1 the first URL
@@ -123,7 +129,13 @@ public class TR03112Utils {
 	    LOG.error("Server certificate couldn't be encoded.");
 	    return false;
 	}
-	return false;
+
+	if (DEVELOPER_MODE) {
+	    LOG.warn("DEVELOPER_MODE: No matching communication certificate found, continuing nevertheless.");
+	    return true;
+	} else {
+	    return false;
+	}
     }
 
     /**

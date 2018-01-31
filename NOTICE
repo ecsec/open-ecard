@@ -1,5 +1,5 @@
 Open eCard App
-Copyright 2011-2016 (see entries below)
+Copyright 2011-2018 (see entries below)
 
 This product includes software developed at:
  - Bremen Online Services (http://www.bos-bremen.de)
@@ -20,6 +20,7 @@ The following software projects are included/used(*) in this software distributi
  - Jackson (http://wiki.fasterxml.com/JacksonHome)
  - JMockit (http://jmockit.github.io/)
  - JNA (https://github.com/java-native-access/jna)
+ - jose4j (https://bitbucket.org/b_c/jose4j)
  - Logback (http://logback.qos.ch/)
  - Logback-Android (https://github.com/tony19/logback-android)
  - Oxygen (http://www.oxygen-icons.org)

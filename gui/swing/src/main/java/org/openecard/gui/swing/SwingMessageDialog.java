@@ -66,6 +66,9 @@ public class SwingMessageDialog implements MessageDialog {
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.DEFAULT_OPTION, icon);
 	final JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
 	dialog.toFront();
 
@@ -95,6 +98,9 @@ public class SwingMessageDialog implements MessageDialog {
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
 	dialog.toFront();
 
@@ -124,6 +130,9 @@ public class SwingMessageDialog implements MessageDialog {
 	dialog.setIconImage(FRAME_ICON);
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
 	dialog.toFront();
 
@@ -154,6 +163,9 @@ public class SwingMessageDialog implements MessageDialog {
 	jop.setSelectionValues(options);
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
 	dialog.toFront();
 
@@ -180,6 +192,9 @@ public class SwingMessageDialog implements MessageDialog {
 	jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon, options);
 	JDialog dialog = jop.createDialog(title);
 	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
 	dialog.toFront();
 

@@ -135,7 +135,7 @@ public class SwingDialogWrapper {
 	return new SwingDialogWrapper(this);
     }
 
-    private boolean needsFullscreen() {
+    public static boolean needsFullscreen() {
 	String fsStr = OpenecardProperties.getProperty(FULLSCREEN_USER_CONSENT);
 	return Boolean.parseBoolean(fsStr);
     }

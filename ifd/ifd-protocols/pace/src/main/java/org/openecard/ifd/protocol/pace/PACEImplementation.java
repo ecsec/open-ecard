@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PACEImplementation {
 
-    private static final Logger logger = LoggerFactory.getLogger(PACEImplementation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PACEImplementation.class);
     // Communication
     private final Dispatcher dispatcher;
     private final KDF kdf;
@@ -92,7 +92,7 @@ public class PACEImplementation {
 		PACEConstants.SUPPORTED_PACE_DOMAIN_PARAMS);
 	if (paceInfoPairs.isEmpty()) {
 	    String msg = "No supported PACE keys found on the card.";
-	    logger.error(msg);
+	    LOG.error(msg);
 	    throw new ProtocolException(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, msg);
 	}
 	this.psip = paceInfoPairs.get(0);
@@ -131,7 +131,15 @@ public class PACEImplementation {
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (APDUException e) {
-	    logger.error(e.getMessage(), e);
+	    if (e.getResponseAPDU() == null) {
+		if (e.getCause() instanceof Exception) {
+		    throw (Exception) e.getCause();
+		} else {
+		    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
+		}
+	    }
+
+	    LOG.error(e.getMessage(), e);
 	    short sw = e.getResponseAPDU().getSW();
 
 	    if (sw == PACEConstants.PASSWORD_DEACTIVATED) {
@@ -141,17 +149,16 @@ public class PACEImplementation {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked
-		    logger.warn("The password is blocked. The password MUST be unblocked.");
+		    LOG.warn("The password is blocked. The password MUST be unblocked.");
 		    if (passwordID == PACEConstants.PASSWORD_PUK) {
 			generalAuthenticateEncryptedNonce();
 		    } else {
-			throw new ProtocolException(
-				ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
+			throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
 				"The password is blocked. The password MUST be unblocked.");
 		    }
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended
-		    logger.warn("The password is suspended. The password MUST be resumed.");
+		    LOG.warn("The password is suspended. The password MUST be resumed.");
 		    //TODO check for an existing SM-Channel with the CAN
 		    // if (mseSetAT.isSecureMessaging()) {
 		    generalAuthenticateEncryptedNonce();
@@ -162,15 +169,15 @@ public class PACEImplementation {
 		    }*/
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is suspended
-		    logger.warn("The password is wrong.");
+		    LOG.warn("The password is wrong.");
 		    generalAuthenticateEncryptedNonce();
 		}
 	    }
 	} catch (ProtocolException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw e;
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }
@@ -191,10 +198,10 @@ public class PACEImplementation {
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
 	} catch (APDUException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getMessage());
 	}
     }
@@ -220,7 +227,7 @@ public class PACEImplementation {
 	try {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	}
 
@@ -270,10 +277,10 @@ public class PACEImplementation {
 		throw new GeneralSecurityException("PACE security violation: equal keys");
 	    }
 	} catch (APDUException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getResult());
 	} catch (GeneralSecurityException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(e.getMessage());
 	}
     }
@@ -309,25 +316,33 @@ public class PACEImplementation {
 		throw new GeneralSecurityException("Cannot verify authentication token.");
 	    }
 	} catch (APDUException e) {
-	    logger.error(e.getMessage(), e);
+	    if (e.getResponseAPDU() == null) {
+		if (e.getCause() instanceof Exception) {
+		    throw (Exception) e.getCause();
+		} else {
+		    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
+		}
+	    }
+
+	    LOG.error(e.getMessage(), e);
 	    int sw = e.getResponseAPDU().getSW();
 
 	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
 		retryCounter = (byte) (sw & (short) 0x000F);
 		if (retryCounter == (byte) 0x00) {
 		    // The password is blocked.
-		    logger.warn("The password is blocked. The password MUST be unblocked.");
+		    LOG.warn("The password is blocked. The password MUST be unblocked.");
 		    throw new ProtocolException(
 			    ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
 			    "The password is blocked. The password MUST be unblocked.");
 		} else if (retryCounter == (byte) 0x01) {
 		    // The password is suspended.
-		    logger.warn("The password is suspended. The password MUST be resumed.");
+		    LOG.warn("The password is suspended. The password MUST be resumed.");
 		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED,
 			    "The password is suspended. The password MUST be resumed.");
 		} else if (retryCounter == (byte) 0x02) {
 		    // The password is wrong.
-		    logger.warn("The password is wrong.");
+		    LOG.warn("The password is wrong.");
 		    throw new ProtocolException(
 			    ECardConstants.Minor.IFD.PASSWORD_ERROR,
 			    "The password is wrong.");
@@ -337,7 +352,7 @@ public class PACEImplementation {
 			ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, "Authentication failed.");
 	    }
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
 	}
     }

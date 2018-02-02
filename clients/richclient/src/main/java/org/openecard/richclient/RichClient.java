@@ -405,10 +405,12 @@ public final class RichClient {
 		    HttpResponse response = exec.execute(req, con, httpCtx);
 		    HttpUtils.dumpHttpResponse(LOG, response, null);
 
-		    if (response.getStatusLine().getStatusCode() == 204) {
+		    int statusCode = response.getStatusLine().getStatusCode();
+		    if (statusCode == 204) {
 			return;
 		    } else {
-			LOG.info("Execution of dispatcher registration is not successful, trying again ...");
+			String msg = "Execution of dispatcher registration is not successful (code={}), trying again ...";
+			LOG.info(msg, statusCode);
 		    }
 		} catch (HttpException | IOException | UnsupportedCharsetException ex) {
 		    LOG.error("Failed to send dispatcher registration reguest.", ex);

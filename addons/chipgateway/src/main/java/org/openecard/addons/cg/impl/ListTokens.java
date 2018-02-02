@@ -64,13 +64,13 @@ public class ListTokens {
     private final TreeSet<byte[]> connectedSlots;
 
     public ListTokens(List<TokenInfoType> requestedTokens, Dispatcher dispatcher) throws UnsupportedAlgorithmException {
-	this.requestedTokens = requestedTokens;
+	this.requestedTokens = new ArrayList<>(requestedTokens);
 	this.dispatcher = dispatcher;
 	this.connectedSlots = new TreeSet<>(new ByteComparator());
 
 	// if no filter is specified, add an empty filter
-	if (requestedTokens.isEmpty()) {
-	    requestedTokens.add(new TokenInfoType());
+	if (this.requestedTokens.isEmpty()) {
+	    this.requestedTokens.add(new TokenInfoType());
 	}
 
 	validateFilters();

@@ -74,17 +74,19 @@ class MwEventRunner implements Runnable {
 
     void initRunner() throws CryptokiException {
 	for (MwSlot slot : this.mwModule.getSlotList(TokenState.NotPresent)) {
-	    this.sendTerminalAdded(slot);
-	    String ifdName = slot.getSlotInfo().getSlotDescription();
+	    if (isHwSlot(slot)) {
+		this.sendTerminalAdded(slot);
+		String ifdName = slot.getSlotInfo().getSlotDescription();
 
-	    try {
-		slot.getTokenInfo().getLabel();
-		this.sendCardInserted(slot);
+		try {
+		    slot.getTokenInfo().getLabel();
+		    this.sendCardInserted(slot);
 
-		// send recognized
-		this.sendCardRecognized(slot);
-	    } catch (TokenException | SessionException e) {
-		LOG.debug("Error getting token information, no card present in the requested slot.", e);
+		    // send recognized
+		    this.sendCardRecognized(slot);
+		} catch (TokenException | SessionException e) {
+		    LOG.debug("Error getting token information, no card present in the requested slot.", e);
+		}
 	    }
 	}
     }
@@ -120,7 +122,7 @@ class MwEventRunner implements Runnable {
 		boolean isProcessed = false;
 		// find actual slot object
 		for (MwSlot slot : this.mwModule.getSlotList(false)) {
-		    if (slot.getSlotInfo().getSlotID() == slotId) {
+		    if (isHwSlot(slot) && slot.getSlotInfo().getSlotID() == slotId) {
 			isProcessed = true;
 			String ifdName = slot.getSlotInfo().getSlotDescription();
 			LOG.debug("Slot event recognized, slotId={}, ifdName={}.", slotId, ifdName);
@@ -136,7 +138,6 @@ class MwEventRunner implements Runnable {
 			    LOG.debug("Error requesting token information.", ex);
 			    this.sendCardRemoved(slot);
 			}
-		    } else {
 		    }
 		}
 		if (! isProcessed) {
@@ -309,6 +310,10 @@ class MwEventRunner implements Runnable {
 		.setProtectedAuthPath(isProtectedAuthPath)
 		.buildConnectionHandle();
 	return h;
+    }
+
+    private boolean isHwSlot(MwSlot slot) {
+	return (slot.getSlotInfo().getFlags() & CryptokiLibrary.CKF_HW_SLOT) > 0;
     }
 
     //Struct for caching

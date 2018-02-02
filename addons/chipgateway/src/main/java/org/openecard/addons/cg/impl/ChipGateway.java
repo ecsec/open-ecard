@@ -42,6 +42,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
@@ -538,6 +539,18 @@ public class ChipGateway {
     private GetCommandType createGetCommandRequest() {
 	GetCommandType cmd = new GetCommandType();
 	cmd.setSessionIdentifier(sessionId);
+
+	// add token info
+	try {
+	    ListTokens helper = new ListTokens(Collections.EMPTY_LIST, dispatcher);
+	    List<TokenInfoType> matchedTokens = helper.findTokens();
+	    cmd.getTokenInfo().addAll(matchedTokens);
+	} catch (UnsupportedAlgorithmException ex) {
+	    throw new RuntimeException("Unexpected error in empty token filter.", ex);
+	} catch (WSHelper.WSException ex) {
+	    LOG.error("Error requesting initial list of tokens.");
+	}
+
 	return cmd;
     }
 

@@ -258,7 +258,7 @@ public final class RichClient {
 		    // try to register with dispatcher service
 		    LOG.debug("Trying to register HTTP binding port with dispatcher service.");
 		    final int realPort = httpBinding.getPort();
-		    final URL regUrl = new URL("http://www.google.de/dp/register");//new URL("http://127.0.0.1:24727/dp/register");
+		    final URL regUrl = new URL("http://127.0.0.1:24727/dp/register");
 		    FutureTask ft = new FutureTask(new DispatcherRegistrator(regUrl, realPort, waitTime, timeout), 1);
 		    Thread registerThread = new Thread(ft, "Register-Dispatcher-Service");
 		    registerThread.setDaemon(true);

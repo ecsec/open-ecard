@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "MiddlewareSpecType", propOrder = {
     "middlewareName",
     "libSpec",
+    "builtinPinDialog",
     "cardConfig"
 })
 public class MiddlewareSpecType {
@@ -55,6 +56,9 @@ public class MiddlewareSpecType {
 
     @XmlElement(name="LibSpec", required = true)
     private List<LibSpecType> libSpec;
+
+    @XmlElement(name="BuiltinPinDialog", required = false)
+    private boolean builtinPinDialog = true;
 
     @XmlElement(name = "CardConfig", required = true)
     private CardConfigType cardConfig;
@@ -89,6 +93,14 @@ public class MiddlewareSpecType {
 	    libSpec = new ArrayList<>();
 	}
 	return libSpec;
+    }
+
+    public boolean isBuiltinPinDialog() {
+	return builtinPinDialog;
+    }
+
+    public void setBuiltinPinDialog(boolean builtinPinDialog) {
+	this.builtinPinDialog = builtinPinDialog;
     }
 
     public CardConfigType getCardConfig() {

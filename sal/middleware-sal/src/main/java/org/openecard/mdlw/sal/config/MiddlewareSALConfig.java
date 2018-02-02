@@ -138,6 +138,10 @@ public class MiddlewareSALConfig {
 	}
     }
 
+    public boolean hasBuiltinPinDialog() {
+	return mwSpec.isBuiltinPinDialog();
+    }
+
     /**
      * Returns true if the card type is known to the corresponding Middleware SAL, otherwise false.
      *

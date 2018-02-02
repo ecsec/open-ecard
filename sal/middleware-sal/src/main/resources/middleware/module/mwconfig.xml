@@ -19,6 +19,8 @@
 			<X64SearchPath>/usr/lib/x86_64-linux-gnu/pkcs11</X64SearchPath>
 		</LibSpec>
 
+		<BuiltinPinDialog>false</BuiltinPinDialog>
+
         <CardConfig>
             <CardSpec>
                 <MiddlewareName>cv cryptovision gmbh (c) v1.0n_PKCS#15</MiddlewareName>

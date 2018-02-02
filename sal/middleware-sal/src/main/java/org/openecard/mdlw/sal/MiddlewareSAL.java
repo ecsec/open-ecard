@@ -180,8 +180,8 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     private final CardStateMap states;
     private final byte[] ctxHandle;
     private final MwEventManager eventMan;
+    private final boolean builtinPinDialog;
     private UserConsent gui;
-    private boolean hasMiddlewareExternalDialog;
 
     private final TreeMap<byte[], MwSlot> managedSlots;
     private final TreeMap<byte[], MwSession> managedSessions;
@@ -202,6 +202,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         this.mwSALConfig = mwSALConfig;
         this.ctxHandle = ValueGenerators.generateRandom(32);
         this.eventMan = new MwEventManager(env, this, ctxHandle);
+	this.builtinPinDialog = mwSALConfig.hasBuiltinPinDialog();
 
         managedSlots = new TreeMap<>(new ByteComparator());
         managedSessions = new TreeMap<>(new ByteComparator());
@@ -330,8 +331,6 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    LOG.error(ex.getMessage());
 	    resp.setResult(ex.getResult());
 	}
-
-	hasMiddlewareExternalDialog = false;
 
         return resp;
     }
@@ -858,7 +857,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		// TODO: display error GUI if the PIN entry failed
 	    } else {
 		// omit GUI when Middleware has its own PIN dialog for class 2 readers
-		if (protectedAuthPath && ! hasMiddlewareExternalDialog) {
+		if (protectedAuthPath && builtinPinDialog) {
 		    session.loginExternal(UserType.User);
 		    pinAuthenticated = true;
 		} else {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -84,27 +84,36 @@ public class HashStep implements ProtocolStep<Hash, HashResponse> {
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 
 	    HashGenerationInfoType hashInfo = cryptoMarker.getHashGenerationInfo();
-	    if (! (hashInfo == null || hashInfo == HashGenerationInfoType.NOT_ON_CARD)) {
-		String msg = String.format("Unsupported Hash generation type (%s) requested.", hashInfo);
+	    if (hashInfo != null) {
+		if (hashInfo == HashGenerationInfoType.NOT_ON_CARD) {
+		    String algId = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+		    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algId);
+		    HashAlgorithms hashAlg = alg.getHashAlg();
+		    if (hashAlg == null) {
+			String msg = String.format("Algorithm %s does not specify a Hash algorithm.", algId);
+			LOG.error(msg);
+			String minor = ECardConstants.Minor.App.INCORRECT_PARM;
+			response.setResult(WSHelper.makeResultError(minor, msg));
+		    } else {
+			// calculate hash
+			MessageDigest md = MessageDigest.getInstance(hashAlg.getJcaAlg());
+			md.update(request.getMessage());
+			byte[] digest = md.digest();
+			response.setHash(digest);
+		    }
+		} else {
+		    // TODO: implement hashing on card
+		    String msg = String.format("Unsupported Hash generation type (%s) requested.", hashInfo);
+		    LOG.error(msg);
+		    String minor = ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION;
+		    response.setResult(WSHelper.makeResultError(minor, msg));
+		}
+	    } else {
+		// no hash alg specified, this is an error
+		String msg = String.format("No Hash generation type specified in CIF.");
 		LOG.error(msg);
 		String minor = ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION;
 		response.setResult(WSHelper.makeResultError(minor, msg));
-	    } else {
-		String algId = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algId);
-		HashAlgorithms hashAlg = alg.getHashAlg();
-		if (hashAlg == null) {
-		    String msg = String.format("Algorithm %s does not specify a Hash algorithm.", algId);
-		    LOG.error(msg);
-		    String minor = ECardConstants.Minor.App.INCORRECT_PARM;
-		    response.setResult(WSHelper.makeResultError(minor, msg));
-		} else {
-		    // calculate hash
-		    MessageDigest md = MessageDigest.getInstance(hashAlg.getJcaAlg());
-		    md.update(request.getMessage());
-		    byte[] digest = md.digest();
-		    response.setHash(digest);
-		}
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

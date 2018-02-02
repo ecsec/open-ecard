@@ -23,6 +23,7 @@
 package org.openecard.crypto.tls.auth;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,6 +44,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.crypto.common.sal.did.DidInfo;
 import org.openecard.crypto.common.sal.did.NoSuchDid;
 import org.slf4j.Logger;
@@ -93,13 +95,18 @@ public class SmartCardSignerCredential implements TlsSigner {
 	    LOG.debug("Performing pre-TLS 1.2 signature.");
 	}
 
-	if (isRaw) {
-	    LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
-	} else {
-	    LOG.debug("Hashed Signature of data blob.");
-	}
-
 	try {
+	    if (isRaw) {
+		LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
+	    } else {
+		LOG.debug("Hashed Signature of data blob.");
+		CryptoMarkerType cryptoMarker = did.getGenericCryptoMarker();
+		    if (didAlg.getHashAlg() != null && (cryptoMarker.getHashGenerationInfo() == null ||
+			    cryptoMarker.getHashGenerationInfo() == HashGenerationInfoType.NOT_ON_CARD)) {
+			sigData = did.hash(sigData);
+		    }
+	    }
+
 	    did.authenticateMissing();
 	    byte[] signature = did.sign(sigData);
 	    return signature;

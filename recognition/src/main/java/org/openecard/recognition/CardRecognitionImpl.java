@@ -50,10 +50,13 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -63,6 +66,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.AppVersion;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Environment;
@@ -98,6 +102,8 @@ public class CardRecognitionImpl implements CardRecognition {
     private final FutureTask<RecognitionTree> tree;
     private final FutureTask<org.openecard.ws.GetCardInfoOrACD> cifRepo;
 
+    private Set<String> supportedCards;
+
     private final Properties cardImagesMap = new Properties();
 
     private final Environment env;
@@ -127,6 +133,10 @@ public class CardRecognitionImpl implements CardRecognition {
 		if (cifRepoTmp == null) {
 		    cifRepoTmp = new LocalCifRepo(cifMarshaller);
 		}
+
+		// request all cifs to fill list of supported cards
+		prepareSupportedCards(cifRepoTmp);
+
 		return cifRepoTmp;
 	    }
 	});
@@ -151,6 +161,49 @@ public class CardRecognitionImpl implements CardRecognition {
 	    }
 	});
 	new Thread(this.tree, "Init-RecognitionTree-Repo").start();
+    }
+
+    private void prepareSupportedCards(org.openecard.ws.GetCardInfoOrACD repo) {
+	try {
+	    try {
+		InputStream in = FileUtils.resolveResourceAsStream(getClass(), "cif-repo/supported_cards");
+		if (in == null) {
+		    throw new IOException("File with supported cards not found.");
+		}
+		List<String> oids = FileUtils.readLinesFromConfig(in, "UTF-8");
+
+		if (oids.size() == 1 && oids.get(0).equals("*")) {
+		    oids = getAllTypesFromRepo(repo);
+		}
+
+		this.supportedCards = Collections.unmodifiableSet(new HashSet<>(oids));
+	    } catch (IOException ex) {
+		// no file loaded falling back to using everything from the repo
+		List<String> oids = getAllTypesFromRepo(repo);
+		this.supportedCards = Collections.unmodifiableSet(new HashSet<>(oids));
+	    }
+	} catch (WSHelper.WSException ex) {
+	    LOG.error("Failed to retrieve CIFs from repo, don't support any card.");
+	    this.supportedCards = Collections.emptySet();
+	}
+    }
+
+    private List<String> getAllTypesFromRepo(org.openecard.ws.GetCardInfoOrACD repo) throws WSHelper.WSException {
+	// read list of all cifs from the repo
+	GetCardInfoOrACD req = new GetCardInfoOrACD();
+	req.setAction(ECardConstants.CIF.GET_OTHER);
+	GetCardInfoOrACDResponse res = repo.getCardInfoOrACD(req);
+	WSHelper.checkResult(res);
+
+	ArrayList<String> oids = new ArrayList<>();
+	for (Object cif : res.getCardInfoOrCapabilityInfo()) {
+	    if (cif instanceof CardInfoType) {
+		String type = ((CardInfoType) cif).getCardType().getObjectIdentifier();
+		oids.add(type);
+	    }
+	}
+
+	return oids;
     }
 
     public void setGUI(UserConsent gui) {
@@ -229,6 +282,11 @@ public class CardRecognitionImpl implements CardRecognition {
 	    }
 	}
 	return cif;
+    }
+
+    private boolean isSupportedCard(String type) {
+	getCifRepo(); // makes sure supportedCards is initialized
+	return supportedCards.contains(type);
     }
 
     /**
@@ -341,8 +399,8 @@ public class CardRecognitionImpl implements CardRecognition {
 	String type = treeCalls(slotHandle, getTree().getCardCall());
 	// disconnect and return
 	disconnect(slotHandle);
-	// build result or throw exception if it is null
-	if (type == null) {
+	// build result or throw exception if it is null or unsupported
+	if (type == null || ! isSupportedCard(type)) {
 	    return null;
 	}
 	RecognitionInfo info = new RecognitionInfo();

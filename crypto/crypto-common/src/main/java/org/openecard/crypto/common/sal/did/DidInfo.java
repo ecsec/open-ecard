@@ -88,7 +88,6 @@ public class DidInfo {
 	this.didTarget = new TargetNameType();
 	this.didTarget.setDIDName(didName);
 	if (pin != null) {
-	    Arrays.fill(this.pin, ' ');
 	    this.pin = pin.clone();
 	} else {
 	    this.pin = null;

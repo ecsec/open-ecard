@@ -73,7 +73,6 @@ public class DidInfos {
     public DidInfos(@Nonnull Dispatcher dispatcher, @Nullable char[] pin, @Nonnull byte[] slotHandle) {
 	this.dispatcher = dispatcher;
 	if (pin != null) {
-	    Arrays.fill(this.pin, ' ');
 	    this.pin = pin.clone();
 	} else {
 	    this.pin = null;

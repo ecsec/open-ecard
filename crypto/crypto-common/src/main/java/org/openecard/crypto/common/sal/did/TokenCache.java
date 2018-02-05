@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -56,6 +56,8 @@ public class TokenCache {
 
 	if (result == null) {
 	    result = new DidInfos(dispatcher, pin, slotHandle);
+	} else if (pin != null) {
+	    result.setPin(pin);
 	}
 
 	return result;

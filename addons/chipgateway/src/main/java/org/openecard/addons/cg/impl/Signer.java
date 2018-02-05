@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -164,6 +164,7 @@ public class Signer {
 	} catch (InterruptedException ex) {
 	    throw new ThreadTerminateException("Signature creation interrupted.");
 	} finally {
+	    tokenCache.clearPins();
 	    if (acquired) {
 		s.release();
 	    }

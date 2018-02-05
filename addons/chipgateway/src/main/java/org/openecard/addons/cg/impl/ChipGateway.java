@@ -56,6 +56,7 @@ import javax.annotation.Nullable;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.lang.JoseException;
+import org.openecard.addon.Context;
 import org.openecard.addons.cg.ex.AuthServerException;
 import org.openecard.addons.cg.ex.ConnectionError;
 import org.openecard.apache.http.HttpEntity;
@@ -134,6 +135,7 @@ public class ChipGateway {
     private final TlsConnectionHandler tlsHandler;
     private final TCToken token;
     private final JsonWebKey pinKey;
+    private final Context addonCtx;
     private final UserConsent gui;
     private final Dispatcher dispatcher;
     private final ObjectMapper mapper;
@@ -161,13 +163,14 @@ public class ChipGateway {
     private final TreeSet<byte[]> connectedSlots;
     private final TokenCache tokenCache;
 
-    public ChipGateway(TlsConnectionHandler handler, TCToken token, Dispatcher dispatcher, UserConsent gui)
+    public ChipGateway(TlsConnectionHandler handler, TCToken token, Context addonCtx)
 	    throws InvalidTCTokenElement {
         try {
             this.tlsHandler = handler;
             this.token = token;
-            this.gui = gui;
-            this.dispatcher = dispatcher;
+	    this.addonCtx = addonCtx;
+            this.gui = addonCtx.getUserConsent();
+            this.dispatcher = addonCtx.getDispatcher();
             this.sessionId = token.getSessionIdentifier();
 
             this.addrBuilder = UrlBuilder.fromUrl(token.getServerAddress());
@@ -542,7 +545,7 @@ public class ChipGateway {
 
 	// add token info
 	try {
-	    ListTokens helper = new ListTokens(Collections.EMPTY_LIST, dispatcher);
+	    ListTokens helper = new ListTokens(Collections.EMPTY_LIST, addonCtx);
 	    List<TokenInfoType> matchedTokens = helper.findTokens();
 	    cmd.getTokenInfo().addAll(matchedTokens);
 	} catch (UnsupportedAlgorithmException ex) {
@@ -588,7 +591,7 @@ public class ChipGateway {
 
 	Date startTime = new Date();
 
-	ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), dispatcher);
+	ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), addonCtx);
 	do {
 	    // build list of matching tokens
 	    List<TokenInfoType> matchedTokens = helper.findTokens();

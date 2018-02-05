@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -181,6 +181,7 @@ public class IFD implements org.openecard.ws.IFD {
 		//scwrapper = new SCWrapper();
 		cm = new ChannelManager();
 		ctxHandle = ChannelManager.createCtxHandle();
+		env.addIFDCtx(ctxHandle);
 		numClients = new AtomicInteger(1);
 		// TODO: add custom ThreadFactory to control the thread name
 		threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -217,6 +218,7 @@ public class IFD implements org.openecard.ws.IFD {
 	ReleaseContextResponse response;
 	if (ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 	    if (numClients.decrementAndGet() == 0) { // last client detaches
+		env.removeIFDCtx(ctxHandle);
 		ctxHandle = null;
 		numClients = null;
 		// terminate thread pool

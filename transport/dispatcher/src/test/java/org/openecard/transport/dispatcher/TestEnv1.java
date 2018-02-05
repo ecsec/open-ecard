@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.transport.dispatcher;
 
+import java.util.List;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.CIFProvider;
@@ -157,6 +158,21 @@ public class TestEnv1 implements Environment {
 
     @Override
     public CIFProvider getCIFProvider() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void addIFDCtx(byte[] ctx) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeIFDCtx(byte[] ctx) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public List<byte[]> getIFDCtx() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

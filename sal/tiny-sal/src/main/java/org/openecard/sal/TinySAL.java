@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *

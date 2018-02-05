@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.common.interfaces;
 
+import java.util.List;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -35,6 +36,10 @@ public interface Environment {
 
     void setIFD(IFD ifd);
     IFD getIFD();
+
+    void addIFDCtx(byte[] ctx);
+    void removeIFDCtx(byte[] ctx);
+    List<byte[]> getIFDCtx();
 
     void setSAL(SAL sal);
     SAL getSAL();

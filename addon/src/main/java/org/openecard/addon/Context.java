@@ -22,12 +22,14 @@
 
 package org.openecard.addon;
 
+import java.util.List;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
@@ -44,8 +46,7 @@ public class Context {
 
     private final AddonProperties addonProperties;
     private final AddonManager manager;
-    private final Dispatcher dispatcher;
-    private final EventDispatcher eventDispatcher;
+    private final Environment env;
     private final String id;
     private final ViewController viewController;
 
@@ -59,16 +60,13 @@ public class Context {
      * Creates a new instance from the given parameters.
      *
      * @param manager {@link AddonManager} to use for this Context object.
-     * @param dispatcher {@link Dispatcher} to use for this Context object.
-     * @param eventManager {@link EventDispatcherImpl} to use for this Context object.
+     * @param env {@link Environment} to use for this Context object.
      * @param spec {@link AddonSpecification} for the generation of the {@link AddonProperties} object.
      * @param addView {@link ViewController} to use for this Context object.
      */
-    public Context(AddonManager manager, Dispatcher dispatcher, EventDispatcher eventManager, AddonSpecification spec,
-	    ViewController addView) {
+    public Context(AddonManager manager, Environment env, AddonSpecification spec, ViewController addView) {
 	this.manager = manager;
-	this.dispatcher = dispatcher;
-	this.eventDispatcher = eventManager;
+	this.env = env;
 	this.id = spec.getId();
 	addonProperties = new AddonProperties(spec);
 	viewController = addView;
@@ -126,7 +124,11 @@ public class Context {
      * @return The {@link Dispatcher} of this Context.
      */
     public Dispatcher getDispatcher() {
-	return dispatcher;
+	return env.getDispatcher();
+    }
+
+    public List<byte[]> getIfdCtx() {
+	return env.getIFDCtx();
     }
 
     /**
@@ -135,7 +137,7 @@ public class Context {
      * @return The {@link EventDispatcherImpl} of this Context.
      */
     public EventDispatcher getEventDispatcher() {
-	return eventDispatcher;
+	return env.getEventDispatcher();
     }
 
     /**

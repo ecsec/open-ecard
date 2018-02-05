@@ -25,6 +25,7 @@ package org.openecard.addons.cg.impl;
 import org.openecard.addons.cg.activate.TlsConnectionHandler;
 import org.openecard.addons.cg.ex.VersionTooOld;
 import java.util.concurrent.Callable;
+import org.openecard.addon.Context;
 import org.openecard.addons.cg.ex.AuthServerException;
 import org.openecard.addons.cg.ex.ChipGatewayDataError;
 import org.openecard.addons.cg.ex.ChipGatewayUnknownError;
@@ -33,8 +34,6 @@ import org.openecard.addons.cg.ex.InvalidRedirectUrlException;
 import org.openecard.addons.cg.ex.InvalidTCTokenElement;
 import org.openecard.addons.cg.ex.ResultMinor;
 import org.openecard.addons.cg.tctoken.TCToken;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.gui.UserConsent;
 import static org.openecard.addons.cg.ex.ErrorTranslations.*;
 import org.openecard.ws.chipgateway.TerminateType;
 
@@ -45,14 +44,12 @@ import org.openecard.ws.chipgateway.TerminateType;
  */
 public class ChipGatewayTask implements Callable<TerminateType> {
 
-    private final Dispatcher dispatcher;
     private final TCToken token;
-    private final UserConsent gui;
+    private final Context ctx;
 
-    public ChipGatewayTask(Dispatcher dispatcher, TCToken token, UserConsent gui) {
-	this.dispatcher = dispatcher;
+    public ChipGatewayTask(TCToken token, Context ctx) {
 	this.token = token;
-	this.gui = gui;
+	this.ctx = ctx;
     }
 
     @Override
@@ -61,7 +58,7 @@ public class ChipGatewayTask implements Callable<TerminateType> {
 	TlsConnectionHandler tlsHandler = new TlsConnectionHandler(token);
 	tlsHandler.setUpClient();
 
-	ChipGateway cg = new ChipGateway(tlsHandler, token, dispatcher, gui);
+	ChipGateway cg = new ChipGateway(tlsHandler, token, ctx);
 	TerminateType result = cg.sendHello();
 
 	if (ChipGatewayStatusCodes.isError(result.getResult())) {

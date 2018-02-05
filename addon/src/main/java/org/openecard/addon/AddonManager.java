@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Set;
-import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.addon.bind.AppExtensionActionProxy;
@@ -72,10 +71,6 @@ public class AddonManager {
     private final CardStateMap cardStates;
     private final EventHandler eventHandler;
     private final ViewController viewController;
-    private final TreeMap<AddonSpecification, TreeMap<String, IFDProtocol>> ifdProtocolCache = new TreeMap<>();
-    private final TreeMap<AddonSpecification, TreeMap<String, SALProtocol>> salProtocolCache = new TreeMap<>();
-    private final TreeMap<AddonSpecification, TreeMap<String, AppExtensionAction>> appExtActionCache = new TreeMap<>();
-    private final TreeMap<AddonSpecification, TreeMap<String, AppPluginAction>> appPluginActionCache = new TreeMap<>();
     private final Cache cache = new Cache();
 
     /**
@@ -408,7 +403,7 @@ public class AddonManager {
     }
 
     private Context createContext(@Nonnull AddonSpecification addonSpec) {
-	Context aCtx = new Context(this, env.getDispatcher(), env.getEventDispatcher(), addonSpec, viewController);
+	Context aCtx = new Context(this, env, addonSpec, viewController);
 	aCtx.setCardRecognition(env.getRecognition());
 	aCtx.setCardStateMap(cardStates);
 	aCtx.setEventHandle(eventHandler);

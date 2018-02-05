@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,9 +33,7 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addons.cg.ex.ChipGatewayUnknownError;
 import org.openecard.addons.cg.tctoken.TCToken;
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException;
-import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.gui.UserConsent;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -72,8 +70,7 @@ public class TCTokenHandler {
 
     private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
 
-    private final Dispatcher dispatcher;
-    private final UserConsent gui;
+    private final Context ctx;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -81,8 +78,7 @@ public class TCTokenHandler {
      * @param ctx Context containing instances to the core modules.
      */
     public TCTokenHandler(Context ctx) {
-	this.dispatcher = ctx.getDispatcher();
-	this.gui = ctx.getUserConsent();
+	this.ctx = ctx;
     }
 
 
@@ -103,7 +99,7 @@ public class TCTokenHandler {
 	String binding = token.getBinding();
 	switch (binding) {
 	    case "http://ws.openecard.org/binding/chipgateway": {
-		ChipGatewayTask task = new ChipGatewayTask(dispatcher, token, gui);
+		ChipGatewayTask task = new ChipGatewayTask(token, ctx);
 		FutureTask<TerminateType> cgTask = new FutureTask<>(task);
 		Thread cgThread = new Thread(cgTask, "ChipGateway-" + THREAD_NUM.getAndIncrement());
 		cgThread.start();

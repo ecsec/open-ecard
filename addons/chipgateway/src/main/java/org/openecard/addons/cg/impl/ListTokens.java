@@ -30,12 +30,18 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.GetStatus;
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
+import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
+import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import org.openecard.addon.Context;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
@@ -59,13 +65,15 @@ public class ListTokens {
     private static final Logger LOG = LoggerFactory.getLogger(ListTokens.class);
 
     private final List<TokenInfoType> requestedTokens;
+    private final Context ctx;
     private final Dispatcher dispatcher;
 
     private final TreeSet<byte[]> connectedSlots;
 
-    public ListTokens(List<TokenInfoType> requestedTokens, Dispatcher dispatcher) throws UnsupportedAlgorithmException {
+    public ListTokens(List<TokenInfoType> requestedTokens, Context ctx) throws UnsupportedAlgorithmException {
 	this.requestedTokens = new ArrayList<>(requestedTokens);
-	this.dispatcher = dispatcher;
+	this.ctx = ctx;
+	this.dispatcher = ctx.getDispatcher();
 	this.connectedSlots = new TreeSet<>(new ByteComparator());
 
 	// if no filter is specified, add an empty filter
@@ -82,7 +90,7 @@ public class ListTokens {
 
 
     public List<TokenInfoType> findTokens() throws WSHelper.WSException {
-	List<ConnectionHandleType> connected = connectCards();
+	ArrayList<ConnectionHandleType> connected = connectCards();
 
 	// save slots of connected cards
 	for (ConnectionHandleType next : connected) {
@@ -90,7 +98,9 @@ public class ListTokens {
 	}
 
 	// convert handles to TokenInfo structure
-	List<TokenInfoType> allTokens = convertHandles(connected);
+	ArrayList<TokenInfoType> allTokens = convertHandles(connected);
+	// add unknown cards to the list
+	allTokens.addAll(getUnknownCards(connected));
 
 	// process handles for each requested filter
 	ArrayList<TokenInfoType> filteredLists = new ArrayList<>();
@@ -108,7 +118,7 @@ public class ListTokens {
     }
 
 
-    private List<ConnectionHandleType> connectCards() throws WSHelper.WSException {
+    private ArrayList<ConnectionHandleType> connectCards() throws WSHelper.WSException {
 	// get all cards in the system
 	CardApplicationPath pathReq = new CardApplicationPath();
 	CardApplicationPathType pathType = new CardApplicationPathType();
@@ -150,7 +160,49 @@ public class ListTokens {
 	return connectedCards;
     }
 
-    private List<TokenInfoType> convertHandles(List<ConnectionHandleType> handles) {
+    private List<TokenInfoType> getUnknownCards(List<ConnectionHandleType> knownHandles) {
+	ArrayList<TokenInfoType> result = new ArrayList<>();
+
+	List<byte[]> ifdCtxs = ctx.getIfdCtx();
+	for (byte[] ifdCtx : ifdCtxs) {
+	    try {
+		// get all IFD names
+		GetStatus gs = new GetStatus();
+		gs.setContextHandle(ifdCtx);
+		GetStatusResponse gsr = (GetStatusResponse) dispatcher.safeDeliver(gs);
+		WSHelper.checkResult(gsr);
+
+		for (IFDStatusType istatus : gsr.getIFDStatus()) {
+		    for (SlotStatusType sstatus : istatus.getSlotStatus())
+		    // check if name is already in the list of known cards
+		    if (sstatus.isCardAvailable() && ! isInHandleList(istatus.getIFDName(), knownHandles)) {
+			TokenInfoType ti = new TokenInfoType();
+			org.openecard.ws.chipgateway.ConnectionHandleType conHandle;
+			conHandle = new org.openecard.ws.chipgateway.ConnectionHandleType();
+			conHandle.setCardType(ECardConstants.UNKNOWN_CARD);
+			ti.setConnectionHandle(conHandle);
+			// add to handle list
+			result.add(ti);
+		    }
+		}
+	    } catch (WSHelper.WSException ex) {
+		LOG.warn("Failed to retrieve status info from IFD. Skipping unknown card entries.");
+	    }
+	}
+
+	return result;
+    }
+
+    private boolean isInHandleList(String ifdName, List<ConnectionHandleType> handles) {
+	for (ConnectionHandleType handle : handles) {
+	    if (ifdName.equals(handle.getIFDName())) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    private ArrayList<TokenInfoType> convertHandles(List<ConnectionHandleType> handles) {
 	ArrayList<TokenInfoType> result = new ArrayList<>();
 	for (ConnectionHandleType next : handles) {
 	    ConnectionHandleType.RecognitionInfo rec = next.getRecognitionInfo();

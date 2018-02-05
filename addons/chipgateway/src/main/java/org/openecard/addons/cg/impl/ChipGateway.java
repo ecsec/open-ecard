@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -53,7 +53,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
+import org.jose4j.jwa.AlgorithmConstraints;
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.lang.JoseException;
 import org.openecard.addon.Context;
@@ -921,8 +924,24 @@ public class ChipGateway {
 		try {
 		    // decrypt PIN
 		    JsonWebEncryption jwe = new JsonWebEncryption();
-		    jwe.setKey(pinKey.getKey());
+
+		    // specify algorithmic constraints
+		    AlgorithmConstraints algConstraints = new AlgorithmConstraints(
+			    AlgorithmConstraints.ConstraintType.WHITELIST, KeyManagementAlgorithmIdentifiers.DIRECT);
+		    jwe.setAlgorithmConstraints(algConstraints);
+		    AlgorithmConstraints encConstraints = new AlgorithmConstraints(
+			    AlgorithmConstraints.ConstraintType.WHITELIST,
+			    ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256,
+			    ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384,
+			    ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512,
+			    ContentEncryptionAlgorithmIdentifiers.AES_128_GCM,
+			    ContentEncryptionAlgorithmIdentifiers.AES_192_GCM,
+			    ContentEncryptionAlgorithmIdentifiers.AES_256_GCM);
+		    jwe.setContentEncryptionAlgorithmConstraints(encConstraints);
+
+		    // perform decryption
 		    jwe.setCompactSerialization(encryptedPin);
+		    jwe.setKey(pinKey.getKey());
 		    byte[] pinBytes = jwe.getPlaintextBytes();
 
 		    // check if PIN is a sane value

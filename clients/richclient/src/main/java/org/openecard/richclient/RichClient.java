@@ -225,7 +225,7 @@ public final class RichClient {
 		int port = 24727;
 		boolean dispatcherMode = false;
 		WinReg.HKEY hk = WinReg.HKEY_LOCAL_MACHINE;
-		String regPath = "SOFTWARE\\OeC";
+		String regPath = "SOFTWARE\\" + OpenecardProperties.getProperty("registry.app_name");
 		if (Platform.isWindows()) {
 		    LOG.debug("Checking if dispatcher mode should be used.");
 		    try {

@@ -154,6 +154,7 @@ import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
 import org.openecard.mdlw.event.MwEventManager;
+import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
@@ -196,12 +197,12 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
      * @param states CardStateMap
      * @param mwSALConfig MiddlewareSALConfig
      */
-    public MiddlewareSAL(Environment env, CardStateMap states, MiddlewareSALConfig mwSALConfig) {
+    public MiddlewareSAL(Environment env, CardStateMap states, MiddlewareSALConfig mwSALConfig, MwStateCallback mwCallback) {
         this.env = env;
         this.states = states;
         this.mwSALConfig = mwSALConfig;
         this.ctxHandle = ValueGenerators.generateRandom(32);
-        this.eventMan = new MwEventManager(env, this, ctxHandle);
+        this.eventMan = new MwEventManager(env, this, ctxHandle, mwCallback);
 	this.builtinPinDialog = mwSALConfig.hasBuiltinPinDialog();
 
         managedSlots = new TreeMap<>(new ByteComparator());

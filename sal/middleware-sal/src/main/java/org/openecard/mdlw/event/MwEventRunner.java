@@ -59,16 +59,18 @@ class MwEventRunner implements Runnable {
     private final HandlerBuilder builder;
     private final DatatypeFactory dataFactory;
     private final MwModule mwModule;
+    private final MwStateCallback mwCallback;
     private final Map<Long, SlotInfo> slots;
 
     private boolean supportsBlockingWait = true;
     private boolean supportsNonBlockingWait = true;
 
-    MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule) {
+    MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule, MwStateCallback mwCallback) {
 	this.env = env;
 	this.dataFactory = dataFactory;
 	this.builder = builder;
 	this.mwModule = mwModule;
+	this.mwCallback = mwCallback;
 	slots = new HashMap<>();
     }
 
@@ -245,7 +247,11 @@ class MwEventRunner implements Runnable {
 	    ConnectionHandleType recHandle = makeKnownCardHandle(ckSlot.getSlotDescription(), ckSlot.getSlotID(),
 		    cardType, protectedAuthPath);
 	    MwEventObject recEvent = new MwEventObject(recHandle, slot);
-	    notify(EventType.CARD_RECOGNIZED, recEvent);
+
+	    // recognize card and create card state entry
+	    if (mwCallback.addEntry(recEvent)) {
+		notify(EventType.CARD_RECOGNIZED, recEvent);
+	    }
 
 	    //For Cache
 	    slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized = true;
@@ -261,6 +267,10 @@ class MwEventRunner implements Runnable {
 
 	ConnectionHandleType handle = makeConnectionHandle(slotInfo.ifdName, slotInfo.slotId);
 	MwEventObject remEvent = new MwEventObject(handle, slot);
+
+	// remove card state entry
+	mwCallback.removeEntry(remEvent);
+
 	notify(EventType.CARD_REMOVED, remEvent);
 
 	//For Cache
@@ -275,6 +285,10 @@ class MwEventRunner implements Runnable {
 
 	ConnectionHandleType handle = makeConnectionHandle(sl.ifdName, sl.slotId);
 	MwEventObject remEvent = new MwEventObject(handle, null);
+
+	// remove card state entry
+	mwCallback.removeEntry(remEvent);
+
 	notify(EventType.CARD_REMOVED, remEvent);
 
 	//For Cache

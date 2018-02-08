@@ -186,8 +186,6 @@ public final class RichClient {
 	    cardStates = new CardStateMap();
 	    SALStateCallback salCallback = new SALStateCallback(env, cardStates);
 	    eventDispatcher.add(salCallback);
-	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates, mwConfigLoader);
-	    eventDispatcher.add(mwCallback);
 
 
 	    // Set up the IFD
@@ -206,9 +204,10 @@ public final class RichClient {
 	    env.setCIFProvider(sal);
 
             // Set up Middleware SAL
+	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates, mwConfigLoader);
             for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
 		if (! mwSALConfig.isDisabled()) {
-		    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig);
+		    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig, mwCallback);
 		    mwSal.setGui(gui);
 		    sal.addSpecializedSAL(mwSal);
 		}

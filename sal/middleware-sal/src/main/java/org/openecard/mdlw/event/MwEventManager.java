@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -48,6 +48,7 @@ public class MwEventManager {
 
     private final MiddlewareSAL mwSAL;
     private final Environment env;
+    private final MwStateCallback mwCallback;
 
     private final String sessionId;
     private final HandlerBuilder builder;
@@ -55,9 +56,10 @@ public class MwEventManager {
     private FutureTask<Void> watcher;
 
 
-    public MwEventManager(Environment env, MiddlewareSAL mwSAL, byte[] contextHandle) {
+    public MwEventManager(Environment env, MiddlewareSAL mwSAL, byte[] contextHandle, MwStateCallback mwCallback) {
 	this.env = env;
 	this.mwSAL = mwSAL;
+	this.mwCallback = mwCallback;
 
 	this.sessionId = ValueGenerators.genBase64Session();
 	this.builder = HandlerBuilder.create()
@@ -69,7 +71,7 @@ public class MwEventManager {
 	// start watcher thread
 	try {
 	    DatatypeFactory dataFactory = DatatypeFactory.newInstance();
-	    MwEventRunner runner = new MwEventRunner(env, builder, dataFactory, mwSAL.getMwModule());
+	    MwEventRunner runner = new MwEventRunner(env, builder, dataFactory, mwSAL.getMwModule(), mwCallback);
 	    runner.initRunner();
 	    watcher = new FutureTask<>(runner, null);
 	    Thread t = new Thread(watcher, "MwEventManager");

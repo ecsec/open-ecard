@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2016-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,6 @@
 
 package org.openecard.mdlw.event;
 
-import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.slf4j.Logger;
@@ -30,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.List;
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.mdlw.sal.config.MiddlewareConfig;
@@ -44,7 +41,7 @@ import org.openecard.mdlw.sal.MwToken;
  *
  * @author Jan Mannsbart
  */
-public class MwStateCallback implements EventCallback {
+public class MwStateCallback {
 
     private static final Logger LOG = LoggerFactory.getLogger(MwStateCallback.class);
 
@@ -58,54 +55,45 @@ public class MwStateCallback implements EventCallback {
         this.mwConfigs = mwConfigLoader.getMiddlewareConfigs();
     }
 
-    @Override
-    public void signalEvent(EventType eventType, EventObject o) {
+    public boolean addEntry(MwEventObject o) {
 	try {
-	    if (o instanceof MwEventObject) {
-		ConnectionHandleType handle = ((MwEventObject) o).getHandle();
-		MwSlot slot = ((MwEventObject) o).getMwSlot();
+	    ConnectionHandleType handle = o.getHandle();
+	    MwSlot slot = o.getMwSlot();
 
-		switch (eventType) {
-		    case CARD_RECOGNIZED:
-			MwToken token = ((MwSlot) slot).getTokenInfo();
-			String cardType = null;
-			String type = String.format("%s_%s", token.getManufacturerID(), token.getModel());
-			for (MiddlewareConfig mwConfig : mwConfigs) {
-			    cardType = mwConfig.mapMiddlewareType(type);
-			    if (cardType != null) {
-				break;
-			    }
-			}
-			CardInfoType cif = null;
-			if (cardType != null) {
-			    cif = env.getCIFProvider().getCardInfo(handle, cardType);
-			}
-			if (cif == null) {
-			    LOG.warn("Unknown card recognized by Middleware.");
-			    return;
-			}
-
-			// create new entry in card states
-			CardStateEntry entry = new CardStateEntry(handle, cif, null);
-			states.addEntry(entry);
-
-			break;
-
-		    case CARD_REMOVED:
-			LOG.info("Remove card");
-			states.removeEntry(handle);
-			break;
-
-		    default:
-			LOG.debug("No relevant event received.");
-			break;
+	    MwToken token = slot.getTokenInfo();
+	    String cardType = null;
+	    String type = String.format("%s_%s", token.getManufacturerID(), token.getModel());
+	    for (MiddlewareConfig mwConfig : mwConfigs) {
+		cardType = mwConfig.mapMiddlewareType(type);
+		if (cardType != null) {
+		    break;
 		}
 	    }
+	    CardInfoType cif = null;
+	    if (cardType != null) {
+		cif = env.getCIFProvider().getCardInfo(handle, cardType);
+	    }
+	    if (cif == null) {
+		LOG.warn("Unknown card recognized by Middleware.");
+		return false;
+	    }
+
+	    // create new entry in card states
+	    CardStateEntry entry = new CardStateEntry(handle, cif, null);
+	    states.addEntry(entry);
+	    return true;
 	} catch (CryptokiException ex) {
 	    LOG.info("Cryptoki Token invalid.", ex);
 	} catch (RuntimeException ex) {
 	    LOG.error("Error in CIF augmentation process.", ex);
 	}
+	return false;
+    }
+
+    public void removeEntry(MwEventObject o) {
+	LOG.info("Remove card");
+	ConnectionHandleType handle = o.getHandle();
+	states.removeEntry(handle);
     }
 
 }

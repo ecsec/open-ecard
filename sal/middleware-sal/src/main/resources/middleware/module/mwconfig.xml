@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MiddlewareConfig xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
 
-    <MiddlewareSpec required="false" disabled="false">
+	<MiddlewareSpec required="false" disabled="false">
 
-        <MiddlewareName>OpenSC</MiddlewareName>
+		<MiddlewareName>OpenSC</MiddlewareName>
 
 		<LibSpec>
 			<LibName>opensc-pkcs11</LibName>
@@ -21,30 +21,30 @@
 
 		<BuiltinPinDialog>false</BuiltinPinDialog>
 
-        <CardConfig>
-            <CardSpec>
-                <MiddlewareName>cv cryptovision gmbh (c) v1.0n_PKCS#15</MiddlewareName>
-                <iso:ObjectIdentifier>http://opencard.org/cif/rub-card</iso:ObjectIdentifier>
-                <iso:CardTypeName xml:lang="en">RUB Card</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="de">RUB Card</iso:CardTypeName>
-                <iso:Version>
-                    <iso:Major>1</iso:Major>
-                    <iso:Minor>0</iso:Minor>
-                    <iso:SubMinor>0</iso:SubMinor>
-                </iso:Version>
-                <iso:Status>Final</iso:Status>
-                <iso:Date>2017-08-28</iso:Date>
+		<CardConfig>
+			<CardSpec>
+				<MiddlewareName>cv cryptovision gmbh (c) v1.0n_PKCS#15</MiddlewareName>
+				<iso:ObjectIdentifier>http://opencard.org/cif/rub-card</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">RUB Card</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">RUB Card</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2017-08-28</iso:Date>
 				<ATR>3BD21802C10A31FE58C80D51</ATR>
-                <CardImage>rub-card.png</CardImage>
-            </CardSpec>
-        </CardConfig>
+				<CardImage>rub-card.png</CardImage>
+			</CardSpec>
+		</CardConfig>
 
-    </MiddlewareSpec>
+	</MiddlewareSpec>
 
 
-    <MiddlewareSpec required="false">
+	<MiddlewareSpec required="false">
 
-        <MiddlewareName>LuxTrust</MiddlewareName>
+		<MiddlewareName>LuxTrust</MiddlewareName>
 
 		<LibSpec>
 			<LibName>gclib</LibName>
@@ -55,49 +55,49 @@
 			<X64SearchPath>C:\Program Files\Gemalto\Classic Client\BIN</X64SearchPath>
 		</LibSpec>
 
-        <CardConfig>
-            <CardSpec>
-                <MiddlewareName>Gemalto S.A._Classic V3</MiddlewareName>
-                <iso:ObjectIdentifier>http://luxtrust.lu/cif/LuxTrust-V3</iso:ObjectIdentifier>
-                <iso:CardTypeName xml:lang="en">LuxTrust V3</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="de">LuxTrust V3</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="fr">LuxTrust V3</iso:CardTypeName>
-                <iso:Version>
-                    <iso:Major>3</iso:Major>
-                    <iso:Minor>0</iso:Minor>
-                    <iso:SubMinor>0</iso:SubMinor>
-                </iso:Version>
-                <iso:Status>Final</iso:Status>
-                <iso:Date>2016-02-16</iso:Date>
-                <ATR>3B7D94000080318065B0831100C883009000</ATR>
+		<CardConfig>
+			<CardSpec>
+				<MiddlewareName>Gemalto S.A._Classic V3</MiddlewareName>
+				<iso:ObjectIdentifier>http://luxtrust.lu/cif/LuxTrust-V3</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">LuxTrust V3</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">LuxTrust V3</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="fr">LuxTrust V3</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>3</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2016-02-16</iso:Date>
+				<ATR>3B7D94000080318065B0831100C883009000</ATR>
 				<ATR>3B7D96000080318065B0830201F383009000</ATR>
-                <CardImage>luxtrust-v3.jpg</CardImage>
-            </CardSpec>
+				<CardImage>luxtrust-v3.jpg</CardImage>
+			</CardSpec>
 
-            <CardSpec>
-                <MiddlewareName>Gemalto S.A._Classic V4</MiddlewareName>
-                <iso:ObjectIdentifier>http://public.lu/cif/Lux-eID</iso:ObjectIdentifier>
-                <iso:CardTypeName xml:lang="en">Luxembourg Identity Card</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="de">Luxemburgischer Personalausweis</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="fr">Carte d'identité Luxembourgeoise</iso:CardTypeName>
-        		<iso:Version>
-        			<iso:Major>1</iso:Major>
-        			<iso:Minor>0</iso:Minor>
-        			<iso:SubMinor>0</iso:SubMinor>
-        		</iso:Version>
-        		<iso:Status>Final</iso:Status>
-        		<iso:Date>2016-03-16</iso:Date>
-                <ATR>3B8F800180318065B0850300EF120FFF82900073</ATR>
-                <CardImage>Lux-eID.jpg</CardImage>
-            </CardSpec>
-        </CardConfig>
+			<CardSpec>
+				<MiddlewareName>Gemalto S.A._Classic V4</MiddlewareName>
+				<iso:ObjectIdentifier>http://public.lu/cif/Lux-eID</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Luxembourg Identity Card</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Luxemburgischer Personalausweis</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="fr">Carte d'identité Luxembourgeoise</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2016-03-16</iso:Date>
+				<ATR>3B8F800180318065B0850300EF120FFF82900073</ATR>
+				<CardImage>Lux-eID.jpg</CardImage>
+			</CardSpec>
+		</CardConfig>
 
-    </MiddlewareSpec>
+	</MiddlewareSpec>
 
 
-    <MiddlewareSpec required="false" disabled="false">
+	<MiddlewareSpec required="false" disabled="false">
 
-        <MiddlewareName>NexusPersonal</MiddlewareName>
+		<MiddlewareName>NexusPersonal</MiddlewareName>
 
 		<LibSpec>
 			<LibName>P11</LibName>
@@ -117,23 +117,23 @@
 			<LibName>/Applications/Personal.app/Contents/PlugIns/CSPBundleNexus.bundle/Contents/Frameworks/tokenapi.framework/tokenapi</LibName>
 		</LibSpec>
 
-        <CardConfig>
-            <CardSpec>
-                <MiddlewareName>D-TRUST GmbH (C)_G&amp;&amp;D STARCOS 3.4</MiddlewareName>
-                <iso:ObjectIdentifier>https://www.ihk.de/cif/ChamberCard</iso:ObjectIdentifier>
-                <iso:CardTypeName xml:lang="en">IHK-ChamberCard</iso:CardTypeName>
-                <iso:CardTypeName xml:lang="de">IHK-ChamberCard</iso:CardTypeName>
-                <iso:Version>
-                    <iso:Major>1</iso:Major>
-                    <iso:Minor>0</iso:Minor>
-                    <iso:SubMinor>0</iso:SubMinor>
-                </iso:Version>
-                <iso:Status>Final</iso:Status>
-                <iso:Date>2017-12-21</iso:Date>
+		<CardConfig>
+			<CardSpec>
+				<MiddlewareName>D-TRUST GmbH (C)_G&amp;&amp;D STARCOS 3.4</MiddlewareName>
+				<iso:ObjectIdentifier>https://www.ihk.de/cif/ChamberCard</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">IHK-ChamberCard</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">IHK-ChamberCard</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2017-12-21</iso:Date>
 				<ATR>3BD818FF81B1FE451F038064041AB403810561</ATR>
-                <CardImage>ihk-card.jpg</CardImage>
-            </CardSpec>
-        </CardConfig>
+				<CardImage>ihk-card.jpg</CardImage>
+			</CardSpec>
+		</CardConfig>
 
 	</MiddlewareSpec>
 

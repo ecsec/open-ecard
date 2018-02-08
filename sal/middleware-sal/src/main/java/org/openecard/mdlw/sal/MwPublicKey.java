@@ -25,6 +25,7 @@ package org.openecard.mdlw.sal;
 import java.io.IOException;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.util.Arrays;
+import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -37,13 +38,13 @@ import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
  */
 public class MwPublicKey extends MwAbstractKey {
 
-    private final Boolean encrypt;
-    private final Boolean verify;
-    private final Boolean verifyRecover;
-    private final Boolean wrap;
-    private final Boolean trusted;
-    private final String keyLabel;
-    private final byte[] subject;
+    private final Promise<Boolean> encrypt;
+    private final Promise<Boolean> verify;
+    private final Promise<Boolean> verifyRecover;
+    private final Promise<Boolean> wrap;
+    private final Promise<Boolean> trusted;
+    private final Promise<String> keyLabel;
+    private final Promise<byte[]> subject;
 
     /**
      * Creates new Public Key from given Object Handle
@@ -55,13 +56,13 @@ public class MwPublicKey extends MwAbstractKey {
      */
     public MwPublicKey(long objectHandle, MiddleWareWrapper mw, MwSession mwSession) throws CryptokiException {
 	super(objectHandle, mw, mwSession);
-        this.encrypt = loadAttrValueEncrypt();
-        this.verify = loadAttrValueVerify();
-        this.verifyRecover = loadAttrValueVerifyRecover();
-        this.wrap = loadAttrValueWrap();
-        this.trusted = loadAttrValueTrusted();
-        this.keyLabel = loadAttrValueLabel();
-        this.subject = loadAttrValueSubject();
+        this.encrypt = new Promise<>();
+        this.verify = new Promise<>();
+        this.verifyRecover = new Promise<>();
+        this.wrap = new Promise<>();
+        this.trusted = new Promise<>();
+        this.keyLabel = new Promise<>();
+        this.subject = new Promise<>();
     }
 
     /**
@@ -173,64 +174,95 @@ public class MwPublicKey extends MwAbstractKey {
      * Returns if the Public Key is Enrypted
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getEncrypt() {
-        return encrypt;
+    public Boolean getEncrypt() throws CryptokiException {
+	if (! encrypt.isDelivered()) {
+	    encrypt.deliver(loadAttrValueEncrypt());
+	}
+        return encrypt.derefNonblocking();
     }
 
     /**
      * Returns if the Public Key is Verifyed
      * 
      * @return
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getVerify() {
-        return verify;
+    public Boolean getVerify() throws CryptokiException {
+	if (! verify.isDelivered()) {
+	    verify.deliver(loadAttrValueVerify());
+	}
+        return verify.derefNonblocking();
     }
 
     /**
      * Returns if the Public Key Verifys Recover
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getVerify_Recover() {
-        return verifyRecover;
+    public Boolean getVerifyRecover() throws CryptokiException {
+	if (! verifyRecover.isDelivered()) {
+	    verifyRecover.deliver(loadAttrValueVerifyRecover());
+	}
+        return verifyRecover.derefNonblocking();
     }
 
     /**
      * Returns if the Public Key is Wrapped
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getWrap() {
-        return wrap;
+    public Boolean getWrap() throws CryptokiException {
+	if (! wrap.isDelivered()) {
+	    wrap.deliver(loadAttrValueWrap());
+	}
+        return wrap.derefNonblocking();
     }
 
     /**
      * Returns if the Public Key is Trusted
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getTrusted() {
-        return trusted;
+    public Boolean getTrusted() throws CryptokiException {
+	if (! trusted.isDelivered()) {
+	    trusted.deliver(loadAttrValueTrusted());
+	}
+        return trusted.derefNonblocking();
     }
 
     /**
      * Returns the Key Label
      * 
      * @return String
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getKeyLabel() {
-        return keyLabel;
+    public String getKeyLabel() throws CryptokiException {
+	if (! keyLabel.isDelivered()) {
+	    keyLabel.deliver(loadAttrValueLabel());
+	}
+        return keyLabel.derefNonblocking();
     }
 
     @Nullable
-    public byte[] getSubject() {
-	return Arrays.clone(subject);
+    public byte[] getSubject() throws CryptokiException {
+	if (! subject.isDelivered()) {
+	    subject.deliver(loadAttrValueSubject());
+	}
+	return Arrays.clone(subject.derefNonblocking());
     }
 
     @Override
     public String toString() {
-	return "PKCS#11 Public Key: {label=" + getKeyLabel() + ", type=" + getKeyTypeName() + "}";
+	try {
+	    return "PKCS#11 Public Key: {label=" + getKeyLabel() + ", type=" + getKeyTypeName() + "}";
+	} catch (CryptokiException ex) {
+	    return "PKCS#11 Public Key: not readable";
+	}
     }
 
 }

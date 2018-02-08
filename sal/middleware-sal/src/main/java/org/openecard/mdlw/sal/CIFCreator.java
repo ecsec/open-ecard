@@ -211,10 +211,14 @@ public class CIFCreator {
 	// find end entity
 	MwCertificate endEntity = null;
 	for (MwCertificate cert : unsortedCerts) {
-	    if (ByteUtils.compare(cert.getID(), keyId)) {
-		sortedCerts.add(cert);
-		endEntity = cert;
-		break;
+	    try {
+		if (ByteUtils.compare(cert.getID(), keyId)) {
+		    sortedCerts.add(cert);
+		    endEntity = cert;
+		    break;
+		}
+	    } catch (CryptokiException ex) {
+		LOG.warn("Skipping certificate due to error.", ex);
 	    }
 	}
 	if (endEntity == null) {
@@ -223,11 +227,11 @@ public class CIFCreator {
 
 	// find certificate chain
 	MwCertificate currentCert = endEntity;
-	while (! ByteUtils.compare(currentCert.getSubject(), currentCert.getIssuer())) {
+	while (! compareSubjectIssuer(currentCert, currentCert)) {
 	    boolean nothingFound = true;
 	    for (MwCertificate cert : unsortedCerts) {
 		// we have a hit when issuer and subject matches
-		if (ByteUtils.compare(cert.getSubject(), currentCert.getIssuer())) {
+		if (compareSubjectIssuer(cert, currentCert)) {
 		    // make sure we don't create loops in the chain
 		    if (sortedCerts.contains(cert)) {
 			continue;
@@ -250,8 +254,19 @@ public class CIFCreator {
 	return sortedCerts;
     }
 
+    private boolean compareSubjectIssuer(MwCertificate subCert, MwCertificate issCert) {
+	try {
+	    byte[] sub = subCert.getSubject();
+	    byte[] iss = issCert.getIssuer();
+	    return ByteUtils.compare(sub, iss);
+	} catch (CryptokiException ex) {
+	    LOG.debug("Error reading subject or issuer from certificate.", ex);
+	    return false;
+	}
+    }
+
     private DIDInfoType createCryptoDID(List<MwCertificate> mwCerts, SignatureAlgorithms sigalg)
-	    throws WSMarshallerException {
+	    throws WSMarshallerException, CryptokiException {
 	LOG.debug("Creating Crypto DID object.");
 	DIDInfoType di = new DIDInfoType();
 
@@ -279,9 +294,14 @@ public class CIFCreator {
 	markerBuilder.setLegacyKeyname(keyLabel);
 	// add certificates
 	for (MwCertificate nextCert : mwCerts) {
-	    CertificateRefType certRef = new CertificateRefType();
-	    certRef.setDataSetName(nextCert.getLabel());
-	    markerBuilder.getCertRefs().add(certRef);
+	    try {
+		CertificateRefType certRef = new CertificateRefType();
+		certRef.setDataSetName(nextCert.getLabel());
+		markerBuilder.getCertRefs().add(certRef);
+	    } catch (CryptokiException ex) {
+		LOG.warn("Certificate chain is not complete.");
+		break;
+	    }
 	}
 
 	// wrap crypto marker and add to parent
@@ -428,7 +448,7 @@ public class CIFCreator {
 	return action;
     }
 
-    private boolean canSign(MwCertificate eeCert) {
+    private boolean canSign(MwCertificate eeCert) throws CryptokiException {
 	try {
 	    InputStream in = new ByteArrayInputStream(eeCert.getValue());
 	    X509Certificate cert = (X509Certificate) getCertFactory().generateCertificate(in);
@@ -461,7 +481,7 @@ public class CIFCreator {
 	return certFactory;
     }
 
-    private List<SignatureAlgorithms> getSigAlgs(MwPublicKey pubKey) {
+    private List<SignatureAlgorithms> getSigAlgs(MwPublicKey pubKey) throws CryptokiException {
 	ArrayList<SignatureAlgorithms> sigAlgs = new ArrayList<>();
 
 	long[] mechanisms = pubKey.getAllowedMechanisms();
@@ -518,7 +538,7 @@ public class CIFCreator {
 	return sigAlgs;
     }
 
-    private void addMechanism(MwPublicKey pubKey, MwMechanism mechanism, ArrayList<SignatureAlgorithms> sigAlgs) {
+    private void addMechanism(MwPublicKey pubKey, MwMechanism mechanism, ArrayList<SignatureAlgorithms> sigAlgs) throws CryptokiException {
 	try {
 	    SignatureAlgorithms sigAlg = mechanism.getSignatureAlgorithm();
 	    LOG.debug("Card signature algorithm: {}", sigAlg);

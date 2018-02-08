@@ -615,14 +615,18 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
             MwSession session = managedSessions.get(slotHandle);
 
             for (MwCertificate cert : session.getCertificates()) {
-                String label = cert.getLabel();
-                if (label.equals(dsiName)) {
-                    // read certificate
-                    byte[] certificate = cert.getValue();
+		try {
+		    String label = cert.getLabel();
+		    if (label.equals(dsiName)) {
+			// read certificate
+			byte[] certificate = cert.getValue();
 
-                    response.setDSIContent(certificate);
-                    return response;
-                }
+			response.setDSIContent(certificate);
+			return response;
+		    }
+		} catch (CryptokiException ex) {
+		    LOG.warn("Skipping certificate due to error.", ex);
+		}
             }
 
             String msg = "The given DSIName does not related to any know DSI or DataSet.";
@@ -684,8 +688,14 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 
             MwSession session = managedSessions.get(slotHandle);
             for (MwPrivateKey key : session.getPrivateKeys()) {
-		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, key.getKeyLabel());
-                if (keyLabel.equals(key.getKeyLabel())) {
+		String nextLabel = "";
+		try {
+		    nextLabel = key.getKeyLabel();
+		} catch (CryptokiException ex) {
+		    LOG.warn("Error reading key label.", ex);
+		}
+		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
+                if (keyLabel.equals(nextLabel)) {
                     long sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
                     byte[] sig = key.sign(sigAlg, message);
                     response.setSignature(sig);

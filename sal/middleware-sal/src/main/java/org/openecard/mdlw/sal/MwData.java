@@ -22,6 +22,7 @@
 
 package org.openecard.mdlw.sal;
 
+import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -36,9 +37,10 @@ public class MwData {
     private final long objectHandle;
     private final MiddleWareWrapper mw;
     private final MwSession session;
-    private final String application;
-    private final byte[] value;
-    private final byte[] objectId;
+
+    private final Promise<String> application;
+    private final Promise<byte[]> value;
+    private final Promise<byte[]> objectId;
 
     /**
      * Creates new Data Object from given Object Handle
@@ -52,9 +54,10 @@ public class MwData {
         this.objectHandle = objectHandle;
         this.mw = mw;
         this.session = mwSession;
-        this.application = loadAttrValApp();
-        this.value = loadAttrValValue();
-        this.objectId = loadAttrValObjectID();
+
+        this.application = new Promise<>();
+        this.value = new Promise<>();
+        this.objectId = new Promise<>();
     }
 
     /**
@@ -94,26 +97,38 @@ public class MwData {
      * Returns the Application Name
      * 
      * @return
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getApplicationName() {
-        return application;
+    public String getApplicationName() throws CryptokiException {
+	if (! application.isDelivered()) {
+	    application.deliver(loadAttrValApp());
+	}
+        return application.derefNonblocking();
     }
 
     /**
      * Returns the Data Value
      * 
      * @return byte[]
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public byte[] getValue() {
-        return value;
+    public byte[] getValue() throws CryptokiException {
+	if (! value.isDelivered()) {
+	    value.deliver(loadAttrValValue());
+	}
+        return value.derefNonblocking();
     }
 
     /**
      * Returns the Object Identifier
      * 
      * @return byte[]
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public byte[] getObjectID() {
-        return objectId;
+    public byte[] getObjectID() throws CryptokiException {
+	if (! objectId.isDelivered()) {
+	    objectId.deliver(loadAttrValObjectID());
+	}
+        return objectId.derefNonblocking();
     }
 }

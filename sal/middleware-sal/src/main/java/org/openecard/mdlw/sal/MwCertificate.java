@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,24 +47,24 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich
  */
 public class MwCertificate {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(MwCertificate.class);
 
     private final long objectHandle;
     private final MiddleWareWrapper mw;
     private final MwSession session;
 
-    private final byte[] value;
-    private final byte[] id;
-    private final byte[] subject;
-    private final byte[] issuer;
-    private final long certType;
-    private final Boolean trusted;
-    private final long certCategory;
-    private final byte[] checkValue;
-    private final Calendar startDate;
-    private final Calendar endDate;
-    private final String label;
+    private final Promise<byte[]> value;
+    private final Promise<byte[]> id;
+    private final Promise<byte[]> subject;
+    private final Promise<byte[]> issuer;
+    private final Promise<Long> certType;
+    private final Promise<Boolean> trusted;
+    private final Promise<Long> certCategory;
+    private final Promise<byte[]> checkValue;
+    private final Promise<Calendar> startDate;
+    private final Promise<Calendar> endDate;
+    private final Promise<String> label;
 
     /**
      * Creates a MwCertificate Object from the given Objecthandle.
@@ -77,17 +78,17 @@ public class MwCertificate {
         this.objectHandle = objectHandle;
         this.mw = mw;
         this.session = mwSession;
-        this.value = loadAttrValValue();
-        this.id = loadAttrValID();
-	this.subject = loadByteArray(CryptokiLibrary.CKA_SUBJECT);
-	this.issuer = loadByteArray(CryptokiLibrary.CKA_ISSUER);
-        this.certType = loadAttrValCertificateType();
-        this.trusted = loadAttrValTrusted();
-        this.certCategory = loadAttrValCertificateCategory();
-        this.checkValue = loadAttrValCheckValue();
-        this.startDate = loadAttrValStartDate();
-        this.endDate = loadAttrValEndDate();
-        this.label = loadAttrValLabel();
+        this.value = new Promise<>();
+        this.id = new Promise<>();
+	this.subject = new Promise<>();
+	this.issuer = new Promise<>();
+        this.certType = new Promise<>();
+        this.trusted = new Promise<>();
+        this.certCategory = new Promise<>();
+        this.checkValue = new Promise<>();
+        this.startDate = new Promise<>();
+        this.endDate = new Promise<>();
+        this.label = new Promise<>();
     }
 
     @Nullable
@@ -133,12 +134,12 @@ public class MwCertificate {
 	String labelStr = AttributeUtils.getString(raw);
 
 	// find replacement if needed
-	if (labelStr == null && subject != null) {
-	    labelStr = new X500Principal(subject).getName(X500Principal.RFC2253);
+	if (labelStr == null && getSubject() != null) {
+	    labelStr = new X500Principal(getSubject()).getName(X500Principal.RFC2253);
 	}
-	if (labelStr == null && value != null) {
+	if (labelStr == null) {
 	    try {
-		byte[] hash = MessageDigest.getInstance("SHA-1").digest(value);
+		byte[] hash = MessageDigest.getInstance("SHA-1").digest(getValue());
 		labelStr = ByteUtils.toHexString(hash);
 	    } catch (NoSuchAlgorithmException ex) {
 		// SHA-1 is a standard name and must be present
@@ -272,40 +273,57 @@ public class MwCertificate {
      * Returns the Certificate Label
      * 
      * @return String
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getLabel() {
-        return label;
+    public String getLabel() throws CryptokiException {
+	if (! label.isDelivered()) {
+	    label.deliver(loadAttrValLabel());
+	}
+        return label.derefNonblocking();
     }
 
     /**
      * Return the Certificate Identifier
      * 
      * @return byte[]
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public byte[] getID() {
-        return id;
+    public byte[] getID() throws CryptokiException {
+	if (! id.isDelivered()) {
+	    id.deliver(loadAttrValID());
+	}
+        return Arrays.clone(id.derefNonblocking());
     }
 
-    public byte[] getSubject() {
-	return subject;
+    public byte[] getSubject() throws CryptokiException {
+	if (! subject.isDelivered()) {
+	    subject.deliver(loadByteArray(CryptokiLibrary.CKA_SUBJECT));
+	}
+        return Arrays.clone(subject.derefNonblocking());
     }
 
-    public byte[] getIssuer() {
-	return issuer;
+    public byte[] getIssuer() throws CryptokiException {
+	if (! issuer.isDelivered()) {
+	    issuer.deliver(loadByteArray(CryptokiLibrary.CKA_ISSUER));
+	}
+        return Arrays.clone(issuer.derefNonblocking());
     }
 
     /**
-     * Returns the Type of Certificate
-     * 
-     * @return String
-     * 
-     * 
-     *         Return Options: CKC_X509, CKC_X_509_ATTR_CERT, CKC_WTLS,
-     *         CKC_VENDOR_DEFINED or UNKNOWN
-     * 
+     * Returns the Type of Certificate.
+     *
+     * @return Return Options: CKC_X509, CKC_X_509_ATTR_CERT, CKC_WTLS, CKC_VENDOR_DEFINED or UNKNOWN
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getCertificateType() {
-	switch ((int) certType) {
+    public String getCertificateType() throws CryptokiException {
+	if (! certType.isDelivered()) {
+	    certType.deliver(loadAttrValCertificateType());
+	}
+	Long val = certType.derefNonblocking();
+	if (val == null) {
+	    val = -1l;
+	}
+	switch (val.intValue()) {
 	    case (int) 0x00000000L:
 		return "CKC_X_509";
 	    case (int) 0x00000001L:
@@ -321,61 +339,93 @@ public class MwCertificate {
 
     /**
      * Returns if the Certificate is trusted
-     * 
+     *
      * @return Boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nullable
-    public Boolean getTrusted() {
-        return trusted;
+    public Boolean getTrusted() throws CryptokiException {
+	if (! trusted.isDelivered()) {
+	    trusted.deliver(loadAttrValTrusted());
+	}
+        return trusted.derefNonblocking();
     }
 
     /**
      * Return the Category of Certificate
      *
      * @return CertCategory
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public CertCategory getCertificateCategory() {
-	return CertCategory.forCategoryType(certCategory);
+    public CertCategory getCertificateCategory() throws CryptokiException {
+	if (! certCategory.isDelivered()) {
+	    certCategory.deliver(loadAttrValCertificateCategory());
+	}
+	return CertCategory.forCategoryType(certCategory.derefNonblocking());
     }
 
     /**
      * Return the Certificate Checkvalue
      * 
      * @return byte[]
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nullable
-    public byte[] getCheckValue() {
-        return checkValue;
+    public byte[] getCheckValue() throws CryptokiException {
+	if (! checkValue.isDelivered()) {
+	    checkValue.deliver(loadAttrValCheckValue());
+	}
+        return Arrays.clone(checkValue.derefNonblocking());
     }
 
     /**
      * Returns the Certificate Start Date
      * 
      * @return CK_DATE
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nullable
-    public Calendar getStartDate() {
-        return startDate;
+    public Calendar getStartDate() throws CryptokiException {
+	if (! startDate.isDelivered()) {
+	    startDate.deliver(loadAttrValStartDate());
+	}
+        Calendar c = startDate.derefNonblocking();
+	if (c != null) {
+	    c = (Calendar) c.clone();
+	}
+	return c;
     }
 
     /**
      * Returns the Certificate End Date
-     * 
+     *
      * @return CK_DATE
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nullable
-    public Calendar getEndDate() {
-        return endDate;
+    public Calendar getEndDate() throws CryptokiException {
+	if (! endDate.isDelivered()) {
+	    endDate.deliver(loadAttrValEndDate());
+	}
+        Calendar c = endDate.derefNonblocking();
+	if (c != null) {
+	    c = (Calendar) c.clone();
+	}
+	return c;
     }
 
     /**
      * Return the Certificate Value
-     * 
+     *
      * @return byte[]
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nonnull
-    public byte[] getValue() {
-        return Arrays.clone(value);
+    public synchronized byte[] getValue() throws CryptokiException {
+	if (! value.isDelivered()) {
+	    value.deliver(loadAttrValValue());
+	}
+        return Arrays.clone(value.derefNonblocking());
     }
 
 }

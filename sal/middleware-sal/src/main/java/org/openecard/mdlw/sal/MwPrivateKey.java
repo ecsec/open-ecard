@@ -30,6 +30,7 @@ import com.sun.jna.Pointer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ThreadTerminateException;
+import org.openecard.common.util.Promise;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.mdlw.sal.cryptoki.CK_RSA_PKCS_PSS_PARAMS;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -47,18 +48,18 @@ public class MwPrivateKey extends MwAbstractKey {
 
     private static final Logger LOG = LoggerFactory.getLogger(MwPrivateKey.class);
 
-    private final String keyLabel;
-    private final Boolean sensitive;
-    private final Boolean decrypt;
-    private final Boolean sign;
-    private final Boolean singRecover;
-    private final Boolean unwrap;
-    private final Boolean extractable;
-    private final Boolean alwaysSensitive;
-    private final Boolean neverExtractable;
-    private final Boolean wrapWithTrusted;
-    private final Long unwrapTemplate;
-    private final Boolean alwaysAuthenticate;
+    private final Promise<String> keyLabel;
+    private final Promise<Boolean> sensitive;
+    private final Promise<Boolean> decrypt;
+    private final Promise<Boolean> sign;
+    private final Promise<Boolean> singRecover;
+    private final Promise<Boolean> unwrap;
+    private final Promise<Boolean> extractable;
+    private final Promise<Boolean> alwaysSensitive;
+    private final Promise<Boolean> neverExtractable;
+    private final Promise<Boolean> wrapWithTrusted;
+    private final Promise<Long> unwrapTemplate;
+    private final Promise<Boolean> alwaysAuthenticate;
 
     /**
      * Created a new Private Key from a given Object Handle
@@ -70,18 +71,18 @@ public class MwPrivateKey extends MwAbstractKey {
      */
     public MwPrivateKey(long objectHandle, MiddleWareWrapper mw, MwSession mwSession) throws CryptokiException {
         super(objectHandle, mw, mwSession);
-        this.keyLabel = loadAttrValueLabel();
-        this.sensitive = loadAttrValueSensitive();
-        this.decrypt = loadAttrValueDecrypt();
-        this.sign = loadAttrValueSign();
-        this.singRecover = loadAttrValueSignRecover();
-        this.unwrap = loadAttrValueUnwrap();
-        this.extractable = loadAttrValueExtractable();
-        this.alwaysSensitive = loadAttrValueAlwaysSensitive();
-        this.neverExtractable = loadAttrValueNeverExtractable();
-        this.wrapWithTrusted = loadAttrValueWrapWithTrusted();
-        this.unwrapTemplate = loadAttrValueUnwrapTemplate();
-        this.alwaysAuthenticate = loadAttrValueAlwaysAuthenticate();
+        this.keyLabel = new Promise<>();
+        this.sensitive = new Promise<>();
+        this.decrypt = new Promise<>();
+        this.sign = new Promise<>();
+        this.singRecover = new Promise<>();
+        this.unwrap = new Promise<>();
+        this.extractable = new Promise<>();
+        this.alwaysSensitive = new Promise<>();
+        this.neverExtractable = new Promise<>();
+        this.wrapWithTrusted = new Promise<>();
+        this.unwrapTemplate = new Promise<>();
+        this.alwaysAuthenticate = new Promise<>();
     }
 
     /**
@@ -321,7 +322,7 @@ public class MwPrivateKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_LABEL
-     * 
+     *
      * @return String
      * @throws CryptokiException
      */
@@ -361,9 +362,13 @@ public class MwPrivateKey extends MwAbstractKey {
      * Returns the Private Key Key Label
      * 
      * @return String
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getKeyLabel() {
-        return keyLabel;
+    public String getKeyLabel() throws CryptokiException {
+	if (! keyLabel.isDelivered()) {
+	    keyLabel.deliver(loadAttrValueLabel());
+	}
+        return keyLabel.derefNonblocking();
     }
 
 
@@ -371,107 +376,155 @@ public class MwPrivateKey extends MwAbstractKey {
      * Returns if the Private Key is Sesnsitive
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getSensitive() {
-        return sensitive;
+    public Boolean getSensitive() throws CryptokiException {
+	if (! sensitive.isDelivered()) {
+	    sensitive.deliver(loadAttrValueSensitive());
+	}
+        return sensitive.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key is Decrypted
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getDecrypt() {
-        return decrypt;
+    public Boolean getDecrypt() throws CryptokiException {
+	if (! decrypt.isDelivered()) {
+	    decrypt.deliver(loadAttrValueDecrypt());
+	}
+        return decrypt.derefNonblocking();
     }
 
     /**
      * Returns can Sign
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getSign() {
-        return sign;
+    public Boolean getSign() throws CryptokiException {
+	if (! sign.isDelivered()) {
+	    sign.deliver(loadAttrValueSign());
+	}
+        return sign.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key Recover Signs
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getSignRecover() {
-        return singRecover;
+    public Boolean getSignRecover() throws CryptokiException {
+	if (! singRecover.isDelivered()) {
+	    singRecover.deliver(loadAttrValueSignRecover());
+	}
+        return singRecover.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key can Unwrap
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getUnwrap() {
-        return unwrap;
+    public Boolean getUnwrap() throws CryptokiException {
+	if (! unwrap.isDelivered()) {
+	    unwrap.deliver(loadAttrValueUnwrap());
+	}
+        return unwrap.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key is extractable
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getExtractable() {
-        return extractable;
+    public Boolean getExtractable() throws CryptokiException {
+	if (! extractable.isDelivered()) {
+	    extractable.deliver(loadAttrValueExtractable());
+	}
+        return extractable.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key is always Sensitive
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getAlwaysSensitive() {
-        return alwaysSensitive;
+    public Boolean getAlwaysSensitive() throws CryptokiException {
+	if (! alwaysSensitive.isDelivered()) {
+	    alwaysSensitive.deliver(loadAttrValueAlwaysSensitive());
+	}
+        return alwaysSensitive.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key is Never Extractable
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public Boolean getNeverExtractable() {
-        return neverExtractable;
+    public Boolean getNeverExtractable() throws CryptokiException {
+	if (! neverExtractable.isDelivered()) {
+	    neverExtractable.deliver(loadAttrValueNeverExtractable());
+	}
+        return neverExtractable.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key wrap with trusted
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nonnull
-    public Boolean getWrapWithTrusted() {
-        return wrapWithTrusted;
+    public Boolean getWrapWithTrusted() throws CryptokiException {
+	if (! wrapWithTrusted.isDelivered()) {
+	    wrapWithTrusted.deliver(loadAttrValueWrapWithTrusted());
+	}
+        return wrapWithTrusted.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key can unwrap template
      * 
      * @return
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nullable
-    public Long getUnwrapTemplate() {
-        return unwrapTemplate;
+    public Long getUnwrapTemplate() throws CryptokiException {
+	if (! unwrapTemplate.isDelivered()) {
+	    unwrapTemplate.deliver(loadAttrValueUnwrapTemplate());
+	}
+        return unwrapTemplate.derefNonblocking();
     }
 
     /**
      * Returns if the Private Key is always authenticate
      * 
      * @return boolean
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
     @Nonnull
-    public Boolean getAlwaysAuthenticate() {
-        return alwaysAuthenticate;
+    public Boolean getAlwaysAuthenticate() throws CryptokiException {
+	if (! alwaysAuthenticate.isDelivered()) {
+	    alwaysAuthenticate.deliver(loadAttrValueAlwaysAuthenticate());
+	}
+        return alwaysAuthenticate.derefNonblocking();
     }
 
     @Override
     public String toString() {
-	return "PKCS#11 Private Key: {label=" + getKeyLabel() + ", type=" + getKeyTypeName() + "}";
+	try {
+	    return "PKCS#11 Private Key: {label=" + getKeyLabel() + ", type=" + getKeyTypeName() + "}";
+	} catch (CryptokiException ex) {
+	    return "PKCS#11 Private Key: not readable";
+	}
     }
 
 }

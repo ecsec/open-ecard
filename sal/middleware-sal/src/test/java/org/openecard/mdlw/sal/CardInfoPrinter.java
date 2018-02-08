@@ -108,10 +108,16 @@ public class CardInfoPrinter {
         List<MwCertificate> certs = session.getCertificates();
 
         for (MwCertificate cert : certs) {
-            System.out.println("CertType: " + cert.getCertificateType());
-            System.out.println("CertLabel: " + cert.getLabel());
-            System.out.println("CertVal: " + cert.getValue());
-            System.out.println("");
+	    try {
+		System.out.println("CertType: " + cert.getCertificateType());
+		System.out.println("CertLabel: " + cert.getLabel());
+		System.out.println("CertVal: " + cert.getValue());
+		System.out.println("");
+	    } catch (CryptokiException ex) {
+		System.out.println("Skipping certificate due to error.");
+		ex.printStackTrace(System.out);
+		System.out.println("");
+	    }
         }
 
         module.destroy();

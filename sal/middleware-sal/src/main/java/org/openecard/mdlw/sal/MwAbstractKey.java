@@ -23,6 +23,7 @@
 package org.openecard.mdlw.sal;
 
 import javax.annotation.Nullable;
+import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
@@ -42,18 +43,18 @@ public class MwAbstractKey {
     protected final MiddleWareWrapper mw;
     protected final MwSession session;
 
-    private final long keyType;
-    private final byte[] keyId;
-    private final long[] allowedMechanisms;
+    private final Promise<Long> keyType;
+    private final Promise<byte[]> keyId;
+    private final Promise<long[]> allowedMechanisms;
 
     public MwAbstractKey(long objectHandle, MiddleWareWrapper mw, MwSession session) throws CryptokiException {
 	this.objectHandle = objectHandle;
 	this.mw = mw;
 	this.session = session;
 
-        this.keyType = loadAttrValueKeyType();
-	this.keyId = loadAttrValueKeyID();
-	this.allowedMechanisms = loadAttrValAllowedMechanisms();
+        this.keyType = new Promise<>();
+	this.keyId = new Promise<>();
+	this.allowedMechanisms = new Promise();
     }
 
     @Nullable
@@ -107,17 +108,21 @@ public class MwAbstractKey {
 	}
     }
 
-    public long getKeyType() {
-	return keyType;
+    public long getKeyType() throws CryptokiException {
+	if (! keyType.isDelivered()) {
+	    keyType.deliver(loadAttrValueKeyType());
+	}
+        return keyType.derefNonblocking();
     }
 
     /**
      * Return the Key Type, for example CKK_RSA
      *
      * @return String
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public String getKeyTypeName() {
-        switch ((int) keyType) {
+    public String getKeyTypeName() throws CryptokiException {
+        switch ((int) getKeyType()) {
         case (int) 0x00000000L:
             return "CKK_RSA";
         case (int) 0x00000001L:
@@ -209,18 +214,26 @@ public class MwAbstractKey {
      * Returns the Private Key Key Identifier
      *
      * @return
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public byte[] getKeyID() {
-        return keyId;
+    public byte[] getKeyID() throws CryptokiException {
+	if (! keyId.isDelivered()) {
+	    keyId.deliver(loadAttrValueKeyID());
+	}
+        return keyId.derefNonblocking();
     }
 
     /**
      * Returns the allowed mechanisms for this key object.
      *
      * @return Array containing the mechanism IDs.
+     * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
-    public long[] getAllowedMechanisms() {
-	return allowedMechanisms;
+    public long[] getAllowedMechanisms() throws CryptokiException {
+	if (! allowedMechanisms.isDelivered()) {
+	    allowedMechanisms.deliver(loadAttrValAllowedMechanisms());
+	}
+        return allowedMechanisms.derefNonblocking();
     }
 
 }

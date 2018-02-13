@@ -130,12 +130,7 @@ public class TR03112Utils {
 	    return false;
 	}
 
-	if (DEVELOPER_MODE) {
-	    LOG.warn("DEVELOPER_MODE: No matching communication certificate found, continuing nevertheless.");
-	    return true;
-	} else {
-	    return false;
-	}
+	return false;
     }
 
     /**

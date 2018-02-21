@@ -138,7 +138,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 
 	Intent actIntent = parent.getIntent();
 	Uri data = actIntent.getData();
-	returnClass = forClassName(actIntent.getStringExtra(RETURN_CLASS));
+	setReturnClass(forClassName(actIntent.getStringExtra(RETURN_CLASS)));
 	final String eIDUrl = data.toString();
 
 	if (eIDUrl != null) {
@@ -159,6 +159,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	}
     }
 
+    @Nullable
     private Class<?> forClassName(@Nullable String className) {
 	if (className != null) {
 	    try {
@@ -385,11 +386,31 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	}
     }
 
-    private Intent createRedirectIntent(String location) {
+    /**
+     * Sets the return class which shall be used as a target in the redirect URL Intent.
+     *
+     * @param clazz Return class.
+     */
+    protected final void setReturnClass(@Nullable Class<?> clazz) {
+	this.returnClass = clazz;
+    }
+
+    protected Intent createRedirectIntent(String location) {
+	return createRedirectIntent(location, returnClass);
+    }
+
+    /**
+     * Build URL Intent which is invoked in the {@link #onAuthenticationSuccess(ActivationResult)}.
+     *
+     * @param location Redirect URL used in the Intent.
+     * @param returnClazz Optional activity class which is the target of the Intent.
+     * @return URL intent containing the redirect URL.
+     */
+    protected Intent createRedirectIntent(String location, @Nullable Class<?> returnClazz) {
 	Intent i;
 	Uri redirectUri = Uri.parse(location);
-	if (returnClass != null) {
-	    i = new Intent(Intent.ACTION_VIEW, redirectUri, parent, returnClass);
+	if (returnClazz != null) {
+	    i = new Intent(Intent.ACTION_VIEW, redirectUri, parent, returnClazz);
 	} else {
 	    i = new Intent(Intent.ACTION_VIEW, redirectUri);
 	}

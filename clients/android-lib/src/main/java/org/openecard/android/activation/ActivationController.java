@@ -103,10 +103,12 @@ public class ActivationController {
 	    LOG.warn(ex.getMessage(), ex);
 	}
 
+	LOG.info("Returning error as INTERRUPTED result.");
 	return new ActivationResult(INTERRUPTED, failureMessage);
     }
 
     private ActivationResult createActivationResult(BindingResult result) {
+	LOG.info("Returning result: {}", result);
 	ActivationResult activationResult;
 	switch (result.getResultCode()) {
 	     case REDIRECT:

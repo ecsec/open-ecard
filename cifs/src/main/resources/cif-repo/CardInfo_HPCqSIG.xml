@@ -930,9 +930,9 @@
 						<iso:CryptoMarker
 							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
-								<iso:Algorithm>SHA256withRSA</iso:Algorithm>
+								<iso:Algorithm>NonewithRSA</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>42</iso:CardAlgRef>

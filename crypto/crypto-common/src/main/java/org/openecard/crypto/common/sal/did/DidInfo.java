@@ -350,7 +350,7 @@ public class DidInfo {
 
 		    // add if it is not already present in the result list
 		    if (! foundDataSets.contains(datasetName)) {
-			DataSetInfo ds = didInfos.getDataSetInfo(application, datasetName);
+			DataSetInfo ds = didInfos.getDataSetInfo(datasetName);
 			result.add(ds);
 			foundDataSets.add(datasetName);
 		    }

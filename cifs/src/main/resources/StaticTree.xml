@@ -371,6 +371,19 @@
 													<iso:Body>
 														<iso:MatchingData>
 															<iso:Offset>1B</iso:Offset>
+															<iso:length>1E</iso:length>
+															<iso:MatchingValue>442D545255535420436172642056332E30207374616E6461726420326765</iso:MatchingValue>
+														</iso:MatchingData>
+													</iso:Body>
+													<iso:Trailer>6282</iso:Trailer>
+													<iso:Conclusion>
+														<iso:RecognizedCardType>http://www.ihk.de/cif</iso:RecognizedCardType>
+													</iso:Conclusion>
+												</iso:ResponseAPDU>
+												<iso:ResponseAPDU>
+													<iso:Body>
+														<iso:MatchingData>
+															<iso:Offset>1B</iso:Offset>
 															<iso:Length>1A</iso:Length>
 															<iso:MatchingValue>442D545255535420436172642056332E30207374616E64617264</iso:MatchingValue>
 														</iso:MatchingData>

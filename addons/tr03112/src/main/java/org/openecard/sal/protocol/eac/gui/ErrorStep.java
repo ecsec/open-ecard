@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -42,7 +42,7 @@ public class ErrorStep extends Step {
     public ErrorStep(String title, String errorText) {
 	super(title);
 	// TODO: remove instantreturn to actually display an error
-	setInstantReturn(true);
+	//setInstantReturn(true);
 	setReversible(false);
 	Text pinBlockedNote = new Text(errorText);
 	getInputInfoUnits().add(pinBlockedNote);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,7 +25,6 @@ package org.openecard.sal.protocol.eac.gui;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import java.util.Arrays;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -61,11 +60,6 @@ import org.slf4j.LoggerFactory;
 public class PINStepAction extends StepAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINStepAction.class);
-    
-    private static final byte[] DEACTIVATED = new byte[] {(byte) 0x62, (byte) 0x83};
-    private static final byte[] RC3 = new byte[] {(byte) 0x90, (byte) 0x00};
-    private static final byte[] RC1 = new byte[] {(byte) 0x63, (byte) 0xC1};
-    private static final byte[] RC2 = new byte[] {(byte) 0x63, (byte) 0xC2};
 
     private static final String PIN_ID_CAN = "2";
 
@@ -91,7 +85,7 @@ public class PINStepAction extends StepAction {
     private int retryCounter;
 
     public PINStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher, PINStep step,
-	    byte[] status) {
+	    EacPinStatus status) {
 	super(step);
 	this.eacData = eacData;
 	this.capturePin = capturePin;
@@ -100,22 +94,23 @@ public class PINStepAction extends StepAction {
 	this.step = step;
 	this.ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
-	// check pin status
-	if (Arrays.equals(status, RC3)) {
-	    retryCounter = 0;
-	} else if (Arrays.equals(status, RC2)) {
-	    retryCounter = 1;
-	    step.updateAttemptsDisplay(2);
-	} else if (Arrays.equals(status, RC1)) {
-	    retryCounter = 2;
-	    step.updateAttemptsDisplay(1);
-	    if (capturePin) {
-		step.addCANEntry();
-	    } else {
-		step.addNativeCANNotice();
-	    }
-	} else if (Arrays.equals(status, DEACTIVATED)) {
-	    retryCounter = -1;
+	switch (status) {
+	    case RC3:
+		retryCounter = 0;
+		break;
+	    case RC2:
+		retryCounter = 1;
+		step.updateAttemptsDisplay(2);
+		break;
+	    case RC1:
+		retryCounter = 2;
+		step.updateAttemptsDisplay(1);
+		if (capturePin) {
+		    step.addCANEntry();
+		} else {
+		    step.addNativeCANNotice();
+		}
+		break;
 	}
 
 	// get some important translations
@@ -125,21 +120,19 @@ public class PINStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack()) {
-	    return new StepActionResult(StepActionResultStatus.BACK);
-	}
-
 	if (retryCounter == 2) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);
 		if (response == null) {
 		    LOG.debug("The CAN does not meet the format requirements.");
+		    step.setStatus(EacPinStatus.RC1);
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		    if (response.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
 			LOG.error("Failed to authenticate with the given CAN.");
+			step.setStatus(EacPinStatus.RC1);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    } else {
 			WSHelper.checkResult(response);
@@ -160,7 +153,6 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT, 
 			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
 		}
-		
 	    }
 	}
 
@@ -174,12 +166,14 @@ public class PINStepAction extends StepAction {
 		    step.updateAttemptsDisplay(3 - retryCounter);
 		    // repeat the step
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    this.step.setStatus(EacPinStatus.RC2);
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
 		    // increase counters and the related displays
 		    retryCounter++;
 		    step.updateAttemptsDisplay(3 - retryCounter);
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    step.setStatus(EacPinStatus.RC1);
 
 		    if (capturePin) {
 			step.addCANEntry();
@@ -190,6 +184,7 @@ public class PINStepAction extends StepAction {
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
 		    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(establishChannelResponse.getResult()));
+		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, EacPinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
 				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));

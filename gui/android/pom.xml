@@ -19,6 +19,11 @@
 			<artifactId>gui-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>tr03112</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

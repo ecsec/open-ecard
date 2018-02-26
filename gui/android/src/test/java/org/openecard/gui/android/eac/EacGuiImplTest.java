@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,13 +25,14 @@ package org.openecard.gui.android.eac;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import mockit.Expectations;
+import mockit.Mocked;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.android.GuiIfaceReceiver;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
-import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
 import org.openecard.gui.definition.UserConsentDescription;
@@ -40,6 +41,10 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
+import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
+import org.openecard.sal.protocol.eac.gui.EacPinStatus;
+import org.openecard.sal.protocol.eac.gui.PINStep;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
@@ -50,13 +55,24 @@ import org.testng.annotations.Test;
  */
 public class EacGuiImplTest {
 
+    @Mocked
+    PACEMarkerType paceMarker;
+    @Mocked
+    EACData eacData;
+
     @Test
     public void testPinOkFirstTime() throws InterruptedException {
+
+	new Expectations() {{
+	    eacData.passwordType = "PIN";
+	    paceMarker.getMinLength(); result = 6;
+	    paceMarker.getMaxLength(); result = 6;
+	}};
 
 	final GuiIfaceReceiver<EacGuiImpl> guiRec = new GuiIfaceReceiver<>();
 	final EacGuiImpl anyGuiImpl = new EacGuiImpl();
 	guiRec.setUiInterface(anyGuiImpl);
-	
+
 	Thread t = new Thread(new Runnable() {
 	    @Override
 	    public void run() {
@@ -73,7 +89,7 @@ public class EacGuiImplTest {
 	ServerData sd = anyGuiImpl.getServerData();
 	assertEquals(sd.getSubject(), "Test Subject");
 	anyGuiImpl.selectAttributes(sd.getReadAccessAttributes(), sd.getWriteAccessAttributes());
-	assertEquals(anyGuiImpl.getPinStatus(), PinStatus.PIN);
+	assertEquals(anyGuiImpl.getPinStatus(), PinStatus.RC3);
 	assertTrue(anyGuiImpl.enterPin(null, "123456"));
 
 	// wait for executor to finish
@@ -102,9 +118,7 @@ public class EacGuiImplTest {
 	    }
 	});
 
-	final Step step3 = new Step("PROTOCOL_EAC_GUI_STEP_PIN", "PIN");
-	PasswordField pin = new PasswordField("PACE_PIN_FIELD");
-	step3.getInputInfoUnits().add(pin);
+	final Step step3 = new PINStep(eacData, true, paceMarker, EacPinStatus.RC3);
 
 	step2.setAction(new StepAction(step2) {
 	    @Override

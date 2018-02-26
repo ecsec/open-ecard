@@ -37,7 +37,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -87,6 +86,7 @@ import org.openecard.sal.protocol.eac.gui.CVCStepAction;
 import org.openecard.sal.protocol.eac.gui.CardMonitor;
 import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
 import org.openecard.sal.protocol.eac.gui.PINStep;
+import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStepAction;
 import org.slf4j.Logger;
@@ -255,12 +255,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    input.setInputAPDU(new byte[] {(byte) 0x00, (byte) 0x22, (byte) 0xC1, (byte) 0xA4, (byte) 0x0F, (byte) 0x80,
 		(byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02,
 		(byte) 0x04, (byte) 0x02, (byte) 0x02, (byte) 0x83, (byte) 0x01, (byte) 0x03});
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x90, (byte) 0x00}); // pin activated 3 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC2}); // pin activated 2 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC1}); // pin suspended 1 try left CAN
-											// needs to be entered
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC0}); // pin blocked 0 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x62, (byte) 0x83}); // pin deactivated
+	    input.getAcceptableStatusCode().addAll(EacPinStatus.getCodes());
 
 	    Transmit transmit = new Transmit();
 	    transmit.setSlotHandle(slotHandle);
@@ -271,44 +266,27 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
 	    CardResponseAPDU outputApdu = new CardResponseAPDU(output);
 	    byte[] status = outputApdu.getStatusBytes();
-	    dynCtx.put(EACProtocol.PIN_STATUS_BYTES, status);
-
-	    boolean pinUsable = ! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0});
+	    dynCtx.put(EACProtocol.PIN_STATUS, EacPinStatus.fromCode(status));
 
 	    // define GUI depending on the PIN status
 	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
 	    final CardMonitor cardMon;
 	    uc.setDialogType("EAC");
-	    if (pinUsable) {
-		// create GUI and init executor
-		cardMon = new CardMonitor();
-		CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
-		eventDispatcher.add(cardMon, filter);
-		CVCStep cvcStep = new CVCStep(eacData);
-		cvcStep.setBackgroundTask(cardMon);
-		CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
-		cvcStep.setAction(cvcStepAction);
-		uc.getSteps().add(cvcStep);
-		uc.getSteps().add(CHATStep.createDummy());
-		uc.getSteps().add(PINStep.createDummy(passwordType));
-		ProcessingStep procStep = new ProcessingStep();
-		ProcessingStepAction procStepAction = new ProcessingStepAction(procStep);
-		procStep.setAction(procStepAction);
-		uc.getSteps().add(procStep);
-	    } else {
-		cardMon = null;
-		// ErrorStep is currently not used and needs to be reworked in 1.3.X
-		// disable the step here completely to avoid flashing of the step ui.
-//		String pin = langPace.translationForKey("pin");
-//		String puk = langPace.translationForKey("puk");
-//		String title = langPace.translationForKey("step_error_title_blocked", pin);
-//		String errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
-//		ErrorStep eStep = new ErrorStep(title, errorMsg);
-//		uc.getSteps().add(eStep);
-
-		dynCtx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
-			ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "The PIN is blocked.")));
-	    }
+	    // create GUI and init executor
+	    cardMon = new CardMonitor();
+	    CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
+	    eventDispatcher.add(cardMon, filter);
+	    CVCStep cvcStep = new CVCStep(eacData);
+	    cvcStep.setBackgroundTask(cardMon);
+	    CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
+	    cvcStep.setAction(cvcStepAction);
+	    uc.getSteps().add(cvcStep);
+	    uc.getSteps().add(CHATStep.createDummy());
+	    uc.getSteps().add(PINStep.createDummy(passwordType));
+	    ProcessingStep procStep = new ProcessingStep();
+	    ProcessingStepAction procStepAction = new ProcessingStepAction(procStep);
+	    procStep.setAction(procStepAction);
+	    uc.getSteps().add(procStep);
 
 	    Thread guiThread = new Thread(new Runnable() {
 		@Override

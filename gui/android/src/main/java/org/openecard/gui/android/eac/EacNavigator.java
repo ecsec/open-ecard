@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
@@ -35,6 +37,8 @@ import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.sal.protocol.eac.EACProtocol;
+import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 
 
 /**
@@ -95,14 +99,24 @@ public class EacNavigator implements UserConsentNavigator {
 		return new AndroidResult(chatStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	    }
 	} else if (idx == 1) {
+	    idx++;
+	    Step pinStep = steps.get(2);
+
 	    if (pinFirstUse) {
 		pinFirstUse = false;
 	    } else {
 		this.guiService.setPinCorrect(false);
 	    }
 
-	    idx++;
-	    Step pinStep = steps.get(2);
+	    // get blocked status from dynamic context
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
+	    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
+		this.guiService.sendPinStatus(blockedStatus);
+		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    }
+
+	    // ask user for the pin
 	    try {
 		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
 		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
@@ -113,17 +127,22 @@ public class EacNavigator implements UserConsentNavigator {
 	} else if (idx == 2) {
 	    idx++;
 	    Step s = steps.get(idx);
+
+	    // get blocked status from dynamic context
+	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
+	    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
+		this.guiService.setPinCorrect(false);
+		this.guiService.sendPinStatus(blockedStatus);
+		return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    }
+
 	    if ("PROTOCOL_GUI_STEP_PROCESSING".equals(s.getID())) {
 		this.guiService.setPinCorrect(true);
 		return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
 	    } else {
 		this.guiService.setPinCorrect(false);
-		try {
-		    this.guiService.getPinResult(s);
-		    return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
-		} catch (InterruptedException ex) {
-		    return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-		}
+		return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	    }
 	} else {
 	    Step s = steps.get(idx);

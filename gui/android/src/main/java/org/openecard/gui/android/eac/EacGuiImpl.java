@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,6 @@
 package org.openecard.gui.android.eac;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.common.util.Promise;
@@ -38,6 +37,8 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
+import org.openecard.sal.protocol.eac.gui.EacPinStatus;
+import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,8 @@ import org.slf4j.LoggerFactory;
 public class EacGuiImpl implements EacGui {
 
     private static final Logger LOG = LoggerFactory.getLogger(EacGuiImpl.class);
+
+    private final Promise<Boolean> cancelPromise = new Promise<>();
 
     private final Promise<ServerData> serverData = new Promise<>();
 
@@ -63,7 +66,6 @@ public class EacGuiImpl implements EacGui {
     private Checkbox readAccessBox;
     private Checkbox writeAccessBox;
 
-    private boolean isCancelled = false;
 
     public EacGuiImpl() {
     }
@@ -120,7 +122,7 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public void cancel() {
-	isCancelled = true;
+	cancelPromise.deliver(Boolean.TRUE);
 	cancelPromise(serverData);
 	cancelPromise(userReadSelection);
 	cancelPromise(userWriteSelection);
@@ -142,7 +144,7 @@ public class EacGuiImpl implements EacGui {
     ///
 
     public boolean isCancelled() {
-	return isCancelled;
+	return cancelPromise.isCancelled();
     }
 
     public void loadValuesFromSteps(Step step1, Step step2) {
@@ -240,49 +242,45 @@ public class EacGuiImpl implements EacGui {
 	return null;
     }
 
-    public List<OutputInfoUnit> getPinResult(Step pinStep) throws InterruptedException {
-	boolean hasPin = false;
-	boolean hasCan = false;
-	for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
-	    if (nextIn.getID().equals("PACE_PIN_FIELD")) {
-		hasPin = true;
-	    } else if (nextIn.getID().equals("PACE_CAN_FIELD")) {
-		hasCan = true;
+    public List<OutputInfoUnit> getPinResult(Step step) throws InterruptedException {
+	if (step instanceof PINStep) {
+	    PINStep pinStep = (PINStep) step;
+
+	    switch (pinStep.getStatus()) {
+		case RC3:
+		    this.pinStatus.deliver(PinStatus.RC3);
+		    break;
+		case RC2:
+		    this.pinStatus.deliver(PinStatus.RC2);
+		    break;
+		case RC1:
+		    this.pinStatus.deliver(PinStatus.CAN);
+		    break;
 	    }
-	}
-	// set flags according to field values
-	if (hasPin && ! hasCan) {
-	    this.pinStatus.deliver(PinStatus.PIN);
-	} else if (hasPin && hasCan) {
-	    this.pinStatus.deliver(PinStatus.CAN);
+
+	    // read values
+	    String pinValue = this.userPin.deref();
+	    String canValue = this.userCan.deref();
+
+	    ArrayList<OutputInfoUnit> result = new ArrayList<>();
+	    for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
+		if (pinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_PIN_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(pinValue.toCharArray());
+		    result.add(pw);
+		} else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(canValue.toCharArray());
+		    result.add(pw);
+		}
+	    }
+
+	    return result;
 	} else {
-	    this.pinStatus.deliver(PinStatus.BLOCKED);
-	    // return directly as there will be no pin entry
-	    return Collections.EMPTY_LIST;
+	    throw new InterruptedException("The given step is not a PinStep.");
 	}
-
-
-	// read values
-	String pinValue = this.userPin.deref();
-	String canValue = this.userCan.deref();
-
-	ArrayList<OutputInfoUnit> result = new ArrayList<>();
-	for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
-	    if (pinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_PIN_FIELD")) {
-		PasswordField pw = new PasswordField(nextIn.getID());
-		pw.copyContentFrom(nextIn);
-		pw.setValue(pinValue.toCharArray());
-		result.add(pw);
-	    } else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
-		PasswordField pw = new PasswordField(nextIn.getID());
-		pw.copyContentFrom(nextIn);
-		pw.setValue(canValue.toCharArray());
-		result.add(pw);
-	    }
-	}
-
-
-	return result;
     }
 
     public void setPinCorrect(boolean isCorrect) {
@@ -293,6 +291,23 @@ public class EacGuiImpl implements EacGui {
 	this.userCan = new Promise<>();
 
 	pc.deliver(isCorrect);
+    }
+
+    public void sendPinStatus(EacPinStatus status) {
+	if (status == EacPinStatus.BLOCKED) {
+	    this.pinStatus.deliver(PinStatus.BLOCKED);
+	} else if (status == EacPinStatus.DEACTIVATED) {
+	    this.pinStatus.deliver(PinStatus.DEACTIVATED);
+	} else {
+	    // break execution instantly
+	    return;
+	}
+	// wait
+	try {
+	    cancelPromise.deref();
+	} catch (InterruptedException ex) {
+	    // I don't care
+	}
     }
 
 }

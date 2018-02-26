@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,9 +29,11 @@ package org.openecard.gui.android.eac.types;
  */
 public enum PinStatus {
 
-    PIN,
+    RC3,
+    RC2,
     CAN,
-    BLOCKED;
+    BLOCKED,
+    DEACTIVATED;
 
     public boolean isBlocked() {
 	return BLOCKED == this;

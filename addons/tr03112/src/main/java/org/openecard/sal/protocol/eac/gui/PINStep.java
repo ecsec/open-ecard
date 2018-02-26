@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,8 +40,8 @@ import org.openecard.sal.protocol.eac.EACData;
  */
 public class PINStep extends Step {
 
-    private static final I18n langEac = I18n.getTranslation("eac");
-    private static final I18n langPace = I18n.getTranslation("pace");
+    private static final I18n LANG_EAC = I18n.getTranslation("eac");
+    private static final I18n LANG_PACE = I18n.getTranslation("pace");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_PIN";
     // GUI translation constants
@@ -61,21 +61,25 @@ public class PINStep extends Step {
     private final String pinType;
     private final PACEMarkerType paceMarker;
 
-    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker) {
+    private EacPinStatus status;
+
+    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker, EacPinStatus status) {
 	super(STEP_ID);
-	this.pinType = langPace.translationForKey(eacData.passwordType);
+	this.pinType = LANG_PACE.translationForKey(eacData.passwordType);
 	this.paceMarker = paceMarker;
-	setTitle(langPace.translationForKey(TITLE, pinType));
-	setDescription(langPace.translationForKey(STEP_DESCRIPTION));
+	setTitle(LANG_PACE.translationForKey(TITLE, pinType));
+	setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
+	setReversible(false);
 
 	// TransactionInfo
 	String transactionInfo = eacData.transactionInfo;
 	if (transactionInfo != null) {
 	    Text transactionInfoField = new Text();
-	    transactionInfoField.setText(langEac.translationForKey(TRANSACTION_INFO, transactionInfo));
+	    transactionInfoField.setText(LANG_EAC.translationForKey(TRANSACTION_INFO, transactionInfo));
 	    getInputInfoUnits().add(transactionInfoField);
 	}
 
+	this.status = status;
 	// create step elements
 	if (capturePin) {
 	    addSoftwareElements();
@@ -84,18 +88,26 @@ public class PINStep extends Step {
 	}
     }
 
+    public void setStatus(EacPinStatus status) {
+	this.status = status;
+    }
+
+    public EacPinStatus getStatus() {
+	return status;
+    }
+
     public static Step createDummy(String passwordType) {
 	Step s = new Step(STEP_ID);
-	String pinType = langPace.translationForKey(passwordType);
-	s.setTitle(langPace.translationForKey(TITLE, pinType));
-	s.setDescription(langPace.translationForKey(STEP_DESCRIPTION));
+	String pinType = LANG_PACE.translationForKey(passwordType);
+	s.setTitle(LANG_PACE.translationForKey(TITLE, pinType));
+	s.setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	return s;
     }
 
     private void addSoftwareElements() {
 	setResetOnLoad(true);
 	Text description = new Text();
-	description.setText(langPace.translationForKey(DESCRIPTION, pinType));
+	description.setText(LANG_PACE.translationForKey(DESCRIPTION, pinType));
 	getInputInfoUnits().add(description);
 
 	PasswordField pinInputField = new PasswordField(PIN_FIELD);
@@ -105,27 +117,27 @@ public class PINStep extends Step {
 	getInputInfoUnits().add(pinInputField);
 
 	Text attemptCount = new Text();
-	attemptCount.setText(langPace.translationForKey("step_pin_retrycount", 3));
+	attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
 	attemptCount.setID(PIN_ATTEMPTS_ID);
 	getInputInfoUnits().add(attemptCount);
 
 	Text notice = new Text();
-	notice.setText(langEac.translationForKey(NOTICE, pinType));
+	notice.setText(LANG_EAC.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
     }
 
     private void addTerminalElements() {
 	setInstantReturn(true);
 	Text description = new Text();
-	description.setText(langPace.translationForKey(DESCRIPTION_NATIVE, pinType));
+	description.setText(LANG_PACE.translationForKey(DESCRIPTION_NATIVE, pinType));
 	getInputInfoUnits().add(description);
 
 	Text notice = new Text();
-	notice.setText(langEac.translationForKey(NOTICE, pinType));
+	notice.setText(LANG_EAC.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
 
 	Text attemptCount = new Text();
-	attemptCount.setText(langPace.translationForKey("step_pin_retrycount", 3));
+	attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
 	attemptCount.setID(PIN_ATTEMPTS_ID);
 	getInputInfoUnits().add(attemptCount);
     }
@@ -133,20 +145,20 @@ public class PINStep extends Step {
     protected void addCANEntry() {
 	PasswordField canField = new PasswordField(CAN_FIELD);
 	canField.setID("CAN");
-	canField.setDescription(langPace.translationForKey("can"));
+	canField.setDescription(LANG_PACE.translationForKey("can"));
 	canField.setMaxLength(6);
 	canField.setMinLength(6);
 	getInputInfoUnits().add(canField);
 
 	Text canNotice = new Text();
-	canNotice.setText(langEac.translationForKey("eac_can_notice"));
+	canNotice.setText(LANG_EAC.translationForKey("eac_can_notice"));
 	canNotice.setID(CAN_NOTICE_ID);
 	getInputInfoUnits().add(canNotice);
     }
 
     protected void addNativeCANNotice() {
 	Text canNotice = new Text();
-	canNotice.setText(langEac.translationForKey("eac_can_notice_native"));
+	canNotice.setText(LANG_EAC.translationForKey("eac_can_notice_native"));
 	canNotice.setID(CAN_NOTICE_ID);
 	getInputInfoUnits().add(canNotice);
     }
@@ -155,7 +167,7 @@ public class PINStep extends Step {
 	for (InputInfoUnit unit : getInputInfoUnits()) {
 	    if (unit.getID().equals(PIN_ATTEMPTS_ID)) {
 		Text text = (Text) unit;
-		text.setText(langPace.translationForKey("step_pin_retrycount", newValue));
+		text.setText(LANG_PACE.translationForKey("step_pin_retrycount", newValue));
 	    }
 	}
     }

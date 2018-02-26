@@ -49,7 +49,8 @@ public class EACProtocol extends SALProtocolBaseImpl {
     private static final String PREFIX = "org.openecard.tr03112.eac.";
 
     public static final String EAC_DATA = PREFIX + "eac_data";
-    public static final String PIN_STATUS_BYTES = PREFIX + "pin_status_bytes";
+    public static final String PIN_STATUS = PREFIX + "pin_status";
+    public static final String PIN_BLOCKED_STATUS = PREFIX + "pin_blocked_status";
     public static final String IS_NATIVE_PACE = PREFIX + "is_native_pace";
     public static final String PACE_MARKER = PREFIX + "pace_marker";
     public static final String PACE_EXCEPTION = PREFIX + "pace_successful";

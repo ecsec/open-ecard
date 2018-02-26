@@ -304,7 +304,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 			    if (guiResult == ResultStatus.CANCEL) {
 				Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
-				if (!pPaceSuccessful.isDelivered()) {
+				if (! pPaceSuccessful.isDelivered()) {
 				    pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
 					    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
 				}

@@ -183,11 +183,11 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
-		    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(establishChannelResponse.getResult()));
 		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, EacPinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
-			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
-				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
+			    new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
+				    lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),
+				    WSHelper.createException(establishChannelResponse.getResult())));
 
 		} else {
 		    WSHelper.checkResult(establishChannelResponse);
@@ -209,16 +209,16 @@ public class PINStepAction extends StepAction {
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
 		LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
-		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
-			new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
+			new ErrorStep(lang.translationForKey(ERROR_TITLE),
+				langPin.translationForKey(ERROR_CARD_REMOVED), ex));
 	    }
 
 	    // repeat the step
 	    LOG.error("An unknown error occured while trying to verify the PIN.");
-	    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
-		    new ErrorStep(langPin.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_UNKNOWN)));
+		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),
+			    langPin.translationForKey(ERROR_UNKNOWN), ex));
 	}
     }
 

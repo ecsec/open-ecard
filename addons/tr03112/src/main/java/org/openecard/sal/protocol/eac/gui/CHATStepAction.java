@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.gui.StepResult;
@@ -90,12 +92,14 @@ public class CHATStepAction extends StepAction {
 		case BLOCKED:
 		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
 		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
-			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN));
+			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
 		    break;
 		case DEACTIVATED:
 		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
 		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
-			    LANG.translationForKey("step_error_pin_deactivated"));
+			    LANG.translationForKey("step_error_pin_deactivated"),
+			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
 		    break;
 		default:
 		    pinStep = new PINStep(eacData, !nativePace, paceMarker, status);

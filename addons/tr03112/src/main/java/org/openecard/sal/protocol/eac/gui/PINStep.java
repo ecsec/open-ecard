@@ -144,7 +144,6 @@ public class PINStep extends Step {
 
     protected void addCANEntry() {
 	PasswordField canField = new PasswordField(CAN_FIELD);
-	canField.setID("CAN");
 	canField.setDescription(LANG_PACE.translationForKey("can"));
 	canField.setMaxLength(6);
 	canField.setMinLength(6);

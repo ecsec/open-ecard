@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>wsdef</artifactId>
-		<version>1.3.0-rc11</version>
+		<version>1.3.0-rc12-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.wsdef</groupId>

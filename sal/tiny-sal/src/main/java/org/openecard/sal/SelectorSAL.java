@@ -191,7 +191,7 @@ public class SelectorSAL implements SAL, CIFProvider {
         if (sal instanceof CIFProvider) {
             return ((CIFProvider) sal).getCardInfo(cardType);
         } else {
-            return null;
+            return recognition.getCardInfoFromRepo(cardType);
         }
     }
 

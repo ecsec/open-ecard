@@ -111,9 +111,9 @@ public class NavigationBar extends JPanel {
 	layout.setAutoCreateContainerGaps(false);
 
 	GroupLayout.SequentialGroup hg = layout.createSequentialGroup();
-	hg.addComponent(backButton, 60, 60, 150);
-	hg.addComponent(nextButton, 60, 60, 150);
-	hg.addComponent(cancelButton, 60, 60, 150);
+	hg.addComponent(backButton, 60, 60, 300);
+	hg.addComponent(nextButton, 60, 60, 300);
+	hg.addComponent(cancelButton, 60, 60, 300);
 	layout.setHorizontalGroup(hg);
 
 	GroupLayout.ParallelGroup vg = layout.createParallelGroup(GroupLayout.Alignment.BASELINE);

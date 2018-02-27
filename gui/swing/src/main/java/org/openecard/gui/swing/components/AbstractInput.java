@@ -22,11 +22,20 @@
 
 package org.openecard.gui.swing.components;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -34,10 +43,13 @@ import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Segment;
+import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.AbstractTextField;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.TextField;
+import static org.openecard.gui.swing.SwingDialogWrapper.needsFullscreen;
+import sun.security.util.SecurityConstants;
 
 
 /**
@@ -60,13 +72,70 @@ public class AbstractInput implements StepComponent, Focusable {
     private final JTextField textField;
 
     private final AbstractTextField result;
+    private int numCharsEntered = 0;
 
     public AbstractInput(TextField input) {
 	this(input, new TextField(input.getID()), new JTextField(20));
     }
     public AbstractInput(PasswordField input) {
 	this(input, new PasswordField(input.getID()), new JPasswordField(12));
-	this.panel.add(new VirtualPinPadButton(textField, input), 1);
+	if (needsFullscreen()) {
+	    JPanel buttons = new JPanel(new GridLayout(4, 3, 4, 4));
+	    this.panel.add(buttons, BorderLayout.CENTER);
+	    for (int i = 1; i <= 9; i++) {
+		buttons.add(createButton(i));
+	    }
+
+	    buttons.add(createRemoveSingleElementButton());
+	    buttons.add(createButton(0));
+	} else {
+	    this.panel.add(new VirtualPinPadButton(textField, input), 1);
+	}
+    }
+    
+    private JButton createButton(int num) {
+	JButton button = new JButton(Integer.toString(num));
+	button.addActionListener(new NumberProcessingListener());
+	return button;
+    }
+    
+    private JButton createRemoveSingleElementButton() {
+	JButton button = new JButton();
+	//setButtonFont(button);
+	button.addActionListener(new RemoveSingleElementListener());
+	Icon ico = new ImageIcon(FileUtils.resolveResourceAsURL(VirtualPinPadDialog.class, "arrow.png"));
+	button.setIcon(ico);
+	Insets marginInset = button.getMargin();
+	button.setMargin(new Insets(marginInset.top, 5, marginInset.bottom, 5));
+	return button;
+    }
+    
+    private class NumberProcessingListener implements ActionListener {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    JButton b = (JButton) e.getSource();
+	    String data = textField.getText();
+	    data += b.getText();
+	    textField.setText(data);
+
+	    numCharsEntered++;
+//	    if (pwInput.getMaxLength() > 0 && numCharsEntered >= pwInput.getMaxLength()) {
+//		setVisible(false);
+//	    }
+	}
+    }
+    
+    private class RemoveSingleElementListener implements ActionListener {
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    String data = textField.getText();
+	    if (! data.isEmpty()) {
+		data = data.substring(0, data.length() - 1);
+		textField.setText(data);
+		numCharsEntered--;
+	    }
+	}
     }
 
     private AbstractInput(AbstractTextField input, AbstractTextField output, JTextField textFieldImpl) {
@@ -109,7 +178,7 @@ public class AbstractInput implements StepComponent, Focusable {
 	this.panel.add(this.textField);
 	this.panel.add(this.label);
     }
-
+    
     @Nonnull
     private char[] getFieldValue() {
         Document doc = textField.getDocument();

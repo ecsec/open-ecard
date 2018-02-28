@@ -5,19 +5,10 @@
 	<uses-permission android:name="android.permission.NFC"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 
-	<uses-feature
-		android:name="android.hardware.nfc"
-		android:required="true" />
-
 	<application
 		android:allowBackup="true"
 		android:label="@string/app_name"
 		android:supportsRtl="true">
-
-		<activity
-			android:name=".activation.AbstractActivationActivity"
-			android:clearTaskOnLaunch="true"
-			android:configChanges="orientation|screenSize" />
 
 		<service
 			android:name=".system.OpeneCardServiceImpl"

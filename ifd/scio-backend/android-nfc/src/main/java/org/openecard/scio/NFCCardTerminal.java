@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -57,10 +57,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	this.terminalName = name;
 	this.cardAbsent = new Object();
 	this.cardPresent = new Object();
-    }
-
-    public int getLengthOfLastAPDU() {
-	return ((NFCCardChannel) nfcCard.getBasicChannel()).getLengthOfLastAPDU();
     }
 
     public int getMaxTransceiveLength() {

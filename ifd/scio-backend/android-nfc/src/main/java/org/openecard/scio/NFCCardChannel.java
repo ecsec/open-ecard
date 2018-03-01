@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,7 +30,6 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.openecard.common.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,6 @@ public class NFCCardChannel implements SCIOChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
     private final NFCCard card;
-    private int lengthOfLastAPDU;
 
     public NFCCardChannel(NFCCard card) {
 	this.card = card;
@@ -76,7 +74,6 @@ public class NFCCardChannel implements SCIOChannel {
 	synchronized (card) {
 	    if (card != null && card.isodep != null && card.isodep.isConnected()) {
 		try {
-		    lengthOfLastAPDU = apdu.length;
 		    card.isodep.setTimeout(card.getTimeoutForTransceive());
 		    return new CardResponseAPDU(card.isodep.transceive(apdu));
 		} catch (IOException e) {
@@ -99,10 +96,6 @@ public class NFCCardChannel implements SCIOChannel {
 	response.put(data);
 
 	return data.length;
-    }
-
-    public int getLengthOfLastAPDU() {
-	return lengthOfLastAPDU;
     }
 
     @Override

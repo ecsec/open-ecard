@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2016 HS Coburg.
+ * Copyright (C) 2013-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -75,7 +75,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
     private final AddonManager addonManager;
     private final AddonSelector selector;
 
-    public HttpAppPluginActionHandler(AddonManager addonManager) {
+    public HttpAppPluginActionHandler(@Nonnull AddonManager addonManager) {
 	super("*");
 
 	this.addonManager = addonManager;
@@ -106,32 +106,26 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	// find suitable addon
 	try {
 	    AppPluginAction action = selector.getAppPluginAction(resourceName);
-	    HttpResponse response;
-	    if (addonManager == null) {
-		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-		StringEntity entity = new StringEntity("Addon initialization failed.", "UTF-8");
-		response.setEntity(entity);
-	    } else {
-		String rawQuery = requestURI.getRawQuery();
-		Map<String, String> queries = new HashMap<>(0);
-		if (rawQuery != null) {
-		    queries = HttpRequestLineUtils.transform(rawQuery);
-		}
 
-		RequestBody body = null;
-		if (httpRequest instanceof HttpEntityEnclosingRequest) {
-		    LOG.debug("Request contains an entity.");
-		    body = getRequestBody(httpRequest, resourceName);
-		}
-
-		Headers headers = readReqHeaders(httpRequest);
-		// and add some special values to the header section
-		headers.setHeader(METHOD_HDR, httpRequest.getRequestLine().getMethod());
-
-		BindingResult bindingResult = action.execute(body, queries, headers, null);
-
-		response = createHTTPResponseFromBindingResult(bindingResult);
+	    String rawQuery = requestURI.getRawQuery();
+	    Map<String, String> queries = new HashMap<>(0);
+	    if (rawQuery != null) {
+		queries = HttpRequestLineUtils.transform(rawQuery);
 	    }
+
+	    RequestBody body = null;
+	    if (httpRequest instanceof HttpEntityEnclosingRequest) {
+		LOG.debug("Request contains an entity.");
+		body = getRequestBody(httpRequest, resourceName);
+	    }
+
+	    Headers headers = readReqHeaders(httpRequest);
+	    // and add some special values to the header section
+	    headers.setHeader(METHOD_HDR, httpRequest.getRequestLine().getMethod());
+
+	    BindingResult bindingResult = action.execute(body, queries, headers, null);
+
+	    HttpResponse response = createHTTPResponseFromBindingResult(bindingResult);
 	    response.setParams(httpRequest.getParams());
 	    LOG.debug("HTTP response: {}", response);
 	    Http11Response.copyHttpResponse(response, httpResponse);

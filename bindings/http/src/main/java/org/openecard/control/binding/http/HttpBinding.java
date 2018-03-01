@@ -107,9 +107,13 @@ public class HttpBinding {
 		    new CacheControlHeaderResponseInterceptor());
 	}
 
-	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
-	service = new HttpService(port, handler, reqInterceptors, respInterceptors);
-	service.start();
+	if (addonManager == null) {
+	    throw new HttpServiceError("Trying to use uninitialized GttpBinding instance.");
+	} else {
+	    HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
+	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);
+	    service.start();
+	}
     }
 
     public void stop() throws Exception {

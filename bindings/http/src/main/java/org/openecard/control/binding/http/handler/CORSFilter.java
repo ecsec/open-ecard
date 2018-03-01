@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -57,6 +57,18 @@ public class CORSFilter {
 
 	// check if we are dealing with a CORS request
 	if (origin != null) {
+	    if (isPreflight(httpRequest)) {
+		// preflight response
+		String method = getMethod(httpRequest);
+		if (method != null) {
+		    HttpResponse res = new Http11Response(HttpStatus.SC_OK);
+		    if (OriginsList.isValidOrigin(origin)) {
+			postProcess(httpRequest, res, context);
+		    }
+		    return res;
+		}
+	    }
+
 	    // only process if this is an allowed resource for CORS
 	    if (isNoCorsPath(httpRequest.getRequestLine().getUri())) {
 		// stop with an error
@@ -64,21 +76,12 @@ public class CORSFilter {
 		return res;
 	    }
 
+	    // TODO: check if this check is really necessary
 	    // check against known origins
 	    if (! OriginsList.isValidOrigin(origin)) {
 		// stop with an error
 		HttpResponse res = new Http11Response(HttpStatus.SC_FORBIDDEN);
 		return res;
-	    }
-
-	    if (isPreflight(httpRequest)) {
-		// preflight response
-		String method = getMethod(httpRequest);
-		if (method != null) {
-		    HttpResponse res = new Http11Response(HttpStatus.SC_OK);
-		    postProcess(httpRequest, res, context);
-		    return res;
-		}
 	    }
 	}
 
@@ -102,7 +105,7 @@ public class CORSFilter {
 	    httpResponse.addHeader("Access-Control-Allow-Origin", origin.toString());
 	    httpResponse.addHeader("Access-Control-Allow-Credentials", "true");
 	    // preflight stuff
-	    
+
 	    if (isPreflight(httpRequest)) {
 		String method = getMethod(httpRequest);
 		if (method != null) {

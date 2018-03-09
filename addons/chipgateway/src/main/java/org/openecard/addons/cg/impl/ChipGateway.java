@@ -602,7 +602,8 @@ public class ChipGateway {
 	    // save handles of connected cards
 	    connectedSlots.addAll(helper.getConnectedSlots());
 
-	    if (! matchedTokens.isEmpty()) {
+	    // return if tokens have been found or no specific set of tokens has been requested
+	    if (! matchedTokens.isEmpty() || tokensReq.getTokenInfo().isEmpty()) {
 		ListTokensResponseType tokensResp = new ListTokensResponseType();
 		tokensResp.setSessionIdentifier(sessionId);
 		tokensResp.setResult(ChipGatewayStatusCodes.OK);

@@ -82,7 +82,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 
     protected final T parent;
 
-    private Dialog cardRemoveDialog;
+    protected Dialog cardRemoveDialog;
 
     private Thread authThread;
     private boolean cardPresent;
@@ -356,7 +356,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	final String location = result.getRedirectUrl();
 
 	// only display if a card is available
-	if (cardPresent) {
+	if (isCardPresent()) {
 	    Dialog d = showCardRemoveDialog();
 	    if (d != null) {
 		cardRemoveDialog = d;
@@ -373,10 +373,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 			// clean dialog field
 			cardRemoveDialog = null;
 			// perform redirect
-			if (location != null) {
-			    // redirect to result location
-			    parent.startActivity(createRedirectIntent(location));
-			}
+			authenticationSuccessAction(location);
 		    }
 		});
 
@@ -385,7 +382,11 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	    }
 	}
 
-	// no dialog shown, just redirect
+	// no dialog shown, just perfrom action
+	authenticationSuccessAction(location);
+    }
+
+    protected void authenticationSuccessAction(String location) {
 	if (location != null) {
 	    // redirect to result location
 	    parent.startActivity(createRedirectIntent(location));
@@ -421,6 +422,10 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	    i = new Intent(Intent.ACTION_VIEW, redirectUri);
 	}
 	return i;
+    }
+
+    protected boolean isCardPresent() {
+	return cardPresent;
     }
 
 }

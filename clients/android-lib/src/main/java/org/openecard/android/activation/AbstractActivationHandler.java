@@ -88,6 +88,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
     private boolean cardPresent;
     private EacGui eacGui;
 
+    private OpeneCardServiceClient client;
     private OpeneCardContext octx;
     private Class<?> returnClass;
 
@@ -112,7 +113,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
     }
 
     public void onStart() {
-	final OpeneCardServiceClient client = new OpeneCardServiceClient(parent);
+	client = new OpeneCardServiceClient(parent);
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
@@ -197,9 +198,14 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
 	if (octx != null) {
 	    octx.getEventDispatcher().del(insertionHandler);
 	}
+	// unbind client
+	if (client != null) {
+	    client.unbindService();
+	}
 
 	// clear member variables
 	returnClass = null;
+	client = null;
 	octx = null;
 	cardRemoveDialog = null;
 	eacGui = null;

@@ -105,11 +105,24 @@ public class OpeneCardServiceClient {
 		throw new IllegalStateException("Trying to stop uninitialized service.");
 	    }
 
+	    // stop then unbind service
 	    OpeneCardService s = oecService.deref();
-	    return s.stopService();
+	    ServiceResponse res = s.stopService();
+	    unbindService();
+	    return res;
 	} catch (InterruptedException | RemoteException ex) {
 	    return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
 	}
+    }
+
+    /**
+     * Unbinds the service client.
+     * This call removes the binding, so te service can be GCed properly.
+     *
+     * @see Context#unbindService(ServiceConnection)
+     */
+    public void unbindService() {
+	appCtx.unbindService(serviceConnection);
     }
 
     /**

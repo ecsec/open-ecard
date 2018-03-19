@@ -140,17 +140,21 @@ public class LogSettingsGroup extends SettingsGroup {
 	addLogLevelBox(lang.translationForKey(CG_NAME), lang.translationForKey(CG_DESC), CG_KEY);
 
 	// add support text
-	JComponent panel = createSupportPanel();
+	try {
+	    JComponent panel = createSupportPanel();
 
-	GridBagConstraints constraints = new GridBagConstraints();
-	constraints.insets = new Insets(5, 10, 0, 5);
-	constraints.fill = GridBagConstraints.NONE;
-	constraints.gridheight = GridBagConstraints.RELATIVE;
-	constraints.gridwidth = GridBagConstraints.RELATIVE;
-	constraints.gridx = 0;
-	constraints.gridy = itemIdx++;
-	constraints.anchor = GridBagConstraints.WEST;
-	getContainer().add(panel, constraints);
+	    GridBagConstraints constraints = new GridBagConstraints();
+	    constraints.insets = new Insets(5, 10, 0, 5);
+	    constraints.fill = GridBagConstraints.NONE;
+	    constraints.gridheight = GridBagConstraints.RELATIVE;
+	    constraints.gridwidth = GridBagConstraints.RELATIVE;
+	    constraints.gridx = 0;
+	    constraints.gridy = itemIdx++;
+	    constraints.anchor = GridBagConstraints.WEST;
+	    getContainer().add(panel, constraints);
+	} catch (IOException ex) {
+	    // no support panel text available
+	}
     }
 
     private JComboBox addLogLevelBox(String name, String desc, String key) {
@@ -350,7 +354,7 @@ public class LogSettingsGroup extends SettingsGroup {
 	}
     }
 
-    private JComponent createSupportPanel() {
+    private JComponent createSupportPanel() throws IOException {
 	HTMLEditorKit kit = new HTMLEditorKit();
 	HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
 
@@ -361,12 +365,8 @@ public class LogSettingsGroup extends SettingsGroup {
 	//editorPane.setMaximumSize(new Dimension(520, 400));
 	editorPane.setPreferredSize(new Dimension(520, 250));
 
-	try {
-	    URL url = I18n.getTranslation("richclient").translationForFile("debug", "html");
-	    editorPane.setPage(url);
-	} catch (IOException ex) {
-	    editorPane.setText("Page not found.");
-	}
+	URL url = I18n.getTranslation("richclient").translationForFile("debug", "html");
+	editorPane.setPage(url);
 
 	editorPane.addHyperlinkListener(new HyperlinkListener() {
 	    @Override

@@ -24,7 +24,9 @@ package org.openecard.mdlw.sal.config;
 
 import iso.std.iso_iec._24727.tech.schema.CardTypeType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -34,6 +36,10 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import org.openecard.crypto.common.SignatureAlgorithms;
+import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,9 +57,12 @@ import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
     "date",
     "atr",
     "mask",
-    "cardImageName"
+    "cardImageName",
+    "signatureAlgorithms"
 })
 public class CardSpecType {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CardSpecType.class);
 
     @XmlElement(name="MiddlewareName")
     private String middlewareName;
@@ -87,6 +96,10 @@ public class CardSpecType {
 
     @XmlElement(name = "CardImage")
     private String cardImageName;
+
+    @XmlElement(name = "SignatureAlgorithm")
+    private List<String> signatureAlgorithms;
+
 
     public void setMiddlewareName(String middlewareName) {
 	this.middlewareName = middlewareName;
@@ -157,6 +170,31 @@ public class CardSpecType {
 
     public void setCardImageName(String imageName) {
 	this.cardImageName = imageName;
+    }
+
+    public List<String> getSignatureAlgorithms() {
+	if (signatureAlgorithms == null) {
+	    signatureAlgorithms = new ArrayList<>();
+	}
+	return signatureAlgorithms;
+    }
+
+    @Nonnull
+    public EnumSet<SignatureAlgorithms> getMappedSignatureAlgorithms() {
+	if (getSignatureAlgorithms().isEmpty()) {
+	    return EnumSet.allOf(SignatureAlgorithms.class);
+	} else {
+	    EnumSet result = EnumSet.noneOf(SignatureAlgorithms.class);
+	    for (String next : getSignatureAlgorithms()) {
+		try {
+		    SignatureAlgorithms alg = SignatureAlgorithms.fromJcaName(next);
+		    result.add(alg);
+		} catch (UnsupportedAlgorithmException ex) {
+		    LOG.warn("Unknown JCA name specified as allowed signature algorithm: {}", next);
+		}
+	    }
+	    return result;
+	}
     }
 
 }

@@ -36,6 +36,9 @@
 				<iso:Date>2017-08-28</iso:Date>
 				<ATR>3BD21802C10A31FE58C80D51</ATR>
 				<CardImage>rub-card.png</CardImage>
+				<SignatureAlgorithm>NONEwithRSA</SignatureAlgorithm>
+				<SignatureAlgorithm>SHA1withRSA</SignatureAlgorithm>
+				<SignatureAlgorithm>SHA256withRSA</SignatureAlgorithm>
 			</CardSpec>
 		</CardConfig>
 

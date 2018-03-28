@@ -180,16 +180,28 @@ public class MiddlewareSALConfig {
      * @return Card Image as InputStream or {@code null} if card is not known by Middleware SAL.
      */
     @Nullable
-    public InputStream getCardImage(String oIdentifier) {
+    public InputStream getCardImage(@Nonnull String oIdentifier) {
+        CardSpecType cardSpec = getCardSpecType(oIdentifier);
+	if (cardSpec != null) {
+	    return mwConfig.getCardImage(cardSpec.getCardImageName());
+	}
+
+        // return nothing
+        return null;
+    }
+
+    @Nullable
+    public CardSpecType getCardSpecType(@Nonnull String oIdentifier) {
         for (CardSpecType cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
             if (cardSpec.getObjectIdentifier().equals(oIdentifier)) {
-                return mwConfig.getCardImage(cardSpec.getCardImageName());
+                return cardSpec;
             }
         }
 
         // return nothing
         return null;
     }
+
 
     /**
      * Maps the Middleware name to the object identifier of the card.

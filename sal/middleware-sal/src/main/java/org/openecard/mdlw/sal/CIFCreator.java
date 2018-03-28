@@ -56,10 +56,12 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.mdlw.sal.config.CardSpecType;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.didfactory.PinMarkerBuilder;
@@ -80,14 +82,20 @@ public class CIFCreator {
 
     private final MwSession session;
     private final CardInfoType cif;
+    private final CardSpecType cardSpec;
+
+    private final EnumSet<SignatureAlgorithms> cardAlgorithms;
 
     private String PIN_NAME;
 
     private CertificateFactory certFactory;
 
-    public CIFCreator(MwSession session, CardInfoType cifTemplate) {
+    public CIFCreator(MwSession session, CardInfoType cifTemplate, CardSpecType cardSpec) {
 	this.session = session;
 	this.cif = cifTemplate;
+	this.cardSpec = cardSpec;
+
+	this.cardAlgorithms = this.cardSpec.getMappedSignatureAlgorithms();
     }
 
     public CardInfoType addTokenInfo() throws WSMarshallerException, CryptokiException {
@@ -486,6 +494,26 @@ public class CIFCreator {
 
 	long[] mechanisms = pubKey.getAllowedMechanisms();
 	if (mechanisms.length == 0) {
+	    try {
+		MwPrivateKey privKey = null;
+		List<MwPrivateKey> privKeys = session.getPrivateKeys();
+
+		for (MwPrivateKey next : privKeys) {
+		    if (next.getKeyLabel().equals(pubKey.getKeyLabel())) {
+			privKey = next;
+			break;
+		    }
+		}
+
+		if (privKey != null) {
+		    mechanisms = privKey.getAllowedMechanisms();
+		}
+	    } catch (CryptokiException ex) {
+		LOG.info("Could not access private key objetcs.");
+	    }
+	}
+
+	if (mechanisms.length == 0) {
 	    // no mechanisms available, ask what the card has to offer and assume this is also what the key offers
 	    try {
 		List<MwMechanism> allMechanisms = session.getSlot().getMechanismList();
@@ -538,15 +566,21 @@ public class CIFCreator {
 	return sigAlgs;
     }
 
-    private void addMechanism(MwPublicKey pubKey, MwMechanism mechanism, ArrayList<SignatureAlgorithms> sigAlgs) throws CryptokiException {
+    private void addMechanism(MwPublicKey pubKey, MwMechanism mechanism, ArrayList<SignatureAlgorithms> sigAlgs)
+	    throws CryptokiException {
 	try {
 	    SignatureAlgorithms sigAlg = mechanism.getSignatureAlgorithm();
 	    LOG.debug("Card signature algorithm: {}", sigAlg);
 	    // only use algorithms matching the key type
 	    long keyType = sigAlg.getKeyType().getPkcs11Mechanism();
 	    if (keyType == pubKey.getKeyType()) {
-		LOG.debug("Allowing signature algorithm: {}", sigAlg);
-		sigAlgs.add(sigAlg);
+		// only use algorithm if it is in whitelist
+		if (cardAlgorithms.contains(sigAlg)) {
+		    LOG.debug("Allowing signature algorithm: {}", sigAlg);
+		    sigAlgs.add(sigAlg);
+		} else {
+		    LOG.debug("Not using signature algorithm {}, because it is not in whitelist for this card.", sigAlg);
+		}
 	    }
 	} catch (UnsupportedAlgorithmException ex) {
 	    LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);

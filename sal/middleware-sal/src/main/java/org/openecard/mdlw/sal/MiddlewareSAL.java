@@ -155,6 +155,7 @@ import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
 import org.openecard.mdlw.event.MwEventManager;
 import org.openecard.mdlw.event.MwStateCallback;
+import org.openecard.mdlw.sal.config.CardSpecType;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
@@ -191,11 +192,12 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     private final MiddlewareSALConfig mwSALConfig;
 
     /**
-     * Creates a new TinySAL.
+     * Creates a new MiddlewareSAL.
      *
      * @param env Environment
      * @param states CardStateMap
      * @param mwSALConfig MiddlewareSALConfig
+     * @param mwCallback MwStateCallback
      */
     public MiddlewareSAL(Environment env, CardStateMap states, MiddlewareSALConfig mwSALConfig, MwStateCallback mwCallback) {
         this.env = env;
@@ -266,8 +268,9 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public CardInfoType getCardInfo(@Nonnull ConnectionHandleType handle, @Nonnull String cardType)
 	    throws RuntimeException {
         CardInfoType cif = mwSALConfig.getCardInfo(cardType);
+	CardSpecType cardSpec = mwSALConfig.getCardSpecType(cardType);
 	if (cif != null) {
-	    cif = augmentCardInfo(handle, cif);
+	    cif = augmentCardInfo(handle, cif, cardSpec);
 	    return cif;
 	} else {
 	    LOG.error("No CIF available for card type '" + cardType + '"');
@@ -275,7 +278,8 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	}
     }
 
-    private CardInfoType augmentCardInfo(@Nonnull ConnectionHandleType handle, @Nonnull CardInfoType template) {
+    private CardInfoType augmentCardInfo(@Nonnull ConnectionHandleType handle, @Nonnull CardInfoType template,
+	    @Nonnull CardSpecType cardSpec) {
 	boolean needsConnect = handle.getSlotHandle() == null;
 	try {
 	    // connect card, so that we have a session
@@ -292,7 +296,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    }
 
 	    if (session != null) {
-		CIFCreator cc = new CIFCreator(session, template);
+		CIFCreator cc = new CIFCreator(session, template, cardSpec);
 		CardInfoType cif = cc.addTokenInfo();
 		LOG.info("Finished augmenting CardInfo file.");
 		return cif;

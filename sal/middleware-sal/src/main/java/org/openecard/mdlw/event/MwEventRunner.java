@@ -40,6 +40,8 @@ import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.Flag;
 import org.openecard.mdlw.sal.enums.TokenState;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
+import org.openecard.mdlw.sal.exceptions.FinalizationException;
+import org.openecard.mdlw.sal.exceptions.InitializationException;
 import org.openecard.mdlw.sal.exceptions.SessionException;
 import org.openecard.mdlw.sal.exceptions.TokenException;
 import org.openecard.mdlw.sal.struct.CkSlot;
@@ -155,6 +157,14 @@ class MwEventRunner implements Runnable {
 		    } else if (supportsNonBlockingWait) {
 			LOG.info("Non-blocking wait is not supported. Terminating event thread.");
 			supportsNonBlockingWait = false;
+			return;
+		    }
+		} else if (ex.getErrorCode() == CryptokiLibrary.CKR_GENERAL_ERROR) {
+		    LOG.error("Unrecoverable error during operation on the token list.", ex);
+		    try {
+			restartMiddleware();
+		    } catch (InterruptedException ex2) {
+			LOG.debug("Middleware Event Runner interrupted.");
 			return;
 		    }
 		}
@@ -328,6 +338,51 @@ class MwEventRunner implements Runnable {
 
     private boolean isHwSlot(MwSlot slot) {
 	return (slot.getSlotInfo().getFlags() & CryptokiLibrary.CKF_HW_SLOT) > 0;
+    }
+
+    private void restartMiddleware() throws InterruptedException {
+	boolean shutDownSuccess = false;
+	while (! shutDownSuccess) {
+	    try {
+		LOG.info("Trying to shutdown middleware.");
+		mwModule.destroy();
+		shutDownSuccess = true;
+		LOG.info("Successfully terminated middleware.");
+	    } catch (FinalizationException ex) {
+		if (ex.getErrorCode() == CryptokiLibrary.CKR_CRYPTOKI_NOT_INITIALIZED) {
+		    LOG.info("Middleware is already terminated.");
+		    shutDownSuccess = true;
+		} else {
+		    LOG.error("Failed to terminate middleware, wait and try again.", ex);
+		    Thread.sleep(5000);
+		}
+	    }
+	}
+
+	// delete all references to the current slots
+	for (SlotInfo slot : slots.values()) {
+	    sendCardRemoved(slot);
+	}
+	slots.clear();
+
+	while (true) {
+	    try {
+		// give the system some time before trying again
+		Thread.sleep(5000);
+
+		LOG.info("Trying to initialize middleware.");
+		mwModule.initialize();
+		LOG.info("Successfully initialized middleware.");
+		return;
+	    } catch (InitializationException ex) {
+		if (ex.getErrorCode() == CryptokiLibrary.CKR_CRYPTOKI_ALREADY_INITIALIZED) {
+		    LOG.debug("Middleware is already initialized.");
+		    return;
+		} else {
+		    LOG.error("Failed to initialize middleware.", ex);
+		}
+	    }
+	}
     }
 
     //Struct for caching

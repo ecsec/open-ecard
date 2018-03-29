@@ -62,7 +62,7 @@ class MwEventRunner implements Runnable {
     private final MwStateCallback mwCallback;
     private final Map<Long, SlotInfo> slots;
 
-    private boolean supportsBlockingWait = true;
+    private boolean supportsBlockingWait = false;
     private boolean supportsNonBlockingWait = true;
 
     MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule, MwStateCallback mwCallback) {

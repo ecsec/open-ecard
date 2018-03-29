@@ -137,7 +137,7 @@ public class SmartCardSignerCredential implements TlsSigner {
     }
 
 
-    private SignatureAlgorithms getDidAlgorithm() {
+    public SignatureAlgorithms getDidAlgorithm() {
 	try {
 	    AlgorithmInfoType algInfo = did.getGenericCryptoMarker().getAlgorithmInfo();
 	    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());

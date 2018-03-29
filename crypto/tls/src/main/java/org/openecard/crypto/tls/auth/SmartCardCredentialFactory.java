@@ -170,7 +170,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 			    Certificate clientCert = convertCert(context.getCrypto(), chain);
 
 			    // find one DID for this problem, then continue with the next algorithm
-			    if (matchesAlg(reqAlg, alg)) {
+			    if (matchesAlg(reqAlg, alg) && (alg.getHashAlg() != null || isSafeForNoneDid(reqAlg))) {
 				LOG.debug("Adding {} signer.", alg.getJcaAlg());
 				TlsSigner signer = new SmartCardSignerCredential(info);
 				cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg);
@@ -503,12 +503,26 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		case HashAlgorithm.sha512:
 		case HashAlgorithm.sha384:
 		case HashAlgorithm.sha256:
-		//case HashAlgorithm.sha1: // too weak
+//		case HashAlgorithm.sha1: // too weak
 		    break;
 		default:
 		    it.remove();
 		    continue;
 	    }
+	}
+    }
+
+
+    private boolean isSafeForNoneDid(SignatureAndHashAlgorithm reqAlg) {
+	switch (reqAlg.getHash()) {
+	    case HashAlgorithm.sha1:
+	    case HashAlgorithm.sha224:
+	    case HashAlgorithm.sha256:
+	    case HashAlgorithm.sha384:
+	    case HashAlgorithm.sha512:
+		return true;
+	    default:
+		return false;
 	}
     }
 

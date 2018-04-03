@@ -142,7 +142,8 @@ public class MwToken {
      * @return String
      */
     public String getSerialNumber() {
-        return new String(orig.getSerialNumber(), StandardCharsets.UTF_8).trim();
+        String serial = new String(orig.getSerialNumber(), StandardCharsets.UTF_8);
+	return serial.trim();
     }
 
     /**
@@ -217,7 +218,8 @@ public class MwToken {
      * @return String
      */
     public String getLabel() {
-        return new String(orig.getLabel(), StandardCharsets.UTF_8).trim();
+        String label = new String(orig.getLabel(), StandardCharsets.UTF_8);
+	return label.trim();
     }
 
     /**
@@ -226,7 +228,8 @@ public class MwToken {
      * @return String
      */
     public String getManufacturerID() {
-        return new String(orig.getManufacturerID(), StandardCharsets.UTF_8).trim();
+        String manId = new String(orig.getManufacturerID(), StandardCharsets.UTF_8);
+	return manId.trim();
     }
 
     /**
@@ -235,7 +238,8 @@ public class MwToken {
      * @return String
      */
     public String getModel() {
-        return new String(orig.getModel(), StandardCharsets.UTF_8).trim();
+        String model = new String(orig.getModel(), StandardCharsets.UTF_8);
+	return model.trim();
     }
 
 }

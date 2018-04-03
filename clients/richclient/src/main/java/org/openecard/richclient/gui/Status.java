@@ -369,7 +369,11 @@ public class Status implements EventCallback {
 
 	LOG.debug("ConnectionHandle: {}, {}", ch.getIFDName(), ch.getSlotHandle());
 	RecognitionInfo info = ch.getRecognitionInfo();
-	LOG.debug("RecognitionInfo: {}, {}", info.getCardType(), ByteUtils.toHexString(info.getCardIdentifier()));
+	if (info != null) {
+	    LOG.debug("RecognitionInfo: {}, {}", info.getCardType(), ByteUtils.toHexString(info.getCardIdentifier()));
+	} else {
+	    LOG.debug("RecognitionInfo: null");
+	}
 	String ifdName = ch.getIFDName();
 	LOG.debug("IFDName: {}", ifdName);
 

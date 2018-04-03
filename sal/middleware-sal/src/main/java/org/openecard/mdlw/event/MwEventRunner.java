@@ -131,7 +131,8 @@ class MwEventRunner implements Runnable {
 			String ifdName = slot.getSlotInfo().getSlotDescription();
 			LOG.debug("Slot event recognized, slotId={}, ifdName={}.", slotId, ifdName);
 			try {
-			    slot.getTokenInfo().getLabel();
+			    MwToken tok = slot.getTokenInfo();
+			    tok.getLabel();
 
 			    // send card inserted
 			    this.sendCardInserted(slot);

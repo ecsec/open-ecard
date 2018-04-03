@@ -52,7 +52,7 @@ public class CryptokiLibraryWrapper implements CryptokiLibrary {
 
 	LOG.info("Loading PKCS#11 functions via C_GetFunctionList.");
 	PointerByReference ref = new PointerByReference();
-	MiddleWareWrapper.check("C_GetFunctionList", lib.C_GetFunctionList(ref));
+	MiddleWareWrapper.check("C_GetFunctionList", () -> lib.C_GetFunctionList(ref));
 	Pointer listPtr = ref.getValue();
 	funs = new CK_FUNCTION_LIST(listPtr);
 	funs.read();

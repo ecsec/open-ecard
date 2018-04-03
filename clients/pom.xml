@@ -28,7 +28,7 @@
 					<name>env.ANDROID_HOME</name>
 				</property>
 				<!-- and this is not JDK 9 as we still have problems there -->
-				<jdk>[1.6,9)</jdk>
+				<jdk>[1.7,9)</jdk>
 			</activation>
 			<modules>
 				<module>android-lib</module>

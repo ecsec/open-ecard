@@ -39,10 +39,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.util.SysUtils;
@@ -154,13 +154,15 @@ public class MiddleWareWrapper {
     }
 
     public void initialize(@Nullable CK_C_INITIALIZE_ARGS arg) throws CryptokiException {
-	Pointer p = null;
+	Pointer p;
 	if (arg != null) {
 	    p = arg.getPointer();
 	    arg.write();
+	} else {
+	    p = null;
 	}
 
-	check("C_Initialize", lib.C_Initialize(p));
+	check("C_Initialize", () -> lib.C_Initialize(p));
     }
 
     public void initialize() throws CryptokiException {
@@ -199,7 +201,7 @@ public class MiddleWareWrapper {
     }
 
     public void destroy(@Nullable Pointer arg) throws CryptokiException {
-	check("C_Finalize", lib.C_Finalize(arg));
+	check("C_Finalize", () -> lib.C_Finalize(arg));
     }
 
     public void destroy() throws CryptokiException {
@@ -209,7 +211,7 @@ public class MiddleWareWrapper {
     public CkInfo getInfo() throws CryptokiException {
 	try (LockedObject lo = lockInternal()) {
 	    CK_INFO info = new CK_INFO();
-	    check("C_GetInfo", lib.C_GetInfo(info));
+	    check("C_GetInfo", () -> lib.C_GetInfo(info));
 	    return new CkInfo(info);
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Failed to release lock for middleware access.");
@@ -229,7 +231,7 @@ public class MiddleWareWrapper {
 
 	    try (LockedObject lo = lockInternal()) {
 		// get slot list
-		check("C_GetSlotList", lib.C_GetSlotList(tokenPresent, slots.getReference(), slotCountRef));
+		check("C_GetSlotList", () -> lib.C_GetSlotList(tokenPresent, slots.getReference(), slotCountRef));
 
 		// create array with size of slots available and fills it with slot
 		long[] result = slots.getValues(slotCountRef.getValue().intValue());
@@ -250,7 +252,7 @@ public class MiddleWareWrapper {
 	byte tokenPresent = (byte) (withToken ? 0x01 : 0x00);
 
 	try (LockedObject lo = lockInternal()) {
-	    check("C_GetSlotList", lib.C_GetSlotList(tokenPresent, null, count));
+	    check("C_GetSlotList", () -> lib.C_GetSlotList(tokenPresent, null, count));
 
 	    // return slot count
 	    return count.getValue().longValue();
@@ -264,7 +266,7 @@ public class MiddleWareWrapper {
 	CK_SLOT_INFO info = new CK_SLOT_INFO();
 	try (LockedObject lo = lockInternal()) {
 	    // fill slot info with data recieved from lib
-	    check("C_GetSlotInfo", lib.C_GetSlotInfo(new NativeLong(slotID), info));
+	    check("C_GetSlotInfo", () -> lib.C_GetSlotInfo(new NativeLong(slotID), info));
 	    // return new info
 	    return new CkSlot(info, slotID);
 	} catch (InterruptedException ex) {
@@ -277,7 +279,7 @@ public class MiddleWareWrapper {
 	CK_TOKEN_INFO pInfo = new CK_TOKEN_INFO();
 	try (LockedObject lo = lockInternal()) {
 	    // fill token info
-	    check("C_GetTokenInfo", lib.C_GetTokenInfo(new NativeLong(slotID), pInfo));
+	    check("C_GetTokenInfo", () -> lib.C_GetTokenInfo(new NativeLong(slotID), pInfo));
 	    // return new token info
 	    return new MwToken(pInfo);
 	} catch (InterruptedException ex) {
@@ -290,7 +292,7 @@ public class MiddleWareWrapper {
 	CK_MECHANISM_INFO info = new CK_MECHANISM_INFO();
 	try (LockedObject lo = lockInternal()) {
 	    // fill info
-	    check("C_GetMechanismInfo", lib.C_GetMechanismInfo(new NativeLong(slotID), new NativeLong(type), info));
+	    check("C_GetMechanismInfo", () -> lib.C_GetMechanismInfo(new NativeLong(slotID), new NativeLong(type), info));
 	    // return new mecha info
 	    try {
 		return new MwMechanism(info, type);
@@ -307,7 +309,7 @@ public class MiddleWareWrapper {
 	NativeLongByReference pulCount = new NativeLongByReference(new NativeLong(0));
 	try (LockedObject lo = lockInternal()) {
 	    // get number
-	    check("C_GetMechanismList", lib.C_GetMechanismList(new NativeLong(slotID), null, pulCount));
+	    check("C_GetMechanismList", () -> lib.C_GetMechanismList(new NativeLong(slotID), null, pulCount));
 	    // return number
 	    return pulCount.getValue().longValue();
 	} catch (InterruptedException ex) {
@@ -324,7 +326,7 @@ public class MiddleWareWrapper {
 	    NativeLongByReference pulCount = new NativeLongByReference(new NativeLong(cnt));
 
 	    try (LockedObject lo = lockInternal()) {
-		check("C_GetMechanismList", lib.C_GetMechanismList(new NativeLong(slotID), pMechanismList.getReference(), pulCount));
+		check("C_GetMechanismList", () -> lib.C_GetMechanismList(new NativeLong(slotID), pMechanismList.getReference(), pulCount));
 
 		// convert to array
 		long[] result = pMechanismList.getValues(pulCount.getValue().intValue());
@@ -344,7 +346,7 @@ public class MiddleWareWrapper {
 
 	try (LockedObject lo = lockInternal()) {
 	    // open session
-	    check("C_OpenSession", lib.C_OpenSession(new NativeLong(slotID), new NativeLong(flags), pApplication, null, session));
+	    check("C_OpenSession", () -> lib.C_OpenSession(new NativeLong(slotID), new NativeLong(flags), pApplication, null, session));
 
 	    // return session id
 	    return session.getValue().longValue();
@@ -356,7 +358,7 @@ public class MiddleWareWrapper {
     public void closeSession(long session) throws CryptokiException {
 	try (LockedObject lo = lockInternal()) {
 	    // close session
-	    check("C_CloseSession", lib.C_CloseSession(new NativeLong(session)));
+	    check("C_CloseSession", () -> lib.C_CloseSession(new NativeLong(session)));
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Failed to release lock for middleware access.");
 	}
@@ -368,7 +370,7 @@ public class MiddleWareWrapper {
 	CK_SESSION_INFO sessionInfo = new CK_SESSION_INFO();
 	try (LockedObject lo = lockInternal()) {
 	    // close session
-	    check("C_CloseSession", lib.C_GetSessionInfo(sessionId, sessionInfo));
+	    check("C_CloseSession", () -> lib.C_GetSessionInfo(sessionId, sessionInfo));
 	    return sessionInfo;
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Failed to release lock for middleware access.");
@@ -376,15 +378,17 @@ public class MiddleWareWrapper {
     }
 
     public void initPin(long hSession, @Nullable byte[] newPin) throws CryptokiException {
-	ByteBuffer pinBytes = null;
+	ByteBuffer pinBytes;
 	NativeLong pinLen = new NativeLong(0);
 	if (newPin != null) {
 	    pinBytes = ByteBuffer.wrap(newPin);
 	    pinLen.setValue(newPin.length);
+	} else {
+	    pinBytes = null;
 	}
 	try (LockedObject lo = lockInternal()) {
 	    // login to session with pin and usertype
-	    check("C_InitPIN", lib.C_InitPIN(new NativeLong(hSession), pinBytes, pinLen));
+	    check("C_InitPIN", () -> lib.C_InitPIN(new NativeLong(hSession), pinBytes, pinLen));
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Failed to release lock for middleware access.");
 	}
@@ -398,10 +402,10 @@ public class MiddleWareWrapper {
 		NativeLong newPinLen = new NativeLong(newPin.length);
 		ByteBuffer newPinBytes = ByteBuffer.wrap(newPin);
 
-		check("C_SetPIN", lib.C_SetPIN(new NativeLong(hSession),
+		check("C_SetPIN", () -> lib.C_SetPIN(new NativeLong(hSession),
 			oldPinBytes, oldPinlen, newPinBytes, newPinLen));
 	    } else {
-		check("C_SetPIN", lib.C_SetPIN(new NativeLong(hSession),
+		check("C_SetPIN", () -> lib.C_SetPIN(new NativeLong(hSession),
 			(ByteBuffer) null, new NativeLong(0), (ByteBuffer) null, new NativeLong(0)));
 	    }
 	} catch (InterruptedException ex) {
@@ -419,15 +423,12 @@ public class MiddleWareWrapper {
 	final ByteBuffer pinBytes = pinBytesTmp;
 
 	try (LockedObject lo = lockInternal()) {
-	    FutureTask<Void> task = new FutureTask<>(new Callable<Void>() {
-		@Override
-		public Void call() throws Exception {
-		    // login to session with pin and usertype
-		    check("C_Login", MiddleWareWrapper.this.lib.C_Login(new NativeLong(hSession),
-			    new NativeLong(userType), pinBytes, pinLen), (long) CryptokiLibrary.CKR_OK,
-			    (long) CryptokiLibrary.CKR_USER_ALREADY_LOGGED_IN);
-		    return null;
-		}
+	    FutureTask<Void> task = new FutureTask<>(() -> {
+		// login to session with pin and usertype
+		check("C_Login", () -> MiddleWareWrapper.this.lib.C_Login(new NativeLong(hSession),
+			new NativeLong(userType), pinBytes, pinLen), (long) CryptokiLibrary.CKR_OK,
+			(long) CryptokiLibrary.CKR_USER_ALREADY_LOGGED_IN);
+		return null;
 	    });
 
 	    Thread t = new Thread(task, "Middleware-Login");
@@ -458,7 +459,7 @@ public class MiddleWareWrapper {
     public void logout(long hSession) throws CryptokiException {
 	try (LockedObject lo = lockInternal()) {
 	    // logout from session
-	    check("C_Logout", lib.C_Logout(new NativeLong(hSession)));
+	    check("C_Logout", () -> lib.C_Logout(new NativeLong(hSession)));
 	} catch (InterruptedException ex) {
 	    throw new IllegalStateException("Failed to release lock for middleware access.");
 	}
@@ -480,7 +481,7 @@ public class MiddleWareWrapper {
 
 	try (LockedObject lo = lockInternal()) {
 	    // determine size of data to read and allocate space
-	    check("C_GetAttributeValue", lib.C_GetAttributeValue(new NativeLong(hSession), new NativeLong(hObject),
+	    check("C_GetAttributeValue", () -> lib.C_GetAttributeValue(new NativeLong(hSession), new NativeLong(hObject),
 		    baseAttr, new NativeLong(attrs.length)));
 	    for (CK_ATTRIBUTE next : attrs) {
 		long valueLen = next.getUlValueLen().longValue();
@@ -491,7 +492,7 @@ public class MiddleWareWrapper {
 	    }
 
 	    // read attributes
-	    check("C_GetAttributeValue", lib.C_GetAttributeValue(new NativeLong(hSession), new NativeLong(hObject),
+	    check("C_GetAttributeValue", () -> lib.C_GetAttributeValue(new NativeLong(hSession), new NativeLong(hObject),
 		    baseAttr, new NativeLong(attrs.length)));
 
 	    ArrayList<CkAttribute> result = new ArrayList<>();
@@ -513,14 +514,16 @@ public class MiddleWareWrapper {
 
 	// LOG.debug("Waiting for slotevent...");
 
-	check("C_WaitForSlotEvent", lib.C_WaitForSlotEvent(new NativeLong(flags), pSlot, Pointer.NULL));
+	check("C_WaitForSlotEvent", () -> lib.C_WaitForSlotEvent(new NativeLong(flags), pSlot, Pointer.NULL));
 
 	// return slotid that changed
 	return pSlot.getValue().longValue();
     }
 
 
-    private static void check(String fname, NativeLong result, Long... validResults) throws CryptokiException {
+    private static void check(String fname, Supplier<NativeLong> fun, Long... validResults) throws CryptokiException {
+	LOG.debug("Executing function {}.", fname);
+	NativeLong result = fun.get();
 	if (LOG.isDebugEnabled()) {
 	    long resultValue = result.longValue();
 	    String constantName = CryptokiException.getErrorConstantName(resultValue);
@@ -533,7 +536,7 @@ public class MiddleWareWrapper {
         }
     }
 
-    public static void check(String fname, NativeLong result) throws CryptokiException {
+    public static void check(String fname, Supplier<NativeLong> result) throws CryptokiException {
 	check(fname, result, (long) CryptokiLibrary.CKR_OK);
     }
 
@@ -712,7 +715,7 @@ public class MiddleWareWrapper {
 
 	    // intialize find object with template and session
 	    // ulCount is the number of attributes in the search template
-	    check("C_FindObjectsInit", lib.C_FindObjectsInit(new NativeLong(hSession), pTemplate, arraySizeRef));
+	    check("C_FindObjectsInit", () -> lib.C_FindObjectsInit(new NativeLong(hSession), pTemplate, arraySizeRef));
 	}
 
 	public List<Long> findObjects(long hSession) throws CryptokiException {
@@ -728,7 +731,7 @@ public class MiddleWareWrapper {
 	    // returned
 	    // pulObjectCount points to the location that receives the actual
 	    // number of object handles returned
-	    check("C_FindObjects", lib.C_FindObjects(new NativeLong(hSession), phObject.getReference(),
+	    check("C_FindObjects", () -> lib.C_FindObjects(new NativeLong(hSession), phObject.getReference(),
 		    new NativeLong(maxObjects), pulObjectCount));
 
 	    long[] result = phObject.getValues(pulObjectCount.getValue().intValue());
@@ -741,11 +744,11 @@ public class MiddleWareWrapper {
 
 	public void findObjectsFinalize(long hSession) throws CryptokiException {
 	    // finish search for token/session
-	    check("C_FindObjectsFinal", lib.C_FindObjectsFinal(new NativeLong(hSession)));
+	    check("C_FindObjectsFinal", () -> lib.C_FindObjectsFinal(new NativeLong(hSession)));
 	}
 
 	public void signInit(long hSession, CK_MECHANISM pMechanism, long hKey) throws CryptokiException {
-	    check("C_SignInit", lib.C_SignInit(new NativeLong(hSession), pMechanism, new NativeLong(hKey)));
+	    check("C_SignInit", () -> lib.C_SignInit(new NativeLong(hSession), pMechanism, new NativeLong(hKey)));
 	}
 
 	public byte[] sign(long hSession, byte[] data) throws CryptokiException {
@@ -754,7 +757,7 @@ public class MiddleWareWrapper {
 	    ByteBuffer sigValue = ByteBuffer.allocate(maxSigLen); // allocate 8k for the signature
 	    NativeLongByReference sigLen = new NativeLongByReference(new NativeLong(maxSigLen));
 
-	    check("C_Sign", lib.C_Sign(new NativeLong(hSession), dataBuf, new NativeLong(data.length), sigValue, sigLen));
+	    check("C_Sign", () -> lib.C_Sign(new NativeLong(hSession), dataBuf, new NativeLong(data.length), sigValue, sigLen));
 
 	    byte[] result = new byte[sigLen.getValue().intValue()];
 	    sigValue.get(result);

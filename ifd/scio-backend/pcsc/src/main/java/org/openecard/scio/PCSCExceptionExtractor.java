@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,7 +37,11 @@ import org.slf4j.LoggerFactory;
  */
 public class PCSCExceptionExtractor {
 
-    private static final Logger logger = LoggerFactory.getLogger(PCSCExceptionExtractor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PCSCExceptionExtractor.class);
+
+    public static SCIOErrorCode getCode(@Nonnull CardException mainException) {
+	return getCode((Exception) mainException);
+    }
 
     /**
      * Gets the actual error code from the given CardException.
@@ -48,30 +52,45 @@ public class PCSCExceptionExtractor {
      * @return The code extracted from the exception, or {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} if no code could be
      *   extracted.
      */
-    public static SCIOErrorCode getCode(@Nonnull CardException mainException) {
+    public static SCIOErrorCode getCode(@Nonnull Exception mainException) {
+	Throwable cause = getPCSCException(mainException);
+	// check the type of the cause over reflections because these classes might not be available (sun internal)
+	if (cause != null) {
+	    try {
+		Class<?> c = cause.getClass();
+		Field f = c.getDeclaredField("code");
+		f.setAccessible(true);
+		int code = f.getInt(cause);
+		return SCIOErrorCode.getErrorCode(code);
+	    } catch (NoSuchFieldException ex) {
+		LOG.error("Failed to find field 'code' in PCSCException.");
+		// fallthrough as this only reduces the quality of the exceptions
+	    } catch (IllegalAccessException ex) {
+		LOG.error("Failed to read field 'code' in PCSCException.");
+		// fallthrough as this only reduces the quality of the exceptions
+	    } catch (SecurityException ex) {
+		LOG.error("Failed access field 'code' in PCSCException or change its accessibility.");
+		// fallthrough as this only reduces the quality of the exceptions
+	    }
+	}
+	return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
+    }
+
+    public static boolean hasPCSCException(Exception mainException) {
+	return getPCSCException(mainException) != null;
+    }
+
+    private static Throwable getPCSCException(Exception mainException) {
 	Throwable cause = mainException.getCause();
 	// check the type of the cause over reflections because these classes might not be available (sun internal)
 	if (cause != null) {
 	    Class<?> c = cause.getClass();
 	    if ("sun.security.smartcardio.PCSCException".equals(c.getName())) {
-		try {
-		    Field f = c.getDeclaredField("code");
-		    f.setAccessible(true);
-		    int code = f.getInt(cause);
-		    return SCIOErrorCode.getErrorCode(code);
-		} catch (NoSuchFieldException ex) {
-		    logger.error("Failed to find field 'code' in PCSCException.");
-		    // fallthrough as this only reduces the quality of the exceptions
-		} catch (IllegalAccessException ex) {
-		    logger.error("Failed to read field 'code' in PCSCException.");
-		    // fallthrough as this only reduces the quality of the exceptions
-		} catch (SecurityException ex) {
-		    logger.error("Failed access field 'code' in PCSCException or change its accessibility.");
-		    // fallthrough as this only reduces the quality of the exceptions
-		}
+		return cause;
 	    }
 	}
-	return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
+
+	return null;
     }
 
 }

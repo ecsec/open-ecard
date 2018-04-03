@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.util.LinuxLibraryFinder;
 import org.slf4j.Logger;
@@ -134,9 +135,24 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	    String msg = "PCSC changed it's algorithm. There is something really wrong.";
 	    LOG.error(msg, ex);
 	    throw new RuntimeException("PCSC changed it's algorithm. There is something really wrong.");
-	} catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchFieldException
-		| NoSuchMethodException | SecurityException ex) {
+	} catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException | NoSuchMethodException |
+		SecurityException ex) {
 	    LOG.error("Failed to perform reflection magic to reload TerminalFactory.", ex);
+	} catch (InvocationTargetException ex) {
+	    if (PCSCExceptionExtractor.hasPCSCException(ex)) {
+		SCIOErrorCode code = PCSCExceptionExtractor.getCode(ex);
+		if (code == SCIOErrorCode.SCARD_E_NO_SERVICE) {
+		    // silent drop after giving the system some time to recover for themselves
+		    try {
+			Thread.sleep(5000);
+		    } catch (InterruptedException ignore) {
+			Thread.currentThread().interrupt();
+		    }
+		    return;
+		}
+	    }
+
+	    LOG.error("Error while invoking PCSC restart functionality.");
 	}
     }
 

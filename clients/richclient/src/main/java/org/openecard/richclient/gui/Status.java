@@ -58,6 +58,7 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.about.AboutDialog;
 import org.openecard.richclient.gui.manage.ManagementDialog;
 import org.slf4j.Logger;
@@ -366,9 +367,9 @@ public class Status implements EventCallback {
 	    return;
 	}
 
-	LOG.debug("ConnectionHandle: {}", ch);
+	LOG.debug("ConnectionHandle: {}, {}", ch.getIFDName(), ch.getSlotHandle());
 	RecognitionInfo info = ch.getRecognitionInfo();
-	LOG.debug("RecognitionInfo: {}", info);
+	LOG.debug("RecognitionInfo: {}, {}", info.getCardType(), ByteUtils.toHexString(info.getCardIdentifier()));
 	String ifdName = ch.getIFDName();
 	LOG.debug("IFDName: {}", ifdName);
 

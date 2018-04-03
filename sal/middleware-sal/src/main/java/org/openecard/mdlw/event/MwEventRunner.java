@@ -98,9 +98,12 @@ class MwEventRunner implements Runnable {
     @Override
     public void run() {
 	LOG.debug("Start event loop.");
+	boolean repeatingNoEvent = false;
 	while (true) {
 	    try {
-		LOG.debug("Waiting for Middleware event.");
+		if (! repeatingNoEvent) {
+		    LOG.debug("Waiting for Middleware event.");
+		}
 		long slotId;
 		if (supportsBlockingWait) {
 		    slotId = mwModule.waitForSlotEvent(0);
@@ -109,6 +112,7 @@ class MwEventRunner implements Runnable {
 		    slotId = mwModule.waitForSlotEvent(1);
 		    if (slotId == -1) {
 			// nothing changed
+			repeatingNoEvent = true;
 			try {
 			    Thread.sleep(1000);
 			    continue;
@@ -121,6 +125,7 @@ class MwEventRunner implements Runnable {
 		    throw new IllegalStateException("This point should never be reached");
 		}
 		LOG.debug("Middleware event detected.");
+		repeatingNoEvent = false;
 
 		//Flag to check if Terminal was removed
 		boolean isProcessed = false;

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
@@ -523,13 +524,17 @@ public class MiddleWareWrapper {
 
     private static void check(String fname, Supplier<NativeLong> fun, Long... validResults) throws CryptokiException {
 	LOG.debug("Executing function {}.", fname);
+	long start = System.nanoTime();
 	NativeLong result = fun.get();
+	long stop = System.nanoTime();
+
 	if (LOG.isDebugEnabled()) {
+	    double diff = (stop - start) * 1e-9d;
 	    long resultValue = result.longValue();
 	    String constantName = CryptokiException.getErrorConstantName(resultValue);
-	    LOG.debug("Return code for {}: {} -> {}", fname, String.format("%#010x", resultValue), constantName);
+	    LOG.debug("Return code for {}: {} -> {}, duration={}", fname, String.format("%#010x", resultValue),
+		    constantName, String.format((Locale) null, "%#.3fs", diff));
 	}
-
 
         if (! Arrays.asList(validResults).contains(result.longValue())) {
 	    raiseError(result.longValue());

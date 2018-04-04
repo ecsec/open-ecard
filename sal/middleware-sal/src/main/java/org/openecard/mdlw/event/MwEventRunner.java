@@ -127,7 +127,7 @@ class MwEventRunner implements Runnable {
 		LOG.debug("Middleware event detected.");
 		repeatingNoEvent = false;
 
-		//Flag to check if Terminal was removed
+		// Flag to check if Terminal was removed
 		boolean isProcessed = false;
 		// find actual slot object
 		for (MwSlot slot : this.mwModule.getSlotList(false)) {
@@ -190,18 +190,19 @@ class MwEventRunner implements Runnable {
     }
 
     private void sendTerminalAdded(MwSlot slot) {
+	CkSlot ckSlot = slot.getSlotInfo();
 	//Add Terminal to cache if not present
-	if (slots.get(slot.getSlotInfo().getSlotID()) == null) {
+	if (slots.get(ckSlot.getSlotID()) == null) {
 	    SlotInfo sl = new SlotInfo();
-	    sl.ifdName = slot.getSlotInfo().getSlotDescription();
-	    sl.slotId = slot.getSlotInfo().getSlotID();
+	    sl.ifdName = ckSlot.getSlotDescription();
+	    sl.slotId = ckSlot.getSlotID();
 
-	    slots.put(slot.getSlotInfo().getSlotID(), sl);
+	    slots.put(ckSlot.getSlotID(), sl);
 	} else {
 	    return; //Event already sent
 	}
-	String ifdName = slot.getSlotInfo().getSlotDescription();
-	long slotId = slot.getSlotInfo().getSlotID();
+	String ifdName = ckSlot.getSlotDescription();
+	long slotId = ckSlot.getSlotID();
 	// send terminal added
 	LOG.debug("Sending TERMINAL_ADDED event, ifdName={} id={}.", ifdName, slotId);
 	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName, slotId);
@@ -230,73 +231,77 @@ class MwEventRunner implements Runnable {
 
     private void sendCardInserted(MwSlot slot) {
 	//Add new Terminal to cache if needed
+	LOG.debug("Sending terminal added event.");
 	this.sendTerminalAdded(slot);
 
-	if (slots.get(slot.getSlotInfo().getSlotID()).isCardPresent) {
+	CkSlot ckSlot = slot.getSlotInfo();
+	String ifdName = ckSlot.getSlotDescription();
+	long slotId = ckSlot.getSlotID();
+
+	if (slots.get(slotId).isCardPresent) {
+	    LOG.debug("Processing of already sent card inserted event detected. Not sending event.");
 	    return; //Event already sended
 	}
-	CkSlot ckSlot = slot.getSlotInfo();
 	// send card inserted
-	ConnectionHandleType insertHandle = makeUnknownCardHandle(ckSlot.getSlotDescription(), ckSlot.getSlotID());
+	ConnectionHandleType insertHandle = makeUnknownCardHandle(ifdName, slotId);
 	MwEventObject insertEvent = new MwEventObject(insertHandle, slot);
 
+	LOG.debug("Sending CARD_INSERTED event, ifdName={} id={}.", ifdName, slotId);
 	notify(EventType.CARD_INSERTED, insertEvent);
 
 	//For Cache
-	slots.get(slot.getSlotInfo().getSlotID()).isCardPresent = true;
+	slots.get(slotId).isCardPresent = true;
     }
 
     private void sendCardRecognized(MwSlot slot) throws CryptokiException {
 	if (slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized) {
+	    LOG.debug("Processing of already sent card recognized event detected. Not sending event.");
 	    return; //Event already sended
 	}
 
 	MwToken token = slot.getTokenInfo();
-
 	CkSlot ckSlot = slot.getSlotInfo();
+	String ifdName = ckSlot.getSlotDescription();
+	long slotId = ckSlot.getSlotID();
 
 	String cardType = String.format("%s_%s", token.getManufacturerID(), token.getModel());
 	LOG.info("Middleware card type: {}", cardType);
 	cardType = mwModule.getMiddlewareSALConfig().mapMiddlewareType(cardType);
 	if (cardType != null) {
 	    boolean protectedAuthPath = token.containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
-	    ConnectionHandleType recHandle = makeKnownCardHandle(ckSlot.getSlotDescription(), ckSlot.getSlotID(),
-		    cardType, protectedAuthPath);
+	    ConnectionHandleType recHandle = makeKnownCardHandle(ifdName, slotId, cardType, protectedAuthPath);
 	    MwEventObject recEvent = new MwEventObject(recHandle, slot);
 
 	    // recognize card and create card state entry
 	    if (mwCallback.addEntry(recEvent)) {
+		LOG.debug("Sending CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
 		notify(EventType.CARD_RECOGNIZED, recEvent);
+	    } else {
+		LOG.debug("Detected card could not be added to the SAL states, not sending card recognized event.");
 	    }
 
 	    //For Cache
 	    slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized = true;
+	} else {
+	    LOG.debug("Middleware instance is not responsible for this type of cards.");
 	}
     }
 
     private void sendCardRemoved(MwSlot slot) {
         CkSlot ckSlot = slot.getSlotInfo();
         SlotInfo slotInfo = slots.get(ckSlot.getSlotID());
-	if (slotInfo == null || ! slotInfo.isCardPresent) {
-	    return; //Event already sent
+	if (slotInfo == null) {
+	    // Event already sent
+	    LOG.debug("Processing of card removed event prevented due to terminal removed already being delivered.");
+	} else {
+	    sendCardRemoved(slotInfo);
 	}
-
-	ConnectionHandleType handle = makeConnectionHandle(slotInfo.ifdName, slotInfo.slotId);
-	MwEventObject remEvent = new MwEventObject(handle, slot);
-
-	// remove card state entry
-	mwCallback.removeEntry(remEvent);
-
-	notify(EventType.CARD_REMOVED, remEvent);
-
-	//For Cache
-	slots.get(slot.getSlotInfo().getSlotID()).isCardPresent = false;
-	slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized = false;
     }
 
     private void sendCardRemoved(SlotInfo sl) {
 	if (! slots.get(sl.slotId).isCardPresent) {
-	    return; //Event already sended
+	    LOG.debug("Processing of already sent card removed event detected. Not sending event.");
+	    return; // Event already sended
 	}
 
 	ConnectionHandleType handle = makeConnectionHandle(sl.ifdName, sl.slotId);
@@ -305,6 +310,7 @@ class MwEventRunner implements Runnable {
 	// remove card state entry
 	mwCallback.removeEntry(remEvent);
 
+	LOG.debug("Sending CARD_REMOVED event, ifdName={} id={} type={}.", sl.ifdName, sl.slotId);
 	notify(EventType.CARD_REMOVED, remEvent);
 
 	//For Cache

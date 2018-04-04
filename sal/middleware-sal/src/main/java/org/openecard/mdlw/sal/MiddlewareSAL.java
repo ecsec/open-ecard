@@ -267,6 +267,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     @Override
     public CardInfoType getCardInfo(@Nonnull ConnectionHandleType handle, @Nonnull String cardType)
 	    throws RuntimeException {
+	LOG.debug("Requesting CIF Template for card type={}.", cardType);
         CardInfoType cif = mwSALConfig.getCardInfo(cardType);
 	CardSpecType cardSpec = mwSALConfig.getCardSpecType(cardType);
 	if (cif != null) {

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.List;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.mdlw.sal.config.MiddlewareConfig;
@@ -70,8 +71,11 @@ public class MwStateCallback {
 		}
 	    }
 	    CardInfoType cif = null;
+	    LOG.debug("Determined cardType={} for middleware name={}.", cardType, type);
 	    if (cardType != null) {
-		cif = env.getCIFProvider().getCardInfo(handle, cardType);
+		LOG.debug("Requesting CIF from CIF provider.");
+		CIFProvider cp = env.getCIFProvider();
+		cif = cp.getCardInfo(handle, cardType);
 	    }
 	    if (cif == null) {
 		LOG.warn("Unknown card recognized by Middleware.");

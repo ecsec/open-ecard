@@ -109,6 +109,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.io.InputStream;
 import java.util.LinkedList;
+import javax.annotation.Nonnull;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.CardRecognition;
@@ -117,7 +118,10 @@ import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.sal.SpecializedSAL;
 import org.openecard.common.sal.util.SALUtils;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.ws.SAL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -127,6 +131,8 @@ import org.openecard.ws.SAL;
  * @author Tobias Wich
  */
 public class SelectorSAL implements SAL, CIFProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SelectorSAL.class);
 
     private final CardRecognition recognition;
     private final SAL main;
@@ -175,12 +181,16 @@ public class SelectorSAL implements SAL, CIFProvider {
 
 
     @Override
-    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+    public CardInfoType getCardInfo(@Nonnull ConnectionHandleType type, String cardType) {
+	LOG.debug("Looking up responsible SAL for handle with, ctx={}, slot={}",
+		ByteUtils.toHexString(type.getContextHandle()), ByteUtils.toHexString(type.getSlotHandle()));
 	SAL sal = getResponsibleSAL(type);
 	// only ask special SAL when we have a handle and a special SAL which is a CIF provider
-	if (type != null && sal instanceof CIFProvider) {
+	if (sal instanceof CIFProvider) {
+	    LOG.debug("Requesting CIF from Specialized SAL for type={}.", cardType);
 	    return ((CIFProvider) sal).getCardInfo(type, cardType);
 	} else {
+	    LOG.debug("Requesting CIF from CIF-Repo for type={}.", cardType);
 	    return recognition.getCardInfoFromRepo(cardType);
 	}
     }
@@ -189,8 +199,10 @@ public class SelectorSAL implements SAL, CIFProvider {
     public CardInfoType getCardInfo(String cardType) throws RuntimeException {
         SAL sal = getResponsibleSAL(cardType);
         if (sal instanceof CIFProvider) {
+	    LOG.debug("Requesting CIF from Specialized SAL for type={}.", cardType);
             return ((CIFProvider) sal).getCardInfo(cardType);
         } else {
+	    LOG.debug("Requesting CIF from CIF-Repo for type={}.", cardType);
             return recognition.getCardInfoFromRepo(cardType);
         }
     }

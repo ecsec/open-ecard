@@ -80,10 +80,9 @@ class MwEventRunner implements Runnable {
 	for (MwSlot slot : this.mwModule.getSlotList(TokenState.NotPresent)) {
 	    if (isHwSlot(slot)) {
 		this.sendTerminalAdded(slot);
-		String ifdName = slot.getSlotInfo().getSlotDescription();
 
 		try {
-		    slot.getTokenInfo().getLabel();
+		    slot.getTokenInfo();
 		    this.sendCardInserted(slot);
 
 		    // send recognized
@@ -256,7 +255,7 @@ class MwEventRunner implements Runnable {
     private void sendCardRecognized(MwSlot slot) throws CryptokiException {
 	if (slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized) {
 	    LOG.debug("Processing of already sent card recognized event detected. Not sending event.");
-	    return; //Event already sended
+	    return; // Event already sent
 	}
 
 	MwToken token = slot.getTokenInfo();
@@ -278,6 +277,10 @@ class MwEventRunner implements Runnable {
 		notify(EventType.CARD_RECOGNIZED, recEvent);
 	    } else {
 		LOG.debug("Detected card could not be added to the SAL states, not sending card recognized event.");
+//		recEvent.getHandle().setContextHandle(null);
+//		recEvent.getHandle().setChannelHandle(null);
+//		LOG.debug("Sending SAL-less CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
+//		notify(EventType.CARD_RECOGNIZED, recEvent);
 	    }
 
 	    //For Cache

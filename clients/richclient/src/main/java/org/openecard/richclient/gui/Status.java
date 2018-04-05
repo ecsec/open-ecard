@@ -81,7 +81,7 @@ public class Status implements EventCallback {
     private final I18n lang = I18n.getTranslation("richclient");
 
     private final Map<String, JPanel> infoMap = new ConcurrentSkipListMap<>();
-    private final Map<String, EventType> cardStatus = new ConcurrentSkipListMap<>();
+    private final Map<String, byte[]> cardContext = new ConcurrentSkipListMap<>();
     private final HashMap<String, ImageIcon> cardIcons = new HashMap<>();
     private JPanel contentPane;
     private JPanel infoView;
@@ -367,43 +367,49 @@ public class Status implements EventCallback {
 	    return;
 	}
 
-	LOG.debug("ConnectionHandle: {}, {}", ch.getIFDName(), ch.getSlotHandle());
+	String ifdName = ch.getIFDName();
+	byte[] ctx = ch.getContextHandle();
+	LOG.debug("ConnectionHandle: ifd={}, slot={}, ctx={}", ifdName, ByteUtils.toHexString(ch.getSlotHandle()),
+		ByteUtils.toHexString(ctx));
 	RecognitionInfo info = ch.getRecognitionInfo();
 	if (info != null) {
 	    LOG.debug("RecognitionInfo: {}, {}", info.getCardType(), ByteUtils.toHexString(info.getCardIdentifier()));
 	} else {
 	    LOG.debug("RecognitionInfo: null");
 	}
-	String ifdName = ch.getIFDName();
-	LOG.debug("IFDName: {}", ifdName);
 
-	if (null != eventType) {
+	if (null != eventType && isResponsibleContext(ifdName, ctx)) {
 	    switch (eventType) {
 		case TERMINAL_ADDED:
 		    addInfo(ifdName, info);
 		    break;
 		case TERMINAL_REMOVED:
 		    removeInfo(ifdName);
+		case CARD_REMOVED:
+		    removeResponsibleContext(ifdName);
 		    break;
-		default:
-		    // track status of the events to prevent double events to overwrite the actual status
-		    EventType lastStatus = cardStatus.get(ifdName);
-		    // only update status for recognized cards in case it is a card removed
-		    if (EventType.CARD_RECOGNIZED == lastStatus) {
-			if (EventType.CARD_REMOVED == eventType) {
-			    cardStatus.remove(ifdName);
-			    updateInfo(ifdName, info);
-			}
-		    } else {
-			if (EventType.CARD_REMOVED == eventType) {
-			    cardStatus.remove(ifdName);
-			} else {
-			    cardStatus.put(ifdName, eventType);
-			}
-			updateInfo(ifdName, info);
-		    }
+		case CARD_RECOGNIZED:
+		    setResponsibleContext(ifdName, ctx);
+		case CARD_INSERTED:
+		    addInfo(ifdName, info);
+		    updateInfo(ifdName, info);
+		    break;
 	    }
 	}
+    }
+
+    private boolean isResponsibleContext(String ifd, byte[] ctx) {
+	boolean isResponsible = ByteUtils.compare(ctx, cardContext.getOrDefault(ifd, ctx));
+	LOG.debug("Event sent has responsibility={} for this card.", isResponsible);
+	return isResponsible;
+    }
+
+    private void setResponsibleContext(String ifd, byte[] ctx) {
+	cardContext.put(ifd, ByteUtils.clone(ctx));
+    }
+
+    private void removeResponsibleContext(String ifd) {
+	cardContext.remove(ifd);
     }
 
 }

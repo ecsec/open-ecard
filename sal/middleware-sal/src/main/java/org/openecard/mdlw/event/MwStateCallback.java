@@ -36,6 +36,8 @@ import org.openecard.mdlw.sal.config.MiddlewareConfig;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.MwSlot;
 import org.openecard.mdlw.sal.MwToken;
+import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
+import org.openecard.mdlw.sal.exceptions.TokenException;
 
 
 /**
@@ -56,7 +58,7 @@ public class MwStateCallback {
         this.mwConfigs = mwConfigLoader.getMiddlewareConfigs();
     }
 
-    public boolean addEntry(MwEventObject o) {
+    public boolean addEntry(MwEventObject o) throws TokenException {
 	try {
 	    ConnectionHandleType handle = o.getHandle();
 	    MwSlot slot = o.getMwSlot();
@@ -88,10 +90,11 @@ public class MwStateCallback {
 	    return true;
 	} catch (CryptokiException ex) {
 	    LOG.info("Cryptoki Token invalid.", ex);
+	    throw new TokenException("Cryptoki Token invalid.", ex.getErrorCode());
 	} catch (RuntimeException ex) {
 	    LOG.error("Error in CIF augmentation process.", ex);
+	    throw new TokenException("Error in CIF augmentation process.", CryptokiLibrary.CKR_TOKEN_NOT_RECOGNIZED);
 	}
-	return false;
     }
 
     public void removeEntry(MwEventObject o) {

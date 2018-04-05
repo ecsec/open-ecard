@@ -248,14 +248,17 @@ public class SelectorSAL implements SAL, CIFProvider {
 
 	    for (SAL next : sals) {
 		try {
+		    // first add it to list of initialized sals, remove later if error
+		    if (next instanceof SpecializedSAL) {
+			initializedSpecializedSals.add((SpecializedSAL) next);
+		    } else {
+			initializedSals.add(next);
+		    }
+
 		    InitializeResponse res = next.initialize(init);
 		    WSHelper.checkResult(res);
-		    if (! WSHelper.resultsInWarn(res)) {
-			if (next instanceof SpecializedSAL) {
-			    initializedSpecializedSals.add((SpecializedSAL) next);
-			} else {
-			    initializedSals.add(next);
-			}
+		    if (WSHelper.resultsInWarn(res)) {
+			WSHelper.createException(res.getResult());
 		    }
 		} catch (WSHelper.WSException ex) {
 		    String msg = "One of the SAL instances failed to initialize:\n" + ex.getMessage();

@@ -38,7 +38,7 @@ import javax.swing.JOptionPane;
  */
 public class MainLoader {
 
-    private static final float VERSION_REFERENCE_VAL = 1.7f;
+    private static final float VERSION_REFERENCE_VAL = 1.8f;
 
     public static void main(String[] args) {
 	try {

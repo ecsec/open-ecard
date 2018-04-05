@@ -179,9 +179,11 @@ public class CIFCreator {
 	return di;
     }
 
+
     private List<DIDInfoType> getSignatureCryptoDIDs() throws WSMarshallerException, CryptokiException {
 	LOG.debug("Reading infos for CryptoDID generation.");
 	ArrayList<DIDInfoType> didInfos = new ArrayList<>();
+	LOG.debug("Reading list of public keys.");
 	List<MwPublicKey> pubKeys = session.getPublicKeys();
 	for (MwPublicKey pubKey : pubKeys) {
 	    LOG.debug("Found key object {}.", pubKey);
@@ -192,6 +194,7 @@ public class CIFCreator {
 
 	    // look up certificates
 	    try {
+		LOG.debug("Reading list of certificates.");
 		List<MwCertificate> mwCerts = createChain(session.getCertificates(), pubKey.getKeyID());
 
 		if (mwCerts.isEmpty()) {

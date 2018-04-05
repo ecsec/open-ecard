@@ -50,15 +50,14 @@ public class ChannelManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChannelManager.class);
 
-    private final SCIOTerminals terminals;
+    private final TerminalFactory termFact;
 
     private final HashMap<String, SingleThreadChannel> baseChannels;
     private final TreeMap<byte[], SingleThreadChannel> handledChannels;
     private final HashMap<String, Set<byte[]>> ifdNameToHandles;
 
     public ChannelManager() throws IFDException {
-	TerminalFactory f = IFDTerminalFactory.getInstance();
-	this.terminals = f.terminals();
+	this.termFact = IFDTerminalFactory.getInstance();
 	this.baseChannels = new HashMap<>();
 	this.handledChannels = new TreeMap<>(new ByteArrayComparator());
 	this.ifdNameToHandles = new HashMap<>();
@@ -77,7 +76,7 @@ public class ChannelManager {
     }
 
     public SCIOTerminals getTerminals() {
-	return terminals;
+	return termFact.terminals();
     }
 
     public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,

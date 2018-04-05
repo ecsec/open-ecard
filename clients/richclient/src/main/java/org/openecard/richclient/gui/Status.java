@@ -272,7 +272,7 @@ public class Status implements EventCallback {
 	    if (is == null) {
 		is = env.getRecognition().getUnknownCardImage();
 	    }
-	    ImageIcon icon = GuiUtils.getImageIcon(is);
+	    ImageIcon icon = GuiUtils.getScaledCardImageIcon(is);
 	    cardIcons.put(cardType, icon);
 	}
 

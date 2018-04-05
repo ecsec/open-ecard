@@ -387,6 +387,7 @@ public class Status implements EventCallback {
 		    removeInfo(ifdName);
 		case CARD_REMOVED:
 		    removeResponsibleContext(ifdName);
+		    updateInfo(ifdName, info);
 		    break;
 		case CARD_RECOGNIZED:
 		    setResponsibleContext(ifdName, ctx);

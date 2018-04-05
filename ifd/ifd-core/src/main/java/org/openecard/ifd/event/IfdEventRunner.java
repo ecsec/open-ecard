@@ -285,11 +285,21 @@ public class IfdEventRunner implements Runnable {
 
     @Nullable
     private IFDCapabilitiesType getCapabilities(String ifdName) {
-	GetIFDCapabilities req = new GetIFDCapabilities();
-	req.setContextHandle(ctxHandle);
-	req.setIFDName(ifdName);
-	GetIFDCapabilitiesResponse res = (GetIFDCapabilitiesResponse) env.getDispatcher().safeDeliver(req);
-	return res.getIFDCapabilities();
+	try {
+	    if (cm.getTerminals().getTerminal(ifdName).isCardPresent()) {
+		GetIFDCapabilities req = new GetIFDCapabilities();
+		req.setContextHandle(ctxHandle);
+		req.setIFDName(ifdName);
+		GetIFDCapabilitiesResponse res = (GetIFDCapabilitiesResponse) env.getDispatcher().safeDeliver(req);
+		return res.getIFDCapabilities();
+	    }
+	} catch (NoSuchTerminal ex) {
+	    LOG.debug("No terminal with the name '{}' available.", ifdName);
+	} catch (SCIOException ex) {
+	    LOG.error("Error requesting card presence status.");
+	}
+
+	return null;
     }
 
     private boolean hasKeypad(@Nullable IFDCapabilitiesType capabilities) {

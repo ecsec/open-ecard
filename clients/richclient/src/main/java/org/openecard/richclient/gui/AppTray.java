@@ -33,7 +33,6 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +49,7 @@ import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogo;
 import org.openecard.gui.graphics.OecLogoBlack;
+import org.openecard.gui.graphics.OecLogoLoading;
 import org.openecard.gui.graphics.OecLogoWhite;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
@@ -199,7 +199,7 @@ public class AppTray {
 
     private Image getImageLinux(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
+	    return GraphicsUtil.createImage(OecLogoLoading.class, dim.width, dim.height);
 	} else {
 	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
@@ -217,7 +217,7 @@ public class AppTray {
 
     private Image getImageDefault(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    return GuiUtils.getImage("loader_icon_default_256.gif");
+	    return GraphicsUtil.createImage(OecLogoLoading.class, dim.width, dim.height);
 	} else {
 	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
@@ -225,22 +225,16 @@ public class AppTray {
 
     private boolean isMacMenuBarDarkMode() {
 	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
-	final FutureTask<Integer> f = new FutureTask<>(new Callable<Integer>() {
-	    @Override
-	    public Integer call() throws Exception {
-		// check for exit status only. Once there are more modes than "dark" and "default", we might need to
-		// analyze string contents..
-		Process proc = Runtime.getRuntime().exec(new String[]{"defaults", "read", "-g", "AppleInterfaceStyle"});
-		proc.waitFor();
-		return proc.exitValue();
-	    }
+	final FutureTask<Integer> f = new FutureTask<>(() -> {
+	    // check for exit status only. Once there are more modes than "dark" and "default", we might need to
+	    // analyze string contents..
+	    Process proc = Runtime.getRuntime().exec(new String[]{"defaults", "read", "-g", "AppleInterfaceStyle"});
+	    proc.waitFor();
+	    return proc.exitValue();
 	});
 	try {
-	    Thread t = new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    f.run();
-		}
+	    Thread t = new Thread(() -> {
+		f.run();
 	    });
 	    t.setDaemon(true);
 	    t.start();

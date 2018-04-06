@@ -19,6 +19,11 @@
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
+				<configuration>
+				    <dex>
+					<multiDex>true</multiDex>
+				    </dex>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -541,6 +541,9 @@ public class IFD implements org.openecard.ws.IFD {
 	    String msg = "Unknown SCIO error occured during wait call.";
 	    LOG.warn(msg, ex);
 	    Result r = WSHelper.makeResultUnknownError(msg);
+	    if (ex.getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+		r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
+	    }
 	    response = WSHelper.makeResponse(WaitResponse.class, r);
 	    return response;
 	} catch (ExecutionException ex) { // this is the exception from within the future
@@ -549,6 +552,9 @@ public class IFD implements org.openecard.ws.IFD {
 		String msg = "Unknown SCIO error occured during wait call.";
 		LOG.warn(msg, cause);
 		Result r = WSHelper.makeResultUnknownError(msg);
+		if (((SCIOException) ex.getCause()).getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+		    r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
+		}
 		response = WSHelper.makeResponse(WaitResponse.class, r);
 	    } else {
 		String msg = "Unknown error during wait call.";

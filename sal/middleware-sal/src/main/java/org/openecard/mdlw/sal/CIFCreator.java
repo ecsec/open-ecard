@@ -57,7 +57,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
@@ -81,8 +80,6 @@ public class CIFCreator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCreator.class);
 
-    private static final HashMap<String, CardInfoType> CIF_CACHE = new HashMap<>();
-
     private final MwSession session;
     private final CardInfoType cif;
     private final CardSpecType cardSpec;
@@ -105,11 +102,12 @@ public class CIFCreator {
 	LOG.debug("Adding information to CardInfo file for card type {}.", cif.getCardType().getObjectIdentifier());
 
 	String serial = session.getSlot().getTokenInfo().getSerialNumber();
-	synchronized (CIF_CACHE) {
-	    if (CIF_CACHE.containsKey(serial)) {
-		LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
-		return CIF_CACHE.get(serial);
-	    }
+
+	CIFCache cache = CIFCache.getInstance();
+	CardInfoType cachedCif = cache.getCif(serial);
+	if (cachedCif != null) {
+	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
+	    return cachedCif;
 	}
 
 	PIN_NAME = "USER_PIN";
@@ -122,10 +120,12 @@ public class CIFCreator {
 	app.getDIDInfo().addAll(cryptoDids);
 	app.getDataSetInfo().addAll(datasets);
 
-	synchronized (CIF_CACHE) {
-	    if (! CIF_CACHE.containsKey(serial)) {
+
+	synchronized (cache) {
+	    cachedCif = cache.getCif(serial);
+	    if (cachedCif == null) {
 		LOG.info("Adding CIF to cache for card with serial={}.", serial);
-		CIF_CACHE.put(serial, cif);
+		cache.saveCif(serial, cif);
 	    }
 	}
 

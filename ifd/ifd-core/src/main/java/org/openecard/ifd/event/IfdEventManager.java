@@ -30,6 +30,7 @@ import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.Wait;
 import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +39,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventType;
@@ -119,9 +121,29 @@ public class IfdEventManager {
 	wait.getIFDStatus().addAll(lastKnown);
 	WaitResponse resp = env.getIFD().wait(wait);
 
-	WSHelper.checkResult(resp);
-	List<IFDStatusType> result = resp.getIFDEvent();
-	return result;
+	try {
+	    WSHelper.checkResult(resp);
+	    List<IFDStatusType> result = resp.getIFDEvent();
+	    return result;
+	} catch (WSException ex) {
+	    if (ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE.equals(ex.getResultMinor())) {
+		// this can only happen when the PCSC stack is reloaded, notify all cards have disappeared
+		ArrayList<IFDStatusType> result = new ArrayList<>(lastKnown.size());
+		if (! lastKnown.isEmpty()) {
+		    LOG.info("PCSC stack seemed to disappear. Signalling that no cards are available anymore.");
+		    for (IFDStatusType next : lastKnown) {
+			LOG.debug("Removing terminal {}.", next.getIFDName());
+			IFDStatusType newStatus = new IFDStatusType();
+			newStatus.setIFDName(next.getIFDName());
+			newStatus.setConnected(Boolean.FALSE);
+			result.add(newStatus);
+		    }
+		}
+		return result;
+	    } else {
+		throw ex;
+	    }
+	}
     }
 
     /**

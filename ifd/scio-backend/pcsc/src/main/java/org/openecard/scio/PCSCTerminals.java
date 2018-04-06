@@ -215,18 +215,21 @@ public class PCSCTerminals implements SCIOTerminals {
 		LOG.trace("Leaving start() with {} states.", result.size());
 		return Collections.unmodifiableList(result);
 	    } catch (CardException ex) {
+		String msg = "Failed to retrieve status from the PCSC system.";
 		SCIOErrorCode code = getCode(ex);
 		if (code == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
 		    LOG.debug("No reader available exception.");
 		    return Collections.emptyList();
-		} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED) {
+		} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED || code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 		    LOG.debug("No service available exception, reloading PCSC and returning empty list.");
 		    parent.reloadFactory();
 		    own.loadTerminals();
 		    return Collections.emptyList();
+		} else if (code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+		    // don't log in order to prevent flooding
+		} else {
+		    LOG.error(msg, ex);
 		}
-		String msg = "Failed to retrieve status from the PCSC system.";
-		LOG.error(msg, ex);
 		throw new SCIOException(msg, code, ex);
 	    } catch (IllegalStateException ex) {
 		LOG.debug("No reader available exception.");

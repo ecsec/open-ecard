@@ -62,6 +62,7 @@ import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.mdlw.sal.config.CardSpecType;
+import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.didfactory.PinMarkerBuilder;
@@ -80,6 +81,7 @@ public class CIFCreator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCreator.class);
 
+    private final MiddlewareSALConfig mwSALConfig;
     private final MwSession session;
     private final CardInfoType cif;
     private final CardSpecType cardSpec;
@@ -90,7 +92,8 @@ public class CIFCreator {
 
     private CertificateFactory certFactory;
 
-    public CIFCreator(MwSession session, CardInfoType cifTemplate, CardSpecType cardSpec) {
+    public CIFCreator(MiddlewareSALConfig mwSALConfig, MwSession session, CardInfoType cifTemplate, CardSpecType cardSpec) {
+	this.mwSALConfig = mwSALConfig;
 	this.session = session;
 	this.cif = cifTemplate;
 	this.cardSpec = cardSpec;
@@ -104,7 +107,7 @@ public class CIFCreator {
 	String serial = session.getSlot().getTokenInfo().getSerialNumber();
 
 	CIFCache cache = CIFCache.getInstance();
-	CardInfoType cachedCif = cache.getCif(serial);
+	CardInfoType cachedCif = cache.getCif(mwSALConfig.getMiddlewareName(), serial);
 	if (cachedCif != null) {
 	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
 	    return cachedCif;
@@ -122,10 +125,10 @@ public class CIFCreator {
 
 
 	synchronized (cache) {
-	    cachedCif = cache.getCif(serial);
+	    cachedCif = cache.getCif(mwSALConfig.getMiddlewareName(), serial);
 	    if (cachedCif == null) {
 		LOG.info("Adding CIF to cache for card with serial={}.", serial);
-		cache.saveCif(serial, cif);
+		cache.saveCif(mwSALConfig.getMiddlewareName(), serial, cif);
 	    }
 	}
 

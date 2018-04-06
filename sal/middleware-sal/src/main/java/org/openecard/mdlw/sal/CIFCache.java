@@ -95,7 +95,7 @@ public class CIFCache {
 
 
     @Nullable
-    public CardInfoType getCif(String serial) {
+    public CardInfoType getCif(String mwName, String serial) {
 	if (! hasCache()) {
 	    LOG.debug("CIF caching is disabled.");
 	    return null;
@@ -108,7 +108,7 @@ public class CIFCache {
 	} else if (hasPersistentCache()) {
 	    LOG.debug("Trying to read CIF from disk cache.");
 	    // try reading from disk
-	    File cifFile = getCifFile(serial);
+	    File cifFile = getCifFile(mwName, serial);
 	    if (cifFile.isFile()) {
 		try {
 		    Document cifDoc = marshaller.str2doc(new FileInputStream(cifFile));
@@ -137,7 +137,7 @@ public class CIFCache {
 	return null;
     }
 
-    public synchronized void saveCif(String serial, CardInfoType cif) {
+    public synchronized void saveCif(String mwName, String serial, CardInfoType cif) {
 	if (! hasCache()) {
 	    LOG.debug("CIF caching is disabled.");
 	    return;
@@ -161,7 +161,7 @@ public class CIFCache {
 		Document cifDoc = marshaller.marshal(cifTarget);
 		String cifXml = marshaller.doc2str(cifDoc);
 
-		File cifFile = getCifFile(serial);
+		File cifFile = getCifFile(mwName, serial);
 		FileOutputStream out = new FileOutputStream(cifFile, false);
 		OutputStreamWriter ow = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 		ow.write(cifXml);
@@ -187,8 +187,8 @@ public class CIFCache {
     }
 
     @Nonnull
-    private File getCifFile(String serial) {
-	File cifFile = new File(cacheDir, serial + ".xml");
+    private File getCifFile(String mwName, String serial) {
+	File cifFile = new File(cacheDir, mwName + "_" + serial + ".xml");
 	return cifFile;
     }
 

@@ -297,7 +297,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    }
 
 	    if (session != null) {
-		CIFCreator cc = new CIFCreator(session, template, cardSpec);
+		CIFCreator cc = new CIFCreator(mwSALConfig, session, template, cardSpec);
 		CardInfoType cif = cc.addTokenInfo();
 		LOG.info("Finished augmenting CardInfo file.");
 		return cif;

@@ -122,14 +122,16 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public void cancel() {
-	cancelPromise.deliver(Boolean.TRUE);
-	cancelPromise(serverData);
-	cancelPromise(userReadSelection);
-	cancelPromise(userWriteSelection);
-	cancelPromise(userPin);
-	cancelPromise(userCan);
-	cancelPromise(pinCorrect);
-	cancelPromise(pinStatus);
+	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
+	    cancelPromise.deliver(Boolean.TRUE);
+	    cancelPromise(serverData);
+	    cancelPromise(userReadSelection);
+	    cancelPromise(userWriteSelection);
+	    cancelPromise(userPin);
+	    cancelPromise(userCan);
+	    cancelPromise(pinCorrect);
+	    cancelPromise(pinStatus);
+	}
     }
 
     private void cancelPromise(@Nullable Promise<?> p) {
@@ -144,7 +146,7 @@ public class EacGuiImpl implements EacGui {
     ///
 
     public boolean isCancelled() {
-	return cancelPromise.isCancelled();
+	return cancelPromise.isDelivered();
     }
 
     public void loadValuesFromSteps(Step step1, Step step2) {

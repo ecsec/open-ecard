@@ -139,4 +139,35 @@
 
 	</MiddlewareSpec>
 
+
+	<MiddlewareSpec required="false" disabled="false">
+
+		<MiddlewareName>Portugal</MiddlewareName>
+
+		<LibSpec>
+			<LibName>pteidpkcs11</LibName>
+			<SearchPath>/usr/local/lib/</SearchPath>
+			<SearchPath>C:\Windows\System32\</SearchPath>
+		</LibSpec>
+
+		<CardConfig>
+			<CardSpec>
+				<MiddlewareName>Portuguese Government_Portuguese eID N</MiddlewareName>
+				<iso:ObjectIdentifier>http://gov.pt/cif/eid</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Portuguese eID</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Portugiesische eID</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2017-11-17</iso:Date>
+				<ATR>3B7D95000080318065B0831100C883009000</ATR>
+				<CardImage>portuguese-eid.png</CardImage>
+			</CardSpec>
+		</CardConfig>
+
+	</MiddlewareSpec>
+
 </MiddlewareConfig>

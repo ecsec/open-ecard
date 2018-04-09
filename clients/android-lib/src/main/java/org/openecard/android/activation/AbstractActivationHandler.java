@@ -113,7 +113,7 @@ public abstract class AbstractActivationHandler <T extends Activity> implements 
     }
 
     public void onStart() {
-	client = new OpeneCardServiceClient(parent);
+	client = new OpeneCardServiceClient(parent.getApplicationContext());
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {

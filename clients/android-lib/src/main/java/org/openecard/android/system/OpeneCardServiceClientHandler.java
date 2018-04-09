@@ -47,7 +47,7 @@ public class OpeneCardServiceClientHandler {
 
     public OpeneCardServiceClientHandler(Activity activity, OpeneCardServiceHandler handler) {
 	this.activity = activity;
-	this.client = new OpeneCardServiceClient(activity);
+	this.client = new OpeneCardServiceClient(activity.getApplicationContext());
 	this.connectionHandler = handler;
     }
 

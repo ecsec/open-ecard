@@ -74,6 +74,8 @@ public class IfdEventRunner implements Runnable {
     private final List<IFDStatusType> initialState;
     private final List<IFDStatusType> currentState;
 
+    private boolean stopped;
+
     public IfdEventRunner(Environment env, IfdEventManager evtManager, HandlerBuilder builder, ChannelManager cm,
 	    byte[] ctxHandle) throws WSException {
 	this.env = env;
@@ -83,6 +85,7 @@ public class IfdEventRunner implements Runnable {
 	this.ctxHandle = ctxHandle;
 	this.initialState = new ArrayList<>(ifdStatus());
 	this.currentState = new ArrayList<>();
+	this.stopped = false;
     }
 
 
@@ -122,7 +125,7 @@ public class IfdEventRunner implements Runnable {
 	fireEvents(initialState);
 	try {
 	    int failCount = 0;
-	    while (true) {
+	    while (! stopped) {
 		try {
 		    List<IFDStatusType> diff = evtManager.wait(currentState);
 		    fireEvents(diff); // also updates current status
@@ -138,6 +141,15 @@ public class IfdEventRunner implements Runnable {
 	} catch (InterruptedException ex) {
 	    LOG.info("Event thread interrupted.", ex);
 	}
+	LOG.info("Stopping IFD event thread.");
+    }
+
+    /**
+     * Set stopped flag, so that the loop stops when another iteration is repeated.
+     * This flag is used as a failsafe when the InterruptedException gets lost du to wrong code in the IFD stack.
+     */
+    public void setStoppedFlag() {
+	stopped = true;
     }
 
     private IFDStatusType getCorresponding(String ifdName, List<IFDStatusType> statuses) {

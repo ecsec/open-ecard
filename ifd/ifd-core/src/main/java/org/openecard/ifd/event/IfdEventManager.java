@@ -71,6 +71,7 @@ public class IfdEventManager {
 
     protected ExecutorService threadPool;
 
+    private IfdEventRunner eventRunner;
     private Future<?> watcher;
 
 
@@ -98,13 +99,15 @@ public class IfdEventManager {
 	});
 	// start watcher thread
 	try {
-	    watcher = threadPool.submit(new IfdEventRunner(env, this, builder, cm, ctx));
+	    eventRunner = new IfdEventRunner(env, this, builder, cm, ctx);
+	    watcher = threadPool.submit(eventRunner);
 	} catch (WSException ex) {
 	    throw new RuntimeException("Failed to request initial status from IFD.");
 	}
     }
 
     public synchronized void terminate() {
+	eventRunner.setStoppedFlag();
 	watcher.cancel(true);
 	threadPool.shutdownNow();
     }

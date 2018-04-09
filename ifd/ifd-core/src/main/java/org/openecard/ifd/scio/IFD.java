@@ -560,8 +560,9 @@ public class IFD implements org.openecard.ws.IFD {
 	} catch (InterruptedException ex) {
 	    String msg = "Wait interrupted by another thread.";
 	    LOG.warn(msg, ex);
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    response = WSHelper.makeResponse(WaitResponse.class, r);
+	    Thread.currentThread().interrupt();
 	    return response;
 	}
     }

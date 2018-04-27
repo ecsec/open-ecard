@@ -1,25 +1,25 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.1//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <!-- ignore generated sources  -->
-    <suppress checks=".*" files="^.*/target/generated-sources/.*$" />
-    <!-- ignore imported bouncycastle -->
-    <suppress checks=".*" files="^.*/crypto/bouncycastle/src/bc/.*$" />
-    <!-- ignore imported smartcardio classes -->
-    <suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/CardImpl.java$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/ChannelImpl.java$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSC.java$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCException.java$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCTerminals.java$" />
-    <suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/TerminalImpl.java$" />
-    <!-- star imports (assert etc.) allowed for test code -->
-    <suppress id="star_import" files="^.*/src/test/.*$" />
-    <!--<suppress checks="AvoidStarImportCheck" files="^.*/src/test/.*$" />-->
-    <!-- package-info files don't need to conform to some java class format checks-->
-    <suppress id="invalid_java_class_file_ending" files="package-info.java" />
-    <suppress id="invalid_class_declaration_format" files="package-info.java" />
-    <suppress id="package_import_header" files="package-info.java" />
+	<!-- ignore generated sources  -->
+	<suppress checks=".*" files="^.*/target/generated-sources/.*$" />
+	<!-- ignore imported bouncycastle -->
+	<suppress checks=".*" files="^.*/crypto/bouncycastle/src/bc/.*$" />
+	<!-- ignore imported smartcardio classes -->
+	<suppress checks=".*" files="^.*/ifd/scio-backend/android-scio/.*$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/android-pcsc/src/main/java/sun/security/smartcardio/.*$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/CardImpl.java$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/ChannelImpl.java$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSC.java$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCException.java$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/PCSCTerminals.java$" />
+	<suppress checks=".*" files="^.*/ifd/scio-backend/osx-pcsc/src/main/java/org/openecard/scio/osx/TerminalImpl.java$" />
+	<!-- star imports (assert etc.) allowed for test code -->
+	<suppress id="star_import" files="^.*/src/test/.*$" />
+	<!--<suppress checks="AvoidStarImportCheck" files="^.*/src/test/.*$" />-->
+	<!-- package-info files don't need to conform to some java class format checks-->
+	<suppress id="invalid_java_class_file_ending" files="package-info.java" />
+	<suppress id="invalid_class_declaration_format" files="package-info.java" />
+	<suppress id="package_import_header" files="package-info.java" />
 </suppressions>

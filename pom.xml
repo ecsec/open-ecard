@@ -70,6 +70,14 @@
 		<android.api.version>21</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
+		<version.toolchain>[1.7,1.8]</version.toolchain>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<!--maven.compiler.release>7</maven.compiler.release-->
+
+		<version.jmockit>1.39</version.jmockit>
+		<version.pmd>6.2.0</version.pmd>
+
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
 	</properties>
@@ -120,40 +128,181 @@
 				</property>
 			</activation>
 		</profile>
+
 		<profile>
 			<id>ci</id>
-			<build>
+			<reporting>
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-site-plugin</artifactId>
-						<configuration>
-							<reportPlugins>
-								<plugin>
-									<groupId>org.apache.maven.plugins</groupId>
-									<artifactId>maven-checkstyle-plugin</artifactId>
-									<reports>
-										<report>checkstyle</report>
-									</reports>
-								</plugin>
-								<plugin>
-									<groupId>org.codehaus.mojo</groupId>
-									<artifactId>cobertura-maven-plugin</artifactId>
-								</plugin>
-								<plugin>
-									<groupId>org.codehaus.mojo</groupId>
-									<artifactId>findbugs-maven-plugin</artifactId>
-								</plugin>
-							</reportPlugins>
-						</configuration>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<id>license-report</id>
+								<reports>
+									<report>aggregate-third-party-report</report>
+								</reports>
+							</reportSet>
+						</reportSets>
 					</plugin>
+
+					<!-- does not support aggregate reports -->
+					<!--plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<inherited>false</inherited>
+					</plugin-->
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>versions-maven-plugin</artifactId>
+						<inherited>false</inherited>
+					</plugin>
+
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<id>cve-report</id>
+								<reports>
+									<report>aggregate</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jxr-plugin</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<reports>
+									<report>aggregate</report>
+									<report>test-aggregate</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-pmd-plugin</artifactId>
+						<inherited>false</inherited>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+						<reportSets>
+							<reportSet>
+								<id>pmd-report</id>
+								<reports>
+									<report>pmd</report>
+								</reports>
+							</reportSet>
+							<reportSet>
+								<id>cpd-report</id>
+								<reports>
+									<report>cpd</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<!-- does not support aggregate reports -->
+					<!--plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<inherited>false</inherited>
+					</plugin-->
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<id>checkstyle-report</id>
+								<reports>
+									<report>checkstyle-aggregate</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>taglist-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+						<reportSets>
+							<reportSet>
+								<id>taglist-report</id>
+								<reports>
+									<report>taglist</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-report-plugin</artifactId>
+						<inherited>false</inherited>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+						<reportSets>
+							<reportSet>
+								<id>unit-tests-report</id>
+								<reports>
+									<report>report-only</report>
+									<report>failsafe-report-only</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<id>coverage-report</id>
+								<reports>
+									<report>report-aggregate</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+					<!--plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<inherited>false</inherited>
+						<reportSets>
+							<reportSet>
+								<reports>
+									<report>javadoc</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin-->
+				</plugins>				
+			</reporting>
+			<build>
+				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<executions>
 							<execution>
 								<goals>
-									<goal>integration-test</goal>
 									<goal>verify</goal>
 								</goals>
 							</execution>
@@ -162,6 +311,7 @@
 				</plugins>
 			</build>
 		</profile>
+
 		<profile>
 			<id>release</id>
 			<properties>
@@ -213,13 +363,15 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>1.14</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>1.1</version>
 					<configuration>
-						<licenseFile>LICENSE.Open-eCard</licenseFile>
-						<generateBundle>true</generateBundle>
-						<bundleLicensePath>META-INF/LICENSE-${project.artifactId}</bundleLicensePath>
+						<toolchains>
+							<jdk>
+								<version>${version.toolchain}</version>
+							</jdk>
+						</toolchains>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -227,9 +379,6 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.7.0</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-						<encoding>${project.build.sourceEncoding}</encoding>
 						<showDeprecation>true</showDeprecation>
 						<showWarnings>true</showWarnings>
 						<debug>true</debug>
@@ -241,14 +390,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.0.2</version>
-					<configuration>
-						<encoding>${project.build.sourceEncoding}</encoding>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.0</version>
 					<configuration>
 						<excludes>
 							<exclude>LICENSE.Open-eCard</exclude>
@@ -257,8 +403,13 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -300,18 +451,28 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20.1</version>
+					<version>2.21.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.20.1</version>
+							<version>2.21.0</version>
+						</dependency>
+						<dependency>
+							<groupId>org.jmockit</groupId>
+							<artifactId>jmockit</artifactId>
+							<version>${version.jmockit}</version>
 						</dependency>
 					</dependencies>
 					<configuration>
+						<argLine>@{argLine} -Djdk.attach.allowAttachSelf</argLine>
+						<systemPropertyVariables>
+							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
+						</systemPropertyVariables>
 						<trimStackTrace>false</trimStackTrace>
 						<excludedGroups>.*</excludedGroups>
 					</configuration>
@@ -319,15 +480,24 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.20.1</version>
+					<version>2.21.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.20.1</version>
+							<version>2.21.0</version>
+						</dependency>
+						<dependency>
+							<groupId>org.jmockit</groupId>
+							<artifactId>jmockit</artifactId>
+							<version>${version.jmockit}</version>
 						</dependency>
 					</dependencies>
 					<configuration>
+						<argLine>@{argLine} -Djdk.attach.allowAttachSelf</argLine>
+						<systemPropertyVariables>
+							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
+						</systemPropertyVariables>
 						<trimStackTrace>false</trimStackTrace>
 						<includes>
 							<includes>**/*.java</includes>
@@ -335,26 +505,7 @@
 						<groups>it</groups>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.0.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>2.20.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>2.9</version>
-				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
@@ -363,10 +514,9 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
+					<version>3.0.0</version>
 					<configuration>
 						<show>protected</show>
-						<linksource>true</linksource>
 						<additionalparam>-Xdoclint:none</additionalparam>
 						<groups>
 							<group>
@@ -392,65 +542,7 @@
 						</excludePackageNames>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.17</version>
-					<configuration>
-						<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
-						<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
-						<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
-						<includeTestSourceDirectory>true</includeTestSourceDirectory>
-						<enableRSS>false</enableRSS>
-						<enableFilesSummary>false</enableFilesSummary>
-						<enableRulesSummary>false</enableRulesSummary>
-						<enableSeveritySummary>false</enableSeveritySummary>
-						<linkXRef>false</linkXRef>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>2.7</version>
-					<configuration>
-						<aggregate>true</aggregate>
-						<quiet>true</quiet>
-						<maxmem>2048m</maxmem>
-						<formats>
-							<format>xml</format>
-						</formats>
-						<instrumentation>
-							<includes>
-								<include>org/openecard/**/*.class</include>
-							</includes>
-							<excludes>
-								<exclude>org/openecard/bouncycastle/**/*.class</exclude>
-								<exclude>org/openecard/apache/http/**/*.class</exclude>
-								<exclude>org/openecard/ws/*.class</exclude>
-								<exclude>org/openecard/ws/schema/**/*.class</exclude>
-							</excludes>
-						</instrumentation>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.5</version>
-					<configuration>
-						<effort>Max</effort>
-						<threshold>Low</threshold>
-						<includeTests>false</includeTests>
-						<maxHeap>2048</maxHeap>
-						<onlyAnalyze>${findbugs.packages}</onlyAnalyze>
-						<xmlOutput>true</xmlOutput>
-						<failOnError>false</failOnError>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>jdepend-maven-plugin</artifactId>
-					<version>2.0</version>
-				</plugin>
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
@@ -480,7 +572,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -492,6 +584,7 @@
 					<artifactId>jaxws-maven-plugin</artifactId>
 					<version>2.5</version>
 					<configuration>
+						<useJdkToolchainExecutable>true</useJdkToolchainExecutable>
 						<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
 						<target>2.2</target>
 						<xjcArgs>
@@ -506,8 +599,126 @@
 						</vmArgs>
 					</configuration>
 				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.7</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-report-plugin</artifactId>
+					<version>2.21.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>1.16</version>
+					<configuration>
+						<licenseFile>LICENSE.Open-eCard</licenseFile>
+						<generateBundle>true</generateBundle>
+						<bundleLicensePath>META-INF/LICENSE-${project.artifactId}</bundleLicensePath>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jxr-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.9.0</version>
+					<configuration>
+						<skipEmptyReport>false</skipEmptyReport>
+						<analysisCache>true</analysisCache>
+					</configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-core</artifactId>
+                            <version>${version.pmd}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-java</artifactId>
+                            <version>${version.pmd}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>findbugs-maven-plugin</artifactId>
+					<version>3.0.5</version>
+					<configuration>
+						<omitVisitors />
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.0.0</version>
+					<configuration>
+						<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
+						<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
+						<suppressionsLocation>src/qa/checkstyle/openecard-checkstyle-suppressions.xml</suppressionsLocation>
+						<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>8.9</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>taglist-maven-plugin</artifactId>
+					<version>2.4</version>
+					<configuration>
+						<tagListOptions>
+							<tagClasses>
+								<tagClass>
+									<displayName>Todo Work</displayName>
+									<tags>
+										<tag>
+											<matchString>TODO</matchString>
+											<matchType>exact</matchType><!--ignoreCase-->
+										</tag>
+										<tag>
+											<matchString>FIXME</matchString>
+											<matchType>exact</matchType>
+										</tag>
+									</tags>
+								</tagClass>
+							</tagClasses>
+						</tagListOptions>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.1</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -549,6 +760,18 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<executions>
@@ -556,6 +779,18 @@
 						<id>add-license</id>
 						<goals>
 							<goal>update-project-license</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -596,12 +831,12 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.14.2</version>
+				<version>6.14.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
-				<version>1.38</version>
+				<version>${version.jmockit}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -638,7 +873,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.4</version>
+				<version>2.9.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>

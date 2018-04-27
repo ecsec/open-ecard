@@ -24,9 +24,14 @@ package org.openecard.mdlw.event;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.datatype.DatatypeFactory;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.event.EventObject;
@@ -64,7 +69,7 @@ class MwEventRunner implements Runnable {
     private final MwStateCallback mwCallback;
     private final Map<Long, SlotInfo> slots;
 
-    private boolean supportsBlockingWait = false;
+    private boolean supportsBlockingWait = true;
     private boolean supportsNonBlockingWait = true;
 
     MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule, MwStateCallback mwCallback) {
@@ -73,7 +78,7 @@ class MwEventRunner implements Runnable {
 	this.builder = builder;
 	this.mwModule = mwModule;
 	this.mwCallback = mwCallback;
-	slots = new HashMap<>();
+	this.slots = new HashMap<>();
     }
 
     void initRunner() throws CryptokiException {
@@ -121,7 +126,12 @@ class MwEventRunner implements Runnable {
 			}
 		    }
 		} else {
-		    throw new IllegalStateException("This point should never be reached");
+		    try {
+			slotId = pollForSlotChange();
+		    } catch (InterruptedException ex) {
+			LOG.debug("Middleware Event Runner interrupted.");
+			return;
+		    }
 		}
 		LOG.debug("Middleware event detected.");
 		repeatingNoEvent = false;
@@ -136,7 +146,6 @@ class MwEventRunner implements Runnable {
 			LOG.debug("Slot event recognized, slotId={}, ifdName={}.", slotId, ifdName);
 			try {
 			    MwToken tok = slot.getTokenInfo();
-			    tok.getLabel();
 
 			    // send card inserted
 			    this.sendCardInserted(slot);
@@ -160,8 +169,11 @@ class MwEventRunner implements Runnable {
 			supportsBlockingWait = false;
 			continue;
 		    } else if (supportsNonBlockingWait) {
-			LOG.info("Non-blocking wait is not supported. Terminating event thread.");
+			LOG.info("Non-blocking wait is not supported. Falling back to polling mode.");
 			supportsNonBlockingWait = false;
+			continue;
+		    } else {
+			LOG.error("Determining the card status is not possible with this middleware.", ex);
 			return;
 		    }
 		} else if (ex.getErrorCode() == CryptokiLibrary.CKR_GENERAL_ERROR) {
@@ -191,17 +203,19 @@ class MwEventRunner implements Runnable {
     private void sendTerminalAdded(MwSlot slot) {
 	CkSlot ckSlot = slot.getSlotInfo();
 	//Add Terminal to cache if not present
+	SlotInfo sl;
 	if (slots.get(ckSlot.getSlotID()) == null) {
-	    SlotInfo sl = new SlotInfo();
+	    sl = new SlotInfo();
 	    sl.ifdName = ckSlot.getSlotDescription();
 	    sl.slotId = ckSlot.getSlotID();
 
-	    slots.put(ckSlot.getSlotID(), sl);
+	    slots.put(sl.slotId, sl);
 	} else {
 	    return; //Event already sent
 	}
-	String ifdName = ckSlot.getSlotDescription();
-	long slotId = ckSlot.getSlotID();
+
+	String ifdName = sl.ifdName;
+	long slotId = sl.slotId;
 	// send terminal added
 	LOG.debug("Sending TERMINAL_ADDED event, ifdName={} id={}.", ifdName, slotId);
 	ConnectionHandleType insertHandle = makeConnectionHandle(ifdName, slotId);
@@ -397,6 +411,63 @@ class MwEventRunner implements Runnable {
 		    LOG.error("Failed to initialize middleware.", ex);
 		}
 	    }
+	}
+    }
+
+    private long pollForSlotChange() throws CryptokiException, InterruptedException {
+	// loop until an event has been found
+	while (true) {
+	    List<MwSlot> currentSlots = mwModule.getSlotList(TokenState.NotPresent);
+
+	    // remove non hw slots
+	    Iterator<MwSlot> i = currentSlots.iterator();
+	    while (i.hasNext()) {
+		MwSlot s = i.next();
+		if (! isHwSlot(s)) {
+		    i.remove();
+		}
+	    }
+
+	    // check if a new terminal appeared
+	    for (MwSlot next : currentSlots) {
+		if (! slots.containsKey(next.getSlotInfo().getSlotID())) {
+		    return next.getSlotInfo().getSlotID();
+		}
+	    }
+
+	    // check if a terminal vanished
+	    {
+		ArrayList<Long> checkIds = new ArrayList<>();
+		for (MwSlot next : currentSlots) {
+		    checkIds.add(next.getSlotInfo().getSlotID());
+		}
+		Set<Long> remainingIds = new HashSet<>(slots.keySet());
+		remainingIds.removeAll(checkIds);
+		if (! remainingIds.isEmpty()) {
+		    return remainingIds.iterator().next();
+		}
+	    }
+
+	    // check if a card has been inserted or removed
+	    for (MwSlot next : currentSlots) {
+		long id = next.getSlotInfo().getSlotID();
+		SlotInfo nextInfo = slots.get(id);
+
+		boolean cardPresent;
+		try {
+		    next.getTokenInfo(); // craises error when no card is present
+		    cardPresent = true;
+		} catch (TokenException | SessionException ex) {
+		    cardPresent = false;
+		}
+
+		if (nextInfo.isCardPresent != cardPresent) {
+		    return id;
+		}
+	    }
+
+	    // nothing found, sleep a bit and try again
+	    Thread.sleep(1000);
 	}
     }
 

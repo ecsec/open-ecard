@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.ECardConstants;
@@ -37,7 +36,6 @@ import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
@@ -56,11 +54,12 @@ import org.slf4j.LoggerFactory;
  * <br> If PACE succeeds the Step for PIN changing will be shown.
  *
  * @author Dirk Petrautzki
+ * @author Tobias WIch
  */
 public class CANStepAction extends StepAction {
 
     // translation and logger
-    private static final Logger logger = LoggerFactory.getLogger(CANStepAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CANStepAction.class);
     private final I18n lang = I18n.getTranslation("pinplugin");
 
     // translation constants
@@ -71,10 +70,10 @@ public class CANStepAction extends StepAction {
 
     private final boolean capturePin;
     private final Dispatcher dispatcher;
+    private final ConnectionHandleType conHandle;
+    private final RecognizedState state;
 
     private String can;
-    private ConnectionHandleType conHandle;
-    private RecognizedState state;
 
     /**
      * Creates a new instance of CANStepAction.
@@ -109,7 +108,7 @@ public class CANStepAction extends StepAction {
 	try {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
-	    logger.error("Failed to read empty Protocol data.", ex);
+	    LOG.error("Failed to read empty Protocol data.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -117,7 +116,7 @@ public class CANStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 
-	    if (!verifyUserInput(executionResults)) {
+	    if (! verifyUserInput(executionResults)) {
 		// let the user enter the can again, when input verification failed
 		return new StepActionResult(StepActionResultStatus.REPEAT, createReplacementStep(false, true));
 	    } else {
@@ -133,7 +132,7 @@ public class CANStepAction extends StepAction {
 	establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
 
 	try {
-	    EstablishChannelResponse ecr = (EstablishChannelResponse) dispatcher.deliver(establishChannel);
+	    EstablishChannelResponse ecr = (EstablishChannelResponse) dispatcher.safeDeliver(establishChannel);
 	    WSHelper.checkResult(ecr);
 
 	    // pace was successfully performed, so get to the next step
@@ -144,14 +143,8 @@ public class CANStepAction extends StepAction {
 	    replacementStep.setAction(pinAction);
 	    return new StepActionResult(StepActionResultStatus.NEXT, replacementStep);
 	} catch (WSException ex) {
-	    logger.info("Wrong CAN entered, trying again");
+	    LOG.info("Wrong CAN entered, trying again");
 	    return new StepActionResult(StepActionResultStatus.REPEAT, createReplacementStep(true, false));
-	} catch (InvocationTargetException ex) {
-	    logger.error("Exception while dispatching EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	} catch (DispatcherException ex) {
-	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 
@@ -164,7 +157,7 @@ public class CANStepAction extends StepAction {
     private boolean verifyUserInput(ExecutionResults executionResults) {
 	// TODO: check pin length and possibly allowed charset with CardInfo file
 	PasswordField canField = (PasswordField) executionResults.getResult(CANEntryStep.CAN_FIELD);
-	can = canField.getValue();
+	can = new String(canField.getValue());
 	if (can.isEmpty() || can.length() != 6) {
 	    return false;
 	}

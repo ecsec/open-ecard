@@ -47,6 +47,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
@@ -79,13 +80,13 @@ import org.slf4j.LoggerFactory;
 public class SettingsGroup extends JPanel {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory.getLogger(SettingsGroup.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SettingsGroup.class);
 
     protected final Settings properties;
     private final I18n lang = I18n.getTranslation("addon");
     private final JPanel container;
     private final HashMap<Component, JLabel> fieldLabels;
-    private int itemIdx;
+    protected int itemIdx;
 
 
     /**
@@ -118,6 +119,10 @@ public class SettingsGroup extends JPanel {
 	layout.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 	layout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 	container.setLayout(layout);
+    }
+
+    protected final JPanel getContainer() {
+	return container;
     }
 
     /**
@@ -162,18 +167,47 @@ public class SettingsGroup extends JPanel {
      */
     protected JTextField addInputItem(@Nonnull String name, @Nullable String description,
 	    final @Nonnull String property) {
+	return addInputItem(name, description, property, false);
+    }
+
+    /**
+     * Adds an input field to the group.
+     * The specified property is bound to the input and updates when the value changes.
+     *
+     * @param name Name displayed on the label besides the input element.
+     * @param description Optional tooltip description visible when hovering the label.
+     * @param property Property entry this element is bound to.
+     * @param isPassword If {@code true} the input field's text is masked and thus usable for passwords.
+     * @return The input element which has been created and added to the entry.
+     */
+    protected JTextField addInputItem(@Nonnull String name, @Nullable String description,
+	    final @Nonnull String property, boolean isPassword) {
 	JLabel label = addLabel(name, description);
 
 	String value = properties.getProperty(property);
 	value = value == null ? "" : value;
-	final JTextField input = new JTextField(value) {
-	    @Override
-	    public Dimension getPreferredSize() {
-		Dimension dim = super.getPreferredSize();
-		dim.width = 100;
-		return dim;
-	    }
-	};
+
+	final JTextField input;
+	if (isPassword) {
+	    input = new JPasswordField(value) {
+		@Override
+		public Dimension getPreferredSize() {
+		    Dimension dim = super.getPreferredSize();
+		    dim.width = 100;
+		    return dim;
+		}
+	    };
+	} else {
+	    input = new JTextField(value) {
+		@Override
+		public Dimension getPreferredSize() {
+		    Dimension dim = super.getPreferredSize();
+		    dim.width = 100;
+		    return dim;
+		}
+	    };
+	}
+
 	fieldLabels.put(input, label);
 	// add listener for value changes
 	input.getDocument().addDocumentListener(new DocumentListener() {
@@ -412,7 +446,7 @@ public class SettingsGroup extends JPanel {
 		model = new SpinnerMathNumberModel(convertedValue, null, null, BigInteger.ONE);
 	    }
 	} else {
-	    logger.error("Type STRING and BOOLEAN are not allowed for the use of this function.");
+	    LOG.error("Type STRING and BOOLEAN are not allowed for the use of this function.");
 	    return null;
 	}
 

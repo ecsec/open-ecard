@@ -62,6 +62,20 @@ public class UrlBuilderTest {
 	assertEquals(result, new URI("http://foo/"));
     }
 
+    @Test
+    public void addPathSegment() throws URISyntaxException {
+	UrlBuilder b = UrlBuilder.fromUrl("http://foo/");
+
+	b = b.addPathSegment("/foo");
+	assertEquals(b.build(), new URI("http://foo/foo"));
+
+	b = b.addPathSegment("bar/");
+	assertEquals(b.build(), new URI("http://foo/foo/bar/"));
+
+	b = b.addPathSegment("/quack");
+	assertEquals(b.build(), new URI("http://foo/foo/bar/quack"));
+    }
+
     // TODO: add more tests
 
 }

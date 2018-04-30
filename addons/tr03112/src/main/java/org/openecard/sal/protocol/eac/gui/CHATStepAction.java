@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
+import org.openecard.common.I18n;
+import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.gui.StepResult;
@@ -50,6 +53,17 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
  */
 public class CHATStepAction extends StepAction {
 
+    static {
+	I18n lang = I18n.getTranslation("pace");
+	LANG = lang;
+	PIN = lang.translationForKey("pin");
+	PUK = lang.translationForKey("puk");
+    }
+
+    private static final I18n LANG;
+    private static final String PIN;
+    private static final String PUK;
+
     private final EACData eacData;
     private final BackgroundTask bTask;
 
@@ -68,14 +82,31 @@ public class CHATStepAction extends StepAction {
 	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    boolean nativePace = (boolean) ctx.get(EACProtocol.IS_NATIVE_PACE);
 	    PACEMarkerType paceMarker = (PACEMarkerType) ctx.get(EACProtocol.PACE_MARKER);
-	    byte[] status = (byte[]) ctx.get(EACProtocol.PIN_STATUS_BYTES);
+	    EacPinStatus status = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
 	    byte[] slotHandle = (byte[]) ctx.get(EACProtocol.SLOT_HANDLE);
 	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
 
-	    PINStep pinStep = new PINStep(eacData, ! nativePace, paceMarker);
-	    pinStep.setBackgroundTask(bTask);
-	    StepAction pinAction = new PINStepAction(eacData, ! nativePace, slotHandle, dispatcher, pinStep, status);
-	    pinStep.setAction(pinAction);
+	    Step pinStep;
+	    assert(status != null);
+	    switch (status) {
+		case BLOCKED:
+		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
+		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
+			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
+		    break;
+		case DEACTIVATED:
+		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
+		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
+			    LANG.translationForKey("step_error_pin_deactivated"),
+			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
+		    break;
+		default:
+		    pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
+		    pinStep.setBackgroundTask(bTask);
+		    StepAction pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, (PINStep) pinStep, status);
+		    pinStep.setAction(pinAction);
+	    }
 
 	    return new StepActionResult(StepActionResultStatus.NEXT, pinStep);
 	} else {

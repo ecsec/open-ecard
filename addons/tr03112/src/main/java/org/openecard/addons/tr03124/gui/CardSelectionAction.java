@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,11 +29,9 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import org.openecard.addon.Context;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.OutputInfoUnit;
@@ -53,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CardSelectionAction extends StepAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(CardSelectionAction.class);
+    private final static Logger LOG = LoggerFactory.getLogger(CardSelectionAction.class);
 
     private final List<ConnectionHandleType> avCard;
     private final List<String> types;
@@ -133,26 +131,22 @@ public class CardSelectionAction extends StepAction {
      * Update the list of available and fitting cards.
      */
     private void updateCards() {
-	try {
-	    avCard.clear();
-	    CardApplicationPath cap = new CardApplicationPath();
-	    cap.setCardAppPathRequest(new CardApplicationPathType());
-	    CardApplicationPathResponse resp = (CardApplicationPathResponse) ctx.getDispatcher().deliver(cap);
-	    List<CardApplicationPathType> cards = resp.getCardAppPathResultSet().getCardApplicationPathResult();
-	    for (CardApplicationPathType path : cards) {
-		CardApplicationConnect connect = new CardApplicationConnect();
-		connect.setCardApplicationPath(path);
-		CardApplicationConnectResponse conResp = (CardApplicationConnectResponse) ctx.getDispatcher().deliver(connect);
-		if (types.contains(conResp.getConnectionHandle().getRecognitionInfo().getCardType())) {
-		    avCard.add(conResp.getConnectionHandle());
-		} else {
-		    CardApplicationDisconnect disconnect = new CardApplicationDisconnect();
-		    disconnect.setConnectionHandle(conResp.getConnectionHandle());
-		    ctx.getDispatcher().deliver(disconnect);
-		}
+	avCard.clear();
+	CardApplicationPath cap = new CardApplicationPath();
+	cap.setCardAppPathRequest(new CardApplicationPathType());
+	CardApplicationPathResponse resp = (CardApplicationPathResponse) ctx.getDispatcher().safeDeliver(cap);
+	List<CardApplicationPathType> cards = resp.getCardAppPathResultSet().getCardApplicationPathResult();
+	for (CardApplicationPathType path : cards) {
+	    CardApplicationConnect connect = new CardApplicationConnect();
+	    connect.setCardApplicationPath(path);
+	    CardApplicationConnectResponse conResp = (CardApplicationConnectResponse) ctx.getDispatcher().safeDeliver(connect);
+	    if (types.contains(conResp.getConnectionHandle().getRecognitionInfo().getCardType())) {
+		avCard.add(conResp.getConnectionHandle());
+	    } else {
+		CardApplicationDisconnect disconnect = new CardApplicationDisconnect();
+		disconnect.setConnectionHandle(conResp.getConnectionHandle());
+		ctx.getDispatcher().safeDeliver(disconnect);
 	    }
-	} catch (DispatcherException | InvocationTargetException ex) {
-	    logger.error("Failed to get currently connected cards.", ex);
 	}
     }
 

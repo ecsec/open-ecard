@@ -31,6 +31,7 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.ifd.IFDProtocol;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.sal.SALProtocol;
+import org.slf4j.LoggerFactory;
 
 
 /**

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,26 +26,34 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.crypto.tls.AlertLevel;
-import org.openecard.bouncycastle.crypto.tls.CipherSuite;
-import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
-import org.openecard.bouncycastle.crypto.tls.ECPointFormat;
-import org.openecard.bouncycastle.crypto.tls.HashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.NamedCurve;
-import org.openecard.bouncycastle.crypto.tls.ProtocolVersion;
-import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
-import org.openecard.bouncycastle.crypto.tls.TlsCipherFactory;
-import org.openecard.bouncycastle.crypto.tls.TlsECCUtils;
-import org.openecard.bouncycastle.crypto.tls.TlsExtensionsUtils;
-import org.openecard.bouncycastle.crypto.tls.TlsKeyExchange;
-import org.openecard.bouncycastle.crypto.tls.TlsUtils;
+import javax.annotation.Nullable;
+import org.openecard.bouncycastle.tls.AlertLevel;
+import org.openecard.bouncycastle.tls.CipherSuite;
+import org.openecard.bouncycastle.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.tls.ECPointFormat;
+import org.openecard.bouncycastle.tls.HashAlgorithm;
+import org.openecard.bouncycastle.tls.NameType;
+import org.openecard.bouncycastle.tls.NamedGroup;
+import org.openecard.bouncycastle.tls.ProtocolVersion;
+import org.openecard.bouncycastle.tls.ServerName;
+import org.openecard.bouncycastle.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsClientContext;
+import org.openecard.bouncycastle.tls.TlsDHUtils;
+import org.openecard.bouncycastle.tls.TlsECCUtils;
+import org.openecard.bouncycastle.tls.TlsExtensionsUtils;
+import org.openecard.bouncycastle.tls.TlsSession;
+import org.openecard.bouncycastle.tls.TlsUtils;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.tls.auth.ContextAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,25 +68,18 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientCertDefaultTlsClient extends DefaultTlsClient implements ClientCertTlsClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientCertDefaultTlsClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientCertDefaultTlsClient.class);
 
     private final String host;
     private TlsAuthentication tlsAuth;
+    private boolean enforceSameSession = false;
+    private TlsSession firstSession;
+    private TlsSession lastSession;
 
-    /**
-     * Create a ClientCertDefaultTlsClient for the given parameters.
-     *
-     * @param host Host or IP address. Value must not be null.
-     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
-     */
-    public ClientCertDefaultTlsClient(@Nonnull String host, boolean doSni) {
-	if (doSni) {
-	    setServerName(host);
-	}
-	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
-	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
-	this.host = host;
-    }
+    protected List<ServerName> serverNames;
+    protected ProtocolVersion clientVersion = ProtocolVersion.TLSv12;
+    protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv10;
+
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
      *
@@ -86,14 +87,88 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
      * @param host Host or IP address. Value must not be null.
      * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertDefaultTlsClient(@Nonnull TlsCipherFactory tcf, @Nonnull String host, boolean doSni) {
+    public ClientCertDefaultTlsClient(@Nonnull TlsCrypto tcf, @Nullable String host, boolean doSni) {
 	super(tcf);
 	if (doSni) {
-	    setServerName(host);
+	    this.serverNames = Collections.singletonList(makeServerName(host));
 	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
-	setMinimumVersion(tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11);
+	this.minClientVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
 	this.host = host;
+    }
+
+
+    public void setServerName(@Nonnull String serverName) {
+	serverNames = Collections.singletonList(makeServerName(serverName));
+    }
+
+    public void setServerNames(@Nonnull List<String> serverNames) {
+	this.serverNames = new ArrayList<>();
+	for (String next : serverNames) {
+	    this.serverNames.add(makeServerName(next));
+	}
+    }
+
+    @Override
+    protected Vector getSNIServerNames() {
+	return serverNames != null ? new Vector(serverNames) : null;
+    }
+
+    private ServerName makeServerName(String name) {
+	return new ServerName(NameType.host_name, name);
+    }
+
+    @Override
+    public ProtocolVersion getClientVersion() {
+	return this.clientVersion;
+    }
+
+    @Override
+    public void setClientVersion(ProtocolVersion version) {
+	this.clientVersion = version;
+    }
+
+    @Override
+    public void setMinimumVersion(ProtocolVersion minClientVersion) {
+	this.minClientVersion = minClientVersion;
+    }
+
+    @Override
+    public ProtocolVersion getMinimumVersion() {
+	return this.minClientVersion;
+    }
+
+
+    public void setEnforceSameSession(boolean enforceSameSession) {
+	this.enforceSameSession = enforceSameSession;
+    }
+
+
+    @Override
+    public synchronized TlsAuthentication getAuthentication() throws IOException {
+	if (tlsAuth == null) {
+	    tlsAuth = new DynamicAuthentication(host);
+	}
+	if (tlsAuth instanceof ContextAware) {
+	    ((ContextAware) tlsAuth).setContext(context);
+	}
+	return tlsAuth;
+    }
+
+    @Override
+    public synchronized void setAuthentication(TlsAuthentication tlsAuth) {
+	this.tlsAuth = tlsAuth;
+    }
+
+
+    @Override
+    public void init(TlsClientContext context) {
+	// save first session so resumption only works with the exact same session
+	if (enforceSameSession && firstSession == null && lastSession != null) {
+	    this.firstSession = lastSession;
+	}
+
+	super.init(context);
     }
 
 
@@ -171,57 +246,32 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     }
 
     @Override
-    protected TlsKeyExchange createDHKeyExchange(int keyExchange) {
-	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
-	    return new TlsDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
+    protected Vector getSupportedSignatureAlgorithms() {
+	boolean weakCrypto = Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"));
+	TlsCrypto crypto = context.getCrypto();
+        short[] hashAlgorithms;
+	if (! weakCrypto) {
+	    hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
+		HashAlgorithm.sha224 };
 	} else {
-	    return super.createDHKeyExchange(keyExchange);
+	    hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
+		HashAlgorithm.sha224, HashAlgorithm.sha1 };
 	}
-    }
+        short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 
-    @Override
-    protected TlsKeyExchange createDHEKeyExchange(int keyExchange) {
-	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
-	    return new TlsDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, null);
-	} else {
-	    return super.createDHEKeyExchange(keyExchange);
-	}
-    }
-
-    @Override
-    protected TlsKeyExchange createECDHKeyExchange(int keyExchange) {
-	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
-	    return new TlsECDHKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
-		    clientECPointFormats, serverECPointFormats);
-	} else {
-	    return super.createECDHKeyExchange(keyExchange);
-	}
-    }
-
-    @Override
-    protected TlsKeyExchange createECDHEKeyExchange(int keyExchange) {
-	if (! Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"))) {
-	    return new TlsECDHEKeyExchangeStrengthCheck(keyExchange, supportedSignatureAlgorithms, namedCurves,
-		    clientECPointFormats, serverECPointFormats);
-	} else {
-	    return super.createECDHEKeyExchange(keyExchange);
-	}
-    }
-
-    @Override
-    public synchronized TlsAuthentication getAuthentication() throws IOException {
-	if (tlsAuth == null) {
-	    tlsAuth = new DynamicAuthentication(host);
-	}
-	if (tlsAuth instanceof ContextAware) {
-	    ((ContextAware) tlsAuth).setContext(context);
-	}
-	return tlsAuth;
-    }
-
-    @Override
-    public synchronized void setAuthentication(TlsAuthentication tlsAuth) {
-	this.tlsAuth = tlsAuth;
+        Vector result = new Vector();
+        for (int i = 0; i < signatureAlgorithms.length; ++i)
+        {
+            for (int j = 0; j < hashAlgorithms.length; ++j)
+            {
+                SignatureAndHashAlgorithm alg = new SignatureAndHashAlgorithm(hashAlgorithms[j], signatureAlgorithms[i]);
+                if (crypto.hasSignatureAndHashAlgorithm(alg))
+                {
+                    result.addElement(alg);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -230,47 +280,36 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
 
 	// code taken from AbstractTlsClient, if that should ever change modify it here too
-	if (TlsECCUtils.containsECCCipherSuites(getCipherSuites())) {
-            this.namedCurves = new int[] {
-		// other possible parameters TR-02102-2 sec. 3.6
-		NamedCurve.brainpoolP512r1, NamedCurve.brainpoolP384r1, NamedCurve.secp384r1,
-		// required parameters TR-03116-4 sec. 4.1.4
-		NamedCurve.brainpoolP256r1, NamedCurve.secp256r1, NamedCurve.secp224r1,
-	    };
+	Vector supportedGroups = new Vector();
+	if (TlsECCUtils.containsECCipherSuites(getCipherSuites())) {
+	    // other possible parameters TR-02102-2 sec. 3.6
+            supportedGroups.add(NamedGroup.brainpoolP512r1);
+	    supportedGroups.add(NamedGroup.brainpoolP384r1);
+	    supportedGroups.add(NamedGroup.secp384r1);
+	    // required parameters TR-03116-4 sec. 4.1.4
+	    supportedGroups.add(NamedGroup.brainpoolP256r1);
+	    supportedGroups.add(NamedGroup.secp256r1);
+	    supportedGroups.add(NamedGroup.secp224r1);
+
 	    this.clientECPointFormats = new short[]{
 		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
 	    };
 
-            TlsECCUtils.addSupportedEllipticCurvesExtension(clientExtensions, namedCurves);
 	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
-
-	// overwrite hash and signature algorithms
-        if (TlsUtils.isSignatureAlgorithmsExtensionAllowed(clientVersion)) {
-	    boolean weakCrypto = Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"));
-            short[] hashAlgorithms;
-	    if (! weakCrypto) {
-		hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-		    HashAlgorithm.sha224 };
-	    } else {
-		hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-		    HashAlgorithm.sha224, HashAlgorithm.sha1 };
-	    }
-
-            short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
-
-            this.supportedSignatureAlgorithms = new Vector();
-            for (int i = 0; i < hashAlgorithms.length; ++i) {
-                for (int j = 0; j < signatureAlgorithms.length; ++j) {
-                    this.supportedSignatureAlgorithms.addElement(new SignatureAndHashAlgorithm(hashAlgorithms[i],
-                        signatureAlgorithms[j]));
-                }
-            }
-
-            clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
-
-            TlsUtils.addSignatureAlgorithmsExtension(clientExtensions, supportedSignatureAlgorithms);
+        if (TlsDHUtils.containsDHECipherSuites(getCipherSuites())) {
+	    // RFC 7919
+            supportedGroups.addElement(NamedGroup.ffdhe2048);
+            supportedGroups.addElement(NamedGroup.ffdhe3072);
+            supportedGroups.addElement(NamedGroup.ffdhe4096);
+            supportedGroups.addElement(NamedGroup.ffdhe6144);
+            supportedGroups.addElement(NamedGroup.ffdhe8192);
         }
+
+	if (! supportedGroups.isEmpty()) {
+	    this.supportedGroups = supportedGroups;
+	    TlsExtensionsUtils.addSupportedGroupsExtension(clientExtensions, supportedGroups);
+	}
 
 	return clientExtensions;
     }
@@ -278,16 +317,16 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public void notifyAlertRaised(short alertLevel, short alertDescription, String message, Throwable cause) {
 	TlsError error = new TlsError(alertLevel, alertDescription, message, cause);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning sent.");
-	    if (logger.isDebugEnabled()) {
-		logger.info(error.toString(), cause);
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning sent.");
+	    if (LOG.isDebugEnabled()) {
+		LOG.info(error.toString(), cause);
 	    } else {
-		logger.info(error.toString());
+		LOG.info(error.toString());
 	    }
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error sent.");
-	    logger.error(error.toString(), cause);
+	    LOG.error("TLS error sent.");
+	    LOG.error(error.toString(), cause);
 	}
 
 	super.notifyAlertRaised(alertLevel, alertDescription, message, cause);
@@ -296,20 +335,62 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     public void notifyAlertReceived(short alertLevel, short alertDescription) {
 	TlsError error = new TlsError(alertLevel, alertDescription);
-	if (alertLevel == AlertLevel.warning && logger.isInfoEnabled()) {
-	    logger.info("TLS warning received.");
-	    logger.info(error.toString());
+	if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	    LOG.info("TLS warning received.");
+	    LOG.info(error.toString());
 	} else if (alertLevel == AlertLevel.fatal) {
-	    logger.error("TLS error received.");
-	    logger.error(error.toString());
+	    LOG.error("TLS error received.");
+	    LOG.error(error.toString());
 	}
 
 	super.notifyAlertReceived(alertLevel, alertDescription);
     }
 
+
+    @Override
+    public TlsSession getSessionToResume() {
+	if (firstSession != null) {
+	    return firstSession;
+	} else {
+	    return super.getSessionToResume();
+	}
+    }
+
+    @Override
+    public void notifySessionID(byte[] sessionID) {
+	if (enforceSameSession) {
+	    // check if someone tries to resume and raise error
+	    TlsSession s = getSessionToResume();
+	    if (s != null) {
+		if (ByteUtils.compare(s.getSessionID(), sessionID)) {
+		    // the session id is the same meaning the protocol implementation will reject the handshake if the
+		    // secrets don't match
+		    LOG.info("Trying to resume previous TLS session.");
+		    return;
+		}
+	    }
+
+	    // resumption not initiated properly
+	    // terminate connection with RuntimeException as BC will handle this error
+	    String msg = "TLS Session resumption not successful.";
+	    LOG.error(msg);
+	    throw new RuntimeException(msg);
+	}
+    }
+
+    @Override
+    public void notifyHandshakeComplete() throws IOException {
+	lastSession = context != null ? context.getResumableSession() : null;
+	if (lastSession != null) {
+	    lastSession = TlsUtils.importSession(lastSession.getSessionID(), lastSession.exportSessionParameters());
+	}
+
+	super.notifyHandshakeComplete();
+    }
+
     @Override
     public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException {
-	// allow renegotiation
+	// pretend we accept it
     }
 
 }

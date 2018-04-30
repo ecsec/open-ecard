@@ -53,7 +53,7 @@ import org.openecard.apache.http.io.HttpMessageParser;
 import org.openecard.apache.http.io.HttpMessageWriter;
 import org.openecard.apache.http.message.BasicHeader;
 import org.openecard.apache.http.protocol.HTTP;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +170,7 @@ public class StreamHttpClientConnection implements HttpClientConnection {
     @Override
     public void sendRequestHeader(HttpRequest request) throws HttpException, IOException {
 	assertOpen();
-	request.setHeader(new BasicHeader("User-Agent", "Open-eCard-App/" + Version.getVersion()));
+	request.setHeader(new BasicHeader("User-Agent", AppVersion.getName() + "/" + AppVersion.getVersion()));
         this.requestWriter.write(request);
         incrementRequestCount();
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
@@ -85,7 +86,9 @@ import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
+import org.openecard.common.event.IfdEventObject;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
@@ -95,16 +98,16 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 
 /**
@@ -113,29 +116,19 @@ import static org.testng.Assert.assertTrue;
  */
 public class GenericCryptographyProtocolTest {
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(GenericCryptographyProtocolTest.class);
+    private static final boolean TESTS_ENABLED = false;
 
-    private static ClientEnv env;
-    private static TinySAL instance;
-    private static CardStateMap states;
+    private String plaintext;
+    private ClientEnv env;
+    private TinySAL instance;
+    private CardStateMap states;
     byte[] cardApplication = StringUtils.toByteArray("A000000167455349474E");
     byte[] cardApplication_ROOT = StringUtils.toByteArray("D2760001448000");
-    private static IFD ifd;
-    private static final String plaintext;
-    private static final Logger logger = LoggerFactory.getLogger(GenericCryptographyProtocolTest.class);
+    private IFD ifd;
 
-    static {
-	try {
-	    plaintext = loadFile("plaintext.txt");
-	} catch (IOException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
-
-    private static String loadFile(String resourcePath) throws IOException {
+    @BeforeClass
+    private void loadFile(String resourcePath) throws IOException {
 	InputStream in = GenericCryptographyProtocolTest.class.getClassLoader().getResourceAsStream(resourcePath);
 	StringWriter w = new StringWriter();
 	BufferedReader r = new BufferedReader(new InputStreamReader(in, Charset.forName("utf-8")));
@@ -144,11 +137,12 @@ public class GenericCryptographyProtocolTest {
 	    w.write(nextLine);
 	    w.write(String.format("%n")); // platform dependent newline character
 	}
-	return w.toString();
+
+	plaintext = w.toString();
     }
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeMethod
+    public void setUp() throws Exception {
 
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
@@ -159,13 +153,32 @@ public class GenericCryptographyProtocolTest {
 	states = new CardStateMap();
 
 	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
-	CardRecognition cr = new CardRecognition(ifd, ecr.getContextHandle());
+	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
+	CIFProvider cp = new CIFProvider() {
+	    @Override
+	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+		return cr.getCardInfo(cardType);
+	    }
+	    @Override
+	    public boolean needsRecognition(byte[] atr) {
+		return true;
+	    }
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return cr.getCardInfo(cardType);
+            }
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return cr.getCardImage(cardType);
+            }
+	};
+	env.setCIFProvider(cp);
 
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
-	SALStateCallback salCallback = new SALStateCallback(cr, states);
+	RecognitionInfo recognitionInfo = cr.recognizeCard(ecr.getContextHandle(), listIFDsResponse.getIFDName().get(0), BigInteger.ZERO);
+	SALStateCallback salCallback = new SALStateCallback(env, states);
 
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(ecr.getContextHandle());
@@ -173,17 +186,17 @@ public class GenericCryptographyProtocolTest {
 	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
 	connectionHandleType.setSlotIndex(new BigInteger("0"));
 
-	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
+	salCallback.signalEvent(EventType.CARD_RECOGNIZED, new IfdEventObject(connectionHandleType));
 	instance = new TinySAL(env, states);
 	env.setSAL(instance);
 
 	// init AddonManager
 	UserConsent uc = new SwingUserConsent(new SwingDialogWrapper());
-	AddonManager manager = new AddonManager(d, uc, states, cr, null, null);
+	AddonManager manager = new AddonManager(env, uc, states, null);
 	instance.setAddonManager(manager);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDGet() throws ParserConfigurationException {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -213,8 +226,8 @@ public class GenericCryptographyProtocolTest {
 	DIDGetResponse didGetResponse = instance.didGet(didGet);
 
 	assertEquals(ECardConstants.Major.OK, didGetResponse.getResult().getResultMajor());
-	org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
-		new org.openecard.crypto.common.sal.CryptoMarkerType(
+	org.openecard.crypto.common.sal.did.CryptoMarkerType cryptoMarker =
+		new org.openecard.crypto.common.sal.did.CryptoMarkerType(
 			(CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 	assertEquals(cryptoMarker.getCertificateRefs().get(0).getDataSetName(), "EF.C.CH.AUT");
     }
@@ -227,7 +240,7 @@ public class GenericCryptographyProtocolTest {
      * @throws Exception
      *             when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testSign() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -279,15 +292,15 @@ public class GenericCryptographyProtocolTest {
 	    didGet.getConnectionHandle().setCardApplication(cardApplication);
 	    DIDGetResponse didGetResponse = instance.didGet(didGet);
 
-	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
-		    new org.openecard.crypto.common.sal.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.did.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.did.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    Sign sign = new Sign();
 	    byte[] message = StringUtils.toByteArray("616263646263646563646566646566676566676861");
 
 	    String algorithm = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-	    if (algorithm.equals(GenericCryptoObjectIdentifier.sigS_ISO9796_2rnd)) {
+	    if (algorithm.equals(GenericCryptoUris.sigS_ISO9796_2rnd)) {
 		// TODO support for sign9796_2_DS2
 		continue;
 	    }
@@ -303,18 +316,21 @@ public class GenericCryptographyProtocolTest {
 	}
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDCreate() {
 	// TODO write test as soon as implemented
 	DIDCreateResponse resp = instance.didCreate(new DIDCreate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDUpdate() {
 	// TODO write test as soon as implemented
 	DIDUpdateResponse resp = instance.didUpdate(new DIDUpdate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testEncipher() {
 	// TODO write test as soon as implemented
 	EncipherResponse resp = instance.encipher(new Encipher());
@@ -330,7 +346,7 @@ public class GenericCryptographyProtocolTest {
      *
      * @throws Exception when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDecipher() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -383,8 +399,8 @@ public class GenericCryptographyProtocolTest {
 	    didGet.getConnectionHandle().setCardApplication(cardApplication);
 	    DIDGetResponse didGetResponse = instance.didGet(didGet);
 
-	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
-		    new org.openecard.crypto.common.sal.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.did.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.did.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    ByteArrayOutputStream ciphertext = new ByteArrayOutputStream();
@@ -404,17 +420,17 @@ public class GenericCryptographyProtocolTest {
 
 	    Cipher cipher;
 	    int blocksize;
-	    String algorithmOID = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-	    if (algorithmOID.equals(GenericCryptoObjectIdentifier.rsaEncryption)) {
+	    String algorithmUri = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+	    if (algorithmUri.equals(GenericCryptoUris.RSA_ENCRYPTION)) {
 		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 		cipher.init(Cipher.ENCRYPT_MODE, cert);
 		blocksize = 245; // keysize/8-pkcspadding = (2048)/8-11
-	    } else if (algorithmOID.equals(GenericCryptoObjectIdentifier.id_RSAES_OAEP)) {
+	    } else if (algorithmUri.equals(GenericCryptoUris.RSAES_OAEP)) {
 		cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding", new BouncyCastleProvider());
 		cipher.init(Cipher.ENCRYPT_MODE, cert);
 		blocksize = cipher.getBlockSize();
 	    } else {
-		logger.warn("Skipping decipher for the unsupported algorithmOID: {}", algorithmOID);
+		LOG.warn("Skipping decipher for the unsupported algorithmOID: {}", algorithmUri);
 		continue;
 	    }
 
@@ -454,12 +470,14 @@ public class GenericCryptographyProtocolTest {
 
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testGetRandom() {
 	// TODO write test as soon as implemented
 	GetRandomResponse resp = instance.getRandom(new GetRandom());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testHash() {
 	// TODO write test as soon as implemented
 	HashResponse resp = instance.hash(new Hash());
@@ -475,7 +493,7 @@ public class GenericCryptographyProtocolTest {
      * @throws Exception
      *             when something in this test went unexpectedly wrong
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifySignature() throws Exception {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -528,19 +546,19 @@ public class GenericCryptographyProtocolTest {
 
 	    Sign sign = new Sign();
 	    byte[] message = new byte[] { 0x01, 0x02, 0x03 };
-	    org.openecard.crypto.common.sal.CryptoMarkerType cryptoMarker =
-		    new org.openecard.crypto.common.sal.CryptoMarkerType(
+	    org.openecard.crypto.common.sal.did.CryptoMarkerType cryptoMarker =
+		    new org.openecard.crypto.common.sal.did.CryptoMarkerType(
 			    (CryptoMarkerType) didGetResponse.getDIDStructure().getDIDMarker());
 
 	    String algorithmIdentifier = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 
-	    if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.id_RSASSA_PSS)) {
+	    if (algorithmIdentifier.equals(GenericCryptoUris.RSASSA_PSS_SHA256)) {
 		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 		message = messageDigest.digest(message);
-	    } else if (algorithmIdentifier.equals(GenericCryptoObjectIdentifier.pkcs_1)) {
+	    } else if (algorithmIdentifier.equals(GenericCryptoUris.RSA_ENCRYPTION)) {
 		// do nothing
 	    } else {
-		logger.warn("Skipping decipher for the unsupported algorithmIdentifier: {}", algorithmIdentifier);
+		LOG.warn("Skipping decipher for the unsupported algorithmIdentifier: {}", algorithmIdentifier);
 		continue;
 	    }
 
@@ -566,18 +584,21 @@ public class GenericCryptographyProtocolTest {
 	}
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testVerifyCertificate() {
 	// TODO write test as soon as implemented
 	VerifyCertificateResponse resp = instance.verifyCertificate(new VerifyCertificate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDAuthenticate() {
 	// TODO write test as soon as implemented
 	DIDAuthenticateResponse resp = instance.didAuthenticate(new DIDAuthenticate());
 	assertEquals(resp.getResult().getResultMajor(), ECardConstants.Major.ERROR);
     }
 
+    @Test(enabled = TESTS_ENABLED)
     public void testCardApplicationStartSession() {
 	// TODO expected result /resultminor/sal#inappropriateProtocolForAction
     }

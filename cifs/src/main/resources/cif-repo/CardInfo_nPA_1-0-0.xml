@@ -3978,7 +3978,7 @@
 								<iso:Algorithm>ECDSAwithSHA256</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
 									<iso:Algorithm>
-										urn:oid:1.2.840.10045.4.3.2
+										http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
 									</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
@@ -4247,11 +4247,15 @@
 												<iso:CommandAPDU>0C2C0381</iso:CommandAPDU>
 												<iso:ResponseAPDU>
 													<iso:Trailer>9000</iso:Trailer>
-													<iso:Conclusion><iso:RecognizedState>eSign_RC3</iso:RecognizedState></iso:Conclusion>
+													<iso:Conclusion>
+														<iso:RecognizedState>eSign_RC3</iso:RecognizedState>
+													</iso:Conclusion>
 												</iso:ResponseAPDU>
 												<iso:ResponseAPDU>
 													<iso:Trailer>6984</iso:Trailer>
-													<iso:Conclusion><iso:RecognizedState>PUK_blocked_in_eSign</iso:RecognizedState></iso:Conclusion>
+													<iso:Conclusion>
+														<iso:RecognizedState>PUK_blocked_in_eSign</iso:RecognizedState>
+													</iso:Conclusion>
 												</iso:ResponseAPDU>
 											</iso:CardCall>
 										</iso:FixedProcedure>
@@ -4312,7 +4316,7 @@
 															</iso:PinInput>
 														</iso:InputUnit>
 														<!-- Try Change Reference Data to set the eSign_PIN. If this is successful (9000) the state was in fact terminated
-															 and the PIN is set. Otherwise (6983) or (6982) it is clear that the state was in fact blocked. -->
+														and the PIN is set. Otherwise (6983) or (6982) it is clear that the state was in fact blocked. -->
 														<iso:Template>0C240181</iso:Template>
 													</iso:ModifyVerificationData>
 												</iso:APICall>
@@ -4371,7 +4375,7 @@
 					</iso:AccessRule>
 
 					<!-- Updating the eSign-PIN is possible with CAN+TAKey+(CAKey or CAKey-ci)+eSign-PIN, where the TA-certificate is a signature terminal
-						 with "Generate qualified electronic signature" bit set. -->
+					with "Generate qualified electronic signature" bit set. -->
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 						<iso:Action>
@@ -4446,7 +4450,7 @@
 					</iso:AccessRule>
 
 					<!-- Entering the eSign-PIN is possible with CAN+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
-						 with "Generate qualified electronic signature" bit set. -->
+					with "Generate qualified electronic signature" bit set. -->
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
 						<iso:Action>
@@ -4526,7 +4530,7 @@
 							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
 						</iso:Action>
 						<!-- Reading the certificate is possible with (CAN or PIN)+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
-							 with "Generate qualified electronic signature" bit set. -->
+						with "Generate qualified electronic signature" bit set. -->
 						<iso:SecurityCondition>
 							<iso:or>
 								<!-- CAN + TAKey + CAKey  -->
@@ -4638,7 +4642,7 @@
 							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
 						</iso:Action>
 						<!-- Writing of certificate is possible for Authentication Terminals with PIN+(CAKey or CAKey-ci)+TAKey
-							 with certificate in which install qualified certificate bit is set. -->
+						with certificate in which install qualified certificate bit is set. -->
 						<iso:SecurityCondition>
 							<iso:or>
 								<!-- PIN+CAKey+TAKey -->
@@ -4713,7 +4717,7 @@
 							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
 						</iso:Action>
 						<!-- Reading the certificate is possible with (CAN or PIN)+TAKey+(CAKey or CAKey-ci), where the TA-certificate is a signature terminal
-							 with "Generate qualified electronic signature" bit set. -->
+						with "Generate qualified electronic signature" bit set. -->
 						<iso:SecurityCondition>
 							<iso:or>
 								<!-- CAN + TAKey + CAKey  -->
@@ -4825,7 +4829,7 @@
 							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
 						</iso:Action>
 						<!-- Writing of certificate is possible for Authentication Terminals with PIN+(CAKey or CAKey-ci)+TAKey
-							 with certificate in which install qualified certificate bit is set. -->
+						with certificate in which install qualified certificate bit is set. -->
 						<iso:SecurityCondition>
 							<iso:or>
 								<!-- PIN+CAKey+TAKey -->

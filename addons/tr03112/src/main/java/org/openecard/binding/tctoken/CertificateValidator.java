@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,7 @@
 package org.openecard.binding.tctoken;
 
 import java.net.URL;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 
 
 /**
@@ -52,6 +52,6 @@ public interface CertificateValidator {
      * @return Status indicating how to proceed.
      * @throws ValidationError Thrown in case the validation failed.
      */
-    VerifierResult validate(URL url, Certificate cert) throws ValidationError;
+    VerifierResult validate(URL url, TlsServerCertificate cert) throws ValidationError;
 
 }

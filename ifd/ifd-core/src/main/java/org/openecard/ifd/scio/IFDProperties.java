@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,7 +24,7 @@ package org.openecard.ifd.scio;
 
 import java.io.IOException;
 import java.util.Properties;
-import org.openecard.common.OverridingProperties;
+import org.openecard.ws.common.OverridingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class IFDProperties {
 
-    private static final Logger _logger = LoggerFactory.getLogger(IFDProperties.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IFDProperties.class);
 
     private static class Internal extends OverridingProperties {
 	public Internal() throws IOException {
@@ -48,7 +48,7 @@ public class IFDProperties {
 	    properties = new Internal();
 	} catch (IOException ex) {
 	    // in that case a null pointer occurs when properties is accessed
-	    _logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	}
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,9 +22,8 @@
 
 package org.openecard.transport.httpcore.cookies;
 
-import org.openecard.transport.httpcore.cookies.CookieManager;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.net.HttpCookie;
+import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -35,49 +34,46 @@ import org.testng.annotations.Test;
  */
 public class CookieManagerNGTest {
 
-    private static final Pattern pat = Pattern.compile("(?<name>.+?)=(?<value>.+?)((; Path=(?<path>.+?))|(; "
-	    + "Domain=(?<domain>.+?))|(; (?<httponly>HttpOnly))|(; (?<secure>Secure))|(; Expires=(?<expires>.+?))|"
-	    + "(; Max-Age=(?<maxage>\\d+?)))*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-
-    private static final String COOKIE1 = "JSESSIONID=123_84fsggasd; domain=example.com; Max-Age=30; Path=/";
-    private static final String COOKIE2 = "WebSessionId=258; Secure; HttpOnly; Expires=Tue, 29-Mar-2014 19:30:42 GMT";
+    private static final String COOKIE1 = "set-cookie: JSESSIONID=123_84fsggasd; domain=example.com; Max-Age=30; Path=/";
+    private static final String COOKIE2 = "set-cookie: WebSessionId=258; Secure; HttpOnly; Expires=Tue, 29-Mar-2014 19:30:42 GMT";
 
     private final CookieManager manager = new CookieManager();
 
     @Test
     public void testCookie1() {
-	Matcher matcher = pat.matcher(COOKIE1);
-	boolean match = matcher.matches();
-	Assert.assertTrue(match);
-	String name = matcher.group("name");
-	String value = matcher.group("value");
-	String domain = matcher.group("domain");
-	String maxage = matcher.group("maxage");
-	String path = matcher.group("path");
+	List<HttpCookie> cookies = HttpCookie.parse(COOKIE1);
+	Assert.assertEquals(cookies.size(), 1);
+	HttpCookie c = cookies.get(0);
+	String name = c.getName();
+	String value = c.getValue();
+	String domain = c.getDomain();
+	long maxage = c.getMaxAge();
+	String path = c.getPath();
 	Assert.assertEquals(name, "JSESSIONID");
 	Assert.assertEquals(value, "123_84fsggasd");
 	Assert.assertEquals(domain, "example.com");
-	Assert.assertEquals(maxage, "30");
+	Assert.assertEquals(maxage, 30);
 	Assert.assertEquals(path, "/");
     }
 
     @Test
     public void testCookie2() {
-	Matcher matcher = pat.matcher(COOKIE2);
-	boolean match = matcher.matches();
-	Assert.assertTrue(match);
-	String name = matcher.group("name");
-	String value = matcher.group("value");
-	String http = matcher.group("httponly");
-	String secure = matcher.group("secure");
-	String expires = matcher.group("expires");
+	List<HttpCookie> cookies = HttpCookie.parse(COOKIE2);
+	Assert.assertEquals(cookies.size(), 1);
+	HttpCookie c = cookies.get(0);
+	String name = c.getName();
+	String value = c.getValue();
+	String path = c.getPath();
+	boolean http = c.isHttpOnly();
+	boolean secure = c.getSecure();
+	//String expires = c.hasExpired();
 	Assert.assertEquals(name, "WebSessionId");
 	Assert.assertEquals(value, "258");
-	Assert.assertEquals(http, "HttpOnly");
-	Assert.assertEquals(secure, "Secure");
-	Assert.assertEquals(expires, "Tue, 29-Mar-2014 19:30:42 GMT");
-	Assert.assertNull(matcher.group("domain"));
-	Assert.assertNull(matcher.group("maxage"));
+	Assert.assertEquals(http, true);
+	Assert.assertEquals(secure, true);
+	//Assert.assertEquals(expires, "Tue, 29-Mar-2014 19:30:42 GMT");
+	Assert.assertNull(c.getDomain());
+	Assert.assertEquals(c.getMaxAge(), 0);
     }
 
     @Test

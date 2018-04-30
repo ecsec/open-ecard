@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2016 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,14 +22,17 @@
 
 package org.openecard.crypto.tls.verify;
 
+import java.io.IOException;
 import org.openecard.bouncycastle.asn1.ASN1Encodable;
 import org.openecard.bouncycastle.asn1.x500.RDN;
 import org.openecard.bouncycastle.asn1.x500.style.BCStrictStyle;
+import org.openecard.bouncycastle.asn1.x509.Certificate;
 import org.openecard.bouncycastle.asn1.x509.Extension;
 import org.openecard.bouncycastle.asn1.x509.Extensions;
 import org.openecard.bouncycastle.asn1.x509.GeneralName;
 import org.openecard.bouncycastle.asn1.x509.GeneralNames;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.bouncycastle.util.IPAddress;
 import org.openecard.common.util.DomainUtils;
 import org.openecard.crypto.tls.CertificateVerificationException;
@@ -48,8 +51,17 @@ public class HostnameVerifier implements CertificateVerifier {
     private static final Logger LOG = LoggerFactory.getLogger(HostnameVerifier.class);
 
     @Override
-    public void isValid(Certificate chain, String hostOrIp) throws CertificateVerificationException {
-	org.openecard.bouncycastle.asn1.x509.Certificate cert = chain.getCertificateAt(0);
+    public void isValid(TlsServerCertificate chain, String hostOrIp) throws CertificateVerificationException {
+	try {
+	    TlsCertificate tlsCert = chain.getCertificate().getCertificateAt(0);
+	    Certificate cert = Certificate.getInstance(tlsCert.getEncoded());
+	    validInt(cert, hostOrIp);
+	} catch (IOException ex) {
+	    throw new CertificateVerificationException("Invalid certificate received from server.", ex);
+	}
+    }
+
+    private void validInt(Certificate cert, String hostOrIp) throws CertificateVerificationException {
 	boolean success = false;
 	boolean isIPAddr = IPAddress.isValid(hostOrIp);
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardCommandStatus;
@@ -38,6 +39,8 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOProtocol;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.TransmitException;
 import org.slf4j.Logger;
@@ -51,55 +54,115 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class SingleThreadChannel {
+public class SingleThreadChannel implements IfdChannel {
 
-    private static final Logger logger = LoggerFactory.getLogger(SingleThreadChannel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingleThreadChannel.class);
+
+    private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
 
     private final ExecutorService exec;
-    private final SCIOChannel channel;
+    private SCIOChannel channel;
     /**
      * Currently active secure messaging protocol.
      */
     private Protocol smProtocol = null;
 
     /**
-     * Creates an instance an launches a command submission thread.
+     * Creates a master instance and launches a command submission thread.
+     * This function connects the terminal with whatever protocol that works.
      *
-     * @param channel Channel to be bound to the command execution thread.
+     * @param term Terminal whose channel is to be bound to the thread.
+     * @throws SCIOException Thrown in case the channel could not be established.
      */
-    public SingleThreadChannel(SCIOChannel channel) {
-	this.exec = Executors.newSingleThreadExecutor(new ThreadFactory() {
+    public SingleThreadChannel(SCIOTerminal term) throws SCIOException {
+	this.exec = createExecutor();
+
+	SCIOCard card = connectCard(term);
+	this.channel = card.getBasicChannel();
+    }
+
+    /**
+     * Creates a slave instance and launches a command submission thread.
+     *
+     * @param master Master (basic) channel from which the other channel instance is to be derived.
+     * @param isBasic {@code true} if a basic channel shall be opened, {@code false} if a logical channel shall be opened.
+     * @throws SCIOException Thrown in case the channel could not be established.
+     */
+    public SingleThreadChannel(SingleThreadChannel master, boolean isBasic)
+	    throws SCIOException {
+	this.exec = createExecutor();
+
+	SCIOCard baseCard = master.channel.getCard();
+	// connect with protocol that worked for the base card
+	SCIOCard card = baseCard.getTerminal().connect(baseCard.getProtocol());
+	if (isBasic) {
+	    this.channel = card.getBasicChannel();
+	} else {
+	    this.channel = card.openLogicalChannel();
+	}
+    }
+
+    private ExecutorService createExecutor() {
+	return Executors.newSingleThreadExecutor(new ThreadFactory() {
 	    @Override
 	    public Thread newThread(Runnable r) {
 		int num = SingleThreadChannel.this.channel.getChannelNumber();
 		String termName = SingleThreadChannel.this.channel.getCard().getTerminal().getName();
-		String name = String.format("Channel %d '%s'", num, termName);
+		String name = String.format("Channel-%d %d '%s'", THREAD_NUM.getAndIncrement(), num, termName);
 		Thread t = new Thread(r, name);
 		t.setDaemon(true);
 		return t;
 	    }
 	});
-	this.channel = channel;
     }
 
-    /**
-     * Terminate the command submission thread and close the channel.
-     * Note that basic channels are not closed by the {@link SCIOChannel#close()} method.
-     *
-     * @throws SCIOException Thrown in case the channel could not be closed properly.
-     */
+    @Override
     public void shutdown() throws SCIOException {
 	exec.shutdown();
 	channel.close();
     }
 
-    /**
-     * Gets the channel bound in this instance.
-     * Be careful when issuing commands as they might fail due to running transactions.
-     *
-     * @return The channel bound in this instance.
-     */
+    private static SCIOCard connectCard(SCIOTerminal term) throws SCIOException {
+	SCIOCard card;
+	try {
+	    card = term.connect(SCIOProtocol.T1);
+	} catch (SCIOException e1) {
+	    try {
+		card = term.connect(SCIOProtocol.TCL);
+	    } catch (SCIOException e2) {
+		try {
+		    card = term.connect(SCIOProtocol.T0);
+		} catch (SCIOException e3) {
+		    try {
+			card = term.connect(SCIOProtocol.ANY);
+		    } catch (SCIOException ex) {
+			throw new SCIOException("Reader refused to connect card with any protocol.", ex.getCode());
+		    }
+		}
+	    }
+	}
+	LOG.info("Card connected with protocol {}.", card.getProtocol());
+	return card;
+    }
+
+    @Override
+    public void reconnect() throws SCIOException {
+	if (channel.isBasicChannel()) {
+	    SCIOCard card = channel.getCard();
+	    SCIOTerminal term = card.getTerminal();
+	    channel.close();
+	    card.disconnect(true);
+	    card = connectCard(term);
+
+	    channel = card.getBasicChannel();
+	    removeSecureMessaging();
+	} else {
+	    throw new RuntimeException("Reconnect called on logical channel.");
+	}
+    }
+
     @Nonnull
+    @Override
     public SCIOChannel getChannel() {
 	return channel;
     }
@@ -153,6 +216,7 @@ public class SingleThreadChannel {
 		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
+	    result.cancel(true);
 	    throw new IllegalStateException("Running command cancelled during execution.");
 	}
     }
@@ -184,47 +248,22 @@ public class SingleThreadChannel {
 	return transmit(command.toByteArray());
     }
 
-    /**
-     * Transmits the given command APDU to the card and evaluates the response against the given response codes.
-     * <p>The CLA byte of the command APDU is automatically adjusted to match the channel number of this channel.</p>
-     * <p>Note that this method cannot be used to transmit {@code MANAGE CHANNEL} APDUs. Logical channels should be
-     * managed using the {@link SCIOCard#openLogicalChannel()} and {@link SCIOChannel#close()} methods.</p>
-     * <p>Implementations must transparently handle artifacts of the transmission protocol. For example, when using the
-     * T=0 protocol, the following processing should occur as described in ISO/IEC 7816-4:</p>
-     * <ul>
-     * <li>if the response APDU has an SW1 of 61, the implementation should issue a {@code GET RESPONSE} command using
-     * SW2 as the Lefield. This process is repeated as long as an SW1 of 61 is received. The response body of these
-     * exchanges is concatenated to form the final response body.</li>
-     * <li>if the response APDU is 6C XX, the implementation should reissue the command using XX as the Le field.</li>
-     * </ul>
-     * <p>The expected responses may be empty meaning that any outcome is acceptable. One byte status codes represent
-     * wildcards by ignoring the second byte of the actual result code.</p>
-     *
-     * @param input Command APDU, which should be sent to the card.
-     * @param responses Expected response codes. May be empty if any code is acceptable. One byte wildcard codes are
-     *   also allowed.
-     * @return The response APDU after the given command APDU is processed.
-     * @throws TransmitException Thrown in case the result contained unexpected response codes.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown if the card is not connected anymore or the channel has been closed.
-     * @throws IllegalArgumentException Thrown if the APDU encodes a {@code MANAGE CHANNEL}.
-     * @throws NullPointerException Thrown in case the argument is {@code null}.
-     */
     @Nonnull
+    @Override
     public byte[] transmit(@Nonnull byte[] input, @Nonnull List<byte[]> responses) throws TransmitException,
 	    SCIOException, IllegalStateException {
 	byte[] inputAPDU = input;
 	if (isSM()) {
-	    logger.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, true));
+	    LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, true));
 	    inputAPDU = smProtocol.applySM(inputAPDU);
 	}
-	logger.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, true));
+	LOG.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, true));
 	CardResponseAPDU rapdu = transmit(inputAPDU);
 	byte[] result = rapdu.toByteArray();
-	logger.debug("Receive APDU: {}", ByteUtils.toHexString(result, true));
+	LOG.debug("Receive APDU: {}", ByteUtils.toHexString(result, true));
 	if (isSM()) {
 	    result = smProtocol.removeSM(result);
-	    logger.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, true));
+	    LOG.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, true));
 	}
 	// get status word
 	byte[] sw = new byte[2];
@@ -250,18 +289,8 @@ public class SingleThreadChannel {
 	throw tex;
     }
 
-    /**
-     * Sends a control command to the terminal.
-     *
-     * @param controlCode The control code of the command.
-     * @param command The command data. The data may be empty.
-     * @return The response of the command. Note that this is not necessarily an APDU.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see 
-     *   {@link SCIOCard#disconnect(boolean)}.
-     * @throws NullPointerException Thrown in case the command data is {@code null}.
-     */
     @Nonnull
+    @Override
     public byte[] transmitControlCommand(final int controlCode, final @Nonnull byte[] command) throws SCIOException,
 	    IllegalStateException, NullPointerException {
 	// send command
@@ -288,31 +317,17 @@ public class SingleThreadChannel {
 		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
+	    result.cancel(true);
 	    throw new IllegalStateException("Running command cancelled during execution.");
 	}
     }
 
-    /**
-     * Starts a transaction on the card.
-     * Usually the transaction is bound to the current thread, but an implementation may decide to choose another
-     * exclusion mechanism.
-     *
-     * @throws SCIOException Thrown if exclusive access is already set or it could not be set due to some other problem.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see
-     *   {@link SCIOCard#disconnect(boolean)}).
-     */
+    @Override
     public void beginExclusive() throws SCIOException, IllegalStateException {
 	submitTransaction(true);
     }
 
-    /**
-     * Ends the exclusive access to the card.
-     * Exclusive access must have been established previously with the {@link #beginExclusive()} method.
-     *
-     * @throws SCIOException Thrown in case the operation failed due to some unkown reason.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see
-     *   {@link SCIOCard#disconnect(boolean)}), or no {@link #beginExclusive()} call has been issued before.
-     */
+    @Override
     public void endExclusive() throws SCIOException, IllegalStateException {
 	submitTransaction(false);
     }
@@ -346,19 +361,23 @@ public class SingleThreadChannel {
 		throw new SCIOException(msg, SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, cause);
 	    }
 	} catch (InterruptedException ex) {
+	    result.cancel(true);
 	    throw new IllegalStateException("Running command cancelled during execution.");
 	}
     }
 
+    @Override
     public boolean isSM() {
 	boolean result = this.smProtocol != null;
 	return result;
     }
 
+    @Override
     public void addSecureMessaging(Protocol protocol) {
 	this.smProtocol = protocol;
     }
 
+    @Override
     public void removeSecureMessaging() {
 	this.smProtocol = null;
     }

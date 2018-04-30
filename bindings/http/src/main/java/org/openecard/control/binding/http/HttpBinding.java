@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,7 @@
 package org.openecard.control.binding.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.addon.AddonManager;
@@ -31,9 +31,9 @@ import org.openecard.apache.http.HttpRequestInterceptor;
 import org.openecard.apache.http.HttpResponseInterceptor;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
-import org.openecard.control.binding.http.interceptor.CORSResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.CacheControlHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor;
+import org.openecard.control.binding.http.interceptor.SecurityHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.ServerHeaderResponseInterceptor;
 import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor;
 
@@ -47,9 +47,7 @@ import org.openecard.control.binding.http.interceptor.StatusLineResponseIntercep
  */
 public class HttpBinding {
 
-    /** Uses the default port 24727 according to BSI-TR-03112 */
-    public static final int DEFAULT_PORT = 24727;
-    private final int port;
+    private int port;
     private final DocumentRoot documentRoot;
     private List<HttpRequestInterceptor> reqInterceptors;
     private List<HttpResponseInterceptor> respInterceptors;
@@ -58,15 +56,6 @@ public class HttpBinding {
 
     public void setAddonManager(AddonManager addonManager) {
 	this.addonManager = addonManager;
-    }
-
-    /**
-     * Creates a new HTTPBinding using a random port.
-     * @throws IOException If the document root cannot be read
-     * @throws Exception
-     */
-    public HttpBinding() throws IOException, Exception {
-	this(DEFAULT_PORT);
     }
 
     /**
@@ -83,7 +72,7 @@ public class HttpBinding {
     /**
      * Creates a new HTTPBinding using the given port and document root.
      *
-     * @param port Port
+     * @param port Port used for the binding. If the port is 0, then chose a port randomly.
      * @param documentRootPath Path of the document root
      * @param listFile
      * @throws IOException If the document root cannot be read
@@ -104,33 +93,33 @@ public class HttpBinding {
 	this.respInterceptors = respInterceptors;
     }
 
-    public void start(boolean tls) throws Exception {
+    public void start() throws Exception {
 	// Add default interceptors if none are given
 	if (reqInterceptors == null) {
 	    reqInterceptors = Collections.emptyList();
 	}
 	if (respInterceptors == null) {
-	    respInterceptors = new ArrayList<>(3);
-	    respInterceptors.add(new StatusLineResponseInterceptor());
-	    respInterceptors.add(new ErrorResponseInterceptor(documentRoot, "/templates/error.html"));
-	    respInterceptors.add(new CORSResponseInterceptor());
-	    respInterceptors.add(new ServerHeaderResponseInterceptor());
-	    respInterceptors.add(new CacheControlHeaderResponseInterceptor());
-	    //FIXME the CORSRequestInterceptor consumes the request entity
-	    //interceptors.addInterceptor(new CORSRequestInterceptor());
+	    respInterceptors = Arrays.asList(
+		    new StatusLineResponseInterceptor(),
+		    new ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
+		    new ServerHeaderResponseInterceptor(),
+		    new SecurityHeaderResponseInterceptor(),
+		    new CacheControlHeaderResponseInterceptor());
 	}
 
-	HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
-	if (! tls) {
-	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);
+	if (addonManager == null) {
+	    throw new HttpServiceError("Trying to use uninitialized GttpBinding instance.");
 	} else {
-	    service = new HttpsService(port, handler, reqInterceptors, respInterceptors);
+	    HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
+	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);
+	    service.start();
 	}
-	service.start();
     }
 
     public void stop() throws Exception {
-	service.interrupt();
+	if (service != null) {
+	    service.interrupt();
+	}
     }
 
     /**

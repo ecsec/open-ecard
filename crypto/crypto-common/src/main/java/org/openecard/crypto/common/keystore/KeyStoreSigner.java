@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 HS Coburg.
+ * Copyright (C) 2013-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,19 +44,18 @@ import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.openecard.bouncycastle.crypto.params.ParametersWithRandom;
 import org.openecard.bouncycastle.crypto.signers.GenericSigner;
 import org.openecard.bouncycastle.crypto.signers.RSADigestSigner;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsUtils;
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
+import org.openecard.bouncycastle.tls.TlsUtils;
 import org.openecard.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.openecard.crypto.common.ReusableSecureRandom;
-import org.openecard.crypto.common.sal.CredentialPermissionDenied;
+import org.openecard.crypto.common.sal.did.CredentialPermissionDenied;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
  * Wrapper for the sign functionality of keystore entries.
- * 
+ *
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
@@ -67,7 +66,7 @@ public class KeyStoreSigner {
     private final KeyStore keyStore;
     private final char[] password;
     private final String alias;
-    private Certificate bcCert;
+//    private Certificate bcCert;
 
     /**
      * Creates a KeyStoreSigner and defines the InputStream to load from and the password and alias.
@@ -99,25 +98,25 @@ public class KeyStoreSigner {
 	return cert;
     }
 
-    /**
-     * Gets the certificate for this KeyStore entry converted to a BouncyCastle TLS certificate.
-     * 
-     * @return The certificate chain in BouncyCastle format.
-     * @throws CertificateException Thrown in case the certificate could not be found or converted.
-     * @throws IllegalStateException Thrown in case the keystore is not initialized.
-     */
-    @Nonnull
-    public synchronized Certificate getCertificateChain() throws CertificateException {
-	if (bcCert == null) {
-	    try {
-		java.security.cert.Certificate[] jcaCerts = getJCACertificateChain();
-		bcCert = KeyTools.convertCertificates(jcaCerts);
-	    } catch (KeyStoreException ex) {
-		throw new IllegalStateException("Uninitialized keystore supplied.");
-	    }
-	}
-	return bcCert;
-    }
+//    /**
+//     * Gets the certificate for this KeyStore entry converted to a BouncyCastle TLS certificate.
+//     *
+//     * @return The certificate chain in BouncyCastle format.
+//     * @throws CertificateException Thrown in case the certificate could not be found or converted.
+//     * @throws IllegalStateException Thrown in case the keystore is not initialized.
+//     */
+//    @Nonnull
+//    public synchronized Certificate getCertificateChain() throws CertificateException {
+//	if (bcCert == null) {
+//	    try {
+//		java.security.cert.Certificate[] jcaCerts = getJCACertificateChain();
+//		bcCert = KeyTools.convertCertificates(jcaCerts);
+//	    } catch (KeyStoreException ex) {
+//		throw new IllegalStateException("Uninitialized keystore supplied.");
+//	    }
+//	}
+//	return bcCert;
+//    }
 
     /**
      * Signs the given hash with the entry represented by this instance.

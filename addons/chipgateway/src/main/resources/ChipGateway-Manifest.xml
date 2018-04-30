@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AddonSpecification>
+	<ID>ChipGateway</ID>
+	<Version>1.0.0</Version>
+	<License/>
+	<LocalizedName xml:lang="EN">LuxTrust ChipGateway</LocalizedName>
+	<LocalizedDescription xml:lang="EN">
+		LuxTrust ChipGateway activation and protocol Add-On.
+	</LocalizedDescription>
+	<About xml:lang="EN">The LuxTrust Chipgateway provides a browser based activation interface and a backend protocol
+	capable of signature creation.</About>
+	<Logo/>
+	<ConfigDescription/>
+	<BindingActions>
+		<AppPluginSpecification>
+			<ClassName>org.openecard.addons.cg.activate.ActivateCGAction</ClassName>
+			<LocalizedName xml:lang="DE">ChipGateway Aktivierungsendpunkt</LocalizedName>
+			<LocalizedName xml:lang="EN">ChipGateway Activation Endpoint</LocalizedName>
+			<LocalizedDescription xml:lang="DE">
+				Endpunkt für die Aktivierung der Open eCard App für das ChipGateway Protokoll.
+			</LocalizedDescription>
+			<LocalizedDescription xml:lang="EN">
+				Endpoint for the activation of the Open eCard App for the ChipGateway protocol.
+			</LocalizedDescription>
+			<ResourceName>activate/ChipGateway</ResourceName>
+			<ConfigDescription/>
+		</AppPluginSpecification>
+	</BindingActions>
+	<ApplicationActions/>
+	<IFDActions />
+	<SALActions />
+</AddonSpecification>

@@ -33,6 +33,8 @@ import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.eac.EACTags;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
+import org.openecard.common.tlv.Tag;
+import org.openecard.common.tlv.TagClass;
 import org.openecard.common.tlv.iso7816.TLVList;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.asn1.eac.oid.EACObjectIdentifier;
@@ -49,7 +51,7 @@ public class AuthenticatedAuxiliaryData extends TLVList {
     private boolean empty = false;
 
     public AuthenticatedAuxiliaryData(@Nonnull TLV tlv) throws TLVException {
-	super(tlv, EACTags.AUTHENTIFICATION_DATA);
+	super(tlv, new Tag(TagClass.APPLICATION, false, EACTags.AUTHENTIFICATION_DATA));
 	templates = new HashMap<>();
 	// convert content to DiscretionaryDataTemplates
 	ArrayList<DiscretionaryDataTemplate> ts = new ArrayList<>();
@@ -79,7 +81,7 @@ public class AuthenticatedAuxiliaryData extends TLVList {
     private static TLV emptyOrStructure(byte[] data) throws TLVException {
 	if (data == null) {
 	    TLV tlv = new TLV();
-	    tlv.setTagNumWithClass(EACTags.AUTHENTIFICATION_DATA);
+	    tlv.setTag(new Tag(TagClass.APPLICATION, false, EACTags.AUTHENTIFICATION_DATA));
 	    return tlv;
 	} else {
 	    return TLV.fromBER(data);

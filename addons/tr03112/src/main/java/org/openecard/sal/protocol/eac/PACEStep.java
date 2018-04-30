@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -37,24 +37,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.smartcardio.ResponseAPDU;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.EventManager;
 import org.openecard.common.interfaces.ObjectSchemaValidator;
 import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.state.CardStateEntry;
@@ -70,6 +68,7 @@ import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateVerifier;
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData;
 import org.openecard.crypto.common.asn1.eac.SecurityInfos;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -87,6 +86,7 @@ import org.openecard.sal.protocol.eac.gui.CVCStepAction;
 import org.openecard.sal.protocol.eac.gui.CardMonitor;
 import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
 import org.openecard.sal.protocol.eac.gui.PINStep;
+import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStepAction;
 import org.slf4j.Logger;
@@ -103,17 +103,17 @@ import org.slf4j.LoggerFactory;
  */
 public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PACEStep.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PACEStep.class.getName());
 
-    private static final I18n lang = I18n.getTranslation("eac");
-    private static final I18n langPace = I18n.getTranslation("pace");
+    private static final I18n LANG = I18n.getTranslation("eac");
+    private static final I18n LANG_PACE = I18n.getTranslation("pace");
 
     // GUI translation constants
     private static final String TITLE = "eac_user_consent_title";
 
     private final Dispatcher dispatcher;
     private final UserConsent gui;
-    private final EventManager eventManager;
+    private final EventDispatcher eventDispatcher;
 
     /**
      * Creates a new PACE protocol step.
@@ -122,10 +122,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
      * @param gui GUI
      * @param eventManager 
      */
-    public PACEStep(Dispatcher dispatcher, UserConsent gui, EventManager eventManager) {
+    public PACEStep(Dispatcher dispatcher, UserConsent gui, EventDispatcher eventManager) {
 	this.dispatcher = dispatcher;
 	this.gui = gui;
-	this.eventManager = eventManager;
+	this.eventDispatcher = eventManager;
     }
 
     @Override
@@ -147,20 +147,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    boolean messageValid = valid.validateObject(request);
 	    if (! messageValid) {
 		String msg = "Validation of the EAC1InputType message failed.";
-		logger.error(msg);
+		LOG.error(msg);
 		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
  	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
@@ -255,76 +255,64 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    input.setInputAPDU(new byte[] {(byte) 0x00, (byte) 0x22, (byte) 0xC1, (byte) 0xA4, (byte) 0x0F, (byte) 0x80,
 		(byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02,
 		(byte) 0x04, (byte) 0x02, (byte) 0x02, (byte) 0x83, (byte) 0x01, (byte) 0x03});
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x90, (byte) 0x00}); // pin activated 3 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC2}); // pin activated 2 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC1}); // pin suspended 1 try left CAN
-											// needs to be entered
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x63, (byte) 0xC0}); // pin blocked 0 tries left
-	    input.getAcceptableStatusCode().add(new byte[] {(byte) 0x62, (byte) 0x83}); // pin deaktivated
+	    input.getAcceptableStatusCode().addAll(EacPinStatus.getCodes());
 
 	    Transmit transmit = new Transmit();
 	    transmit.setSlotHandle(slotHandle);
 	    transmit.getInputAPDUInfo().add(input);
 
-	    TransmitResponse pinCheckResponse = (TransmitResponse) dispatcher.deliver(transmit);
+	    TransmitResponse pinCheckResponse = (TransmitResponse) dispatcher.safeDeliver(transmit);
+	    WSHelper.checkResult(pinCheckResponse);
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
-	    ResponseAPDU outputApdu = new ResponseAPDU(output);
-	    byte[] status = {(byte) outputApdu.getSW1(), (byte) outputApdu.getSW2()};
-	    dynCtx.put(EACProtocol.PIN_STATUS_BYTES, status);
-
-	    boolean pinUsable = ! Arrays.equals(status, new byte[]{(byte) 0x63, (byte) 0xC0});
+	    CardResponseAPDU outputApdu = new CardResponseAPDU(output);
+	    byte[] status = outputApdu.getStatusBytes();
+	    dynCtx.put(EACProtocol.PIN_STATUS, EacPinStatus.fromCode(status));
 
 	    // define GUI depending on the PIN status
-	    final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(TITLE));
-	    if (pinUsable) {
-		// create GUI and init executor
-		CardMonitor cardMon = new CardMonitor();
-		CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
-		eventManager.register(cardMon, filter);
-		CVCStep cvcStep = new CVCStep(eacData);
-		cvcStep.setBackgroundTask(cardMon);
-		CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
-		cvcStep.setAction(cvcStepAction);
-		uc.getSteps().add(cvcStep);
-		uc.getSteps().add(CHATStep.createDummy());
-		uc.getSteps().add(PINStep.createDummy(passwordType));
-		ProcessingStep procStep = new ProcessingStep();
-		ProcessingStepAction procStepAction = new ProcessingStepAction(procStep);
-		procStep.setAction(procStepAction);
-		uc.getSteps().add(procStep);
-	    } else {
-		// ErrorStep is currently not used and needs to be reworked in 1.3.X
-		// disable the step here completely to avoid flashing of the step ui.
-//		String pin = langPace.translationForKey("pin");
-//		String puk = langPace.translationForKey("puk");
-//		String title = langPace.translationForKey("step_error_title_blocked", pin);
-//		String errorMsg = langPace.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
-//		ErrorStep eStep = new ErrorStep(title, errorMsg);
-//		uc.getSteps().add(eStep);
-
-		dynCtx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
-			ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "The PIN is blocked.")));
-	    }
+	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
+	    final CardMonitor cardMon;
+	    uc.setDialogType("EAC");
+	    // create GUI and init executor
+	    cardMon = new CardMonitor();
+	    CardRemovedFilter filter = new CardRemovedFilter(conHandle.getIFDName(), conHandle.getSlotIndex());
+	    eventDispatcher.add(cardMon, filter);
+	    CVCStep cvcStep = new CVCStep(eacData);
+	    cvcStep.setBackgroundTask(cardMon);
+	    CVCStepAction cvcStepAction = new CVCStepAction(cvcStep);
+	    cvcStep.setAction(cvcStepAction);
+	    uc.getSteps().add(cvcStep);
+	    uc.getSteps().add(CHATStep.createDummy());
+	    uc.getSteps().add(PINStep.createDummy(passwordType));
+	    ProcessingStep procStep = new ProcessingStep();
+	    ProcessingStepAction procStepAction = new ProcessingStepAction(procStep);
+	    procStep.setAction(procStepAction);
+	    uc.getSteps().add(procStep);
 
 	    Thread guiThread = new Thread(new Runnable() {
 		@Override
 		public void run() {
-		    // get context here because it is thread local
-		    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-		    if (!uc.getSteps().isEmpty()) {
-			UserConsentNavigator navigator = gui.obtainNavigator(uc);
-			dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
-			ExecutionEngine exec = new ExecutionEngine(navigator);
-			ResultStatus guiResult = exec.process();
+		    try {
+			// get context here because it is thread local
+			DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+			if (! uc.getSteps().isEmpty()) {
+			    UserConsentNavigator navigator = gui.obtainNavigator(uc);
+			    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
+			    ExecutionEngine exec = new ExecutionEngine(navigator);
+			    ResultStatus guiResult = exec.process();
 
-			dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
+			    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
 
-			if (guiResult == ResultStatus.CANCEL) {
-			    Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
-			    if (!pPaceSuccessful.isDelivered()) {
-				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
-					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+			    if (guiResult == ResultStatus.CANCEL) {
+				Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
+				if (! pPaceSuccessful.isDelivered()) {
+				    pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+					    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+				}
 			    }
+			}
+		    } finally {
+			if (cardMon != null) {
+			    eventDispatcher.del(cardMon);
 			}
 		    }
 		}
@@ -388,20 +376,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    response.setAuthenticationProtocolData(eac1Output.getAuthDataType());
 
 	} catch (CertificateException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (WSHelper.WSException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (ElementParsingException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}
@@ -465,10 +453,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		    return r;
 		}
 	    } else {
-		logger.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) skipped.");
+		LOG.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) skipped.");
 	    }
 	} else {
-	    logger.warn("Checks according to BSI TR03112 3.4.4 skipped.");
+	    LOG.warn("Checks according to BSI TR03112 3.4.4 skipped.");
 	}
 
 	// all checks passed
@@ -476,51 +464,48 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private boolean checkTCTokenAndSubjectURL(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.TCTOKEN_URL);
-	if (o instanceof URL) {
-	    URL tcTokenURL = (URL) o;
+	URL tcTokenURL = (URL) dynCtx.get(TR03112Keys.TCTOKEN_URL);
+	if (tcTokenURL != null) {
 	    try {
 		URL subjectURL = new URL(certDescription.getSubjectURL());
 		return TR03112Utils.checkSameOriginPolicy(tcTokenURL, subjectURL);
 	    } catch (MalformedURLException e) {
-		logger.error("SubjectURL in CertificateDescription is not a well formed URL.");
+		LOG.error("SubjectURL in CertificateDescription is not a well formed URL.");
 		return false;
 	    }
 	} else {
-	    logger.error("No TC Token URL set in Dynamic Context.");
+	    LOG.error("No TC Token URL set in Dynamic Context.");
 	    return false;
 	}
     }
 
     private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
-	if (o instanceof Certificate) {
-	    Certificate certificate = (Certificate) o;
-	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates());
+	TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
+	if (certificate != null) {
+	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eService");
 	} else {
-	    logger.error("No eService TLS Certificate set in Dynamic Context.");
+	    LOG.error("No eService TLS Certificate set in Dynamic Context.");
 	    return false;
 	}
     }
 
     private boolean checkTCTokenServerCertificates(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object o = dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
-	if (o instanceof List) {
-	    List<?> certificates = (List<?>) o;
-	    for (Object cert : certificates) {
+	List<Pair<URL, TlsServerCertificate>> certificates;
+	certificates = (List<Pair<URL, TlsServerCertificate>>) dynCtx.get(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES);
+	if (certificates != null) {
+	    for (Pair<URL, TlsServerCertificate> cert : certificates) {
 		if (cert instanceof Pair) {
-		    Pair<?, ?> p = (Pair<?, ?>) cert;
-		    if (p.p2 instanceof Certificate) {
-			Certificate bcCert = (Certificate) p.p2;
-			if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates())) {
-			    return false;
-			}
+		    URL u = cert.p1;
+		    String host = u.getProtocol() + "://" + u.getHost() + (u.getPort() == -1 ? "" : (":" + u.getPort()));
+		    TlsServerCertificate bcCert = cert.p2;
+		    if (! TR03112Utils.isInCommCertificates(bcCert, certDescription.getCommCertificates(), host)) {
+			return false;
 		    }
 		}
 	    }
 	    return true;
 	} else {
-	    logger.error("No TC Token server certificates set in Dynamic Context.");
+	    LOG.error("No TC Token server certificates set in Dynamic Context.");
 	    return false;
 	}
     }
@@ -531,14 +516,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
      *
      * @param connectionHandle Handle describing the IFD and reader.
      * @return true when card reader supports genericPACE, false otherwise.
-     * @throws Exception
+     * @throws WSHelper.WSException
      */
-    private boolean genericPACESupport(ConnectionHandleType connectionHandle) throws Exception {
+    private boolean genericPACESupport(ConnectionHandleType connectionHandle) throws WSHelper.WSException {
 	// Request terminal capabilities
 	GetIFDCapabilities capabilitiesRequest = new GetIFDCapabilities();
 	capabilitiesRequest.setContextHandle(connectionHandle.getContextHandle());
 	capabilitiesRequest.setIFDName(connectionHandle.getIFDName());
-	GetIFDCapabilitiesResponse capabilitiesResponse = (GetIFDCapabilitiesResponse) dispatcher.deliver(capabilitiesRequest);
+	GetIFDCapabilitiesResponse capabilitiesResponse = (GetIFDCapabilitiesResponse) dispatcher.safeDeliver(capabilitiesRequest);
 	WSHelper.checkResult(capabilitiesResponse);
 
 	if (capabilitiesResponse.getIFDCapabilities() != null) {

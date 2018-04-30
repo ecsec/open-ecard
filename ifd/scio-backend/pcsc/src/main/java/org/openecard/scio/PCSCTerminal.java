@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2014-2016 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -72,6 +72,9 @@ public class PCSCTerminal implements SCIOTerminal {
 	    } catch (CardException ex) {
 		String msg = "Failed to connect the card in terminal '%s'.";
 		throw new SCIOException(String.format(msg, getName()), getCode(ex), ex);
+	    } catch (IllegalArgumentException ex) {
+		String msg = String.format("Protocol %s is not accepted by PCSC stack.", protocol.identifier);
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_PROTO_MISMATCH, ex);
 	    }
 	}
     }

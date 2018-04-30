@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,11 +32,13 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.9.
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class GenericCryptoProtocol extends SALProtocolBaseImpl {
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
+	addStatelessStep(new HashStep(ctx.getDispatcher()));
 	addStatelessStep(new SignStep(ctx.getDispatcher()));
 	addStatelessStep(new DecipherStep(ctx.getDispatcher()));
 	addStatelessStep(new VerifySignatureStep(ctx.getDispatcher()));

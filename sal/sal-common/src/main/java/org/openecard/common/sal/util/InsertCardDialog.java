@@ -27,11 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
-import org.openecard.common.enums.EventType;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.event.EventType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -58,7 +59,7 @@ public class InsertCardDialog {
     private final UserConsent gui;
     private final Map<String, String> cardNameAndType;
     private final CardStateMap cardStates;
-    private final EventManager manager;
+    private final EventDispatcher evDispatcher;
 
     /**
      * Creates a new InsertCardDialog.
@@ -70,11 +71,11 @@ public class InsertCardDialog {
      * @param manager EventManager to register the EventCallbacks.
      */
     public InsertCardDialog(UserConsent gui, CardStateMap cardStates, Map<String, String> cardNameAndType,
-	    EventManager manager) {
+	    EventDispatcher manager) {
 	this.gui = gui;
 	this.cardNameAndType = cardNameAndType;
 	this.cardStates = cardStates;
-	this.manager = manager;
+	this.evDispatcher = manager;
     }
 
     /**
@@ -89,7 +90,7 @@ public class InsertCardDialog {
 	} else {
 	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, 
 		    cardNameAndType.values());
-	    manager.register(insertCardAction, EventType.CARD_RECOGNIZED);
+	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
 	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	    ExecutionEngine exec = new ExecutionEngine(ucr);
 	    // run gui
@@ -98,7 +99,7 @@ public class InsertCardDialog {
 	    if (status == ResultStatus.CANCEL) {
 		return null;
 	    }
-	    manager.unregister(insertCardAction);
+	    evDispatcher.del(insertCardAction);
 	    return insertCardAction.getResponse();
 	}
     }
@@ -132,7 +133,7 @@ public class InsertCardDialog {
      * @return A {@link UserConsentDescription} which may be executed by the {@link ExecutionEngine}.
      */
     private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title"));
+	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title", AppVersion.getName()), "insert_card_dialog");
 
 	// create step
 	Step s = new Step(STEP_ID, lang.translationForKey("step.title"));

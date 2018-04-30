@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,7 @@
 package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
@@ -42,39 +42,77 @@ import org.slf4j.LoggerFactory;
  */
 public class NFCCard implements SCIOCard {
 
-    private static final Logger logger = LoggerFactory.getLogger(NFCCard.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
+
     private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    private final NFCCardTerminal nfcCardTerminal;
+    private final int timeoutForTransceive;
+    private final byte[] histBytes;
+
     protected IsoDep isodep;
-    
-    NFCCard(IsoDep tag) {
+
+    public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) {
 	isodep = tag;
+	timeoutForTransceive = timeout;
+	nfcCardTerminal = terminal;
+
+	byte[] histBytesTmp = isodep.getHistoricalBytes();
+	if (histBytesTmp == null) {
+	    histBytesTmp = isodep.getHiLayerResponse();
+	}
+	this.histBytes = histBytesTmp;
+    }
+
+    public int getTimeoutForTransceive() {
+	return timeoutForTransceive;
     }
 
     @Override
     public void beginExclusive() throws SCIOException {
-	logger.warn("beginExclusive not supported");
+	LOG.warn("beginExclusive not supported");
     }
 
     @Override
     public void endExclusive() throws SCIOException {
-	logger.warn("endExclusive not supported");
+	LOG.warn("endExclusive not supported");
     }
 
     @Override
     public void disconnect(boolean arg0) throws SCIOException {
-	try {
-	    isodep.close();
-	} catch (IOException e) {
-	    // TODO: check if the error code can be chosen more specifically
-	    throw new SCIOException("Disconnect failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
-	}
+	nfcCardChannel.close();
     }
 
     @Override
     public SCIOATR getATR() {
-	logger.warn("getATR not supported");
-	// for now there is no way to get the ATR in android nfc api
-	return new SCIOATR(new byte[0]);
+	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
+	if (histBytes == null) {
+	    return new SCIOATR(new byte[0]);
+	} else {
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    // Initial Header
+	    out.write(0x3B);
+	    // T0
+	    out.write(0x80 | (histBytes.length & 0xF));
+	    // TD1
+	    out.write(0x80);
+	    // TD2
+	    out.write(0x01);
+	    // ISO14443A: The historical bytes from ATS response.
+	    // ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
+	    // TODO: check that the HiLayerResponse matches the requirements for ISO14443B
+	    out.write(histBytes, 0, histBytes.length);
+
+	    // TCK: Exclusive-OR of bytes T0 to Tk
+	    byte[] preATR = out.toByteArray();
+	    byte chkSum = 0;
+	    for (int i = 1; i < preATR.length; i++) {
+		chkSum ^= preATR[i];
+	    }
+	    out.write(chkSum);
+
+	    byte[] atr = out.toByteArray();
+	    return new SCIOATR(atr);
+	}
     }
 
     @Override
@@ -84,9 +122,8 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public SCIOProtocol getProtocol() {
-	logger.warn("getProtocol not supported");
-	// for now theres no way to get the used protocol in android nfc api
-        return null;
+	// NFC is contactless
+        return SCIOProtocol.TCL;
     }
 
     @Override
@@ -95,13 +132,19 @@ public class NFCCard implements SCIOCard {
     }
 
     @Override
-    public byte[] transmitControlCommand(int arg0, byte[] arg1) throws SCIOException {
-	logger.warn("transmitControlCommand not supported");
-	return new byte[0];
+    public byte[] transmitControlCommand(int controlCode, byte[] command) throws SCIOException {
+	if (controlCode == (0x42000000 + 3400)) {
+	    // GET_FEATURE_REQUEST_CTLCODE
+	    return new byte[0];
+	} else {
+	    String msg = "Control command not supported.";
+	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_INVALID_PARAMETER);
+	}
     }
 
     @Override
     public SCIOTerminal getTerminal() {
-        return null;
+        return nfcCardTerminal;
     }
+
 }

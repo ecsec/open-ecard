@@ -23,6 +23,7 @@
 package org.openecard.common.util;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FuturePromise<T> extends Promise<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(FuturePromise.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FuturePromise.class);
+    private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
 
     public FuturePromise(final Callable<T> function) {
 	new Thread(new Runnable() {
@@ -46,13 +48,13 @@ public class FuturePromise<T> extends Promise<T> {
 		try {
 		    result = function.call();
 		} catch (Exception ex) {
-		    logger.error("Failed to complete computation of the result.", ex);
+		    LOG.error("Failed to complete computation of the result.", ex);
 		    result = null;
 		}
 		// We have either a result or an error
 		FuturePromise.super.deliver(result);
 	    }
-	}, "FuturePromise").start();
+	}, "FuturePromise-" + THREAD_NUM.getAndIncrement()).start();
     }
 
     @Override

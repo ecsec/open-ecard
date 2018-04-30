@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,11 +23,12 @@
 package org.openecard.transport.httpcore;
 
 import java.io.IOException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.CertificateRequest;
-import org.openecard.bouncycastle.crypto.tls.DefaultTlsClient;
-import org.openecard.bouncycastle.crypto.tls.TlsAuthentication;
-import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 
 
 /**
@@ -37,11 +38,15 @@ import org.openecard.bouncycastle.crypto.tls.TlsCredentials;
  */
 public class DefaultTlsClientImpl extends DefaultTlsClient {
 
+    public DefaultTlsClientImpl(TlsCrypto crypto) {
+	super(crypto);
+    }
+
     @Override
     public TlsAuthentication getAuthentication() throws IOException {
 	return new TlsAuthentication() {
 	    @Override
-	    public void notifyServerCertificate(Certificate crtfct) throws IOException {
+	    public void notifyServerCertificate(TlsServerCertificate serverCertificate) throws IOException {
 		// ignore
 	    }
 	    @Override

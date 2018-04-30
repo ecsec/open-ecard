@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,12 +41,12 @@ import org.openecard.common.util.UrlBuilder;
  */
 public class TCToken extends TCTokenType {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCToken.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TCToken.class);
 
     private boolean invalidPSK = false;
 
     /**
-     * Gets the CoomunicationErrorAddress for use in error conditions.
+     * Gets the CommunicationErrorAddress for use in error conditions.
      * If the CommunicationErrorAddress is available this one is used.
      *
      * @param minor The ResultMinor string.
@@ -63,7 +63,7 @@ public class TCToken extends TCTokenType {
 	    return result;
 	} catch (URISyntaxException ex) {
 	    // should not happen, but here it is anyways
-	    logger.error("Construction of redirect URL failed.", ex);
+	    LOG.error("Construction of redirect URL failed.", ex);
 	    throw new InvalidRedirectUrlException(NO_URL);
 	}
     }
@@ -99,11 +99,11 @@ public class TCToken extends TCTokenType {
 		URI url = new URI(urlStr);
 		return url;
 	    } catch (URISyntaxException ex) {
-		logger.error("No valid CommunicationErrorAddress provided.");
+		LOG.error("No valid CommunicationErrorAddress provided.");
 		throw new InvalidRedirectUrlException(NO_URL);
 	    }
 	} else {
-	    logger.error("No CommunicationErrorAddress to perform a redirect provided.");
+	    LOG.error("No CommunicationErrorAddress to perform a redirect provided.");
 	    throw new InvalidRedirectUrlException(NO_REDIRECT_AVAILABLE);
 	}
     }

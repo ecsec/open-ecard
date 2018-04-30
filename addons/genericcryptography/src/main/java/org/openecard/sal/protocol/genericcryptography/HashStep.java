@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,13 +22,26 @@
 
 package org.openecard.sal.protocol.genericcryptography;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.Hash;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.HashResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.util.SALUtils;
+import org.openecard.crypto.common.HashAlgorithms;
+import org.openecard.crypto.common.SignatureAlgorithms;
+import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +51,11 @@ import org.slf4j.LoggerFactory;
  * See TR-03112, version 1.1.2, part 7, section 4.9.8.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class HashStep implements ProtocolStep<Hash, HashResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(HashStep.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HashStep.class);
     private final Dispatcher dispatcher;
 
     /**
@@ -50,7 +64,6 @@ public class HashStep implements ProtocolStep<Hash, HashResponse> {
      * @param dispatcher Dispatcher
      */
     public HashStep(Dispatcher dispatcher) {
-	//TODO Implement me
 	this.dispatcher = dispatcher;
     }
 
@@ -61,7 +74,57 @@ public class HashStep implements ProtocolStep<Hash, HashResponse> {
 
     @Override
     public HashResponse perform(Hash request, Map<String, Object> internalData) {
-	return WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	HashResponse response = WSHelper.makeResponse(HashResponse.class, WSHelper.makeResultOK());
+
+	try {
+	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+	    String didName = SALUtils.getDIDName(request);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
+	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
+
+	    HashGenerationInfoType hashInfo = cryptoMarker.getHashGenerationInfo();
+	    if (hashInfo != null) {
+		if (hashInfo == HashGenerationInfoType.NOT_ON_CARD) {
+		    String algId = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
+		    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algId);
+		    HashAlgorithms hashAlg = alg.getHashAlg();
+		    if (hashAlg == null) {
+			String msg = String.format("Algorithm %s does not specify a Hash algorithm.", algId);
+			LOG.error(msg);
+			String minor = ECardConstants.Minor.App.INCORRECT_PARM;
+			response.setResult(WSHelper.makeResultError(minor, msg));
+		    } else {
+			// calculate hash
+			MessageDigest md = MessageDigest.getInstance(hashAlg.getJcaAlg());
+			md.update(request.getMessage());
+			byte[] digest = md.digest();
+			response.setHash(digest);
+		    }
+		} else {
+		    // TODO: implement hashing on card
+		    String msg = String.format("Unsupported Hash generation type (%s) requested.", hashInfo);
+		    LOG.error(msg);
+		    String minor = ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION;
+		    response.setResult(WSHelper.makeResultError(minor, msg));
+		}
+	    } else {
+		// no hash alg specified, this is an error
+		String msg = String.format("No Hash generation type specified in CIF.");
+		LOG.error(msg);
+		String minor = ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION;
+		response.setResult(WSHelper.makeResultError(minor, msg));
+	    }
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
+	} catch (UnsupportedAlgorithmException | NoSuchAlgorithmException ex) {
+
+	} catch (Exception e) {
+	    LOG.warn(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
     }
 
 }

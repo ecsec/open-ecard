@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,10 +22,17 @@
 
 package org.openecard.transport.dispatcher;
 
+import java.util.List;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.CIFProvider;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Environment;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.interfaces.EventFilter;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -63,13 +70,44 @@ public class TestEnv1 implements Environment {
     }
 
     @Override
-    public void setEventManager(EventManager manager) {
+    public void setEventDispatcher(EventDispatcher manager) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public EventManager getEventManager() {
-	throw new UnsupportedOperationException("Not supported yet.");
+    public EventDispatcher getEventDispatcher() {
+	return new EventDispatcher() {
+	    @Override
+	    public void start() {
+	    }
+
+	    @Override
+	    public void terminate() {
+	    }
+
+	    @Override
+	    public EventCallback add(EventCallback cb) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	    }
+
+	    @Override
+	    public EventCallback add(EventCallback cb, EventType... eventTypes) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	    }
+
+	    @Override
+	    public EventCallback add(EventCallback cb, EventFilter filter) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	    }
+
+	    @Override
+	    public EventCallback del(EventCallback cb) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	    }
+	    @Override
+	    public void notify(EventType t, EventObject o) {
+	    }
+	};
     }
 
     @Override
@@ -100,6 +138,41 @@ public class TestEnv1 implements Environment {
 
     @Override
     public Management getManagement() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setRecognition(CardRecognition recognition) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public CardRecognition getRecognition() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setCIFProvider(CIFProvider provider) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public CIFProvider getCIFProvider() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void addIFDCtx(byte[] ctx) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeIFDCtx(byte[] ctx) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public List<byte[]> getIFDCtx() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

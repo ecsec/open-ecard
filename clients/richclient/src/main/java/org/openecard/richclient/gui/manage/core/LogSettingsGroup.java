@@ -23,14 +23,27 @@
 package org.openecard.richclient.gui.manage.core;
 
 import ch.qos.logback.core.joran.spi.JoranException;
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Properties;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -46,6 +59,8 @@ import org.openecard.richclient.gui.manage.SettingsGroup;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -62,38 +77,49 @@ public class LogSettingsGroup extends SettingsGroup {
 
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("addon");
+    private static final Logger LOG = LoggerFactory.getLogger(LogSettingsGroup.class);
 
-    private static final String GROUP         = "addon.list.core.connection.logging.group_name";
-    private static final String ROOT_NAME     = "addon.list.core.connection.logging.root";
-    private static final String ROOT_DESC     = "addon.list.core.connection.logging.root.desc";
+    private static final String GROUP         = "addon.core.logging.group_name";
+    private static final String ROOT_NAME     = "addon.core.logging.root";
+    private static final String ROOT_DESC     = "addon.core.logging.root.desc";
     private static final String ROOT_KEY      = "logging.root";
-    private static final String PAOS_NAME     = "addon.list.core.connection.logging.paos";
-    private static final String PAOS_DESC     = "addon.list.core.connection.logging.paos.desc";
+    private static final String PAOS_NAME     = "addon.core.logging.paos";
+    private static final String PAOS_DESC     = "addon.core.logging.paos.desc";
     private static final String PAOS_KEY      = "org.openecard.transport.paos";
-    private static final String EAC_NAME      = "addon.list.core.connection.logging.eac";
-    private static final String EAC_DESC      = "addon.list.core.connection.logging.eac.desc";
+    private static final String EAC_NAME      = "addon.core.logging.eac";
+    private static final String EAC_DESC      = "addon.core.logging.eac.desc";
     private static final String EAC_KEY       = "org.openecard.sal.protocol.eac";
-    private static final String PACE_NAME     = "addon.list.core.connection.logging.pace";
-    private static final String PACE_DESC     = "addon.list.core.connection.logging.pace.desc";
+    private static final String PACE_NAME     = "addon.core.logging.pace";
+    private static final String PACE_DESC     = "addon.core.logging.pace.desc";
     private static final String PACE_KEY      = "org.openecard.ifd.protocol.pace";
-    private static final String TRCHECKS_NAME = "addon.list.core.connection.logging.trchecks";
-    private static final String TRCHECKS_DESC = "addon.list.core.connection.logging.trchecks.desc";
+    private static final String TRCHECKS_NAME = "addon.core.logging.trchecks";
+    private static final String TRCHECKS_DESC = "addon.core.logging.trchecks.desc";
     private static final String TRCHECKS_KEY  = "org.openecard.common.util.TR03112Utils";
-    private static final String TCTOKEN_NAME  = "addon.list.core.connection.logging.tctoken";
-    private static final String TCTOKEN_DESC  = "addon.list.core.connection.logging.tctoken.desc";
+    private static final String TCTOKEN_NAME  = "addon.core.logging.tctoken";
+    private static final String TCTOKEN_DESC  = "addon.core.logging.tctoken.desc";
     private static final String TCTOKEN_KEY   = "org.openecard.binding.tctoken";
-    private static final String EVENT_NAME    = "addon.list.core.connection.logging.event";
-    private static final String EVENT_DESC    = "addon.list.core.connection.logging.event.desc";
+    private static final String EVENT_NAME    = "addon.core.logging.event";
+    private static final String EVENT_DESC    = "addon.core.logging.event.desc";
     private static final String EVENT_KEY     = "org.openecard.event";
-    private static final String HTTPBIND_NAME = "addon.list.core.connection.logging.httpbind";
-    private static final String HTTPBIND_DESC = "addon.list.core.connection.logging.httpbind.desc";
+    private static final String HTTPBIND_NAME = "addon.core.logging.httpbind";
+    private static final String HTTPBIND_DESC = "addon.core.logging.httpbind.desc";
     private static final String HTTPBIND_KEY  = "org.openecard.control.binding.http";
-    private static final String ADDON_NAME    = "addon.list.core.connection.logging.addon";
-    private static final String ADDON_DESC    = "addon.list.core.connection.logging.addon.desc";
+    private static final String ADDON_NAME    = "addon.core.logging.addon";
+    private static final String ADDON_DESC    = "addon.core.logging.addon.desc";
     private static final String ADDON_KEY     = "org.openecard.addon";
-    private static final String SALSTATE_NAME = "addon.list.core.connection.logging.salstate";
-    private static final String SALSTATE_DESC = "addon.list.core.connection.logging.salstate.desc";
+    private static final String SALSTATE_NAME = "addon.core.logging.salstate";
+    private static final String SALSTATE_DESC = "addon.core.logging.salstate.desc";
     private static final String SALSTATE_KEY  = "org.openecard.common.sal.state";
+
+    private static final String MDLW_NAME        = "addon.core.logging.middleware";
+    private static final String MDLW_DESC        = "addon.core.logging.middleware.desc";
+    private static final String MDLW_KEY         = "org.openecard.mdlw.sal";
+    private static final String MDLW_EVENT_NAME  = "addon.core.logging.middleware-event";
+    private static final String MDLW_EVENT_DESC  = "addon.core.logging.middleware-event.desc";
+    private static final String MDLW_EVENT_KEY   = "org.openecard.mdlw.event";
+    private static final String CG_NAME          = "addon.core.logging.chipgateway";
+    private static final String CG_DESC          = "addon.core.logging.chipgateway.desc";
+    private static final String CG_KEY           = "org.openecard.addons.cg";
 
     public LogSettingsGroup() {
 	super(lang.translationForKey(GROUP), SettingsFactory.getInstance(loadProperties()));
@@ -109,6 +135,26 @@ public class LogSettingsGroup extends SettingsGroup {
 	addLogLevelBox(lang.translationForKey(HTTPBIND_NAME), lang.translationForKey(HTTPBIND_DESC), HTTPBIND_KEY);
 	addLogLevelBox(lang.translationForKey(ADDON_NAME), lang.translationForKey(ADDON_DESC), ADDON_KEY);
 	addLogLevelBox(lang.translationForKey(SALSTATE_NAME), lang.translationForKey(SALSTATE_DESC), SALSTATE_KEY);
+	addLogLevelBox(lang.translationForKey(MDLW_NAME), lang.translationForKey(MDLW_DESC), MDLW_KEY);
+	addLogLevelBox(lang.translationForKey(MDLW_EVENT_NAME), lang.translationForKey(MDLW_EVENT_DESC), MDLW_EVENT_KEY);
+	addLogLevelBox(lang.translationForKey(CG_NAME), lang.translationForKey(CG_DESC), CG_KEY);
+
+	// add support text
+	try {
+	    JComponent panel = createSupportPanel();
+
+	    GridBagConstraints constraints = new GridBagConstraints();
+	    constraints.insets = new Insets(5, 10, 0, 5);
+	    constraints.fill = GridBagConstraints.NONE;
+	    constraints.gridheight = GridBagConstraints.RELATIVE;
+	    constraints.gridwidth = GridBagConstraints.RELATIVE;
+	    constraints.gridx = 0;
+	    constraints.gridy = itemIdx++;
+	    constraints.anchor = GridBagConstraints.WEST;
+	    getContainer().add(panel, constraints);
+	} catch (IOException ex) {
+	    // no support panel text available
+	}
     }
 
     private JComboBox addLogLevelBox(String name, String desc, String key) {
@@ -120,16 +166,18 @@ public class LogSettingsGroup extends SettingsGroup {
     protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
 	try {
 	    File confFile = LogbackConfig.getConfFile();
+
 	    // create file if needed
-	    if (! confFile.exists()) {
+	    //if (! confFile.exists()) {
+	    { // overwrite with default settings
 		InputStream is = FileUtils.resolveResourceAsStream(LogSettingsGroup.class, "/logback.xml");
-		FileOutputStream os = new FileOutputStream(confFile);
-		byte[] buffer = new byte[4096];
-		int n;
-		while ((n = is.read(buffer)) > 0) {
-		    os.write(buffer, 0, n);
+		try (FileOutputStream os = new FileOutputStream(confFile)) {
+		    byte[] buffer = new byte[4096];
+		    int n;
+		    while ((n = is.read(buffer)) > 0) {
+			os.write(buffer, 0, n);
+		    }
 		}
-		os.close();
 	    }
 	    // load file into a Document
 	    WSMarshaller m = WSMarshallerFactory.createInstance();
@@ -169,12 +217,20 @@ public class LogSettingsGroup extends SettingsGroup {
 	    val = properties.getProperty(SALSTATE_KEY);
 	    val = (val != null) ? val : "";
 	    setLoglevel(conf, SALSTATE_KEY, val);
-
-	    // write log to file
-	    FileWriter w = new FileWriter(confFile);
-	    String confStr = m.doc2str(conf);
-	    w.write(confStr);
-	    w.close();
+	    val = properties.getProperty(MDLW_KEY);
+	    val = (val != null) ? val : "";
+	    setLoglevel(conf, MDLW_KEY, val);
+	    val = properties.getProperty(MDLW_EVENT_KEY);
+	    val = (val != null) ? val : "";
+	    setLoglevel(conf, MDLW_EVENT_KEY, val);
+	    val = properties.getProperty(CG_KEY);
+	    val = (val != null) ? val : "";
+	    setLoglevel(conf, CG_KEY, val);
+	    try ( // write log to file
+		    FileWriter w = new FileWriter(confFile)) {
+		String confStr = m.doc2str(conf);
+		w.write(confStr);
+	    }
 	    // reload log config
 	    LogbackConfig.load();
 	} catch (JoranException ex) {
@@ -208,6 +264,9 @@ public class LogSettingsGroup extends SettingsGroup {
 		p.setProperty(HTTPBIND_KEY, getLoglevel(conf, HTTPBIND_KEY));
 		p.setProperty(ADDON_KEY, getLoglevel(conf, ADDON_KEY));
 		p.setProperty(SALSTATE_KEY, getLoglevel(conf, SALSTATE_KEY));
+		p.setProperty(MDLW_KEY, getLoglevel(conf, MDLW_KEY));
+		p.setProperty(MDLW_EVENT_KEY, getLoglevel(conf, MDLW_EVENT_KEY));
+		p.setProperty(CG_KEY, getLoglevel(conf, CG_KEY));
 		return p;
 	    }
 	} catch (IOException | SAXException | WSMarshallerException | AddonPropertiesException ex) {
@@ -292,6 +351,62 @@ public class LogSettingsGroup extends SettingsGroup {
 	    e.setAttribute("level", level);
 	} catch (DOMException | XPathExpressionException ex) {
 	    throw new AddonPropertiesException("Failed to operate on log config document.");
+	}
+    }
+
+    private JComponent createSupportPanel() throws IOException {
+	HTMLEditorKit kit = new HTMLEditorKit();
+	HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
+
+	JEditorPane editorPane = new JEditorPane();
+	editorPane.setEditable(false);
+	editorPane.setEditorKit(kit);
+	editorPane.setDocument(doc);
+	//editorPane.setMaximumSize(new Dimension(520, 400));
+	editorPane.setPreferredSize(new Dimension(520, 250));
+
+	URL url = I18n.getTranslation("richclient").translationForFile("debug", "html");
+	editorPane.setPage(url);
+
+	editorPane.addHyperlinkListener(new HyperlinkListener() {
+	    @Override
+	    public void hyperlinkUpdate(HyperlinkEvent e) {
+		openUrl(e);
+	    }
+	});
+
+	return editorPane;
+    }
+
+    private void openUrl(HyperlinkEvent event) {
+	HyperlinkEvent.EventType type = event.getEventType();
+	if (type == HyperlinkEvent.EventType.ACTIVATED) {
+	    String url = event.getURL().toExternalForm();
+	    try {
+		boolean browserOpened = false;
+		URI uri = new URI(url);
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+		    try {
+			Desktop.getDesktop().browse(uri);
+			browserOpened = true;
+		    } catch (IOException ex) {
+			// failed to open browser
+			LOG.debug(ex.getMessage(), ex);
+		    }
+		}
+		if (! browserOpened) {
+		    ProcessBuilder pb = new ProcessBuilder("xdg-open", uri.toString());
+		    try {
+			pb.start();
+		    } catch (IOException ex) {
+			// failed to execute command
+			LOG.debug(ex.getMessage(), ex);
+		    }
+		}
+	    } catch (URISyntaxException ex) {
+		// wrong syntax
+		LOG.debug(ex.getMessage(), ex);
+	    }
 	}
     }
 

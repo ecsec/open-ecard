@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
@@ -69,11 +70,19 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     private final Map<String, SALProtocol> protoObjects = new TreeMap<>();
     private FCP lastSelectedEfFCP;
 
-    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif) {
+    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif, @Nullable String interfaceProtocol) {
+	this(handle, new CardInfoWrapper(cif, interfaceProtocol));
+    }
+
+    private CardStateEntry(ConnectionHandleType handle, CardInfoWrapper cifWrapper) {
 	serialNumber = nextNumber();
-	infoObject = new CardInfoWrapper(cif);
+	infoObject = new CardInfoWrapper(cifWrapper);
 	this.handle = handle;
 	this.handle.setCardApplication(getImplicitlySelectedApplicationIdentifier());
+    }
+
+    public CardStateEntry derive(ConnectionHandleType handle) {
+	return new CardStateEntry(handle, infoObject);
     }
 
 
@@ -95,11 +104,11 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return authenticatedDIDs;
     }
 
-    public void addAuthenticated(String didName, byte[] cardApplication){
+    public void addAuthenticated(String didName, byte[] cardApplication) {
 	this.authenticatedDIDs.add(this.infoObject.getDIDInfo(didName, cardApplication));
     }
 
-    public void removeAuthenticated(DIDInfoType didInfo){
+    public void removeAuthenticated(DIDInfoType didInfo) {
 	this.authenticatedDIDs.remove(didInfo);
     }
 
@@ -202,7 +211,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return getAuthenticatedDIDs().contains(didInfo);
     }
 
-     public boolean isAuthenticated(String didName, DIDScopeType didScope) {
+    public boolean isAuthenticated(String didName, DIDScopeType didScope) {
 	DIDInfoType didInfo = infoObject.getDIDInfo(didName, didScope);
 	return getAuthenticatedDIDs().contains(didInfo);
     }

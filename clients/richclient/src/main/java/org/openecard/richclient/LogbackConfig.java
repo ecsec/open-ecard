@@ -24,6 +24,7 @@ package org.openecard.richclient;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.util.ContextInitializer;
 import ch.qos.logback.core.joran.spi.JoranException;
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 public class LogbackConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogbackConfig.class);
     private static final String CFG_FILENAME = "richclient_logback.xml";
+    private static Logger LOG; // loaded on demand, for reason see in load() below
 
     public static File getConfFile() throws IOException {
 	File cfgDir = FileUtils.getHomeConfigDir();
@@ -62,13 +63,33 @@ public class LogbackConfig {
 	File logFile = getConfFile();
 
 	if (logFile.canRead() && logFile.isFile()) {
+	    // this prevents loading the bundled config
+	    System.setProperty("logback.configurationFile", logFile.getAbsolutePath());
+
+	    // make sure to reload logging config
 	    LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
+	    ctx.reset();
 	    JoranConfigurator conf = new JoranConfigurator();
 	    conf.setContext(ctx);
 	    ctx.reset();
 	    conf.doConfigure(logFile);
-	    logger.info("Configured Logback with config file from: {}", logFile);
+
+	    // load logger after loading config, in order to avoid loading bundled config first
+	    if (LOG == null) {
+		LOG = LoggerFactory.getLogger(LogbackConfig.class);
+	    }
+	    LOG.info("Configured Logback with config file from: {}", logFile);
+	} else {
+	    loadDefault();
 	}
+    }
+
+    public static void loadDefault() throws JoranException {
+	System.clearProperty("logback.configurationFile");
+	LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
+	ctx.reset();
+	ContextInitializer init = new ContextInitializer(ctx);
+	init.autoConfig();
     }
 
 }

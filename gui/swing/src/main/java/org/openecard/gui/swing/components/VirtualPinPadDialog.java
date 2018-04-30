@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,12 +23,14 @@
 package org.openecard.gui.swing.components;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.Box;
+import java.awt.event.WindowEvent;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -57,10 +59,11 @@ public class VirtualPinPadDialog extends JDialog {
     /**
      * Creates a new instance of the dialog.
      *
+     * @param pinButton
      * @param inputField The component capturing the PIN.
      * @param passDef The definition of the password field.
      */
-    public VirtualPinPadDialog(JTextComponent inputField, PasswordField passDef) {
+    public VirtualPinPadDialog(VirtualPinPadButton pinButton, JTextComponent inputField, PasswordField passDef) {
 	super(getOwningWindow(inputField), "PIN-Pad", ModalityType.DOCUMENT_MODAL);
 	this.inputField = inputField;
 	this.passDef = passDef;
@@ -69,23 +72,20 @@ public class VirtualPinPadDialog extends JDialog {
 	setSize(200, 200);
 	setResizable(false);
 	setLayout(new BorderLayout(3, 3));
-	setLocationRelativeTo(getOwningWindow(inputField));
 
-	JPanel buttons = new JPanel(new GridLayout(4, 4, 4, 4));
+	Point dialogLocation = pinButton.getLocationOnScreen();
+	dialogLocation.translate(0, pinButton.getHeight());
+	setLocation(dialogLocation);
+
+	JPanel buttons = new JPanel(new GridLayout(4, 3, 4, 4));
 	add(buttons, BorderLayout.CENTER);
 	for (int i = 1; i <= 9; i++) {
-	    if (i == 4) {
-		buttons.add(createRemoveSingleElementButton());
-	    }
-
-	    if (i == 7) {
-		buttons.add(createClearButton());
-	    }
 	    buttons.add(createButton(i));
 	}
-	buttons.add(Box.createGlue());
-	buttons.add(Box.createGlue());
+	// last row
+	buttons.add(createRemoveSingleElementButton());
 	buttons.add(createButton(0));
+	buttons.add(createCloseButton());
     }
 
     private JButton createButton(int num) {
@@ -94,21 +94,32 @@ public class VirtualPinPadDialog extends JDialog {
 	return button;
     }
 
-    private JButton createClearButton() {
-	JButton button = new JButton("CLR");
-	button.addActionListener(new ClearInputListener());
+    private JButton createRemoveSingleElementButton() {
+	JButton button = new JButton();
+	//setButtonFont(button);
+	button.addActionListener(new RemoveSingleElementListener());
+	Icon ico = new ImageIcon(FileUtils.resolveResourceAsURL(VirtualPinPadDialog.class, "arrow.png"));
+	button.setIcon(ico);
 	Insets marginInset = button.getMargin();
 	button.setMargin(new Insets(marginInset.top, 5, marginInset.bottom, 5));
 	return button;
     }
 
-    private JButton createRemoveSingleElementButton() {
-	JButton button = new JButton();
-	button.addActionListener(new RemoveSingelElementListener());
-	Icon ico = new ImageIcon(FileUtils.resolveResourceAsURL(VirtualPinPadDialog.class, "arrow.png"));
-	button.setIcon(ico);
+    private JButton createCloseButton() {
+	JButton button = new JButton("OK");
+	//setButtonFont(button);
+	button.addActionListener(new CloseInputListener());
+	Insets marginInset = button.getMargin();
+	button.setMargin(new Insets(marginInset.top, 5, marginInset.bottom, 5));
 	return button;
     }
+
+    private void setButtonFont(JButton button) {
+	Font f = button.getFont();
+	f = f.deriveFont(f.getSize2D() + 10);
+	button.setFont(f);
+    }
+
 
     private static Window getOwningWindow(JTextComponent inputField) {
 	return SwingUtilities.getWindowAncestor(inputField);
@@ -132,25 +143,24 @@ public class VirtualPinPadDialog extends JDialog {
 	}
     }
 
-    private class ClearInputListener implements ActionListener {
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    inputField.setText("");
-	    numCharsEntered = 0;
-	}
-    }
-
-    private class RemoveSingelElementListener implements ActionListener {
+    private class RemoveSingleElementListener implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 	    String data = inputField.getText();
-	    if (!data.isEmpty()) {
+	    if (! data.isEmpty()) {
 		data = data.substring(0, data.length() - 1);
 		inputField.setText(data);
 		numCharsEntered--;
 	    }
+	}
+    }
+
+    private class CloseInputListener implements ActionListener {
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    dispatchEvent(new WindowEvent(VirtualPinPadDialog.this, WindowEvent.WINDOW_CLOSING));
 	}
     }
 

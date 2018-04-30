@@ -2,6 +2,8 @@
 <iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+			  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+			  xmlns:xenc11='http://www.w3.org/2009/xmlenc11#'
 			  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
 	<iso:CardType>
 		<iso:ObjectIdentifier>http://ws.gematik.de/egk/1.0.0</iso:ObjectIdentifier>
@@ -473,7 +475,6 @@
 		<!-- =============== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D2760001448000</iso:ApplicationIdentifier>
 			<iso:ApplicationName>root</iso:ApplicationName>
 
@@ -2254,7 +2255,6 @@
 		<!-- =============== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>D27600000102</iso:ApplicationIdentifier>
 			<iso:ApplicationName>HCA</iso:ApplicationName>
 			<!-- ================= -->
@@ -2263,7 +2263,7 @@
 
 
 			<!-- As there are only standardized card application services, there are no
-				 CardApplicationServiceInfo elements. -->
+			CardApplicationServiceInfo elements. -->
 
 			<!-- ======================= -->
 			<!-- HCA: CardApplicationACL -->
@@ -5971,7 +5971,6 @@
 		<!-- =============== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>A000000167455349474E</iso:ApplicationIdentifier>
 			<iso:ApplicationName>ESIGN</iso:ApplicationName>
 			<!-- =================== -->
@@ -5979,7 +5978,7 @@
 			<!-- =================== -->
 
 			<!-- As there are only standardized card application services, there are no
-				 CardApplicationServiceInfo elements. -->
+			CardApplicationServiceInfo elements. -->
 
 			<!-- ========================= -->
 			<!-- ESIGN: CardApplicationACL -->
@@ -6356,8 +6355,8 @@
 			<!-- ======================================== -->
 
 			<!-- According to [eGK-1#N086900(d)] calling INTERNAL AUTHENTICATE with rsaClientAuthentication corresponds to
-				 computing an RSASSA_PSS_SIGN signature according to Section 8.1.1 and Section 9.1.1 of
-				 PKCS#1 (v2.1), ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1.pdf  -->
+			computing an RSASSA_PSS_SIGN signature according to Section 8.1.1 and Section 9.1.1 of
+			PKCS#1 (v2.1), ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1.pdf  -->
 
 			<iso:DIDInfo>
 				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
@@ -6371,8 +6370,8 @@
 								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
 									<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
-										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -6792,7 +6791,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>signPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>02</iso:CardAlgRef>
@@ -7002,7 +7001,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>signPSS</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -7210,8 +7209,8 @@
 			<!-- ========================================= -->
 
 			<!-- According to [eGK-1#N086900(d)] calling INTERNAL AUTHENTICATE with rsaClientAuthentication corresponds to
-				 computing an RSASSA_PSS_SIGN signature according to Section 8.1.1 and Section 9.1.1 of
-				 PKCS#1 (v2.1), ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1.pdf  -->
+			computing an RSASSA_PSS_SIGN signature according to Section 8.1.1 and Section 9.1.1 of
+			PKCS#1 (v2.1), ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1.pdf  -->
 
 			<iso:DIDInfo>
 				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
@@ -7225,8 +7224,8 @@
 								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
 									<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
-										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -7436,7 +7435,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>02</iso:CardAlgRef>
@@ -7656,7 +7655,11 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherOaep</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.7</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</iso:Algorithm>
+									<iso:Parameters>
+										<xenc11:MGF Algorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256" />
+										<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+									</iso:Parameters>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>85</iso:CardAlgRef>
@@ -7846,7 +7849,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>81</iso:CardAlgRef>
@@ -8048,7 +8051,11 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherOaep</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.7</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p</iso:Algorithm>
+									<iso:Parameters>
+										<xenc11:MGF Algorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256" />
+										<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+									</iso:Parameters>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>85</iso:CardAlgRef>
@@ -8240,7 +8247,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>81</iso:CardAlgRef>
@@ -9039,7 +9046,6 @@
 		<!-- =============== -->
 		<iso:CardApplication>
 			<iso:RequirementLevel>PlatformMandatory</iso:RequirementLevel>
-			<iso:InterfaceProtocol>urn:iso:std:iso-iec:7816:-3:protocols:T-equals-1</iso:InterfaceProtocol>
 			<iso:ApplicationIdentifier>E828BD080FA000000167455349474E</iso:ApplicationIdentifier>
 			<iso:ApplicationName>CIA.ESIGN</iso:ApplicationName>
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  package="org.openecard.android">
+
+	<uses-permission android:name="android.permission.NFC"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
+
+	<uses-feature
+		android:name="android.hardware.nfc"
+		android:required="false" />
+
+	<application
+		android:allowBackup="true"
+		android:label="@string/app_name"
+		android:supportsRtl="true">
+
+		<service
+			android:name=".system.OpeneCardServiceImpl"
+			android:exported="true"
+			android:label="Open eCard Service"/>
+
+	</application>
+
+</manifest>

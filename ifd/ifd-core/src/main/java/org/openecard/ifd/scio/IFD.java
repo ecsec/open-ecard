@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -82,10 +82,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.jws.WebService;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.ifd.Protocol;
@@ -97,21 +99,22 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.interfaces.Publish;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.ValueGenerators;
 import org.openecard.gui.UserConsent;
+import org.openecard.ifd.event.IfdEventManager;
 import org.openecard.ifd.scio.reader.EstablishPACERequest;
 import org.openecard.ifd.scio.reader.EstablishPACEResponse;
 import org.openecard.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.ifd.scio.reader.ExecutePACEResponse;
 import org.openecard.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
-import org.openecard.ifd.scio.wrapper.HandledChannel;
 import org.openecard.ifd.scio.wrapper.NoSuchChannel;
+import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.openecard.ifd.scio.wrapper.TerminalInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,15 +129,17 @@ import org.slf4j.LoggerFactory;
 public class IFD implements org.openecard.ws.IFD {
     // TODO: make all commands cancellable
 
-    private static final Logger logger = LoggerFactory.getLogger(IFD.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IFD.class);
 
     private byte[] ctxHandle = null;
     //private SCWrapper scwrapper;
     private ChannelManager cm;
-    private Dispatcher dispatcher;
+
+    private Environment env;
     private UserConsent gui = null;
+
     private final ProtocolFactories protocolFactories = new ProtocolFactories();
-    private EventManager evManager;
+    private IfdEventManager evManager;
 
     private AtomicInteger numClients;
     private ExecutorService threadPool;
@@ -153,16 +158,13 @@ public class IFD implements org.openecard.ws.IFD {
 	return hasContext;
     }
 
+
+    public void setEnvironment(Environment env) {
+	this.env = env;
+    }
+
     public void setGUI(UserConsent gui) {
 	this.gui = gui;
-    }
-
-    public void setDispatcher(Dispatcher dispatcher) {
-	this.dispatcher = dispatcher;
-    }
-
-    public void setEventManager(EventManager manager) {
-	this.evManager = manager;
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -179,10 +181,23 @@ public class IFD implements org.openecard.ws.IFD {
 		//scwrapper = new SCWrapper();
 		cm = new ChannelManager();
 		ctxHandle = ChannelManager.createCtxHandle();
+		env.addIFDCtx(ctxHandle);
 		numClients = new AtomicInteger(1);
 		// TODO: add custom ThreadFactory to control the thread name
-		threadPool = Executors.newCachedThreadPool();
+		threadPool = Executors.newCachedThreadPool(new ThreadFactory() {
+		    private final AtomicInteger num = new AtomicInteger(0);
+		    private final ThreadGroup group = new ThreadGroup("IFD Wait");
+		    @Override
+		    public Thread newThread(Runnable r) {
+			String name = String.format("SCIO Watcher %d", num.getAndIncrement());
+			Thread t = new Thread(group, r, name);
+			t.setDaemon(false);
+			return t;
+		    }
+		});
 		asyncWaitThreads = new ConcurrentSkipListMap<>();
+		evManager = new IfdEventManager(env, cm, ctxHandle);
+		evManager.initialize();
 	    } else {
 		// on second or further calls, increment usage counter
 		numClients.incrementAndGet();
@@ -193,7 +208,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    response.setContextHandle(ctxHandle);
 	    return response;
 	} catch (IFDException ex) {
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
 	    return WSHelper.makeResponse(EstablishContextResponse.class, ex.getResult());
 	}
     }
@@ -203,6 +218,7 @@ public class IFD implements org.openecard.ws.IFD {
 	ReleaseContextResponse response;
 	if (ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 	    if (numClients.decrementAndGet() == 0) { // last client detaches
+		env.removeIFDCtx(ctxHandle);
 		ctxHandle = null;
 		numClients = null;
 		// terminate thread pool
@@ -211,6 +227,7 @@ public class IFD implements org.openecard.ws.IFD {
 		threadPool = null;
 		asyncWaitThreads = null;
 	    }
+	    evManager.terminate();
 
 	    response = WSHelper.makeResponse(ReleaseContextResponse.class, WSHelper.makeResultOK());
 	    return response;
@@ -242,7 +259,7 @@ public class IFD implements org.openecard.ws.IFD {
 		response.getIFDName().addAll(ifds);
 		return response;
 	    } catch (SCIOException ex) {
-		logger.warn(ex.getMessage(), ex);
+		LOG.warn(ex.getMessage(), ex);
 		Result r = WSHelper.makeResultUnknownError(ex.getMessage());
 		response = WSHelper.makeResponse(ListIFDsResponse.class, r);
 		return response;
@@ -263,12 +280,18 @@ public class IFD implements org.openecard.ws.IFD {
 	    return response;
 	}
 
-	// open channel to our IFD
-	TerminalInfo info = null;
 	try {
+	    TerminalInfo info;
 	    String ifdName = parameters.getIFDName();
-	    SCIOTerminal term = cm.getTerminals().getTerminal(ifdName);
-	    info = new TerminalInfo(cm, term);
+	    try {
+		SingleThreadChannel channel = cm.openMasterChannel(ifdName);
+		info = new TerminalInfo(cm, channel);
+	    } catch (NoSuchTerminal ex) {
+		// continue without a channel
+		SCIOTerminal term = cm.getTerminals().getTerminal(ifdName);
+		info = new TerminalInfo(cm, term);
+	    }
+	    
 	    IFDCapabilitiesType cap = new IFDCapabilitiesType();
 
 	    // slot capability
@@ -315,20 +338,22 @@ public class IFD implements org.openecard.ws.IFD {
 	    return response;
 	} catch (NullPointerException | NoSuchTerminal ex) {
 	    String msg = String.format("Requested terminal not found.");
-	    logger.warn(msg, ex);
+	    LOG.warn(msg, ex);
 	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
 	    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, r);
 	    return response;
 	} catch (SCIOException ex) {
 	    String msg = String.format("Failed to request status from terminal.");
-	    logger.warn(msg, ex);
+	    // use debug when card has been removed, as this happens all the time
+	    SCIOErrorCode code = ex.getCode();
+	    if (! (code == SCIOErrorCode.SCARD_E_NO_SMARTCARD || code == SCIOErrorCode.SCARD_W_REMOVED_CARD)) {
+		LOG.warn(msg, ex);
+	    } else {
+		LOG.debug(msg, ex);
+	    }
 	    Result r = WSHelper.makeResultUnknownError(msg);
 	    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, r);
 	    return response;
-	} finally {
-	    if (info != null) {
-		info.disconnect();
-	    }
 	}
     }
 
@@ -355,7 +380,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    ifds.add(t);
 		} catch (NoSuchTerminal ex) {
 		    String msg = "The requested IFD name does not exist.";
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    String minor = ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD;
 		    Result r = WSHelper.makeResult(ECardConstants.Major.ERROR, minor, msg);
 		    response = WSHelper.makeResponse(GetStatusResponse.class, r);
@@ -366,7 +391,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    }
 	} catch (SCIOException ex) {
 	    String msg = "Failed to get list with the terminals.";
-	    logger.warn(msg, ex);
+	    LOG.warn(msg, ex);
 	    response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultUnknownError(msg));
 	    return response;
 	}
@@ -374,9 +399,17 @@ public class IFD implements org.openecard.ws.IFD {
 	// request status for each ifd
 	ArrayList<IFDStatusType> status = new ArrayList<>(ifds.size());
 	for (SCIOTerminal ifd : ifds) {
-	    TerminalInfo termInfo = new TerminalInfo(cm, ifd);
+
+	    TerminalInfo info;
 	    try {
-		IFDStatusType s = termInfo.getStatus();
+		SingleThreadChannel channel = cm.openMasterChannel(ifd.getName());
+		info = new TerminalInfo(cm, channel);
+	    } catch (NoSuchTerminal | SCIOException ex) {
+		// continue without a channel
+		info = new TerminalInfo(cm, ifd);
+	    }
+	    try {
+		IFDStatusType s = info.getStatus();
 		status.add(s);
 	    } catch (SCIOException ex) {
 		if (ex.getCode() != SCIOErrorCode.SCARD_W_UNPOWERED_CARD &&
@@ -384,17 +417,14 @@ public class IFD implements org.openecard.ws.IFD {
 			ex.getCode() != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD &&
 			ex.getCode() != SCIOErrorCode.SCARD_E_PROTO_MISMATCH) {
 		    String msg = String.format("Failed to determine status of terminal '%s'.", ifd.getName());
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    Result r = WSHelper.makeResultUnknownError(msg);
 		    response = WSHelper.makeResponse(GetStatusResponse.class, r);
 		    return response;
 		} else {
 		    // fall througth if there is a card which can not be connected
-		    logger.info("Ignoring failed status request from terminal.", ex);
+		    LOG.info("Ignoring failed status request from terminal.", ex);
 		}
-
-	    } finally {
-		termInfo.disconnect();
 	    }
 	}
 
@@ -432,7 +462,7 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    timeoutL = (long) timeout.doubleValue();
 	} catch (ArithmeticException ex) {
-	    logger.warn("Too big timeout value give, shortening to Long.MAX_VALUE.");
+	    LOG.warn("Too big timeout value give, shortening to Long.MAX_VALUE.");
 	    timeoutL = Long.MAX_VALUE;
 	}
 
@@ -509,29 +539,36 @@ public class IFD implements org.openecard.ws.IFD {
 	    }
 	} catch (SCIOException ex) {
 	    String msg = "Unknown SCIO error occured during wait call.";
-	    logger.warn(msg, ex);
+	    LOG.warn(msg, ex);
 	    Result r = WSHelper.makeResultUnknownError(msg);
+	    if (ex.getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+		r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
+	    }
 	    response = WSHelper.makeResponse(WaitResponse.class, r);
 	    return response;
 	} catch (ExecutionException ex) { // this is the exception from within the future
 	    Throwable cause = ex.getCause();
 	    if (cause instanceof SCIOException) {
 		String msg = "Unknown SCIO error occured during wait call.";
-		logger.warn(msg, cause);
+		LOG.warn(msg, cause);
 		Result r = WSHelper.makeResultUnknownError(msg);
+		if (((SCIOException) ex.getCause()).getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+		    r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
+		}
 		response = WSHelper.makeResponse(WaitResponse.class, r);
 	    } else {
 		String msg = "Unknown error during wait call.";
-		logger.error(msg, cause);
+		LOG.error(msg, cause);
 		Result r = WSHelper.makeResultUnknownError(msg);
 		response =  WSHelper.makeResponse(WaitResponse.class, r);
 	    }
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Wait interrupted by another thread.";
-	    logger.warn(msg, ex);
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    LOG.warn(msg, ex);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    response = WSHelper.makeResponse(WaitResponse.class, r);
+	    Thread.currentThread().interrupt();
 	    return response;
 	}
     }
@@ -612,7 +649,7 @@ public class IFD implements org.openecard.ws.IFD {
 	command = Arrays.copyOfRange(command, 1, command.length);
 
 	try {
-	    HandledChannel ch = cm.getChannel(handle);
+	    SingleThreadChannel ch = cm.getSlaveChannel(handle);
 	    TerminalInfo info = new TerminalInfo(cm, ch);
 	    Integer featureCode = info.getFeatureCodes().get(Integer.valueOf(ctrlCode));
 	    // see if the terminal can deal with that
@@ -634,13 +671,13 @@ public class IFD implements org.openecard.ws.IFD {
 	    String msg = "The card or the terminal is not available anymore.";
 	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
 	    response = WSHelper.makeResponse(ControlIFDResponse.class, r);
-	    logger.warn(msg, ex);
+	    LOG.warn(msg, ex);
 	    return response;
 	} catch (SCIOException ex) {
 	    String msg = "Unknown error while sending transmit control command.";
 	    Result r = WSHelper.makeResultUnknownError(msg);
 	    response = WSHelper.makeResponse(ControlIFDResponse.class, r);
-	    logger.warn(msg, ex);
+	    LOG.warn(msg, ex);
 	    return response;
 	}
     }
@@ -659,8 +696,12 @@ public class IFD implements org.openecard.ws.IFD {
 	    } else {
 		try {
 		    String name = parameters.getIFDName();
-		    byte[] slotHandle = cm.openChannel(name);
-		    HandledChannel ch = cm.getChannel(slotHandle);
+
+		    // make sure the slot is connected before attemting to get a slave channel
+		    cm.openMasterChannel(name);
+
+		    byte[] slotHandle = cm.openSlaveChannel(name).p1;
+		    SingleThreadChannel ch = cm.getSlaveChannel(slotHandle);
 
 		    // make connection exclusive
 		    Boolean exclusive = parameters.isExclusive();
@@ -684,27 +725,25 @@ public class IFD implements org.openecard.ws.IFD {
 		    String msg = "The requested terminal does not exist.";
 		    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
 		    response = WSHelper.makeResponse(ConnectResponse.class, r);
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    return response;
 		} catch (IllegalStateException ex) {
 		    String msg = "No card available in the requested terminal.";
 		    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.NO_CARD, msg);
 		    response = WSHelper.makeResponse(ConnectResponse.class, r);
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    return response;
 		} catch (SCIOException ex) {
 		    String msg = "Unknown error in the underlying SCIO implementation.";
 		    Result r = WSHelper.makeResultUnknownError(msg);
 		    response = WSHelper.makeResponse(ConnectResponse.class, r);
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    return response;
 		}
 	    }
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(ConnectResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -723,27 +762,44 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    try {
 		byte[] handle = parameters.getSlotHandle();
-		HandledChannel ch = cm.getChannel(handle);
-		// close channel to this card
-		cm.closeChannel(handle);
+		SingleThreadChannel ch = cm.getSlaveChannel(handle);
+		cm.closeSlaveChannel(handle);
 
 		// process actions
 		SCIOCard card = ch.getChannel().getCard();
 		ActionType action = parameters.getAction();
 		if (ActionType.RESET == action) {
+		    String ifdName = card.getTerminal().getName();
+		    SingleThreadChannel master = cm.getMasterChannel(ifdName);
+
 		    HandlerBuilder builder = HandlerBuilder.create();
 		    ConnectionHandleType cHandleIn = builder.setCardType(ECardConstants.UNKNOWN_CARD)
+			    .setCardIdentifier(card.getATR().getBytes())
 			    .setContextHandle(ctxHandle)
-			    .setIfdName(card.getTerminal().getName())
+			    .setIfdName(ifdName)
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
 		    builder = HandlerBuilder.create();
 		    ConnectionHandleType cHandleRm = builder.setContextHandle(ctxHandle)
-			    .setIfdName(card.getTerminal().getName())
+			    .setIfdName(ifdName)
 			    .setSlotIdx(BigInteger.ZERO)
 			    .buildConnectionHandle();
-		    evManager.resetCard(cHandleRm, cHandleIn);
-		    card.disconnect(true);
+
+		    try {
+			master.reconnect();
+			evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+		    } catch (IllegalStateException ex) {
+			LOG.warn("Card reconnect failed, trying to establish new card connection.", ex);
+			cm.closeMasterChannel(ifdName);
+			LOG.debug("Master channel closed successfully.");
+			try {
+			    cm.getMasterChannel(ifdName);
+			    LOG.debug("New card connection established successfully.");
+			    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+			} catch (NoSuchTerminal ex2) {
+			    LOG.error("No terminal present anymore.", ex);
+			}
+		    }
 		}
 		// TODO: take care of other actions (probably over ControlIFD)
 		// the default is to not disconnect the card, because all existing connections would be broken
@@ -754,20 +810,18 @@ public class IFD implements org.openecard.ws.IFD {
 		String msg = "No card available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		response = WSHelper.makeResponse(DisconnectResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    } catch (SCIOException ex) {
 		String msg = "Unknown error in the underlying SCIO implementation.";
 		Result r = WSHelper.makeResultUnknownError(msg);
 		response = WSHelper.makeResponse(DisconnectResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    }
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(DisconnectResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -786,29 +840,42 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    try {
 		byte[] handle = beginTransaction.getSlotHandle();
-		HandledChannel ch = cm.getChannel(handle);
+		SingleThreadChannel ch = cm.getSlaveChannel(handle);
 		ch.beginExclusive();
 	    } catch (NoSuchChannel | IllegalStateException ex) {
 		String msg = "No card available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    } catch (SCIOException ex) {
-		String msg = "Unknown error in the underlying SCIO implementation.";
-		Result r = WSHelper.makeResultUnknownError(msg);
+		String msg;
+		String minor;
+		switch (ex.getCode()) {
+		    case SCARD_W_RESET_CARD:
+		    case SCARD_W_REMOVED_CARD:
+		    case SCARD_E_READER_UNAVAILABLE:
+		    case SCARD_E_NO_SMARTCARD:
+		    case SCARD_E_NO_SERVICE:
+			msg = String.format("Slot handle is not available [%s].", ex.getCode().name());
+			minor = ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE;
+			LOG.debug(msg, ex);
+			break;
+		    default:
+			msg = "Unknown error in the underlying SCIO implementation.";
+			minor = ECardConstants.Minor.App.UNKNOWN_ERROR;
+			LOG.warn(msg, ex);
+		}
+		Result r = WSHelper.makeResultError(minor, msg);
 		response = WSHelper.makeResponse(BeginTransactionResponse.class, r);
-		logger.warn(msg, ex);
 		return response;
 	    }
 
 	    response = WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResultOK());
 	    return response;
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(BeginTransactionResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -826,29 +893,27 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    try {
 		byte[] handle = parameters.getSlotHandle();
-		HandledChannel ch = cm.getChannel(handle);
+		SingleThreadChannel ch = cm.getSlaveChannel(handle);
 		ch.endExclusive();
 	    } catch (NoSuchChannel | IllegalStateException ex) {
 		String msg = "No card with transaction available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		response = WSHelper.makeResponse(EndTransactionResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    } catch (SCIOException ex) {
 		String msg = "Unknown error in the underlying SCIO implementation.";
 		Result r = WSHelper.makeResultUnknownError(msg);
 		response = WSHelper.makeResponse(EndTransactionResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    }
 
 	    response = WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResultOK());
 	    return response;
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(EndTransactionResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -868,7 +933,7 @@ public class IFD implements org.openecard.ws.IFD {
 
 	    try {
 		byte[] handle = parameters.getSlotHandle();
-		HandledChannel ch = cm.getChannel(handle);
+		SingleThreadChannel ch = cm.getSlaveChannel(handle);
 
 		List<InputAPDUInfoType> apdus = parameters.getInputAPDUInfo();
 		// check that the apdus contain sane values
@@ -898,15 +963,15 @@ public class IFD implements org.openecard.ws.IFD {
 		    result = ex.getResult();
 		} catch (SCIOException ex) {
 		    String msg = "Error during transmit.";
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    result = WSHelper.makeResultUnknownError(msg);
 		} catch (IllegalStateException ex) {
 		    String msg = "Card removed during transmit.";
-		    logger.warn(msg, ex);
+		    LOG.warn(msg, ex);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		} catch (IllegalArgumentException ex) {
 		    String msg = "Given command contains a MANAGE CHANNEL APDU.";
-		    logger.error(msg, ex);
+		    LOG.error(msg, ex);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		}
 		response.setResult(result);
@@ -916,14 +981,12 @@ public class IFD implements org.openecard.ws.IFD {
 		String msg = "No card with transaction available in the requested terminal.";
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
 		response = WSHelper.makeResponse(TransmitResponse.class, r);
-		logger.warn(msg, ex);
+		LOG.warn(msg, ex);
 		return response;
 	    }
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(TransmitResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -941,7 +1004,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    }
 
-	    HandledChannel channel = cm.getChannel(parameters.getSlotHandle());
+	    SingleThreadChannel channel = cm.getSlaveChannel(parameters.getSlotHandle());
 	    AbstractTerminal aTerm = new AbstractTerminal(this, cm, channel, gui, ctxHandle, parameters.getDisplayIndex());
 	    try {
 		response = aTerm.verifyUser(parameters);
@@ -951,10 +1014,8 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    }
 	} catch (Exception ex) {
-	    if (ex instanceof RuntimeException) {
-		throw (RuntimeException)ex;
-	    }
-	    logger.warn(ex.getMessage(), ex);
+	    LOG.warn(ex.getMessage(), ex);
+	    throwThreadKillException(ex);
 	    return WSHelper.makeResponse(VerifyUserResponse.class, WSHelper.makeResult(ex));
 	}
     }
@@ -982,7 +1043,7 @@ public class IFD implements org.openecard.ws.IFD {
     public EstablishChannelResponse establishChannel(EstablishChannel parameters) {
 	byte[] slotHandle = parameters.getSlotHandle();
 	try {
-	    HandledChannel channel = cm.getChannel(slotHandle);
+	    SingleThreadChannel channel = cm.getSlaveChannel(slotHandle);
 	    TerminalInfo termInfo = new TerminalInfo(cm, channel);
 	    DIDAuthenticationDataType protoParam = parameters.getAuthenticationProtocolData();
 	    String protocol = protoParam.getProtocol();
@@ -1012,11 +1073,11 @@ public class IFD implements org.openecard.ws.IFD {
 		// TODO: check if this additional check is really necessary
 		if (estPaceReq.isSupportedType(paceCapabilities)) {
 		    byte[] reqData = execPaceReq.toBytes();
-		    logger.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
+		    LOG.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
 		    // execute pace
 		    Map<Integer, Integer> features = termInfo.getFeatureCodes();
 		    byte[] resData = channel.transmitControlCommand(features.get(PCSCFeatures.EXECUTE_PACE), reqData);
-		    logger.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
+		    LOG.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
 		    // evaluate response
 		    ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
 		    if (execPaceRes.isError()) {
@@ -1049,7 +1110,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (this.protocolFactories.contains(protocol)) {
 		ProtocolFactory factory = this.protocolFactories.get(protocol);
 		Protocol protoImpl = factory.createInstance();
-		EstablishChannelResponse response = protoImpl.establish(parameters, dispatcher, this.gui);
+		EstablishChannelResponse response = protoImpl.establish(parameters, env.getDispatcher(), this.gui);
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    channel.addSecureMessaging(protoImpl);
@@ -1070,7 +1131,7 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    DestroyChannelResponse destroyChannelResponse = new DestroyChannelResponse();
 	    byte[] slotHandle = parameters.getSlotHandle();
-	    HandledChannel channel = cm.getChannel(slotHandle);
+	    SingleThreadChannel channel = cm.getSlaveChannel(slotHandle);
 	    TerminalInfo termInfo = new TerminalInfo(cm, channel);
 
 	    // check if it is PACE and try to perform native implementation
@@ -1080,11 +1141,11 @@ public class IFD implements org.openecard.ws.IFD {
 		ExecutePACERequest execPaceReq = new ExecutePACERequest(ExecutePACERequest.Function.DestroyPACEChannel);
 
 		byte[] reqData = execPaceReq.toBytes();
-		logger.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
+		LOG.debug("executeCtrlCode request: {}", ByteUtils.toHexString(reqData));
 		// execute pace
 		Map<Integer, Integer> features = termInfo.getFeatureCodes();
 		byte[] resData = channel.transmitControlCommand(features.get(PCSCFeatures.EXECUTE_PACE), reqData);
-		logger.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
+		LOG.debug("Response of executeCtrlCode: {}", ByteUtils.toHexString(resData));
 		// evaluate response
 		ExecutePACEResponse execPaceRes = new ExecutePACEResponse(resData);
 		if (execPaceRes.isError()) {
@@ -1112,6 +1173,23 @@ public class IFD implements org.openecard.ws.IFD {
 	    case 0x9000: return WSHelper.makeResultOK();
 	    case 0x6400: return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
             default:     return WSHelper.makeResultUnknownError("Unknown return code from terminal.");
+	}
+    }
+
+    private void throwThreadKillException(Exception ex) {
+	Throwable cause;
+	if (ex instanceof InvocationTargetExceptionUnchecked) {
+	    cause = ex.getCause();
+	} else {
+	    cause = ex;
+	}
+
+	if (cause instanceof ThreadTerminateException) {
+	    throw (RuntimeException) cause;
+	} else if (cause instanceof InterruptedException) {
+	    throw new ThreadTerminateException("Thread running inside SAL interrupted.", cause);
+	} else if (cause instanceof RuntimeException) {
+	    throw (RuntimeException) ex;
 	}
     }
 

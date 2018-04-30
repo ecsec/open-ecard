@@ -24,7 +24,7 @@ package org.openecard.transport.httpcore;
 
 import java.net.URL;
 import org.openecard.apache.http.HttpRequest;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 
 
 /**
@@ -43,7 +43,7 @@ public class HttpRequestHelper {
      */
     public static HttpRequest setDefaultHeader(HttpRequest request, String host) {
 	request.setHeader("Connection", "keep-alive");
-	request.setHeader("User-Agent", "Open-eCard-App/" + Version.getVersion());
+	request.setHeader("User-Agent", AppVersion.getName() + "/" + AppVersion.getVersion());
 	if (host != null && ! host.isEmpty()) {
 	    request.setHeader("Host", host);
 	}

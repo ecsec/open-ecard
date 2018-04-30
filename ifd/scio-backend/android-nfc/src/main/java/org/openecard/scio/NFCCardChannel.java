@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
  * NFC implementation of smartcardio's cardChannel interface.
  *
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class NFCCardChannel implements SCIOChannel {
 
-    private static final Logger logger = LoggerFactory.getLogger(NFCCardChannel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
     private final NFCCard card;
-    private int lengthOfLastAPDU;
 
     public NFCCardChannel(NFCCard card) {
 	this.card = card;
@@ -51,7 +51,6 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public void close() throws SCIOException {
-	logger.warn("close not supported");
 	// we only have one channel and this will be open as long as we are connected to the tag
     }
 
@@ -67,42 +66,48 @@ public class NFCCardChannel implements SCIOChannel {
 
     @Override
     public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
-	try {
-	    lengthOfLastAPDU = apdu.toByteArray().length;
-	    return new CardResponseAPDU(card.isodep.transceive(apdu.toByteArray()));
-	} catch (IOException e) {
-	    // TODO: check if the error code can be chosen more specifically
-	    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
-	}
+	return transmit(apdu.toByteArray());
     }
 
     @Override
     public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
-	return transmit(new CardCommandAPDU(apdu));
+	synchronized (card) {
+	    if (card != null && card.isodep != null && card.isodep.isConnected()) {
+		try {
+		    card.isodep.setTimeout(card.getTimeoutForTransceive());
+		    return new CardResponseAPDU(card.isodep.transceive(apdu));
+		} catch (IOException e) {
+		    // Tag isn't available, so remove nfc tag from terminal
+		    ((NFCCardTerminal) card.getTerminal()).removeTag();
+		    // TODO: check if the error code can be chosen more specifically
+		    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+		}
+	    } else {
+		throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
+			SCIOErrorCode.SCARD_W_REMOVED_CARD);
+	    }
+	}
     }
 
     @Override
     public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException {
-	CardCommandAPDU cca = new CardCommandAPDU(command.array());
-	CardResponseAPDU cra = transmit(cca);
+	CardResponseAPDU cra = transmit(command.array());
 	byte[] data = cra.toByteArray();
 	response.put(data);
 
 	return data.length;
     }
 
-    public int getLengthOfLastAPDU() {
-	return lengthOfLastAPDU;
-    }
-
     @Override
     public boolean isBasicChannel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return true;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean isLogicalChannel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return true;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

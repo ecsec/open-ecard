@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -61,16 +61,17 @@ public class CredentialManager {
      * The method adds a new credential to the managed {@link CardStateMap}.
      *
      * @param handle A {@link ConnectionHandleType} object for the creation of a new {@link CardStateEntry} object.
+     * @param protocol Interface protocol with which the card is connected.
      * @param cif A {@link CardInfoType} object for the creation of a new {@link CardStateEntry} object.
      * @return The method returns {@code true} if the credential was added successfully else {@code false}.
      */
-    public boolean addCredential(ConnectionHandleType handle, CardInfoType cif) {
+    public boolean addCredential(ConnectionHandleType handle, String protocol, CardInfoType cif) {
 	if (handle == null || cif == null) {
 	    logger.warn("The ConnectionHandle and/or CardInfo object is null. Can't add the Credential.");
 	    return false;
 	}
 
-	CardStateEntry entry = new CardStateEntry(handle, cif);
+	CardStateEntry entry = new CardStateEntry(handle, cif, protocol);
 	states.addEntry(entry);
 	return true;
     }

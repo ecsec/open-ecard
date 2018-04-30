@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,8 +32,9 @@ package org.openecard.addon.bind;
  */
 public class AuxDataKeys {
 
-    private static final String prefix = "org.openecard.addon.bind.aux_data.";
+    private static final String PREFIX = "org.openecard.addon.bind.aux_data.";
 
-    public static final String REDIRECT_LOCATION = prefix + "redirect_location" ;
+    public static final String REDIRECT_LOCATION = PREFIX + "redirect_location" ;
+    public static final String RESPONSE_HEADERS = PREFIX + "response_headers";
 
 }

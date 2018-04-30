@@ -1,0 +1,4 @@
+# One ObjectIdentifier per line.
+# An empty file means no cards are supported.
+# The speacial value * means all known cifs are supported.
+*

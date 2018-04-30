@@ -78,6 +78,9 @@ public class Tag {
     public Tag() {
 	this(TagClass.UNIVERSAL, true, 0);
     }
+    public Tag(Tag tag) {
+	this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum());
+    }
     public Tag(TagClass tagClass, boolean primitive, long tagNum) {
 	this.tagClass = tagClass;
 	this.primitive = primitive;

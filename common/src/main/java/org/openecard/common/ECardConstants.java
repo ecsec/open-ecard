@@ -405,7 +405,7 @@ public class ECardConstants {
 	    public static final String WARN_SESSION_END = SAL_PFX + "#warningSessionEnded";
 	    public static final String NAMED_ENTITY_NOT_FOUND = SAL_PFX + "#namedEntityNotFound";
 	    public static final String INSUFFICIENT_RES = SAL_PFX + "#insufficientResources";
-	    public static final String SECURITY_CONDITINON_NOT_SATISFIED = SAL_PFX + "#securityConditionNotSatisfied";
+	    public static final String SECURITY_CONDITION_NOT_SATISFIED = SAL_PFX + "#securityConditionNotSatisfied";
 	    public static final String EXCLUSIVE_NA = SAL_PFX + "#exclusiveNotAvailable";
 	    public static final String NO_SESSION = SAL_PFX + "#noActiveSession";
 	    public static final String DEC_NOT_POSSIBLE = SAL_PFX + "#decryptionNotPossible";

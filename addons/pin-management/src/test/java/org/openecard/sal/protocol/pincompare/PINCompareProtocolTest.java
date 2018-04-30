@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -44,34 +45,35 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import java.io.InputStream;
 import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import mockit.Mocked;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.anytype.PINCompareMarkerType;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.UserConsent;
-import org.openecard.gui.swing.SwingDialogWrapper;
-import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.sal.TinySAL;
-import org.openecard.sal.protocol.pincompare.anytype.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
+import org.openecard.common.event.IfdEventObject;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
 
 
 /**
@@ -80,57 +82,75 @@ import static org.testng.Assert.*;
  */
 public class PINCompareProtocolTest {
 
-    @BeforeClass
-    public static void disable() {
-	throw new SkipException("Test completely disabled.");
-    }
+    private static final boolean TESTS_ENABLED = false;
 
-    private static ClientEnv env;
-    private static TinySAL instance;
-    private static CardStateMap states;
+    private ClientEnv env;
+    private TinySAL instance;
+    private CardStateMap states;
     byte[] appIdentifier_ROOT = StringUtils.toByteArray("D2760001448000");
     byte[] appIdentifier_ESIGN = StringUtils.toByteArray("A000000167455349474E");
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @Mocked
+    private UserConsent uc;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
 	env.setDispatcher(d);
 	IFD ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setGUI(uc);
 	env.setIFD(ifd);
 	states = new CardStateMap();
 
 	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
-	CardRecognition cr = new CardRecognition(ifd, ecr.getContextHandle());
+	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
+	CIFProvider cp = new CIFProvider() {
+	    @Override
+	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
+		return cr.getCardInfo(cardType);
+	    }
+	    @Override
+	    public boolean needsRecognition(byte[] atr) {
+		return true;
+	    }
+            @Override
+            public CardInfoType getCardInfo(String cardType) throws RuntimeException {
+                return cr.getCardInfo(cardType);
+            }
+            @Override
+            public InputStream getCardImage(String cardType) {
+                return cr.getCardImage(cardType);
+            }
+	};
+	env.setCIFProvider(cp);
 
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);
-	RecognitionInfo recognitionInfo = cr.recognizeCard(listIFDsResponse.getIFDName().get(0), new BigInteger("0"));
-	SALStateCallback salCallback = new SALStateCallback(cr, states);
+	RecognitionInfo recognitionInfo = cr.recognizeCard(ecr.getContextHandle(), listIFDsResponse.getIFDName().get(0), BigInteger.ZERO);
+	SALStateCallback salCallback = new SALStateCallback(env, states);
 	Connect c = new Connect();
 	c.setContextHandle(ecr.getContextHandle());
 	c.setIFDName(listIFDsResponse.getIFDName().get(0));
-	c.setSlot(new BigInteger("0"));
+	c.setSlot(BigInteger.ZERO);
 	ConnectResponse connectResponse = env.getIFD().connect(c);
 
 	ConnectionHandleType connectionHandleType = new ConnectionHandleType();
 	connectionHandleType.setContextHandle(ecr.getContextHandle());
 	connectionHandleType.setRecognitionInfo(recognitionInfo);
 	connectionHandleType.setIFDName(listIFDsResponse.getIFDName().get(0));
-	connectionHandleType.setSlotIndex(new BigInteger("0"));
+	connectionHandleType.setSlotIndex(BigInteger.ZERO);
 	connectionHandleType.setSlotHandle(connectResponse.getSlotHandle());
-	salCallback.signalEvent(EventType.CARD_RECOGNIZED, connectionHandleType);
+	salCallback.signalEvent(EventType.CARD_RECOGNIZED, new IfdEventObject(connectionHandleType));
 	instance = new TinySAL(env, states);
 
 	// init AddonManager
-	UserConsent uc = new SwingUserConsent(new SwingDialogWrapper());
-	AddonManager manager = new AddonManager(d, uc, states, cr, null, null);
+	AddonManager manager = new AddonManager(env, uc, states, null);
 	instance.setAddonManager(manager);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDAuthenticate() throws ParserConfigurationException {
 
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -188,17 +208,17 @@ public class PINCompareProtocolTest {
 	assertEquals(result.getAuthenticationProtocolData().getAny().size(), 0);
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDCreate() {
 	// TODO
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDUpdate() {
 	// TODO
     }
 
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testDIDGet() {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();
@@ -267,7 +287,7 @@ public class PINCompareProtocolTest {
      * This Test ensures that all functions unsupported by this protocol relay the correct error message when
      * called.
      */
-    @Test
+    @Test(enabled = TESTS_ENABLED)
     public void testUnsupportedFunctions() {
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	CardApplicationPathType cardApplicationPathType = new CardApplicationPathType();

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -43,7 +43,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -81,7 +81,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
  */
 public class PAOS {
 
-    private static final Logger logger = LoggerFactory.getLogger(PAOS.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PAOS.class);
 
     public static final String HEADER_KEY_PAOS = "PAOS";
 
@@ -124,7 +124,7 @@ public class PAOS {
 	    this.idGenerator = new MessageIdGenerator();
 	    this.m = WSMarshallerFactory.createInstance();
 	} catch (WSMarshallerException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex);
 	}
     }
@@ -183,7 +183,7 @@ public class PAOS {
 		throw new PAOSException(MESSAGE_ID_MISSMATCH);
 	    }
 	} catch (SOAPException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    throw new PAOSException(e.getMessage(), e);
 	}
     }
@@ -204,25 +204,25 @@ public class PAOS {
 	   // msg.getSOAPHeader().
 	    updateMessageID(msg);
 
-	    if (logger.isDebugEnabled()) {
+	    if (LOG.isDebugEnabled()) {
 		try {
-		    logger.debug("Message received:\n{}", m.doc2str(doc));
+		    LOG.debug("Message received:\n{}", m.doc2str(doc));
 		} catch (TransformerException ex) {
-		    logger.warn("Failed to log PAOS request message.", ex);
+		    LOG.warn("Failed to log PAOS request message.", ex);
 		}
 	    }
 
 	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
 	} catch (MarshallingTypeException ex) {
-	    logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
 	} catch (WSMarshallerException ex) {
 	    String msg = "Failed to read/process message from PAOS server.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new PAOSException(MARSHALLING_ERROR, ex);
 	} catch (IOException | SAXException ex) {
 	    String msg = "Failed to read/process message from PAOS server.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
 	}
     }
@@ -231,7 +231,7 @@ public class PAOS {
 	SOAPMessage msg = createSOAPMessage(obj);
 	String result = m.doc2str(msg.getDocument());
 
-	logger.debug("Message sent:\n{}", result);
+	LOG.debug("Message sent:\n{}", result);
 
 	return result;
     }
@@ -282,19 +282,14 @@ public class PAOS {
 	HttpContext ctx = new BasicHttpContext();
 	HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
 	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
-	boolean firstLoop = true;
 	boolean connectionDropped = false;
 	ResponseBaseType lastResponse = null;
 
 	try {
 	    // loop and send makes a computer happy
 	    while (true) {
-		if (! firstLoop && tlsHandler.isSameChannel()) {
-		    throw new PAOSException(CONNECTION_CLOSED);
-		}
-		firstLoop = false;
-
 		// set up connection to PAOS endpoint
+		// if this one fails we may not continue
 		conn = openHttpStream();
 
 		boolean isReusable;
@@ -313,16 +308,16 @@ public class PAOS {
 			req.setHeader("Accept", "text/xml, application/xml, application/vnd.paos+xml");
 
 			ContentType reqContentType = ContentType.create("application/vnd.paos+xml", "UTF-8");
-			HttpUtils.dumpHttpRequest(logger, "before adding content", req);
+			HttpUtils.dumpHttpRequest(LOG, "before adding content", req);
 			String reqMsgStr = createPAOSResponse(msg);
 			StringEntity reqMsg = new StringEntity(reqMsgStr, reqContentType);
 			req.setEntity(reqMsg);
 			req.setHeader(reqMsg.getContentType());
 			req.setHeader("Content-Length", Long.toString(reqMsg.getContentLength()));
 			// send request and receive response
-			logger.debug("Sending HTTP request.");
+			LOG.debug("Sending HTTP request.");
 			HttpResponse response = httpexecutor.execute(req, conn, ctx);
-			logger.debug("HTTP response received.");
+			LOG.debug("HTTP response received.");
 			int statusCode = response.getStatusLine().getStatusCode();
 
 			try {
@@ -339,7 +334,7 @@ public class PAOS {
 			conn.receiveResponseEntity(response);
 			HttpEntity entity = response.getEntity();
 			byte[] entityData = FileUtils.toByteArray(entity.getContent());
-			HttpUtils.dumpHttpResponse(logger, response, entityData);
+			HttpUtils.dumpHttpResponse(LOG, response, entityData);
 			// consume entity
 			Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
 
@@ -366,10 +361,10 @@ public class PAOS {
 		} catch (IOException ex) {
 		    if (! connectionDropped) {
 			connectionDropped = true;
-			logger.warn("PAOS server closed the connection. Trying to connect again. (Try {})");
+			LOG.warn("PAOS server closed the connection. Trying to connect again.");
 		    } else {
 			String errMsg = "Error in the link to the PAOS server.";
-			logger.error(errMsg);
+			LOG.error(errMsg);
 			throw new PAOSException(DELIVERY_FAILED, ex);
 		    }
 		}
@@ -398,13 +393,13 @@ public class PAOS {
     }
 
 
-     private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
+    private StreamHttpClientConnection openHttpStream() throws PAOSConnectionException {
         StreamHttpClientConnection conn;
 	try {
-	    logger.debug("Opening connection to PAOS server.");
+	    LOG.debug("Opening connection to PAOS server.");
             TlsClientProtocol handler = tlsHandler.createTlsConnection();
             conn = new StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream());
-	    logger.debug("Connection to PAOS server established.");
+	    LOG.debug("Connection to PAOS server established.");
             return conn;
         } catch (IOException | URISyntaxException ex) {
             throw new PAOSConnectionException(ex);
@@ -426,7 +421,7 @@ public class PAOS {
 	} else if (statusCode == 200) {
 	    String msg2 = "The PAOS endpoint sent the http status code 200 which does not conform to the "
 		    + "PAOS specification. (See section 9.4 Processing Rules of the PAOS Specification)";
-	    logger.warn(msg2);
+	    LOG.warn(msg2);
 	}
     }
 

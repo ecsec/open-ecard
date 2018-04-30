@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9" xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+	<iso:PinRef>
+		<iso:KeyRef>02</iso:KeyRef>
+	</iso:PinRef>
+	<iso:PasswordAttributes>
+		<!-- See [eGK-1#9.1.7]. -->
+		<iso:pwdFlags>needs-padding</iso:pwdFlags>
+		<iso:pwdType>iso9564-1</iso:pwdType>
+		<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.8]. -->
+		<iso:storedLength>8</iso:storedLength>
+		<iso:maxLength>8</iso:maxLength>
+		<iso:padChar>FF</iso:padChar>
+	</iso:PasswordAttributes>
+	<!--
+		The different states may be distinguished by calling the GET PIN STATUS
+		function according to [eGK-1#15.6.4]:
+
+		CL ='80' - as it is a proprietary command
+		INS='20' - just as VERIFY
+		P1 ='00'
+		P2 ='02' - Key Reference of the PIN (as <iso:KeyRef>02</iso:KeyRef> is specified above)
+		
+		The status of the PIN is indicated in the response of the GET PIN STATUS command
+		(cf. [eGK-1#15.6.4.2]), where according to [eGK-2#6.2.8] there are four states to distinguish:
+		- regularPassword - means that the PIN is operational (Response=63Cx, where x is RetryCounter)
+		- Leer–PIN_1 (LeerPIN1) - transport state, which can be resumed with CHANGE REFERENCE DATA with P1='01' (Response=62C7)
+		- Leer–PIN_2 (LeerPIN2) - transport state, which can be resumed with CHANGE REFERENCE DATA with P1='00' and OldSecret='20FF FFFF FFFF FFFF' (Response=62C4)
+		- Transport–PIN_0000 (TransportPIN0000) - transport state, which can be resumed with CHANGE REFERENCE DATA with P1='00' and OldSecret='2400 00FF FFFF FFFF'  (Response=62CF)
+	-->
+	
+	<iso:StateInfo>
+		<iso:StateRecognition>
+			<iso:CardCall>
+				<iso:CommandAPDU>80200002</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>62C7</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_LeerPIN1</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>62C4</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_LeerPIN2</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>62CF</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_TransportPIN0000</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>9000</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_regularPassword-verified</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>63C3</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_regularPassword-RC3</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>63C2</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_regularPassword-RC2</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>63C1</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_regularPassword-RC1</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+				<iso:ResponseAPDU>
+					<iso:Trailer>63C0</iso:Trailer>
+					<iso:Conclusion>
+						<iso:RecognizedState>PIN.home_blocked</iso:RecognizedState>
+					</iso:Conclusion>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:StateRecognition>
+
+		<!-- Start state to trigger recognition -->
+		<iso:State StateName="PIN.home_start" StateClass="RecognitionNecessary" />
+
+		<iso:State StateName="PIN.home_LeerPIN1" StateClass="NotOperational">
+			<iso:StateTransition TargetState="PIN.home_regularPassword-RC3">
+				<!-- As specified in [eGK-2#6.2.8] the transition from the transport state to the operational
+					 state (regularPassword) is performed using a CHANGE REFERENCE DATA with P1='01' (cf. [eGK-1#15.6.1.2]):
+					 CL ='00' -
+					 INS='24' - CHANGE REFERENCE DATA
+					 P1 ='01' -
+					 P2 ='02' - Key Reference of the PIN (as <iso:KeyRef>02</iso:KeyRef> is specified above)
+					 Data = operational PIN, which must be captured and appended to CommandAPDU below
+
+					 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+				-->
+				<iso:FixedProcedure>
+					<iso:CardCall>
+						<iso:APICall>
+							<iso:ModifyVerificationData>
+								<iso:SlotHandle></iso:SlotHandle>
+								<iso:InputUnit>
+									<iso:PinInput>
+										<iso:Index>0</iso:Index>
+										<iso:PasswordAttributes>
+											<!-- See [eGK-1#9.1.7]. -->
+											<iso:pwdFlags>needs-padding</iso:pwdFlags>
+											<iso:pwdType>iso9564-1</iso:pwdType>
+											<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+											<iso:storedLength>8</iso:storedLength>
+											<iso:maxLength>8</iso:maxLength>
+											<iso:padChar>FF</iso:padChar>
+										</iso:PasswordAttributes>
+									</iso:PinInput>
+								</iso:InputUnit>
+								<iso:Template>00240102</iso:Template>
+							</iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+							<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+								<dss:Result>
+									<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+								</dss:Result>
+								<iso:Response>9000</iso:Response>
+							</iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					</iso:CardCall>
+				</iso:FixedProcedure>
+			</iso:StateTransition>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_LeerPIN2" StateClass="NotOperational">
+			<iso:StateTransition TargetState="PIN.home_regularPassword-RC3">
+				<!-- As specified in [eGK-1#9.2.5] the transition from the transport state to the operational
+					 state (regularPassword) is performed using a CHANGE REFERENCE DATA with P1='00' and OldSecret='20FF FFFF FFFF FFFF' (cf. [eGK-1#15.6.1.2]):
+					 CL ='00' -
+					 INS='24' - CHANGE REFERENCE DATA
+					 P1 ='00' -
+					 P2 ='02' - Key Reference of the PIN (as <iso:KeyRef>02</iso:KeyRef> is specified above)
+					 Data = OldPin | NewPIN = '20FF FFFF FFFF FFFF' | operational PIN, where the operational PIN MUST be captured and appended to the CommandAPDU below
+
+					 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+				-->
+				<iso:FixedProcedure>
+					<iso:CardCall>
+						<iso:APICall>
+							<iso:ModifyVerificationData>
+								<iso:SlotHandle></iso:SlotHandle>
+								<iso:InputUnit>
+									<iso:PinInput>
+										<iso:Index>0</iso:Index>
+										<iso:PasswordAttributes>
+											<!-- See [eGK-1#9.1.7]. -->
+											<iso:pwdFlags>needs-padding</iso:pwdFlags>
+											<iso:pwdType>iso9564-1</iso:pwdType>
+											<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+											<iso:storedLength>8</iso:storedLength>
+											<iso:maxLength>8</iso:maxLength>
+											<iso:padChar>FF</iso:padChar>
+										</iso:PasswordAttributes>
+									</iso:PinInput>
+								</iso:InputUnit>
+								<iso:OldReferenceData>20FFFFFFFFFFFFFF</iso:OldReferenceData>
+								<iso:Template>00240002</iso:Template>
+							</iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+							<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+								<dss:Result>
+									<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+								</dss:Result>
+								<iso:Response>9000</iso:Response>
+							</iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					</iso:CardCall>
+				</iso:FixedProcedure>
+			</iso:StateTransition>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_TransportPIN0000" StateClass="NotOperational">
+			<iso:StateTransition TargetState="PIN.home_regularPassword-RC3">
+				<!-- As specified in [eGK-1#9.2.5] the transition from the transport state to the operational
+					 state (regularPassword) is performed using a CHANGE REFERENCE DATA with P1='00' and OldSecret='2400 00FF FFFF FFFF' (cf. [eGK-1#15.6.1.2]):
+					 CL ='00' -
+					 INS='24' - CHANGE REFERENCE DATA
+					 P1 ='00' -
+					 P2 ='02' - Key Reference of the PIN (as <iso:KeyRef>02</iso:KeyRef> is specified above)
+					 Data = OldPin | NewPIN = '2400 00FF FFFF FFFF' | operational PIN, where the operational PIN MUST be captured and appended to the CommandAPDU below
+
+					 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+				-->
+				<iso:FixedProcedure>
+					<iso:CardCall>
+						<iso:APICall>
+							<iso:ModifyVerificationData>
+								<iso:SlotHandle></iso:SlotHandle>
+								<iso:InputUnit>
+									<iso:PinInput>
+										<iso:Index>0</iso:Index>
+										<iso:PasswordAttributes>
+											<!-- See [eGK-1#9.1.7]. -->
+											<iso:pwdFlags>needs-padding</iso:pwdFlags>
+											<iso:pwdType>iso9564-1</iso:pwdType>
+											<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+											<iso:storedLength>8</iso:storedLength>
+											<iso:maxLength>8</iso:maxLength>
+											<iso:padChar>FF</iso:padChar>
+										</iso:PasswordAttributes>
+									</iso:PinInput>
+								</iso:InputUnit>
+								<iso:OldReferenceData>240000FFFFFFFFFF</iso:OldReferenceData>
+								<iso:Template>00240002</iso:Template>
+							</iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+							<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+								<dss:Result>
+									<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+								</dss:Result>
+								<iso:Response>9000</iso:Response>
+							</iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					</iso:CardCall>
+				</iso:FixedProcedure>
+			</iso:StateTransition>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_regularPassword-verified" StateClass="Operational">
+			<iso:RetryCounter>3</iso:RetryCounter>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_regularPassword-RC3" StateClass="Operational">
+			<iso:RetryCounter>3</iso:RetryCounter>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_regularPassword-RC2" StateClass="Operational">
+			<iso:RetryCounter>2</iso:RetryCounter>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_regularPassword-RC1" StateClass="Operational">
+			<iso:RetryCounter>1</iso:RetryCounter>
+		</iso:State>
+
+		<iso:State StateName="PIN.home_blocked" StateClass="NotOperational">
+			<iso:RetryCounter>0</iso:RetryCounter>
+			<!-- As specified in [eGK-2#6.2.8] the command RESET RETRY COUNTER may be used with P1='00' and P1='01' (cf. [eGK-1#15.6.5]):
+				 CL ='00' -
+				 INS='2C' - RESET RETRY COUNTER
+				 P1 = either
+				 '00' - Data contains PUK and new PIN
+				 '01' - Data contains PUK only
+				 P2 ='02' - Key Reference of the PIN (as <iso:KeyRef>02</iso:KeyRef> is specified above)
+				 Data = either
+				 PUK | NewPIN, if P1='00'
+				 PUK         , if P1='01'
+
+				 This step is realized by invoking the ModifyVerificationData-function defined in [eCard-6].
+			-->
+			<iso:StateTransition TargetState="PIN.home_regularPassword-RC3">
+				<iso:FixedProcedure>
+					<!-- Case P1='00' (PUK and PIN) -->
+					<iso:CardCall>
+						<iso:APICall>
+							<iso:ModifyVerificationData>
+								<iso:SlotHandle></iso:SlotHandle>
+								<iso:InputUnit>
+									<iso:PinInput>
+										<iso:Index>0</iso:Index>
+										<iso:PasswordAttributes>
+											<!-- See [eGK-1#9.1.7]. -->
+											<iso:pwdFlags>needs-padding</iso:pwdFlags>
+											<iso:pwdType>iso9564-1</iso:pwdType>
+											<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+											<iso:storedLength>8</iso:storedLength>
+											<iso:maxLength>8</iso:maxLength>
+											<iso:padChar>FF</iso:padChar>
+										</iso:PasswordAttributes>
+									</iso:PinInput>
+								</iso:InputUnit>
+								<iso:Template>002C0002</iso:Template>
+							</iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+							<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+								<dss:Result>
+									<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+								</dss:Result>
+								<iso:Response>9000</iso:Response>
+							</iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					</iso:CardCall>
+				</iso:FixedProcedure>
+			</iso:StateTransition>
+			<iso:StateTransition TargetState="PIN.home_regularPassword-RC3">
+				<iso:FixedProcedure>
+					<!-- Case P1='01' (PUK only) -->
+					<iso:CardCall>
+						<iso:APICall>
+							<iso:ModifyVerificationData>
+								<iso:SlotHandle></iso:SlotHandle>
+								<iso:InputUnit>
+									<iso:PinInput>
+										<iso:Index>0</iso:Index>
+										<iso:PasswordAttributes>
+											<!-- See [eGK-1#9.1.7]. -->
+											<iso:pwdFlags>needs-padding</iso:pwdFlags>
+											<iso:pwdType>iso9564-1</iso:pwdType>
+											<iso:minLength>6</iso:minLength> <!-- See [eGK-2#6.2.7] -->
+											<iso:storedLength>8</iso:storedLength>
+											<iso:maxLength>8</iso:maxLength>
+											<iso:padChar>FF</iso:padChar>
+										</iso:PasswordAttributes>
+									</iso:PinInput>
+								</iso:InputUnit>
+								<iso:Template>002C0102</iso:Template>
+							</iso:ModifyVerificationData>
+						</iso:APICall>
+						<iso:APIResponse>
+							<iso:ModifyVerificationDataResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
+								<dss:Result>
+									<dss:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</dss:ResultMajor>
+								</dss:Result>
+								<iso:Response>9000</iso:Response>
+							</iso:ModifyVerificationDataResponse>
+						</iso:APIResponse>
+					</iso:CardCall>
+				</iso:FixedProcedure>
+			</iso:StateTransition>
+		</iso:State>
+	</iso:StateInfo>
+</iso:PinCompareMarker>
+

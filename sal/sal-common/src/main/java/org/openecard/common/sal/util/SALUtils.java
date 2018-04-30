@@ -29,8 +29,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import org.openecard.common.ECardException;
 import org.openecard.common.sal.Assert;
+import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
+import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
@@ -43,11 +45,17 @@ import org.openecard.common.sal.state.cif.CardApplicationWrapper;
  */
 public class SALUtils {
 
-    public static ConnectionHandleType getConnectionHandle(Object object) throws ECardException, Exception {
+    public static ConnectionHandleType getConnectionHandle(Object object) throws IncorrectParameterException, Exception {
 	ConnectionHandleType value = (ConnectionHandleType) get(object, "getConnectionHandle");
 	Assert.assertIncorrectParameter(value, "The parameter ConnectionHandle is empty.");
 
 	return value;
+    }
+
+    public static ConnectionHandleType createConnectionHandle(byte[] slotHandle) {
+	ConnectionHandleType handle = new ConnectionHandleType();
+	handle.setSlotHandle(slotHandle);
+	return handle;
     }
 
     public static String getDIDName(Object object) throws ECardException, Exception {
@@ -88,7 +96,11 @@ public class SALUtils {
 	    throws UnknownConnectionHandleException {
 	CardStateEntry value = states.getEntry(connectionHandle, filterAppId);
 	if (value == null) {
-	    throw new UnknownConnectionHandleException(connectionHandle);
+	    if (connectionHandle.getSlotHandle() != null) {
+		throw new UnknownSlotHandleException(connectionHandle);
+	    } else {
+		throw new UnknownConnectionHandleException(connectionHandle);
+	    }
 	}
 
 	return value;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -112,7 +112,8 @@ public class SwingStepResult implements StepResult {
 	synchronize();
 	synchronized (this) {
 	    return getStatus() == ResultStatus.RELOAD;
-	}    }
+	}
+    }
 
     @Override
     public List<OutputInfoUnit> getResults() {
@@ -139,8 +140,8 @@ public class SwingStepResult implements StepResult {
 	if (status == null) {
 	    try {
 		syncPoint.exchange(null);
-	    } catch (InterruptedException ignore) {
-		// TODO: maybe setting status to cancel makes sense here
+	    } catch (InterruptedException ex) {
+		status = ResultStatus.INTERRUPTED;
 	    }
 	}
     }

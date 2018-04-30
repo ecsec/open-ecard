@@ -281,149 +281,149 @@
 							</iso:PasswordAttributes>
 							<iso:StateInfo>
 								<iso:StateRecognition>
-								    <!-- First check the QES PIN if PIN QES is in transport mode PIN.CH will not work -->
-								    <iso:CardCall>
-									<iso:CommandAPDU>00A4040C06D27600006601</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>9000</iso:Trailer>
-									</iso:ResponseAPDU>
-								    </iso:CardCall>
-								    <iso:CardCall>
-									<iso:CommandAPDU>80200081</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>9000</iso:Trailer>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>62C1</iso:Trailer>
-									    <iso:Conclusion>
-										<iso:RecognizedState>TRANSPORT_MODE</iso:RecognizedState>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C0</iso:Trailer>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C1</iso:Trailer>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C2</iso:Trailer>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C3</iso:Trailer>
-									</iso:ResponseAPDU>
-								    </iso:CardCall>
-								    <iso:CardCall>
-									<iso:CommandAPDU>80200001</iso:CommandAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>6300</iso:Trailer>
-									    <iso:Conclusion>
-										<iso:RecognizedState>PIN1_BLOCKED</iso:RecognizedState>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C1</iso:Trailer>
-									    <iso:Conclusion>
-										<iso:RecognizedState>PIN1_ACTIVATE_RC1</iso:RecognizedState>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C2</iso:Trailer>
-									    <iso:Conclusion>
-										<iso:RecognizedState>PIN1_ACTIVATE_RC2</iso:RecognizedState>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-									<iso:ResponseAPDU>
-									    <iso:Trailer>63C3</iso:Trailer>
-									    <iso:Conclusion>
-										<iso:RecognizedState>PIN1_ACTIVATE_RC3</iso:RecognizedState>
-									    </iso:Conclusion>
-									</iso:ResponseAPDU>
-								    </iso:CardCall>
+									<!-- First check the QES PIN if PIN QES is in transport mode PIN.CH will not work -->
+									<iso:CardCall>
+										<iso:CommandAPDU>00A4040C06D27600006601</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+									<iso:CardCall>
+										<iso:CommandAPDU>80200081</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>9000</iso:Trailer>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>62C1</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>TRANSPORT_MODE</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C0</iso:Trailer>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C1</iso:Trailer>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C2</iso:Trailer>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C3</iso:Trailer>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
+									<iso:CardCall>
+										<iso:CommandAPDU>80200001</iso:CommandAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>6300</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN1_BLOCKED</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C1</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN1_ACTIVATE_RC1</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C2</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN1_ACTIVATE_RC2</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+										<iso:ResponseAPDU>
+											<iso:Trailer>63C3</iso:Trailer>
+											<iso:Conclusion>
+												<iso:RecognizedState>PIN1_ACTIVATE_RC3</iso:RecognizedState>
+											</iso:Conclusion>
+										</iso:ResponseAPDU>
+									</iso:CardCall>
 								</iso:StateRecognition>
 								<iso:State StateClass="RecognitionNecessary" StateName="PIN1_START"/>
 								<iso:State StateClass="NotOperational" StateName="TRANSPORT_MODE">
-								    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-									<iso:FixedProcedure>
-									    <iso:CardCall>
-										<iso:CommandAPDU>00A4040C06D27600006601</iso:CommandAPDU>
-										<iso:ResponseAPDU>
-										    <iso:Trailer>9000</iso:Trailer>
-										</iso:ResponseAPDU>
-									    </iso:CardCall>
-									    <iso:CardCall>
-										<iso:APICall>
-										    <iso:DIDUpdate>
-											<iso:Marker>
-											    <iso:PinRef>
-												<iso:KeyRef>81</iso:KeyRef>
-											    </iso:PinRef>
-											    <iso:PasswordAttributes>
-												<iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
-												<iso:pwdType>iso9564-1</iso:pwdType>
-												<iso:minLength>6</iso:minLength>
-												<iso:storedLength>8</iso:storedLength>
-												<iso:maxLength>12</iso:maxLength>
-												<iso:padChar>FF</iso:padChar>
-											    </iso:PasswordAttributes>
-											</iso:Marker>
-										    </iso:DIDUpdate>
-										</iso:APICall>
-									    </iso:CardCall>
-									</iso:FixedProcedure>
-								    </iso:StateTransition>
+									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:CommandAPDU>00A4040C06D27600006601</iso:CommandAPDU>
+												<iso:ResponseAPDU>
+													<iso:Trailer>9000</iso:Trailer>
+												</iso:ResponseAPDU>
+											</iso:CardCall>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:DIDUpdate>
+														<iso:Marker>
+															<iso:PinRef>
+																<iso:KeyRef>81</iso:KeyRef>
+															</iso:PinRef>
+															<iso:PasswordAttributes>
+																<iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>6</iso:minLength>
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>12</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:Marker>
+													</iso:DIDUpdate>
+												</iso:APICall>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="NotOperational" StateName="PIN1_BLOCKED">
-								    <iso:RetryCounter>0</iso:RetryCounter>
-								    <!-- Unblock with PUK only -->
-								    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-									<iso:FixedProcedure>
-									    <iso:CardCall>
-										<iso:APICall>
-										    <iso:DIDUpdate>
-											<iso:Marker>
-											    <iso:PinRef>
-												<iso:KeyRef>01</iso:KeyRef>
-											    </iso:PinRef>
-											    <iso:PasswordAttributes>
-												<iso:pwdFlags>case-sensitive local initialized needs-padding unblockingPassword exchangeRefData</iso:pwdFlags>
-												<iso:pwdType>iso9564-1</iso:pwdType>
-												<iso:minLength>8</iso:minLength>
-												<iso:storedLength>8</iso:storedLength>
-												<iso:maxLength>12</iso:maxLength>
-												<iso:padChar>FF</iso:padChar>
-											    </iso:PasswordAttributes>
-											</iso:Marker>
-										    </iso:DIDUpdate>
-										</iso:APICall>
-									    </iso:CardCall>
-									</iso:FixedProcedure>
-								    </iso:StateTransition>
-								    <!-- Unblock and set new PIN -->
-								    <iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
-									<iso:FixedProcedure>
-									    <iso:CardCall>
-										<iso:APICall>
-										    <iso:ModifyVerificationData>
-											<iso:SlotHandle></iso:SlotHandle>
-											<iso:InputUnit>
-											    <iso:PinInput>
-												<iso:Index>0</iso:Index>
-												<iso:PasswordAttributes>
-												    <iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
-												    <iso:pwdType>iso9564-1</iso:pwdType>
-												    <iso:minLength>6</iso:minLength>
-												    <iso:storedLength>8</iso:storedLength>
-												    <iso:maxLength>12</iso:maxLength>
-												    <iso:padChar>FF</iso:padChar>
-												</iso:PasswordAttributes>
-											    </iso:PinInput>
-											</iso:InputUnit>
-											<iso:Template>002C0001</iso:Template>
-										    </iso:ModifyVerificationData>
-										</iso:APICall>
-									    </iso:CardCall>
-									</iso:FixedProcedure>
-								    </iso:StateTransition>
+									<iso:RetryCounter>0</iso:RetryCounter>
+									<!-- Unblock with PUK only -->
+									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:DIDUpdate>
+														<iso:Marker>
+															<iso:PinRef>
+																<iso:KeyRef>01</iso:KeyRef>
+															</iso:PinRef>
+															<iso:PasswordAttributes>
+																<iso:pwdFlags>case-sensitive local initialized needs-padding unblockingPassword exchangeRefData</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>8</iso:minLength>
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>12</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:Marker>
+													</iso:DIDUpdate>
+												</iso:APICall>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
+									<!-- Unblock and set new PIN -->
+									<iso:StateTransition TargetState="PIN1_ACTIVATE_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:ModifyVerificationData>
+														<iso:SlotHandle></iso:SlotHandle>
+														<iso:InputUnit>
+															<iso:PinInput>
+																<iso:Index>0</iso:Index>
+																<iso:PasswordAttributes>
+																	<iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
+																	<iso:pwdType>iso9564-1</iso:pwdType>
+																	<iso:minLength>6</iso:minLength>
+																	<iso:storedLength>8</iso:storedLength>
+																	<iso:maxLength>12</iso:maxLength>
+																	<iso:padChar>FF</iso:padChar>
+																</iso:PasswordAttributes>
+															</iso:PinInput>
+														</iso:InputUnit>
+														<iso:Template>002C0001</iso:Template>
+													</iso:ModifyVerificationData>
+												</iso:APICall>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="Operational" StateName="PIN1_ACTIVATE_RC1">
 									<iso:RetryCounter>1</iso:RetryCounter>
@@ -712,7 +712,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>1323</iso:CardAlgRef>
@@ -813,8 +813,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
-									<iso:Parameters>urn:oid:urn:oid:2.16.840.1.101.3.4.2.1</iso:Parameters>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>133330</iso:CardAlgRef>
@@ -2078,56 +2077,56 @@
 								</iso:StateRecognition>
 								<iso:State StateClass="RecognitionNecessary" StateName="PIN2_START"/>
 								<iso:State StateClass="NotOperational" StateName="PIN2_BLOCKED">
-								    <iso:RetryCounter>0</iso:RetryCounter>
-								    <!-- Unblock with PUK only -->
-								    <iso:StateTransition TargetState="PIN2_ACTIVATE_RC3">
-									<iso:FixedProcedure>
-									    <iso:CardCall>
-										<iso:APICall>
-										    <iso:DIDUpdate>
-											<iso:Marker>
-											    <iso:PinRef>
-												<iso:KeyRef>81</iso:KeyRef>
-											    </iso:PinRef>
-											    <iso:PasswordAttributes>
-												<iso:pwdFlags>case-sensitive local initialized needs-padding unblockingPassword exchangeRefData</iso:pwdFlags>
-												<iso:pwdType>iso9564-1</iso:pwdType>
-												<iso:minLength>8</iso:minLength>
-												<iso:storedLength>8</iso:storedLength>
-												<iso:maxLength>12</iso:maxLength>
-												<iso:padChar>FF</iso:padChar>
-											    </iso:PasswordAttributes>
-											</iso:Marker>
-										    </iso:DIDUpdate>
-										</iso:APICall>
-									    </iso:CardCall>
-									</iso:FixedProcedure>
-								    </iso:StateTransition>
+									<iso:RetryCounter>0</iso:RetryCounter>
+									<!-- Unblock with PUK only -->
+									<iso:StateTransition TargetState="PIN2_ACTIVATE_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:DIDUpdate>
+														<iso:Marker>
+															<iso:PinRef>
+																<iso:KeyRef>81</iso:KeyRef>
+															</iso:PinRef>
+															<iso:PasswordAttributes>
+																<iso:pwdFlags>case-sensitive local initialized needs-padding unblockingPassword exchangeRefData</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>8</iso:minLength>
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>12</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:Marker>
+													</iso:DIDUpdate>
+												</iso:APICall>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="NotOperational" StateName="TRANSPORT_MODE">
-								    <iso:StateTransition TargetState="PIN2_ACTIVATE_RC3">
-									<iso:FixedProcedure>
-									    <iso:CardCall>
-										<iso:APICall>
-										    <iso:DIDUpdate>
-											<iso:Marker>
-											    <iso:PinRef>
-												<iso:KeyRef>81</iso:KeyRef>
-											    </iso:PinRef>
-											    <iso:PasswordAttributes>
-												<iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
-												<iso:pwdType>iso9564-1</iso:pwdType>
-												<iso:minLength>6</iso:minLength>
-												<iso:storedLength>8</iso:storedLength>
-												<iso:maxLength>12</iso:maxLength>
-												<iso:padChar>FF</iso:padChar>
-											    </iso:PasswordAttributes>
-											</iso:Marker>
-										    </iso:DIDUpdate>
-										</iso:APICall>
-									    </iso:CardCall>
-									</iso:FixedProcedure>
-								    </iso:StateTransition>
+									<iso:StateTransition TargetState="PIN2_ACTIVATE_RC3">
+										<iso:FixedProcedure>
+											<iso:CardCall>
+												<iso:APICall>
+													<iso:DIDUpdate>
+														<iso:Marker>
+															<iso:PinRef>
+																<iso:KeyRef>81</iso:KeyRef>
+															</iso:PinRef>
+															<iso:PasswordAttributes>
+																<iso:pwdFlags>case-sensitive local initialized needs-padding exchangeRefData</iso:pwdFlags>
+																<iso:pwdType>iso9564-1</iso:pwdType>
+																<iso:minLength>6</iso:minLength>
+																<iso:storedLength>8</iso:storedLength>
+																<iso:maxLength>12</iso:maxLength>
+																<iso:padChar>FF</iso:padChar>
+															</iso:PasswordAttributes>
+														</iso:Marker>
+													</iso:DIDUpdate>
+												</iso:APICall>
+											</iso:CardCall>
+										</iso:FixedProcedure>
+									</iso:StateTransition>
 								</iso:State>
 								<iso:State StateClass="Operational" StateName="PIN2_ACTIVATE_RC1">
 									<iso:RetryCounter>1</iso:RetryCounter>
@@ -2226,7 +2225,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>1323</iso:CardAlgRef>
@@ -2326,8 +2325,7 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
-									<iso:Parameters>urn:oid:urn:oid:2.16.840.1.101.3.4.2.1</iso:Parameters>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>133330</iso:CardAlgRef>

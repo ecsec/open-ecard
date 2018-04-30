@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,7 +33,6 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -43,12 +42,15 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.openecard.addon.AddonManager;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
+import org.openecard.common.interfaces.Environment;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
-import org.openecard.gui.graphics.OecLogoBgWhite;
-import org.openecard.gui.graphics.OecLogoBlackBgTransparent;
-import org.openecard.gui.graphics.OecLogoWhiteBgTransparent;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.gui.graphics.OecLogo;
+import org.openecard.gui.graphics.OecLogoBlack;
+import org.openecard.gui.graphics.OecLogoLoading;
+import org.openecard.gui.graphics.OecLogoWhite;
 import org.openecard.richclient.RichClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,15 +107,15 @@ public class AppTray {
      * Finishes the setup process.
      * The loading icon is replaced with the eCard logo.
      *
-     * @param rec
+     * @param env
      * @param manager
      */
-    public void endSetup(CardRecognition rec, AddonManager manager) {
-	status = new Status(this, rec, manager);
+    public void endSetup(Environment env, AddonManager manager) {
+	status = new Status(this, env, manager);
 
 	if (trayAvailable) {
 	    trayIcon.setImage(getTrayIconImage(ICON_LOGO));
-	    trayIcon.setToolTip(lang.translationForKey("tray.title"));
+	    trayIcon.setToolTip(lang.translationForKey("tray.title", AppVersion.getName()));
 	} else {
 	    frame.setVisible(false);
 	    status.setInfoPanel(frame);
@@ -140,9 +142,9 @@ public class AppTray {
      */
     public void shutdown() {
 	if (trayAvailable) {
-	    if (! isMacOSX()) {
-		String desc = lang.translationForKey("tray.message.shutdown");
-		trayIcon.displayMessage("Open eCard App", desc, TrayIcon.MessageType.INFO);
+	    if (! SysUtils.isMacOSX()) {
+		String desc = lang.translationForKey("tray.message.shutdown", AppVersion.getName());
+		trayIcon.displayMessage(AppVersion.getName(), desc, TrayIcon.MessageType.INFO);
 	    }
 	    client.teardown();
 	    tray.remove(trayIcon);
@@ -158,7 +160,8 @@ public class AppTray {
 
 	tray = SystemTray.getSystemTray();
 
-	trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER), lang.translationForKey("tray.message.loading"), null);
+	trayIcon = new TrayIcon(getTrayIconImage(ICON_LOADER),
+		lang.translationForKey("tray.message.loading", AppVersion.getName()), null);
 	trayIcon.setImageAutoSize(true);
 	trayIcon.addMouseListener(new MouseAdapter() {
 	    @Override
@@ -185,9 +188,9 @@ public class AppTray {
     private Image getTrayIconImage(String name) {
 	Dimension dim = tray.getTrayIconSize();
 
-	if (isLinux()) {
+	if (SysUtils.isUnix()) {
 	    return getImageLinux(name, dim);
-	} else if (isMacOSX()) {
+	} else if (SysUtils.isMacOSX()) {
 	    return getImageMacOSX(name, dim);
 	} else {
 	    return getImageDefault(name, dim);
@@ -196,52 +199,42 @@ public class AppTray {
 
     private Image getImageLinux(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    return GuiUtils.getImage("loader_icon_linux_default_256.gif");
+	    return GraphicsUtil.createImage(OecLogoLoading.class, dim.width, dim.height);
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
     }
 
     private Image getImageMacOSX(String name, Dimension dim) {
 	Class<? extends Icon> c;
 	if (isMacMenuBarDarkMode()) {
-	    c = OecLogoWhiteBgTransparent.class;
+	    c = OecLogoWhite.class;
 	} else {
-	    c = OecLogoBlackBgTransparent.class;
+	    c = OecLogoBlack.class;
 	}
 	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1);
     }
 
     private Image getImageDefault(String name, Dimension dim) {
 	if (name.equals(ICON_LOADER)) {
-	    return GuiUtils.getImage("loader_icon_default_256.gif");
+	    return GraphicsUtil.createImage(OecLogoLoading.class, dim.width, dim.height);
 	} else {
-	    return GraphicsUtil.createImage(OecLogoBgWhite.class, dim.width, dim.height);
+	    return GraphicsUtil.createImage(OecLogo.class, dim.width, dim.height);
 	}
-    }
-
-    private boolean isMacOSX() {
-	return System.getProperty("os.name").contains("OS X");
     }
 
     private boolean isMacMenuBarDarkMode() {
 	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
-	final FutureTask<Integer> f = new FutureTask<>(new Callable<Integer>() {
-	    @Override
-	    public Integer call() throws Exception {
-		// check for exit status only. Once there are more modes than "dark" and "default", we might need to
-		// analyze string contents..
-		Process proc = Runtime.getRuntime().exec(new String[]{"defaults", "read", "-g", "AppleInterfaceStyle"});
-		proc.waitFor();
-		return proc.exitValue();
-	    }
+	final FutureTask<Integer> f = new FutureTask<>(() -> {
+	    // check for exit status only. Once there are more modes than "dark" and "default", we might need to
+	    // analyze string contents..
+	    Process proc = Runtime.getRuntime().exec(new String[]{"defaults", "read", "-g", "AppleInterfaceStyle"});
+	    proc.waitFor();
+	    return proc.exitValue();
 	});
 	try {
-	    Thread t = new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    f.run();
-		}
+	    Thread t = new Thread(() -> {
+		f.run();
 	    });
 	    t.setDaemon(true);
 	    t.start();
@@ -253,14 +246,6 @@ public class AppTray {
 	    f.cancel(true); // make sure the thread is dead
 	    return false;
 	}
-    }
-
-    private boolean isLinux() {
-	if (isLinux == null) {
-	    String os = System.getProperty("os.name").toLowerCase();
-	    isLinux = os.contains("nux");
-	}
-	return isLinux;
     }
 
     private boolean isKde() {
@@ -295,18 +280,19 @@ public class AppTray {
     private boolean isTraySupported() {
 	return SystemTray.isSupported()
 		&& ! isPlasma()
-		&& ! isGnome();
+		&& ! isGnome()
+		&& ! SysUtils.isMacOSX();
     }
 
     private void setupFrame() {
 	trayAvailable = false;
 
-	frame = new InfoFrame(lang.translationForKey("tray.title"));
+	frame = new InfoFrame(lang.translationForKey("tray.title", AppVersion.getName()));
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setIconImage(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
+	frame.setIconImage(GraphicsUtil.createImage(OecLogo.class, 256, 256));
 
-	JLabel label = new JLabel(new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256)));
-	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogoBgWhite.class, 256, 256));
+	ImageIcon logo = new ImageIcon(GraphicsUtil.createImage(OecLogo.class, 256, 256));
+	JLabel label = new JLabel(logo);
 	Container c = frame.getContentPane();
 	c.setPreferredSize(new Dimension(logo.getIconWidth(), logo.getIconHeight()));
 	c.setBackground(Color.white);

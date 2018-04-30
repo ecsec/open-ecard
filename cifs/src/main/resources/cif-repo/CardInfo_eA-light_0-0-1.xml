@@ -662,7 +662,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>RSA_encryption</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Encipher</iso:SupportedOperations>
 							</iso:AlgorithmInfo>
@@ -748,7 +748,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>RSA_encryption</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 							</iso:AlgorithmInfo>

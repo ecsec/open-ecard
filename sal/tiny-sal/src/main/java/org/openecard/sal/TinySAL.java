@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,6 +45,8 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse.CardAppPathResultSet;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationSelect;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceCreate;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceCreateResponse;
@@ -133,13 +135,14 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -148,6 +151,7 @@ import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.DeleteFile;
 import org.openecard.common.apdu.EraseBinary;
@@ -165,8 +169,8 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.utils.CardUtils;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.interfaces.Publish;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.exception.InappropriateProtocolForActionException;
@@ -187,7 +191,7 @@ import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
@@ -207,7 +211,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TinySAL implements SAL {
 
-    private static final Logger logger = LoggerFactory.getLogger(TinySAL.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TinySAL.class);
     private static final byte[] MF = new byte[] {(byte) 0x3F, (byte) 0x00};
 
     private final Environment env;
@@ -241,7 +245,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public InitializeResponse initialize(Initialize request) {
-	return WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	InitializeResponse res = WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultOK());
+	return res;
     }
 
     /**
@@ -254,7 +259,8 @@ public class TinySAL implements SAL {
      */
     @Override
     public TerminateResponse terminate(Terminate request) {
-	return WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
+	TerminateResponse res = WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultOK());
+	return res;
     }
 
     /**
@@ -286,7 +292,7 @@ public class TinySAL implements SAL {
 		    if (entry.getImplicitlySelectedApplicationIdentifier() != null) {
 			pathCopy.setCardApplication(entry.getImplicitlySelectedApplicationIdentifier());
 		    } else {
-			logger.warn("No CardApplication and ImplicitlySelectedApplication available using MF now.");
+			LOG.warn("No CardApplication and ImplicitlySelectedApplication available using MF now.");
 			pathCopy.setCardApplication(MF);
 		    }
 		}
@@ -338,13 +344,14 @@ public class TinySAL implements SAL {
 		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
-	    CardApplicationPathType cardApplicationPath = cardStateEntry.pathCopy();
+	    ConnectionHandleType handle = cardStateEntry.handleCopy();
+	    cardStateEntry = cardStateEntry.derive(handle);
 	    Connect connect = new Connect();
-	    connect.setContextHandle(cardApplicationPath.getContextHandle());
-	    connect.setIFDName(cardApplicationPath.getIFDName());
-	    connect.setSlot(cardApplicationPath.getSlotIndex());
+	    connect.setContextHandle(handle.getContextHandle());
+	    connect.setIFDName(handle.getIFDName());
+	    connect.setSlot(handle.getSlotIndex());
 
-	    ConnectResponse connectResponse = (ConnectResponse) env.getDispatcher().deliver(connect);
+	    ConnectResponse connectResponse = (ConnectResponse) env.getDispatcher().safeDeliver(connect);
 	    WSHelper.checkResult(connectResponse);
 
 	    // Select the card application
@@ -377,9 +384,62 @@ public class TinySAL implements SAL {
 	    response.getConnectionHandle().setCardApplication(applicationID);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
-	} catch (DispatcherException | InvocationTargetException e) {
-	    logger.error(e.getMessage(), e);
-	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	return response;
+    }
+
+    @Override
+    public CardApplicationSelectResponse cardApplicationSelect(CardApplicationSelect request) {
+	CardApplicationSelectResponse response = WSHelper.makeResponse(CardApplicationSelectResponse.class,
+		WSHelper.makeResultOK());
+
+	try {
+	    byte[] slotHandle = request.getSlotHandle();
+	    ConnectionHandleType connectionHandle = SALUtils.createConnectionHandle(slotHandle);
+	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    byte[] reqApplicationID = request.getCardApplication();
+
+	    Assert.assertIncorrectParameter(reqApplicationID, "The parameter CardApplication is empty.");
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardApplicationWrapper appInfo = cardInfoWrapper.getCardApplication(reqApplicationID);
+	    Assert.assertNamedEntityNotFound(appInfo, "The given Application cannot be found.");
+
+	    Assert.securityConditionApplication(cardStateEntry, reqApplicationID,
+		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
+
+	    // check if the currently selected application is already what the caller wants
+	    byte[] curApplicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
+	    if (! ByteUtils.compare(reqApplicationID, curApplicationID)) {
+		// Select the card application
+		CardCommandAPDU select;
+		// TODO: proper determination of path, file and app id
+		if (reqApplicationID.length == 2) {
+		    select = new Select.File(reqApplicationID);
+		    List<byte[]> responses = new ArrayList<>();
+		    responses.add(TrailerConstants.Success.OK());
+		    responses.add(TrailerConstants.Error.WRONG_P1_P2());
+		    CardResponseAPDU resp = select.transmit(env.getDispatcher(), slotHandle, responses);
+
+		    if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
+			select = new Select.AbsolutePath(reqApplicationID);
+			select.transmit(env.getDispatcher(), slotHandle);
+		    }
+
+		} else {
+		    select = new Select.Application(reqApplicationID);
+		    select.transmit(env.getDispatcher(), slotHandle);
+		}
+
+		cardStateEntry.setCurrentCardApplication(reqApplicationID);
+		// reset the ef FCP
+		cardStateEntry.unsetFCPOfSelectedEF();
+	    }
+
+	    response.setConnectionHandle(cardStateEntry.handleCopy());
+	} catch (ECardException e) {
+	    response.setResult(e.getResult());
 	}
 
 	return response;
@@ -413,7 +473,7 @@ public class TinySAL implements SAL {
 		disconnect.setAction(request.getAction());
 	    }
 	    
-	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().deliver(disconnect);
+	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 
 	    // remove entries associated with this handle
 	    states.removeSlotHandleEntry(slotHandle);
@@ -422,7 +482,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -453,14 +514,14 @@ public class TinySAL implements SAL {
 	    DIDAuthenticationDataType didAuthenticationProtocolData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationProtocolData,
 		    "The parameter didAuthenticationProtocolData is empty.");
-	    
+
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
 		    ConnectionServiceActionName.CARD_APPLICATION_START_SESSION);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.CardApplicationStartSession)) {
 		response = protocol.cardApplicationStartSession(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -470,7 +531,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -502,7 +564,7 @@ public class TinySAL implements SAL {
 		    ConnectionServiceActionName.CARD_APPLICATION_END_SESSION);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.CardApplicationEndSession)) {
 		response = protocol.cardApplicationEndSession(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -512,7 +574,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -553,7 +616,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -600,7 +664,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -653,7 +718,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -750,7 +816,8 @@ public class TinySAL implements SAL {
          } catch (ECardException e) {
 	    response.setResult(e.getResult());
 	 } catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	 }
 
@@ -798,7 +865,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -850,16 +918,24 @@ public class TinySAL implements SAL {
 	    CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
 		    null, CardUtils.FCP_RESPONSE_DATA);
 
+	    FCP fcp = null;
 	    if (result != null && result.getData().length > 0) {
-		cardStateEntry.setFCPOfSelectedEF(new FCP(result.getData()));
-	    } else {
-		cardStateEntry.setFCPOfSelectedEF(new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2,
-			fileID.length))));
+		try {
+		    fcp = new FCP(result.getData());
+		} catch (TLVException ex) {
+		    LOG.warn("Invalid FCP received.");
+		}
 	    }
+	    if (fcp == null) {
+		LOG.info("Using fake FCP.");
+		fcp = new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2, fileID.length)));
+	    }
+	    cardStateEntry.setFCPOfSelectedEF(fcp);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -901,7 +977,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -949,7 +1026,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1016,7 +1094,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1095,10 +1174,11 @@ public class TinySAL implements SAL {
 		rmBinary.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);
 	    }
 	} catch (ECardException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1162,7 +1242,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1301,7 +1382,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1346,7 +1428,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Encipher)) {
 		response = protocol.encipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1356,7 +1438,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1398,7 +1481,7 @@ public class TinySAL implements SAL {
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, didScope);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    
 	    if (protocol.hasNextStep(FunctionType.Decipher)) {
 		response = protocol.decipher(request);
@@ -1409,7 +1492,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1451,7 +1535,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.GetRandom)) {
 		response = protocol.getRandom(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1461,7 +1545,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1505,7 +1590,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Hash)) {
 		response = protocol.hash(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1515,7 +1600,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1533,9 +1619,10 @@ public class TinySAL implements SAL {
     public SignResponse sign(Sign request) {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 
+	CardStateEntry cardStateEntry = null;
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] message = request.getMessage();
@@ -1558,7 +1645,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.Sign)) {
 		response = protocol.sign(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1568,9 +1655,13 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
+
+	// TODO: remove when PIN state tracking is implemented
+	setPinNotAuth(cardStateEntry);
 
 	return response;
     }
@@ -1612,7 +1703,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.VerifySignature)) {
 		response = protocol.verifySignature(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1622,7 +1713,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1674,7 +1766,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.VerifyCertificate)) {
 		response = protocol.verifyCertificate(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1684,7 +1776,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1785,7 +1878,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1827,7 +1921,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1864,7 +1959,7 @@ public class TinySAL implements SAL {
 		    DifferentialIdentityServiceActionName.DID_UPDATE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDUpdate)) {
 		response = protocol.didUpdate(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1874,7 +1969,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1907,7 +2003,7 @@ public class TinySAL implements SAL {
 		    DifferentialIdentityServiceActionName.DID_DELETE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDDelete)) {
 		response = protocol.didDelete(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1917,7 +2013,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -1945,15 +2042,15 @@ public class TinySAL implements SAL {
 	    String protocolURI = didAuthenticationData.getProtocol();
 	    // FIXME: workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
-		logger.warn("ProtocolURI was null");
+		LOG.warn("ProtocolURI was null");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    } else if (protocolURI.equals("urn:oid:1.0.24727.3.0.0.7.2")) {
-		logger.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
+		LOG.warn("ProtocolURI was urn:oid:1.0.24727.3.0.0.7.2");
 		protocolURI = ECardConstants.Protocol.EAC_GENERIC;
 	    }
 	    didAuthenticationData.setProtocol(protocolURI);
 
-	    SALProtocol protocol = getProtocol(connectionHandle, protocolURI);
+	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
 	    if (protocol.hasNextStep(FunctionType.DIDAuthenticate)) {
 		response = protocol.didAuthenticate(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -1963,7 +2060,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -2018,7 +2116,8 @@ public class TinySAL implements SAL {
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
+	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -2058,14 +2157,14 @@ public class TinySAL implements SAL {
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
-	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle);
+	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
 	    entry.removeProtocol(protocolURI);
 	}
     }
 
-    private SALProtocol getProtocol(ConnectionHandleType handle, String protocolURI)
-	    throws UnknownProtocolException, UnknownConnectionHandleException {
-	CardStateEntry entry = SALUtils.getCardStateEntry(states, handle);
+    private SALProtocol getProtocol(@Nonnull ConnectionHandleType handle, @Nullable DIDScopeType scope,
+	    @Nonnull String protocolURI) throws UnknownProtocolException, UnknownConnectionHandleException {
+	CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, scope != DIDScopeType.GLOBAL);
 	SALProtocol protocol = entry.getProtocol(protocolURI);
 	if (protocol == null) {
 	    try {
@@ -2090,8 +2189,39 @@ public class TinySAL implements SAL {
 	    fcp.setChild(fileID);
 	    return fcp.toBER();
 	} catch (TLVException ex) {
-	    logger.error(null, ex);
+	    LOG.error(null, ex);
 	    return null;
+	}
+    }
+
+    // TODO: remove function when state tracking is implemented
+    private void setPinNotAuth(@Nullable CardStateEntry cardStateEntry) {
+	if (cardStateEntry != null) {
+	    LOG.info("Unauthenticate Card PIN (state=false).");
+
+	    // This method only works in a a very limited way. All PIN DIDs get status unauth here.
+	    for (DIDInfoType didInfo : Collections.unmodifiableCollection(cardStateEntry.getAuthenticatedDIDs())) {
+		if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
+		    cardStateEntry.removeAuthenticated(didInfo);
+		}
+	    }
+	}
+    }
+
+    private void throwThreadKillException(Exception ex) {
+	Throwable cause;
+	if (ex instanceof InvocationTargetExceptionUnchecked) {
+	    cause = ex.getCause();
+	} else {
+	    cause = ex;
+	}
+
+	if (cause instanceof ThreadTerminateException) {
+	    throw (ThreadTerminateException) cause;
+	} else if (cause instanceof InterruptedException) {
+	    throw new ThreadTerminateException("Thread running inside SAL interrupted.", cause);
+	} else if (cause instanceof RuntimeException) {
+	    throw (RuntimeException) ex;
 	}
     }
 

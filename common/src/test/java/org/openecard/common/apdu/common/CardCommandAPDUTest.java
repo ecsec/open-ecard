@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,6 +29,7 @@ import org.openecard.common.apdu.GeneralAuthenticate;
 import org.openecard.common.apdu.ReadBinary;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.IntegerUtils;
+import org.openecard.common.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -36,6 +37,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class CardCommandAPDUTest {
 
@@ -189,6 +191,15 @@ public class CardCommandAPDUTest {
 	byte[] apdu = new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC};
 
 	CardCommandAPDU.getHeader(apdu);
+    }
+
+    @Test
+    public void SMparsing() {
+	String orig = "0C 84 00 00 0D 97 01 08 8E 08 74 F2 71 EF 73 64 20 02 00";
+	byte[] origBytes = StringUtils.toByteArray(orig, true);
+	CardCommandAPDU apdu = new CardCommandAPDU(origBytes);
+	byte[] copyBytes = apdu.toByteArray();
+	assertEquals(copyBytes, origBytes);
     }
 
     private byte[] fillBytesWithLength(int i) throws IOException {

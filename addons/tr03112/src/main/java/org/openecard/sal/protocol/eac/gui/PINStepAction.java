@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,8 +25,6 @@ package org.openecard.sal.protocol.eac.gui;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -38,7 +36,6 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
@@ -62,12 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PINStepAction extends StepAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(PINStepAction.class);
-    
-    private static final byte[] DEAKTIVATED = new byte[] {(byte) 0x62, (byte) 0x83};
-    private static final byte[] RC3 = new byte[] {(byte) 0x90, (byte) 0x00};
-    private static final byte[] RC1 = new byte[] {(byte) 0x63, (byte) 0xC1};
-    private static final byte[] RC2 = new byte[] {(byte) 0x63, (byte) 0xC2};
+    private static final Logger LOG = LoggerFactory.getLogger(PINStepAction.class);
 
     private static final String PIN_ID_CAN = "2";
 
@@ -93,7 +85,7 @@ public class PINStepAction extends StepAction {
     private int retryCounter;
 
     public PINStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher, PINStep step,
-	    byte[] status) {
+	    EacPinStatus status) {
 	super(step);
 	this.eacData = eacData;
 	this.capturePin = capturePin;
@@ -102,22 +94,23 @@ public class PINStepAction extends StepAction {
 	this.step = step;
 	this.ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
-	// check pin status
-	if (Arrays.equals(status, RC3)) {
-	    retryCounter = 0;
-	} else if (Arrays.equals(status, RC2)) {
-	    retryCounter = 1;
-	    step.updateAttemptsDisplay(2);
-	} else if (Arrays.equals(status, RC1)) {
-	    retryCounter = 2;
-	    step.updateAttemptsDisplay(1);
-	    if (capturePin) {
-		step.addCANEntry();
-	    } else {
-		step.addNativeCANNotice();
-	    }
-	} else if (Arrays.equals(status, DEAKTIVATED)) {
-	    retryCounter = -1;
+	switch (status) {
+	    case RC3:
+		retryCounter = 0;
+		break;
+	    case RC2:
+		retryCounter = 1;
+		step.updateAttemptsDisplay(2);
+		break;
+	    case RC1:
+		retryCounter = 2;
+		step.updateAttemptsDisplay(1);
+		if (capturePin) {
+		    step.addCANEntry();
+		} else {
+		    step.addNativeCANNotice();
+		}
+		break;
 	}
 
 	// get some important translations
@@ -127,47 +120,39 @@ public class PINStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack()) {
-	    return new StepActionResult(StepActionResultStatus.BACK);
-	}
-
 	if (retryCounter == 2) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);
 		if (response == null) {
-		    logger.debug("The CAN does not meet the format requirements.");
+		    LOG.debug("The CAN does not meet the format requirements.");
+		    step.setStatus(EacPinStatus.RC1);
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		    if (response.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
-			logger.error("Failed to authenticate with the given CAN.");
+			LOG.error("Failed to authenticate with the given CAN.");
+			step.setStatus(EacPinStatus.RC1);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    } else {
 			WSHelper.checkResult(response);
 		    }
 		}
-	    } catch (DispatcherException | InvocationTargetException ex) {
-		logger.error("Failed to dispatch the EstablishChannel request.", ex);
-		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
-		return new StepActionResult(StepActionResultStatus.REPEAT,
-		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
 	    } catch (WSException ex) {
 		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		    logger.error("User canceled the authentication manually.", ex);
+		    LOG.error("User canceled the authentication manually.", ex);
 		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.CANCEL);
 		}
 
 		// for people which think they have to remove the card in the process
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		    logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
+		    LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.REPEAT, 
 			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
 		}
-		
 	    }
 	}
 
@@ -180,13 +165,15 @@ public class PINStepAction extends StepAction {
 		    retryCounter++;
 		    step.updateAttemptsDisplay(3 - retryCounter);
 		    // repeat the step
-		    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    this.step.setStatus(EacPinStatus.RC2);
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
 		    // increase counters and the related displays
 		    retryCounter++;
 		    step.updateAttemptsDisplay(3 - retryCounter);
-		    logger.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    step.setStatus(EacPinStatus.RC1);
 
 		    if (capturePin) {
 			step.addCANEntry();
@@ -195,11 +182,12 @@ public class PINStepAction extends StepAction {
 		    }
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
-		    logger.warn("Wrong PIN entered. The PIN is blocked.");
-		    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(establishChannelResponse.getResult()));
+		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
+		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, EacPinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
-			new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
-				lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)));
+			    new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
+				    lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),
+				    WSHelper.createException(establishChannelResponse.getResult())));
 
 		} else {
 		    WSHelper.checkResult(establishChannelResponse);
@@ -213,40 +201,34 @@ public class PINStepAction extends StepAction {
 	} catch (WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
-		logger.error("User canceled the authentication manually.", ex);
+		LOG.error("User canceled the authentication manually.", ex);
 		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 
 	    // for people which think they have to remove the card in the process
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
-		logger.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
-		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
+		LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
-			new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
+			new ErrorStep(lang.translationForKey(ERROR_TITLE),
+				langPin.translationForKey(ERROR_CARD_REMOVED), ex));
 	    }
 
 	    // repeat the step
-	    logger.error("An unknown error occured while trying to verify the PIN.");
-	    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
+	    LOG.error("An unknown error occured while trying to verify the PIN.");
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
-		    new ErrorStep(langPin.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_UNKNOWN)));
-	} catch (DispatcherException | InvocationTargetException ex) {
-	    logger.error("Failed to dispatch EstablishChannelCommand.", ex);
-	    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
-	    return new StepActionResult(StepActionResultStatus.REPEAT,
-		    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_INTERNAL)));
+		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),
+			    langPin.translationForKey(ERROR_UNKNOWN), ex));
 	}
     }
 
-    private EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) 
-	    throws DispatcherException, InvocationTargetException {
+    private EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) {
 	DIDAuthenticationDataType protoData = eacData.didRequest.getAuthenticationProtocolData();
 	AuthDataMap paceAuthMap;
 	try {
 	    paceAuthMap = new AuthDataMap(protoData);
 	} catch (ParserConfigurationException ex) {
-	    logger.error("Failed to read EAC Protocol data.", ex);
+	    LOG.error("Failed to read EAC Protocol data.", ex);
 	    return null;
 	}
 	AuthDataResponse paceInputMap = paceAuthMap.createResponse(protoData);
@@ -254,13 +236,14 @@ public class PINStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField p = (PasswordField) executionResults.getResult(PINStep.PIN_FIELD);
-	    String pinIn = p.getValue();
+	    char[] pinIn = p.getValue();
 	    // let the user enter the pin again, when there is none entered
 	    // TODO: check pin length and possibly allowed charset with CardInfo file
-	    if (pinIn.isEmpty()) {
+	    if (pinIn.length == 0) {
 		return null;
 	    } else {
-		paceInputMap.addElement(PACEInputType.PIN, pinIn);
+		// NOTE: saving pin as string prevents later removal of the value from memory !!!
+		paceInputMap.addElement(PACEInputType.PIN, new String(pinIn));
 	    }
 	}
 
@@ -270,18 +253,17 @@ public class PINStepAction extends StepAction {
 	String certDesc = ByteUtils.toHexString(eacData.rawCertificateDescription);
 	paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, certDesc);
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.deliver(eChannel);
+	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
     }
 
-    private EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults)
-	    throws DispatcherException, InvocationTargetException {
+    private EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp;
 	try {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
-	    logger.error("Failed to read empty Protocol data.", ex);
+	    LOG.error("Failed to read empty Protocol data.", ex);
 	    return null;
 	}
 
@@ -289,7 +271,7 @@ public class PINStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(PINStep.CAN_FIELD);
-	    String canValue = canField.getValue();
+	    String canValue = new String(canField.getValue());
 
 	    if (canValue.length() != 6) {
 		// let the user enter the can again, when input verification failed
@@ -302,7 +284,7 @@ public class PINStepAction extends StepAction {
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.deliver(eChannel);
+	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
     }
 
     private EstablishChannel createEstablishChannelStructure(AuthDataResponse paceInputMap) {

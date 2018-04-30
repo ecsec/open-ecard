@@ -49,7 +49,7 @@ import javax.swing.border.EmptyBorder;
 import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
 import org.openecard.gui.graphics.GraphicsUtil;
-import org.openecard.gui.graphics.OecLogoBgWhite;
+import org.openecard.gui.graphics.OecLogo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,7 +230,7 @@ public class AddonPanel extends JPanel {
     }
 
     private Image getDefaultLogo() {
-	Image original = GraphicsUtil.createImage(OecLogoBgWhite.class, LOGO_WIDTH, LOGO_HEIGHT);
+	Image original = GraphicsUtil.createImage(OecLogo.class, LOGO_WIDTH, LOGO_HEIGHT);
 	BufferedImage result = new BufferedImage(LOGO_WIDTH, LOGO_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 	Graphics2D g = result.createGraphics();
 

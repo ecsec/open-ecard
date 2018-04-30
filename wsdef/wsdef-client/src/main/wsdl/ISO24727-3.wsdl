@@ -76,6 +76,19 @@
 		</wsdl:part>
 	</wsdl:message>
 
+	<!-- Custom Extension: CardApplicationSelect -->
+
+	<wsdl:message name="CardApplicationSelectRequest">
+		<wsdl:part name="parameters"
+			element="iso:CardApplicationSelect">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="CardApplicationSelectResponse">
+		<wsdl:part name="parameters"
+			element="iso:CardApplicationSelectResponse">
+		</wsdl:part>
+	</wsdl:message>
+
 	<!-- 7.3 CardApplicationDisconnect -->
 
 	<wsdl:message name="CardApplicationDisconnectRequest">
@@ -530,6 +543,13 @@
 			<wsdl:output message="iso:CardApplicationConnectResponse"></wsdl:output>
 		</wsdl:operation>
 
+		<!-- Custom Extension: CardApplicationSelect -->
+
+		<wsdl:operation name="CardApplicationSelect">
+			<wsdl:input message="iso:CardApplicationSelectRequest"></wsdl:input>
+			<wsdl:output message="iso:CardApplicationSelectResponse"></wsdl:output>
+		</wsdl:operation>
+
 		<!-- 7.3 CardApplicationDisconnect -->
 
 		<wsdl:operation name="CardApplicationDisconnect">
@@ -905,6 +925,19 @@
 		<wsdl:operation name="CardApplicationConnect">
 			<soap:operation
 				soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationConnect" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+
+		<!-- Custom Extension: CardApplicationSelect -->
+
+		<wsdl:operation name="CardApplicationSelect">
+			<soap:operation
+				soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationSelect" />
 			<wsdl:input>
 				<soap:body use="literal" />
 			</wsdl:input>

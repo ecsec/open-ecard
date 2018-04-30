@@ -554,6 +554,12 @@
 						</element>
 						<element name="AltVUMessages"
 							type="iso:AltVUMessagesType" maxOccurs="1" minOccurs="0" />
+						<element name="ReferenceData"
+							type="string" maxOccurs="1" minOccurs="0" >
+							<annotation>
+								<documentation>Used with Class 1 Readers.</documentation>
+							</annotation>
+						</element>
 						<element name="TimeoutUntilFirstKey"
 							type="positiveInteger" maxOccurs="1" minOccurs="0" />
 						<element name="TimeoutAfterFirstKey"
@@ -708,8 +714,19 @@
 						</element>
 						<element name="AltMVDMessages"
 							type="iso:AltMVDMessagesType" maxOccurs="1" minOccurs="0">
-						</element>						<element name="OldReferenceData"
-							type="hexBinary" maxOccurs="1" minOccurs="0" />
+						</element>
+						<element name="OldReferenceData"
+							type="string" maxOccurs="1" minOccurs="0" >
+							<annotation>
+								<documentation>Used with Class 1 Readers.</documentation>
+							</annotation>
+						</element>
+						<element name="NewReferenceData"
+							type="string" maxOccurs="1" minOccurs="0" >
+							<annotation>
+								<documentation>Used with Class 1 Readers.</documentation>
+							</annotation>
+						</element>
 						<element name="TimeoutUntilFirstKey"
 							type="positiveInteger" maxOccurs="1" minOccurs="0">
 						</element>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,25 +22,31 @@
 
 package org.openecard.crypto.tls.auth;
 
+import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
+import java.io.OutputStream;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.DERNull;
 import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.openecard.bouncycastle.asn1.x509.DigestInfo;
-import org.openecard.bouncycastle.crypto.tls.AbstractTlsSignerCredentials;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
-import org.openecard.bouncycastle.crypto.tls.SignatureAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.crypto.tls.TlsContext;
-import org.openecard.bouncycastle.crypto.tls.TlsUtils;
-import org.openecard.bouncycastle.util.io.pem.PemObject;
-import org.openecard.bouncycastle.util.io.pem.PemWriter;
-import org.openecard.crypto.common.sal.CredentialPermissionDenied;
-import org.openecard.crypto.common.sal.GenericCryptoSigner;
+import org.openecard.bouncycastle.tls.HashAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
+import org.openecard.bouncycastle.tls.TlsUtils;
+import org.openecard.bouncycastle.tls.crypto.TlsSigner;
+import org.openecard.bouncycastle.tls.crypto.TlsStreamSigner;
+import org.openecard.common.SecurityConditionUnsatisfiable;
+import org.openecard.common.WSHelper;
+import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.SignatureAlgorithms;
+import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
+import org.openecard.crypto.common.sal.did.DidInfo;
+import org.openecard.crypto.common.sal.did.NoSuchDid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,94 +54,119 @@ import org.slf4j.LoggerFactory;
 /**
  * Signing credential delegating all calls to a wrapped GenericCryptoSigner.
  *
- * @see GenericCryptoSigner
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-public class SmartCardSignerCredential extends AbstractTlsSignerCredentials implements ContextAware {
+public class SmartCardSignerCredential implements TlsSigner {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmartCardSignerCredential.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmartCardSignerCredential.class);
 
-    private final GenericCryptoSigner signerImpl;
-    private TlsContext context;
-    private Certificate certificate = Certificate.EMPTY_CHAIN;
+    private final DidInfo did;
 
-    public SmartCardSignerCredential(@Nonnull GenericCryptoSigner signerImpl) {
-	this.signerImpl = signerImpl;
+
+    public SmartCardSignerCredential(@Nonnull DidInfo info) {
+	this.did = info;
     }
 
-    @Override
-    public void setContext(TlsContext context) {
-	this.context = context;
-    }
 
     @Override
-    public byte[] generateCertificateSignature(@Nonnull byte[] hash) throws IOException {
-	// Note: this check is necessary to avoid the pin dialog when the certificate is
-	//       Certificate.EMPTY_CHAIN
-	if (! certificate.equals(Certificate.EMPTY_CHAIN)) {
-	    // When using TLS 1.2, a real PKCs#1 1.5 signature must be made, no raw RSA signature as in older versions
-	    // see http://tools.ietf.org/html/rfc5246#section-4.7
-	    if (TlsUtils.isTLSv12(context)) {
-		SignatureAndHashAlgorithm sigAlg = getSignatureAndHashAlgorithm();
-		if (sigAlg.getSignature() == SignatureAlgorithm.rsa) {
-		    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(sigAlg.getHash());
-		    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId), hash);
-		    hash = digestInfo.getEncoded(ASN1Encoding.DER);
-		}
-	    }
-	    // perform the signature on the card
-	    try {
-		return signerImpl.sign(hash);
-	    } catch (SignatureException ex) {
-		throw new IOException("Failed to create signature because of an unknown error.", ex);
-	    } catch (CredentialPermissionDenied ex) {
-		throw new IOException("Failed to create signature because of missing permissions.", ex);
+    public byte[] generateRawSignature(SignatureAndHashAlgorithm algorithm, byte[] hash) throws IOException {
+	return genSig(algorithm, hash, true);
+    }
+
+    private byte[] genSig(SignatureAndHashAlgorithm algorithm, byte[] sigData, boolean isRaw)
+	    throws IOException {
+	SignatureAlgorithms didAlg = getDidAlgorithm();
+	LOG.debug("Using DID with algorithm={}.", didAlg.getJcaAlg());
+
+	if (algorithm != null) {
+	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(algorithm.getSignature()),
+		    HashAlgorithm.getText(algorithm.getHash()));
+	    LOG.debug("Performing TLS 1.2 signature for algorithm={}.", reqAlgStr);
+
+	    if (isRaw && isRawRSA(didAlg)) {
+		// TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
+		ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
+		DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), sigData);
+		sigData = digestInfo.getEncoded(ASN1Encoding.DER);
+		LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
 	    }
 	} else {
-	    return new byte[]{};
+	    LOG.debug("Performing pre-TLS 1.2 signature.");
+	}
+
+	try {
+	    if (isRaw) {
+		LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
+	    } else {
+		LOG.debug("Hashed Signature of data blob.");
+		CryptoMarkerType cryptoMarker = did.getGenericCryptoMarker();
+		    if (didAlg.getHashAlg() != null && (cryptoMarker.getHashGenerationInfo() == null ||
+			    cryptoMarker.getHashGenerationInfo() == HashGenerationInfoType.NOT_ON_CARD)) {
+			sigData = did.hash(sigData);
+		    }
+	    }
+
+	    did.authenticateMissing();
+	    byte[] signature = did.sign(sigData);
+	    return signature;
+	} catch (WSHelper.WSException ex) {
+	    String msg = "Failed to create signature because of an unknown error.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
+	} catch (SecurityConditionUnsatisfiable ex) {
+	    String msg = "Access to the signature DID could not be obtained.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
+	} catch (NoSuchDid ex) {
+	    String msg = "Signing DID not available anymore.";
+	    LOG.warn(msg, ex);
+	    throw new IOException(msg, ex);
+	}
+    }
+
+    private boolean isRawSignature(SignatureAlgorithms alg) {
+	return isRawRSA(alg) || isRawECDSA(alg);
+    }
+
+    private boolean isRawRSA(SignatureAlgorithms alg) {
+	return alg == SignatureAlgorithms.CKM_RSA_PKCS;
+    }
+    private boolean isRawECDSA(SignatureAlgorithms alg) {
+	return alg == SignatureAlgorithms.CKM_ECDSA;
+    }
+
+
+    public SignatureAlgorithms getDidAlgorithm() {
+	try {
+	    AlgorithmInfoType algInfo = did.getGenericCryptoMarker().getAlgorithmInfo();
+	    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
+	    return alg;
+	} catch (UnsupportedAlgorithmException | WSHelper.WSException ex) {
+	    throw new RuntimeException("Error evaluating algorithm", ex);
 	}
     }
 
     @Override
-    public synchronized Certificate getCertificate() {
-	if (certificate.equals(Certificate.EMPTY_CHAIN)) {
-	    try {
-		certificate = signerImpl.getBCCertificateChain();
-	    } catch (IOException ex) {
-		logger.error("Failed to read certificate due to an unknown error.", ex);
-	    } catch (CredentialPermissionDenied ex) {
-		logger.error("Failed to get certificate because of missing permissions.", ex);
-	    } catch (CertificateException ex) {
-		logger.error("Failed to deserialize certificate.", ex);
-	    }
-	}
+    public TlsStreamSigner getStreamSigner(final SignatureAndHashAlgorithm algorithm) throws IOException {
+	if (! isRawSignature(getDidAlgorithm())) {
+	    // create stream signer for use with real data, not the hash of it
+	    return new TlsStreamSigner() {
+		private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-	if (logger.isDebugEnabled()) {
-	    StringWriter sw = new StringWriter();
-	    sw.write("Using the following certificate for authentication:\n");
-	    for (org.openecard.bouncycastle.asn1.x509.Certificate c : certificate.getCertificateList()) {
-		try (PemWriter pw = new PemWriter(sw)) {
-		    sw.append("\nSubject: ")
-			    .append(c.getSubject().toString())
-			    .append("\n");
-		    sw.append("Issuer:  ")
-			    .append(c.getIssuer().toString());
-		    pw.writeObject(new PemObject("CERTIFICATE", c.getEncoded()));
-		    sw.write("\n");
-		} catch (IOException ex) {
-		    logger.error("Failed to encode certificate in PEM format.");
+		@Override
+		public OutputStream getOutputStream() throws IOException {
+		    return buffer;
 		}
-	    }
-	    logger.debug(sw.toString());
+
+		@Override
+		public byte[] getSignature() throws IOException {
+		    return genSig(algorithm, buffer.toByteArray(), false);
+		}
+	    };
+	} else {
+	    return null;
 	}
-
-	return certificate;
-    }
-
-    @Override
-    public SignatureAndHashAlgorithm getSignatureAndHashAlgorithm() {
-	return signerImpl.getSignatureAndHashAlgorithm();
     }
 
 }

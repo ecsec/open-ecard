@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iso:CardInfo xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	      xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+	      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	      xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
+
+	<iso:CardType>
+		<!-- {ManufacturerID}_{Model} -->
+		<iso:ObjectIdentifier>http://openecard.org/cif/template</iso:ObjectIdentifier>
+	</iso:CardType>
+
+	<iso:CardIdentification>
+	</iso:CardIdentification>
+
+	<iso:ApplicationCapabilities>
+		<iso:ImplicitlySelectedApplication>3F00</iso:ImplicitlySelectedApplication>
+		<iso:CardApplication>
+			<iso:ApplicationIdentifier>3F00</iso:ApplicationIdentifier>
+			<iso:ApplicationName>MF</iso:ApplicationName>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
+		</iso:CardApplication>
+
+	</iso:ApplicationCapabilities>
+
+</iso:CardInfo>

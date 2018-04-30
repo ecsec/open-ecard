@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExecutePACEResponse {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExecutePACEResponse.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExecutePACEResponse.class);
 
     final int result;
     final short length;
@@ -95,12 +95,13 @@ public class ExecutePACEResponse {
                         case 0x63C0: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
                         case 0x63C1: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, msg);
                         case 0x63C2: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_ERROR, msg);
+                        case 0x6283: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED, msg);
                     }
                 }
 
 		// unknown error
 		String hexStringResult = ByteUtils.toHexString(IntegerUtils.toByteArray(result));
-		logger.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);
+		LOG.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);
 		return WSHelper.makeResultUnknownError(null);
 	    }
 	}

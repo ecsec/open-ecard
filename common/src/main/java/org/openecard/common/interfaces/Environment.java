@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.common.interfaces;
 
+import java.util.List;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -36,14 +37,24 @@ public interface Environment {
     void setIFD(IFD ifd);
     IFD getIFD();
 
+    void addIFDCtx(byte[] ctx);
+    void removeIFDCtx(byte[] ctx);
+    List<byte[]> getIFDCtx();
+
     void setSAL(SAL sal);
     SAL getSAL();
 
-    void setEventManager(EventManager manager);
-    EventManager getEventManager();
+    void setEventDispatcher(EventDispatcher manager);
+    EventDispatcher getEventDispatcher();
 
     void setDispatcher(Dispatcher dispatcher);
     Dispatcher getDispatcher();
+
+    void setRecognition(CardRecognition recognition);
+    CardRecognition getRecognition();
+
+    void setCIFProvider(CIFProvider provider);
+    CIFProvider getCIFProvider();
 
     void setGenericComponent(String id, Object component);
     Object getGenericComponent(String id);

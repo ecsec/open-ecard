@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -54,8 +54,9 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpService implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
-    private static final int backlog = 10;
+    private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
+    private static final int BACKLOG = 10;
+
     private final Thread thread;
     private final org.openecard.apache.http.protocol.HttpService service;
     protected final ServerSocket server;
@@ -71,9 +72,9 @@ public class HttpService implements Runnable {
      */
     public HttpService(int port, HttpRequestHandler handler, List<HttpRequestInterceptor> reqInterceptors,
 	    List<HttpResponseInterceptor> respInterceptors) throws Exception {
-	thread = new Thread(this, "Open-eCard Localhost-Binding");
-	server = new ServerSocket(port, backlog, InetAddress.getByName("127.0.0.1"));
-	logger.debug("Starting HTTPBinding on port {}", server.getLocalPort());
+	server = new ServerSocket(port, BACKLOG, InetAddress.getByName("127.0.0.1"));
+	LOG.debug("Starting HTTP Binding on port {}", getPort());
+	thread = new Thread(this, "Open-eCard Localhost-Binding-" + getPort());
 
 	// Reuse strategy
 	ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
@@ -84,7 +85,7 @@ public class HttpService implements Runnable {
 
 	// Set up handler registry
 	UriHttpRequestHandlerMapper handlerRegistry = new UriHttpRequestHandlerMapper();
-	logger.debug("Add handler [{}] for ID [{}]", new Object[]{handler.getClass().getCanonicalName(), "*"});
+	LOG.debug("Add handler [{}] for ID [{}]", new Object[]{handler.getClass().getCanonicalName(), "*"});
 	handlerRegistry.register("*", handler);
 
 	// create service instance
@@ -133,9 +134,9 @@ public class HttpService implements Runnable {
 			} catch (ConnectionClosedException ex) {
 			    // connection closed by client, this is the expected outcome
 			} catch (org.openecard.apache.http.HttpException ex) {
-			    logger.error("Error processing HTTP request or response.", ex);
+			    LOG.error("Error processing HTTP request or response.", ex);
 			} catch (IOException ex) {
-			    logger.error("IO Error while processing HTTP request or response.", ex);
+			    LOG.error("IO Error while processing HTTP request or response.", ex);
 			} finally {
 			    try {
 				connection.shutdown();
@@ -145,12 +146,14 @@ public class HttpService implements Runnable {
 		    }
 
 		}.start();
-	    } catch (HttpsServiceError ex) {
-		logger.error("Failed to initialize TLS server socket.", ex);
-		// no chance this gets better, just close down the server
-		return;
 	    } catch (IOException | HttpServiceError ex) {
-		logger.error(ex.getMessage(), ex);
+		// if interrupted the error is intentionally (SocketClosedException)
+		if (! Thread.interrupted()) {
+		    LOG.error(ex.getMessage(), ex);
+		} else {
+		    // set interrupt status again after reading it
+		    thread.interrupt();
+		}
 	    }
 	}
     }
@@ -160,7 +163,7 @@ public class HttpService implements Runnable {
      *
      * @return Port
      */
-    public int getPort() {
+    public final int getPort() {
 	return server.getLocalPort();
     }
 

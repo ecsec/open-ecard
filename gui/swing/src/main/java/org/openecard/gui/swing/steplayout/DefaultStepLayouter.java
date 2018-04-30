@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -65,7 +65,7 @@ public class DefaultStepLayouter extends StepLayouter {
     private final JPanel rootPanel;
 
     protected DefaultStepLayouter(List<InputInfoUnit> infoUnits, String stepName) {
-	components = new ArrayList<StepComponent>(infoUnits.size());
+	components = new ArrayList<>(infoUnits.size());
 	rootPanel = new JPanel(new BorderLayout());
 
 	// Add a panel containing step title and separator

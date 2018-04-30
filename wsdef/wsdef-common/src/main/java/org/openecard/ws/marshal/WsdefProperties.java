@@ -24,7 +24,7 @@ package org.openecard.ws.marshal;
 
 import java.io.IOException;
 import java.util.Properties;
-import org.openecard.common.OverridingProperties;
+import org.openecard.ws.common.OverridingProperties;
 
 
 /**

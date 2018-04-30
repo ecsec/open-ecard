@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,9 +34,13 @@ import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetNameListType;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.openecard.common.util.ByteArrayWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -49,17 +53,27 @@ import org.openecard.common.util.ByteArrayWrapper;
  */
 public class CardInfoWrapper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CardInfoWrapper.class);
+
     private final CardInfoType cif;
-    private Map<ByteArrayWrapper, CardApplicationWrapper> cardApplications =
-	    new HashMap<ByteArrayWrapper, CardApplicationWrapper>();
-    List<byte[]> cardApplicationNames = new ArrayList<byte[]>();
+    private final Map<ByteArrayWrapper, CardApplicationWrapper> cardApplications = new HashMap<>();
+    private final List<byte[]> cardApplicationNames = new ArrayList<>();
+    private final String interfaceProtocol;
 
     /**
      *
      * @param cif the CardInfo that should be wrapped
+     * @param interfaceProtocol Protocol with which the card is connected.
      */
-    public CardInfoWrapper(CardInfoType cif) {
+    public CardInfoWrapper(CardInfoType cif, @Nullable String interfaceProtocol) {
 	this.cif = cif;
+	this.interfaceProtocol = interfaceProtocol;
+
+	filterForProtocol();
+    }
+
+    public CardInfoWrapper(CardInfoWrapper other) {
+	this(other.cif, other.interfaceProtocol);
     }
 
     /**
@@ -93,7 +107,7 @@ public class CardInfoWrapper {
      */
     public Map<ByteArrayWrapper, CardApplicationWrapper> getCardApplications() {
 	if (cardApplications.isEmpty()) {
-	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
+	    for (CardApplicationType cardApplication : getApplicationCapabilities().getCardApplication()) {
 		cardApplications.put(new ByteArrayWrapper(cardApplication.getApplicationIdentifier()),
 			new CardApplicationWrapper(cardApplication));
 	    }
@@ -127,7 +141,7 @@ public class CardInfoWrapper {
      * @return the DIDInfo of the specified DID or null, if either the card application or the DID do not exist
      */
     public DIDInfoType getDIDInfo(String didName, DIDScopeType didScope) {
-	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
+	List<CardApplicationType> cardApps = getApplicationCapabilities().getCardApplication();
 	for (CardApplicationType cardApp : cardApps) {
 	    for (DIDInfoType did : cardApp.getDIDInfo()) {
 		if (did.getDifferentialIdentity().getDIDName().equals(didName)) {
@@ -283,7 +297,7 @@ public class CardInfoWrapper {
      */
     public List<byte[]> getCardApplicationNameList() {
 	if (cardApplicationNames.isEmpty()) {
-	    for (CardApplicationType cardApplication : cif.getApplicationCapabilities().getCardApplication()) {
+	    for (CardApplicationType cardApplication : getApplicationCapabilities().getCardApplication()) {
 		cardApplicationNames.add(cardApplication.getApplicationIdentifier());
 	    }
 	}
@@ -343,7 +357,7 @@ public class CardInfoWrapper {
      * with the first occurrence of didName is returned.
      */
     public byte[] getApplicationIdByDidName(String didName, DIDScopeType didScope) {
-	List<CardApplicationType> cardApps = cif.getApplicationCapabilities().getCardApplication();
+	List<CardApplicationType> cardApps = getApplicationCapabilities().getCardApplication();
 	for (CardApplicationType cardApp : cardApps) {
 	    for (DIDInfoType did : cardApp.getDIDInfo()) {
 		if (did.getDifferentialIdentity().getDIDName().equals(didName)) {
@@ -391,6 +405,27 @@ public class CardInfoWrapper {
 	}
 
 	return null;
+    }
+
+    private void filterForProtocol() {
+	List<CardApplicationType> apps = getApplicationCapabilities().getCardApplication();
+	Iterator<CardApplicationType> it = apps.iterator();
+	while (it.hasNext()) {
+	    CardApplicationType app = it.next();
+	    List<String> interfaceProtos = app.getInterfaceProtocol();
+	    // remove when there is a protocol list not containing the current protocol
+	    if (! interfaceProtos.isEmpty()) {
+		if (interfaceProtocol == null) {
+		    String msg = "Interface protocol is not available.";
+		    LOG.error(msg);
+		    throw new IllegalStateException(msg);
+		}
+
+		if (! interfaceProtos.contains(interfaceProtocol)) {
+		    it.remove();
+		}
+	    }
+	}
     }
 
 }

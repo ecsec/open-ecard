@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,11 +22,11 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import org.openecard.common.GenericFactory;
-import org.openecard.common.GenericFactoryException;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
+import org.openecard.ws.common.GenericFactory;
+import org.openecard.ws.common.GenericFactoryException;
 
 
 /**

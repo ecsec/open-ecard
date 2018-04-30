@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,6 +34,7 @@ public enum ResultStatus {
     OK,
     BACK,
     CANCEL,
-    RELOAD;
+    RELOAD,
+    INTERRUPTED; // only used internally and never returned by ExecutionEngine
 
 }

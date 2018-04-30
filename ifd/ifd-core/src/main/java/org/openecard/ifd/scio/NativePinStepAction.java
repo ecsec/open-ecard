@@ -32,7 +32,7 @@ import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ifd.scio.reader.PCSCPinVerify;
-import org.openecard.ifd.scio.wrapper.HandledChannel;
+import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.openecard.ifd.scio.wrapper.TerminalInfo;
 
 
@@ -46,11 +46,11 @@ public class NativePinStepAction extends StepAction {
     public IFDException exception = null;
     public byte[] response = null;
     private final PinInputType pinInput;
-    private final HandledChannel ch;
+    private final SingleThreadChannel ch;
     private final TerminalInfo termInfo;
     private final byte[] template;
 
-    public NativePinStepAction(String stepName, PinInputType pinInput, HandledChannel ch, TerminalInfo termInfo, byte[] template) {
+    public NativePinStepAction(String stepName, PinInputType pinInput, SingleThreadChannel ch, TerminalInfo termInfo, byte[] template) {
 	super(stepName);
 	this.pinInput = pinInput;
 	this.ch = ch;

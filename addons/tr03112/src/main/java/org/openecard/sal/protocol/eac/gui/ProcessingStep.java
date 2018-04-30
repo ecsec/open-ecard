@@ -23,7 +23,7 @@
 package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.I18n;
-import org.openecard.common.Version;
+import org.openecard.common.AppVersion;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 
@@ -37,21 +37,20 @@ public class ProcessingStep extends Step {
 
     private static final I18n lang = I18n.getTranslation("eac");
     // step id
-    public static final String STEP_ID = "PROTOCOL_GUI_STEP_INIT";
+    public static final String STEP_ID = "PROTOCOL_GUI_STEP_PROCESSING";
     // GUI translation constants
     private static final String TITLE = "step_processing_title";
     private static final String STEP_DESCRIPTION = "step_processing_step_description";
     private static final String DESCRIPTION = "step_processing_description";
 
     public ProcessingStep() {
-	super(STEP_ID);
-	setTitle(lang.translationForKey(TITLE));
+	super(STEP_ID, lang.translationForKey(TITLE));
 	setDescription(lang.translationForKey(STEP_DESCRIPTION));
 	setInstantReturn(true);
 	setReversible(false);
 
 	Text desc = new Text();
-	desc.setText(lang.translationForKey(DESCRIPTION, Version.getName()));
+	desc.setText(lang.translationForKey(DESCRIPTION, AppVersion.getName()));
 	getInputInfoUnits().add(desc);
     }
 

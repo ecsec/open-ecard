@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -29,11 +29,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.util.ArrayList;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import java.util.Set;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 
@@ -47,7 +51,8 @@ import org.openecard.crypto.tls.CertificateVerifier;
  */
 public class JavaSecVerifier implements CertificateVerifier {
 
-    private final CertPathValidator certPathValidator;
+    protected final boolean checkRevocation;
+    protected final CertPathValidator certPathValidator;
 
     /**
      * Create a JavaSecVerifier and load the internal certificate path validator.
@@ -55,23 +60,37 @@ public class JavaSecVerifier implements CertificateVerifier {
      * @throws RuntimeException Thrown in case the validator could not be loaded due to a missing algorithm.
      */
     public JavaSecVerifier() throws RuntimeException {
+	this(false);
+    }
+
+    public JavaSecVerifier(boolean checkRevocation) throws RuntimeException {
+	this.checkRevocation = checkRevocation;
 	try {
-	    certPathValidator = CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+	    certPathValidator = CertPathValidator.getInstance("PKIX");
 	} catch (NoSuchAlgorithmException ex) {
 	    throw new RuntimeException("Failed to load CertPathValidator");
 	}
     }
 
+    protected Set<TrustAnchor> getTrustStore() {
+	return new TrustStoreLoader().getTrustAnchors();
+    }
+
 
     @Override
-    public void isValid(Certificate chain, String hostname) throws CertificateVerificationException {
+    public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
 	    CertPath certPath = convertChain(chain);
 
 	    // create the parameters for the validator
-	    PKIXParameters params = new PKIXParameters(TrustStoreLoader.getTrustAnchors());
-	    // disable CRL checking since we are not supplying any CRLs yet
-	    params.setRevocationEnabled(false);
+	    PKIXParameters params = new PKIXParameters(getTrustStore());
+	    if (checkRevocation) {
+		params.setRevocationEnabled(true);
+		System.setProperty("com.sun.security.enableCRLDP", "true");
+	    } else {
+		// disable CRL checking since we are not supplying any CRLs yet
+		params.setRevocationEnabled(false);
+	    }
 
 	    // validate - exception marks failure
 	    certPathValidator.validate(certPath, params);
@@ -85,19 +104,30 @@ public class JavaSecVerifier implements CertificateVerifier {
     }
 
 
-    private CertPath convertChain(Certificate chain) throws CertificateException, IOException {
-	final int numCerts = chain.getCertificateList().length;
+    public static CertPath convertChain(TlsServerCertificate chain) throws CertificateException, IOException {
+	final int numCerts = chain.getCertificate().getCertificateList().length;
 	ArrayList<java.security.cert.Certificate> result = new ArrayList<>(numCerts);
 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-	for (org.openecard.bouncycastle.asn1.x509.Certificate next : chain.getCertificateList()) {
-	    byte[] nextData = next.getEncoded();
-	    ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
-	    java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);
+	for (TlsCertificate next : chain.getCertificate().getCertificateList()) {
+	    Certificate nextConverted = convertCertificateInt(cf, next);
 	    result.add(nextConverted);
 	}
 
 	return cf.generateCertPath(result);
+    }
+
+    public static Certificate convertCertificate(TlsCertificate cert) throws CertificateException, IOException {
+	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	return convertCertificateInt(cf, cert);
+    }
+
+    public static Certificate convertCertificateInt(CertificateFactory cf, TlsCertificate cert)
+	    throws CertificateException, IOException {
+	byte[] nextData = cert.getEncoded();
+	ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
+	java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);
+	return nextConverted;
     }
 
 }

@@ -41,7 +41,7 @@ import org.openecard.sal.protocol.eac.EACData;
  */
 public class CVCStep extends Step {
 
-    private static final I18n lang = I18n.getTranslation("eac");
+    private static final I18n LANG = I18n.getTranslation("eac");
     // step id
     public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_CVC";
     // GUI translation constants
@@ -63,8 +63,8 @@ public class CVCStep extends Step {
     public CVCStep(EACData eacData) {
 	super(STEP_ID);
 	this.eacData = eacData;
-	setTitle(lang.translationForKey(TITLE));
-	setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	setTitle(LANG.translationForKey(TITLE));
+	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
@@ -72,25 +72,27 @@ public class CVCStep extends Step {
 
     public static Step createDummy() {
 	Step s = new Step(STEP_ID);
-	s.setTitle(lang.translationForKey(TITLE));
-	s.setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	s.setTitle(LANG.translationForKey(TITLE));
+	s.setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 	return s;
     }
 
     private void addElements() {
 	Text description = new Text();
-	description.setText(lang.translationForKey(DESCRIPTION));
+	description.setText(LANG.translationForKey(DESCRIPTION));
 	getInputInfoUnits().add(description);
 
 	// SubjectName
 	ToggleText subjectName = new ToggleText();
-	subjectName.setTitle(lang.translationForKey(SUBJECT_NAME));
+	subjectName.setID("SubjectName");
+	subjectName.setTitle(LANG.translationForKey(SUBJECT_NAME));
 	subjectName.setText(eacData.certificateDescription.getSubjectName());
 	getInputInfoUnits().add(subjectName);
 
 	// SubjectURL
 	ToggleText subjectURL = new ToggleText();
-	subjectURL.setTitle(lang.translationForKey(SUBJECT_URL));
+	subjectURL.setID("SubjectURL");
+	subjectURL.setTitle(LANG.translationForKey(SUBJECT_URL));
 	if (eacData.certificateDescription.getSubjectURL() != null) {
 	    subjectURL.setText(eacData.certificateDescription.getSubjectURL());
 	} else {
@@ -98,9 +100,10 @@ public class CVCStep extends Step {
 	}
 	getInputInfoUnits().add(subjectURL);
 
-	// TermsofUsage
+	// TermsOfUsage
 	ToggleText termsOfUsage = new ToggleText();
-	termsOfUsage.setTitle(lang.translationForKey(TERMS_OF_USAGE));
+	termsOfUsage.setID("TermsOfUsage");
+	termsOfUsage.setTitle(LANG.translationForKey(TERMS_OF_USAGE));
 	Document doc = new Document();
 	doc.setMimeType(eacData.certificateDescription.getTermsOfUsageMimeType());
 	doc.setValue(eacData.certificateDescription.getTermsOfUsageBytes());
@@ -111,35 +114,38 @@ public class CVCStep extends Step {
 	// Validity
 	DateFormat dateFormat;
 	try {
-	    dateFormat = new SimpleDateFormat(lang.translationForKey(VALIDITY_FORMAT));
+	    dateFormat = new SimpleDateFormat(LANG.translationForKey(VALIDITY_FORMAT));
 	} catch (IllegalArgumentException e) {
 	    dateFormat = new SimpleDateFormat();
 	}
 	StringBuilder sb = new StringBuilder(150);
-	sb.append(lang.translationForKey(VALIDITY_FROM));
+	sb.append(LANG.translationForKey(VALIDITY_FROM));
 	sb.append(" ");
 	sb.append(dateFormat.format(eacData.certificate.getEffectiveDate().getTime()));
 	sb.append(" ");
-	sb.append(lang.translationForKey(VALIDITY_TO));
+	sb.append(LANG.translationForKey(VALIDITY_TO));
 	sb.append(" ");
 	sb.append(dateFormat.format(eacData.certificate.getExpirationDate().getTime()));
 
 	ToggleText validity = new ToggleText();
-	validity.setTitle(lang.translationForKey(VALIDITY));
+	validity.setID("Validity");
+	validity.setTitle(LANG.translationForKey(VALIDITY));
 	validity.setText(sb.toString());
 	validity.setCollapsed(true);
 	getInputInfoUnits().add(validity);
 
 	// IssuerName
 	ToggleText issuerName = new ToggleText();
-	issuerName.setTitle(lang.translationForKey(ISSUER_NAME));
+	issuerName.setID("IssuerName");
+	issuerName.setTitle(LANG.translationForKey(ISSUER_NAME));
 	issuerName.setText(eacData.certificateDescription.getIssuerName());
 	issuerName.setCollapsed(true);
 	getInputInfoUnits().add(issuerName);
 
 	// IssuerURL
 	ToggleText issuerURL = new ToggleText();
-	issuerURL.setTitle(lang.translationForKey(ISSUER_URL));
+	issuerURL.setID("IssuerURL");
+	issuerURL.setTitle(LANG.translationForKey(ISSUER_URL));
 	// issuer url is optional so perform a null check
 	if (eacData.certificateDescription.getIssuerURL() != null) {
 	    issuerURL.setText(eacData.certificateDescription.getIssuerURL());

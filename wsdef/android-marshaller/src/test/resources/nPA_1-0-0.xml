@@ -4111,7 +4111,7 @@
 								<iso:Algorithm>ECDSAwithSHA256</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
 									<iso:Algorithm>
-										urn:oid:1.2.840.10045.4.3.2
+										http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256
 									</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>

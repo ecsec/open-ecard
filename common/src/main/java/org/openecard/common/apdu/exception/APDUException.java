@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.common.apdu.exception;
 
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardException;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -85,7 +86,9 @@ public final class APDUException extends ECardException {
 	this(cause);
 
 	transmitResponse = tr;
-	responseAPDU = new CardResponseAPDU(tr);
+	if (! tr.getOutputAPDU().isEmpty()) {
+	    responseAPDU = new CardResponseAPDU(tr);
+	}
     }
 
     /**
@@ -102,6 +105,7 @@ public final class APDUException extends ECardException {
      *
      * @return ResponseAPDU
      */
+    @Nullable
     public CardResponseAPDU getResponseAPDU() {
 	return responseAPDU;
     }

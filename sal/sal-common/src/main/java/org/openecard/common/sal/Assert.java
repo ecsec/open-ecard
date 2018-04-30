@@ -22,10 +22,13 @@
 
 package org.openecard.common.sal;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.Collection;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException;
+import org.openecard.common.sal.exception.UnknownConnectionHandleException;
+import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
 
 
@@ -50,7 +53,7 @@ public final class Assert {
     }
 
     /**
-     * Checks if the given value is not null, otherwise a IncorrectParameterException is thrown.
+     * Checks if the given value is not null or empty, otherwise a IncorrectParameterException is thrown.
      *
      * @param value Value
      * @param message Exception message
@@ -62,6 +65,32 @@ public final class Assert {
 	} else if (value instanceof Collection) {
 	    if (((Collection) value).isEmpty()) {
 		throw new IncorrectParameterException(message);
+	    }
+	}
+    }
+
+    /**
+     * Checks if the given value is not null or empty, otherwise an {@link UnknownConnectionHandleException} is thrown.
+     *
+     * @param value Value
+     * @param handle Connection handle which caused the problems.
+     * @throws UnknownConnectionHandleException
+     */
+    public static void assertConnectionHandle(Object value, ConnectionHandleType handle)
+	    throws UnknownConnectionHandleException {
+	if (value == null) {
+	    if (handle != null && handle.getSlotHandle() != null) {
+		throw new UnknownSlotHandleException(handle);
+	    } else {
+		throw new UnknownConnectionHandleException(handle);
+	    }
+	} else if (value instanceof Collection) {
+	    if (((Collection) value).isEmpty()) {
+		if (handle != null && handle.getSlotHandle() != null) {
+		    throw new UnknownSlotHandleException(handle);
+		} else {
+		    throw new UnknownConnectionHandleException(handle);
+		}
 	    }
 	}
     }

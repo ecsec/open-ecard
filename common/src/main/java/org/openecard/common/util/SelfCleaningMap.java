@@ -27,15 +27,19 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
  *
  * @author Tobias Wich
+ * @param <K>
+ * @param <V>
  */
 public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
 
-    private static final long rerun = 30 * 1000;
+    private static final long RERUN = 30 * 1000;
+    private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
     private final long kill;
     private final RemoveActionFactory<V> actionFactory;
 
@@ -52,6 +56,7 @@ public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
 
     /**
      *
+     * @param <M>
      * @param c
      * @param lifetime in minutes
      * @throws InstantiationException
@@ -95,12 +100,16 @@ public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
 
     private class Cleaner extends Thread {
 
+	public Cleaner() {
+	    super(String.format("MapCleaner-%d", THREAD_NUM.getAndIncrement()));
+	}
+
 	@Override
 	public void run() {
 	    synchronized (this) {
 		while (!_map.isEmpty()) { // only run as long as there are entries in the map
 		    try {
-			wait(rerun); // block 30 seconds
+			wait(RERUN); // block 30 seconds
 			long now = System.currentTimeMillis();
 			Iterator<Map.Entry<K, Entry>> i = _map.entrySet().iterator();
 			while (i.hasNext()) {

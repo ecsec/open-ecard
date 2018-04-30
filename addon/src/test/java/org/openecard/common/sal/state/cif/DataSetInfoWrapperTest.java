@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2017 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,8 +24,13 @@ package org.openecard.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
+import mockit.Expectations;
+import mockit.Mocked;
+import org.openecard.common.ClientEnv;
+import org.openecard.common.interfaces.CIFProvider;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognition;
+import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -38,6 +43,9 @@ public class DataSetInfoWrapperTest {
 
     private static final byte[] rootApplication = StringUtils.toByteArray("3F00");
 
+    @Mocked
+    public CIFProvider cifp;
+
     /**
      * Simple test for DataSetInfoWrapper-class. After getting the DataSetInfoWrapper for the EF.DIR data set in the
      * root applicaton of the npa we check if the get-methods return the expected values.
@@ -46,9 +54,15 @@ public class DataSetInfoWrapperTest {
      */
     @Test
     public void test() throws Exception {
-	CardRecognition recognition = new CardRecognition(null, null);
+	new Expectations() {{
+	    cifp.getCardInfo(anyString); result = null;
+	}};
+
+	Environment env = new ClientEnv();
+	env.setCIFProvider(cifp);
+	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
-	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo);
+	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 
 	CardApplicationWrapper cardApplicationWrapper = cardInfoWrapper.getCardApplication(rootApplication);
 

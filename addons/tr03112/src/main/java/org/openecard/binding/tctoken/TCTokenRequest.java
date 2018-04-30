@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,16 +46,18 @@ import org.openecard.addons.tr03124.gui.CardMonitorTask;
 import org.openecard.addons.tr03124.gui.CardSelectionAction;
 import org.openecard.addons.tr03124.gui.CardSelectionStep;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.common.AppVersion;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.UrlBuilder;
@@ -64,7 +66,6 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
-import org.openecard.recognition.CardRecognition;
 
 
 /**
@@ -77,8 +78,8 @@ import org.openecard.recognition.CardRecognition;
  */
 public class TCTokenRequest {
 
-    private static final Logger logger = LoggerFactory.getLogger(TCTokenRequest.class);
-    private static final I18n lang = I18n.getTranslation("tr03112");
+    private static final Logger LOG = LoggerFactory.getLogger(TCTokenRequest.class);
+    private static final I18n LANG = I18n.getTranslation("tr03112");
 
     private TCToken token;
     private String ifdName;
@@ -86,7 +87,7 @@ public class TCTokenRequest {
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
     private boolean tokenFromObject;
-    private List<Pair<URL, Certificate>> certificates;
+    private List<Pair<URL, TlsServerCertificate>> certificates;
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
 
@@ -105,6 +106,7 @@ public class TCTokenRequest {
      * @throws InvalidTCTokenUrlException
      * @throws SecurityViolationException
      * @throws InvalidAddressException
+     * @throws UserCancellationException
      */
     public static TCTokenRequest convert(Map<String, String> parameters, Context ctx) throws
 	    InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
@@ -114,10 +116,6 @@ public class TCTokenRequest {
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters, ctx);
 	    result.tokenFromObject = false;
-	    return result;
-	} else if (parameters.containsKey("activationObject")) {
-	    result = parseObjectURI(parameters);
-	    result.tokenFromObject = true;
 	    return result;
 	}
 
@@ -154,7 +152,7 @@ public class TCTokenRequest {
 	    if (queries.containsKey("cardTypes")) {
 		addTokenUrlParameter(queries, queries.get("cardTypes").split(",")[0]);
 	    }
-	    logger.warn("The user aborted the CardInsertion dialog.", ex);
+	    LOG.warn("The user aborted the CardInsertion dialog.", ex);
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    dynCtx.put(TR03112Keys.CARD_SELECTION_CANCELLATION, ex);
 	}
@@ -166,7 +164,7 @@ public class TCTokenRequest {
 	    String v = next.getValue();
 
 	    if (v == null || v.isEmpty()) {
-		logger.info("Skipping query parameter '{}' because it does not contain a value.", k);
+		LOG.info("Skipping query parameter '{}' because it does not contain a value.", k);
 	    } else {
 		switch (k) {
 		    case "tcTokenURL":
@@ -185,7 +183,7 @@ public class TCTokenRequest {
 			tcTokenRequest.cardType = v;
 			break;
 		    default:
-			logger.info("Unknown query element: {}", k);
+			LOG.info("Unknown query element: {}", k);
 			break;
 		}
 	    }
@@ -216,41 +214,6 @@ public class TCTokenRequest {
 	return tcTokenRequest;
     }
 
-    private static TCTokenRequest parseObjectURI(Map<String, String> queries) throws InvalidTCTokenException,
-	    MissingActivationParameterException, AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement,
-	    InvalidTCTokenUrlException, SecurityViolationException, UserCancellationException {
-	// TODO: get rid of this crap as soon as possible
-	TCTokenRequest tcTokenRequest = new TCTokenRequest();
-
-	for (Map.Entry<String, String> next : queries.entrySet()) {
-	    String k = next.getKey();
-	    k = k == null ? "" : k;
-	    String v = next.getValue();
-
-	    if (v == null || v.isEmpty()) {
-		logger.info("Skipping query parameter '{}' because it does not contain a value.", k);
-	    } else {
-		switch (k) {
-		    case "activationObject":
-			TCTokenContext tcToken = TCTokenContext.generateTCToken(v);
-			tcTokenRequest.token = tcToken.getToken();
-			break;
-		    case "serverCertificate":
-			// TODO: convert base64 and url encoded certificate to Certificate object
-			break;
-		    default:
-			logger.info("Unknown query element: {}", k);
-			break;
-		}
-	    }
-	}
-
-	if (tcTokenRequest.token == null) {
-	    throw new MissingActivationParameterException(NO_TOKEN);
-	}
-	return tcTokenRequest;
-    }
-
     /**
      * Finds a card which matches one of the give types.
      *
@@ -268,26 +231,24 @@ public class TCTokenRequest {
 	}
 
 	InsertCardDialog insCardDiag =
-		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getEventManager());
+		new InsertCardDialog(ctx.getUserConsent(), ctx.getCardStates(), namesAndType, ctx.getEventDispatcher());
 	List<ConnectionHandleType> usableCards = insCardDiag.show();
-	
+
 	if (usableCards == null) {
 	    // user aborted the card insertion dialog
-	    throw new UserCancellationException(null, lang.translationForKey(CARD_INSERTION_ABORT));
+	    throw new UserCancellationException(null, LANG.translationForKey(CARD_INSERTION_ABORT));
 	}
 
 	ConnectionHandleType handle;
 	if (usableCards.size() > 1) {
-	    UserConsentDescription ucd = new UserConsentDescription(lang.translationForKey("card.selection.heading.uc"));
-	    String stepTitle = lang.translationForKey("card.selection.heading.step");
+	    UserConsentDescription ucd = new UserConsentDescription(LANG.translationForKey("card.selection.heading.uc",
+		    AppVersion.getName()));
+	    String stepTitle = LANG.translationForKey("card.selection.heading.step");
 	    CardSelectionStep step = new CardSelectionStep(stepTitle, usableCards, ctx.getRecognition());
 	    ArrayList<String> types2 = new ArrayList<>();
 	    types2.addAll(namesAndType.values());
 	    CardMonitorTask task = new CardMonitorTask(types2, step);
-	    List<EventType> events = new ArrayList<>();
-	    events.add(EventType.CARD_REMOVED);
-	    events.add(EventType.CARD_RECOGNIZED);
-	    ctx.getEventManager().register(task, events);
+	    ctx.getEventDispatcher().add(task, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
 	    step.setBackgroundTask(task);
 	    CardSelectionAction action = new CardSelectionAction(step, usableCards, types2, ctx);
 	    step.setAction(action);
@@ -302,7 +263,7 @@ public class TCTokenRequest {
 	    }
 
 	    handle = action.getResult();
-	    ctx.getEventManager().unregister(task);
+	    ctx.getEventDispatcher().del(task);
 	} else {
 	    handle = usableCards.get(0);
 	}
@@ -448,7 +409,7 @@ public class TCTokenRequest {
      * @return List of the X509 server certificates and the requested URLs. May be null under certain circumstances
      *   (e.g. legacy activation).
      */
-    public List<Pair<URL, Certificate>> getCertificates() {
+    public List<Pair<URL, TlsServerCertificate>> getCertificates() {
 	return certificates;
     }
 

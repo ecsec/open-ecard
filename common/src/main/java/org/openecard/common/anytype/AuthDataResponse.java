@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,21 +31,22 @@ import org.w3c.dom.Element;
 /**
  *
  * @author Tobias Wich
+ * @param <T> Specialiued type of the DIDAuthenticationData.
  */
-public class AuthDataResponse {
+public class AuthDataResponse <T extends DIDAuthenticationDataType> {
 
-    private static final String isoNs = "urn:iso:std:iso-iec:24727:tech:schema";
+    private static final String ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema";
 
-    private DIDAuthenticationDataType responseObj;
+    private final T responseObj;
 
     private final Document xmlDoc;
 
-    protected AuthDataResponse(Document xmlDoc, DIDAuthenticationDataType responseObj) {
+    protected AuthDataResponse(Document xmlDoc, T responseObj) {
 	this.xmlDoc = xmlDoc;
 	this.responseObj = responseObj;
     }
 
-    public DIDAuthenticationDataType getResponse() {
+    public T getResponse() {
 	return responseObj;
     }
 
@@ -67,7 +68,7 @@ public class AuthDataResponse {
     }
 
     public Element addElement(String localName, String data) {
-	return addElement(new QName(isoNs, localName), data);
+	return addElement(new QName(ISO_NS, localName), data);
     }
 
 }

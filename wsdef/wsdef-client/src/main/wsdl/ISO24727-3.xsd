@@ -195,6 +195,20 @@
 							</sequence>
 						</complexType>
 					</element>
+
+					<element name="SlotInfo" maxOccurs="1" minOccurs="0">
+						<annotation>
+							<documentation>
+								Custom extension reflecting the capabilities of the terminal and the token.
+							</documentation>
+						</annotation>
+						<complexType>
+							<sequence>
+								<element name="ProtectedAuthPath" type="boolean"
+									maxOccurs="1" minOccurs="0" />
+							</sequence>
+						</complexType>
+					</element>
 				</sequence>
 			</extension>
 		</complexContent>
@@ -547,6 +561,35 @@
 						<element name="ConnectionHandle"
 							type="iso:ConnectionHandleType" />
 
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
+	<!-- Custom Extension: CardApplicationSelect -->
+
+	<element name="CardApplicationSelect">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SlotHandle" type="iso:SlotHandleType" />
+						<element name="CardApplication" type="iso:ApplicationIdentifierType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CardApplicationSelectResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
 					</sequence>
 				</extension>
 			</complexContent>
@@ -1537,9 +1580,13 @@
 					<sequence>
 						<element name="ConnectionHandle"
 							type="iso:ConnectionHandleType" />
+						<element name="DIDScope" type="iso:DIDScopeType"
+							maxOccurs="1" minOccurs="0" />
 						<element name="DIDName" type="iso:NameType" />
 						<element name="DIDUpdateData"
 							type="iso:DIDUpdateDataType" />
+						<element name="SAMConnectionHandle"
+							type="iso:ConnectionHandleType" maxOccurs="1" minOccurs="0" />
 
 					</sequence>
 				</extension>

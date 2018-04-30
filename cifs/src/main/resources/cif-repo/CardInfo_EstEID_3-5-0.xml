@@ -19,24 +19,37 @@
 	<iso:Date>2012-11-12</iso:Date>
     </iso:CardType>
 
-    <iso:CardIdentification>
-	<iso:CharacteristicFeature>
-	    <!-- select MF the AID should be unique -->
-	    <iso:CardCall>
-	    <iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
-	    <iso:ResponseAPDU>
-		<iso:Body>
-		    <iso:MatchingData>
-			<iso:Offset>00</iso:Offset>
-			<iso:Length>00</iso:Length>
-			<iso:MatchingValue/>
-		    </iso:MatchingData>
-		</iso:Body>
-		<iso:Trailer>9000</iso:Trailer>
-	    </iso:ResponseAPDU>
-	</iso:CardCall>
-	</iso:CharacteristicFeature>
-    </iso:CardIdentification>
+	<iso:CardIdentification>
+		<iso:CharacteristicFeature>
+			<!-- select MF the AID should be unique -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00A4040C0FD23300000045737445494420763335</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<iso:Offset>00</iso:Offset>
+							<iso:Length>00</iso:Length>
+							<iso:MatchingValue/>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+			<!-- Read version from EstEID file via GET DATA -->
+			<iso:CardCall>
+				<iso:CommandAPDU>00CA010003</iso:CommandAPDU>
+				<iso:ResponseAPDU>
+					<iso:Body>
+						<iso:MatchingData>
+							<!-- Version is 03.05 -->
+							<iso:MatchingValue>0305</iso:MatchingValue>
+						</iso:MatchingData>
+					</iso:Body>
+					<iso:Trailer>9000</iso:Trailer>
+				</iso:ResponseAPDU>
+			</iso:CardCall>
+		</iso:CharacteristicFeature>
+	</iso:CardIdentification>
 
     <iso:ApplicationCapabilities>
 	<!-- for version 3 and higher cards -->
@@ -799,7 +812,7 @@
 			    <iso:AlgorithmInfo>
 				<iso:Algorithm>signPKCS1_V1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+				    <iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 			    </iso:AlgorithmInfo>
@@ -864,7 +877,7 @@
 			    <iso:AlgorithmInfo>
 				<iso:Algorithm>signPKCS1_V1_5</iso:Algorithm>
 				<iso:AlgorithmIdentifier>
-				    <iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+				    <iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 				</iso:AlgorithmIdentifier>
 				<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 			    </iso:AlgorithmInfo>
@@ -1070,63 +1083,63 @@
 					Type of residence permit
 					Notes*
 
-			* variable length file
-		-->
-	    </iso:DataSetInfo>
-	    <!-- Secret key use counter -->
-	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.SKeyUsageCounter</iso:DataSetName>
-		<iso:DataSetACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DataSetACL>
-		<iso:DataSetPath>
-		    <iso:efIdOrPath>3F00EEEE0013</iso:efIdOrPath>
-		</iso:DataSetPath>
-	    </iso:DataSetInfo>
-	    <!-- key references -->
-	    <iso:DataSetInfo>
-		<iso:DataSetName>EF.KeyReferences</iso:DataSetName>
-		<iso:DataSetACL>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		    <iso:AccessRule>
-			<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-			<iso:Action>
-			    <iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-			</iso:Action>
-			<iso:SecurityCondition>
-			    <iso:always>true</iso:always>
-			</iso:SecurityCondition>
-		    </iso:AccessRule>
-		</iso:DataSetACL>
-		<iso:DataSetPath>
-		    <iso:efIdOrPath>3F00EEEE0033</iso:efIdOrPath>
-		</iso:DataSetPath>
-	    </iso:DataSetInfo>
-	</iso:CardApplication>
-    </iso:ApplicationCapabilities>
+					* variable length file
+				-->
+			</iso:DataSetInfo>
+			<!-- Secret key use counter -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.SKeyUsageCounter</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F00EEEE0013</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+			<!-- key references -->
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.KeyReferences</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F00EEEE0033</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+		</iso:CardApplication>
+	</iso:ApplicationCapabilities>
 </iso:CardInfo>

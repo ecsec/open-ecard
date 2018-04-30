@@ -22,8 +22,8 @@
 
 package org.openecard.ws.marshal;
 
-import org.openecard.common.GenericFactory;
-import org.openecard.common.GenericFactoryException;
+import org.openecard.ws.common.GenericFactory;
+import org.openecard.ws.common.GenericFactoryException;
 
 
 /**

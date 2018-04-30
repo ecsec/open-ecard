@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,9 +24,7 @@ package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.security.SecureRandom;
-import org.openecard.bouncycastle.crypto.tls.TlsClientProtocol;
-import org.openecard.crypto.common.ReusableSecureRandom;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -52,8 +50,7 @@ public class JavaSecVerifierTest {
 	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
-	    SecureRandom sr = ReusableSecureRandom.getInstance();
-	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}
@@ -76,8 +73,7 @@ public class JavaSecVerifierTest {
 	    assertFalse(socket.isClosed());
 	    // connect client
 	    c = new DefaultTlsClientImpl(hostName);
-	    SecureRandom sr = ReusableSecureRandom.getInstance();
-	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream(), sr);
+	    handler = new TlsClientProtocol(socket.getInputStream(), socket.getOutputStream());
 	} catch (Exception ex) {
 	    throw new SkipException("Unable to create TLS client.");
 	}

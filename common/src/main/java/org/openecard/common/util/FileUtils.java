@@ -34,8 +34,11 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -348,6 +351,23 @@ public class FileUtils {
 	    url = loader.getResource(name);
 	}
 	return url;
+    }
+
+    public static List<String> readLinesFromConfig(InputStream in) {
+	return readLinesFromConfig(in, "UTF-8");
+    }
+    public static List<String> readLinesFromConfig(InputStream in, String charset) {
+	ArrayList<String> result = new ArrayList<>();
+	
+	Scanner s = new Scanner(in, charset);
+	while (s.hasNextLine()) {
+	    String next = s.nextLine().trim();
+	    if (! next.isEmpty() && ! next.startsWith("#")) {
+		result.add(next);
+	    }
+	}
+
+	return result;
     }
 
 }

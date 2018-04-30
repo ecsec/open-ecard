@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,12 +42,14 @@ public class Promise <T> {
 
     private final CountDownLatch gate;
 
+    private boolean isCancelled;
     private T value;
 
     /**
      * Creates an undelivered promise.
      */
     public Promise() {
+	isCancelled = false;
 	gate = new CountDownLatch(1);
     }
 
@@ -59,10 +61,32 @@ public class Promise <T> {
     public synchronized boolean isDelivered() {
 	try {
 	    boolean isSet = gate.await(0, TimeUnit.MILLISECONDS);
-	    return isSet;
+	    return isSet && ! isCancelled;
 	} catch (InterruptedException ex) {
-	    // very unlikely if not impossible, but if it happens the right thing to do is probably kill the thread
-	    throw new RuntimeException("Promise interrupted while waiting. Shutting down.");
+	    // this basically is not a wait function, so ignore interrupt status here and fail later
+	    return false;
+	}
+    }
+
+    /**
+     * Gets the promises cancelled status.
+     *
+     * @return {@code true} if promise is cancelled, {@code false} otherwise.
+     */
+    public synchronized boolean isCancelled() {
+	return isCancelled;
+    }
+
+    /**
+     * Cancel the promise, forcing to return all waiting threads.
+     *
+     * @see #deref()
+     * @see #deref(long, TimeUnit)
+     */
+    public synchronized void cancel() {
+	isCancelled = true;
+	if (gate.getCount() > 0) {
+	    gate.countDown();
 	}
     }
 
@@ -78,9 +102,11 @@ public class Promise <T> {
      */
     public synchronized @Nullable T deliver(@Nullable final T value) throws IllegalStateException {
 	if (! isDelivered()) {
-	    this.value = value;
-	    this.gate.countDown();
-	    return this.value;
+	    if (! isCancelled()) {
+		this.value = value;
+		this.gate.countDown();
+	    }
+	    return value;
 	} else {
 	    throw new IllegalStateException("Failed to deliver promise, as it is already delivered.");
 	}
@@ -102,6 +128,7 @@ public class Promise <T> {
 	    return null;
 	}
     }
+
     /**
      * Dereferences the promise, aka tries to get its result.
      * The function waits as long as defined by the wait parameters. A timeout value of 0 indicates not to wait at all.
@@ -109,14 +136,17 @@ public class Promise <T> {
      * @param timeout Value from 0 to {@link Long#MAX_VALUE} indicating the number of units to wait.
      * @param unit The unit qualifying the timeout value.
      * @return The value that has been delivered to the promise.
-     * @throws InterruptedException Thrown in case the current thread has been interrupted while waiting.
+     * @throws InterruptedException Thrown in case the current thread has been interrupted while waiting. This also
+     *   includes a cancellation of the promise.
      * @throws TimeoutException Thrown in case a timeout occured.
      */
     public @Nullable T deref(@Nonnegative long timeout, @Nonnull TimeUnit unit) throws InterruptedException,
 	    TimeoutException {
 	boolean delivered = gate.await(timeout, unit);
 	synchronized (this) {
-	    if (delivered) {
+	    if (isCancelled()) {
+		throw new InterruptedException("Promise has been cancelled.");
+	    } else if (delivered) {
 		return this.value;
 	    } else {
 		throw new TimeoutException("Wait for promised value timed out.");
@@ -130,7 +160,8 @@ public class Promise <T> {
      * 0. It does not throw a TimeoutException, but returns null when no value is delivered yet. This may be
      * unambiguous with a delivered null value.
      *
-     * @return The delivered value or {@code null} when no value has been deliverd yet.
+     * @return The delivered value or {@code null} when no value has been delivered yet or the promise has been
+     *   cancelled.
      */
     public @Nullable T derefNonblocking() {
 	if (isDelivered()) {

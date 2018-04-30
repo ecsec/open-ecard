@@ -1,19 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>app</artifactId>
-		<version>1.2.4</version>
+		<version>1.3.0-rc13-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard</groupId>
 	<artifactId>cifs</artifactId>
-	<packaging>signed-packed-jar</packaging>
+	<packaging>jar</packaging>
 	<name>CardInfo files</name>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jarsigner-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign</id>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<build>
 		<pluginManagement>
@@ -31,22 +51,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-
-		<plugins>
-			<plugin>
-				<groupId>org.openecard.tools</groupId>
-				<artifactId>pack200-maven-plugin</artifactId>
-				<configuration>
-					<processMainArtifact>true</processMainArtifact>
-					<packLogLevel>SEVERE</packLogLevel>
-					<effort>9</effort>
-					<modificationTime>latest</modificationTime>
-					<segmentLimit>-1</segmentLimit>
-					<stripDebugAttributes>true</stripDebugAttributes>
-				</configuration>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
 	</build>
 
 </project>

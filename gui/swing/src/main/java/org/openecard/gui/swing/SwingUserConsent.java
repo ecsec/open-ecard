@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,23 +22,17 @@
 
 package org.openecard.gui.swing;
 
-import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
-import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import org.openecard.common.I18n;
 import org.openecard.gui.FileDialog;
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.UserConsent;
@@ -50,6 +44,7 @@ import org.openecard.gui.swing.common.GUIConstants;
 
 /**
  * Swing implementation of the UserConsent interface.
+ * The implementation encapsulates a DialogWrapper which is needed to supply a root pane for all draw operations.
  *
  * @author Tobias Wich
  * @author Florian Feldmann
@@ -58,25 +53,37 @@ import org.openecard.gui.swing.common.GUIConstants;
  */
 public class SwingUserConsent implements UserConsent {
 
-    private final SwingDialogWrapper dialogWrapper;
-    private final I18n lang = I18n.getTranslation("addon");
+    private final SwingDialogWrapper baseDialogWrapper;
 
     /**
      * Instantiate SwingUserConsent.
-     * The implementation encapsulates a DialogWrapper which is needed to supply a root pane for all draw operations.
      *
      * @param dialogWrapper
      */
     public SwingUserConsent(SwingDialogWrapper dialogWrapper) {
-	this.dialogWrapper = dialogWrapper;
+	this.baseDialogWrapper = dialogWrapper;
     }
 
     @Override
     public UserConsentNavigator obtainNavigator(UserConsentDescription parameters) {
+	SwingDialogWrapper dialogWrapper = baseDialogWrapper.derive();
 	dialogWrapper.setTitle(parameters.getTitle());
 
 	Container rootPanel = dialogWrapper.getContentPane();
 	rootPanel.removeAll();
+
+	boolean isPinEntryDialog = parameters.getDialogType().equals("pin_entry_dialog");
+	boolean isPinChangeDialog = parameters.getDialogType().equals("pin_change_dialog");
+	boolean isUpdateDialog = parameters.getDialogType().equals("update_dialog");
+
+	// set different size when special dialog type is requested
+	if (isPinEntryDialog) {
+	    dialogWrapper.setSize(350, 284);
+	} else if (isPinChangeDialog) {
+	    dialogWrapper.setSize(570, 430);
+	} else if (isUpdateDialog) {
+	    dialogWrapper.setSize(480, 330);
+	}
 
 	String dialogType = parameters.getDialogType();
 	List<Step> steps = parameters.getSteps();
@@ -93,19 +100,7 @@ public class SwingUserConsent implements UserConsent {
 
 	final SwingNavigator navigator = new SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar);
 	navBar.registerEvents(navigator);
-
-	dialogWrapper.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-		.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "process-next-button");
-	dialogWrapper.getRootPane().getActionMap()
-		.put("process-next-button", new AbstractAction() {
-	    @Override
-	    public void actionPerformed(ActionEvent event) {
-		if (navBar.isNextButtonAccessible()) {
-		    ActionEvent e = new ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_NEXT);
-		    navigator.actionPerformed(e);
-		}
-	    }
-	});
+	navBar.setDefaultButton(dialogWrapper.getRootPane());
 
 	dialogWrapper.getDialog().addWindowListener(new WindowAdapter() {
 	    @Override
@@ -124,18 +119,31 @@ public class SwingUserConsent implements UserConsent {
 	layout.setAutoCreateGaps(false);
 	layout.setAutoCreateContainerGaps(true);
 
-	layout.setHorizontalGroup(
-		layout.createSequentialGroup()
-		.addComponent(sideBar, 200, 200, 200)
-		.addGroup(layout.createParallelGroup()
-		.addComponent(stepPanel)
-		.addComponent(navBar)));
-	layout.setVerticalGroup(
-		layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-		.addComponent(sideBar)
-		.addGroup(layout.createSequentialGroup()
-		.addComponent(stepPanel)
-		.addComponent(navBar)));
+	if (isPinEntryDialog || isPinChangeDialog || isUpdateDialog) {
+	    layout.setHorizontalGroup(
+		    layout.createSequentialGroup()
+		    .addGroup(layout.createParallelGroup()
+			    .addComponent(stepPanel)
+			    .addComponent(navBar)));
+	    layout.setVerticalGroup(
+		    layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+		    .addGroup(layout.createSequentialGroup()
+			    .addComponent(stepPanel)
+			    .addComponent(navBar)));
+	} else {
+	    layout.setHorizontalGroup(
+		    layout.createSequentialGroup()
+		    .addComponent(sideBar, 200, 200, 200)
+		    .addGroup(layout.createParallelGroup()
+			    .addComponent(stepPanel)
+			    .addComponent(navBar)));
+	    layout.setVerticalGroup(
+		    layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+		    .addComponent(sideBar)
+		    .addGroup(layout.createSequentialGroup()
+			    .addComponent(stepPanel)
+			    .addComponent(navBar)));
+	}
 
 	rootPanel.validate();
 	rootPanel.repaint();

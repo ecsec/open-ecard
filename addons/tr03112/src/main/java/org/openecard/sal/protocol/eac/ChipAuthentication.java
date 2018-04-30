@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,14 +23,12 @@
 package org.openecard.sal.protocol.eac;
 
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
-import java.lang.reflect.InvocationTargetException;
 import org.openecard.common.apdu.GeneralAuthenticate;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
@@ -51,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ChipAuthentication {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChipAuthentication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ChipAuthentication.class);
 
     private final Dispatcher dispatcher;
     private final byte[] slotHandle;
@@ -133,14 +131,9 @@ public class ChipAuthentication {
      * Destroys a previously established PACE channel.
      */
     public void destroySecureChannel() {
-	try {
-	    DestroyChannel destroyChannel = new DestroyChannel();
-	    destroyChannel.setSlotHandle(slotHandle);
-	    dispatcher.deliver(destroyChannel);
-	} catch (InvocationTargetException | DispatcherException ex) {
-	    // ignore and hope for the best
-	    logger.warn("Failed to disable secure messaging channel.");
-	}
+	DestroyChannel destroyChannel = new DestroyChannel();
+	destroyChannel.setSlotHandle(slotHandle);
+	dispatcher.safeDeliver(destroyChannel);
     }
 
 }

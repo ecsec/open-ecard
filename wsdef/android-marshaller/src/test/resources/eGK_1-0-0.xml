@@ -2,6 +2,8 @@
 <iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+			  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+			  xmlns:xenc11='http://www.w3.org/2009/xmlenc11#'
 			  xsi:schemaLocation="urn:iso:std:iso-iec:24727:tech:schema http://ws.openecard.org/schema/CardInfo.xsd">
 	<iso:CardType>
 		<iso:ObjectIdentifier>http://ws.gematik.de/egk/1.0.0</iso:ObjectIdentifier>
@@ -6362,7 +6364,7 @@
 								<iso:AlgorithmIdentifier>
 									<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
 										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Internal-authenticate</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -6782,7 +6784,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>signPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>02</iso:CardAlgRef>
@@ -6992,7 +6994,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>signPSS</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -7212,7 +7214,7 @@
 								<iso:AlgorithmIdentifier>
 									<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
 										 id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.10</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Internal-authenticate Compute-signature</iso:SupportedOperations>
 								<iso:CardAlgRef>05</iso:CardAlgRef>
@@ -7432,7 +7434,11 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherOaep</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.7</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2009/xmlenc11#rsa-oaep</iso:Algorithm>
+									<iso:Parameters>
+										<xenc11:MGF Algorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256" />
+										<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+									</iso:Parameters>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>85</iso:CardAlgRef>
@@ -7622,7 +7628,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>81</iso:CardAlgRef>
@@ -7824,7 +7830,11 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherOaep</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.7</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2009/xmlenc11#rsa-oaep</iso:Algorithm>
+									<iso:Parameters>
+										<xenc11:MGF Algorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256" />
+										<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+									</iso:Parameters>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>85</iso:CardAlgRef>
@@ -8016,7 +8026,7 @@
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>rsaDecipherPKCS1_V1_5</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmlenc#rsa-1_5</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher</iso:SupportedOperations>
 								<iso:CardAlgRef>81</iso:CardAlgRef>

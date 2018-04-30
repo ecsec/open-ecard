@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,7 +24,6 @@ package org.openecard.binding.tctoken;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
@@ -32,6 +31,7 @@ import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 
 
 /**
@@ -42,7 +42,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
  */
 public class RedirectCertificateValidator implements CertificateValidator {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedirectCertificateValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedirectCertificateValidator.class);
 
     private final Promise<Object> descPromise;
     private final boolean redirectChecks;
@@ -63,16 +63,17 @@ public class RedirectCertificateValidator implements CertificateValidator {
 
 
     @Override
-    public VerifierResult validate(URL url, Certificate cert) throws ValidationError {
+    public VerifierResult validate(URL url, TlsServerCertificate cert) throws ValidationError {
 	try {
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    if (redirectChecks) {
 		CertificateDescription desc = (CertificateDescription) descPromise.derefNonblocking();
 		certDescExists = desc != null;
 
+		String host = url.getProtocol() + "://" + url.getHost() + (url.getPort() == -1 ? "" : (":" + url.getPort()));
 		// check points certificate (but just in case we have a certificate description)
-		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates())) {
-		    logger.error("The retrieved server certificate is NOT contained in the CommCertificates of "
+		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates(), host)) {
+		    LOG.error("The retrieved server certificate is NOT contained in the CommCertificates of "
 			    +	"the CertificateDescription extension of the eService certificate.");
 		    throw new ValidationError(INVALID_REDIRECT);
 		}

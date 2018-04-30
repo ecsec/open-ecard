@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.common.ifd.scio;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.common.ECardConstants;
 
 
 /**
@@ -80,6 +81,21 @@ public enum SCIOProtocol {
     @Override
     public String toString() {
 	return identifier;
+    }
+
+    @Nullable
+    public String toUri() {
+	switch (this) {
+	    case T0:
+		return ECardConstants.IFD.Protocol.T0;
+	    case T1:
+		return ECardConstants.IFD.Protocol.T1;
+	    case TCL:
+		return ECardConstants.IFD.Protocol.TYPE_A;
+	    default:
+		// no distinct protocol known
+		return null;
+	}
     }
 
 }

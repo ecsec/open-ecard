@@ -79,8 +79,8 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
 import org.openecard.common.util.StringUtils;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.soap.SOAPHeader;
 import org.openecard.ws.soap.SOAPMessage;
@@ -100,48 +100,50 @@ import static org.testng.Assert.assertTrue;
  */
 public class AndroidMarshallerTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AndroidMarshallerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AndroidMarshallerTest.class);
 
-    private static final String getRecognitionTreeResponseXML;
-    private static final String establishContextXML;
-    private static final String getStatusResponse;
-    private static final String conclusion;
-    private static final String initializeFramework;
-    private static final String startPAOSResponse;
-    private static final String didAuthenticatePACE;
-    private static final String didAuthenticateTA;
-    private static final String didAuthenticateCA;
-    private static final String didAuthenticateResponse;
-    private static final String npaCif;
-    private static final String egkCif;
-    private static final String disconnect;
-    private static final String disconnectResponse;
-    private static final String destroyChannel;
-    private static final String startPAOS;
-    private static final String transmit;
+    private static final String RECOGNITION_TREE_RESPONSE_XML;
+    private static final String ESTABLISH_CONTEXT_XML;
+    private static final String GET_STATUS_RESPONSE;
+    private static final String CONCLUSION;
+    private static final String INITIALIZE_FRAMEWORK;
+    private static final String START_PAOS_RESPONSE;
+    private static final String DID_AUTHENTICATE_PACE;
+    private static final String DID_AUTHENTICATE_TA;
+    private static final String DID_AUTHENTICATE_CA;
+    private static final String DID_AUTHENTICATE_RESPONSE;
+    private static final String NPA_CIF;
+    private static final String EGK_CIF;
+    private static final String ECARD_AT_CIF;
+    private static final String DISCONNECT;
+    private static final String DISCONNECT_RESPONSE;
+    private static final String DESTROY_CHANNEL;
+    private static final String START_PAOS;
+    private static final String TRANSMIT;
 
-    private static final String testAddonBundleDescripion;
+    private static final String TEST_ADDON_BUNDDLE_DESCRIPTION;
 
     static {
 	try {
-	    getRecognitionTreeResponseXML = loadXML("GetRecognitionTreeResponse.xml");
-	    establishContextXML = loadXML("EstablishContext.xml");
-	    getStatusResponse = loadXML("GetStatusResponse.xml");
-	    conclusion = loadXML("Conclusion.xml");
-	    initializeFramework = loadXML("InitializeFramework.xml");
-	    startPAOSResponse = loadXML("StartPAOSResponse.xml");
-	    didAuthenticatePACE = loadXML("DIDAuthenticatePACE.xml");
-	    didAuthenticateTA = loadXML("DIDAuthenticateTA.xml");
-	    didAuthenticateCA = loadXML("DIDAuthenticateCA.xml");
-	    didAuthenticateResponse = loadXML("DIDAuthenticateResponse.xml");
-	    npaCif = loadXML("nPA_1-0-0.xml");
-	    egkCif = loadXML("eGK_1-0-0.xml");
-	    disconnect = loadXML("Disconnect.xml");
-	    disconnectResponse = loadXML("DisconnectResponse.xml");
-	    destroyChannel = loadXML("DestroyChannel.xml");
-	    startPAOS = loadXML("StartPAOS.xml");
-	    transmit = loadXML("Transmit.xml");
-	    testAddonBundleDescripion = loadXML("TestAddonBundleDescription.xml");
+	    RECOGNITION_TREE_RESPONSE_XML = loadXML("GetRecognitionTreeResponse.xml");
+	    ESTABLISH_CONTEXT_XML = loadXML("EstablishContext.xml");
+	    GET_STATUS_RESPONSE = loadXML("GetStatusResponse.xml");
+	    CONCLUSION = loadXML("Conclusion.xml");
+	    INITIALIZE_FRAMEWORK = loadXML("InitializeFramework.xml");
+	    START_PAOS_RESPONSE = loadXML("StartPAOSResponse.xml");
+	    DID_AUTHENTICATE_PACE = loadXML("DIDAuthenticatePACE.xml");
+	    DID_AUTHENTICATE_TA = loadXML("DIDAuthenticateTA.xml");
+	    DID_AUTHENTICATE_CA = loadXML("DIDAuthenticateCA.xml");
+	    DID_AUTHENTICATE_RESPONSE = loadXML("DIDAuthenticateResponse.xml");
+	    NPA_CIF = loadXML("nPA_1-0-0.xml");
+	    EGK_CIF = loadXML("eGK_1-0-0.xml");
+	    ECARD_AT_CIF = loadXML("ecardAT_0-9-0.xml");
+	    DISCONNECT = loadXML("Disconnect.xml");
+	    DISCONNECT_RESPONSE = loadXML("DisconnectResponse.xml");
+	    DESTROY_CHANNEL = loadXML("DestroyChannel.xml");
+	    START_PAOS = loadXML("StartPAOS.xml");
+	    TRANSMIT = loadXML("Transmit.xml");
+	    TEST_ADDON_BUNDDLE_DESCRIPTION = loadXML("TestAddonBundleDescription.xml");
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -150,7 +152,7 @@ public class AndroidMarshallerTest {
     private static void marshalLog(Object o) {
 	StringWriter w = new StringWriter();
 	JAXB.marshal(o, w);
-	logger.debug(w.toString());
+	LOG.debug(w.toString());
     }
 
     private static String loadXML(String resourcePath) throws IOException {
@@ -168,7 +170,7 @@ public class AndroidMarshallerTest {
     @Test
     public void testConversionOfCardInfo() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(npaCif));
+	Object o = m.unmarshal(m.str2doc(NPA_CIF));
 	if (!(o instanceof CardInfo)) {
 	    throw new Exception("Object should be an instace of CardInfo");
 	}
@@ -201,7 +203,7 @@ public class AndroidMarshallerTest {
 	}
 
 	// Test eGK
-	o = m.unmarshal(m.str2doc(egkCif));
+	o = m.unmarshal(m.str2doc(EGK_CIF));
 	if (!(o instanceof CardInfo)) {
 	    throw new Exception("Object should be an instace of CardInfo");
 	}
@@ -226,6 +228,13 @@ public class AndroidMarshallerTest {
 	FileOutputStream fos2 = new FileOutputStream(f2);
 	marshalLog(cardInfoJM, fos);
 	marshalLog(cardInfo, fos2);*/
+
+	// Test ecard AT 0.9.0
+	o = m.unmarshal(m.str2doc(ECARD_AT_CIF));
+	if (! (o instanceof CardInfo)) {
+	    throw new Exception("Object should be an instance of CardInfo");
+	}
+	cardInfo = (CardInfo) o;
     }
 
     @Test
@@ -235,7 +244,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(establishContext);
 	String s = m.doc2str(d);
 
-	assertEquals(s.trim(), establishContextXML.trim());
+	assertEquals(s.trim(), ESTABLISH_CONTEXT_XML.trim());
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof EstablishContext)) {
@@ -246,7 +255,7 @@ public class AndroidMarshallerTest {
     @Test
     public void testConversionOfDisconnect() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(disconnect));
+	Object o = m.unmarshal(m.str2doc(DISCONNECT));
 
 	if (!(o instanceof Disconnect)) {
 	    throw new Exception("Object should be an instace of EstablishContext");
@@ -263,7 +272,7 @@ public class AndroidMarshallerTest {
 	DisconnectResponse dr = new DisconnectResponse();
 	dr.setResult(WSHelper.makeResultOK());
 	Document d = m.marshal(dr);
-	assertEquals(m.doc2str(d), disconnectResponse);
+	assertEquals(m.doc2str(d), DISCONNECT_RESPONSE);
     }
 
     @Test
@@ -272,13 +281,13 @@ public class AndroidMarshallerTest {
 	DestroyChannel destroy = new DestroyChannel();
 	destroy.setSlotHandle(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5 });
 	Document d = m.marshal(destroy);
-	assertEquals(m.doc2str(d), destroyChannel);
+	assertEquals(m.doc2str(d), DESTROY_CHANNEL);
     }
 
     @Test
     public void testConversionOfTransmit() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(transmit));
+	Object o = m.unmarshal(m.str2doc(TRANSMIT));
 	if (!(o instanceof Transmit)) {
 	    throw new Exception("Object should be an instace of Transmit");
 	}
@@ -314,13 +323,13 @@ public class AndroidMarshallerTest {
 	startP.getConnectionHandle().add(connectionHandleType);
 
 	Document d = m.marshal(startP);
-	assertEquals(m.doc2str(d), startPAOS);
+	assertEquals(m.doc2str(d), START_PAOS);
     }
 
     @Test
     public void testConversionOfStartPAOSResponse() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(startPAOSResponse));
+	Object o = m.unmarshal(m.str2doc(START_PAOS_RESPONSE));
 
 	if (!(o instanceof StartPAOSResponse)) {
 	    throw new Exception("Object should be an instace of StartPAOSResponse");
@@ -373,7 +382,7 @@ public class AndroidMarshallerTest {
 	elem.setTextContent("messageid");
 
 	String responseStr = m.doc2str(msg.getDocument());
-	logger.debug(responseStr);
+	LOG.debug(responseStr);
 
     }
 
@@ -387,7 +396,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(internationalStringType);
 
 	String s = m.doc2str(d);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
@@ -404,7 +413,7 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(r);
 
 	String s = m.doc2str(d);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
@@ -445,7 +454,7 @@ public class AndroidMarshallerTest {
 	Document doc = m.marshal(establishChannel);
 
 	String s = m.doc2str(doc);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
@@ -480,7 +489,7 @@ public class AndroidMarshallerTest {
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	logger.debug(s);
+	LOG.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
@@ -518,7 +527,7 @@ public class AndroidMarshallerTest {
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	logger.debug(s);
+	LOG.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
@@ -572,7 +581,7 @@ public class AndroidMarshallerTest {
 	Document doc = m.marshal(didAuthResponse);
 
 	String s = m.doc2str(doc);
-	logger.debug(s);
+	LOG.debug(s);
 	StringReader sr = new StringReader(s);
 	DIDAuthenticateResponse didaresp = JAXB.unmarshal(sr, DIDAuthenticateResponse.class);
 
@@ -582,7 +591,7 @@ public class AndroidMarshallerTest {
     @Test
     public void testConversionOfDIDAutheticate() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Document d = m.str2doc(didAuthenticatePACE);
+	Document d = m.str2doc(DID_AUTHENTICATE_PACE);
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
@@ -610,7 +619,7 @@ public class AndroidMarshallerTest {
 	    }
 	}
 
-	d = m.str2doc(didAuthenticateTA);
+	d = m.str2doc(DID_AUTHENTICATE_TA);
 
 	o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
@@ -631,7 +640,7 @@ public class AndroidMarshallerTest {
 
 	marshalLog(didAuthenticate);
 
-	d = m.str2doc(didAuthenticateCA);
+	d = m.str2doc(DID_AUTHENTICATE_CA);
 
 	o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
@@ -675,13 +684,13 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(initializeFrameworkResponse);
 
 	String s = m.doc2str(d);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
     public void testConversionOfInitializeFramework() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Document d = m.str2doc(initializeFramework);
+	Document d = m.str2doc(INITIALIZE_FRAMEWORK);
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof InitializeFramework)) {
@@ -693,7 +702,7 @@ public class AndroidMarshallerTest {
     public void testConversionOfGetRecognitionTreeResponse() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
 
-	Object o = m.unmarshal(m.str2doc(getRecognitionTreeResponseXML));
+	Object o = m.unmarshal(m.str2doc(RECOGNITION_TREE_RESPONSE_XML));
 	if (o instanceof GetRecognitionTreeResponse) {
 	    RecognitionTree tree = ((GetRecognitionTreeResponse) o).getRecognitionTree();
 	    StringWriter sw = new StringWriter();
@@ -703,7 +712,7 @@ public class AndroidMarshallerTest {
 	    Document d = m.marshal(tree);
 
 	    String s = m.doc2str(d);
-	    logger.debug(s);
+	    LOG.debug(s);
 	} else {
 	    throw new Exception("Object should be an instace of GetRecognitionTreeResponse");
 	}
@@ -712,10 +721,10 @@ public class AndroidMarshallerTest {
     @Test
     public void testConversionOfConclusion() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(conclusion));
+	Object o = m.unmarshal(m.str2doc(CONCLUSION));
 	Conclusion c = (Conclusion) o;
 	assertEquals("http://ws.gematik.de/egk/1.0.0", c.getRecognizedCardType());
-	Conclusion cc = JAXB.unmarshal(new StringReader(conclusion), Conclusion.class);
+	Conclusion cc = JAXB.unmarshal(new StringReader(CONCLUSION), Conclusion.class);
 	// TODO
 	// assertEquals(c.getTLSMarker().getAny().get(0),
 	// cc.getTLSMarker().getAny().get(0));
@@ -731,13 +740,13 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(getStatus);
 
 	String s = m.doc2str(d);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
     public void testConversionOfGetStatusResponse() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(getStatusResponse));
+	Object o = m.unmarshal(m.str2doc(GET_STATUS_RESPONSE));
 	if (!(o instanceof GetStatusResponse)) {
 	    throw new Exception("Object should be an instace of GetStatusResponse");
 	}
@@ -762,13 +771,13 @@ public class AndroidMarshallerTest {
 	Document d = m.marshal(w);
 
 	String s = m.doc2str(d);
-	logger.debug(s);
+	LOG.debug(s);
     }
 
     @Test
     public void testConversionOfAddonBundleDescription() throws Exception {
 	WSMarshaller m = new AndroidMarshaller();
-	Object o = m.unmarshal(m.str2doc(testAddonBundleDescripion));
+	Object o = m.unmarshal(m.str2doc(TEST_ADDON_BUNDDLE_DESCRIPTION));
 	if (!(o instanceof AddonSpecification)) {
 	    throw new Exception("Object should be an instace of AddonSpecification");
 	}

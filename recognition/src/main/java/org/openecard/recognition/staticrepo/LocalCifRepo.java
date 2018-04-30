@@ -70,10 +70,10 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	    // load and unmarshal
 	    InputStream cifStream = getStream(next.trim());
 	    Document cifDoc = m.str2doc(cifStream);
-	    CardInfoType cif = (CardInfoType) m.unmarshal(cifDoc);
-	    String cardType = cif.getCardType().getObjectIdentifier();
-	    // add file
-	    cifs.put(cardType, cifDoc);
+            CardInfoType cif = (CardInfoType) m.unmarshal(cifDoc);
+            String cardType = cif.getCardType().getObjectIdentifier();
+            // add file
+            cifs.put(cardType, cifDoc);
 	}
     }
 

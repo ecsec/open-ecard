@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,12 +36,12 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.bouncycastle.crypto.tls.Certificate;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.UrlBuilder;
 
@@ -59,7 +59,7 @@ public class TCTokenVerifier {
     private final ResourceContext ctx;
 
     /**
-     * Creates a new TCTokenVerifier to verify a TCToken.
+     * Creates a new TCTokenVerifier to verifyUrlToken a TCToken.
      *
      * @param token Token
      * @param ctx Context over which the token has been received.
@@ -92,10 +92,10 @@ public class TCTokenVerifier {
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
      * @throws UserCancellationException Thrown in case the user aborted the insert card dialog.
      */
-    public void verify() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, 
+    public void verifyUrlToken() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException, UserCancellationException {
 	// ordering is important because of the raised errors in case the first two are not https URLs
-	initialCheck();
+	initialUrlTokenCheck();
 	verifyRefreshAddress();
 	verifyCommunicationErrorAddress();
 	checkUserCancellation();
@@ -214,7 +214,7 @@ public class TCTokenVerifier {
 	}
 
 	assertRequired("PathSecurityProtocol", proto);
-	String[] protos = {"urn:ietf:rfc:4346", "urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
+	String[] protos = {"urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
 	if ("urn:ietf:rfc:4279".equals(proto)) {
 	    try {
@@ -318,8 +318,8 @@ public class TCTokenVerifier {
 	// TR-03124-1 does not mention that redirects on the TCToken address are possible and it also states that there
 	// are only two channels. So I guess we should force this here as well.
 	URL paosUrl = assertURL(name, address);
-	List<Pair<URL, Certificate>> urls = ctx.getCerts();
-	for (Pair<URL, Certificate> next : urls) {
+	List<Pair<URL, TlsServerCertificate>> urls = ctx.getCerts();
+	for (Pair<URL, TlsServerCertificate> next : urls) {
 	    if (! TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
 		String minor = ResultMinor.COMMUNICATION_ERROR;
 		String errorUrl = token.getComErrorAddressWithParams(minor);
@@ -352,7 +352,7 @@ public class TCTokenVerifier {
      * @throws InvalidRedirectUrlException
      * @throws InvalidTCTokenElement
      */
-    private void initialCheck() throws InvalidRedirectUrlException, InvalidTCTokenElement {
+    private void initialUrlTokenCheck() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	if (token.getCommunicationErrorAddress() != null && ! token.getCommunicationErrorAddress().isEmpty() &&
 		token.getRefreshAddress().isEmpty() && token.getServerAddress().isEmpty() &&
 		token.getSessionIdentifier().isEmpty() && token.getBinding().isEmpty() &&
@@ -377,8 +377,8 @@ public class TCTokenVerifier {
 		CertificateValidator validator = new RedirectCertificateValidator(true);
 		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()), validator);
 		newResCtx.closeStream();
-		List<Pair<URL, Certificate>> resultPoints = newResCtx.getCerts();
-		Pair<URL, Certificate> last = resultPoints.get(resultPoints.size() - 1);
+		List<Pair<URL, TlsServerCertificate>> resultPoints = newResCtx.getCerts();
+		Pair<URL, TlsServerCertificate> last = resultPoints.get(resultPoints.size() - 1);
 		URL resAddr = last.p1;
 		String refreshUrl = resAddr.toString();
 

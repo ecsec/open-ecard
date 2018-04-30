@@ -53,7 +53,7 @@ public class TCTokenVerifierTest {
 
     @Test
     public void testVerify() throws Exception {
-	verifier.verify();
+	verifier.verifyUrlToken();
     }
 
     @Test(expectedExceptions = InvalidTCTokenElement.class)

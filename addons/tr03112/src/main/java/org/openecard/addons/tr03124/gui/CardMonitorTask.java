@@ -24,8 +24,9 @@ package org.openecard.addons.tr03124.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.List;
-import org.openecard.common.enums.EventType;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.StepActionResult;
@@ -47,14 +48,14 @@ public class CardMonitorTask implements EventCallback, BackgroundTask {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
+    public void signalEvent(EventType eventType, EventObject eventData) {
 	switch (eventType) {
 	    case CARD_RECOGNIZED:
-		result = (ConnectionHandleType) eventData;
+		result = eventData.getHandle();
 		cardAction.deliver(null);
 		break;
 	    case CARD_REMOVED:
-		result = (ConnectionHandleType) eventData;
+		result = eventData.getHandle();
 		cardAction.deliver(null);
 		break;
 

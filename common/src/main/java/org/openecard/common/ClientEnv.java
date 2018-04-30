@@ -22,12 +22,19 @@
 
 package org.openecard.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.openecard.common.interfaces.CardRecognition;
+import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Environment;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -40,14 +47,18 @@ import org.openecard.ws.SAL;
 public class ClientEnv implements Environment {
 
     private IFD ifd;
+    private final LinkedHashSet<byte[]> ifdCtx;
     private SAL sal;
-    private EventManager manager;
+    private EventDispatcher manager;
     private Dispatcher dispatcher;
     private Management management;
+    private CardRecognition recognition;
+    private CIFProvider cifProvider;
     private final Map<String, Object> genericComponents;
 
     public ClientEnv() {
 	genericComponents = new ConcurrentSkipListMap<>();
+	ifdCtx = new LinkedHashSet<>();
     }
 
 
@@ -63,12 +74,40 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public void setEventManager(EventManager manager) {
+    public synchronized void addIFDCtx(byte[] ctx) {
+	if (ctx != null && ctx.length > 0) {
+	    ifdCtx.add(Arrays.copyOf(ctx, ctx.length));
+	}
+    }
+
+    @Override
+    public synchronized void removeIFDCtx(byte[] ctx) {
+	Iterator<byte[]> it = ifdCtx.iterator();
+	while (it.hasNext()) {
+	    byte[] next = it.next();
+	    if (Arrays.equals(next, ctx)) {
+		it.remove();
+		return;
+	    }
+	}
+    }
+
+    @Override
+    public synchronized List<byte[]> getIFDCtx() {
+	ArrayList<byte[]> result = new ArrayList<>(ifdCtx.size());
+	for (byte[] next : ifdCtx) {
+	    result.add(Arrays.copyOf(next, next.length));
+	}
+	return result;
+    }
+
+    @Override
+    public void setEventDispatcher(EventDispatcher manager) {
 	this.manager = manager;
     }
 
     @Override
-    public EventManager getEventManager() {
+    public EventDispatcher getEventDispatcher() {
 	return manager;
     }
 
@@ -112,6 +151,26 @@ public class ClientEnv implements Environment {
     @Dispatchable(interfaceClass = Management.class)
     public Management getManagement() {
 	return management;
+    }
+
+    @Override
+    public void setRecognition(CardRecognition recognition) {
+	this.recognition = recognition;
+    }
+
+    @Override
+    public CardRecognition getRecognition() {
+	return recognition;
+    }
+
+    @Override
+    public void setCIFProvider(CIFProvider provider) {
+	this.cifProvider = provider;
+    }
+
+    @Override
+    public CIFProvider getCIFProvider() {
+	return cifProvider;
     }
 
 }

@@ -76,6 +76,7 @@ public class InfoPopup extends JDialog implements StatusContainer {
     public void updateContent(Container c) {
 	setContentPane(c);
 	pack();
+	repaint();
 	setLocation(calculatePosition(c, point));
     }
 

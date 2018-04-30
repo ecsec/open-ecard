@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2013-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,6 +25,7 @@ package org.openecard.gui.swing;
 import java.awt.Image;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -45,7 +46,7 @@ import org.openecard.gui.swing.common.GUIDefaults;
  */
 public class SwingMessageDialog implements MessageDialog {
 
-    private static final Image frameIcon = GUIDefaults.getImage("Frame.icon", 45, 45).getImage();
+    private static final Image FRAME_ICON = GUIDefaults.getImage("Frame.icon", 45, 45).getImage();
 
     @Override
     public MessageDialogResult showMessageDialog(String msg, String title) {
@@ -54,20 +55,23 @@ public class SwingMessageDialog implements MessageDialog {
 
     @Override
     public MessageDialogResult showMessageDialog(String msg, String title, DialogType msgType) {
-	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType));
-	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
-	dialog.setVisible(true);
-	return new MessageDialogResult(ReturnType.OK);
+	return showMessageDialog(msg, title, msgType, null);
     }
 
     @Override
-    public MessageDialogResult showMessageDialog(String msg, String title, DialogType msgType, byte[] iconData) {
-	ImageIcon icon = new ImageIcon(iconData);
+    public MessageDialogResult showMessageDialog(String msg, String title, DialogType msgType,
+	    @Nullable byte[] iconData) {
+	msg = formatMessage(msg);
+	ImageIcon icon = iconData != null ? new ImageIcon(iconData) : null;
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.DEFAULT_OPTION, icon);
-	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
+	final JDialog dialog = jop.createDialog(title);
+	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	return new MessageDialogResult(ReturnType.OK);
     }
 
@@ -83,27 +87,22 @@ public class SwingMessageDialog implements MessageDialog {
 
     @Override
     public MessageDialogResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType) {
-	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType));
-	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
-	dialog.setVisible(true);
-
-	Object returnValue = jop.getValue();
-	if (returnValue == null) {
-	    return new MessageDialogResult(ReturnType.CANCEL);
-	} else {
-	    return new MessageDialogResult(convertReturnType((Integer) returnValue));
-	}
+	return showConfirmDialog(msg, title, optionType, msgType, null);
     }
 
     @Override
     public MessageDialogResult showConfirmDialog(String msg, String title, OptionType optionType, DialogType msgType,
-	    byte[] iconData) {
-	ImageIcon icon = new ImageIcon(iconData);
+	    @Nullable byte[] iconData) {
+	msg = formatMessage(msg);
+	ImageIcon icon = iconData != null ? new ImageIcon(iconData) : null;
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon);
 	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
+	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
+	dialog.toFront();
 
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
@@ -125,12 +124,18 @@ public class SwingMessageDialog implements MessageDialog {
 
     @Override
     public MessageDialogResult showInputDialog(String msg, String title, DialogType msgType, String initialValue) {
+	msg = formatMessage(msg);
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION);
 	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
+	dialog.setIconImage(FRAME_ICON);
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getInputValue();
 	if (returnValue == null) {
 	    return new MessageDialogResult((String) null);
@@ -142,6 +147,7 @@ public class SwingMessageDialog implements MessageDialog {
     @Override
     public MessageDialogResult showInputDialog(String msg, String title, DialogType msgType, byte[] iconData,
 	    int initialSelectedIndex, String... options) {
+	msg = formatMessage(msg);
 	List<String> optionsList = Arrays.asList(options);
 	if (optionsList.isEmpty()) {
 	    throw new IllegalArgumentException("List of options must be given.");
@@ -153,11 +159,16 @@ public class SwingMessageDialog implements MessageDialog {
 	ImageIcon icon = new ImageIcon(iconData);
 	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), JOptionPane.OK_CANCEL_OPTION, icon);
 	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
+	dialog.setIconImage(FRAME_ICON);
 	jop.setSelectionValues(options);
 	jop.setInitialSelectionValue(initialValue);
 	jop.setWantsInput(true);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getInputValue();
 	if ("uninitializedValue".equals(returnValue) && ! optionsList.contains("uninitializedValue")) {
 	    return new MessageDialogResult(ReturnType.CANCEL);
@@ -169,6 +180,7 @@ public class SwingMessageDialog implements MessageDialog {
     @Override
     public MessageDialogResult showOptionDialog(String msg, String title, OptionType optionType, DialogType msgType,
 	    byte[] iconData, String... options) {
+	msg = formatMessage(msg);
 	if (options.length == 0) {
 	    throw new IllegalArgumentException("List of options must be given.");
 	}
@@ -176,11 +188,16 @@ public class SwingMessageDialog implements MessageDialog {
 	if (iconData != null) {
 	    icon = new ImageIcon(iconData);
 	}
-	JOptionPane jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon,
-		options);
+	JOptionPane jop;
+	jop = new JOptionPane(msg, convertDialogType(msgType), convertOptionType(optionType), icon, options);
 	JDialog dialog = jop.createDialog(title);
-	dialog.setIconImage(frameIcon);
+	dialog.setIconImage(FRAME_ICON);
+	if (SwingDialogWrapper.needsFullscreen()) {
+	    dialog.setAlwaysOnTop(true);
+	}
 	dialog.setVisible(true);
+	dialog.toFront();
+
 	Object returnValue = jop.getValue();
 	if (returnValue == null) {
 	    return new MessageDialogResult(ReturnType.CANCEL);
@@ -216,6 +233,14 @@ public class SwingMessageDialog implements MessageDialog {
 	    case JOptionPane.CANCEL_OPTION: return ReturnType.CANCEL;
 	}
 	throw new IllegalArgumentException();
+    }
+
+    private String formatMessage(String message) {
+	StringBuilder builder = new StringBuilder();
+	builder.append("<html><body style='width: 450px;'><p>");
+	builder.append(message.replace("\n", "<br>"));
+	builder.append("</p></body></html>");
+	return builder.toString();
     }
 
 }

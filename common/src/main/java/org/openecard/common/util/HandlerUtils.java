@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,11 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
+import java.lang.reflect.Method;
+import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -35,6 +39,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @author Tobias Wich
  */
 public class HandlerUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HandlerUtils.class);
 
     public HandlerBuilder createBuilder() {
 	return HandlerBuilder.create();
@@ -47,6 +53,7 @@ public class HandlerUtils {
 	copyPath(result, handle);
 	result.setSlotHandle(ByteUtils.clone(handle.getSlotHandle()));
 	result.setRecognitionInfo(copyRecognition(handle.getRecognitionInfo()));
+	result.setSlotInfo(copySlotInfo(handle.getSlotInfo()));
 	return result;
     }
 
@@ -97,6 +104,63 @@ public class HandlerUtils {
 	result.setParameters(sec.getParameters()); // TODO: copy depending on actual content
 	result.setProtocol(sec.getProtocol());
 	return result;
+    }
+
+    private static ConnectionHandleType.SlotInfo copySlotInfo(ConnectionHandleType.SlotInfo slotInfo) {
+	if (slotInfo == null) {
+	    return null;
+	}
+
+	ConnectionHandleType.SlotInfo result = new ConnectionHandleType.SlotInfo();
+	result.setProtectedAuthPath(slotInfo.isProtectedAuthPath());
+	return result;
+    }
+
+
+    public static ConnectionHandleType extractHandle(@Nonnull Object obj) {
+	// SAL calls
+	ConnectionHandleType handle = getMember(obj, "getConnectionHandle", ConnectionHandleType.class);
+	if (handle != null) {
+	    LOG.debug("Found ConnectionHandle in object of type {}.", obj.getClass().getSimpleName());
+	    return handle;
+	}
+
+	// IFD calls with context handle
+	byte[] ctxHandle = getMember(obj, "getContextHandle", byte[].class);
+	if (ctxHandle != null) {
+	    LOG.debug("Found ContextHandle in object of type {}.", obj.getClass().getSimpleName());
+	    String ifdName = getMember(obj, "getIFDName", String.class);
+	    String sessionId = getMember(obj, "getSessionIdentifier", String.class);
+	    return HandlerBuilder.create()
+		    .setContextHandle(ctxHandle)
+		    .setIfdName(ifdName)
+		    .setSessionId(sessionId)
+		    .buildConnectionHandle();
+	}
+
+	// IFD calls with slot handle
+	byte[] slotHandle = getMember(obj, "getSlotHandle", byte[].class);
+	if (slotHandle != null) {
+	    LOG.debug("Found SlotHandle in object of type {}.", obj.getClass().getSimpleName());
+	    return HandlerBuilder.create()
+		    .setSlotHandle(slotHandle)
+		    .buildConnectionHandle();
+	}
+
+	// no handle could be determined
+	return null;
+    }
+
+    private static <T> T getMember(Object obj, String methodName, Class<T> memberType) {
+	try {
+	    Method getter = obj.getClass().getMethod(methodName);
+	    if (memberType.equals(getter.getReturnType())) {
+		return memberType.cast(getter.invoke(obj));
+	    }
+	} catch (ReflectiveOperationException ex) {
+	    // nothing found
+	}
+	return null;
     }
 
 }

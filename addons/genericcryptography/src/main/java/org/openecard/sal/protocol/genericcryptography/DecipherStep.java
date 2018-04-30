@@ -41,7 +41,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.TLV;

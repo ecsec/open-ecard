@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,7 @@
 
 package org.openecard.binding.tctoken;
 
-import org.openecard.bouncycastle.crypto.tls.Certificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
@@ -38,7 +38,7 @@ public class SaveEServiceCertHandler implements CertificateVerifier {
     boolean firstCert = true;
 
     @Override
-    public void isValid(Certificate chain, String hostOrIP) throws CertificateVerificationException {
+    public void isValid(TlsServerCertificate chain, String hostOrIP) throws CertificateVerificationException {
 	if (firstCert) {
 	    firstCert = false;
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.gui.definition;
 
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +37,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTextField extends IDTrait implements InputInfoUnit, OutputInfoUnit {
 
-    private static final Logger _logger = LoggerFactory.getLogger(AbstractTextField.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTextField.class);
 
     private String description;
-    private String value;
+    private char[] value;
     private int minLength;
     private int maxLength;
 
@@ -50,6 +51,7 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      */
     public AbstractTextField(String id) {
 	super(id);
+	this.value = new char[0];
 	this.minLength = 0;
 	this.maxLength = Integer.MAX_VALUE;
     }
@@ -80,8 +82,8 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      *
      * @return The value of the text field.
      */
-    public String getValue() {
-	return value;
+    public char[] getValue() {
+	return value.clone();
     }
 
     /**
@@ -89,8 +91,9 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
      *
      * @param value The value of the text field.
      */
-    public void setValue(String value) {
-	this.value = value;
+    public void setValue(char[] value) {
+	Arrays.fill(this.value, ' ');
+	this.value = value.clone();
     }
 
     /**
@@ -149,13 +152,14 @@ public abstract class AbstractTextField extends IDTrait implements InputInfoUnit
     @Override
     public void copyContentFrom(InfoUnit origin) {
 	if (!(this.getClass().equals(origin.getClass()))) {
-	    _logger.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
+	    LOG.warn("Trying to copy content from type {} to type {}.", origin.getClass(), this.getClass());
 	    return;
 	}
 	AbstractTextField other = (AbstractTextField) origin;
 	// do copy
 	this.description = other.description;
-	this.value = other.value;
+	Arrays.fill(this.value, ' ');
+	this.value = other.value.clone();
 	this.minLength = other.minLength;
 	this.maxLength = other.maxLength;
     }

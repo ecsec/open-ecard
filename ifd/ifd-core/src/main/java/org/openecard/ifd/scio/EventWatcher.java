@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,13 +33,11 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
-import org.openecard.ifd.scio.wrapper.HandledChannel;
-import org.openecard.ifd.scio.wrapper.NoSuchChannel;
+import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EventWatcher implements Callable<List<IFDStatusType>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventWatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventWatcher.class);
 
     private final ChannelManager cm;
     private final long timeout;
@@ -128,10 +126,18 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 		if (next.getIFDName().equals(name)) {
 		    switch (event.getState()) {
 			case CARD_INSERTED:
-			    slot.setCardAvailable(true);
-			    slot.setATRorATS(getATR(name));
+			    try {
+				SingleThreadChannel ch = cm.openMasterChannel(name);
+				slot.setCardAvailable(true);
+				slot.setATRorATS(ch.getChannel().getCard().getATR().getBytes());
+			    } catch (NoSuchTerminal | SCIOException ex) {
+				LOG.error("Failed to open master channel for terminal '" + name + "'.", ex);
+				slot.setCardAvailable(false);
+				cm.closeMasterChannel(name);
+			    }
 			    break;
 			case CARD_REMOVED:
+			    cm.closeMasterChannel(name);
 			    slot.setCardAvailable(false);
 			    break;
 			case TERMINAL_REMOVED:
@@ -296,20 +302,6 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 //	    // this method returns false when both are null, thatswhy the if before
 //	    return ByteUtils.compare(a.getATRorATS(), b.getATRorATS());
 //	}
-    }
-
-    @Nullable
-    private byte[] getATR(@Nonnull String ifdName) {
-	try {
-	    byte[] handle = cm.openChannel(ifdName);
-	    HandledChannel channel = cm.getChannel(handle);
-	    SCIOATR atr = channel.getChannel().getCard().getATR();
-	    channel.shutdown();
-	    return atr.getBytes();
-	} catch (IllegalStateException | NoSuchChannel | NoSuchTerminal | SCIOException ex) {
-	    logger.error("Failed to retrieve ATR from card.", ex);
-	    return null;
-	}
     }
 
 }

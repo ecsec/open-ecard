@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,14 +28,23 @@ import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
+import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType.APICommand;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
+import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1Integer;
+import org.openecard.bouncycastle.asn1.DERSequence;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
@@ -50,9 +59,10 @@ import org.openecard.common.apdu.common.CardCommandTemplate;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.common.TLVFunction;
 import org.openecard.common.apdu.exception.APDUException;
+import org.openecard.common.apdu.utils.SALErrorUtils;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.crypto.common.sal.CryptoMarkerType;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.util.SALUtils;
@@ -71,10 +81,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class SignStep implements ProtocolStep<Sign, SignResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SignStep.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SignStep.class);
 
     //TODO extract the blocksize from somewhere
     private static final byte BLOCKSIZE = (byte) 256;
@@ -82,10 +93,10 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     private static final byte KEY_REFERENCE_PRIVATE_KEY = (byte) 0x84;
     private static final byte CARD_ALG_REF = (byte) 0x80;
 
-    private static final String HASHTOSIGN = "hashToSign";
-    private static final String KEYREFERENCE = "keyReference";
-    private static final String ALGORITHMIDENTIFIER = "algorithmIdentifier";
-    private static final String HASHALGORITHMREFERENCE = "hashAlgorithmReference";
+    private static final String HASH_TO_SIGN = "hashToSign";
+    private static final String KEY_REFERENCE = "keyReference";
+    private static final String ALGORITHM_IDENTIFIER = "algorithmIdentifier";
+    private static final String HASHALGORITHM_REFERENCE = "hashAlgorithmReference";
 
     private final Dispatcher dispatcher;
 
@@ -124,7 +135,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] hashRef = cryptoMarker.getAlgorithmInfo().getHashAlgRef();
 	    HashGenerationInfoType hashInfo = cryptoMarker.getHashGenerationInfo();
 
-	    if (didStructure.getDIDScope().equals(DIDScopeType.LOCAL)) {
+	    if (didStructure.getDIDScope() == DIDScopeType.LOCAL) {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 
@@ -134,16 +145,16 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    } else {
 		// assuming that legacySignatureInformation exists
 		BaseTemplateContext templateContext = new BaseTemplateContext();
-		templateContext.put(HASHTOSIGN, message);
-		templateContext.put(KEYREFERENCE, keyReference);
-		templateContext.put(ALGORITHMIDENTIFIER, algorithmIdentifier);
-		templateContext.put(HASHALGORITHMREFERENCE, hashRef);
-		response = performLegacySignature(cryptoMarker, slotHandle, templateContext);
+		templateContext.put(HASH_TO_SIGN, message);
+		templateContext.put(KEY_REFERENCE, keyReference);
+		templateContext.put(ALGORITHM_IDENTIFIER, algorithmIdentifier);
+		templateContext.put(HASHALGORITHM_REFERENCE, hashRef);
+		response = performLegacySignature(cryptoMarker, connectionHandle, templateContext);
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
-	    logger.warn(e.getMessage(), e);
+	    LOG.warn(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResult(e));
 	}
 
@@ -196,7 +207,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		    cmdAPDU = new ManageSecurityEnvironment(SET_COMPUTATION, ManageSecurityEnvironment.AT, mseData);
 		} else {
 		    String msg = "The command 'MSE_KEY' followed by 'INT_AUTH' and 'PSO_CDS' is currently not supported.";
-		    logger.error(msg);
+		    LOG.error(msg);
 		    throw new IncorrectParameterException(msg);
 		}
 	    } else if (command.equals("PSO_CDS")) {
@@ -212,8 +223,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 		mseDataTLV.setValue(hashRef);
 		cmdAPDU.setData(mseDataTLV.toBER());
 	    } else if (command.equals("PSO_HASH")) {
-		if (hashInfo.value().equals(HashGenerationInfoType.LAST_ROUND_ON_CARD.value()) ||
-			hashInfo.value().equals(HashGenerationInfoType.NOT_ON_CARD.value())) {
+		if (hashInfo == HashGenerationInfoType.LAST_ROUND_ON_CARD ||
+			hashInfo == HashGenerationInfoType.NOT_ON_CARD) {
 		    cmdAPDU = new PSOHash(PSOHash.P2_SET_HASH_OR_PART, message);
 		} else {
 		    cmdAPDU = new PSOHash(PSOHash.P2_HASH_MESSAGE, message);
@@ -248,7 +259,8 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	}
 
 	if (! Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, responseAPDU.getStatusMessage()));
+	    String minor = SALErrorUtils.getMinor(responseAPDU.getTrailer());
+	    response.setResult(WSHelper.makeResultError(minor, responseAPDU.getStatusMessage()));
 	    return response;
 	}
 	
@@ -261,27 +273,33 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
      * This method creates a signature with APDUs which are not covered by the methods defined in TR-03112 part 7.
      *
      * @param cryptoMarker A {@link CryptoMarkerType} object containing the information about the creation of a signature
-     * in a legacy way.
+     *   in a legacy way.
      * @param slotHandle A slotHandle identifying the current card.
      * @param templateCTX A Map containing the context data for the evaluation of the template variables. This object
-     * contains per default the message to sign and the {@link TLVFunction}.
+     *   contains per default the message to sign and the {@link TLVFunction}.
      * @return A {@link SignResponse} object containing the signature of the <b>message</b>.
      * @throws APDUTemplateException Thrown if the evaluation of the {@link CardCommandTemplate} failed.
      * @throws APDUException Thrown if one of the commands to execute failed.
-     * @throws org.openecard.common.WSHelper.WSException Thrown if the checkResult method of WSHelper failed.
+     * @throws WSHelper.WSException Thrown if the checkResult method of WSHelper failed.
      */
-    private SignResponse performLegacySignature(CryptoMarkerType cryptoMarker, byte[] slotHandle,
+    private SignResponse performLegacySignature(CryptoMarkerType cryptoMarker, ConnectionHandleType connectionHandle,
 	    BaseTemplateContext templateCTX) throws APDUTemplateException, APDUException, WSHelper.WSException {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
-	List<CardCallTemplateType> legacyCommands = cryptoMarker.getLegacySignatureGenerationInfo();
+	List<Object> legacyCommands = cryptoMarker.getLegacySignatureGenerationInfo();
 	CardCommandAPDU cmdAPDU;
 	CardResponseAPDU responseAPDU = null;
+	byte[] slotHandle = connectionHandle.getSlotHandle();
 	byte[] signedMessage;
 
-	for (CardCallTemplateType cctt : legacyCommands) {
-	    CardCommandTemplate template = new CardCommandTemplate(cctt);
-	    cmdAPDU = template.evaluate(templateCTX);
-	    responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, Collections.<byte[]>emptyList());
+	for (Object next : legacyCommands) {
+	    if (next instanceof CardCallTemplateType) {
+		CardCallTemplateType cctt = (CardCallTemplateType) next;
+		CardCommandTemplate template = new CardCommandTemplate(cctt);
+		cmdAPDU = template.evaluate(templateCTX);
+		responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, Collections.<byte[]>emptyList());
+	    } else if (next instanceof APICommand) {
+		sendAPICommand(connectionHandle, (APICommand) next);
+	    }
 	}
 
 	signedMessage = responseAPDU.getData();
@@ -294,13 +312,80 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    signedMessage = Arrays.concatenate(signedMessage, responseAPDU.getData());
 	}
 
-	if (!Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, responseAPDU.getStatusMessage()));
+	if (! Arrays.areEqual(responseAPDU.getTrailer(), new byte[]{(byte) 0x90, (byte) 0x00})) {
+	    String minor = SALErrorUtils.getMinor(responseAPDU.getTrailer());
+	    response.setResult(WSHelper.makeResultError(minor, responseAPDU.getStatusMessage()));
 	    return response;
+	}
+
+	// fix output format
+	String outForm = cryptoMarker.getLegacyOutputFormat();
+	if (outForm != null) {
+	    switch (outForm) {
+		case "rawRS":
+		    signedMessage = encodeRawRS(signedMessage);
+		    break;
+		default:
+		    LOG.warn("Unsupport outputFormat={} specified in LegacySignatureGenerationInfo.", outForm);
+	    }
 	}
 
 	response.setSignature(signedMessage);
 	return response;
+    }
+
+    private void sendAPICommand(ConnectionHandleType handle, APICommand cmd) {
+	// TODO: make this a utility function in common
+	List<Object> callObjs = cmd.getAPICall().getAny();
+	Object callObj = callObjs.get(0);
+
+	// set connection handle
+	try {
+	    Method func = callObj.getClass().getMethod("setConnectionHandle", ConnectionHandleType.class);
+	    func.invoke(callObj, handle);
+	} catch (NoSuchMethodException ex) {
+	    // ignore as this is totally valid
+	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+	    LOG.warn("Failed to execute setConnectionHandle.", ex);
+	}
+
+	// set slot handle
+	try {
+	    Method func = callObj.getClass().getMethod("setSlotHandle", byte[].class);
+	    func.invoke(callObj, new Object[] { handle.getSlotHandle() });
+	} catch (NoSuchMethodException ex) {
+	    // ignore as this is totally valid
+	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+	    LOG.warn("Failed to execute setSlotHandle.", ex);
+	}
+
+	LOG.debug("Sending API call.");
+	Object result = dispatcher.safeDeliver(callObj);
+
+	// TODO: match against APIResponse objects
+    }
+
+    private byte[] encodeRawRS(byte[] signature) throws WSHelper.WSException {
+	try {
+	    LOG.info("Reencoding raw RS parameters as ECDSA signature.");
+	    int n = signature.length / 2;
+	    byte[] bytes = new byte[n];
+	    System.arraycopy(signature, 0, bytes, 0, n);
+	    BigInteger r = new BigInteger(1, bytes);
+	    System.arraycopy(signature, n, bytes, 0, n);
+	    BigInteger s = new BigInteger(1, bytes);
+
+	    ASN1EncodableVector v = new ASN1EncodableVector();
+
+	    v.add(new ASN1Integer(r));
+	    v.add(new ASN1Integer(s));
+
+	    return new DERSequence(v).getEncoded(ASN1Encoding.DER);
+	} catch (IOException ex) {
+	    throw WSHelper.createException(WSHelper.makeResultError(
+		    ECardConstants.Minor.App.INT_ERROR,
+		    "Failed to reencode raw RS parameters as ECDSA signature."));
+	}
     }
 
 }

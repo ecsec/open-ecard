@@ -25,7 +25,8 @@ package org.openecard.sal.protocol.eac.gui;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
 import javax.annotation.Nonnull;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
+import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.EventFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CardRemovedFilter implements EventFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CardRemovedFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardRemovedFilter.class);
 
     private final String ifdName;
     private final BigInteger slotIdx;
@@ -50,15 +51,20 @@ public class CardRemovedFilter implements EventFilter {
 
     @Override
     public boolean matches(EventType t, Object o) {
-	logger.debug("Received event.");
+	LOG.debug("Received event.");
 	if (t.equals(EventType.CARD_REMOVED)) {
-	    logger.debug("Received CARD_REMOVED event.");
-	    ConnectionHandleType conHandle = (ConnectionHandleType) o;
-	    if (ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
-		logger.info("Card removed during processing of EAC GUI.");
+	    LOG.debug("Received CARD_REMOVED event.");
+	    ConnectionHandleType conHandle = null;
+	    if (o instanceof IfdEventObject) {
+		conHandle = ((IfdEventObject) o).getHandle();
+	    } else if (o instanceof ConnectionHandleType) {
+		conHandle = (ConnectionHandleType) o;
+	    }
+	    if (conHandle != null && ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
+		LOG.info("Card removed during processing of EAC GUI.");
 		return true;
 	    } else {
-		logger.debug("An unrelated card has been removed.");
+		LOG.debug("An unrelated card has been removed.");
 		return false;
 	    }
 	}

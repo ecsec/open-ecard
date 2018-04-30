@@ -22,8 +22,15 @@
 
 package org.openecard.addon.bind;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
+import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -34,6 +41,8 @@ import org.openecard.ws.marshal.WSMarshallerException;
  * @author Tobias Wich
  */
 public class RequestBody extends Body {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RequestBody.class);
 
     /**
      * Resource path of the request.
@@ -57,6 +66,30 @@ public class RequestBody extends Body {
      */
     public String getPath() {
 	return path;
+    }
+
+    public Map<String, String> getFormParamValue() {
+	Map<String, String> result = new HashMap<>();
+	String value = StringUtils.nullToEmpty(getValue()).trim();
+
+	String[] entries = value.split("&");
+	for (String entry : entries) {
+	    String[] split = entry.split("=");
+	    try {
+		if (split.length == 1) {
+		    String key = URLDecoder.decode(split[0], "UTF-8");
+		    result.put(key, null);
+		} else if (split.length == 2) {
+		    String key = URLDecoder.decode(split[0], "UTF-8");
+		    String val = URLDecoder.decode(split[1], "UTF-8");
+		    result.put(key, val);
+		}
+	    } catch (UnsupportedEncodingException ex) {
+		LOG.error("Default encoding is not supported by this JVM.", ex);
+	    }
+	}
+
+	return result;
     }
 
 }

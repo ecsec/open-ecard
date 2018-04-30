@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,10 @@
 
 package org.openecard.common;
 
+import org.openecard.ws.common.OverridingProperties;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OpenecardProperties {
 
-    private static final Logger _logger = LoggerFactory.getLogger(OpenecardProperties.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpenecardProperties.class);
 
     private static OverridingProperties properties;
 
@@ -67,13 +69,13 @@ public class OpenecardProperties {
 	    String fileName = "openecard_config/openecard.properties";
 	    bundledProps = FileUtils.resolveResourceAsStream(OpenecardProperties.class, fileName);
 	} catch (IOException ex) {
-	    _logger.info("Failed to load properties from config dir.", ex);
+	    LOG.info("Failed to load properties from config dir.", ex);
 	}
 	try {
 	    properties = new OverridingProperties(bundledProps, homeProps);
 	} catch (IOException ex) {
 	    // in that case a null pointer occurs when properties is accessed
-	    _logger.error(ex.getMessage(), ex);
+	    LOG.error(ex.getMessage(), ex);
 	}
     }
 
@@ -83,8 +85,11 @@ public class OpenecardProperties {
 	    File cfgFile = new File(homePath, "openecard.properties");
 	    InputStream homeProps = new FileInputStream(cfgFile);
 	    return homeProps;
+	} catch (FileNotFoundException ex) {
+	    LOG.debug("No properties file to load as it does not exist.");
+	    return null;
 	} catch (IOException ex) {
-	    _logger.info("Failed to load bundled properties.", ex);
+	    LOG.warn("Failed to load bundled properties.", ex);
 	    return null;
 	}
     }

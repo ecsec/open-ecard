@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,14 +35,15 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,16 +55,24 @@ import org.slf4j.LoggerFactory;
  */
 public class TrustStoreLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(TrustStoreLoader.class);
-    private static final String TRUSTSTORE_FILE = "oec_cacerts.zip";
+    private static final Logger LOG = LoggerFactory.getLogger(TrustStoreLoader.class);
+    private static final String DEFAULT_TRUSTSTORE_FILE = "oec_cacerts.zip";
 
-    private static Set<TrustAnchor> trustAnchors = Collections.emptySet();
+    private static final Map<String, KeyStore> TRUST_STORES = new HashMap<>();
+    private static final Map<String, Set<TrustAnchor>> TRUST_ANCHORS = new HashMap<>();
 
-    static {
-	load();
+    public static final void reset() {
+	synchronized (TrustStoreLoader.class) {
+	    TRUST_STORES.clear();
+	    TRUST_ANCHORS.clear();
+	}
     }
 
-    public static synchronized void load() {
+    protected String getStoreFileName() {
+	return DEFAULT_TRUSTSTORE_FILE;
+    }
+
+    protected void load() {
 	try {
 	    String tmAlg = TrustManagerFactory.getDefaultAlgorithm();
 	    TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(tmAlg);
@@ -89,25 +98,39 @@ public class TrustStoreLoader {
 
 	    if (anchors.isEmpty()) {
 		// no hard fail nevertheless, validation will just not work
-		logger.error("No trusted CAs found.");
+		LOG.error("No trusted CAs found.");
 	    }
 
-	    trustAnchors = Collections.unmodifiableSet(anchors);
-	} catch (NoSuchAlgorithmException | KeyStoreException ex) {
+	    // make sure that we set a keystore object for this file
+	    if (ks == null) {
+		ks = KeyStore.getInstance(KeyStore.getDefaultType());
+		ks.load(null);
+
+		// add anchors to the file
+		for (TrustAnchor a : anchors) {
+		    X509Certificate cert = a.getTrustedCert();
+		    if (ks.getCertificateAlias(cert) == null) {
+			ks.setCertificateEntry(cert.getSubjectX500Principal().getName(), cert);
+		    }
+		}
+	    }
+
+	    synchronized (TrustStoreLoader.class) {
+		TRUST_STORES.put(getStoreFileName(), ks);
+		TRUST_ANCHORS.put(getStoreFileName(), Collections.unmodifiableSet(anchors));
+	    }
+	} catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException ex) {
 	    String msg = "Failed to create or initialize TrustManagerFactory.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    throw new RuntimeException(msg, ex);
 	}
     }
 
-    private static boolean useInternalStore() {
-	String useSysStr = OpenecardProperties.getProperty("tls.truststore.use-system");
-	// if not set, this should evaluate to true
-	boolean useSys = Boolean.valueOf(useSysStr);
-	return ! useSys;
+    protected boolean useInternalStore() {
+	return false;
     }
 
-    private static KeyStore loadInternalStore() {
+    protected KeyStore loadInternalStore() {
 	if (useInternalStore()) {
 	    // The internal keystore is a zip file containing DER encoded certificates.
 	    // This is due to the following problems:
@@ -121,7 +144,7 @@ public class TrustStoreLoader {
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
 		// get stream to zip file containing the certificates
-		InputStream is = FileUtils.resolveResourceAsStream(TrustStoreLoader.class, TRUSTSTORE_FILE);
+		InputStream is = FileUtils.resolveResourceAsStream(TrustStoreLoader.class, getStoreFileName());
 		ZipInputStream zis = is != null ? new ZipInputStream(is) : null;
 		if (zis != null) {
 		    ZipEntry entry;
@@ -147,20 +170,38 @@ public class TrustStoreLoader {
 
 		    return ks;
 		} else {
-		    logger.error("Internal keystore not found, falling back to next available trust store.");
+		    LOG.error("Internal keystore not found, falling back to next available trust store.");
 		}
 	    } catch (IOException ex) {
-		logger.error("Error reading embedded keystore.", ex);
+		LOG.error("Error reading embedded keystore.", ex);
 	    } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
-		logger.error("Failed to obtain keystore or save entry in it..", ex);
+		LOG.error("Failed to obtain keystore or save entry in it..", ex);
 	    }
 	}
 	// error or different keystore requested
 	return null;
     }
 
-    public static Set<TrustAnchor> getTrustAnchors() {
-	return trustAnchors;
+    public Set<TrustAnchor> getTrustAnchors() {
+	Set<TrustAnchor> result = TRUST_ANCHORS.get(getStoreFileName());
+	if (result != null) {
+	    return result;
+	} else {
+	    // load truststore and try again
+	    load();
+	    return getTrustAnchors();
+	}
+    }
+
+    public KeyStore getTrustStore() {
+	KeyStore result = TRUST_STORES.get(getStoreFileName());
+	if (result != null) {
+	    return result;
+	} else {
+	    // load truststore and try again
+	    load();
+	    return getTrustStore();
+	}
     }
 
 }

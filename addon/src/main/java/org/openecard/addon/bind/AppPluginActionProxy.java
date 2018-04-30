@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -50,9 +50,9 @@ public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> impl
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments) {
 	//TODO use annotations to find the right function
-	return c.execute(body, parameters, attachments);
+	return c.execute(body, parameters, headers, attachments);
     }
 
     @Override

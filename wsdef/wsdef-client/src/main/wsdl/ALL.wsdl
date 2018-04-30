@@ -46,6 +46,9 @@
     <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
       <xsd:import namespace="http://www.w3.org/2007/05/xmldsig-more#" schemaLocation="rsa-pss.xsd" />
     </xsd:schema>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+      <xsd:import namespace="http://ws.openecard.org/chipgateway" schemaLocation="ChipGateway.xsd" />
+    </xsd:schema>
   </wsdl:types>
 
 
@@ -350,6 +353,17 @@
   <wsdl:message name="CardApplicationConnectResponse">
     <wsdl:part name="parameters"
 	       element="iso:CardApplicationConnectResponse">
+    </wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="CardApplicationSelectRequest">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationSelect">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CardApplicationSelectResponse">
+    <wsdl:part name="parameters"
+	       element="iso:CardApplicationSelectResponse">
     </wsdl:part>
   </wsdl:message>
 
@@ -1150,6 +1164,13 @@
     <wsdl:operation name="CardApplicationConnect">
       <wsdl:input message="oec:CardApplicationConnectRequest"></wsdl:input>
       <wsdl:output message="oec:CardApplicationConnectResponse"></wsdl:output>
+    </wsdl:operation>
+
+    <!-- Custom Extension: CardApplicationSelect -->
+
+    <wsdl:operation name="CardApplicationSelect">
+      <wsdl:input message="oec:CardApplicationSelectRequest"></wsdl:input>
+      <wsdl:output message="oec:CardApplicationSelectResponse"></wsdl:output>
     </wsdl:operation>
 
     <!-- 7.3 CardApplicationDisconnect -->
@@ -2133,6 +2154,19 @@
     <wsdl:operation name="CardApplicationConnect">
       <soap:operation
 	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationConnect" />
+      <wsdl:input>
+	<soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+	<soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+
+    <!-- Custom Extension: CardApplicationSelect -->
+
+    <wsdl:operation name="CardApplicationSelect">
+      <soap:operation
+	  soapAction="urn:iso:std:iso-iec:24727:tech:schema:CardApplicationSelect" />
       <wsdl:input>
 	<soap:body use="literal" />
       </wsdl:input>

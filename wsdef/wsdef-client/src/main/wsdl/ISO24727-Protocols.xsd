@@ -4,6 +4,8 @@
 	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 	xmlns:ecdsa="http://www.w3.org/2001/04/xmldsig-more#"
 	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+	xmlns:xenc11="http://www.w3.org/2009/xmlenc11#"
+	xmlns:ds='http://www.w3.org/2000/09/xmldsig#'
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
 	<!-- ======================== -->
@@ -17,6 +19,12 @@
 
 	<import namespace="http://www.w3.org/2001/04/xmldsig-more#"
 		schemaLocation="ecdsa.xsd" />
+
+	<import namespace='http://www.w3.org/2009/xmlenc11#'
+			schemaLocation='xenc-schema-11.xsd'/>
+
+	<import namespace='http://www.w3.org/2000/09/xmldsig#'
+			schemaLocation='xmldsig-core-schema.xsd'/>
 
 	<import namespace="urn:oasis:names:tc:dss:1.0:core:schema"
 		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
@@ -231,10 +239,8 @@
 
 	<complexType name="DIDMarkerType">
 		<choice>
-			<element name="PinCompareMarker"
-				type="iso:PinCompareMarkerType" />
-			<element name="MutualAuthMarker"
-				type="iso:MutualAuthMarkerType" />
+			<element name="PinCompareMarker" type="iso:PinCompareMarkerType" />
+			<element name="MutualAuthMarker" type="iso:MutualAuthMarkerType" />
 			<element name="RSAAuthMarker" type="iso:RSAAuthMarkerType" />
 			<element name="CryptoMarker" type="iso:CryptoMarkerType" />
 			<element name="EACMarker" type="iso:EACMarkerType" />
@@ -353,7 +359,51 @@
 	<complexType name="StateInfoType">
 		<sequence>
 			<element name="StateRecognition" maxOccurs="1" minOccurs="0" type="iso:CardCallSequenceType" />
-			<element name="State" type="iso:StateType" maxOccurs="unbounded" minOccurs="1">
+			<element name="State" type="iso:StateType" maxOccurs="unbounded" minOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<element name="StateInfoReference">
+		<complexType>
+			<complexContent>
+				<extension base="iso:StateInfoReferenceType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+	<complexType name="StateInfoReferenceType">
+		<sequence>
+			<element name="DIDName" type="iso:DIDNameType">
+				<annotation>
+					<documentation>References the StateInfo object of another DID. The referenced StateInfo object is valid for both DIDs. Implementations should operate on the same state if this is used. The StateInfo itself should not contain any values if the reference is used.
+
+An example for which this is useful looks like this:
+<iso:StateInfo>
+	<iso:UsageCounter>0</iso:UsageCounter>
+	<iso:State StateName="sign_counter" StateClass="Operational">
+		<iso:StateTransition TargetState="sign_counter">
+			<iso:FixedProcedure>
+				<iso:Sign>
+					<iso:DIDName></iso:DIDName>
+				</iso:Sign>
+			</iso:FixedProcedure>
+			<iso:UpdateCounter operation="add" variable="UsageCounter">1</iso:UpdateCounter>
+		</iso:StateTransition>
+
+		<iso:StateTransition TargetState="sign_counter">
+			<iso:UsageCounter>10</iso:UsageCounter>
+			<iso:UpdateCounter operation="set" variable="UsageCounter">0</iso:UpdateCounter>
+			<iso:UpdateDIDAuthenticationState>
+				<iso:DIDName>PIN</iso:DIDName>
+				<iso:DIDScope>global</iso:DIDScope>
+				<iso:DIDState>false</iso:DIDState>
+			</iso:UpdateDIDAuthenticationState>
+		</iso:StateTransition>
+	</iso:State>
+</iso:StateInfo></documentation>
+				</annotation>
 			</element>
 		</sequence>
 	</complexType>
@@ -392,6 +442,11 @@
 					type="iso:CardCallSequenceType" />
 			</choice>			
 			<element name="UpdateCounter" maxOccurs="2" minOccurs="0" type="iso:UpdateCounterType" />
+			<element name="UpdateDIDAuthenticationState" type="iso:DIDAuthenticationStateType" maxOccurs="1" minOccurs="0">
+				<annotation>
+					<documentation>Updates the state of a DID, when this transition is followed.</documentation>
+				</annotation>
+			</element>
 		</sequence>
 		<attribute name="TargetState" type="IDREF" use="optional" />
 	</complexType>
@@ -443,7 +498,10 @@
 						minOccurs="0" />
 					<element name="PasswordAttributes"
 						type="iso:PasswordAttributesType" maxOccurs="1" minOccurs="0" />
-					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
+					<choice maxOccurs="1" minOccurs="0">
+						<element ref="iso:StateInfo" />
+						<element ref="iso:StateInfoReference" />
+					</choice>
 				</sequence>
 			</restriction>
 		</complexContent>
@@ -835,7 +893,10 @@
 					</element>
 					<element name="minLength" type="nonNegativeInteger" maxOccurs="1" minOccurs="0"/>
 					<element name="maxLength" type="nonNegativeInteger" maxOccurs="1" minOccurs="0" />
-					<element ref="iso:StateInfo" maxOccurs="1" minOccurs="0" />
+					<choice maxOccurs="1" minOccurs="0">
+						<element ref="iso:StateInfo" />
+						<element ref="iso:StateInfoReference" />
+					</choice>
 				</sequence>
 			</restriction>
 		</complexContent>
@@ -1393,6 +1454,13 @@
 		</sequence>
 	</complexType>
 
+	<complexType name="OAEPParameterType">
+		<sequence>
+			<element ref="xenc11:MGF" maxOccurs="1" minOccurs="0" />
+			<element ref="ds:DigestMethod" maxOccurs="1" minOccurs="0"/>
+		</sequence>
+	</complexType>
+
 
 	<complexType name="CryptoKeyInfoType">
 		<sequence>
@@ -1466,7 +1534,7 @@
 			</documentation>
 		</annotation>
 		<restriction base="normalizedString">
-		 <pattern value="^([0-9a-fA-F]{2}|(\{[a-zA-Z][a-zA-Z0-9]*(\s+(([a-zA-Z][a-zA-Z0-9]*)|(0x([0-9a-fA-F]{2})+)))*\}))+$" />
+		 <pattern value="([0-9a-fA-F]{2}|(\{[a-zA-Z][a-zA-Z0-9]*(\s+(([a-zA-Z][a-zA-Z0-9]*)|(0x([0-9a-fA-F]{2})+)))*\}))+" />
 		</restriction>
 	</simpleType>
 
@@ -1479,9 +1547,32 @@
 	</complexType>
 
 	<complexType name="LegacySignatureGenerationType">
-		<sequence>
-			<element name="CardCommand" type="iso:CardCallTemplateType" minOccurs="1" />
-		</sequence>
+		<choice minOccurs="1" maxOccurs="unbounded">
+			<element name="CardCommand" type="iso:CardCallTemplateType" />
+			<element name="APICommand">
+				<complexType>
+					<sequence>
+						<element name="APICall" type="dss:AnyType" />
+						<element name="APIResponse" type="dss:AnyType" maxOccurs="unbounded" minOccurs="0" />
+					</sequence>
+				</complexType>
+			</element>
+		</choice>
+		<attribute name="outputFormat" type="anyURI" use="optional">
+			<annotation>
+				<documentation>
+					Specifies the format of the output value, indicating that further transformations may be needed to
+					obtain the final signature value.<br/>
+					The following values are currently defined:
+					<ul>
+						<li>
+							<tt>rawRS</tt>: The output represents the raw concatenation of R and S. The ASN.1 structure
+							is missing.
+						</li>
+					</ul>
+				</documentation>
+			</annotation>
+		</attribute>
 	</complexType>
 
 
@@ -1507,9 +1598,10 @@
 						minOccurs="0" type="iso:CertificateRefType" />
 					<element name="LegacyKeyName" type="string"
 						maxOccurs="1" minOccurs="0" />
-					<element ref="iso:StateInfo" maxOccurs="1"
-						minOccurs="0">
-					</element>
+					<choice maxOccurs="1" minOccurs="0">
+						<element ref="iso:StateInfo" />
+						<element ref="iso:StateInfoReference" />
+					</choice>
 				</sequence>
 			</restriction>
 		</complexContent>

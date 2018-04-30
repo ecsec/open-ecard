@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,9 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import org.openecard.common.enums.EventType;
+import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
-import org.openecard.common.interfaces.EventManager;
+import org.openecard.common.event.EventObject;
 import org.openecard.ws.schema.StatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +40,11 @@ import org.slf4j.LoggerFactory;
  * @author Johannes Schmölz
  * @author Benedikt Biallowons
  * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
 public class EventHandler implements EventCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
 
     private final Map<String, LinkedBlockingQueue<StatusChange>> eventQueues;
     private final Map<String, ReschedulableTimer> timers;
@@ -52,13 +53,10 @@ public class EventHandler implements EventCallback {
 
     /**
      * Create a new EventHandler.
-     *
-     * @param eventManager event manager to get events (status changes) from
      */
-    public EventHandler(EventManager eventManager) {
+    public EventHandler() {
 	eventQueues = new HashMap<>();
 	timers = new HashMap<>();
-	eventManager.registerAllEvents(this);
     }
 
     /**
@@ -72,14 +70,14 @@ public class EventHandler implements EventCallback {
 	StatusChange handle = null;
 	LinkedBlockingQueue<StatusChange> queue = eventQueues.get(session);
 	if (queue == null) {
-	    logger.error("No queue found for session {}", session);
+	    LOG.error("No queue found for session {}", session);
 	    return null;
 	}
 	do {
 	    try {
 		timers.get(session).reschedule(deleteDelay);
 		handle = eventQueues.get(session).poll(30, TimeUnit.SECONDS);
-		logger.debug("WaitForChange event pulled from event queue.");
+		LOG.debug("WaitForChange event pulled from event queue.");
 	    } catch (InterruptedException ex) {
 		return null;
 	    }
@@ -88,19 +86,17 @@ public class EventHandler implements EventCallback {
     }
 
     @Override
-    public void signalEvent(EventType eventType, Object eventData) {
-	if (eventData instanceof ConnectionHandleType) {
-	    ConnectionHandleType connectionHandle = (ConnectionHandleType) eventData;
+    public void signalEvent(EventType eventType, EventObject eventData) {
+	ConnectionHandleType connectionHandle = eventData.getHandle();
 
-	    for (Map.Entry<String, LinkedBlockingQueue<StatusChange>> entry : eventQueues.entrySet()) {
-		try {
-		    LinkedBlockingQueue<StatusChange> queue = entry.getValue();
-		    StatusChange statusChange = new StatusChange();
-		    statusChange.setAction(eventType.getEventTypeIdentifier());
-		    statusChange.setConnectionHandle(connectionHandle);
-		    queue.put(statusChange);
-		} catch (InterruptedException ignore) {
-		}
+	for (Map.Entry<String, LinkedBlockingQueue<StatusChange>> entry : eventQueues.entrySet()) {
+	    try {
+		LinkedBlockingQueue<StatusChange> queue = entry.getValue();
+		StatusChange statusChange = new StatusChange();
+		statusChange.setAction(eventType.getEventTypeIdentifier());
+		statusChange.setConnectionHandle(connectionHandle);
+		queue.put(statusChange);
+	    } catch (InterruptedException ignore) {
 	    }
 	}
     }

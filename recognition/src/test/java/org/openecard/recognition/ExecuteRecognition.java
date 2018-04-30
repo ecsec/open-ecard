@@ -29,6 +29,8 @@ import iso.std.iso_iec._24727.tech.schema.GetStatus;
 import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import java.math.BigInteger;
+import org.openecard.common.ClientEnv;
+import org.openecard.common.interfaces.Environment;
 import org.openecard.ws.IFD;
 import org.testng.annotations.Test;
 
@@ -41,7 +43,9 @@ public class ExecuteRecognition {
 
     @Test(enabled = false)
     public void testExecute() throws Exception {
+	Environment env = new ClientEnv();
 	IFD ifd = new org.openecard.ifd.scio.IFD();
+	env.setIFD(ifd);
 	byte[] ctx;
 	// establish context
 	EstablishContext eCtx = new EstablishContext();
@@ -53,9 +57,9 @@ public class ExecuteRecognition {
 	GetStatusResponse statusR = ifd.getStatus(status);
 
 	if (statusR.getIFDStatus().size() > 0 && statusR.getIFDStatus().get(0).getSlotStatus().get(0).isCardAvailable()) {
-	    CardRecognition recog = new CardRecognition(ifd, ctx);
+	    CardRecognitionImpl recog = new CardRecognitionImpl(env);
 	    IFDStatusType stat = statusR.getIFDStatus().get(0);
-	    RecognitionInfo info = recog.recognizeCard(stat.getIFDName(), BigInteger.ZERO);
+	    RecognitionInfo info = recog.recognizeCard(ctx, stat.getIFDName(), BigInteger.ZERO);
 	    if (info == null) {
 		System.out.println("Card not recognized.");
 	    } else {

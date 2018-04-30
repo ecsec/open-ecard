@@ -64,6 +64,12 @@ class TagLengthValue {
     }
 
 
+    public Tag getTag() {
+	return new Tag(this.tag);
+    }
+    public void setTag(Tag tag) {
+	this. tag = new Tag(tag);
+    }
 
     public TagClass getTagClass() {
 	return this.tag.getTagClass();
@@ -121,8 +127,14 @@ class TagLengthValue {
      * @param inputWithThisTag
      * @return
      */
-    byte[] extractRest(byte[] inputWithThisTag) {
-	return Arrays.copyOfRange(inputWithThisTag, getRawLength(), inputWithThisTag.length);
+    byte[] extractRest(byte[] inputWithThisTag) throws TLVException {
+	try {
+	    int from = getRawLength();
+	    int to = inputWithThisTag.length;
+	    return Arrays.copyOfRange(inputWithThisTag, from, to);
+	} catch (ArrayIndexOutOfBoundsException | IllegalArgumentException ex) {
+	    throw new TLVException("Data length and claimed length do not match.", ex);
+	}
     }
 
 

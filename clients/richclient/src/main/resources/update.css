@@ -1,0 +1,21 @@
+.table-row-cell:selected {
+    -fx-background-color: steelblue;
+}
+
+.table-row-cell:selected .table-cell .hyperlink {
+    -fx-text-fill: -fx-text-background-color;
+    -fx-underline: true;
+}
+
+.update {
+    -fx-background-color: white;
+    -fx-font-family: 'sans-serif';
+    -fx-padding: 10;
+    -fx-spacing: 15;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.table-cell {
+    -fx-alignment:CENTER;
+}

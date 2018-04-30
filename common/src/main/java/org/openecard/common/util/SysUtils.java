@@ -183,6 +183,18 @@ public class SysUtils {
 	return s;
     }
 
+    public static boolean is64bit() {
+	String arch = System.getProperty("os.arch", "").toLowerCase();
+
+	switch (arch) {
+	    case "x86_64":
+	    case "amd64":
+	    case "ppc64":
+		return true;
+	    default:
+		return false;
+	}
+    }
 
     /**
      * Opens a URL in the OS configured default program.

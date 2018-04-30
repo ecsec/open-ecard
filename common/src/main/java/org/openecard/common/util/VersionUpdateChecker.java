@@ -22,22 +22,11 @@
 
 package org.openecard.common.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.openecard.common.AppVersion;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.common.SemanticVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,69 +54,15 @@ public class VersionUpdateChecker {
     private final List<VersionUpdate> updates;
     private final SemanticVersion installedVersion;
 
-    private VersionUpdateChecker(List<VersionUpdate> updates) {
+    private VersionUpdateChecker(SemanticVersion installedVersion, List<VersionUpdate> updates) {
 	this.updates = updates;
-	this.installedVersion = AppVersion.getVersion();
+	this.installedVersion = installedVersion;
     }
 
     public static VersionUpdateChecker loadCurrentVersionList() {
-	String pkgType = getSystemPackageType();
-	try {
-	    // load list data
-	    URL updateUrl = getUpdateUrl();
-	    URLConnection con = updateUrl.openConnection();
-	    con.connect();
-	    InputStream in = con.getInputStream();
-	    JSONObject obj = new JSONObject(new JSONTokener(in));
-
-	    // access package specific list
-	    JSONArray updatesRaw = obj.getJSONArray(pkgType);
-	    ArrayList<VersionUpdate> updates = new ArrayList<>();
-	    for (int i = 0; i < updatesRaw.length(); i++) {
-		try {
-		    VersionUpdate next = VersionUpdate.fromJson(updatesRaw.getJSONObject(i));
-		    updates.add(next);
-		} catch (InvalidUpdateDefinition ex) {
-		    LOG.warn("Invalid version info contained in update list.", ex);
-		}
-	    }
-
-	    // make sure the versions are in the correct order
-	    Collections.sort(updates);
-
-	    return new VersionUpdateChecker(updates);
-	} catch (MalformedURLException ex) {
-	    LOG.error("Failed to get URL for update list.");
-	} catch (IOException ex) {
-	    LOG.error("Failed to retrieve update list from server.", ex);
-	} catch (JSONException ex) {
-	    LOG.warn("Package type {} not supported in update list.", pkgType);
-	}
-
-	LOG.info("Using no update list.");
-	return new VersionUpdateChecker(Collections.EMPTY_LIST);
-    }
-
-    private static URL getUpdateUrl() throws MalformedURLException {
-	String url = OpenecardProperties.getProperty("update-list.location");
-	return new URL(url);
-    }
-
-
-    private static String getSystemPackageType() {
-	if (SysUtils.isWin()) {
-	    return "win";
-	} else if (SysUtils.isDebianOrDerivate()) {
-	    return "deb";
-	} else if (SysUtils.isRedhatOrDerivate()) {
-	    // not supported yet
-	    //return "rpm";
-	} else if (SysUtils.isSuSEOrDerivate()) {
-	    // not supported yet
-	    //return "rpm";
-	}
-
-	return "UNKNOWN";
+	VersionUpdateLoader loader = new VersionUpdateLoader();
+	List<VersionUpdate> updates = loader.loadVersions();
+	return new VersionUpdateChecker(AppVersion.getVersion(), updates);
     }
 
     public boolean needsUpdate() {
@@ -151,6 +86,14 @@ public class VersionUpdateChecker {
     public VersionUpdate getMajorUpgrade() {
 	ArrayList<VersionUpdate> copy = new ArrayList<>(updates);
 
+	Iterator<VersionUpdate> i = copy.iterator();
+	while (i.hasNext()) {
+	    VersionUpdate next = i.next();
+	    if (installedVersion.getMajor() >= next.getVersion().getMajor()) {
+		i.remove();
+	    }
+	}
+
 	// just compare last version as it will be the most current one
 	if (! copy.isEmpty()) {
 	    VersionUpdate last = copy.get(copy.size() - 1);
@@ -167,13 +110,15 @@ public class VersionUpdateChecker {
     public VersionUpdate getMinorUpgrade() {
 	ArrayList<VersionUpdate> copy = new ArrayList<>(updates);
 
-	// remove all versions having a different major version
+	// remove all versions having a different major and smaller minor version
 	Iterator<VersionUpdate> i = copy.iterator();
 	while (i.hasNext()) {
 	    VersionUpdate next = i.next();
 	    if (installedVersion.getMajor() != next.getVersion().getMajor()) {
 		i.remove();
-	    }
+	    } else if (installedVersion.getMinor() >= next.getVersion().getMinor()) {
+		i.remove();
+ 	    }
 	}
 
 	// just compare last version as it will be the most current one

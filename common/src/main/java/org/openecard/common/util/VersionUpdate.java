@@ -105,4 +105,10 @@ public class VersionUpdate implements Comparable<VersionUpdate> {
 	return this.getVersion().compareTo(o.getVersion());
     }
 
+    @Override
+    public String toString() {
+	return String.format("{version: '%s',%n dl_page: '%s',%n dl_link: '%s',%n status: '%s'}",
+		getVersion(), getDownloadPage(), getDownloadLink(), getStatus());
+    }
+
 }

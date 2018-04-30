@@ -62,6 +62,7 @@ import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.event.EventType;
+import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.gui.message.DialogType;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -76,6 +77,7 @@ import org.openecard.mdlw.sal.MiddlewareSAL;
 import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
+import org.openecard.richclient.gui.update.UpdateSysTray;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -296,6 +298,13 @@ public final class RichClient {
 
 	    // perform GC to bring down originally allocated memory
 	    new Timer().schedule(new GCTask(), 5000);
+
+	    // check for updates
+	    VersionUpdateChecker updateChecker = VersionUpdateChecker.loadCurrentVersionList();
+	    if (updateChecker.needsUpdate()) {
+		UpdateSysTray ust = new UpdateSysTray(updateChecker);
+		ust.init();
+	    }
 
 	} catch (Exception ex) {
 	    LOG.error(ex.getMessage(), ex);

@@ -24,23 +24,19 @@ package org.openecard.richclient.gui.update;
 
 import java.awt.AWTException;
 import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URI;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import javax.swing.SwingUtilities;
 import org.openecard.common.I18n;
-import org.openecard.common.util.SysUtils;
-import org.openecard.common.util.VersionUpdate;
 import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.richclient.gui.GuiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -49,45 +45,28 @@ import org.openecard.richclient.gui.GuiUtils;
  */
 public class UpdateSysTray {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateSysTray.class);
+
     private final VersionUpdateChecker updateChecker;
     private final I18n lang = I18n.getTranslation("update");
     private TrayIcon trayIcon;
     private SystemTray tray;
+    private UpdateWindow uw;
 
     public UpdateSysTray(VersionUpdateChecker updateChecker) {
 	this.updateChecker = updateChecker;
     }
 
     public void init() {
+	Platform.setImplicitExit(false);
 	new JFXPanel(); //initialize JavaFX
 	Image image = GuiUtils.getImage("update.jpg");
 
 	//Check the SystemTray is supported
 	if (! SystemTray.isSupported()) {
-	    System.out.println("SystemTray is not supported");
-	    return;
+	    LOG.warn("SystemTray is not supported. Opening update dialog directly.");
+	    openUpdateWindow();
 	}
-
-	final PopupMenu popup = new PopupMenu();
-	final MenuItem directDownload = new MenuItem(lang.translationForKey("direct_download"));
-	directDownload.addActionListener((ActionEvent e) -> {
-	    String url = getDownloadUrl();
-	    SysUtils.openUrl(URI.create(url), false);
-	    removeTrayIcon();
-	});
-
-	final MenuItem downloadPage = new MenuItem(lang.translationForKey("download_page"));
-	downloadPage.addActionListener((ActionEvent e) -> {
-	    String url = getDownloadPage();
-	    SysUtils.openUrl(URI.create(url), false);
-	    removeTrayIcon();
-	});
-
-	final MenuItem close = new MenuItem(lang.translationForKey("close"));
-	close.addActionListener((ActionEvent e) -> {
-	    removeTrayIcon();
-	});
-
 
 	trayIcon = new TrayIcon(image);
 	tray = SystemTray.getSystemTray();
@@ -101,10 +80,6 @@ public class UpdateSysTray {
 	    }
 	});
 
-	popup.add(directDownload);
-	popup.add(downloadPage);
-	popup.add(close);
-	trayIcon.setPopupMenu(popup);
 	trayIcon.setToolTip(lang.translationForKey("tooltip_msg"));
 	trayIcon.setImageAutoSize(true);
 
@@ -113,53 +88,25 @@ public class UpdateSysTray {
 	} catch (AWTException e) {
 	    System.out.println("TrayIcon could not be added.");
 	}
-
     }
 
-    private String getDownloadUrl(){
-	VersionUpdate major = updateChecker.getMajorUpgrade();
-	if(major != null){
-	    return major.getDownloadLink().toString();
+    private synchronized void openUpdateWindow() {
+	if (uw == null) {
+	    // no window displayed, start it up
+	    Platform.runLater(() -> {
+		Stage stage = new Stage();
+		stage.setOnHidden(event -> {
+		    synchronized (this) {
+			uw = null;
+		    }
+		});
+		uw = new UpdateWindow(updateChecker, stage);
+		uw.init();
+	    });
+	} else {
+	    // window is already displayed, just bring it to the front
+	    Platform.runLater(uw::toFront);
 	}
-
-	VersionUpdate minor = updateChecker.getMinorUpgrade();
-	if(minor != null){
-	    return minor.getDownloadLink().toString();
-	}
-
-	VersionUpdate sec = updateChecker.getSecurityUpgrade();
-	if(sec != null){
-	    return sec.getDownloadLink().toString();
-	}
-
-	return null;
-    }
-
-    private String getDownloadPage(){
-	VersionUpdate major = updateChecker.getMajorUpgrade();
-	if(major != null){
-	    return major.getDownloadPage().toString();
-	}
-
-	VersionUpdate minor = updateChecker.getMinorUpgrade();
-	if(minor != null){
-	    return minor.getDownloadPage().toString();
-	}
-
-	VersionUpdate sec = updateChecker.getSecurityUpgrade();
-	if(sec != null){
-	    return sec.getDownloadPage().toString();
-	}
-
-	return null;
-    }
-
-    private void openUpdateWindow() {
-	Platform.runLater(() -> {
-	    Stage stage = new Stage();
-	    removeTrayIcon();
-	    UpdateWindow uw = new UpdateWindow(updateChecker, stage);
-	});
     }
 
     public void removeTrayIcon() {

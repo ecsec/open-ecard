@@ -26,12 +26,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.openecard.common.AppVersion;
 import org.openecard.common.SemanticVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,6 +42,8 @@ import org.testng.annotations.Test;
  * @author Sebastian Schuberth
  */
 public class VersionTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(VersionTest.class);
 
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
@@ -152,7 +154,7 @@ public class VersionTest {
 	    URL downloadUrl = new URL(url);
 	    return new VersionUpdate(version, downloadUrl, downloadUrl, VersionUpdate.Status.MAINTAINED);
 	} catch (MalformedURLException ex) {
-	    Logger.getLogger(VersionTest.class.getName()).log(Level.SEVERE, null, ex);
+	    LOG.error(ex.getMessage(), ex);
 	}
 	return null;
     }

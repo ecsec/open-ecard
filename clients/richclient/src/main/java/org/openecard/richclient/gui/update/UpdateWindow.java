@@ -65,10 +65,9 @@ public class UpdateWindow {
     public UpdateWindow(VersionUpdateChecker checker, Stage stage) {
 	this.updateChecker = checker;
 	this.stage = stage;
-	this.init();
     }
 
-    private void init() {
+    public void init() {
 	VBox sp = new VBox();
 	List<Node> nodes = getElements();
 
@@ -85,6 +84,10 @@ public class UpdateWindow {
 	stage.setScene(scene);
 	stage.setResizable(false);
 	stage.show();
+    }
+
+    public void toFront() {
+	stage.toFront();
     }
 
     private List<Node> getElements() {

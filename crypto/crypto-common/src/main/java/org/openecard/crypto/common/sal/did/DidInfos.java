@@ -293,6 +293,36 @@ public class DidInfos {
 	return result;
     }
 
+    public DataSetInfo getDataSetInfo(String name) throws NoSuchDataSet, WSHelper.WSException {
+
+	DataSetInfo finalResult = null;
+
+	for (byte[] application : getApplications()) {
+	    Map<String, DataSetInfo> appCache = getDataSetCache(application);
+	    DataSetInfo result = appCache.get(name);
+
+	    // in case there is no cached info object, try to find one
+	    if (result == null) {
+		List<String> names = getDataSetNames(application);
+		for (String next : names) {
+		    if (name.equals(next)) {
+			result = new DataSetInfo(this, application, name);
+			appCache.put(name, result);
+			finalResult = result;
+		    }
+		}
+
+	    } else {
+		finalResult = result;
+	    }
+	}
+	if (finalResult == null) {
+	    throw new NoSuchDataSet("The DataSet " + name + " does not exist.");
+	}
+	return finalResult;
+
+    }
+
     public void connectApplication(byte[] application) throws WSHelper.WSException {
 	CardApplicationSelect req = new CardApplicationSelect();
 	req.setCardApplication(application);

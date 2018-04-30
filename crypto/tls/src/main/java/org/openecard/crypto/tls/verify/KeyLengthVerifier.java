@@ -24,9 +24,6 @@ package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
 import org.openecard.bouncycastle.asn1.x509.Certificate;
-import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.common.keystore.KeyLengthException;
@@ -59,10 +56,8 @@ public class KeyLengthVerifier implements CertificateVerifier {
 		// skip key comparison step if this is a root certificate, but still check self signed server certs
 		boolean isRootCert = selfSigned && ! firstCert;
 		if (! isRootCert) {
-		    // get public key and determine minimum size for the actual type
-		    SubjectPublicKeyInfo pkInfo = x509.getSubjectPublicKeyInfo();
-		    AsymmetricKeyParameter key = PublicKeyFactory.createKey(pkInfo);
-		    KeyTools.assertKeyLength(key);
+		    // determine if key has the minimum size
+		    KeyTools.assertKeyLength(x509);
 
 		    firstCert = false;
 		}

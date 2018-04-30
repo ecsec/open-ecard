@@ -34,14 +34,19 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
+import org.openecard.bouncycastle.asn1.x500.X500Name;
+import org.openecard.bouncycastle.asn1.x500.style.IETFUtils;
+import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.openecard.bouncycastle.crypto.params.DHKeyParameters;
 import org.openecard.bouncycastle.crypto.params.DSAKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ECKeyParameters;
 import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters;
 import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
+import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
 import org.openecard.bouncycastle.tls.Certificate;
 import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 
@@ -128,21 +133,43 @@ public class KeyTools {
     /**
      * Checks the given key if it satisfies the key length requirements defined in BSI TR-03116-4.
      *
+     * @param x509 The certificate containing the key to test.
+     * @throws KeyLengthException Thrown in case the key is too short.
+     * @throws IOException Thrown in case the certificate could not be parsed.
+     * @throws UnsupportedOperationException Thrown in case no reference value could be obtained for the given keytype.
+     */
+    public static void assertKeyLength(@Nonnull org.openecard.bouncycastle.asn1.x509.Certificate x509)
+	    throws KeyLengthException, IOException {
+	SubjectPublicKeyInfo pkInfo = x509.getSubjectPublicKeyInfo();
+	AsymmetricKeyParameter key = PublicKeyFactory.createKey(pkInfo);
+	assertKeyLength(key, x509.getSubject());
+    }
+
+    /**
+     * Checks the given key if it satisfies the key length requirements defined in BSI TR-03116-4.
+     *
      * @param key The key to test.
      * @throws KeyLengthException Thrown in case the key is too short.
      * @throws UnsupportedOperationException Thrown in case no reference value could be obtained for the given keytype.
      */
     public static void assertKeyLength(@Nonnull AsymmetricKeyParameter key) throws KeyLengthException {
+	assertKeyLength(key, null);
+    }
+
+    private static void assertKeyLength(@Nonnull AsymmetricKeyParameter key, @Nullable X500Name subj) throws KeyLengthException {
+	String subStr = subj != null ? IETFUtils.valueToString(subj) : "UNKNOWN";
+	String keyClass = key.getClass().getName();
 	int reference = getReferenceKeySize(key);
 	int numbits = getKeySize(key);
-
 	if (reference == -1) {
-	    throw new UnsupportedOperationException("The key type " + key.getClass().getName() + " is unsupported.");
+	    String msg = String.format("The key type %s is unsupported in certificate [%s].", keyClass, subStr);
+	    throw new UnsupportedOperationException(msg);
 	}
 
 	if (numbits < reference) {
 	    String msg = "The key size does not meet the requirements ";
-	    msg += String.format("(%d < %d).", numbits, reference);
+	    msg += String.format("(%d < %d) ", numbits, reference);
+	    msg += String.format("in certificate [%s].", subStr);
 	    throw new KeyLengthException(msg);
 	}
     }

@@ -24,7 +24,6 @@ package org.openecard.gui.about;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -33,9 +32,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import javax.annotation.Nullable;
@@ -259,54 +256,8 @@ public class AboutDialog extends JFrame {
     private void openUrl(HyperlinkEvent event) {
 	EventType type = event.getEventType();
 	if (type == EventType.ACTIVATED) {
-	    try {
-		URL url = event.getURL();
-		String urlStr = url.toExternalForm();
-		urlStr = SysUtils.expandSysProps(urlStr);
-		url = new URL(urlStr);
-
-		boolean browserOpened = false;
-		if (Desktop.isDesktopSupported()) {
-		    URI uri = new URI(urlStr);
-		    if ("file".equals(url.getProtocol()) && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-			try {
-			    Desktop.getDesktop().open(new File(uri));
-			    browserOpened = true;
-			} catch (IOException ex) {
-			    // failed to open browser
-			    LOG.debug(ex.getMessage(), ex);
-			}
-		    } else if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-			try {
-			    Desktop.getDesktop().browse(uri);
-			    browserOpened = true;
-			} catch (IOException ex) {
-			    // failed to open browser
-			    LOG.debug(ex.getMessage(), ex);
-			}
-		    }
-		}
-		if (! browserOpened) {
-		    String openTool;
-		    if (SysUtils.isUnix()) {
-			openTool = "xdg-open";
-		    } else if (SysUtils.isWin()) {
-			openTool = "start";
-		    } else {
-			openTool = "open";
-		    }
-		    ProcessBuilder pb = new ProcessBuilder(openTool, urlStr);
-		    try {
-			pb.start();
-		    } catch (IOException ex) {
-			// failed to execute command
-			LOG.debug(ex.getMessage(), ex);
-		    }
-		}
-	    } catch (URISyntaxException | MalformedURLException ex) {
-		// wrong syntax
-		LOG.debug(ex.getMessage(), ex);
-	    }
+	    URL url = event.getURL();
+	    SysUtils.openUrl(URI.create(url.toExternalForm()), true);
 	}
     }
 

@@ -14,7 +14,7 @@
 			<cleanHistoryOnStart>true</cleanHistoryOnStart>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %-5level %class{35}:%line - %msg%n</pattern>
+			<pattern>%date{"yyyy-MM-dd HH:mm:ss,SSSX"} () [%thread] %-5level %class{35}:%line - %msg%n</pattern>
 		</encoder>
 	</appender>
 

@@ -41,6 +41,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.FutureTask;
+import javafx.embed.swing.JFXPanel;
 import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
 import org.openecard.apache.http.HttpException;
@@ -77,7 +78,6 @@ import org.openecard.mdlw.sal.MiddlewareSAL;
 import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
-import org.openecard.richclient.gui.update.UpdateSysTray;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
@@ -120,7 +120,8 @@ public final class RichClient {
     // card states
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
-    private byte[] contextHandle;
+    private byte[] contextHandle;    
+    private boolean javaFxInitialized = false;
 
     static {
 	try {
@@ -298,14 +299,13 @@ public final class RichClient {
 
 	    // perform GC to bring down originally allocated memory
 	    new Timer().schedule(new GCTask(), 5000);
-
-	    // check for updates
-	    VersionUpdateChecker updateChecker = VersionUpdateChecker.loadCurrentVersionList();
-	    if (updateChecker.needsUpdate()) {
-		UpdateSysTray ust = new UpdateSysTray(updateChecker);
-		ust.init();
+	   	    
+	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	    
+	    if(update){	
+		 // check for updates
+		new Timer().schedule(new UpdateTask(), 1);
 	    }
-
+	   
 	} catch (Exception ex) {
 	    LOG.error(ex.getMessage(), ex);
 
@@ -321,6 +321,28 @@ public final class RichClient {
 	} catch (Throwable ex) {
 	    LOG.error("Unexpected error occurred. Exiting client.", ex);
 	    System.exit(1);
+	}
+    }
+    
+    private void initJavaFXIfNecessary() {
+	    if(!javaFxInitialized){
+		javafx.application.Platform.setImplicitExit(false);
+		new JFXPanel(); 
+		javaFxInitialized = true;
+	    } 	    
+    }
+    
+    private class UpdateTask extends TimerTask {
+	@Override
+	public void run() {	    
+	    VersionUpdateChecker updateChecker = VersionUpdateChecker.loadCurrentVersionList();
+	    
+	    if (updateChecker.needsUpdate()) {			    
+		initJavaFXIfNecessary();
+		tray.status().showUpdateIcon(updateChecker);
+	    }
+	    // repeat every 24 hours
+	    new Timer().schedule(new UpdateTask(), 24 * 60 * 60 * 1000);	    
 	}
     }
 

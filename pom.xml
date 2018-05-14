@@ -80,6 +80,7 @@
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
+		<argLine></argLine>
 	</properties>
 
     <prerequisites>

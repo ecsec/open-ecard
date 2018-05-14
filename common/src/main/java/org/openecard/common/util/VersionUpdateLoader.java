@@ -48,50 +48,76 @@ import org.slf4j.LoggerFactory;
 public class VersionUpdateLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(VersionUpdateLoader.class);
+    private final URL updateUrl;
+    private final String pkgType;
+       
+    VersionUpdateLoader(URL updateUrl, String systemPackageType) {
+	this.updateUrl = updateUrl;
+	this.pkgType = systemPackageType;
+    }
 
-    public List<VersionUpdate> loadVersions() {
-	String pkgType = getSystemPackageType();
+    public static VersionUpdateLoader createWithDefaults() throws IllegalArgumentException {	
 	try {
+	    return new VersionUpdateLoader(getUpdateUrl(), getPkgType());
+	} catch (MalformedURLException ex) {
+	    String msg = "Update URL value is not a valid URL.";
+	    LOG.error(msg, ex);
+	    throw new IllegalArgumentException(msg, ex);
+	}
+    }
+    
+    public VersionUpdateList loadVersionUpdateList() throws IllegalArgumentException {	
+	try {	 
 	    // load list data
-	    URL updateUrl = getUpdateUrl();
+	    LOG.info("Trying to load version list.");
 	    URLConnection con = updateUrl.openConnection();
 	    con.connect();
 	    InputStream in = con.getInputStream();
 	    JSONObject obj = new JSONObject(new JSONTokener(in));
-
+	    
+	    // get package specific download page
+	    String dowloadPageString = obj.getString(pkgType+"_download_page");
+	    	    
 	    // access package specific list
 	    JSONArray updatesRaw = obj.getJSONArray(pkgType);
+	    
 	    ArrayList<VersionUpdate> updates = new ArrayList<>();
+	    
 	    for (int i = 0; i < updatesRaw.length(); i++) {
 		try {
 		    VersionUpdate next = VersionUpdate.fromJson(updatesRaw.getJSONObject(i));
 		    updates.add(next);
 		} catch (InvalidUpdateDefinition ex) {
 		    LOG.warn("Invalid version info contained in update list.", ex);
+		    throw new IllegalArgumentException("Invalid version info contained in update list.", ex);
 		}
 	    }
 
 	    // make sure the versions are in the correct order
 	    Collections.sort(updates);
-
-	    return updates;
+	    	    
+	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(dowloadPageString));
+	    LOG.info("Successfully got versionupdatelist!");
+	    return list;
+	    
 	} catch (MalformedURLException ex) {
 	    LOG.error("Failed to get URL for update list.");
+	    throw new IllegalArgumentException("Failed to get URL for update list.", ex);
 	} catch (IOException ex) {
 	    LOG.error("Failed to retrieve update list from server.", ex);
+	    throw new IllegalArgumentException("Failed to retrieve update list from server.", ex);
 	} catch (JSONException ex) {
 	    LOG.warn("Package type {} not supported in update list.", pkgType);
+	    throw new IllegalArgumentException("Package type "+pkgType+" not supported in update list.", ex);
 	}
-	LOG.info("Using no update list.");
-	return Collections.emptyList();
     }
-
-    private URL getUpdateUrl() throws MalformedURLException {
+      	    	    
+    private static URL getUpdateUrl() throws MalformedURLException {
 	String url = OpenecardProperties.getProperty("update-list.location");
 	return new URL(url);
     }
 
-    private String getSystemPackageType() {
+    private static String getPkgType() {
 	if (SysUtils.isWin() && SysUtils.is64bit()) {
 	    return "win64";
 	} else if (SysUtils.isWin()) {

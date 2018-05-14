@@ -22,6 +22,7 @@
 
 package org.openecard.common.util;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-
 /**
  *
  * @author Sebastian Schuberth
@@ -48,6 +48,8 @@ public class VersionTest {
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
     private List<VersionUpdate> updates;
+    private VersionUpdateList updateList;
+    private URL downloadPage;
 
     @Mocked
     VersionUpdateLoader loader;
@@ -57,20 +59,31 @@ public class VersionTest {
     @BeforeMethod
     public void init() {
 	updates = new ArrayList<>();
+	try {
+	    downloadPage = new URL(url + "/downloadpage");
+	} catch (MalformedURLException ex) {
+	    LOG.error("The test URL is invalid.", ex);
+	}
     }
 
     @Test(enabled = true)
-    public void checkNoUpdate() {
+    public void testNoUpdateAvailable() throws MalformedURLException {
 	SemanticVersion version = currentVersion;
 
 	VersionUpdate minor = newVersionUpdate(version);
 	updates.add(newVersionUpdate(currentVersion));
 	updates.add(minor);
 
-	new Expectations() {{
-	    loader.loadVersions(); result = updates;
-	    AppVersion.getVersion(); result = currentVersion;
-	}};
+	updateList = new VersionUpdateList(updates, downloadPage);
+
+	new Expectations() {
+	    {
+		loader.loadVersionUpdateList();
+		result = updateList;
+		AppVersion.getVersion();
+		result = currentVersion;
+	    }
+	};
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -82,17 +95,23 @@ public class VersionTest {
     }
 
     @Test(enabled = true)
-    public void checkUpdateMajorVersion() {
+    public void testUpdateMajorVersionAvailable() throws MalformedURLException {
 	SemanticVersion version = incrementPatch(incrementMajor(currentVersion));
 
 	VersionUpdate major = newVersionUpdate(version);
 	updates.add(newVersionUpdate(currentVersion));
 	updates.add(major);
 
-	new Expectations() {{
-	    loader.loadVersions(); result = updates;
-	    AppVersion.getVersion(); result = currentVersion;
-	}};
+	updateList = new VersionUpdateList(updates, downloadPage);
+
+	new Expectations() {
+	    {
+		loader.loadVersionUpdateList();
+		result = updateList;
+		AppVersion.getVersion();
+		result = currentVersion;
+	    }
+	};
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -104,17 +123,23 @@ public class VersionTest {
     }
 
     @Test(enabled = true)
-    public void checkUpdateSecurityVersion() {
+    public void testUpdateSecurityVersionAvailable() throws MalformedURLException {
 	SemanticVersion version = incrementPatch(incrementPatch(currentVersion));
 
 	VersionUpdate patch = newVersionUpdate(version);
 	updates.add(newVersionUpdate(currentVersion));
 	updates.add(patch);
 
-	new Expectations() {{
-	    loader.loadVersions(); result = updates;
-	    AppVersion.getVersion(); result = currentVersion;
-	}};
+	updateList = new VersionUpdateList(updates, downloadPage);
+
+	new Expectations() {
+	    {
+		loader.loadVersionUpdateList();
+		result = updateList;
+		AppVersion.getVersion();
+		result = currentVersion;
+	    }
+	};
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -126,19 +151,23 @@ public class VersionTest {
     }
 
     @Test(enabled = true)
-    public void checkUpdateMinorVersion() {
+    public void testUpdateMinorVersionAvailable() throws MalformedURLException {
 	SemanticVersion version = incrementPatch(incrementMinor(currentVersion));
 
 	VersionUpdate minor = newVersionUpdate(version);
 	updates.add(newVersionUpdate(currentVersion));
 	updates.add(minor);
 
-	new Expectations() {{
-	    loader.loadVersions();
-	    result = updates;
-	    AppVersion.getVersion();
-	    result = currentVersion;
-	}};
+	updateList = new VersionUpdateList(updates, downloadPage);
+
+	new Expectations() {
+	    {
+		loader.loadVersionUpdateList();
+		result = updateList;
+		AppVersion.getVersion();
+		result = currentVersion;
+	    }
+	};
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -147,6 +176,22 @@ public class VersionTest {
 	Assert.assertNull(result.getMajorUpgrade());
 	Assert.assertEquals(minor, result.getMinorUpgrade());
 	Assert.assertTrue(result.needsUpdate());
+    }
+
+    @Test(enabled = true)
+    public void testLoadUpdateList() throws MalformedURLException, IOException {
+	URL downloadListAddress = VersionTest.class.getResource("/updatelist.json");
+	String systemPkg = "deb";
+	try {
+	    VersionUpdateLoader updateLoader = new VersionUpdateLoader(downloadListAddress, systemPkg);
+
+	    VersionUpdateList result = updateLoader.loadVersionUpdateList();
+	    Assert.assertFalse(result.getVersionUpdates().isEmpty());
+
+	} catch (IllegalArgumentException ex) {
+	    LOG.info(ex.getMessage(), ex);
+	}
+
     }
 
     private VersionUpdate newVersionUpdate(SemanticVersion version) {

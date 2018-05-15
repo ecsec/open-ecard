@@ -80,6 +80,8 @@
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
+		
+		<!-- fix for netbeans as it executes the surefire:test task directly -->
 		<argLine></argLine>
 	</properties>
 

@@ -34,7 +34,6 @@ import org.openecard.common.SemanticVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -47,43 +46,14 @@ public class VersionTest {
 
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
-    private List<VersionUpdate> updates;
-    private VersionUpdateList updateList;
-    private URL downloadPage;
 
-    @Mocked
-    VersionUpdateLoader loader;
     @Mocked
     AppVersion appVersion;
 
-    @BeforeMethod
-    public void init() {
-	updates = new ArrayList<>();
-	try {
-	    downloadPage = new URL(url + "/downloadpage");
-	} catch (MalformedURLException ex) {
-	    LOG.error("The test URL is invalid.", ex);
-	}
-    }
-
     @Test(enabled = true)
-    public void testNoUpdateAvailable() throws MalformedURLException {
-	SemanticVersion version = currentVersion;
+    public void testNoUpdateAvailable(@Mocked final VersionUpdateLoader loader) throws MalformedURLException {
 
-	VersionUpdate minor = newVersionUpdate(version);
-	updates.add(newVersionUpdate(currentVersion));
-	updates.add(minor);
-
-	updateList = new VersionUpdateList(updates, downloadPage);
-
-	new Expectations() {
-	    {
-		loader.loadVersionUpdateList();
-		result = updateList;
-		AppVersion.getVersion();
-		result = currentVersion;
-	    }
-	};
+	expectUpdateInVersions(loader);
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -94,52 +64,46 @@ public class VersionTest {
 	Assert.assertFalse(result.needsUpdate());
     }
 
-    @Test(enabled = true)
-    public void testUpdateMajorVersionAvailable() throws MalformedURLException {
-	SemanticVersion version = incrementPatch(incrementMajor(currentVersion));
+    private VersionUpdateList createInput() {
+	return createInput(newVersionUpdate(currentVersion));
+    }
 
-	VersionUpdate major = newVersionUpdate(version);
+    private VersionUpdateList createInput(VersionUpdate update) {
+	
+	List<VersionUpdate> updates = new ArrayList<>();
 	updates.add(newVersionUpdate(currentVersion));
-	updates.add(major);
+	updates.add(update);
+	
+	URL downloadPage;
+	try {
+	    downloadPage = new URL(url + "/downloadpage");
+	} catch (MalformedURLException ex) {
+	   throw new IllegalArgumentException("Wrong url", ex);
+	}
+	final VersionUpdateList updateList = new VersionUpdateList(updates, downloadPage);
+	return updateList;
+    }
 
-	updateList = new VersionUpdateList(updates, downloadPage);
+    @Test(enabled = true)
+    public void testUpdateMajorVersionAvailable(@Mocked final VersionUpdateLoader loader) throws MalformedURLException {
+	VersionUpdate nextMajorUpdate = newVersionUpdate(incrementPatch(incrementMajor(currentVersion)));
 
-	new Expectations() {
-	    {
-		loader.loadVersionUpdateList();
-		result = updateList;
-		AppVersion.getVersion();
-		result = currentVersion;
-	    }
-	};
+	expectUpdateInVersions(loader, nextMajorUpdate);
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertNull(result.getSecurityUpgrade());
 	Assert.assertNull(result.getMinorUpgrade());
-	Assert.assertEquals(major, result.getMajorUpgrade());
+	Assert.assertEquals(nextMajorUpdate, result.getMajorUpgrade());
 	Assert.assertTrue(result.needsUpdate());
     }
 
     @Test(enabled = true)
-    public void testUpdateSecurityVersionAvailable() throws MalformedURLException {
-	SemanticVersion version = incrementPatch(incrementPatch(currentVersion));
+    public void testUpdateSecurityVersionAvailable(@Mocked final VersionUpdateLoader loader) throws MalformedURLException {
+	VersionUpdate nextPatchUpdate = newVersionUpdate(incrementPatch(incrementPatch(currentVersion)));
 
-	VersionUpdate patch = newVersionUpdate(version);
-	updates.add(newVersionUpdate(currentVersion));
-	updates.add(patch);
-
-	updateList = new VersionUpdateList(updates, downloadPage);
-
-	new Expectations() {
-	    {
-		loader.loadVersionUpdateList();
-		result = updateList;
-		AppVersion.getVersion();
-		result = currentVersion;
-	    }
-	};
+	expectUpdateInVersions(loader, nextPatchUpdate);
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
@@ -147,34 +111,21 @@ public class VersionTest {
 	Assert.assertTrue(result.needsUpdate());
 	Assert.assertNull(result.getMinorUpgrade());
 	Assert.assertNull(result.getMajorUpgrade());
-	Assert.assertEquals(patch, result.getSecurityUpgrade());
+	Assert.assertEquals(nextPatchUpdate, result.getSecurityUpgrade());
     }
 
     @Test(enabled = true)
-    public void testUpdateMinorVersionAvailable() throws MalformedURLException {
-	SemanticVersion version = incrementPatch(incrementMinor(currentVersion));
+    public void testUpdateMinorVersionAvailable(@Mocked final VersionUpdateLoader loader) throws MalformedURLException {
+	VersionUpdate nextMinorUpdate = newVersionUpdate(incrementPatch(incrementMinor(currentVersion)));
 
-	VersionUpdate minor = newVersionUpdate(version);
-	updates.add(newVersionUpdate(currentVersion));
-	updates.add(minor);
-
-	updateList = new VersionUpdateList(updates, downloadPage);
-
-	new Expectations() {
-	    {
-		loader.loadVersionUpdateList();
-		result = updateList;
-		AppVersion.getVersion();
-		result = currentVersion;
-	    }
-	};
+	expectUpdateInVersions(loader, nextMinorUpdate);
 
 	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertNull(result.getSecurityUpgrade());
 	Assert.assertNull(result.getMajorUpgrade());
-	Assert.assertEquals(minor, result.getMinorUpgrade());
+	Assert.assertEquals(nextMinorUpdate, result.getMinorUpgrade());
 	Assert.assertTrue(result.needsUpdate());
     }
 
@@ -205,11 +156,11 @@ public class VersionTest {
     }
 
     private SemanticVersion incrementMajor(SemanticVersion currentVersion) {
-	return createVersion(currentVersion.getMajor()+1, currentVersion.getMinor(), currentVersion.getPatch());
+	return createVersion(currentVersion.getMajor() + 1, currentVersion.getMinor(), currentVersion.getPatch());
     }
 
     private SemanticVersion incrementMinor(SemanticVersion currentVersion) {
-	return createVersion(currentVersion.getMajor(), currentVersion.getMinor()+1, currentVersion.getPatch());
+	return createVersion(currentVersion.getMajor(), currentVersion.getMinor() + 1, currentVersion.getPatch());
     }
 
     private SemanticVersion incrementPatch(SemanticVersion currentVersion) {
@@ -219,6 +170,31 @@ public class VersionTest {
     private SemanticVersion createVersion(final int major, final int minor, final int patch) {
 	String incremented = String.format("%d.%d.%d", major, minor, patch);
 	return new SemanticVersion(incremented);
+    }
+
+    private void expectUpdateInVersions(final VersionUpdateLoader loader) {
+	final VersionUpdateList updateList = createInput();
+
+	expectUpdateInVersions(loader, updateList);
+    }
+
+    private void expectUpdateInVersions(final VersionUpdateLoader loader, VersionUpdate nextMajorUpdate) {
+	final VersionUpdateList updateList = createInput(nextMajorUpdate);
+
+	expectUpdateInVersions(loader, updateList);
+    }
+
+    private void expectUpdateInVersions(final VersionUpdateLoader loader, final VersionUpdateList updateList) {
+	new Expectations() {
+	    {
+		VersionUpdateLoader.createWithDefaults();
+		result = loader;
+		loader.loadVersionUpdateList();
+		result = updateList;
+		AppVersion.getVersion();
+		result = currentVersion;
+	    }
+	};
     }
 
 }

@@ -188,7 +188,7 @@ public class Status implements EventCallback {
 		}
 	    }
 	});
-	
+
 	JButton btnAbout = new JButton(lang.translationForKey("tray.about"));
 	btnAbout.addActionListener(new ActionListener() {
 	    @Override
@@ -433,21 +433,21 @@ public class Status implements EventCallback {
 	if (updateLabel != null) {	
 	    gradPanel.remove(updateLabel);
 	}
-	
+
 	Image img = GuiUtils.getImage("update.jpg");
 	Image resizedImage = img.getScaledInstance(60, 40, 0);
 	Icon icon = new ImageIcon(resizedImage);
 	updateLabel = new JLabel(icon);
-	
+
 	updateLabel.addMouseListener(new MouseAdapter() {
 	    @Override
 	    public void mouseClicked(MouseEvent e){
 		openUpdateWindow(checker);
 	    }
 	});
-	
+
 	gradPanel.add(updateLabel, BorderLayout.EAST); 
-	
+
 	if (popup != null) {
 		popup.updateContent(contentPane);
 	}
@@ -456,7 +456,7 @@ public class Status implements EventCallback {
     private synchronized void openUpdateWindow(VersionUpdateChecker checker) {
 	if (uw == null) {
 	    // no window displayed, start it up	    
-	    
+
 	    Platform.runLater(() -> {
 		Stage stage = new Stage();
 		stage.setOnHidden(event -> {

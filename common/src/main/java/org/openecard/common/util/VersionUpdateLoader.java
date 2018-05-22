@@ -73,7 +73,7 @@ public class VersionUpdateLoader {
 	    con.connect();
 	    InputStream in = con.getInputStream();
 	    JSONObject obj = new JSONObject(new JSONTokener(in));
-	
+
 	    // get package specific download page
 	    String dowloadPageString = obj.getString(pkgType+"_download_page");
 

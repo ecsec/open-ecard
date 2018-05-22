@@ -305,7 +305,7 @@ public final class RichClient {
 		 // check for updates
 		new Timer().schedule(new UpdateTask(), 1);
 	    }
-	
+
 	} catch (Exception ex) {
 	    LOG.error(ex.getMessage(), ex);
 

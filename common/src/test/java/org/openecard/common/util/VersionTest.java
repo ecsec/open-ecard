@@ -1,5 +1,4 @@
-/**
- * **************************************************************************
+/****************************************************************************
  * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,8 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- **************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.common.util;
 
 import java.io.IOException;

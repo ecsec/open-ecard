@@ -72,10 +72,10 @@ public class UpdateWindow {
 	// get a list of all needed elements for the window and add it to VBox
 	List<Node> nodes = getElements();
 	sp.getChildren().addAll(nodes);
-	
+
 	// set width to table.getPrefWidth() + 20 to avoid scrolling bars (bug with getPrefWidth() ?)	
 	sp.setMaxSize(width+20, VBox.USE_PREF_SIZE);
-	
+
 	// create new scene and apply the corresponding CSS rules
 	sp.getStyleClass().add("update");
 	Scene scene = new Scene(sp, sp.getMaxWidth(), sp.getMaxHeight());
@@ -96,7 +96,7 @@ public class UpdateWindow {
 
     private List<Node> getElements() {
 	final FitContentTableView<VersionUpdateTableItem> table = new FitContentTableView<>();
-	
+
 	// create Table cells and bind them to the relevant property of VersionUpdateTableItem
 	TableColumn versionCol = new TableColumn(lang.translationForKey("version"));
 	versionCol.setCellValueFactory(new PropertyValueFactory("version"));
@@ -104,7 +104,7 @@ public class UpdateWindow {
 	updateTypeCol.setCellValueFactory(new PropertyValueFactory("updateType"));
 	TableColumn downloadLinkCol = new TableColumn(lang.translationForKey("direct_download"));
 	downloadLinkCol.setCellValueFactory(new PropertyValueFactory("downloadLink"));
-	
+
 	// make URL in download link column appear as link
 	downloadLinkCol.setCellFactory(new HyperlinkCell());
 
@@ -121,7 +121,7 @@ public class UpdateWindow {
 	    });
 	    return row;
 	});
-	
+
 	// option to open update link by using the enter key
 	table.setOnKeyPressed((KeyEvent t) -> {
 	    if (! table.getSelectionModel().isEmpty() && t.getCode() == KeyCode.ENTER) {
@@ -129,7 +129,7 @@ public class UpdateWindow {
 		openLink(item);
 	    }
 	});
-	
+
 	// make table immutable and add the three columns
 	table.setEditable(false);
 	table.getColumns().add(versionCol);
@@ -138,10 +138,10 @@ public class UpdateWindow {
 
 	List<VersionUpdate> updates = new ArrayList();
 	ObservableList<VersionUpdateTableItem> updateList = FXCollections.observableArrayList();
-	
+
 	// if there is a major update, add table entry with version, type = "major" and download link
 	VersionUpdate majUpdate = updateChecker.getMajorUpgrade();
-	
+
 	if (majUpdate != null) {
 	    String version = majUpdate.getVersion().toString();
 	    String type = "major";
@@ -152,7 +152,7 @@ public class UpdateWindow {
 
 	    updates.add(majUpdate);
 	}
-	
+
 	// if there is a minor update, add table entry with version, type = "minor" and download link
 	VersionUpdate minUpdate = updateChecker.getMinorUpgrade();
 
@@ -166,7 +166,7 @@ public class UpdateWindow {
 
 	    updates.add(minUpdate);
 	}
-	
+
 	// if there is a security update, add table entry with version, type = "security" and download link
 	VersionUpdate secUpdate = updateChecker.getSecurityUpgrade();
 
@@ -179,7 +179,7 @@ public class UpdateWindow {
 
 	    updates.add(secUpdate);
 	}
-	
+
 	table.getColumns().forEach((column) -> column.setSortable(false));
 
 	// add all (between 1 and 3) table rows and set width to the calculated width, which is needed to 
@@ -201,7 +201,7 @@ public class UpdateWindow {
 	// determine message on top ("not maintained anymore" or "new version(s) available")
 	Label label = null;
 	int numberOfVersions = updates.size();
-	
+
 	if (! updateChecker.isCurrentMaintained()) {
 	    label = new Label(lang.translationForKey("version_not_maintained", currentVersion));
 	} else if (numberOfVersions == 1) {
@@ -209,7 +209,7 @@ public class UpdateWindow {
 	} else if (numberOfVersions > 1) {
 	    label = new Label(lang.translationForKey("new_versions_msg", currentVersion));
 	}
-	
+
 	label.wrapTextProperty().set(true);
 
 	// add section for the manual download link
@@ -218,7 +218,7 @@ public class UpdateWindow {
 	vbox.getChildren().add(labelPage);
 	Hyperlink downloadPage = generateHyperLink(updateChecker.getDownloadPage().toString());
 	vbox.getChildren().add(downloadPage);
-	
+
 	// add message, update table and manual download section to list and return it
 	List<Node> result = new ArrayList<>();
 	result.add(label);

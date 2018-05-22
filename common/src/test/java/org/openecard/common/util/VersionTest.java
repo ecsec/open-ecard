@@ -1,4 +1,5 @@
-/****************************************************************************
+/**
+ * **************************************************************************
  * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +19,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ **************************************************************************
+ */
 package org.openecard.common.util;
 
 import java.io.IOException;
@@ -69,16 +70,16 @@ public class VersionTest {
     }
 
     private VersionUpdateList createInput(VersionUpdate update) {
-	
+
 	List<VersionUpdate> updates = new ArrayList<>();
 	updates.add(newVersionUpdate(currentVersion));
 	updates.add(update);
-	
+
 	URL downloadPage;
 	try {
 	    downloadPage = new URL(url + "/downloadpage");
 	} catch (MalformedURLException ex) {
-	   throw new IllegalArgumentException("Wrong url", ex);
+	    throw new IllegalArgumentException("Wrong url", ex);
 	}
 	final VersionUpdateList updateList = new VersionUpdateList(updates, downloadPage);
 	return updateList;
@@ -131,18 +132,14 @@ public class VersionTest {
 
     @Test(enabled = true)
     public void testLoadUpdateList() throws MalformedURLException, IOException {
-	URL downloadListAddress = VersionTest.class.getResource("/updatelist.json");
+	URL downloadListAddress = VersionTest.class.getResource("/updatelist.json");	
 	String systemPkg = "deb";
-	try {
-	    VersionUpdateLoader updateLoader = new VersionUpdateLoader(downloadListAddress, systemPkg);
+	URL expectedDownloadPage = new URL("https://www.openecard.org/downloads_"+systemPkg);
+	VersionUpdateLoader updateLoader = new VersionUpdateLoader(downloadListAddress, systemPkg);
 
-	    VersionUpdateList result = updateLoader.loadVersionUpdateList();
-	    Assert.assertFalse(result.getVersionUpdates().isEmpty());
-
-	} catch (IllegalArgumentException ex) {
-	    LOG.info(ex.getMessage(), ex);
-	}
-
+	VersionUpdateList result = updateLoader.loadVersionUpdateList();
+	Assert.assertFalse(result.getVersionUpdates().isEmpty());
+	Assert.assertEquals(result.getDownloadPage(), expectedDownloadPage);
     }
 
     private VersionUpdate newVersionUpdate(SemanticVersion version) {

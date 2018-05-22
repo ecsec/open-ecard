@@ -176,9 +176,9 @@ public final class RichClient {
 	    TinyManagement management = new TinyManagement(env);
 	    env.setManagement(management);
 
-            // Set up MiddlewareConfig
+	    // Set up MiddlewareConfig
 	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
-            List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
+	    List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
 
 	    // Set up CardRecognitionImpl
 	    recognition = new CardRecognitionImpl(env);
@@ -206,15 +206,15 @@ public final class RichClient {
 	    env.setSAL(sal);
 	    env.setCIFProvider(sal);
 
-            // Set up Middleware SAL
+	    // Set up Middleware SAL
 	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates, mwConfigLoader);
-            for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
+	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
 		if (! mwSALConfig.isDisabled()) {
 		    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig, mwCallback);
 		    mwSal.setGui(gui);
 		    sal.addSpecializedSAL(mwSal);
 		}
-            }
+	    }
 
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
@@ -299,13 +299,13 @@ public final class RichClient {
 
 	    // perform GC to bring down originally allocated memory
 	    new Timer().schedule(new GCTask(), 5000);
-	   	    
-	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	    
+
+	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	
 	    if(update){	
 		 // check for updates
 		new Timer().schedule(new UpdateTask(), 1);
 	    }
-	   
+	
 	} catch (Exception ex) {
 	    LOG.error(ex.getMessage(), ex);
 
@@ -323,7 +323,7 @@ public final class RichClient {
 	    System.exit(1);
 	}
     }
-    
+
     private void initJavaFXIfNecessary() {
 	    if(!javaFxInitialized){
 		javafx.application.Platform.setImplicitExit(false);
@@ -331,7 +331,7 @@ public final class RichClient {
 		javaFxInitialized = true;
 	    } 	    
     }
-    
+
     private class UpdateTask extends TimerTask {
 	@Override
 	public void run() {	    

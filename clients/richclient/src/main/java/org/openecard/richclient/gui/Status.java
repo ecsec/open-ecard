@@ -81,6 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Johannes Schmölz
  * @author Tobias Wich
+ * @author Sebastian Schuberth
  */
 public class Status implements EventCallback {
 
@@ -283,7 +284,7 @@ public class Status implements EventCallback {
 	}
 
 	if (! cardIcons.containsKey(cardType)) {
-            InputStream is = env.getRecognition().getCardImage(cardType);
+	    InputStream is = env.getRecognition().getCardImage(cardType);
 	    if (is == null) {
 		is = env.getRecognition().getUnknownCardImage();
 	    }
@@ -427,7 +428,7 @@ public class Status implements EventCallback {
     private void removeResponsibleContext(String ifd) {
 	cardContext.remove(ifd);
     }
-    
+
     public void showUpdateIcon(VersionUpdateChecker checker) {
 	if (updateLabel != null) {	
 	    gradPanel.remove(updateLabel);
@@ -451,7 +452,7 @@ public class Status implements EventCallback {
 		popup.updateContent(contentPane);
 	}
     }
-    
+
     private synchronized void openUpdateWindow(VersionUpdateChecker checker) {
 	if (uw == null) {
 	    // no window displayed, start it up	    
@@ -471,5 +472,5 @@ public class Status implements EventCallback {
 	    Platform.runLater(uw::toFront);
 	}
     }
-    
+
 }

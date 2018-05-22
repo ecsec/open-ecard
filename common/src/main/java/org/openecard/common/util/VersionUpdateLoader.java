@@ -29,7 +29,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +49,7 @@ public class VersionUpdateLoader {
     private static final Logger LOG = LoggerFactory.getLogger(VersionUpdateLoader.class);
     private final URL updateUrl;
     private final String pkgType;
-       
+
     VersionUpdateLoader(URL updateUrl, String systemPackageType) {
 	this.updateUrl = updateUrl;
 	this.pkgType = systemPackageType;
@@ -65,7 +64,7 @@ public class VersionUpdateLoader {
 	    throw new IllegalArgumentException(msg, ex);
 	}
     }
-    
+
     public VersionUpdateList loadVersionUpdateList() throws IllegalArgumentException {	
 	try {	 
 	    // load list data
@@ -74,15 +73,15 @@ public class VersionUpdateLoader {
 	    con.connect();
 	    InputStream in = con.getInputStream();
 	    JSONObject obj = new JSONObject(new JSONTokener(in));
-	    
+	
 	    // get package specific download page
 	    String dowloadPageString = obj.getString(pkgType+"_download_page");
-	    	    
+
 	    // access package specific list
 	    JSONArray updatesRaw = obj.getJSONArray(pkgType);
-	    
+
 	    ArrayList<VersionUpdate> updates = new ArrayList<>();
-	    
+
 	    for (int i = 0; i < updatesRaw.length(); i++) {
 		try {
 		    VersionUpdate next = VersionUpdate.fromJson(updatesRaw.getJSONObject(i));
@@ -95,11 +94,10 @@ public class VersionUpdateLoader {
 
 	    // make sure the versions are in the correct order
 	    Collections.sort(updates);
-	    	    
+
 	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(dowloadPageString));
 	    LOG.info("Successfully got versionupdatelist!");
 	    return list;
-	    
 	} catch (MalformedURLException ex) {
 	    LOG.error("Failed to get URL for update list.");
 	    throw new IllegalArgumentException("Failed to get URL for update list.", ex);
@@ -111,7 +109,7 @@ public class VersionUpdateLoader {
 	    throw new IllegalArgumentException("Package type "+pkgType+" not supported in update list.", ex);
 	}
     }
-      	    	    
+
     private static URL getUpdateUrl() throws MalformedURLException {
 	String url = OpenecardProperties.getProperty("update-list.location");
 	return new URL(url);

@@ -98,9 +98,6 @@ public class VersionUpdateLoader {
 	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(dowloadPageString));
 	    LOG.info("Successfully got versionupdatelist!");
 	    return list;
-	} catch (MalformedURLException ex) {
-	    LOG.error("Failed to get URL for update list.");
-	    throw new IllegalArgumentException("Failed to get URL for update list.", ex);
 	} catch (IOException ex) {
 	    LOG.error("Failed to retrieve update list from server.", ex);
 	    throw new IllegalArgumentException("Failed to retrieve update list from server.", ex);
@@ -110,12 +107,12 @@ public class VersionUpdateLoader {
 	}
     }
 
-    private static URL getUpdateUrl() throws MalformedURLException {
+    static URL getUpdateUrl() throws MalformedURLException {
 	String url = OpenecardProperties.getProperty("update-list.location");
 	return new URL(url);
     }
 
-    private static String getPkgType() {
+    static String getPkgType() {
 	if (SysUtils.isWin() && SysUtils.is64bit()) {
 	    return "win64";
 	} else if (SysUtils.isWin()) {
@@ -130,5 +127,5 @@ public class VersionUpdateLoader {
 
 	return "UNKNOWN";
     }
-
+    
 }

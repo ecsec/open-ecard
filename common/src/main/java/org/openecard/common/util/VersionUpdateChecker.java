@@ -57,7 +57,7 @@ public class VersionUpdateChecker {
     private final SemanticVersion installedVersion;
     private final URL downloadPage;
 
-    private VersionUpdateChecker(SemanticVersion installedVersion, VersionUpdateList list) {
+    VersionUpdateChecker(SemanticVersion installedVersion, VersionUpdateList list) {
 	this.updates = list.getVersionUpdates();
 	this.installedVersion = installedVersion;
 	this.downloadPage = list.getDownloadPage();

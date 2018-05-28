@@ -1,0 +1,11 @@
+{
+  "win": [],
+  "deb_download_page": "https://www.openecard.org/downloads_deb",
+  "deb": [{
+    "version": "1.3.0",
+    "download_page": "https://www.openecard.org/downloads/v1.3.0",
+    "download_url": "https://www.openecard.org/downloads/OeC-1.3.0.deb",
+    "status": "MAINTAINED"
+  }],
+  "rpm": []
+}

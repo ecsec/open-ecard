@@ -31,24 +31,31 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import org.openecard.addon.AddonManager;
@@ -59,8 +66,10 @@ import org.openecard.common.event.EventObject;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.gui.about.AboutDialog;
 import org.openecard.richclient.gui.manage.ManagementDialog;
+import org.openecard.richclient.gui.update.UpdateWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Johannes Schmölz
  * @author Tobias Wich
+ * @author Sebastian Schuberth
  */
 public class Status implements EventCallback {
 
@@ -90,6 +100,9 @@ public class Status implements EventCallback {
     private final AppTray appTray;
     private final Environment env;
     private final AddonManager manager;
+    private UpdateWindow uw;
+    private GradientPanel gradPanel;
+    private JLabel updateLabel;
 
     /**
      * Constructor of Status class.
@@ -150,11 +163,14 @@ public class Status implements EventCallback {
 
 	JLabel label = new JLabel(" " + lang.translationForKey("tray.title", AppVersion.getName()) + " ");
 	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+	label.setHorizontalAlignment(SwingConstants.CENTER);
 
-	GradientPanel panel = new GradientPanel(new Color(106, 163, 213), new Color(80, 118, 177));
-	panel.setOpaque(false);
-	panel.add(label);
-
+	gradPanel = new GradientPanel(new Color(106, 163, 213), new Color(80, 118, 177));
+	gradPanel.setLayout(new BorderLayout());
+	
+	gradPanel.setOpaque(false);
+	gradPanel.add(label, BorderLayout.CENTER);
+	
 	JPanel btnPanel = new JPanel();
 	btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 	btnPanel.setBackground(Color.white);
@@ -205,7 +221,7 @@ public class Status implements EventCallback {
 	btnPanel.add(btnAbout);
 	btnPanel.add(btnExit);
 
-	contentPane.add(panel, BorderLayout.NORTH);
+	contentPane.add(gradPanel, BorderLayout.NORTH);
 	contentPane.add(infoView, BorderLayout.CENTER);
 	contentPane.add(btnPanel, BorderLayout.SOUTH);
     }
@@ -268,7 +284,7 @@ public class Status implements EventCallback {
 	}
 
 	if (! cardIcons.containsKey(cardType)) {
-            InputStream is = env.getRecognition().getCardImage(cardType);
+	    InputStream is = env.getRecognition().getCardImage(cardType);
 	    if (is == null) {
 		is = env.getRecognition().getUnknownCardImage();
 	    }
@@ -411,6 +427,50 @@ public class Status implements EventCallback {
 
     private void removeResponsibleContext(String ifd) {
 	cardContext.remove(ifd);
+    }
+
+    public void showUpdateIcon(VersionUpdateChecker checker) {
+	if (updateLabel != null) {	
+	    gradPanel.remove(updateLabel);
+	}
+
+	Image img = GuiUtils.getImage("update.jpg");
+	Image resizedImage = img.getScaledInstance(60, 40, 0);
+	Icon icon = new ImageIcon(resizedImage);
+	updateLabel = new JLabel(icon);
+
+	updateLabel.addMouseListener(new MouseAdapter() {
+	    @Override
+	    public void mouseClicked(MouseEvent e){
+		openUpdateWindow(checker);
+	    }
+	});
+
+	gradPanel.add(updateLabel, BorderLayout.EAST); 
+
+	if (popup != null) {
+		popup.updateContent(contentPane);
+	}
+    }
+
+    private synchronized void openUpdateWindow(VersionUpdateChecker checker) {
+	if (uw == null) {
+	    // no window displayed, start it up	    
+
+	    Platform.runLater(() -> {
+		Stage stage = new Stage();
+		stage.setOnHidden(event -> {
+		    synchronized (this) {
+			uw = null;
+		    }
+		});
+		uw = new UpdateWindow(checker, stage);
+		uw.init();
+	    });
+	} else {
+	    // window is already displayed, just bring it to the front
+	    Platform.runLater(uw::toFront);
+	}
     }
 
 }

@@ -22,6 +22,7 @@
 
 package org.openecard.common.util;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * <p>The update-list location is taken from the built in property: <tt>update-list.location</tt></p>
  *
  * @author Tobias Wich
+ * @author Sebastian Schuberth
  */
 public class VersionUpdateChecker {
 
@@ -53,16 +55,22 @@ public class VersionUpdateChecker {
 
     private final List<VersionUpdate> updates;
     private final SemanticVersion installedVersion;
+    private final URL downloadPage;
 
-    private VersionUpdateChecker(SemanticVersion installedVersion, List<VersionUpdate> updates) {
-	this.updates = updates;
+    VersionUpdateChecker(SemanticVersion installedVersion, VersionUpdateList list) {
+	this.updates = list.getVersionUpdates();
 	this.installedVersion = installedVersion;
+	this.downloadPage = list.getDownloadPage();
     }
 
     public static VersionUpdateChecker loadCurrentVersionList() {
-	VersionUpdateLoader loader = new VersionUpdateLoader();
-	List<VersionUpdate> updates = loader.loadVersions();
-	return new VersionUpdateChecker(AppVersion.getVersion(), updates);
+	VersionUpdateLoader loader = VersionUpdateLoader.createWithDefaults();
+	VersionUpdateList list = loader.loadVersionUpdateList();
+	return new VersionUpdateChecker(AppVersion.getVersion(), list);
+    }
+
+    public URL getDownloadPage() {
+	return this.downloadPage;
     }
 
     public boolean needsUpdate() {
@@ -118,7 +126,7 @@ public class VersionUpdateChecker {
 		i.remove();
 	    } else if (installedVersion.getMinor() >= next.getVersion().getMinor()) {
 		i.remove();
- 	    }
+	    }
 	}
 
 	// just compare last version as it will be the most current one

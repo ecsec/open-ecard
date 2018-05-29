@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HTMLPanel {
 
-    private static final Logger logger = LoggerFactory.getLogger(HTMLPanel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTMLPanel.class);
     
     private static JFXPanel jfxPane;
     private static WebView browser;
@@ -65,7 +65,6 @@ public class HTMLPanel {
 	jfxPane = new JFXPanel();
 	contentPane.add(jfxPane);
 	Platform.runLater(new Runnable() {
-
 	    @Override
 	    public void run() {
 		initFx(mimeType, content);
@@ -82,7 +81,6 @@ public class HTMLPanel {
      * @param content The content to display.
      */
     private static void initFx(String mimeType, byte[] content) {
-
 	BorderPane borderPane = new BorderPane();
 	browser = new WebView();
 	WebEngine engine = browser.getEngine();

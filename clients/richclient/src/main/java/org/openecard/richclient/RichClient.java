@@ -301,7 +301,7 @@ public final class RichClient {
 	    new Timer().schedule(new GCTask(), 5000);
 
 	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	
-	    if(update){	
+	    if (update) {
 		 // check for updates
 		new Timer().schedule(new UpdateTask(), 1);
 	    }
@@ -324,25 +324,32 @@ public final class RichClient {
 	}
     }
 
-    private void initJavaFXIfNecessary() {
-	    if(!javaFxInitialized){
-		javafx.application.Platform.setImplicitExit(false);
-		new JFXPanel(); 
-		javaFxInitialized = true;
-	    } 	    
-    }
-
     private class UpdateTask extends TimerTask {
 	@Override
 	public void run() {	    
 	    VersionUpdateChecker updateChecker = VersionUpdateChecker.loadCurrentVersionList();
 	    
-	    if (updateChecker.needsUpdate()) {			    
-		initJavaFXIfNecessary();
-		tray.status().showUpdateIcon(updateChecker);
+	    if (updateChecker.needsUpdate()) {
+		LOG.info("Available update found.");
+		try {
+		    RichClient.class.getClassLoader().loadClass("javafx.embed.swing.JFXPanel");
+		    initJavaFXIfNecessary();
+		    tray.status().showUpdateIcon(updateChecker);
+		} catch (ClassNotFoundException ex) {
+		    LOG.warn("JavaFX is not supported by this platform.");
+		    return;
+		}
 	    }
 	    // repeat every 24 hours
 	    new Timer().schedule(new UpdateTask(), 24 * 60 * 60 * 1000);	    
+	}
+
+	private void initJavaFXIfNecessary() {
+	    if (!javaFxInitialized) {
+		javafx.application.Platform.setImplicitExit(false);
+		new JFXPanel();
+		javaFxInitialized = true;
+	    }
 	}
     }
 

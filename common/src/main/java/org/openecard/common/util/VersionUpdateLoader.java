@@ -75,7 +75,7 @@ public class VersionUpdateLoader {
 	    JSONObject obj = new JSONObject(new JSONTokener(in));
 
 	    // get package specific download page
-	    String dowloadPageString = obj.getString(pkgType+"_download_page");
+	    String dowloadPageString = obj.getString(pkgType + "_download_page");
 
 	    // access package specific list
 	    JSONArray updatesRaw = obj.getJSONArray(pkgType);
@@ -96,7 +96,7 @@ public class VersionUpdateLoader {
 	    Collections.sort(updates);
 
 	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(dowloadPageString));
-	    LOG.info("Successfully got versionupdatelist!");
+	    LOG.info("Successfully retrieved version update list.");
 	    return list;
 	} catch (IOException ex) {
 	    LOG.error("Failed to retrieve update list from server.", ex);
@@ -127,5 +127,5 @@ public class VersionUpdateLoader {
 
 	return "UNKNOWN";
     }
-    
+
 }

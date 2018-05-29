@@ -326,9 +326,15 @@ public final class RichClient {
 
     private class UpdateTask extends TimerTask {
 	@Override
-	public void run() {	    
+	public void run() {
+	    if (AppVersion.getBuildId() != null) {
+		// snapshot versions don't need updates
+		LOG.info("Skipping update check for developer build.");
+		return;
+	    }
+
 	    VersionUpdateChecker updateChecker = VersionUpdateChecker.loadCurrentVersionList();
-	    
+
 	    if (updateChecker.needsUpdate()) {
 		LOG.info("Available update found.");
 		try {

@@ -49,6 +49,7 @@ import org.openecard.common.I18n;
 import org.openecard.common.util.SysUtils;
 import org.openecard.common.util.VersionUpdate;
 import org.openecard.common.util.VersionUpdateChecker;
+import org.openecard.gui.swing.common.GUIDefaults;
 
 
 /**
@@ -82,8 +83,7 @@ public class UpdateWindow {
 	String css = getClass().getResource("/update.css").toExternalForm();
 	scene.getStylesheets().add(css);
 
-	String icon = getClass().getResource("/images/update.jpg").toExternalForm();
-	stage.getIcons().add(new Image(icon));
+	stage.getIcons().add(new Image(GUIDefaults.getImageStream("Frame.icon", 45, 45)));
 	stage.setTitle(lang.translationForKey("tooltip_msg"));
 	stage.setScene(scene);
 	stage.setResizable(false);

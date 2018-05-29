@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,12 +24,19 @@ package org.openecard.gui.swing.common;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -41,18 +48,19 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class GUIDefaults {
 
-    private static final Logger logger = LoggerFactory.getLogger(GUIDefaults.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(GUIDefaults.class.getName());
 
     // Regex pattern for hex colors
     private static final String HEX_PATTERN = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
-    private static final Pattern hexColorPattern = Pattern.compile(HEX_PATTERN);
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile(HEX_PATTERN);
     // Swing UIDefaults
-    private static final UIDefaults defaults = UIManager.getDefaults();
-    private static final UIDefaults ownDefaults = new UIDefaults();
-    private static final ArrayList<String> colorProperties = new ArrayList<String>() {
+    private static final UIDefaults DEFAULTS = UIManager.getDefaults();
+    private static final UIDefaults OWN_DEFAULTS = new UIDefaults();
+    private static final ArrayList<String> COLOR_PROPERTIES = new ArrayList<String>() {
 	private static final long serialVersionUID = 1L;
 	{
 	    add("foreground");
@@ -62,7 +70,7 @@ public class GUIDefaults {
 	    add("disabledText");
 	}
     };
-    private static final ArrayList<String> fontProperties = new ArrayList<String>() {
+    private static final ArrayList<String> FONT_PROPERTIES = new ArrayList<String>() {
 	private static final long serialVersionUID = 1L;
 	{
 	    add("font");
@@ -70,7 +78,7 @@ public class GUIDefaults {
 	    add("acceleratorFont");
 	}
     };
-    private static final ArrayList<String> iconProperties = new ArrayList<String>() {
+    private static final ArrayList<String> ICON_PROPERTIES = new ArrayList<String>() {
 	private static final long serialVersionUID = 1L;
 	{
 	    add("icon");
@@ -81,7 +89,7 @@ public class GUIDefaults {
     };
 
     private static Object getProperty(String identifier) {
-	return ownDefaults.get(identifier);
+	return OWN_DEFAULTS.get(identifier);
     }
 
     public static Color getColor(String identifier) {
@@ -119,6 +127,35 @@ public class GUIDefaults {
     public static ImageIcon getImage(String identifier) {
 	return getImage(identifier, -1, -1);
     }
+    
+    public static InputStream getImageStream(String identifier, int width, int height) {
+	return getImageStream(getImage(identifier, width, height));
+    }
+    
+    public static InputStream getImageStream(String identifier) {
+	return getImageStream(getImage(identifier));
+    }
+
+    private static InputStream getImageStream(ImageIcon icon) {
+	BufferedImage bi = new BufferedImage(
+		icon.getIconWidth(),
+		icon.getIconHeight(),
+		BufferedImage.TYPE_INT_ARGB);
+	Graphics g = bi.createGraphics();
+	// paint the Icon to the BufferedImage
+	icon.paintIcon(null, g, 0, 0);
+	g.dispose();
+
+	try {
+	    ByteArrayOutputStream os = new ByteArrayOutputStream();
+	    ImageIO.write(bi, "PNG", os);
+	    InputStream is = new ByteArrayInputStream(os.toByteArray());
+
+	    return is;
+	} catch (IOException ex) {
+	    throw new IllegalArgumentException("Failed to convert image to PNG.");
+	}
+    }
 
     public static void initialize() {
 	try {
@@ -135,7 +172,7 @@ public class GUIDefaults {
 		    String value = (String) props.getProperty(property);
 
 		    // Parse color property
-		    if (colorProperties.contains(propertyAttribute)) {
+		    if (COLOR_PROPERTIES.contains(propertyAttribute)) {
 			validateHexColor(value);
 			if (value.length() == 4) {
 			    StringBuilder sb = new StringBuilder("#");
@@ -146,36 +183,36 @@ public class GUIDefaults {
 			    value = sb.toString();
 			}
 			Color color = Color.decode(value);
-			defaults.put(property, color);
-			ownDefaults.put(property, color);
+			DEFAULTS.put(property, color);
+			OWN_DEFAULTS.put(property, color);
 		    } // Parse font propertiy
-		    else if (fontProperties.contains(propertyAttribute)) {
+		    else if (FONT_PROPERTIES.contains(propertyAttribute)) {
 			Font font = Font.decode(value);
-			defaults.put(property, font);
-			ownDefaults.put(property, font);
+			DEFAULTS.put(property, font);
+			OWN_DEFAULTS.put(property, font);
 		    }// Parse icon propertiy
-		    else if (iconProperties.contains(propertyAttribute)) {
+		    else if (ICON_PROPERTIES.contains(propertyAttribute)) {
 			URL url = FileUtils.resolveResourceAsURL(guiProps.getClass(), value);
 			if (url == null) {
-			    logger.error("Cannot parse the property: " + property);
+			    LOG.error("Cannot parse the property: " + property);
 			} else {
 			    Image image = toolkit.getImage(url);
 			    ImageIcon icon = new ImageIcon(image);
-			    defaults.put(property, icon);
-			    ownDefaults.put(property, icon);
+			    DEFAULTS.put(property, icon);
+			    OWN_DEFAULTS.put(property, icon);
 			}
 		    }
 		} catch (Exception e) {
-		    logger.error("Cannot parse the property: " + property);
+		    LOG.error("Cannot parse the property: " + property);
 		}
 	    }
 	} catch (Exception e) {
-	    logger.error(e.getMessage());
+	    LOG.error(e.getMessage());
 	}
     }
 
     private static void validateHexColor(String hex) throws IllegalArgumentException {
-	if (!hexColorPattern.matcher(hex).matches()) {
+	if (! HEX_COLOR_PATTERN.matcher(hex).matches()) {
 	    throw new IllegalArgumentException();
 	}
     }

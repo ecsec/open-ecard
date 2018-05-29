@@ -434,8 +434,8 @@ public class Status implements EventCallback {
 	    gradPanel.remove(updateLabel);
 	}
 
-	Image img = GuiUtils.getImage("update.jpg");
-	Image resizedImage = img.getScaledInstance(60, 40, 0);
+	Image img = GuiUtils.getImage("update_available.png");
+	Image resizedImage = img.getScaledInstance(40, 40, 0);
 	Icon icon = new ImageIcon(resizedImage);
 	updateLabel = new JLabel(icon);
 

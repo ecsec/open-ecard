@@ -120,8 +120,7 @@ public final class RichClient {
     // card states
     private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
-    private byte[] contextHandle;    
-    private boolean javaFxInitialized = false;
+    private byte[] contextHandle;
 
     static {
 	try {
@@ -298,12 +297,12 @@ public final class RichClient {
 	    }
 
 	    // perform GC to bring down originally allocated memory
-	    new Timer().schedule(new GCTask(), 5000);
+	    new Timer("GC-Task").schedule(new GCTask(), 5000);
 
 	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	
 	    if (update) {
 		 // check for updates
-		new Timer().schedule(new UpdateTask(), 1);
+		new Timer("Update-Task").schedule(new UpdateTask(tray), 1);
 	    }
 
 	} catch (Exception ex) {
@@ -324,7 +323,15 @@ public final class RichClient {
 	}
     }
 
-    private class UpdateTask extends TimerTask {
+    private static class UpdateTask extends TimerTask {
+
+	private static boolean javaFxInitialized = false;
+	private final AppTray tray;
+
+	UpdateTask(AppTray tray) {
+	    this.tray = tray;
+	}
+
 	@Override
 	public void run() {
 	    if (AppVersion.getBuildId() != null) {
@@ -345,13 +352,16 @@ public final class RichClient {
 		    LOG.warn("JavaFX is not supported by this platform.");
 		    return;
 		}
+	    } else {
+		LOG.info("No update found, trying again later.");
 	    }
+
 	    // repeat every 24 hours
-	    new Timer().schedule(new UpdateTask(), 24 * 60 * 60 * 1000);	    
+	    new Timer().schedule(new UpdateTask(tray), 24 * 60 * 60 * 1000);
 	}
 
 	private void initJavaFXIfNecessary() {
-	    if (!javaFxInitialized) {
+	    if (! javaFxInitialized) {
 		javafx.application.Platform.setImplicitExit(false);
 		new JFXPanel();
 		javaFxInitialized = true;

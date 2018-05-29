@@ -78,7 +78,8 @@ public class VersionUpdateChecker {
 	VersionUpdate minor = getMinorUpgrade();
 	VersionUpdate sec = getSecurityUpgrade();
 
-	return major != null || minor != null || sec != null || ! isCurrentMaintained();
+	// don't check for maintained version as this would trigger an update without any versions to update to
+	return major != null || minor != null || sec != null /*|| ! isCurrentMaintained()*/;
     }
 
     public boolean isCurrentMaintained() {

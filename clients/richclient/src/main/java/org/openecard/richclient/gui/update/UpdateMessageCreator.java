@@ -23,6 +23,7 @@
 package org.openecard.richclient.gui.update;
 
 import java.util.ArrayList;
+import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.util.VersionUpdate;
 import org.openecard.common.util.VersionUpdateChecker;
@@ -63,7 +64,7 @@ public class UpdateMessageCreator {
 
 	String msg = "";
 	if (numberOfVersions == 1) {
-	    msg = lang.translationForKey("new_version_msg", updateVersions.get(0));
+	    msg = lang.translationForKey("new_version_msg", AppVersion.getName(), updateVersions.get(0));
 	} else if (numberOfVersions > 1) {
 	    StringBuilder sb = new StringBuilder();
 
@@ -74,7 +75,7 @@ public class UpdateMessageCreator {
 		}
 	    }
 
-	    msg = lang.translationForKey("new_versions_msg", sb.toString());
+	    msg = lang.translationForKey("new_versions_msg", AppVersion.getName(), sb.toString());
 	}
 
 	if (! updateChecker.isCurrentMaintained()) {

@@ -84,7 +84,7 @@ public class UpdateWindow {
 	scene.getStylesheets().add(css);
 
 	stage.getIcons().add(new Image(GUIDefaults.getImageStream("Frame.icon", 45, 45)));
-	stage.setTitle(lang.translationForKey("tooltip_msg"));
+	stage.setTitle(lang.translationForKey("tooltip_msg", AppVersion.getName()));
 	stage.setScene(scene);
 	stage.setResizable(false);
 	stage.show();
@@ -205,9 +205,9 @@ public class UpdateWindow {
 	if (! updateChecker.isCurrentMaintained()) {
 	    label = new Label(lang.translationForKey("version_not_maintained", currentVersion));
 	} else if (numberOfVersions == 1) {
-	    label = new Label(lang.translationForKey("new_version_msg", currentVersion));
+	    label = new Label(lang.translationForKey("new_version_msg", AppVersion.getName(), currentVersion));
 	} else if (numberOfVersions > 1) {
-	    label = new Label(lang.translationForKey("new_versions_msg", currentVersion));
+	    label = new Label(lang.translationForKey("new_versions_msg", AppVersion.getName(), currentVersion));
 	}
 
 	label.wrapTextProperty().set(true);

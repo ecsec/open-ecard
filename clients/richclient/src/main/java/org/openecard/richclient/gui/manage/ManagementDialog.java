@@ -66,6 +66,7 @@ import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel;
 import org.openecard.richclient.gui.manage.core.ConnectionSettingsAddon;
 import org.openecard.richclient.gui.manage.core.GeneralSettingsAddon;
 import org.openecard.richclient.gui.manage.core.LogSettingsAddon;
+import org.openecard.richclient.gui.manage.core.MiddlewareSelectionAddon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -237,7 +238,8 @@ public class ManagementDialog extends JFrame {
 	model.addElement(lang.translationForKey("addon.list.core.general"), new GeneralSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.logging"), new LogSettingsAddon());
-
+	model.addElement("Middlewares", new MiddlewareSelectionAddon());
+	
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
 	for (AddonSpecification desc : cpReg.listAddons()) {

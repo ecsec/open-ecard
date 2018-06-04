@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,7 +26,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.annotation.Nonnull;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -48,11 +47,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class ActionEntryPanel extends JPanel {
+public final class ActionEntryPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
-    private static final Logger logger = LoggerFactory.getLogger(ActionEntryPanel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActionEntryPanel.class);
 
     protected final JButton actionBtn;
 
@@ -90,19 +89,23 @@ public class ActionEntryPanel extends JPanel {
      * @param action Action to perform when the button is pressed.
      */
     private void addAction(final AppExtensionAction action) {
-	actionBtn.addActionListener(new ActionListener() {
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		new SwingWorker() {
-		    @Override
-		    protected Object doInBackground() throws Exception {
-			actionBtn.setEnabled(false);
+	actionBtn.addActionListener((ActionEvent e) -> {
+	    new SwingWorker<Void, Void>() {
+		@Override
+		protected Void doInBackground() throws Exception {
+		    actionBtn.setEnabled(false);
+		    try {
 			action.execute();
-			actionBtn.setEnabled(true);
 			return null;
+		    } catch (Throwable t) {
+			// this catch is here just in case anything uncaught is thrown during execute
+			LOG.error("Execution ended with an error.", t);
+			throw t;
+		    } finally {
+			actionBtn.setEnabled(true);
 		    }
-		}.execute();
-	    }
+		}
+	    }.execute();
 	});
     }
 

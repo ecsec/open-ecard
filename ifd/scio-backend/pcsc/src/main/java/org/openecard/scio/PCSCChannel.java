@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2014-2018 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PCSCChannel implements SCIOChannel {
 
-    private static final Logger logger = LoggerFactory.getLogger(PCSCChannel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PCSCChannel.class);
 
     private final PCSCCard card;
     private final CardChannel channel;
@@ -61,7 +61,7 @@ public class PCSCChannel implements SCIOChannel {
 	} catch (IllegalStateException ex) {
 	    // very unlikely event, that the card is removed during the connect phase
 	    String msg = "Card disconnected during connect phase, pretending to be channel 0 regardless of what it is.";
-	    logger.error(msg);
+	    LOG.error(msg);
 	}
 	this.channelNum = num;
     }
@@ -78,7 +78,7 @@ public class PCSCChannel implements SCIOChannel {
 
     @Override
     public boolean isBasicChannel() {
-	return channel.getChannelNumber() == 0;
+	return getChannelNumber() == 0;
     }
 
     @Override

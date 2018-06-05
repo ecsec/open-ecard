@@ -24,13 +24,14 @@ package org.openecard.richclient.gui.manage.core;
 
 import org.openecard.richclient.gui.manage.SettingsPanel;
 
+
 /**
  * Settings panel for Middleware related properties.
  * This panel hosts the following settings groups:
  * <ul>
  * <li>Middleware</li>
  * </ul>
- * 
+ *
  * @author Sebastian Schuberth
  */
 public class MiddlewareSelectionPanel extends SettingsPanel{
@@ -42,5 +43,5 @@ public class MiddlewareSelectionPanel extends SettingsPanel{
 	middlewares = new MiddlewareSelectionGroup();
 	addSettingsGroup(middlewares);
     }
-    
+
 }

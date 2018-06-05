@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -78,11 +78,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class ManagementDialog extends JFrame {
+public final class ManagementDialog extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private static final String LANGUAGE_CODE = System.getProperty("user.language");
-    private static final Logger logger = LoggerFactory.getLogger(ManagementDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ManagementDialog.class);
 
     private static ManagementDialog runningDialog;
 
@@ -106,7 +106,7 @@ public class ManagementDialog extends JFrame {
      */
     public static synchronized void showDialog(AddonManager manager) {
 	if (runningDialog == null) {
-	    logger.debug("Creating ManagementDialog.");
+	    LOG.debug("Creating ManagementDialog.");
 	    ManagementDialog dialog = new ManagementDialog(manager);
 	    dialog.addWindowListener(new WindowListener() {
 		@Override
@@ -126,11 +126,11 @@ public class ManagementDialog extends JFrame {
 		@Override
 		public void windowDeactivated(WindowEvent e) { }
 	    });
-	    logger.debug("Displaying ManagementDialog.");
+	    LOG.debug("Displaying ManagementDialog.");
 	    dialog.setVisible(true);
 	    runningDialog = dialog;
 	} else {
-	    logger.debug("Not displaying ManagementDialog.");
+	    LOG.debug("Not displaying ManagementDialog.");
 	    // dialog already shown, bring to front
 	    runningDialog.toFront();
 	}
@@ -145,7 +145,7 @@ public class ManagementDialog extends JFrame {
      * @param manager
      */
     public ManagementDialog(AddonManager manager) {
-	logger.debug("Creating ManagementDialog.");
+	LOG.debug("Creating ManagementDialog.");
 	this.manager = manager;
 	cpReg = manager.getBuiltinRegistry();
 	fileReg = manager.getExternalRegistry();
@@ -176,17 +176,17 @@ public class ManagementDialog extends JFrame {
 	selectionLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0};
 	selectionPanel.setLayout(selectionLayout);
 
-	logger.debug("Creating core list.");
+	LOG.debug("Creating core list.");
 	createCoreList();
-	logger.debug("Creating addon list.");
+	LOG.debug("Creating addon list.");
 	createAddonList();
-	logger.debug("Setup core list.");
+	LOG.debug("Setup core list.");
 	setupCoreList();
-	logger.debug("Setup addon list.");
+	LOG.debug("Setup addon list.");
 	setupAddonList();
 
 	setLocationRelativeTo(null);
-	logger.debug("Finished creating ManagementDialog.");
+	LOG.debug("Finished creating ManagementDialog.");
     }
 
     /**
@@ -238,8 +238,8 @@ public class ManagementDialog extends JFrame {
 	model.addElement(lang.translationForKey("addon.list.core.general"), new GeneralSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.connection"), new ConnectionSettingsAddon());
 	model.addElement(lang.translationForKey("addon.list.core.logging"), new LogSettingsAddon());
-	model.addElement("Middlewares", new MiddlewareSelectionAddon());
-	
+	model.addElement(lang.translationForKey("addon.list.core.middleware"), new MiddlewareSelectionAddon());
+
 	// this assumes that all addons in the ClasspathRegistry are core addons
 	// an ActionPanel for every addon that has one ore more AppExtensionActions will be added
 	for (AddonSpecification desc : cpReg.listAddons()) {
@@ -365,7 +365,7 @@ public class ManagementDialog extends JFrame {
 		ClassLoader loader = manager.getRegistry().downloadAddon(desc);
 		logo = loadLogo(loader, "META-INF/" + desc.getLogo());
 	    } catch (AddonException ex) {
-		logger.error("Failed to load logo from Add-on bundle.");
+		LOG.error("Failed to load logo from Add-on bundle.");
 		logo = null;
 	    }
 	}

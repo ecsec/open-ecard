@@ -22,43 +22,27 @@
 
 package org.openecard.richclient.gui.manage.core;
 
-import java.awt.Image;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import org.openecard.common.I18n;
-import org.openecard.common.util.FileUtils;
 import org.openecard.richclient.gui.manage.AddonPanel;
+
 
 /**
  * Convenience class to create a settings add-on panel for en- or disabling middlewares.
- * 
+ *
  * @author Sebastian Schuberth
  */
 public class MiddlewareSelectionAddon extends AddonPanel {
     
     private static final long serialVersionUID = 1L;
-    private static final I18n lang = I18n.getTranslation("addon");
+    private static final I18n LANG = I18n.getTranslation("addon");
 
     public MiddlewareSelectionAddon() {
-	super(createAction(), "Middlewares", null, loadLogo());
+	super(createAction(), LANG.translationForKey("addon.list.core.middleware"), null, null);
     }
 
     private static JPanel createAction() {
 	return new MiddlewareSelectionPanel();
-    }
-
-    private static Image loadLogo() {
-	try {
-	    String fName = "images/logging.png";
-	    InputStream in = FileUtils.resolveResourceAsStream(ConnectionSettingsAddon.class, fName);
-	    ImageIcon icon = new ImageIcon(FileUtils.toByteArray(in));
-	    return icon.getImage();
-	} catch (IOException ex) {
-	    // ignore and let the default decide
-	    return null;
-	}
     }
 
 }

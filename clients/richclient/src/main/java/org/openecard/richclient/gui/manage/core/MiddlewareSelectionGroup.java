@@ -1,5 +1,4 @@
-/**
- * **************************************************************************
+/****************************************************************************
  * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -19,29 +18,18 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- **************************************************************************
- */
+ ***************************************************************************/
+
 package org.openecard.richclient.gui.manage.core;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.xml.bind.JAXBException;
 import org.openecard.common.I18n;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Custom settings group for Middleware selection
@@ -50,36 +38,40 @@ import org.slf4j.LoggerFactory;
  */
 public class MiddlewareSelectionGroup extends OpenecardPropertiesSettingsGroup {
 
-    private static final I18n lang = I18n.getTranslation("addon");
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MiddlewareSelectionGroup.class);
+    private static final I18n LANG = I18n.getTranslation("addon");
 
     public MiddlewareSelectionGroup() {
-	super("Middleware selection");
+	super(LANG.translationForKey("addon.core.middleware.group_name"));
 	addMiddlewares();
-
     }
 
     private void addMiddlewares() {
-
 	try {
 	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
-	    List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
-
-	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
-
-		if (!mwSALConfig.isDisabled()) {
-		    String middName = mwSALConfig.getMiddlewareName();
-		    if (mwSALConfig.isSALRequired()) {
-			JCheckBox box = addBoolItem(middName + " Middleware (required)", "The " + middName + " Middleware is required and cannot be en-/disabled", middName + ".enabled");
-			box.setEnabled(false);
-		    } else {
-			addBoolItem(middName + " Middleware", "En-/Disable the " + middName + " Middleware", middName + ".enabled");
-		    }
-		}
-	    }
-
+	    mwConfigLoader.getMiddlewareSALConfigs().forEach((cfg) -> {
+		addMiddleware(cfg);
+	    });
 	} catch (IOException | JAXBException ex) {
 	    LOG.error("Could not read middleware config.", ex);
+	}
+    }
+
+    private void addMiddleware(MiddlewareSALConfig mwSALConfig) {
+	if (! mwSALConfig.getMwSpec().isDisabled()) {
+	    String mwName = mwSALConfig.getMiddlewareName();
+	    String label = LANG.translationForKey("addon.core.middleware.item.label", mwName);
+	    String prop = mwName + ".enabled";
+
+	    JCheckBox box;
+	    if (mwSALConfig.isSALRequired()) {
+		String desc = LANG.translationForKey("addon.core.middleware.item.desc");
+		box = addBoolItem(label, desc, prop);
+	    } else {
+		String desc = LANG.translationForKey("addon.core.middleware.item.desc");
+		box = addBoolItem(label, desc, prop);
+	    }
+	    box.setEnabled(! mwSALConfig.isDisabled());
 	}
     }
 

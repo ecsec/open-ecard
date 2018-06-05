@@ -223,7 +223,7 @@ public class CIFCreator {
 		// determine available algorithms
 		List<SignatureAlgorithms> sigalgs = getSigAlgs(pubKey);
 		for (SignatureAlgorithms sigalg : sigalgs) {
-		    DIDInfoType did = createCryptoDID(mwCerts, sigalg);
+		    DIDInfoType did = createCryptoDID(pubKey, mwCerts, sigalg);
 		    didInfos.add(did);
 		}
 	    } catch (NoCertificateChainException ex) {
@@ -297,12 +297,12 @@ public class CIFCreator {
 	}
     }
 
-    private DIDInfoType createCryptoDID(List<MwCertificate> mwCerts, SignatureAlgorithms sigalg)
+    private DIDInfoType createCryptoDID(MwPublicKey pubKey, List<MwCertificate> mwCerts, SignatureAlgorithms sigalg)
 	    throws WSMarshallerException, CryptokiException {
 	LOG.debug("Creating Crypto DID object.");
 	DIDInfoType di = new DIDInfoType();
 
-	String keyLabel = mwCerts.get(0).getLabel();
+	String keyLabel = pubKey.getKeyLabel();
 	String certLabel = mwCerts.get(0).getLabel();
 
 	// create differential identity

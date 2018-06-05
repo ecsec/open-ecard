@@ -170,4 +170,35 @@
 
 	</MiddlewareSpec>
 
+
+	<MiddlewareSpec required="false" disabled="false">
+
+		<MiddlewareName>SafeNet</MiddlewareName>
+
+		<LibSpec>
+			<LibName>eTPkcs11</LibName>
+		</LibSpec>
+		<LibSpec os="Windows">
+			<LibName>eTPKCS11</LibName>
+		</LibSpec>
+
+		<CardConfig>
+			<CardSpec>
+				<MiddlewareName>SafeNet, Inc._eToken</MiddlewareName>
+				<iso:ObjectIdentifier>http://gemalto.com/safenet/eToken</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">SafeNet eToken</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2018-06-01</iso:Date>
+				<ATR>3BD518008131FE7D8073C82110F4</ATR>
+				<CardImage>SafeNet-eToken.jpg</CardImage>
+			</CardSpec>
+		</CardConfig>
+
+	</MiddlewareSpec>
+
 </MiddlewareConfig>

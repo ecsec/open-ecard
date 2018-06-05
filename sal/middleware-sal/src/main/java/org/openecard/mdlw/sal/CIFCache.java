@@ -59,6 +59,7 @@ public class CIFCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCache.class);
 
+    private static final String PREFIX = "";//"V2_";
     private static final CIFCache INST = new CIFCache();
 
     private final WSMarshaller marshaller;
@@ -188,7 +189,7 @@ public class CIFCache {
 
     @Nonnull
     private File getCifFile(String mwName, String serial) {
-	File cifFile = new File(cacheDir, mwName + "_" + serial + ".xml");
+	File cifFile = new File(cacheDir, PREFIX + mwName + "_" + serial + ".xml");
 	return cifFile;
     }
 

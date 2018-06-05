@@ -303,11 +303,12 @@ public class CIFCreator {
 	DIDInfoType di = new DIDInfoType();
 
 	String keyLabel = mwCerts.get(0).getLabel();
+	String certLabel = mwCerts.get(0).getLabel();
 
 	// create differential identity
 	DifferentialIdentityType did = new DifferentialIdentityType();
 	di.setDifferentialIdentity(did);
-	String didName = keyLabel + "_" + mwCerts.get(0).getLabel() + "_" + sigalg.getJcaAlg();
+	String didName = certLabel + "_" + sigalg.getJcaAlg();
 	LOG.debug("DIDName: {}", didName);
 	did.setDIDName(didName);
 	did.setDIDProtocol("urn:oid:1.3.162.15480.3.0.25");

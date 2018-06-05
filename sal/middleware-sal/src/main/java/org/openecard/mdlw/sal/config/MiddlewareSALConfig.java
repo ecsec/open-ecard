@@ -105,6 +105,11 @@ public class MiddlewareSALConfig {
     }
 
     @Nonnull
+    public MiddlewareSpecType getMwSpec() {
+	return mwSpec;
+    }
+
+    @Nonnull
     protected LibSpecType getLibSpec() throws NullPointerException {
 	LibSpecType defaultSpec = null, fullMatch = null, nameMatch = null, archMatch = null;
 	String osName = System.getProperty("os.name", "");

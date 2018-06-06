@@ -23,8 +23,12 @@
 package org.openecard.richclient.gui.manage.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.xml.bind.JAXBException;
+import org.openecard.addon.AddonPropertiesException;
 import org.openecard.common.I18n;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
@@ -40,6 +44,8 @@ public class MiddlewareSelectionGroup extends OpenecardPropertiesSettingsGroup {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MiddlewareSelectionGroup.class);
     private static final I18n LANG = I18n.getTranslation("addon");
+    private final List<Boolean> checkBoxesOriginalState = new ArrayList<>();
+    private final List<JCheckBox> boxes = new ArrayList<>();
 
     public MiddlewareSelectionGroup() {
 	super(LANG.translationForKey("addon.core.middleware.group_name"));
@@ -65,14 +71,38 @@ public class MiddlewareSelectionGroup extends OpenecardPropertiesSettingsGroup {
 
 	    JCheckBox box;
 	    if (mwSALConfig.isSALRequired()) {
-		String desc = LANG.translationForKey("addon.core.middleware.item.desc");
+		String desc = LANG.translationForKey("addon.core.middleware.item.desc_force");
 		box = addBoolItem(label, desc, prop);
+		box.setEnabled(false);
 	    } else {
 		String desc = LANG.translationForKey("addon.core.middleware.item.desc");
-		box = addBoolItem(label, desc, prop);
+		box = addBoolItem(label, desc, prop);	
 	    }
-	    box.setEnabled(! mwSALConfig.isDisabled());
+	    box.setSelected(! mwSALConfig.isDisabled());
+	    checkBoxesOriginalState.add(box.isSelected());
+	    boxes.add(box);	
 	}
+    }
+    
+    @Override
+    protected void saveProperties() throws IOException, SecurityException, AddonPropertiesException {
+	
+	if(propertiesChanged()){
+	   super.saveProperties(); 
+	   JOptionPane.showMessageDialog(getContainer(), LANG.translationForKey("addon.core.middleware.restart.msg"));
+	}
+    }
+
+    private boolean propertiesChanged() {
+
+	for(int i = 0; i < boxes.size(); i++){
+
+	    if(boxes.get(i).isSelected() != checkBoxesOriginalState.get(i)){
+		return true;
+	    }
+	}
+
+	return false;
     }
 
 }

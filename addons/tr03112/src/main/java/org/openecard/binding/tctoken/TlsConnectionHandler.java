@@ -105,10 +105,6 @@ public class TlsConnectionHandler {
 	    serverAddress = new URL(token.getServerAddress());
 	    String serverHost = serverAddress.getHost();
 
-	    if (Boolean.valueOf(OpenecardProperties.getProperty("legacy.session"))) {
-		serverAddress = fixServerAddress(serverAddress, sessionId);
-	    }
-
 	    // extract connection parameters from endpoint
 	    hostname = serverAddress.getHost();
 	    port = serverAddress.getPort();
@@ -261,16 +257,6 @@ public class TlsConnectionHandler {
 	handler.connect(tlsClient);
 
 	return handler;
-    }
-
-    private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {
-	// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
-	try {
-	    UrlBuilder b = UrlBuilder.fromUrl(serverAddress);
-	    return b.queryParam("sessionid", sessionIdentifier, false).build().toURL();
-	} catch (URISyntaxException ex) {
-	    throw new MalformedURLException(ex.getMessage());
-	}
     }
 
     @Nullable

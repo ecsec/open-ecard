@@ -33,14 +33,12 @@ import org.openecard.common.I18n;
 public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup {
 
     private static final long serialVersionUID = 1L;
-    private static final I18n lang = I18n.getTranslation("addon");
+    private static final I18n LANG = I18n.getTranslation("addon");
     private static final String GROUP            = "addon.list.core.general.legacy.group_name";
     private static final String TLS1             = "addon.list.core.general.legacy.tls1";
     private static final String	TLS1_DESC        = "addon.list.core.general.legacy.tls1.desc";
     private static final String WEAK_CRYPTO      = "addon.list.core.general.legacy.weak_crypto";
     private static final String	WEAK_CRYPTO_DESC = "addon.list.core.general.legacy.weak_crypto.desc";
-    private static final String SESSION          = "addon.list.core.general.legacy.session";
-    private static final String	SESSION_DESC     = "addon.list.core.general.legacy.session.desc";
     private static final String CAR              = "addon.list.core.general.legacy.car";
     private static final String	CAR_DESC         = "addon.list.core.general.legacy.car.desc";
     private static final String NS               = "addon.list.core.general.legacy.ignore_ns";
@@ -48,13 +46,12 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
 
 
     public GeneralSettingsLegacyGroup() {
-	super(lang.translationForKey(GROUP));
+	super(LANG.translationForKey(GROUP));
 
-	addBoolItem(lang.translationForKey(TLS1), lang.translationForKey(TLS1_DESC), "legacy.tls1");
-	addBoolItem(lang.translationForKey(WEAK_CRYPTO), lang.translationForKey(WEAK_CRYPTO_DESC), "legacy.weak_crypto");
-	addBoolItem(lang.translationForKey(SESSION), lang.translationForKey(SESSION_DESC), "legacy.session");
-	addBoolItem(lang.translationForKey(CAR), lang.translationForKey(CAR_DESC), "legacy.car");
-	addBoolItem(lang.translationForKey(NS), lang.translationForKey(NS_DESC), "legacy.ignore_ns");
+	addBoolItem(LANG.translationForKey(TLS1), LANG.translationForKey(TLS1_DESC), "legacy.tls1");
+	addBoolItem(LANG.translationForKey(WEAK_CRYPTO), LANG.translationForKey(WEAK_CRYPTO_DESC), "legacy.weak_crypto");
+	addBoolItem(LANG.translationForKey(CAR), LANG.translationForKey(CAR_DESC), "legacy.car");
+	addBoolItem(LANG.translationForKey(NS), LANG.translationForKey(NS_DESC), "legacy.ignore_ns");
     }
 
 }

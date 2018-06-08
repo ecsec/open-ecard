@@ -247,16 +247,9 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     @Override
     protected Vector getSupportedSignatureAlgorithms() {
-	boolean weakCrypto = Boolean.valueOf(OpenecardProperties.getProperty("legacy.weak_crypto"));
 	TlsCrypto crypto = context.getCrypto();
-        short[] hashAlgorithms;
-	if (! weakCrypto) {
-	    hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-		HashAlgorithm.sha224 };
-	} else {
-	    hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-		HashAlgorithm.sha224, HashAlgorithm.sha1 };
-	}
+        short[] hashAlgorithms = new short[]{HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
+	    HashAlgorithm.sha224};
         short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 
         Vector result = new Vector();

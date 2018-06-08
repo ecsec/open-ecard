@@ -39,8 +39,6 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
     private static final String	TLS1_DESC        = "addon.list.core.general.legacy.tls1.desc";
     private static final String WEAK_CRYPTO      = "addon.list.core.general.legacy.weak_crypto";
     private static final String	WEAK_CRYPTO_DESC = "addon.list.core.general.legacy.weak_crypto.desc";
-    private static final String CAR              = "addon.list.core.general.legacy.car";
-    private static final String	CAR_DESC         = "addon.list.core.general.legacy.car.desc";
     private static final String NS               = "addon.list.core.general.legacy.ignore_ns";
     private static final String	NS_DESC          = "addon.list.core.general.legacy.ignore_ns.desc";
 
@@ -50,7 +48,6 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
 
 	addBoolItem(LANG.translationForKey(TLS1), LANG.translationForKey(TLS1_DESC), "legacy.tls1");
 	addBoolItem(LANG.translationForKey(WEAK_CRYPTO), LANG.translationForKey(WEAK_CRYPTO_DESC), "legacy.weak_crypto");
-	addBoolItem(LANG.translationForKey(CAR), LANG.translationForKey(CAR_DESC), "legacy.car");
 	addBoolItem(LANG.translationForKey(NS), LANG.translationForKey(NS_DESC), "legacy.ignore_ns");
     }
 

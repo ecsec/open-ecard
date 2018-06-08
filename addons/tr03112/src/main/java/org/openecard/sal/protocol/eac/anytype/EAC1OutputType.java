@@ -23,7 +23,6 @@
 package org.openecard.sal.protocol.eac.anytype;
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
 import org.openecard.common.util.ByteUtils;
@@ -134,15 +133,13 @@ public class EAC1OutputType {
      */
     public DIDAuthenticationDataType getAuthDataType() {
 	AuthDataResponse authResponse = authMap.createResponse(new iso.std.iso_iec._24727.tech.schema.EAC1OutputType());
-	boolean carAsString = Boolean.valueOf(OpenecardProperties.getProperty("legacy.car"));
-
 	if (retryCounter != null) {
 	    authResponse.addElement(RETRY_COUNTER, String.valueOf(retryCounter));
 	}
 	authResponse.addElement(CHAT, ByteUtils.toHexString(chat));
-	authResponse.addElement(CAR, carAsString ? new String(currentCar) : ByteUtils.toHexString(currentCar));
+	authResponse.addElement(CAR, new String(currentCar));
 	if (previousCar != null) {
-	    authResponse.addElement(CAR, carAsString ? new String(previousCar) : ByteUtils.toHexString(previousCar));
+	    authResponse.addElement(CAR, new String(previousCar));
 	}
 	authResponse.addElement(EF_CARDACCESS, ByteUtils.toHexString(efCardAccess));
 	authResponse.addElement(ID_PICC, ByteUtils.toHexString(idpicc));

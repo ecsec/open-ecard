@@ -125,6 +125,7 @@ import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.ThreadTerminateException;
@@ -696,7 +697,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
             for (MwPrivateKey key : session.getPrivateKeys()) {
 		String nextLabel = "";
 		try {
-		    nextLabel = key.getKeyLabel();
+		    nextLabel = Hex.toHexString(key.getKeyID());
 		} catch (CryptokiException ex) {
 		    LOG.warn("Error reading key label.", ex);
 		}

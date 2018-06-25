@@ -58,6 +58,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
@@ -302,7 +303,7 @@ public class CIFCreator {
 	LOG.debug("Creating Crypto DID object.");
 	DIDInfoType di = new DIDInfoType();
 
-	String keyLabel = pubKey.getKeyLabel();
+	String keyLabel = Hex.toHexString(pubKey.getKeyID());
 	String certLabel = mwCerts.get(0).getLabel();
 
 	// create differential identity
@@ -323,8 +324,9 @@ public class CIFCreator {
 	algIdentifier.setAlgorithm(sigalg.getAlgId());
 	algInfo.setAlgorithmIdentifier(algIdentifier);
 	algInfo.getSupportedOperations().add("Compute-signature");
-	markerBuilder.setAlgInfo(algInfo);
+	markerBuilder.setAlgInfo(algInfo);	
 	markerBuilder.setLegacyKeyname(keyLabel);
+
 	// add certificates
 	for (MwCertificate nextCert : mwCerts) {
 	    try {

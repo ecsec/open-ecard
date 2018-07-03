@@ -691,18 +691,18 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
             Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
             CryptoMarkerType marker = new CryptoMarkerType(didStructure.getDIDMarker());
-            String keyLabel = marker.getLegacyKeyName();
+	    byte[] keyLabel = marker.getLegacyKeyName();
 
             MwSession session = managedSessions.get(slotHandle);
             for (MwPrivateKey key : session.getPrivateKeys()) {
-		String nextLabel = "";
+		byte[] nextLabel = null;
 		try {
-		    nextLabel = Hex.toHexString(key.getKeyID());
+		    nextLabel = key.getKeyID();
 		} catch (CryptokiException ex) {
 		    LOG.warn("Error reading key label.", ex);
 		}
 		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
-                if (keyLabel.equals(nextLabel)) {
+                if (Arrays.equals(keyLabel, nextLabel)) {
                     long sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
                     byte[] sig = key.sign(sigAlg, message);
                     response.setSignature(sig);

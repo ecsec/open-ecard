@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.xml.bind.JAXBElement;
+import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -56,13 +57,14 @@ import org.w3c.dom.NodeList;
  * @author Dirk Petrautzki
  * @author Hans-Martin Haase
  * @author Tobias Wich
+ * @author Sebastian Schuberth
  */
 public class CryptoMarkerType extends AbstractMarkerType {
 
     private static final Logger LOG = LoggerFactory.getLogger(CryptoMarkerType.class);
 
     private WSMarshaller m;
-    private String legacyKeyName = null;
+    private byte[] legacyKeyName = null;
     private AlgorithmInfoType algorithmInfo = null;
     private HashGenerationInfoType hashGenerationInfo = HashGenerationInfoType.NOT_ON_CARD;
     private List<CertificateRefType> certificateRefs = null;
@@ -70,6 +72,7 @@ public class CryptoMarkerType extends AbstractMarkerType {
     private String[] signatureGenerationInfo = null;
     private List<Object> legacySignatureGenerationInfo = null;
     private String legacyOutputFormat = null;
+    private boolean hasContextPin = false;
 
     /**
      * The constructor gets an {@link DIDAbstractMarkerType} object and parses the object to a CryptoMarkerType object.
@@ -203,9 +206,12 @@ public class CryptoMarkerType extends AbstractMarkerType {
 			break;
 		    }
 		case "LegacyKeyName":
-		    this.legacyKeyName = elem.getTextContent();
+		    this.legacyKeyName = Base64.decode(elem.getTextContent());
 		    break;
 	    	case "StateInfo":
+		    break;
+		case "HasContextPin":
+		    this.hasContextPin = Boolean.valueOf(elem.getTextContent());
 		    break;
 	    }
 	}
@@ -261,9 +267,9 @@ public class CryptoMarkerType extends AbstractMarkerType {
     /**
      * Get the value of the property LegacyKeyName if it exists.
      *
-     * @return A string containing a key name. If no such key name is available {@code null} is returned.
+     * @return A byte array containing a key name. If no such key name is available {@code null} is returned.
      */
-    public String getLegacyKeyName() {
+    public byte[] getLegacyKeyName() {
 	return legacyKeyName;
     }
 
@@ -310,6 +316,15 @@ public class CryptoMarkerType extends AbstractMarkerType {
      */
     public StateInfo getStateInfo() {
 	throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    /**
+     * Get the value of the property HasContextPin if it exists.
+     *
+     * @return A boolean indicating if the DID has a context PIN or not.
+     */
+    public boolean getHasContextPin() {
+	return hasContextPin;
     }
 
     @Nullable

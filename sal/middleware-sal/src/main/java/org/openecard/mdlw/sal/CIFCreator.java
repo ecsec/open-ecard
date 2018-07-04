@@ -56,9 +56,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
@@ -113,7 +113,7 @@ public class CIFCreator {
 	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
 	    return cachedCif;
 	}
-
+	
 	PIN_NAME = "USER_PIN";
 	DIDInfoType pinDid = createPinDID();
 	List<DIDInfoType> cryptoDids = getSignatureCryptoDIDs();
@@ -303,7 +303,6 @@ public class CIFCreator {
 	LOG.debug("Creating Crypto DID object.");
 	DIDInfoType di = new DIDInfoType();
 
-	String keyLabel = Hex.toHexString(pubKey.getKeyID());
 	String certLabel = mwCerts.get(0).getLabel();
 
 	// create differential identity
@@ -325,7 +324,10 @@ public class CIFCreator {
 	algInfo.setAlgorithmIdentifier(algIdentifier);
 	algInfo.getSupportedOperations().add("Compute-signature");
 	markerBuilder.setAlgInfo(algInfo);	
-	markerBuilder.setLegacyKeyname(keyLabel);
+	markerBuilder.setLegacyKeyname(pubKey.getKeyID());
+	
+	boolean hasContextPin = hasContextPin(pubKey.getKeyID());
+	markerBuilder.setHasContextPin(hasContextPin);
 
 	// add certificates
 	for (MwCertificate nextCert : mwCerts) {
@@ -353,9 +355,12 @@ public class CIFCreator {
 	rules.add(createRuleTrue(DifferentialIdentityServiceActionName.DID_GET));
 	// create sign rule with PIN reference
 	AccessRuleType signRule = createRuleTrue(CryptographicServiceActionName.SIGN);
-	signRule.setSecurityCondition(createDidCond(PIN_NAME));
-	rules.add(signRule);
 
+	if(!hasContextPin) {
+	    signRule.setSecurityCondition(createDidCond(PIN_NAME));
+	}
+
+	rules.add(signRule);
 	return di;
     }
 
@@ -612,6 +617,34 @@ public class CIFCreator {
 	} catch (UnsupportedAlgorithmException ex) {
 	    LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);
 	}
+    }
+
+    private boolean hasContextPin(byte[] keyLabel) {
+
+	boolean hasContextPin = false;
+       
+	try {
+	    for (MwPrivateKey key : session.getPrivateKeys()) {
+		byte[] nextLabel = key.getKeyID();
+		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
+		if (Arrays.equals(keyLabel, nextLabel)) {
+		    hasContextPin = true;
+		    break;
+		}
+	    }   
+
+	} catch (CryptokiException ex) {
+	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
+	    return false;
+	}
+	    
+	if(hasContextPin) {
+	    LOG.debug("Can access private keys without PIN -> hasContextPin=true");
+	} else {
+	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
+	}
+
+	return hasContextPin;
     }
 
 }

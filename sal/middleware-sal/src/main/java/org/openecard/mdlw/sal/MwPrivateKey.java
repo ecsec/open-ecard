@@ -207,16 +207,17 @@ public class MwPrivateKey extends MwAbstractKey {
     }
 
     /**
-     * Signs Data with a {@link Mechanism}.
+     * Signs Data with a {@link SignatureAlgorithms}.
      * Returns the signed Data in an byte array.
      *
-     * @param mechanism
+     * @param algo
      * @param data
      * @return
      * @throws CryptokiException
      */
-    public byte[] sign(SignatureAlgorithms mechanism, byte[] data) throws CryptokiException {
-	return sign(mechanism.getPkcs11Mechanism(), data);
+    public byte[] sign(SignatureAlgorithms algo, byte[] data) throws CryptokiException {
+	signInit(algo.getPkcs11Mechanism(), data);
+	return sign(data);
     }
 
     /**
@@ -229,6 +230,36 @@ public class MwPrivateKey extends MwAbstractKey {
      * @throws CryptokiException
      */
     public byte[] sign(long mechanism, byte[] data) throws CryptokiException {
+	signInit(mechanism, data);
+	return sign(data);
+    }
+
+    /**
+     * Signs Data
+     * Returns the signed Data in an byte array.
+     *
+     * @param data
+     * @return
+     * @throws CryptokiException
+     */
+    public byte[] sign(byte[] data) throws CryptokiException {
+
+	try (MiddleWareWrapper.LockedMiddlewareWrapper lmw = mw.lock()) {
+	    return lmw.sign(session.getSessionId(), data);
+	} catch (InterruptedException ex) {
+	    throw new ThreadTerminateException("Thread interrupted while waiting for Middleware lock.", ex);
+	}
+    }
+
+    /**
+     * Initializes the signing process
+     *
+     * @param mechanism
+     * @param data
+     * @throws CryptokiException
+     */
+    public void signInit(long mechanism, byte[] data) throws CryptokiException {
+
 	Pointer paramsPtr;
 	NativeLong paramsPtrSize;
 
@@ -251,7 +282,6 @@ public class MwPrivateKey extends MwAbstractKey {
 
 	try (MiddleWareWrapper.LockedMiddlewareWrapper lmw = mw.lock()) {
 	    lmw.signInit(session.getSessionId(), pMechanism, objectHandle);
-	    return lmw.sign(session.getSessionId(), data);
 	} catch (InterruptedException ex) {
 	    throw new ThreadTerminateException("Thread interrupted while waiting for Middleware lock.", ex);
 	}

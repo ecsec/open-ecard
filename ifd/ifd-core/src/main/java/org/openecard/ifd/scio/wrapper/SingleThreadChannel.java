@@ -254,16 +254,16 @@ public class SingleThreadChannel implements IfdChannel {
 	    SCIOException, IllegalStateException {
 	byte[] inputAPDU = input;
 	if (isSM()) {
-	    LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, true));
+	    LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, false));
 	    inputAPDU = smProtocol.applySM(inputAPDU);
 	}
-	LOG.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, true));
+	LOG.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, false));
 	CardResponseAPDU rapdu = transmit(inputAPDU);
 	byte[] result = rapdu.toByteArray();
-	LOG.debug("Receive APDU: {}", ByteUtils.toHexString(result, true));
+	LOG.debug("Receive APDU: {}", ByteUtils.toHexString(result, false));
 	if (isSM()) {
 	    result = smProtocol.removeSM(result);
-	    LOG.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, true));
+	    LOG.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, false));
 	}
 	// get status word
 	byte[] sw = new byte[2];

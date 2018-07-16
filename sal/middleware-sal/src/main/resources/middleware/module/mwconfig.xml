@@ -8,7 +8,16 @@
 		<LibSpec>
 			<LibName>opensc-pkcs11</LibName>
 			<SearchPath>/usr/lib/pkcs11</SearchPath>
+		</LibSpec>
+		<LibSpec os="Windows" arch="x86">
+			<LibName>opensc-pkcs11</LibName>
+			<SearchPath>C:\Program Files (x86)\OpenSC Project\OpenSC\pkcs11</SearchPath>
 			<SearchPath>C:\Windows\System32\</SearchPath>
+		</LibSpec>
+		<LibSpec os="Windows" arch="amd64">
+			<LibName>opensc-pkcs11</LibName>
+			<SearchPath>C:\Program Files\OpenSC Project\OpenSC\pkcs11</SearchPath>
+			<SearchPath>C:\Windows\SysWOW64\</SearchPath>
 		</LibSpec>
 		<LibSpec os="Linux">
 			<LibName>opensc-pkcs11.so</LibName>

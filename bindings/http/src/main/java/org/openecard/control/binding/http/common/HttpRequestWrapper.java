@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpRequestWrapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpRequestWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRequestWrapper.class);
 
     private final HttpRequest request;
     private final Map<String, List<String>> parameterMap;
@@ -57,7 +57,7 @@ public class HttpRequestWrapper {
      */
     public HttpRequestWrapper(HttpRequest request) {
 	this.request = request;
-	this.parameterMap = new HashMap<String, List<String>>();
+	this.parameterMap = new HashMap<>();
 
 	parseRequestParameters();
     }
@@ -97,7 +97,7 @@ public class HttpRequestWrapper {
      * @return true or false
      */
     public boolean hasRequestParameter(String parameterName) {
-	return this.parameterMap.containsKey(parameterName) ? true : false;
+	return this.parameterMap.containsKey(parameterName);
     }
 
     /**
@@ -130,7 +130,7 @@ public class HttpRequestWrapper {
 		if (this.parameterMap.containsKey(name)) {
 		    this.parameterMap.get(name).add(value);
 		} else {
-		    List<String> values = new ArrayList<String>();
+		    List<String> values = new ArrayList<>();
 		    values.add(value);
 		    this.parameterMap.put(name, values);
 		}

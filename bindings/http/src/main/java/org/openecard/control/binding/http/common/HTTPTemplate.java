@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HTTPTemplate {
 
-    private static final Logger _logger = LoggerFactory.getLogger(HTTPTemplate.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTTPTemplate.class);
     private HashMap<String, String> properties = new HashMap<>();
     private String content;
 
@@ -50,7 +50,7 @@ public class HTTPTemplate {
 	    URL url = documentRoot.getFile(templatePath);
 	    content = FileUtils.toString(url.openStream());
 	} catch (Exception e) {
-	    _logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
     }
 

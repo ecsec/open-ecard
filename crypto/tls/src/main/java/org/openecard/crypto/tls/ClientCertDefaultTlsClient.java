@@ -178,16 +178,11 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		// recommended ciphers from TR-02102-2 sec. 3.3.1
 		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-		CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
 		CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-		CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
 		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 		CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-		CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-		CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+		CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
 		// acceptable in case DHE is not available
 		// there seems to be a problem with DH and besides that I don't like them anyways
 		/*
@@ -212,10 +207,8 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 		    // SHA1 is acceptable until 2015
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-		    CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
 		    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-		    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+		    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
 		    // acceptable in case DHE is not available
 		    // there seems to be a problem with DH and besides that I don't like them anyways
 		    /*
@@ -290,14 +283,6 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
 	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
-        if (TlsDHUtils.containsDHECipherSuites(getCipherSuites())) {
-	    // RFC 7919
-            supportedGroups.addElement(NamedGroup.ffdhe2048);
-            supportedGroups.addElement(NamedGroup.ffdhe3072);
-            supportedGroups.addElement(NamedGroup.ffdhe4096);
-            supportedGroups.addElement(NamedGroup.ffdhe6144);
-            supportedGroups.addElement(NamedGroup.ffdhe8192);
-        }
 
 	if (! supportedGroups.isEmpty()) {
 	    this.supportedGroups = supportedGroups;

@@ -141,10 +141,6 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 		// recommended ciphers from TR-02102-2 sec. 3.3.1
 		CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384,
 		CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
-		CipherSuite.TLS_DHE_PSK_WITH_AES_256_GCM_SHA384,
-		CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
-		CipherSuite.TLS_DHE_PSK_WITH_AES_256_CBC_SHA384,
-		CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
 		CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
 		// TODO: see if this still holds: this cipher suite does not work with the governikus eID server, so it is excluded here
@@ -231,14 +227,6 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
 	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
-        if (TlsDHUtils.containsDHECipherSuites(getCipherSuites())) {
-	    // RFC 7919
-            supportedGroups.addElement(NamedGroup.ffdhe2048);
-            supportedGroups.addElement(NamedGroup.ffdhe3072);
-            supportedGroups.addElement(NamedGroup.ffdhe4096);
-            supportedGroups.addElement(NamedGroup.ffdhe6144);
-            supportedGroups.addElement(NamedGroup.ffdhe8192);
-        }
 
 	if (! supportedGroups.isEmpty()) {
 	    this.supportedGroups = supportedGroups;

@@ -23,10 +23,10 @@
 package org.openecard.control.binding.http.interceptor;
 
 import java.io.IOException;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.openecard.apache.http.HttpException;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.HttpResponseInterceptor;
+import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.common.AppVersion;
 
 

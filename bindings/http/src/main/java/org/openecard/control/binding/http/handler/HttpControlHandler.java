@@ -22,7 +22,7 @@
 
 package org.openecard.control.binding.http.handler;
 
-import org.apache.http.protocol.HttpRequestHandler;
+import org.openecard.apache.http.protocol.HttpRequestHandler;
 
 
 /**

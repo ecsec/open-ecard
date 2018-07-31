@@ -540,6 +540,7 @@
 						<excludePackageNames>
 							org.openecard.bouncycastle:
 							org.openecard.bouncycastle.*:
+							org.openecard.apache.http.*:
 							javax.smartcardio:sun.security.smartcardio
 						</excludePackageNames>
 					</configuration>

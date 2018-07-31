@@ -15,6 +15,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.openecard.transport</groupId>
+			<artifactId>http-core-shade</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.openecard.crypto</groupId>
 			<artifactId>tls</artifactId>
 			<version>${project.version}</version>
@@ -90,11 +95,6 @@
 			<artifactId>status</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -22,9 +22,9 @@
 
 package org.openecard.control.binding.http.handler;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+import org.openecard.apache.http.HttpRequest;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.HttpStatus;
 import org.openecard.control.binding.http.HttpException;
 import org.openecard.control.binding.http.common.Http11Response;
 

@@ -28,11 +28,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.protocol.HttpContext;
+import org.openecard.apache.http.Header;
+import org.openecard.apache.http.HttpRequest;
+import org.openecard.apache.http.HttpResponse;
+import org.openecard.apache.http.HttpStatus;
+import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.control.binding.http.common.Http11Method;
 import org.openecard.control.binding.http.common.Http11Response;
 

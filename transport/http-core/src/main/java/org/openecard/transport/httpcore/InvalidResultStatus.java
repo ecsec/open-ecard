@@ -22,7 +22,7 @@
 
 package org.openecard.transport.httpcore;
 
-import org.apache.http.HttpException;
+import org.openecard.apache.http.HttpException;
 
 
 /**

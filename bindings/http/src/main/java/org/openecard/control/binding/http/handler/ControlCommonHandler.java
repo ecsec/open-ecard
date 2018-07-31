@@ -23,12 +23,12 @@
 package org.openecard.control.binding.http.handler;
 
 import java.io.IOException;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.apache.http.entity.StringEntity;
-import org.openecard.apache.http.protocol.HttpContext;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ControlCommonHandler extends HttpControlHandler {
 
-    private static final Logger _logger = LoggerFactory.getLogger(ControlCommonHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ControlCommonHandler.class);
 
     /**
      * Creates a new new ControlCommonHandler.
@@ -78,7 +78,7 @@ public abstract class ControlCommonHandler extends HttpControlHandler {
      */
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-	_logger.debug("HTTP request: {}", request.toString());
+	LOG.debug("HTTP request: {}", request.toString());
 	HttpResponse httpResponse = null;
 
 	try {
@@ -97,11 +97,11 @@ public abstract class ControlCommonHandler extends HttpControlHandler {
 	    httpResponse.setStatusCode(e.getHTTPStatusCode());
 	} catch (Exception e) {
 	    httpResponse = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-	    _logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	} finally {
 	    Http11Response.copyHttpResponse(httpResponse, response);
-	    _logger.debug("HTTP response: {}", response);
-	    _logger.debug("HTTP request handled by: {}", this.getClass().getName());
+	    LOG.debug("HTTP response: {}", response);
+	    LOG.debug("HTTP request handled by: {}", this.getClass().getName());
 	}
     }
 

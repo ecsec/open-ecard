@@ -13,49 +13,6 @@
 	<packaging>jar</packaging>
 	<name>Open eCard WS classes</name>
 
-	<!-- Set wsimport for Windows/Linux when building on Java 9 -->
-	<profiles>
-		<profile>
-			<id>win</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<properties>
-				<tool.wsimport>${java.home}/bin/wsimport.exe</tool.wsimport>
-			</properties>
-		</profile>
-		<profile>
-			<id>nix</id>
-			<activation>
-				<os>
-					<family>!windows</family>
-				</os>
-			</activation>
-			<properties>
-				<tool.wsimport>${java.home}/bin/wsimport</tool.wsimport>
-			</properties>
-		</profile>
-		<profile>
-			<activation>
-				<jdk>[9</jdk>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.codehaus.mojo</groupId>
-							<artifactId>jaxws-maven-plugin</artifactId>
-							<configuration>
-								<executable>${tool.wsimport}</executable>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<resources>

@@ -589,9 +589,6 @@
 						<useJdkToolchainExecutable>true</useJdkToolchainExecutable>
 						<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
 						<target>2.2</target>
-						<xjcArgs>
-							<xjcArg>-npa</xjcArg>
-						</xjcArgs>
 						<!-- <keep>true</keep> -->
 						<!-- <verbose>true</verbose> -->
 						<!-- Java 8 has tighter restrictions -->

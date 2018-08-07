@@ -150,7 +150,7 @@ class AbstractTerminal {
     }
 
 
-    public VerifyUserResponse verifyUser(VerifyUser verify) throws SCIOException, IFDException {
+    public VerifyUserResponse verifyUser(VerifyUser verify) throws SCIOException, IFDException, InterruptedException {
 	byte[] handle = verify.getSlotHandle();
 	// get capabilities
 	getCapabilities();

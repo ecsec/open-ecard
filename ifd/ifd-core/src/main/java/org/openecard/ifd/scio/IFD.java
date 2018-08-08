@@ -357,7 +357,7 @@ public class IFD implements org.openecard.ws.IFD {
 	} catch (InterruptedException ex) {
 	    String msg = String.format("Cancellation by user.");
 	    LOG.warn(msg, ex);
-	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, r);
 	    return response;
 	}
@@ -688,7 +688,7 @@ public class IFD implements org.openecard.ws.IFD {
 	} catch (InterruptedException ex) {
 	    String msg = String.format("Cancellation by user.");
 	    LOG.warn(msg, ex);
-	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    response = WSHelper.makeResponse(ControlIFDResponse.class, r);
 	    return response;
 	}
@@ -985,7 +985,12 @@ public class IFD implements org.openecard.ws.IFD {
 		    String msg = "Given command contains a MANAGE CHANNEL APDU.";
 		    LOG.error(msg, ex);
 		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg);
+		} catch (InterruptedException ex) {
+		    String msg = String.format("Cancellation by user.");
+		    LOG.error(msg, ex);
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg); 
 		}
+
 		response.setResult(result);
 
 		return response;

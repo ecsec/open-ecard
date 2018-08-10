@@ -316,13 +316,22 @@ public class ActivateAction implements AppPluginAction {
      */
     private BindingResult processShowPinManagement() {
 	Thread pinManThread = new Thread(new Runnable() {
-
 	    @Override
 	    public void run() {
 		pinManAction.execute();
 	    }
 	}, "ShowPINManagement");
 	pinManThread.start();
+
+	// wait for thread to finish
+	try {
+	    pinManThread.join();
+	} catch (InterruptedException ex) {
+	    // notify pin management that someone interrupted the execution
+	    pinManThread.interrupt();
+	    return new BindingResult(BindingResultCode.INTERRUPTED);
+	}
+
 	return new BindingResult(BindingResultCode.OK);
     }
 

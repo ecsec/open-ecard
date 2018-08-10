@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -34,21 +34,15 @@ public class ActivationResult {
     private final String errorMessage;
 
     public ActivationResult(ActivationResultCode resultCode) {
-	this.redirectUrl = null;
-	this.resultCode = resultCode;
-	this.errorMessage = null;
+	this(null, resultCode, null);
     }
 
     public ActivationResult(ActivationResultCode resultCode, String errorMessage) {
-	this.redirectUrl = null;
-	this.resultCode = resultCode;
-	this.errorMessage = errorMessage;
+	this(null, resultCode, errorMessage);
     }
 
     public ActivationResult(String redirectUrl, ActivationResultCode resultCode) {
-	this.redirectUrl = redirectUrl;
-	this.resultCode = resultCode;
-	this.errorMessage = null;
+	this(redirectUrl, resultCode, null);
     }
 
     public ActivationResult(String redirectUrl, ActivationResultCode resultCode, String errorMessage) {

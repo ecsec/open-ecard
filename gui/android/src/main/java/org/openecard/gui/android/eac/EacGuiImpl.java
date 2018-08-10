@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.common.util.Promise;
+import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
@@ -68,6 +69,12 @@ public class EacGuiImpl implements EacGui {
 
 
     public EacGuiImpl() {
+    }
+
+    @Override
+    public String getProtocolType() {
+	// generic EAC2
+	return "urn:oid:1.3.162.15480.3.0.14";
     }
 
     ///

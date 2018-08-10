@@ -52,5 +52,5 @@ public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<O
     public Promise<? extends Object> getIfacePromise() {
 	return ifaceReceiver.getUiInterface();
     }
-    
+
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017-2018 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,22 +22,21 @@
 
 package org.openecard.gui.android;
 
-import org.openecard.common.util.Promise;
-import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.definition.UserConsentDescription;
-
 
 /**
+ * Marker interface for Android GUI implementations.
+ * The ecard protocol identifier of the GUI can be requested as text.
  *
- * @author Neil Crossley
- * @param <T> Type of the UI interaction interface.
+ * @author Tobias Wich
  */
-public interface UserConsentNavigatorFactory <T> {
+public interface AndroidGui {
 
-    boolean canCreateFrom(UserConsentDescription uc);
-
-    UserConsentNavigator createFrom(UserConsentDescription uc);
-
-    Promise<? extends T> getIfacePromise();
+    /**
+     * Gets the ecard protocol identifier handled by this GUI.
+     * This may be the identifier for EAC, Pin Compare, etc.
+     *
+     * @return Protocol identifier.
+     */
+    String getProtocolType();
 
 }

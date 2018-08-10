@@ -25,7 +25,7 @@ package org.openecard.android.activation;
 import android.app.Dialog;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.openecard.gui.android.eac.EacGui;
+import org.openecard.gui.android.AndroidGui;
 
 
 /**
@@ -33,8 +33,9 @@ import org.openecard.gui.android.eac.EacGui;
  *
  * @author Mike Prechtl
  * @author Tobias Wich
+ * @param <GUI> Type of the UI that should be used.
  */
-public interface ActivationImplementationInterface {
+public interface ActivationImplementationInterface <GUI extends AndroidGui> {
 
     /**
      * Key for the return class which is used in extra arguments of the Intent used to transport the activation URL.
@@ -64,14 +65,14 @@ public interface ActivationImplementationInterface {
     void onCardInserted(String cardType);
 
     /**
-     * This method is called when the EacGui is available to the activity.
+     * This method is called when the specific android GUI is available to the activity.
      * <p>If this method is called the server data can be accessed and the PIN can be entered.</p>
      * <p>This method marks the starting point when interaction between the EAC process and the implementing activity
      * can start.</p>
      *
-     * @param eacGui Instance of the EacGui interface connected to the current EAC process.
+     * @param androidGui Instance of the Android GUI interface connected to the current process.
      */
-    void onEacIfaceSet(EacGui eacGui);
+    void onGuiIfaceSet(GUI androidGui);
 
     /**
      * Callback when the authentication process is concluded with a redirect address.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017-2018 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,24 +20,34 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.android;
+package org.openecard.android.activation;
 
-import org.openecard.common.util.Promise;
-import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.definition.UserConsentDescription;
+import android.app.Activity;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import org.openecard.gui.android.eac.EacGui;
 
 
 /**
+ * Implementation of the actiuvation handler for EAC.
  *
- * @author Neil Crossley
- * @param <T> Type of the UI interaction interface.
+ * @author Tobias Wich
+ * @param <T>
  */
-public interface UserConsentNavigatorFactory <T> {
+public abstract class EacActivationHandler <T extends Activity> extends AbstractActivationHandler<T, EacGui> {
 
-    boolean canCreateFrom(UserConsentDescription uc);
+    public EacActivationHandler(T parent) {
+	super(parent, EacGui.class);
+    }
 
-    UserConsentNavigator createFrom(UserConsentDescription uc);
-
-    Promise<? extends T> getIfacePromise();
+    protected static final Set<String> SUPPORTED_CARDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	    "http://bsi.bund.de/cif/npa.xml"
+    )));
+    @Override
+    public Set<String> getSupportedCards() {
+	return SUPPORTED_CARDS;
+    }
 
 }

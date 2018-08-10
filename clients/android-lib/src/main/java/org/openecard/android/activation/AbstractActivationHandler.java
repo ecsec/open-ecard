@@ -274,11 +274,20 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	}
 
 	switch (result.getResultCode()) {
+	    case OK:
 	    case REDIRECT:
 		parent.runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			onAuthenticationSuccess(result);
+		    }
+		});
+		break;
+	    case INTERRUPTED:
+		parent.runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			onAuthenticationInterrupted(result);
 		    }
 		});
 		break;
@@ -387,7 +396,9 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 			// clean dialog field
 			cardRemoveDialog = null;
 			// perform redirect
-			authenticationSuccessAction(location);
+			if (result.getResultCode() == ActivationResultCode.REDIRECT) {
+			    authenticationSuccessAction(location);
+			}
 		    }
 		});
 
@@ -397,7 +408,9 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	}
 
 	// no dialog shown, just perfrom action
-	authenticationSuccessAction(location);
+	if (result.getResultCode() == ActivationResultCode.REDIRECT) {
+	    authenticationSuccessAction(location);
+	}
     }
 
     protected void authenticationSuccessAction(String location) {
@@ -406,6 +419,18 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	    parent.startActivity(createRedirectIntent(location));
 	}
     }
+
+    /**
+     * Default handler calling the failure handler ({@link #onAuthenticationFailure(ActivationResult)}).
+     *
+     * @param result Result with redirect status code.
+     */
+    @Override
+    public void onAuthenticationInterrupted(ActivationResult result) {
+	// forward as failure. Can be overridden by the implementor
+	onAuthenticationFailure(result);
+    }
+
 
     /**
      * Sets the return class which shall be used as a target in the redirect URL Intent.

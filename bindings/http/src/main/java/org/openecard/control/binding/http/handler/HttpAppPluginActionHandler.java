@@ -225,6 +225,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 		break;
 	    case INTERNAL_ERROR:
+	    case INTERRUPTED:
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		break;
 	    case RESOURCE_UNAVAILABLE:

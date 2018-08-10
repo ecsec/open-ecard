@@ -75,7 +75,7 @@ public interface ActivationImplementationInterface <GUI extends AndroidGui> {
     void onGuiIfaceSet(GUI androidGui);
 
     /**
-     * Callback when the authentication process is concluded with a redirect address.
+     * Callback when the authentication process is concluded with a redirect address or OK status.
      * <p>Receiving a redirect address does not necessarily mean that the authentication has been successful. This is
      * for the server to decide. The URL contains more information about the actual outcome of the authentication.
      * Functionality handling these kind of errors may be added to this method before calling the default
@@ -99,6 +99,15 @@ public interface ActivationImplementationInterface <GUI extends AndroidGui> {
      *   not be present.
      */
     void onAuthenticationFailure(ActivationResult result);
+
+    /**
+     * Callback when the authentication process has been interrupted.
+     * <p>An interruption can be caused by either a user cancel call or by the shutdown of a subsystem.</p>
+     *
+     * @param result Result possibly containg a message describing what interrupted the process.
+     */
+    void onAuthenticationInterrupted(ActivationResult result);
+
 
     /**
      * Function creating a dialog instructing the user to remove the card for safety purposes.

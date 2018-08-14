@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,37 +22,22 @@
 
 package org.openecard.addon.bind;
 
-import org.openecard.addon.AbstractFactory;
-import org.openecard.addon.Context;
-import org.openecard.addon.ActionInitializationException;
+import org.openecard.common.WSHelper;
 
 
 /**
+ * Exception indicating an error in the processing of an AppExtension.
  *
  * @author Tobias Wich
- * @author Dirk Petrautzki
  */
-public class AppExtensionActionProxy extends AbstractFactory<AppExtensionAction> implements AppExtensionAction {
+public class AppExtensionException extends WSHelper.WSException {
 
-    private AppExtensionAction c;
-
-    public AppExtensionActionProxy(String implClass, ClassLoader classLoader) {
-	super(implClass, classLoader);
+    public AppExtensionException(String minor, String msg) {
+	super(WSHelper.makeResultError(minor, msg));
     }
 
-    @Override
-    public void execute() throws AppExtensionException {
-	c.execute();
-    }
-
-    @Override 
-    public void init(Context ctx) throws ActionInitializationException {
-	c = loadInstance(ctx, AppExtensionAction.class);
-    }
-
-    @Override
-    public void destroy() {
-	c.destroy();
+    public AppExtensionException(String msg) {
+	super(WSHelper.makeResultUnknownError(msg));
     }
 
 }

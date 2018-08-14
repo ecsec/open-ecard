@@ -31,6 +31,6 @@ import org.openecard.addon.LifecycleTrait;
  */
 public interface AppExtensionAction extends LifecycleTrait {
 
-    void execute();
+    void execute() throws AppExtensionException;
 
 }

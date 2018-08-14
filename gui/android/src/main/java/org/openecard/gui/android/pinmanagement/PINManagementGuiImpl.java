@@ -22,15 +22,24 @@
 
 package org.openecard.gui.android.pinmanagement;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.common.util.Promise;
+import org.openecard.gui.definition.InputInfoUnit;
+import org.openecard.gui.definition.OutputInfoUnit;
+import org.openecard.gui.definition.PasswordField;
+import org.openecard.gui.definition.Step;
 import org.openecard.plugins.pinplugin.RecognizedState;
+import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  *
  * @author Sebastian Schuberth
+ * @author Tobias Wich
  */
 public class PINManagementGuiImpl implements PINManagementGui {
 
@@ -38,14 +47,15 @@ public class PINManagementGuiImpl implements PINManagementGui {
 
     private final Promise<Boolean> cancelPromise = new Promise<>();
 
-    private Promise<String> userPin = new Promise<>();
-    private Promise<String> newPin = new Promise<>();
+    private Promise<String> userPinOld = new Promise<>();
+    private Promise<String> userPinNew = new Promise<>();
     private Promise<String> userCan = new Promise<>();
     private Promise<String> userPuk = new Promise<>();
     private Promise<Boolean> pinCorrect = new Promise<>();
     private Promise<Boolean> canCorrect = new Promise<>();
     private Promise<Boolean> pukCorrect = new Promise<>();
     private Promise<PinStatus> pinStatus = new Promise<>();
+
 
     @Override
     public PinStatus getPinStatus() throws InterruptedException {
@@ -63,8 +73,8 @@ public class PINManagementGuiImpl implements PINManagementGui {
 
     @Override
     public boolean changePin(String oldPin, String newPin) throws InterruptedException {
-	userPin.deliver(oldPin);
-	userCan.deliver(newPin);
+	userPinOld.deliver(oldPin);
+	userPinNew.deliver(newPin);
 
 	// wait for the UI to set the value whether PIN is correct or not
 	try {
@@ -102,7 +112,8 @@ public class PINManagementGuiImpl implements PINManagementGui {
     public void cancel() {
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
 	    cancelPromise.deliver(Boolean.TRUE);
-	    cancelPromise(userPin);
+	    cancelPromise(userPinOld);
+	    cancelPromise(userPinNew);
 	    cancelPromise(userCan);
 	    cancelPromise(pinCorrect);
 	    cancelPromise(pinStatus);
@@ -127,23 +138,9 @@ public class PINManagementGuiImpl implements PINManagementGui {
 	Promise<Boolean> pc = this.pinCorrect;
 
 	this.pinCorrect = new Promise<>();
-	this.userPin = new Promise<>();
+	this.userPinOld = new Promise<>();
+	this.userPinNew = new Promise<>();
 	this.userCan = new Promise<>();
-	this.newPin = new Promise<>();
-	this.userPuk = new Promise<>();
-	this.canCorrect = new Promise<>();
-	this.pukCorrect = new Promise<>();
-
-	pc.deliver(isCorrect);
-    }
-
-    public void setPukCorrect(boolean isCorrect) {
-	Promise<Boolean> pc = this.pukCorrect;
-
-	this.pukCorrect = new Promise<>();
-	this.userPin = new Promise<>();
-	this.userCan = new Promise<>();
-	this.newPin = new Promise<>();
 	this.userPuk = new Promise<>();
 	this.canCorrect = new Promise<>();
 	this.pukCorrect = new Promise<>();
@@ -154,26 +151,104 @@ public class PINManagementGuiImpl implements PINManagementGui {
     public void setCanCorrect(boolean isCorrect) {
 	Promise<Boolean> pc = this.canCorrect;
 
-	this.canCorrect = new Promise<>();
-	this.userPin = new Promise<>();
+	this.pinCorrect = new Promise<>();
+	this.userPinOld = new Promise<>();
+	this.userPinNew = new Promise<>();
 	this.userCan = new Promise<>();
-	this.newPin = new Promise<>();
 	this.userPuk = new Promise<>();
-	this.pukCorrect = new Promise<>();
+	this.canCorrect = new Promise<>();
 	this.pukCorrect = new Promise<>();
 
 	pc.deliver(isCorrect);
     }
 
-    public void sendPinStatus(RecognizedState status) {
-	if (status == RecognizedState.PIN_blocked) {
-	    this.pinStatus.deliver(PinStatus.PIN_BLOCKED);
-	} else if (status == RecognizedState.PIN_deactivated) {
-	    this.pinStatus.deliver(PinStatus.DEACTIVATED);
+    public void setPukCorrect(boolean isCorrect) {
+	Promise<Boolean> pc = this.pukCorrect;
+
+	this.pinCorrect = new Promise<>();
+	this.userPinOld = new Promise<>();
+	this.userPinNew = new Promise<>();
+	this.userCan = new Promise<>();
+	this.userPuk = new Promise<>();
+	this.canCorrect = new Promise<>();
+	this.pukCorrect = new Promise<>();
+
+	pc.deliver(isCorrect);
+    }
+
+    public List<OutputInfoUnit> getPinResult(Step step) throws InterruptedException {
+	// read values
+	String oldPinValue = this.userPinOld.deref();
+	String newPinValue = this.userPinNew.deref();
+	String canValue = this.userCan.deref();
+	String pukValue = this.userPuk.deref();
+
+	if (step instanceof GenericPINStep) {
+	    ArrayList<OutputInfoUnit> result = new ArrayList<>();
+	    for (InputInfoUnit nextIn : step.getInputInfoUnits()) {
+		if (oldPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("OLD_PIN_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(oldPinValue.toCharArray());
+		    result.add(pw);
+		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(newPinValue.toCharArray());
+		    result.add(pw);
+		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_REPEAT_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(newPinValue.toCharArray());
+		    result.add(pw);
+		} else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("CAN_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(canValue.toCharArray());
+		    result.add(pw);
+		} else if (pukValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PUK_FIELD")) {
+		    PasswordField pw = new PasswordField(nextIn.getID());
+		    pw.copyContentFrom(nextIn);
+		    pw.setValue(pukValue.toCharArray());
+		    result.add(pw);
+		}
+	    }
+
+	    return result;
 	} else {
-	    // break execution instantly
-	    return;
+	    throw new InterruptedException("The given step is not a PinStep.");
 	}
+    }
+
+    public void sendPinStatus(RecognizedState status) {
+	switch (status) {
+	    case PIN_activated_RC3:
+		this.pinStatus.deliver(PinStatus.RC3);
+		break;
+	    case PIN_activated_RC2:
+		this.pinStatus.deliver(PinStatus.RC2);
+		break;
+	    case PIN_suspended:
+		this.pinStatus.deliver(PinStatus.CAN);
+		break;
+	    case PIN_resumed:
+		this.pinStatus.deliver(PinStatus.RC1);
+		break;
+	    case PIN_blocked:
+		this.pinStatus.deliver(PinStatus.PIN_BLOCKED);
+		break;
+	    case PUK_blocked:
+		this.pinStatus.deliver(PinStatus.PUK_BLOCKED);
+		break;
+	    case PIN_deactivated:
+		this.pinStatus.deliver(PinStatus.DEACTIVATED);
+		break;
+	    default:
+		throw new IllegalArgumentException("Unhandled PIN status received from UI.");
+	}
+    }
+
+    public void waitForUserCancel() {
 	// wait
 	try {
 	    cancelPromise.deref();

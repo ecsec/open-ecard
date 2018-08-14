@@ -26,26 +26,36 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.AndroidResult;
 import org.openecard.gui.android.GuiIfaceReceiver;
+import org.openecard.gui.definition.InputInfoUnit;
+import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
+import org.openecard.plugins.pinplugin.RecognizedState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
  * @author Sebastian Schuberth
+ * @author Tobias Wich
  */
 public class PINManagementNavigator implements UserConsentNavigator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PINManagementNavigator.class);
 
     private final List<Step> steps;
     private final GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver;
     private final PINManagementGuiImpl guiService;
 
     private int idx = -1;
-    private boolean pinFirstUse = true;
 
 
     public PINManagementNavigator(UserConsentDescription uc, GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver) {
@@ -69,18 +79,61 @@ public class PINManagementNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult next() {
+	// if cancel call has been issued, abort the whole process
 	if (this.guiService.isCancelled()) {
 	    // prevent index out of bounds
 	    int i = idx == -1 ? 0 : idx > steps.size() ? steps.size() - 1 : idx;
 	    return new AndroidResult(steps.get(i), ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	}
 
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	// handle step display
+	idx++;
+	Step pinStep = steps.get(0);
+
+	DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
+	RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
+	Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
+	Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
+	Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
+
+	if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
+	    LOG.error("No pin state received from UI.");
+	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	}
+
+	// set pin state
+	this.guiService.sendPinStatus(uiPinState);
+
+	// set result values if any
+	if (pinCorrect != null) {
+	    this.guiService.setPinCorrect(pinCorrect);
+	} else if (canCorrect != null) {
+	    this.guiService.setCanCorrect(canCorrect);
+	} else if (pukCorrect != null) {
+	    this.guiService.setPukCorrect(pukCorrect);
+	}
+
+	// pin accepted or card blocked
+	if ("success".equals(pinStep.getID())) {
+	    return new AndroidResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	} else if ("error".equals(pinStep.getID())) {
+	    this.guiService.waitForUserCancel();
+	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	}
+
+	// ask user for the pin
+	try {
+	    List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+	    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+	    return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
+	} catch (InterruptedException ex) {
+	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	}
     }
 
     @Override
     public StepResult previous() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -108,6 +161,16 @@ public class PINManagementNavigator implements UserConsentNavigator {
     @Override
     public void close() {
 	ifaceReceiver.terminate();
+    }
+
+    private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
+	for (InputInfoUnit infoInUnit : inInfo) {
+	    for (OutputInfoUnit infoOutUnit : outInfo) {
+		if (infoInUnit.getID().equals(infoOutUnit.getID())) {
+		    infoInUnit.copyContentFrom(infoOutUnit);
+		}
+	    }
+	}
     }
 
 }

@@ -22,6 +22,7 @@
 
 package org.openecard.gui.android.pinmanagement;
 
+
 /**
  *
  * @author Sebastian Schuberth
@@ -36,16 +37,33 @@ public enum PinStatus {
     PUK_BLOCKED,
     DEACTIVATED;
 
-    public boolean isPinBlocked() {
-	return PIN_BLOCKED == this;
+    public boolean isDead() {
+	switch (this) {
+	    case DEACTIVATED:
+	    case PUK_BLOCKED:
+		return true;
+	    default:
+		return false;
+	}
     }
 
-    public boolean isOperational() {
-	return ! isPinBlocked();
+    public boolean isNormalPinEntry() {
+	switch (this) {
+	    case RC3:
+	    case RC2:
+	    case RC1:
+		return true;
+	    default:
+		return false;
+	}
     }
 
     public boolean needsCan() {
 	return CAN == this;
+    }
+
+    public boolean needsPuk() {
+	return PIN_BLOCKED == this;
     }
 
 }

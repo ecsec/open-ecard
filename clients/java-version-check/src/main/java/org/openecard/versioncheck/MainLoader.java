@@ -46,7 +46,7 @@ public class MainLoader {
 	    if (! checkJavaVersion(VERSION_REFERENCE_VAL)) {
 		String msg = getBundle().getString("MainLoader.invalid_java_version");
 		String title = getBundle().getString("MainLoader.invalid_java_version.title");
-		msg(title, msg, System.getProperty("java.version"));
+		msg(title, msg, VERSION_REFERENCE_VAL, System.getProperty("java.version"));
 		System.exit(1);
 	    }
 

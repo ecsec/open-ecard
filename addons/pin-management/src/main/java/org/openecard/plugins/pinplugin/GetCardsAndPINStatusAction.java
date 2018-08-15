@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2016 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.plugins.pinplugin.gui.PINDialog;
 import org.slf4j.Logger;
@@ -35,38 +36,56 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetCardsAndPINStatusAction.class);
 
+    public static final String DYNCTX_INSTANCE_KEY = "GetCardsAndPINStatusAction";
+
+    public static final String PIN_STATUS = "pin-status";
+    public static final String PIN_CORRECT = "pin-correct";
+    public static final String CAN_CORRECT = "can-correct";
+    public static final String PUK_CORRECT = "puk-correct";
+
+
     @Override
     public void execute() {
-	// check if a german identity card is inserted, if not wait for it
-	ConnectionHandleType cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
+	// init dyn ctx
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
 
-	if (cHandle == null) {
-	    LOG.debug("User cancelled card insertion.");
-	    return;
-	}
-
-	cHandle = connectToRootApplication(cHandle);
-
-	RecognizedState pinState = recognizeState(cHandle);
-	boolean nativePace;
 	try {
-	    nativePace = genericPACESupport(cHandle);
-	} catch (WSException e) {
-	    LOG.error("Could not get capabilities from reader.");
-	    return;
+	    // check if a german identity card is inserted, if not wait for it
+	    ConnectionHandleType cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
+
+	    if (cHandle == null) {
+		LOG.debug("User cancelled card insertion.");
+		return;
+	    }
+
+	    cHandle = connectToRootApplication(cHandle);
+
+	    RecognizedState pinState = recognizeState(cHandle);
+	    ctx.put(PIN_STATUS, pinState);
+
+	    boolean nativePace;
+	    try {
+		nativePace = genericPACESupport(cHandle);
+	    } catch (WSException e) {
+		LOG.error("Could not get capabilities from reader.");
+		return;
+	    }
+
+	    PINDialog uc = new PINDialog(gui, dispatcher, cHandle, pinState, !nativePace);
+	    uc.show();
+
+	    Disconnect d = new Disconnect();
+	    d.setSlotHandle(cHandle.getSlotHandle());
+	    dispatcher.safeDeliver(d);
+	} finally {
+	    ctx.clear();
 	}
-
-	PINDialog uc = new PINDialog(gui, dispatcher, cHandle, pinState, !nativePace);
-	uc.show();
-
-	Disconnect d = new Disconnect();
-	d.setSlotHandle(cHandle.getSlotHandle());
-	dispatcher.safeDeliver(d);
     }
 
     @Override

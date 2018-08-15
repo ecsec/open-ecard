@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2016 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -70,6 +71,10 @@ import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ifd.scio.reader.PCSCPinModify;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.CAN_CORRECT;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_CORRECT;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PUK_CORRECT;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +83,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class GenericPINAction extends StepAction {
 
@@ -133,6 +139,9 @@ public class GenericPINAction extends StepAction {
 	    updateConnectionHandle();
 	}
 
+	// clean up values
+	clearCorrectValues();
+
 	switch (state) {
 	    case PIN_activated_RC3:
 	    case PIN_activated_RC2:
@@ -141,20 +150,16 @@ public class GenericPINAction extends StepAction {
 		return performResumePIN(oldResults);
 	    case PIN_resumed:
 		return performPINChange(oldResults);
-	    case PIN_deactivated:
-		// nothing todo here the error message was displayed so just return next.
-		return new StepActionResult(StepActionResultStatus.NEXT);
 	    case PIN_blocked:
 		return performUnblockPIN(oldResults);
+	    case PIN_deactivated:
 	    case PUK_blocked:
-		// nothing todo here the error message was displayed so just return next.
-		return new StepActionResult(StepActionResultStatus.NEXT);
 	    case UNKNOWN:
 		// nothing todo here the error message was displayed so just return next.
 		return new StepActionResult(StepActionResultStatus.NEXT);
 	}
-	return null;
 
+	return null;
     }
 
     private EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults)
@@ -269,6 +274,7 @@ public class GenericPINAction extends StepAction {
 	    } catch (UnsupportedEncodingException ex) {
 		LOG.error("ISO_8859_1 charset is not support.", ex);
 		gPINStep.updateState(state); // to reset the text fields
+		gPINStep.setFailedPINVerify(true, false);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 	}
@@ -277,30 +283,26 @@ public class GenericPINAction extends StepAction {
 	    EstablishChannelResponse pinResponse = performPACEWithPIN(oldResults);
 	    if (pinResponse == null) {
 		// the entered pin has a wrong format repeat the entering of the data
-		gPINStep.setFailedPINVerify(false);
-		gPINStep.setWrongPINFormat(true);
+		gPINStep.setFailedPINVerify(true, false);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
 	    if (pinResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		switch (pinResponse.getResult().getResultMinor()) {
 		    case ECardConstants.Minor.IFD.PASSWORD_ERROR:
-			gPINStep.setFailedPINVerify(true);
-			gPINStep.setWrongPINFormat(false);
-			gPINStep.updateState(RecognizedState.PIN_activated_RC2);
+			gPINStep.setFailedPINVerify(false, true);
 			state = RecognizedState.PIN_activated_RC2;
+			gPINStep.updateState(state);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    case ECardConstants.Minor.IFD.PASSWORD_SUSPENDED:
-			gPINStep.setFailedPINVerify(true);
-			gPINStep.setWrongPINFormat(false);
-			gPINStep.updateState(RecognizedState.PIN_suspended);
+			gPINStep.setFailedPINVerify(false, true);
 			state = RecognizedState.PIN_suspended;
+			gPINStep.updateState(state);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
-			gPINStep.setFailedPINVerify(true);
-			gPINStep.setWrongPINFormat(false);
-			gPINStep.updateState(RecognizedState.PIN_blocked);
+			gPINStep.setFailedPINVerify(false, true);
 			state = RecognizedState.PIN_blocked;
+			gPINStep.updateState(state);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    default:
 			WSHelper.checkResult(pinResponse);
@@ -310,7 +312,6 @@ public class GenericPINAction extends StepAction {
 
 	    if (capturePin) {
 		// pace with the old pin was successful now modify the pin
-
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
 		    // no result check necessary everything except a 9000 leads to an APDU exception
 		    sendResetRetryCounter(newPINValue.getBytes(ISO_8859_1));
@@ -321,14 +322,16 @@ public class GenericPINAction extends StepAction {
 	    }
 
 	    // PIN modified successfully, proceed with next step
+	    gPINStep.setFailedPINVerify(false, false);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (APDUException | IFDException | ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to change the PIN", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
-	}  catch (UnsupportedEncodingException ex) {
+	} catch (UnsupportedEncodingException ex) {
 	    LOG.warn("The encoding of the PIN is wrong.", ex);
+	    gPINStep.setFailedPINVerify(true, false);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (WSHelper.WSException ex) {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
@@ -383,17 +386,14 @@ public class GenericPINAction extends StepAction {
 	    EstablishChannelResponse canResponse = performPACEWithCAN(oldResults);
 
 	    if (canResponse == null) {
-		gPINStep.setWrongCANFormat(true);
-		gPINStep.setFailedCANVerify(false);
+		gPINStep.setFailedCANVerify(true, false);
 		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
 	    if (canResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
-
 		if (canResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
-		    gPINStep.setWrongCANFormat(false);
-		    gPINStep.setFailedCANVerify(true);
+		    gPINStep.setFailedCANVerify(false, true);
 		    gPINStep.updateState(state); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else {
@@ -401,8 +401,8 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
-	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    state = RecognizedState.PIN_resumed;
+	    gPINStep.updateState(state);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to resume the PIN.", ex);
@@ -442,8 +442,7 @@ public class GenericPINAction extends StepAction {
 	    EstablishChannelResponse pukResponse = performPACEWithPUK(oldResults);
 
 	    if (pukResponse == null) {
-		gPINStep.setWrongPUKFormat(true);
-		gPINStep.setFailedPUKVerify(false);
+		gPINStep.setFailedPUKVerify(true, false);
 		gPINStep.updateState(state); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
@@ -452,8 +451,7 @@ public class GenericPINAction extends StepAction {
 		if (pukResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
 		    // i think we should not display the counter
 		    //gPINStep.decreasePUKCounter();
-		    gPINStep.setWrongPUKFormat(false);
-		    gPINStep.setFailedPUKVerify(true);
+		    gPINStep.setFailedPUKVerify(false, true);
 		    gPINStep.updateState(state); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else {
@@ -470,13 +468,16 @@ public class GenericPINAction extends StepAction {
 	    CardResponseAPDU resetCounterResponse = resetRetryCounter.transmit(dispatcher, slotHandle, responses);
 	    if (Arrays.equals(resetCounterResponse.getTrailer(), new byte[] {(byte) 0x69, (byte) 0x84})) {
 		gPINStep.updateState(RecognizedState.PUK_blocked);
+		gPINStep.setFailedPUKVerify(false, true);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    } else if (Arrays.equals(resetCounterResponse.getTrailer(), new byte[] {(byte) 0x90, (byte) 0x00})) {
 		gPINStep.updateState(RecognizedState.PIN_activated_RC3);
+		gPINStep.setFailedPUKVerify(false, false);
 		return new StepActionResult(StepActionResultStatus.REPEAT,
 			generateSuccessStep(lang.translationForKey(PUK_SUCCESS)));
 	    } else {
 		gPINStep.updateState(RecognizedState.UNKNOWN);
+		gPINStep.setFailedPUKVerify(false, true);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 	} catch (APDUException | ParserConfigurationException ex) {
@@ -565,7 +566,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private Step generateSuccessStep(String successMessage) {
-	Step successStep = new Step(lang.translationForKey(SUCCESS_TITLE));
+	Step successStep = new Step("success", lang.translationForKey(SUCCESS_TITLE));
 	successStep.setReversible(false);
 	Text successText = new Text(successMessage);
 	successStep.getInputInfoUnits().add(successText);
@@ -573,7 +574,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private Step generateErrorStep(String errorMessage) {
-	Step errorStep = new Step(lang.translationForKey(ERROR_TITLE));
+	Step errorStep = new Step("error", lang.translationForKey(ERROR_TITLE));
 	errorStep.setReversible(false);
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);
@@ -638,5 +639,14 @@ public class GenericPINAction extends StepAction {
 	    }
 	}
     }
+
+    private void clearCorrectValues() {
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
+	ctx.remove(PIN_CORRECT);
+	ctx.remove(CAN_CORRECT);
+	ctx.remove(PUK_CORRECT);
+    }
+
+
 
 }

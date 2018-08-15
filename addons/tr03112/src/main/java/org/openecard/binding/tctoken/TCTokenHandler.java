@@ -154,7 +154,7 @@ public class TCTokenHandler {
 	List<CardApplicationPathType> pathRes;
 	pathRes = appPathRes.getCardAppPathResultSet().getCardApplicationPathResult();
 	appConnect.setCardApplicationPath(pathRes.get(0));
-	CardApplicationConnectResponse appConnectRes;	
+	CardApplicationConnectResponse appConnectRes;
 	appConnectRes = (CardApplicationConnectResponse) dispatcher.safeDeliver(appConnect);
 	// Update ConnectionHandle. It now includes a SlotHandle.
 	connectionHandle = appConnectRes.getConnectionHandle();
@@ -391,9 +391,9 @@ public class TCTokenHandler {
 		response.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, ex.getBindingResult().getAuxResultData().get(
 			AuxDataKeys.REDIRECT_LOCATION));
 	    }
-    
-	return response;
-    }
+
+	    return response;
+	}
     }
 
     private static void waitForTask(Future<?> task) throws PAOSException, DispatcherException {

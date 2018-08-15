@@ -56,6 +56,11 @@ public class PINManagementGuiImpl implements PINManagementGui {
     private Promise<Boolean> pukCorrect = new Promise<>();
     private Promise<PinStatus> pinStatus = new Promise<>();
 
+    @Override
+    public String getProtocolType() {
+	return "urn:oid:1.3.162.15480.3.0.9";
+    }
+
 
     @Override
     public PinStatus getPinStatus() throws InterruptedException {

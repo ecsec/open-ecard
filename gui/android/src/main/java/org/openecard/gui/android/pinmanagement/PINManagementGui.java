@@ -22,12 +22,14 @@
 
 package org.openecard.gui.android.pinmanagement;
 
+import org.openecard.gui.android.AndroidGui;
+
 
 /**
  *
  * @author Sebastian Schuberth
  */
-public interface PINManagementGui {
+public interface PINManagementGui extends AndroidGui {
 
     /**
      * Get status of the PIN on the card.

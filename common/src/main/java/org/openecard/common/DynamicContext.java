@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,13 +41,13 @@ import org.openecard.common.util.Promise;
  */
 public class DynamicContext {
 
-    private static final InheritableThreadLocal<Map<String, DynamicContext>> localMap;
+    private static final InheritableThreadLocal<Map<String, DynamicContext>> LOCAL_MAP;
 
     private final Map<String, Promise<Object>> context;
 
 
     static {
-	localMap = new InheritableThreadLocal<Map<String, DynamicContext>>() {
+	LOCAL_MAP = new InheritableThreadLocal<Map<String, DynamicContext>>() {
 	    @Override
 	    protected Map<String, DynamicContext> initialValue() {
 		return new ConcurrentSkipListMap<>();
@@ -68,7 +68,7 @@ public class DynamicContext {
      */
     @Nonnull
     public static DynamicContext getInstance(@Nonnull String key) {
-	final Map<String, DynamicContext> local = localMap.get();
+	final Map<String, DynamicContext> local = LOCAL_MAP.get();
 	synchronized (local) {
 	    DynamicContext inst;
 	    if (local.containsKey(key)) {
@@ -89,7 +89,7 @@ public class DynamicContext {
      * @see ThreadLocal#remove()
      */
     public static void remove() {
-	localMap.remove();
+	LOCAL_MAP.remove();
     }
 
 
@@ -119,7 +119,7 @@ public class DynamicContext {
 
     /**
      * Gets the value saved for the given key.
-     * The method does not block and returns null if no value is in the promise represented by thos key
+     * The method does not block and returns null if no value is in the promise represented by this key
      *
      * @see Map#get(java.lang.Object)
      * @param key Key for which the value should be retrieved.

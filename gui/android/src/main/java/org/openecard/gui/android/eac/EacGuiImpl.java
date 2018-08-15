@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.common.util.Promise;
-import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;

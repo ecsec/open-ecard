@@ -27,19 +27,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.openecard.gui.android.eac.EacGui;
+import org.openecard.gui.android.pinmanagement.PINManagementGui;
 
 
 /**
- * Implementation of the activation handler for EAC.
+ * Implementation of the activation handler for nPA PIN Management.
  *
  * @author Tobias Wich
  * @param <T>
  */
-public abstract class EacActivationHandler <T extends Activity> extends AbstractActivationHandler<T, EacGui> {
+public abstract class PinMgmtActivationHandler <T extends Activity> extends AbstractActivationHandler<T, PINManagementGui> {
 
-    public EacActivationHandler(T parent) {
-	super(parent, EacGui.class);
+    public PinMgmtActivationHandler(T parent) {
+	super(parent, PINManagementGui.class);
     }
 
     protected static final Set<String> SUPPORTED_CARDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(

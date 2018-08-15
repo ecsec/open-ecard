@@ -189,7 +189,7 @@ public class SingleThreadChannel implements IfdChannel {
      * @throws NullPointerException Thrown in case the argument is {@code null}.
      */
     @Nonnull
-    private CardResponseAPDU transmit(final @Nonnull byte[] command) throws SCIOException, IllegalStateException {
+    private CardResponseAPDU transmit(final @Nonnull byte[] command) throws SCIOException, IllegalStateException, InterruptedException {
 	// send command
 	Future<CardResponseAPDU> result = exec.submit(new Callable<CardResponseAPDU>() {
 	    @Override
@@ -217,7 +217,7 @@ public class SingleThreadChannel implements IfdChannel {
 	    }
 	} catch (InterruptedException ex) {
 	    result.cancel(true);
-	    throw new IllegalStateException("Running command cancelled during execution.");
+	    throw new InterruptedException("Interruption during transmit.");
 	}
     }
 
@@ -244,14 +244,15 @@ public class SingleThreadChannel implements IfdChannel {
      */
     @Nonnull
     private CardResponseAPDU transmit(final @Nonnull CardCommandAPDU command) throws SCIOException,
-	    IllegalStateException {
+	    IllegalStateException,
+	    InterruptedException {
 	return transmit(command.toByteArray());
     }
 
     @Nonnull
     @Override
     public byte[] transmit(@Nonnull byte[] input, @Nonnull List<byte[]> responses) throws TransmitException,
-	    SCIOException, IllegalStateException {
+	    SCIOException, IllegalStateException, InterruptedException {
 	byte[] inputAPDU = input;
 	if (isSM()) {
 	    LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, false));
@@ -292,7 +293,7 @@ public class SingleThreadChannel implements IfdChannel {
     @Nonnull
     @Override
     public byte[] transmitControlCommand(final int controlCode, final @Nonnull byte[] command) throws SCIOException,
-	    IllegalStateException, NullPointerException {
+	    IllegalStateException, NullPointerException, InterruptedException {
 	// send command
 	Future<byte[]> result = exec.submit(new Callable<byte[]>() {
 	    @Override
@@ -318,21 +319,21 @@ public class SingleThreadChannel implements IfdChannel {
 	    }
 	} catch (InterruptedException ex) {
 	    result.cancel(true);
-	    throw new IllegalStateException("Running command cancelled during execution.");
+	    throw new InterruptedException("Interruption during transmit control command.");
 	}
     }
 
     @Override
-    public void beginExclusive() throws SCIOException, IllegalStateException {
+    public void beginExclusive() throws SCIOException, IllegalStateException, InterruptedException {
 	submitTransaction(true);
     }
 
     @Override
-    public void endExclusive() throws SCIOException, IllegalStateException {
+    public void endExclusive() throws SCIOException, IllegalStateException, InterruptedException {
 	submitTransaction(false);
     }
 
-    private void submitTransaction(final boolean start) throws SCIOException, IllegalStateException {
+    private void submitTransaction(final boolean start) throws SCIOException, IllegalStateException, InterruptedException {
 	// send command
 	Future<Void> result = exec.submit(new Callable<Void>() {
 	    @Override
@@ -362,7 +363,7 @@ public class SingleThreadChannel implements IfdChannel {
 	    }
 	} catch (InterruptedException ex) {
 	    result.cancel(true);
-	    throw new IllegalStateException("Running command cancelled during execution.");
+	    throw new InterruptedException("Interruption during transaction submit.");
 	}
     }
 

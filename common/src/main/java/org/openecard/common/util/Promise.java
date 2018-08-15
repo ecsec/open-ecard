@@ -59,13 +59,8 @@ public class Promise <T> {
      * @return {@code true} if the promise is delivered, {@code false} otherwise.
      */
     public synchronized boolean isDelivered() {
-	try {
-	    boolean isSet = gate.await(0, TimeUnit.MILLISECONDS);
-	    return isSet && ! isCancelled;
-	} catch (InterruptedException ex) {
-	    // this basically is not a wait function, so ignore interrupt status here and fail later
-	    return false;
-	}
+	boolean isSet = gate.getCount() <= 0;
+	return isSet && ! isCancelled;
     }
 
     /**
@@ -124,7 +119,7 @@ public class Promise <T> {
 	    // wait an infinite time, most certainly longer than the machine running this program exists :p
 	    return deref(Long.MAX_VALUE, TimeUnit.DAYS);
 	} catch (TimeoutException ex) {
-	    // ignore the exception, as trhe timout is quasi forever
+	    // ignore the exception, as the timeout is quasi forever
 	    return null;
 	}
     }

@@ -80,10 +80,11 @@ public interface IfdChannel {
      * @throws IllegalStateException Thrown if the card is not connected anymore or the channel has been closed.
      * @throws IllegalArgumentException Thrown if the APDU encodes a {@code MANAGE CHANNEL}.
      * @throws NullPointerException Thrown in case the argument is {@code null}.
+     * @throws InterruptedException if the user cancels the process
      */
     @Nonnull
     byte[] transmit(@Nonnull byte[] input, @Nonnull List<byte[]> responses) throws TransmitException,
-	    SCIOException, IllegalStateException;
+	    SCIOException, IllegalStateException, InterruptedException;
 
     /**
      * Sends a control command to the terminal.
@@ -95,10 +96,11 @@ public interface IfdChannel {
      * @throws IllegalStateException Thrown in case the card is already disconnected (see
      *   {@link SCIOCard#disconnect(boolean)}.
      * @throws NullPointerException Thrown in case the command data is {@code null}.
+     * @throws InterruptedException if the user cancels the process
      */
     @Nonnull
     byte[] transmitControlCommand(final int controlCode, final @Nonnull byte[] command) throws SCIOException,
-	    IllegalStateException, NullPointerException;
+	    IllegalStateException, NullPointerException, InterruptedException;
 
     /**
      * Starts a transaction on the card.
@@ -108,8 +110,9 @@ public interface IfdChannel {
      * @throws SCIOException Thrown if exclusive access is already set or it could not be set due to some other problem.
      * @throws IllegalStateException Thrown in case the card is already disconnected (see
      *   {@link SCIOCard#disconnect(boolean)}).
+     * @throws InterruptedException if the user cancels the process
      */
-    void beginExclusive() throws SCIOException, IllegalStateException;
+    void beginExclusive() throws SCIOException, IllegalStateException, InterruptedException;
 
     /**
      * Ends the exclusive access to the card.
@@ -118,8 +121,9 @@ public interface IfdChannel {
      * @throws SCIOException Thrown in case the operation failed due to some unkown reason.
      * @throws IllegalStateException Thrown in case the card is already disconnected (see
      *   {@link SCIOCard#disconnect(boolean)}), or no {@link #beginExclusive()} call has been issued before.
+     * @throws InterruptedException if the user cancels the process
      */
-    void endExclusive() throws SCIOException, IllegalStateException;
+    void endExclusive() throws SCIOException, IllegalStateException, InterruptedException;
 
     boolean isSM();
 

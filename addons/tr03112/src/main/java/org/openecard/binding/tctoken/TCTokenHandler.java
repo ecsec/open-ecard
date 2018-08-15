@@ -230,6 +230,11 @@ public class TCTokenHandler {
 	} catch (WSException ex) {
 	    String msg = "Failed to connect to card.";
 	    LOG.error(msg, ex);
+
+	    if(ECardConstants.Minor.IFD.CANCELLATION_BY_USER.equals(ex.getResultMinor())) {
+		throw new PAOSException(ex);
+	    }
+	    
 	    throw new DispatcherException(msg, ex);
 	}
     }
@@ -525,6 +530,7 @@ public class TCTokenHandler {
 	String errorMsg;
 	switch (ex.getResultMinor()) {
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+	    case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 		errorMsg = LANG_TOKEN.translationForKey("cancel");
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
 		break;

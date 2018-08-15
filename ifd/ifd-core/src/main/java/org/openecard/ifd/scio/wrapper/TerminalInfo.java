@@ -142,7 +142,7 @@ public class TerminalInfo {
 	return status;
     }
 
-    public SlotCapabilityType getSlotCapability() throws SCIOException {
+    public SlotCapabilityType getSlotCapability() throws SCIOException, InterruptedException {
 	if (! slotCapRead) {
 	    SlotCapabilityType cap = new SlotCapabilityType();
 	    cap.setIndex(BigInteger.ZERO);
@@ -189,7 +189,7 @@ public class TerminalInfo {
     }
 
     @Nullable
-    public DisplayCapabilityType getDisplayCapability() throws SCIOException {
+    public DisplayCapabilityType getDisplayCapability() throws SCIOException, InterruptedException {
 	if (! dispCapRead) {
 	    if (isConnected()) {
 		Map<Integer, Integer> features = getFeatureCodes();
@@ -215,7 +215,7 @@ public class TerminalInfo {
     }
 
     @Nullable
-    public KeyPadCapabilityType getKeypadCapability() throws SCIOException {
+    public KeyPadCapabilityType getKeypadCapability() throws SCIOException, InterruptedException {
 	if (! keyCapRead) {
 	    if (isConnected()) {
 		// try to get the properties from the reader
@@ -256,7 +256,7 @@ public class TerminalInfo {
     }
 
 
-    private Integer getPaceCtrlCode() throws SCIOException {
+    private Integer getPaceCtrlCode() throws SCIOException, InterruptedException {
 	if (isConnected()) {
 	    Map<Integer, Integer> features = getFeatureCodes();
 	    return features.get(PCSCFeatures.EXECUTE_PACE);
@@ -265,11 +265,11 @@ public class TerminalInfo {
 	}
     }
 
-    public boolean supportsPace() throws SCIOException {
+    public boolean supportsPace() throws SCIOException, InterruptedException {
 	return getPaceCtrlCode() != null;
     }
 
-    public List<PACECapabilities.PACECapability> getPACECapabilities() throws SCIOException {
+    public List<PACECapabilities.PACECapability> getPACECapabilities() throws SCIOException, InterruptedException {
 	List<PACECapabilities.PACECapability> result = new LinkedList<>();
 
 	if (PACECapabilities == null) {
@@ -298,7 +298,7 @@ public class TerminalInfo {
     }
 
 
-    private Integer getPinCompareCtrlCode() throws SCIOException {
+    private Integer getPinCompareCtrlCode() throws SCIOException, InterruptedException {
 	if (isConnected()) {
 	    Map<Integer, Integer> features = getFeatureCodes();
 	    return features.get(PCSCFeatures.VERIFY_PIN_DIRECT);
@@ -306,12 +306,12 @@ public class TerminalInfo {
 	return null;
     }
 
-    public boolean supportsPinCompare() throws SCIOException {
+    public boolean supportsPinCompare() throws SCIOException, InterruptedException {
 	return getPinCompareCtrlCode() != null;
     }
 
     @Nonnull
-    public Map<Integer, Integer> getFeatureCodes() throws SCIOException {
+    public Map<Integer, Integer> getFeatureCodes() throws SCIOException, InterruptedException {
 	if (isConnected()) {
 	    if (featureCodes == null) {
 		int code = PCSCFeatures.GET_FEATURE_REQUEST_CTLCODE();

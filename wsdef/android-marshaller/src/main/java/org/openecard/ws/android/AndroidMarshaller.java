@@ -1284,7 +1284,7 @@ public class AndroidMarshaller implements WSMarshaller {
 	    em.appendChild(document.createTextNode(r.getResultMinor()));
 	    emResult.appendChild(em);
 	}
-	if (r.getResultMessage() != null) {
+	if (r.getResultMessage() != null && r.getResultMessage().getValue() != null) {
 	    emResult.appendChild(marshalInternationStringType(r.getResultMessage(), document, "ResultMessage"));
 	}
 	return emResult;

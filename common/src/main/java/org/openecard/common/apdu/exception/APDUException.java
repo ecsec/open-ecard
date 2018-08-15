@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardException;
+import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 
 
@@ -75,6 +76,15 @@ public final class APDUException extends ECardException {
     public APDUException(Throwable cause) {
 	makeException(this, cause);
     }
+    
+    /**
+     * Creates a new APDUException.
+     *
+     * @param ex WSException
+     */
+    public APDUException(WSHelper.WSException ex) {
+	makeException(this, ex, ex.getResultMajor(), ex.getResultMinor(), ex.getResultMessage());
+    }
 
     /**
      * Creates a new APDUException.
@@ -84,6 +94,21 @@ public final class APDUException extends ECardException {
      */
     public APDUException(Throwable cause, TransmitResponse tr) {
 	this(cause);
+
+	transmitResponse = tr;
+	if (! tr.getOutputAPDU().isEmpty()) {
+	    responseAPDU = new CardResponseAPDU(tr);
+	}
+    }
+
+    /**
+     * Creates a new APDUException.
+     *
+     * @param ex WSException
+     * @param tr TransmitResponse
+     */
+    public APDUException(WSHelper.WSException ex, TransmitResponse tr) {
+	this(ex);
 
 	transmitResponse = tr;
 	if (! tr.getOutputAPDU().isEmpty()) {

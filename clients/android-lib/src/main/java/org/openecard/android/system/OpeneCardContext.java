@@ -75,8 +75,10 @@ import org.openecard.android.utils.NfcUtils;
 import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.EacNavigatorFactory;
 import org.openecard.gui.android.InsertCardNavigatorFactory;
+import org.openecard.gui.android.PINManagementNavigatorFactory;
 import org.openecard.gui.android.UserConsentNavigatorFactory;
 import org.openecard.gui.android.eac.EacGui;
+import org.openecard.gui.android.pinmanagement.PINManagementGui;
 import org.openecard.gui.definition.ViewController;
 
 
@@ -153,9 +155,13 @@ public class OpeneCardContext implements EventCallback {
 	// the key type must match the generic. This can't be enforced so watch it here.
 	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
 	realFactories.put(EacGui.class, eacNavFac);
+	
+	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
+	realFactories.put(PINManagementGui.class, pinMngFac);
 
 	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
 		eacNavFac,
+		pinMngFac,
 		new InsertCardNavigatorFactory());
 
 	gui = new AndroidUserConsent(allFactories);

@@ -52,6 +52,7 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import static org.openecard.addons.activate.ActivateAction.needsFullscreen;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.binding.tctoken.ex.NonGuiException;
@@ -81,7 +82,6 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.common.util.TR03112Utils;
 import org.openecard.transport.paos.PAOSConnectionException;
 
 
@@ -501,20 +501,19 @@ public class TCTokenHandler {
 	// disable checks when not using the nPA
 	if (! tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {
 	    activationChecks = false;
-	} else if (TR03112Utils.DEVELOPER_MODE) {
-	    activationChecks = false;
-	    LOG.warn("DEVELOPER_MODE: All TR-03124-1 security checks are disabled.");
 	}
 	return activationChecks;
     }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
-	    }
-	}, "Background_MsgBox").start();
+	if (!needsFullscreen()) {
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
+		}
+	    }, "Background_MsgBox").start();
+	}
     }
 
     private void showErrorMessage(String errMsg) {

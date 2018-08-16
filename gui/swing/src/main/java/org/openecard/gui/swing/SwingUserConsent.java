@@ -133,7 +133,7 @@ public class SwingUserConsent implements UserConsent {
 	} else {
 	    layout.setHorizontalGroup(
 		    layout.createSequentialGroup()
-		    .addComponent(sideBar, 200, 200, 200)
+		    .addComponent(sideBar, 300, 400, 600)
 		    .addGroup(layout.createParallelGroup()
 			    .addComponent(stepPanel)
 			    .addComponent(navBar)));

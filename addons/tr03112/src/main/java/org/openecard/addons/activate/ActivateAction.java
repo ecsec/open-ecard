@@ -71,6 +71,7 @@ public class ActivateAction implements AppPluginAction {
     private static final Semaphore SEMAPHORE = new Semaphore(1);
 
     private final I18n lang = I18n.getTranslation("tr03112");
+    private static final String FULLSCREEN_USER_CONSENT = "display_fullscreen_uc";
 
     private TCTokenHandler tokenHandler;
     private AppPluginAction statusAction;
@@ -152,12 +153,14 @@ public class ActivateAction implements AppPluginAction {
      * @param dialogType Type of the dialog.
      */
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
-	    }
-	}, "Background_MsgBox").start();
+	if (!needsFullscreen()) {
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
+		}
+	    }, "Background_MsgBox").start();
+	}
     }
 
     /**
@@ -172,6 +175,11 @@ public class ActivateAction implements AppPluginAction {
 	String removeCard = lang.translationForKey(REMOVE_CARD);
 	String msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard);
 	showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE);
+    }
+    
+    public static boolean needsFullscreen() {
+	String fsStr = OpenecardProperties.getProperty(FULLSCREEN_USER_CONSENT);
+	return Boolean.parseBoolean(fsStr);
     }
 
     /**

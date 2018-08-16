@@ -70,9 +70,9 @@ public class DefaultStepLayouter extends StepLayouter {
 
 	// Add a panel containing step title and separator
 	JPanel pageStart = new JPanel(new BorderLayout());
-	JLabel title = new JLabel("<html><h3>" + stepName + "</h3></html>");
+	JLabel title = new JLabel("<html><h1>" + stepName + "</h1></html>");
 	// add a space of 20 on top and 3 below to match with the logo separator
-	title.setBorder(new EmptyBorder(20, 0, 3, 0));
+	title.setBorder(new EmptyBorder(11, 0, 0, 0));
 	pageStart.add(title, BorderLayout.PAGE_START);
 	JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
 	pageStart.add(sep, BorderLayout.CENTER);
@@ -139,5 +139,5 @@ public class DefaultStepLayouter extends StepLayouter {
     public Container getPanel() {
 	return rootPanel;
     }
-
-}
+    
+	}

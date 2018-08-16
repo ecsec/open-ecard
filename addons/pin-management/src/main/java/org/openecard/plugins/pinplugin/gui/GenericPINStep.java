@@ -357,19 +357,19 @@ public class GenericPINStep extends Step {
     protected void setFailedPINVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongPINFormat = wrongFormat;
 	failedPINVerify = failedVerify;
-	exportPinCorrect(! wrongFormat || ! failedVerify);
+	exportPinCorrect(! wrongFormat && ! failedVerify);
     }
 
     protected void setFailedCANVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongCANFormat = wrongFormat;
 	failedCANVerify = failedVerify;
-	exportCanCorrect(! wrongFormat || ! failedVerify);
+	exportCanCorrect(! wrongFormat && ! failedVerify);
     }
 
     protected void setFailedPUKVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongPUKFormat = wrongFormat;
 	failedPUKVerify = failedVerify;
-	exportPukCorrect(! wrongFormat || ! failedVerify);
+	exportPukCorrect(! wrongFormat && ! failedVerify);
     }
 
     protected void exportPinCorrect(boolean isCorrect) {

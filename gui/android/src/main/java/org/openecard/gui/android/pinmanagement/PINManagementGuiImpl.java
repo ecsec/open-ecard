@@ -80,7 +80,8 @@ public class PINManagementGuiImpl implements PINManagementGui {
     public boolean changePin(String oldPin, String newPin) throws InterruptedException {
 	userPinOld.deliver(oldPin);
 	userPinNew.deliver(newPin);
-
+	userCan.deliver(null);
+	userPuk.deliver(null);
 	// wait for the UI to set the value whether PIN is correct or not
 	try {
 	    return pinCorrect.deref();
@@ -91,7 +92,10 @@ public class PINManagementGuiImpl implements PINManagementGui {
 
     @Override
     public boolean enterCan(String can) throws InterruptedException {
+	userPinOld.deliver(null);
+	userPinNew.deliver(null);
 	userCan.deliver(can);
+	userPuk.deliver(null);
 
 	// wait for the UI to set the value whether CAN is correct or not
 	try {
@@ -103,6 +107,9 @@ public class PINManagementGuiImpl implements PINManagementGui {
 
     @Override
     public boolean unblockPin(String puk) throws InterruptedException {
+	userPinOld.deliver(null);
+	userPinNew.deliver(null);
+	userCan.deliver(null);
 	userPuk.deliver(puk);
 
 	// wait for the UI to set the value whether PUK is correct or not
@@ -120,8 +127,11 @@ public class PINManagementGuiImpl implements PINManagementGui {
 	    cancelPromise(userPinOld);
 	    cancelPromise(userPinNew);
 	    cancelPromise(userCan);
+	    cancelPromise(userPuk);
 	    cancelPromise(pinCorrect);
 	    cancelPromise(pinStatus);
+	    cancelPromise(canCorrect);
+	    cancelPromise(pukCorrect);
 	}
     }
 

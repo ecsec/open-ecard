@@ -366,6 +366,10 @@ public class TCTokenHandler {
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
 			w.getLocalizedMessage()));
+	    } else if (innerException instanceof InterruptedException) {
+		response.setResultCode(BindingResultCode.INTERRUPTED);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		return response;
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));

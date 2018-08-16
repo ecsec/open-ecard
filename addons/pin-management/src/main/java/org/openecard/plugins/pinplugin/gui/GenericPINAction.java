@@ -401,6 +401,7 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
+	    gPINStep.setFailedCANVerify(false, false);
 	    state = RecognizedState.PIN_resumed;
 	    gPINStep.updateState(state);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);

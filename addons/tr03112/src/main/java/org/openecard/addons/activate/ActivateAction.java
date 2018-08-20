@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.transport.httpcore.cookies.CookieManager;
 import org.openecard.common.interfaces.Dispatcher;
@@ -437,7 +438,12 @@ public class ActivateAction implements AppPluginAction {
 		}
 	    }
 	} catch (RuntimeException e) {
-	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+
+	    if(e instanceof ThreadTerminateException){
+		response = new BindingResult(BindingResultCode.INTERRUPTED);
+	    } else {
+		response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+	    }
 	    LOG.error(e.getMessage(), e);
 	}
 

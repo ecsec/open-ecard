@@ -353,6 +353,8 @@ public class ActivateAction implements AppPluginAction {
 		    LOG.info("PIN Management got cancelled.");
 		    return new BindingResult(BindingResultCode.INTERRUPTED);
 		}
+	    } else if (cause instanceof ThreadTerminateException) {
+		return new BindingResult(BindingResultCode.INTERRUPTED);
 	    }
 
 	    // just count as normal error

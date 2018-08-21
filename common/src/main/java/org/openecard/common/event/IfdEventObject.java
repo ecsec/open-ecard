@@ -34,16 +34,22 @@ import javax.annotation.Nullable;
 public class IfdEventObject extends EventObject {
 
     private final String ifaceProtocol;
+    private final boolean reset;
 
     // TODO: move this class to IFD package, but this needs refactoring of StateMap as well
 
     public IfdEventObject(@Nonnull ConnectionHandleType handle) {
-	this(handle, null);
+	this(handle, null, false);
     }
 
     public IfdEventObject(@Nonnull ConnectionHandleType handle, @Nullable String ifaceProtocol) {
+	this(handle, ifaceProtocol, false);
+    }
+
+    public IfdEventObject(@Nonnull ConnectionHandleType handle, @Nullable String ifaceProtocol, boolean reset) {
 	super(handle);
 	this.ifaceProtocol = ifaceProtocol;
+	this.reset = reset;
     }
 
     @Override
@@ -56,6 +62,10 @@ public class IfdEventObject extends EventObject {
     @Nullable
     public String getIfaceProtocol() {
 	return ifaceProtocol;
+    }
+
+    public boolean cardWasReset(){
+	return reset;
     }
 
 }

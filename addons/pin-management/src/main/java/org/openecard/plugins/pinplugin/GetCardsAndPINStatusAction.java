@@ -73,92 +73,97 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     
     private EventCallback disconnectEventSink;
     private ConnectionHandleType cHandle;
+    private Future<ResultStatus> pinManagement;
 
 
     @Override
     public void execute() throws AppExtensionException {
 	// init dyn ctx
 	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
-
-	// check if a german identity card is inserted, if not wait for it
-	cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
-
-	if (cHandle == null) {
-	    LOG.debug("User cancelled card insertion.");
-	    return;
-	}
-
-	cHandle = connectToRootApplication(cHandle);
-
-	final RecognizedState pinState = recognizeState(cHandle);
-	ctx.put(PIN_STATUS, pinState);
-
-	boolean nativePace;
+	
 	try {
-	    nativePace = genericPACESupport(cHandle);
-	} catch (WSException e) {
-	    LOG.error("Could not get capabilities from reader.");
-	    return;
-	}
+	    // check if a german identity card is inserted, if not wait for it
+	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
 
-	final ConnectionHandleType handle = cHandle;
-	final boolean capturePin = !nativePace;
+	    if (cHandle == null) {
+		LOG.debug("User cancelled card insertion.");
+		return;
+	    }
 
-	ExecutorService es = Executors.newSingleThreadExecutor(new ThreadFactory() {
-	    @Override
-	    public Thread newThread(Runnable action) {
-	        return new Thread(action, "ShowPINManagement");
-	    }
-	});
+	    cHandle = connectToRootApplication(cHandle);
+
+	    final RecognizedState pinState = recognizeState(cHandle);
+	    ctx.put(PIN_STATUS, pinState);
+
+	    boolean nativePace = genericPACESupport(cHandle);
+
+	    final ConnectionHandleType handle = cHandle;
+	    final boolean capturePin = !nativePace;
+
+	    try { 
+		ExecutorService es = Executors.newSingleThreadExecutor(new ThreadFactory() {
+		    @Override
+		    public Thread newThread(Runnable action) {
+			return new Thread(action, "ShowPINManagementDialog");
+		    }
+		});
+
+		pinManagement = es.submit(new Callable<ResultStatus>() {
+		    @Override
+		    public ResultStatus call() throws Exception {
+			PINDialog uc = new PINDialog(gui, dispatcher, handle , pinState, capturePin);
+			return uc.show();
+		    }
+		});
+
+
+		disconnectEventSink = new EventCallback() {
+		    @Override
+		    public void signalEvent(EventType eventType, EventObject eventData) {
+			if (eventType == EventType.CARD_REMOVED) {
+			    LOG.info("Card has been removed. Shutting down PIN Management process.");
+			    pinManagement.cancel(true);
+			}
+		}};
+
+		EventFilter evFilter = new CardRemovedFilter(cHandle.getIFDName(), cHandle.getSlotIndex());
+		evDispatcher.add(disconnectEventSink, evFilter);
+
+		ResultStatus result = pinManagement.get();
+		if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED){
+		    throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+		}   
 	    
-	final Future<ResultStatus> pinManagement = es.submit(new Callable<ResultStatus>() {
-	    @Override
-	    public ResultStatus call() throws Exception {
-	        PINDialog uc = new PINDialog(gui, dispatcher, handle , pinState, capturePin);
-	        return uc.show();
-	    }
-	});
-	    
-	    
-	disconnectEventSink = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		if (eventType == EventType.CARD_REMOVED) {
-		    LOG.info("Card has been removed. Shutting down PIN Management process.");
-		    pinManagement.cancel(true);
+	    } catch (InterruptedException ex) {
+		LOG.info("waiting for PIN management to stop interrupted.", ex);
+		pinManagement.cancel(true);
+	    } catch (ExecutionException ex) {
+		LOG.warn("Pin Management failed", ex);
+	    } catch (CancellationException ex) {
+		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");  
+	    } finally {
+		if(disconnectEventSink != null) {   
+		    evDispatcher.del(disconnectEventSink);
 		}
-	}};
-	    
-	EventFilter evFilter = new CardRemovedFilter(cHandle.getIFDName(), cHandle.getSlotIndex());
-	evDispatcher.add(disconnectEventSink, evFilter);
-	    
-	try {
-	    ResultStatus result = pinManagement.get();
-	    if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED){
-		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
-	    }   
-	} catch (InterruptedException ex) {
-	    LOG.info("waiting for PIN management to stop interrupted.", ex);
-	    pinManagement.cancel(true);
-	} catch (ExecutionException ex) {
-	    LOG.warn("Pin Management failed", ex);
-	} catch (CancellationException ex) {
-	    throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");    
+
+		pinManagement = null;
+
+		// destroy the pace channel
+		DestroyChannel destChannel = new DestroyChannel();
+		destChannel.setSlotHandle(cHandle.getSlotHandle());
+		dispatcher.safeDeliver(destChannel);
+
+		// Transaction based communication does not work on java 8 so the PACE channel is not closed after an
+		// EndTransaction call. So do a reset of the card to close the PACE channel.
+		Disconnect disconnect = new Disconnect();
+		disconnect.setSlotHandle(cHandle.getSlotHandle());
+		disconnect.setAction(ActionType.RESET);
+		dispatcher.safeDeliver(disconnect);
+	    }
+	} catch (WSException ex){
+	    throw new AppExtensionException(ex.getResultMinor(), ex.getMessage());
+	
 	} finally {
-	    evDispatcher.del(disconnectEventSink);
-  
-	    // destroy the pace channel
-	    DestroyChannel destChannel = new DestroyChannel();
-	    destChannel.setSlotHandle(cHandle.getSlotHandle());
-	    dispatcher.safeDeliver(destChannel);
-	    
-	    // Transaction based communication does not work on java 8 so the PACE channel is not closed after an
-	    // EndTransaction call. So do a reset of the card to close the PACE channel.
-	    Disconnect disconnect = new Disconnect();
-	    disconnect.setSlotHandle(cHandle.getSlotHandle());
-	    disconnect.setAction(ActionType.RESET);
-	    dispatcher.safeDeliver(disconnect);
-	    
 	    ctx.clear();
 	}
     }

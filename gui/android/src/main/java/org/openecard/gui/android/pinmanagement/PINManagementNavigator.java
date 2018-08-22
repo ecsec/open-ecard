@@ -117,7 +117,7 @@ public class PINManagementNavigator implements UserConsentNavigator {
 	if ("success".equals(pinStep.getID())) {
 	    return new AndroidResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
 	} else if ("error".equals(pinStep.getID())) {
-	    this.guiService.waitForUserCancel();
+	    //this.guiService.waitForUserCancel();
 	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	}
 

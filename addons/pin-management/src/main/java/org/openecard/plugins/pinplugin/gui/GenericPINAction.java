@@ -33,8 +33,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
-import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
-import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
@@ -367,17 +365,6 @@ public class GenericPINAction extends StepAction {
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	} finally {
-	    // destroy the pace channel
-	    DestroyChannel destChannel = new DestroyChannel();
-	    destChannel.setSlotHandle(slotHandle);
-	    dispatcher.safeDeliver(destChannel);
-
-	    // Transaction based communication does not work on java 8 so the PACE channel is not closed after an
-	    // EndTransaction call. So do a reset of the card to close the PACE channel.
-	    Disconnect disconnect = new Disconnect();
-	    disconnect.setSlotHandle(slotHandle);
-	    disconnect.setAction(ActionType.RESET);
-	    dispatcher.safeDeliver(disconnect);
 	}
     }
 
@@ -512,16 +499,6 @@ public class GenericPINAction extends StepAction {
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)));
 	} finally {
-	    // destroy the pace channel
-	    DestroyChannel destChannel = new DestroyChannel();
-	    destChannel.setSlotHandle(slotHandle);
-	    dispatcher.safeDeliver(destChannel);
-
-	    // For readers which do not support DestroyChannel but have generic pace support
-	    Disconnect disconnect = new Disconnect();
-	    disconnect.setSlotHandle(slotHandle);
-	    disconnect.setAction(ActionType.RESET);
-	    dispatcher.safeDeliver(disconnect);
 	}
 
     }

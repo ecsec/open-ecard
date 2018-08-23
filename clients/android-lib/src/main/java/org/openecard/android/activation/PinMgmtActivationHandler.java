@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,23 +22,32 @@
 
 package org.openecard.android.activation;
 
+import android.app.Activity;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import org.openecard.gui.android.pinmanagement.PINManagementGui;
+
 
 /**
+ * Implementation of the activation handler for nPA PIN Management.
  *
- * @author Mike Prechtl
+ * @author Tobias Wich
+ * @param <T>
  */
-public enum ActivationResultCode {
+public abstract class PinMgmtActivationHandler <T extends Activity> extends AbstractActivationHandler<T, PINManagementGui> {
 
-    OK(200), REDIRECT(301), INTERRUPTED(400), INTERNAL_ERROR(500);
-
-    private final int statusCode;
-
-    private ActivationResultCode(int statusCode) {
-	this.statusCode = statusCode;
+    public PinMgmtActivationHandler(T parent) {
+	super(parent, PINManagementGui.class);
     }
 
-    public int getHttpStatusCode() {
-	return statusCode;
+    protected static final Set<String> SUPPORTED_CARDS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+	    "http://bsi.bund.de/cif/npa.xml"
+    )));
+    @Override
+    public Set<String> getSupportedCards() {
+	return SUPPORTED_CARDS;
     }
 
 }

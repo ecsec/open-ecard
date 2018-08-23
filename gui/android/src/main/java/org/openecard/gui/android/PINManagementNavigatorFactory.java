@@ -24,20 +24,37 @@ package org.openecard.gui.android;
 
 import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.pinmanagement.PINManagementGui;
+import org.openecard.gui.android.pinmanagement.PINManagementGuiImpl;
+import org.openecard.gui.android.pinmanagement.PINManagementNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
-
 
 /**
  *
- * @author Neil Crossley
- * @param <T> Type of the UI interaction interface.
+ * @author Sebastian Schuberth
  */
-public interface UserConsentNavigatorFactory <T> {
+public class PINManagementNavigatorFactory implements UserConsentNavigatorFactory<PINManagementGui> {
 
-    boolean canCreateFrom(UserConsentDescription uc);
+    private final GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver = new GuiIfaceReceiver<>();
 
-    UserConsentNavigator createFrom(UserConsentDescription uc);
+    @Override
+    public boolean canCreateFrom(UserConsentDescription uc) {
+	return "pin_change_dialog".equals(uc.getDialogType());
+    }
 
-    Promise<? extends T> getIfacePromise();
+    @Override
+    public UserConsentNavigator createFrom(UserConsentDescription uc) {
+	if (! this.canCreateFrom(uc)) {
+	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
+	}
+
+	ifaceReceiver.setUiInterface(new PINManagementGuiImpl());
+	return new PINManagementNavigator(uc, ifaceReceiver);
+    }
+
+    @Override
+    public Promise<? extends PINManagementGui> getIfacePromise() {
+	return ifaceReceiver.getUiInterface();
+    }
 
 }

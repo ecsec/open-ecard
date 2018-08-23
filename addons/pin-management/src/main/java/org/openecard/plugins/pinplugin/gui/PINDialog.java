@@ -24,6 +24,7 @@ package org.openecard.plugins.pinplugin.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
@@ -54,11 +55,12 @@ public class PINDialog {
 
     /**
      * Shows this Dialog.
+     * @return 
      */
-    public void show() {
+    public ResultStatus show() {
 	UserConsentNavigator ucr = gui.obtainNavigator(createUserConsentDescription());
 	ExecutionEngine exec = new ExecutionEngine(ucr);
-	exec.process();
+	return exec.process();
     }
 
     private UserConsentDescription createUserConsentDescription() {

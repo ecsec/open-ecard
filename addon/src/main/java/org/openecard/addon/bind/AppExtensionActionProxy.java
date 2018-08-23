@@ -41,7 +41,7 @@ public class AppExtensionActionProxy extends AbstractFactory<AppExtensionAction>
     }
 
     @Override
-    public void execute() {
+    public void execute() throws AppExtensionException {
 	c.execute();
     }
 

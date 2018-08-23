@@ -70,6 +70,12 @@ public class EacGuiImpl implements EacGui {
     public EacGuiImpl() {
     }
 
+    @Override
+    public String getProtocolType() {
+	// generic EAC2
+	return "urn:oid:1.3.162.15480.3.0.14";
+    }
+
     ///
     /// Functions for the visible UI
     ///

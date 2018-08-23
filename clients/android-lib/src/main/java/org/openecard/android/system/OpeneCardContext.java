@@ -65,13 +65,20 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import javax.annotation.Nonnull;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.utils.NfcUtils;
+import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.EacNavigatorFactory;
 import org.openecard.gui.android.InsertCardNavigatorFactory;
+import org.openecard.gui.android.PINManagementNavigatorFactory;
 import org.openecard.gui.android.UserConsentNavigatorFactory;
+import org.openecard.gui.android.eac.EacGui;
+import org.openecard.gui.android.pinmanagement.PINManagementGui;
 import org.openecard.gui.definition.ViewController;
 
 
@@ -109,7 +116,7 @@ public class OpeneCardContext implements EventCallback {
     private TinyManagement management;
 
     private AndroidUserConsent gui;
-    private EacNavigatorFactory eacNavFac;
+    private HashMap<Class<? extends AndroidGui>, UserConsentNavigatorFactory<? extends AndroidGui>> realFactories;
 
     // true if already initialized
     private boolean initialized = false;
@@ -144,12 +151,20 @@ public class OpeneCardContext implements EventCallback {
 	}
 
 	// initialize gui
-	eacNavFac = new EacNavigatorFactory();
-	List<UserConsentNavigatorFactory<?>> factories = Arrays.asList(
+	realFactories = new HashMap<>();
+	// the key type must match the generic. This can't be enforced so watch it here.
+	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
+	realFactories.put(EacGui.class, eacNavFac);
+	
+	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
+	realFactories.put(PINManagementGui.class, pinMngFac);
+
+	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
 		eacNavFac,
+		pinMngFac,
 		new InsertCardNavigatorFactory());
 
-	gui = new AndroidUserConsent(factories);
+	gui = new AndroidUserConsent(allFactories);
 
 	// set up nfc and android marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);
@@ -394,8 +409,30 @@ public class OpeneCardContext implements EventCallback {
 	return gui;
     }
 
-    public EacNavigatorFactory getEacNavigatorFactory() {
-	return eacNavFac;
+    @Nonnull
+    public UserConsentNavigatorFactory<? extends AndroidGui> getGuiNavigatorFactory(Class<? extends AndroidGui> guiClass)
+	    throws IllegalArgumentException {
+	UserConsentNavigatorFactory<? extends AndroidGui> fac = realFactories.get(guiClass);
+	if (fac == null) {
+	    throw new IllegalArgumentException("The requested GUI class is not handled by any of the factory objects.");
+	} else {
+	    return fac;
+	}
+    }
+
+    @Nonnull
+    public List<UserConsentNavigatorFactory<? extends AndroidGui>> getGuiNavigatorFactories(List<Class<? extends AndroidGui>> classes) {
+	if (classes.isEmpty()) {
+	    // return all
+	    return new ArrayList(realFactories.values());
+	} else {
+	    // return filtered
+	    ArrayList<UserConsentNavigatorFactory<? extends AndroidGui>> result = new ArrayList<>();
+	    for (Class<? extends AndroidGui> next : classes) {
+		result.add(getGuiNavigatorFactory(next));
+	    }
+	    return result;
+	}
     }
 
     public AddonManager getManager() {

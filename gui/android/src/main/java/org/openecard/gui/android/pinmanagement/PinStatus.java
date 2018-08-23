@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,50 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.activation;
+package org.openecard.gui.android.pinmanagement;
 
 
 /**
  *
- * @author Mike Prechtl
+ * @author Sebastian Schuberth
  */
-public enum ActivationResultCode {
+public enum PinStatus {
 
-    OK(200), REDIRECT(301), INTERRUPTED(400), INTERNAL_ERROR(500);
+    RC3,
+    RC2,
+    CAN,
+    RC1,
+    PIN_BLOCKED,
+    PUK_BLOCKED,
+    DEACTIVATED;
 
-    private final int statusCode;
-
-    private ActivationResultCode(int statusCode) {
-	this.statusCode = statusCode;
+    public boolean isDead() {
+	switch (this) {
+	    case DEACTIVATED:
+	    case PUK_BLOCKED:
+		return true;
+	    default:
+		return false;
+	}
     }
 
-    public int getHttpStatusCode() {
-	return statusCode;
+    public boolean isNormalPinEntry() {
+	switch (this) {
+	    case RC3:
+	    case RC2:
+	    case RC1:
+		return true;
+	    default:
+		return false;
+	}
+    }
+
+    public boolean needsCan() {
+	return CAN == this;
+    }
+
+    public boolean needsPuk() {
+	return PIN_BLOCKED == this;
     }
 
 }

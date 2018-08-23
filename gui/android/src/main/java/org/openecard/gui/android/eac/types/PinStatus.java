@@ -40,7 +40,7 @@ public enum PinStatus {
     }
 
     public boolean isOperational() {
-	return ! isBlocked();
+	return ! isBlocked() && DEACTIVATED != this;
     }
 
     public boolean needsCan() {

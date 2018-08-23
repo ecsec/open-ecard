@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,6 +24,7 @@ package org.openecard.gui.android.eac;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
@@ -33,7 +34,7 @@ import org.openecard.gui.android.eac.types.ServerData;
  *
  * @author Tobias Wich
  */
-public interface EacGui {
+public interface EacGui extends AndroidGui {
 
     /**
      * Gets the server data according to the CertificateDescription data structure.

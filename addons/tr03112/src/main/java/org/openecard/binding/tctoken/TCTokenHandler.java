@@ -366,6 +366,10 @@ public class TCTokenHandler {
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
 			w.getLocalizedMessage()));
+	    } else if (innerException instanceof InterruptedException) {
+		response.setResultCode(BindingResultCode.INTERRUPTED);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		return response;
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
@@ -379,9 +383,15 @@ public class TCTokenHandler {
 		response.finishResponse(true);
 	    } catch (InvalidRedirectUrlException ex) {
 		LOG.error(ex.getMessage(), ex);
-		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
-		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
-		throw new NonGuiException(response, ex.getMessage(), ex);
+		// in case we were interrupted before, use INTERRUPTED as result status
+		if (innerException instanceof InterruptedException) {
+		    response.setResultCode(BindingResultCode.INTERRUPTED);
+		    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		} else {
+		    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		    response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
+		    throw new NonGuiException(response, ex.getMessage(), ex);
+		}
 	    } catch (SecurityViolationException ex) {
 		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
 			+ "CommunicationErrorAddress.";

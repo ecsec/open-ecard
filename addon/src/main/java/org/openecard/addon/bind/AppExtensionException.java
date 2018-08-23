@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,24 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.activation;
+package org.openecard.addon.bind;
+
+import org.openecard.common.WSHelper;
 
 
 /**
+ * Exception indicating an error in the processing of an AppExtension.
  *
- * @author Mike Prechtl
+ * @author Tobias Wich
  */
-public enum ActivationResultCode {
+public class AppExtensionException extends WSHelper.WSException {
 
-    OK(200), REDIRECT(301), INTERRUPTED(400), INTERNAL_ERROR(500);
-
-    private final int statusCode;
-
-    private ActivationResultCode(int statusCode) {
-	this.statusCode = statusCode;
+    public AppExtensionException(String minor, String msg) {
+	super(WSHelper.makeResultError(minor, msg));
     }
 
-    public int getHttpStatusCode() {
-	return statusCode;
+    public AppExtensionException(String msg) {
+	super(WSHelper.makeResultUnknownError(msg));
     }
 
 }

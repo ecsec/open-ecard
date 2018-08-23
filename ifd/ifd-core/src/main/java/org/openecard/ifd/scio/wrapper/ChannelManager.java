@@ -23,10 +23,12 @@
 package org.openecard.ifd.scio.wrapper;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -123,9 +125,10 @@ public class ChannelManager {
     public synchronized void closeMasterChannel(String ifdName) {
 	Set<byte[]> slotHandles = ifdNameToHandles.get(ifdName);
 	if (slotHandles != null) {
-	    for (byte[] slotHandle : slotHandles) {
+	    Iterator<byte[]> slotHandlesIt = slotHandles.iterator();
+	    while (slotHandlesIt.hasNext()) {
 		try {
-		    closeSlaveChannel(slotHandle);
+		    closeSlaveChannel(slotHandlesIt.next(), slotHandlesIt);
 		} catch (NoSuchChannel | SCIOException ex) {
 		    LOG.warn("Failed to close channel for terminal '" + ifdName + "'.", ex);
 		}
@@ -144,14 +147,32 @@ public class ChannelManager {
 	    }
 	}
     }
-
+    
     public synchronized void closeSlaveChannel(@Nonnull byte[] slotHandle) throws NoSuchChannel, SCIOException {
+	this.closeSlaveChannel(slotHandle, null);
+    }
+
+    /**
+     * Uses an iterator to avoid a concurrent modification of the set. 
+     * @param slotHandle
+     * @param slotHandlesIt Iterator pointing to the element in question.
+     * @throws NoSuchChannel
+     * @throws SCIOException 
+     */
+    private synchronized void closeSlaveChannel(@Nonnull byte[] slotHandle, @Nullable Iterator<byte[]> slotHandlesIt)
+	    throws NoSuchChannel, SCIOException {
 	SingleThreadChannel ch = handledChannels.remove(slotHandle);
 	if (ch == null) {
 	    throw new NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.");
 	} else {
 	    String ifdName = ch.getChannel().getCard().getTerminal().getName();
-	    ifdNameToHandles.get(ifdName).remove(slotHandle);
+	    
+	    if(slotHandlesIt != null) {
+		slotHandlesIt.remove();
+	    }
+	    else {
+		ifdNameToHandles.get(ifdName).remove(slotHandle);
+	    }
 	    ch.shutdown();
 	}
     }

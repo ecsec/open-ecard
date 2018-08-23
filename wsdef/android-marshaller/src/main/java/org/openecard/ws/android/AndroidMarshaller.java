@@ -822,58 +822,62 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	    // ChannelHandle
 	    ChannelHandleType h = p.getCardAppPathRequest().getChannelHandle();
-	    Element emChild = createElementIso(document, "ChannelHandle");
-	    em.appendChild(emChild);
+	    
+	    if(h != null){
+	    
+		Element emChild = createElementIso(document, "ChannelHandle");
+		em.appendChild(emChild);
 
-	    Element emChildOfCH;
-	    if (h.getProtocolTerminationPoint() != null) {
-		emChildOfCH = createElementIso(document, "ProtocolTerminationPoint");
-		emChildOfCH.appendChild(document.createTextNode(h.getProtocolTerminationPoint()));
-		emChild.appendChild(emChildOfCH);
+		Element emChildOfCH;
+		if (h.getProtocolTerminationPoint() != null) {
+		    emChildOfCH = createElementIso(document, "ProtocolTerminationPoint");
+		    emChildOfCH.appendChild(document.createTextNode(h.getProtocolTerminationPoint()));
+		    emChild.appendChild(emChildOfCH);
+		}
+
+		if (h.getSessionIdentifier() != null) {
+		    emChildOfCH = createElementIso(document, "SessionIdentifier");
+		    emChildOfCH.appendChild(document.createTextNode(h.getSessionIdentifier()));
+		    emChild.appendChild(emChildOfCH);
+		}
+
+		if (h.getBinding() != null) {
+		    emChildOfCH = createElementIso(document, "Binding");
+		    emChildOfCH.appendChild(document.createTextNode(h.getBinding()));
+		    emChild.appendChild(emChildOfCH);
+		}
+
+		PathSecurityType ps = h.getPathSecurity();
+		if (ps != null) {
+		    emChildOfCH = createElementIso(document, "PathSecurity");
+		    Element emChildOfPS = createElementIso(document, "Protocol");
+		    emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
+		    emChildOfCH.appendChild(emChildOfPS);
+		    // TODO here any type parsen
+		    LOG.error("AnyType of CardApplicationPath: " + ps.getParameters().toString());
+		    emChild.appendChild(emChildOfCH);
+		}
+
+		// context handle
+		emChild = createElementIso(document, "ContextHandle");
+		emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getContextHandle())));
+		em.appendChild(emChild);
+
+		// IFDName
+		emChild = createElementIso(document, "IFDName");
+		emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getIFDName()));
+		em.appendChild(emChild);
+
+		// SlotIndex
+		emChild = createElementIso(document, "SlotIndex");
+		emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getSlotIndex().toString()));
+		em.appendChild(emChild);
+
+		// Card Application
+		emChild = createElementIso(document, "CardApplication");
+		emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getCardApplication())));
+		em.appendChild(emChild);
 	    }
-
-	    if (h.getSessionIdentifier() != null) {
-		emChildOfCH = createElementIso(document, "SessionIdentifier");
-		emChildOfCH.appendChild(document.createTextNode(h.getSessionIdentifier()));
-		emChild.appendChild(emChildOfCH);
-	    }
-
-	    if (h.getBinding() != null) {
-		emChildOfCH = createElementIso(document, "Binding");
-		emChildOfCH.appendChild(document.createTextNode(h.getBinding()));
-		emChild.appendChild(emChildOfCH);
-	    }
-
-	    PathSecurityType ps = h.getPathSecurity();
-	    if (ps != null) {
-		emChildOfCH = createElementIso(document, "PathSecurity");
-		Element emChildOfPS = createElementIso(document, "Protocol");
-		emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
-		emChildOfCH.appendChild(emChildOfPS);
-		// TODO here any type parsen
-		LOG.error("AnyType of CardApplicationPath: " + ps.getParameters().toString());
-		emChild.appendChild(emChildOfCH);
-	    }
-
-	    // context handle
-	    emChild = createElementIso(document, "ContextHandle");
-	    emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getContextHandle())));
-	    em.appendChild(emChild);
-
-	    // IFDName
-	    emChild = createElementIso(document, "IFDName");
-	    emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getIFDName()));
-	    em.appendChild(emChild);
-
-	    // SlotIndex
-	    emChild = createElementIso(document, "SlotIndex");
-	    emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getSlotIndex().toString()));
-	    em.appendChild(emChild);
-
-	    // Card Application
-	    emChild = createElementIso(document, "CardApplication");
-	    emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getCardApplication())));
-	    em.appendChild(emChild);
 
 	    rootElement.appendChild(em);
 	} else if (o instanceof CardApplicationPathResponse) {

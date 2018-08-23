@@ -111,9 +111,15 @@ public class ActivationController {
 	LOG.info("Returning result: {}", result);
 	ActivationResult activationResult;
 	switch (result.getResultCode()) {
-	     case REDIRECT:
+	    case REDIRECT:
 		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
 		activationResult = new ActivationResult(location, REDIRECT);
+		break;
+	    case OK:
+		activationResult = new ActivationResult(OK);
+		break;
+	    case INTERRUPTED:
+		activationResult = new ActivationResult(INTERRUPTED, result.getResultMessage());
 		break;
 	    default:
 		activationResult = new ActivationResult(INTERNAL_ERROR, result.getResultMessage());

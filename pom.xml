@@ -75,8 +75,8 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<!--maven.compiler.release>7</maven.compiler.release-->
 
-		<version.jmockit>1.40</version.jmockit>
-		<version.pmd>6.5.0</version.pmd>
+		<version.jmockit>1.41</version.jmockit>
+		<version.pmd>6.6.0</version.pmd>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
@@ -128,6 +128,10 @@
 		<pluginRepository>
 			<id>openecard-repos</id>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>central</id>
+			<url>http://central.maven.org/maven2/</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -390,7 +394,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.7.0</version>
+					<version>3.8.0</version>
 					<configuration>
 						<showDeprecation>true</showDeprecation>
 						<showWarnings>true</showWarnings>
@@ -692,7 +696,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.11</version>
+							<version>8.12</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -878,7 +882,7 @@
 			<dependency>
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
-				<version>20180130</version>
+				<version>20180813</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>

@@ -129,10 +129,6 @@
 			<id>openecard-repos</id>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</pluginRepository>
-		<pluginRepository>
-			<id>central</id>
-			<url>http://central.maven.org/maven2/</url>
-		</pluginRepository>
 	</pluginRepositories>
 
 	<profiles>
@@ -459,14 +455,6 @@
 							<git>maven-scm-provider-gitexe</git>
 						</providerImplementations-->
 					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.maven.scm</groupId>
-							<artifactId>maven-scm-provider-gitexe</artifactId>
-							<version>1.10.0</version>
-							<classifier>submodule</classifier>
-						</dependency>
-					</dependencies>
 				</plugin>
 
 				<plugin>

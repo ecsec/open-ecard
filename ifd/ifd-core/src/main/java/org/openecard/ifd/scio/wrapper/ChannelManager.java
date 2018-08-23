@@ -22,6 +22,7 @@
 
 package org.openecard.ifd.scio.wrapper;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -123,7 +124,8 @@ public class ChannelManager {
     public synchronized void closeMasterChannel(String ifdName) {
 	Set<byte[]> slotHandles = ifdNameToHandles.get(ifdName);
 	if (slotHandles != null) {
-	    for (byte[] slotHandle : slotHandles) {
+	    // iterate over copy of the list as the closeSlaveHandle call modifies the original slotHandles list
+	    for (byte[] slotHandle : Collections.unmodifiableCollection(slotHandles)) {
 		try {
 		    closeSlaveChannel(slotHandle);
 		} catch (NoSuchChannel | SCIOException ex) {

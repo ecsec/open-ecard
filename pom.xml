@@ -70,9 +70,9 @@
 		<android.api.version>21</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<version.toolchain>[1.7,1.8]</version.toolchain>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<version.toolchain>[1.8]</version.toolchain>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>7</maven.compiler.release-->
 
 		<version.jmockit>1.41</version.jmockit>
@@ -358,7 +358,7 @@
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
-							<artifactId>java-7-openjdk</artifactId>
+							<artifactId>java18</artifactId>
 							<version>1.0</version>
 						</signature>
 					</configuration>

@@ -28,19 +28,6 @@
 			</resource>
 		</resources>
 
-		<pluginManagement>
-			<plugins>
-				<!-- skip java 6 compat checker, JAXB is irellevant for android and only SE 7 is supported -->
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

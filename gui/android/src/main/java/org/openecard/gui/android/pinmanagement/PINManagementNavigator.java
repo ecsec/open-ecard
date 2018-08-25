@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.AndroidNavigator;
 import org.openecard.gui.android.AndroidResult;
 import org.openecard.gui.android.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Sebastian Schuberth
  * @author Tobias Wich
  */
-public class PINManagementNavigator implements UserConsentNavigator {
+public class PINManagementNavigator extends AndroidNavigator {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINManagementNavigator.class);
 
@@ -90,45 +90,47 @@ public class PINManagementNavigator implements UserConsentNavigator {
 	idx++;
 	Step pinStep = steps.get(0);
 
-	DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
-	RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
-	Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
-	Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
-	Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
+	return displayAndExecuteBackground(pinStep, () -> {
+	    DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
+	    RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
+	    Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
+	    Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
+	    Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
 
-	if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
-	    LOG.error("No pin state received from UI.");
-	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	}
+	    if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
+		LOG.error("No pin state received from UI.");
+		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    }
 
-	// set pin state
-	this.guiService.sendPinStatus(uiPinState);
+	    // set pin state
+	    this.guiService.sendPinStatus(uiPinState);
 
-	// set result values if any
-	if (pinCorrect != null) {
-	    this.guiService.setPinCorrect(pinCorrect);
-	} else if (canCorrect != null) {
-	    this.guiService.setCanCorrect(canCorrect);
-	} else if (pukCorrect != null) {
-	    this.guiService.setPukCorrect(pukCorrect);
-	}
+	    // set result values if any
+	    if (pinCorrect != null) {
+		this.guiService.setPinCorrect(pinCorrect);
+	    } else if (canCorrect != null) {
+		this.guiService.setCanCorrect(canCorrect);
+	    } else if (pukCorrect != null) {
+		this.guiService.setPukCorrect(pukCorrect);
+	    }
 
-	// pin accepted or card blocked
-	if ("success".equals(pinStep.getID())) {
-	    return new AndroidResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
-	} else if ("error".equals(pinStep.getID())) {
-	    //this.guiService.waitForUserCancel();
-	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	}
+	    // pin accepted or card blocked
+	    if ("success".equals(pinStep.getID())) {
+		return new AndroidResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	    } else if ("error".equals(pinStep.getID())) {
+		//this.guiService.waitForUserCancel();
+		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    }
 
-	// ask user for the pin
-	try {
-	    List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
-	    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-	    return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
-	} catch (InterruptedException ex) {
-	    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	}
+	    // ask user for the pin
+	    try {
+		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
+	    } catch (InterruptedException ex) {
+		return new AndroidResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+	    }
+	});
     }
 
     @Override

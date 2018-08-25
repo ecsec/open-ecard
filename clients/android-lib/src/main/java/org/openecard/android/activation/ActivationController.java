@@ -77,12 +77,14 @@ public class ActivationController {
 	// find suitable addon
 	String failureMessage;
 	AddonManager manager = sctx.getManager();
-	AddonSelector selector = new AddonSelector(manager);
+	AddonSelector selector = null;
+	AppPluginAction action = null;
 	try {
-	    if (manager == null || selector == null) {
+	    if (manager == null) {
 		throw new IllegalStateException("Addon initialization failed.");
 	    } else {
-		AppPluginAction action = selector.getAppPluginAction(resourceName);
+		selector = new AddonSelector(manager);
+		action = selector.getAppPluginAction(resourceName);
 
 		String rawQuery = requestURI.getRawQuery();
 		Map<String, String> queries = new HashMap<>(0);
@@ -101,6 +103,10 @@ public class ActivationController {
 	} catch (Exception ex) {
 	    failureMessage = ex.getMessage();
 	    LOG.warn(ex.getMessage(), ex);
+	} finally {
+	    if (selector != null && action != null) {
+		selector.returnAppPluginAction(action);
+	    }
 	}
 
 	LOG.info("Returning error as INTERRUPTED result.");

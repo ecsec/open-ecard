@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2013-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -71,6 +71,7 @@ public class AddonManager {
     private final CardStateMap cardStates;
     private final EventHandler eventHandler;
     private final ViewController viewController;
+    // TODO: rework cache to have borrow and return semantic
     private final Cache cache = new Cache();
 
     /**
@@ -99,11 +100,8 @@ public class AddonManager {
 	this.env.getEventDispatcher().add(eventHandler);
 	this.viewController = view;
 
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		loadLoadOnStartAddons();
-	    }
+	new Thread(() -> {
+	    loadLoadOnStartAddons();
 	}, "Init-Addons").start();
     }
 
@@ -180,19 +178,9 @@ public class AddonManager {
      * @param addonSpec The {@link AddonSpecification} of the add-on to unload.
      */
     protected void unloadAddon(AddonSpecification addonSpec) {
-	Collection<Object> actionsAndProtocols = cache.getAllAddonData(addonSpec);
-	for (Object obj : actionsAndProtocols) {
-	    if (obj instanceof IFDProtocol) {
-		((IFDProtocol) obj).destroy();
-	    } else if (obj instanceof SALProtocol) {
-		((SALProtocol) obj).destroy();
-	    } else if (obj instanceof AppExtensionAction) {
-		((AppExtensionAction) obj).destroy();
-	    } else if (obj instanceof AppPluginAction) {
-		((AppPluginAction) obj).destroy();
-	    } else {
-		LOG.warn("The cache contains invalid objects.");
-	    }
+	Collection<? extends LifecycleTrait> actionsAndProtocols = cache.getAllAddonData(addonSpec);
+	for (LifecycleTrait obj : actionsAndProtocols) {
+	    obj.destroy();
 	}
 
 	cache.removeCompleteAddonCache(addonSpec);
@@ -292,6 +280,10 @@ public class AddonManager {
 	return null;
     }
 
+    public void returnIFDProtocol(IFDProtocol obj) {
+	obj.destroy();
+    }
+
     /**
      * Get a specific SALProtocol.
      *
@@ -326,6 +318,10 @@ public class AddonManager {
 	    }
 	}
 	return null;
+    }
+
+    public void returnSALProtocol(SALProtocol obj) {
+	obj.destroy();
     }
 
     /**
@@ -365,6 +361,10 @@ public class AddonManager {
 	return null;
     }
 
+    public void returnAppExtensionAction(AppExtensionAction obj) {
+	obj.destroy();
+    }
+
     /**
      * Get a specific AppPluginAction.
      *
@@ -400,6 +400,10 @@ public class AddonManager {
 	    }
 	}
 	return null;
+    }
+
+    public void returnAppPluginAction(AppPluginAction obj) {
+	obj.destroy();
     }
 
     private Context createContext(@Nonnull AddonSpecification addonSpec) {

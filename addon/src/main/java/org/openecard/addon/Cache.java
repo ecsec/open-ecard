@@ -45,7 +45,7 @@ public class Cache {
     /**
      * A TreeMap which caches all the protocols and actions.
      */
-    private final TreeMap<AddonSpecification, TreeMap<String, Object>> addonSpecAndId;
+    private final TreeMap<AddonSpecification, TreeMap<String, LifecycleTrait>> addonSpecAndId;
 
     /**
      *	Creates a new Cache object.
@@ -106,8 +106,8 @@ public class Cache {
      * @param id Unique identifier which identifies the object in the context of the add-on.
      * @param protocolOrAction The protocol or action to add.
      */
-    private void addEntry(AddonSpecification spec, String id, Object protocolOrAction) {
-	TreeMap<String, Object> protocols = addonSpecAndId.get(spec);
+    private <T extends LifecycleTrait> void addEntry(AddonSpecification spec, String id, T protocolOrAction) {
+	TreeMap<String, LifecycleTrait> protocols = addonSpecAndId.get(spec);
 	if (protocols == null) {
 	    protocols = new TreeMap<>();
 	}
@@ -189,13 +189,13 @@ public class Cache {
      * @return A {@link Object} which is referenced by the {@code spec} and {@code id} or NULL if no Object is associated
      * with the {@code spec} and {@code id}.
      */
-    private Object getObject(AddonSpecification spec, String id) {
-	TreeMap<String, Object> protocols = addonSpecAndId.get(spec);
+    private <T extends LifecycleTrait> T getObject(AddonSpecification spec, String id) {
+	TreeMap<String, ? super LifecycleTrait> protocols = addonSpecAndId.get(spec);
 	if (protocols == null) {
 	    return null;
 	}
 
-	return protocols.get(id);
+	return (T) protocols.get(id);
     }
 
     /**
@@ -205,8 +205,8 @@ public class Cache {
      * @return A Collection containing all loaded Actions and Protocols of a add-on. If no entries for the given
      * {@link AddonSpecification} exists an empty collection is returned.
      */
-    protected Collection<Object> getAllAddonData(AddonSpecification spec) {
-	TreeMap<String, Object> data = addonSpecAndId.get(spec);
+    protected Collection<? extends LifecycleTrait> getAllAddonData(AddonSpecification spec) {
+	TreeMap<String, ? extends LifecycleTrait> data = addonSpecAndId.get(spec);
 	if (data != null) {
 	    return data.values();
 	} else {
@@ -221,7 +221,7 @@ public class Cache {
      * @param id A identifier of an Action or Protocol which refers to specific object in the add-ons context.
      */
     public void removeCacheEntry(AddonSpecification spec, String id) {
-	TreeMap<String, Object> protocols = addonSpecAndId.get(spec);
+	TreeMap<String, ? extends LifecycleTrait> protocols = addonSpecAndId.get(spec);
 	protocols.remove(id);
     }
 

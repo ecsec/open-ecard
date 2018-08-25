@@ -2157,8 +2157,12 @@ public class TinySAL implements SAL {
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
-	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
-	    entry.removeProtocol(protocolURI);
+	    try {
+		CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
+		entry.removeProtocol(protocolURI);
+	    } finally {
+		protocolSelector.returnSALProtocol(protocol);
+	    }
 	}
     }
 

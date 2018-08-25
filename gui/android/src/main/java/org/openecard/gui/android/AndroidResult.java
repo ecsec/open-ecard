@@ -23,6 +23,7 @@
 package org.openecard.gui.android;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.OutputInfoUnit;
@@ -44,7 +45,7 @@ public class AndroidResult implements StepResult {
 	this(step, status, outputUnits, null);
     }
 
-    public AndroidResult(Step step, ResultStatus status, List<OutputInfoUnit> outputUnits, Step replacement) {
+    public AndroidResult(Step step, ResultStatus status, List<OutputInfoUnit> outputUnits, @Nullable Step replacement) {
 	this.step = step;
 	this.status = status;
 	this.outputUnits = outputUnits;

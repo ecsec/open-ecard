@@ -26,25 +26,17 @@ import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppExtensionException;
-import org.openecard.addon.bind.BindingResult;
-import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.ThreadTerminateException;
-import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventFilter;
@@ -80,7 +72,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     public void execute() throws AppExtensionException {
 	// init dyn ctx
 	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
-	
+
 	try {
 	    // check if a german identity card is inserted, if not wait for it
 	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
@@ -98,42 +90,32 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    boolean nativePace = genericPACESupport(cHandle);
 
 	    final ConnectionHandleType handle = cHandle;
-	    final boolean capturePin = !nativePace;
+	    final boolean capturePin = ! nativePace;
 
 	    try { 
-		ExecutorService es = Executors.newSingleThreadExecutor(new ThreadFactory() {
-		    @Override
-		    public Thread newThread(Runnable action) {
-			return new Thread(action, "ShowPINManagementDialog");
-		    }
-		});
+		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
-		pinManagement = es.submit(new Callable<ResultStatus>() {
-		    @Override
-		    public ResultStatus call() throws Exception {
-			PINDialog uc = new PINDialog(gui, dispatcher, handle , pinState, capturePin);
-			return uc.show();
-		    }
+		pinManagement = es.submit(() -> {
+		    PINDialog uc = new PINDialog(gui, dispatcher, handle , pinState, capturePin);
+		    return uc.show();
 		});
 
 
-		disconnectEventSink = new EventCallback() {
-		    @Override
-		    public void signalEvent(EventType eventType, EventObject eventData) {
-			if (eventType == EventType.CARD_REMOVED) {
-			    LOG.info("Card has been removed. Shutting down PIN Management process.");
-			    pinManagement.cancel(true);
-			}
-		}};
+		disconnectEventSink = (eventType, eventData) -> {
+		    if (eventType == EventType.CARD_REMOVED) {
+			LOG.info("Card has been removed. Shutting down PIN Management process.");
+			pinManagement.cancel(true);
+		    }
+		};
 
 		EventFilter evFilter = new CardRemovedFilter(cHandle.getIFDName(), cHandle.getSlotIndex());
 		evDispatcher.add(disconnectEventSink, evFilter);
 
 		ResultStatus result = pinManagement.get();
-		if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED){
+		if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
 		    throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
 		}   
-	    
+
 	    } catch (InterruptedException ex) {
 		LOG.info("waiting for PIN management to stop interrupted.", ex);
 		pinManagement.cancel(true);

@@ -23,6 +23,7 @@
 package org.openecard.plugins.pinplugin.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
@@ -60,7 +61,11 @@ public class PINDialog {
     public ResultStatus show() {
 	UserConsentNavigator ucr = gui.obtainNavigator(createUserConsentDescription());
 	ExecutionEngine exec = new ExecutionEngine(ucr);
-	return exec.process();
+	try {
+	    return exec.process();
+	} catch (ThreadTerminateException ex) {
+	    return ResultStatus.INTERRUPTED;
+	}
     }
 
     private UserConsentDescription createUserConsentDescription() {

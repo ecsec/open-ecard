@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements Chip Authentication protocol step according to BSI-TR-03112-7. See BSI-TR-03112, version 1.1.2, part 7,
- * section 4.6.6.
+ * Implements Chip Authentication protocol step according to BSI-TR-03112-7.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
  *
  * @author Moritz Horsch
  * @author Dirk Petrautzki
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
     private final Dispatcher dispatcher;
 
     /**
@@ -84,20 +84,20 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    boolean messageValid = valid.validateObject(didAuthenticate);
 	    if (! messageValid) {
 		String msg = "Validation of the EACAdditionalInputType message failed.";
-		logger.error(msg);
+		LOG.error(msg);
 		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
 	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EACAdditionalInputType message failed due to invalid input data.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
@@ -122,7 +122,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
 	}

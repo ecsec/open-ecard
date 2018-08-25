@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ProcessingStepAction extends StepAction {
     
-    private static final Logger logger = LoggerFactory.getLogger(ProcessingStepAction.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessingStepAction.class);
 
     private final DynamicContext ctx;
     private final Promise<Object> p = new Promise<>();
@@ -70,11 +70,11 @@ public class ProcessingStepAction extends StepAction {
 	    pAuthDone.deref(120, TimeUnit.SECONDS);
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (InterruptedException ex) {
-	    logger.error("ProcessingStepAction interrupted by the user or an other thread.", ex);
+	    LOG.error("ProcessingStepAction interrupted by the user or an other thread.", ex);
 	    p.deliver(true);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (TimeoutException ex) {
-	    logger.info("Timeout while waiting for the authentication to finish.", ex);
+	    LOG.info("Timeout while waiting for the authentication to finish.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }

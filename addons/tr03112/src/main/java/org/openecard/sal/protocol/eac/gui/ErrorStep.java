@@ -51,6 +51,7 @@ public class ErrorStep extends Step {
 
     public ErrorStep(String title, String errorText, final WSHelper.WSException paceException) {
 	super(title);
+	setID("EAC-Error");
 
 	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 

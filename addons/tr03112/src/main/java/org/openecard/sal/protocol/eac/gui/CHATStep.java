@@ -62,9 +62,8 @@ public class CHATStep extends Step {
     private final EACData eacData;
 
     public CHATStep(EACData eacData) {
-	super(STEP_ID);
+	super(STEP_ID, LANG.translationForKey(TITLE));
 	this.eacData = eacData;
-	setTitle(LANG.translationForKey(TITLE));
 	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements

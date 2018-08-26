@@ -47,6 +47,7 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -288,35 +289,34 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    procStep.setAction(procStepAction);
 	    uc.getSteps().add(procStep);
 
-	    Thread guiThread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    try {
-			// get context here because it is thread local
-			DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-			if (! uc.getSteps().isEmpty()) {
-			    UserConsentNavigator navigator = gui.obtainNavigator(uc);
-			    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
-			    ExecutionEngine exec = new ExecutionEngine(navigator);
-			    ResultStatus guiResult = exec.process();
+	    Thread guiThread = new Thread(() -> {
+		try {
+		    // get context here because it is thread local
+		    DynamicContext dynCtx2 = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		    if (! uc.getSteps().isEmpty()) {
+			UserConsentNavigator navigator = gui.obtainNavigator(uc);
+			ExecutionEngine exec = new ExecutionEngine(navigator);
+			ResultStatus guiResult;
+			try {
+			    guiResult = exec.process();
+			} catch (ThreadTerminateException ex) {
+			    guiResult = ResultStatus.INTERRUPTED;
+			}
 
-			    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
-
-			    if (guiResult == ResultStatus.CANCEL) {
-				Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
-				if (! pPaceSuccessful.isDelivered()) {
-				    pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
-					    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
-				}
+			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
+			    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
+			    if (! pPaceSuccessful.isDelivered()) {
+				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
 			    }
 			}
-		    } finally {
-			if (cardMon != null) {
-			    eventDispatcher.del(cardMon);
-			}
 		    }
+		} finally {
+		    eventDispatcher.del(cardMon);
 		}
 	    }, "EAC-GUI");
+	    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_THREAD, guiThread);
 	    guiThread.start();
 
 	    // wait for PACE to finish

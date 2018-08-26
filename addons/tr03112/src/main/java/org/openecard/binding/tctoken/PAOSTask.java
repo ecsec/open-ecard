@@ -32,16 +32,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.gui.UserConsent;
-import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSConnectionException;
 import org.openecard.transport.paos.PAOSException;
@@ -80,20 +75,6 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     public StartPAOSResponse call()
 	    throws MalformedURLException, PAOSException, DispatcherException, InvocationTargetException,
 	    ConnectionError, PAOSConnectionException {
-	// add event listener terminating the whole process in case the card is removed
-	final Thread execThread = Thread.currentThread();
-	EventCallback disconnectEventSink = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		if (eventType == EventType.CARD_REMOVED) {
-		    LOG.info("Card has been removed during authentication. Shutting down EAC process.");
-		    execThread.interrupt();
-		}
-	    }
-	};
-	EventFilter evFilter = new CardRemovedFilter(connectionHandle.getIFDName(), connectionHandle.getSlotIndex());
-	evManager.add(disconnectEventSink, evFilter);
-
 	try {
 	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
 	    tlsHandler.setUpClient();
@@ -123,9 +104,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
 	    return p.sendStartPAOS(sp);
 	} finally {
-	    evManager.del(disconnectEventSink);
 	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
-	    TCTokenHandler.killUserConsent();
 	}
     }
 

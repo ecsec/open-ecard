@@ -134,11 +134,11 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
             return response;
         } else {
             // authentication finished, notify GUI
-            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-            response = new DIDAuthenticateResponse();
+	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    response = new DIDAuthenticateResponse();
 	    String msg = "Authentication canceled by the user.";
-            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
-            return response;
+	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+	    return response;
         }
     }
 

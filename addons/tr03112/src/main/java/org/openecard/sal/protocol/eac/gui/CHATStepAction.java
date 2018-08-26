@@ -90,13 +90,11 @@ public class CHATStepAction extends StepAction {
 	    assert(status != null);
 	    switch (status) {
 		case BLOCKED:
-		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
 		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
 			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
 			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
 		    break;
 		case DEACTIVATED:
-		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, status);
 		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
 			    LANG.translationForKey("step_error_pin_deactivated"),
 			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));

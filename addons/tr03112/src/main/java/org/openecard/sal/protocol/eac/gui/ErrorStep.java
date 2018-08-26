@@ -43,6 +43,8 @@ import org.openecard.sal.protocol.eac.EACProtocol;
  */
 public class ErrorStep extends Step {
 
+    public static final String STEP_ID = "PROTOCOL_EAC_GUI_STEP_ERROR";
+
     private final DynamicContext ctx;
 
     public ErrorStep(String title, String errorText) {
@@ -51,7 +53,7 @@ public class ErrorStep extends Step {
 
     public ErrorStep(String title, String errorText, final WSHelper.WSException paceException) {
 	super(title);
-	setID("EAC-Error");
+	setID(STEP_ID);
 
 	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 

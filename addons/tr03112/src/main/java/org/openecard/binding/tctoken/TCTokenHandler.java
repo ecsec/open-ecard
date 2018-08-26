@@ -67,7 +67,6 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
 import org.openecard.gui.UserConsent;
-import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -247,15 +246,6 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
-    public static void killUserConsent() {
-	// kill any open dialog
-	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	Object navObj = ctx.get(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR);
-	if (navObj instanceof UserConsentNavigator) {
-	    UserConsentNavigator nav = (UserConsentNavigator) navObj;
-	    nav.close();
-	}
-    }
 
     /**
      * Activates the client according to the received TCToken.
@@ -581,7 +571,6 @@ public class TCTokenHandler {
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 	}
 	return errorMsg;
-	
     }
 
     /**

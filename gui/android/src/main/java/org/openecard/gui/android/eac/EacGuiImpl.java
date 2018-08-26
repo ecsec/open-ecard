@@ -128,6 +128,7 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public void cancel() {
+	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
 	    cancelPromise.deliver(Boolean.TRUE);
 	    cancelPromise(serverData);
@@ -312,6 +313,7 @@ public class EacGuiImpl implements EacGui {
 	}
 	// wait
 	try {
+	    LOG.debug("Waiting for call of the cancel function.");
 	    cancelPromise.deref();
 	} catch (InterruptedException ex) {
 	    // I don't care

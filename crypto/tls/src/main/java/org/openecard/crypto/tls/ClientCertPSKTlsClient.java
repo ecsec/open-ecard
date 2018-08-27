@@ -45,7 +45,6 @@ import org.openecard.bouncycastle.tls.ServerName;
 import org.openecard.bouncycastle.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.tls.TlsAuthentication;
-import org.openecard.bouncycastle.tls.TlsDHUtils;
 import org.openecard.bouncycastle.tls.TlsECCUtils;
 import org.openecard.bouncycastle.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.tls.TlsPSKIdentity;
@@ -139,11 +138,8 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     public int[] getCipherSuites() {
 	ArrayList<Integer> ciphers = new ArrayList<>(Arrays.asList(
 		// recommended ciphers from TR-02102-2 sec. 3.3.1
-		CipherSuite.TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384,
-		CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
 		CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
 		CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-		// TODO: see if this still holds: this cipher suite does not work with the governikus eID server, so it is excluded here
 		CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
 		CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
 		// must have according to TR-03124-1 sec. 4.4

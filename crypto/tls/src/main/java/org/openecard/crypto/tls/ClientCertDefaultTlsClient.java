@@ -46,7 +46,6 @@ import org.openecard.bouncycastle.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.tls.TlsAuthentication;
 import org.openecard.bouncycastle.tls.TlsClientContext;
-import org.openecard.bouncycastle.tls.TlsDHUtils;
 import org.openecard.bouncycastle.tls.TlsECCUtils;
 import org.openecard.bouncycastle.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.tls.TlsSession;

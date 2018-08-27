@@ -209,7 +209,6 @@ public class NFCCardTerminals implements SCIOTerminals {
 
 		    // check if card is present to the present time
 		    if (nfcIntegratedTerminal.isCardPresent()) {
-			LOG.debug("New card is present.");
 			newCardPresent.add(nfcIntegratedTerminal.getName());
 		    }
 
@@ -231,9 +230,7 @@ public class NFCCardTerminals implements SCIOTerminals {
 			StateChangeEvent event = pendingEvents.remove();
 			LOG.info("StateChangeEvent: " + event.getState() + " " + event.getTerminal());
 			return event;
-		    } catch (NoSuchElementException ex) {
-			LOG.debug("No card state changes.");
-		    }
+		    } catch (NoSuchElementException ex) { }
 		}
 
 		long finishTime = System.nanoTime();

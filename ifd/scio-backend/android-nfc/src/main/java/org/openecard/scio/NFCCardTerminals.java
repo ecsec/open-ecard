@@ -113,16 +113,14 @@ public class NFCCardTerminals implements SCIOTerminals {
 	private final NFCCardTerminals nfcTerminals;
 	private final NFCCardTerminal nfcIntegratedTerminal;
 
+	private Queue<StateChangeEvent> pendingEvents;
+	private Collection<String> cardPresent;
+	private boolean initialized = false;
+
 	public NFCCardWatcher(NFCCardTerminals terminals) {
 	    this.nfcTerminals = terminals;
 	    this.nfcIntegratedTerminal = nfcTerminals.getIntegratedNfcTerminal();
 	}
-
-	private Queue<StateChangeEvent> pendingEvents;
-	private Collection<String> terminals;
-	private Collection<String> cardPresent;
-
-	private boolean isEnabled;
 
 	@Override
 	public SCIOTerminals getTerminals() {
@@ -141,15 +139,12 @@ public class NFCCardTerminals implements SCIOTerminals {
 	    }
 
 	    // initialize
+	    initialized = true;
 	    pendingEvents = new LinkedList<>();
-	    terminals = new HashSet<>();
 	    cardPresent = new HashSet<>();
 
 	    // Check if NFC Adapter is present and enabled
-	    isEnabled = nfcTerminals.adapter.isEnabled();
-
-	    String name = nfcIntegratedTerminal.getName();
-	    terminals.add(name);
+	    boolean isEnabled = nfcTerminals.adapter.isEnabled();
 
 	    // check if nfc adapter is null
 	    if (nfcTerminals.adapter == null) {
@@ -163,6 +158,8 @@ public class NFCCardTerminals implements SCIOTerminals {
 	    }
 
 	    if (nfcTerminals.adapter != null && isEnabled) {
+		String name = nfcIntegratedTerminal.getName();
+
 		// check if card present at integrated terminal
 		if (nfcIntegratedTerminal.isCardPresent()) {
 		    LOG.debug("Card is present.");
@@ -187,51 +184,64 @@ public class NFCCardTerminals implements SCIOTerminals {
 	@Override
 	public StateChangeEvent waitForChange(long timeout) throws SCIOException {
 	    LOG.debug("NFCCardWatcher wait for change...");
-	    if (pendingEvents == null) {
+
+	    // check if watcher is initialized
+	    if (! initialized) {
 		throw new IllegalStateException("Calling wait on uninitialized watcher instance.");
 	    }
 
-	    sleep(2500);
-
-	    // try to return any present events first
-	    StateChangeEvent nextEvent = pendingEvents.poll();
-	    if (nextEvent != null) {
-		LOG.trace("Leaving wait for change with queued event.");
-		return nextEvent;
-	    } else {
-		Collection<String> newCardPresent = new HashSet<>();
-		String ifdName = nfcIntegratedTerminal.getName();
-
-		if (nfcIntegratedTerminal.isCardPresent()) {
-		    LOG.debug("Card is present.");
-		    newCardPresent.add(ifdName);
-		} else {
-		    LOG.debug("No card is present.");
-		}
-
-		// calculate what has actually happened
-		// removed cards
-		Collection<String> cardRemoved = subtract(cardPresent, newCardPresent);
-		Collection<StateChangeEvent> crEvents = createEvents(EventType.CARD_REMOVED, cardRemoved);
-		// added cards
-		Collection<String> cardAdded = subtract(newCardPresent, cardPresent);
-		Collection<StateChangeEvent> caEvents = createEvents(EventType.CARD_INSERTED, cardAdded);
-
-		// update internal status with the calculated state
-		cardPresent = newCardPresent;
-		pendingEvents.addAll(crEvents);
-		pendingEvents.addAll(caEvents);
-		// use remove so we get an exception when no event has been recorded
-		// this would mean our algorithm is corrupt
-		LOG.trace("Leaving wait for change with fresh event.");
-		try {
-		    StateChangeEvent event = pendingEvents.remove();
-		    LOG.info("StateChangeEvent: " + event.getState() + " " + event.getTerminal());
-		    return event;
-		} catch (NoSuchElementException e) {
-		    return new StateChangeEvent();
-		}
+	    // set timeout to maximum when value says wait indefinitely
+	    if (timeout == 0) {
+		timeout = Long.MAX_VALUE;
 	    }
+
+	    while (timeout > 0) {
+		long startTime = System.nanoTime();
+
+		// try to return any present events first
+		StateChangeEvent nextEvent = pendingEvents.poll();
+
+		if (nextEvent != null) {
+		    LOG.trace("Leaving wait for change with queued event.");
+		    return nextEvent;
+		} else {
+		    Collection<String> newCardPresent = new HashSet<>();
+
+		    // check if card is present to the present time
+		    if (nfcIntegratedTerminal.isCardPresent()) {
+			LOG.debug("New card is present.");
+			newCardPresent.add(nfcIntegratedTerminal.getName());
+		    }
+
+		    // check if card is removed
+		    Collection<String> cardRemoved = subtract(cardPresent, newCardPresent);
+		    Collection<StateChangeEvent> crEvents = createEvents(EventType.CARD_REMOVED, cardRemoved);
+
+		    // check if card is added
+		    Collection<String> cardAdded = subtract(newCardPresent, cardPresent);
+		    Collection<StateChangeEvent> caEvents = createEvents(EventType.CARD_INSERTED, cardAdded);
+
+		    // update internal status with the calculated state
+		    cardPresent = newCardPresent;
+
+		    pendingEvents.addAll(crEvents);
+		    pendingEvents.addAll(caEvents);
+
+		    try {
+			StateChangeEvent event = pendingEvents.remove();
+			LOG.info("StateChangeEvent: " + event.getState() + " " + event.getTerminal());
+			return event;
+		    } catch (NoSuchElementException ex) {
+			LOG.debug("No card state changes.");
+		    }
+		}
+
+		long finishTime = System.nanoTime();
+		long delta = finishTime - startTime;
+		timeout = timeout - (delta / 1000_000);
+	    }
+
+	    return new StateChangeEvent();
         }
 
 	private static <T> Collection<T> subtract(Collection<T> a, Collection<T> b) {
@@ -246,13 +256,6 @@ public class NFCCardTerminals implements SCIOTerminals {
 		result.add(new StateChangeEvent(type, next));
 	    }
 	    return result;
-	}
-
-	private void sleep(long millis) throws SCIOException {
-	    try {
-		Thread.sleep(millis);
-	    } catch (InterruptedException ignore) {
-	    }
 	}
     }
 }

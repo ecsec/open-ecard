@@ -57,12 +57,12 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	LOG.info("Create new NFCFactory");
 	if (adapter == null || terminals == null) {
 	    adapter = getNFCAdapter();
-	    terminals = new NFCCardTerminals(adapter);
 	    if(adapter == null) {
 		String msg = "NFC not available";
 		LOG.error(msg);
 		throw new NoSuchTerminal(msg);
 	    }
+	    terminals = new NFCCardTerminals(adapter);
 	}
     }
 

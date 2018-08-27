@@ -25,11 +25,10 @@ package org.openecard.scio;
 import android.nfc.NfcAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import javax.annotation.Nonnull;
@@ -56,29 +55,34 @@ public class NFCCardTerminals implements SCIOTerminals {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminals.class);
 
-    /**
-     * Nfc Terminals are represented by a Map. The key of an entry represents the name of the nfc terminal.
-     */
-    private final Map<String, NFCCardTerminal> nfcTerminals = new HashMap<>();
-
-    private final NFCCardTerminal integratedNfcTerminal;
+    private final List<SCIOTerminal> nfcTerminals = new ArrayList<>();
 
     private final NfcAdapter adapter;
 
     public NFCCardTerminals(NfcAdapter adapter) {
 	String nameOfIntegratedNfc = NFCCardTerminal.STD_TERMINAL_NAME;
+
 	this.adapter = adapter;
-	this.integratedNfcTerminal = new NFCCardTerminal(nameOfIntegratedNfc);
-	this.nfcTerminals.put(nameOfIntegratedNfc, this.integratedNfcTerminal);
+	this.nfcTerminals.add(new NFCCardTerminal(nameOfIntegratedNfc));
     }
 
     @Override
     public List<SCIOTerminal> list(State arg0) throws SCIOException {
-	List<SCIOTerminal> list = new ArrayList<SCIOTerminal>() {};
-	for (Map.Entry<String, NFCCardTerminal> entry : nfcTerminals.entrySet()) {
-	    list.add(entry.getValue());
+	switch (arg0) {
+	    case ALL:
+		return this.nfcTerminals;
+	    case CARD_ABSENT:
+		if (! getIntegratedNfcTerminal().isCardPresent()) {
+		    return this.nfcTerminals;
+		}
+		break;
+	    case CARD_PRESENT:
+		if (getIntegratedNfcTerminal().isCardPresent()) {
+		    return this.nfcTerminals;
+		}
+		break;
 	}
-	return list;
+	return Collections.emptyList();
     }
 
     @Override
@@ -87,17 +91,16 @@ public class NFCCardTerminals implements SCIOTerminals {
     }
 
     public NFCCardTerminal getIntegratedNfcTerminal() {
-	return integratedNfcTerminal;
+	return (NFCCardTerminal) nfcTerminals.get(0);
     }
 
     @Override
     public SCIOTerminal getTerminal(@Nonnull String name) throws NoSuchTerminal {
-        for (Map.Entry<String, NFCCardTerminal> entry : nfcTerminals.entrySet()) {
-	    if (entry.getKey().equals(name)) {
-		return entry.getValue();
-	    }
+        if (getIntegratedNfcTerminal().getName().equals(name)) {
+	    return getIntegratedNfcTerminal();
 	}
-	return null;
+	String errorMsg = String.format("There is no terminal with the name '%s' available.", name);
+	throw new NoSuchTerminal(errorMsg);
     }
 
     @Override
@@ -112,7 +115,7 @@ public class NFCCardTerminals implements SCIOTerminals {
 
 	public NFCCardWatcher(NFCCardTerminals terminals) {
 	    this.nfcTerminals = terminals;
-	    this.nfcIntegratedTerminal = nfcTerminals.integratedNfcTerminal;
+	    this.nfcIntegratedTerminal = nfcTerminals.getIntegratedNfcTerminal();
 	}
 
 	private Queue<StateChangeEvent> pendingEvents;

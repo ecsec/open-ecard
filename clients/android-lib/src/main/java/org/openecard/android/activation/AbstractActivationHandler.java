@@ -24,13 +24,13 @@ package org.openecard.android.activation;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
 import org.openecard.android.system.OpeneCardContext;
@@ -120,19 +120,20 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     public void onStart() {
 	client = new OpeneCardServiceClient(parent.getApplicationContext());
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		ServiceResponse r = client.startService();
-		switch (r.getResponseLevel()) {
-		    case INFO:
-			onOecInitSuccess(client.getContext());
-			break;
-		    default:
-			onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR, r.getMessage()));
-		}
+	new Thread(() -> {
+	    ServiceResponse r = client.startService();
+	    switch (r.getResponseLevel()) {
+		case INFO:
+		    onOecInitSuccess(client.getContext());
+		    break;
+		default:
+		    onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR, r.getMessage()));
 	    }
 	}, "Oec Service Initializer").start();
+    }
+
+    protected boolean isActivateUrlAllowed(@Nonnull Uri eIDUrl) {
+	return true;
     }
 
     private void onOecInitSuccess(OpeneCardContext ctx) {
@@ -146,23 +147,20 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	Intent actIntent = parent.getIntent();
 	Uri data = actIntent.getData();
 	setReturnClass(forClassName(actIntent.getStringExtra(RETURN_CLASS)));
-	final String eIDUrl = data.toString();
 
-	if (eIDUrl != null) {
+	if (data == null || ! isActivateUrlAllowed(data)) {
+	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
+		    "Missing or invalid activation URL received."));
+	} else {
+	    String eIDUrl = data.toString();
 	    waitForEacGui();
 	    // startService TR procedure according to [BSI-TR-03124-1]
-	    authThread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    ActivationResult result = ac.activate(eIDUrl);
-		    handleActivationResult(result);
-		}
+	    authThread = new Thread(() -> {
+		ActivationResult result = ac.activate(eIDUrl);
+		handleActivationResult(result);
 	    }, "OeC Activation Process");
 	    authThread.start();
 	    // when app is closed or minimized the authentication process is interrupted and have to startService again
-	} else {
-	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
-		    "Authentication process already finished."));
 	}
     }
 
@@ -245,11 +243,8 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    Set<String> supportedCards = getSupportedCards();
 		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
 		    if (supportedCards == null || supportedCards.contains(type)) {
-			parent.runOnUiThread(new Runnable() {
-			    @Override
-			    public void run() {
-				onCardInserted(type);
-			    }
+			parent.runOnUiThread(() -> {
+			    onCardInserted(type);
 			});
 
 			// remove handler when the correct card is present
@@ -276,27 +271,18 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	switch (result.getResultCode()) {
 	    case OK:
 	    case REDIRECT:
-		parent.runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			onAuthenticationSuccess(result);
-		    }
+		parent.runOnUiThread(() -> {
+		    onAuthenticationSuccess(result);
 		});
 		break;
 	    case INTERRUPTED:
-		parent.runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			onAuthenticationInterrupted(result);
-		    }
+		parent.runOnUiThread(() -> {
+		    onAuthenticationInterrupted(result);
 		});
 		break;
 	    default:
-		parent.runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			onAuthenticationFailure(result);
-		    }
+		parent.runOnUiThread(() -> {
+		    onAuthenticationFailure(result);
 		});
 		break;
 	}
@@ -308,18 +294,15 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
      * called.
      */
     private void waitForEacGui() {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		List<UserConsentNavigatorFactory<? extends AndroidGui>> eacNavFactories;
-		eacNavFactories = octx.getGuiNavigatorFactories(androidGuiClasses);
-		try {
-		    androidGui = waitForGuiPromise(eacNavFactories);
-		    // the following cast is an assumption that all classes are compatible to the required generic
-		    onGuiIfaceSet((GUI) androidGui);
-		} catch (InterruptedException ex) {
-		    LOG.error("Waiting for Eac Gui was interrupted.", ex);
-		}
+	new Thread(() -> {
+	    List<UserConsentNavigatorFactory<? extends AndroidGui>> eacNavFactories;
+	    eacNavFactories = octx.getGuiNavigatorFactories(androidGuiClasses);
+	    try {
+		androidGui = waitForGuiPromise(eacNavFactories);
+		// the following cast is an assumption that all classes are compatible to the required generic
+		onGuiIfaceSet((GUI) androidGui);
+	    } catch (InterruptedException ex) {
+		LOG.error("Waiting for Eac Gui was interrupted.", ex);
 	    }
 	}, "WaitForEacGuiThread").start();
     }
@@ -390,15 +373,12 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    d.show();
 		}
 		// redirect to the termination uri when the card remove dialog is closed
-		d.setOnDismissListener(new DialogInterface.OnDismissListener() {
-		    @Override
-		    public void onDismiss(DialogInterface dialog) {
-			// clean dialog field
-			cardRemoveDialog = null;
-			// perform redirect
-			if (result.getResultCode() == ActivationResultCode.REDIRECT) {
-			    authenticationSuccessAction(location);
-			}
+		d.setOnDismissListener(dialog -> {
+		    // clean dialog field
+		    cardRemoveDialog = null;
+		    // perform redirect
+		    if (result.getResultCode() == ActivationResultCode.REDIRECT) {
+			authenticationSuccessAction(location);
 		    }
 		});
 

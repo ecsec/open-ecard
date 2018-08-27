@@ -132,10 +132,15 @@ public class NFCCardTerminals implements SCIOTerminals {
 	@Override
 	public List<TerminalState> start() throws SCIOException {
 	    LOG.debug("Entering start of nfc card watcher.");
+
 	    ArrayList<TerminalState> result = new ArrayList<>();
+
+	    // check if start is called the second time
 	    if (pendingEvents != null) {
 		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	    }
+
+	    // initialize
 	    pendingEvents = new LinkedList<>();
 	    terminals = new HashSet<>();
 	    cardPresent = new HashSet<>();
@@ -146,16 +151,24 @@ public class NFCCardTerminals implements SCIOTerminals {
 	    String name = nfcIntegratedTerminal.getName();
 	    terminals.add(name);
 
+	    // check if nfc adapter is null
 	    if (nfcTerminals.adapter == null) {
 		String msg = "No nfc Adapter on this Android Device.";
 		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE);
-	    } else if (! isEnabled) {
+	    }
+
+	    // check if nfc is enabled
+	    if (! isEnabled) {
 		throw new SCIOException("Nfc Adapter not enabled.", SCIOErrorCode.SCARD_E_NO_SERVICE);
-	    } else if (nfcTerminals.adapter != null && isEnabled) {
+	    }
+
+	    if (nfcTerminals.adapter != null && isEnabled) {
+		// check if card present at integrated terminal
 		if (nfcIntegratedTerminal.isCardPresent()) {
 		    LOG.debug("Card is present.");
 		    cardPresent.add(name);
 		    result.add(new TerminalState(name, true));
+		// otherwise card is not present at integrated terminal
 		} else {
 		    LOG.debug("No card is present.");
 		    result.add(new TerminalState(name, false));

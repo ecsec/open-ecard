@@ -335,10 +335,11 @@ public class AddonManager {
     public AppExtensionAction getAppExtensionAction(@Nonnull AddonSpecification addonSpec, @Nonnull String actionId) {
 	// get extension from cache
 	AppExtensionAction appExtAction = cache.getAppExtensionAction(addonSpec, actionId);
-	if (appExtAction != null) {
-	    // AppExtensionAction cached so return it
-	    return appExtAction;
-	}
+	// TODO: find a better way to deal with the reuse of protocol plugins
+//	if (appExtAction != null) {
+//	    // AppExtensionAction cached so return it
+//	    return appExtAction;
+//	}
 
 	AppExtensionSpecification protoSpec = addonSpec.searchByActionId(actionId);
 	if (protoSpec == null) {
@@ -376,10 +377,11 @@ public class AddonManager {
      */
     public AppPluginAction getAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
 	AppPluginAction appPluginAction = cache.getAppPluginAction(addonSpec, resourceName);
-	if (appPluginAction != null) {
-	    // AppExtensionAction cached so return it
-	    return appPluginAction;
-	}
+	// TODO: find a better way to deal with the reuse of protocol plugins
+//	if (appPluginAction != null) {
+//	    // AppExtensionAction cached so return it
+//	    return appPluginAction;
+//	}
 
 	AppPluginSpecification protoSpec = addonSpec.searchByResourceName(resourceName);
 	if (protoSpec == null) {

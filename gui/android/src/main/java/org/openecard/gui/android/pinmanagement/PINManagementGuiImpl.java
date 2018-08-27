@@ -236,6 +236,11 @@ public class PINManagementGuiImpl implements PINManagementGui {
     }
 
     public void sendPinStatus(RecognizedState status) {
+
+	if (this.pinStatus.isDelivered()) {
+	   this.pinStatus = new Promise<>();
+	}
+
 	switch (status) {
 	    case PIN_activated_RC3:
 		this.pinStatus.deliver(PinStatus.RC3);

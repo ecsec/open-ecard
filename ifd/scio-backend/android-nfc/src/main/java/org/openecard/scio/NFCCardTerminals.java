@@ -196,6 +196,9 @@ public class NFCCardTerminals implements SCIOTerminals {
 	    }
 
 	    while (timeout > 0) {
+		// stressless for the CPU
+		sleep(250);
+
 		long startTime = System.nanoTime();
 
 		// try to return any present events first
@@ -253,6 +256,12 @@ public class NFCCardTerminals implements SCIOTerminals {
 		result.add(new StateChangeEvent(type, next));
 	    }
 	    return result;
+	}
+
+	private void sleep(long millis) throws SCIOException {
+	    try {
+		Thread.sleep(millis);
+	    } catch (InterruptedException ignore) { }
 	}
     }
 }

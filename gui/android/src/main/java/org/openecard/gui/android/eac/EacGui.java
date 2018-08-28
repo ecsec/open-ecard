@@ -24,6 +24,7 @@ package org.openecard.gui.android.eac;
 
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
@@ -43,6 +44,15 @@ public interface EacGui extends AndroidGui {
      * @throws InterruptedException Thrown if waiting for the value has been interrupted.
      */
     ServerData getServerData() throws InterruptedException;
+
+    /**
+     * Gets the TransactionInfo from the EAC1Input message.
+     * 
+     * @return The TransactionInfo value, or {@code null} if none is sent by the eID Server.
+     * @throws InterruptedException Thrown if waiting for the value has been interrupted.
+     */
+    @Nullable
+    String getTransactionInfo() throws InterruptedException;
 
     /**
      * Sets the attribute selection made by the user in the EAC process.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -38,23 +38,29 @@ public class NFCCardMonitoring implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardMonitoring.class);
 
     private final NFCCardTerminal terminal;
+    private final NFCCard card;
 
-    public NFCCardMonitoring(NFCCardTerminal terminal) {
+    public NFCCardMonitoring(NFCCardTerminal terminal, NFCCard card) {
 	this.terminal = terminal;
+	this.card = card;
     }
 
     @Override
     public void run() {
+	LOG.debug("Starting monitor thread.");
 	while (true) {
 	    try {
-		Thread.sleep(250);
-		if (! terminal.isCardConnected()) {
+		if (! card.isCardPresent()) {
 		    // remove tag if card is no longer available/connected to terminal
 		    terminal.removeTag();
-		    break;
+		    LOG.debug("Stopping monitor thread.");
+		    return;
 		}
+		Thread.sleep(250);
 	    } catch (InterruptedException ex) {
 		LOG.warn("Task which checks the availability of the nfc card is interrupted.", ex);
+		LOG.debug("Stopping monitor thread.");
+		return;
 	    }
 	}
     }

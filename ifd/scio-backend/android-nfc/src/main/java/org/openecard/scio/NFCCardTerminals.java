@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,16 +23,10 @@
 package org.openecard.scio;
 
 import android.nfc.NfcAdapter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import javax.annotation.Nonnull;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
@@ -50,34 +44,31 @@ import org.slf4j.LoggerFactory;
  * @author Daniel Nemmert
  * @author Mike Prechtl
  */
-public class NFCCardTerminals implements SCIOTerminals {
+public final class NFCCardTerminals implements SCIOTerminals {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminals.class);
 
-    private final List<SCIOTerminal> nfcTerminals = new ArrayList<>();
-
+    private final NFCCardTerminal nfcTerminal;
     private final NfcAdapter adapter;
 
     public NFCCardTerminals(NfcAdapter adapter) {
-	String nameOfIntegratedNfc = NFCCardTerminal.STD_TERMINAL_NAME;
-
 	this.adapter = adapter;
-	this.nfcTerminals.add(new NFCCardTerminal(nameOfIntegratedNfc));
+	this.nfcTerminal = new NFCCardTerminal();
     }
 
     @Override
-    public List<SCIOTerminal> list(State arg0) throws SCIOException {
-	switch (arg0) {
+    public List<SCIOTerminal> list(State state) throws SCIOException {
+	switch (state) {
 	    case ALL:
-		return this.nfcTerminals;
+		return Collections.singletonList(this.nfcTerminal);
 	    case CARD_ABSENT:
-		if (! getIntegratedNfcTerminal().isCardPresent()) {
-		    return this.nfcTerminals;
+		if (! nfcTerminal.isCardPresent()) {
+		    return Collections.singletonList(this.nfcTerminal);
 		}
 		break;
 	    case CARD_PRESENT:
-		if (getIntegratedNfcTerminal().isCardPresent()) {
-		    return this.nfcTerminals;
+		if (nfcTerminal.isCardPresent()) {
+		    return Collections.singletonList(this.nfcTerminal);
 		}
 		break;
 	}
@@ -89,13 +80,13 @@ public class NFCCardTerminals implements SCIOTerminals {
         return list(State.ALL);
     }
 
-    public NFCCardTerminal getIntegratedNfcTerminal() {
-	return (NFCCardTerminal) nfcTerminals.get(0);
+    NFCCardTerminal getIntegratedNfcTerminal() {
+	return nfcTerminal;
     }
 
     @Override
     public SCIOTerminal getTerminal(@Nonnull String name) throws NoSuchTerminal {
-        if (getIntegratedNfcTerminal().getName().equals(name)) {
+        if (nfcTerminal.getName().equals(name)) {
 	    return getIntegratedNfcTerminal();
 	}
 	String errorMsg = String.format("There is no terminal with the name '%s' available.", name);
@@ -107,19 +98,18 @@ public class NFCCardTerminals implements SCIOTerminals {
 	return new NFCCardWatcher(this);
     }
 
+
     private static class NFCCardWatcher implements TerminalWatcher {
 
 	private final NFCCardTerminals nfcTerminals;
 	private final NFCCardTerminal nfcIntegratedTerminal;
 
-	private Queue<StateChangeEvent> pendingEvents;
-	private Collection<String> cardPresent;
 	private boolean initialized = false;
 	private volatile boolean isCardPresent = false;
 
 	public NFCCardWatcher(NFCCardTerminals terminals) {
 	    this.nfcTerminals = terminals;
-	    this.nfcIntegratedTerminal = nfcTerminals.getIntegratedNfcTerminal();
+	    this.nfcIntegratedTerminal = terminals.nfcTerminal;
 	}
 
 	@Override
@@ -131,50 +121,24 @@ public class NFCCardTerminals implements SCIOTerminals {
 	public List<TerminalState> start() throws SCIOException {
 	    LOG.debug("Entering start of nfc card watcher.");
 
-	    ArrayList<TerminalState> result = new ArrayList<>();
-
-	    // check if start is called the second time
-	    if (pendingEvents != null) {
+	    // allow this method to be called only once
+	    if (initialized) {
 		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	    }
-
-	    // initialize
 	    initialized = true;
-	    pendingEvents = new LinkedList<>();
-	    cardPresent = new HashSet<>();
 
-	    // Check if NFC Adapter is present and enabled
-	    boolean isEnabled = nfcTerminals.adapter.isEnabled();
-
-	    // check if nfc adapter is null
-	    if (nfcTerminals.adapter == null) {
-		String msg = "No nfc Adapter on this Android Device.";
-		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE);
+	    String name = nfcIntegratedTerminal.getName();
+	    // check if card present at integrated terminal
+	    if (nfcIntegratedTerminal.isCardPresent()) {
+		LOG.debug("Card is present.");
+		isCardPresent = true;
+		return Collections.singletonList(new TerminalState(name, true));
+	    // otherwise card is not present at integrated terminal
+	    } else {
+		LOG.debug("No card is present.");
+		isCardPresent = false;
+		return Collections.singletonList(new TerminalState(name, false));
 	    }
-
-	    // check if nfc is enabled
-	    if (! isEnabled) {
-		throw new SCIOException("Nfc Adapter not enabled.", SCIOErrorCode.SCARD_E_NO_SERVICE);
-	    }
-
-	    if (nfcTerminals.adapter != null && isEnabled) {
-		String name = nfcIntegratedTerminal.getName();
-
-		// check if card present at integrated terminal
-		if (nfcIntegratedTerminal.isCardPresent()) {
-		    LOG.debug("Card is present.");
-		    cardPresent.add(name);
-		    isCardPresent = true;
-		    result.add(new TerminalState(name, true));
-		// otherwise card is not present at integrated terminal
-		} else {
-		    LOG.debug("No card is present.");
-		    result.add(new TerminalState(name, false));
-		}
-	    }
-
-	    LOG.trace("Leaving start() with {} states.", result.size());
-	    return result;
 	}
 
 	@Override
@@ -184,7 +148,7 @@ public class NFCCardTerminals implements SCIOTerminals {
 
 	@Override
 	public StateChangeEvent waitForChange(long timeout) throws SCIOException {
-	    LOG.debug("NFCCardWatcher wait for change...");
+	    LOG.debug("NFCCardWatcher wait for change ...");
 
 	    // check if watcher is initialized
 	    if (! initialized) {
@@ -196,58 +160,30 @@ public class NFCCardTerminals implements SCIOTerminals {
 		timeout = Long.MAX_VALUE;
 	    }
 
-	    while (timeout > 0) {
-		// stressless for the CPU
-		sleep(250);
+	    // terminal name
+	    String terminalName = nfcIntegratedTerminal.getName();
 
-		long startTime = System.nanoTime();
-
-		// terminal name
-		String terminalName = nfcIntegratedTerminal.getName();
-
-		// check if card is present to the present time
-		boolean newCardPresent = nfcIntegratedTerminal.isCardPresent();
-
-		// if no card was present but now
-		if (! isCardPresent && newCardPresent) {
-		    isCardPresent = true;
-		    StateChangeEvent cardPresentState = new StateChangeEvent(EventType.CARD_INSERTED, terminalName);
-		    LOG.info("StateChangeEvent: " + cardPresentState.getState() + " " + cardPresentState.getTerminal());
-		    return cardPresentState;
-		// if card was present but now it is removed
-		} else if (isCardPresent && ! newCardPresent) {
+	    if (isCardPresent) {
+		LOG.debug("Waiting for card to become absent.");
+		boolean result = nfcIntegratedTerminal.waitForCardAbsent(timeout);
+		LOG.debug("Function waitForCardPresent()={}.", result);
+		if (result) {
 		    isCardPresent = false;
-		    StateChangeEvent cardRemovedState = new StateChangeEvent(EventType.CARD_REMOVED, terminalName);
-		    LOG.info("StateChangeEvent: " + cardRemovedState.getState() + " " + cardRemovedState.getTerminal());
-		    return cardRemovedState;
+		    return new StateChangeEvent(EventType.CARD_REMOVED, terminalName);
 		}
-
-		long finishTime = System.nanoTime();
-		long delta = finishTime - startTime;
-		timeout = timeout - (delta / 1000_000);
+	    } else {
+		LOG.debug("Waiting for card to become present.");
+		boolean result = nfcIntegratedTerminal.waitForCardPresent(timeout);
+		LOG.debug("Function waitForCardPresent()={}.", result);
+		if (result) {
+		    isCardPresent = true;
+		    return new StateChangeEvent(EventType.CARD_INSERTED, terminalName);
+		}
 	    }
 
 	    return new StateChangeEvent();
         }
 
-	private static <T> Collection<T> subtract(Collection<T> a, Collection<T> b) {
-	    HashSet<T> result = new HashSet<>(a);
-	    result.removeAll(b);
-	    return result;
-	}
-
-	private static Collection<StateChangeEvent> createEvents(EventType type, Collection<String> list) {
-	    Collection<StateChangeEvent> result = new ArrayList<>(list.size());
-	    for (String next : list) {
-		result.add(new StateChangeEvent(type, next));
-	    }
-	    return result;
-	}
-
-	private void sleep(long millis) throws SCIOException {
-	    try {
-		Thread.sleep(millis);
-	    } catch (InterruptedException ignore) { }
-	}
     }
+
 }

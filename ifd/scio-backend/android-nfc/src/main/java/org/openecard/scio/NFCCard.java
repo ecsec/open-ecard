@@ -24,6 +24,7 @@ package org.openecard.scio;
 
 import android.nfc.tech.IsoDep;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
@@ -44,14 +45,15 @@ public class NFCCard implements SCIOCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
 
-    private final NFCCardChannel nfcCardChannel = new NFCCardChannel(this);
+    private final NFCCardChannel nfcCardChannel;
     private final NFCCardTerminal nfcCardTerminal;
     private final int timeoutForTransceive;
     private final byte[] histBytes;
+    private final IsoDep isodep;
 
-    protected IsoDep isodep;
+    private Thread monitor;
 
-    public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) {
+    public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
 	isodep = tag;
 	timeoutForTransceive = timeout;
 	nfcCardTerminal = terminal;
@@ -61,10 +63,26 @@ public class NFCCard implements SCIOCard {
 	    histBytesTmp = isodep.getHiLayerResponse();
 	}
 	this.histBytes = histBytesTmp;
+
+	isodep.connect();
+
+	this.nfcCardChannel = new NFCCardChannel(this);
+
+	// start thread which is monitoring the availability of the card
+	monitor = getMonitor();
+	monitor.start();
     }
 
-    public int getTimeoutForTransceive() {
+    private Thread getMonitor() {
+	return new Thread(new NFCCardMonitoring(nfcCardTerminal, this));
+    }
+
+    private int getTimeoutForTransceive() {
 	return timeoutForTransceive;
+    }
+
+    public synchronized boolean isCardPresent() {
+	return isodep.isConnected();
     }
 
     @Override
@@ -78,8 +96,31 @@ public class NFCCard implements SCIOCard {
     }
 
     @Override
-    public void disconnect(boolean arg0) throws SCIOException {
-	nfcCardChannel.close();
+    public void disconnect(boolean reset) throws SCIOException {
+	if (reset) {
+	    if (this.monitor != null) {
+		this.monitor.interrupt();
+	    }
+	    // wait for monitor, then disconnect in order to not get a CARD_REMOVED event
+	    try {
+		this.monitor.join();
+	    } catch (InterruptedException ex) {
+		// should not happen
+	    }
+
+	    nfcCardChannel.close();
+	    try {
+		isodep.close();
+		isodep.connect();
+
+		// start thread which is monitoring the availability of the card
+		monitor = getMonitor();
+		monitor.start();
+	    } catch (IOException ex) {
+		LOG.error("Failed to close channel.", ex);
+		throw new SCIOException("Failed to close channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+	    }
+	}
     }
 
     @Override
@@ -128,7 +169,7 @@ public class NFCCard implements SCIOCard {
 
     @Override
     public SCIOChannel openLogicalChannel() throws SCIOException {
-	return nfcCardChannel;
+	throw new SCIOException("Logical channels are not supported.", SCIOErrorCode.SCARD_E_UNSUPPORTED_FEATURE);
     }
 
     @Override
@@ -145,6 +186,11 @@ public class NFCCard implements SCIOCard {
     @Override
     public SCIOTerminal getTerminal() {
         return nfcCardTerminal;
+    }
+
+    byte[] transceive(byte[] apdu) throws IOException {
+	isodep.setTimeout(getTimeoutForTransceive());
+	return isodep.transceive(apdu);
     }
 
 }

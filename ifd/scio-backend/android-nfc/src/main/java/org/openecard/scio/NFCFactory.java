@@ -27,6 +27,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
@@ -114,7 +115,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	try {
 	    // standard nfc terminal
 	    terminals.getIntegratedNfcTerminal().setTag(isoDepTag, timeout);
-	} catch (SCIOException ex) {
+	} catch (IOException ex) {
 	    LOG.warn(ex.getMessage(), ex);
 	}
     }

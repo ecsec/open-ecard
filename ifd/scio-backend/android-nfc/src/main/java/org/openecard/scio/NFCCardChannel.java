@@ -30,8 +30,6 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public class NFCCardChannel implements SCIOChannel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
     private final NFCCard card;
 
     public NFCCardChannel(NFCCard card) {
@@ -72,22 +69,20 @@ public class NFCCardChannel implements SCIOChannel {
     @Override
     public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
 	synchronized (card) {
-	    if (card != null && card.isodep != null && card.isodep.isConnected()) {
-		try {
-		    card.isodep.setTimeout(card.getTimeoutForTransceive());
-		    return new CardResponseAPDU(card.isodep.transceive(apdu));
-		} catch (IOException e) {
-		    // Tag isn't available, so remove nfc tag from terminal
-		    ((NFCCardTerminal) card.getTerminal()).removeTag();
+	    try {
+		return new CardResponseAPDU(card.transceive(apdu));
+	    } catch (IOException ex) {
+		if (! card.isCardPresent()) {
+		    throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
+			    SCIOErrorCode.SCARD_W_REMOVED_CARD);
+		} else {
 		    // TODO: check if the error code can be chosen more specifically
-		    throw new SCIOException("Transmit failed", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, e);
+		    throw new SCIOException("Transmit failed.", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex);
 		}
-	    } else {
-		throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
-			SCIOErrorCode.SCARD_W_REMOVED_CARD);
 	    }
 	}
     }
+
 
     @Override
     public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException {
@@ -101,13 +96,11 @@ public class NFCCardChannel implements SCIOChannel {
     @Override
     public boolean isBasicChannel() {
 	return true;
-        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean isLogicalChannel() {
-	return true;
-        //throw new UnsupportedOperationException("Not supported yet.");
+	return false;
     }
 
 }

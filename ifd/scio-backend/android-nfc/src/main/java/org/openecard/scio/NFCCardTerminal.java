@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * NFC implementation of smartcardio's CardTerminal interface.<br>
+ * NFC implementation of smartcardio's CardTerminal interface.
  * Implemented as singleton because we only have one nfc-interface. Only
  * activitys can react on a new intent, so they must set the tag via setTag()
  *
@@ -53,14 +53,10 @@ public class NFCCardTerminal implements SCIOTerminal {
     private final Object cardPresent;
     private final Object cardAbsent;
 
-    public NFCCardTerminal(String name) {
-	this.terminalName = name;
+    public NFCCardTerminal() {
+	this.terminalName = STD_TERMINAL_NAME;
 	this.cardAbsent = new Object();
 	this.cardPresent = new Object();
-    }
-
-    public int getMaxTransceiveLength() {
-	return nfcCard.isodep.getMaxTransceiveLength();
     }
 
     @Override
@@ -68,33 +64,24 @@ public class NFCCardTerminal implements SCIOTerminal {
 	return terminalName;
     }
 
-    public synchronized boolean isCardConnected() {
-	return nfcCard != null && nfcCard.isodep != null && nfcCard.isodep.isConnected();
-    }
-
+    // used externally
     @Override
-    public synchronized boolean isCardPresent() throws SCIOException {
-	return nfcCard != null && nfcCard.isodep != null;
+    public synchronized boolean isCardPresent() {
+	return nfcCard != null;
     }
 
-    public synchronized void setTag(IsoDep tag, int timeout) throws SCIOException {
-	LOG.debug("Set nfc tag on terminal '" + getName() + "'");
-	if (tag.isExtendedLengthApduSupported()) {
-	    LOG.debug("Max Transceive Length: " + tag.getMaxTransceiveLength() + " Bytes.");
-	    LOG.debug("Extended Length APDU is supported.");
-	    this.nfcCard = new NFCCard(tag, timeout, this);
-	    notifyCardPresent();
-	} else {
-	    String msg = "Extended Length APDU is not supported.";
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_READER_UNSUPPORTED);
-	}
+    public synchronized void setTag(IsoDep tag, int timeout) throws IOException {
+	LOG.debug("Set nfc tag on terminal: {}.", getName());
+	LOG.debug("Max Transceive Length: {}.", tag.getMaxTransceiveLength());
+	this.nfcCard = new NFCCard(tag, timeout, this);
+	notifyCardPresent();
     }
 
     public synchronized void removeTag() {
+	LOG.debug("");
 	if (nfcCard != null) { // maybe nfc tag is already removed
 	    try {
 		nfcCard.disconnect(true);
-		nfcCard.isodep = null;
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
 	    }
@@ -104,44 +91,30 @@ public class NFCCardTerminal implements SCIOTerminal {
     }
 
     public void notifyCardPresent() {
-	synchronized(cardPresent) {
+	synchronized (cardPresent) {
 	    cardPresent.notifyAll();
 	}
     }
 
     public void notifyCardAbsent() {
-	synchronized(cardAbsent) {
+	synchronized (cardAbsent) {
 	    cardAbsent.notifyAll();
 	}
     }
 
     @Override
     public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
-	if (nfcCard == null || nfcCard.isodep == null) {
+	if (nfcCard == null) {
 	    String msg = "No tag present.";
 	    LOG.warn(msg);
 	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
-	}
-	try {
-	    if (! nfcCard.isodep.isConnected()) {
-		nfcCard.isodep.connect();
-
-		// start thread which is monitoring the availability of the card
-		Thread nfcAvailableTask = new Thread(new NFCCardMonitoring((this)));
-		nfcAvailableTask.start();
-	    }
-	} catch (IOException e) {
-	    nfcCard = null;
-	    String msg = "No connection can be established.";
-	    LOG.warn(msg, e);
-	    // TODO: check if error code is correct
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD, e);
 	}
 	return nfcCard;
     }
 
     @Override
     public boolean waitForCardAbsent(long timeout) throws SCIOException {
+	long startTime = System.nanoTime() / 1000_000;
 	boolean absent = ! isCardPresent();
 	if (absent) {
 	    LOG.debug("Card already absent...");
@@ -149,8 +122,14 @@ public class NFCCardTerminal implements SCIOTerminal {
 	}
 	LOG.debug("Waiting for card absent...");
 	try {
-	    synchronized(cardAbsent) {
+	    synchronized (cardAbsent) {
 		while (isCardPresent()) {
+		    // wait only if timeout is not finished
+		    long curTime = System.nanoTime() / 1000_000;
+		    long waitTime = timeout - (curTime - startTime);
+		    if (waitTime < 0) {
+			break;
+		    }
 		    cardAbsent.wait(timeout);
 		}
 	    }
@@ -162,6 +141,7 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     @Override
     public boolean waitForCardPresent(long timeout) throws SCIOException {
+	long startTime = System.nanoTime() / 1000_000;
 	boolean present = isCardPresent();
 	if (present) {
 	    LOG.debug("Card already present...");
@@ -171,6 +151,12 @@ public class NFCCardTerminal implements SCIOTerminal {
 	try {
 	    synchronized(cardPresent) {
 		while (! isCardPresent()) {
+		    // wait only if timeout is not finished
+		    long curTime = System.nanoTime() / 1000_000;
+		    long waitTime = timeout - (curTime - startTime);
+		    if (waitTime < 0) {
+			break;
+		    }
 		    cardPresent.wait(timeout);
 		}
 	    }

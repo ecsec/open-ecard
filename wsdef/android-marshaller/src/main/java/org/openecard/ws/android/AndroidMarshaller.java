@@ -285,7 +285,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	if (o instanceof DestroyChannel) {
 	    DestroyChannel destroyChannel = (DestroyChannel) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    Element emSlotHandle = createElementIso(document, "SlotHandle");
 	    emSlotHandle.appendChild(document.createTextNode(ByteUtils.toHexString(destroyChannel.getSlotHandle())));
 	    rootElement.appendChild(emSlotHandle);
@@ -293,7 +292,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof DestroyChannelResponse) {
 	    DestroyChannelResponse response = (DestroyChannelResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 
 	    if (response.getProfile() != null) {
 		Element emProfile = createElementIso(document, "Profile");
@@ -315,7 +313,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof EstablishChannel) {
 	    EstablishChannel establishChannel = (EstablishChannel) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 
 	    Element emSlotHandle = createElementIso(document, "SlotHandle");
 	    emSlotHandle.appendChild(document.createTextNode(ByteUtils.toHexString(establishChannel.getSlotHandle())));
@@ -327,7 +324,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    for (Element e : establishChannel.getAuthenticationProtocolData().getAny()) {
 		Element eClone = createElementIso(document, e.getLocalName());
 		eClone.setTextContent(e.getTextContent());
-		eClone.setAttribute("xmlns", "urn:iso:std:iso-iec:24727:tech:schema");
 		emAuthProtData.appendChild(eClone);
 
 	    }
@@ -348,7 +344,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof EstablishChannelResponse) {
 	    EstablishChannelResponse response = (EstablishChannelResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 
 	    if (response.getProfile() != null) {
 		Element emProfile = createElementIso(document, "Profile");
@@ -374,7 +369,6 @@ public class AndroidMarshaller implements WSMarshaller {
 		for (Element e : response.getAuthenticationProtocolData().getAny()) {
 		    Element eClone = createElementIso(document, e.getLocalName());
 		    eClone.setTextContent(e.getTextContent());
-		    eClone.setAttribute("xmlns", "urn:iso:std:iso-iec:24727:tech:schema");
 		    emAuthProtData.appendChild(eClone);
 
 		}
@@ -382,7 +376,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof DIDAuthenticate) {
 	    DIDAuthenticate auth = (DIDAuthenticate) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 
 	    Element em;
 	    if (auth.getConnectionHandle() != null) {
@@ -457,7 +450,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	} else if (o instanceof DIDAuthenticateResponse) {
 	    DIDAuthenticateResponse didAuthenticateResponse = (DIDAuthenticateResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    rootElement.appendChild(marshalResult(didAuthenticateResponse.getResult(), document));
 	    if (didAuthenticateResponse.getAuthenticationProtocolData() != null) {
 		DIDAuthenticationDataType didAuthenticationDataType = didAuthenticateResponse.getAuthenticationProtocolData();
@@ -516,7 +508,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    rootElement.appendChild(marshalConnectionHandle(startPAOS.getConnectionHandle().get(0), document));
 	} else if (o instanceof TransmitResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    TransmitResponse transmitResponsePOJO = (TransmitResponse) o;
 
 	    Element em = marshalResult(transmitResponsePOJO.getResult(), document);
@@ -530,10 +521,8 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof EstablishContext) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	} else if (o instanceof EstablishContextResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
 
 	    Element em = createElementIso(document, "ContextHandle");
@@ -545,7 +534,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof GetStatus) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    GetStatus getStatus = (GetStatus) o;
 
 	    Element em = createElementIso(document, "ContextHandle");
@@ -559,7 +547,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof Wait) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    Wait w = (Wait) o;
 
 	    Element em = createElementIso(document, "ContextHandle");
@@ -610,7 +597,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof Connect) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    Connect c = (Connect) o;
 
 	    Element em = createElementIso(document, "ContextHandle");
@@ -632,7 +618,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof ConnectResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    ConnectResponse cr = (ConnectResponse) o;
 
 	    Element em = createElementIso(document, "SlotHandle");
@@ -645,7 +630,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	    rootElement.appendChild(em);
 	} else if (o instanceof ListIFDs) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    ListIFDs c = (ListIFDs) o;
 
 	    Element em = createElementIso(document, "ContextHandle");
@@ -654,7 +638,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof ListIFDsResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    ListIFDsResponse listIFDsResponse = (ListIFDsResponse) o;
 
 	    for (String s : listIFDsResponse.getIFDName()) {
@@ -668,7 +651,6 @@ public class AndroidMarshaller implements WSMarshaller {
 
 	} else if (o instanceof Transmit) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    Transmit t = (Transmit) o;
 
 	    Element em = createElementIso(document, "SlotHandle");

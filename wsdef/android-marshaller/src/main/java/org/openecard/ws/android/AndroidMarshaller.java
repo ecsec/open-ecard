@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -159,7 +159,6 @@ import org.openecard.addon.manifest.ConfigurationEntry;
 import org.openecard.addon.manifest.EnumEntry;
 import org.openecard.addon.manifest.LocalizedString;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
-import org.openecard.bouncycastle.crypto.RuntimeCryptoException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.MarshallingTypeException;
@@ -2893,10 +2892,8 @@ public class AndroidMarshaller implements WSMarshaller {
 	    String name = cls.getSimpleName().replace("Type", "");
 	    paceMarker.getAny().addAll(parseAnyTypes(parser, name, parser.getNamespace(), d, false, new String[0], new String[0]));
 	    return paceMarker;
-	} catch (InstantiationException e) {
-	    throw new RuntimeCryptoException();
-	} catch (IllegalAccessException e) {
-	    throw new RuntimeCryptoException();
+	} catch (InstantiationException | IllegalAccessException e) {
+	    throw new IOException("Error while instantiating the abstract marker type.");
 	}
     }
 

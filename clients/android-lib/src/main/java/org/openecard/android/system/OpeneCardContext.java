@@ -34,11 +34,8 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventDispatcherImpl;
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SALStateCallback;
@@ -59,7 +56,6 @@ import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
@@ -90,7 +86,7 @@ import org.openecard.gui.definition.ViewController;
  * @author Mike Prechtl
  * @author Tobias Wich
  */
-public class OpeneCardContext implements EventCallback {
+public class OpeneCardContext {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardContext.class);
 
@@ -122,10 +118,6 @@ public class OpeneCardContext implements EventCallback {
     private boolean initialized = false;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
-    // true if card is available and usable
-    private boolean isCardAvailable = false;
-    // card type of the usable card
-    private String cardType;
 
     private final Context appCtx;
 
@@ -258,11 +250,7 @@ public class OpeneCardContext implements EventCallback {
 		throw ex;
 	    }
 
-	    // Initialize the Event Dispatcher
-	    eventDispatcher.add(this, EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
-		    EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED);
-
-	    // start event dispatcher
+	    // Initialize and start the Event Dispatcher
 	    eventDispatcher.start();
 	    LOG.info("Event dispatcher started.");
 
@@ -318,47 +306,6 @@ public class OpeneCardContext implements EventCallback {
 	    return FAILURE;
 	}
     }
-
-    ///
-    /// Recognize events
-    ///
-
-    @Override
-    public void signalEvent(EventType eventType, EventObject o) {
-	LOG.info("Event recognized: " + eventType.name());
-	ConnectionHandleType ch = o.getHandle();
-	switch (eventType) {
-	    case CARD_RECOGNIZED:
-		LOG.info("Card recognized.");
-		if (ch != null && ch.getRecognitionInfo() != null) {
-		    synchronized (OpeneCardContext.class) {
-			cardType = ch.getRecognitionInfo().getCardType();
-			isCardAvailable = true;
-		    }
-		    LOG.info("CardType: " + cardType);
-		}
-		break;
-	    case CARD_INSERTED:
-		LOG.info("Card inserted.");
-		break;
-	    case CARD_REMOVED:
-		LOG.info("Card removed.");
-		synchronized (OpeneCardContext.class) {
-		    cardType = null;
-		    isCardAvailable = false;
-		}
-		break;
-	    case TERMINAL_ADDED:
-		LOG.info("Terminal added.");
-		break;
-	    case TERMINAL_REMOVED:
-		LOG.info("Terminal removed.");
-		break;
-	    default:
-		break;
-	}
-    }
-
 
 
     ///

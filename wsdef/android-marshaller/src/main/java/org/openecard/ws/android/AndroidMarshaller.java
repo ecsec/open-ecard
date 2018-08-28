@@ -1089,31 +1089,6 @@ public class AndroidMarshaller implements WSMarshaller {
 	Element em = createElementIso(document, "ConnectionHandle");
 
 	Element em2;
-	if (ch.getContextHandle() != null) {
-	    em2 = createElementIso(document, "ContextHandle");
-	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getContextHandle())));
-	    em.appendChild(em2);
-	}
-	if (ch.getSlotHandle() != null) {
-	    em2 = createElementIso(document, "SlotHandle");
-	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getSlotHandle())));
-	    em.appendChild(em2);
-	}
-	if (ch.getCardApplication() != null) {
-	    em2 = createElementIso(document, "CardApplication");
-	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getCardApplication())));
-	    em.appendChild(em2);
-	}
-	if (ch.getSlotIndex() != null) {
-	    em2 = createElementIso(document, "SlotIndex");
-	    em2.appendChild(document.createTextNode(ch.getSlotIndex().toString()));
-	    em.appendChild(em2);
-	}
-	if (ch.getIFDName() != null) {
-	    em2 = createElementIso(document, "IFDName");
-	    em2.appendChild(document.createTextNode(ch.getIFDName()));
-	    em.appendChild(em2);
-	}
 	if (ch.getChannelHandle() != null) {
 	    em2 = createElementIso(document, "ChannelHandle");
 	    if (ch.getChannelHandle().getSessionIdentifier() != null) {
@@ -1124,6 +1099,31 @@ public class AndroidMarshaller implements WSMarshaller {
 	    }
 	    em.appendChild(em2);
 	}
+	if (ch.getContextHandle() != null) {
+	    em2 = createElementIso(document, "ContextHandle");
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getContextHandle())));
+	    em.appendChild(em2);
+	}
+	if (ch.getIFDName() != null) {
+	    em2 = createElementIso(document, "IFDName");
+	    em2.appendChild(document.createTextNode(ch.getIFDName()));
+	    em.appendChild(em2);
+	}
+	if (ch.getSlotIndex() != null) {
+	    em2 = createElementIso(document, "SlotIndex");
+	    em2.appendChild(document.createTextNode(ch.getSlotIndex().toString()));
+	    em.appendChild(em2);
+	}
+	if (ch.getCardApplication() != null) {
+	    em2 = createElementIso(document, "CardApplication");
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getCardApplication())));
+	    em.appendChild(em2);
+	}
+	if (ch.getSlotHandle() != null) {
+	    em2 = createElementIso(document, "SlotHandle");
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(ch.getSlotHandle())));
+	    em.appendChild(em2);
+	}
 	if (ch.getRecognitionInfo() != null) {
 	    em2 = createElementIso(document, "RecognitionInfo");
 	    Element em3 = createElementIso(document, "CardType");
@@ -1131,6 +1131,23 @@ public class AndroidMarshaller implements WSMarshaller {
 	    em2.appendChild(em3);
 	    em.appendChild(em2);
 	}
+	if (ch.getSlotInfo() != null) {
+	    em.appendChild(marshalSlotInfo(ch.getSlotInfo(), document));
+	}
+
+	return em;
+    }
+
+    private Element marshalSlotInfo(SlotInfo si, Document document) {
+	Element em = createElementIso(document, "SlotInfo");
+
+	Element em2;
+	if (si.isProtectedAuthPath() != null) {
+	    em2 = createElementIso(document, "ProtectedAuthPath");
+	    em2.appendChild(document.createTextNode(si.isProtectedAuthPath().toString()));
+	    em.appendChild(em2);
+	}
+
 	return em;
     }
 

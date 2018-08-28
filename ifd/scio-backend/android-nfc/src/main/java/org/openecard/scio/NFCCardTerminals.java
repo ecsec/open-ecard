@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Queue;
 import javax.annotation.Nonnull;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
@@ -116,6 +115,7 @@ public class NFCCardTerminals implements SCIOTerminals {
 	private Queue<StateChangeEvent> pendingEvents;
 	private Collection<String> cardPresent;
 	private boolean initialized = false;
+	private volatile boolean isCardPresent = false;
 
 	public NFCCardWatcher(NFCCardTerminals terminals) {
 	    this.nfcTerminals = terminals;
@@ -164,6 +164,7 @@ public class NFCCardTerminals implements SCIOTerminals {
 		if (nfcIntegratedTerminal.isCardPresent()) {
 		    LOG.debug("Card is present.");
 		    cardPresent.add(name);
+		    isCardPresent = true;
 		    result.add(new TerminalState(name, true));
 		// otherwise card is not present at integrated terminal
 		} else {
@@ -201,39 +202,24 @@ public class NFCCardTerminals implements SCIOTerminals {
 
 		long startTime = System.nanoTime();
 
-		// try to return any present events first
-		StateChangeEvent nextEvent = pendingEvents.poll();
+		// terminal name
+		String terminalName = nfcIntegratedTerminal.getName();
 
-		if (nextEvent != null) {
-		    LOG.trace("Leaving wait for change with queued event.");
-		    return nextEvent;
-		} else {
-		    Collection<String> newCardPresent = new HashSet<>();
+		// check if card is present to the present time
+		boolean newCardPresent = nfcIntegratedTerminal.isCardPresent();
 
-		    // check if card is present to the present time
-		    if (nfcIntegratedTerminal.isCardPresent()) {
-			newCardPresent.add(nfcIntegratedTerminal.getName());
-		    }
-
-		    // check if card is removed
-		    Collection<String> cardRemoved = subtract(cardPresent, newCardPresent);
-		    Collection<StateChangeEvent> crEvents = createEvents(EventType.CARD_REMOVED, cardRemoved);
-
-		    // check if card is added
-		    Collection<String> cardAdded = subtract(newCardPresent, cardPresent);
-		    Collection<StateChangeEvent> caEvents = createEvents(EventType.CARD_INSERTED, cardAdded);
-
-		    // update internal status with the calculated state
-		    cardPresent = newCardPresent;
-
-		    pendingEvents.addAll(crEvents);
-		    pendingEvents.addAll(caEvents);
-
-		    try {
-			StateChangeEvent event = pendingEvents.remove();
-			LOG.info("StateChangeEvent: " + event.getState() + " " + event.getTerminal());
-			return event;
-		    } catch (NoSuchElementException ex) { }
+		// if no card was present but now
+		if (! isCardPresent && newCardPresent) {
+		    isCardPresent = true;
+		    StateChangeEvent cardPresentState = new StateChangeEvent(EventType.CARD_INSERTED, terminalName);
+		    LOG.info("StateChangeEvent: " + cardPresentState.getState() + " " + cardPresentState.getTerminal());
+		    return cardPresentState;
+		// if card was present but now it is removed
+		} else if (isCardPresent && ! newCardPresent) {
+		    isCardPresent = false;
+		    StateChangeEvent cardRemovedState = new StateChangeEvent(EventType.CARD_REMOVED, terminalName);
+		    LOG.info("StateChangeEvent: " + cardRemovedState.getState() + " " + cardRemovedState.getTerminal());
+		    return cardRemovedState;
 		}
 
 		long finishTime = System.nanoTime();

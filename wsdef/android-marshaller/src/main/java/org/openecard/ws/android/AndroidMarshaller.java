@@ -497,15 +497,77 @@ public class AndroidMarshaller implements WSMarshaller {
 	    Result r = (Result) o;
 	    rootElement = marshalResult(r, document);
 	} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
-	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.setAttribute("xmlns:iso", "urn:iso:std:iso-iec:24727:tech:schema");
 	    StartPAOS startPAOS = (StartPAOS) o;
+
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    if (startPAOS.getRequestID() != null) {
+		rootElement.setAttribute("RequestID", startPAOS.getRequestID());
+	    }
+	    if (startPAOS.getProfile() != null) {
+		rootElement.setAttribute("Profile", startPAOS.getProfile());
+	    }
 
 	    Element em = createElementIso(document, "SessionIdentifier");
 	    em.appendChild(document.createTextNode(startPAOS.getSessionIdentifier()));
 	    rootElement.appendChild(em);
 
 	    rootElement.appendChild(marshalConnectionHandle(startPAOS.getConnectionHandle().get(0), document));
+
+	    StartPAOS.UserAgent ua = startPAOS.getUserAgent();
+	    if (ua != null) {
+		Element emUa = createElementIso(document, "UserAgent");
+		if (ua.getName() != null) {
+		    Element emUaSub = createElementIso(document, "Name");
+		    emUaSub.appendChild(document.createTextNode(ua.getName()));
+		    emUa.appendChild(emUaSub);
+		}
+		if (ua.getVersionMajor() != null) {
+		    Element emUaSub = createElementIso(document, "VersionMajor");
+		    emUaSub.appendChild(document.createTextNode(ua.getVersionMajor().toString()));
+		    emUa.appendChild(emUaSub);
+		}
+		if (ua.getVersionMinor() != null) {
+		    Element emUaSub = createElementIso(document, "VersionMinor");
+		    emUaSub.appendChild(document.createTextNode(ua.getVersionMinor().toString()));
+		    emUa.appendChild(emUaSub);
+		}
+		if (ua.getVersionSubminor() != null) {
+		    Element emUaSub = createElementIso(document, "VersionSubminor");
+		    emUaSub.appendChild(document.createTextNode(ua.getVersionSubminor().toString()));
+		    emUa.appendChild(emUaSub);
+		}
+		rootElement.appendChild(emUa);
+	    }
+
+	    List<StartPAOS.SupportedAPIVersions> sas = startPAOS.getSupportedAPIVersions();
+	    for (StartPAOS.SupportedAPIVersions sa : sas) {
+		if (sa != null) {
+		    Element emSa = createElementIso(document, "SupportedAPIVersions");
+		    if (sa.getMajor() != null) {
+			Element emSaSub = createElementIso(document, "Major");
+			emSaSub.appendChild(document.createTextNode(sa.getMajor().toString()));
+			emSa.appendChild(emSaSub);
+		    }
+		    if (sa.getMinor() != null) {
+			Element emSaSub = createElementIso(document, "Minor");
+			emSaSub.appendChild(document.createTextNode(sa.getMinor().toString()));
+			emSa.appendChild(emSaSub);
+		    }
+		    if (sa.getSubminor() != null) {
+			Element emSaSub = createElementIso(document, "Subminor");
+			emSaSub.appendChild(document.createTextNode(sa.getSubminor().toString()));
+			emSa.appendChild(emSaSub);
+		    }
+		    rootElement.appendChild(emSa);
+		}
+	    }
+
+	    List<String> sdids = startPAOS.getSupportedDIDProtocols();
+	    for (String sdid : sdids) {
+		Element emSdid = createElementIso(document, "SupportedDIDProtocols");
+		emSdid.appendChild(document.createTextNode(sdid));
+		rootElement.appendChild(emSdid);
+	    }
 	} else if (o instanceof TransmitResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    TransmitResponse transmitResponsePOJO = (TransmitResponse) o;

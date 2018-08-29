@@ -46,10 +46,10 @@ import org.slf4j.LoggerFactory;
  */
 public final class StepBar extends JPanel {
 
-    private static final Logger logger = LoggerFactory.getLogger(StepBar.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StepBar.class);
     private static final long serialVersionUID = 1L;
 
-    private static final ImageIcon loader;
+    private static final ImageIcon LOADER;
 
     private List<Step> steps;
     private List<JLabel> labels;
@@ -57,7 +57,7 @@ public final class StepBar extends JPanel {
 
     static {
 	URL loaderUrl = FileUtils.resolveResourceAsURL(StepBar.class, "loader.gif");
-	loader = new ImageIcon(loaderUrl);
+	LOADER = new ImageIcon(loaderUrl);
     }
 
 
@@ -69,6 +69,7 @@ public final class StepBar extends JPanel {
      */
     public StepBar(List<Step> steps) {
 	this.curIdx = -1;
+	initializeLayout();
 	updateStepBar(steps);
     }
 
@@ -82,7 +83,6 @@ public final class StepBar extends JPanel {
 	this.steps = steps;
 	this.labels = new ArrayList<>(steps.size());
 	removeAll();
-	initializeLayout();
 	initializeComponents();
     }
 
@@ -94,7 +94,7 @@ public final class StepBar extends JPanel {
     public void selectIdx(final int nextIdx) {
 	final int oldIdx = curIdx;
 	curIdx = nextIdx;
-	logger.debug("Selecting index {}, previous was {}.", nextIdx, oldIdx);
+	LOG.debug("Selecting index {}, previous was {}.", nextIdx, oldIdx);
 
 	if (oldIdx >= 0 && oldIdx < getComponentCount()) {
 	    // reset last displayed element
@@ -112,7 +112,7 @@ public final class StepBar extends JPanel {
     public void enableLoaderImage() {
 	if (curIdx >= 0 && curIdx < labels.size()) {
 	    JLabel label = labels.get(curIdx);
-	    label.setIcon(loader);
+	    label.setIcon(LOADER);
 	}
     }
 

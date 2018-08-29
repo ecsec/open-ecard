@@ -79,6 +79,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public synchronized void terminate() {
+	// shutdown all thread pools
 	for (Map.Entry<EventCallback, ExecutorService> threadPool : threadPools.entrySet()) {
 	    threadPool.getValue().shutdownNow();
 	}
@@ -103,6 +104,9 @@ public class EventDispatcherImpl implements EventDispatcher {
 	    eventFilter.put(cb, new ArrayList<>());
 	}
 	eventFilter.get(cb).add(filter);
+	// create an executor service for each callback
+	// avoids the problem from before where we synchronized the whole class to fire the events out
+	// this step blocked the delete functionality
 	createExecutorService(cb);
 	return cb;
     }
@@ -122,9 +126,11 @@ public class EventDispatcherImpl implements EventDispatcher {
 	for (Map.Entry<EventCallback, ArrayList<EventFilter>> entry : eventFilter.entrySet()) {
 	    EventCallback cb = entry.getKey();
 	    for (EventFilter filter : entry.getValue()) {
+		// when there is a filter match, then fire out the event (only once!)
 		if (filter.matches(t, o)) {
 		    ExecutorService executor = threadPools.get(cb);
 		    executor.execute(new EventRunner(cb, t, o));
+		    break;
 		}
 	    }
 	}

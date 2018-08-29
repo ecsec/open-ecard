@@ -121,13 +121,6 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
     }
 
     /**
-     * Signals if a nfc tag is removed.
-     */
-    public static void removeNFCTag() {
-	terminals.getIntegratedNfcTerminal().removeTag();
-    }
-
-    /**
      * Proof if NFC is available on the corresponding device.
      *
      * @return true if nfc is available, otherwise false

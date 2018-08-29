@@ -98,17 +98,8 @@ public class NFCCard implements SCIOCard {
     @Override
     public void disconnect(boolean reset) throws SCIOException {
 	if (reset) {
-	    if (this.monitor != null) {
-		this.monitor.interrupt();
-	    }
-	    // wait for monitor, then disconnect in order to not get a CARD_REMOVED event
-	    try {
-		this.monitor.join();
-	    } catch (InterruptedException ex) {
-		// should not happen
-	    }
+	    terminate();
 
-	    nfcCardChannel.close();
 	    try {
 		isodep.close();
 		isodep.connect();
@@ -121,6 +112,20 @@ public class NFCCard implements SCIOCard {
 		throw new SCIOException("Failed to close channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
 	    }
 	}
+    }
+
+    public void terminate() throws SCIOException {
+	if (this.monitor != null) {
+	    this.monitor.interrupt();
+	}
+	// wait for monitor, then disconnect in order to not get a CARD_REMOVED event
+	try {
+	    this.monitor.join();
+	} catch (InterruptedException ex) {
+	    // should not happen
+	}
+
+	nfcCardChannel.close();
     }
 
     @Override

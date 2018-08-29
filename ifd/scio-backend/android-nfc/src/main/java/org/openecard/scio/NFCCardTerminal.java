@@ -78,10 +78,9 @@ public class NFCCardTerminal implements SCIOTerminal {
     }
 
     public synchronized void removeTag() {
-	LOG.debug("");
 	if (nfcCard != null) { // maybe nfc tag is already removed
 	    try {
-		nfcCard.disconnect(true);
+		nfcCard.terminate();
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
 	    }

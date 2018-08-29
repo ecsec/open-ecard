@@ -23,6 +23,7 @@
 package org.openecard.common.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,15 +49,13 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventDispatcherImpl.class);
 
-    private final ConcurrentHashMap<EventCallback, ArrayList<EventFilter>> eventFilter;
-    private final HashMap<EventCallback, ExecutorService> threadPools;
-
     private final ThreadFactory threadFactory;
 
-    public EventDispatcherImpl() {
-	this.eventFilter = new ConcurrentHashMap<>();
-	this.threadPools = new HashMap<>();
+    private ConcurrentHashMap<EventCallback, ArrayList<EventFilter>> eventFilter;
+    private HashMap<EventCallback, ExecutorService> threadPools;
+    private boolean initialized;
 
+    public EventDispatcherImpl() {
 	this.threadFactory = new ThreadFactory() {
 	    private final AtomicInteger num = new AtomicInteger(0);
 	    private final ThreadGroup group = new ThreadGroup("Event Dispatcher");
@@ -74,14 +73,23 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public synchronized void start() {
-	// do nothing
+	this.eventFilter = new ConcurrentHashMap<>();
+	this.threadPools = new HashMap<>();
+
+	this.initialized = true;
     }
 
     @Override
     public synchronized void terminate() {
-	// shutdown all thread pools
-	for (Map.Entry<EventCallback, ExecutorService> threadPool : threadPools.entrySet()) {
-	    threadPool.getValue().shutdownNow();
+	if (initialized) {
+	    // remove everything and thereby shutdown thread pools
+	    for (EventCallback entry : Collections.list(eventFilter.keys())) {
+		del(entry);
+	    }
+
+	    initialized = false;
+	    eventFilter = null;
+	    threadPools = null;
 	}
     }
 
@@ -105,8 +113,6 @@ public class EventDispatcherImpl implements EventDispatcher {
 	}
 	eventFilter.get(cb).add(filter);
 	// create an executor service for each callback
-	// avoids the problem from before where we synchronized the whole class to fire the events out
-	// this step blocked the delete functionality
 	createExecutorService(cb);
 	return cb;
     }
@@ -115,21 +121,22 @@ public class EventDispatcherImpl implements EventDispatcher {
     public synchronized EventCallback del(EventCallback cb) {
 	if (eventFilter.containsKey(cb)) {
 	    eventFilter.remove(cb);
-	    threadPools.remove(cb);
+	    ExecutorService exec = threadPools.remove(cb);
+	    exec.shutdownNow();
 	}
 	return cb;
     }
 
     @Override
-    public void notify(EventType t, EventObject o) {
-	LOG.debug("Received event {}.", t);
+    public synchronized void notify(EventType t, EventObject o) {
 	for (Map.Entry<EventCallback, ArrayList<EventFilter>> entry : eventFilter.entrySet()) {
 	    EventCallback cb = entry.getKey();
 	    for (EventFilter filter : entry.getValue()) {
 		// when there is a filter match, then fire out the event (only once!)
 		if (filter.matches(t, o)) {
+		    LOG.debug("Sending event notification {} to EventCallback {}.", t, cb);
 		    ExecutorService executor = threadPools.get(cb);
-		    executor.execute(new EventRunner(cb, t, o));
+		    executor.execute(() -> cb.signalEvent(t, o));
 		    break;
 		}
 	    }

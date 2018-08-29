@@ -322,6 +322,21 @@ public class AndroidMarshallerTest {
 	connectionHandleType.setRecognitionInfo(recognitionInfo);
 	startP.getConnectionHandle().add(connectionHandleType);
 
+	StartPAOS.UserAgent ua = new StartPAOS.UserAgent();
+	ua.setName("Open eCard App");
+	ua.setVersionMajor(BigInteger.valueOf(1));
+	ua.setVersionMinor(BigInteger.valueOf(3));
+	ua.setVersionSubminor(BigInteger.valueOf(0));
+	startP.setUserAgent(ua);
+
+	StartPAOS.SupportedAPIVersions av = new StartPAOS.SupportedAPIVersions();
+	av.setMajor(BigInteger.valueOf(1));
+	av.setMinor(BigInteger.valueOf(3));
+	av.setSubminor(BigInteger.valueOf(0));
+	startP.getSupportedAPIVersions().add(av);
+
+	startP.getSupportedDIDProtocols().add("EAC");
+
 	Document d = m.marshal(startP);
 	assertEquals(m.doc2str(d), START_PAOS);
     }

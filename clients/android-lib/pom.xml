@@ -51,6 +51,7 @@
 							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 							<!-- This dependency is not removed correctly in full builds due to a bug (probably in dep plugin) -->
 							<excludeGroupIds>org.apache.httpcomponents</excludeGroupIds>
+							<excludes>/cif-repo/repo-config.properties</excludes>
 						</configuration>
 					</execution>
 				</executions>

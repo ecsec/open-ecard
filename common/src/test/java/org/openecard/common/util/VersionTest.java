@@ -214,13 +214,12 @@ public class VersionTest {
 	    VersionUpdateList result = updateLoader.loadVersionUpdateList();
 	    Assert.fail(); // Exception expected
 	} catch (IllegalArgumentException ex) {
-	    Assert.assertEquals(ex.getMessage(), "Failed to retrieve update list from server.");
+	    // fine, end the test
 	}
     }
 
     @Test(enabled = true)
     public void validVersionUpdate() throws InvalidUpdateDefinition, MalformedURLException {
-
 	// Same values as the default values of the JSONObjectBuilder
 	String downloadPage = "http://www.google.de/downloadpage";
 	String downloadUrl = "http://www.google.de/downloadurl";

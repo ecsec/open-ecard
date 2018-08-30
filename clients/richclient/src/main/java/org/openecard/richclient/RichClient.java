@@ -169,6 +169,9 @@ public final class RichClient {
 
 	    // Set up EventDispatcherImpl
 	    eventDispatcher = new EventDispatcherImpl();
+	    // start event dispatcher
+	    eventDispatcher.start();
+
 	    env.setEventDispatcher(eventDispatcher);
 
 	    // Set up Management
@@ -279,9 +282,6 @@ public final class RichClient {
 		    EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
 		    EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED);
 
-	    // start event dispatcher
-	    eventDispatcher.start();
-
 	    // initialize SAL
 	    WSHelper.checkResult(sal.initialize(new Initialize()));
 
@@ -299,7 +299,7 @@ public final class RichClient {
 	    // perform GC to bring down originally allocated memory
 	    new Timer("GC-Task").schedule(new GCTask(), 5000);
 
-	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));	
+	    boolean update = Boolean.parseBoolean(OpenecardProperties.getProperty("check-for-updates"));
 	    if (update) {
 		 // check for updates
 		new Timer("Update-Task").schedule(new UpdateTask(tray), 1);

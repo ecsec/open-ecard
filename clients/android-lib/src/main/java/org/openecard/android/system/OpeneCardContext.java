@@ -147,7 +147,7 @@ public class OpeneCardContext {
 	// the key type must match the generic. This can't be enforced so watch it here.
 	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
 	realFactories.put(EacGui.class, eacNavFac);
-	
+
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
 	realFactories.put(PINManagementGui.class, pinMngFac);
 
@@ -197,8 +197,10 @@ public class OpeneCardContext {
 
 	    // set up event dispatcher
 	    eventDispatcher = new EventDispatcherImpl();
+	    // Initialize and start the Event Dispatcher
+	    eventDispatcher.start();
+	    LOG.info("Event dispatcher started.");
 	    env.setEventDispatcher(eventDispatcher);
-	    LOG.info("Event Dispatcher initialized.");
 
 	    // set up SALStateCallback
 	    cardStates = new CardStateMap();
@@ -249,10 +251,6 @@ public class OpeneCardContext {
 		errorMsg = ADD_ON_INIT_FAILED;
 		throw ex;
 	    }
-
-	    // Initialize and start the Event Dispatcher
-	    eventDispatcher.start();
-	    LOG.info("Event dispatcher started.");
 
 	    // initialize SAL
 	    try {

@@ -27,7 +27,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/core/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/core/src/main/java/org/bouncycastle</basedir>
 							<excludes>
 								<exclude>crypto/tls/*</exclude>
 							</excludes>
@@ -40,7 +40,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/prov/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/prov/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
 					<execution>
@@ -50,7 +50,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/pkix/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/pkix/src/main/java/org/bouncycastle</basedir>
 							<excludes>
 								<exclude>**/openssl/**</exclude>
 							</excludes>
@@ -64,14 +64,13 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>
+					<outputBasedir>${project.basedir}/target/generated-sources/bc</outputBasedir>
 					<outputDir>org/openecard/bouncycastle</outputDir>
-					<encoding>${project.build.sourceEncoding}</encoding>
 					<includes>
 						<include>**/*.java</include>
 					</includes>

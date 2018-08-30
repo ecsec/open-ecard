@@ -451,9 +451,6 @@
 						<tagNameFormat>@{project.version}</tagNameFormat>
 						<localCheckout>true</localCheckout>
 						<goals>deploy</goals>
-						<!--providerImplementations>
-							<git>maven-scm-provider-gitexe</git>
-						</providerImplementations-->
 					</configuration>
 				</plugin>
 

@@ -108,18 +108,20 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public synchronized EventCallback add(EventCallback cb, EventFilter filter) {
-	if (! eventFilter.containsKey(cb)) {
-	    eventFilter.put(cb, new ArrayList<>());
+	if (initialized) {
+	    if (! eventFilter.containsKey(cb)) {
+		eventFilter.put(cb, new ArrayList<>());
+	    }
+	    eventFilter.get(cb).add(filter);
+	    // create an executor service for each callback
+	    createExecutorService(cb);
 	}
-	eventFilter.get(cb).add(filter);
-	// create an executor service for each callback
-	createExecutorService(cb);
 	return cb;
     }
 
     @Override
     public synchronized EventCallback del(EventCallback cb) {
-	if (eventFilter.containsKey(cb)) {
+	if (initialized && eventFilter.containsKey(cb)) {
 	    eventFilter.remove(cb);
 	    ExecutorService exec = threadPools.remove(cb);
 	    exec.shutdownNow();

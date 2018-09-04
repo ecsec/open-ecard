@@ -82,11 +82,11 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 	    try {
 		availableCards.add(promise.deref());
 	    } catch (InterruptedException ex) {
-		
+
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 	    availableCards.addAll(checkAvailability());
-	} 
+	}
 
 	response.addAll(availableCards);
 	return new StepActionResult(StepActionResultStatus.NEXT);
@@ -143,7 +143,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
-	if (eventType == EventType.CARD_RECOGNIZED) {
+	if (eventType == EventType.CARD_RECOGNIZED && ! promise.isDelivered()) {
 	    ConnectionHandleType handle = eventData.getHandle();
 	    for (String cardType : cardTypes) {
 		if (cardType.equals(handle.getRecognitionInfo().getCardType())) {

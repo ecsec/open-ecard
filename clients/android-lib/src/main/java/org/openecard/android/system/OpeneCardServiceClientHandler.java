@@ -59,17 +59,11 @@ public class OpeneCardServiceClientHandler {
      * Starts the service asynchronously and calls the appropriate callback functions once it is finished.
      */
     public void startService() {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		final ServiceResponse r = client.startService();
-		activity.runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			mapStartServiceResult(r);
-		    }
-		});
-	    }
+	new Thread(() -> {
+	    final ServiceResponse r = client.startService();
+	    activity.runOnUiThread(() -> {
+		mapStartServiceResult(r);
+	    });
 	}, "OeC Service Start").start();
     }
 
@@ -77,17 +71,11 @@ public class OpeneCardServiceClientHandler {
      * Stops the service asynchronously and calls the appropriate callback functions once it is finished.
      */
     public void stopService() {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		final ServiceResponse r = client.stopService();
-		activity.runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			mapStopServiceResult(r);
-		    }
-		});
-	    }
+	new Thread(() -> {
+	    final ServiceResponse r = client.stopService();
+	    activity.runOnUiThread(() -> {
+		mapStopServiceResult(r);
+	    });
 	}, "OeC Service Stop").start();
     }
 

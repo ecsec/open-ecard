@@ -65,6 +65,7 @@ public class NFCCard implements SCIOCard {
 	this.histBytes = histBytesTmp;
 
 	isodep.connect();
+	isodep.setTimeout(getTimeoutForTransceive());
 
 	this.nfcCardChannel = new NFCCardChannel(this);
 
@@ -194,7 +195,6 @@ public class NFCCard implements SCIOCard {
     }
 
     byte[] transceive(byte[] apdu) throws IOException {
-	isodep.setTimeout(getTimeoutForTransceive());
 	return isodep.transceive(apdu);
     }
 

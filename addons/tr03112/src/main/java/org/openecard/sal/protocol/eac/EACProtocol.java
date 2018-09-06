@@ -31,10 +31,12 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.interfaces.ObjectSchemaValidator;
 import org.openecard.common.util.FuturePromise;
-import org.openecard.common.util.JAXBSchemaValidator;
+import org.openecard.common.util.MarshallerSchemaValidator;
 import org.openecard.common.util.Promise;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -68,11 +70,14 @@ public class EACProtocol extends SALProtocolBaseImpl {
 	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<ObjectSchemaValidator>(() -> {
 	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
 	    if (! noValid) {
-		return JAXBSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
-	    } else {
-		// always valid
-		return (obj) -> true;
+		try {
+		    return MarshallerSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
+		} catch (SAXException | WSMarshallerException ex) {
+		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
+		}
 	    }
+	    // always valid
+	    return (obj) -> true;
 	}));
 
 	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventDispatcher()));

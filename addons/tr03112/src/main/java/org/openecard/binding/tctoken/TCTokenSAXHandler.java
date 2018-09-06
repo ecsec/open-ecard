@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -121,6 +121,12 @@ public class TCTokenSAXHandler extends DefaultHandler {
 		}
 	    } catch (NumberFormatException ex) {
 		token.setInvalidPSK(true);
+	    }
+	} else if (qName.equalsIgnoreCase(PATH_SECURITY_PARAMETERS)) {
+	    // check if a PSK value is actually present, if not delete PSP element and force attached eID Server case
+	    TCTokenType.PathSecurityParameters psp = token.getPathSecurityParameters();
+	    if (psp.getPSK() == null || psp.getPSK().length == 0) {
+		token.setPathSecurityParameters(null);
 	    }
 	}
     }

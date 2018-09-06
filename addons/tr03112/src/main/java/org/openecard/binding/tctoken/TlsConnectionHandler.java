@@ -49,8 +49,6 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.util.UrlBuilder;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 

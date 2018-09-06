@@ -127,6 +127,14 @@ public class ActivationController {
 	    case INTERRUPTED:
 		activationResult = new ActivationResult(INTERRUPTED, result.getResultMessage());
 		break;
+	    case DEPENDING_HOST_UNREACHABLE:
+		activationResult = new ActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
+		break;
+	    case WRONG_PARAMETER:
+	    case MISSING_PARAMETER:
+	    case RESOURCE_UNAVAILABLE:
+		activationResult = new ActivationResult(CLIENT_ERROR, result.getResultMessage());
+		break;
 	    default:
 		activationResult = new ActivationResult(INTERNAL_ERROR, result.getResultMessage());
 	}

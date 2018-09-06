@@ -29,7 +29,7 @@ package org.openecard.android.activation;
  */
 public enum ActivationResultCode {
 
-    OK(200), REDIRECT(301), INTERRUPTED(400), INTERNAL_ERROR(500);
+    OK(200), REDIRECT(301), CLIENT_ERROR(400), INTERRUPTED(400), INTERNAL_ERROR(500), DEPENDING_HOST_UNREACHABLE(503);
 
     private final int statusCode;
 

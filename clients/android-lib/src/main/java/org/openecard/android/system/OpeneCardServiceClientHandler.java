@@ -79,6 +79,10 @@ public class OpeneCardServiceClientHandler {
 	}, "OeC Service Stop").start();
     }
 
+    public void unbindService() {
+	client.unbindService();
+    }
+
     /**
      * Returns whether the Open eCard Stack is initialized or not.
      * This value can also change when the service managing the stack is stopped from the outside.

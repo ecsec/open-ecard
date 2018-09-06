@@ -85,20 +85,20 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    if (! messageValid) {
 		String msg = "Validation of the EACAdditionalInputType message failed.";
 		LOG.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
 	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EACAdditionalInputType message failed due to invalid input data.";
 	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
 	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}
@@ -124,7 +124,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
 	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
@@ -134,7 +134,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
             return response;
         } else {
             // authentication finished, notify GUI
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response = new DIDAuthenticateResponse();
 	    String msg = "Authentication canceled by the user.";
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));

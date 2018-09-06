@@ -149,20 +149,20 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    if (! messageValid) {
 		String msg = "Validation of the EAC1InputType message failed.";
 		LOG.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
  	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
 	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
 	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}
@@ -171,7 +171,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    String msg = "Invalid connection handle given in DIDAuthenticate message.";
 	    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, msg);
 	    response.setResult(r);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    return response;
 	}
 
@@ -203,7 +203,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    Result activationChecksResult = performChecks(certDescription, dynCtx);
 	    if (! ECardConstants.Major.OK.equals(activationChecksResult.getResultMajor())) {
 		response.setResult(activationChecksResult);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		return response;
 	    }
 
@@ -227,7 +227,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		String msg = "Unsupported terminal type in Terminal Certificate referenced. Refernced terminal type is " +
 			taCHAT.getRole().toString() + ".";
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		return response;
 	    }
 
@@ -304,7 +304,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			}
 
 			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
-			    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
 			    if (! pPaceSuccessful.isDelivered()) {
 				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
@@ -379,19 +379,19 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    LOG.error(ex.getMessage(), ex);
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (WSHelper.WSException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (ElementParsingException ex) {
 	    LOG.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
 	return response;

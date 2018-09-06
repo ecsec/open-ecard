@@ -61,7 +61,6 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
-    public static final String AUTHENTICATION_FAILED = PREFIX + "authentication_failed";
 
 
     @Override
@@ -119,17 +118,14 @@ public class EACProtocol extends SALProtocolBaseImpl {
 	    Promise p = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE);
 	    if (p.isDelivered()) {
 		LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.");
+		finished = true;
 		try {
-		    finished = (boolean) p.deref();
-		} catch (InterruptedException ex) {
-		    // error would mean don't use the value, so this is ok to ignore
-		}
-	    }
-	    Promise p2 = ctx.getPromise(EACProtocol.AUTHENTICATION_FAILED);
-	    if (p2.isDelivered()) {
-		LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.");
-		try {
-		    finished = (boolean) p2.deref();
+		    boolean failed = ! (boolean) p.deref();
+		    if (failed) {
+			LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.");
+		    } else {
+			LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.");
+		    }
 		} catch (InterruptedException ex) {
 		    // error would mean don't use the value, so this is ok to ignore
 		}

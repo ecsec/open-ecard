@@ -85,20 +85,20 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    if (! messageValid) {
 		String msg = "Validation of the EAC2InputType message failed.";
 		logger.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
 	} catch (ObjectValidatorException ex) {
 	    String msg = "Validation of the EAC2InputType message failed due to invalid input data.";
 	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	} catch (InterruptedException ex) {
 	    String msg = "Thread interrupted while waiting for schema validator instance.";
 	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
 	    return response;
 	}
@@ -167,7 +167,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	} catch (Exception e) {
 	    logger.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
 	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);

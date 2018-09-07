@@ -61,8 +61,8 @@ public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> impl
     }
 
     @Override
-    public void destroy() {
-	c.destroy();
+    public void destroy(boolean force) {
+	c.destroy(force);
     }
 
 }

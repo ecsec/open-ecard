@@ -233,6 +233,7 @@ public class TinySAL implements SAL {
     public void setAddonManager(AddonManager manager) {
 	protocolSelector = new AddonSelector(manager);
 	protocolSelector.setStrategy(new HighestVersionSelector());
+	states.setProtocolSelector(protocolSelector);
     }
 
     /**
@@ -2161,7 +2162,7 @@ public class TinySAL implements SAL {
 		CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
 		entry.removeProtocol(protocolURI);
 	    } finally {
-		protocolSelector.returnSALProtocol(protocol);
+		protocolSelector.returnSALProtocol(protocol, false);
 	    }
 	}
     }

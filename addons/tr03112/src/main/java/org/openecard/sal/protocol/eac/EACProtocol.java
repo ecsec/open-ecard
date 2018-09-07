@@ -85,13 +85,17 @@ public class EACProtocol extends SALProtocolBaseImpl {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	LOG.debug("Destroying EAC protocol instance.");
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	Thread guiThread = (Thread) dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD);
 	if (guiThread != null) {
 	    // wait for gui to finish
 	    try {
+		if (force) {
+		    LOG.debug("Force shutdown of EAC Protocol.");
+		    guiThread.interrupt();
+		}
 		LOG.debug("Waiting for EAC GUI to terminate.");
 		guiThread.join();
 		LOG.debug("EAC GUI terminated.");

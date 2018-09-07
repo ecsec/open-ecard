@@ -88,8 +88,8 @@ public class AddonSelector {
 	return manager.getSALProtocol(addon, uri);
     }
 
-    public void returnSALProtocol(SALProtocol obj) {
-	manager.returnSALProtocol(obj);
+    public void returnSALProtocol(SALProtocol obj, boolean force) {
+	manager.returnSALProtocol(obj, force);
     }
 
     public AppExtensionAction getAppExtensionAction(@Nonnull String actionId) throws AddonNotFoundException {

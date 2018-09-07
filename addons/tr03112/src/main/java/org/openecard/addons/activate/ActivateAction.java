@@ -112,7 +112,7 @@ public class ActivateAction implements AppPluginAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	tokenHandler = null;
 	manager.returnAppPluginAction(statusAction);
 	manager.returnAppExtensionAction(pinManAction);

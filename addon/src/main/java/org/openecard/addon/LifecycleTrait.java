@@ -24,13 +24,13 @@ package org.openecard.addon;
 
 
 /**
- * 
+ *
  * @author Tobias Wich
  */
 public interface LifecycleTrait {
 
     void init(Context aCtx) throws ActionInitializationException;
 
-    void destroy();
+    void destroy(boolean force);
 
 }

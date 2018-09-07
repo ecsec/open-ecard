@@ -180,7 +180,7 @@ public class AddonManager {
     protected void unloadAddon(AddonSpecification addonSpec) {
 	Collection<? extends LifecycleTrait> actionsAndProtocols = cache.getAllAddonData(addonSpec);
 	for (LifecycleTrait obj : actionsAndProtocols) {
-	    obj.destroy();
+	    obj.destroy(true);
 	}
 
 	cache.removeCompleteAddonCache(addonSpec);
@@ -281,7 +281,7 @@ public class AddonManager {
     }
 
     public void returnIFDProtocol(IFDProtocol obj) {
-	obj.destroy();
+	obj.destroy(false);
     }
 
     /**
@@ -320,8 +320,8 @@ public class AddonManager {
 	return null;
     }
 
-    public void returnSALProtocol(SALProtocol obj) {
-	obj.destroy();
+    public void returnSALProtocol(SALProtocol obj, boolean force) {
+	obj.destroy(force);
     }
 
     /**
@@ -363,7 +363,7 @@ public class AddonManager {
     }
 
     public void returnAppExtensionAction(AppExtensionAction obj) {
-	obj.destroy();
+	obj.destroy(false);
     }
 
     /**
@@ -405,7 +405,7 @@ public class AddonManager {
     }
 
     public void returnAppPluginAction(AppPluginAction obj) {
-	obj.destroy();
+	obj.destroy(false);
     }
 
     private Context createContext(@Nonnull AddonSpecification addonSpec) {

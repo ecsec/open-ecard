@@ -45,7 +45,7 @@ public class GenericCryptoProtocol extends SALProtocolBaseImpl {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	// nothing to see here ... move along
     }
 

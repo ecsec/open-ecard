@@ -53,7 +53,7 @@ public class StatusAction implements AppPluginAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	statusHandler = null;
     }
 

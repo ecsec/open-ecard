@@ -160,7 +160,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	//ignore
     }
 

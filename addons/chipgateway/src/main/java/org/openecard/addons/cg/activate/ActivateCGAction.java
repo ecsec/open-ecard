@@ -69,7 +69,7 @@ public class ActivateCGAction implements AppPluginAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	this.ctx = null;
     }
 

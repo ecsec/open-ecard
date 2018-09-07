@@ -29,11 +29,14 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.openecard.addon.AddonSelector;
+import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.util.ByteComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,12 @@ public class CardStateMap {
     private final ConcurrentSkipListMap<String,Set<CardStateEntry>> sessionMap = new ConcurrentSkipListMap<>();
     private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> contextMap = new ConcurrentSkipListMap<>(new ByteComparator());
     private final ConcurrentSkipListMap<byte[],Set<CardStateEntry>> slothandleMap = new ConcurrentSkipListMap<>(new ByteComparator());
+
+    private AddonSelector protocolSelector;
+
+    public void setProtocolSelector(AddonSelector protocolSelector) {
+	this.protocolSelector = protocolSelector;
+    }
 
 
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle) {
@@ -125,7 +134,13 @@ public class CardStateMap {
 	if (it.hasNext()) {
 	    CardStateEntry allEntriesEntry = it.next();
 	    if (entry.equals(allEntriesEntry)) {
-		allEntriesEntry.removeAllProtocols();
+		Collection<SALProtocol> ps = allEntriesEntry.removeAllProtocols();
+		// destroy all protocols
+		for (SALProtocol p : ps) {
+		    if (protocolSelector != null) {
+			protocolSelector.returnSALProtocol(p, true);
+		    }
+		}
 	    }
 	}
     }

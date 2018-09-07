@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -116,6 +117,13 @@ public class MarshallerSchemaValidator implements ObjectSchemaValidator {
     public boolean validateObject(@Nonnull Object obj) throws ObjectValidatorException {
 	try {
 	    Document doc = wsm.marshal(obj);
+	    if (LOG.isDebugEnabled()) {
+		try {
+		    LOG.debug("Validating XML document:\n {}", wsm.doc2str(doc));
+		} catch (TransformerException ex) {
+		    LOG.error ("Failed to convert DOM to text.", ex);
+		}
+	    }
 	    Source source = new DOMSource(doc);
 	    Validator validator= schema.newValidator();
 	    validator.setErrorHandler(new CustomErrorHandler());

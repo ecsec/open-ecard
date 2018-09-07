@@ -400,7 +400,8 @@ public class TCTokenHandler {
 	try {
 	    task.get();
 	} catch (InterruptedException ex) {
-	    LOG.error(ex.getMessage(), ex);
+	    LOG.info("Waiting for PAOS Task to finish has been interrupted. Cancelling authentication.");
+	    task.cancel(true);
 	    throw new PAOSException(ex);
 	} catch (ExecutionException ex) {
 	    LOG.error(ex.getMessage(), ex);

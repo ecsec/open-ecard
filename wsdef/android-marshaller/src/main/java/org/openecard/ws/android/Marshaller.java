@@ -74,11 +74,14 @@ import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.Wait;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import oasis.names.tc.dss._1_0.core.schema.RequestBaseType;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.util.ByteUtils;
 import static org.openecard.ws.android.AndroidMarshaller.*;
@@ -114,6 +117,7 @@ public class Marshaller {
 	if (o instanceof DestroyChannel) {
 	    DestroyChannel destroyChannel = (DestroyChannel) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(destroyChannel, rootElement);
 	    Element emSlotHandle = createElementIso(document, "SlotHandle");
 	    emSlotHandle.appendChild(document.createTextNode(ByteUtils.toHexString(destroyChannel.getSlotHandle())));
 	    rootElement.appendChild(emSlotHandle);
@@ -121,27 +125,12 @@ public class Marshaller {
 	} else if (o instanceof DestroyChannelResponse) {
 	    DestroyChannelResponse response = (DestroyChannelResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-
-	    if (response.getProfile() != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(response.getProfile()));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    if (response.getRequestID() != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(response.getRequestID()));
-		rootElement.appendChild(emRequest);
-	    }
-
-	    if (response.getResult() != null) {
-		Element emResult = marshalResult(response.getResult(), document);
-		rootElement.appendChild(emResult);
-	    }
+	    appendResponseValues(response, rootElement, document);
 
 	} else if (o instanceof EstablishChannel) {
 	    EstablishChannel establishChannel = (EstablishChannel) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(establishChannel, rootElement);
 
 	    Element emSlotHandle = createElementIso(document, "SlotHandle");
 	    emSlotHandle.appendChild(document.createTextNode(ByteUtils.toHexString(establishChannel.getSlotHandle())));
@@ -155,39 +144,11 @@ public class Marshaller {
 		emAuthProtData.appendChild(eClone);
 	    }
 
-	    if (establishChannel.getProfile() != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(establishChannel.getProfile()));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    if (establishChannel.getRequestID() != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(establishChannel.getRequestID()));
-		rootElement.appendChild(emRequest);
-	    }
-
 	    rootElement.appendChild(emAuthProtData);
 	} else if (o instanceof EstablishChannelResponse) {
 	    EstablishChannelResponse response = (EstablishChannelResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-
-	    if (response.getProfile() != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(response.getProfile()));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    if (response.getRequestID() != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(response.getRequestID()));
-		rootElement.appendChild(emRequest);
-	    }
-
-	    if (response.getResult() != null) {
-		Element emResult = marshalResult(response.getResult(), document);
-		rootElement.appendChild(emResult);
-	    }
+	    appendResponseValues(response, rootElement, document);
 
 	    if (response.getAuthenticationProtocolData() != null) {
 		Element emAuthProtData = marshalAuthProtocolData(response.getAuthenticationProtocolData(), document);
@@ -200,59 +161,12 @@ public class Marshaller {
 	    }
 	} else if (o instanceof DIDAuthenticate) {
 	    DIDAuthenticate auth = (DIDAuthenticate) o;
-	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-
-	    Element em;
-	    if (auth.getConnectionHandle() != null) {
-		em = marshalConnectionHandle(auth.getConnectionHandle(), document);
-		rootElement.appendChild(em);
-	    }
-
-	    if (auth.getDIDScope() != null) {
-		em = createElementIso(document, "DIDScope");
-		em.appendChild(document.createTextNode(auth.getDIDScope().value()));
-		rootElement.appendChild(em);
-	    }
-
-	    if (auth.getDIDName() != null) {
-		em = createElementIso(document, "DIDName");
-		em.appendChild(document.createTextNode(auth.getDIDName()));
-		rootElement.appendChild(em);
-	    }
-
-	    if (auth.getAuthenticationProtocolData() != null) {
-		DIDAuthenticationDataType d = auth.getAuthenticationProtocolData();
-
-		em = marshalAuthProtocolData(d, document);
-
-		for (Element e : d.getAny()) {
-		    Element elemCopy = createElementIso(document, e.getLocalName());
-		    elemCopy.setTextContent(e.getTextContent());
-		    em.appendChild(elemCopy);
-		}
-		rootElement.appendChild(em);
-	    }
-
-	    if (auth.getSAMConnectionHandle() != null) {
-		em = marshalConnectionHandle(auth.getSAMConnectionHandle(), document);
-		rootElement.appendChild(em);
-	    }
-
-	    if (auth.getProfile() != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(auth.getProfile()));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    if (auth.getRequestID() != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(auth.getRequestID()));
-		rootElement.appendChild(emRequest);
-	    }
+	    rootElement = marshalDidAuthenticate(auth, document);
 	} else if (o instanceof DIDAuthenticateResponse) {
 	    DIDAuthenticateResponse didAuthenticateResponse = (DIDAuthenticateResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    rootElement.appendChild(marshalResult(didAuthenticateResponse.getResult(), document));
+	    appendResponseValues(didAuthenticateResponse, rootElement, document);
+
 	    if (didAuthenticateResponse.getAuthenticationProtocolData() != null) {
 		DIDAuthenticationDataType didAuthenticationDataType = didAuthenticateResponse.getAuthenticationProtocolData();
 
@@ -268,19 +182,7 @@ public class Marshaller {
 	    } // else only the result (with error) is returned
 	} else if (o instanceof InitializeFrameworkResponse) {
 	    InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
-	    rootElement = createElementEcapi(document, o.getClass().getSimpleName());
-	    rootElement.appendChild(marshalResult(initializeFrameworkResponse.getResult(), document));
-	    Element emVersion = createElementEcapi(document, "Version");
-	    Element emMajor = createElementEcapi(document, "Major");
-	    emMajor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMajor().toString()));
-	    emVersion.appendChild(emMajor);
-	    Element emMinor = createElementEcapi(document, "Minor");
-	    emMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getMinor().toString()));
-	    emVersion.appendChild(emMinor);
-	    Element emSubMinor = createElementEcapi(document, "SubMinor");
-	    emSubMinor.appendChild(document.createTextNode(initializeFrameworkResponse.getVersion().getSubMinor().toString()));
-	    emVersion.appendChild(emSubMinor);
-	    rootElement.appendChild(emVersion);
+	    rootElement = marshalInitializeFramework(initializeFrameworkResponse, document);
 	} else if (o instanceof InternationalStringType) {
 	    InternationalStringType internationalStringType = (InternationalStringType) o;
 	    rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
@@ -290,105 +192,35 @@ public class Marshaller {
 	    rootElement = marshalResult(r, document);
 	} else if (o instanceof iso.std.iso_iec._24727.tech.schema.StartPAOS) {
 	    StartPAOS startPAOS = (StartPAOS) o;
-
-	    rootElement = createElementIso(document, o.getClass().getSimpleName());
-	    if (startPAOS.getRequestID() != null) {
-		rootElement.setAttribute("RequestID", startPAOS.getRequestID());
-	    }
-	    if (startPAOS.getProfile() != null) {
-		rootElement.setAttribute("Profile", startPAOS.getProfile());
-	    }
-
-	    Element em = createElementIso(document, "SessionIdentifier");
-	    em.appendChild(document.createTextNode(startPAOS.getSessionIdentifier()));
-	    rootElement.appendChild(em);
-
-	    rootElement.appendChild(marshalConnectionHandle(startPAOS.getConnectionHandle().get(0), document));
-
-	    StartPAOS.UserAgent ua = startPAOS.getUserAgent();
-	    if (ua != null) {
-		Element emUa = createElementIso(document, "UserAgent");
-		if (ua.getName() != null) {
-		    Element emUaSub = createElementIso(document, "Name");
-		    emUaSub.appendChild(document.createTextNode(ua.getName()));
-		    emUa.appendChild(emUaSub);
-		}
-		if (ua.getVersionMajor() != null) {
-		    Element emUaSub = createElementIso(document, "VersionMajor");
-		    emUaSub.appendChild(document.createTextNode(ua.getVersionMajor().toString()));
-		    emUa.appendChild(emUaSub);
-		}
-		if (ua.getVersionMinor() != null) {
-		    Element emUaSub = createElementIso(document, "VersionMinor");
-		    emUaSub.appendChild(document.createTextNode(ua.getVersionMinor().toString()));
-		    emUa.appendChild(emUaSub);
-		}
-		if (ua.getVersionSubminor() != null) {
-		    Element emUaSub = createElementIso(document, "VersionSubminor");
-		    emUaSub.appendChild(document.createTextNode(ua.getVersionSubminor().toString()));
-		    emUa.appendChild(emUaSub);
-		}
-		rootElement.appendChild(emUa);
-	    }
-
-	    List<StartPAOS.SupportedAPIVersions> sas = startPAOS.getSupportedAPIVersions();
-	    for (StartPAOS.SupportedAPIVersions sa : sas) {
-		if (sa != null) {
-		    Element emSa = createElementIso(document, "SupportedAPIVersions");
-		    if (sa.getMajor() != null) {
-			Element emSaSub = createElementIso(document, "Major");
-			emSaSub.appendChild(document.createTextNode(sa.getMajor().toString()));
-			emSa.appendChild(emSaSub);
-		    }
-		    if (sa.getMinor() != null) {
-			Element emSaSub = createElementIso(document, "Minor");
-			emSaSub.appendChild(document.createTextNode(sa.getMinor().toString()));
-			emSa.appendChild(emSaSub);
-		    }
-		    if (sa.getSubminor() != null) {
-			Element emSaSub = createElementIso(document, "Subminor");
-			emSaSub.appendChild(document.createTextNode(sa.getSubminor().toString()));
-			emSa.appendChild(emSaSub);
-		    }
-		    rootElement.appendChild(emSa);
-		}
-	    }
-
-	    List<String> sdids = startPAOS.getSupportedDIDProtocols();
-	    for (String sdid : sdids) {
-		Element emSdid = createElementIso(document, "SupportedDIDProtocols");
-		emSdid.appendChild(document.createTextNode(sdid));
-		rootElement.appendChild(emSdid);
-	    }
+	    rootElement = marshalStartPAOS(startPAOS, document);
 	} else if (o instanceof TransmitResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    TransmitResponse transmitResponsePOJO = (TransmitResponse) o;
-
-	    Element em = marshalResult(transmitResponsePOJO.getResult(), document);
-	    rootElement.appendChild(em);
+	    appendResponseValues(transmitResponsePOJO, rootElement, document);
 
 	    for (int i = 0; i < transmitResponsePOJO.getOutputAPDU().size(); i++) {
-		em = createElementIso(document, "OutputAPDU");
+		Element em = createElementIso(document, "OutputAPDU");
 		em.appendChild(document.createTextNode(ByteUtils.toHexString(transmitResponsePOJO.getOutputAPDU().get(i))));
 		rootElement.appendChild(em);
 	    }
 
 	} else if (o instanceof EstablishContext) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    EstablishContext req = (EstablishContext) o;
+	    appendRequestValues(req, rootElement);
 	} else if (o instanceof EstablishContextResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    EstablishContextResponse establishContextResponse = (EstablishContextResponse) o;
+	    appendResponseValues(establishContextResponse, rootElement, document);
 
 	    Element em = createElementIso(document, "ContextHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(establishContextResponse.getContextHandle())));
 	    rootElement.appendChild(em);
 
-	    em = marshalResult(establishContextResponse.getResult(), document);
-	    rootElement.appendChild(em);
-
 	} else if (o instanceof GetStatus) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    GetStatus getStatus = (GetStatus) o;
+	    appendRequestValues(getStatus, rootElement);
 
 	    Element em = createElementIso(document, "ContextHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(getStatus.getContextHandle())));
@@ -400,58 +232,13 @@ public class Marshaller {
 	    }
 
 	} else if (o instanceof Wait) {
-	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    Wait w = (Wait) o;
-
-	    Element em = createElementIso(document, "ContextHandle");
-	    em.appendChild(document.createTextNode(ByteUtils.toHexString(w.getContextHandle())));
-	    rootElement.appendChild(em);
-
-	    if (w.getTimeOut() != null) {
-		em = createElementIso(document, "TimeOut");
-		em.appendChild(document.createTextNode(w.getTimeOut().toString(16)));
-		rootElement.appendChild(em);
-	    }
-
-	    if (w.getCallback() != null) {
-		ChannelHandleType callback = w.getCallback();
-		em = createElementIso(document, "Callback");
-
-		if (callback.getBinding() != null) {
-		    Element em2 = createElementIso(document, "Binding");
-		    em2.appendChild(document.createTextNode(callback.getBinding()));
-		    em.appendChild(em2);
-		}
-		if (callback.getSessionIdentifier() != null) {
-		    Element em2 = createElementIso(document, "SessionIdentifier");
-		    em2.appendChild(document.createTextNode(callback.getSessionIdentifier()));
-		    em.appendChild(em2);
-		}
-		if (callback.getProtocolTerminationPoint() != null) {
-		    Element em2 = createElementIso(document, "ProtocolTerminationPoint");
-		    em2.appendChild(document.createTextNode(callback.getProtocolTerminationPoint()));
-		    em.appendChild(em2);
-		}
-		if (callback.getPathSecurity() != null) {
-		    PathSecurityType pathSecurityType = callback.getPathSecurity();
-		    Element em2 = createElementIso(document, "PathSecurity");
-		    Element em3 = createElementIso(document, "Protocol");
-
-		    em3.appendChild(document.createTextNode(pathSecurityType.getProtocol()));
-		    em2.appendChild(em3);
-		    if (pathSecurityType.getParameters() != null) {
-			em3 = createElementIso(document, "Parameters");
-			em3.appendChild(document.createTextNode(pathSecurityType.getParameters().toString()));
-			em2.appendChild(em3);
-		    }
-		    em.appendChild(em2);
-		}
-		rootElement.appendChild(em);
-	    }
+	    rootElement = marshalWait(w, document);
 
 	} else if (o instanceof Connect) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    Connect c = (Connect) o;
+	    appendRequestValues(c, rootElement);
 
 	    Element em = createElementIso(document, "ContextHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
@@ -473,18 +260,18 @@ public class Marshaller {
 	} else if (o instanceof ConnectResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    ConnectResponse cr = (ConnectResponse) o;
+	    appendResponseValues(cr, rootElement, document);
 
-	    Element em = createElementIso(document, "SlotHandle");
 	    if (cr.getSlotHandle() != null) {
+		Element em = createElementIso(document, "SlotHandle");
 		em.appendChild(document.createTextNode(ByteUtils.toHexString(cr.getSlotHandle())));
 		rootElement.appendChild(em);
 	    }
 
-	    em = marshalResult(cr.getResult(), document);
-	    rootElement.appendChild(em);
 	} else if (o instanceof ListIFDs) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    ListIFDs c = (ListIFDs) o;
+	    appendRequestValues(c, rootElement);
 
 	    Element em = createElementIso(document, "ContextHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(c.getContextHandle())));
@@ -493,6 +280,7 @@ public class Marshaller {
 	} else if (o instanceof ListIFDsResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    ListIFDsResponse listIFDsResponse = (ListIFDsResponse) o;
+	    appendResponseValues(listIFDsResponse, rootElement, document);
 
 	    for (String s : listIFDsResponse.getIFDName()) {
 		Element em = createElementIso(document, "IFDName");
@@ -500,30 +288,9 @@ public class Marshaller {
 		rootElement.appendChild(em);
 	    }
 
-	    Element em = marshalResult(listIFDsResponse.getResult(), document);
-	    rootElement.appendChild(em);
-
 	} else if (o instanceof Transmit) {
-	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    Transmit t = (Transmit) o;
-
-	    Element em = createElementIso(document, "SlotHandle");
-	    em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
-	    rootElement.appendChild(em);
-
-	    for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
-		em = createElementIso(document, "InputAPDUInfo");
-		rootElement.appendChild(em);
-		Element em2 = createElementIso(document, "InputAPDU");
-		em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getInputAPDU())));
-		em.appendChild(em2);
-		for (int y = 0; y < t.getInputAPDUInfo().get(i).getAcceptableStatusCode().size(); y++) {
-		    em2 = createElementIso(document, "AcceptableStatusCode");
-		    em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getAcceptableStatusCode()
-			    .get(y))));
-		    em.appendChild(em2);
-		}
-	    }
+	    rootElement = marshalTransmit(t, document);
 	} else if (o instanceof RecognitionTree) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    RecognitionTree recognitionTree = (RecognitionTree) o;
@@ -537,6 +304,7 @@ public class Marshaller {
 	} else if (o instanceof Disconnect) {
 	    Disconnect d = (Disconnect) o;
 	    rootElement = createElementIso(document, d.getClass().getSimpleName());
+	    appendRequestValues(d, rootElement);
 
 	    Element em = createElementIso(document, "SlotHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(d.getSlotHandle())));
@@ -549,24 +317,13 @@ public class Marshaller {
 	} else if (o instanceof DisconnectResponse) {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    DisconnectResponse response = (DisconnectResponse) o;
-	    String profile = response.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-	    String requestID = response.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-	    Element emResult = marshalResult(response.getResult(), document);
-	    rootElement.appendChild(emResult);
+	    appendResponseValues(response, rootElement, document);
 
 	} else if (o instanceof GetIFDCapabilities) {
 	    GetIFDCapabilities getIFDCapabilities = (GetIFDCapabilities) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(getIFDCapabilities, rootElement);
+
 	    Element emContextHandle = createElementIso(document, "ContextHandle");
 	    emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(getIFDCapabilities.getContextHandle())));
 	    rootElement.appendChild(emContextHandle);
@@ -574,170 +331,26 @@ public class Marshaller {
 	    emIFDName.appendChild(document.createTextNode(getIFDCapabilities.getIFDName()));
 	    rootElement.appendChild(emIFDName);
 	} else if (o instanceof GetIFDCapabilitiesResponse) {
-	    try {
-		GetIFDCapabilitiesResponse response = (GetIFDCapabilitiesResponse) o;
-		rootElement = createElementIso(document, o.getClass().getSimpleName());
-		String profile = response.getProfile();
-		if (profile != null) {
-		    Element emProfile = createElementIso(document, "Profile");
-		    emProfile.appendChild(document.createTextNode(profile));
-		    rootElement.appendChild(emProfile);
-		}
-		String requestID = response.getRequestID();
-		if (requestID != null) {
-		    Element emRequest = createElementIso(document, "RequestID");
-		    emRequest.appendChild(document.createElement(requestID));
-		    rootElement.appendChild(emRequest);
-		}
-		Element emResult = marshalResult(response.getResult(), document);
-		rootElement.appendChild(emResult);
-		if (response.getIFDCapabilities() != null) {
-		    Element emIFDCaps = marshalIFDCapabilities(response.getIFDCapabilities(), document);
-		    rootElement.appendChild(emIFDCaps);
-		}
-	    } catch (Exception ex) {
-		LOG.error(ex.getMessage(), ex);
+	    GetIFDCapabilitiesResponse response = (GetIFDCapabilitiesResponse) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendResponseValues(response, rootElement, document);
+
+	    if (response.getIFDCapabilities() != null) {
+		Element emIFDCaps = marshalIFDCapabilities(response.getIFDCapabilities(), document);
+		rootElement.appendChild(emIFDCaps);
 	    }
+
 	} else if (o instanceof TCTokenType) {
 	    TCTokenType tctoken = (TCTokenType) o;
-	    rootElement = document.createElement(o.getClass().getSimpleName());
-	    Element em = document.createElement("ServerAddress");
-	    em.appendChild(document.createTextNode(tctoken.getServerAddress()));
-	    rootElement.appendChild(em);
-	    em = document.createElement("SessionIdentifier");
-	    em.appendChild(document.createTextNode(tctoken.getSessionIdentifier()));
-	    rootElement.appendChild(em);
-	    em = document.createElement("RefreshAddress");
-	    em.appendChild(document.createTextNode(tctoken.getRefreshAddress()));
-	    rootElement.appendChild(em);
-	    // Optional element CommunicationErrorAddress
-	    String communicationErrorAddress = tctoken.getCommunicationErrorAddress();
-	    if (communicationErrorAddress != null) {
-		em = document.createElement("CommunicationErrorAddress");
-		em.appendChild(document.createTextNode(tctoken.getCommunicationErrorAddress()));
-		rootElement.appendChild(em);
-	    }
-	    em = document.createElement("Binding");
-	    em.appendChild(document.createTextNode(tctoken.getBinding()));
-	    rootElement.appendChild(em);
-	    // Optional element PathSecurity-Protocol
-	    String pathSecurityProtocol = tctoken.getPathSecurityProtocol();
-	    if (pathSecurityProtocol != null) {
-		em = document.createElement("PathSecurity-Protocol");
-		em.appendChild(document.createTextNode(tctoken.getPathSecurityProtocol()));
-		rootElement.appendChild(em);
-	    }
-	    // Optional element PathSecurity-Parameters
-	    TCTokenType.PathSecurityParameters pathSecurityParameters = tctoken.getPathSecurityParameters();
-	    if (pathSecurityParameters != null) {
-		em = document.createElement("PSK");
-		em.appendChild(document.createTextNode(ByteUtils.toHexString(pathSecurityParameters.getPSK())));
-		Element em1 = document.createElement("PathSecurity-Parameters");
-		em1.appendChild(em);
-		rootElement.appendChild(em1);
-	    }
+	    rootElement = marshalTCToken(tctoken, document);
 	} else if (o instanceof CardApplicationPath) {
 	    CardApplicationPath p = (CardApplicationPath) o;
-	    rootElement = createElementIso(document, "CardApplicationPath");
+	    rootElement = marshalCardApplicationPath(p, document);
 
-	    Element em = createElementIso(document, "CardAppPathRequest");
-
-	    String profile = p.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-	    String requestID = p.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-
-	    // ChannelHandle
-	    ChannelHandleType h = p.getCardAppPathRequest().getChannelHandle();
-
-	    if(h != null){
-
-		Element emChild = createElementIso(document, "ChannelHandle");
-		em.appendChild(emChild);
-
-		Element emChildOfCH;
-		if (h.getProtocolTerminationPoint() != null) {
-		    emChildOfCH = createElementIso(document, "ProtocolTerminationPoint");
-		    emChildOfCH.appendChild(document.createTextNode(h.getProtocolTerminationPoint()));
-		    emChild.appendChild(emChildOfCH);
-		}
-
-		if (h.getSessionIdentifier() != null) {
-		    emChildOfCH = createElementIso(document, "SessionIdentifier");
-		    emChildOfCH.appendChild(document.createTextNode(h.getSessionIdentifier()));
-		    emChild.appendChild(emChildOfCH);
-		}
-
-		if (h.getBinding() != null) {
-		    emChildOfCH = createElementIso(document, "Binding");
-		    emChildOfCH.appendChild(document.createTextNode(h.getBinding()));
-		    emChild.appendChild(emChildOfCH);
-		}
-
-		PathSecurityType ps = h.getPathSecurity();
-		if (ps != null) {
-		    emChildOfCH = createElementIso(document, "PathSecurity");
-		    Element emChildOfPS = createElementIso(document, "Protocol");
-		    emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
-		    emChildOfCH.appendChild(emChildOfPS);
-		    // TODO here any type parsen
-		    LOG.error("AnyType of CardApplicationPath: " + ps.getParameters().toString());
-		    emChild.appendChild(emChildOfCH);
-		}
-
-		// context handle
-		emChild = createElementIso(document, "ContextHandle");
-		emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getContextHandle())));
-		em.appendChild(emChild);
-
-		// IFDName
-		emChild = createElementIso(document, "IFDName");
-		emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getIFDName()));
-		em.appendChild(emChild);
-
-		// SlotIndex
-		emChild = createElementIso(document, "SlotIndex");
-		emChild.appendChild(document.createTextNode(p.getCardAppPathRequest().getSlotIndex().toString()));
-		em.appendChild(emChild);
-
-		// Card Application
-		emChild = createElementIso(document, "CardApplication");
-		emChild.appendChild(document.createTextNode(ByteUtils.toHexString(p.getCardAppPathRequest().getCardApplication())));
-		em.appendChild(emChild);
-	    }
-
-	    rootElement.appendChild(em);
 	} else if (o instanceof CardApplicationPathResponse) {
 	    CardApplicationPathResponse resp = (CardApplicationPathResponse) o;
 	    rootElement = createElementIso(document, "CardApplicationPathResponse");
-
-	    String profile = resp.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    String requestID = resp.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-
-	    Result result = resp.getResult();
-	    if (result != null) {
-		Element emResult = marshalResult(resp.getResult(), document);
-		rootElement.appendChild(emResult);
-	    }
+	    appendResponseValues(resp, rootElement, document);
 
 	    Element em = createElementIso(document, "CardAppPathResultSet");
 	    for (CardApplicationPathType path : resp.getCardAppPathResultSet().getCardApplicationPathResult()) {
@@ -747,6 +360,7 @@ public class Marshaller {
 	} else if (o instanceof BeginTransaction) {
 	    BeginTransaction t = (BeginTransaction) o;
 	    rootElement = createElementIso(document, "BeginTransaction");
+	    appendRequestValues(t, rootElement);
 
 	    Element em = createElementIso(document, "SlotHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
@@ -754,24 +368,12 @@ public class Marshaller {
 	} else if (o instanceof BeginTransactionResponse) {
 	    BeginTransactionResponse response = (BeginTransactionResponse) o;
 	    rootElement = createElementIso(document, "BeginTransactionResponse");
-	    String profile = response.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-	    String requestID = response.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-	    Element emResult = marshalResult(response.getResult(), document);
-	    rootElement.appendChild(emResult);
+	    appendResponseValues(response, rootElement, document);
 
 	} else if (o instanceof EndTransaction) {
 	    EndTransaction end = (EndTransaction) o;
 	    rootElement = createElementIso(document, "EndTransaction");
+	    appendRequestValues(end, rootElement);
 
 	    Element em = createElementIso(document, "SlotHandle");
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(end.getSlotHandle())));
@@ -779,23 +381,11 @@ public class Marshaller {
 	} else if (o instanceof EndTransactionResponse) {
 	    EndTransactionResponse response = (EndTransactionResponse) o;
 	    rootElement = createElementIso(document, "EndTransactionResponse");
-	    String profile = response.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-	    String requestID = response.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-	    Element emResult = marshalResult(response.getResult(), document);
-	    rootElement.appendChild(emResult);
+	    appendResponseValues(response, rootElement, document);
 	} else if (o instanceof CardApplicationConnect) {
 	    CardApplicationConnect c = (CardApplicationConnect) o;
 	    rootElement = createElementIso(document, "CardApplicationConnect");
+	    appendRequestValues(c, rootElement);
 
 	    // Card Application Path
 	    rootElement.appendChild(marshalCardApplicationPathResult(c.getCardApplicationPath(), document, "CardApplicationPath"));
@@ -816,8 +406,7 @@ public class Marshaller {
 	} else if (o instanceof CardApplicationConnectResponse) {
 	    CardApplicationConnectResponse resp = (CardApplicationConnectResponse) o;
 	    rootElement = createElementIso(document, "CardApplicationConnectResponse");
-
-	    appendResponseValues(resp.getProfile(), resp.getRequestID(), resp.getResult(), rootElement, document);
+	    appendResponseValues(resp, rootElement, document);
 
 	    ConnectionHandleType ch = resp.getConnectionHandle();
 	    if (ch != null) {
@@ -827,6 +416,7 @@ public class Marshaller {
 	} else if (o instanceof CardApplicationDisconnect) {
 	    CardApplicationDisconnect c = (CardApplicationDisconnect) o;
 	    rootElement = createElementIso(document, "CardApplicationDisconnect");
+	    appendRequestValues(c, rootElement);
 
 	    if (c.getConnectionHandle() != null) {
 		rootElement.appendChild(marshalConnectionHandle(c.getConnectionHandle(), document));
@@ -838,41 +428,14 @@ public class Marshaller {
 		rootElement.appendChild(em);
 	    }
 
-	    String profile = c.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-
-	    String requestID = c.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
 	} else if (o instanceof CardApplicationDisconnectResponse) {
 	    CardApplicationDisconnectResponse response = (CardApplicationDisconnectResponse) o;
 	    rootElement = createElementIso(document, "CardApplicationDisconnectResponse");
-	    String profile = response.getProfile();
-	    if (profile != null) {
-		Element emProfile = createElementIso(document, "Profile");
-		emProfile.appendChild(document.createTextNode(profile));
-		rootElement.appendChild(emProfile);
-	    }
-	    String requestID = response.getRequestID();
-	    if (requestID != null) {
-		Element emRequest = createElementIso(document, "RequestID");
-		emRequest.appendChild(document.createElement(requestID));
-		rootElement.appendChild(emRequest);
-	    }
-	    if (response.getResult() != null) {
-		Element emResult = marshalResult(response.getResult(), document);
-		rootElement.appendChild(emResult);
-	    }
+	    appendResponseValues(response, rootElement, document);
 	} else {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
+
 	document.appendChild(rootElement);
 	return document;
     }
@@ -990,22 +553,31 @@ public class Marshaller {
 	return elemAd;
     }
 
-    private void appendResponseValues(String profile, String requestID, Result result, Element rootElement, Document document) {
+    private void appendRequestValues(RequestBaseType req, Element e) {
+	String profile = req.getProfile();
 	if (profile != null) {
-	    Element emProfile = createElementIso(document, "Profile");
-	    emProfile.appendChild(document.createTextNode(profile));
-	    rootElement.appendChild(emProfile);
+	    e.setAttribute("Profile", profile);
+	}
+	String reqId = req.getRequestID();
+	if (reqId != null) {
+	    e.setAttribute("RequestID", reqId);
+	}
+    }
+
+    private void appendResponseValues(ResponseBaseType res, Element e, Document document) {
+	String profile = res.getProfile();
+	if (profile != null) {
+	    e.setAttribute("Profile", profile);
+	}
+	String reqId = res.getRequestID();
+	if (reqId != null) {
+	    e.setAttribute("RequestID", reqId);
 	}
 
-	if (requestID != null) {
-	    Element emRequest = createElementIso(document, "RequestID");
-	    emRequest.appendChild(document.createElement(requestID));
-	    rootElement.appendChild(emRequest);
-	}
-
+	Result result = res.getResult();
 	if (result != null) {
 	    Element emResult = marshalResult(result, document);
-	    rootElement.appendChild(emResult);
+	    e.appendChild(emResult);
 	}
     }
 
@@ -1053,65 +625,177 @@ public class Marshaller {
 	return em;
     }
 
+    private Element marshalStartPAOS(StartPAOS startPAOS, Document document) {
+	Element rootElement = createElementIso(document, "StartPAOS");
+	appendRequestValues(startPAOS, rootElement);
+
+	Element em = createElementIso(document, "SessionIdentifier");
+	em.appendChild(document.createTextNode(startPAOS.getSessionIdentifier()));
+	rootElement.appendChild(em);
+
+	rootElement.appendChild(marshalConnectionHandle(startPAOS.getConnectionHandle().get(0), document));
+
+	StartPAOS.UserAgent ua = startPAOS.getUserAgent();
+	if (ua != null) {
+	    Element emUa = createElementIso(document, "UserAgent");
+	    if (ua.getName() != null) {
+		Element emUaSub = createElementIso(document, "Name");
+		emUaSub.appendChild(document.createTextNode(ua.getName()));
+		emUa.appendChild(emUaSub);
+	    }
+	    if (ua.getVersionMajor() != null) {
+		Element emUaSub = createElementIso(document, "VersionMajor");
+		emUaSub.appendChild(document.createTextNode(ua.getVersionMajor().toString()));
+		emUa.appendChild(emUaSub);
+	    }
+	    if (ua.getVersionMinor() != null) {
+		Element emUaSub = createElementIso(document, "VersionMinor");
+		emUaSub.appendChild(document.createTextNode(ua.getVersionMinor().toString()));
+		emUa.appendChild(emUaSub);
+	    }
+	    if (ua.getVersionSubminor() != null) {
+		Element emUaSub = createElementIso(document, "VersionSubminor");
+		emUaSub.appendChild(document.createTextNode(ua.getVersionSubminor().toString()));
+		emUa.appendChild(emUaSub);
+	    }
+	    rootElement.appendChild(emUa);
+	}
+
+	List<StartPAOS.SupportedAPIVersions> sas = startPAOS.getSupportedAPIVersions();
+	for (StartPAOS.SupportedAPIVersions sa : sas) {
+	    if (sa != null) {
+		Element emSa = createElementIso(document, "SupportedAPIVersions");
+		if (sa.getMajor() != null) {
+		    Element emSaSub = createElementIso(document, "Major");
+		    emSaSub.appendChild(document.createTextNode(sa.getMajor().toString()));
+		    emSa.appendChild(emSaSub);
+		}
+		if (sa.getMinor() != null) {
+		    Element emSaSub = createElementIso(document, "Minor");
+		    emSaSub.appendChild(document.createTextNode(sa.getMinor().toString()));
+		    emSa.appendChild(emSaSub);
+		}
+		if (sa.getSubminor() != null) {
+		    Element emSaSub = createElementIso(document, "Subminor");
+		    emSaSub.appendChild(document.createTextNode(sa.getSubminor().toString()));
+		    emSa.appendChild(emSaSub);
+		}
+		rootElement.appendChild(emSa);
+	    }
+	}
+
+	List<String> sdids = startPAOS.getSupportedDIDProtocols();
+	for (String sdid : sdids) {
+	    Element emSdid = createElementIso(document, "SupportedDIDProtocols");
+	    emSdid.appendChild(document.createTextNode(sdid));
+	    rootElement.appendChild(emSdid);
+	}
+
+	return rootElement;
+    }
+
     private Element marshalCardApplicationPathResult(CardApplicationPathType type, Document document, String name) {
 	Element em = createElementIso(document, name);
 
 	// ChannelHandle
 	ChannelHandleType h = type.getChannelHandle();
-	Element emChild = createElementIso(document, "ChannelHandle");
-
-	Element emChildOfCH;
-	if (h.getProtocolTerminationPoint() != null) {
-	    emChildOfCH = createElementIso(document, "ProtocolTerminationPoint");
-	    emChildOfCH.appendChild(document.createTextNode(h.getProtocolTerminationPoint()));
-	    emChild.appendChild(emChildOfCH);
-	}
-
-	if (h.getSessionIdentifier() != null) {
-	    emChildOfCH = createElementIso(document, "SessionIdentifier");
-	    emChildOfCH.appendChild(document.createTextNode(h.getSessionIdentifier()));
-	    emChild.appendChild(emChildOfCH);
-	}
-
-	if (h.getBinding() != null) {
-	    emChildOfCH = createElementIso(document, "Binding");
-	    emChildOfCH.appendChild(document.createTextNode(h.getBinding()));
-	    emChild.appendChild(emChildOfCH);
-	}
-
-	PathSecurityType ps = h.getPathSecurity();
-	if (ps != null) {
-	    emChildOfCH = createElementIso(document, "PathSecurity");
-	    Element emChildOfPS = createElementIso(document, "Protocol");
-	    emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
-	    emChildOfCH.appendChild(emChildOfPS);
-	    // TODO here any type parsen
-	    LOG.error("AnyType of CardApplicationPath: " + ps.getParameters().toString());
-	    emChild.appendChild(emChildOfCH);
+	if (h != null) {
+	    Element emChild = createElementIso(document, "ChannelHandle");
 	    em.appendChild(emChild);
+
+	    Element emChildOfCH;
+	    if (h.getProtocolTerminationPoint() != null) {
+		emChildOfCH = createElementIso(document, "ProtocolTerminationPoint");
+		emChildOfCH.appendChild(document.createTextNode(h.getProtocolTerminationPoint()));
+		emChild.appendChild(emChildOfCH);
+	    }
+
+	    if (h.getSessionIdentifier() != null) {
+		emChildOfCH = createElementIso(document, "SessionIdentifier");
+		emChildOfCH.appendChild(document.createTextNode(h.getSessionIdentifier()));
+		emChild.appendChild(emChildOfCH);
+	    }
+
+	    if (h.getBinding() != null) {
+		emChildOfCH = createElementIso(document, "Binding");
+		emChildOfCH.appendChild(document.createTextNode(h.getBinding()));
+		emChild.appendChild(emChildOfCH);
+	    }
+
+	    PathSecurityType ps = h.getPathSecurity();
+	    if (ps != null) {
+		emChildOfCH = createElementIso(document, "PathSecurity");
+		Element emChildOfPS = createElementIso(document, "Protocol");
+		emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
+		emChildOfCH.appendChild(emChildOfPS);
+		emChild.appendChild(emChildOfCH);
+		
+		// TODO: parse parameters element
+	    }
 	}
 
 	// context handle
-	emChild = createElementIso(document, "ContextHandle");
-	emChild.appendChild(document.createTextNode(ByteUtils.toHexString(type.getContextHandle())));
-	em.appendChild(emChild);
+	byte[] ctxHdl = type.getContextHandle();
+	if (ctxHdl != null) {
+	    Element emChild = createElementIso(document, "ContextHandle");
+	    emChild.appendChild(document.createTextNode(ByteUtils.toHexString(ctxHdl)));
+	    em.appendChild(emChild);
+	}
 
 	// IFDName
-	emChild = createElementIso(document, "IFDName");
-	emChild.appendChild(document.createTextNode(type.getIFDName()));
-	em.appendChild(emChild);
+	String ifdName = type.getIFDName();
+	if (ifdName != null) {
+	    Element emChild = createElementIso(document, "IFDName");
+	    emChild.appendChild(document.createTextNode(ifdName));
+	    em.appendChild(emChild);
+	}
 
 	// SlotIndex
-	emChild = createElementIso(document, "SlotIndex");
-	emChild.appendChild(document.createTextNode(type.getSlotIndex().toString()));
-	em.appendChild(emChild);
+	BigInteger slotIdx = type.getSlotIndex();
+	if (slotIdx != null) {
+	    Element emChild = createElementIso(document, "SlotIndex");
+	    emChild.appendChild(document.createTextNode(slotIdx.toString()));
+	    em.appendChild(emChild);
+	}
 
 	// Card Application
-	emChild = createElementIso(document, "CardApplication");
-	emChild.appendChild(document.createTextNode(ByteUtils.toHexString(type.getCardApplication())));
-	em.appendChild(emChild);
+	byte[] cardApp = type.getCardApplication();
+	if (cardApp != null) {
+	    Element emChild = createElementIso(document, "CardApplication");
+	    emChild.appendChild(document.createTextNode(ByteUtils.toHexString(cardApp)));
+	    em.appendChild(emChild);
+	}
 
 	return em;
+    }
+
+    private Element marshalInitializeFramework(InitializeFrameworkResponse res, Document document) {
+	Element rootElement = createElementEcapi(document, "InitializeFrameworkResponse");
+	appendResponseValues(res, rootElement, document);
+
+	InitializeFrameworkResponse.Version v = res.getVersion();
+	Element emVersion = createElementEcapi(document, "Version");
+	rootElement.appendChild(emVersion);
+
+	Element emMajor = createElementEcapi(document, "Major");
+	emMajor.appendChild(document.createTextNode(v.getMajor().toString()));
+	emVersion.appendChild(emMajor);
+
+	BigInteger minor = v.getMinor();
+	if (minor != null) {
+	    Element emMinor = createElementEcapi(document, "Minor");
+	    emMinor.appendChild(document.createTextNode(minor.toString()));
+	    emVersion.appendChild(emMinor);
+	}
+
+	BigInteger subminor = v.getSubMinor();
+	if (subminor != null) {
+	    Element emSubMinor = createElementEcapi(document, "SubMinor");
+	    emSubMinor.appendChild(document.createTextNode(subminor.toString()));
+	    emVersion.appendChild(emSubMinor);
+	}
+
+	return rootElement;
     }
 
     private Element marshalIFDCapabilities(IFDCapabilitiesType cap, Document document) {
@@ -1263,6 +947,178 @@ public class Marshaller {
 	    }
 	}
 	return emCardCall;
+    }
+
+    private Element marshalCardApplicationPath(CardApplicationPath p, Document document) {
+	Element rootElement = createElementIso(document, "CardApplicationPath");
+	appendRequestValues(p, rootElement);
+
+	Element em = marshalCardApplicationPathResult(p.getCardAppPathRequest(), document, "CardAppPathRequest");
+	rootElement.appendChild(em);
+
+	return rootElement;
+    }
+
+    private Element marshalWait(Wait w, Document document) {
+	Element rootElement = createElementIso(document, "Wait");
+	appendRequestValues(w, rootElement);
+
+	Element em = createElementIso(document, "ContextHandle");
+	em.appendChild(document.createTextNode(ByteUtils.toHexString(w.getContextHandle())));
+	rootElement.appendChild(em);
+
+	if (w.getTimeOut() != null) {
+	    em = createElementIso(document, "TimeOut");
+	    em.appendChild(document.createTextNode(w.getTimeOut().toString(16)));
+	    rootElement.appendChild(em);
+	}
+
+	if (w.getCallback() != null) {
+	    ChannelHandleType callback = w.getCallback();
+	    em = createElementIso(document, "Callback");
+
+	    if (callback.getBinding() != null) {
+		Element em2 = createElementIso(document, "Binding");
+		em2.appendChild(document.createTextNode(callback.getBinding()));
+		em.appendChild(em2);
+	    }
+	    if (callback.getSessionIdentifier() != null) {
+		Element em2 = createElementIso(document, "SessionIdentifier");
+		em2.appendChild(document.createTextNode(callback.getSessionIdentifier()));
+		em.appendChild(em2);
+	    }
+	    if (callback.getProtocolTerminationPoint() != null) {
+		Element em2 = createElementIso(document, "ProtocolTerminationPoint");
+		em2.appendChild(document.createTextNode(callback.getProtocolTerminationPoint()));
+		em.appendChild(em2);
+	    }
+	    if (callback.getPathSecurity() != null) {
+		PathSecurityType pathSecurityType = callback.getPathSecurity();
+		Element em2 = createElementIso(document, "PathSecurity");
+		Element em3 = createElementIso(document, "Protocol");
+
+		em3.appendChild(document.createTextNode(pathSecurityType.getProtocol()));
+		em2.appendChild(em3);
+		if (pathSecurityType.getParameters() != null) {
+		    em3 = createElementIso(document, "Parameters");
+		    em3.appendChild(document.createTextNode(pathSecurityType.getParameters().toString()));
+		    em2.appendChild(em3);
+		}
+		em.appendChild(em2);
+	    }
+	    rootElement.appendChild(em);
+	}
+
+	return rootElement;
+    }
+
+    private Element marshalDidAuthenticate(DIDAuthenticate auth, Document document) {
+	Element rootElement = createElementIso(document, "DIDAuthenticate");
+	appendRequestValues(auth, rootElement);
+
+	Element em;
+	if (auth.getConnectionHandle() != null) {
+	    em = marshalConnectionHandle(auth.getConnectionHandle(), document);
+	    rootElement.appendChild(em);
+	}
+
+	if (auth.getDIDScope() != null) {
+	    em = createElementIso(document, "DIDScope");
+	    em.appendChild(document.createTextNode(auth.getDIDScope().value()));
+	    rootElement.appendChild(em);
+	}
+
+	if (auth.getDIDName() != null) {
+	    em = createElementIso(document, "DIDName");
+	    em.appendChild(document.createTextNode(auth.getDIDName()));
+	    rootElement.appendChild(em);
+	}
+
+	if (auth.getAuthenticationProtocolData() != null) {
+	    DIDAuthenticationDataType d = auth.getAuthenticationProtocolData();
+
+	    em = marshalAuthProtocolData(d, document);
+
+	    for (Element e : d.getAny()) {
+		Element elemCopy = createElementIso(document, e.getLocalName());
+		elemCopy.setTextContent(e.getTextContent());
+		em.appendChild(elemCopy);
+	    }
+	    rootElement.appendChild(em);
+	}
+
+	if (auth.getSAMConnectionHandle() != null) {
+	    em = marshalConnectionHandle(auth.getSAMConnectionHandle(), document);
+	    rootElement.appendChild(em);
+	}
+
+	return rootElement;
+    }
+
+    private Element marshalTransmit(Transmit t, Document document) {
+	Element rootElement = createElementIso(document, "Transmit");
+	appendRequestValues(t, rootElement);
+
+	Element em = createElementIso(document, "SlotHandle");
+	em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
+	rootElement.appendChild(em);
+
+	for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
+	    em = createElementIso(document, "InputAPDUInfo");
+	    rootElement.appendChild(em);
+	    Element em2 = createElementIso(document, "InputAPDU");
+	    em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getInputAPDU())));
+	    em.appendChild(em2);
+	    for (int y = 0; y < t.getInputAPDUInfo().get(i).getAcceptableStatusCode().size(); y++) {
+		em2 = createElementIso(document, "AcceptableStatusCode");
+		em2.appendChild(document.createTextNode(ByteUtils.toHexString(t.getInputAPDUInfo().get(i).getAcceptableStatusCode()
+			.get(y))));
+		em.appendChild(em2);
+	    }
+	}
+
+	return rootElement;
+    }
+
+    private Element marshalTCToken(TCTokenType tctoken, Document document) {
+	Element rootElement = document.createElement("TCTokenType");
+	Element em = document.createElement("ServerAddress");
+	em.appendChild(document.createTextNode(tctoken.getServerAddress()));
+	rootElement.appendChild(em);
+	em = document.createElement("SessionIdentifier");
+	em.appendChild(document.createTextNode(tctoken.getSessionIdentifier()));
+	rootElement.appendChild(em);
+	em = document.createElement("RefreshAddress");
+	em.appendChild(document.createTextNode(tctoken.getRefreshAddress()));
+	rootElement.appendChild(em);
+	// Optional element CommunicationErrorAddress
+	String communicationErrorAddress = tctoken.getCommunicationErrorAddress();
+	if (communicationErrorAddress != null) {
+	    em = document.createElement("CommunicationErrorAddress");
+	    em.appendChild(document.createTextNode(tctoken.getCommunicationErrorAddress()));
+	    rootElement.appendChild(em);
+	}
+	em = document.createElement("Binding");
+	em.appendChild(document.createTextNode(tctoken.getBinding()));
+	rootElement.appendChild(em);
+	// Optional element PathSecurity-Protocol
+	String pathSecurityProtocol = tctoken.getPathSecurityProtocol();
+	if (pathSecurityProtocol != null) {
+	    em = document.createElement("PathSecurity-Protocol");
+	    em.appendChild(document.createTextNode(tctoken.getPathSecurityProtocol()));
+	    rootElement.appendChild(em);
+	}
+	// Optional element PathSecurity-Parameters
+	TCTokenType.PathSecurityParameters pathSecurityParameters = tctoken.getPathSecurityParameters();
+	if (pathSecurityParameters != null) {
+	    em = document.createElement("PSK");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(pathSecurityParameters.getPSK())));
+	    Element em1 = document.createElement("PathSecurity-Parameters");
+	    em1.appendChild(em);
+	    rootElement.appendChild(em1);
+	}
+
+	return rootElement;
     }
 
 }

@@ -22,11 +22,10 @@
 
 package org.openecard.ws.android;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.StringWriter;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -35,6 +34,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -84,7 +84,7 @@ public class AndroidMarshaller implements WSMarshaller {
     private DocumentBuilder documentBuilder;
     private Transformer transformer;
     private MessageFactory soapFactory;
-    
+
     public AndroidMarshaller() {
 	documentBuilderFactory = null;
 	documentBuilder = null;
@@ -96,21 +96,28 @@ public class AndroidMarshaller implements WSMarshaller {
 	    documentBuilderFactory.setIgnoringComments(true);
 	    documentBuilderFactory.setExpandEntityReferences(false);
 	    documentBuilder = documentBuilderFactory.newDocumentBuilder();
-	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-	    transformer = transformerFactory.newTransformer();
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-	    // transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
-	    // "yes");
-	    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
-	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+	    transformer = createTransformer();
 
 	    soapFactory = MessageFactory.newInstance(documentBuilder);
 	} catch (Exception ex) {
 	    LOG.error(ex.getMessage(), ex);
 	    System.exit(1); // non recoverable
 	}
+    }
+
+    private static Transformer createTransformer() throws TransformerConfigurationException {
+	TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	Transformer transformer = transformerFactory.newTransformer();
+	transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+	// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+	// "yes");
+	transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+	transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+	return transformer;
     }
 
     public static Element createElementIso(Document document, String name) {
@@ -144,13 +151,14 @@ public class AndroidMarshaller implements WSMarshaller {
 
     @Override
     public synchronized String doc2str(Node doc) throws TransformerException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	transformer.transform(new DOMSource(doc), new StreamResult(out));
 	String result;
+	DOMSource docSrc = new DOMSource(doc);
 	try {
-	    result = out.toString("UTF-8");
-	} catch (UnsupportedEncodingException ex) {
-	    throw new TransformerException(ex);
+	    StringWriter out = new StringWriter();
+	    transformer.transform(docSrc, new StreamResult(out));
+	    result = out.toString();
+	} catch (TransformerException ex) {
+	    throw ex;
 	}
 	return result;
     }

@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -72,7 +73,8 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
+
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
@@ -91,7 +93,6 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    AuthenticationHelper auth = new AuthenticationHelper(ta, ca);
 	    eac2Output = auth.performAuth(eac2Output, internalData);
 
-	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
 	    LOG.error(e.getMessage(), e);
@@ -107,9 +108,9 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
         } else {
             // authentication finished, notify GUI
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response = new DIDAuthenticateResponse();
 	    String msg = "Authentication canceled by the user.";
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+	    Result result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
+	    response = WSHelper.makeResponse(DIDAuthenticateResponse.class, result);
 	    return response;
         }
     }

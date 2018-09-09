@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -220,16 +220,13 @@ public class TinyManagement implements  Management {
     @Publish
     @Override
     public InitializeFrameworkResponse initializeFramework(InitializeFramework arg0) {
-	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
+	InitializeFrameworkResponse ifr = WSHelper.makeResponse(InitializeFrameworkResponse.class, WSHelper.makeResultOK());
 	Version version = new Version();
 	version.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR);
 	version.setMinor(ECardConstants.ECARD_API_VERSION_MINOR);
 	version.setSubMinor(ECardConstants.ECARD_API_VERSION_SUBMINOR);
-	initializeFrameworkResponse.setVersion(version);
-	Result r = new Result();
-	r.setResultMajor(ECardConstants.Major.OK);
-	initializeFrameworkResponse.setResult(r);
-	return initializeFrameworkResponse;
+	ifr.setVersion(version);
+	return ifr;
     }
 
     @Override

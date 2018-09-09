@@ -25,6 +25,7 @@ package org.openecard.sal.protocol.eac;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -73,7 +74,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
@@ -135,7 +136,6 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 		eac2Output.setChallenge(rPICC);
 	    }
 
-	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);
@@ -147,9 +147,9 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
         if (p.derefNonblocking() == null) {
             return response;
         } else {
-            response = new DIDAuthenticateResponse();
 	    String msg = "Authentication Canceled by the user.";
-            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
+	    Result result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
+            response = WSHelper.makeResponse(DIDAuthenticateResponse.class, result);
             return response;
         }
     }

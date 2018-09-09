@@ -404,19 +404,6 @@ public class AndroidMarshallerTest {
     }
 
     @Test
-    public void testConversionOfInternationalStringType() throws Exception {
-	InternationalStringType internationalStringType = new InternationalStringType();
-	internationalStringType.setLang("lang");
-	internationalStringType.setValue("value");
-
-	WSMarshaller m = new AndroidMarshaller();
-	Document d = m.marshal(internationalStringType);
-
-	String s = m.doc2str(d);
-	LOG.debug(s);
-    }
-
-    @Test
     public void testConversionOfResult() throws Exception {
 	Result r = new Result();
 	r.setResultMajor("major");

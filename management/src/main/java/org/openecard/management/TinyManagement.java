@@ -87,7 +87,6 @@ import de.bund.bsi.ecard.api._1.TerminateFramework;
 import de.bund.bsi.ecard.api._1.TerminateFrameworkResponse;
 import de.bund.bsi.ecard.api._1.UnregisterIFD;
 import de.bund.bsi.ecard.api._1.UnregisterIFDResponse;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Environment;

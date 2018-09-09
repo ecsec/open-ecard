@@ -143,6 +143,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		dispatcher.safeDeliver(disconnect);
 	    }
 	} catch (WSException ex){
+	    LOG.debug("Error while executing PIN Management.", ex);
 	    throw new AppExtensionException(ex.getResultMinor(), ex.getMessage());
 	
 	} finally {

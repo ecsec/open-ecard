@@ -142,7 +142,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
 	// add callback to this abstract activity when card is removed
 	octx.getEventDispatcher().add(insertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
-	octx.getEventDispatcher().add(cardDetectHandler, EventType.CARD_RECOGNIZED);
+	octx.getEventDispatcher().add(cardDetectHandler, EventType.RECOGNIZED_CARD_ACTIVE);
 
 	Intent actIntent = parent.getIntent();
 	Uri data = actIntent.getData();
@@ -239,7 +239,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    switch (eventType) {
-		case CARD_RECOGNIZED:
+		case RECOGNIZED_CARD_ACTIVE:
 		    Set<String> supportedCards = getSupportedCards();
 		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
 		    if (supportedCards == null || supportedCards.contains(type)) {

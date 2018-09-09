@@ -374,7 +374,7 @@ public class TinySAL implements SAL {
 		select = new Select.Application(applicationID);
 		select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
 	    }
-	    
+
 	    cardStateEntry.setCurrentCardApplication(applicationID);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
 	    // reset the ef FCP

@@ -152,11 +152,11 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 		(CardApplicationPathResponse) dispatcher.safeDeliver(cardApplicationPath);
 
 	// Check CardApplicationPathResponse
-	
-	WSHelper.checkResult(cardApplicationPathResponse);
-	
 
-	if(cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().isEmpty()){
+	WSHelper.checkResult(cardApplicationPathResponse);
+
+
+	if (cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().isEmpty()){
 	    LOG.error("CardApplicationPath failed.");
 	    Result result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Card was removed.");
 	    WSException ex = WSHelper.createException(result);    

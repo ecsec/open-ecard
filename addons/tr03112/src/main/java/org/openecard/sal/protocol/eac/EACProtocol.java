@@ -22,21 +22,14 @@
 
 package org.openecard.sal.protocol.eac;
 
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.util.FuturePromise;
-import org.openecard.common.util.MarshallerSchemaValidator;
 import org.openecard.common.util.Promise;
-import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -65,20 +58,6 @@ public class EACProtocol extends SALProtocolBaseImpl {
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
-	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<ObjectSchemaValidator>(() -> {
-	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
-	    if (! noValid) {
-		try {
-		    return MarshallerSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
-		} catch (SAXException | WSMarshallerException ex) {
-		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
-		}
-	    }
-	    // always valid
-	    return (obj) -> true;
-	}));
-
 	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventDispatcher()));
 	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
 	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));

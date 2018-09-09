@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,19 +41,16 @@ public class FuturePromise<T> extends Promise<T> {
     private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
 
     public FuturePromise(final Callable<T> function) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		T result;
-		try {
-		    result = function.call();
-		} catch (Exception ex) {
-		    LOG.error("Failed to complete computation of the result.", ex);
-		    result = null;
-		}
-		// We have either a result or an error
-		FuturePromise.super.deliver(result);
+	new Thread(() -> {
+	    T result;
+	    try {
+		result = function.call();
+	    } catch (Exception ex) {
+		LOG.error("Failed to complete computation of the result.", ex);
+		result = null;
 	    }
+	    // We have either a result or an error
+	    FuturePromise.super.deliver(result);
 	}, "FuturePromise-" + THREAD_NUM.getAndIncrement()).start();
     }
 

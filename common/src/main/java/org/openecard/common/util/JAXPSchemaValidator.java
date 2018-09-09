@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,123 +22,95 @@
 
 package org.openecard.common.util;
 
-import org.openecard.common.interfaces.ObjectValidatorException;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 /**
- * Utility class which allows to validate a JAXB object against XML schemas.
+ * Utility class which allows to validate documents against the eCard schemas.
  *
  * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-public class MarshallerSchemaValidator implements ObjectSchemaValidator {
+public class JAXPSchemaValidator implements DocumentSchemaValidator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MarshallerSchemaValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JAXPSchemaValidator.class);
 
     private static final String ANDROID_FACTORY = "org.apache.xerces.jaxp.validation.XMLSchemaFactory";
 
     private final Schema schema;
-    private final WSMarshaller wsm;
 
     /**
-     * Loads a JAXBSchemaValidator instance based on the given JAXB class and schemas.
+     * Loads a ECardSchemaValidator instance based on the given schemas.
      *
-     * @param clazz Class of the JAXB element which shall be validated.
      * @param schemaNames Resource names of the schemas which shall be used in the validation process.
      * @return Instance if the schema validator capable of verificating the given schema.
      * @throws IOException Thrown in case the schemas could not be loaded from the given resources.
      * @throws SAXException Thrown in case the XML schemas are errornous.
-     * @throws WSMarshallerException Thrown in case the given JAXB class or one of its decendents is invalid.
      */
-    public static ObjectSchemaValidator load(@Nonnull Class<?> clazz, String... schemaNames) throws IOException,
-	    SAXException, WSMarshallerException {
+    public static DocumentSchemaValidator load(String... schemaNames) throws IOException, SAXException {
 	try {
 	    if (schemaNames == null || schemaNames.length == 0) {
 		throw new IOException("No schemas given to validate the object.");
-	    } else if (schemaNames.length == 1) {
-		URL schemaURL = FileUtils.resolveResourceAsURL(MarshallerSchemaValidator.class, schemaNames[0]);
-		return new MarshallerSchemaValidator(clazz, schemaURL);
 	    } else {
 		StreamSource[] schemaDocuments = convertSchemaStrings2StreamSources(schemaNames);
-		return new MarshallerSchemaValidator(clazz, schemaDocuments);
+		return new JAXPSchemaValidator(schemaDocuments);
 	    }
 	} catch (IOException ex) {
-	    LOG.error("No schemas given for the validation or the schemas could not be found.", ex);
+	    LOG.error("Not all schemas could not be found or loaded.", ex);
 	    throw ex;
 	}
     }
 
-    private MarshallerSchemaValidator(Class<?> clazz, URL schemaURL) throws SAXException, WSMarshallerException {
+    private JAXPSchemaValidator(URL schemaURL) throws SAXException {
 	schema = getSchemaFactory().newSchema(schemaURL);
-	wsm = getMarshaller(clazz);
     }
 
-    private MarshallerSchemaValidator(Class<?> clazz, StreamSource[] schemaDocuments) throws SAXException, WSMarshallerException {
+    private JAXPSchemaValidator(StreamSource[] schemaDocuments) throws SAXException {
 	schema = getSchemaFactory().newSchema(schemaDocuments);
-	wsm = getMarshaller(clazz);
     }
 
 
-    /**
-     * Validates a JAXB object against the loaded XML schemas.
-     *
-     * Note: If you pass one single schema into the function the validator tries to load referenced schemas. If you
-     * specify more than one schema you have to specify all other schemas which are referenced in the schemas. This has
-     * to be done in the correct order. The correct ordering is definition first, then use of the definitions.
-     *
-     * @param obj The object to validate. This have to be an JAXB class.
-     * @return TRUE if the object is valid against the schemas else FALSE.
-     * @throws ObjectValidatorException Thrown if the JAXBSource object could not be initialized.
-     */
     @Override
-    public boolean validateObject(@Nonnull Object obj) throws ObjectValidatorException {
+    public void validate(@Nonnull Document doc) throws DocumentValidatorException {
+	validateNode(doc);
+    }
+
+    @Override
+    public void validate(@Nonnull Element doc) throws DocumentValidatorException {
+	validateNode(doc);
+    }
+
+    private void validateNode(@Nonnull Node doc) throws DocumentValidatorException {
 	try {
-	    Document doc = wsm.marshal(obj);
-	    if (LOG.isDebugEnabled()) {
-		try {
-		    LOG.debug("Validating XML document:\n {}", wsm.doc2str(doc));
-		} catch (TransformerException ex) {
-		    LOG.error ("Failed to convert DOM to text.", ex);
-		}
-	    }
 	    Source source = new DOMSource(doc);
 	    Validator validator= schema.newValidator();
 	    validator.setErrorHandler(new CustomErrorHandler());
 	    validator.validate(source);
-	    return true;
 	} catch (SAXException ex) {
 	    LOG.error("Validation of the input object failed.", ex);
-	    return false;
-	} catch (MarshallingTypeException ex) {
-	    String msg = "Failed to create Source instance from given object.";
-	    LOG.error(msg, ex);
-	    throw new ObjectValidatorException(msg, ex);
+	    throw new DocumentValidatorException("Failed to validate eCard message.", ex);
 	} catch (IOException ex) {
-	    LOG.error("No object given for validation.", ex);
-	    throw new ObjectValidatorException("No object given for validation.", ex);
+	    throw new IllegalArgumentException("Given object contains errors.", ex);
 	}
     }
 
@@ -151,17 +123,18 @@ public class MarshallerSchemaValidator implements ObjectSchemaValidator {
      * @throws IOException Thrown in case a schema file was not found.
      */
     private static StreamSource[] convertSchemaStrings2StreamSources(String[] schemaNames) throws IOException {
-	ArrayList<StreamSource> sources = new ArrayList<>();
+	ArrayList<StreamSource> ssources = new ArrayList<>();
 
-	for(String schemaName : schemaNames) {
-	    StreamSource source = new StreamSource(FileUtils.resolveResourceAsStream(MarshallerSchemaValidator.class, schemaName));
-	    sources.add(source);
+	for(String sname : schemaNames) {
+	    URL surl = FileUtils.resolveResourceAsURL(JAXPSchemaValidator.class, sname);
+	    StreamSource ssource = new StreamSource(surl.toExternalForm());
+	    ssources.add(ssource);
 	}
 
-	return sources.toArray(new StreamSource[sources.size()]);
+	return ssources.toArray(new StreamSource[ssources.size()]);
     }
 
-    private static SchemaFactory getSchemaFactory() throws WSMarshallerException {
+    private static SchemaFactory getSchemaFactory() throws SAXException {
 	try {
 	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 	} catch (IllegalArgumentException ex) {
@@ -169,23 +142,16 @@ public class MarshallerSchemaValidator implements ObjectSchemaValidator {
 	}
 	try {
 	    // on android we need an additional library for XML support
-	    ClassLoader cl = MarshallerSchemaValidator.class.getClassLoader();
+	    ClassLoader cl = JAXPSchemaValidator.class.getClassLoader();
 	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, ANDROID_FACTORY, cl);
 	} catch (IllegalArgumentException ex) {
 	    String msg = "No SchemaFactory available on this platform.";
 	    LOG.warn(msg);
-	    throw new WSMarshallerException(msg);
+	    throw new SAXException(msg);
 	}
     }
 
-    private WSMarshaller getMarshaller(Class<?> clazz) throws WSMarshallerException {
-	WSMarshaller m = WSMarshallerFactory.createInstance();
-	m.removeAllTypeClasses();
-	m.addXmlTypeClass(clazz);
-	return m;
-    }
-
-    private class CustomErrorHandler implements ErrorHandler {
+    private static class CustomErrorHandler implements ErrorHandler {
 
 	@Override
 	public void warning(SAXParseException exception) throws SAXException {

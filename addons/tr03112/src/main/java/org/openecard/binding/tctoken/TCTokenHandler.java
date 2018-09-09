@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -77,11 +77,18 @@ import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.HandlerUtils;
-import org.openecard.common.interfaces.CardRecognition;
-import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.util.JAXPSchemaValidator;
+import org.openecard.common.util.FuturePromise;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.transport.paos.PAOSConnectionException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -120,9 +127,8 @@ public class TCTokenHandler {
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
-    private final CardRecognition rec;
     private final AddonManager manager;
-    private final EventDispatcher evManager;
+    private final Promise<DocumentSchemaValidator> schemaValidator;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -133,11 +139,30 @@ public class TCTokenHandler {
 	this.cardStates = ctx.getCardStates();
 	this.dispatcher = ctx.getDispatcher();
 	this.gui = ctx.getUserConsent();
-	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
-	this.evManager = ctx.getEventDispatcher();
 	pin = LANG_PACE.translationForKey("pin");
 	puk = LANG_PACE.translationForKey("puk");
+
+	schemaValidator = new FuturePromise<>(() -> {
+	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
+	    if (! noValid) {
+		try {
+		    return JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+		} catch (SAXException ex) {
+		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
+		}
+	    }
+	    // always valid
+	    LOG.warn("Schema validation is disabled.");
+	    return new DocumentSchemaValidator() {
+		@Override
+		public void validate(Document doc) throws DocumentValidatorException {
+		}
+		@Override
+		public void validate(Element doc) throws DocumentValidatorException {
+		}
+	    };
+	});
     }
 
     private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws WSException {
@@ -198,7 +223,7 @@ public class TCTokenHandler {
 		    // send StartPAOS
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
-		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui, evManager);
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, schemaValidator);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
@@ -360,6 +385,10 @@ public class TCTokenHandler {
 		response.setResultCode(BindingResultCode.INTERRUPTED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
 		return response;
+	    } else if (innerException instanceof DocumentValidatorException) {
+		errorMsg = LANG_TR.translationForKey(SCHEMA_VALIDATION_FAILED);
+		// it is ridiculous, that this should be a client error, but the test spec demands this
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));

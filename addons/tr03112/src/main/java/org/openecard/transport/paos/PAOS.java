@@ -67,6 +67,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
 
 
 /**
@@ -104,6 +106,7 @@ public class PAOS {
     private final TlsConnectionHandler tlsHandler;
 
     private final String serviceString;
+    private final DocumentSchemaValidator schemaValidator;
 
     /**
      * Creates a PAOS instance and configures it for a given endpoint.
@@ -112,13 +115,16 @@ public class PAOS {
      * @param dispatcher The dispatcher instance capable of dispatching the received messages.
      * @param tlsHandler The TlsClient containing the configuration of the yet to be established TLS channel, or
      *   {@code null} if TLS should not be used.
+     * @param schemaValidator Schema Validator used to validate incoming messages.
      * @throws PAOSException In case the PAOS module could not be initialized.
      */
-    public PAOS(@Nonnull Dispatcher dispatcher, @Nonnull TlsConnectionHandler tlsHandler) throws PAOSException {
+    public PAOS(@Nonnull Dispatcher dispatcher, @Nonnull TlsConnectionHandler tlsHandler,
+	    @Nonnull DocumentSchemaValidator schemaValidator) throws PAOSException {
 	this.dispatcher = dispatcher.getFilter();
 	this.tlsHandler = tlsHandler;
-	serviceString = buildServiceString();
-	headerValuePaos = String.format("ver=\"%s\" %s", ECardConstants.PAOS_VERSION_20, serviceString);
+	this.schemaValidator = schemaValidator;
+	this.serviceString = buildServiceString();
+	this.headerValuePaos = String.format("ver=\"%s\" %s", ECardConstants.PAOS_VERSION_20, this.serviceString);
 
 	try {
 	    this.idGenerator = new MessageIdGenerator();
@@ -197,11 +203,11 @@ public class PAOS {
 	elem.setTextContent(value);
     }
 
-    private Object processPAOSRequest(InputStream content) throws PAOSException {
+    private Object processPAOSRequest(InputStream content) throws PAOSException, DocumentValidatorException {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	   // msg.getSOAPHeader().
+	    Element body = msg.getSOAPBody().getChildElements().get(0);
 	    updateMessageID(msg);
 
 	    if (LOG.isDebugEnabled()) {
@@ -212,7 +218,10 @@ public class PAOS {
 		}
 	    }
 
-	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
+	    // validate input message
+	    schemaValidator.validate(body);
+
+	    return m.unmarshal(body);
 	} catch (MarshallingTypeException ex) {
 	    LOG.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
@@ -238,6 +247,13 @@ public class PAOS {
 
     private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, SOAPException {
 	Document contentDoc = m.marshal(content);
+
+	try {
+	    schemaValidator.validate(contentDoc);
+	} catch (DocumentValidatorException ex) {
+	    LOG.warn("Schema validation of outgoing message failed.", ex);
+	}
+
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();
 
@@ -373,6 +389,8 @@ public class PAOS {
 	    throw new PAOSException(DELIVERY_FAILED, ex);
 	} catch (SOAPException ex) {
 	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
+	} catch (DocumentValidatorException ex) {
+	    throw new PAOSException(SCHEMA_VALIDATION_FAILED, ex);
 	} catch (MarshallingTypeException ex) {
 	    throw new PAOSDispatcherException(MARSHALLING_ERROR, ex);
 	} catch (InvocationTargetException ex) {

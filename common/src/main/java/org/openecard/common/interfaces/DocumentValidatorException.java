@@ -22,25 +22,20 @@
 
 package org.openecard.common.interfaces;
 
-import javax.annotation.Nonnull;
-
 
 /**
- * Interface for schema based object validations.
- * One example of schema based validation is XML Schema validation for JAXB objects.
+ * Exception indicating problems in the validation of an object.
  *
  * @author Tobias Wich
  */
-public interface ObjectSchemaValidator {
+public class DocumentValidatorException extends Exception {
 
-    /**
-     * Validates the given object against the schema definition of the instance.
-     *
-     * @param obj The object to verify.
-     * @return {@code true} if the object validates, {@code false} otherwise.
-     * @throws ObjectValidatorException Indicates any error beyond the pure validation such as a failed conversion of
-     *   the data.
-     */
-    boolean validateObject(@Nonnull Object obj) throws ObjectValidatorException;
+    public DocumentValidatorException(String message) {
+	super(message);
+    }
+
+    public DocumentValidatorException(String message, Throwable cause) {
+	super(message, cause);
+    }
 
 }

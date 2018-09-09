@@ -30,12 +30,15 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.openecard.binding.tctoken.ex.ErrorTranslations;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HandlerUtils;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsent;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSConnectionException;
@@ -57,17 +60,15 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     private final ConnectionHandleType connectionHandle;
     private final List<String> supportedDIDs;
     private final TCTokenRequest tokenRequest;
-    private final UserConsent gui;
-    private final EventDispatcher evManager;
+    private final Promise<DocumentSchemaValidator> schemaValidator;
 
     public PAOSTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, List<String> supportedDIDs,
-	    TCTokenRequest tokenRequest, UserConsent gui, EventDispatcher evManager) {
+	    TCTokenRequest tokenRequest, Promise<DocumentSchemaValidator> schemaValidator) {
 	this.dispatcher = dispatcher;
 	this.connectionHandle = connectionHandle;
 	this.supportedDIDs = supportedDIDs;
 	this.tokenRequest = tokenRequest;
-	this.gui = gui;
-	this.evManager = evManager;
+	this.schemaValidator = schemaValidator;
     }
 
 
@@ -79,8 +80,16 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
 	    tlsHandler.setUpClient();
 
+	    DocumentSchemaValidator v;
+	    try {
+		v = schemaValidator.deref();
+	    } catch (InterruptedException ex) {
+		// TODO: add i18n
+		throw new PAOSException(ErrorTranslations.PAOS_INTERRUPTED);
+	    }
+
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(dispatcher, tlsHandler);
+	    PAOS p = new PAOS(dispatcher, tlsHandler, v);
 
 	    // Create StartPAOS message
 	    StartPAOS sp = new StartPAOS();

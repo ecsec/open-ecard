@@ -54,8 +54,6 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Pair;
@@ -142,30 +140,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	DIDAuthenticate didAuthenticate = request;
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
-
-	try {
-	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
-	    boolean messageValid = valid.validateObject(request);
-	    if (! messageValid) {
-		String msg = "Validation of the EAC1InputType message failed.";
-		LOG.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		return response;
-	    }
- 	} catch (ObjectValidatorException ex) {
-	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	} catch (InterruptedException ex) {
-	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	}
 
 	if (! ByteUtils.compare(conHandle.getSlotHandle(), didAuthenticate.getConnectionHandle().getSlotHandle())) {
 	    String msg = "Invalid connection handle given in DIDAuthenticate message.";

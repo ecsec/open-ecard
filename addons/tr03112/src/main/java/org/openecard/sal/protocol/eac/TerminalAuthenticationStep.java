@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,8 +32,6 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.util.Promise;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
@@ -54,7 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TerminalAuthenticationStep.class.getName());
 
     private final Dispatcher dispatcher;
 
@@ -77,31 +75,6 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-
-	try {
-	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
-
-	    boolean messageValid = valid.validateObject(didAuthenticate);
-	    if (! messageValid) {
-		String msg = "Validation of the EAC2InputType message failed.";
-		logger.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		return response;
-	    }
-	} catch (ObjectValidatorException ex) {
-	    String msg = "Validation of the EAC2InputType message failed due to invalid input data.";
-	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	} catch (InterruptedException ex) {
-	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	}
 
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 
@@ -127,7 +100,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 
 	    if (certificateChain.getCertificates().isEmpty()) {
 		String msg = "Failed to create a valid certificate chain from the transmitted certificates.";
-		logger.error(msg);
+		LOG.error(msg);
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		return response;
 	    }
@@ -144,7 +117,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate);
 
 	    if (signature != null) {
-		logger.trace("Signature has been provided in EAC2InputType.");
+		LOG.trace("Signature has been provided in EAC2InputType.");
 
 		// perform TA and CA authentication
 		ChipAuthentication ca = new ChipAuthentication(dispatcher, slotHandle);
@@ -155,7 +128,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 		DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 		ctx.put(EACProtocol.AUTHENTICATION_DONE, true);
 	    } else {
-		logger.trace("Signature has not been provided in EAC2InputType.");
+		LOG.trace("Signature has not been provided in EAC2InputType.");
 
 		// send challenge again
 		byte[] rPICC = (byte[]) internalData.get(EACConstants.IDATA_CHALLENGE);
@@ -165,7 +138,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 	} catch (Exception e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}

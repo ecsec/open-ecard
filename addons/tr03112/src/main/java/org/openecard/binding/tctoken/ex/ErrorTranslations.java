@@ -83,6 +83,7 @@ public enum ErrorTranslations implements I18nKey {
     NO_TOKEN("missing.activation.parameter.exception.no_valid_tctoken_available"),
     NO_URL("invalid.redirect.url.exception.no_url"),
     PAOS_CONNECTION_EXCEPTION("paos.connection.exception"),
+    PAOS_INTERRUPTED("paos.exception.interrupted"),
     REDIRECT_MALFORMED_URL("redirect.cert.validator.malformed_subject_url"),
     REFRESH_DETERMINATION_FAILED("invalid.redirect.url.exception.refresh_address_determination_failed"),
     REFRESH_URL_ERROR("illegal.state.exception.invalid_refresh_address_in_tctoken"),
@@ -94,7 +95,8 @@ public enum ErrorTranslations implements I18nKey {
     UNKNOWN_ECARD_ERROR("paos.exception.unknown_ecard_exception"),
     UNKNOWN_SEC_PROTOCOL("connection.error.unknown_sec_protocol"),
     UNSUPPORTED_FEATURE("illegal.argument.exception.unsupported_parser_feature"),
-    WRONG_SERVER_RESULT("connection.error.invalid_status_code");
+    WRONG_SERVER_RESULT("connection.error.invalid_status_code"),
+    SCHEMA_VALIDATION_FAILED("paos.exception.msg_invalid_schema");
 
     private final String key;
 

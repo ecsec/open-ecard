@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -26,20 +26,20 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
+import org.openecard.common.interfaces.DocumentValidatorException;
 import org.openecard.ws.marshal.WSMarshallerException;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
 
 
 /**
@@ -48,30 +48,54 @@ import org.xml.sax.SAXException;
  */
 public class SchemaValidationTest {
 
+    private final DocumentBuilder builder;
+    private final DocumentSchemaValidator validator;
+
+    public SchemaValidationTest() throws ParserConfigurationException, IOException, SAXException {
+	// instantiate w3 stuff
+	DocumentBuilderFactory tmpW3Factory = DocumentBuilderFactory.newInstance();
+	tmpW3Factory.setNamespaceAware(true);
+	tmpW3Factory.setIgnoringComments(true);
+	tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+	builder = tmpW3Factory.newDocumentBuilder();
+
+	validator = JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+    }
+
+
     @Test
-    public void testDIDAuth() throws JAXBException, WSMarshallerException, SAXException, IOException, ObjectValidatorException,
-	    ParserConfigurationException {
-	ObjectSchemaValidator validator;
+    public void testDIDAuthEac1InputOk() throws JAXBException, WSMarshallerException, SAXException, IOException,
+	    DocumentValidatorException, ParserConfigurationException {
+	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DID_EAC1Input.xml");
+	Document didAuth = builder.parse(dataStream);
+	validator.validate(didAuth);
+    }
+
+    @Test
+    public void testDIDAuthEac2InputOk() throws JAXBException, WSMarshallerException, SAXException, IOException,
+	    DocumentValidatorException, ParserConfigurationException {
+	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate.xml");
+	Document didAuth = builder.parse(dataStream);
+	validator.validate(didAuth);
+    }
+
+    @Test(expectedExceptions = DocumentValidatorException.class)
+    public void testDIDAuthNok() throws IOException, JAXBException, ParserConfigurationException,
+	    DocumentValidatorException {
 	JAXBContext jc = JAXBContext.newInstance(DIDAuthenticate.class);
 	Unmarshaller unmarshaller = jc.createUnmarshaller();
-
 	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate.xml");
-	DIDAuthenticate didAuth = (DIDAuthenticate) unmarshaller.unmarshal(dataStream);
-	validator = MarshallerSchemaValidator.load(didAuth.getClass(), "ISO24727-Protocols.xsd");
-	Assert.assertEquals(validator.validateObject(didAuth), true);
-
-	dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate.xml");
 	DIDAuthenticate didAuth2 = (DIDAuthenticate) unmarshaller.unmarshal(dataStream);
 	DIDAuthenticationDataType authData = didAuth2.getAuthenticationProtocolData();
-	DocumentBuilderFactory docFac = DocumentBuilderFactory.newInstance();
-	DocumentBuilder docBuilder = docFac.newDocumentBuilder();
-	Document d = docBuilder.newDocument();
+	Document d = builder.newDocument();
 	Element sigElem = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature");
 	sigElem.setTextContent("1254786930AAD4A8");
 	authData.getAny().add(sigElem);
 	didAuth2.setAuthenticationProtocolData(authData);
-	validator = MarshallerSchemaValidator.load(didAuth2.getClass(), "ISO24727-Protocols.xsd");
-	Assert.assertEquals(validator.validateObject(didAuth2), false);
+	Document target = builder.newDocument();
+	jc.createMarshaller().marshal(didAuth2, target);
+	validator.validate(target);
     }
 
 }

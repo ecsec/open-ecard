@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,8 +33,6 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.Promise;
@@ -79,32 +77,6 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
-	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
-
-	    boolean messageValid = valid.validateObject(didAuthenticate);
-	    if (! messageValid) {
-		String msg = "Validation of the EACAdditionalInputType message failed.";
-		LOG.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		return response;
-	    }
-	} catch (ObjectValidatorException ex) {
-	    String msg = "Validation of the EACAdditionalInputType message failed due to invalid input data.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	} catch (InterruptedException ex) {
-	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	}
-
-	try {
-
 	    EACAdditionalInputType eacAdditionalInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC2OutputType eac2Output = eacAdditionalInput.getOutputType();
 

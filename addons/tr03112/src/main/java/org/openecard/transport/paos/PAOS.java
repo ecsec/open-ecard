@@ -218,6 +218,13 @@ public class PAOS {
 		}
 	    }
 
+	    // fix profile attribute if it is not present
+	    // while there are the eID-Servers to blame, some don't get it right and actually Profile is a useless attribute anyway
+	    if (! body.hasAttribute("Profile")) {
+		LOG.warn("Received message without Profile attribute, adding one for proper validation.");
+		body.setAttribute("Profile", ECardConstants.Profile.ECARD_1_1);
+	    }
+
 	    // validate input message
 	    schemaValidator.validate(body);
 

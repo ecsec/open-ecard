@@ -113,6 +113,7 @@ import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.Encipher;
 import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
 import iso.std.iso_iec._24727.tech.schema.ExecuteAction;
@@ -2035,12 +2036,13 @@ public class TinySAL implements SAL {
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate request) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 
+	String protocolURI = "";
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
-	    String protocolURI = didAuthenticationData.getProtocol();
+	    protocolURI = didAuthenticationData.getProtocol();
 	    // FIXME: workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
 		LOG.warn("ProtocolURI was null");
@@ -2064,6 +2066,13 @@ public class TinySAL implements SAL {
 	    LOG.error(e.getMessage(), e);
 	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	// add empty response data if none are present
+	if (response.getAuthenticationProtocolData() == null) {
+	    EmptyResponseDataType data = new EmptyResponseDataType();
+	    data.setProtocol(protocolURI);
+	    response.setAuthenticationProtocolData(data);
 	}
 
 	return response;

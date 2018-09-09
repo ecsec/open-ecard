@@ -79,6 +79,7 @@ import iso.std.iso_iec._24727.tech.schema.EAC2InputType;
 import iso.std.iso_iec._24727.tech.schema.EAC2OutputType;
 import iso.std.iso_iec._24727.tech.schema.EACAdditionalInputType;
 import iso.std.iso_iec._24727.tech.schema.EACMarkerType;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.EndTransaction;
 import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
@@ -1751,24 +1752,19 @@ public class Unmarshaller {
 	String attrValue = parser.getAttributeValue(XSI_NS, "type");
 	if (attrValue != null && attrValue.contains("EAC1InputType")) {
 	    didAuthenticationDataType = new EAC1InputType();
-	    didAuthenticationDataType.getOtherAttributes().put(new QName(XSI_NS, "type"), ISO_PFX + ":EAC1InputType");
 	} else if (attrValue != null && attrValue.contains("EAC1OutputType")) {
 	    didAuthenticationDataType = new EAC1OutputType();
-	    didAuthenticationDataType.getOtherAttributes().put(new QName(XSI_NS, "type"), ISO_PFX + ":EAC1OutputType");
 	} else if (attrValue != null && attrValue.contains("EAC2InputType")) {
 	    didAuthenticationDataType = new EAC2InputType();
-	    didAuthenticationDataType.getOtherAttributes().put(new QName(XSI_NS, "type"), ISO_PFX + ":EAC2InputType");
 	} else if (attrValue != null && attrValue.contains("EAC2OutputType")) {
 	    didAuthenticationDataType = new EAC2OutputType();
-	    didAuthenticationDataType.getOtherAttributes().put(new QName(XSI_NS, "type"), ISO_PFX + ":EAC2OutputType");
 	} else if (attrValue != null && attrValue.contains("EACAdditionalInputType")) {
 	    didAuthenticationDataType = new EACAdditionalInputType();
-	    didAuthenticationDataType.getOtherAttributes().put(new QName(XSI_NS, "type"), ISO_PFX + ":EACAdditionalInputType");
+	} else if (attrValue != null && attrValue.contains("EmptyResponseDataType")) {
+	    didAuthenticationDataType = new EmptyResponseDataType();
 	} else {
 	    didAuthenticationDataType = new DIDAuthenticationDataType();
 	}
-	// add iso prefix
-	didAuthenticationDataType.getOtherAttributes().put(new QName(XMLNS_NS, ISO_PFX, XMLNS_PFX), ISO_NS);
 
 	if (parser.getAttributeValue(null, "Protocol") != null && ! parser.getAttributeValue(null, "Protocol").isEmpty()) {
 	    didAuthenticationDataType.setProtocol(parser.getAttributeValue(null, "Protocol"));

@@ -69,6 +69,8 @@ public class AndroidMarshaller implements WSMarshaller {
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidMarshaller.class);
 
+    public static final String XML_PFX = XMLConstants.XML_NS_PREFIX;
+    public static final String XML_NS = XMLConstants.XML_NS_URI;
     public static final String XMLNS_PFX = XMLConstants.XMLNS_ATTRIBUTE;
     public static final String XMLNS_NS = XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
     public static final String XSI_PFX = "xsi";

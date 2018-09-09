@@ -22,6 +22,7 @@
 
 package org.openecard.ws.android;
 
+import de.bund.bsi.ecard.api._1.InitializeFramework;
 import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
@@ -52,6 +53,7 @@ import iso.std.iso_iec._24727.tech.schema.EAC1OutputType;
 import iso.std.iso_iec._24727.tech.schema.EAC2InputType;
 import iso.std.iso_iec._24727.tech.schema.EAC2OutputType;
 import iso.std.iso_iec._24727.tech.schema.EACAdditionalInputType;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.EndTransaction;
 import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
@@ -180,13 +182,13 @@ public class Marshaller {
 		rootElement.appendChild(elemEACOutput);
 
 	    } // else only the result (with error) is returned
+	} else if (o instanceof InitializeFramework) {
+	    InitializeFramework initializeFramework = (InitializeFramework) o;
+	    rootElement = createElementIso(document, "InitializeFramework");
+	    appendRequestValues(initializeFramework, rootElement);
 	} else if (o instanceof InitializeFrameworkResponse) {
 	    InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;
-	    rootElement = marshalInitializeFramework(initializeFrameworkResponse, document);
-	} else if (o instanceof InternationalStringType) {
-	    InternationalStringType internationalStringType = (InternationalStringType) o;
-	    rootElement = marshalInternationStringType(internationalStringType, document, internationalStringType.getClass()
-		    .getSimpleName());
+	    rootElement = marshalInitializeFrameworkResponse(initializeFrameworkResponse, document);
 	} else if (o instanceof Result) {
 	    Result r = (Result) o;
 	    rootElement = marshalResult(r, document);
@@ -437,6 +439,7 @@ public class Marshaller {
 	}
 
 	document.appendChild(rootElement);
+	document.normalizeDocument();
 	return document;
     }
 
@@ -547,6 +550,10 @@ public class Marshaller {
 		elemAd.setAttributeNS(XSI_NS, XSI_PFX + ":type", ISO_PFX + ":EAC2OutputType");
 	    } else if (authData instanceof EACAdditionalInputType) {
 		elemAd.setAttributeNS(XSI_NS, XSI_PFX + ":type", ISO_PFX + ":EACAdditionalInputType");
+	    } else if (authData instanceof EmptyResponseDataType) {
+		elemAd.setAttributeNS(XSI_NS, XSI_PFX + ":type", ISO_PFX + ":EmptyResponseDataType");
+	    } else {
+		elemAd.setAttributeNS(XSI_NS, XSI_PFX + ":type", ISO_PFX + ":DIDAuthenticationDataType");
 	    }
 	}
 
@@ -584,7 +591,7 @@ public class Marshaller {
     private Element marshalInternationStringType(InternationalStringType internationalStringType, Document document, String name) {
 	Element em = createElementDss(document, name);
 	em.appendChild(document.createTextNode(internationalStringType.getValue()));
-	em.setAttribute("xml:lang", internationalStringType.getLang());
+	em.setAttributeNS(XML_NS, XML_PFX + ":lang", internationalStringType.getLang());
 	return em;
     }
 
@@ -769,7 +776,7 @@ public class Marshaller {
 	return em;
     }
 
-    private Element marshalInitializeFramework(InitializeFrameworkResponse res, Document document) {
+    private Element marshalInitializeFrameworkResponse(InitializeFrameworkResponse res, Document document) {
 	Element rootElement = createElementEcapi(document, "InitializeFrameworkResponse");
 	appendResponseValues(res, rootElement, document);
 

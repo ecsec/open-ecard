@@ -67,11 +67,26 @@
 			<artifactId>http</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- Dependencies which can be used to test android marshaller -->
+		<!--dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>android-marshaller</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ogce</groupId>
+			<artifactId>xpp3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+		</dependency-->
 
 		<dependency>
 			<groupId>org.openecard.addons</groupId>

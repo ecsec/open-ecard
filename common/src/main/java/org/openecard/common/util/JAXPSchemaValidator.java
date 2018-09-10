@@ -55,7 +55,7 @@ public class JAXPSchemaValidator implements DocumentSchemaValidator {
 
     private static final Logger LOG = LoggerFactory.getLogger(JAXPSchemaValidator.class);
 
-    private static final String ANDROID_FACTORY = "org.apache.xerces.jaxp.validation.XMLSchemaFactory";
+    private static final String XERCES_FACTORY = "org.apache.xerces.jaxp.validation.XMLSchemaFactory";
 
     private final Schema schema;
 
@@ -136,14 +136,15 @@ public class JAXPSchemaValidator implements DocumentSchemaValidator {
 
     private static SchemaFactory getSchemaFactory() throws SAXException {
 	try {
-	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+	    // try to use original xerces if it is in the classpath
+	    ClassLoader cl = JAXPSchemaValidator.class.getClassLoader();
+	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, XERCES_FACTORY, cl);
 	} catch (IllegalArgumentException ex) {
 	    LOG.warn("Did not find a default SchemaFactory.");
 	}
 	try {
-	    // on android we need an additional library for XML support
-	    ClassLoader cl = JAXPSchemaValidator.class.getClassLoader();
-	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, ANDROID_FACTORY, cl);
+	    // fallback to default implementation
+	    return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 	} catch (IllegalArgumentException ex) {
 	    String msg = "No SchemaFactory available on this platform.";
 	    LOG.warn(msg);
@@ -155,9 +156,7 @@ public class JAXPSchemaValidator implements DocumentSchemaValidator {
 
 	@Override
 	public void warning(SAXParseException exception) throws SAXException {
-	    // Ignore this. One of the TRs demands to accept as much as possible.
 	    LOG.warn(exception.getLocalizedMessage());
-	    throw exception;
 	}
 
 	@Override

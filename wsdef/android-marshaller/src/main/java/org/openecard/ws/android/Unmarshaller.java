@@ -124,7 +124,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
@@ -547,34 +546,12 @@ public class Unmarshaller {
 		if (eventType == XmlPullParser.START_TAG) {
 		    if (name.equals("CardAppPathRequest")) {
 			path.setCardAppPathRequest(parseCardApplicationPath(parser));
-		    } else if (name.equals("Profile")) {
-			path.setProfile(parser.nextText());
-		    } else if (name.equals("RequestID")) {
-			path.setRequestID(parser.nextText());
 		    }
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationPath")));
 	    return path;
 	} else if (parser.getName().equals("CardAppPathRequest") || parser.getName().equals("CardApplicationPathResult")) {
-	    CardApplicationPathType type = new CardApplicationPathType();
-	    int eventType;
-	    do {
-		parser.next();
-		eventType = parser.getEventType();
-		if (eventType == XmlPullParser.START_TAG) {
-		    if (parser.getName().equals("ChannelHandle")) {
-			type.setChannelHandle(parseChannelHandle(parser));
-		    } else if (parser.getName().equals("ContextHandle")) {
-			type.setContextHandle(StringUtils.toByteArray(parser.nextText()));
-		    } else if (parser.getName().equals("IFDName")) {
-			type.setIFDName(parser.nextText());
-		    } else if (parser.getName().equals("SlotIndex")) {
-			type.setSlotIndex(new BigInteger(parser.nextText()));
-		    } else if (parser.getName().equals("CardApplication")) {
-			type.setCardApplication(StringUtils.toByteArray(parser.nextText()));
-		    }
-		}
-	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardAppPathRequest")));
+	    CardApplicationPathType type = parseCardApplicationPath(parser);
 	    return type;
 	} else if (parser.getName().equals("CardApplicationPathResponse")) {
 	    CardApplicationPathResponse resp = new CardApplicationPathResponse();
@@ -649,10 +626,6 @@ public class Unmarshaller {
 			result.setConnectionHandle(parseConnectionHandle(parser));
 		    } else if (parser.getName().equals("Action")) {
 			result.setAction(ActionType.fromValue(parser.nextText()));
-		    } else if (parser.getName().equals("Profile")) {
-			result.setProfile(parser.nextText());
-		    } else if (parser.getName().equals("RequestID")) {
-			result.setRequestID(parser.nextText());
 		    }
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardApplicationDisconnect")));
@@ -933,10 +906,6 @@ public class Unmarshaller {
 			result.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
 		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
 			result.setAuthenticationProtocolData(parseDIDAuthenticationDataType(parser));
-		    } else if (parser.getName().equals("Profile")) {
-			result.setProfile(parser.nextText());
-		    } else if (parser.getName().equals("RequestID")) {
-			result.setRequestID(parser.nextText());
 		    } else {
 			throw new IOException("Unmarshalling of " + parser.getName() + " in EstablishChannel not supported.");
 		    }

@@ -220,9 +220,18 @@ public class PAOS {
 
 	    // fix profile attribute if it is not present
 	    // while there are the eID-Servers to blame, some don't get it right and actually Profile is a useless attribute anyway
-	    if (! body.hasAttribute("Profile")) {
+	    if (body.getLocalName().equals("StartPAOSResponse") && ! body.hasAttribute("Profile")) {
 		LOG.warn("Received message without Profile attribute, adding one for proper validation.");
 		body.setAttribute("Profile", ECardConstants.Profile.ECARD_1_1);
+
+		try {
+		    // copy or the validation produces strange errors
+		    String docStr = m.doc2str(body);
+		    Document newDoc = m.str2doc(docStr);
+		    body = newDoc.getDocumentElement();
+		} catch (SAXException | TransformerException ex) {
+		    throw new PAOSException("Failed to copy document.", ex);
+		}
 	    }
 
 	    // validate input message
@@ -256,9 +265,13 @@ public class PAOS {
 	Document contentDoc = m.marshal(content);
 
 	try {
-	    schemaValidator.validate(contentDoc);
+	    String docStr = m.doc2str(contentDoc);
+	    Document newDoc = m.str2doc(docStr);
+	    schemaValidator.validate(newDoc);
 	} catch (DocumentValidatorException ex) {
 	    LOG.warn("Schema validation of outgoing message failed.", ex);
+	} catch (SAXException | TransformerException ex) {
+	    throw new MarshallingTypeException("Failed to copy document.", ex);
 	}
 
 	SOAPMessage msg = m.add2soap(contentDoc);

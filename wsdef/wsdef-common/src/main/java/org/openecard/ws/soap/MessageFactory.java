@@ -65,7 +65,11 @@ public class MessageFactory {
 	    // XXE countermeasures
 	    tmpW3Factory.setExpandEntityReferences(false);
 	    tmpW3Factory.setXIncludeAware(false);
-	    tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    try {
+		tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Failed to disallow external DTD access.");
+	    }
 	    try {
 		tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 	    } catch (ParserConfigurationException ex) {

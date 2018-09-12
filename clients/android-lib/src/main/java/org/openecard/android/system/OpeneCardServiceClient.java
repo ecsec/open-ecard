@@ -47,6 +47,9 @@ public class OpeneCardServiceClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceClient.class);
 
+    // lock object to make access to the openecard service globally locked
+    private static final Object SYNC = new Object();
+
     private final Context appCtx;
     private Promise<OpeneCardService> oecService;
     private boolean isInitialized;
@@ -79,17 +82,20 @@ public class OpeneCardServiceClient {
      * @return The result of the start function.
      */
     public ServiceResponse startService() {
-	try {
-	    if (! isInitialized) {
-		Intent i = createOpeneCardIntent();
-		appCtx.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-	    }
+	synchronized (SYNC) {
+	    try {
+		if (! isInitialized) {
+		    Intent i = createOpeneCardIntent();
+		    appCtx.bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+		}
 
-	    // wait until service is connected, then call startService
-	    OpeneCardService s = oecService.deref();
-	    return s.startService();
-	} catch (InterruptedException | RemoteException ex) {
-	    return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+		// wait until service is connected, then call startService
+		OpeneCardService s = oecService.deref();
+		assert(s != null);
+		return s.startService();
+	    } catch (InterruptedException | RemoteException ex) {
+		return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+	    }
 	}
     }
 
@@ -100,18 +106,21 @@ public class OpeneCardServiceClient {
      * @throws IllegalStateException Thrown in case the service is already stopped.
      */
     public ServiceResponse stopService() throws IllegalStateException {
-	try {
-	    if (! isInitialized) {
-		throw new IllegalStateException("Trying to stop uninitialized service.");
-	    }
+	synchronized (SYNC) {
+	    try {
+		if (! isInitialized) {
+		    throw new IllegalStateException("Trying to stop uninitialized service.");
+		}
 
-	    // stop then unbind service
-	    OpeneCardService s = oecService.deref();
-	    ServiceResponse res = s.stopService();
-	    unbindService();
-	    return res;
-	} catch (InterruptedException | RemoteException ex) {
-	    return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+		// stop then unbind service
+		OpeneCardService s = oecService.deref();
+		assert(s != null);
+		ServiceResponse res = s.stopService();
+		unbindService();
+		return res;
+	    } catch (InterruptedException | RemoteException ex) {
+		return new ServiceErrorResponse(INTERNAL_ERROR, ex.getMessage());
+	    }
 	}
     }
 
@@ -143,10 +152,12 @@ public class OpeneCardServiceClient {
      * @see {@link #isInitialized()} for information when this method may be called.
      */
     public OpeneCardContext getContext() throws IllegalStateException {
-	if (isInitialized()) {
-	    return OpeneCardServiceImpl.getContext();
-	} else {
-	    throw new IllegalStateException("Requested unitialized Context object.");
+	synchronized (SYNC) {
+	    if (isInitialized()) {
+		return OpeneCardServiceImpl.getContext();
+	    } else {
+		throw new IllegalStateException("Requested unitialized Context object.");
+	    }
 	}
     }
 

@@ -131,15 +131,17 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public synchronized void notify(EventType t, EventObject o) {
-	for (Map.Entry<EventCallback, ArrayList<EventFilter>> entry : eventFilter.entrySet()) {
-	    EventCallback cb = entry.getKey();
-	    for (EventFilter filter : entry.getValue()) {
-		// when there is a filter match, then fire out the event (only once!)
-		if (filter.matches(t, o)) {
-		    LOG.debug("Sending event notification {} to EventCallback {}.", t, cb);
-		    ExecutorService executor = threadPools.get(cb);
-		    executor.execute(() -> cb.signalEvent(t, o));
-		    break;
+	if (initialized) {
+	    for (Map.Entry<EventCallback, ArrayList<EventFilter>> entry : eventFilter.entrySet()) {
+		EventCallback cb = entry.getKey();
+		for (EventFilter filter : entry.getValue()) {
+		    // when there is a filter match, then fire out the event (only once!)
+		    if (filter.matches(t, o)) {
+			LOG.debug("Sending event notification {} to EventCallback {}.", t, cb);
+			ExecutorService executor = threadPools.get(cb);
+			executor.execute(() -> cb.signalEvent(t, o));
+			break;
+		    }
 		}
 	    }
 	}

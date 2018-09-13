@@ -474,12 +474,11 @@ public class TinySAL implements SAL {
 	    if (request.getAction() != null) {
 		disconnect.setAction(request.getAction());
 	    }
-	    
-	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 
 	    // remove entries associated with this handle
-	    states.removeSlotHandleEntry(slotHandle);
+	    states.removeSlotHandleEntry(connectionHandle.getContextHandle(), slotHandle);
 
+	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 	    response.setResult(disconnectResponse.getResult());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

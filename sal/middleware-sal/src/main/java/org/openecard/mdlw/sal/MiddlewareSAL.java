@@ -451,7 +451,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    }
 
             // remove entries associated with this handle
-            states.removeSlotHandleEntry(slotHandle);
+            states.removeSlotHandleEntry(ctxHandle, slotHandle);
         } catch (ECardException e) {
             response.setResult(e.getResult());
         } catch (Exception e) {

@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import org.openecard.addon.AddonSelector;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.util.ByteComparator;
+import org.openecard.common.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +100,7 @@ public class CardStateMap {
      * @param handle
      */
     public synchronized void removeEntry(ConnectionHandleType handle) {
+	LOG.debug("Removing CardStateEntries based on connection handle.");
 	Set<CardStateEntry> entries = getMatchingEntries(handle);
 	Iterator<CardStateEntry> it = entries.iterator();
 	boolean removeSlotHandles = handle.getSlotHandle() == null;
@@ -113,34 +115,25 @@ public class CardStateMap {
      * Remove the entry reference in slotHandle index. <br>
      * This function is needed to update the index in CardApplicationDisconnect.
      *
+     * @param ctx Contex handle.
      * @param slotHandle SlotHandle for which the entry reference should be deleted.
      */
-    public synchronized void removeSlotHandleEntry(byte[] slotHandle) {
+    public synchronized void removeSlotHandleEntry(byte[] ctx, byte[] slotHandle) {
+	LOG.debug("Removing CardStateEntries for slot={}.", ByteUtils.toHexString(slotHandle));
 	ConnectionHandleType handle = new ConnectionHandleType();
+	handle.setContextHandle(ctx);
 	handle.setSlotHandle(slotHandle);
-	Set<CardStateEntry> entries = getMatchingEntries(handle);
-	Iterator<CardStateEntry> it = entries.iterator();
-
-	if (it.hasNext()) {
-	    CardStateEntry entry = it.next();
-	    removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
-
-	    clearProtocolsForEntry(entry);
-	}
+	removeEntry(handle);
     }
 
     private void clearProtocolsForEntry(CardStateEntry entry) {
-	Iterator<CardStateEntry> it = allEntries.iterator();
-	if (it.hasNext()) {
-	    CardStateEntry allEntriesEntry = it.next();
-	    if (entry.equals(allEntriesEntry)) {
-		Collection<SALProtocol> ps = allEntriesEntry.removeAllProtocols();
-		// destroy all protocols
-		for (SALProtocol p : ps) {
-		    if (protocolSelector != null) {
-			protocolSelector.returnSALProtocol(p, true);
-		    }
-		}
+	Collection<SALProtocol> ps = entry.removeAllProtocols();
+	// destroy all protocols
+	for (SALProtocol p : ps) {
+	    LOG.debug("Trying to removing protocol {}.", p);
+	    if (protocolSelector != null) {
+		LOG.debug("Force removing protocol {}.", p);
+		protocolSelector.returnSALProtocol(p, true);
 	    }
 	}
     }
@@ -150,7 +143,7 @@ public class CardStateMap {
      * @param entry Entry to delete.
      * @param removeSlotHandles When set remove all occurrences of this entry in the slotHandle index.
      */
-    private synchronized void removeEntry(CardStateEntry entry, boolean removeSlotHandles) {
+    private void removeEntry(CardStateEntry entry, boolean removeSlotHandles) {
 	ConnectionHandleType handle = entry.handleCopy();
 	ChannelHandleType channel = handle.getChannelHandle();
 
@@ -168,6 +161,9 @@ public class CardStateMap {
 	} else {
 	    removeMapEntry(handle.getSlotHandle(), slothandleMap, entry);
 	}
+
+	clearProtocolsForEntry(entry);
+
 	allEntries.remove(entry);
     }
 
@@ -284,7 +280,7 @@ public class CardStateMap {
 	    result = map.get(key);
 	}
 
-	return (result != null) ? result : new TreeSet<CardStateEntry>();
+	return (result != null) ? result : new TreeSet<>();
     }
 
     /**

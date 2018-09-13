@@ -391,6 +391,7 @@ public class PAOS {
 				// if the last error was a schema validation error, then we must communicate that to caller
 				DocumentValidatorException validateEx = validationError.derefNonblocking();
 				if (validateEx != null) {
+				    LOG.debug("Previous validation error found, terminating process.");
 				    throw validateEx;
 				}
 
@@ -523,7 +524,7 @@ public class PAOS {
 		DIDAuthenticate didAuth = (DIDAuthenticate) obj;
 		DIDAuthenticationDataType protoIn = didAuth.getAuthenticationProtocolData();
 
-		Result r = WSHelper.makeResultError(serviceString, cause.getMessage());
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, cause.getMessage());
 		DIDAuthenticateResponse res = WSHelper.makeResponse(DIDAuthenticateResponse.class, r);
 		EmptyResponseDataType protoData = new EmptyResponseDataType();
 		res.setAuthenticationProtocolData(protoIn);

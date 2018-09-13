@@ -86,7 +86,6 @@ public class TCTokenRequest {
     private BigInteger slotIndex;
     private byte[] contextHandle;
     private String cardType = "http://bsi.bund.de/cif/npa.xml";
-    private boolean tokenFromObject;
     private List<Pair<URL, TlsServerCertificate>> certificates;
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
@@ -115,7 +114,6 @@ public class TCTokenRequest {
 	TCTokenRequest result;
 	if (parameters.containsKey("tcTokenURL")) {
 	    result = parseTCTokenRequestURI(parameters, ctx);
-	    result.tokenFromObject = false;
 	    return result;
 	}
 
@@ -392,15 +390,6 @@ public class TCTokenRequest {
      */
     public String getCardType() {
 	return cardType;
-    }
-
-    /**
-     * Gets whether the token was created from an object tag or fetched from a URL.
-     *
-     * @return {@code true} when the token was created from an object tag, {@code false} otherwise.
-     */
-    public boolean isTokenFromObject() {
-	return tokenFromObject;
     }
 
     /**

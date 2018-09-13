@@ -227,10 +227,8 @@ public class TCTokenHandler {
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
-		    if (! tokenRequest.isTokenFromObject()) {
-			// wait for computation to finish
-			waitForTask(paosTask);
-		    }
+		    // wait for computation to finish
+		    waitForTask(paosTask);
 		    response.setBindingTask(paosTask);
 		    break;
 		}
@@ -539,11 +537,8 @@ public class TCTokenHandler {
     }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
-	    }
+	new Thread(() -> {
+	    gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
 	}, "Background_MsgBox").start();
     }
 

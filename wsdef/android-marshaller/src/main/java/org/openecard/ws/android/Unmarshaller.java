@@ -24,6 +24,7 @@ package org.openecard.ws.android;
 
 import de.bund.bsi.ecard.api._1.ConnectionHandle;
 import de.bund.bsi.ecard.api._1.InitializeFramework;
+import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.APIAccessEntryPointName;
 import iso.std.iso_iec._24727.tech.schema.AccessControlListType;
 import iso.std.iso_iec._24727.tech.schema.AccessRuleType;
@@ -390,6 +391,8 @@ public class Unmarshaller {
 	} else if (parser.getName().equals("InitializeFramework")) {
 	    InitializeFramework initializeFramework = new InitializeFramework();
 	    return initializeFramework;
+	} else if (parser.getName().equals("InitializeFrameworkResponse")) {
+	    return parseInitFrameworkResponse(parser);
 	} else if (parser.getName().equals("Conclusion")) {
 	    return parseConclusion(parser);
 	} else if (parser.getName().equals("WaitResponse")) {
@@ -906,8 +909,6 @@ public class Unmarshaller {
 			result.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
 		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
 			result.setAuthenticationProtocolData(parseDIDAuthenticationDataType(parser));
-		    } else {
-			throw new IOException("Unmarshalling of " + parser.getName() + " in EstablishChannel not supported.");
 		    }
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishChannel")));
@@ -1898,6 +1899,53 @@ public class Unmarshaller {
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(name)));
 
 	return simpleFUStatusType;
+    }
+
+    private InitializeFrameworkResponse parseInitFrameworkResponse(XmlPullParser parser) throws XmlPullParserException, IOException {
+	InitializeFrameworkResponse ifr = new InitializeFrameworkResponse();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Result")) {
+		    ifr.setResult(this.parseResult(parser));
+		} else if (parser.getName().equals("Version")) {
+		    ifr.setVersion(new InitializeFrameworkResponse.Version());
+		} else if (parser.getName().equals("Major")) {
+		    String text = parser.nextText();
+		    try {
+			InitializeFrameworkResponse.Version v = ifr.getVersion();
+			if (v != null) {
+			    v.setMajor(new BigInteger(text));
+			}
+		    } catch (NumberFormatException | NullPointerException ex) {
+			// skipping this number
+		    }
+		} else if (parser.getName().equals("Minor")) {
+		    String text = parser.nextText();
+		    try {
+			InitializeFrameworkResponse.Version v = ifr.getVersion();
+			if (v != null) {
+			    v.setMajor(new BigInteger(text));
+			}
+		    } catch (NumberFormatException | NullPointerException ex) {
+			// skipping this number
+		    }
+		} else if (parser.getName().equals("SubMinor")) {
+		    String text = parser.nextText();
+		    try {
+			InitializeFrameworkResponse.Version v = ifr.getVersion();
+			if (v != null) {
+			    v.setMajor(new BigInteger(text));
+			}
+		    } catch (NumberFormatException | NullPointerException ex) {
+			// skipping this number
+		    }
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("WaitResponse")));
+	return ifr;
     }
 
 }

@@ -106,4 +106,12 @@ public class SchemaValidationTest {
 	validator.validate(didAuth);
     }
 
+    @Test
+    public void testInitFrameworkOk() throws JAXBException, WSMarshallerException, SAXException, IOException,
+	    DocumentValidatorException, ParserConfigurationException {
+	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "InitializeFramework.xml");
+	Document initFrame = builder.parse(dataStream);
+	validator.validate(initFrame);
+    }
+
 }

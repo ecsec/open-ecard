@@ -164,6 +164,7 @@
 				<MiddlewareName>Portuguese Government_Portuguese eID N</MiddlewareName>
 				<iso:ObjectIdentifier>http://gov.pt/cif/eid</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">Portuguese eID</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="pt">Cartão eID português</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="de">Portugiesische eID</iso:CardTypeName>
 				<iso:Version>
 					<iso:Major>1</iso:Major>

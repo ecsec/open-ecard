@@ -98,4 +98,12 @@ public class SchemaValidationTest {
 	validator.validate(target);
     }
 
+    @Test(expectedExceptions = DocumentValidatorException.class)
+    public void testDIDAuthEac1InputNoCert() throws JAXBException, WSMarshallerException, SAXException, IOException,
+	    DocumentValidatorException, ParserConfigurationException {
+	InputStream dataStream = FileUtils.resolveResourceAsStream(SchemaValidationTest.class, "DIDAuthenticate_EACInput1_nocert.xml");
+	Document didAuth = builder.parse(dataStream);
+	validator.validate(didAuth);
+    }
+
 }

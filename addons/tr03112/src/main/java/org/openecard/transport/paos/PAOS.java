@@ -527,7 +527,7 @@ public class PAOS {
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, cause.getMessage());
 		DIDAuthenticateResponse res = WSHelper.makeResponse(DIDAuthenticateResponse.class, r);
 		EmptyResponseDataType protoData = new EmptyResponseDataType();
-		res.setAuthenticationProtocolData(protoIn);
+		res.setAuthenticationProtocolData(protoData);
 		if (protoIn != null) {
 		    protoData.setProtocol(protoIn.getProtocol());
 		}

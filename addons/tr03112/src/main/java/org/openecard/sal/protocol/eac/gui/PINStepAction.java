@@ -183,7 +183,7 @@ public class PINStepAction extends StepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
-		    ctx.put(EACProtocol.PIN_BLOCKED_STATUS, EacPinStatus.BLOCKED);
+		    ctx.put(EACProtocol.PIN_STATUS, EacPinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			    new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
 				    lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),

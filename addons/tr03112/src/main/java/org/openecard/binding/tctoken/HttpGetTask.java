@@ -73,7 +73,6 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	    getRequest();
 	} finally {
 	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
-	    TCTokenHandler.killUserConsent();
 	}
 
 	// produce a positive result

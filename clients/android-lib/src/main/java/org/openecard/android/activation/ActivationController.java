@@ -77,12 +77,14 @@ public class ActivationController {
 	// find suitable addon
 	String failureMessage;
 	AddonManager manager = sctx.getManager();
-	AddonSelector selector = new AddonSelector(manager);
+	AddonSelector selector = null;
+	AppPluginAction action = null;
 	try {
-	    if (manager == null || selector == null) {
+	    if (manager == null) {
 		throw new IllegalStateException("Addon initialization failed.");
 	    } else {
-		AppPluginAction action = selector.getAppPluginAction(resourceName);
+		selector = new AddonSelector(manager);
+		action = selector.getAppPluginAction(resourceName);
 
 		String rawQuery = requestURI.getRawQuery();
 		Map<String, String> queries = new HashMap<>(0);
@@ -101,6 +103,10 @@ public class ActivationController {
 	} catch (Exception ex) {
 	    failureMessage = ex.getMessage();
 	    LOG.warn(ex.getMessage(), ex);
+	} finally {
+	    if (selector != null && action != null) {
+		selector.returnAppPluginAction(action);
+	    }
 	}
 
 	LOG.info("Returning error as INTERRUPTED result.");
@@ -111,9 +117,23 @@ public class ActivationController {
 	LOG.info("Returning result: {}", result);
 	ActivationResult activationResult;
 	switch (result.getResultCode()) {
-	     case REDIRECT:
+	    case REDIRECT:
 		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
 		activationResult = new ActivationResult(location, REDIRECT);
+		break;
+	    case OK:
+		activationResult = new ActivationResult(OK);
+		break;
+	    case INTERRUPTED:
+		activationResult = new ActivationResult(INTERRUPTED, result.getResultMessage());
+		break;
+	    case DEPENDING_HOST_UNREACHABLE:
+		activationResult = new ActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
+		break;
+	    case WRONG_PARAMETER:
+	    case MISSING_PARAMETER:
+	    case RESOURCE_UNAVAILABLE:
+		activationResult = new ActivationResult(CLIENT_ERROR, result.getResultMessage());
 		break;
 	    default:
 		activationResult = new ActivationResult(INTERNAL_ERROR, result.getResultMessage());

@@ -5,7 +5,7 @@
     <parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>crypto</artifactId>
-		<version>1.3.0-rc13-SNAPSHOT</version>
+		<version>1.3.0-rc18-SNAPSHOT</version>
     </parent>
 
     <groupId>org.openecard.crypto</groupId>
@@ -14,19 +14,6 @@
     <name>Open eCard Bouncy Castle</name>
 
     <build>
-		<pluginManagement>
-			<plugins>
-				<!-- skip API check as this is a third party component taking care of backwards compatibility -->
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
 		<plugins>
 			<!-- copy bouncycastle sources -->
 			<plugin>
@@ -40,7 +27,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/core/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/core/src/main/java/org/bouncycastle</basedir>
 							<excludes>
 								<exclude>crypto/tls/*</exclude>
 							</excludes>
@@ -53,7 +40,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/prov/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/prov/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
 					<execution>
@@ -63,7 +50,7 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/pkix/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/pkix/src/main/java/org/bouncycastle</basedir>
 							<excludes>
 								<exclude>**/openssl/**</exclude>
 							</excludes>
@@ -77,14 +64,13 @@
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<basedir>${basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
+							<basedir>${project.basedir}/src/bc/tls/src/main/java/org/bouncycastle</basedir>
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<outputBasedir>${basedir}/target/generated-sources/bc</outputBasedir>
+					<outputBasedir>${project.basedir}/target/generated-sources/bc</outputBasedir>
 					<outputDir>org/openecard/bouncycastle</outputDir>
-					<encoding>${project.build.sourceEncoding}</encoding>
 					<includes>
 						<include>**/*.java</include>
 					</includes>

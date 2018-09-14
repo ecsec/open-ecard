@@ -90,7 +90,7 @@ public class InsertCardDialog {
 	} else {
 	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, 
 		    cardNameAndType.values());
-	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
+	    evDispatcher.add(insertCardAction, EventType.RECOGNIZED_CARD_ACTIVE);
 	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	    ExecutionEngine exec = new ExecutionEngine(ucr);
 	    // run gui

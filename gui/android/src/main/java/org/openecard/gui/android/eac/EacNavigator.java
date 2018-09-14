@@ -25,12 +25,13 @@ package org.openecard.gui.android.eac;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.android.AndroidNavigator;
 import org.openecard.gui.android.AndroidResult;
 import org.openecard.gui.android.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
@@ -38,21 +39,31 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.sal.protocol.eac.EACProtocol;
+import org.openecard.sal.protocol.eac.gui.CHATStep;
+import org.openecard.sal.protocol.eac.gui.CVCStep;
 import org.openecard.sal.protocol.eac.gui.EacPinStatus;
+import org.openecard.sal.protocol.eac.gui.ErrorStep;
+import org.openecard.sal.protocol.eac.gui.PINStep;
+import org.openecard.sal.protocol.eac.gui.ProcessingStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class EacNavigator implements UserConsentNavigator {
+public class EacNavigator extends AndroidNavigator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EacNavigator.class);
 
     private final List<Step> steps;
     private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver;
     private final EacGuiImpl guiService;
 
-    private int idx = -1;
+    private int idx = 0;
     private boolean pinFirstUse = true;
+    private boolean finalPinStatusDelivered = false;
 
 
     public EacNavigator(UserConsentDescription uc, GuiIfaceReceiver<EacGuiImpl> ifaceReceiver) {
@@ -63,7 +74,7 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public boolean hasNext() {
-	return idx < (steps.size() - 1);
+	return idx < steps.size();
     }
 
     @Override
@@ -79,28 +90,34 @@ public class EacNavigator implements UserConsentNavigator {
 	// if cancel call has been issued, abort the whole process
 	if (this.guiService.isCancelled()) {
 	    // prevent index out of bounds
-	    int i = idx == -1 ? 0 : idx > steps.size() ? steps.size() - 1 : idx;
-	    return new AndroidResult(steps.get(i), ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    int i = idx > steps.size() ? steps.size() - 1 : idx;
+	    return new AndroidResult(steps.get(i), ResultStatus.CANCEL, Collections.emptyList());
 	}
 
+	// get current step
+	Step curStep = steps.get(idx);
+
 	// handle step display
-	if (idx == -1) {
+	if (CVCStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
-	    return new AndroidResult(steps.get(idx), ResultStatus.OK, Collections.EMPTY_LIST);
-	} else if (idx == 0) {
+	    // step over CVC step, its data is processed in the next step
+	    return new AndroidResult(curStep, ResultStatus.OK, Collections.emptyList());
+	} else if (CHATStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
 	    Step cvcStep = steps.get(0);
 	    Step chatStep = steps.get(1);
-	    try {
-		this.guiService.loadValuesFromSteps(cvcStep, chatStep);
-		List<OutputInfoUnit> outInfo = this.guiService.getSelection();
-		return new AndroidResult(chatStep, ResultStatus.OK, outInfo);
-	    } catch (InterruptedException ex) {
-		return new AndroidResult(chatStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-	} else if (idx == 1) {
+	    return displayAndExecuteBackground(chatStep, () -> {
+		try {
+		    this.guiService.loadValuesFromSteps(cvcStep, chatStep);
+		    List<OutputInfoUnit> outInfo = this.guiService.getSelection();
+		    return new AndroidResult(chatStep, ResultStatus.OK, outInfo);
+		} catch (InterruptedException ex) {
+		    return new AndroidResult(cvcStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+		}
+	    });
+	} else if (PINStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
-	    Step pinStep = steps.get(2);
+	    Step pinStep = curStep;
 
 	    if (pinFirstUse) {
 		pinFirstUse = false;
@@ -108,46 +125,48 @@ public class EacNavigator implements UserConsentNavigator {
 		this.guiService.setPinCorrect(false);
 	    }
 
-	    // get blocked status from dynamic context
-	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
-	    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
-		this.guiService.sendPinStatus(blockedStatus);
-		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-
-	    // ask user for the pin
-	    try {
-		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
-		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-		return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
-	    } catch (InterruptedException ex) {
-		return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-	} else if (idx == 2) {
+	    return displayAndExecuteBackground(pinStep, () -> {
+		// ask user for the pin
+		try {
+		    List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+		    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+		    return new AndroidResult(pinStep, ResultStatus.OK, outInfo);
+		} catch (InterruptedException ex) {
+		    return new AndroidResult(pinStep, ResultStatus.CANCEL, Collections.emptyList());
+		}
+	    });
+	} else if (ProcessingStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
-	    Step s = steps.get(idx);
 
-	    // get blocked status from dynamic context
-	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
-	    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
-		this.guiService.setPinCorrect(false);
-		this.guiService.sendPinStatus(blockedStatus);
-		return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-
-	    if ("PROTOCOL_GUI_STEP_PROCESSING".equals(s.getID())) {
+	    return displayAndExecuteBackground(curStep, () -> {
+		LOG.debug("Delivering final PIN status in ProcessingStep.");
+		// notify user that PIN entry was successful
+		this.finalPinStatusDelivered = true;
 		this.guiService.setPinCorrect(true);
-		return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
-	    } else {
-		this.guiService.setPinCorrect(false);
-		return new AndroidResult(s, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-	} else {
-	    Step s = steps.get(idx);
+		return new AndroidResult(curStep, ResultStatus.OK, Collections.emptyList());
+	    });
+	} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
-	    return new AndroidResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
+
+	    return displayAndExecuteBackground(curStep, () -> {
+		if (! finalPinStatusDelivered) {
+		    LOG.debug("Delivering final PIN status in ErrorStep.");
+		    finalPinStatusDelivered = true;
+		    // get blocked status from dynamic context
+		    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
+		    LOG.debug("Final PIN status is {}.", blockedStatus);
+		    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
+			this.guiService.setPinCorrect(false);
+			this.guiService.sendPinStatus(blockedStatus);
+		    }
+		}
+		// errors always end in cancel
+		return new AndroidResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	    });
+	} else {
+	    idx++;
+	    return new AndroidResult(curStep, ResultStatus.OK, Collections.emptyList());
 	}
     }
 
@@ -158,13 +177,13 @@ public class EacNavigator implements UserConsentNavigator {
 
     @Override
     public StepResult replaceCurrent(Step step) {
-	steps.set(idx, step);
+	steps.set(idx - 1, step);
 	return current();
     }
 
     @Override
     public StepResult replaceNext(Step step) {
-	steps.set(idx+1, step);
+	steps.set(idx, step);
 	return next();
     }
 
@@ -182,6 +201,19 @@ public class EacNavigator implements UserConsentNavigator {
     public void close() {
 	ifaceReceiver.terminate();
     }
+
+    @Override
+    protected StepResult displayAndExecuteBackground(Step stepObj, Callable<StepResult> step) {
+	StepResult r = super.displayAndExecuteBackground(stepObj, step);
+	switch (r.getStatus()) {
+	    case CANCEL:
+	    case INTERRUPTED:
+		guiService.cancel();
+		break;
+	}
+	return r;
+    }
+
 
     private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
 	for (InputInfoUnit infoInUnit : inInfo) {

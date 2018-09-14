@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>transport</artifactId>
-		<version>1.3.0-rc13-SNAPSHOT</version>
+		<version>1.3.0-rc18-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.transport</groupId>
@@ -17,7 +17,6 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
@@ -41,16 +40,6 @@
 									<shadedPattern>org.openecard.apache.http</shadedPattern>
 								</relocation>
 							</relocations>
-							<artifactSet>
-								<includes>
-									<include>org.apache.httpcomponents:*</include>
-								</includes>
-							</artifactSet>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-								</filter>
-							</filters>
 						</configuration>
 					</execution>
 				</executions>

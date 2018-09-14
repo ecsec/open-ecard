@@ -103,7 +103,7 @@ public class VersionUpdateLoader {
 	    throw new IllegalArgumentException("Failed to retrieve update list from server.", ex);
 	} catch (JSONException ex) {
 	    LOG.warn("Package type {} not supported in update list.", pkgType);
-	    throw new IllegalArgumentException("Package type "+pkgType+" not supported in update list.", ex);
+	    throw new IllegalArgumentException("Package type " + pkgType + " not supported in update list.", ex);
 	}
     }
 
@@ -123,6 +123,8 @@ public class VersionUpdateLoader {
 	    return "rpm";
 	} else if (SysUtils.isSuSEOrDerivate()) {
 	    return "rpm";
+	} else if (SysUtils.isMacOSX()) {
+	    return "osx";
 	}
 
 	return "UNKNOWN";

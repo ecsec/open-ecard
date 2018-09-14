@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,10 @@
 
 package org.openecard.transport.paos;
 
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.ByteArrayInputStream;
@@ -30,9 +34,11 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.apache.http.HttpEntity;
 import org.openecard.apache.http.HttpException;
 import org.openecard.apache.http.HttpResponse;
@@ -67,6 +73,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.util.Promise;
 
 
 /**
@@ -104,6 +113,8 @@ public class PAOS {
     private final TlsConnectionHandler tlsHandler;
 
     private final String serviceString;
+    private final DocumentSchemaValidator schemaValidator;
+    private final Promise<DocumentValidatorException> validationError;
 
     /**
      * Creates a PAOS instance and configures it for a given endpoint.
@@ -112,13 +123,17 @@ public class PAOS {
      * @param dispatcher The dispatcher instance capable of dispatching the received messages.
      * @param tlsHandler The TlsClient containing the configuration of the yet to be established TLS channel, or
      *   {@code null} if TLS should not be used.
+     * @param schemaValidator Schema Validator used to validate incoming messages.
      * @throws PAOSException In case the PAOS module could not be initialized.
      */
-    public PAOS(@Nonnull Dispatcher dispatcher, @Nonnull TlsConnectionHandler tlsHandler) throws PAOSException {
+    public PAOS(@Nonnull Dispatcher dispatcher, @Nonnull TlsConnectionHandler tlsHandler,
+	    @Nonnull DocumentSchemaValidator schemaValidator) throws PAOSException {
 	this.dispatcher = dispatcher.getFilter();
 	this.tlsHandler = tlsHandler;
-	serviceString = buildServiceString();
-	headerValuePaos = String.format("ver=\"%s\" %s", ECardConstants.PAOS_VERSION_20, serviceString);
+	this.schemaValidator = schemaValidator;
+	this.validationError = new Promise<>();
+	this.serviceString = buildServiceString();
+	this.headerValuePaos = String.format("ver=\"%s\" %s", ECardConstants.PAOS_VERSION_20, this.serviceString);
 
 	try {
 	    this.idGenerator = new MessageIdGenerator();
@@ -197,11 +212,11 @@ public class PAOS {
 	elem.setTextContent(value);
     }
 
-    private Object processPAOSRequest(InputStream content) throws PAOSException {
+    private Object processPAOSRequest(InputStream content) throws PAOSException, DocumentValidatorException {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	   // msg.getSOAPHeader().
+	    Element body = msg.getSOAPBody().getChildElements().get(0);
 	    updateMessageID(msg);
 
 	    if (LOG.isDebugEnabled()) {
@@ -212,7 +227,26 @@ public class PAOS {
 		}
 	    }
 
-	    return m.unmarshal(msg.getSOAPBody().getChildElements().get(0));
+	    // fix profile attribute if it is not present
+	    // while there are the eID-Servers to blame, some don't get it right and actually Profile is a useless attribute anyway
+	    if (body.getLocalName().equals("StartPAOSResponse") && ! body.hasAttribute("Profile")) {
+		LOG.warn("Received message without Profile attribute, adding one for proper validation.");
+		body.setAttribute("Profile", ECardConstants.Profile.ECARD_1_1);
+
+		try {
+		    // copy or the validation produces strange errors
+		    String docStr = m.doc2str(body);
+		    Document newDoc = m.str2doc(docStr);
+		    body = newDoc.getDocumentElement();
+		} catch (SAXException | TransformerException ex) {
+		    throw new PAOSException("Failed to copy document.", ex);
+		}
+	    }
+
+	    // validate input message
+	    schemaValidator.validate(body);
+
+	    return m.unmarshal(body);
 	} catch (MarshallingTypeException ex) {
 	    LOG.error(ex.getMessage(), ex);
 	    throw new PAOSException(ex.getMessage(), ex);
@@ -238,6 +272,17 @@ public class PAOS {
 
     private SOAPMessage createSOAPMessage(Object content) throws MarshallingTypeException, SOAPException {
 	Document contentDoc = m.marshal(content);
+
+	try {
+	    String docStr = m.doc2str(contentDoc);
+	    Document newDoc = m.str2doc(docStr);
+	    schemaValidator.validate(newDoc);
+	} catch (DocumentValidatorException ex) {
+	    LOG.warn("Schema validation of outgoing message failed.", ex);
+	} catch (SAXException | TransformerException ex) {
+	    throw new MarshallingTypeException("Failed to copy document.", ex);
+	}
+
 	SOAPMessage msg = m.add2soap(contentDoc);
 	SOAPHeader header = msg.getSOAPHeader();
 
@@ -335,24 +380,48 @@ public class PAOS {
 			HttpEntity entity = response.getEntity();
 			byte[] entityData = FileUtils.toByteArray(entity.getContent());
 			HttpUtils.dumpHttpResponse(LOG, response, entityData);
-			// consume entity
-			Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
+			try {
+			    // consume entity
+			    Object requestObj = processPAOSRequest(new ByteArrayInputStream(entityData));
 
-			// break when message is startpaosresponse
-			if (requestObj instanceof StartPAOSResponse) {
-			    StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
-			    // Some eID-Servers ignore error from previous steps so check whether our last message was ok.
-			    // This does not in case we sent a correct message with wrong content and the eID-Server returns
-			    // an ok.
-			    if (lastResponse != null) {
-				WSHelper.checkResult(lastResponse);
+			    // break when message is startpaosresponse
+			    if (requestObj instanceof StartPAOSResponse) {
+				StartPAOSResponse startPAOSResponse = (StartPAOSResponse) requestObj;
+
+				// if the last error was a schema validation error, then we must communicate that to caller
+				DocumentValidatorException validateEx = validationError.derefNonblocking();
+				if (validateEx != null) {
+				    LOG.debug("Previous validation error found, terminating process.");
+				    throw validateEx;
+				}
+
+				// Some eID-Servers ignore error from previous steps so check whether our last message was ok.
+				// This does not in case we sent a correct message with wrong content and the eID-Server returns
+				// an ok.
+				if (lastResponse != null) {
+				    WSHelper.checkResult(lastResponse);
+				}
+				WSHelper.checkResult(startPAOSResponse);
+				return startPAOSResponse;
 			    }
-			    WSHelper.checkResult(startPAOSResponse);
-			    return startPAOSResponse;
-			}
 
-			// send via dispatcher
-			msg = dispatcher.deliver(requestObj);
+			    // send via dispatcher
+			    msg = dispatcher.deliver(requestObj);
+			} catch (DocumentValidatorException ex) {
+			    LOG.error("PAOS input message failed to validate.", ex);
+
+			    // the ecard API forces us to interpret the message because the response must be the equivalent message not a fault
+			    Object responseObj = synthesizeObj(new ByteArrayInputStream(entityData), ex);
+			    if (responseObj != null) {
+				msg = responseObj;
+				if (! validationError.isDelivered()) {
+				    validationError.deliver(ex);
+				}
+			    } else {
+				// do the right thing and throw an error
+				throw ex;
+			    }
+			}
 
 			// check if connection can be used one more time
 			isReusable = reuse.keepAlive(response, ctx);
@@ -373,6 +442,8 @@ public class PAOS {
 	    throw new PAOSException(DELIVERY_FAILED, ex);
 	} catch (SOAPException ex) {
 	    throw new PAOSException(SOAP_MESSAGE_FAILURE, ex);
+	} catch (DocumentValidatorException ex) {
+	    throw new PAOSException(SCHEMA_VALIDATION_FAILED, ex);
 	} catch (MarshallingTypeException ex) {
 	    throw new PAOSDispatcherException(MARSHALLING_ERROR, ex);
 	} catch (InvocationTargetException ex) {
@@ -439,6 +510,37 @@ public class PAOS {
 	    builder.append('"');
 	}
 	return builder.toString();
+    }
+
+    @Nullable
+    private Object synthesizeObj(ByteArrayInputStream content, DocumentValidatorException cause) {
+	try {
+	    Document doc = m.str2doc(content);
+	    SOAPMessage msg = m.doc2soap(doc);
+	    Element body = msg.getSOAPBody().getChildElements().get(0);
+	    Object obj = m.unmarshal(body);
+
+	    if (obj instanceof DIDAuthenticate) {
+		DIDAuthenticate didAuth = (DIDAuthenticate) obj;
+		DIDAuthenticationDataType protoIn = didAuth.getAuthenticationProtocolData();
+
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, cause.getMessage());
+		DIDAuthenticateResponse res = WSHelper.makeResponse(DIDAuthenticateResponse.class, r);
+		EmptyResponseDataType protoData = new EmptyResponseDataType();
+		res.setAuthenticationProtocolData(protoData);
+		if (protoIn != null) {
+		    protoData.setProtocol(protoIn.getProtocol());
+		}
+
+		return res;
+	    }
+
+	    // no special case needed
+	    return null;
+	} catch (IOException | SAXException | WSMarshallerException ex) {
+	    // in case of error, just quit
+	    return null;
+	}
     }
 
 }

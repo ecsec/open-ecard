@@ -30,18 +30,14 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.openecard.binding.tctoken.ex.ErrorTranslations;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.EventCallback;
-import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.common.interfaces.EventFilter;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
 import org.openecard.common.util.HandlerUtils;
-import org.openecard.gui.UserConsent;
-import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
+import org.openecard.common.util.Promise;
 import org.openecard.transport.paos.PAOS;
 import org.openecard.transport.paos.PAOSConnectionException;
 import org.openecard.transport.paos.PAOSException;
@@ -62,17 +58,15 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     private final ConnectionHandleType connectionHandle;
     private final List<String> supportedDIDs;
     private final TCTokenRequest tokenRequest;
-    private final UserConsent gui;
-    private final EventDispatcher evManager;
+    private final Promise<DocumentSchemaValidator> schemaValidator;
 
     public PAOSTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, List<String> supportedDIDs,
-	    TCTokenRequest tokenRequest, UserConsent gui, EventDispatcher evManager) {
+	    TCTokenRequest tokenRequest, Promise<DocumentSchemaValidator> schemaValidator) {
 	this.dispatcher = dispatcher;
 	this.connectionHandle = connectionHandle;
 	this.supportedDIDs = supportedDIDs;
 	this.tokenRequest = tokenRequest;
-	this.gui = gui;
-	this.evManager = evManager;
+	this.schemaValidator = schemaValidator;
     }
 
 
@@ -80,26 +74,20 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
     public StartPAOSResponse call()
 	    throws MalformedURLException, PAOSException, DispatcherException, InvocationTargetException,
 	    ConnectionError, PAOSConnectionException {
-	// add event listener terminating the whole process in case the card is removed
-	final Thread execThread = Thread.currentThread();
-	EventCallback disconnectEventSink = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		if (eventType == EventType.CARD_REMOVED) {
-		    LOG.info("Card has been removed during authentication. Shutting down EAC process.");
-		    execThread.interrupt();
-		}
-	    }
-	};
-	EventFilter evFilter = new CardRemovedFilter(connectionHandle.getIFDName(), connectionHandle.getSlotIndex());
-	evManager.add(disconnectEventSink, evFilter);
-
 	try {
 	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
 	    tlsHandler.setUpClient();
 
+	    DocumentSchemaValidator v;
+	    try {
+		v = schemaValidator.deref();
+	    } catch (InterruptedException ex) {
+		// TODO: add i18n
+		throw new PAOSException(ErrorTranslations.PAOS_INTERRUPTED);
+	    }
+
 	    // Set up PAOS connection
-	    PAOS p = new PAOS(dispatcher, tlsHandler);
+	    PAOS p = new PAOS(dispatcher, tlsHandler, v);
 
 	    // Create StartPAOS message
 	    StartPAOS sp = new StartPAOS();
@@ -123,9 +111,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
 	    return p.sendStartPAOS(sp);
 	} finally {
-	    evManager.del(disconnectEventSink);
 	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
-	    TCTokenHandler.killUserConsent();
 	}
     }
 

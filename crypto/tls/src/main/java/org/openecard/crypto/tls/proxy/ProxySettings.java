@@ -147,18 +147,38 @@ public class ProxySettings {
      */
     public Socket getSocket(String protocol, String hostname, int port) throws IOException, URISyntaxException {
 	Proxy p = getProxy(protocol, hostname, port);
-	Socket sock = new Socket(p);
-	SocketAddress addr;
-	if (p.type() == Proxy.Type.DIRECT) {
-	    addr = new InetSocketAddress(hostname, port);
-	} else {
-	    addr = InetSocketAddress.createUnresolved(hostname, port);
+
+	if (isAndroid() && p.type() == Proxy.Type.HTTP) {
+	    LOG.debug("Replacing proxy implementation for Android system.");
+	    SocketAddress sa = p.address();
+	    if (sa instanceof InetSocketAddress) {
+		InetSocketAddress isa = (InetSocketAddress) sa;
+		String phost = isa.getHostString();
+		int pport = isa.getPort();
+		HttpConnectProxy hcp = new HttpConnectProxy("HTTP", false, phost, pport, null, null);
+		p = hcp;
+	    }
 	}
-	sock.setKeepAlive(true);
-	 // this is pretty much, but not a problem, as this only shifts the responsibility to the server
-	sock.setSoTimeout(5 * 60 * 1000);
-	sock.connect(addr, 60 * 1000);
-	return sock;
+
+	if (p instanceof HttpConnectProxy) {
+	    LOG.debug("Using custom HttpConnectProxy to obtain socket.");
+	    HttpConnectProxy hcp = (HttpConnectProxy) p;
+	    return hcp.getSocket(hostname, port);
+	} else {
+	    LOG.debug("Using proxy ({}) to obtain socket.", p.type());
+	    Socket sock = new Socket(p);
+	    SocketAddress addr;
+	    if (p.type() == Proxy.Type.DIRECT) {
+		addr = new InetSocketAddress(hostname, port);
+	    } else {
+		addr = InetSocketAddress.createUnresolved(hostname, port);
+	    }
+	    sock.setKeepAlive(true);
+	     // this is pretty much, but not a problem, as this only shifts the responsibility to the server
+	    sock.setSoTimeout(5 * 60 * 1000);
+	    sock.connect(addr, 60 * 1000);
+	    return sock;
+	}
     }
 
 }

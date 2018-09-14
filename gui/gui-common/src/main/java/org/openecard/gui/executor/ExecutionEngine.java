@@ -88,6 +88,7 @@ public class ExecutionEngine {
 	// loop over steps. break inside loop
 	while (true) {
 	    ResultStatus result = next.getStatus();
+	    LOG.debug("Step {} finished with result {}.", next.getStepID(), result);
 	    // close dialog on cancel and interrupt
 	    if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted()) {
 		navigator.close();
@@ -120,21 +121,23 @@ public class ExecutionEngine {
 	    }
 
 	    // replace step if told by result value
-	    if (next.getReplacement() != null) {
+	    Step replaceStep = next.getReplacement();
+	    if (replaceStep != null) {
+		LOG.debug("Replacing with step.id={}.", replaceStep.getID());
 		switch (next.getStatus()) {
 		    case BACK:
-			next = navigator.replacePrevious(next.getReplacement());
+			next = navigator.replacePrevious(replaceStep);
 			break;
 		    case OK:
 			if (navigator.hasNext()) {
-			    next = navigator.replaceNext(next.getReplacement());
+			    next = navigator.replaceNext(replaceStep);
 			} else {
 			    navigator.close();
 			    return convertStatus(StepActionResultStatus.NEXT);
 			}
 			break;
 		    case RELOAD:
-			next = navigator.replaceCurrent(next.getReplacement());
+			next = navigator.replaceCurrent(replaceStep);
 			break;
 		    default:
 			// fallthrough because CANCEL and INTERRUPTED are already handled
@@ -151,6 +154,7 @@ public class ExecutionEngine {
 		StepActionResult actionResult;
 		try {
 		    actionResult = actionFuture.get();
+		    LOG.debug("Step Action {} finished with result {}.", action.getStepID(), actionResult.getStatus());
 		} catch (CancellationException ex) {
 		    LOG.info("StepAction was canceled.", ex);
 		    navigator.close();
@@ -183,21 +187,23 @@ public class ExecutionEngine {
 		}
 
 		// replace step if told by result value
-		if (actionResult.getReplacement() != null) {
+		Step actionReplace = actionResult.getReplacement();
+		if (actionReplace != null) {
+		    LOG.debug("Replacing after action with step.id={}.", actionReplace.getID());
 		    switch (actionResult.getStatus()) {
 			case BACK:
-			    next = navigator.replacePrevious(actionResult.getReplacement());
+			    next = navigator.replacePrevious(actionReplace);
 			    break;
 			case NEXT:
 			    if (navigator.hasNext()) {
-				next = navigator.replaceNext(actionResult.getReplacement());
+				next = navigator.replaceNext(actionReplace);
 			    } else {
 				navigator.close();
 				return convertStatus(StepActionResultStatus.NEXT);
 			    }
 			    break;
 			case REPEAT:
-			    next = navigator.replaceCurrent(actionResult.getReplacement());
+			    next = navigator.replaceCurrent(actionReplace);
 			    break;
 			default:
 			    // fallthrough because CANCEL is already handled

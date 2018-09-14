@@ -97,7 +97,11 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    // XXE countermeasures
 	    tmpW3Factory.setExpandEntityReferences(false);
 	    tmpW3Factory.setXIncludeAware(false);
-	    tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    try {
+		tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Failed to disallow external DTD access.");
+	    }
 	    try {
 		tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 	    } catch (ParserConfigurationException ex) {
@@ -111,8 +115,16 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    TransformerFactory tfactory = TransformerFactory.newInstance();
 	    tfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 	    // XXE countermeasures
-	    tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-	    tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+	    try {
+		tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Failed to disallow external DTD access.");
+	    }
+	    try {
+		tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Failed to disallow external stylesheet access.");
+	    }
 	    try {
 		tfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 	    } catch (TransformerConfigurationException ex) {

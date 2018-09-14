@@ -24,6 +24,8 @@ package org.openecard.ifd.scio;
 
 import iso.std.iso_iec._24727.tech.schema.PinInputType;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
@@ -66,11 +68,13 @@ public class NativePinStepAction extends StepAction {
 	    exception = new IFDException(ex);
 	} catch (IFDException ex) {
 	    exception = ex;
+	} catch (InterruptedException ex) {
+	    exception = new IFDException(ex);
 	}
 	return new StepActionResult(StepActionResultStatus.NEXT);
     }
 
-    private byte[] nativePinVerify() throws IFDException, SCIOException {
+    private byte[] nativePinVerify() throws IFDException, SCIOException, InterruptedException {
 	// get data for verify command and perform it
 	PCSCPinVerify verifyStruct = new PCSCPinVerify(pinInput.getPasswordAttributes(), template);
 	byte[] verifyStructData = verifyStruct.toBytes();

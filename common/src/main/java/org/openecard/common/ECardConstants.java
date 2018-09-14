@@ -58,7 +58,7 @@ public class ECardConstants {
 
     public static final BigInteger ECARD_API_VERSION_MAJOR = BigInteger.valueOf(1);
     public static final BigInteger ECARD_API_VERSION_MINOR = BigInteger.valueOf(1);
-    public static final BigInteger ECARD_API_VERSION_SUBMINOR = BigInteger.valueOf(4);
+    public static final BigInteger ECARD_API_VERSION_SUBMINOR = BigInteger.valueOf(5);
 
 
     public static class CIF {

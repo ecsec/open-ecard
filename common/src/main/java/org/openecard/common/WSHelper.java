@@ -77,6 +77,30 @@ public class WSHelper {
 	return r.getResultMajor().equals(ECardConstants.Major.WARN);
     }
 
+    public static <T extends ResponseBaseType> boolean minorIsOneOf(@Nonnull T response, @Nonnull String... minors) {
+	Result r = response.getResult();
+	return minorIsOneOf(r, minors);
+    }
+
+    public static <T extends ECardException> boolean minorIsOneOf(@Nonnull T ex, @Nonnull String... minors) {
+	Result r = ex.getResult();
+	return minorIsOneOf(r, minors);
+    }
+
+    public static boolean minorIsOneOf(@Nonnull Result r, @Nonnull String... minors) {
+	String minor = r.getResultMinor();
+
+	if (minor != null) {
+	    for (String next : minors) {
+		if (r.getResultMinor().equals(next)) {
+		    return true;
+		}
+	    }
+	}
+
+	return false;
+    }
+
     /**
      * Creates a WSException instance based on the given Result instance.
      * The result is not checked if it represents an error. The caller of this function should be aware of that fact.

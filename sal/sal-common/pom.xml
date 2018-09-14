@@ -5,7 +5,7 @@
     <parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>sal</artifactId>
-		<version>1.3.0-rc13-SNAPSHOT</version>
+		<version>1.3.0-rc18-SNAPSHOT</version>
     </parent>
 
 	<groupId>org.openecard.sal</groupId>

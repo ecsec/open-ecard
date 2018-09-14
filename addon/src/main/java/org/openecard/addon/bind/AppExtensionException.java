@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,15 +20,24 @@
  *
  ***************************************************************************/
 
-@XmlSchema(
-	elementFormDefault=XmlNsForm.QUALIFIED,
-	namespace="http://www.bsi.bund.de/ecard/api/1.1",
-	xmlns={
-	    @XmlNs(prefix="iso", namespaceURI="urn:iso:std:iso-iec:24727:tech:schema")
-	}
-)
-package de.bund.bsi.ecard.api._1;
+package org.openecard.addon.bind;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
+import org.openecard.common.WSHelper;
+
+
+/**
+ * Exception indicating an error in the processing of an AppExtension.
+ *
+ * @author Tobias Wich
+ */
+public class AppExtensionException extends WSHelper.WSException {
+
+    public AppExtensionException(String minor, String msg) {
+	super(WSHelper.makeResultError(minor, msg));
+    }
+
+    public AppExtensionException(String msg) {
+	super(WSHelper.makeResultUnknownError(msg));
+    }
+
+}

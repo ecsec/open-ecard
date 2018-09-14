@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,20 +22,32 @@
 
 package org.openecard.common.interfaces;
 
+import javax.annotation.Nonnull;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 
 /**
- * Exception indicating problems in the validation of an object.
+ * Interface for schema based document validations.
  *
  * @author Tobias Wich
  */
-public class ObjectValidatorException extends Exception {
+public interface DocumentSchemaValidator {
 
-    public ObjectValidatorException(String message) {
-	super(message);
-    }
+    /**
+     * Validates the given document against the schema definition of the instance.
+     *
+     * @param doc The document to verify.
+     * @throws DocumentValidatorException Indicates a failed document validation.
+     */
+    void validate(@Nonnull Document doc) throws DocumentValidatorException;
 
-    public ObjectValidatorException(String message, Throwable cause) {
-	super(message, cause);
-    }
+    /**
+     * Validates the given document element against the schema definition of the instance.
+     *
+     * @param doc The element to verify.
+     * @throws DocumentValidatorException Indicates a failed document validation.
+     */
+    void validate(@Nonnull Element doc) throws DocumentValidatorException;
 
 }

@@ -25,6 +25,8 @@ package org.openecard.gui.android.eac;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
@@ -37,6 +39,8 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
+import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.slf4j.Logger;
@@ -54,6 +58,7 @@ public class EacGuiImpl implements EacGui {
     private final Promise<Boolean> cancelPromise = new Promise<>();
 
     private final Promise<ServerData> serverData = new Promise<>();
+    private final Promise<String> transactionInfo = new Promise<>();
 
     private final Promise<List<BoxItem>> userReadSelection = new Promise<>();
     private final Promise<List<BoxItem>> userWriteSelection = new Promise<>();
@@ -70,6 +75,12 @@ public class EacGuiImpl implements EacGui {
     public EacGuiImpl() {
     }
 
+    @Override
+    public String getProtocolType() {
+	// generic EAC2
+	return "urn:oid:1.3.162.15480.3.0.14";
+    }
+
     ///
     /// Functions for the visible UI
     ///
@@ -80,6 +91,15 @@ public class EacGuiImpl implements EacGui {
 	    return serverData.deref();
 	} catch (InterruptedException ex) {
 	    throw new InterruptedException("Waiting for ServerData cancelled by thread termination.");
+	}
+    }
+
+    @Override
+    public String getTransactionInfo() throws InterruptedException {
+	try {
+	    return transactionInfo.deref();
+	} catch (InterruptedException ex) {
+	    throw new InterruptedException("Waiting for TransactionInfo cancelled by thread termination.");
 	}
     }
 
@@ -122,9 +142,11 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public void cancel() {
+	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
 	    cancelPromise.deliver(Boolean.TRUE);
 	    cancelPromise(serverData);
+	    cancelPromise(transactionInfo);
 	    cancelPromise(userReadSelection);
 	    cancelPromise(userWriteSelection);
 	    cancelPromise(userPin);
@@ -201,6 +223,14 @@ public class EacGuiImpl implements EacGui {
 
 	ServerData sd = new ServerData(subject, subjectUrl, termsOfUsage, validity, issuer, issuerUrl, readAccess, writeAccess);
 	serverData.deliver(sd);
+
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	EACData eacData = (EACData) ctx.get(EACProtocol.EAC_DATA);
+	String tInfo = null;
+	if (eacData != null) {
+	    tInfo = eacData.transactionInfo;
+	}
+	transactionInfo.deliver(tInfo);
     }
 
     public List<OutputInfoUnit> getSelection() throws InterruptedException {
@@ -306,6 +336,7 @@ public class EacGuiImpl implements EacGui {
 	}
 	// wait
 	try {
+	    LOG.debug("Waiting for call of the cancel function.");
 	    cancelPromise.deref();
 	} catch (InterruptedException ex) {
 	    // I don't care

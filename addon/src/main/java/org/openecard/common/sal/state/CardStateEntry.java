@@ -31,6 +31,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -161,8 +163,10 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	protoObjects.remove(type);
     }
 
-    public void removeAllProtocols() {
+    public Collection<SALProtocol> removeAllProtocols() {
+	Collection<SALProtocol> ps = Collections.unmodifiableCollection(protoObjects.values());
 	protoObjects.clear();
+	return ps;
     }
 
     public void setFCPOfSelectedEF(FCP fcp) {

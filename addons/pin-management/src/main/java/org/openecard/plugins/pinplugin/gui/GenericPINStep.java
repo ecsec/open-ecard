@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -22,16 +22,23 @@
 
 package org.openecard.plugins.pinplugin.gui;
 
+import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.CAN_CORRECT;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_CORRECT;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_STATUS;
+import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PUK_CORRECT;
 import org.openecard.plugins.pinplugin.RecognizedState;
 
 
 /**
  *
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class GenericPINStep extends Step {
 
@@ -168,6 +175,10 @@ public class GenericPINStep extends Step {
 	pinState = newState;
 	getInputInfoUnits().clear();
 	generateGenericGui();
+
+	// update state
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
+	ctx.put(PIN_STATUS, newState);
     }
 
     private void createPINChangeGuiNativ() {
@@ -326,9 +337,10 @@ public class GenericPINStep extends Step {
     }
 
     private void createErrorGui() {
+	setID("error");
 	setReversible(false);
 	Text errorText = new Text();
-	switch(pinState) {
+	switch (pinState) {
 	    case PIN_deactivated:
 		errorText.setText(lang.translationForKey(ERRORSTEP_DEACTIVATED));
 		break;
@@ -342,28 +354,37 @@ public class GenericPINStep extends Step {
 	getInputInfoUnits().add(errorText);
     }
 
-    protected void setWrongPINFormat(boolean wrongFormat) {
+    protected void setFailedPINVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongPINFormat = wrongFormat;
-    }
-
-    protected void setFailedPINVerify(boolean failedVerify) {
 	failedPINVerify = failedVerify;
+	exportPinCorrect(! wrongFormat && ! failedVerify);
     }
 
-    protected void setWrongCANFormat(boolean wrongFormat) {
+    protected void setFailedCANVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongCANFormat = wrongFormat;
-    }
-
-    protected void setFailedCANVerify(boolean failedVerify) {
 	failedCANVerify = failedVerify;
+	exportCanCorrect(! wrongFormat && ! failedVerify);
     }
 
-    protected void setWrongPUKFormat(boolean wrongFormat) {
+    protected void setFailedPUKVerify(boolean wrongFormat, boolean failedVerify) {
 	wrongPUKFormat = wrongFormat;
+	failedPUKVerify = failedVerify;
+	exportPukCorrect(! wrongFormat && ! failedVerify);
     }
 
-    protected void setFailedPUKVerify(boolean failedVerify) {
-	failedPUKVerify = failedVerify;
+    protected void exportPinCorrect(boolean isCorrect) {
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
+	ctx.put(PIN_CORRECT, isCorrect);
+    }
+
+    private void exportCanCorrect(boolean isCorrect) {
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
+	ctx.put(CAN_CORRECT, isCorrect);
+    }
+
+    private void exportPukCorrect(boolean isCorrect) {
+	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
+	ctx.put(PUK_CORRECT, isCorrect);
     }
 
     protected void decreasePUKCounter() {

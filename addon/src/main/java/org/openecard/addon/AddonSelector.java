@@ -31,7 +31,6 @@ import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.ifd.IFDProtocol;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.sal.SALProtocol;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -76,6 +75,10 @@ public class AddonSelector {
 	return manager.getIFDProtocol(addon, uri);
     }
 
+    public void returnIFDProtocol(IFDProtocol obj) {
+	manager.returnIFDProtocol(obj);
+    }
+
     public SALProtocol getSALProtocol(@Nonnull String uri) throws AddonNotFoundException {
 	Set<AddonSpecification> addons = manager.getRegistry().searchSALProtocol(uri);
 	if (addons.isEmpty()) {
@@ -83,6 +86,10 @@ public class AddonSelector {
 	}
 	AddonSpecification addon = strategy.select(addons);
 	return manager.getSALProtocol(addon, uri);
+    }
+
+    public void returnSALProtocol(SALProtocol obj, boolean force) {
+	manager.returnSALProtocol(obj, force);
     }
 
     public AppExtensionAction getAppExtensionAction(@Nonnull String actionId) throws AddonNotFoundException {
@@ -94,6 +101,10 @@ public class AddonSelector {
 	return manager.getAppExtensionAction(addon, actionId);
     }
 
+    public void returnAppExtensionAction(AppExtensionAction obj) {
+	manager.returnAppExtensionAction(obj);
+    }
+
     public AppPluginAction getAppPluginAction(@Nonnull String resourceName) throws AddonNotFoundException {
 	Set<AddonSpecification> addons = manager.getRegistry().searchByResourceName(resourceName);
 	if (addons.isEmpty()) {
@@ -101,6 +112,10 @@ public class AddonSelector {
 	}
 	AddonSpecification addon = strategy.select(addons);
 	return manager.getAppPluginAction(addon, resourceName);
+    }
+
+    public void returnAppPluginAction(AppPluginAction obj) {
+	manager.returnAppPluginAction(obj);
     }
 
 }

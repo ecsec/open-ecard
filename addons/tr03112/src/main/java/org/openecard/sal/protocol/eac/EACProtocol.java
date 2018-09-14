@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,19 +22,14 @@
 
 package org.openecard.sal.protocol.eac;
 
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import java.util.concurrent.Callable;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
-import org.openecard.common.util.FuturePromise;
-import org.openecard.common.util.JAXBSchemaValidator;
 import org.openecard.common.util.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -46,77 +41,80 @@ import org.openecard.common.util.Promise;
  */
 public class EACProtocol extends SALProtocolBaseImpl {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EACProtocol.class);
+
     private static final String PREFIX = "org.openecard.tr03112.eac.";
 
     public static final String EAC_DATA = PREFIX + "eac_data";
     public static final String PIN_STATUS = PREFIX + "pin_status";
-    public static final String PIN_BLOCKED_STATUS = PREFIX + "pin_blocked_status";
     public static final String IS_NATIVE_PACE = PREFIX + "is_native_pace";
     public static final String PACE_MARKER = PREFIX + "pace_marker";
     public static final String PACE_EXCEPTION = PREFIX + "pace_successful";
-    public static final String GUI_RESULT = PREFIX + "gui_result";
     public static final String SLOT_HANDLE = PREFIX + "slot_handle";
     public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
-    public static final String AUTHENTICATION_FAILED = PREFIX + "authentication_failed";
 
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
-	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.putPromise(SCHEMA_VALIDATOR, new FuturePromise<>(new Callable<ObjectSchemaValidator>() {
-	    @Override
-	    public ObjectSchemaValidator call() throws Exception {
-		boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
-		ObjectSchemaValidator v;
-		if (! noValid) {
-		    v = JAXBSchemaValidator.load(DIDAuthenticate.class, "ISO24727-Protocols.xsd");
-		} else {
-		    // always valid
-		    v = new ObjectSchemaValidator() {
-			@Override
-			public boolean validateObject(Object obj) throws ObjectValidatorException {
-			    return true;
-			}
-		    };
-		}
-		return v;
-	    }
-	}));
-
 	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventDispatcher()));
 	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
 	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));
     }
 
     @Override
-    public void destroy() {
-	// nothing to see here ... move along
+    public void destroy(boolean force) {
+	LOG.debug("Destroying EAC protocol instance.");
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	Thread guiThread = (Thread) dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD);
+	if (guiThread != null) {
+	    // wait for gui to finish
+	    try {
+		if (force) {
+		    LOG.debug("Force shutdown of EAC Protocol.");
+		    guiThread.interrupt();
+		}
+		LOG.debug("Waiting for EAC GUI to terminate.");
+		guiThread.join();
+		LOG.debug("EAC GUI terminated.");
+	    } catch (InterruptedException ex) {
+		// gui thread has its own handling of the shutdown, so interrupt thread and wait
+		LOG.debug("Triggering hard shutdown of EAC GUI.");
+		guiThread.interrupt();
+		// wait again until the GUI is actually gone
+		try {
+		    guiThread.join();
+		} catch (InterruptedException ex2) {
+		    // ignore as we continue anyway
+		}
+	    }
+	}
     }
 
     @Override
     public boolean isFinished() {
+	LOG.debug("Checking if EAC protocol is finished.");
 	boolean finished = super.isFinished();
 	if (! finished) {
 	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    Promise p = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE);
 	    if (p.isDelivered()) {
+		LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.");
+		finished = true;
 		try {
-		    finished = (boolean) p.deref();
-		} catch (InterruptedException ex) {
-		    // error would mean don't use the value, so this is ok to ignore
-		}
-	    }
-	    Promise p2 = ctx.getPromise(EACProtocol.AUTHENTICATION_FAILED);
-	    if (p2.isDelivered()) {
-		try {
-		    finished = (boolean) p2.deref();
+		    boolean failed = ! (boolean) p.deref();
+		    if (failed) {
+			LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.");
+		    } else {
+			LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.");
+		    }
 		} catch (InterruptedException ex) {
 		    // error would mean don't use the value, so this is ok to ignore
 		}
 	    }
 	}
+	LOG.debug("EAC authentication finished={}.", finished);
 	return finished;
     }
 

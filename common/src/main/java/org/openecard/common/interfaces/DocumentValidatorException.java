@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,15 +20,22 @@
  *
  ***************************************************************************/
 
-@XmlSchema(
-	elementFormDefault=XmlNsForm.QUALIFIED,
-	namespace="urn:iso:std:iso-iec:24727:tech:schema",
-	xmlns={
-	    @XmlNs(prefix="iso", namespaceURI="urn:iso:std:iso-iec:24727:tech:schema")
-	}
-)
-package iso.std.iso_iec._24727.tech.schema;
+package org.openecard.common.interfaces;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
+
+/**
+ * Exception indicating problems in the validation of an object.
+ *
+ * @author Tobias Wich
+ */
+public class DocumentValidatorException extends Exception {
+
+    public DocumentValidatorException(String message) {
+	super(message);
+    }
+
+    public DocumentValidatorException(String message, Throwable cause) {
+	super(message, cause);
+    }
+
+}

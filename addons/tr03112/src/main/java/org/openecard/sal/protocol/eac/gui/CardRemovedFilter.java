@@ -51,7 +51,6 @@ public class CardRemovedFilter implements EventFilter {
 
     @Override
     public boolean matches(EventType t, Object o) {
-	LOG.debug("Received event.");
 	if (t.equals(EventType.CARD_REMOVED)) {
 	    LOG.debug("Received CARD_REMOVED event.");
 	    ConnectionHandleType conHandle = null;

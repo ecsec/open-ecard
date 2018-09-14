@@ -54,6 +54,7 @@ public final class ActionEntryPanel extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(ActionEntryPanel.class);
 
     protected final JButton actionBtn;
+    protected final AddonManager manager;
 
     /**
      * Creates an entry without the actual action added.
@@ -79,8 +80,8 @@ public final class ActionEntryPanel extends JPanel {
 	desc.setFont(desc.getFont().deriveFont(Font.PLAIN));
 	add(desc);
 
-	AppExtensionAction action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
-	addAction(action);
+	this.manager = manager;
+	addAction(addonSpec, actionSpec);
     }
 
     /**
@@ -88,11 +89,12 @@ public final class ActionEntryPanel extends JPanel {
      *
      * @param action Action to perform when the button is pressed.
      */
-    private void addAction(final AppExtensionAction action) {
+    private void addAction(@Nonnull AddonSpecification addonSpec, @Nonnull AppExtensionSpecification actionSpec) {
 	actionBtn.addActionListener((ActionEvent e) -> {
 	    new SwingWorker<Void, Void>() {
 		@Override
 		protected Void doInBackground() throws Exception {
+		    AppExtensionAction action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
 		    actionBtn.setEnabled(false);
 		    try {
 			action.execute();
@@ -102,6 +104,7 @@ public final class ActionEntryPanel extends JPanel {
 			LOG.error("Execution ended with an error.", t);
 			throw t;
 		    } finally {
+			manager.returnAppExtensionAction(action);
 			actionBtn.setEnabled(true);
 		    }
 		}

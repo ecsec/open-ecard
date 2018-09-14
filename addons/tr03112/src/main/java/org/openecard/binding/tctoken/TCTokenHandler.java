@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -67,7 +67,6 @@ import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
 import org.openecard.gui.UserConsent;
-import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.message.DialogType;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -78,11 +77,18 @@ import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.HandlerUtils;
-import org.openecard.common.interfaces.CardRecognition;
-import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.util.JAXPSchemaValidator;
+import org.openecard.common.util.FuturePromise;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.transport.paos.PAOSConnectionException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 
 /**
@@ -121,9 +127,8 @@ public class TCTokenHandler {
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
-    private final CardRecognition rec;
     private final AddonManager manager;
-    private final EventDispatcher evManager;
+    private final Promise<DocumentSchemaValidator> schemaValidator;
 
     /**
      * Creates a TCToken handler instances and initializes it with the given parameters.
@@ -134,11 +139,30 @@ public class TCTokenHandler {
 	this.cardStates = ctx.getCardStates();
 	this.dispatcher = ctx.getDispatcher();
 	this.gui = ctx.getUserConsent();
-	this.rec = ctx.getRecognition();
 	this.manager = ctx.getManager();
-	this.evManager = ctx.getEventDispatcher();
 	pin = LANG_PACE.translationForKey("pin");
 	puk = LANG_PACE.translationForKey("puk");
+
+	schemaValidator = new FuturePromise<>(() -> {
+	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
+	    if (! noValid) {
+		try {
+		    return JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+		} catch (SAXException ex) {
+		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
+		}
+	    }
+	    // always valid
+	    LOG.warn("Schema validation is disabled.");
+	    return new DocumentSchemaValidator() {
+		@Override
+		public void validate(Document doc) throws DocumentValidatorException {
+		}
+		@Override
+		public void validate(Element doc) throws DocumentValidatorException {
+		}
+	    };
+	});
     }
 
     private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws WSException {
@@ -199,14 +223,12 @@ public class TCTokenHandler {
 		    // send StartPAOS
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
-		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, gui, evManager);
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, schemaValidator);
 		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
 		    Thread paosThread = new Thread(paosTask, "PAOS");
 		    paosThread.start();
-		    if (! tokenRequest.isTokenFromObject()) {
-			// wait for computation to finish
-			waitForTask(paosTask);
-		    }
+		    // wait for computation to finish
+		    waitForTask(paosTask);
 		    response.setBindingTask(paosTask);
 		    break;
 		}
@@ -230,6 +252,11 @@ public class TCTokenHandler {
 	} catch (WSException ex) {
 	    String msg = "Failed to connect to card.";
 	    LOG.error(msg, ex);
+
+	    if(ECardConstants.Minor.IFD.CANCELLATION_BY_USER.equals(ex.getResultMinor())) {
+		throw new PAOSException(ex);
+	    }
+	    
 	    throw new DispatcherException(msg, ex);
 	}
     }
@@ -242,15 +269,6 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
-    public static void killUserConsent() {
-	// kill any open dialog
-	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	Object navObj = ctx.get(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR);
-	if (navObj instanceof UserConsentNavigator) {
-	    UserConsentNavigator nav = (UserConsentNavigator) navObj;
-	    nav.close();
-	}
-    }
 
     /**
      * Activates the client according to the received TCToken.
@@ -361,6 +379,14 @@ public class TCTokenHandler {
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
 			w.getLocalizedMessage()));
+	    } else if (innerException instanceof InterruptedException) {
+		response.setResultCode(BindingResultCode.INTERRUPTED);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		return response;
+	    } else if (innerException instanceof DocumentValidatorException) {
+		errorMsg = LANG_TR.translationForKey(SCHEMA_VALIDATION_FAILED);
+		// it is ridiculous, that this should be a client error, but the test spec demands this
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
@@ -374,9 +400,15 @@ public class TCTokenHandler {
 		response.finishResponse(true);
 	    } catch (InvalidRedirectUrlException ex) {
 		LOG.error(ex.getMessage(), ex);
-		response.setResultCode(BindingResultCode.INTERNAL_ERROR);
-		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
-		throw new NonGuiException(response, ex.getMessage(), ex);
+		// in case we were interrupted before, use INTERRUPTED as result status
+		if (innerException instanceof InterruptedException) {
+		    response.setResultCode(BindingResultCode.INTERRUPTED);
+		    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		} else {
+		    response.setResultCode(BindingResultCode.INTERNAL_ERROR);
+		    response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, ex.getLocalizedMessage()));
+		    throw new NonGuiException(response, ex.getMessage(), ex);
+		}
 	    } catch (SecurityViolationException ex) {
 		String msg2 = "The RefreshAddress contained in the TCToken is invalid. Redirecting to the "
 			+ "CommunicationErrorAddress.";
@@ -395,7 +427,8 @@ public class TCTokenHandler {
 	try {
 	    task.get();
 	} catch (InterruptedException ex) {
-	    LOG.error(ex.getMessage(), ex);
+	    LOG.info("Waiting for PAOS Task to finish has been interrupted. Cancelling authentication.");
+	    task.cancel(true);
 	    throw new PAOSException(ex);
 	} catch (ExecutionException ex) {
 	    LOG.error(ex.getMessage(), ex);
@@ -504,11 +537,8 @@ public class TCTokenHandler {
     }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
-	    }
+	new Thread(() -> {
+	    gui.obtainMessageDialog().showMessageDialog(msg, title, dialogType);
 	}, "Background_MsgBox").start();
     }
 
@@ -525,6 +555,7 @@ public class TCTokenHandler {
 	String errorMsg;
 	switch (ex.getResultMinor()) {
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+	    case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 		errorMsg = LANG_TOKEN.translationForKey("cancel");
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
 		break;
@@ -565,7 +596,6 @@ public class TCTokenHandler {
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 	}
 	return errorMsg;
-	
     }
 
     /**

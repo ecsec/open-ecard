@@ -61,9 +61,8 @@ public class CVCStep extends Step {
     private final EACData eacData;
 
     public CVCStep(EACData eacData) {
-	super(STEP_ID);
+	super(STEP_ID, LANG.translationForKey(TITLE));
 	this.eacData = eacData;
-	setTitle(LANG.translationForKey(TITLE));
 	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements

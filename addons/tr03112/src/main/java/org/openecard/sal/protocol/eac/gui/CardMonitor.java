@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 ecsec GmbH.
+ * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CardMonitor implements BackgroundTask, EventCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(CardMonitor.class);
-    private static final I18n langPin = I18n.getTranslation("pinplugin");
+    private static final Logger LOG = LoggerFactory.getLogger(CardMonitor.class);
+    private static final I18n LANG_PIN = I18n.getTranslation("pinplugin");
 
     // Translation constants
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
@@ -62,18 +62,18 @@ public class CardMonitor implements BackgroundTask, EventCallback {
     @Override
     public StepActionResult call() throws Exception {
 	try {
-	    logger.debug("Waiting for card to be removed.");
+	    LOG.debug("Waiting for card to be removed.");
 	    cardRemoved.deref();
-	    logger.debug("Card has been removed.");
-	    String title = langPin.translationForKey(ERROR_TITLE);
-	    String desc = langPin.translationForKey(ERROR_CARD_REMOVED);
+	    LOG.debug("Card has been removed.");
+	    String title = LANG_PIN.translationForKey(ERROR_TITLE);
+	    String desc = LANG_PIN.translationForKey(ERROR_CARD_REMOVED);
 	    ErrorStep replacement = new ErrorStep(title, desc);
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    dynCtx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
 		    ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, "Card has been removed.")));
 	    return new StepActionResult(StepActionResultStatus.REPEAT, replacement);
 	} catch (InterruptedException ex) {
-	    logger.debug("Card has not been removed.");
+	    LOG.debug("Card has not been removed.");
 	    // terminate the current thread
 	    throw ex;
 	}
@@ -81,7 +81,10 @@ public class CardMonitor implements BackgroundTask, EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
-	cardRemoved.deliver(null);
+	// we only handle one remove event, everything else doesn't matter
+	if (! cardRemoved.isDelivered()) {
+	    cardRemoved.deliver(null);
+	}
     }
 
 }

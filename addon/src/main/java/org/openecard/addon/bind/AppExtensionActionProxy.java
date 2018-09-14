@@ -41,7 +41,7 @@ public class AppExtensionActionProxy extends AbstractFactory<AppExtensionAction>
     }
 
     @Override
-    public void execute() {
+    public void execute() throws AppExtensionException {
 	c.execute();
     }
 
@@ -51,8 +51,8 @@ public class AppExtensionActionProxy extends AbstractFactory<AppExtensionAction>
     }
 
     @Override
-    public void destroy() {
-	c.destroy();
+    public void destroy(boolean force) {
+	c.destroy(force);
     }
 
 }

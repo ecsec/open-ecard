@@ -65,6 +65,8 @@ public class SALStateCallback implements EventCallback {
 		    CardInfoType cif = env.getCIFProvider().getCardInfo(handle, cardType);
 		    if (cif != null) {
 			manager.addCredential(handle, ifdEvtData.getIfaceProtocol(), cif);
+			// notify everyone that the card is now available in the SAL
+			env.getEventDispatcher().notify(EventType.RECOGNIZED_CARD_ACTIVE, eventData);
 		    } else {
 			LOG.info("Not adding card to SAL, because it has no CardInfo file.");
 		    }

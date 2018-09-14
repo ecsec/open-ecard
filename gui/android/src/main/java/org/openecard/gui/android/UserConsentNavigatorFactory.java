@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,9 +33,9 @@ import org.openecard.gui.definition.UserConsentDescription;
  * @param <T> Type of the UI interaction interface.
  */
 public interface UserConsentNavigatorFactory <T> {
-    
+
     boolean canCreateFrom(UserConsentDescription uc);
-    
+
     UserConsentNavigator createFrom(UserConsentDescription uc);
 
     Promise<? extends T> getIfacePromise();

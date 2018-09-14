@@ -47,14 +47,13 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Pair;
@@ -139,38 +138,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	DIDAuthenticate didAuthenticate = request;
-	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 	ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
-
-	try {
-	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
-	    boolean messageValid = valid.validateObject(request);
-	    if (! messageValid) {
-		String msg = "Validation of the EAC1InputType message failed.";
-		LOG.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		return response;
-	    }
- 	} catch (ObjectValidatorException ex) {
-	    String msg = "Validation of the EAC1InputType message failed due to invalid input data.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	} catch (InterruptedException ex) {
-	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    LOG.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	}
 
 	if (! ByteUtils.compare(conHandle.getSlotHandle(), didAuthenticate.getConnectionHandle().getSlotHandle())) {
 	    String msg = "Invalid connection handle given in DIDAuthenticate message.";
 	    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.UNKNOWN_HANDLE, msg);
 	    response.setResult(r);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    return response;
 	}
 
@@ -198,11 +173,11 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    // put CertificateDescription into DynamicContext which is needed for later checks
 	    dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE_DESC, certDescription);
 
-	    // according to BSI-INSTANCE_KEY-7 we MUST perform some checks immediately after receiving the eService cert
+	    // according to BSI-TR-03124-1 we MUST perform some checks immediately after receiving the eService cert
 	    Result activationChecksResult = performChecks(certDescription, dynCtx);
 	    if (! ECardConstants.Major.OK.equals(activationChecksResult.getResultMajor())) {
 		response.setResult(activationChecksResult);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		return response;
 	    }
 
@@ -226,7 +201,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		String msg = "Unsupported terminal type in Terminal Certificate referenced. Refernced terminal type is " +
 			taCHAT.getRole().toString() + ".";
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 		return response;
 	    }
 
@@ -288,35 +263,34 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    procStep.setAction(procStepAction);
 	    uc.getSteps().add(procStep);
 
-	    Thread guiThread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    try {
-			// get context here because it is thread local
-			DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-			if (! uc.getSteps().isEmpty()) {
-			    UserConsentNavigator navigator = gui.obtainNavigator(uc);
-			    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_NAVIGATOR, navigator);
-			    ExecutionEngine exec = new ExecutionEngine(navigator);
-			    ResultStatus guiResult = exec.process();
+	    Thread guiThread = new Thread(() -> {
+		try {
+		    // get context here because it is thread local
+		    DynamicContext dynCtx2 = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		    if (! uc.getSteps().isEmpty()) {
+			UserConsentNavigator navigator = gui.obtainNavigator(uc);
+			ExecutionEngine exec = new ExecutionEngine(navigator);
+			ResultStatus guiResult;
+			try {
+			    guiResult = exec.process();
+			} catch (ThreadTerminateException ex) {
+			    guiResult = ResultStatus.INTERRUPTED;
+			}
 
-			    dynCtx.put(EACProtocol.GUI_RESULT, guiResult);
-
-			    if (guiResult == ResultStatus.CANCEL) {
-				Promise<Object> pPaceSuccessful = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
-				if (! pPaceSuccessful.isDelivered()) {
-				    pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
-					    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
-				}
+			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
+			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
+			    if (! pPaceSuccessful.isDelivered()) {
+				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
 			    }
 			}
-		    } finally {
-			if (cardMon != null) {
-			    eventDispatcher.del(cardMon);
-			}
 		    }
+		} finally {
+		    eventDispatcher.del(cardMon);
 		}
 	    }, "EAC-GUI");
+	    dynCtx.put(TR03112Keys.OPEN_USER_CONSENT_THREAD, guiThread);
 	    guiThread.start();
 
 	    // wait for PACE to finish
@@ -379,19 +353,19 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    LOG.error(ex.getMessage(), ex);
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (WSHelper.WSException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (ElementParsingException ex) {
 	    LOG.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
 	return response;

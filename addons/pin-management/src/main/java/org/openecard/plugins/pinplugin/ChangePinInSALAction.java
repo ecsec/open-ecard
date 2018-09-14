@@ -112,7 +112,7 @@ public class ChangePinInSALAction extends AbstractPINAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	//ignore
     }
 

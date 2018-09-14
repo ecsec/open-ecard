@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,27 +20,23 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.event;
+package org.openecard.gui.android;
 
-import org.openecard.common.interfaces.EventCallback;
 
 /**
+ * Marker interface for Android GUI implementations.
+ * The ecard protocol identifier of the GUI can be requested as text.
  *
  * @author Tobias Wich
  */
-class EventRunner implements Runnable {
+public interface AndroidGui {
 
-    private final EventCallback cb;
-    private final EventType t;
-    private final EventObject o;
-
-    public EventRunner(EventCallback cb, EventType t, EventObject o) {
-	this.cb = cb; this.t = t; this.o = o;
-    }
-
-    @Override
-    public void run() {
-	cb.signalEvent(t, o);
-    }
+    /**
+     * Gets the ecard protocol identifier handled by this GUI.
+     * This may be the identifier for EAC, Pin Compare, etc.
+     *
+     * @return Protocol identifier.
+     */
+    String getProtocolType();
 
 }

@@ -32,6 +32,7 @@ import org.openecard.gui.UserConsent;
  *
  * @author Tobias Wich
  */
+// TODO: replace with addon IFD protocols
 public interface Protocol {
 
     /**

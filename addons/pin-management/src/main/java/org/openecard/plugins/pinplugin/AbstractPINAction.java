@@ -36,7 +36,9 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.bind.AppExtensionAction;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -139,8 +141,9 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      * @param cHandle
      *            The connection handle for the card to connect to root application.
      * @return The updated connection handle (now including a SlotHandle) or null if connecting went wrong.
+     * @throws org.openecard.common.WSHelper.WSException
      */
-    protected ConnectionHandleType connectToRootApplication(ConnectionHandleType cHandle) {
+    protected ConnectionHandleType connectToRootApplication(ConnectionHandleType cHandle) throws WSException {
 
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
@@ -149,13 +152,17 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 		(CardApplicationPathResponse) dispatcher.safeDeliver(cardApplicationPath);
 
 	// Check CardApplicationPathResponse
-	try {
-	    WSHelper.checkResult(cardApplicationPathResponse);
-	} catch (WSException ex) {
-	    LOG.error("CardApplicationPath failed.", ex);
-	    return null;
-	}
 
+	WSHelper.checkResult(cardApplicationPathResponse);
+
+
+	if (cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().isEmpty()){
+	    LOG.error("CardApplicationPath failed.");
+	    Result result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Card was removed.");
+	    WSException ex = WSHelper.createException(result);    
+	    throw ex;
+	} 
+	
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(
 		cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
@@ -163,12 +170,8 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 		(CardApplicationConnectResponse) dispatcher.safeDeliver(cardApplicationConnect);
 
 	// Check CardApplicationConnectResponse
-	try {
-	    WSHelper.checkResult(cardApplicationConnectResponse);
-	} catch (WSException ex) {
-	    LOG.error("CardApplicationConnect failed.", ex);
-	    return null;
-	}
+	
+	WSHelper.checkResult(cardApplicationConnectResponse);
 
 	// Update ConnectionHandle. It now includes a SlotHandle.
 	cHandle = cardApplicationConnectResponse.getConnectionHandle();

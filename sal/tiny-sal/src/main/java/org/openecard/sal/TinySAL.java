@@ -113,6 +113,7 @@ import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.Encipher;
 import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
 import iso.std.iso_iec._24727.tech.schema.ExecuteAction;
@@ -233,6 +234,7 @@ public class TinySAL implements SAL {
     public void setAddonManager(AddonManager manager) {
 	protocolSelector = new AddonSelector(manager);
 	protocolSelector.setStrategy(new HighestVersionSelector());
+	states.setProtocolSelector(protocolSelector);
     }
 
     /**
@@ -373,7 +375,7 @@ public class TinySAL implements SAL {
 		select = new Select.Application(applicationID);
 		select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
 	    }
-	    
+
 	    cardStateEntry.setCurrentCardApplication(applicationID);
 	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
 	    // reset the ef FCP
@@ -472,12 +474,11 @@ public class TinySAL implements SAL {
 	    if (request.getAction() != null) {
 		disconnect.setAction(request.getAction());
 	    }
-	    
-	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 
 	    // remove entries associated with this handle
-	    states.removeSlotHandleEntry(slotHandle);
+	    states.removeSlotHandleEntry(connectionHandle.getContextHandle(), slotHandle);
 
+	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 	    response.setResult(disconnectResponse.getResult());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
@@ -2034,12 +2035,13 @@ public class TinySAL implements SAL {
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate request) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 
+	String protocolURI = "";
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
 	    Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
 
-	    String protocolURI = didAuthenticationData.getProtocol();
+	    protocolURI = didAuthenticationData.getProtocol();
 	    // FIXME: workaround for missing protocol URI from eID-Servers
 	    if (protocolURI == null) {
 		LOG.warn("ProtocolURI was null");
@@ -2063,6 +2065,13 @@ public class TinySAL implements SAL {
 	    LOG.error(e.getMessage(), e);
 	    throwThreadKillException(e);
 	    response.setResult(WSHelper.makeResult(e));
+	}
+
+	// add empty response data if none are present
+	if (response.getAuthenticationProtocolData() == null) {
+	    EmptyResponseDataType data = new EmptyResponseDataType();
+	    data.setProtocol(protocolURI);
+	    response.setAuthenticationProtocolData(data);
 	}
 
 	return response;
@@ -2157,8 +2166,12 @@ public class TinySAL implements SAL {
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
-	    CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
-	    entry.removeProtocol(protocolURI);
+	    try {
+		CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
+		entry.removeProtocol(protocolURI);
+	    } finally {
+		protocolSelector.returnSALProtocol(protocol, false);
+	    }
 	}
     }
 

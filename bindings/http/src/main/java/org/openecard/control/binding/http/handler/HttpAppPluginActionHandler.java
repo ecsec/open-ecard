@@ -104,8 +104,9 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	String resourceName = path.substring(1, path.length()); // remove leading '/'
 
 	// find suitable addon
+	AppPluginAction action = null;
 	try {
-	    AppPluginAction action = selector.getAppPluginAction(resourceName);
+	    action = selector.getAppPluginAction(resourceName);
 
 	    String rawQuery = requestURI.getRawQuery();
 	    Map<String, String> queries = new HashMap<>(0);
@@ -139,6 +140,10 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		new FileHandler(new DocumentRoot("/www", "/www-files")).handle(httpRequest, httpResponse, context);
 	    } else {
 		new DefaultHandler().handle(httpRequest, httpResponse, context);
+	    }
+	} finally {
+	    if (action != null) {
+		selector.returnAppPluginAction(action);
 	    }
 	}
     }
@@ -225,6 +230,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response = new Http11Response(HttpStatus.SC_BAD_REQUEST);
 		break;
 	    case INTERNAL_ERROR:
+	    case INTERRUPTED:
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 		break;
 	    case RESOURCE_UNAVAILABLE:

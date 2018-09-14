@@ -63,8 +63,8 @@ public class IFDProtocolProxy extends AbstractFactory<IFDProtocol> implements IF
     }
 
     @Override
-    public void destroy() {
-	c.destroy();
+    public void destroy(boolean force) {
+	c.destroy(force);
     }
 
 }

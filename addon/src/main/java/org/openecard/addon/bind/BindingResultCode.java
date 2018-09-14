@@ -79,5 +79,12 @@ public enum BindingResultCode {
     /**
      * Indicates that a required parameter is wrong.
      */
-    WRONG_PARAMETER;
+    WRONG_PARAMETER,
+
+    /**
+     * Indicates a thread interruption, either explicitly by the user or implicitly by a shutdown of a
+     * subsystem or the whole system.
+     */
+    INTERRUPTED;
+
 }

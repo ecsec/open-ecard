@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import javax.annotation.Nullable;
@@ -125,45 +124,50 @@ public class CardRecognitionImpl implements CardRecognition {
 
 	cardImagesMap.load(FileUtils.resolveResourceAsStream(CardRecognitionImpl.class, IMAGE_PROPERTIES));
 
-	this.cifRepo = new FutureTask<>(new Callable<org.openecard.ws.GetCardInfoOrACD>() {
-	    @Override
-	    public org.openecard.ws.GetCardInfoOrACD call() throws Exception {
-		final WSMarshaller cifMarshaller = WSMarshallerFactory.createInstance();
-		org.openecard.ws.GetCardInfoOrACD cifRepoTmp = cifRepo;
-		if (cifRepoTmp == null) {
-		    cifRepoTmp = new LocalCifRepo(cifMarshaller);
-		}
-
-		// request all cifs to fill list of supported cards
-		prepareSupportedCards(cifRepoTmp);
-
-		return cifRepoTmp;
+	this.cifRepo = new FutureTask<>(() -> {
+	    LOG.info("Initializing CIF Repo.");
+	    final WSMarshaller cifMarshaller = WSMarshallerFactory.createInstance();
+	    org.openecard.ws.GetCardInfoOrACD cifRepoTmp = cifRepo;
+	    if (cifRepoTmp == null) {
+		cifRepoTmp = new LocalCifRepo(cifMarshaller);
 	    }
+	    LOG.debug("Done loading CIF documents.");
+
+	    // request all cifs to fill list of supported cards
+	    prepareSupportedCards(cifRepoTmp);
+	    LOG.debug("Done determining supported cards.");
+
+	    LOG.info("Finished initializing CIF Repo.");
+	    return cifRepoTmp;
 	});
 	new Thread(this.cifRepo, "Init-CardInfo-Repo").start();
 
-	this.tree = new FutureTask<>(new Callable<RecognitionTree>() {
-	    @Override
-	    public RecognitionTree call() throws Exception {
-		final WSMarshaller treeMarshaller = WSMarshallerFactory.createInstance();
-		GetRecognitionTree treeRepoTmp = treeRepo;
-		if (treeRepoTmp == null) {
-		    treeRepoTmp = new LocalFileTree(treeMarshaller);
-		}
-		// request tree from service
-		iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req;
-		req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
-		req.setAction(RecognitionProperties.getAction());
-		GetRecognitionTreeResponse resp = treeRepoTmp.getRecognitionTree(req);
-		checkResult(resp.getResult());
-
-		return resp.getRecognitionTree();
+	this.tree = new FutureTask<>(() -> {
+	    LOG.info("Initializing RecognitionTree Repo.");
+	    final WSMarshaller treeMarshaller = WSMarshallerFactory.createInstance();
+	    GetRecognitionTree treeRepoTmp = treeRepo;
+	    if (treeRepoTmp == null) {
+		treeRepoTmp = new LocalFileTree(treeMarshaller);
 	    }
+	    // request tree from service
+	    iso.std.iso_iec._24727.tech.schema.GetRecognitionTree req;
+	    req = new iso.std.iso_iec._24727.tech.schema.GetRecognitionTree();
+	    req.setAction(RecognitionProperties.getAction());
+	    GetRecognitionTreeResponse resp = treeRepoTmp.getRecognitionTree(req);
+	    checkResult(resp.getResult());
+
+	    LOG.info("Finished initializing RecognitionTree Repo.");
+	    return resp.getRecognitionTree();
 	});
 	new Thread(this.tree, "Init-RecognitionTree-Repo").start();
     }
 
     private void prepareSupportedCards(org.openecard.ws.GetCardInfoOrACD repo) {
+	if (repo instanceof LocalCifRepo) {
+	    this.supportedCards = ((LocalCifRepo) repo).getSupportedCardTypes();
+	    return;
+	}
+
 	try {
 	    try {
 		InputStream in = FileUtils.resolveResourceAsStream(getClass(), "cif-repo/supported_cards");

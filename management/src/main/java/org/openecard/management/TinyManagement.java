@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -87,7 +87,6 @@ import de.bund.bsi.ecard.api._1.TerminateFramework;
 import de.bund.bsi.ecard.api._1.TerminateFrameworkResponse;
 import de.bund.bsi.ecard.api._1.UnregisterIFD;
 import de.bund.bsi.ecard.api._1.UnregisterIFDResponse;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Environment;
@@ -220,16 +219,13 @@ public class TinyManagement implements  Management {
     @Publish
     @Override
     public InitializeFrameworkResponse initializeFramework(InitializeFramework arg0) {
-	InitializeFrameworkResponse initializeFrameworkResponse = new InitializeFrameworkResponse();
+	InitializeFrameworkResponse ifr = WSHelper.makeResponse(InitializeFrameworkResponse.class, WSHelper.makeResultOK());
 	Version version = new Version();
 	version.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR);
 	version.setMinor(ECardConstants.ECARD_API_VERSION_MINOR);
 	version.setSubMinor(ECardConstants.ECARD_API_VERSION_SUBMINOR);
-	initializeFrameworkResponse.setVersion(version);
-	Result r = new Result();
-	r.setResultMajor(ECardConstants.Major.OK);
-	initializeFrameworkResponse.setResult(r);
-	return initializeFrameworkResponse;
+	ifr.setVersion(version);
+	return ifr;
     }
 
     @Override

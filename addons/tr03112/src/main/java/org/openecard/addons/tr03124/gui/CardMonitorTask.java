@@ -50,7 +50,7 @@ public class CardMonitorTask implements EventCallback, BackgroundTask {
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
 	switch (eventType) {
-	    case CARD_RECOGNIZED:
+	    case RECOGNIZED_CARD_ACTIVE:
 		result = eventData.getHandle();
 		cardAction.deliver(null);
 		break;

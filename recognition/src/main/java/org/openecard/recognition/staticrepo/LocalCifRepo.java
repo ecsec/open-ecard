@@ -28,10 +28,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -51,7 +60,7 @@ import org.xml.sax.SAXException;
  */
 public class LocalCifRepo implements GetCardInfoOrACD {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocalCifRepo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalCifRepo.class);
 
     private final WSMarshaller m;
     private final HashMap<String, Document> cifs = new HashMap<>();
@@ -70,8 +79,7 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	    // load and unmarshal
 	    InputStream cifStream = getStream(next.trim());
 	    Document cifDoc = m.str2doc(cifStream);
-            CardInfoType cif = (CardInfoType) m.unmarshal(cifDoc);
-            String cardType = cif.getCardType().getObjectIdentifier();
+            String cardType = getTypeFromCIF(cifDoc);
             // add file
             cifs.put(cardType, cifDoc);
 	}
@@ -89,8 +97,38 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 	return s;
     }
 
+    private String getTypeFromCIF(Document cif) {
+	try {
+	    XPath p = XPathFactory.newInstance().newXPath();
+	    p.setNamespaceContext(new NamespaceContext() {
+		@Override
+		public String getNamespaceURI(String prefix) {
+		    return "urn:iso:std:iso-iec:24727:tech:schema";
+		}
+		@Override
+		public String getPrefix(String namespaceURI) {
+		    return "iso";
+		}
+		@Override
+		public Iterator getPrefixes(String namespaceURI) {
+		    return Collections.singleton("iso").iterator();
+		}
+	    });
+	    XPathExpression exp = p.compile("/iso:CardInfo/iso:CardType/iso:ObjectIdentifier/text()");
+	    String e = (String) exp.evaluate(cif, XPathConstants.STRING);
+	    return e;
+	} catch (XPathExpressionException ex) {
+	    throw new RuntimeException("CIF input is invalid.", ex);
+	}
+    }
+
+    public Set<String> getSupportedCardTypes() {
+	return Collections.unmodifiableSet(cifs.keySet());
+    }
+
     @Override
     public GetCardInfoOrACDResponse getCardInfoOrACD(iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD parameters) {
+	LOG.debug("Requesting CIFs with GetCardInfoOrACD call.");
 	List<String> cardTypes = parameters.getCardTypeIdentifier();
 	ArrayList<CardInfoType> cifsResult = new ArrayList<>(cardTypes.size());
 	Result result = WSHelper.makeResultOK();
@@ -131,10 +169,11 @@ public class LocalCifRepo implements GetCardInfoOrACD {
 
 	    GetCardInfoOrACDResponse res = WSHelper.makeResponse(GetCardInfoOrACDResponse.class, result);
 	    res.getCardInfoOrCapabilityInfo().addAll(cifsResult);
+	    LOG.debug("Returning CIFs from GetCardInfoOrACD call.");
 	    return res;
 	} catch (WSMarshallerException ex) {
 	    String msg = "Failed to unmarshal a CIF document.";
-	    logger.error(msg, ex);
+	    LOG.error(msg, ex);
 	    result = WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg);
 	    GetCardInfoOrACDResponse res = WSHelper.makeResponse(GetCardInfoOrACDResponse.class, result);
 	    return res;

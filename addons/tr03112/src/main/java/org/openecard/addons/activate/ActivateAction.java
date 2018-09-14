@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2016 HS Coburg.
+ * Copyright (C) 2013-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,11 +26,16 @@ import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppExtensionAction;
+import org.openecard.addon.bind.AppExtensionException;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
 import org.openecard.addon.bind.BindingResult;
@@ -53,6 +58,8 @@ import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ThreadTerminateException;
+import org.openecard.common.WSHelper;
 import org.openecard.transport.httpcore.cookies.CookieManager;
 import org.openecard.common.interfaces.Dispatcher;
 
@@ -103,8 +110,10 @@ public class ActivateAction implements AppPluginAction {
     }
 
     @Override
-    public void destroy() {
+    public void destroy(boolean force) {
 	tokenHandler = null;
+	manager.returnAppPluginAction(statusAction);
+	manager.returnAppExtensionAction(pinManAction);
     }
 
     @Override
@@ -113,13 +122,16 @@ public class ActivateAction implements AppPluginAction {
 
 	try {
 	    if (SEMAPHORE.tryAcquire()) {
-		response = checkRequestParameters(body, params, headers, attachments);
+		try {
+		    response = checkRequestParameters(body, params, headers, attachments);
+		} finally {
+		    SEMAPHORE.release();
+		}
 	    } else {
 		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
 		response.setResultMessage("An authentication process is already running.");
 	    }
 	} finally {
-	    SEMAPHORE.release();
 	    // in some cases an error does not lead to a removal of the dynamic context so remove it here
 	    DynamicContext.remove();
 	}
@@ -297,13 +309,7 @@ public class ActivateAction implements AppPluginAction {
      * result.
      */
     private BindingResult processShowDefault() {
-	Thread defautlViewThread = new Thread(new Runnable() {
-
-	    @Override
-	    public void run() {
-		settingsAndDefaultView.showDefaultViewUI();
-	    }
-	}, "ShowDefaultView");
+	Thread defautlViewThread = new Thread(settingsAndDefaultView::showDefaultViewUI, "ShowDefaultView");
 	defautlViewThread.start();
 	return new BindingResult(BindingResultCode.OK);
     }
@@ -315,15 +321,39 @@ public class ActivateAction implements AppPluginAction {
      * result.
      */
     private BindingResult processShowPinManagement() {
-	Thread pinManThread = new Thread(new Runnable() {
+	// submit thread
+	ExecutorService es = Executors.newSingleThreadExecutor((Runnable action) -> new Thread(action, "ShowPINManagement"));
+	Future<Void> guiThread = es.submit(() -> {
+	    pinManAction.execute();
+	    return null;
+	});
 
-	    @Override
-	    public void run() {
-		pinManAction.execute();
+	try {
+	    guiThread.get();
+	    return new BindingResult(BindingResultCode.OK);
+	} catch (InterruptedException ex) {
+	    guiThread.cancel(true);
+	    return new BindingResult(BindingResultCode.INTERRUPTED);
+	} catch (ExecutionException ex) {
+	    Throwable cause = ex.getCause();
+	    if (cause instanceof AppExtensionException) {
+		AppExtensionException appEx = (AppExtensionException) cause;
+		if (WSHelper.minorIsOneOf(appEx, ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
+			ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
+		    LOG.info("PIN Management got cancelled.");
+		    return new BindingResult(BindingResultCode.INTERRUPTED);
+		}
+	    } else if (cause instanceof ThreadTerminateException) {
+		return new BindingResult(BindingResultCode.INTERRUPTED);
 	    }
-	}, "ShowPINManagement");
-	pinManThread.start();
-	return new BindingResult(BindingResultCode.OK);
+
+	    // just count as normal error
+	    LOG.warn("Failed to execute PIN Management.", ex);
+	    return new BindingResult(BindingResultCode.INTERNAL_ERROR);
+	} finally {
+	    // clean up executor
+	    es.shutdown();
+	}
     }
 
     /**
@@ -333,13 +363,7 @@ public class ActivateAction implements AppPluginAction {
      * result.
      */
     private BindingResult processShowSettings() {
-	Thread settingsThread = new Thread(new Runnable() {
-
-	    @Override
-	    public void run() {
-		settingsAndDefaultView.showSettingsUI();
-	    }
-	}, "ShowSettings");
+	Thread settingsThread = new Thread(settingsAndDefaultView::showSettingsUI, "ShowSettings");
 	settingsThread.start();
 	return new BindingResult(BindingResultCode.OK);
     }
@@ -401,7 +425,12 @@ public class ActivateAction implements AppPluginAction {
 		}
 	    }
 	} catch (RuntimeException e) {
-	    response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+
+	    if(e instanceof ThreadTerminateException){
+		response = new BindingResult(BindingResultCode.INTERRUPTED);
+	    } else {
+		response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+	    }
 	    LOG.error(e.getMessage(), e);
 	}
 

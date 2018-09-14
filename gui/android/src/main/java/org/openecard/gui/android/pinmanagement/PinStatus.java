@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,27 +20,50 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.interfaces;
-
-import javax.annotation.Nonnull;
+package org.openecard.gui.android.pinmanagement;
 
 
 /**
- * Interface for schema based object validations.
- * One example of schema based validation is XML Schema validation for JAXB objects.
  *
- * @author Tobias Wich
+ * @author Sebastian Schuberth
  */
-public interface ObjectSchemaValidator {
+public enum PinStatus {
 
-    /**
-     * Validates the given object against the schema definition of the instance.
-     *
-     * @param obj The object to verify.
-     * @return {@code true} if the object validates, {@code false} otherwise.
-     * @throws ObjectValidatorException Indicates any error beyond the pure validation such as a failed conversion of
-     *   the data.
-     */
-    boolean validateObject(@Nonnull Object obj) throws ObjectValidatorException;
+    RC3,
+    RC2,
+    CAN,
+    RC1,
+    PIN_BLOCKED,
+    PUK_BLOCKED,
+    DEACTIVATED;
+
+    public boolean isDead() {
+	switch (this) {
+	    case DEACTIVATED:
+	    case PUK_BLOCKED:
+		return true;
+	    default:
+		return false;
+	}
+    }
+
+    public boolean isNormalPinEntry() {
+	switch (this) {
+	    case RC3:
+	    case RC2:
+	    case RC1:
+		return true;
+	    default:
+		return false;
+	}
+    }
+
+    public boolean needsCan() {
+	return CAN == this;
+    }
+
+    public boolean needsPuk() {
+	return PIN_BLOCKED == this;
+    }
 
 }

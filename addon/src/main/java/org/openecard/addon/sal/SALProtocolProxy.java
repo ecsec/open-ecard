@@ -168,8 +168,8 @@ public class SALProtocolProxy extends AbstractFactory<SALProtocol> implements SA
     }
 
     @Override
-    public void destroy() {
-	c.destroy();
+    public void destroy(boolean force) {
+	c.destroy(force);
     }
 
 }

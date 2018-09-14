@@ -5,7 +5,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
 	<packaging>pom</packaging>
-	<version>1.3.0-rc13-SNAPSHOT</version>
+	<version>1.3.0-rc18-SNAPSHOT</version>
 	<name>Open eCard Client</name>
 
 	<url>http://www.openecard.org/</url>
@@ -70,19 +70,29 @@
 		<android.api.version>21</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<version.toolchain>[1.7,1.8]</version.toolchain>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<version.toolchain>[1.8]</version.toolchain>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>7</maven.compiler.release-->
 
-		<version.jmockit>1.39</version.jmockit>
-		<version.pmd>6.2.0</version.pmd>
+		<version.jmockit>1.41</version.jmockit>
+		<version.pmd>6.6.0</version.pmd>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
 
 		<!-- fix for netbeans as it executes the surefire:test task directly -->
 		<argLine>-Djdk.attach.allowAttachSelf</argLine>
+
+        <!-- Netbeans config properties -->
+        <org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>8</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>none</org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>4</org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>4</org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>4</org-netbeans-modules-editor-indent.CodeStyle.project.tab-size>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>120</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
+        <org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>false</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
+        <org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
 	</properties>
 
     <prerequisites>
@@ -130,6 +140,38 @@
 					<name>env.ANDROID_HOME</name>
 				</property>
 			</activation>
+		</profile>
+
+		<profile>
+			<!-- fix submodule in release plugin -->
+			<id>submodule-update</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<inherited>false</inherited> <!-- only execute these in the parent -->
+						<executions>
+							<execution>
+								<id>git submodule update</id>
+								<phase>initialize</phase>
+								<configuration>
+									<executable>git</executable>
+									<arguments>
+										<argument>submodule</argument>
+										<argument>update</argument>
+										<argument>--init</argument>
+										<argument>--recursive</argument>
+									</arguments>
+								</configuration>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>
@@ -344,11 +386,11 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.16</version>
+					<version>1.17</version>
 					<configuration>
 						<signature>
 							<groupId>org.codehaus.mojo.signature</groupId>
-							<artifactId>java-7-openjdk</artifactId>
+							<artifactId>java18</artifactId>
 							<version>1.0</version>
 						</signature>
 					</configuration>
@@ -380,7 +422,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.7.0</version>
+					<version>3.8.0</version>
 					<configuration>
 						<showDeprecation>true</showDeprecation>
 						<showWarnings>true</showWarnings>
@@ -392,7 +434,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -441,29 +483,19 @@
 						<tagNameFormat>@{project.version}</tagNameFormat>
 						<localCheckout>true</localCheckout>
 						<goals>deploy</goals>
-						<!--providerImplementations>
-							<git>maven-scm-provider-gitexe</git>
-						</providerImplementations-->
+						<releaseProfiles>submodule-update</releaseProfiles>
 					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.maven.scm</groupId>
-							<artifactId>maven-scm-provider-gitexe</artifactId>
-							<version>1.9.5</version>
-							<classifier>submodule</classifier>
-						</dependency>
-					</dependencies>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.21.0</version>
+					<version>2.22.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.21.0</version>
+							<version>2.22.0</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -483,12 +515,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.21.0</version>
+					<version>2.22.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.21.0</version>
+							<version>2.22.0</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -517,7 +549,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.0.1</version>
 					<configuration>
 						<show>protected</show>
 						<additionalparam>-Xdoclint:none</additionalparam>
@@ -590,9 +622,6 @@
 						<useJdkToolchainExecutable>true</useJdkToolchainExecutable>
 						<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
 						<target>2.2</target>
-						<xjcArgs>
-							<xjcArg>-npa</xjcArg>
-						</xjcArgs>
 						<!-- <keep>true</keep> -->
 						<!-- <verbose>true</verbose> -->
 						<!-- Java 8 has tighter restrictions -->
@@ -606,13 +635,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7</version>
+					<version>3.7.1</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>2.21.0</version>
+					<version>2.22.0</version>
 				</plugin>
 
 				<plugin>
@@ -628,7 +657,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -644,7 +673,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>3.10.0</version>
 					<configuration>
 						<skipEmptyReport>false</skipEmptyReport>
 						<analysisCache>true</analysisCache>
@@ -685,7 +714,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.9</version>
+							<version>8.12</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -850,7 +879,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.9</version>
+				<version>4.4.10</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.android</groupId>
@@ -867,21 +896,31 @@
 				<artifactId>jsr181-api</artifactId>
 				<version>1.0-MR1</version>
 			</dependency>
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.12.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ogce</groupId>
+				<artifactId>xpp3</artifactId>
+				<version>1.1.6</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
-				<version>20180130</version>
+				<version>20180813</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.5</version>
+				<version>2.9.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
-				<version>0.6.3</version>
+				<version>0.6.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
@@ -892,12 +931,12 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna-platform</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>wsdef</artifactId>
-		<version>1.3.0-rc13-SNAPSHOT</version>
+		<version>1.3.0-rc18-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.wsdef</groupId>
@@ -13,49 +13,6 @@
 	<packaging>jar</packaging>
 	<name>Open eCard WS classes</name>
 
-	<!-- Set wsimport for Windows/Linux when building on Java 9 -->
-	<profiles>
-		<profile>
-			<id>win</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<properties>
-				<tool.wsimport>${java.home}/bin/wsimport.exe</tool.wsimport>
-			</properties>
-		</profile>
-		<profile>
-			<id>nix</id>
-			<activation>
-				<os>
-					<family>!windows</family>
-				</os>
-			</activation>
-			<properties>
-				<tool.wsimport>${java.home}/bin/wsimport</tool.wsimport>
-			</properties>
-		</profile>
-		<profile>
-			<activation>
-				<jdk>[9</jdk>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.codehaus.mojo</groupId>
-							<artifactId>jaxws-maven-plugin</artifactId>
-							<configuration>
-								<executable>${tool.wsimport}</executable>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<resources>
@@ -70,19 +27,6 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-
-		<pluginManagement>
-			<plugins>
-				<!-- skip java 6 compat checker, JAXB is irellevant for android and only SE 7 is supported -->
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 
 		<plugins>
 			<plugin>

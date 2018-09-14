@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -33,8 +34,6 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.ObjectSchemaValidator;
-import org.openecard.common.interfaces.ObjectValidatorException;
 import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.Promise;
@@ -45,8 +44,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Implements Chip Authentication protocol step according to BSI-TR-03112-7. See BSI-TR-03112, version 1.1.2, part 7,
- * section 4.6.6.
+ * Implements Chip Authentication protocol step according to BSI-TR-03112-7.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
  *
  * @author Moritz Horsch
  * @author Dirk Petrautzki
@@ -55,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ChipAuthenticationStep.class.getName());
     private final Dispatcher dispatcher;
 
     /**
@@ -74,37 +73,12 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
-	DIDAuthenticateResponse response = new DIDAuthenticateResponse();
+	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
+
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
-	    ObjectSchemaValidator valid = (ObjectSchemaValidator) dynCtx.getPromise(EACProtocol.SCHEMA_VALIDATOR).deref();
-
-	    boolean messageValid = valid.validateObject(didAuthenticate);
-	    if (! messageValid) {
-		String msg = "Validation of the EACAdditionalInputType message failed.";
-		logger.error(msg);
-		dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
-		return response;
-	    }
-	} catch (ObjectValidatorException ex) {
-	    String msg = "Validation of the EACAdditionalInputType message failed due to invalid input data.";
-	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	} catch (InterruptedException ex) {
-	    String msg = "Thread interrupted while waiting for schema validator instance.";
-	    logger.error(msg, ex);
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
-	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INT_ERROR, msg));
-	    return response;
-	}
-
-	try {
-
 	    EACAdditionalInputType eacAdditionalInput = new EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData());
 	    EAC2OutputType eac2Output = eacAdditionalInput.getOutputType();
 
@@ -119,12 +93,11 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    AuthenticationHelper auth = new AuthenticationHelper(ta, ca);
 	    eac2Output = auth.performAuth(eac2Output, internalData);
 
-	    response.setResult(WSHelper.makeResultOK());
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
 	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
-	    logger.error(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
-	    dynCtx.put(EACProtocol.AUTHENTICATION_FAILED, true);
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
 	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
@@ -134,11 +107,11 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
             return response;
         } else {
             // authentication finished, notify GUI
-            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-            response = new DIDAuthenticateResponse();
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    String msg = "Authentication canceled by the user.";
-            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg));
-            return response;
+	    Result result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
+	    response = WSHelper.makeResponse(DIDAuthenticateResponse.class, result);
+	    return response;
         }
     }
 

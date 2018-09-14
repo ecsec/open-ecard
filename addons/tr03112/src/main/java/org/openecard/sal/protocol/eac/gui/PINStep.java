@@ -64,7 +64,7 @@ public class PINStep extends Step {
     private EacPinStatus status;
 
     public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker, EacPinStatus status) {
-	super(STEP_ID);
+	super(STEP_ID, "Dummy-Title");
 	this.pinType = LANG_PACE.translationForKey(eacData.passwordType);
 	this.paceMarker = paceMarker;
 	setTitle(LANG_PACE.translationForKey(TITLE, pinType));

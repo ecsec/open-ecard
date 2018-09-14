@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -87,6 +87,7 @@ public class TCTokenContext extends ResourceContext {
 	    AuthServerException, InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException, UserCancellationException {
 	// correct common TCToken shortcomings
+	LOG.debug("Received TCToken:\n{}", data);
 	data = TCTokenHacks.fixPathSecurityParameters(data);
 	LOG.debug("Cleaned up TCToken:\n{}", data);
 

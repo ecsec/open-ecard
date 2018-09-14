@@ -49,8 +49,6 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.util.UrlBuilder;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
@@ -104,10 +102,6 @@ public class TlsConnectionHandler {
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());
 	    String serverHost = serverAddress.getHost();
-
-	    if (Boolean.valueOf(OpenecardProperties.getProperty("legacy.session"))) {
-		serverAddress = fixServerAddress(serverAddress, sessionId);
-	    }
 
 	    // extract connection parameters from endpoint
 	    hostname = serverAddress.getHost();
@@ -261,16 +255,6 @@ public class TlsConnectionHandler {
 	handler.connect(tlsClient);
 
 	return handler;
-    }
-
-    private static URL fixServerAddress(URL serverAddress, String sessionIdentifier) throws MalformedURLException {
-	// FIXME: remove this hilariously stupid bull*#@%&/ code which satisfies a mistake introduced by the AA
-	try {
-	    UrlBuilder b = UrlBuilder.fromUrl(serverAddress);
-	    return b.queryParam("sessionid", sessionIdentifier, false).build().toURL();
-	} catch (URISyntaxException ex) {
-	    throw new MalformedURLException(ex.getMessage());
-	}
     }
 
     @Nullable

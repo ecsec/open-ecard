@@ -27,6 +27,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
@@ -57,12 +58,12 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	LOG.info("Create new NFCFactory");
 	if (adapter == null || terminals == null) {
 	    adapter = getNFCAdapter();
-	    terminals = new NFCCardTerminals(adapter);
 	    if(adapter == null) {
 		String msg = "NFC not available";
 		LOG.error(msg);
 		throw new NoSuchTerminal(msg);
 	    }
+	    terminals = new NFCCardTerminals(adapter);
 	}
     }
 
@@ -114,16 +115,9 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	try {
 	    // standard nfc terminal
 	    terminals.getIntegratedNfcTerminal().setTag(isoDepTag, timeout);
-	} catch (SCIOException ex) {
+	} catch (IOException ex) {
 	    LOG.warn(ex.getMessage(), ex);
 	}
-    }
-
-    /**
-     * Signals if a nfc tag is removed.
-     */
-    public static void removeNFCTag() {
-	terminals.getIntegratedNfcTerminal().removeTag();
     }
 
     /**

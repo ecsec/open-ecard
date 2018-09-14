@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -105,13 +105,15 @@ public class CryptoMarkerType extends AbstractMarkerType {
 			NodeList nodeList = node.getChildNodes();
 			for (int y = 0; y < nodeList.getLength(); y++) {
 			    Node n = nodeList.item(y);
-			    if (null != n.getLocalName()) switch (n.getLocalName()) {
-			    	case "Algorithm":
-				    algorithmIdentifierType.setAlgorithm(n.getTextContent());
-				    break;
-			    	case "Parameters":
-				    algorithmIdentifierType.setParameters(n);
-				    break;
+			    if (null != n.getLocalName()) {
+				switch (n.getLocalName()) {
+				    case "Algorithm":
+					algorithmIdentifierType.setAlgorithm(n.getTextContent());
+					break;
+				    case "Parameters":
+					algorithmIdentifierType.setParameters(n);
+					break;
+				}
 			    }
 			}
 			algorithmInfo.setAlgorithmIdentifier(algorithmIdentifierType);
@@ -187,7 +189,8 @@ public class CryptoMarkerType extends AbstractMarkerType {
 		{
 		    if (certificateRefs == null) {
 			certificateRefs = new ArrayList<>();
-		    }	CertificateRefType certificateRef = new CertificateRefType();
+		    }
+		    CertificateRefType certificateRef = new CertificateRefType();
 		    NodeList nodeList = elem.getChildNodes();
 		    for (int i = 0; i < nodeList.getLength(); i++) {
 			Node n = nodeList.item(i);
@@ -202,9 +205,10 @@ public class CryptoMarkerType extends AbstractMarkerType {
 				certificateRef.setCertificateType(n.getTextContent());
 				break;
 			}
-		}	certificateRefs.add(certificateRef);
-			break;
 		    }
+		    certificateRefs.add(certificateRef);
+		    break;
+		}
 		case "LegacyKeyName":
 		    this.legacyKeyName = Base64.decode(elem.getTextContent());
 		    break;

@@ -1944,7 +1944,7 @@ public class Unmarshaller {
 		    }
 		}
 	    }
-	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("WaitResponse")));
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("InitializeFrameworkResponse")));
 	return ifr;
     }
 

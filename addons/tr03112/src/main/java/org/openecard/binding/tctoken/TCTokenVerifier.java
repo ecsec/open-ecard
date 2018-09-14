@@ -211,6 +211,9 @@ public class TCTokenVerifier {
 	} else if ((! checkEmpty(proto)) && (! checkEmpty(psp)) && checkEmpty(psp.getPSK()) && ! token.isInvalidPSK()) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
+	} else if ((! checkEmpty(proto)) && checkEmpty(psp)) {
+	    assertSameChannel("ServerAddress", token.getServerAddress());
+	    return;
 	}
 
 	assertRequired("PathSecurityProtocol", proto);

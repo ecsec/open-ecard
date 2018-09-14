@@ -173,7 +173,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    // put CertificateDescription into DynamicContext which is needed for later checks
 	    dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE_DESC, certDescription);
 
-	    // according to BSI-INSTANCE_KEY-7 we MUST perform some checks immediately after receiving the eService cert
+	    // according to BSI-TR-03124-1 we MUST perform some checks immediately after receiving the eService cert
 	    Result activationChecksResult = performChecks(certDescription, dynCtx);
 	    if (! ECardConstants.Major.OK.equals(activationChecksResult.getResultMajor())) {
 		response.setResult(activationChecksResult);

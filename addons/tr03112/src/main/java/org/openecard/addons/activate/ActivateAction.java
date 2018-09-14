@@ -26,13 +26,11 @@ import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.Context;
@@ -124,13 +122,16 @@ public class ActivateAction implements AppPluginAction {
 
 	try {
 	    if (SEMAPHORE.tryAcquire()) {
-		response = checkRequestParameters(body, params, headers, attachments);
+		try {
+		    response = checkRequestParameters(body, params, headers, attachments);
+		} finally {
+		    SEMAPHORE.release();
+		}
 	    } else {
 		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
 		response.setResultMessage("An authentication process is already running.");
 	    }
 	} finally {
-	    SEMAPHORE.release();
 	    // in some cases an error does not lead to a removal of the dynamic context so remove it here
 	    DynamicContext.remove();
 	}
@@ -308,12 +309,7 @@ public class ActivateAction implements AppPluginAction {
      * result.
      */
     private BindingResult processShowDefault() {
-	Thread defautlViewThread = new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		settingsAndDefaultView.showDefaultViewUI();
-	    }
-	}, "ShowDefaultView");
+	Thread defautlViewThread = new Thread(settingsAndDefaultView::showDefaultViewUI, "ShowDefaultView");
 	defautlViewThread.start();
 	return new BindingResult(BindingResultCode.OK);
     }
@@ -326,18 +322,10 @@ public class ActivateAction implements AppPluginAction {
      */
     private BindingResult processShowPinManagement() {
 	// submit thread
-	ExecutorService es = Executors.newSingleThreadExecutor(new ThreadFactory() {
-	    @Override
-	    public Thread newThread(Runnable action) {
-		return new Thread(action, "ShowPINManagement");
-	    }
-	});
-	Future<Void> guiThread = es.submit(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {
-		pinManAction.execute();
-		return null;
-	    }
+	ExecutorService es = Executors.newSingleThreadExecutor((Runnable action) -> new Thread(action, "ShowPINManagement"));
+	Future<Void> guiThread = es.submit(() -> {
+	    pinManAction.execute();
+	    return null;
 	});
 
 	try {
@@ -375,12 +363,7 @@ public class ActivateAction implements AppPluginAction {
      * result.
      */
     private BindingResult processShowSettings() {
-	Thread settingsThread = new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		settingsAndDefaultView.showSettingsUI();
-	    }
-	}, "ShowSettings");
+	Thread settingsThread = new Thread(settingsAndDefaultView::showSettingsUI, "ShowSettings");
 	settingsThread.start();
 	return new BindingResult(BindingResultCode.OK);
     }

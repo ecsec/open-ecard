@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -51,7 +51,7 @@ public class AuthDataMap {
     private final Document xmlDoc;
 
     public AuthDataMap(DIDAuthenticationDataType data) throws ParserConfigurationException {
-	ignoreNs = Boolean.valueOf(OpenecardProperties.getProperty("legacy.ignore_ns"));
+	ignoreNs = Boolean.valueOf(OpenecardProperties.getProperty("legacy.invalid_schema"));
 	this.protocol = data.getProtocol();
 	// read content
 	List<Element> content = data.getAny();

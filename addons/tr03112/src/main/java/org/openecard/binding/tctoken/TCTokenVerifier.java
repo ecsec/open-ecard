@@ -195,7 +195,7 @@ public class TCTokenVerifier {
      * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
      * @throws SecurityViolationException Thrown in case the same origin policy is violated.
      * @throws UserCancellationException Thrown in case the user aborted the insert card dialog but this should never
-     * happen in this case.
+     *   happen in this case.
      */
     public void verifyPathSecurity() throws InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException,
 	    SecurityViolationException, UserCancellationException {
@@ -208,10 +208,7 @@ public class TCTokenVerifier {
 	if ((checkEmpty(proto) && checkEmpty(psp))) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
-	} else if ((! checkEmpty(proto)) && (! checkEmpty(psp)) && checkEmpty(psp.getPSK()) && ! token.isInvalidPSK()) {
-	    assertSameChannel("ServerAddress", token.getServerAddress());
-	    return;
-	} else if ((! checkEmpty(proto)) && checkEmpty(psp)) {
+	} else if ((! checkEmpty(proto)) && checkEmpty(psp) && ! token.isInvalidPSK()) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
 	}

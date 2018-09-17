@@ -220,12 +220,13 @@ public class TCTokenVerifier {
 	String[] protos = {"urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
 	if ("urn:ietf:rfc:4279".equals(proto)) {
-	    try {
-		assertRequired("PathSecurityParameters", psp);
-	    } catch (InvalidTCTokenElement ex) {
-		determineRefreshAddress(ex);
+	    if (token.isInvalidPSK()) {
+		String minor = ResultMinor.COMMUNICATION_ERROR;
+		String errorUrl = token.getComErrorAddressWithParams(minor);
+		determineRefreshAddress(new InvalidTCTokenElement(errorUrl, INVALID_ELEMENT, "PSK"));
 	    }
 	    try {
+		assertRequired("PathSecurityParameters", psp);
 		assertRequired("PSK", psp.getPSK());
 	    } catch (InvalidTCTokenElement ex) {
 		determineRefreshAddress(ex);

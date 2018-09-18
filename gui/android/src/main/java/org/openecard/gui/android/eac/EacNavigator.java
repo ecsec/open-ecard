@@ -166,7 +166,7 @@ public class EacNavigator extends AndroidNavigator {
 	    });
 	} else {
 	    idx++;
-	    return new AndroidResult(curStep, ResultStatus.OK, Collections.emptyList());
+	    return new AndroidResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 	}
     }
 

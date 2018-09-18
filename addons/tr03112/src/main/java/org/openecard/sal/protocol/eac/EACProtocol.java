@@ -22,6 +22,9 @@
 
 package org.openecard.sal.protocol.eac;
 
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
+import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
+import javax.annotation.Nonnull;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.sal.SALProtocolBaseImpl;
@@ -54,6 +57,7 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
+    public static final String AUTHENTICATION_CANCELLED = PREFIX + "authentication_cancelled";
 
 
     @Override
@@ -116,6 +120,13 @@ public class EACProtocol extends SALProtocolBaseImpl {
 	}
 	LOG.debug("EAC authentication finished={}.", finished);
 	return finished;
+    }
+
+    public static DIDAuthenticateResponse setEmptyResponseData(@Nonnull DIDAuthenticateResponse resp) {
+	EmptyResponseDataType d = new EmptyResponseDataType();
+	d.setProtocol("urn:oid:1.3.162.15480.3.0.14.2");
+	resp.setAuthenticationProtocolData(d);
+	return resp;
     }
 
 }

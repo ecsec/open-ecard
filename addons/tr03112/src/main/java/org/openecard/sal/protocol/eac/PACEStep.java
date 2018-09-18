@@ -139,6 +139,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	DIDAuthenticate didAuthenticate = request;
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
+	EACProtocol.setEmptyResponseData(response);
 	ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
 
 	if (! ByteUtils.compare(conHandle.getSlotHandle(), didAuthenticate.getConnectionHandle().getSlotHandle())) {
@@ -278,6 +279,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			}
 
 			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
+			    dynCtx.put(EACProtocol.AUTHENTICATION_CANCELLED, true);
 			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
 			    if (! pPaceSuccessful.isDelivered()) {
@@ -366,6 +368,12 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+	}
+
+	if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
+	    response.setResult(WSHelper.makeResultError(
+		    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
+	    EACProtocol.setEmptyResponseData(response);
 	}
 
 	return response;

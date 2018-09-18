@@ -74,6 +74,7 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
+	EACProtocol.setEmptyResponseData(response);
 
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
@@ -102,8 +103,17 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 
 	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
         if (p.derefNonblocking() == null) {
+	    boolean finishedResult = true;
+
+	    if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
+		response.setResult(WSHelper.makeResultError(
+			ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
+		EACProtocol.setEmptyResponseData(response);
+		finishedResult = false;
+	    }
+
             // authentication finished, notify GUI
-            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, true);
+            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, finishedResult);
             return response;
         } else {
             // authentication finished, notify GUI

@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
@@ -53,13 +55,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class EacNavigator extends AndroidNavigator {
+public final class EacNavigator extends AndroidNavigator {
 
     private static final Logger LOG = LoggerFactory.getLogger(EacNavigator.class);
 
     private final List<Step> steps;
     private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver;
     private final EacGuiImpl guiService;
+
+    private Thread eacNextThread;
 
     private int idx = 0;
     private boolean pinFirstUse = true;
@@ -70,6 +74,7 @@ public class EacNavigator extends AndroidNavigator {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.ifaceReceiver = ifaceReceiver;
 	this.guiService = ifaceReceiver.getUiInterface().derefNonblocking();
+	this.guiService.setEacNav(this);
     }
 
     @Override
@@ -97,6 +102,41 @@ public class EacNavigator extends AndroidNavigator {
 	// get current step
 	Step curStep = steps.get(idx);
 
+
+	FutureTask<StepResult> eacNext = new FutureTask<>(() -> nextInt(curStep));
+	try {
+	    // run next in thread and wait for completion
+	    // note that promise does not allow to access the result in case of a cancellation
+	    eacNextThread = new Thread(eacNext, "EAC-GUI-Next");
+	    eacNextThread.start();
+	    LOG.debug("Waiting for next GUI step to finish.");
+	    eacNextThread.join();
+	    LOG.debug("Next GUI step finished.");
+	    return eacNext.get();
+	} catch (InterruptedException ex) {
+	    LOG.debug("Waiting for next GUI step interrupted, interrupting the GUI step processing.");
+	    eacNextThread.interrupt();
+	    try {
+		// wait again after interrupting the thread
+		LOG.debug("Waiting again for next GUI step to finish.");
+		eacNextThread.join();
+		LOG.debug("Next GUI step finished.");
+		return eacNext.get();
+	    } catch (InterruptedException exIn) {
+		return new AndroidResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+	    } catch (ExecutionException exIn) {
+		LOG.error("Unexpected exception occurred in UI Step.", ex);
+		return new AndroidResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	    }
+	} catch (ExecutionException ex) {
+	    LOG.error("Unexpected exception occurred in UI Step.", ex);
+	    return new AndroidResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	} finally {
+	    eacNextThread = null;
+	}
+    }
+
+    private StepResult nextInt(Step curStep) {
 	// handle step display
 	if (CVCStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
@@ -213,6 +253,14 @@ public class EacNavigator extends AndroidNavigator {
 		break;
 	}
 	return r;
+    }
+
+    synchronized void cancel() {
+	Thread curNext = eacNextThread;
+	if (curNext != null) {
+	    LOG.debug("Cancelling step display.");
+	    curNext.interrupt();
+	}
     }
 
 

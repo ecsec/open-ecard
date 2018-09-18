@@ -57,6 +57,8 @@ public class EacGuiImpl implements EacGui {
 
     private static final Logger LOG = LoggerFactory.getLogger(EacGuiImpl.class);
 
+    private EacNavigator eacNav;
+
     private final Promise<Boolean> cancelPromise = new Promise<>();
 
     private final Promise<ServerData> serverData = new Promise<>();
@@ -155,6 +157,10 @@ public class EacGuiImpl implements EacGui {
 	    cancelPromise(userCan);
 	    cancelPromise(pinCorrect);
 	    cancelPromise(pinStatus);
+
+	    if (eacNav != null) {
+		eacNav.cancel();
+	    }
 	}
     }
 
@@ -178,6 +184,10 @@ public class EacGuiImpl implements EacGui {
     ///
     /// Functions for the UserConsent interface implementation
     ///
+
+    public void setEacNav(EacNavigator eacNav) {
+	this.eacNav = eacNav;
+    }
 
     public boolean isCancelled() {
 	Boolean v = cancelPromise.derefNonblocking();

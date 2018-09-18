@@ -827,7 +827,8 @@ An example for which this is useful looks like this:
 					<element name="EphemeralPublicKey" type="hexBinary"
 						maxOccurs="1" minOccurs="1" />
 
-					<element name="Signature" type="hexBinary" />
+					<!-- fix cardinality for EACAdditionalInputType, which is preceded by this type without signature -->
+					<element name="Signature" type="hexBinary" minOccurs="0" />
 
 				</sequence>
 			</restriction>

@@ -220,7 +220,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.transactionInfo = eac1Input.getTransactionInfo();
 	    eacData.requiredCHAT = requiredCHAT;
 	    eacData.optionalCHAT = optionalCHAT;
-	    eacData.selectedCHAT = requiredCHAT;
+	    eacData.selectedCHAT = new CHAT(requiredCHAT.toByteArray());
 	    eacData.aad = aad;
 	    eacData.pinID = pinID;
 	    eacData.passwordType = passwordType;

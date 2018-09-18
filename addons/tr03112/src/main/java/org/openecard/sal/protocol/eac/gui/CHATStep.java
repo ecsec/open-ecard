@@ -103,7 +103,7 @@ public class CHATStep extends Step {
 		    readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
 		}
 	    } else {
-		eacData.requiredCHAT.setReadAccess(dataGroup, false);
+		eacData.selectedCHAT.setReadAccess(dataGroup, false);
 	    }
 	}
 
@@ -118,7 +118,7 @@ public class CHATStep extends Step {
 		    textData = new Object[] { yearDiff };
 		} else {
 		    // disable this function as no working reference value is given
-		    eacData.requiredCHAT.setSpecialFunctions(specialFunction, false);
+		    eacData.selectedCHAT.setSpecialFunctions(specialFunction, false);
 		    continue;
 		}
 	    }
@@ -132,7 +132,7 @@ public class CHATStep extends Step {
 		    readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, textData));
 		}
 	    } else {
-		eacData.requiredCHAT.setSpecialFunctions(specialFunction, false);
+		eacData.selectedCHAT.setSpecialFunctions(specialFunction, false);
 	    }
 	}
 
@@ -158,7 +158,7 @@ public class CHATStep extends Step {
 		    writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false));
 		}
 	    } else {
-		eacData.requiredCHAT.setWriteAccess(dataGroup, false);
+		eacData.selectedCHAT.setWriteAccess(dataGroup, false);
 	    }
 	}
 

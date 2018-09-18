@@ -122,7 +122,7 @@ public class CHATStepAction extends StepAction {
 	// process read access and special functions
 	Checkbox cbRead = (Checkbox) executionResults.getResult(CHATStep.READ_CHAT_BOXES);
 	if (cbRead != null) {
-	    CHAT selectedCHAT = eacData.requiredCHAT;
+	    CHAT selectedCHAT = eacData.selectedCHAT;
 	    for (BoxItem item : cbRead.getBoxItems()) {
 		if (dataGroupsNames.contains(item.getName())) {
 		    selectedCHAT.setReadAccess(item.getName(), item.isChecked());
@@ -135,7 +135,7 @@ public class CHATStepAction extends StepAction {
 	// process write access
 	Checkbox cbWrite = (Checkbox) executionResults.getResult(CHATStep.WRITE_CHAT_BOXES);
 	if (cbWrite != null) {
-	    CHAT selectedCHAT = eacData.requiredCHAT;
+	    CHAT selectedCHAT = eacData.selectedCHAT;
 	    for (BoxItem item : cbWrite.getBoxItems()) {
 		if (dataGroupsNames.contains(item.getName())) {
 		    selectedCHAT.setWriteAccess(item.getName(), item.isChecked());

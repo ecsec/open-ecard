@@ -75,7 +75,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     @Override
     public DIDAuthenticateResponse perform(DIDAuthenticate didAuthenticate, Map<String, Object> internalData) {
 	DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
-	EACProtocol.setEmptyResponseData(response);
+	//EACProtocol.setEmptyResponseData(response);
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	byte[] slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle();
@@ -149,7 +149,8 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
 		response.setResult(WSHelper.makeResultError(
 			ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
-		EACProtocol.setEmptyResponseData(response);
+		//EACProtocol.setEmptyResponseData(response);
+		response.setAuthenticationProtocolData(null);
 	    }
 
             return response;

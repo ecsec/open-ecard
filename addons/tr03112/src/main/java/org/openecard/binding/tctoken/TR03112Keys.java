@@ -35,6 +35,7 @@ public class TR03112Keys {
 
     public static final String OBJECT_ACTIVATION = "object_activation";
     public static final String TCTOKEN_CHECKS = "tctoken_checks";
+    public static final String ACTIVATION_THREAD = "activation_thread";
     public static final String CONNECTION_HANDLE = "connection_handle";
     public static final String ESERVICE_CERTIFICATE_DESC = "eservice_certificate_description";
     public static final String ESERVICE_CERTIFICATE = "eservice_certificate";

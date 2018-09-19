@@ -217,6 +217,9 @@ public class TCTokenHandler {
 	    response.setTCToken(token);
 	    response.setResult(WSHelper.makeResultOK());
 
+	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	    dynCtx.put(TR03112Keys.ACTIVATION_THREAD, Thread.currentThread());
+
 	    String binding = token.getBinding();
 	    switch (binding) {
 	    	case "urn:liberty:paos:2006-08": {

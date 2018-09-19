@@ -63,6 +63,7 @@ public final class EacNavigator extends AndroidNavigator {
     private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver;
     private final EacGuiImpl guiService;
 
+    private Future<?> runningAction;
     private Thread eacNextThread;
 
     private int idx = 0;
@@ -234,7 +235,7 @@ public final class EacNavigator extends AndroidNavigator {
 
     @Override
     public void setRunningAction(Future<?> action) {
-	// don't care about the action
+	this.runningAction = action;
     }
 
     @Override
@@ -260,6 +261,13 @@ public final class EacNavigator extends AndroidNavigator {
 	if (curNext != null) {
 	    LOG.debug("Cancelling step display.");
 	    curNext.interrupt();
+	}
+
+	// cancel a potentially running action
+	Future<?> a = runningAction;
+	if (a != null && ! a.isDone()) {
+	    LOG.debug("Cancelling step action.");
+	    a.cancel(true);
 	}
     }
 

@@ -280,11 +280,19 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
 			    dynCtx.put(EACProtocol.AUTHENTICATION_CANCELLED, true);
+			    LOG.debug("EAC GUI returned with CANCEL or INTERRUPTED.");
 			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
 			    if (! pPaceSuccessful.isDelivered()) {
+				LOG.debug("Setting PACE result to cancelled.");
 				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
 					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
+			    } else {
+				Thread actThread = (Thread) dynCtx2.get(TR03112Keys.ACTIVATION_THREAD);
+				if (actThread != null) {
+				    LOG.debug("Interrupting activation thread.");
+				    actThread.interrupt();
+				}
 			    }
 			}
 		    }

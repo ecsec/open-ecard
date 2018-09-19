@@ -24,6 +24,8 @@ package org.openecard.gui.android.eac;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.Nullable;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
@@ -144,7 +146,7 @@ public class EacGuiImpl implements EacGui {
     public void cancel() {
 	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
-	    cancelPromise.deliver(Boolean.TRUE);
+	    cancelPromise.deliver(Boolean.FALSE);
 	    cancelPromise(serverData);
 	    cancelPromise(transactionInfo);
 	    cancelPromise(userReadSelection);
@@ -154,6 +156,16 @@ public class EacGuiImpl implements EacGui {
 	    cancelPromise(pinCorrect);
 	    cancelPromise(pinStatus);
 	}
+    }
+
+    @Override
+    public boolean isDone() {
+	return cancelPromise.isDelivered();
+    }
+
+    @Override
+    public void waitForDone(long timeout) throws InterruptedException, TimeoutException {
+	cancelPromise.deref(timeout, TimeUnit.MILLISECONDS);
     }
 
     private void cancelPromise(@Nullable Promise<?> p) {
@@ -168,7 +180,8 @@ public class EacGuiImpl implements EacGui {
     ///
 
     public boolean isCancelled() {
-	return cancelPromise.isDelivered();
+	Boolean v = cancelPromise.derefNonblocking();
+	return v != null && v == false;
     }
 
     public void loadValuesFromSteps(Step step1, Step step2) {
@@ -340,6 +353,12 @@ public class EacGuiImpl implements EacGui {
 	    cancelPromise.deref();
 	} catch (InterruptedException ex) {
 	    // I don't care
+	}
+    }
+
+    public void setIsDone() {
+	if (! cancelPromise.isDelivered()) {
+	    this.cancelPromise.deliver(Boolean.TRUE);
 	}
     }
 

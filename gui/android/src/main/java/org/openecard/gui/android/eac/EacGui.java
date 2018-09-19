@@ -23,6 +23,7 @@
 package org.openecard.gui.android.eac;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.gui.android.AndroidGui;
@@ -88,5 +89,25 @@ public interface EacGui extends AndroidGui {
      * Cancel EAC process.
      */
     void cancel();
+
+    /**
+     * Non blocking call returning whether the UI is corrently open or if it is closed.
+     * The done status is {@code true} if either the UI has been cancelled, or the UI is done being displayed.
+     * This information can be used to determine whether
+     *
+     * @return {@code true} in case the GUI is not isplayed anymore, {@code false} otherwise.
+     */
+    boolean isDone();
+
+    /**
+     * Waits until the UI is finished.
+     * The UI is finished either if it is cancelled, it terminated with an error, or it finished without an error.
+     *
+     * @param timeout Timeout in milliseconds. The value is a positive integer. Use {@link Long#MAX_VALUE} to wait
+     *   quasi forever.
+     * @throws InterruptedException Thrown in case waiting has been interrupted.
+     * @throws TimeoutException Thrown in case the timeout limi is reached without the UI closing in the meantime.
+     */
+    void waitForDone(long timeout) throws InterruptedException, TimeoutException;
 
 }

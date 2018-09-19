@@ -200,6 +200,7 @@ public class EacNavigator extends AndroidNavigator {
     @Override
     public void close() {
 	ifaceReceiver.terminate();
+	guiService.setIsDone();
     }
 
     @Override

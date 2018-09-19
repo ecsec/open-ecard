@@ -32,6 +32,8 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.ToggleText;
 import org.openecard.sal.protocol.eac.EACData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -43,6 +45,8 @@ import org.openecard.sal.protocol.eac.EACData;
  * @author Hans-Martin Haase
  */
 public class CHATStep extends Step {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CHATStep.class);
 
     private static final I18n LANG = I18n.getTranslation("eac");
     // step id
@@ -117,6 +121,14 @@ public class CHATStep extends Step {
 		    int yearDiff = getYearDifference(c);
 		    textData = new Object[] { yearDiff };
 		} else {
+		    LOG.warn("Removing age verification because of missing or invalid AAD.");
+		    // disable this function as no working reference value is given
+		    eacData.selectedCHAT.setSpecialFunctions(specialFunction, false);
+		    continue;
+		}
+	    } else if (CHAT.SpecialFunction.COMMUNITY_ID_VERIFICATION == specialFunction) {
+		if (eacData.aad.getCommunityIDVerificationData() == null) {
+		    LOG.warn("Removing community ID verification because of missing AAD.");
 		    // disable this function as no working reference value is given
 		    eacData.selectedCHAT.setSpecialFunctions(specialFunction, false);
 		    continue;

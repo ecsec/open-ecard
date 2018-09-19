@@ -101,29 +101,9 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
-	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
-        if (p.derefNonblocking() == null) {
-	    boolean finishedResult = true;
-
-	    if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
-		response.setResult(WSHelper.makeResultError(
-			ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
-		//EACProtocol.setEmptyResponseData(response);
-		response.setAuthenticationProtocolData(null);
-		finishedResult = false;
-	    }
-
-            // authentication finished, notify GUI
-            dynCtx.put(EACProtocol.AUTHENTICATION_DONE, finishedResult);
-            return response;
-        } else {
-            // authentication finished, notify GUI
-	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	    String msg = "Authentication canceled by the user.";
-	    Result result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
-	    response = WSHelper.makeResponse(DIDAuthenticateResponse.class, result);
-	    return response;
-        }
+	// authentication finished, notify GUI
+	dynCtx.put(EACProtocol.AUTHENTICATION_DONE, true);
+	return response;
     }
 
 }

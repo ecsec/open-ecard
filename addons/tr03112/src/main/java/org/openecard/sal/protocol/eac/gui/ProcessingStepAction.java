@@ -50,18 +50,15 @@ public class ProcessingStepAction extends StepAction {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessingStepAction.class);
 
     private final DynamicContext ctx;
-    private final Promise<Object> p = new Promise<>();
 
     public ProcessingStepAction(Step step) {
 	super(step);
 	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	ctx.putPromise(TR03112Keys.PROCESSING_CANCELLATION, p);
     }
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	if (result.isCancelled()) {
-	    p.deliver(true);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -71,7 +68,6 @@ public class ProcessingStepAction extends StepAction {
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (InterruptedException ex) {
 	    LOG.error("ProcessingStepAction interrupted by the user or an other thread.", ex);
-	    p.deliver(true);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (TimeoutException ex) {
 	    LOG.info("Timeout while waiting for the authentication to finish.", ex);

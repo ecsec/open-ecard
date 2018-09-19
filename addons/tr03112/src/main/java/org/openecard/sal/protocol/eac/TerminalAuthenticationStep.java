@@ -25,7 +25,6 @@ package org.openecard.sal.protocol.eac;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -33,7 +32,6 @@ import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.util.Promise;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate;
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain;
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType;
@@ -144,22 +142,7 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	}
 
-	Promise<Object> p = (Promise<Object>) dynCtx.getPromise(TR03112Keys.PROCESSING_CANCELLATION);
-        if (p.derefNonblocking() == null) {
-	    if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
-		response.setResult(WSHelper.makeResultError(
-			ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
-		//EACProtocol.setEmptyResponseData(response);
-		response.setAuthenticationProtocolData(null);
-	    }
-
-            return response;
-        } else {
-	    String msg = "Authentication Canceled by the user.";
-	    Result result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
-            response = WSHelper.makeResponse(DIDAuthenticateResponse.class, result);
-            return response;
-        }
+	return response;
     }
 
 }

@@ -149,9 +149,8 @@ public class PINStepAction extends StepAction {
 		// for people which think they have to remove the card in the process
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
 		    LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
-		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.REPEAT, 
-			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED)));
+			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED), ex));
 		}
 	    }
 	}

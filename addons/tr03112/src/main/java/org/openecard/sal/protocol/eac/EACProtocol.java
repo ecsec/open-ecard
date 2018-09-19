@@ -57,7 +57,6 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
-    public static final String AUTHENTICATION_CANCELLED = PREFIX + "authentication_cancelled";
 
 
     @Override

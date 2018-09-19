@@ -279,7 +279,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			}
 
 			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
-			    dynCtx.put(EACProtocol.AUTHENTICATION_CANCELLED, true);
 			    LOG.debug("EAC GUI returned with CANCEL or INTERRUPTED.");
 			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
@@ -376,13 +375,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	}
-
-	if (dynCtx.get(EACProtocol.AUTHENTICATION_CANCELLED) != null) {
-	    response.setResult(WSHelper.makeResultError(
-		    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."));
-	    //EACProtocol.setEmptyResponseData(response);
-	    response.setAuthenticationProtocolData(null);
 	}
 
 	return response;

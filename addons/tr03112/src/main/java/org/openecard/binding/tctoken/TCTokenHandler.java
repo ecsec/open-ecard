@@ -385,7 +385,6 @@ public class TCTokenHandler {
 	    } else if (innerException instanceof InterruptedException) {
 		response.setResultCode(BindingResultCode.INTERRUPTED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
-		return response;
 	    } else if (innerException instanceof DocumentValidatorException) {
 		errorMsg = LANG_TR.translationForKey(SCHEMA_VALIDATION_FAILED);
 		// it is ridiculous, that this should be a client error, but the test spec demands this

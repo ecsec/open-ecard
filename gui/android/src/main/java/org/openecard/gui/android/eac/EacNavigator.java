@@ -202,8 +202,8 @@ public final class EacNavigator extends AndroidNavigator {
 			this.guiService.sendPinStatus(blockedStatus);
 		    }
 		}
-		// errors always end in cancel
-		return new AndroidResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+		// cancel is returned by the step action
+		return new AndroidResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
 	} else {
 	    idx++;

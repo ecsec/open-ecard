@@ -126,6 +126,11 @@ public class WSHelper {
 	return result;
     }
 
+    public static Result makeResultUnknownIFDError(String msg) {
+	Result result = makeResult(ECardConstants.Major.ERROR, ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg);
+	return result;
+    }
+
     public static Result makeResult(String major, String minor, String message) {
 	Result result = makeResult(major, minor, message, "en");
 	return result;

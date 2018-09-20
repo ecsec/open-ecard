@@ -260,7 +260,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } catch (SCIOException ex) {
 		LOG.warn(ex.getMessage(), ex);
-		Result r = WSHelper.makeResultUnknownError(ex.getMessage());
+		Result r = WSHelper.makeResultUnknownIFDError(ex.getMessage());
 		response = WSHelper.makeResponse(ListIFDsResponse.class, r);
 		return response;
 	    }
@@ -351,7 +351,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    } else {
 		LOG.debug(msg, ex);
 	    }
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultUnknownIFDError(msg);
 	    response = WSHelper.makeResponse(GetIFDCapabilitiesResponse.class, r);
 	    return response;
 	} catch (InterruptedException ex) {
@@ -398,7 +398,7 @@ public class IFD implements org.openecard.ws.IFD {
 	} catch (SCIOException ex) {
 	    String msg = "Failed to get list with the terminals.";
 	    LOG.warn(msg, ex);
-	    response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultUnknownError(msg));
+	    response = WSHelper.makeResponse(GetStatusResponse.class, WSHelper.makeResultUnknownIFDError(msg));
 	    return response;
 	}
 
@@ -424,7 +424,7 @@ public class IFD implements org.openecard.ws.IFD {
 			ex.getCode() != SCIOErrorCode.SCARD_E_PROTO_MISMATCH) {
 		    String msg = String.format("Failed to determine status of terminal '%s'.", ifd.getName());
 		    LOG.warn(msg, ex);
-		    Result r = WSHelper.makeResultUnknownError(msg);
+		    Result r = WSHelper.makeResultUnknownIFDError(msg);
 		    response = WSHelper.makeResponse(GetStatusResponse.class, r);
 		    return response;
 		} else {
@@ -460,7 +460,7 @@ public class IFD implements org.openecard.ws.IFD {
 	}
 	if (timeout.signum() == -1 || timeout.signum() == 0) {
 	    String msg = "Invalid timeout value given, must be strictly positive.";
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg);
 	    response = WSHelper.makeResponse(WaitResponse.class, r);
 	    return response;
 	}
@@ -546,7 +546,7 @@ public class IFD implements org.openecard.ws.IFD {
 	} catch (SCIOException ex) {
 	    String msg = "Unknown SCIO error occured during wait call.";
 	    LOG.warn(msg, ex);
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultUnknownIFDError(msg);
 	    if (ex.getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 		r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
 	    }
@@ -557,7 +557,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (cause instanceof SCIOException) {
 		String msg = "Unknown SCIO error occured during wait call.";
 		LOG.warn(msg, cause);
-		Result r = WSHelper.makeResultUnknownError(msg);
+		Result r = WSHelper.makeResultUnknownIFDError(msg);
 		if (((SCIOException) ex.getCause()).getCode() == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 		    r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE);
 		}
@@ -647,7 +647,7 @@ public class IFD implements org.openecard.ws.IFD {
 	byte[] command = parameters.getCommand();
 	if (handle == null || command == null) {
 	    String msg = "Missing parameter.";
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg);
 	    response = WSHelper.makeResponse(ControlIFDResponse.class, r);
 	    return response;
 	}
@@ -669,7 +669,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } else {
 		String msg = "The terminal is not capable of performing the requested action.";
-		Result r = WSHelper.makeResultUnknownError(msg);
+		Result r = WSHelper.makeResultUnknownIFDError(msg);
 		response = WSHelper.makeResponse(ControlIFDResponse.class, r);
 		return response;
 	    }
@@ -681,7 +681,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    return response;
 	} catch (SCIOException ex) {
 	    String msg = "Unknown error while sending transmit control command.";
-	    Result r = WSHelper.makeResultUnknownError(msg);
+	    Result r = WSHelper.makeResultUnknownIFDError(msg);
 	    response = WSHelper.makeResponse(ControlIFDResponse.class, r);
 	    LOG.warn(msg, ex);
 	    return response;
@@ -747,7 +747,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    return response;
 		} catch (SCIOException ex) {
 		    String msg = "Unknown error in the underlying SCIO implementation.";
-		    Result r = WSHelper.makeResultUnknownError(msg);
+		    Result r = WSHelper.makeResultUnknownIFDError(msg);
 		    response = WSHelper.makeResponse(ConnectResponse.class, r);
 		    LOG.warn(msg, ex);
 		    return response;
@@ -826,7 +826,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } catch (SCIOException ex) {
 		String msg = "Unknown error in the underlying SCIO implementation.";
-		Result r = WSHelper.makeResultUnknownError(msg);
+		Result r = WSHelper.makeResultUnknownIFDError(msg);
 		response = WSHelper.makeResponse(DisconnectResponse.class, r);
 		LOG.warn(msg, ex);
 		return response;
@@ -915,7 +915,7 @@ public class IFD implements org.openecard.ws.IFD {
 		return response;
 	    } catch (SCIOException ex) {
 		String msg = "Unknown error in the underlying SCIO implementation.";
-		Result r = WSHelper.makeResultUnknownError(msg);
+		Result r = WSHelper.makeResultUnknownIFDError(msg);
 		response = WSHelper.makeResponse(EndTransactionResponse.class, r);
 		LOG.warn(msg, ex);
 		return response;
@@ -976,7 +976,7 @@ public class IFD implements org.openecard.ws.IFD {
 		} catch (SCIOException ex) {
 		    String msg = "Error during transmit.";
 		    LOG.warn(msg, ex);
-		    result = WSHelper.makeResultUnknownError(msg);
+		    result = WSHelper.makeResultUnknownIFDError(msg);
 		} catch (IllegalStateException ex) {
 		    String msg = "Card removed during transmit.";
 		    LOG.warn(msg, ex);
@@ -1189,7 +1189,7 @@ public class IFD implements org.openecard.ws.IFD {
 	switch (result) {
 	    case 0x9000: return WSHelper.makeResultOK();
 	    case 0x6400: return WSHelper.makeResultError(ECardConstants.Minor.IFD.TIMEOUT_ERROR, "Timeout.");
-            default:     return WSHelper.makeResultUnknownError("Unknown return code from terminal.");
+            default:     return WSHelper.makeResultUnknownIFDError("Unknown return code from terminal.");
 	}
     }
 

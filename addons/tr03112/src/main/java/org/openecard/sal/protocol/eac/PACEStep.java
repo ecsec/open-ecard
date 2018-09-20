@@ -281,16 +281,31 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
 			    LOG.debug("EAC GUI returned with CANCEL or INTERRUPTED.");
 			    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-			    Promise<Object> pPaceSuccessful = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
-			    if (! pPaceSuccessful.isDelivered()) {
+			    Promise<Object> paceErrorPromise = dynCtx2.getPromise(EACProtocol.PACE_EXCEPTION);
+			    Object paceError = paceErrorPromise.derefNonblocking();
+			    if (! paceErrorPromise.isDelivered()) {
 				LOG.debug("Setting PACE result to cancelled.");
-				pPaceSuccessful.deliver(WSHelper.createException(WSHelper.makeResultError(
+				paceErrorPromise.deliver(WSHelper.createException(WSHelper.makeResultError(
 					ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the PACE dialog.")));
 			    } else {
-				Thread actThread = (Thread) dynCtx2.get(TR03112Keys.ACTIVATION_THREAD);
-				if (actThread != null) {
-				    LOG.debug("Interrupting activation thread.");
-				    actThread.interrupt();
+				// determine if the error is cancel, or something else
+				boolean needsTermination = false;
+				if (paceError instanceof WSHelper.WSException) {
+				    WSHelper.WSException ex = (WSHelper.WSException) paceError;
+				    String minor = ex.getResultMinor();
+				    switch (minor) {
+					case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
+					case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+					    needsTermination = true;
+				    }
+				}
+				// terminate activation thread
+				if (needsTermination) {
+				    Thread actThread = (Thread) dynCtx2.get(TR03112Keys.ACTIVATION_THREAD);
+				    if (actThread != null) {
+					LOG.debug("Interrupting activation thread.");
+					actThread.interrupt();
+				    }
 				}
 			    }
 			}

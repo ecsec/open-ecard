@@ -142,7 +142,6 @@ public class PINStepAction extends StepAction {
 		// This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		    LOG.error("User canceled the authentication manually.", ex);
-		    ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		    return new StepActionResult(StepActionResultStatus.CANCEL);
 		}
 
@@ -201,7 +200,6 @@ public class PINStepAction extends StepAction {
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		LOG.error("User canceled the authentication manually.", ex);
-		ctx.put(EACProtocol.PACE_EXCEPTION, ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 

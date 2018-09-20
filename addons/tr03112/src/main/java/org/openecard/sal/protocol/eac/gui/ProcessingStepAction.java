@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
+import org.openecard.common.WSHelper;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.Step;
@@ -58,19 +60,19 @@ public class ProcessingStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isCancelled()) {
-	    return new StepActionResult(StepActionResultStatus.CANCEL);
-	}
-
 	Promise<Object> pAuthDone = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE);
 	try {
 	    pAuthDone.deref(120, TimeUnit.SECONDS);
 	    return new StepActionResult(StepActionResultStatus.NEXT);
 	} catch (InterruptedException ex) {
 	    LOG.error("ProcessingStepAction interrupted by the user or an other thread.", ex);
+	    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
+		    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog.")));
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	} catch (TimeoutException ex) {
 	    LOG.info("Timeout while waiting for the authentication to finish.", ex);
+	    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
+		    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog.")));
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }

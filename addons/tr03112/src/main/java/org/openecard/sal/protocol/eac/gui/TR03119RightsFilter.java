@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,45 +36,45 @@ public class TR03119RightsFilter {
     /**
      * Set containing all DataGroups which are readable according to BSI TR-03119.
      */
-    private static final HashSet<CHAT.DataGroup> readRights;
+    private static final HashSet<CHAT.DataGroup> READ_RIGHTS;
     /**
      * Set containing all DataGroups which are writable according to BSI TR-03119.
      */
-    private static final HashSet<CHAT.DataGroup> writeRights;
+    private static final HashSet<CHAT.DataGroup> WRITE_RIGHTS;
     /**
      * Set containing all SpecialFuntions which are allowed according to BSI TR-03119.
      */
-    private static final HashSet<CHAT.SpecialFunction> specialFunction;
+    private static final HashSet<CHAT.SpecialFunction> SPECIAL_FUNCTION;
 
     // fill the maps
     static {
-	readRights = new HashSet<>();
-	writeRights = new HashSet<>();
-	specialFunction = new HashSet<>();
+	READ_RIGHTS = new HashSet<>();
+	WRITE_RIGHTS = new HashSet<>();
+	SPECIAL_FUNCTION = new HashSet<>();
 
 	// allowed read rights
-	readRights.add(CHAT.DataGroup.DG01);
-	readRights.add(CHAT.DataGroup.DG02);
-	readRights.add(CHAT.DataGroup.DG03);
-	readRights.add(CHAT.DataGroup.DG04);
-	readRights.add(CHAT.DataGroup.DG05);
-	readRights.add(CHAT.DataGroup.DG06);
-	readRights.add(CHAT.DataGroup.DG07);
-	readRights.add(CHAT.DataGroup.DG08);
-	readRights.add(CHAT.DataGroup.DG09);
-	readRights.add(CHAT.DataGroup.DG10);
-	readRights.add(CHAT.DataGroup.DG13);
-	readRights.add(CHAT.DataGroup.DG17);
-	readRights.add(CHAT.DataGroup.DG19);
+	READ_RIGHTS.add(CHAT.DataGroup.DG01);
+	READ_RIGHTS.add(CHAT.DataGroup.DG02);
+	READ_RIGHTS.add(CHAT.DataGroup.DG03);
+	READ_RIGHTS.add(CHAT.DataGroup.DG04);
+	READ_RIGHTS.add(CHAT.DataGroup.DG05);
+	READ_RIGHTS.add(CHAT.DataGroup.DG06);
+	READ_RIGHTS.add(CHAT.DataGroup.DG07);
+	READ_RIGHTS.add(CHAT.DataGroup.DG08);
+	READ_RIGHTS.add(CHAT.DataGroup.DG09);
+	READ_RIGHTS.add(CHAT.DataGroup.DG10);
+	READ_RIGHTS.add(CHAT.DataGroup.DG13);
+	READ_RIGHTS.add(CHAT.DataGroup.DG17);
+	READ_RIGHTS.add(CHAT.DataGroup.DG19);
 
 	// allowed write rights
 	// none so far ;-)
 
 	// allowed special functions
-	specialFunction.add(CHAT.SpecialFunction.AGE_VERIFICATION);
-	specialFunction.add(CHAT.SpecialFunction.COMMUNITY_ID_VERIFICATION);
-	specialFunction.add(CHAT.SpecialFunction.INSTALL_QUALIFIED_CERTIFICATE);
-	specialFunction.add(CHAT.SpecialFunction.RESTRICTED_IDENTIFICATION);
+	SPECIAL_FUNCTION.add(CHAT.SpecialFunction.AGE_VERIFICATION);
+	SPECIAL_FUNCTION.add(CHAT.SpecialFunction.COMMUNITY_ID_VERIFICATION);
+	SPECIAL_FUNCTION.add(CHAT.SpecialFunction.INSTALL_QUALIFIED_CERTIFICATE);
+	SPECIAL_FUNCTION.add(CHAT.SpecialFunction.RESTRICTED_IDENTIFICATION);
     }
 
     /**
@@ -86,7 +86,7 @@ public class TR03119RightsFilter {
      * @return {@code true} if the read right of the given data group is mentioned in BSI TR-03119 else {@code false}.
      */
     public static boolean isTr03119ConformReadRight(CHAT.DataGroup right) {
-	return readRights.contains(right);
+	return READ_RIGHTS.contains(right);
     }
 
     /**
@@ -99,7 +99,7 @@ public class TR03119RightsFilter {
      *   otherwise.
      */
     public static boolean isTr03119ConformWriteRight(CHAT.DataGroup right) {
-	return writeRights.contains(right);
+	return WRITE_RIGHTS.contains(right);
     }
 
     /**
@@ -112,7 +112,7 @@ public class TR03119RightsFilter {
      *   {@code false}.
      */
     public static boolean isTr03119ConformSpecialFunction(CHAT.SpecialFunction function) {
-	return specialFunction.contains(function);
+	return SPECIAL_FUNCTION.contains(function);
     }
 
 }

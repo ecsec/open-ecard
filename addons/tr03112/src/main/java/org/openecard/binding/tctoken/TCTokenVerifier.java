@@ -208,7 +208,7 @@ public class TCTokenVerifier {
 	if ((checkEmpty(proto) && checkEmpty(psp))) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
-	} else if ((! checkEmpty(proto)) && checkEmpty(psp) && ! token.isInvalidPSK()) {
+	} else if ((! checkEmpty(proto)) && "urn:ietf:rfc:4279".equals(proto) && checkEmpty(psp) && ! token.isInvalidPSK()) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
 	}

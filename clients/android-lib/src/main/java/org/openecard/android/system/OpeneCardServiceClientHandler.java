@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,12 +41,10 @@ public class OpeneCardServiceClientHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardServiceClientHandler.class);
 
-    private final Activity activity;
     private final OpeneCardServiceClient client;
     private final OpeneCardServiceHandler connectionHandler;
 
     public OpeneCardServiceClientHandler(Activity activity, OpeneCardServiceHandler handler) {
-	this.activity = activity;
 	this.client = new OpeneCardServiceClient(activity.getApplicationContext());
 	this.connectionHandler = handler;
     }
@@ -61,9 +59,7 @@ public class OpeneCardServiceClientHandler {
     public void startService() {
 	new Thread(() -> {
 	    final ServiceResponse r = client.startService();
-	    activity.runOnUiThread(() -> {
-		mapStartServiceResult(r);
-	    });
+	    mapStartServiceResult(r);
 	}, "OeC Service Start").start();
     }
 
@@ -73,9 +69,7 @@ public class OpeneCardServiceClientHandler {
     public void stopService() {
 	new Thread(() -> {
 	    final ServiceResponse r = client.stopService();
-	    activity.runOnUiThread(() -> {
-		mapStopServiceResult(r);
-	    });
+	    mapStopServiceResult(r);
 	}, "OeC Service Stop").start();
     }
 

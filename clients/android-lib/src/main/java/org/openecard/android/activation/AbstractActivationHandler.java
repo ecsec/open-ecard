@@ -243,9 +243,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    Set<String> supportedCards = getSupportedCards();
 		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
 		    if (supportedCards == null || supportedCards.contains(type)) {
-			parent.runOnUiThread(() -> {
-			    onCardInserted(type);
-			});
+			onCardInserted(type);
 
 			// remove handler when the correct card is present
 			if (octx != null) {
@@ -271,19 +269,13 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	switch (result.getResultCode()) {
 	    case OK:
 	    case REDIRECT:
-		parent.runOnUiThread(() -> {
-		    onAuthenticationSuccess(result);
-		});
+		onAuthenticationSuccess(result);
 		break;
 	    case INTERRUPTED:
-		parent.runOnUiThread(() -> {
-		    onAuthenticationInterrupted(result);
-		});
+		onAuthenticationInterrupted(result);
 		break;
 	    default:
-		parent.runOnUiThread(() -> {
-		    onAuthenticationFailure(result);
-		});
+		onAuthenticationFailure(result);
 		break;
 	}
     }
@@ -365,23 +357,28 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	if (isCardPresent()) {
 	    Dialog d = showCardRemoveDialog();
 	    if (d != null) {
-		cardRemoveDialog = d;
-		d.setCanceledOnTouchOutside(false);
-		d.setCancelable(false);
-		// if card remove dialog is not shown, then show it
-		if (! d.isShowing()) {
-		    d.show();
-		}
-		// redirect to the termination uri when the card remove dialog is closed
-		d.setOnDismissListener(dialog -> {
-		    // clean dialog field
-		    cardRemoveDialog = null;
-		    // perform redirect
-		    if (result.getResultCode() == ActivationResultCode.REDIRECT) {
-			authenticationSuccessAction(location);
+		// dialog functions must run on the UI thread
+		parent.runOnUiThread(() -> {
+		    cardRemoveDialog = d;
+		    d.setCanceledOnTouchOutside(false);
+		    d.setCancelable(false);
+		    // if card remove dialog is not shown, then show it
+		    if (! d.isShowing()) {
+			d.show();
 		    }
+		    // redirect to the termination uri when the card remove dialog is closed
+		    d.setOnDismissListener(dialog -> {
+			// clean dialog field
+			cardRemoveDialog = null;
+			// perform redirect
+			if (result.getResultCode() == ActivationResultCode.REDIRECT) {
+			    // handlers belong into the background
+			    new Thread(() -> {
+				authenticationSuccessAction(location);
+			    }, "EAC Success Handler").start();
+			}
+		    });
 		});
-
 		// return as the redirect is handled in the DismissListener
 		return;
 	    }

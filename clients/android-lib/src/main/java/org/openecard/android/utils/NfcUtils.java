@@ -71,7 +71,7 @@ public class NfcUtils {
     }
 
     public void enableNFCDispatch(Activity activity) {
-	if (isNfcAvailableAndEnabled(activity)) {
+	if (isNfcEnabled(activity)) {
 	    LOG.debug("Enable NFC foreground dispatch...");
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
@@ -81,7 +81,7 @@ public class NfcUtils {
     }
 
     public void disableNFCDispatch(Activity activity) {
-	if (isNfcAvailableAndEnabled(activity)) {
+	if (isNfcEnabled(activity)) {
 	    LOG.debug("Disable NFC foreground dispatch...");
 	    // disable dispatch of messages with nfc tag
 	    NfcAdapter.getDefaultAdapter(activity).disableForegroundDispatch(activity);
@@ -101,9 +101,14 @@ public class NfcUtils {
 	}
     }
 
-    private boolean isNfcAvailableAndEnabled(Context ctx) {
+    public static boolean isNfcEnabled(Context ctx) {
 	NFCFactory.setContext(ctx);
-	return NFCFactory.isNFCAvailable() && NFCFactory.isNFCEnabled();
+	return NFCFactory.isNFCEnabled();
+    }
+
+    public static boolean isNfcAvailable(Context ctx) {
+	NFCFactory.setContext(ctx);
+	return NFCFactory.isNFCAvailable();
     }
 
 

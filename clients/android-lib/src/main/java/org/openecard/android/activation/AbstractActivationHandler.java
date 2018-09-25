@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
@@ -355,11 +357,11 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
 	// only display if a card is available
 	if (isCardPresent()) {
-	    Dialog d = showCardRemoveDialog();
+	    Dialog d = getDialog();
 	    if (d != null) {
+		cardRemoveDialog = d;
 		// dialog functions must run on the UI thread
 		parent.runOnUiThread(() -> {
-		    cardRemoveDialog = d;
 		    d.setCanceledOnTouchOutside(false);
 		    d.setCancelable(false);
 		    // if card remove dialog is not shown, then show it
@@ -387,6 +389,21 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	// no dialog shown, just perfrom action
 	if (result.getResultCode() == ActivationResultCode.REDIRECT) {
 	    authenticationSuccessAction(location);
+	}
+    }
+
+    @Nullable
+    private Dialog getDialog() {
+	try {
+	    FutureTask<Dialog> t = new FutureTask(this::showCardRemoveDialog);
+	    parent.runOnUiThread(t);
+	    return t.get();
+	} catch (ExecutionException ex) {
+	    LOG.error("Exception seen while obtaining Card Removed Dialog.", ex);
+	    return null;
+	} catch (InterruptedException ex) {
+	    LOG.warn("Interruption received while obtaining Card Removed Dialog, continuing nevertheless.");
+	    return null;
 	}
     }
 

@@ -70,12 +70,13 @@ public class NFCCard implements SCIOCard {
 	this.nfcCardChannel = new NFCCardChannel(this);
 
 	// start thread which is monitoring the availability of the card
-	monitor = getMonitor();
-	monitor.start();
+	monitor = startMonitor();
     }
 
-    private Thread getMonitor() {
-	return new Thread(new NFCCardMonitoring(nfcCardTerminal, this));
+    private Thread startMonitor() {
+	Thread t = new Thread(new NFCCardMonitoring(nfcCardTerminal, this));
+	t.start();
+	return t;
     }
 
     private int getTimeoutForTransceive() {
@@ -106,8 +107,7 @@ public class NFCCard implements SCIOCard {
 		isodep.connect();
 
 		// start thread which is monitoring the availability of the card
-		monitor = getMonitor();
-		monitor.start();
+		monitor = startMonitor();
 	    } catch (IOException ex) {
 		LOG.error("Failed to close channel.", ex);
 		throw new SCIOException("Failed to close channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);

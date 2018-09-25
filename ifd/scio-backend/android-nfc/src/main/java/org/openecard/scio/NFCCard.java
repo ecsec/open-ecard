@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki
  */
-public class NFCCard implements SCIOCard {
+public final class NFCCard implements SCIOCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
 

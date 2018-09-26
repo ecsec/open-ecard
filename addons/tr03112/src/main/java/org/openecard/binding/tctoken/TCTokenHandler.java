@@ -144,7 +144,7 @@ public class TCTokenHandler {
 	puk = LANG_PACE.translationForKey("puk");
 
 	schemaValidator = new FuturePromise<>(() -> {
-	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("invalid_schema"));
+	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.invalid_schema"));
 	    if (! noValid) {
 		try {
 		    return JAXPSchemaValidator.load("ISO24727-Protocols.xsd");

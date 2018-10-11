@@ -267,6 +267,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	} else {
 	    authThread = null;
 	}
+	authThread = null;
 
 	switch (result.getResultCode()) {
 	    case OK:

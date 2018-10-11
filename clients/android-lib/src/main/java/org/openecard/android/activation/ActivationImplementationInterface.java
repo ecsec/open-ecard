@@ -59,8 +59,19 @@ public interface ActivationImplementationInterface <GUI extends AndroidGui> exte
 
     /**
      * Cancels the running authentication if there is one running.
-     * This method is safe to call even though there is no running authentication.
+     * This is the same as calling {@link #cancelAuthentication(boolean)} with the parameter set to {@code false}.
+     *
+     * @see #cancelAuthentication(boolean)
      */
+    // TODO: set deprecation to only use overloaded method
     void cancelAuthentication();
+
+    /**
+     * Cancels the running authentication if there is one running.
+     * This method is safe to call even though there is no running authentication.<br>
+     *
+     * @param runInThread If {@code true}, the cancel action is performed in the background and does not block the
+     */
+    void cancelAuthentication(boolean runInThread);
 
 }

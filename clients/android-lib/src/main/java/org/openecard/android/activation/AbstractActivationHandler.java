@@ -198,7 +198,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     public void onStop() {
 	// make sure nothing is running anymore
-	cancelAuthenticationInt(false);
+	cancelAuthenticationInt(false, false);
 
 	// remove callback which is set onStart
 	if (octx != null) {
@@ -323,29 +323,44 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     @Override
     public void cancelAuthentication() {
-	cancelAuthenticationInt(true);
+	cancelAuthentication(false);
     }
 
-    private void cancelAuthenticationInt(boolean showFailure) {
+    @Override
+    public void cancelAuthentication(boolean runInThread) {
+	cancelAuthenticationInt(true, runInThread);
+    }
+
+    private void cancelAuthenticationInt(boolean showFailure, boolean runInNewThread) {
 	Thread at = authThread;
 	if (at != null) {
-	    try {
-		LOG.info("Stopping Authentication thread ...");
-		at.interrupt();
-		at.join();
-		LOG.info("Authentication thread has stopped.");
+	    // define function
+	    Runnable fun = () -> {
+		try {
+		    LOG.info("Stopping Authentication thread ...");
+		    at.interrupt();
+		    at.join();
+		    LOG.info("Authentication thread has stopped.");
 
-		// cancel task and handle event
-		if (showFailure) {
-		    String msg = "";
-		    ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
-		    handleActivationResult(r);
+		    // cancel task and handle event
+		    if (showFailure) {
+			String msg = "";
+			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+			handleActivationResult(r);
+		    }
+		} catch (InterruptedException ex) {
+		    LOG.error("Waiting for Authentication thread interrupted.");
+		} finally {
+		    // make sure it is really null after this method is finished
+		    authThread = null;
 		}
-	    } catch (InterruptedException ex) {
-		LOG.error("Waiting for Authentication thread interrupted.");
-	    } finally {
-		// make sure it is really null after this method is finished
-		authThread = null;
+	    };
+
+	    // run in thread if requested or run synchronous
+	    if (runInNewThread) {
+		new Thread(fun).start();
+	    } else {
+		fun.run();
 	    }
 	}
     }

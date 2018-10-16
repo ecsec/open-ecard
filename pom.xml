@@ -80,7 +80,7 @@
 		<version.openjfx>11</version.openjfx>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
-		<jarsigner.tsa>https://timestamp.geotrust.com/tsa</jarsigner.tsa>
+		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>
 
 		<!-- fix for netbeans as it executes the surefire:test task directly -->
 		<argLine>-Djdk.attach.allowAttachSelf</argLine>

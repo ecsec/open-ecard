@@ -33,6 +33,16 @@
 			<artifactId>gui-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${version.openjfx}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-web</artifactId>
+			<version>${version.openjfx}</version>
+		</dependency>
 	</dependencies>
 
 </project>

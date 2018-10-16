@@ -70,7 +70,7 @@
 		<android.api.version>21</android.api.version>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<version.toolchain>[1.8]</version.toolchain>
+		<version.toolchain>[11]</version.toolchain>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>7</maven.compiler.release-->

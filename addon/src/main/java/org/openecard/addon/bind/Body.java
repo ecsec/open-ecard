@@ -24,8 +24,8 @@ package org.openecard.addon.bind;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.transform.TransformerException;
+import org.openecard.bouncycastle.util.encoders.Base64;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -45,7 +45,7 @@ import org.w3c.dom.Node;
  */
 public abstract class Body {
 
-    private static final Logger logger = LoggerFactory.getLogger(Body.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Body.class);
 
     private String value;
     private String mimeType;
@@ -169,7 +169,7 @@ public abstract class Body {
 	if (value == null) {
 	    mimeType = null;
 	} else if (mimeType == null || "".equals(mimeType)) {
-	    logger.warn("No MIME type specified, falling back to 'text/plain'.");
+	    LOG.warn("No MIME type specified, falling back to 'text/plain'.");
 	    mimeType = "text/plain";
 	}
 	// preemptively correct base64 if no value is supplied
@@ -214,7 +214,7 @@ public abstract class Body {
 	if (value == null) {
 	    throw new NullPointerException("The supplied value is null.");
 	}
-	String encVal = DatatypeConverter.printBase64Binary(value);
+	String encVal = Base64.toBase64String(value);
 	setValue(encVal, mimeType, true);
     }
 

@@ -14,6 +14,11 @@
 	<name>Android Client Lib</name>
 
 
+	<properties>
+		<!-- no support for java 11 yet -->
+		<animal.sniffer.skip>true</animal.sniffer.skip>
+	</properties>
+
 	<build>
 		<pluginManagement>
 			<plugins>

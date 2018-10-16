@@ -13,19 +13,9 @@
 	<packaging>jar</packaging>
 	<name>Swing GUI</name>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+	<properties>
+		<animal.sniffer.skip>true</animal.sniffer.skip>
+	</properties>
 
 	<dependencies>
 		<dependency>

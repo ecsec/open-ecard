@@ -13,6 +13,10 @@
     <packaging>jar</packaging>
     <name>Open eCard Bouncy Castle</name>
 
+	<properties>
+		<animal.sniffer.skip>true</animal.sniffer.skip>
+	</properties>
+
     <build>
 		<plugins>
 			<!-- copy bouncycastle sources -->

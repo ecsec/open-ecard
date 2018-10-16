@@ -19,6 +19,11 @@
 			<artifactId>graphics</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openecard.gui</groupId>
+			<artifactId>swing</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

@@ -30,8 +30,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javax.swing.JPanel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -47,8 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HTMLPanel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HTMLPanel.class);
-    
     private static JFXPanel jfxPane;
     private static WebView browser;
     private static JPanel contentPane;
@@ -64,11 +60,8 @@ public class HTMLPanel {
 	contentPane = new JPanel();
 	jfxPane = new JFXPanel();
 	contentPane.add(jfxPane);
-	Platform.runLater(new Runnable() {
-	    @Override
-	    public void run() {
-		initFx(mimeType, content);
-	    }
+	Platform.runLater(() -> {
+	    initFx(mimeType, content);
 	});
 
 	return contentPane;

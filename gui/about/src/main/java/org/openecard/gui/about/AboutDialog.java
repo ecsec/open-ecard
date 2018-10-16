@@ -27,7 +27,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -49,15 +48,14 @@ import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.common.I18n;
 import org.openecard.common.AppVersion;
 import org.openecard.common.util.StringUtils;
-import org.openecard.common.util.SysUtils;
 import org.openecard.gui.graphics.GraphicsUtil;
 import org.openecard.gui.graphics.OecLogo;
+import org.openecard.gui.swing.common.SwingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,11 +203,8 @@ public class AboutDialog extends JFrame {
 
 	JButton btnClose = new JButton(LANG.translationForKey("about.button.close"));
 	btnClose.setBounds(587, 416, 117, 25);
-	btnClose.addActionListener(new ActionListener() {
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		dispose();
-	    }
+	btnClose.addActionListener((ActionEvent e) -> {
+	    dispose();
 	});
 	getContentPane().add(btnClose);
 
@@ -237,11 +232,8 @@ public class AboutDialog extends JFrame {
 	    editorPane.setText("Page not found.");
 	}
 
-	editorPane.addHyperlinkListener(new HyperlinkListener() {
-	    @Override
-	    public void hyperlinkUpdate(HyperlinkEvent e) {
-		openUrl(e);
-	    }
+	editorPane.addHyperlinkListener((HyperlinkEvent e) -> {
+	    openUrl(e);
 	});
 
 	JScrollPane scrollPane = new JScrollPane(editorPane);
@@ -257,7 +249,7 @@ public class AboutDialog extends JFrame {
 	EventType type = event.getEventType();
 	if (type == EventType.ACTIVATED) {
 	    URL url = event.getURL();
-	    SysUtils.openUrl(URI.create(url.toExternalForm()), true);
+	    SwingUtils.openUrl(URI.create(url.toExternalForm()), true);
 	}
     }
 

@@ -73,6 +73,7 @@
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<!-- Dependencies which can be used to test android marshaller -->
 		<!--dependency>
 			<groupId>org.openecard.wsdef</groupId>
@@ -82,10 +83,12 @@
 		<dependency>
 			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
+			<version>1.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
+			<version>2.12.0</version>
 		</dependency-->
 
 		<dependency>

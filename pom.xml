@@ -73,10 +73,10 @@
 		<version.toolchain>[11]</version.toolchain>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<!--maven.compiler.release>7</maven.compiler.release-->
+		<!--maven.compiler.release>11</maven.compiler.release-->
 
 		<version.jmockit>1.41</version.jmockit>
-		<version.pmd>6.6.0</version.pmd>
+		<version.pmd>6.8.0</version.pmd>
 		<version.openjfx>11</version.openjfx>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
@@ -491,12 +491,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.0</version>
+					<version>2.22.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.22.0</version>
+							<version>2.22.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -516,12 +516,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.22.0</version>
+					<version>2.22.1</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.22.0</version>
+							<version>2.22.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -583,17 +583,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.8</version>
-				</plugin>
-				<plugin>
-					<groupId>com.simpligility.maven.plugins</groupId>
-					<artifactId>android-maven-plugin</artifactId>
-					<version>4.5.0-jarfix</version>
-					<extensions>true</extensions>
-					<configuration>
-						<sdk>
-							<platform>${android.api.version}</platform>
-						</sdk>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -741,7 +730,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.1</version>
+					<version>0.8.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -834,24 +823,37 @@
 				<version>1.7.25</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-ext</artifactId>
-				<version>1.7.25</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-jdk14</artifactId>
-				<version>1.7.25</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-android</artifactId>
-				<version>1.7.25</version>
-			</dependency>
-			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>1.2.3</version>
+			</dependency>
+
+			<!-- JAXB API and implementation -->
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-core</artifactId>
+				<version>2.3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<!-- JAXWS API -->
+			<dependency>
+				<groupId>javax.jws</groupId>
+				<artifactId>javax.jws-api</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.xml.ws</groupId>
+				<artifactId>jaxws-api</artifactId>
+				<version>2.3.1</version>
 			</dependency>
 
 			<!-- testing -->
@@ -881,26 +883,6 @@
 				<artifactId>android</artifactId>
 				<version>4.1.1.4</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.android</groupId>
-				<artifactId>support-v4</artifactId>
-				<version>r7</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.jws</groupId>
-				<artifactId>jsr181-api</artifactId>
-				<version>1.0-MR1</version>
-			</dependency>
-			<dependency>
-				<groupId>xerces</groupId>
-				<artifactId>xercesImpl</artifactId>
-				<version>2.12.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ogce</groupId>
-				<artifactId>xpp3</artifactId>
-				<version>1.1.6</version>
-			</dependency>
 
 			<dependency>
 				<groupId>org.json</groupId>
@@ -910,7 +892,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.6</version>
+				<version>2.9.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
@@ -926,12 +908,12 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>4.5.2</version>
+				<version>5.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna-platform</artifactId>
-				<version>4.5.2</version>
+				<version>5.0.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -30,26 +30,25 @@
 
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxws-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>All other Services</id>
-						<goals>
-							<goal>wsimport</goal>
-						</goals>
-						<configuration>
-							<wsdlDirectory>${basedir}/src/main/wsdl</wsdlDirectory>
-							<wsdlFiles>
-								<wsdlFile>ALL.wsdl</wsdlFile>
-							</wsdlFiles>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-codegen-plugin</artifactId>
+				<configuration>
+					<wsdlOptions>
+						<wsdlOption>
 							<wsdlLocation>ALL.wsdl</wsdlLocation>
+							<wsdl>${basedir}/src/main/wsdl/ALL.wsdl</wsdl>
 							<bindingFiles>
 								<bindingFile>${basedir}/src/main/wsdl/serialization.xjc</bindingFile>
+								<bindingFile>${basedir}/src/main/wsdl/wrapperStyle.xjc</bindingFile>
 							</bindingFiles>
-							<!-- <keep>true</keep> -->
-							<!-- <verbose>true</verbose> -->
-						</configuration>
+						</wsdlOption>
+					</wsdlOptions>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

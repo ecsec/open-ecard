@@ -615,20 +615,14 @@
 					<version>1.4</version>
 				</plugin>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>jaxws-maven-plugin</artifactId>
-					<version>2.5</version>
+					<groupId>org.apache.cxf</groupId>
+					<artifactId>cxf-codegen-plugin</artifactId>
+					<version>3.3.0-j11</version>
 					<configuration>
-						<useJdkToolchainExecutable>true</useJdkToolchainExecutable>
-						<sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
-						<target>2.2</target>
-						<!-- <keep>true</keep> -->
-						<!-- <verbose>true</verbose> -->
-						<!-- Java 8 has tighter restrictions -->
-						<!-- http://docs.oracle.com/javase/tutorial/jaxp/properties/properties.html -->
-						<vmArgs>
-							<vmArg>-Djavax.xml.accessExternalSchema=file</vmArg>
-						</vmArgs>
+						<defaultOptions>
+							<suppressGeneratedDate>true</suppressGeneratedDate>
+							<validateWsdl>true</validateWsdl>
+						</defaultOptions>
 					</configuration>
 				</plugin>
 

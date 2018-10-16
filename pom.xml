@@ -505,7 +505,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<argLine>@{argLine} ${argLine}</argLine>
+						<argLine>@{argLine}</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
 						</systemPropertyVariables>
@@ -530,7 +530,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<argLine>@{argLine} ${argLine}</argLine>
+						<argLine>@{argLine}</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
 						</systemPropertyVariables>

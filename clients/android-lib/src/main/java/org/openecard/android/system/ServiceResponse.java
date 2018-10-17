@@ -38,7 +38,7 @@ public class ServiceResponse implements Parcelable {
     private final String message;
     private final int statusCode;
 
-    // TODO aufspalten in AppErrorResponse AppWarningResponse
+    // TODO: split into AppErrorResponse AppWarningResponse
 
     public ServiceResponse(Parcel in) {
 	this.level = ServiceResponseLevel.valueOf(in.readString());

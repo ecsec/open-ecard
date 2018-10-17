@@ -9,60 +9,91 @@
 	</parent>
 
 	<groupId>org.openecard.clients</groupId>
-	<artifactId>android-lib</artifactId>
-	<packaging>aar</packaging>
-	<name>Android Client Lib</name>
-
+	<artifactId>android-lib-builder</artifactId>
+	<packaging>pom</packaging>
+	<name>Android Client Lib Builder</name>
 
 	<properties>
-		<!-- no support for java 11 yet -->
-		<animal.sniffer.skip>true</animal.sniffer.skip>
+		<gradle.cmd>./gradlew</gradle.cmd>
 	</properties>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<configuration>
-						<ignores>
-							<ignore>com.github.markusbernhardt.proxy.*</ignore>
-						</ignores>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>com.simpligility.maven.plugins</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<configuration>
-					<dexMultiDex>true</dexMultiDex>
-					<release>true</release>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>dep-copy</id>
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
+	<profiles>
+		<profile>
+			<id>windows_gradle_binary</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<properties>
+				<gradle.cmd>gradlew.bat</gradle.cmd>
+			</properties>
+		</profile>
+		<profile>
+			<id>android</id>
+			<activation>
+				<!-- activate android when sdk path is defined -->
+				<property>
+					<name>env.ANDROID_HOME</name>
+				</property>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
 						<configuration>
-							<includeScope>runtime</includeScope>
-							<outputDirectory>${project.build.directory}/classes</outputDirectory>
-							<!-- This dependency is not removed correctly in full builds due to a bug (probably in dep plugin) -->
-							<excludeGroupIds>org.apache.httpcomponents</excludeGroupIds>
-							<excludes>/cif-repo/repo-config.properties</excludes>
+							<executable>${gradle.cmd}</executable>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+						<executions>
+							<execution>
+								<id>gradle-clean</id>
+								<phase>clean</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<commandlineArgs>clean</commandlineArgs>
+								</configuration>
+							</execution>
+							<execution>
+								<id>gradle-compile</id>
+								<phase>package</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<commandlineArgs>build</commandlineArgs>
+								</configuration>
+							</execution>
+							<execution>
+								<id>gradle-install</id>
+								<phase>install</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<commandlineArgs>publishToMavenLocal</commandlineArgs>
+								</configuration>
+							</execution>
+							<execution>
+								<id>gradle-deploy</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<commandlineArgs>publish</commandlineArgs>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 
 	<dependencies>
 		<!-- Android Activity Stuff / Support Elements -->
@@ -72,7 +103,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Open eCard Stuff -->
+		<!-- name all dependencies, so that build is only triggered after these are built -->
 		<dependency>
 			<groupId>org.openecard.ifd.scio-backend</groupId>
 			<artifactId>android-nfc</artifactId>
@@ -107,12 +138,6 @@
 			<groupId>org.openecard</groupId>
 			<artifactId>common</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.json</groupId>
-					<artifactId>json</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard</groupId>
@@ -133,16 +158,6 @@
 			<groupId>org.openecard.addons</groupId>
 			<artifactId>tr03112</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.markusbernhardt</groupId>
-					<artifactId>proxy-vole</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.java.dev.jna</groupId>
-					<artifactId>jna</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.addons</groupId>
@@ -168,12 +183,6 @@
 			<groupId>org.openecard.gui</groupId>
 			<artifactId>android</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-
-		<!-- WebMethod Annotation is needed at runtime -->
-		<dependency>
-			<groupId>javax.jws</groupId>
-			<artifactId>jsr181-api</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OverridingProperties {
 
-    private static final Logger logger = LoggerFactory.getLogger(OverridingProperties.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OverridingProperties.class);
 
     private final Properties properties;
 
@@ -111,13 +112,14 @@ public class OverridingProperties {
 		baseProps = homeProps;
 	    }
 	} catch (IOException ex) {
-	    logger.error("Failed to load given properties stream.", ex);
+	    LOG.error("Failed to load given properties stream.", ex);
 	}
 
 	properties = mergeWithOverrides(baseProps);
     }
 
 
+    @Nullable
     private static InputStream getfileStream(Class clazz, String fName) {
 	InputStream in = clazz.getResourceAsStream("/" + fName);
 	if (in == null) {

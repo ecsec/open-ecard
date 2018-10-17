@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,7 +39,7 @@ public class IFDProperties {
 
     private static class Internal extends OverridingProperties {
 	public Internal() throws IOException {
-	    super("ifd.properties");
+	    super(IFDProperties.class, "ifd.properties");
 	}
     }
 

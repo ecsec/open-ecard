@@ -49,7 +49,9 @@ import org.slf4j.LoggerFactory;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CardSpecType", propOrder = {
-    "middlewareName",
+    "manufacturer",
+    "model",
+    "label",
     "objectIdentifier",
     "cardTypeName",
     "version",
@@ -64,8 +66,14 @@ public class CardSpecType {
 
     private static final Logger LOG = LoggerFactory.getLogger(CardSpecType.class);
 
-    @XmlElement(name="MiddlewareName")
-    private String middlewareName;
+    @XmlElement(name="TokenManufacturer")
+    private String manufacturer;
+
+    @XmlElement(name="TokenModel")
+    private String model;
+
+    @XmlElement(name="TokenLabel")
+    private String label;
 
     @XmlElement(name = "ObjectIdentifier", namespace = "urn:iso:std:iso-iec:24727:tech:schema", required = true)
     @XmlSchemaType(name = "anyURI")
@@ -101,13 +109,30 @@ public class CardSpecType {
     private List<String> signatureAlgorithms;
 
 
-    public void setMiddlewareName(String middlewareName) {
-	this.middlewareName = middlewareName;
+    public void setManufacturer(String manufacturer) {
+	this.manufacturer = manufacturer;
     }
 
-    public String getMiddlewareName() {
-	return middlewareName;
+    public String getManufacturer() {
+	return manufacturer;
     }
+
+    public void setModel(String model) {
+	this.model = model;
+    }
+
+    public String getModel() {
+	return model;
+    }
+
+    public void setLabel(String label) {
+	this.label = label;
+    }
+
+    public String getLabel() {
+	return label;
+    }
+
 
     public String getObjectIdentifier() {
 	return objectIdentifier;

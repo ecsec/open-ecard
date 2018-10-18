@@ -30,6 +30,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.StringUtils;
 
 
 /**
@@ -209,17 +210,33 @@ public class MiddlewareSALConfig {
 
 
     /**
-     * Maps the Middleware name to the object identifier of the card.
+     * Maps the token identifier values to the object identifier of the card.
+     * All parameters handle the empty string as null values.
      *
-     * @param middlewareCardType
+     * @param manufacturer Manufacturer field obtained from the PKCS11 middleware.
+     * @param model Model field obtained from the PKCS11 middleware.
+     * @param label Label field obtained from the PKCS11 middleware.
      * @return Object identifier of card, mapped by middleware name.
      */
     @Nullable
-    public String mapMiddlewareType(@Nonnull String middlewareCardType) {
-	for (CardSpecType spec : mwSpec.getCardConfig().getCardSpecs()) {
-	    String mwName = spec.getMiddlewareName();
-	    if (middlewareCardType.equals(mwName)) {
-		return spec.getObjectIdentifier();
+    public String mapMiddlewareType(@Nullable String manufacturer, @Nullable String model, @Nullable String label) {
+	// make sure empty strings are null values, so the if statements work correctly
+	manufacturer = StringUtils.emptyToNull(manufacturer);
+	model = StringUtils.emptyToNull(model);
+	label = StringUtils.emptyToNull(label);
+
+	// only check if there is at least one value that needs to be checked
+	if (! (manufacturer == null && model == null && label == null)) {
+	    for (CardSpecType spec : mwSpec.getCardConfig().getCardSpecs()) {
+		String tMan = spec.getManufacturer();
+		String tMod = spec.getModel();
+		String tLab = spec.getLabel();
+
+		if ((tMan == null || tMan.equals(manufacturer))
+			&& (tMod == null || tMod.equals(model))
+			&& (tLab == null || tLab.equals(label))) {
+		    return spec.getObjectIdentifier();
+		}
 	    }
 	}
 

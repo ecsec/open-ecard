@@ -161,10 +161,6 @@ publishing {
 
     publications {
         lib(MavenPublication) {
-            //groupId 'com.foo'
-            artifactId 'android-lib'
-            //version '0.1'
-            //artifact("$buildDir/outputs/aar/android-lib-debug.aar")
             from components.android
         }
     }

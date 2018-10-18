@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
@@ -71,18 +70,10 @@ public class MiddlewareConfig {
     private static final JAXBContext MW_CFG_CTX;
 
     static {
-	MARSHALLER = new FuturePromise<>(new Callable<WSMarshaller>() {
-	    @Override
-	    public WSMarshaller call() throws Exception {
-		return WSMarshallerFactory.createInstance();
-	    }
-	});
-	CIF_DOC = new FuturePromise<>(new Callable<Document>() {
-	    @Override
-	    public Document call() throws Exception {
-		InputStream in = FileUtils.resolveResourceAsStream(MiddlewareConfig.class, CIF_TEMPLATE_PATH);
-		return MARSHALLER.deref().str2doc(in);
-	    }
+	MARSHALLER = new FuturePromise<>(() -> WSMarshallerFactory.createInstance());
+	CIF_DOC = new FuturePromise<>(() -> {
+	    InputStream in = FileUtils.resolveResourceAsStream(MiddlewareConfig.class, CIF_TEMPLATE_PATH);
+	    return MARSHALLER.deref().str2doc(in);
 	});
 	try {
 	    MW_CFG_CTX = JAXBContext.newInstance(MiddlewareConfigType.class);
@@ -186,15 +177,18 @@ public class MiddlewareConfig {
     }
 
     /**
-     * Maps the Middleware name to the object identifier of the card.
+     * Maps the token identifier values to the object identifier of the card.
+     * All parameters handle the empty string as null values.
      *
-     * @param middlewareCardType
+     * @param manufacturer Manufacturer field obtained from the PKCS11 middleware.
+     * @param model Model field obtained from the PKCS11 middleware.
+     * @param label Label field obtained from the PKCS11 middleware.
      * @return object identifier
      */
     @Nullable
-    public String mapMiddlewareType(@Nonnull String middlewareCardType) {
+    public String mapMiddlewareType(@Nullable String manufacturer, @Nullable String model, @Nullable String label) {
         for (MiddlewareSALConfig mwSALConfig : getMiddlewareSALConfigs()) {
-            String mwType = mwSALConfig.mapMiddlewareType(middlewareCardType);
+            String mwType = mwSALConfig.mapMiddlewareType(manufacturer, model, label);
             if (mwType != null) {
 		return mwType;
 	    }

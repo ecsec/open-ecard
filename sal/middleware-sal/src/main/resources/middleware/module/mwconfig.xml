@@ -32,7 +32,9 @@
 
 		<CardConfig>
 			<CardSpec>
-				<MiddlewareName>cv cryptovision gmbh (c) v1.0n_PKCS#15</MiddlewareName>
+				<TokenManufacturer>cv cryptovision gmbh (c) v1.0n</TokenManufacturer>
+				<TokenModel>PKCS#15</TokenModel>
+				<TokenLabel>User Pin (Student Card)</TokenLabel>
 				<iso:ObjectIdentifier>http://opencard.org/cif/rub-card</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">RUB Card</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="de">RUB Card</iso:CardTypeName>
@@ -67,7 +69,8 @@
 
 		<CardConfig>
 			<CardSpec>
-				<MiddlewareName>Gemalto S.A._Classic V3</MiddlewareName>
+				<TokenManufacturer>Gemalto S.A.</TokenManufacturer>
+				<TokenModel>Classic V3</TokenModel>
 				<iso:ObjectIdentifier>http://luxtrust.lu/cif/LuxTrust-V3</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">LuxTrust V3</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="de">LuxTrust V3</iso:CardTypeName>
@@ -86,7 +89,8 @@
 			</CardSpec>
 
 			<CardSpec>
-				<MiddlewareName>Gemalto S.A._Classic V4</MiddlewareName>
+				<TokenManufacturer>Gemalto S.A.</TokenManufacturer>
+				<TokenModel>Classic V4</TokenModel>
 				<iso:ObjectIdentifier>http://public.lu/cif/Lux-eID</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">Luxembourg Identity Card</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="de">Luxemburgischer Personalausweis</iso:CardTypeName>
@@ -130,7 +134,8 @@
 
 		<CardConfig>
 			<CardSpec>
-				<MiddlewareName>D-TRUST GmbH (C)_G&amp;&amp;D STARCOS 3.4</MiddlewareName>
+				<TokenManufacturer>D-TRUST GmbH (C)</TokenManufacturer>
+				<TokenModel>G&amp;&amp;D STARCOS 3.4</TokenModel>
 				<iso:ObjectIdentifier>https://www.ihk.de/cif/ChamberCard</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">IHK-ChamberCard</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="de">IHK-ChamberCard</iso:CardTypeName>
@@ -161,7 +166,8 @@
 
 		<CardConfig>
 			<CardSpec>
-				<MiddlewareName>Portuguese Government_Portuguese eID N</MiddlewareName>
+				<TokenManufacturer>Portuguese Government</TokenManufacturer>
+				<TokenModel>Portuguese eID N</TokenModel>
 				<iso:ObjectIdentifier>http://gov.pt/cif/eid</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">Portuguese eID</iso:CardTypeName>
 				<iso:CardTypeName xml:lang="pt">Cartão eID português</iso:CardTypeName>
@@ -194,7 +200,8 @@
 
 		<CardConfig>
 			<CardSpec>
-				<MiddlewareName>SafeNet, Inc._eToken</MiddlewareName>
+				<TokenManufacturer>SafeNet, Inc.</TokenManufacturer>
+				<TokenModel>eToken</TokenModel>
 				<iso:ObjectIdentifier>http://gemalto.com/safenet/eToken</iso:ObjectIdentifier>
 				<iso:CardTypeName xml:lang="en">SafeNet eToken</iso:CardTypeName>
 				<iso:Version>

@@ -277,9 +277,11 @@ class MwEventRunner implements Runnable {
 	String ifdName = ckSlot.getSlotDescription();
 	long slotId = ckSlot.getSlotID();
 
-	String cardType = String.format("%s_%s", token.getManufacturerID(), token.getModel());
-	LOG.info("Middleware card type: {}", cardType);
-	cardType = mwModule.getMiddlewareSALConfig().mapMiddlewareType(cardType);
+	String manufacturer = token.getManufacturerID();
+	String model = token.getModel();
+	String label = token.getLabel();
+	LOG.info("Middleware token identifiers: <{}> <{}> <{}>", manufacturer, model, label);
+	String cardType = mwModule.getMiddlewareSALConfig().mapMiddlewareType(manufacturer, model, label);
 	if (cardType != null) {
 	    boolean protectedAuthPath = token.containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
 	    ConnectionHandleType recHandle = makeKnownCardHandle(ifdName, slotId, cardType, protectedAuthPath);

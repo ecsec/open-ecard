@@ -64,16 +64,20 @@ public class MwStateCallback {
 	    MwSlot slot = o.getMwSlot();
 
 	    MwToken token = slot.getTokenInfo();
+
+	    String manufacturer = token.getManufacturerID();
+	    String model = token.getModel();
+	    String label = token.getLabel();
+
 	    String cardType = null;
-	    String type = String.format("%s_%s", token.getManufacturerID(), token.getModel());
 	    for (MiddlewareConfig mwConfig : mwConfigs) {
-		cardType = mwConfig.mapMiddlewareType(type);
+		cardType = mwConfig.mapMiddlewareType(manufacturer, model, label);
 		if (cardType != null) {
 		    break;
 		}
 	    }
 	    CardInfoType cif = null;
-	    LOG.debug("Determined cardType={} for middleware name={}.", cardType, type);
+	    LOG.debug("Determined cardType={} for middleware token <{}> <{}> <{}>.", cardType, manufacturer, model, label);
 	    if (cardType != null) {
 		LOG.debug("Requesting CIF from CIF provider.");
 		CIFProvider cp = env.getCIFProvider();

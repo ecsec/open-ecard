@@ -26,8 +26,10 @@ android {
     }
 
     lintOptions {
-//    	disable 'LintError'
-        abortOnError false
+        // disable warnings caused by bouncycastle JCA
+        disable "TrustAllX509TrustManager"
+        // disable warnings caused by jaxb annotations
+        disable "InvalidPackage"
     }
 
     packagingOptions {

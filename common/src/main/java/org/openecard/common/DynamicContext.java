@@ -83,12 +83,13 @@ public class DynamicContext {
 
     /**
      * Removes the value from this thread.
-     * This does not clear the values saved in the context, but makes the context inaccessible for further invocations
+     * This first clears the values saved in the context, and makes the context inaccessible for further invocations
      * of the {@link #getInstance(String)} method.
      *
      * @see ThreadLocal#remove()
      */
-    public static void remove() {
+    public static synchronized void remove() {
+	LOCAL_MAP.get().clear();
 	LOCAL_MAP.remove();
     }
 

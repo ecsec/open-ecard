@@ -145,23 +145,27 @@ public class EacGuiImpl implements EacGui {
     }
 
     @Override
-    public void cancel() {
+    public synchronized void cancel() {
 	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
-	    cancelPromise.deliver(Boolean.FALSE);
-	    cancelPromise(serverData);
-	    cancelPromise(transactionInfo);
-	    cancelPromise(userReadSelection);
-	    cancelPromise(userWriteSelection);
-	    cancelPromise(userPin);
-	    cancelPromise(userCan);
-	    cancelPromise(pinCorrect);
-	    cancelPromise(pinStatus);
+	    cancelPromises(false);
 
 	    if (eacNav != null) {
 		eacNav.cancel();
 	    }
 	}
+    }
+
+    private void cancelPromises(boolean cpValue) {
+	cancelPromise.deliver(cpValue);
+	cancelPromise(serverData);
+	cancelPromise(transactionInfo);
+	cancelPromise(userReadSelection);
+	cancelPromise(userWriteSelection);
+	cancelPromise(userPin);
+	cancelPromise(userCan);
+	cancelPromise(pinCorrect);
+	cancelPromise(pinStatus);
     }
 
     @Override
@@ -368,7 +372,7 @@ public class EacGuiImpl implements EacGui {
 
     public void setIsDone() {
 	if (! cancelPromise.isDelivered()) {
-	    this.cancelPromise.deliver(Boolean.TRUE);
+	    cancelPromises(true);
 	}
     }
 

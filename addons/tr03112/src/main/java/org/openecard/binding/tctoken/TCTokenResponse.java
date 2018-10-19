@@ -151,7 +151,7 @@ public class TCTokenResponse extends BindingResult {
 	    }
 
 	    // clear and remove the DynamicContext
-	    if (! clearContext) {
+	    if (clearContext) {
 		dynCtx.clear();
 		DynamicContext.remove();
 	    }

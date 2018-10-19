@@ -342,7 +342,7 @@ public class TCTokenHandler {
 	    response = processBinding(request, connectionHandle);
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
-	    response.finishResponse(isObjectActivation);
+	    response.finishResponse(! isObjectActivation);
 	    return response;
 	} catch (DispatcherException w) {
 	    LOG.error(w.getMessage(), w);

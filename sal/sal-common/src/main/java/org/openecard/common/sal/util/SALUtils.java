@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,14 +36,19 @@ import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Convenience class for the SAL.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public class SALUtils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SALUtils.class);
 
     public static ConnectionHandleType getConnectionHandle(Object object) throws IncorrectParameterException, Exception {
 	ConnectionHandleType value = (ConnectionHandleType) get(object, "getConnectionHandle");
@@ -97,8 +102,10 @@ public class SALUtils {
 	CardStateEntry value = states.getEntry(connectionHandle, filterAppId);
 	if (value == null) {
 	    if (connectionHandle.getSlotHandle() != null) {
+		LOG.debug("No slot handle contained in card states.");
 		throw new UnknownSlotHandleException(connectionHandle);
 	    } else {
+		LOG.debug("No entry found in card states.");
 		throw new UnknownConnectionHandleException(connectionHandle);
 	    }
 	}

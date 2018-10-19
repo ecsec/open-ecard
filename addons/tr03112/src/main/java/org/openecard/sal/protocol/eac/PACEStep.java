@@ -275,6 +275,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			try {
 			    guiResult = exec.process();
 			} catch (ThreadTerminateException ex) {
+			    LOG.debug("GUI executer has been terminated.");
 			    guiResult = ResultStatus.INTERRUPTED;
 			}
 
@@ -321,6 +322,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    Promise<Object> pPaceException = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
 	    Object pPaceError = pPaceException.deref();
 	    if (pPaceError != null) {
+		if (LOG.isDebugEnabled()) {
+		    if (pPaceError instanceof Throwable) {
+			LOG.debug("Received error object from GUI.", (Throwable) pPaceError);
+		    } else {
+			LOG.debug("Received error object from GUI: {}", pPaceError);
+		    }
+		}
+
 		if (pPaceError instanceof WSHelper.WSException) {
 		    response.setResult(((WSHelper.WSException) pPaceError).getResult());
 		    return response;
@@ -335,6 +344,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		    response.setResult(r);
 		    return response;
 		}
+	    } else {
+		LOG.debug("No error returned returned during PACE execution in GUI.");
 	    }
 
 	    // get challenge from card

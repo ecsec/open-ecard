@@ -2059,12 +2059,13 @@ public class TinySAL implements SAL {
 	    } else {
 		throw new InappropriateProtocolForActionException("DIDAuthenticate", protocol.toString());
 	    }
-	} catch (ECardException e) {
-	    response.setResult(e.getResult());
-	} catch (Exception e) {
-	    LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-	    response.setResult(WSHelper.makeResult(e));
+	} catch (ECardException ex) {
+	    LOG.debug("ECard error occurred during DIDAuthenticate execution.", ex);
+	    response.setResult(ex.getResult());
+	} catch (Exception ex) {
+	    LOG.error("General error occurred during DIDAuthenticate execution.", ex);
+	    throwThreadKillException(ex);
+	    response.setResult(WSHelper.makeResult(ex));
 	}
 
 	// add empty response data if none are present
@@ -2166,6 +2167,7 @@ public class TinySAL implements SAL {
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException {
 	if (protocol.isFinished()) {
+	    LOG.debug("SAL Protocol is finished, destroying protocol instance.");
 	    try {
 		CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
 		entry.removeProtocol(protocolURI);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -67,6 +67,15 @@ public class CardStateMap {
 	return getEntry(handle, true);
     }
     public synchronized CardStateEntry getEntry(ConnectionHandleType handle, boolean filterAppId) {
+	if (LOG.isDebugEnabled()) {
+	    LOG.debug("Requesting entry (filterAppId={}) for handle:{}{}",
+		    filterAppId, System.lineSeparator(), HandlePrinter.printHandle(handle));
+	    LOG.debug("Current state entries are:");
+	    for (CardStateEntry e : allEntries) {
+		LOG.debug("{}{}", e, System.lineSeparator());
+	    }
+	}
+
 	Set<CardStateEntry> entry = getMatchingEntries(handle, filterAppId);
 	switch (entry.size()) {
 	    case 1:
@@ -82,6 +91,7 @@ public class CardStateMap {
     }
 
     public synchronized void addEntry(CardStateEntry entry) {
+	LOG.debug("Add new entry to card states: {}", entry);
 	ConnectionHandleType handle = entry.handleCopy();
 	ChannelHandleType channel = handle.getChannelHandle();
 
@@ -100,7 +110,10 @@ public class CardStateMap {
      * @param handle
      */
     public synchronized void removeEntry(ConnectionHandleType handle) {
-	LOG.debug("Removing CardStateEntries based on connection handle.");
+	if (LOG.isDebugEnabled()) {
+	    LOG.debug("Removing CardStateEntries based on connection handle.{}{}",
+		    System.lineSeparator(), HandlePrinter.printHandle(handle));
+	}
 	Set<CardStateEntry> entries = getMatchingEntries(handle);
 	Iterator<CardStateEntry> it = entries.iterator();
 	boolean removeSlotHandles = handle.getSlotHandle() == null;

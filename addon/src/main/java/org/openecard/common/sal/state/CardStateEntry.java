@@ -33,6 +33,7 @@ import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -320,6 +321,24 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	int hash = 3;
 	hash = 53 * hash + this.serialNumber;
 	return hash;
+    }
+
+    @Override
+    public String toString() {
+	Formatter f = new Formatter();
+	f.format("CardStateEntry@%d {%n", serialNumber);
+	if (handle != null) {
+	    f.format("  handle=%s%n", HandlerUtils.print(handle, "  ", "  "));
+	}
+	for (String proto : protoObjects.keySet()) {
+	    f.format("  protocol=%s%n", proto);
+	}
+	for (DIDInfoType did : authenticatedDIDs) {
+	    f.format("  authDid=%s%n", did.getId());
+	}
+	f.format("}");
+
+	return f.toString();
     }
 
 }

@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import java.lang.reflect.Method;
+import java.util.Formatter;
 import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
@@ -161,6 +162,32 @@ public class HandlerUtils {
 	    // nothing found
 	}
 	return null;
+    }
+
+    public static String print(@Nonnull ConnectionHandleType handle) {
+	return print(handle, "", "  ");
+    }
+
+    public static String print(@Nonnull ConnectionHandleType handle, @Nonnull String prefix, @Nonnull String prefixIncrement) {
+	String p1 = prefix;
+	String p2 = p1 + prefixIncrement;
+	String p3 = p2 + prefixIncrement;
+	Formatter f = new Formatter();
+	f.format("%sConnectionHandle {%n", p1);
+	f.format("%sctx=%s%n", p2, ByteUtils.toHexString(handle.getContextHandle()));
+	f.format("%sifd=%s%n", p2, handle.getIFDName());
+	f.format("%sidx=%s%n", p2, handle.getSlotIndex());
+	f.format("%sslot=%s%n", p2, ByteUtils.toHexString(handle.getSlotHandle()));
+	f.format("%sapp=%s%n", p2, ByteUtils.toHexString(handle.getCardApplication()));
+	ConnectionHandleType.RecognitionInfo ri = handle.getRecognitionInfo();
+	if (ri != null) {
+	    f.format("%sRecognition {%n", p2);
+	    f.format("%styp=%s%n", p3, ri.getCardType());
+	    f.format("%sident=%s%n", p3, ByteUtils.toHexString(ri.getCardIdentifier()));
+	    f.format("%s}%n", p2);
+	}
+	f.format("%s}", p1);
+	return f.toString();
     }
 
 }

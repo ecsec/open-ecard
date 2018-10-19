@@ -59,7 +59,7 @@ public class CIFCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCache.class);
 
-    private static final String PREFIX = "V2_";
+    private static final String PREFIX = "V3_";
     private static final CIFCache INST = new CIFCache();
 
     private final WSMarshaller marshaller;
@@ -96,20 +96,20 @@ public class CIFCache {
 
 
     @Nullable
-    public CardInfoType getCif(String mwName, String serial) {
+    public CardInfoType getCif(String identifier) {
 	if (! hasCache()) {
 	    LOG.debug("CIF caching is disabled.");
 	    return null;
 	}
 
 	// check mem cache first
-	if (memCache.containsKey(serial)) {
+	if (memCache.containsKey(identifier)) {
 	    LOG.debug("Returning CIF from in memory cache.");
-	    return memCache.get(serial);
+	    return memCache.get(identifier);
 	} else if (hasPersistentCache()) {
 	    LOG.debug("Trying to read CIF from disk cache.");
 	    // try reading from disk
-	    File cifFile = getCifFile(mwName, serial);
+	    File cifFile = getCifFile(identifier);
 	    if (cifFile.isFile()) {
 		try {
 		    Document cifDoc = marshaller.str2doc(new FileInputStream(cifFile));
@@ -117,7 +117,7 @@ public class CIFCache {
 		    if (o instanceof CardInfo) {
 			CardInfo cif = (CardInfo) o;
 			// save in memory for faster lookup next time
-			memCache.put(serial, cif);
+			memCache.put(identifier, cif);
 			return cif;
 		    } else {
 			throw new WSMarshallerException("Cache file did not contain a CardInfo file.");
@@ -127,7 +127,7 @@ public class CIFCache {
 		    try {
 			cifFile.delete();
 		    } catch (SecurityException ex2) {
-			LOG.error(String.format("Failed to delete cache file for serial %s.", serial), ex2);
+			LOG.error(String.format("Failed to delete cache file for identifier %s.", identifier), ex2);
 		    }
 		}
 	    } else {
@@ -138,14 +138,14 @@ public class CIFCache {
 	return null;
     }
 
-    public synchronized void saveCif(String mwName, String serial, CardInfoType cif) {
+    public synchronized void saveCif(String identifier, CardInfoType cif) {
 	if (! hasCache()) {
 	    LOG.debug("CIF caching is disabled.");
 	    return;
 	}
 
 	// save in memory
-	memCache.put(serial, cif);
+	memCache.put(identifier, cif);
 
 	// save on disk
 	if (hasPersistentCache()) {
@@ -162,7 +162,7 @@ public class CIFCache {
 		Document cifDoc = marshaller.marshal(cifTarget);
 		String cifXml = marshaller.doc2str(cifDoc);
 
-		File cifFile = getCifFile(mwName, serial);
+		File cifFile = getCifFile(identifier);
 		FileOutputStream out = new FileOutputStream(cifFile, false);
 		OutputStreamWriter ow = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 		ow.write(cifXml);
@@ -188,8 +188,8 @@ public class CIFCache {
     }
 
     @Nonnull
-    private File getCifFile(String mwName, String serial) {
-	File cifFile = new File(cacheDir, PREFIX + mwName + "_" + serial + ".xml");
+    private File getCifFile(String identifier) {
+	File cifFile = new File(cacheDir, PREFIX + identifier + ".xml");
 	return cifFile;
     }
 

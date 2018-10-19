@@ -105,10 +105,16 @@ public class CIFCreator {
     public CardInfoType addTokenInfo() throws WSMarshallerException, CryptokiException {
 	LOG.debug("Adding information to CardInfo file for card type {}.", cif.getCardType().getObjectIdentifier());
 
-	String serial = session.getSlot().getTokenInfo().getSerialNumber();
+	MwToken token = session.getSlot().getTokenInfo();
+	String mwName = mwSALConfig.getMiddlewareName();
+	String manufacturer = token.getManufacturerID();
+	String model = token.getModel();
+	String label = token.getLabel();
+	String serial = token.getSerialNumber();
+	String identifier = String.format("%s_%s_%s_%s_%s", mwName, serial, manufacturer, model, label);
 
 	CIFCache cache = CIFCache.getInstance();
-	CardInfoType cachedCif = cache.getCif(mwSALConfig.getMiddlewareName(), serial);
+	CardInfoType cachedCif = cache.getCif(identifier);
 	if (cachedCif != null) {
 	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
 	    return cachedCif;
@@ -126,10 +132,10 @@ public class CIFCreator {
 
 
 	synchronized (cache) {
-	    cachedCif = cache.getCif(mwSALConfig.getMiddlewareName(), serial);
+	    cachedCif = cache.getCif(identifier);
 	    if (cachedCif == null) {
 		LOG.info("Adding CIF to cache for card with serial={}.", serial);
-		cache.saveCif(mwSALConfig.getMiddlewareName(), serial, cif);
+		cache.saveCif(identifier, cif);
 	    }
 	}
 

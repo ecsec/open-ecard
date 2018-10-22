@@ -23,12 +23,10 @@
 package org.openecard.ifd.scio.wrapper;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -103,16 +101,13 @@ public class SingleThreadChannel implements IfdChannel {
     }
 
     private ExecutorService createExecutor() {
-	return Executors.newSingleThreadExecutor(new ThreadFactory() {
-	    @Override
-	    public Thread newThread(Runnable r) {
-		int num = SingleThreadChannel.this.channel.getChannelNumber();
-		String termName = SingleThreadChannel.this.channel.getCard().getTerminal().getName();
-		String name = String.format("Channel-%d %d '%s'", THREAD_NUM.getAndIncrement(), num, termName);
-		Thread t = new Thread(r, name);
-		t.setDaemon(true);
-		return t;
-	    }
+	return Executors.newSingleThreadExecutor((Runnable r) -> {
+	    int num = SingleThreadChannel.this.channel.getChannelNumber();
+	    String termName = SingleThreadChannel.this.channel.getCard().getTerminal().getName();
+	    String name = String.format("Channel-%d %d '%s'", THREAD_NUM.getAndIncrement(), num, termName);
+	    Thread t = new Thread(r, name);
+	    t.setDaemon(true);
+	    return t;
 	});
     }
 
@@ -191,12 +186,7 @@ public class SingleThreadChannel implements IfdChannel {
     @Nonnull
     private CardResponseAPDU transmit(final @Nonnull byte[] command) throws SCIOException, IllegalStateException, InterruptedException {
 	// send command
-	Future<CardResponseAPDU> result = exec.submit(new Callable<CardResponseAPDU>() {
-	    @Override
-	    public CardResponseAPDU call() throws Exception {
-		return channel.transmit(command);
-	    }
-	});
+	Future<CardResponseAPDU> result = exec.submit(() -> channel.transmit(command));
 	// return result or evaluate errors
 	try {
 	    return result.get();
@@ -295,12 +285,7 @@ public class SingleThreadChannel implements IfdChannel {
     public byte[] transmitControlCommand(final int controlCode, final @Nonnull byte[] command) throws SCIOException,
 	    IllegalStateException, NullPointerException, InterruptedException {
 	// send command
-	Future<byte[]> result = exec.submit(new Callable<byte[]>() {
-	    @Override
-	    public byte[] call() throws Exception {
-		return channel.getCard().transmitControlCommand(controlCode, command);
-	    }
-	});
+	Future<byte[]> result = exec.submit(() -> channel.getCard().transmitControlCommand(controlCode, command));
 	// return result or evaluate errors
 	try {
 	    return result.get();
@@ -335,17 +320,14 @@ public class SingleThreadChannel implements IfdChannel {
 
     private void submitTransaction(final boolean start) throws SCIOException, IllegalStateException, InterruptedException {
 	// send command
-	Future<Void> result = exec.submit(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {
-		SCIOCard card = channel.getCard();
-		if (start) {
-		    card.beginExclusive();
-		} else {
-		    card.endExclusive();
-		}
-		return null;
+	Future<Void> result = exec.submit(() -> {
+	    SCIOCard card = channel.getCard();
+	    if (start) {
+		card.beginExclusive();
+	    } else {
+		card.endExclusive();
 	    }
+	    return null;
 	});
 	// return result or evaluate errors
 	try {

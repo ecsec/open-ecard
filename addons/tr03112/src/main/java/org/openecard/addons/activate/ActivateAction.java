@@ -143,7 +143,8 @@ public class ActivateAction implements AppPluginAction {
 		return new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    }
 	} finally {
-	    // in some cases an error does not lead to a removal of the dynamic context so remove it here
+	    // clean up context
+	    dynCtx.clear();
 	    DynamicContext.remove();
 	}
     }

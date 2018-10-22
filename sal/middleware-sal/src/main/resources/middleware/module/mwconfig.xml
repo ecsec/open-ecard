@@ -218,4 +218,103 @@
 
 	</MiddlewareSpec>
 
+
+	<!-- The following definitions and the card image have been contributed by the Georgian Public Service Development Agency -->
+	<MiddlewareSpec required="false" disabled="false">
+
+		<MiddlewareName>Georgia</MiddlewareName>
+
+		<LibSpec os="Windows" arch="x86">
+			<LibName>pkcs11-geo-eid</LibName>
+			<SearchPath>C:\Windows\SysWOW64</SearchPath>
+		</LibSpec>
+		<LibSpec os="Windows" arch="amd64">
+			<LibName>pkcs11-geo-eid-x64</LibName>
+			<SearchPath>C:\Windows\System32\</SearchPath>
+		</LibSpec>
+		<LibSpec os="Linux">
+			<LibName>pkcs11_geo_eid.so</LibName>
+			<SearchPath>/usr/share/georgian-eid-card</SearchPath>
+		</LibSpec>
+		<LibSpec os="Mac OS">
+			<LibName>pkcs11-geo-eid.so</LibName>
+			<SearchPath>/Library/GeoEIDMiddleware/lib</SearchPath>
+		</LibSpec>
+
+		<CardConfig>
+			<CardSpec>
+				<TokenLabel>Georgian eID Card (Auth PIN)</TokenLabel>
+				<TokenManufacturer>Public Service Development Agc</TokenManufacturer>
+				<TokenModel>PKCS#15 emulated</TokenModel>
+				<iso:ObjectIdentifier>https://id.ge/v1/auth</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Georgian ID Card and Residence Card (v1.x)</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Georgischer Personalausweis/Aufenthaltstitel (v1.x)</iso:CardTypeName>
+        		<iso:CardTypeName xml:lang="ka">საქართველოს პირადობის (ბინადრობის) მოწმობა (v1.x)</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2018-06-01</iso:Date>
+				<ATR>3BFD1800008131FE4580318153474531738421C081072E</ATR>
+				<CardImage>GeoEID.jpg</CardImage>
+			</CardSpec>
+			<CardSpec>
+				<TokenLabel>Georgian eID Card (Sign PIN)</TokenLabel>
+				<TokenManufacturer>Public Service Development Agc</TokenManufacturer>
+				<TokenModel>PKCS#15 emulated</TokenModel>
+				<iso:ObjectIdentifier>https://id.ge/v1/sign</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Georgian ID Card and Residence Card (v1.x)</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Georgischer Personalausweis/Aufenthaltstitel (v1.x)</iso:CardTypeName>
+        		<iso:CardTypeName xml:lang="ka">საქართველოს პირადობის (ბინადრობის) მოწმობა (v1.x)</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2018-06-01</iso:Date>
+				<ATR>3BFD1800008131FE4580318153474531738421C081072E</ATR>
+				<CardImage>GeoEID.jpg</CardImage>
+			</CardSpec>
+			<CardSpec>
+				<TokenLabel>GEORGIA ID (User PIN)</TokenLabel>
+				<TokenManufacturer>Oberthur Technologies</TokenManufacturer>
+				<TokenModel>PKCS#15</TokenModel>
+				<iso:ObjectIdentifier>https://id.ge/v2/auth</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Georgian ID Card and Residence Card (v2.x)</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Georgischer Personalausweis/Aufenthaltstitel (v2.x)</iso:CardTypeName>
+        		<iso:CardTypeName xml:lang="ka">საქართველოს პირადობის (ბინადრობის) მოწმობა (v2.x)</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2018-06-01</iso:Date>
+				<ATR>3BFD1800008131FE4580318153474531738421C081072E</ATR>
+				<CardImage>GeoEID.jpg</CardImage>
+			</CardSpec>
+			<CardSpec>
+				<TokenLabel>GEORGIA ID (Signature PIN)</TokenLabel>
+				<TokenManufacturer>Oberthur Technologies</TokenManufacturer>
+				<TokenModel>PKCS#15</TokenModel>
+				<iso:ObjectIdentifier>https://id.ge/v2/sign</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">Georgian ID Card and Residence Card (v2.x)</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">Georgischer Personalausweis/Aufenthaltstitel (v2.x)</iso:CardTypeName>
+        		<iso:CardTypeName xml:lang="ka">საქართველოს პირადობის (ბინადრობის) მოწმობა (v2.x)</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>1</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2018-06-01</iso:Date>
+				<ATR>3BFD1800008131FE4580318153474531738421C081072E</ATR>
+				<CardImage>GeoEID.jpg</CardImage>
+			</CardSpec>
+		</CardConfig>
+	</MiddlewareSpec>
+
 </MiddlewareConfig>

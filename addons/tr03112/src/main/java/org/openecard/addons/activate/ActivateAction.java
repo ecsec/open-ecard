@@ -118,9 +118,10 @@ public class ActivateAction implements AppPluginAction {
 
     @Override
     public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments) {
-	BindingResult response;
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
+	    BindingResult response;
 	    if (SEMAPHORE.tryAcquire()) {
 		try {
 		    response = checkRequestParameters(body, params, headers, attachments);
@@ -131,12 +132,20 @@ public class ActivateAction implements AppPluginAction {
 		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
 		response.setResultMessage("An authentication process is already running.");
 	    }
+
+	    return response;
+	} catch (Throwable t) {
+	    LOG.error("Unexpected error returned from eID-Client Activation.", t);
+	    if (t instanceof Error) {
+		// don't handle errors, they are reserved for unhandleable errors
+		throw t;
+	    } else {
+		return new BindingResult(BindingResultCode.INTERNAL_ERROR);
+	    }
 	} finally {
 	    // in some cases an error does not lead to a removal of the dynamic context so remove it here
 	    DynamicContext.remove();
 	}
-
-	return response;
     }
 
     private boolean isShowRemoveCard() {

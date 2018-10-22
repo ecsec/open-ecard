@@ -31,8 +31,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,6 +47,8 @@ import org.openecard.common.sal.state.cif.DataSetInfoWrapper;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteArrayWrapper;
 import org.openecard.common.util.HandlerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -55,6 +57,8 @@ import org.openecard.common.util.HandlerUtils;
  * @author Dirk Petrautzki
  */
 public class CardStateEntry implements Comparable<CardStateEntry> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CardStateEntry.class);
 
     // this number is used as an number authority, so each entry can have a distinct number
     private static int numberRegistry = 0;
@@ -165,7 +169,8 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     }
 
     public Collection<SALProtocol> removeAllProtocols() {
-	Collection<SALProtocol> ps = Collections.unmodifiableCollection(protoObjects.values());
+	LOG.debug("Removing {} protocols from card state entry.", protoObjects.size());
+	Collection<SALProtocol> ps = new ArrayList<>(protoObjects.values());
 	protoObjects.clear();
 	return ps;
     }

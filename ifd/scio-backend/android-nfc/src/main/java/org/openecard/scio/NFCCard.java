@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ public final class NFCCard implements SCIOCard {
 
     private final NFCCardChannel nfcCardChannel;
     private final NFCCardTerminal nfcCardTerminal;
-    private final int timeoutForTransceive;
+    private final int transceiveTimeout;
     private final byte[] histBytes;
     private final IsoDep isodep;
 
@@ -55,7 +55,7 @@ public final class NFCCard implements SCIOCard {
 
     public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
 	isodep = tag;
-	timeoutForTransceive = timeout;
+	transceiveTimeout = timeout;
 	nfcCardTerminal = terminal;
 
 	byte[] histBytesTmp = isodep.getHistoricalBytes();
@@ -65,7 +65,7 @@ public final class NFCCard implements SCIOCard {
 	this.histBytes = histBytesTmp;
 
 	isodep.connect();
-	isodep.setTimeout(getTimeoutForTransceive());
+	isodep.setTimeout(getTransceiveTimeout());
 
 	this.nfcCardChannel = new NFCCardChannel(this);
 
@@ -79,8 +79,8 @@ public final class NFCCard implements SCIOCard {
 	return t;
     }
 
-    private int getTimeoutForTransceive() {
-	return timeoutForTransceive;
+    private int getTransceiveTimeout() {
+	return transceiveTimeout;
     }
 
     public synchronized boolean isCardPresent() {

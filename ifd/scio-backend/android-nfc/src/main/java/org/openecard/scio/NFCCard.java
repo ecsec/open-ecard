@@ -100,22 +100,28 @@ public final class NFCCard implements SCIOCard {
     @Override
     public void disconnect(boolean reset) throws SCIOException {
 	if (reset) {
-	    terminate();
+	    // flag indicating whether the NFC connection shall be restarted
+	    // Note that this is disabled because of a bug with the nPA where the card seems to work and fails at the
+	    // exact same SM-APDU when the channel has been reset before.
+	    boolean killNfcConnection = false;
+
+	    terminate(killNfcConnection);
 
 	    try {
-		isodep.close();
-		isodep.connect();
+		if (killNfcConnection) {
+		    isodep.connect();
+		}
 
 		// start thread which is monitoring the availability of the card
 		monitor = startMonitor();
 	    } catch (IOException ex) {
-		LOG.error("Failed to close channel.", ex);
-		throw new SCIOException("Failed to close channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+		LOG.error("Failed to connect NFC tag.", ex);
+		throw new SCIOException("Failed to reset channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
 	    }
 	}
     }
 
-    public void terminate() throws SCIOException {
+    public void terminate(boolean killNfcConnection) throws SCIOException {
 	if (this.monitor != null) {
 	    this.monitor.interrupt();
 	}
@@ -127,6 +133,15 @@ public final class NFCCard implements SCIOCard {
 	}
 
 	nfcCardChannel.close();
+
+	try {
+	    if (killNfcConnection) {
+		isodep.close();
+	    }
+	} catch (IOException ex) {
+	    LOG.error("Failed to close NFC tag.");
+	    throw new SCIOException("Failed to close NFC channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+	}
     }
 
     @Override

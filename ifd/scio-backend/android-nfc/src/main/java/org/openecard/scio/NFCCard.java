@@ -101,15 +101,14 @@ public final class NFCCard implements SCIOCard {
     public void disconnect(boolean reset) throws SCIOException {
 	if (reset) {
 	    // flag indicating whether the NFC connection shall be restarted
-	    // Note that this is disabled because of a bug with the nPA where the card seems to work and fails at the
-	    // exact same SM-APDU when the channel has been reset before.
-	    boolean killNfcConnection = false;
+	    boolean killNfcConnection = true;
 
 	    terminate(killNfcConnection);
 
 	    try {
 		if (killNfcConnection) {
 		    isodep.connect();
+		    isodep.setTimeout(getTransceiveTimeout());
 		}
 
 		// start thread which is monitoring the availability of the card

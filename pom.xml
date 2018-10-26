@@ -81,9 +81,6 @@
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>
 
-		<!-- fix for netbeans as it executes the surefire:test task directly -->
-		<argLine>-Djdk.attach.allowAttachSelf</argLine>
-
         <!-- Netbeans config properties -->
         <org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>8</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>
         <org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>none</org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap>
@@ -502,7 +499,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<argLine>@{argLine}</argLine>
+						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
 						</systemPropertyVariables>
@@ -527,7 +524,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<argLine>@{argLine}</argLine>
+						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
 						</systemPropertyVariables>

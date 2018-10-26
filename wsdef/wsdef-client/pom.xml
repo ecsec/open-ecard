@@ -14,6 +14,10 @@
 	<name>Open eCard WS classes</name>
 
 
+	<properties>
+		<doclint>-syntax</doclint>
+	</properties>
+
 	<build>
 		<resources>
 			<resource>

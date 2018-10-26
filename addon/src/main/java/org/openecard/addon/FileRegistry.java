@@ -321,7 +321,7 @@ public class FileRegistry implements AddonRegistry {
     /**
      * Uninstall an add-on.
      * The method removes the jar file containing the add-on. The cleanup is done by the
-     * {@link PluginDirectoryAlterationListener}. This method is intended just for the {@link AddonManager} and should
+     * {@link AddonManager}. This method is intended just for the {@link AddonManager} and should
      * not be called in any other class.
      *
      * @param addonSpec The {@link AddonSpecification} of the add-on to uninstall.

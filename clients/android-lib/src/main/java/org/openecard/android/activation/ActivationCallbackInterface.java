@@ -36,7 +36,7 @@ public interface ActivationCallbackInterface <GUI extends AndroidGui> {
 
     /**
      * Gets a set of card types supported by this activity.
-     * This list is used to determine whether {@link #onCardInserted()} is called or not when a card is recognized by
+     * This list is used to determine whether {@link #onCardInserted(String)} is called or not when a card is recognized by
      * the system. In case all cards should be matched, {@code null} can be returned by this method.
      *
      * @return The set of supported cards, or {@code null} in case all cards are supported.
@@ -69,10 +69,10 @@ public interface ActivationCallbackInterface <GUI extends AndroidGui> {
      * for the server to decide. The URL contains more information about the actual outcome of the authentication.
      * Functionality handling these kind of errors may be added to this method before calling the default
      * implementation.</p>
-     * <p>The default implementation in {@link AbstractActivationActivity} of this method performs a TR-03124 conforming
+     * <p>The default implementation in {@link AbstractActivationHandler} of this method performs a TR-03124 conforming
      * URL intent (redirect). When the Intent starting the Activity contained the return class in the extra arguments
-     * (see {@link #RETURN_CLASS}, then an explicit Intent is performed and the user does not have the choice to select
-     * a suitable Application to receive the URL.</p>
+     * (see {@link ActivationImplementationInterface#RETURN_CLASS}, then an explicit Intent is performed and the user
+     * does not have the choice to select a suitable Application to receive the URL.</p>
      *
      * @param result Result of the finished eID Activation process.
      */
@@ -96,6 +96,5 @@ public interface ActivationCallbackInterface <GUI extends AndroidGui> {
      * @param result Result possibly containg a message describing what interrupted the process.
      */
     void onAuthenticationInterrupted(ActivationResult result);
-
 
 }

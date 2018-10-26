@@ -30,14 +30,14 @@ import org.openecard.common.event.EventType;
  * Interface for event callback handlers.
  * This interface must be implemented by a callback registering itself in the event system.
  *
- * @see EventManager
+ * @see EventDispatcher
  * @author Johannes Schmoelz
  */
 public interface EventCallback {
 
     /**
      * Callback funtion for IFD events.
-     * This function gets called for each registered event in the {@link EventManager}.
+     * This function gets called for each registered event in the {@link EventDispatcher}.
      *
      * @param eventType Type of the event.
      * @param eventData Data describing the event further.

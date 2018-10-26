@@ -25,6 +25,7 @@ package org.openecard.ifd.scio.wrapper;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.common.ifd.Protocol;
+import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.ifd.scio.TransmitException;

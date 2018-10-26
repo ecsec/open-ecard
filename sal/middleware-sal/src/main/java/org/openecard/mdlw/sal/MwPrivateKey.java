@@ -221,13 +221,14 @@ public class MwPrivateKey extends MwAbstractKey {
     }
 
     /**
-     * Signs Data with a {@link Mechanism}.
+     * Signs Data with a specific PKCS11 Mechanism.
      * Returns the signed Data in an byte array.
      *
      * @param mechanism
      * @param data
      * @return
      * @throws CryptokiException
+     * @see SignatureAlgorithms#getPkcs11Mechanism()
      */
     public byte[] sign(long mechanism, byte[] data) throws CryptokiException {
 	signInit(mechanism, data);

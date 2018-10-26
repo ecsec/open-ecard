@@ -552,7 +552,6 @@
 					<version>3.0.1</version>
 					<configuration>
 						<show>protected</show>
-						<additionalparam>-Xdoclint:none</additionalparam>
 						<groups>
 							<group>
 								<title>Open eCard Client Classes</title>

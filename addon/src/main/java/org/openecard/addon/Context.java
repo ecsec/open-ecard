@@ -73,9 +73,9 @@ public class Context {
     }
 
     /**
-     * Sets the CardRecognitionImpl of this Context.
+     * Sets the CardRecognition implementation of this Context.
      *
-     * @param cardRec The {@link CardRecognitionImpl} to set.
+     * @param cardRec The {@link CardRecognition} implementation to set.
      */
     public void setCardRecognition(CardRecognition cardRec) {
 	recognition = cardRec;
@@ -180,9 +180,9 @@ public class Context {
     }
 
     /**
-     * Get the CardRecognitionImpl of this Context.
+     * Get the CardRecognition implementation of this Context.
      *
-     * @return The {@link CardRecognitionImpl} of this Context.
+     * @return The {@link CardRecognition} implementation of this Context.
      */
     public CardRecognition getRecognition() {
 	return recognition;

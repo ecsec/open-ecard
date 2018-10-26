@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * <p>An example implementation can be found in the CustomActivationActivity in
  * <a href="https://github.com/ecsec/open-ecard-android">ecsec/open-ecard-android</a>).</p>
  *
- * <p>The parent activity must call the following handler functions in order to use the implementation in the wrapper.
+ * <p>The parent activity must call the following handler functions in order to use the implementation in the wrapper.</p>
  * <ul>
  * <li>{@code onStart()}</li>
  * <li>{@code onStop()}</li>
@@ -65,16 +65,15 @@ import org.slf4j.LoggerFactory;
  * <li>{@code onResume()}</li>
  * <li>{@code onNewIntent(Intent)}</li>
  * </ul>
- * Such an implementation looks as follows:
+ * <p>Such an implementation looks as follows:</p>
  * <pre>{@code
- private final AbstractActivationHandler activationImpl;
-
- protected void onStart() {
-     super.onStart();
-     activationImpl.onStart();
- }
- }</pre>
- * </p>
+ * private final AbstractActivationHandler activationImpl;
+ *
+ * protected void onStart() {
+ *     super.onStart();
+ *     activationImpl.onStart();
+ * }
+ * }</pre>
  *
  * @author Mike Prechtl
  * @author Tobias Wich

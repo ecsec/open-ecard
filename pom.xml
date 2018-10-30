@@ -77,6 +77,8 @@
 		<version.jmockit>1.43</version.jmockit>
 		<version.pmd>6.8.0</version.pmd>
 		<version.openjfx>11</version.openjfx>
+		<!-- preset argLine for Netbeans direct test execution -->
+		<argLine></argLine>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>

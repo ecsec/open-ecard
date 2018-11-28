@@ -147,7 +147,7 @@ public class TCTokenHandler {
 	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.invalid_schema"));
 	    if (! noValid) {
 		try {
-		    return JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+		    return JAXPSchemaValidator.load("Management.xsd");
 		} catch (SAXException ex) {
 		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
 		}

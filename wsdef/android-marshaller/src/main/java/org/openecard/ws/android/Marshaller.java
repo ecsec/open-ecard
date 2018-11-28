@@ -184,7 +184,7 @@ public class Marshaller {
 	    } // else only the result (with error) is returned
 	} else if (o instanceof InitializeFramework) {
 	    InitializeFramework initializeFramework = (InitializeFramework) o;
-	    rootElement = createElementIso(document, "InitializeFramework");
+	    rootElement = createElementEcapi(document, "InitializeFramework");
 	    appendRequestValues(initializeFramework, rootElement);
 	} else if (o instanceof InitializeFrameworkResponse) {
 	    InitializeFrameworkResponse initializeFrameworkResponse = (InitializeFrameworkResponse) o;

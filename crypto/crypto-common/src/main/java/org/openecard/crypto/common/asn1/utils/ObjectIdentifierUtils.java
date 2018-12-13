@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,8 @@
 
 package org.openecard.crypto.common.asn1.utils;
 
-import java.util.StringTokenizer;
+import java.io.IOException;
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 
@@ -31,6 +32,7 @@ import org.openecard.common.tlv.TLVException;
  * Helper class to convert ASN1 object identifier.
  *
  * @author Moritz Horsch
+ * @author Tobias Wich
  */
 public final class ObjectIdentifierUtils {
 
@@ -42,11 +44,11 @@ public final class ObjectIdentifierUtils {
      * @throws TLVException
      */
     public static byte[] toByteArray(String oid) throws TLVException {
-	TLV tlv = new TLV();
-	tlv.setTagNum((byte) 0x06);
-	tlv.setValue(getValue(oid));
-
-	return tlv.toBER();
+	try {
+	    return new ASN1ObjectIdentifier(oid).getEncoded();
+	} catch (IllegalArgumentException | IOException ex) {
+	    throw new TLVException("Failed to parse OID.", ex);
+	}
     }
 
     /**
@@ -57,58 +59,38 @@ public final class ObjectIdentifierUtils {
      * @throws TLVException
      */
     public static String toString(byte[] oid) throws TLVException {
-	StringBuilder sb = new StringBuilder(32);
-
-	if (oid[0] == (byte) 0x06) {
-	    oid = TLV.fromBER(oid).getValue();
-	}
-
-	switch ((oid[0] & 0x7f) / 40) {
-	    case 0:
-		sb.append('0');
-		break;
-	    case 1:
-		sb.append('1');
-		break;
-	    default:
-		sb.append('2');
-	}
-
-	sb.append('.');
-
-	for (int i = 0; i < oid.length; i++) {
-	    sb.append(oid[i]);
-	    if (i < oid.length - 1) {
-		sb.append(".");
+	try {
+	    TLV obj;
+	    try {
+		obj = TLV.fromBER(oid);
+	    } catch (TLVException ex) {
+		// read as plain value
+		obj = new TLV();
+		obj.setTagNum(0x06);
+		obj.setValue(oid);
 	    }
+	    return ASN1ObjectIdentifier.getInstance(obj.toBER()).getId();
+	} catch (IllegalArgumentException ex) {
+	    throw new TLVException("Failed to parse OID.", ex);
 	}
-
-	return sb.toString();
     }
 
     /**
-     * Converts a ASN1 object identifier to a byte array. Returns only the value
-     * without the length and 0x06 tag.
+     * Converts a ASN1 object identifier to a byte array.
+     * Returns only the value without the length and 0x06 tag.
      *
      * @param oid String
      * @return Value of the object identifier
+     * @throws TLVException
      */
-    public static byte[] getValue(String oid) {
-	StringTokenizer st = new StringTokenizer(oid, ".");
-	byte[] ret = new byte[st.countTokens() - 1];
-
-	// Skip leading null
-	//FIXME
-	if (oid.startsWith("0")) {
-	    st.nextElement();
+    public static byte[] getValue(String oid) throws TLVException {
+	try {
+	    ASN1ObjectIdentifier oidObj = new ASN1ObjectIdentifier(oid);
+	    TLV oidTlv = TLV.fromBER(oidObj.getEncoded());
+	    return oidTlv.getValue();
+	} catch (IllegalArgumentException | IOException ex) {
+	    throw new TLVException("Failed to parse OID.", ex);
 	}
-
-	for (int i = 0; st.hasMoreElements(); i++) {
-	    int t = Integer.valueOf((String) st.nextElement());
-	    ret[i] = (byte) (t & 0xFF);
-	}
-
-	return ret;
     }
 
 }

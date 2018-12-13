@@ -66,4 +66,10 @@ public class ObjectIdentifierUtilsTest {
 	assertEquals(expResult, result);
     }
 
+    @Test
+    public void testLargeOidValues() throws TLVException {
+	String oid = "1.2.3.128";
+	assertEquals(ObjectIdentifierUtils.toString(ObjectIdentifierUtils.getValue(oid)), oid);
+    }
+
 }

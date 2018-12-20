@@ -560,9 +560,10 @@
 						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>urn:oid:1.2.840.113549.1.1.1</iso:Algorithm>
+									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
 								</iso:AlgorithmIdentifier>
 								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
+								<iso:CardAlgRef>01</iso:CardAlgRef>
 							</iso:AlgorithmInfo>
 							<iso:KeyInfo>
 								<iso:KeyRef>

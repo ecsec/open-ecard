@@ -51,6 +51,29 @@
 			</CardSpec>
 		</CardConfig>
 
+		<CardConfig>
+			<CardSpec>
+				<TokenManufacturer>piv_II</TokenManufacturer>
+				<TokenModel>PKCS#15 emulated</TokenModel>
+				<iso:ObjectIdentifier>https://nist.gov/piv-ii</iso:ObjectIdentifier>
+				<iso:CardTypeName xml:lang="en">PIV Card</iso:CardTypeName>
+				<iso:CardTypeName xml:lang="de">PIV Card</iso:CardTypeName>
+				<iso:Version>
+					<iso:Major>2</iso:Major>
+					<iso:Minor>0</iso:Minor>
+					<iso:SubMinor>0</iso:SubMinor>
+				</iso:Version>
+				<iso:Status>Final</iso:Status>
+				<iso:Date>2019-01-30</iso:Date>
+				<ATR>3B7D96000080318065B0831117D683009000</ATR>
+				<ATR>3B888001000000008081C100C9</ATR>
+				<ATR>3B8F80018073CC91CBF9A0000003080000100029</ATR>
+				<ATR>3B8F80018091E1318065B0831117D683009000DA</ATR>
+				<ATR>3BDF960081B1FE451F838073CC91CBF9A0000003080000100079</ATR>
+				<CardImage>piv.jpg</CardImage>
+			</CardSpec>
+		</CardConfig>
+
 	</MiddlewareSpec>
 
 

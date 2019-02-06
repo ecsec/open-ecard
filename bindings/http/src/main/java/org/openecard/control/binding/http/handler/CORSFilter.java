@@ -68,21 +68,6 @@ public class CORSFilter {
 		    return res;
 		}
 	    }
-
-	    // only process if this is an allowed resource for CORS
-	    if (isNoCorsPath(httpRequest.getRequestLine().getUri())) {
-		// stop with an error
-		HttpResponse res = new Http11Response(HttpStatus.SC_FORBIDDEN);
-		return res;
-	    }
-
-	    // TODO: check if this check is really necessary
-	    // check against known origins
-	    if (! OriginsList.isValidOrigin(origin)) {
-		// stop with an error
-		HttpResponse res = new Http11Response(HttpStatus.SC_FORBIDDEN);
-		return res;
-	    }
 	}
 
 	// no CORS, just continue
@@ -104,8 +89,8 @@ public class CORSFilter {
 	    // add CORS Headers
 	    httpResponse.addHeader("Access-Control-Allow-Origin", origin.toString());
 	    httpResponse.addHeader("Access-Control-Allow-Credentials", "true");
-	    // preflight stuff
 
+	    // preflight stuff
 	    if (isPreflight(httpRequest)) {
 		String method = getMethod(httpRequest);
 		if (method != null) {

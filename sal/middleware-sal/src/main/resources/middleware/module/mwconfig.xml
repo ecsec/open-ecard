@@ -27,6 +27,9 @@
 			<X64SearchPath>/usr/lib/x86_64-linux-gnu</X64SearchPath>
 			<X64SearchPath>/usr/lib/x86_64-linux-gnu/pkcs11</X64SearchPath>
 		</LibSpec>
+		<LibSpec os="Mac OS">
+			<LibName>/Library/OpenSC/lib/opensc-pkcs11.so</LibName>
+		</LibSpec>
 
 		<BuiltinPinDialog>false</BuiltinPinDialog>
 

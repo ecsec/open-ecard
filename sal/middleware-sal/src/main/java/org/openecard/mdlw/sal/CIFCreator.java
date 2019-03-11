@@ -119,7 +119,7 @@ public class CIFCreator {
 	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
 	    return cachedCif;
 	}
-	
+
 	PIN_NAME = "USER_PIN";
 	DIDInfoType pinDid = createPinDID();
 	List<DIDInfoType> cryptoDids = getSignatureCryptoDIDs();
@@ -329,9 +329,9 @@ public class CIFCreator {
 	algIdentifier.setAlgorithm(sigalg.getAlgId());
 	algInfo.setAlgorithmIdentifier(algIdentifier);
 	algInfo.getSupportedOperations().add("Compute-signature");
-	markerBuilder.setAlgInfo(algInfo);	
+	markerBuilder.setAlgInfo(algInfo);
 	markerBuilder.setLegacyKeyname(pubKey.getKeyID());
-	
+
 	boolean hasContextPin = hasContextPin(pubKey.getKeyID());
 	markerBuilder.setHasContextPin(hasContextPin);
 
@@ -626,9 +626,8 @@ public class CIFCreator {
     }
 
     private boolean hasContextPin(byte[] keyLabel) {
-
 	boolean hasContextPin = false;
-       
+
 	try {
 	    for (MwPrivateKey key : session.getPrivateKeys()) {
 		byte[] nextLabel = key.getKeyID();
@@ -637,17 +636,9 @@ public class CIFCreator {
 		    hasContextPin = true;
 		    break;
 		}
-	    }   
-
+	    }
 	} catch (CryptokiException ex) {
-	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
 	    return false;
-	}
-	    
-	if(hasContextPin) {
-	    LOG.debug("Can access private keys without PIN -> hasContextPin=true");
-	} else {
-	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
 	}
 
 	return hasContextPin;

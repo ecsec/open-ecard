@@ -58,15 +58,15 @@ public class PinEntryStep extends Step {
     private boolean pinBlocked = false;
     private boolean unkownError = false;
 
-    public PinEntryStep(boolean protectedAuthPath, @Nonnull PINCompareMarkerType pinMarker, @Nonnull MwSession session)
-	    throws CryptokiException {
+    public PinEntryStep(boolean protectedAuthPath, boolean performContextSpecificLogin,
+	    @Nonnull PINCompareMarkerType pinMarker, @Nonnull MwSession session) throws CryptokiException {
 	super(STEP_ID);
 
 	this.protectedAuthPath = protectedAuthPath;
 	this.pinMarker = pinMarker;
 	this.session = session;
 
-	setAction(new PinEntryStepAction(this));
+	setAction(new PinEntryStepAction(this, performContextSpecificLogin));
 
 	updateState();
     }

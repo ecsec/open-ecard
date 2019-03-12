@@ -42,14 +42,20 @@ public class PinEntryDialog {
 
     private final UserConsent gui;
     private final boolean protectedAuthPath;
+    private final boolean performContextSpecificLogin;
     private final PINCompareMarkerType pinMarker;
     private final MwSession session;
     private PinEntryStep pinStep;
 
-    public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, PINCompareMarkerType pinMarker,
-	    MwSession session) {
+    public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, PINCompareMarkerType pinMarker, MwSession session) {
+	this(gui, protectedAuthPath, false, pinMarker, session);
+    }
+
+    public PinEntryDialog(UserConsent gui, boolean protectedAuthPath, boolean performContextSpecificLogin,
+	    PINCompareMarkerType pinMarker, MwSession session) {
 	this.gui = gui;
 	this.protectedAuthPath = protectedAuthPath;
+	this.performContextSpecificLogin = performContextSpecificLogin;
 	this.pinMarker = pinMarker;
 	this.session = session;
     }
@@ -64,7 +70,7 @@ public class PinEntryDialog {
     private UserConsentDescription createUserConsentDescription() throws CryptokiException {
 	String title = LANG.translationForKey("action.changepin.userconsent.pinstep.title");
 	UserConsentDescription uc = new UserConsentDescription(title, "pin_entry_dialog");
-	pinStep = new PinEntryStep(protectedAuthPath, pinMarker, session);
+	pinStep = new PinEntryStep(protectedAuthPath, performContextSpecificLogin, pinMarker, session);
 	uc.getSteps().add(pinStep);
 
 	return uc;

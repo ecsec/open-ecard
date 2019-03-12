@@ -52,9 +52,7 @@
 				<CardImage>rub-card.png</CardImage>
 				<!--SignatureAlgorithm>SHA1withRSA</SignatureAlgorithm-->
 			</CardSpec>
-		</CardConfig>
 
-		<CardConfig>
 			<CardSpec>
 				<TokenManufacturer>piv_II</TokenManufacturer>
 				<TokenModel>PKCS#15 emulated</TokenModel>

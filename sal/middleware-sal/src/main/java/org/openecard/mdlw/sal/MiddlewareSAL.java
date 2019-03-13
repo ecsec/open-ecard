@@ -117,6 +117,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -127,6 +128,10 @@ import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
+import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1Integer;
+import org.openecard.bouncycastle.asn1.DERSequence;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.ThreadTerminateException;
@@ -742,6 +747,12 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    }
 
 		    byte[] sig = key.sign(message);
+
+		    // encode EC signatures as ASN.1 structure
+		    if (marker.getAlgorithmInfo().getAlgorithm().contains("withECDSA")) {
+			sig = encodeECSignature(sig);
+		    }
+
 		    response.setSignature(sig);
 
 		    // set PIN to unauthenticated
@@ -1003,6 +1014,29 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	} else if (cause instanceof RuntimeException) {
 	    throw (RuntimeException) ex;
 	}
+    }
+
+    /**
+     * The PKCS#11 MW returns an EC signature as an octet string where the first half of the signature is r and the
+     * second half is s. This method splits the signature into the two parts (r and s) and creates a DER encoded
+     * ASN.1 structure which is returned.
+     *
+     * @param originalSig This argument represents the original signature value.
+     * @return An ASN.1 structure with r and s is returned.
+     * @throws IOException
+     */
+    private byte[] encodeECSignature(byte[] originalSig) throws IOException {
+	byte[] rRaw = Arrays.copyOfRange(originalSig, 0, originalSig.length / 2);
+	byte[] sRaw = Arrays.copyOfRange(originalSig, originalSig.length / 2, originalSig.length);
+
+	// r and s are positive values!
+	BigInteger r = new BigInteger(1, rRaw);
+	BigInteger s = new BigInteger(1, sRaw);
+
+	ASN1EncodableVector v = new ASN1EncodableVector();
+	v.add(new ASN1Integer(r));
+	v.add(new ASN1Integer(s));
+	return new DERSequence(v).getEncoded(ASN1Encoding.DER);
     }
 
 }

@@ -737,7 +737,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 			}
 
 			// omit GUI when Middleware has its own PIN dialog for class 2 readers
-			if (builtinPinDialog) {
+			if (protectedAuthPath && builtinPinDialog) {
 			    session.loginExternal(UserType.Context_specific);
 			} else if (pinCompareMarker.isPresent()) {
 			    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,

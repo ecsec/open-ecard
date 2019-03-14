@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.OpenecardProperties;
@@ -146,6 +147,42 @@ public class MiddlewareSALConfig {
 
     public boolean hasBuiltinPinDialog() {
 	return mwSpec.isBuiltinPinDialog();
+    }
+
+    /**
+     * This method checks if a context specific login can be skipped for a given card type and DID. An empty optional
+     * is returned, if there is no information if the context specific login should be skipped. If there are more elements
+     * with the same DID name, then the last one is used!
+     *
+     * @param cardType This argument represents the given card type.
+     * @param didName This argument represents the name of the DID.
+     * @return
+     */
+    public Optional<Boolean> canSkipContextSpecificLogin(String cardType, String didName) {
+	Optional<Boolean> canSkipContextSpecificLogin = Optional.empty();
+
+	for (CardSpecType cardSpec : mwSpec.getCardConfig().getCardSpecs()) {
+	    if (cardSpec.getObjectIdentifier().equals(cardType)) {
+		// iterate over all context specific login elements and check if DID name is equals to the given one.
+		// If there is no DID name given for the context specific login element, then it applies for all DIDs.
+		for (CardSpecType.ContextSpecificLoginType skippableCtxLoginElem : cardSpec.getContextSpecificLogins()) {
+		    Optional<String> didNameOfSkippableCtxLogin = Optional.ofNullable(skippableCtxLoginElem.getDidName());
+
+		    // if DID name is present, then it applies only for this name!
+		    if (didNameOfSkippableCtxLogin.isPresent()) {
+			// if DID name is equals to the given one, skip CTX-Login based on the set value.
+			if (didNameOfSkippableCtxLogin.get().equals(didName)) {
+			    canSkipContextSpecificLogin = Optional.of(skippableCtxLoginElem.canSkipContextSpecificLogin());
+			}
+		    // if no DID name is present, then it works for each DID.
+		    } else {
+			canSkipContextSpecificLogin = Optional.of(skippableCtxLoginElem.canSkipContextSpecificLogin());
+		    }
+		}
+	    }
+	}
+
+	return canSkipContextSpecificLogin;
     }
 
     /**

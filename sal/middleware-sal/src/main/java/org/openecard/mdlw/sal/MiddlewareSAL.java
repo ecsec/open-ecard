@@ -724,26 +724,12 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 
 		    key.signInit(sigAlg, message);
 
-		    // Context-Specific Login is required if 'hasContextPIN' returns true.
-		    if (doContextSpecificLogin) {
-			// extract PINCompareMarker from authenticated DIDs
-			Optional<PINCompareMarkerType> pinCompareMarker = Optional.empty();
-			for (DIDInfoType didInfo : cardStateEntry.getCurrentCardApplication().getDIDInfoList()) {
-			    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
-				PinCompareMarkerType pinCompareMarkerRaw = didInfo.getDifferentialIdentity()
-					.getDIDMarker().getPinCompareMarker();
-				pinCompareMarker = Optional.of(new PINCompareMarkerType(pinCompareMarkerRaw));
-			    }
-			}
+		    // check if context specific login can be skipped based on the card type and DID name.
+		    String cardType = cardStateEntry.getCardType();
+		    Optional<Boolean> skipCtxSpecificLogin = mwSALConfig.canSkipContextSpecificLogin(cardType, didName);
 
-			// omit GUI when Middleware has its own PIN dialog for class 2 readers
-			if (protectedAuthPath && builtinPinDialog) {
-			    session.loginExternal(UserType.Context_specific);
-			} else if (pinCompareMarker.isPresent()) {
-			    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,
-				    pinCompareMarker.get(), session);
-			    dialog.show();
-			}
+		    if (doContextSpecificLogin && (! skipCtxSpecificLogin.isPresent() || ! skipCtxSpecificLogin.get())) {
+			doContextSpecificLogin(session, cardStateEntry, protectedAuthPath);
 		    }
 
 		    byte[] sig = key.sign(message);
@@ -1037,6 +1023,36 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	v.add(new ASN1Integer(r));
 	v.add(new ASN1Integer(s));
 	return new DERSequence(v).getEncoded(ASN1Encoding.DER);
+    }
+
+    /**
+     * This method is used to trigger a context specific login. For this purpose, a PIN dialog is shown.
+     *
+     * @param session Is used to trigger the login functionality.
+     * @param cardStateEntry Is required to extract the PINCompareMarker.
+     * @param protectedAuthPath Indicates if the login is handled by the MW.
+     * @throws CryptokiException
+     */
+    private void doContextSpecificLogin(MwSession session, CardStateEntry cardStateEntry, boolean protectedAuthPath)
+	    throws CryptokiException {
+	// extract PINCompareMarker from authenticated DIDs
+	Optional<PINCompareMarkerType> pinCompareMarker = Optional.empty();
+	for (DIDInfoType didInfo : cardStateEntry.getCurrentCardApplication().getDIDInfoList()) {
+	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
+		PinCompareMarkerType pinCompareMarkerRaw = didInfo.getDifferentialIdentity()
+			.getDIDMarker().getPinCompareMarker();
+		pinCompareMarker = Optional.of(new PINCompareMarkerType(pinCompareMarkerRaw));
+	    }
+	}
+
+	// omit GUI when Middleware has its own PIN dialog for class 2 readers
+	if (protectedAuthPath && builtinPinDialog) {
+	    session.loginExternal(UserType.Context_specific);
+	} else if (pinCompareMarker.isPresent()) {
+	    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,
+		    pinCompareMarker.get(), session);
+	    dialog.show();
+	}
     }
 
 }

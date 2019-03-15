@@ -720,7 +720,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    // The always authenticate flag is used to force re-authentication for each use of a private key.
 		    // Re-authentication occurs by calling C_Login with userType set to CKU_CONTEXT_SPECIFIC immediately
 		    // after a cryptographic operation using the key has been initiated (e.g. after C_SignInit).
-		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate() && ! protectedAuthPath;
+		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate();
 
 		    key.signInit(sigAlg, message);
 

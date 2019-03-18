@@ -156,6 +156,7 @@ import org.openecard.common.util.ByteComparator;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.util.ValueGenerators;
+import org.openecard.crypto.common.KeyTypes;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
@@ -710,7 +711,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		}
 		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
 		if (Arrays.equals(keyLabel, nextLabel)) {
-		    long sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
+		    SignatureAlgorithms sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
 
 		    // If the token has a "protected authentication", then that means that there is some way for a user
 		    // to be authenticated to the token without having to send a PIN through the Cryptoki library.
@@ -722,7 +723,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    // after a cryptographic operation using the key has been initiated (e.g. after C_SignInit).
 		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate();
 
-		    key.signInit(sigAlg, message);
+		    key.signInit(sigAlg.getPkcs11Mechanism(), message);
 
 		    // check if context specific login can be skipped based on the card type and DID name.
 		    String cardType = cardStateEntry.getCardType();
@@ -735,7 +736,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    byte[] sig = key.sign(message);
 
 		    // encode EC signatures as ASN.1 structure
-		    if (marker.getAlgorithmInfo().getAlgorithm().contains("withECDSA")) {
+		    if (sigAlg.getKeyType().equals(KeyTypes.CKK_EC)) {
 			sig = encodeECSignature(sig);
 		    }
 
@@ -764,11 +765,11 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         return response;
     }
 
-    private long getPKCS11Alg(AlgorithmInfoType algInfo) throws UnsupportedAlgorithmException {
+    private SignatureAlgorithms getPKCS11Alg(AlgorithmInfoType algInfo) throws UnsupportedAlgorithmException {
         String algUri = algInfo.getAlgorithmIdentifier().getAlgorithm();
 	algUri = StringUtils.nullToEmpty(algUri);
 	SignatureAlgorithms a = SignatureAlgorithms.fromAlgId(algUri);
-	return a.getPkcs11Mechanism();
+	return a;
     }
 
     @Override

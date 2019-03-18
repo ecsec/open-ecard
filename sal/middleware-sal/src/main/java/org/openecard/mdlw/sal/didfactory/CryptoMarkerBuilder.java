@@ -59,7 +59,6 @@ public class CryptoMarkerBuilder {
     private HashGenerationInfoType hashGenInfo;
     private ArrayList<CertificateRefType> certRefs;
     private byte[] legacyKeyname;
-    private Boolean hasContextPin;
 
 
     public CryptoMarkerBuilder() throws WSMarshallerException {
@@ -97,10 +96,6 @@ public class CryptoMarkerBuilder {
 
     public void setLegacyKeyname(byte[] legacyKeyname) {
 	this.legacyKeyname = legacyKeyname;
-    }
-
-    public void setHasContextPin (boolean hasContextPin) {
-	this.hasContextPin = hasContextPin;
     }
 
     public CryptoMarkerType build() {
@@ -181,17 +176,6 @@ public class CryptoMarkerBuilder {
 		marker.getAny().add(d.getDocumentElement());
 	    } catch (MarshallingTypeException ex) {
 		LOG.error("Failed to marshal LegacyKeyName element.", ex);
-	    }
-	}
-	
-	if (hasContextPin != null) {
-	    try {
-		JAXBElement<String> e;
-		e = new JAXBElement(new QName(ISONS, "HasContextPin"), Boolean.class, hasContextPin);
-		Document d = m.marshal(e);
-		marker.getAny().add(d.getDocumentElement());
-	    } catch (MarshallingTypeException ex) {
-		LOG.error("Failed to marshal HasContextPin element.", ex);
 	    }
 	}
 

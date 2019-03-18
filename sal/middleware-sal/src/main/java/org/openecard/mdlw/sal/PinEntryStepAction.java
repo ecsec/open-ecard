@@ -48,19 +48,24 @@ public class PinEntryStepAction extends StepAction {
     private static final Logger LOG = LoggerFactory.getLogger(PinEntryStepAction.class);
     private final PinEntryStep pinStep;
 
-    public PinEntryStepAction(PinEntryStep pinStep) {
+    private final boolean performContextSpecificLogin;
+
+    public PinEntryStepAction(PinEntryStep pinStep, boolean performContextSpecificLogin) {
 	super(pinStep);
 	this.pinStep = pinStep;
+	this.performContextSpecificLogin = performContextSpecificLogin;
     }
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	try {
+	    UserType userType = performContextSpecificLogin ? UserType.Context_specific : UserType.User;
+
 	    if (pinStep.isProtectedAuthPath()) {
-		pinStep.getSession().loginExternal(UserType.User);
+		pinStep.getSession().loginExternal(userType);
 	    } else {
 		char[] pPin = getPin();
-		pinStep.getSession().login(UserType.User, pPin);
+		pinStep.getSession().login(userType, pPin);
 	    }
 	    pinStep.setPinAuthenticated();
 	    return new StepActionResult(StepActionResultStatus.NEXT);

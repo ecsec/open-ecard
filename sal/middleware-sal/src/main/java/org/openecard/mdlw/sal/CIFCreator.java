@@ -56,17 +56,18 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
+import org.openecard.gui.UserConsent;
 import org.openecard.mdlw.sal.config.CardSpecType;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.didfactory.CryptoMarkerBuilder;
 import org.openecard.mdlw.sal.didfactory.PinMarkerBuilder;
+import org.openecard.mdlw.sal.enums.Flag;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.NoCertificateChainException;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -86,6 +87,7 @@ public class CIFCreator {
     private final MwSession session;
     private final CardInfoType cif;
     private final CardSpecType cardSpec;
+    private final UserConsent gui;
 
     private final EnumSet<SignatureAlgorithms> cardAlgorithms;
 
@@ -93,11 +95,13 @@ public class CIFCreator {
 
     private CertificateFactory certFactory;
 
-    public CIFCreator(MiddlewareSALConfig mwSALConfig, MwSession session, CardInfoType cifTemplate, CardSpecType cardSpec) {
+    public CIFCreator(UserConsent gui, MiddlewareSALConfig mwSALConfig, MwSession session, CardInfoType cifTemplate,
+	    CardSpecType cardSpec) {
 	this.mwSALConfig = mwSALConfig;
 	this.session = session;
 	this.cif = cifTemplate;
 	this.cardSpec = cardSpec;
+	this.gui = gui;
 
 	this.cardAlgorithms = this.cardSpec.getMappedSignatureAlgorithms();
     }
@@ -119,7 +123,7 @@ public class CIFCreator {
 	    LOG.debug("Reusing previously generated CIF for card with serial={}.", serial);
 	    return cachedCif;
 	}
-	
+
 	PIN_NAME = "USER_PIN";
 	DIDInfoType pinDid = createPinDID();
 	List<DIDInfoType> cryptoDids = getSignatureCryptoDIDs();
@@ -329,11 +333,8 @@ public class CIFCreator {
 	algIdentifier.setAlgorithm(sigalg.getAlgId());
 	algInfo.setAlgorithmIdentifier(algIdentifier);
 	algInfo.getSupportedOperations().add("Compute-signature");
-	markerBuilder.setAlgInfo(algInfo);	
+	markerBuilder.setAlgInfo(algInfo);
 	markerBuilder.setLegacyKeyname(pubKey.getKeyID());
-	
-	boolean hasContextPin = hasContextPin(pubKey.getKeyID());
-	markerBuilder.setHasContextPin(hasContextPin);
 
 	// add certificates
 	for (MwCertificate nextCert : mwCerts) {
@@ -362,7 +363,8 @@ public class CIFCreator {
 	// create sign rule with PIN reference
 	AccessRuleType signRule = createRuleTrue(CryptographicServiceActionName.SIGN);
 
-	if(!hasContextPin) {
+	boolean isLoginRequired = session.getSlot().getTokenInfo().containsFlag(Flag.CKF_LOGIN_REQUIRED);
+	if(isLoginRequired) {
 	    signRule.setSecurityCondition(createDidCond(PIN_NAME));
 	}
 
@@ -623,34 +625,6 @@ public class CIFCreator {
 	} catch (UnsupportedAlgorithmException ex) {
 	    LOG.warn("Skipping unknown signature algorithm ({}).", mechanism);
 	}
-    }
-
-    private boolean hasContextPin(byte[] keyLabel) {
-
-	boolean hasContextPin = false;
-       
-	try {
-	    for (MwPrivateKey key : session.getPrivateKeys()) {
-		byte[] nextLabel = key.getKeyID();
-		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
-		if (Arrays.equals(keyLabel, nextLabel)) {
-		    hasContextPin = true;
-		    break;
-		}
-	    }   
-
-	} catch (CryptokiException ex) {
-	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
-	    return false;
-	}
-	    
-	if(hasContextPin) {
-	    LOG.debug("Can access private keys without PIN -> hasContextPin=true");
-	} else {
-	    LOG.debug("Can not access private keys without PIN -> hasContextPin=false");
-	}
-
-	return hasContextPin;
     }
 
 }

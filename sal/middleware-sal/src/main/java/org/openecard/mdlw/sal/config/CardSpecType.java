@@ -29,9 +29,11 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
     "atr",
     "mask",
     "cardImageName",
+    "contextSpecificLogins",
     "signatureAlgorithms"
 })
 public class CardSpecType {
@@ -104,6 +107,9 @@ public class CardSpecType {
 
     @XmlElement(name = "CardImage")
     private String cardImageName;
+
+    @XmlElement(name = "SkipContextSpecificLogin")
+    private List<ContextSpecificLoginType> contextSpecificLogins;
 
     @XmlElement(name = "SignatureAlgorithm")
     private List<String> signatureAlgorithms;
@@ -204,6 +210,17 @@ public class CardSpecType {
 	return signatureAlgorithms;
     }
 
+    public List<ContextSpecificLoginType> getContextSpecificLogins() {
+	if (contextSpecificLogins == null) {
+	    contextSpecificLogins = new ArrayList<>();
+	}
+	return contextSpecificLogins;
+    }
+
+    public void setContextSpecificLogins(List<ContextSpecificLoginType> contextSpecificLogins) {
+	this.contextSpecificLogins = contextSpecificLogins;
+    }
+
     @Nonnull
     public EnumSet<SignatureAlgorithms> getMappedSignatureAlgorithms() {
 	if (getSignatureAlgorithms().isEmpty()) {
@@ -220,6 +237,34 @@ public class CardSpecType {
 	    }
 	    return result;
 	}
+    }
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "SkipContextSpecificLogin")
+    public static class ContextSpecificLoginType {
+
+	@XmlValue
+	private boolean skipContextSpecificLogin = true;
+
+	@XmlAttribute
+	private String didName;
+
+	public boolean canSkipContextSpecificLogin() {
+	    return skipContextSpecificLogin;
+	}
+
+	public void setSkipContextSpecificLogin(boolean skipContextSpecificLogin) {
+	    this.skipContextSpecificLogin = skipContextSpecificLogin;
+	}
+
+	public String getDidName() {
+	    return didName;
+	}
+
+	public void setDidName(String didName) {
+	    this.didName = didName;
+	}
+
     }
 
 }

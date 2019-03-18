@@ -72,7 +72,6 @@ public class CryptoMarkerType extends AbstractMarkerType {
     private String[] signatureGenerationInfo = null;
     private List<Object> legacySignatureGenerationInfo = null;
     private String legacyOutputFormat = null;
-    private boolean hasContextPin = false;
 
     /**
      * The constructor gets an {@link DIDAbstractMarkerType} object and parses the object to a CryptoMarkerType object.
@@ -214,9 +213,6 @@ public class CryptoMarkerType extends AbstractMarkerType {
 		    break;
 	    	case "StateInfo":
 		    break;
-		case "HasContextPin":
-		    this.hasContextPin = Boolean.valueOf(elem.getTextContent());
-		    break;
 	    }
 	}
     }
@@ -320,15 +316,6 @@ public class CryptoMarkerType extends AbstractMarkerType {
      */
     public StateInfo getStateInfo() {
 	throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    /**
-     * Get the value of the property HasContextPin if it exists.
-     *
-     * @return A boolean indicating if the DID has a context PIN or not.
-     */
-    public boolean getHasContextPin() {
-	return hasContextPin;
     }
 
     @Nullable

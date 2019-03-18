@@ -52,9 +52,7 @@
 				<CardImage>rub-card.png</CardImage>
 				<!--SignatureAlgorithm>SHA1withRSA</SignatureAlgorithm-->
 			</CardSpec>
-		</CardConfig>
 
-		<CardConfig>
 			<CardSpec>
 				<TokenManufacturer>piv_II</TokenManufacturer>
 				<TokenModel>PKCS#15 emulated</TokenModel>
@@ -130,6 +128,7 @@
 				<iso:Date>2016-03-16</iso:Date>
 				<ATR>3B8F800180318065B0850300EF120FFF82900073</ATR>
 				<CardImage>Lux-eID.jpg</CardImage>
+				<SkipContextSpecificLogin>true</SkipContextSpecificLogin>
 			</CardSpec>
 		</CardConfig>
 

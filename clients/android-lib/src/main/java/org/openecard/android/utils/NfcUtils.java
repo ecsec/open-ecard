@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -30,6 +30,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.TagTechnology;
+import android.os.Build;
 import android.provider.Settings;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -112,6 +113,7 @@ public class NfcUtils {
     }
 
 
+    @Deprecated
     public static boolean supportsExtendedLength(Context context) {
 	NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
 	if (nfcAdapter != null) {
@@ -132,6 +134,48 @@ public class NfcUtils {
 	}
 
 	return false;
+    }
+
+    /**
+     * Checks the support of extended length APDUs of the system.
+     * <p>This function uses non public API in order to work without a card insert intent. As this is forbidden since
+     * API 28, this function returns {@link NfcCapabilityResult#QUERY_NOT_ALLOWED} when the system runs on API level 28
+     * or higher.</p>
+     *
+     * @param context
+     * @return Result of the extended length determination.
+     */
+    public static NfcCapabilityResult checkExtendedLength(Context context) {
+	if (canUseHiddenApi()) {
+	    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
+	    if (nfcAdapter != null) {
+		Object tagObj = getTagObject(nfcAdapter);
+		if (tagObj != null) {
+		    Boolean extSup = isExtendedLengthSupported(tagObj);
+		    Integer maxLen = getMaxTransceiveLength(tagObj);
+		    LOG.info("maxLen = {} ; extSup = {}", maxLen, extSup);
+		    if (extSup != null) {
+			return extSup ? NfcCapabilityResult.SUPPORTED : NfcCapabilityResult.NOT_SUPPORTED;
+		    } else if (maxLen != null) {
+			// This is roughly the size of the biggest APDU observed in EAC
+			return maxLen > 370 ? NfcCapabilityResult.SUPPORTED : NfcCapabilityResult.NOT_SUPPORTED;
+		    }
+		}
+
+		// not values determined, assume not supported for some other reason
+		return NfcCapabilityResult.NOT_SUPPORTED;
+	    } else {
+		LOG.warn("NfcAdapter is not available.");
+		return NfcCapabilityResult.NFC_SYSTEM_DISABLED;
+	    }
+	} else {
+	    return NfcCapabilityResult.QUERY_NOT_ALLOWED;
+	}
+    }
+
+    private static boolean canUseHiddenApi() {
+	// we can only request this API, when we are < Android 9 (API 28)
+	return Build.VERSION.SDK_INT < 28;
     }
 
     private static Object getTagObject(NfcAdapter nfcAdapter) {

@@ -128,11 +128,21 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	this.minClientVersion = minClientVersion;
     }
 
-    @Override
     public ProtocolVersion getMinimumVersion() {
 	return this.minClientVersion;
     }
 
+    @Override
+    public ProtocolVersion[] getSupportedVersions() {
+	ProtocolVersion desiredVersion = getClientVersion();
+	ProtocolVersion minVersion = getClientVersion();
+
+	if (! desiredVersion.isLaterVersionOf(minVersion)) {
+	    return new ProtocolVersion[] { desiredVersion };
+	} else {
+	    return getClientVersion().downTo(getMinimumVersion());
+	}
+    }
 
     @Override
     public int[] getCipherSuites() {
@@ -207,7 +217,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
 	// code taken from AbstractTlsClient, if that should ever change modify it here too
 	Vector supportedGroups = new Vector();
-	if (TlsECCUtils.containsECCipherSuites(getCipherSuites())) {
+	if (TlsCipherUtils.containsECCipherSuites(getCipherSuites())) {
 	    // other possible parameters TR-02102-2 sec. 3.6
             supportedGroups.add(NamedGroup.brainpoolP512r1);
 	    supportedGroups.add(NamedGroup.brainpoolP384r1);
@@ -217,11 +227,11 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	    supportedGroups.add(NamedGroup.secp256r1);
 	    supportedGroups.add(NamedGroup.secp224r1);
 
-	    this.clientECPointFormats = new short[]{
+	    short[] clientECPointFormats = new short[]{
 		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
 	    };
 
-	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
+	    TlsExtensionsUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
 	}
 
 	if (! supportedGroups.isEmpty()) {

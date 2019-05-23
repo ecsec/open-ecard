@@ -49,6 +49,13 @@ public interface ClientCertTlsClient extends TlsClient {
     void setClientVersion(ProtocolVersion version);
 
     /**
+     * Get the desired TLS protocol version.
+     *
+     * @return Returns the TLS protocol version.
+     */
+    ProtocolVersion getClientVersion();
+
+    /**
      * Sets the minimum accepted TLS protocol version.
      * In case the server tries to use a lower version, an error will occur in the TLS stack.
      *

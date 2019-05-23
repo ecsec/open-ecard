@@ -135,12 +135,12 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     @Override
     public ProtocolVersion[] getSupportedVersions() {
 	ProtocolVersion desiredVersion = getClientVersion();
-	ProtocolVersion minVersion = getClientVersion();
+	ProtocolVersion minVersion = getMinimumVersion();
 
 	if (! desiredVersion.isLaterVersionOf(minVersion)) {
 	    return new ProtocolVersion[] { desiredVersion };
 	} else {
-	    return getClientVersion().downTo(getMinimumVersion());
+	    return getClientVersion().downTo(minVersion);
 	}
     }
 

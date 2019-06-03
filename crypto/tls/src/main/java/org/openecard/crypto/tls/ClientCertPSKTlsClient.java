@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,8 +26,6 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -35,18 +33,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.tls.AlertLevel;
 import org.openecard.bouncycastle.tls.CipherSuite;
-import org.openecard.bouncycastle.tls.ECPointFormat;
 import org.openecard.bouncycastle.tls.HashAlgorithm;
 import org.openecard.bouncycastle.tls.NameType;
 import org.openecard.bouncycastle.tls.NamedGroup;
+import org.openecard.bouncycastle.tls.NamedGroupRole;
 import org.openecard.bouncycastle.tls.PSKTlsClient;
 import org.openecard.bouncycastle.tls.ProtocolVersion;
 import org.openecard.bouncycastle.tls.ServerName;
 import org.openecard.bouncycastle.tls.SignatureAlgorithm;
 import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
 import org.openecard.bouncycastle.tls.TlsAuthentication;
-import org.openecard.bouncycastle.tls.TlsECCUtils;
-import org.openecard.bouncycastle.tls.TlsExtensionsUtils;
 import org.openecard.bouncycastle.tls.TlsPSKIdentity;
 import org.openecard.bouncycastle.tls.TlsUtils;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
@@ -70,7 +66,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     private final String host;
     private TlsAuthentication tlsAuth;
 
-    protected List<ServerName> serverNames;
+    protected ArrayList<ServerName> serverNames;
     protected ProtocolVersion clientVersion = ProtocolVersion.TLSv12;
     protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv10;
 
@@ -85,8 +81,9 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     public ClientCertPSKTlsClient(@Nonnull TlsCrypto tcf, @Nonnull TlsPSKIdentity pskId, @Nullable String host,
 	    boolean doSni) {
 	super(tcf, pskId);
+	this.serverNames = new ArrayList<>();
 	if (doSni) {
-	    this.serverNames = Collections.singletonList(makeServerName(host));
+	    this.serverNames.add(makeServerName(host));
 	}
 	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
 	this.minClientVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
@@ -94,11 +91,12 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     }
 
     public void setServerName(@Nonnull String serverName) {
-	serverNames = Collections.singletonList(makeServerName(serverName));
+	serverNames.clear();
+	serverNames.add(makeServerName(serverName));
     }
 
     public void setServerNames(@Nonnull List<String> serverNames) {
-	this.serverNames = new ArrayList<>();
+	this.serverNames.clear();
 	for (String next : serverNames) {
 	    this.serverNames.add(makeServerName(next));
 	}
@@ -106,7 +104,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
     @Override
     protected Vector getSNIServerNames() {
-	return serverNames != null ? new Vector(serverNames) : null;
+	return serverNames.isEmpty() ? null : new Vector(serverNames);
     }
 
     private ServerName makeServerName(String name) {
@@ -128,11 +126,21 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	this.minClientVersion = minClientVersion;
     }
 
-    @Override
     public ProtocolVersion getMinimumVersion() {
 	return this.minClientVersion;
     }
 
+    @Override
+    public ProtocolVersion[] getSupportedVersions() {
+	ProtocolVersion desiredVersion = getClientVersion();
+	ProtocolVersion minVersion = getMinimumVersion();
+
+	if (! desiredVersion.isLaterVersionOf(minVersion)) {
+	    return new ProtocolVersion[] { desiredVersion };
+	} else {
+	    return getClientVersion().downTo(minVersion);
+	}
+    }
 
     @Override
     public int[] getCipherSuites() {
@@ -201,13 +209,10 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     }
 
     @Override
-    public Hashtable getClientExtensions() throws IOException {
-	Hashtable clientExtensions = super.getClientExtensions();
-	clientExtensions = TlsExtensionsUtils.ensureExtensionsInitialised(clientExtensions);
+    protected Vector getSupportedGroups(Vector namedGroupRoles) {
+        Vector supportedGroups = new Vector();
 
-	// code taken from AbstractTlsClient, if that should ever change modify it here too
-	Vector supportedGroups = new Vector();
-	if (TlsECCUtils.containsECCipherSuites(getCipherSuites())) {
+        if (namedGroupRoles.contains(NamedGroupRole.ecdh) || namedGroupRoles.contains(NamedGroupRole.ecdsa)) {
 	    // other possible parameters TR-02102-2 sec. 3.6
             supportedGroups.add(NamedGroup.brainpoolP512r1);
 	    supportedGroups.add(NamedGroup.brainpoolP384r1);
@@ -216,20 +221,9 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 	    supportedGroups.add(NamedGroup.brainpoolP256r1);
 	    supportedGroups.add(NamedGroup.secp256r1);
 	    supportedGroups.add(NamedGroup.secp224r1);
+        }
 
-	    this.clientECPointFormats = new short[]{
-		ECPointFormat.ansiX962_compressed_prime, ECPointFormat.uncompressed
-	    };
-
-	    TlsECCUtils.addSupportedPointFormatsExtension(clientExtensions, clientECPointFormats);
-	}
-
-	if (! supportedGroups.isEmpty()) {
-	    this.supportedGroups = supportedGroups;
-	    TlsExtensionsUtils.addSupportedGroupsExtension(clientExtensions, supportedGroups);
-	}
-
-	return clientExtensions;
+        return supportedGroups;
     }
 
     @Override

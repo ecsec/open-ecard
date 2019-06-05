@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.security.auth.x500.X500Principal;
-import org.openecard.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.openecard.common.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

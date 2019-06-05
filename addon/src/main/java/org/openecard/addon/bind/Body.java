@@ -25,7 +25,7 @@ package org.openecard.addon.bind;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.transform.TransformerException;
-import org.openecard.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;

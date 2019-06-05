@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,29 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.crypto.tls.auth;
-
-import java.util.List;
-import javax.annotation.Nonnull;
-import org.bouncycastle.tls.CertificateRequest;
-import org.bouncycastle.tls.TlsCredentialedSigner;
+package org.openecard.crypto.tls;
 
 
 /**
- * Interface of a factory for TlsCredentials
  *
- * @author Tobias Wich
+ * @author Mike Prechtl
  */
-public interface CredentialFactory {
+public class TlsCipherUtils {
 
-    /**
-     * Gets all credentials matching the given certificate request.
-     * Given a set of credentials the factory manages, filter out all that do NOT match the given certificate request.
-     *
-     * @param cr Certificate request for which a credential is searched.
-     * @return Possibly empty list of all credentials which could answer the given request.
-     */
-    @Nonnull
-    List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr);
+    public static boolean containsECCipherSuites(int[] cipherSuites) {
+	for (int i = 0; i < cipherSuites.length; ++i) {
+	    if (org.bouncycastle.tls.TlsECCUtils.isECCCipherSuite(cipherSuites[i])) {
+		return true;
+	    }
+	}
+	return false;
+    }
 
 }

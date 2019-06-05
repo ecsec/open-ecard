@@ -38,7 +38,7 @@ import java.security.spec.PSSParameterSpec;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
-import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;

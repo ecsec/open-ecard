@@ -33,7 +33,7 @@ import org.openecard.mdlw.sal.cryptoki.CK_DATE;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
-import org.openecard.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
@@ -196,7 +196,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_CHECK_VALUE
-     * 
+     *
      * @return byte []
      * @throws CryptokiException
      */
@@ -207,7 +207,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_START_DATE
-     * 
+     *
      * @return Calendar object with UTC based timezone.
      * @throws CryptokiException
      */
@@ -218,7 +218,7 @@ public class MwCertificate {
 
     /**
      * Loading the Attribute Value for CKA_END_DATE
-     * 
+     *
      * @return Calendar object with UTC based timezone.
      * @throws CryptokiException
      */
@@ -244,7 +244,7 @@ public class MwCertificate {
 
     /**
      * Returns the Object Handle.
-     * 
+     *
      * @return long
      */
     public long getObjectHandle() {
@@ -253,7 +253,7 @@ public class MwCertificate {
 
     /**
      * Returns the MiddlewareWrapper.
-     * 
+     *
      * @return MiddlewareWrapper
      */
     public MiddleWareWrapper getMW() {
@@ -262,7 +262,7 @@ public class MwCertificate {
 
     /**
      * Returns the Session Identifier
-     * 
+     *
      * @return long
      */
     public MwSession getSession() {
@@ -271,7 +271,7 @@ public class MwCertificate {
 
     /**
      * Returns the Certificate Label
-     * 
+     *
      * @return String
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -284,7 +284,7 @@ public class MwCertificate {
 
     /**
      * Return the Certificate Identifier
-     * 
+     *
      * @return byte[]
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -366,7 +366,7 @@ public class MwCertificate {
 
     /**
      * Return the Certificate Checkvalue
-     * 
+     *
      * @return byte[]
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -380,7 +380,7 @@ public class MwCertificate {
 
     /**
      * Returns the Certificate Start Date
-     * 
+     *
      * @return CK_DATE
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */

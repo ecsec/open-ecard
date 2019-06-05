@@ -24,9 +24,9 @@ package org.openecard.ifd.protocol.pace.crypto;
 
 import java.security.GeneralSecurityException;
 import java.util.List;
-import org.openecard.bouncycastle.crypto.engines.AESEngine;
-import org.openecard.bouncycastle.crypto.macs.CMac;
-import org.openecard.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.macs.CMac;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.tlv.TagClass;

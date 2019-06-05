@@ -49,7 +49,7 @@ import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.openecard.apache.http.protocol.BasicHttpContext;
 import org.openecard.apache.http.protocol.HttpContext;
 import org.openecard.apache.http.protocol.HttpRequestExecutor;
-import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -320,7 +320,7 @@ public class PAOS {
      * @throws PAOSException In case there were errors in the transport layer.
      * @throws PAOSConnectionException
      */
-    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException, 
+    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException,
 	    PAOSConnectionException {
 	Object msg = message;
 	StreamHttpClientConnection conn = null;

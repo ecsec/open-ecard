@@ -36,7 +36,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.addons.cg.impl.AllowedApiEndpoints;
 import org.openecard.addons.cg.impl.ChipGatewayProperties;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 import org.slf4j.Logger;

@@ -41,11 +41,11 @@ import java.util.List;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
-import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
-import org.openecard.bouncycastle.asn1.ASN1Encoding;
-import org.openecard.bouncycastle.asn1.ASN1Integer;
-import org.openecard.bouncycastle.asn1.DERSequence;
-import org.openecard.bouncycastle.util.Arrays;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.util.Arrays;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
@@ -263,7 +263,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    response.setResult(WSHelper.makeResultError(minor, responseAPDU.getStatusMessage()));
 	    return response;
 	}
-	
+
 	response.setSignature(signedMessage);
 	return response;
     }

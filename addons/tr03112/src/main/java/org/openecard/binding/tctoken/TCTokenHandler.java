@@ -76,7 +76,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.interfaces.DocumentSchemaValidator;
@@ -121,7 +121,7 @@ public class TCTokenHandler {
 
     // Translation constants
     private static final String ERROR_CARD_REMOVED = "action.error.card.removed";
-    
+
     private final String pin;
     private final String puk;
     private final CardStateMap cardStates;
@@ -259,7 +259,7 @@ public class TCTokenHandler {
 	    if(ECardConstants.Minor.IFD.CANCELLATION_BY_USER.equals(ex.getResultMinor())) {
 		throw new PAOSException(ex);
 	    }
-	    
+
 	    throw new DispatcherException(msg, ex);
 	}
     }
@@ -486,7 +486,7 @@ public class TCTokenHandler {
 	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
 	    String code = ECardConstants.Minor.App.COMMUNICATION_ERROR;
 	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams(code);
-	    
+
 	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
 		throw new SecurityViolationException(communicationErrorAddress, REFRESH_DETERMINATION_FAILED, ex);
 	    }

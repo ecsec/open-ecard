@@ -37,18 +37,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
-import org.openecard.bouncycastle.asn1.x500.X500Name;
-import org.openecard.bouncycastle.asn1.x500.style.IETFUtils;
-import org.openecard.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.params.DHKeyParameters;
-import org.openecard.bouncycastle.crypto.params.DSAKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ECKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters;
-import org.openecard.bouncycastle.crypto.params.RSAKeyParameters;
-import org.openecard.bouncycastle.crypto.util.PublicKeyFactory;
-import org.openecard.bouncycastle.tls.Certificate;
-import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.DHKeyParameters;
+import org.bouncycastle.crypto.params.DSAKeyParameters;
+import org.bouncycastle.crypto.params.ECKeyParameters;
+import org.bouncycastle.crypto.params.ElGamalKeyParameters;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.tls.Certificate;
+import org.bouncycastle.tls.crypto.TlsCertificate;
 
 
 /**
@@ -138,7 +138,7 @@ public class KeyTools {
      * @throws IOException Thrown in case the certificate could not be parsed.
      * @throws UnsupportedOperationException Thrown in case no reference value could be obtained for the given keytype.
      */
-    public static void assertKeyLength(@Nonnull org.openecard.bouncycastle.asn1.x509.Certificate x509)
+    public static void assertKeyLength(@Nonnull org.bouncycastle.asn1.x509.Certificate x509)
 	    throws KeyLengthException, IOException {
 	SubjectPublicKeyInfo pkInfo = x509.getSubjectPublicKeyInfo();
 	AsymmetricKeyParameter key = PublicKeyFactory.createKey(pkInfo);
@@ -218,13 +218,13 @@ public class KeyTools {
 //     * @throws CertificateException Thrown in case one of the given certificates could not be encoded.
 //     */
 //    public static Certificate convertCertificates(java.security.cert.Certificate... chain) throws CertificateException {
-//	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
-//	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
+//	org.bouncycastle.asn1.x509.Certificate[] certs;
+//	certs = new org.bouncycastle.asn1.x509.Certificate[chain.length];
 //
 //	for (int i = 0; i < chain.length; i++) {
 //	    java.security.cert.Certificate next = chain[i];
 //	    byte[] encCert = next.getEncoded();
-//	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
+//	    certs[i] = org.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
 //	}
 //
 //	Certificate cert = new Certificate(certs);

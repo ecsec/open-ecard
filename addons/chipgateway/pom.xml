@@ -45,12 +45,18 @@
 			<groupId>org.bitbucket.b_c</groupId>
 			<artifactId>jose4j</artifactId>
 		</dependency>
-  
+
 		<dependency>
 			<groupId>org.openecard.gui</groupId>
 			<artifactId>swing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
 		</dependency>
 	</dependencies>
 

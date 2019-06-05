@@ -121,7 +121,7 @@ import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openecard.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Hex;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.event.EventType;

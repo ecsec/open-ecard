@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

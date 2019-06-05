@@ -34,10 +34,10 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.tls.TlsClientProtocol;
-import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
-import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
-import org.openecard.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.tls.TlsClientProtocol;
+import org.bouncycastle.tls.crypto.TlsCrypto;
+import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.bouncycastle.util.encoders.Base64;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
@@ -99,7 +99,7 @@ public final class HttpConnectProxy extends Proxy {
     public Socket getSocket(@Nonnull String host, @Nonnegative int port) throws IOException {
 	Socket sock = connectSocket();
 	String requestStr = makeRequestStr(host, port);
-	
+
 	// deliver request
 	sock.getOutputStream().write(requestStr.getBytes());
 

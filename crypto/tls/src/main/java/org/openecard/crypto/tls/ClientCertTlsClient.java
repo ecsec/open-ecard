@@ -22,9 +22,9 @@
 
 package org.openecard.crypto.tls;
 
-import org.openecard.bouncycastle.tls.ProtocolVersion;
-import org.openecard.bouncycastle.tls.TlsAuthentication;
-import org.openecard.bouncycastle.tls.TlsClient;
+import org.bouncycastle.tls.ProtocolVersion;
+import org.bouncycastle.tls.TlsAuthentication;
+import org.bouncycastle.tls.TlsClient;
 
 
 /**

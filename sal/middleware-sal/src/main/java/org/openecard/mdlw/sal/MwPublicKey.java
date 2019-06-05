@@ -24,7 +24,7 @@ package org.openecard.mdlw.sal;
 
 import java.io.IOException;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;
@@ -48,7 +48,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Creates new Public Key from given Object Handle
-     * 
+     *
      * @param objectHandle
      * @param mw
      * @param mwSession
@@ -67,7 +67,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_ENCRYPT
-     * 
+     *
      * @return boolean
      * @throws CryptokiException
      */
@@ -78,7 +78,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_VERIFY
-     * 
+     *
      * @return boolean
      * @throws CryptokiException
      */
@@ -89,7 +89,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_VERIFY_RECOVER
-     * 
+     *
      * @return boolean
      * @throws CryptokiException
      */
@@ -100,7 +100,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_WRAP
-     * 
+     *
      * @return boolean
      * @throws CryptokiException
      */
@@ -111,7 +111,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_TRUSTED
-     * 
+     *
      * @return boolean
      * @throws CryptokiException
      */
@@ -122,7 +122,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_LABEL
-     * 
+     *
      * @return String
      * @throws CryptokiException
      */
@@ -133,7 +133,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Loading the Attribute Value for CKA_SUBJECT
-     * 
+     *
      * @return byte []
      * @throws CryptokiException
      * @throws IOException
@@ -145,7 +145,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns the Private Key Object Handle
-     * 
+     *
      * @return long
      */
     public long getObjectHandle() {
@@ -154,7 +154,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns the MiddlewareWrapper
-     * 
+     *
      * @return {@link MiddleWareWrapper}
      */
     public MiddleWareWrapper getmw() {
@@ -163,7 +163,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns the Session
-     * 
+     *
      * @return {@link MwSession}
      */
     public MwSession getSession() {
@@ -172,7 +172,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns if the Public Key is Enrypted
-     * 
+     *
      * @return boolean
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -185,7 +185,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns if the Public Key is Verifyed
-     * 
+     *
      * @return
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -198,7 +198,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns if the Public Key Verifys Recover
-     * 
+     *
      * @return boolean
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -211,7 +211,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns if the Public Key is Wrapped
-     * 
+     *
      * @return boolean
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -224,7 +224,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns if the Public Key is Trusted
-     * 
+     *
      * @return boolean
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */
@@ -237,7 +237,7 @@ public class MwPublicKey extends MwAbstractKey {
 
     /**
      * Returns the Key Label
-     * 
+     *
      * @return String
      * @throws CryptokiException Thrown in case the attribute could not be loaded from the middleware.
      */

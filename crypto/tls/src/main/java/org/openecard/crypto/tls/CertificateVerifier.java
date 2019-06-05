@@ -23,7 +23,7 @@
 package org.openecard.crypto.tls;
 
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 
 
 /**

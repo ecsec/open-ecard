@@ -23,7 +23,7 @@
 package org.openecard.binding.tctoken;
 
 import java.net.URL;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 
 
 /**

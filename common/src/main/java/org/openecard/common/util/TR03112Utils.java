@@ -28,7 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class TR03112Utils {
 
     /**
      * Check if the two given URLs comply the Same-Origin-Policy.
-     * 
+     *
      * @param url1 the first URL
      * @param url2 the second URL
      * @return {@code true} if the Same-Origin-Policy has been complied with, {@code false} otherwise
@@ -94,7 +94,7 @@ public class TR03112Utils {
     /**
      * Check if the hash of the retrieved server certificate is contained in the CommCertificates of the
      * CertificateDescription extension of the eService certificate.
-     * 
+     *
      * @param serverCertificate the retrieved server certificate
      * @param commCertificates List of hashes of the communication certificates as obtained from the
      *     CertificateDescription

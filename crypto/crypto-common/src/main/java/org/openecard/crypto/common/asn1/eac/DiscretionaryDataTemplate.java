@@ -23,8 +23,8 @@
 package org.openecard.crypto.common.asn1.eac;
 
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.openecard.bouncycastle.asn1.eac.EACTags;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.eac.EACTags;
 import org.openecard.common.tlv.Parser;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;

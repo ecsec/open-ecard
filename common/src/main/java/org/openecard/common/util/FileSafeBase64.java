@@ -25,9 +25,9 @@ package org.openecard.common.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.openecard.bouncycastle.util.Strings;
-import org.openecard.bouncycastle.util.encoders.Base64Encoder;
-import org.openecard.bouncycastle.util.encoders.Encoder;
+import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Base64Encoder;
+import org.bouncycastle.util.encoders.Encoder;
 
 
 /**

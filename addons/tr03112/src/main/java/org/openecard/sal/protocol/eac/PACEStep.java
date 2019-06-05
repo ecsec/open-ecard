@@ -43,7 +43,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -119,7 +119,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
      *
      * @param dispatcher Dispatcher
      * @param gui GUI
-     * @param eventManager 
+     * @param eventManager
      */
     public PACEStep(Dispatcher dispatcher, UserConsent gui, EventDispatcher eventManager) {
 	this.dispatcher = dispatcher;
@@ -195,7 +195,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
 	    // Verify that the required CHAT matches the terminal certificate's CHAT
 	    CHAT taCHAT = taCert.getCHAT();
-	    
+
 	    // Check that we got an authentication terminal terminal certificate. We abort the process in case there is
 	    // an other role.
 	    if (taCHAT.getRole() != CHAT.Role.AUTHENTICATION_TERMINAL) {

@@ -25,9 +25,8 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard.crypto</groupId>
-			<artifactId>bouncycastle</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

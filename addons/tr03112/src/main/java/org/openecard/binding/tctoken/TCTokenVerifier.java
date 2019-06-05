@@ -41,7 +41,7 @@ import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.UrlBuilder;
 
@@ -389,7 +389,7 @@ public class TCTokenVerifier {
 			    ex.getMessage());
 		    throw new UserCancellationException(refreshUrlAsUrl.toString(), ex);
 		}
-		
+
 		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl,
 			ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);

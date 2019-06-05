@@ -25,7 +25,7 @@ package org.openecard.common.util;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 
 /**

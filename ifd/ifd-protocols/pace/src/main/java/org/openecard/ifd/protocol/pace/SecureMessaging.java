@@ -32,9 +32,9 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.openecard.bouncycastle.crypto.engines.AESFastEngine;
-import org.openecard.bouncycastle.crypto.macs.CMac;
-import org.openecard.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.macs.CMac;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
@@ -159,7 +159,7 @@ public class SecureMessaging {
 	// Build APDU
 	TLV macStructure = new TLV();
 	macStructure.setTagNumWithClass((byte) 0x8E);
-	macStructure.setValue(mac);	
+	macStructure.setValue(mac);
 	byte[] secureData = ByteUtils.concatenate(baos.toByteArray(), macStructure.toBER());
 
 	CardCommandAPDU secureCommand = new CardCommandAPDU(header[0], header[1], header[2], header[3], secureData);

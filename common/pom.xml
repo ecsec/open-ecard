@@ -49,14 +49,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bctls-jdk15on</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>wsdef-client</artifactId>
 			<version>${project.version}</version>
@@ -68,6 +60,16 @@
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bctls-jdk15on</artifactId>
 		</dependency>
 	</dependencies>
 

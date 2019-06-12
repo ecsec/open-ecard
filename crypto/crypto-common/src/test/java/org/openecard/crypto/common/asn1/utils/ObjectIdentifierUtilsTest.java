@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.crypto.common.asn1.utils;
 
+import org.openecard.common.tlv.TLVException;
 import org.openecard.crypto.common.asn1.eac.oid.EACObjectIdentifier;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -58,11 +59,17 @@ public class ObjectIdentifierUtilsTest {
     }
 
     @Test
-    public void testGetValue() {
+    public void testGetValue() throws TLVException {
 	String oid = EACObjectIdentifier.id_PACE;
 	byte[] expResult = new byte[]{0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04};
 	byte[] result = ObjectIdentifierUtils.getValue(oid);
 	assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testLargeOidValues() throws TLVException {
+	String oid = "1.2.3.128";
+	assertEquals(ObjectIdentifierUtils.toString(ObjectIdentifierUtils.getValue(oid)), oid);
     }
 
 }

@@ -53,7 +53,7 @@ public class HTMLUtils {
      *
      * @param input String to encode, may be {@code null}.
      * @return The encoded string, or {@code null} if {@code null} was given as input.
-     * @see https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content
+     * @see <a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content">OWASP XSS Cheat Sheet</a>
      */
     @Nullable
     public static String escapeHtml(@Nullable String input) {
@@ -74,7 +74,7 @@ public class HTMLUtils {
      *
      * @param input String to encode, may be {@code null}.
      * @return The encoded string, or {@code null} if {@code null} was given as input.
-     * @see https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#RULE_.232_-_Attribute_Escape_Before_Inserting_Untrusted_Data_into_HTML_Common_Attributes
+     * @see <a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#RULE_.232_-_Attribute_Escape_Before_Inserting_Untrusted_Data_into_HTML_Common_Attributes">OWASP XSS Cheat Sheet</a>
      */
     public static String escapeAttribute(@Nullable String input) {
 	// shortcut if the string does not contain anything interesting

@@ -419,7 +419,7 @@ public enum SignatureAlgorithms {
 
     static {
 	SignatureAlgorithms[] values = values();
-	
+
 	mechanismLookup = new HashMap<>(values.length);
 	jcaLookup = new HashMap<>(values.length);
 	algIdLookup = new HashMap<>(values.length);

@@ -119,10 +119,9 @@ public class TCTokenResponse extends BindingResult {
      * Completes the response, so that it can be used in the binding.
      * The values extended include result code, result message and the redirect address.
      *
-     * @param clearContext If {@code true} then delete context. Keep it otherwise.
      * @throws InvalidRedirectUrlException Thrown in case the error redirect URL could not be determined.
      */
-    public void finishResponse(boolean clearContext) throws InvalidRedirectUrlException {
+    public void finishResponse() throws InvalidRedirectUrlException {
 	try {
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    UrlBuilder ub = UrlBuilder.fromUrl(getRefreshAddress());
@@ -142,18 +141,12 @@ public class TCTokenResponse extends BindingResult {
 		} else {
 		    refreshURL = token.getComErrorAddressWithParams(result.getResultMinor());
 		}
-		
+
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 
 		if (result.getResultMessage().getValue() != null) {
 		    setResultMessage(result.getResultMessage().getValue());
 		}
-	    }
-
-	    // clear and remove the DynamicContext
-	    if (! clearContext) {
-		dynCtx.clear();
-		DynamicContext.remove();
 	    }
 	} catch (URISyntaxException ex) {
 	    // this is a code failure as the URLs are verified upfront

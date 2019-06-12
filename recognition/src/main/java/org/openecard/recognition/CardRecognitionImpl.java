@@ -419,13 +419,21 @@ public class CardRecognitionImpl implements CardRecognition {
 	}
     }
     /**
-     * Special transmit check determining only whether a response is present or not and it contains at least a trailer.<br>
+     * Special transmit check determining only whether a response is present or not and it contains at least a trailer.
      * Unexpected result may be the wrong cause, because the command could represent multiple commands.
      *
      * @param r The response to check
      * @return True when result present, false otherwise.
+     * @throws RecognitionException Thrown in case there is a critical error returned from the IFD which is preventing
+     *   continuous options.
      */
-    private boolean checkTransmitResult(TransmitResponse r) {
+    private boolean checkTransmitResult(TransmitResponse r) throws RecognitionException {
+	// check if card has been removed
+	if (WSHelper.minorIsOneOf(r, ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+	    String msg = "The card is not accessible anymore to the IFD layer.";
+	    throw new RecognitionException(r.getResult().getResultMinor(), msg);
+	}
+
 	if (! r.getOutputAPDU().isEmpty() && r.getOutputAPDU().get(0).length >= 2) {
 	    return true;
 	} else {
@@ -515,7 +523,7 @@ public class CardRecognitionImpl implements CardRecognition {
 	checkResult(r.getResult());
     }
 
-    private byte[] transmit(byte[] slotHandle, byte[] input, List<ResponseAPDUType> results) {
+    private byte[] transmit(byte[] slotHandle, byte[] input, List<ResponseAPDUType> results) throws RecognitionException {
 	Transmit t = new Transmit();
 	t.setSlotHandle(slotHandle);
 	InputAPDUInfoType apdu = new InputAPDUInfoType();

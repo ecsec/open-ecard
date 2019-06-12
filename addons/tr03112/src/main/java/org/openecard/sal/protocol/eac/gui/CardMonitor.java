@@ -81,6 +81,7 @@ public class CardMonitor implements BackgroundTask, EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
+	LOG.info("Receiving card removed event.");
 	// we only handle one remove event, everything else doesn't matter
 	if (! cardRemoved.isDelivered()) {
 	    cardRemoved.deliver(null);

@@ -22,6 +22,7 @@
 
 package org.openecard.scio;
 
+import android.nfc.TagLostException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -30,6 +31,8 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -39,6 +42,8 @@ import org.openecard.common.ifd.scio.SCIOException;
  * @author Tobias Wich
  */
 public class NFCCardChannel implements SCIOChannel {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
 
     private final NFCCard card;
 
@@ -62,19 +67,21 @@ public class NFCCardChannel implements SCIOChannel {
     }
 
     @Override
-    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException {
+    public CardResponseAPDU transmit(CardCommandAPDU apdu) throws SCIOException, IllegalStateException {
 	return transmit(apdu.toByteArray());
     }
 
     @Override
-    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException {
+    public CardResponseAPDU transmit(byte[] apdu) throws SCIOException, IllegalStateException {
 	synchronized (card) {
 	    try {
 		return new CardResponseAPDU(card.transceive(apdu));
+	    } catch (TagLostException ex) {
+		LOG.debug("NFC Tag is not present.", ex);
+		throw new IllegalStateException("Transmit of apdu command failed, because the card is not present.");
 	    } catch (IOException ex) {
 		if (! card.isCardPresent()) {
-		    throw new SCIOException("Transmit of apdu command failed, because the card has already been removed.",
-			    SCIOErrorCode.SCARD_W_REMOVED_CARD);
+		    throw new IllegalStateException("Transmit of apdu command failed, because the card has been removed.");
 		} else {
 		    // TODO: check if the error code can be chosen more specifically
 		    throw new SCIOException("Transmit failed.", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex);
@@ -85,7 +92,7 @@ public class NFCCardChannel implements SCIOChannel {
 
 
     @Override
-    public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException {
+    public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException, IllegalStateException {
 	CardResponseAPDU cra = transmit(command.array());
 	byte[] data = cra.toByteArray();
 	response.put(data);

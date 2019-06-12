@@ -52,7 +52,7 @@ public class CardSelectionStep extends Step {
      *
      * @param title Title of this step.
      * @param availableCards List of {@link ConnectionHandleType} objects representing the available credentials.
-     * @param rec {@link CardRecognitionImpl} object used to translate cardTypeNames into human understandable strings.
+     * @param rec {@link CardRecognition} object used to translate cardTypeNames into human understandable strings.
      */
     public CardSelectionStep(@Nonnull String title, @Nonnull List<ConnectionHandleType> availableCards,
 	    @Nonnull CardRecognition rec) {

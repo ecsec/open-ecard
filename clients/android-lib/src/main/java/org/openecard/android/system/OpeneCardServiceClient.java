@@ -146,10 +146,11 @@ public class OpeneCardServiceClient {
 
     /**
      * Gets the context object when the Open eCard Stack is intialized.
-     * 
+     * The {@link #isInitialized()} method should return {@code true} before this method can be used.
+     *
      * @return The context object.
      * @throws IllegalStateException Thrown in case the stack is not initialized.
-     * @see {@link #isInitialized()} for information when this method may be called.
+     * @see #isInitialized()
      */
     public OpeneCardContext getContext() throws IllegalStateException {
 	synchronized (SYNC) {

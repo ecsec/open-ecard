@@ -47,10 +47,10 @@ public interface ActivationImplementationInterface <GUI extends AndroidGui> exte
     /**
      * Function creating a dialog instructing the user to remove the card for safety purposes.
      * <p>The dialog is shown by the default implementation of
-     * {@link AbstractActivationActivity#onAuthenticationSuccess(ActivationResult)}. In case no dialog shall be shown,
+     * {@link AbstractActivationHandler#onAuthenticationSuccess(ActivationResult)}. In case no dialog shall be shown,
      * {@code null} may be returned by this function.</p>
      *
-     * @see Requirement from BSI TR-03124-1 Sec.3.8
+     * @see "Requirement from BSI TR-03124-1 Sec.3.8"
      * @return Dialog instructing the user to remove the card from the reader, or {@code null} in case no dialog shall
      *   be shown.
      */

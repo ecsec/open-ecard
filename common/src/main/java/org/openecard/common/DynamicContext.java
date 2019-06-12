@@ -29,6 +29,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.util.FuturePromise;
 import org.openecard.common.util.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -40,6 +42,8 @@ import org.openecard.common.util.Promise;
  * @author Tobias Wich
  */
 public class DynamicContext {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DynamicContext.class);
 
     private static final InheritableThreadLocal<Map<String, DynamicContext>> LOCAL_MAP;
 
@@ -83,12 +87,13 @@ public class DynamicContext {
 
     /**
      * Removes the value from this thread.
-     * This does not clear the values saved in the context, but makes the context inaccessible for further invocations
+     * This does not clear the values saved in the context, it just makes the context inaccessible for further invocations
      * of the {@link #getInstance(String)} method.
      *
      * @see ThreadLocal#remove()
      */
-    public static void remove() {
+    public static synchronized void remove() {
+	LOG.debug("Removing DynamicContext which contains {} map entries.", LOCAL_MAP.get().size());
 	LOCAL_MAP.remove();
     }
 

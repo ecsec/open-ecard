@@ -147,7 +147,7 @@ public class TCTokenHandler {
 	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.invalid_schema"));
 	    if (! noValid) {
 		try {
-		    return JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+		    return JAXPSchemaValidator.load("Management.xsd");
 		} catch (SAXException ex) {
 		    LOG.warn("No Schema Validator available, skipping schema validation.", ex);
 		}
@@ -299,12 +299,7 @@ public class TCTokenHandler {
 	if (! performChecks) {
 	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
-	boolean isObjectActivation = request.getTCTokenURL() == null;
-	if (isObjectActivation) {
-	    LOG.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) are disabled.");
-	}
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
-	dynCtx.put(TR03112Keys.OBJECT_ACTIVATION, isObjectActivation);
 	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
 
 	ConnectionHandleType connectionHandle = null;
@@ -333,7 +328,7 @@ public class TCTokenHandler {
 	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
-	    response.finishResponse(true);
+	    response.finishResponse();
 	    return response;
 	}
 
@@ -342,7 +337,7 @@ public class TCTokenHandler {
 	    response = processBinding(request, connectionHandle);
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
-	    response.finishResponse(isObjectActivation);
+	    response.finishResponse();
 	    return response;
 	} catch (DispatcherException w) {
 	    LOG.error(w.getMessage(), w);
@@ -399,7 +394,7 @@ public class TCTokenHandler {
 	    try {
 		// fill in values, so it is usuable by the transport module
 		response = determineRefreshURL(request, response);
-		response.finishResponse(true);
+		response.finishResponse();
 	    } catch (InvalidRedirectUrlException ex) {
 		LOG.error(ex.getMessage(), ex);
 		// in case we were interrupted before, use INTERRUPTED as result status
@@ -464,12 +459,6 @@ public class TCTokenHandler {
 	    String endpointStr = response.getRefreshAddress();
 	    URL endpoint = new URL(endpointStr);
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-
-	    // omit checks completely if this is an object tag activation
-	    Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
-	    if (objectActivation instanceof Boolean && ((Boolean) objectActivation) == true) {
-		return response;
-	    }
 
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    boolean redirectChecks = isPerformTR03112Checks(request);

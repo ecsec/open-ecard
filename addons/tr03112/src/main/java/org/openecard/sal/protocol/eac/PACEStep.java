@@ -275,6 +275,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 			try {
 			    guiResult = exec.process();
 			} catch (ThreadTerminateException ex) {
+			    LOG.debug("GUI executer has been terminated.");
 			    guiResult = ResultStatus.INTERRUPTED;
 			}
 
@@ -321,6 +322,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    Promise<Object> pPaceException = dynCtx.getPromise(EACProtocol.PACE_EXCEPTION);
 	    Object pPaceError = pPaceException.deref();
 	    if (pPaceError != null) {
+		if (LOG.isDebugEnabled()) {
+		    if (pPaceError instanceof Throwable) {
+			LOG.debug("Received error object from GUI.", (Throwable) pPaceError);
+		    } else {
+			LOG.debug("Received error object from GUI: {}", pPaceError);
+		    }
+		}
+
 		if (pPaceError instanceof WSHelper.WSException) {
 		    response.setResult(((WSHelper.WSException) pPaceError).getResult());
 		    return response;
@@ -335,6 +344,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		    response.setResult(r);
 		    return response;
 		}
+	    } else {
+		LOG.debug("No error returned returned during PACE execution in GUI.");
 	    }
 
 	    // get challenge from card
@@ -420,12 +431,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
      * @return a {@link Result} set according to the results of the checks
      */
     private Result performChecks(CertificateDescription certDescription, DynamicContext dynCtx) {
-	Object objectActivation = dynCtx.get(TR03112Keys.OBJECT_ACTIVATION);
 	Object tokenChecks = dynCtx.get(TR03112Keys.TCTOKEN_CHECKS);
-	boolean checkPassed;
 	// omit these checks if explicitly disabled
 	if (convertToBoolean(tokenChecks)) {
-	    checkPassed = checkEserviceCertificate(certDescription, dynCtx);
+	    boolean checkPassed = checkEserviceCertificate(certDescription, dynCtx);
 	    if (! checkPassed) {
 		String msg = "Hash of eService certificate is NOT contained in the CertificateDescription.";
 		// TODO check for the correct minor type
@@ -433,25 +442,21 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		return r;
 	    }
 
-	    // only perform the following checks if new activation is used
-	    if (! convertToBoolean(objectActivation)) {
-		checkPassed = checkTCTokenServerCertificates(certDescription, dynCtx);
-		if (! checkPassed) {
-		    String msg = "Hash of the TCToken server certificate is NOT contained in the CertificateDescription.";
-		    // TODO check for the correct minor type
-		    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
-		    return r;
-		}
+	    // perform checks according to TR-03124
+	    checkPassed = checkTCTokenServerCertificates(certDescription, dynCtx);
+	    if (! checkPassed) {
+		String msg = "Hash of the TCToken server certificate is NOT contained in the CertificateDescription.";
+		// TODO check for the correct minor type
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
+		return r;
+	    }
 
-		checkPassed = checkTCTokenAndSubjectURL(certDescription, dynCtx);
-		if (! checkPassed) {
-		    String msg = "TCToken does not come from the server to which the authorization certificate was issued.";
-		    // TODO check for the correct minor type
-		    Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
-		    return r;
-		}
-	    } else {
-		LOG.warn("Checks according to BSI TR03112 3.4.4 (TCToken specific) skipped.");
+	    checkPassed = checkTCTokenAndSubjectURL(certDescription, dynCtx);
+	    if (! checkPassed) {
+		String msg = "TCToken does not come from the server to which the authorization certificate was issued.";
+		// TODO check for the correct minor type
+		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
+		return r;
 	    }
 	} else {
 	    LOG.warn("Checks according to BSI TR03112 3.4.4 skipped.");

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.utils.NfcCapabilityResult;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.EacNavigatorFactory;
@@ -166,13 +167,15 @@ public class OpeneCardContext {
 	try {
 	    boolean nfcAvailable = NFCFactory.isNFCAvailable();
 	    boolean nfcEnabled = NFCFactory.isNFCEnabled();
-	    boolean nfcExtendedLengthSupport = NfcUtils.supportsExtendedLength(appCtx);
+	    NfcCapabilityResult nfcExtendedLengthSupport = NfcUtils.checkExtendedLength(appCtx);
 	    if (! nfcAvailable) {
 		throw new NfcUnavailable();
 	    } else if (! nfcEnabled) {
 		throw new NfcDisabled();
-	    } else if (! nfcExtendedLengthSupport) {
+	    } else if (nfcExtendedLengthSupport == NfcCapabilityResult.NOT_SUPPORTED) {
 		throw new ApduExtLengthNotSupported(NFC_NO_EXTENDED_LENGTH_SUPPORT);
+	    } else {
+		LOG.info("NFC extended length capability: {}", nfcExtendedLengthSupport);
 	    }
 	    terminalFactory = IFDTerminalFactory.getInstance();
 	    LOG.info("Terminal factory initialized.");

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<InitializeFramework:InitializeFramework
-	xsi:type="iso:RequestType" xmlns="http://www.bsi.bund.de/ecard/api/1.1"
+<InitializeFramework
+	xmlns="http://www.bsi.bund.de/ecard/api/1.1"
 	xmlns:tsl2="http://uri.etsi.org/02231/v2.1.1#" xmlns:ecdsa="http://www.w3.org/2001/04/xmldsig-more#"
 	xmlns:olsc="http://www.openlimit.com/ecard/api/ext/acbc" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
 	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion"
 	xmlns:vr="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
-	xmlns:InitializeFramework="http://www.bsi.bund.de/ecard/api/1.1"
 	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
 	xmlns:dsse="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#"
 	xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1" xmlns:tsl="http://uri.etsi.org/02231/v3.1.2#"

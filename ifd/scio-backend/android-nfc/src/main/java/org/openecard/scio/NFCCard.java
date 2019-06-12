@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 HS Coburg.
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,7 @@ public final class NFCCard implements SCIOCard {
 
     private final NFCCardChannel nfcCardChannel;
     private final NFCCardTerminal nfcCardTerminal;
-    private final int timeoutForTransceive;
+    private final int transceiveTimeout;
     private final byte[] histBytes;
     private final IsoDep isodep;
 
@@ -55,7 +55,7 @@ public final class NFCCard implements SCIOCard {
 
     public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
 	isodep = tag;
-	timeoutForTransceive = timeout;
+	transceiveTimeout = timeout;
 	nfcCardTerminal = terminal;
 
 	byte[] histBytesTmp = isodep.getHistoricalBytes();
@@ -65,7 +65,7 @@ public final class NFCCard implements SCIOCard {
 	this.histBytes = histBytesTmp;
 
 	isodep.connect();
-	isodep.setTimeout(getTimeoutForTransceive());
+	isodep.setTimeout(getTransceiveTimeout());
 
 	this.nfcCardChannel = new NFCCardChannel(this);
 
@@ -79,8 +79,8 @@ public final class NFCCard implements SCIOCard {
 	return t;
     }
 
-    private int getTimeoutForTransceive() {
-	return timeoutForTransceive;
+    private int getTransceiveTimeout() {
+	return transceiveTimeout;
     }
 
     public synchronized boolean isCardPresent() {
@@ -100,22 +100,27 @@ public final class NFCCard implements SCIOCard {
     @Override
     public void disconnect(boolean reset) throws SCIOException {
 	if (reset) {
-	    terminate();
+	    // flag indicating whether the NFC connection shall be restarted
+	    boolean killNfcConnection = true;
+
+	    terminate(killNfcConnection);
 
 	    try {
-		isodep.close();
-		isodep.connect();
+		if (killNfcConnection) {
+		    isodep.connect();
+		    isodep.setTimeout(getTransceiveTimeout());
+		}
 
 		// start thread which is monitoring the availability of the card
 		monitor = startMonitor();
 	    } catch (IOException ex) {
-		LOG.error("Failed to close channel.", ex);
-		throw new SCIOException("Failed to close channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+		LOG.error("Failed to connect NFC tag.", ex);
+		throw new SCIOException("Failed to reset channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
 	    }
 	}
     }
 
-    public void terminate() throws SCIOException {
+    public void terminate(boolean killNfcConnection) throws SCIOException {
 	if (this.monitor != null) {
 	    this.monitor.interrupt();
 	}
@@ -127,6 +132,15 @@ public final class NFCCard implements SCIOCard {
 	}
 
 	nfcCardChannel.close();
+
+	try {
+	    if (killNfcConnection) {
+		isodep.close();
+	    }
+	} catch (IOException ex) {
+	    LOG.error("Failed to close NFC tag.");
+	    throw new SCIOException("Failed to close NFC channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+	}
     }
 
     @Override

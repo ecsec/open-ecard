@@ -56,17 +56,19 @@ public class PinEntryStep extends Step {
     private boolean lastTryFailed = false;
     private boolean pinAuthenticated = false;
     private boolean pinBlocked = false;
+    private boolean performContextSpecificLogin = false;
     private boolean unkownError = false;
 
-    public PinEntryStep(boolean protectedAuthPath, @Nonnull PINCompareMarkerType pinMarker, @Nonnull MwSession session)
-	    throws CryptokiException {
+    public PinEntryStep(boolean protectedAuthPath, boolean performContextSpecificLogin,
+	    @Nonnull PINCompareMarkerType pinMarker, @Nonnull MwSession session) throws CryptokiException {
 	super(STEP_ID);
 
 	this.protectedAuthPath = protectedAuthPath;
+	this.performContextSpecificLogin = performContextSpecificLogin;
 	this.pinMarker = pinMarker;
 	this.session = session;
 
-	setAction(new PinEntryStepAction(this));
+	setAction(new PinEntryStepAction(this, performContextSpecificLogin));
 
 	updateState();
     }
@@ -108,7 +110,12 @@ public class PinEntryStep extends Step {
 	    case PIN_OK:
 	    case PIN_COUNT_LOW:
 	    case PIN_FINAL_TRY:
-		setTitle(LANG.translationForKey("action.changepin.userconsent.pinstep.title"));
+		if (performContextSpecificLogin) {
+		    setTitle(LANG.translationForKey("action.changepin.userconsent.pinstep.context_specific"));
+		} else {
+		    setTitle(LANG.translationForKey("action.changepin.userconsent.pinstep.title"));
+		}
+
 		if (protectedAuthPath) {
 		    createPinEntryNativeGui();
 		} else {

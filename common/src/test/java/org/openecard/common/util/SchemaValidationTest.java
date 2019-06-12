@@ -60,7 +60,7 @@ public class SchemaValidationTest {
 
 	builder = tmpW3Factory.newDocumentBuilder();
 
-	validator = JAXPSchemaValidator.load("ISO24727-Protocols.xsd");
+	validator = JAXPSchemaValidator.load("Management.xsd");
     }
 
 

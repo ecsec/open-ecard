@@ -25,6 +25,7 @@ package org.openecard.gui.android.eac.types;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.crypto.common.asn1.cvc.CHAT;
 
 
 /**
@@ -81,7 +82,7 @@ public class BoxItem implements Serializable {
      *
      * @see CHAT.DataGroup
      * @see CHAT.SpecialFunction
-     * @see BSI TR-03110-4 (v2.21) Sec. 2.2.3.2
+     * @see "BSI TR-03110-4 (v2.21) Sec. 2.2.3.2"
      */
     protected String name;
     /**

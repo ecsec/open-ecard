@@ -108,6 +108,7 @@ import iso.std.iso_iec._24727.tech.schema.HashResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.InitializeResponse;
 import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.SignResponse;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
@@ -116,16 +117,21 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.bouncycastle.util.encoders.Hex;
+import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
+import org.openecard.bouncycastle.asn1.ASN1Encoding;
+import org.openecard.bouncycastle.asn1.ASN1Integer;
+import org.openecard.bouncycastle.asn1.DERSequence;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.ThreadTerminateException;
@@ -150,6 +156,7 @@ import org.openecard.common.util.ByteComparator;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.util.ValueGenerators;
+import org.openecard.crypto.common.KeyTypes;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
@@ -158,6 +165,7 @@ import org.openecard.mdlw.event.MwEventManager;
 import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.CardSpecType;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
+import org.openecard.mdlw.sal.enums.Flag;
 import org.openecard.mdlw.sal.enums.UserType;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.exceptions.FinalizationException;
@@ -298,7 +306,7 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    }
 
 	    if (session != null) {
-		CIFCreator cc = new CIFCreator(mwSALConfig, session, template, cardSpec);
+		CIFCreator cc = new CIFCreator(gui, mwSALConfig, session, template, cardSpec);
 		CardInfoType cif = cc.addTokenInfo();
 		LOG.info("Finished augmenting CardInfo file.");
 		return cif;
@@ -693,8 +701,8 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
             CryptoMarkerType marker = new CryptoMarkerType(didStructure.getDIDMarker());
 	    byte[] keyLabel = marker.getLegacyKeyName();
 
-            MwSession session = managedSessions.get(slotHandle);
-            for (MwPrivateKey key : session.getPrivateKeys()) {
+	    MwSession session = managedSessions.get(slotHandle);
+	    for (MwPrivateKey key : session.getPrivateKeys()) {
 		byte[] nextLabel = null;
 		try {
 		    nextLabel = key.getKeyID();
@@ -702,17 +710,44 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 		    LOG.warn("Error reading key label.", ex);
 		}
 		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
-                if (Arrays.equals(keyLabel, nextLabel)) {
-                    long sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
-                    byte[] sig = key.sign(sigAlg, message);
-                    response.setSignature(sig);
+		if (Arrays.equals(keyLabel, nextLabel)) {
+		    SignatureAlgorithms sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
+
+		    // If the token has a "protected authentication", then that means that there is some way for a user
+		    // to be authenticated to the token without having to send a PIN through the Cryptoki library.
+		    boolean protectedAuthPath = session.getSlot()
+			    .getTokenInfo().containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
+
+		    // The always authenticate flag is used to force re-authentication for each use of a private key.
+		    // Re-authentication occurs by calling C_Login with userType set to CKU_CONTEXT_SPECIFIC immediately
+		    // after a cryptographic operation using the key has been initiated (e.g. after C_SignInit).
+		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate();
+
+		    key.signInit(sigAlg.getPkcs11Mechanism(), message);
+
+		    // check if context specific login can be skipped based on the card type and DID name.
+		    String cardType = cardStateEntry.getCardType();
+		    Optional<Boolean> skipCtxSpecificLogin = mwSALConfig.canSkipContextSpecificLogin(cardType, didName);
+
+		    if (doContextSpecificLogin && (! skipCtxSpecificLogin.isPresent() || ! skipCtxSpecificLogin.get())) {
+			doContextSpecificLogin(session, cardStateEntry, protectedAuthPath);
+		    }
+
+		    byte[] sig = key.sign(message);
+
+		    // encode EC signatures as ASN.1 structure
+		    if (sigAlg.getKeyType().equals(KeyTypes.CKK_EC)) {
+			sig = encodeECSignature(sig);
+		    }
+
+		    response.setSignature(sig);
 
 		    // set PIN to unauthenticated
 		    setPinNotAuth(cardStateEntry);
 
-                    return response;
-                }
-            }
+		    return response;
+		}
+	    }
 
             // TODO: use other exception
             String msg = String.format("The given DIDName %s references an unknown key.", didName);
@@ -730,11 +765,11 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         return response;
     }
 
-    private long getPKCS11Alg(AlgorithmInfoType algInfo) throws UnsupportedAlgorithmException {
+    private SignatureAlgorithms getPKCS11Alg(AlgorithmInfoType algInfo) throws UnsupportedAlgorithmException {
         String algUri = algInfo.getAlgorithmIdentifier().getAlgorithm();
 	algUri = StringUtils.nullToEmpty(algUri);
 	SignatureAlgorithms a = SignatureAlgorithms.fromAlgId(algUri);
-	return a.getPkcs11Mechanism();
+	return a;
     }
 
     @Override
@@ -965,6 +1000,59 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	    throw new ThreadTerminateException("Thread running inside SAL interrupted.", cause);
 	} else if (cause instanceof RuntimeException) {
 	    throw (RuntimeException) ex;
+	}
+    }
+
+    /**
+     * The PKCS#11 MW returns an EC signature as an octet string where the first half of the signature is r and the
+     * second half is s. This method splits the signature into the two parts (r and s) and creates a DER encoded
+     * ASN.1 structure which is returned.
+     *
+     * @param originalSig This argument represents the original signature value.
+     * @return An ASN.1 structure with r and s is returned.
+     * @throws IOException
+     */
+    private byte[] encodeECSignature(byte[] originalSig) throws IOException {
+	byte[] rRaw = Arrays.copyOfRange(originalSig, 0, originalSig.length / 2);
+	byte[] sRaw = Arrays.copyOfRange(originalSig, originalSig.length / 2, originalSig.length);
+
+	// r and s are positive values!
+	BigInteger r = new BigInteger(1, rRaw);
+	BigInteger s = new BigInteger(1, sRaw);
+
+	ASN1EncodableVector v = new ASN1EncodableVector();
+	v.add(new ASN1Integer(r));
+	v.add(new ASN1Integer(s));
+	return new DERSequence(v).getEncoded(ASN1Encoding.DER);
+    }
+
+    /**
+     * This method is used to trigger a context specific login. For this purpose, a PIN dialog is shown.
+     *
+     * @param session Is used to trigger the login functionality.
+     * @param cardStateEntry Is required to extract the PINCompareMarker.
+     * @param protectedAuthPath Indicates if the login is handled by the MW.
+     * @throws CryptokiException
+     */
+    private void doContextSpecificLogin(MwSession session, CardStateEntry cardStateEntry, boolean protectedAuthPath)
+	    throws CryptokiException {
+	// extract PINCompareMarker from authenticated DIDs
+	Optional<PINCompareMarkerType> pinCompareMarker = Optional.empty();
+	for (DIDInfoType didInfo : cardStateEntry.getCurrentCardApplication().getDIDInfoList()) {
+	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
+		PinCompareMarkerType pinCompareMarkerRaw = didInfo.getDifferentialIdentity()
+			.getDIDMarker().getPinCompareMarker();
+		pinCompareMarker = Optional.of(new PINCompareMarkerType(pinCompareMarkerRaw));
+	    }
+	}
+
+	// omit GUI when Middleware has its own PIN dialog for class 2 readers
+	if (protectedAuthPath && builtinPinDialog) {
+	    session.loginExternal(UserType.Context_specific);
+	} else if (pinCompareMarker.isPresent()) {
+	    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,
+		    pinCompareMarker.get(), session);
+	    dialog.show();
 	}
     }
 

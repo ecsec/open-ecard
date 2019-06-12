@@ -14,7 +14,7 @@
 					 xmlns:dssx="urn:oasis:names:tc:dss-x:1.0:profiles:SignaturePolicy:schema#"
 					 xmlns:ers="http://www.setcce.org/schemas/ers" xmlns:tslg="http://uri.etsi.org/02231/v2.x#"
 					 xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<iso:ConnectionHandle xsi:type="iso:ConnectionHandleType">
+	<iso:ConnectionHandle>
 		<iso:ChannelHandle>
 			<iso:SessionIdentifier>9W-L3sKkoMb759Dsc4K-qw</iso:SessionIdentifier>
 		</iso:ChannelHandle>

@@ -84,154 +84,150 @@ public class ExecutionEngine {
      * @throws ThreadTerminateException Thrown in case the GUI has been closed externally (interrupted).
      */
     public ResultStatus process() throws ThreadTerminateException {
-	StepResult next = navigator.next(); // get first step
-	// loop over steps. break inside loop
-	while (true) {
-	    ResultStatus result = next.getStatus();
-	    LOG.debug("Step {} finished with result {}.", next.getStepID(), result);
-	    // close dialog on cancel and interrupt
-	    if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted()) {
-		navigator.close();
-		throw new ThreadTerminateException("GUI has been interrupted.");
-	    } else if (result == ResultStatus.CANCEL) {
-		navigator.close();
-		return result;
-	    }
-
-	    // get result and put it in resultmap
-	    List<OutputInfoUnit> stepResults = next.getResults();
-	    Map<String, ExecutionResults> oldResults = Collections.unmodifiableMap(results);
-	    results.put(next.getStepID(), new ExecutionResults(next.getStepID(), stepResults));
-
-	    // replace InfoInputUnit values in live list
-	    if (! next.getStep().isResetOnLoad()) {
-		Step s = next.getStep();
-		List<InputInfoUnit> inputInfo = s.getInputInfoUnits();
-		Map<String, InputInfoUnit> infoMap = new HashMap<>();
-		// create index over infos
-		for (InputInfoUnit nextInfo : inputInfo) {
-		    infoMap.put(nextInfo.getID(), nextInfo);
-		}
-		for (OutputInfoUnit nextOut : stepResults) {
-		    InputInfoUnit matchingInfo = infoMap.get(nextOut.getID());
-		    // an entry must exist, otherwise this is an error in the GUI implementation
-		    // this type of error should be found in tests
-		    matchingInfo.copyContentFrom(nextOut);
-		}
-	    }
-
-	    // replace step if told by result value
-	    Step replaceStep = next.getReplacement();
-	    if (replaceStep != null) {
-		LOG.debug("Replacing with step.id={}.", replaceStep.getID());
-		switch (next.getStatus()) {
-		    case BACK:
-			next = navigator.replacePrevious(replaceStep);
-			break;
-		    case OK:
-			if (navigator.hasNext()) {
-			    next = navigator.replaceNext(replaceStep);
-			} else {
-			    navigator.close();
-			    return convertStatus(StepActionResultStatus.NEXT);
-			}
-			break;
-		    case RELOAD:
-			next = navigator.replaceCurrent(replaceStep);
-			break;
-		    default:
-			// fallthrough because CANCEL and INTERRUPTED are already handled
-			break;
-		}
-	    } else {
-		// step replacement did not happen, so we can execute the action
-		StepAction action = next.getStep().getAction();
-		StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
-		// use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
-		ExecutorService execService = Executors.newSingleThreadExecutor();
-		Future<StepActionResult> actionFuture = execService.submit(actionCallable);
-		navigator.setRunningAction(actionFuture);
-		StepActionResult actionResult;
-		try {
-		    actionResult = actionFuture.get();
-		    LOG.debug("Step Action {} finished with result {}.", action.getStepID(), actionResult.getStatus());
-		} catch (CancellationException ex) {
-		    LOG.info("StepAction was canceled.", ex);
-		    navigator.close();
-		    return ResultStatus.CANCEL;
-		} catch (InterruptedException ex) {
-		    LOG.info("StepAction was interrupted.", ex);
-		    navigator.close();
+	try {
+	    StepResult next = navigator.next(); // get first step
+	    // loop over steps. break inside loop
+	    while (true) {
+		ResultStatus result = next.getStatus();
+		LOG.debug("Step {} finished with result {}.", next.getStepID(), result);
+		// close dialog on cancel and interrupt
+		if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted()) {
 		    throw new ThreadTerminateException("GUI has been interrupted.");
-		} catch (ExecutionException ex) {
-		    // there are some special kinds we need to handle here
-		    if (ex.getCause() instanceof InvocationTargetExceptionUnchecked) {
-			InvocationTargetExceptionUnchecked iex = (InvocationTargetExceptionUnchecked) ex.getCause();
-			if (iex.getCause() instanceof ThreadTerminateException) {
-			    LOG.info("StepAction was interrupted.", ex);
-			    navigator.close();
-			    throw new ThreadTerminateException("GUI has been interrupted.");
-			}
-		    }
-		    // all other types
-		    LOG.error("StepAction failed with error.", ex.getCause());
-		    navigator.close();
-		    return ResultStatus.CANCEL;
+		} else if (result == ResultStatus.CANCEL) {
+		    return result;
 		}
 
-		// break out if cancel was returned
-		if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
-		    LOG.info("StepAction was canceled.");
-		    navigator.close();
-		    return ResultStatus.CANCEL;
+		// get result and put it in resultmap
+		List<OutputInfoUnit> stepResults = next.getResults();
+		Map<String, ExecutionResults> oldResults = Collections.unmodifiableMap(results);
+		results.put(next.getStepID(), new ExecutionResults(next.getStepID(), stepResults));
+
+		// replace InfoInputUnit values in live list
+		if (! next.getStep().isResetOnLoad()) {
+		    Step s = next.getStep();
+		    List<InputInfoUnit> inputInfo = s.getInputInfoUnits();
+		    Map<String, InputInfoUnit> infoMap = new HashMap<>();
+		    // create index over infos
+		    for (InputInfoUnit nextInfo : inputInfo) {
+			infoMap.put(nextInfo.getID(), nextInfo);
+		    }
+		    for (OutputInfoUnit nextOut : stepResults) {
+			InputInfoUnit matchingInfo = infoMap.get(nextOut.getID());
+			// an entry must exist, otherwise this is an error in the GUI implementation
+			// this type of error should be found in tests
+			matchingInfo.copyContentFrom(nextOut);
+		    }
 		}
 
 		// replace step if told by result value
-		Step actionReplace = actionResult.getReplacement();
-		if (actionReplace != null) {
-		    LOG.debug("Replacing after action with step.id={}.", actionReplace.getID());
-		    switch (actionResult.getStatus()) {
+		Step replaceStep = next.getReplacement();
+		if (replaceStep != null) {
+		    LOG.debug("Replacing with step.id={}.", replaceStep.getID());
+		    switch (next.getStatus()) {
 			case BACK:
-			    next = navigator.replacePrevious(actionReplace);
+			    next = navigator.replacePrevious(replaceStep);
 			    break;
-			case NEXT:
+			case OK:
 			    if (navigator.hasNext()) {
-				next = navigator.replaceNext(actionReplace);
+				next = navigator.replaceNext(replaceStep);
 			    } else {
-				navigator.close();
 				return convertStatus(StepActionResultStatus.NEXT);
 			    }
 			    break;
-			case REPEAT:
-			    next = navigator.replaceCurrent(actionReplace);
+			case RELOAD:
+			    next = navigator.replaceCurrent(replaceStep);
 			    break;
 			default:
-			    // fallthrough because CANCEL is already handled
+			    // fallthrough because CANCEL and INTERRUPTED are already handled
 			    break;
 		    }
 		} else {
-		    // no replacement just proceed
-		    switch (actionResult.getStatus()) {
-			case BACK:
-			    next = navigator.previous();
-			    break;
-			case NEXT:
-			    if (navigator.hasNext()) {
-				next = navigator.next();
-			    } else {
-				navigator.close();
-				return convertStatus(StepActionResultStatus.NEXT);
+		    // step replacement did not happen, so we can execute the action
+		    StepAction action = next.getStep().getAction();
+		    StepActionCallable actionCallable = new StepActionCallable(action, oldResults, next);
+		    // use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
+		    ExecutorService execService = Executors.newSingleThreadExecutor();
+		    Future<StepActionResult> actionFuture = execService.submit(actionCallable);
+		    navigator.setRunningAction(actionFuture);
+		    StepActionResult actionResult;
+		    try {
+			actionResult = actionFuture.get();
+			LOG.debug("Step Action {} finished with result {}.", action.getStepID(), actionResult.getStatus());
+		    } catch (CancellationException ex) {
+			LOG.info("StepAction was canceled.", ex);
+			return ResultStatus.CANCEL;
+		    } catch (InterruptedException ex) {
+			LOG.info("StepAction was interrupted.", ex);
+			navigator.close();
+			throw new ThreadTerminateException("GUI has been interrupted.");
+		    } catch (ExecutionException ex) {
+			// there are some special kinds we need to handle here
+			if (ex.getCause() instanceof InvocationTargetExceptionUnchecked) {
+			    InvocationTargetExceptionUnchecked iex = (InvocationTargetExceptionUnchecked) ex.getCause();
+			    if (iex.getCause() instanceof ThreadTerminateException) {
+				LOG.info("StepAction was interrupted.", ex);
+				throw new ThreadTerminateException("GUI has been interrupted.");
 			    }
-			    break;
-			case REPEAT:
-			    next = navigator.current();
-			    break;
-			default:
-			    // fallthrough because CANCEL is already handled
-			    break;
+			}
+			// all other types
+			LOG.error("StepAction failed with error.", ex.getCause());
+			return ResultStatus.CANCEL;
+		    }
+
+		    // break out if cancel was returned
+		    if (actionResult.getStatus() == StepActionResultStatus.CANCEL) {
+			LOG.info("StepAction was canceled.");
+			return ResultStatus.CANCEL;
+		    }
+
+		    // replace step if told by result value
+		    Step actionReplace = actionResult.getReplacement();
+		    if (actionReplace != null) {
+			LOG.debug("Replacing after action with step.id={}.", actionReplace.getID());
+			switch (actionResult.getStatus()) {
+			    case BACK:
+				next = navigator.replacePrevious(actionReplace);
+				break;
+			    case NEXT:
+				if (navigator.hasNext()) {
+				    next = navigator.replaceNext(actionReplace);
+				} else {
+				    return convertStatus(StepActionResultStatus.NEXT);
+				}
+				break;
+			    case REPEAT:
+				next = navigator.replaceCurrent(actionReplace);
+				break;
+			    default:
+				// fallthrough because CANCEL is already handled
+				break;
+			}
+		    } else {
+			// no replacement just proceed
+			switch (actionResult.getStatus()) {
+			    case BACK:
+				next = navigator.previous();
+				break;
+			    case NEXT:
+				if (navigator.hasNext()) {
+				    next = navigator.next();
+				} else {
+				    return convertStatus(StepActionResultStatus.NEXT);
+				}
+				break;
+			    case REPEAT:
+				next = navigator.current();
+				break;
+			    default:
+				// fallthrough because CANCEL is already handled
+				break;
+			}
 		    }
 		}
 	    }
+	} finally {
+	    LOG.debug("Closing UserConsentNavigator.");
+	    navigator.close();
 	}
     }
 

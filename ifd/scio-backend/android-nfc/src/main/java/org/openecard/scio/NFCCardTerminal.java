@@ -64,14 +64,15 @@ public class NFCCardTerminal implements SCIOTerminal {
 	return terminalName;
     }
 
-    // used externally
     @Override
     public synchronized boolean isCardPresent() {
 	return nfcCard != null;
     }
 
+    // external management functions
+
     public synchronized void setTag(IsoDep tag, int timeout) throws IOException {
-	LOG.debug("Set nfc tag on terminal: {}.", getName());
+	LOG.debug("Set NFC tag on integrated NFC terminal.");
 	LOG.debug("Max Transceive Length: {}.", tag.getMaxTransceiveLength());
 	this.nfcCard = new NFCCard(tag, timeout, this);
 	notifyCardPresent();
@@ -79,23 +80,26 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     public synchronized void removeTag() {
 	if (nfcCard != null) { // maybe nfc tag is already removed
+	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
-		nfcCard.terminate();
+		nfcCard.terminate(true);
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
 	    }
 	    this.nfcCard = null;
+	    notifyCardAbsent();
+	} else {
+	    LOG.warn("Double invocation of removeTag function.");
 	}
-	notifyCardAbsent();
     }
 
-    public void notifyCardPresent() {
+    private void notifyCardPresent() {
 	synchronized (cardPresent) {
 	    cardPresent.notifyAll();
 	}
     }
 
-    public void notifyCardAbsent() {
+    private void notifyCardAbsent() {
 	synchronized (cardAbsent) {
 	    cardAbsent.notifyAll();
 	}

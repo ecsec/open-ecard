@@ -97,7 +97,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the host name for the certificate verification step.
      *
-     * @see #notifyServerCertificate(org.openecard.bouncycastle.crypto.tls.Certificate)
+     * @see #notifyServerCertificate(org.openecard.bouncycastle.tls.TlsServerCertificate)
      * @param hostname Name or IP of the host that will be used for certificate validation, when a verifier is set.
      */
     public void setHostname(@Nonnull String hostname) {
@@ -107,7 +107,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the implementation for the certificate verification step.
      *
-     * @see #notifyServerCertificate(org.openecard.bouncycastle.crypto.tls.Certificate)
+     * @see #notifyServerCertificate(org.openecard.bouncycastle.tls.TlsServerCertificate)
      * @see CertificateVerifier
      * @param certVerifier Verifier to use for server certificate checks.
      */

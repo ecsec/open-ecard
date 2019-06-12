@@ -35,16 +35,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Update checker for the Open eCard App.
- * <p>
- * The data structure returned from the server is as follows:
+ * <p>The data structure returned from the server is as follows:</p>
  * <pre>{
  *   win: [&lt;update1&gt;, &lt;update2&gt;, ...]
  *   deb: [&lt;update1&gt;, &lt;update2&gt;, ...]
  *   rpm: [&lt;update1&gt;, &lt;update2&gt;, ...]
- *}</pre>
- * The content of the update elements is defined in {@link VersionUpdate}.
- * </p>
- * <p>The update-list location is taken from the built in property: <tt>update-list.location</tt></p>
+ * }</pre>
+ * <p>The content of the update elements is defined in {@link VersionUpdate}.<br>
+ * The update-list location is taken from the built in property: <tt>update-list.location</tt></p>
  *
  * @author Tobias Wich
  * @author Sebastian Schuberth

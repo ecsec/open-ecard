@@ -15,10 +15,6 @@
 
 	<properties>
 		<animal.sniffer.skip>true</animal.sniffer.skip>
-	</properties>
-
-
-	<properties>
 		<doclint>-syntax</doclint>
 	</properties>
 

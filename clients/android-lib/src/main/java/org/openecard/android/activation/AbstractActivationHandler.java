@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,8 +143,10 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	final ActivationController ac = new ActivationController(octx);
 
 	// add callback to this abstract activity when card is removed
+	cardRecognized = false;
 	octx.getEventDispatcher().add(insertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	octx.getEventDispatcher().add(cardDetectHandler, EventType.RECOGNIZED_CARD_ACTIVE);
+	octx.getEventDispatcher().add(removalHandler, EventType.CARD_REMOVED);
 
 	Intent actIntent = parent.getIntent();
 	Uri data = actIntent.getData();
@@ -203,6 +206,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	if (octx != null) {
 	    octx.getEventDispatcher().del(insertionHandler);
 	    octx.getEventDispatcher().del(cardDetectHandler);
+	    octx.getEventDispatcher().del(removalHandler);
 	}
 	// unbind client
 	if (client != null) {
@@ -215,6 +219,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	octx = null;
 	cardRemoveDialog = null;
 	androidGui = null;
+	cardRecognized = false;
     }
 
     private final EventCallback insertionHandler = new EventCallback() {
@@ -237,20 +242,24 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	}
     };
 
+    private boolean cardRecognized = false;
     private final EventCallback cardDetectHandler = new EventCallback() {
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    switch (eventType) {
 		case RECOGNIZED_CARD_ACTIVE:
 		    Set<String> supportedCards = getSupportedCards();
-		    final String type = eventData.getHandle().getRecognitionInfo().getCardType();
-		    if (supportedCards == null || supportedCards.contains(type)) {
-			onCardInserted(type);
+		    ConnectionHandleType handle = eventData.getHandle();
+		    final String type = handle.getRecognitionInfo().getCardType();
 
+		    if (supportedCards == null || supportedCards.contains(type)) {
 			// remove handler when the correct card is present
 			if (octx != null) {
 			    octx.getEventDispatcher().del(this);
 			}
+
+			cardRecognized = true;
+			onCardInserted(type);
 		    }
 		    break;
 		default:
@@ -259,6 +268,17 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	    }
 	}
     };
+
+    private final EventCallback removalHandler = new EventCallback() {
+	@Override
+	public void signalEvent(EventType eventType, EventObject eventData) {
+	    if (cardRecognized) {
+		cardRecognized = false;
+		onCardRemoved();
+	    }
+	}
+    };
+
 
     private synchronized void handleActivationResult(final ActivationResult result) {
 	// only this first invocation must be processed, in order to prevent double finish when cancelling the auth job
@@ -319,6 +339,12 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
     public void onCardInserted(String cardType) {
 	// default implementation does nothing
 	LOG.info("Card recognized event received in activity: cardType={}", cardType);
+    }
+
+    @Override
+    public void onCardRemoved() {
+	// default implementation does nothing
+	LOG.info("Card removed event received in activity.");
     }
 
     @Override

@@ -202,6 +202,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	// remove callback which is set onStart
 	if (octx != null) {
 	    octx.getEventDispatcher().del(insertionHandler);
+	    octx.getEventDispatcher().del(cardDetectHandler);
 	}
 	// unbind client
 	if (client != null) {

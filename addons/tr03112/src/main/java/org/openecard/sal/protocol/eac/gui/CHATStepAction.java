@@ -44,6 +44,7 @@ import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
+import org.openecard.sal.protocol.eac.anytype.PasswordID;
 
 
 /**
@@ -141,6 +142,12 @@ public class CHATStepAction extends StepAction {
 		    selectedCHAT.setWriteAccess(item.getName(), item.isChecked());
 		}
 	    }
+	}
+
+	// change PIN ID to CAN if CAN ALLOWED is used
+	if (eacData.selectedCHAT.getSpecialFunctions().getOrDefault(CHAT.SpecialFunction.CAN_ALLOWED, Boolean.FALSE)) {
+	    eacData.pinID = PasswordID.CAN.getByte();
+	    eacData.passwordType = PasswordID.parse(eacData.pinID).getString();
 	}
     }
 

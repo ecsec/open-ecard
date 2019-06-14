@@ -75,15 +75,15 @@ public interface EacGui extends AndroidGui {
     PinStatus getPinStatus() throws InterruptedException;
 
     /**
-     * Enter the PIN and if needed also the CAN.
+     * Enter the user's password (usually PIN) and if needed also the CAN.
      * In case the CAN is not needed, the parameter may be null.
      *
      * @param can
-     * @param pin
-     * @return rue if PIN is accepted, false otherwise.
+     * @param password
+     * @return {@code true} if PIN is accepted, {@code false} otherwise.
      * @throws InterruptedException Thrown if waiting for the value has been interrupted.
      */
-    boolean enterPin(String can, String pin) throws InterruptedException;
+    boolean enterPin(String can, String password) throws InterruptedException;
 
     /**
      * Cancel EAC process.

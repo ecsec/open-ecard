@@ -43,6 +43,10 @@
 									<pattern>org.bouncycastle</pattern>
 									<shadedPattern>org.openecard.bc</shadedPattern>
 								</relocation>
+								<relocation>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>org.openecard.apache.http</shadedPattern>
+								</relocation>
 							</relocations>
 						</configuration>
 					</execution>

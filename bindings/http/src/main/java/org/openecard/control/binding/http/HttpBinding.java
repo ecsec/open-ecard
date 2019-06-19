@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.addon.AddonManager;
-import org.openecard.apache.http.HttpRequestInterceptor;
-import org.openecard.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
 import org.openecard.control.binding.http.common.DocumentRoot;
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler;
 import org.openecard.control.binding.http.interceptor.CacheControlHeaderResponseInterceptor;
@@ -41,7 +41,7 @@ import org.openecard.control.binding.http.interceptor.StatusLineResponseIntercep
 /**
  * Implements a HTTP binding for the control interface.
  *
- * @author Moritz Horsch 
+ * @author Moritz Horsch
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */

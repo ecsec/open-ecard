@@ -23,12 +23,12 @@
 package org.openecard.control.binding.http.handler;
 
 import java.io.IOException;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.apache.http.entity.StringEntity;
-import org.openecard.apache.http.protocol.HttpContext;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
 import org.openecard.control.binding.http.common.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

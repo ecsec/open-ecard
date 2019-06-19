@@ -26,11 +26,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.apache.http.Header;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.RequestLine;
-import org.openecard.apache.http.StatusLine;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.RequestLine;
+import org.apache.http.StatusLine;
 import org.slf4j.Logger;
 
 

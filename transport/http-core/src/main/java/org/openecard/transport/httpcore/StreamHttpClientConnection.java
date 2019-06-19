@@ -25,34 +25,34 @@ package org.openecard.transport.httpcore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.openecard.apache.http.Header;
-import org.openecard.apache.http.HttpClientConnection;
-import org.openecard.apache.http.HttpConnectionMetrics;
-import org.openecard.apache.http.HttpEntity;
-import org.openecard.apache.http.HttpEntityEnclosingRequest;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpMessage;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.apache.http.config.MessageConstraints;
-import org.openecard.apache.http.entity.BasicHttpEntity;
-import org.openecard.apache.http.entity.ContentLengthStrategy;
-import org.openecard.apache.http.impl.HttpConnectionMetricsImpl;
-import org.openecard.apache.http.impl.entity.LaxContentLengthStrategy;
-import org.openecard.apache.http.impl.entity.StrictContentLengthStrategy;
-import org.openecard.apache.http.impl.io.ChunkedInputStream;
-import org.openecard.apache.http.impl.io.ChunkedOutputStream;
-import org.openecard.apache.http.impl.io.ContentLengthInputStream;
-import org.openecard.apache.http.impl.io.ContentLengthOutputStream;
-import org.openecard.apache.http.impl.io.DefaultHttpRequestWriterFactory;
-import org.openecard.apache.http.impl.io.DefaultHttpResponseParserFactory;
-import org.openecard.apache.http.impl.io.IdentityInputStream;
-import org.openecard.apache.http.impl.io.IdentityOutputStream;
-import org.openecard.apache.http.io.HttpMessageParser;
-import org.openecard.apache.http.io.HttpMessageWriter;
-import org.openecard.apache.http.message.BasicHeader;
-import org.openecard.apache.http.protocol.HTTP;
+import org.apache.http.Header;
+import org.apache.http.HttpClientConnection;
+import org.apache.http.HttpConnectionMetrics;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
+import org.apache.http.HttpMessage;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.config.MessageConstraints;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.ContentLengthStrategy;
+import org.apache.http.impl.HttpConnectionMetricsImpl;
+import org.apache.http.impl.entity.LaxContentLengthStrategy;
+import org.apache.http.impl.entity.StrictContentLengthStrategy;
+import org.apache.http.impl.io.ChunkedInputStream;
+import org.apache.http.impl.io.ChunkedOutputStream;
+import org.apache.http.impl.io.ContentLengthInputStream;
+import org.apache.http.impl.io.ContentLengthOutputStream;
+import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
+import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
+import org.apache.http.impl.io.IdentityInputStream;
+import org.apache.http.impl.io.IdentityOutputStream;
+import org.apache.http.io.HttpMessageParser;
+import org.apache.http.io.HttpMessageWriter;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.openecard.common.AppVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Stream based HTTP client. <br>
- * In contrast to the default client ({@link org.openecard.apache.http.impl.DefaultBHttpClientConnection}, this
+ * In contrast to the default client ({@link org.apache.http.impl.DefaultBHttpClientConnection}, this
  * implementation uses an already existing connection instead of creating a new one.
  *
  * @author Tobias Wich

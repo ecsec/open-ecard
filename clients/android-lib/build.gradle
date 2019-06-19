@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
         classpath 'digital.wup:android-maven-publish:3.6.2'
     }
 }
@@ -68,22 +68,12 @@ version = pomDom.'m:parent'.'m:version'.text()
 group pomDom.'m:groupId'.text()
 
 
-
-// define config to load OeC deps
-
 configurations {
-    bundleImpl {
-        exclude group: "com.github.markusbernhardt"
-        exclude group: "org.openecard.ifd.scio-backend", module: "pcsc"
-        exclude group: "org.json"
-        exclude group: "javax.jws"
-        exclude group: "javax.xml.ws"
-    }
+    bundleImpl
 }
 
 
 dependencies {
-
     implementation 'com.android.support:appcompat-v7:28.0.0'
     //testImplementation 'junit:junit:4.12'
     //androidTestImplementation 'com.android.support.test:runner:1.0.2'
@@ -97,27 +87,14 @@ dependencies {
     compileOnly 'javax.xml.bind:jaxb-api:2.3.1'
     compileOnly 'com.google.code.findbugs:annotations:3.0.1u2'
 
-    // all OeC dependencies
+    // Android Oec-Core
+    bundleImpl "org.openecard.clients:android-core:${version}"
 
-    bundleImpl "org.openecard.wsdef:android-marshaller:${version}"
-    bundleImpl "org.openecard.gui:android:${version}"
-    bundleImpl "org.openecard.transport:dispatcher:${version}"
-    bundleImpl "org.openecard:recognition:${version}"
-    bundleImpl "org.openecard:management:${version}"
-    bundleImpl "org.openecard.ifd.scio-backend:android-nfc:${version}"
-    bundleImpl "org.openecard.sal:tiny-sal:${version}"
-    bundleImpl "org.openecard:addon:${version}"
-    bundleImpl "org.openecard.addons:tr03112:${version}"
-    bundleImpl "org.openecard.addons:pin-management:${version}"
-    bundleImpl "org.openecard.addons:status:${version}"
-    bundleImpl "org.openecard.addons:genericcryptography:${version}"
-    bundleImpl "org.openecard.ifd.protocols:pace:${version}"
     // needed or the thing crashes (should be made an api dependecy)
     bundleImpl "javax.jws.jsr181-api:jsr181-api:2.1.1"
 
     // add all bundleImpl deps, so that class files get copied and the deps are available for the compilation
     implementation configurations.bundleImpl.asFileTree
-
 }
 
 

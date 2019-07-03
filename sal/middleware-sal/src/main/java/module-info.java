@@ -41,4 +41,13 @@ module openecard.sal.middleware {
     requires com.sun.jna;
     requires slf4j.api;
     requires annotations;
+
+    exports org.openecard.mdlw.event;
+    exports org.openecard.mdlw.sal;
+    exports org.openecard.mdlw.sal.config;
+    exports org.openecard.mdlw.sal.cryptoki;
+    exports org.openecard.mdlw.sal.didfactory;
+    exports org.openecard.mdlw.sal.enums;
+    exports org.openecard.mdlw.sal.exceptions;
+    exports org.openecard.mdlw.sal.struct;
 }

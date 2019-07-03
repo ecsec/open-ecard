@@ -14,10 +14,6 @@
 	<name>Rich Client</name>
 
 
-	<properties>
-		<animal.sniffer.skip>true</animal.sniffer.skip>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.openecard.sal</groupId>

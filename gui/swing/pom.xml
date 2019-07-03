@@ -13,9 +13,6 @@
 	<packaging>jar</packaging>
 	<name>Swing GUI</name>
 
-	<properties>
-		<animal.sniffer.skip>true</animal.sniffer.skip>
-	</properties>
 
 	<dependencies>
 		<dependency>

@@ -16,7 +16,7 @@
 	<modules>
 		<module>java-version-check</module>
 		<module>richclient</module>
-		<module>richclient-bundle</module>
+		<module>richclient-jlink</module>
 		<module>android-core</module>
 		<module>android-lib</module>
 	</modules>

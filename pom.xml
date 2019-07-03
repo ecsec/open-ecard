@@ -70,8 +70,8 @@
 		<strip.debug.symbols>false</strip.debug.symbols>
 
 		<version.toolchain>[11,)</version.toolchain>
-		<maven.compiler.source>9</maven.compiler.source>
-		<maven.compiler.target>9</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
 
 		<version.bouncycastle>1.62</version.bouncycastle>
@@ -716,6 +716,21 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.2</version>
 				</plugin>
+
+				<!-- JLink Plugin -->
+				<plugin>
+					<artifactId>maven-jlink-plugin</artifactId>
+					<version>3.0.0-alpha-1</version>
+					<extensions>true</extensions>
+					<dependencies>
+						<!-- Use newer version of ASM -->
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>6.2</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -844,11 +859,27 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${version.jmockit}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>annotations</artifactId>
 				<version>3.0.1u2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.jcip</groupId>
+						<artifactId>jcip-annotations</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<!-- other third party libs -->
 			<dependency>
@@ -939,27 +970,11 @@
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.code.findbugs</groupId>
-					<artifactId>jsr305</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
 			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.code.findbugs</groupId>
-					<artifactId>jsr305</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.jcip</groupId>
-					<artifactId>jcip-annotations</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 

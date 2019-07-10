@@ -48,4 +48,23 @@ module openecard.wsdef.client {
     exports org.w3._2007._05.xmldsig_more_;
     exports org.w3._2009.xmlenc11_;
     exports generated;
+
+    opens de.bund.bsi.ecard.api._1 to java.xml.bind;
+    opens iso.std.iso_iec._24727.tech.schema to java.xml.bind;
+    opens oasis.names.tc.dss._1_0.core.schema to java.xml.bind;
+    opens oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_ to java.xml.bind;
+    opens oasis.names.tc.saml._1_0.assertion to java.xml.bind;
+    opens oasis.names.tc.saml._2_0.assertion to java.xml.bind;
+    opens org.etsi.uri._01903.v1_3 to java.xml.bind;
+    opens org.etsi.uri._02231.v3_1 to java.xml.bind;
+    opens org.openecard.ws to java.xml.bind;
+    opens org.openecard.ws.chipgateway to java.xml.bind;
+    opens org.openecard.ws.schema to java.xml.bind;
+    opens org.setcce.schemas.ers to java.xml.bind;
+    opens org.w3._2000._09.xmldsig_ to java.xml.bind;
+    opens org.w3._2001._04.xmldsig_more_ to java.xml.bind;
+    opens org.w3._2001._04.xmlenc_ to java.xml.bind;
+    opens org.w3._2007._05.xmldsig_more_ to java.xml.bind;
+    opens org.w3._2009.xmlenc11_ to java.xml.bind;
+    opens generated to java.xml.bind;
 }

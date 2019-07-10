@@ -24,7 +24,6 @@ module openecard.jaxb.marshaller {
     requires openecard.wsdef.common;
     requires openecard.wsdef.client;
 
-    requires jaxb.core;
     requires java.xml.ws;
     requires java.xml.bind;
     requires java.activation;

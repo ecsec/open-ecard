@@ -68,6 +68,16 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!-- JAXB API and implementation -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+
 		<!-- This must be named explicitly because the parent pom interferes with the dependency resolution -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

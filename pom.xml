@@ -70,8 +70,8 @@
 		<strip.debug.symbols>false</strip.debug.symbols>
 
 		<version.toolchain>[11,)</version.toolchain>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
 
 		<version.bouncycastle>1.62</version.bouncycastle>
@@ -354,6 +354,39 @@
 		</profile>
 
 		<profile>
+			<id>module-info-compile</id>
+			<activation>
+				<jdk>11</jdk>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>java-module-compile</id>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+								<configuration>
+									<!-- compile module-info for Java 11 -->
+									<jdkToolchain>
+										<version>11</version>
+									</jdkToolchain>
+									<release>11</release>
+									<includes>
+										<include>module-info.java</include>
+									</includes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
 			<id>release</id>
 			<properties>
 				<strip.debug.symbols>true</strip.debug.symbols>
@@ -416,6 +449,20 @@
 						<debuglevel>source,lines,vars</debuglevel>
 						<optimize>false</optimize>
 					</configuration>
+					<executions>
+						<execution>
+							<id>default-compile</id>
+							<goals>
+								<goal>compile</goal>
+							</goals>
+							<!-- compile everything for target VM except the module-info.java -->
+							<configuration>
+								<excludes>
+									<exclude>module-info.java</exclude>
+								</excludes>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

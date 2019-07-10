@@ -13,20 +13,28 @@
 	<packaging>pom</packaging>
 	<name>Client Implementations</name>
 
-	<modules>
-		<module>java-version-check</module>
-		<module>richclient</module>
-		<module>android-core</module>
-		<module>android-lib</module>
-	</modules>
 
 	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>java-version-check</module>
+				<module>richclient</module>
+				<module>android-core</module>
+				<module>android-lib</module>
+			</modules>
+		</profile>
 		<profile>
 			<id>module-info-compile</id>
 			<activation>
 				<jdk>11</jdk>
 			</activation>
 			<modules>
+				<module>java-version-check</module>
+				<module>richclient</module>
 				<module>richclient-jlink</module>
 			</modules>
 		</profile>

@@ -490,6 +490,8 @@
 						</dependency>
 					</dependencies>
 					<configuration>
+						<!-- https://stackoverflow.com/questions/53437819/maven-surefire-and-jdk-11 -->
+						<forkCount>0</forkCount>
 						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->

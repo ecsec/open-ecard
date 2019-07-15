@@ -11,7 +11,6 @@
 			  xmlns:ns7="http://www.setcce.org/schemas/ers" xmlns:ns8="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
 			  xmlns:ns9="http://uri.etsi.org/01903/v1.3.2#">
 
-
 	<iso:CardType>
 		<iso:ObjectIdentifier>http://www.ekds.gov.tr/2.5</iso:ObjectIdentifier>
 		<iso:CardTypeName xml:lang="en">Turkish eID</iso:CardTypeName>

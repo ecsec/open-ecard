@@ -312,7 +312,6 @@ public class ListCertificates {
 
 		// no SERIALNUMBER, hash subject and cross fingers that this is unique across replacement cards
 		try {
-
 			SHA256Digest digest = new SHA256Digest();
 			byte[] subData = sub.getEncoded();
 			digest.update(subData, 0, subData.length);

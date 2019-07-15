@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema"
+<iso:CardInfo xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema" xmlns="urn:oasis:names:tc:dss:1.0:core:schema"
 			  xmlns:ns10="urn:oasis:names:tc:SAML:1.0:assertion" xmlns:ns11="urn:oasis:names:tc:SAML:2.0:assertion"
 			  xmlns:ns12="http://www.w3.org/2001/04/xmlenc#" xmlns:ns13="http://ws.openecard.org/schema"
 			  xmlns:ns14="http://www.w3.org/2001/04/xmldsig-more#" xmlns:ns15="http://www.w3.org/2007/05/xmldsig-more#"
-			  xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:ns4="http://www.bsi.bund.de/ecard/api/1.1"
+			  xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
+			  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+			  xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema"
+			  xmlns:ns4="http://www.bsi.bund.de/ecard/api/1.1"
 			  xmlns:ns5="http://uri.etsi.org/02231/v3.1.2#" xmlns:ns6="http://www.w3.org/2009/xmlenc11#"
 			  xmlns:ns7="http://www.setcce.org/schemas/ers" xmlns:ns8="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
 			  xmlns:ns9="http://uri.etsi.org/01903/v1.3.2#">
+
 
 	<iso:CardType>
 		<iso:ObjectIdentifier>http://www.ekds.gov.tr/2.5</iso:ObjectIdentifier>
@@ -16,6 +20,7 @@
 		<iso:Date>2018-12-19</iso:Date>
 	</iso:CardType>
 
+	<!--(required)Allows to determine the type of a given card by traversing an appropriate decision tree and checking whether the characteristic features are as expected-->
 	<iso:CardIdentification>
 		<iso:ATR>
 			<iso:TS>
@@ -136,11 +141,15 @@
 		</iso:ATR>
 	</iso:CardIdentification>
 
-	<iso:ApplicationCapabilities>
+	<!--(optional if CIA(Cryptographic Information Application) information according to ISO/IEC 7816-15 is exist)
+		Allows to specify the card-applications on the card and shall be used to realize the mapping from SALcalls to card-specific APDUs.-->
 
+	<iso:ApplicationCapabilities>
+		<iso:ImplicitlySelectedApplication>4B442D504B43532D3135</iso:ImplicitlySelectedApplication>
+	<!--KDU PKCS 15 Authentication App-->
 		<iso:CardApplication>
-			<iso:ApplicationIdentifier>A000000063504B43532D3135</iso:ApplicationIdentifier>
-			<iso:ApplicationName>KD-PKCS-15</iso:ApplicationName>
+			<iso:ApplicationIdentifier>4B442D504B43532D3135</iso:ApplicationIdentifier>
+			<iso:ApplicationName>KDU-PKCS-15</iso:ApplicationName>
 			<iso:CardApplicationACL>
 				<iso:AccessRule>
 					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
@@ -216,10 +225,10 @@
 				</iso:AccessRule>
 			</iso:CardApplicationACL>
 
-			<!-- TODO: taken from beID, must be corrected accordingly -->
+			<!-- DIDInfo for PIN comparison for authentication protocol -->
 			<iso:DIDInfo>
 				<iso:DifferentialIdentity>
-					<iso:DIDName>PIN</iso:DIDName>
+					<iso:DIDName>PIN1</iso:DIDName>
 					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
 					<iso:DIDMarker>
 						<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
@@ -227,286 +236,11 @@
 								<iso:KeyRef>01</iso:KeyRef>
 							</iso:PinRef>
 							<iso:PasswordAttributes>
-								<iso:pwdFlags>initialized exchangeRefData needs-padding</iso:pwdFlags>
-								<iso:pwdType>iso9564-1</iso:pwdType>
+								<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
+								<iso:pwdType>ascii-numeric</iso:pwdType><!--char 2 ASCII-->
 								<iso:minLength>4</iso:minLength>
-								<iso:storedLength>8</iso:storedLength>
+								<iso:storedLength>6</iso:storedLength> <!--Lc-->
 								<iso:maxLength>10</iso:maxLength>
-								<iso:padChar>FF</iso:padChar>
-							</iso:PasswordAttributes>
-
-							<iso:StateInfo>
-								<iso:StateRecognition>
-									<iso:CardCall>
-										<iso:CommandAPDU>00200001</iso:CommandAPDU>
-										<iso:ResponseAPDU>
-											<iso:Trailer>63C3</iso:Trailer>
-											<iso:Conclusion>
-												<iso:RecognizedState>pin_rc3</iso:RecognizedState>
-											</iso:Conclusion>
-										</iso:ResponseAPDU>
-										<iso:ResponseAPDU>
-											<iso:Trailer>63C2</iso:Trailer>
-											<iso:Conclusion>
-												<iso:RecognizedState>pin_rc2</iso:RecognizedState>
-											</iso:Conclusion>
-										</iso:ResponseAPDU>
-										<iso:ResponseAPDU>
-											<iso:Trailer>63C1</iso:Trailer>
-											<iso:Conclusion>
-												<iso:RecognizedState>pin_rc1</iso:RecognizedState>
-											</iso:Conclusion>
-										</iso:ResponseAPDU>
-										<iso:ResponseAPDU>
-											<iso:Trailer>63C0</iso:Trailer>
-											<iso:Conclusion>
-												<iso:RecognizedState>pin_blocked</iso:RecognizedState>
-											</iso:Conclusion>
-										</iso:ResponseAPDU>
-									</iso:CardCall>
-								</iso:StateRecognition>
-								<iso:State StateName="pin_rc3" StateClass="Operational">
-									<iso:RetryCounter>3</iso:RetryCounter>
-									<iso:StateTransition TargetState="pin_rc2">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:VerifyUser>
-													</iso:VerifyUser>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:VerifyUserResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:VerifyUserResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_rc2">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:ModifyVerificationDataResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-								</iso:State>
-								<iso:State StateName="pin_rc2" StateClass="Operational">
-									<iso:RetryCounter>2</iso:RetryCounter>
-									<iso:StateTransition TargetState="pin_rc3">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-										</iso:DIDAuthenticationState>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_rc3">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:DIDUpdate>
-														<iso:DIDName>PIN</iso:DIDName>
-													</iso:DIDUpdate>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:DIDUpdateResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:DIDUpdateResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_rc1">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:VerifyUser>
-													</iso:VerifyUser>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:VerifyUserResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:VerifyUserResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_rc1">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:ModifyVerificationDataResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-								</iso:State>
-								<iso:State StateName="pin_rc1" StateClass="Operational">
-									<iso:RetryCounter>1</iso:RetryCounter>
-									<iso:StateTransition TargetState="pin_rc3">
-										<iso:DIDAuthenticationState>
-											<iso:DIDName>PIN</iso:DIDName>
-											<iso:DIDState>true</iso:DIDState>
-										</iso:DIDAuthenticationState>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_rc3">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:DIDUpdate>
-														<iso:DIDName>PIN</iso:DIDName>
-													</iso:DIDUpdate>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:DIDUpdateResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:DIDUpdateResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_blocked">
-										<iso:FixedProcedure TargetState="pin_rc3">
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:VerifyUser>
-													</iso:VerifyUser>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:VerifyUserResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:VerifyUserResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-									<iso:StateTransition TargetState="pin_blocked">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:ModifyVerificationData>
-													</iso:ModifyVerificationData>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:ModifyVerificationDataResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:ModifyVerificationDataResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-								</iso:State>
-								<iso:State StateName="pin_blocked" StateClass="NotOperational">
-									<iso:RetryCounter>0</iso:RetryCounter>
-									<iso:StateTransition TargetState="pin_rc3">
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:DIDAuthenticate>
-														<iso:DIDName>PUK</iso:DIDName>
-													</iso:DIDAuthenticate>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:DIDAuthenticateResponse>
-														<ns3:Result>
-															<ns3:ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</ns3:ResultMajor>
-														</ns3:Result>
-													</iso:DIDAuthenticateResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-									</iso:StateTransition>
-								</iso:State>
-							</iso:StateInfo>
-						</iso:PinCompareMarker>
-					</iso:DIDMarker>
-					<iso:DIDScope>global</iso:DIDScope>
-				</iso:DifferentialIdentity>
-				<iso:DIDACL>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-				</iso:DIDACL>
-			</iso:DIDInfo>
-
-			<!-- TODO: taken from beID, must be corrected accordingly -->
-			<iso:DIDInfo>
-				<iso:DifferentialIdentity>
-					<iso:DIDName>PUK</iso:DIDName>
-					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
-					<iso:DIDMarker>
-						<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
-							<iso:PinRef>
-								<iso:KeyRef>02</iso:KeyRef>
-							</iso:PinRef>
-							<iso:PasswordAttributes>
-								<iso:pwdFlags>initialized needs-padding change-disabled</iso:pwdFlags>
-								<iso:pwdType>iso9564-1</iso:pwdType>
-								<iso:minLength>8</iso:minLength>
-								<iso:storedLength>8</iso:storedLength>
-								<iso:maxLength>10</iso:maxLength>
-								<iso:padChar>FF</iso:padChar>
 							</iso:PasswordAttributes>
 						</iso:PinCompareMarker>
 					</iso:DIDMarker>
@@ -552,68 +286,47 @@
 				</iso:DIDACL>
 			</iso:DIDInfo>
 
+			<!-- DIDInfo for Asymmetric Internal Authentication protocol for authentication app-->
 			<iso:DIDInfo>
 				<iso:DifferentialIdentity>
-					<iso:DIDName>10366366371#TCKK</iso:DIDName>
-					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+					<iso:DIDName>Authenticate-rsaSSA-PSS</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol><!--Generic Cryptography-->
 					<iso:DIDMarker>
-						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
+						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25"><!--for digital signature operation - Asymmetric internal authentication-->
 							<iso:AlgorithmInfo>
+								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
-									<iso:Algorithm>http://ws.openecard.org/alg/rsa</iso:Algorithm>
-								</iso:AlgorithmIdentifier>
-								<iso:SupportedOperations>Decipher Compute-signature</iso:SupportedOperations>
-								<iso:CardAlgRef>01</iso:CardAlgRef>
+								<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
+									id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
+								<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm><!--taken from CardInfo_eGK_1-0-0-->
+							    </iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<iso:CardAlgRef>01</iso:CardAlgRef><!--???-->
 							</iso:AlgorithmInfo>
 							<iso:KeyInfo>
 								<iso:KeyRef>
-									<iso:KeyRef>01</iso:KeyRef>
+									<iso:KeyRef>81</iso:KeyRef><!--PrK Reference local first-->
 								</iso:KeyRef>
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
-
-							<!-- TODO: taken from beID, must be corrected accordingly -->
+							<iso:LegacySignatureGenerationInfo>
+								<iso:CardCommand>
+									<iso:HeaderTemplate>002241B6</iso:HeaderTemplate><!--MSE-->
+									<!--<iso:DataTemplate>{tlv algorithmIdentifier}{tlv keyReference}</iso:DataTemplate>-->
+									<iso:DataTemplate>{tlv 0x80 0x91}{tlv 0x84 keyReference}</iso:DataTemplate>
+								</iso:CardCommand>
+								<iso:CardCommand>
+									<iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate><!--PSO(CDS)-->
+									<iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+									<iso:ExpectedLength>256</iso:ExpectedLength>
+								</iso:CardCommand>
+							</iso:LegacySignatureGenerationInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>Authentication</iso:DataSetName>
+								<iso:DataSetName>AuthenticationCert</iso:DataSetName>
 							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>CA</iso:DataSetName>
-							</iso:CertificateRef>
-							<iso:CertificateRef>
-								<iso:DataSetName>Root</iso:DataSetName>
-							</iso:CertificateRef>
-							<!-- TODO: taken from beID, must be corrected accordingly -->
-							<iso:StateInfo>
-								<iso:State StateName="invalidate_pin" StateClass="Operational">
-									<iso:StateTransition>
-										<iso:FixedProcedure>
-											<iso:CardCall>
-												<iso:APICall>
-													<iso:Sign>
-														<iso:ConnectionHandle></iso:ConnectionHandle>
-														<iso:DIDName></iso:DIDName>
-														<iso:Message></iso:Message>
-													</iso:Sign>
-												</iso:APICall>
-												<iso:APIResponse>
-													<iso:SignResponse Profile="http://www.bsi.bund.de/ecard/api/1.1">
-														<ns3:Result>
-															<ns3:ResultMajor></ns3:ResultMajor>
-														</ns3:Result>
-													</iso:SignResponse>
-												</iso:APIResponse>
-											</iso:CardCall>
-										</iso:FixedProcedure>
-										<iso:UpdateDIDAuthenticationState>
-											<iso:DIDName>PIN</iso:DIDName>
-											<iso:DIDScope>global</iso:DIDScope>
-											<iso:DIDState>false</iso:DIDState>
-										</iso:UpdateDIDAuthenticationState>
-									</iso:StateTransition>
-								</iso:State>
-							</iso:StateInfo>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
 				</iso:DifferentialIdentity>
 				<iso:DIDACL>
 					<iso:AccessRule>
@@ -641,7 +354,7 @@
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:DIDAuthentication>
-								<iso:DIDName>PIN</iso:DIDName>
+								<iso:DIDName>PIN1</iso:DIDName>
 								<iso:DIDState>true</iso:DIDState>
 							</iso:DIDAuthentication>
 						</iso:SecurityCondition>
@@ -681,7 +394,7 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>5031</iso:efIdOrPath>
+					<iso:efIdOrPath>3F003D005031</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -717,7 +430,7 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>2F01</iso:efIdOrPath>
+					<iso:efIdOrPath>3F003D002F01</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -753,12 +466,12 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>2F04</iso:efIdOrPath>
+					<iso:efIdOrPath>3F003D002F04</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
 			<iso:DataSetInfo>
-				<iso:DataSetName>10366366371#TCKK</iso:DataSetName>
+				<iso:DataSetName>AuthenticationCert</iso:DataSetName>
 				<iso:DataSetACL>
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
@@ -789,7 +502,7 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>2F10</iso:efIdOrPath>
+					<iso:efIdOrPath>3F003D002F10</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -825,27 +538,408 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>5032</iso:efIdOrPath>
+					<iso:efIdOrPath>3F003D005032</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 		</iso:CardApplication>
 
+	<!--PKCS 15 Signing App-->
+
 		<iso:CardApplication>
-			<iso:ApplicationIdentifier>A000000063504B43532D31352D32</iso:ApplicationIdentifier>
+			<iso:ApplicationIdentifier>504B43532D3135</iso:ApplicationIdentifier>
 			<iso:ApplicationName>PKCS-15</iso:ApplicationName>
-			<iso:CardApplicationACL/>
-		</iso:CardApplication>
+			<iso:CardApplicationACL>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationConnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationDisconnect</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationStartSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>ConnectionService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:ConnectionServiceAction>CardApplicationEndSession</iso:ConnectionServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>CardApplicationService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:CardApplicationServiceAction>CardApplicationList</iso:CardApplicationServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:NamedDataServiceAction>DataSetList</iso:NamedDataServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+				<iso:AccessRule>
+					<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+					<iso:Action>
+						<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+					</iso:Action>
+					<iso:SecurityCondition>
+						<iso:always>true</iso:always>
+					</iso:SecurityCondition>
+				</iso:AccessRule>
+			</iso:CardApplicationACL>
 
-		<iso:CardApplication>
-			<iso:ApplicationIdentifier>D97200000154434B4B454B</iso:ApplicationIdentifier>
-			<iso:ApplicationName>TCKKEK</iso:ApplicationName>
-			<iso:CardApplicationACL/>
-		</iso:CardApplication>
+			<!-- DIDInfo for PIN comparison for signing protocol -->
+			<iso:DIDInfo>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PIN3</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.9</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<iso:PinCompareMarker Protocol="urn:oid:1.3.162.15480.3.0.9">
+							<iso:PinRef>
+								<iso:KeyRef>81</iso:KeyRef>
+							</iso:PinRef>
+							<iso:PasswordAttributes>
+								<iso:pwdFlags>initialized exchangeRefData</iso:pwdFlags>
+								<iso:pwdType>ascii-numeric</iso:pwdType><!--char 2 ASCII-->
+								<iso:minLength>4</iso:minLength>
+								<iso:storedLength>6</iso:storedLength> <!--Lc-->
+								<iso:maxLength>10</iso:maxLength>
+							</iso:PasswordAttributes>
+						</iso:PinCompareMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDList</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDAuthenticate</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
 
-		<iso:CardApplication>
-			<iso:ApplicationIdentifier>D9720000012943494C</iso:ApplicationIdentifier>
-			<iso:ApplicationName>HEALTH</iso:ApplicationName>
-			<iso:CardApplicationACL/>
+			<!-- DIDInfo for Asymmetric Internal Authentication protocol for signature creation app-->
+			<iso:DIDInfo>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>Signature-rsaSSA-PSS</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol><!--Generic Cryptography-->
+					<iso:DIDMarker>
+						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25"><!--for digital signature operation - Asymmetric internal authentication-->
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>rsaClientAuthentication</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+								<!-- pkcs-1 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) 1
+									id-RSASSA-PSS OBJECT IDENTIFIER ::= { pkcs-1 10 } -->
+								<iso:Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</iso:Algorithm><!--taken from CardInfo_eGK_1-0-0-->
+							    </iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<iso:CardAlgRef>01</iso:CardAlgRef><!--???-->
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>81</iso:KeyRef><!--PrK Reference local first-->
+								</iso:KeyRef>
+								<iso:KeySize>2048</iso:KeySize>
+							</iso:KeyInfo>
+							<iso:LegacySignatureGenerationInfo>
+								<iso:CardCommand>
+									<iso:HeaderTemplate>002241B6</iso:HeaderTemplate><!--MSE-->
+									<!--<iso:DataTemplate>{tlv algorithmIdentifier}{tlv keyReference}</iso:DataTemplate>-->
+									<iso:DataTemplate>{tlv 0x80 0x91}{tlv 0x84 keyReference}</iso:DataTemplate>
+								</iso:CardCommand>
+								<iso:CardCommand>
+									<iso:HeaderTemplate>002A9E9A</iso:HeaderTemplate><!--PSO(CDS)-->
+									<iso:DataTemplate>{hashToSign}</iso:DataTemplate>
+									<iso:ExpectedLength>256</iso:ExpectedLength>
+								</iso:CardCommand>
+							</iso:LegacySignatureGenerationInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>SignatureCreationCert</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>DifferentialIdentityService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:DifferentialIdentityServiceAction>DIDGet</iso:DifferentialIdentityServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN3</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.OD</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F003D015031</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.PrKD2F01</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F003D012F01</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.CD2F04</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F003D012F04</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<iso:DataSetInfo>
+				<iso:DataSetName>SignatureCreationCert</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F003D012F10</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
+			<iso:DataSetInfo>
+				<iso:DataSetName>EF.CIAInfo</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>AuthorizationService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:AuthorizationServiceAction>ACLList</iso:AuthorizationServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>3F003D015032</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
 		</iso:CardApplication>
 
 	</iso:ApplicationCapabilities>

@@ -88,7 +88,7 @@ public class GraphicsUtil {
 	// handled separately. If an exception is thrown, regardless of its specific type, the result is always the
 	// same: the image doesn't get painted onto the canvas. Hence catching Exception is acceptable.
 	try {
-	    Icon svgIcon = clazz.newInstance();
+	    Icon svgIcon = clazz.getDeclaredConstructor().newInstance();
 
 	    Method method = clazz.getMethod("setDimension", Dimension.class);
 	    method.invoke(svgIcon, new Dimension(imageWidth, imageHeight));

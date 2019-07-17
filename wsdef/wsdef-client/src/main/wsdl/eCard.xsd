@@ -7,7 +7,6 @@
 	xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
 	xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
 	xmlns:vr="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
-	xmlns:ers="http://www.setcce.org/schemas/ers"
 	xmlns:XAdES="http://uri.etsi.org/01903/v1.3.2#"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
@@ -41,8 +40,6 @@
 		schemaLocation="oasis-dss-core-schema-v1.0-os.xsd" />
 	<import namespace="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
 		schemaLocation="oasis-dssx-1.0-profiles-verification-report-cs1.xsd" />
-	<import namespace="http://www.setcce.org/schemas/ers"
-		schemaLocation="xmlers-schema-draft-v0.3.xsd" />
 
 
 	<!-- =============================== -->
@@ -266,8 +263,6 @@
 
 	<complexType name="EvidenceRecordType">
 		<choice>
-			<element name="xmlEvidenceRecord"
-				type="ers:EvidenceRecordType" />
 			<element name="asn1EvidenceRecord" type="base64Binary" />
 		</choice>
 	</complexType>

@@ -64,19 +64,19 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<maven.min.version>3.5.0</maven.min.version>
+		<maven.min.version>3.6.1</maven.min.version>
 		<license.licenseName>gpl_v3</license.licenseName>
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<version.toolchain>[11,)</version.toolchain>
+		<used.java.version>11</used.java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
 
 		<version.bouncycastle>1.62</version.bouncycastle>
-		<version.jmockit>1.43</version.jmockit>
-		<version.pmd>6.8.0</version.pmd>
+		<version.jmockit>1.47</version.jmockit>
+		<version.pmd>6.16.0</version.pmd>
 		<version.openjfx>11</version.openjfx>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine></argLine>
@@ -139,38 +139,6 @@
 		</profile>
 
 		<profile>
-			<!-- fix submodule in release plugin -->
-			<id>submodule-update</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<inherited>false</inherited> <!-- only execute these in the parent -->
-						<executions>
-							<execution>
-								<id>git submodule update</id>
-								<phase>initialize</phase>
-								<configuration>
-									<executable>git</executable>
-									<arguments>
-										<argument>submodule</argument>
-										<argument>update</argument>
-										<argument>--init</argument>
-										<argument>--recursive</argument>
-									</arguments>
-								</configuration>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-		<profile>
 			<id>ci</id>
 			<reporting>
 				<plugins>
@@ -204,6 +172,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
+						<version>5.1.0</version>
 						<inherited>false</inherited>
 						<reportSets>
 							<reportSet>
@@ -353,38 +322,6 @@
 			</build>
 		</profile>
 
-		<profile>
-			<id>module-info-compile</id>
-			<activation>
-				<jdk>11</jdk>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>java-module-compile</id>
-								<goals>
-									<goal>compile</goal>
-								</goals>
-								<configuration>
-									<!-- compile module-info for Java 11 -->
-									<jdkToolchain>
-										<version>11</version>
-									</jdkToolchain>
-									<release>11</release>
-									<includes>
-										<include>module-info.java</include>
-									</includes>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 
 		<profile>
 			<id>release</id>
@@ -417,31 +354,22 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
+					<version>3.0.0-M2</version>
 					<configuration>
 						<rules>
 							<requireMavenVersion>
 								<version>[${maven.min.version},)</version>
 							</requireMavenVersion>
+							<requireJavaVersion>
+								<version>[${used.java.version},)</version>
+							</requireJavaVersion>
 						</rules>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-toolchains-plugin</artifactId>
-					<version>1.1</version>
-					<configuration>
-						<toolchains>
-							<jdk>
-								<version>${version.toolchain}</version>
-							</jdk>
-						</toolchains>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.8.1</version>
 					<configuration>
 						<showDeprecation>true</showDeprecation>
 						<showWarnings>true</showWarnings>
@@ -455,12 +383,6 @@
 							<goals>
 								<goal>compile</goal>
 							</goals>
-							<!-- compile everything for target VM except the module-info.java -->
-							<configuration>
-								<excludes>
-									<exclude>module-info.java</exclude>
-								</excludes>
-							</configuration>
 						</execution>
 					</executions>
 				</plugin>
@@ -472,7 +394,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.2</version>
 					<configuration>
 						<excludes>
 							<exclude>LICENSE.Open-eCard</exclude>
@@ -482,7 +404,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -497,12 +419,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>3.0.0-M1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
+					<version>3.0.0-M1</version>
 					<configuration>
 						<deployAtEnd>false</deployAtEnd>
 					</configuration>
@@ -523,12 +445,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>3.0.0-M3</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.22.1</version>
+							<version>3.0.0-M3</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -538,7 +460,6 @@
 					</dependencies>
 					<configuration>
 						<!-- https://stackoverflow.com/questions/53437819/maven-surefire-and-jdk-11 -->
-						<forkCount>0</forkCount>
 						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
 						<systemPropertyVariables>
 							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
@@ -550,12 +471,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>3.0.0-M3</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.apache.maven.surefire</groupId>
 							<artifactId>surefire-testng</artifactId>
-							<version>2.22.1</version>
+							<version>3.0.0-M3</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jmockit</groupId>
@@ -579,12 +500,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.1</version>
 					<configuration>
 						<show>protected</show>
 						<groups>
@@ -598,8 +519,7 @@
 									generated:de.bund.bsi.ecard.api._1:
 									iso.std.iso_iec._24727.tech.schema:
 									oasis.names.tc.*:org.etsi.uri.*:
-									org.setcce.schemas.ers:org.w3._*:
-									org.openecard.ws:org.openecard.ws.schema
+									org.w3._*:org.openecard.ws:org.openecard.ws.schema
 								</packages>
 							</group>
 						</groups>
@@ -630,17 +550,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jarsigner-plugin</artifactId>
-					<version>1.4</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.cxf</groupId>
 					<artifactId>cxf-codegen-plugin</artifactId>
-					<version>3.3.0-j11</version>
+					<version>3.3.2</version>
 					<configuration>
 						<defaultOptions>
 							<suppressGeneratedDate>true</suppressGeneratedDate>
@@ -658,7 +578,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>3.0.0-M3</version>
 				</plugin>
 
 				<plugin>
@@ -685,12 +605,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jxr-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.0.0</version>
 				</plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.12.0</version>
 					<configuration>
 						<skipEmptyReport>false</skipEmptyReport>
 						<analysisCache>true</analysisCache>
@@ -720,7 +640,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<configuration>
 						<configLocation>src/qa/checkstyle/openecard-checkstyle.xml</configLocation>
 						<headerLocation>src/qa/checkstyle/openecard-checkstyle-header.txt</headerLocation>
@@ -731,7 +651,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.18</version>
+							<version>8.22</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -763,7 +683,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.2</version>
+					<version>0.8.4</version>
 				</plugin>
 
 				<!-- JLink Plugin -->
@@ -776,7 +696,7 @@
 						<dependency>
 							<groupId>org.ow2.asm</groupId>
 							<artifactId>asm</artifactId>
-							<version>6.2</version>
+							<version>7.1</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -807,18 +727,6 @@
 						<phase>pre-site</phase>
 						<goals>
 							<goal>enforce</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-toolchains-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>toolchain</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -873,21 +781,11 @@
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>2.3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>2.3.1</version>
+				<version>2.3.2</version>
 			</dependency>
 
 			<!-- JAXWS API -->
-			<dependency>
+			<!--dependency>
 				<groupId>javax.jws</groupId>
 				<artifactId>javax.jws-api</artifactId>
 				<version>1.1</version>
@@ -902,14 +800,9 @@
 						<artifactId>javax.annotation-api</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
+			</dependency-->
 
 			<!-- testing -->
-			<dependency>
-				<groupId>org.testng</groupId>
-				<artifactId>testng</artifactId>
-				<version>6.14.3</version>
-			</dependency>
 			<dependency>
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
@@ -920,6 +813,11 @@
 						<artifactId>jsr305</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.14.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
@@ -940,7 +838,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.10</version>
+				<version>4.4.11</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.android</groupId>
@@ -961,7 +859,7 @@
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
-				<version>0.6.4</version>
+				<version>0.6.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
@@ -972,12 +870,12 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>5.0.0</version>
+				<version>5.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna-platform</artifactId>
-				<version>5.0.0</version>
+				<version>5.3.1</version>
 			</dependency>
 
 			<!-- BouncyCastle -->

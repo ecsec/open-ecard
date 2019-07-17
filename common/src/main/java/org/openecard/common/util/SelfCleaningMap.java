@@ -22,6 +22,7 @@
 
 package org.openecard.common.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -46,11 +47,13 @@ public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
     private Map<K,Entry> _map;
 
 
-    public <M extends Map> SelfCleaningMap(Class<M> c) throws InstantiationException, IllegalAccessException {
+    public <M extends Map> SelfCleaningMap(Class<M> c) throws NoSuchMethodException, IllegalAccessException,
+	    InvocationTargetException, InstantiationException {
 	this(c, 15 * 60);
     };
 
-    public <M extends Map> SelfCleaningMap(Class<M> c, RemoveActionFactory<V> actionFactory) throws InstantiationException, IllegalAccessException {
+    public <M extends Map> SelfCleaningMap(Class<M> c, RemoveActionFactory<V> actionFactory)
+	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	this(c, actionFactory, 15 * 60);
     };
 
@@ -60,16 +63,20 @@ public class SelfCleaningMap<K extends Comparable, V> implements Map<K, V> {
      * @param c
      * @param lifetime in minutes
      * @throws InstantiationException
+     * @throws NoSuchMethodException
      * @throws IllegalAccessException
+     * @throws InvocationTargetException
      */
-    public <M extends Map> SelfCleaningMap(Class<M> c, int lifetime) throws InstantiationException, IllegalAccessException {
+    public <M extends Map> SelfCleaningMap(Class<M> c, int lifetime) throws NoSuchMethodException,
+	    IllegalAccessException, InvocationTargetException, InstantiationException {
 	this(c, null, lifetime);
     };
 
-    public <M extends Map> SelfCleaningMap(Class<M> c, RemoveActionFactory<V> actionFactory, int lifetime) throws InstantiationException, IllegalAccessException {
+    public <M extends Map> SelfCleaningMap(Class<M> c, RemoveActionFactory<V> actionFactory, int lifetime)
+	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	this.kill = lifetime * 1000;
 	this.actionFactory = actionFactory;
-	this._map = c.newInstance();
+	this._map = c.getDeclaredConstructor().newInstance();
     };
 
     private boolean hasAction() {

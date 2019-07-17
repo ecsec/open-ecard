@@ -31,10 +31,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
-import javax.jws.WebMethod;
 import javax.xml.transform.TransformerException;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.Publish;
+import org.openecard.ws.ECardApiMethod;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 class Service implements Comparable<Service> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Service.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
     private final Class<?> iface;
     private final Class<?> impl;
@@ -85,13 +85,13 @@ class Service implements Comparable<Service> {
     private void init() {
 	Method[] methods = impl.getDeclaredMethods();
 	for (Method m : methods) {
-	    WebMethod webAnnotation = getAnnotation(m, WebMethod.class);
+	    ECardApiMethod webAnnotation = getAnnotation(m, ECardApiMethod.class);
 	    if (isReqParam(m) &&  webAnnotation != null) {
 		Class<?> reqClass = getReqParamClass(m);
 		if (requestMethods.containsKey(reqClass.getName())) {
 		    String msg = "Omitting method {} in service interface {}, because its parameter type is ";
 		    msg += "already associated with another method.";
-		    logger.warn(msg, m.getName(), impl.getName());
+		    LOG.warn(msg, m.getName(), impl.getName());
 		} else {
 		    String action = webAnnotation.action();
 		    if (isFilter) {
@@ -269,14 +269,14 @@ class Service implements Comparable<Service> {
 		    WSMarshaller m = WSMarshallerFactory.createInstance();
 		    String msgObjStr = m.doc2str(m.marshal(msgObj));
 		    l.trace("{}\n{}", msg, msgObjStr);
-		} else if (logger.isTraceEnabled()) {
+		} else if (LOG.isTraceEnabled()) {
 		    // check if the message needs to be logged in the dispatcher class
 		    WSMarshaller m = WSMarshallerFactory.createInstance();
 		    String msgObjStr = m.doc2str(m.marshal(msgObj));
-		    logger.trace("{}\n{}", msg, msgObjStr);
+		    LOG.trace("{}\n{}", msg, msgObjStr);
 		}
 	    } catch (TransformerException | WSMarshallerException ex) {
-		logger.error("Failed to log message.", ex);
+		LOG.error("Failed to log message.", ex);
 	    }
 	}
 

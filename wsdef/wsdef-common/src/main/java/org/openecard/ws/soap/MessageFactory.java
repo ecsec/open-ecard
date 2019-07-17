@@ -61,10 +61,18 @@ public class MessageFactory {
 	    final DocumentBuilderFactory tmpW3Factory = DocumentBuilderFactory.newInstance();
 	    tmpW3Factory.setNamespaceAware(true);
 	    tmpW3Factory.setIgnoringComments(true);
-	    tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    try {
+		tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to enable secure processing for DOM Builder.");
+	    }
 	    // XXE countermeasures
 	    tmpW3Factory.setExpandEntityReferences(false);
-	    tmpW3Factory.setXIncludeAware(false);
+	    try {
+		tmpW3Factory.setXIncludeAware(false);
+	    } catch (UnsupportedOperationException ex) {
+		LOG.warn("Failed to disable XInclude support.");
+	    }
 	    try {
 		tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 	    } catch (IllegalArgumentException ex) {
@@ -75,8 +83,12 @@ public class MessageFactory {
 	    } catch (ParserConfigurationException ex) {
 		LOG.warn("Failed to disallow DTDs entirely.");
 	    }
-	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+	    try {
+		tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to disable XEE mitigations.");
+	    }
 
 	    final DocumentBuilder tmpW3Builder = tmpW3Factory.newDocumentBuilder();
 

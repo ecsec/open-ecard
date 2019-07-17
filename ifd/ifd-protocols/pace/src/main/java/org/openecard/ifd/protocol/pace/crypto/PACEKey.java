@@ -158,7 +158,7 @@ public final class PACEKey {
 	if (pdp.isDH()) {
 	    return ((ElGamalPublicKeyParameters) pk).getY().toByteArray();
 	} else if (pdp.isECDH()) {
-	    return ((ECPublicKeyParameters) pk).getQ().getEncoded();
+	    return ((ECPublicKeyParameters) pk).getQ().getEncoded(false);
 	} else {
 	    throw new IllegalArgumentException();
 	}

@@ -120,7 +120,7 @@ public class MiddleWareWrapper {
 	    options.put(Library.OPTION_OPEN_FLAGS, 0x6);
 	}
 
-	CryptokiLibrary tmpLib = (CryptokiLibrary) Native.loadLibrary(libName, CryptokiLibrary.class, options);
+	CryptokiLibrary tmpLib = (CryptokiLibrary) Native.load(libName, CryptokiLibrary.class, options);
 	nl = NativeLibrary.getInstance(libName, options);
 
 	threadLock = new Semaphore(1, true);

@@ -41,6 +41,9 @@
 								<bindingFile>${basedir}/src/main/wsdl/serialization.xjc</bindingFile>
 								<bindingFile>${basedir}/src/main/wsdl/wrapperStyle.xjc</bindingFile>
 							</bindingFiles>
+							<extraargs>
+								<extraarg>-xjc-npa</extraarg>
+							</extraargs>
 						</wsdlOption>
 					</wsdlOptions>
 				</configuration>
@@ -52,7 +55,38 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+							<excludeDefaultDirectories>true</excludeDefaultDirectories>
+							<filesets>
+								<fileset>
+									<directory>target/generated-sources/cxf/org/openecard/ws</directory>
+									<includes>
+										<include>*.java</include>
+									</includes>
+								</fileset>
+							</filesets>
+						</configuration>
+					</execution>
+				</executions>
+            </plugin>
 		</plugins>
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>

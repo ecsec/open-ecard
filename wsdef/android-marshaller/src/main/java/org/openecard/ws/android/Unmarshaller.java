@@ -120,6 +120,7 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.WaitResponse;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1542,13 +1543,13 @@ public class Unmarshaller {
 
     private DIDAbstractMarkerType parseMarker(XmlPullParser parser, Class<? extends DIDAbstractMarkerType> cls) throws XmlPullParserException, IOException {
 	try {
-	    DIDAbstractMarkerType paceMarker = cls.newInstance();
+	    DIDAbstractMarkerType paceMarker = cls.getDeclaredConstructor().newInstance();
 	    paceMarker.setProtocol(parser.getAttributeValue(null, "Protocol"));
 	    Document d = documentBuilder.newDocument();
 	    String name = cls.getSimpleName().replace("Type", "");
 	    paceMarker.getAny().addAll(parseAnyTypes(parser, name, parser.getNamespace(), d, false, new String[0], new String[0]));
 	    return paceMarker;
-	} catch (InstantiationException | IllegalAccessException e) {
+	} catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
 	    throw new IOException("Error while instantiating the abstract marker type.");
 	}
     }

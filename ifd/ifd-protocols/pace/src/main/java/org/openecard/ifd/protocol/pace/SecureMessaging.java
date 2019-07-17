@@ -32,7 +32,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -358,7 +358,7 @@ public class SecureMessaging {
      * @return CMAC
      */
     private CMac getCMAC(byte[] smssc) {
-	CMac cmac = new CMac(new AESFastEngine());
+	CMac cmac = new CMac(new AESEngine());
 	cmac.init(new KeyParameter(keyMAC));
 	cmac.update(smssc, 0, smssc.length);
 

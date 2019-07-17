@@ -62,7 +62,7 @@ public class TinyManagementTest {
 
     @Test
     public void testRest() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
-	    InvocationTargetException {
+	    InvocationTargetException, NoSuchMethodException {
 	for (Method m : instance.getClass().getDeclaredMethods()) {
 	    // cobertura adds methods whose names start with '__cobertura'
 	    if (m.getName().equals("initializeFramework") || m.getName().startsWith("__cobertura")) {
@@ -71,7 +71,7 @@ public class TinyManagementTest {
 	    System.out.println(m.getName());
 
 	    if (m.getParameterTypes().length == 1) {
-		Object o = m.getParameterTypes()[0].newInstance();
+		Object o = m.getParameterTypes()[0].getDeclaredConstructor().newInstance();
 
 		ResponseType result = (ResponseType) m.invoke(instance, o);
 		assertEquals(ECardConstants.Major.ERROR, result.getResult().getResultMajor());

@@ -56,6 +56,10 @@ public class TestRealVersionUpdate {
     @Mocked
     OpenecardProperties props;
 
+    @Test(enabled = true)
+    public void foo() {
+	Assert.assertTrue(true);
+    }
 
     @Test(enabled = true)
     public void validDefaultCreationOfVersionUpdateLoader() throws MalformedURLException {

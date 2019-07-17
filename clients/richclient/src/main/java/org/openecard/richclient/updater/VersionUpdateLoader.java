@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.richclient.updater;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +34,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.InvalidUpdateDefinition;
+import org.openecard.common.util.SysUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

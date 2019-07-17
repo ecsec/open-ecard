@@ -20,8 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.richclient.updater;
 
+import org.openecard.richclient.updater.VersionUpdate;
+import org.openecard.richclient.updater.VersionUpdateList;
+import org.openecard.richclient.updater.VersionUpdateChecker;
+import org.openecard.richclient.updater.VersionUpdateLoader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +37,8 @@ import org.json.JSONObject;
 import org.openecard.common.AppVersion;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.SemanticVersion;
-import org.openecard.common.util.VersionUpdate.Status;
+import org.openecard.common.util.InvalidUpdateDefinition;
+import org.openecard.richclient.updater.VersionUpdate.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;

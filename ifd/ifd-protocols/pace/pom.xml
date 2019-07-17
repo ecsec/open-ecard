@@ -29,20 +29,12 @@
 			<artifactId>crypto-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.ifd</groupId>
 			<artifactId>ifd-core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>pcsc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>dispatcher</artifactId>
-			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.gui</groupId>

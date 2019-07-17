@@ -20,13 +20,14 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.richclient.updater;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openecard.common.SemanticVersion;
+import org.openecard.common.util.InvalidUpdateDefinition;
 
 
 /**

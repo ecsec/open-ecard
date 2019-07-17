@@ -25,8 +25,8 @@ package org.openecard.richclient.gui.update;
 import java.util.ArrayList;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
-import org.openecard.common.util.VersionUpdate;
-import org.openecard.common.util.VersionUpdateChecker;
+import org.openecard.richclient.updater.VersionUpdate;
+import org.openecard.richclient.updater.VersionUpdateChecker;
 
 
 /**

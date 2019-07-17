@@ -20,8 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.richclient.updater;
 
+import org.openecard.richclient.updater.VersionUpdate;
+import org.openecard.richclient.updater.VersionUpdateList;
+import org.openecard.richclient.updater.VersionUpdateChecker;
+import org.openecard.richclient.updater.VersionUpdateLoader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;

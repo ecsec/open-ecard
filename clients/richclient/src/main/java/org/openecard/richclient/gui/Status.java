@@ -66,10 +66,10 @@ import org.openecard.common.event.EventObject;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.util.ByteUtils;
-import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.gui.about.AboutDialog;
 import org.openecard.richclient.gui.manage.ManagementDialog;
 import org.openecard.richclient.gui.update.UpdateWindow;
+import org.openecard.richclient.updater.VersionUpdateChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

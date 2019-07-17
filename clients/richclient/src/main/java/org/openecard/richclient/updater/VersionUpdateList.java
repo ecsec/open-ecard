@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.richclient.updater;
 
 import java.net.URL;
 import java.util.Collections;

@@ -25,10 +25,14 @@ package org.openecard.richclient.updater;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +40,7 @@ import org.json.JSONTokener;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.InvalidUpdateDefinition;
 import org.openecard.common.util.SysUtils;
+import org.openecard.crypto.tls.proxy.ProxySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,10 +73,21 @@ public class VersionUpdateLoader {
     }
 
     public VersionUpdateList loadVersionUpdateList() throws IllegalArgumentException {	
-	try {	 
-	    // load list data
+	try {
+	    // load proxy if one is available
+	    ProxySettings.getDefault(); // make sure it is initialized
+	    List<Proxy> proxies = ProxySelector.getDefault().select(updateUrl.toURI());
+	    Proxy p = Proxy.NO_PROXY;
+	    for (Proxy next : proxies) {
+		if (next.type() != Proxy.Type.DIRECT) {
+		    LOG.debug("Found a proxy for the update connection.");
+		    p = next;
+		    break;
+		}
+	    }
+
 	    LOG.info("Trying to load version list.");
-	    URLConnection con = updateUrl.openConnection();
+	    URLConnection con = updateUrl.openConnection(p);
 	    con.connect();
 	    InputStream in = con.getInputStream();
 	    JSONObject obj = new JSONObject(new JSONTokener(in));
@@ -106,6 +122,10 @@ public class VersionUpdateLoader {
 	} catch (JSONException ex) {
 	    LOG.warn("Package type {} not supported in update list.", pkgType);
 	    throw new IllegalArgumentException("Package type " + pkgType + " not supported in update list.", ex);
+	} catch (URISyntaxException ex) {
+	    String msg = "Failed to convert Update URL to a URI.";
+	    LOG.error(msg, ex);
+	    throw new IllegalArgumentException(msg, ex);
 	}
     }
 

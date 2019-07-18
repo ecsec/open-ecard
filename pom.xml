@@ -783,24 +783,6 @@
 				<version>2.3.2</version>
 			</dependency>
 
-			<!-- JAXWS API -->
-			<!--dependency>
-				<groupId>javax.jws</groupId>
-				<artifactId>javax.jws-api</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.xml.ws</groupId>
-				<artifactId>jaxws-api</artifactId>
-				<version>2.3.1</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.annotation</groupId>
-						<artifactId>javax.annotation-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency-->
-
 			<!-- testing -->
 			<dependency>
 				<groupId>org.jmockit</groupId>

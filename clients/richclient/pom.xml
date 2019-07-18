@@ -21,6 +21,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>pcsc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>tiny-sal</artifactId>
 			<version>${project.version}</version>
@@ -111,8 +116,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
+			<groupId>org.bitbucket.b_c</groupId>
+			<artifactId>jose4j</artifactId>
 		</dependency>
 
 		<dependency>

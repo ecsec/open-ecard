@@ -24,19 +24,22 @@ package org.openecard.richclient.updater;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.jose4j.json.internal.json_simple.JSONArray;
+import org.jose4j.json.internal.json_simple.JSONObject;
+import org.jose4j.json.internal.json_simple.parser.JSONParser;
+import org.jose4j.json.internal.json_simple.parser.ParseException;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.InvalidUpdateDefinition;
 import org.openecard.common.util.SysUtils;
@@ -90,19 +93,21 @@ public class VersionUpdateLoader {
 	    URLConnection con = updateUrl.openConnection(p);
 	    con.connect();
 	    InputStream in = con.getInputStream();
-	    JSONObject obj = new JSONObject(new JSONTokener(in));
+	    Reader r = new InputStreamReader(in, StandardCharsets.UTF_8);
+
+	    JSONObject rootObj = (JSONObject) new JSONParser().parse(r);
 
 	    // get package specific download page
-	    String dowloadPageString = obj.getString(pkgType + "_download_page");
+	    String downloadPageString = (String) rootObj.get(pkgType + "_download_page");
 
 	    // access package specific list
-	    JSONArray updatesRaw = obj.getJSONArray(pkgType);
+	    JSONArray updatesRaw = (JSONArray) rootObj.get(pkgType);
 
 	    ArrayList<VersionUpdate> updates = new ArrayList<>();
 
-	    for (int i = 0; i < updatesRaw.length(); i++) {
+	    for (Object ur : updatesRaw) {
 		try {
-		    VersionUpdate next = VersionUpdate.fromJson(updatesRaw.getJSONObject(i));
+		    VersionUpdate next = VersionUpdate.fromJson((JSONObject) ur);
 		    updates.add(next);
 		} catch (InvalidUpdateDefinition ex) {
 		    LOG.warn("Invalid version info contained in update list.", ex);
@@ -113,17 +118,21 @@ public class VersionUpdateLoader {
 	    // make sure the versions are in the correct order
 	    Collections.sort(updates);
 
-	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(dowloadPageString));
+	    VersionUpdateList list =  new VersionUpdateList(updates, new URL(downloadPageString));
 	    LOG.info("Successfully retrieved version update list.");
 	    return list;
 	} catch (IOException ex) {
 	    LOG.error("Failed to retrieve update list from server.", ex);
 	    throw new IllegalArgumentException("Failed to retrieve update list from server.", ex);
-	} catch (JSONException ex) {
+	} catch (NullPointerException ex) {
 	    LOG.warn("Package type {} not supported in update list.", pkgType);
 	    throw new IllegalArgumentException("Package type " + pkgType + " not supported in update list.", ex);
 	} catch (URISyntaxException ex) {
 	    String msg = "Failed to convert Update URL to a URI.";
+	    LOG.error(msg, ex);
+	    throw new IllegalArgumentException(msg, ex);
+	} catch (ParseException ex) {
+	    String msg = "Failed to deserialize JSON data.";
 	    LOG.error(msg, ex);
 	    throw new IllegalArgumentException(msg, ex);
 	}

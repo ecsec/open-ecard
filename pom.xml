@@ -833,6 +833,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
 			<!-- other third party libs -->
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -845,11 +846,6 @@
 				<version>4.1.1.4</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.json</groupId>
-				<artifactId>json</artifactId>
-				<version>20180813</version>
-			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
@@ -865,6 +861,7 @@
 				<artifactId>proxy-vole</artifactId>
 				<version>1.0.3</version>
 			</dependency>
+
 			<!-- Java Native Access -->
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>

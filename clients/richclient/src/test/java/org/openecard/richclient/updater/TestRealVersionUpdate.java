@@ -22,10 +22,6 @@
 
 package org.openecard.richclient.updater;
 
-import org.openecard.richclient.updater.VersionUpdate;
-import org.openecard.richclient.updater.VersionUpdateList;
-import org.openecard.richclient.updater.VersionUpdateChecker;
-import org.openecard.richclient.updater.VersionUpdateLoader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.json.JSONObject;
+import org.jose4j.json.internal.json_simple.JSONObject;
 import org.openecard.common.AppVersion;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.SemanticVersion;
@@ -212,7 +208,6 @@ public class TestRealVersionUpdate {
 
     @Test(enabled = true)
     public void versionUpdateinvalidSemanticVersionSpecified() {
-
 	try {
 	    String invalidVersion = "0.0.0";
 	    JSONObject obj = new JSONObjectBuilder().version(invalidVersion).build();
@@ -225,20 +220,18 @@ public class TestRealVersionUpdate {
 
     @Test(enabled = true)
     public void versionUpdateinvalidDownloadURL() {
-
 	try {
 	    String invalidDownloadURL = "test";
 	    JSONObject obj = new JSONObjectBuilder().downloadUrl(invalidDownloadURL).build();
 	    VersionUpdate update = VersionUpdate.fromJson(obj);
 	    Assert.fail(); // Exception expected
 	} catch (InvalidUpdateDefinition ex) {
-	    Assert.assertEquals(ex.getMessage(), "At least one of the download URLs is not a valid URL.");
+	    Assert.assertEquals(ex.getMessage(), "Incomplete JSON data received.");
 	}
     }
 
     @Test(enabled = true)
     public void versionUpdateDownloadPageNotHTTP() {
-
 	try {
 	    String invalidDownloadPage = "file://test";
 	    JSONObject obj = new JSONObjectBuilder().downloadPage(invalidDownloadPage).build();
@@ -251,7 +244,6 @@ public class TestRealVersionUpdate {
 
     @Test(enabled = true)
     public void versionUpdateDownloadUrlNotHTTP() {
-
 	try {
 	    String invalidDownloadURL = "file://test";
 	    JSONObject obj = new JSONObjectBuilder().downloadUrl(invalidDownloadURL).build();
@@ -274,6 +266,7 @@ public class TestRealVersionUpdate {
 	final VersionUpdateList updateList = new VersionUpdateList(updates, downloadPage);
 	return updateList;
     }
+
 
     public static class JSONObjectBuilder {
 

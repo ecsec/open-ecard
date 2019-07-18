@@ -32,7 +32,6 @@
 							<artifactSet>
 								<excludes>
 									<exclude>com.github.markusbernhardt</exclude>
-									<exclude>org.json</exclude>
 								</excludes>
 							</artifactSet>
 							<relocations>

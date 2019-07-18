@@ -24,8 +24,7 @@ package org.openecard.richclient.updater;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.jose4j.json.internal.json_simple.JSONObject;
 import org.openecard.common.SemanticVersion;
 import org.openecard.common.util.InvalidUpdateDefinition;
 
@@ -57,12 +56,12 @@ public class VersionUpdate implements Comparable<VersionUpdate> {
 
     public static VersionUpdate fromJson(JSONObject jsonObject) throws InvalidUpdateDefinition {
 	try {
-	    SemanticVersion version = new SemanticVersion(jsonObject.getString("version"));
-	    URL dlPage = new URL(jsonObject.getString("download_page"));
-	    URL dlUrl = new URL(jsonObject.getString("download_url"));
+	    SemanticVersion version = new SemanticVersion((String) jsonObject.get("version"));
+	    URL dlPage = new URL((String) jsonObject.get("download_page"));
+	    URL dlUrl = new URL((String) jsonObject.get("download_url"));
 	    Status status;
 	    try {
-		status = Status.valueOf(jsonObject.getString("status"));
+		status = Status.valueOf((String) jsonObject.get("status"));
 	    } catch (IllegalArgumentException ex) {
 		status = Status.UNKNOWN;
 	    }
@@ -78,9 +77,7 @@ public class VersionUpdate implements Comparable<VersionUpdate> {
 	    }
 
 	    return new VersionUpdate(version, dlPage, dlUrl, status);
-	} catch (MalformedURLException ex) {
-	    throw new InvalidUpdateDefinition("At least one of the download URLs is not a valid URL.", ex);
-	} catch (JSONException ex) {
+	} catch (MalformedURLException | NullPointerException ex) {
 	    throw new InvalidUpdateDefinition("Incomplete JSON data received.", ex);
 	}
     }

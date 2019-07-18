@@ -14,10 +14,6 @@
 	<name>Android Core</name>
 
 
-	<properties>
-		<application.name>Open eCard App</application.name>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>

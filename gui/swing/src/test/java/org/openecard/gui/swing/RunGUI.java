@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 Ruhr Uni Bochum.
+ * Copyright (C) 2012-2019 Ruhr Uni Bochum.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.gui.swing;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,6 +31,7 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
+import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
@@ -54,7 +56,7 @@ import org.testng.annotations.Test;
  */
 public class RunGUI {
 
-    private static final Logger _logger = LoggerFactory.getLogger(RunGUI.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RunGUI.class);
 
     private UserConsentDescription uc;
 
@@ -93,7 +95,7 @@ public class RunGUI {
 	return identityCheck_ServerConnection_Step;
     }
 
-    private Step providerInfoStep() {
+    private Step providerInfoStep() throws IOException {
 	Step step = new Step("Anbieter");
 
 	Text decription = new Text();
@@ -119,6 +121,20 @@ public class RunGUI {
 		+ "Zuständige Datenschutzbehörde:\nTest-Datenschutzbehörde\nTest-Strasse 1\n12345 Test-Ort");
 	termsofUsage.setCollapsed(true);
 	step.getInputInfoUnits().add(termsofUsage);
+
+	ToggleText termsofUsageHtml = new ToggleText();
+	termsofUsageHtml.setTitle("Nutzungsbestimmungen (HTML)");
+	byte[] usageTextHtml = RunGUI.class.getResourceAsStream("/description.html").readAllBytes();
+	termsofUsageHtml.setDocument(new Document("text/html", usageTextHtml));
+	termsofUsageHtml.setCollapsed(true);
+	step.getInputInfoUnits().add(termsofUsageHtml);
+
+	ToggleText termsofUsagePdf = new ToggleText();
+	termsofUsagePdf.setTitle("Nutzungsbestimmungen (PDF)");
+	byte[] usageTextPdf = RunGUI.class.getResourceAsStream("/description.pdf").readAllBytes();
+	termsofUsagePdf.setDocument(new Document("application/pdf", usageTextPdf));
+	termsofUsagePdf.setCollapsed(true);
+	step.getInputInfoUnits().add(termsofUsagePdf);
 
 	ToggleText validation = new ToggleText();
 	validation.setTitle("Gültigkeit");
@@ -383,7 +399,7 @@ public class RunGUI {
 
 	    exec.process();
 	} catch (Throwable w) {
-	    _logger.error(w.getMessage(), w);
+	    LOG.error(w.getMessage(), w);
 	}
     }
 

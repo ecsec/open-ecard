@@ -24,10 +24,6 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-swing</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-		</dependency>
 	</dependencies>
 
 </project>

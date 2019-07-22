@@ -30,12 +30,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import javax.activation.MimeType;
+import javax.activation.MimeTypeParseException;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -46,7 +52,10 @@ import javax.swing.SwingConstants;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.ChangedCharSetException;
 import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.Document;
@@ -265,6 +274,33 @@ public class ToggleText implements StepComponent {
     }
 
     private void createHtmlPane(byte[] content) {
+	// charset specifications inside the document don't work with the parser
+	// we try to parse the file with UTF-8 and try to determine the actual encoding if the parser chokes
+	// if the determination is not successful we fall back to UTF-8
+	// charset errors are ignored in the
+	Charset charset = StandardCharsets.UTF_8;
+	try {
+	    HTMLEditorKit kit = new HTMLEditorKit();
+	    HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
+	    kit.read(new InputStreamReader(new ByteArrayInputStream(content)), doc, 0);
+	} catch (ChangedCharSetException ex) {
+	    try {
+		String spec = ex.getCharSetSpec();
+		MimeType mt = new MimeType(spec);
+		String charsetString = mt.getParameter("charset");
+		if (charsetString != null && ! charsetString.isEmpty()) {
+		    charset = Charset.forName(charsetString);
+		}
+	    } catch (MimeTypeParseException ex2) {
+		LOG.warn("Failed to parse MIME Type specification.", ex2);
+	    } catch (IllegalCharsetNameException | UnsupportedCharsetException ex2) {
+		LOG.warn("Unsupported charset specification inside HTML docuemnt.");
+	    }
+	} catch (BadLocationException | IOException ex) {
+	    LOG.error("Failed to parse HTML document.", ex);
+	}
+
+
 	JTextPane htmlText = new JTextPane();
 	htmlText.setMargin(new Insets(0, 13, 0, 0));
 	htmlText.setEditable(false);
@@ -272,7 +308,7 @@ public class ToggleText implements StepComponent {
 
 	HTMLDocument doc = (HTMLDocument) htmlText.getDocument();
 	doc.putProperty("IgnoreCharsetDirective", true);
-	htmlText.setText(new String(content, StandardCharsets.UTF_8));
+	htmlText.setText(new String(content, charset));
 
 	text = htmlText;
     }

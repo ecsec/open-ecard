@@ -24,6 +24,11 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-swing</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

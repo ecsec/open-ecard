@@ -856,6 +856,12 @@
 				<version>1.0.3</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.pdfbox</groupId>
+				<artifactId>pdfbox</artifactId>
+				<version>2.0.13</version>
+			</dependency>
+
 			<!-- Java Native Access -->
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>

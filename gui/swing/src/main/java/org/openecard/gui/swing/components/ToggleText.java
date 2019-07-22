@@ -25,6 +25,7 @@ package org.openecard.gui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -44,7 +45,7 @@ import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
@@ -56,6 +57,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.ChangedCharSetException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.Document;
@@ -84,7 +87,7 @@ public class ToggleText implements StepComponent {
 
     private JPanel rootPanel;
     private JButton button;
-    private JComponent text;
+    private Component text;
     private File tmpDir;
 
     /**
@@ -152,17 +155,18 @@ public class ToggleText implements StepComponent {
 		createJTextArea(new String(content.getValue(), Charset.forName("UTF-8")));
 		break;
 	    case "application/pdf":
-		try {
-		    createTmpDir();
-		    String pdfFile = createTmpPdf(content.getValue());
-		    createStartPdfViewButton(pdfFile);
-		} catch (FileNotFoundException | SecurityException ex) {
-		    LOG.error("Failed to access the tmp pdf file.", ex);
-		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
-		} catch (IOException ex) {
-		    LOG.error("Failed to create the tmp pdf file.", ex);
-		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
-		}
+		createPdfComponent(content.getValue());
+//		try {
+//		    createTmpDir();
+//		    String pdfFile = createTmpPdf(content.getValue());
+//		    createStartPdfViewButton(pdfFile);
+//		} catch (FileNotFoundException | SecurityException ex) {
+//		    LOG.error("Failed to access the tmp pdf file.", ex);
+//		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
+//		} catch (IOException ex) {
+//		    LOG.error("Failed to create the tmp pdf file.", ex);
+//		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
+//		}
 		break;
 	    default:
 		LOG.warn("Unsupported usage of content of type " + mimeType + " in " + ToggleText.class.getName());
@@ -366,7 +370,34 @@ public class ToggleText implements StepComponent {
 	});
 	contentPane.add(pdfButton);
 	text = contentPane;
+    }
 
+    private void createPdfComponent(byte[] pdfData) {
+	try {
+	    PDDocument doc = PDDocument.load(pdfData);
+	    PdfComponent pdfComp = new PdfComponent(doc) {
+		// override so sizing the pdf component works properly in the gridlayout
+		@Override
+		public Dimension getPreferredSize() {
+		    if (!isPreferredSizeSet() && isValidPage()) {
+			int compWidth = getWidth();
+			PDRectangle pdfRect = getPageDim(getCurPage());
+			if (compWidth > 0) {
+			    float scale = compWidth / pdfRect.getWidth();
+			    int prefHeight = (int) Math.ceil(pdfRect.getHeight() * scale);
+			    return new Dimension(compWidth, prefHeight);
+			}
+		    }
+
+		    return super.getPreferredSize();
+		}
+	    };
+	    pdfComp.setCurrentPage(0);
+	    text = pdfComp;
+	} catch (IOException ex) {
+	    LOG.error("Failed to load PDF document.");
+	    text = new JLabel("Failed to load PDF.");
+	}
     }
 
 }

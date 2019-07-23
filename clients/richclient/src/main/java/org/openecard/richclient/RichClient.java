@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,7 +41,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.FutureTask;
-import javafx.embed.swing.JFXPanel;
 import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
 import org.apache.http.HttpException;
@@ -325,7 +324,6 @@ public final class RichClient {
 
     private static class UpdateTask extends TimerTask {
 
-	private static boolean javaFxInitialized = false;
 	private final AppTray tray;
 
 	UpdateTask(AppTray tray) {
@@ -344,28 +342,13 @@ public final class RichClient {
 
 	    if (updateChecker.needsUpdate()) {
 		LOG.info("Available update found.");
-		try {
-		    RichClient.class.getClassLoader().loadClass("javafx.embed.swing.JFXPanel");
-		    initJavaFXIfNecessary();
-		    tray.status().showUpdateIcon(updateChecker);
-		} catch (ClassNotFoundException ex) {
-		    LOG.warn("JavaFX is not supported by this platform.");
-		    return;
-		}
+		tray.status().showUpdateIcon(updateChecker);
 	    } else {
 		LOG.info("No update found, trying again later.");
 	    }
 
 	    // repeat every 24 hours
 	    new Timer().schedule(new UpdateTask(tray), 24 * 60 * 60 * 1000);
-	}
-
-	private void initJavaFXIfNecessary() {
-	    if (! javaFxInitialized) {
-		javafx.application.Platform.setImplicitExit(false);
-		new JFXPanel();
-		javaFxInitialized = true;
-	    }
 	}
     }
 

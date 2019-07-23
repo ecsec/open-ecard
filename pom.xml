@@ -791,7 +791,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-web</artifactId>
+				<artifactId>javafx-controls</artifactId>
 				<version>${version.openjfx}</version>
 			</dependency>
 

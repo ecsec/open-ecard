@@ -18,6 +18,7 @@
 		<module>richclient</module>
 		<module>android-core</module>
 		<module>android-lib</module>
+		<module>richclient-bundle</module>
 	</modules>
 
 </project>

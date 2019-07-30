@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 HS Coburg.
+ * Copyright (C) 2012-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -36,6 +36,7 @@ import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
 import org.openecard.addon.EventHandler;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.common.ECardConstants;
@@ -44,6 +45,7 @@ import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.schema.Status;
 import org.openecard.ws.schema.StatusType;
 import org.slf4j.Logger;
@@ -58,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StatusHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(StatusHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StatusHandler.class);
 
     private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
@@ -80,8 +82,9 @@ public class StatusHandler {
      *
      * @param statusRequest Status Request possibly containing a session identifier for event registration.
      * @return Status message.
+     * @throws WSMarshallerException
      */
-    public StatusResponse handleRequest(StatusRequest statusRequest) {
+    public BindingResult handleRequest(StatusRequest statusRequest) throws WSMarshallerException {
 	Status status = new Status();
 
 	// user agent
@@ -119,7 +122,7 @@ public class StatusHandler {
 	    eventHandler.addQueue(sessionIdentifier);
 	}
 
-	return new StatusResponse(status);
+	return new StatusResponseBodyFactory().createStatusResponse(status);
     }
 
     @Nonnull

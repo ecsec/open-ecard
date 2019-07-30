@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2018 HS Coburg.
+ * Copyright (C) 2013-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -49,6 +49,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
@@ -187,13 +188,10 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	if (responseBody != null && responseBody.hasValue()) {
 	    LOG.debug("BindingResult contains a body.");
 	    // determine content type
-	    ContentType ct = ContentType.create(responseBody.getMimeType(), Charset.forName("UTF-8"));
-	    StringEntity entity = new StringEntity(responseBody.getValue(), ct);
+	    ContentType ct = ContentType.create(responseBody.getMimeType(), responseBody.getEncoding());
+
+	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.getValue(), ct);
 	    response.setEntity(entity);
-	    // evaluate Base64 flag
-	    if (responseBody.isBase64()) {
-		response.setHeader("Content-Transfer-Encoding", "Base64");
-	    }
 	} else {
 	    LOG.debug("BindingResult contains no body.");
 	    if (bindingResult.getResultMessage() != null) {
@@ -259,14 +257,13 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    HttpEntity entity = entityRequest.getEntity();
 	    InputStream is = entity.getContent();
 
-	    // TODO: This assumes the content is UTF-8. Evaluate what is actually sent.
-	    String value = FileUtils.toString(is);
-	    String mimeType = ContentType.get(entity).getMimeType();
-	    // TODO: find out if we have a Base64 coded value
-	    boolean base64Content = false;
+	    ContentType ct = ContentType.get(entity);
+	    byte[] value = FileUtils.toByteArray(is);
+	    String mimeType = ct.getMimeType();
+	    Charset cs = ct.getCharset();
 
-	    RequestBody body = new RequestBody(resourceName, null);
-	    body.setValue(value, mimeType, base64Content);
+	    RequestBody body = new RequestBody(resourceName);
+	    body.setValue(value, cs, mimeType);
 	    return body;
 	} catch (UnsupportedCharsetException | ParseException e) {
 	    LOG.error("Failed to create request body.", e);

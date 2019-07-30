@@ -72,13 +72,11 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 
     public static final String METHOD_HDR = "X-OeC-Method";
 
-    private final AddonManager addonManager;
     private final AddonSelector selector;
 
     public HttpAppPluginActionHandler(@Nonnull AddonManager addonManager) {
 	super("*");
 
-	this.addonManager = addonManager;
 	this.selector = new AddonSelector(addonManager);
     }
 
@@ -117,7 +115,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    RequestBody body = null;
 	    if (httpRequest instanceof HttpEntityEnclosingRequest) {
 		LOG.debug("Request contains an entity.");
-		body = getRequestBody(httpRequest, resourceName);
+		body = getRequestBody((HttpEntityEnclosingRequest) httpRequest, resourceName);
 	    }
 
 	    Headers headers = readReqHeaders(httpRequest);
@@ -256,9 +254,8 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	return response;
     }
 
-    private RequestBody getRequestBody(HttpRequest httpRequest, String resourceName) throws IOException {
+    private RequestBody getRequestBody(HttpEntityEnclosingRequest entityRequest, String resourceName) throws IOException {
 	try {
-	    HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) httpRequest;
 	    HttpEntity entity = entityRequest.getEntity();
 	    InputStream is = entity.getContent();
 

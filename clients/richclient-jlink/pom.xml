@@ -2,103 +2,145 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.openecard</groupId>
-		<artifactId>clients</artifactId>
-		<version>1.3.1-SNAPSHOT</version>
-	</parent>
-
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>richclient-jlink</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jlink</packaging>
+
 	<name>Rich Client (JLink)</name>
 
 
 	<properties>
-		<application.name>Open eCard App</application.name>
+		<maven.compiler.release>11</maven.compiler.release>
+
+		<version.bouncycastle>1.62</version.bouncycastle>
+		<version.openjfx>12.0.1</version.openjfx>
+		<version.jaxb.runtime>2.3.2</version.jaxb.runtime>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>openecard-repos</id>
+			<name>Openecard Repos</name>
+			<url>https://mvn.ecsec.de/repository/openecard-public</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>openecard-repos</id>
+			<url>https://mvn.ecsec.de/repository/openecard-public</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+					<debug>true</debug>
+					<debuglevel>source,lines,vars</debuglevel>
+					<optimize>false</optimize>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jlink-plugin</artifactId>
+				<version>3.0.0-alpha-2-20190731</version>
 				<extensions>true</extensions>
+				<dependencies>
+					<!-- Use newer version of ASM -->
+					<dependency>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+						<version>7.1</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<excludeModules>
+						<module>javafx.baseEmpty</module>
+						<module>javafx.controlsEmpty</module>
+						<module>javafx.graphicsEmpty</module>
+						<module>javafx.swingEmpty</module>
+					</excludeModules>
+					<launcher>openecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
+					<ignoreSigningInformation>true</ignoreSigningInformation>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jarsigner-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign</id>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
-
 	<dependencies>
+		<!-- Open eCard RichClient Bundle -->
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
-			<artifactId>richclient</artifactId>
-			<version>${project.version}</version>
+			<artifactId>richclient-bundle</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openecard.clients</groupId>
+					<artifactId>richclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
+		<!-- JavaFX -->
 		<dependency>
-			<groupId>org.openecard.clients</groupId>
-			<artifactId>java-version-check</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${version.openjfx}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${version.openjfx}</version>
 		</dependency>
 
-		<!-- JAXB API and implementation -->
+		<!-- BouncyCastle -->
 		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${version.bouncycastle}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bctls-jdk15on</artifactId>
+			<version>${version.bouncycastle}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${version.bouncycastle}</version>
+		</dependency>
+
+		<!-- JAXB -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
+			<version>${version.jaxb.runtime}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.activation</groupId>
+					<artifactId>jakarta.activation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
-		<!-- This must be named explicitly because the parent pom interferes with the dependency resolution -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-
-		<!-- Annotation Module: annotations -->
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>annotations</artifactId>
-		</dependency>
-
-		<!-- Java-Annotation Module: java.annotations -->
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<version>1.3.2</version>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>jakarta.activation</artifactId>
+			<version>1.2.2-20190731</version>
 		</dependency>
 	</dependencies>
 

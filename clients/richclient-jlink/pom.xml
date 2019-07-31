@@ -77,6 +77,9 @@
 					</excludeModules>
 					<launcher>openecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
 					<ignoreSigningInformation>true</ignoreSigningInformation>
+					<noHeaderFiles>true</noHeaderFiles>
+					<noManPages>true</noManPages>
+					<stripDebug>true</stripDebug>
 				</configuration>
 			</plugin>
 		</plugins>

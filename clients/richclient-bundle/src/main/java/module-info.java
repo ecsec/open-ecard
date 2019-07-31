@@ -36,21 +36,24 @@ module org.openecard.richclient {
     requires javafx.controls;
     requires javafx.graphics;
 
-    opens de.bund.bsi.ecard.api._1 to java.xml.bind;
-    opens iso.std.iso_iec._24727.tech.schema to java.xml.bind;
-    opens oasis.names.tc.dss._1_0.core.schema to java.xml.bind;
-    opens oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_ to java.xml.bind;
-    opens oasis.names.tc.saml._1_0.assertion to java.xml.bind;
-    opens oasis.names.tc.saml._2_0.assertion to java.xml.bind;
-    opens org.etsi.uri._01903.v1_3 to java.xml.bind;
-    opens org.etsi.uri._02231.v3_1 to java.xml.bind;
-    opens org.openecard.ws to java.xml.bind;
-    opens org.openecard.ws.chipgateway to java.xml.bind;
-    opens org.openecard.ws.schema to java.xml.bind;
-    opens org.w3._2000._09.xmldsig_ to java.xml.bind;
-    opens org.w3._2001._04.xmldsig_more_ to java.xml.bind;
-    opens org.w3._2001._04.xmlenc_ to java.xml.bind;
-    opens org.w3._2007._05.xmldsig_more_ to java.xml.bind;
-    opens org.w3._2009.xmlenc11_ to java.xml.bind;
-    opens generated to java.xml.bind;
+    opens de.bund.bsi.ecard.api._1;
+    opens iso.std.iso_iec._24727.tech.schema;
+    opens oasis.names.tc.dss._1_0.core.schema;
+    opens oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_;
+    opens oasis.names.tc.saml._1_0.assertion;
+    opens oasis.names.tc.saml._2_0.assertion;
+    opens org.etsi.uri._01903.v1_3;
+    opens org.etsi.uri._02231.v3_1;
+    opens org.openecard.ws;
+    opens org.openecard.ws.chipgateway;
+    opens org.openecard.ws.schema;
+    opens org.w3._2000._09.xmldsig_;
+    opens org.w3._2001._04.xmldsig_more_;
+    opens org.w3._2001._04.xmlenc_;
+    opens org.w3._2007._05.xmldsig_more_;
+    opens org.w3._2009.xmlenc11_;
+    opens generated;
+
+    opens org.openecard.mdlw.sal.config to java.xml.bind;
+    opens org.openecard.addon.manifest to java.xml.bind;
 }

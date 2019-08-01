@@ -108,7 +108,7 @@ public class HttpBinding {
 	}
 
 	if (addonManager == null) {
-	    throw new HttpServiceError("Trying to use uninitialized GttpBinding instance.");
+	    throw new HttpServiceError("Trying to use uninitialized HttpBinding instance.");
 	} else {
 	    HttpAppPluginActionHandler handler = new HttpAppPluginActionHandler(addonManager);
 	    service = new HttpService(port, handler, reqInterceptors, respInterceptors);

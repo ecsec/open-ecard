@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,12 +20,30 @@
  *
  ***************************************************************************/
 
+package org.openecard.httpcore;
+
+import java.io.InputStream;
+import org.apache.http.impl.io.HttpTransportMetricsImpl;
+import org.apache.http.impl.io.SessionInputBufferImpl;
+
+
 /**
- * Stream based extension to the Apache http-core library.
- * <p>Instead of being socket based, the {@link org.openecard.apache.http.HttpClientConnection} implementation in this
- * package can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream}
- * class.</p>
+ * Stream based input buffer for use in Apache httpcore.
  *
- * @see <a href="https://hc.apache.org/httpcomponents-core-ga/tutorial/html/fundamentals.html">http-core Tutorial</a>
+ * @author Tobias Wich
  */
-package org.openecard.transport.httpcore;
+public class StreamSessionInputBuffer extends SessionInputBufferImpl {
+
+    /**
+     * Creates a StreamSessionInputBuffer instance based on a given InputStream.
+     *
+     * @param in The destination input stream.
+     * @param bufsize The size of the internal buffer.
+     */
+    public StreamSessionInputBuffer(InputStream in, int bufsize) {
+	super(new HttpTransportMetricsImpl(), bufsize);
+	// use a buffer stream, so the mark/reset operation is supported
+	bind(in);
+    }
+
+}

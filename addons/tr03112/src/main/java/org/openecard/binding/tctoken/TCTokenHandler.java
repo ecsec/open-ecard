@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 HS Coburg.
+ * Copyright (C) 2012-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.httpcore.ValidationError;
 import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
@@ -52,7 +53,6 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
@@ -85,6 +85,10 @@ import org.openecard.common.util.JAXPSchemaValidator;
 import org.openecard.common.util.FuturePromise;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.TR03112Utils;
+import org.openecard.httpcore.HttpResourceException;
+import org.openecard.httpcore.InvalidProxyException;
+import org.openecard.httpcore.InvalidUrlException;
+import org.openecard.httpcore.ResourceContext;
 import org.openecard.transport.paos.PAOSConnectionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -463,7 +467,7 @@ public class TCTokenHandler {
 	    // disable certificate checks according to BSI TR03112-7 in some situations
 	    boolean redirectChecks = isPerformTR03112Checks(request);
 	    RedirectCertificateValidator verifier = new RedirectCertificateValidator(redirectChecks);
-	    ResourceContext ctx = ResourceContext.getStream(endpoint, verifier);
+	    ResourceContext ctx = new TrResourceContextLoader().getStream(endpoint, verifier);
 	    ctx.closeStream();
 
 	    // using this verifier no result must be present, meaning no status code different than a redirect occurred
@@ -483,7 +487,7 @@ public class TCTokenHandler {
 	    return response;
 	} catch (MalformedURLException ex) {
 	    throw new IllegalStateException(LANG_TR.translationForKey(REFRESH_URL_ERROR), ex);
-	} catch (ResourceException | InvalidAddressException | ValidationError | IOException ex) {
+	} catch (HttpResourceException | InvalidUrlException | InvalidProxyException | ValidationError | IOException ex) {
 	    String code = ECardConstants.Minor.App.COMMUNICATION_ERROR;
 	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams(code);
 

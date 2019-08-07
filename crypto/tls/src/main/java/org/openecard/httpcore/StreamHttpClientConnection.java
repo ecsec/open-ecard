@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
+package org.openecard.httpcore;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StreamHttpClientConnection implements HttpClientConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(StreamHttpClientConnection.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StreamHttpClientConnection.class);
 
     private static final int BUFSIZE = 4 * 1024;
 
@@ -114,12 +114,12 @@ public class StreamHttpClientConnection implements HttpClientConnection {
 	try {
 	    in.close();
 	} catch (IOException ex) {
-	    logger.warn("Error forcibly closing input stream.");
+	    LOG.warn("Error forcibly closing input stream.");
 	}
 	try {
 	    out.close();
 	} catch (IOException ex) {
-	    logger.warn("Error forcibly closing output stream.");
+	    LOG.warn("Error forcibly closing output stream.");
 	}
     }
 
@@ -152,7 +152,7 @@ public class StreamHttpClientConnection implements HttpClientConnection {
     @Override
     public void setSocketTimeout(int timeout) {
 	// ignore
-	logger.info("Not supported in this type of connection.");
+	LOG.info("Not supported in this type of connection.");
     }
 
     @Override
@@ -182,9 +182,9 @@ public class StreamHttpClientConnection implements HttpClientConnection {
         if (entity == null) {
             return;
         }
-        final OutputStream outstream = prepareOutput(request);
-        entity.writeTo(outstream);
-        outstream.close();
+        try (OutputStream outstream = prepareOutput(request)) {
+	    entity.writeTo(outstream);
+	}
     }
 
     @Override

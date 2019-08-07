@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,29 +20,34 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
+package org.openecard.httpcore.cookies;
 
-import java.io.OutputStream;
-import org.apache.http.impl.io.HttpTransportMetricsImpl;
-import org.apache.http.impl.io.SessionOutputBufferImpl;
+import javax.annotation.Nonnull;
 
 
 /**
- * Stream based output buffer for use in Apache httpcore.
+ * Exception implementation which shall be used for the CookieManager and the Cookie class.
  *
- * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
-public class StreamSessionOutputBuffer extends SessionOutputBufferImpl {
+public class CookieException extends Exception {
 
     /**
-     * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
+     * Create a new instance with the given message.
      *
-     * @param out The destination output stream.
-     * @param bufsize The size of the internal buffer.
+     * @param message The exception message to set.
      */
-    public StreamSessionOutputBuffer(OutputStream out, int bufsize) {
-	super(new HttpTransportMetricsImpl(), bufsize);
-	bind(out);
+    public CookieException(@Nonnull String message) {
+	super(message);
     }
 
+    /**
+     * Creates a new instance with the given message and cause.
+     *
+     * @param message The exception message to set.
+     * @param cause The cause of the exception to set.
+     */
+    public CookieException(@Nonnull String message, @Nonnull Throwable cause) {
+	super(message, cause);
+    }
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,36 +20,39 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken;
+package org.openecard.httpcore;
 
-import javax.annotation.Nonnull;
-import org.openecard.common.I18n;
-import org.openecard.common.I18nException;
-import org.openecard.common.I18nKey;
+import org.apache.http.HttpException;
 
 
 /**
+ * Exception indicating an errornous result.
+ * Results with codes greater than 400 are errors. In some circumstances it is more convenient to raise an error to
+ * signal the invalid result. This class helps to do so.
  *
  * @author Tobias Wich
  */
-public class ValidationError extends I18nException {
+public class InvalidResultStatus extends HttpException {
 
-    private static final I18n lang = I18n.getTranslation("tr03112");
+    private static final long serialVersionUID = 1L;
 
-    public ValidationError(@Nonnull String message) {
+    private int code;
+    private String reason;
+
+    public InvalidResultStatus(int code, String reason, String message) {
 	super(message);
     }
 
-    public ValidationError(@Nonnull String message, Throwable cause) {
+    public InvalidResultStatus(int code, String reason, String message, Throwable cause) {
 	super(message, cause);
     }
 
-    public ValidationError(I18nKey key, Object... params) {
-	super(lang, key, params);
+    public int getCode() {
+	return code;
     }
 
-    public ValidationError(I18nKey key, Throwable cause, Object... params) {
-	super(lang, key, cause, params);
+    public String getReason() {
+	return reason;
     }
 
 }

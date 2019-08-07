@@ -80,9 +80,9 @@ import org.openecard.richclient.updater.VersionUpdateChecker;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.transport.httpcore.HttpRequestHelper;
-import org.openecard.transport.httpcore.HttpUtils;
-import org.openecard.transport.httpcore.StreamHttpClientConnection;
+import org.openecard.httpcore.HttpRequestHelper;
+import org.openecard.httpcore.HttpUtils;
+import org.openecard.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -439,7 +439,7 @@ public final class RichClient {
 		    // send request
 		    HttpUtils.dumpHttpRequest(LOG, req);
 		    HttpResponse response = exec.execute(req, con, httpCtx);
-		    HttpUtils.dumpHttpResponse(LOG, response, null);
+		    HttpUtils.dumpHttpResponse(LOG, response);
 
 		    int statusCode = response.getStatusLine().getStatusCode();
 		    if (statusCode == 204) {

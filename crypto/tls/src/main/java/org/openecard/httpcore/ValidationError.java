@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,34 +20,34 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore.cookies;
+package org.openecard.httpcore;
 
 import javax.annotation.Nonnull;
+import org.openecard.common.I18n;
+import org.openecard.common.I18nException;
+import org.openecard.common.I18nKey;
 
 
 /**
- * Exception implementation which shall be used for the CookieManager and the Cookie class.
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-public class CookieException extends Exception {
+public class ValidationError extends I18nException {
 
-    /**
-     * Create a new instance with the given message.
-     *
-     * @param message The exception message to set.
-     */
-    public CookieException(@Nonnull String message) {
+    public ValidationError(@Nonnull String message) {
 	super(message);
     }
 
-    /**
-     * Creates a new instance with the given message and cause.
-     *
-     * @param message The exception message to set.
-     * @param cause The cause of the exception to set.
-     */
-    public CookieException(@Nonnull String message, @Nonnull Throwable cause) {
+    public ValidationError(@Nonnull String message, Throwable cause) {
 	super(message, cause);
     }
+
+    public ValidationError(I18n lang, I18nKey key, Object... params) {
+	super(lang, key, params);
+    }
+
+    public ValidationError(I18n lang, I18nKey key, Throwable cause, Object... params) {
+	super(lang, key, cause, params);
+    }
+
 }

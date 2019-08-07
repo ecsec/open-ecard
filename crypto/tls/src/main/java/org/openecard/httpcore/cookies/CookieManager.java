@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore.cookies;
+package org.openecard.httpcore.cookies;
 
 import java.net.HttpCookie;
 import java.net.MalformedURLException;

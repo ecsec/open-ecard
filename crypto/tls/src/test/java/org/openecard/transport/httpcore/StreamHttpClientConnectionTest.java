@@ -22,6 +22,8 @@
 
 package org.openecard.transport.httpcore;
 
+import org.openecard.httpcore.HttpRequestHelper;
+import org.openecard.httpcore.StreamHttpClientConnection;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.SecureRandom;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2013-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.binding.tctoken;
+package org.openecard.httpcore;
 
 import java.net.URL;
 import org.bouncycastle.tls.TlsServerCertificate;

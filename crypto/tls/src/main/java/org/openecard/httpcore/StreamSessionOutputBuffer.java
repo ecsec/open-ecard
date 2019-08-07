@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,30 +20,29 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
+package org.openecard.httpcore;
 
-import java.io.InputStream;
+import java.io.OutputStream;
 import org.apache.http.impl.io.HttpTransportMetricsImpl;
-import org.apache.http.impl.io.SessionInputBufferImpl;
+import org.apache.http.impl.io.SessionOutputBufferImpl;
 
 
 /**
- * Stream based input buffer for use in Apache httpcore.
+ * Stream based output buffer for use in Apache httpcore.
  *
  * @author Tobias Wich
  */
-public class StreamSessionInputBuffer extends SessionInputBufferImpl {
+public class StreamSessionOutputBuffer extends SessionOutputBufferImpl {
 
     /**
-     * Creates a StreamSessionInputBuffer instance based on a given InputStream.
+     * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
      *
-     * @param in The destination input stream.
+     * @param out The destination output stream.
      * @param bufsize The size of the internal buffer.
      */
-    public StreamSessionInputBuffer(InputStream in, int bufsize) {
+    public StreamSessionOutputBuffer(OutputStream out, int bufsize) {
 	super(new HttpTransportMetricsImpl(), bufsize);
-	// use a buffer stream, so the mark/reset operation is supported
-	bind(in);
+	bind(out);
     }
 
 }

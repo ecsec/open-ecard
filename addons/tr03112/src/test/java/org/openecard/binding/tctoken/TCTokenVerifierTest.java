@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.common.util.FileUtils;
+import org.openecard.httpcore.ResourceContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 

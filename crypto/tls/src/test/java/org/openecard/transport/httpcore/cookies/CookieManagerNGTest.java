@@ -22,6 +22,7 @@
 
 package org.openecard.transport.httpcore.cookies;
 
+import org.openecard.httpcore.cookies.CookieManager;
 import java.net.HttpCookie;
 import java.util.List;
 import org.testng.Assert;

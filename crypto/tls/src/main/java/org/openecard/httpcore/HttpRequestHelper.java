@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
+package org.openecard.httpcore;
 
 import java.net.URL;
 import org.apache.http.HttpRequest;

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,28 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
-
-import org.apache.http.HttpException;
-
-
 /**
- * Exception indicating an errornous result.
- * Results with codes greater than 400 are errors. In some circumstances it is more convenient to raise an error to
- * signal the invalid result. This class helps to do so.
+ * Stream based extension to the Apache http-core library and a TLS based HTTP client.
+ * <p>Instead of being socket based, the {@link org.openecard.apache.http.HttpClientConnection} implementation in this
+ * package can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream}
+ * class.</p>
  *
- * @author Tobias Wich
+ * @see <a href="https://hc.apache.org/httpcomponents-core-ga/tutorial/html/fundamentals.html">http-core Tutorial</a>
  */
-public class InvalidResultStatus extends HttpException {
-
-    private static final long serialVersionUID = 1L;
-
-    public InvalidResultStatus(String message) {
-	super(message);
-    }
-
-    public InvalidResultStatus(String message, Throwable cause) {
-	super(message, cause);
-    }
-
-}
+package org.openecard.httpcore;

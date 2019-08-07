@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2013 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.httpcore;
+package org.openecard.httpcore;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -125,6 +125,10 @@ public class HttpUtils {
     public static void dumpHttpResponse(@Nonnull Logger logger, @Nonnull HttpResponse res,
 	    @Nullable byte[] entityData) {
 	dumpHttpResponse(logger, res, entityData != null ? new String(entityData) : null);
+    }
+
+    public static void dumpHttpResponse(@Nonnull Logger logger, @Nonnull HttpResponse res) {
+	dumpHttpResponse(logger, res, (String) null);
     }
 
 }

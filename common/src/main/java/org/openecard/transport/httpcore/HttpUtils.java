@@ -85,14 +85,14 @@ public class HttpUtils {
     /**
      * Dump the given HTTP response and log it with the given logger instance.
      * The response message is not modifyed by the method. If the data contained in the message should be printed, it
-     * must be extracted seperately and provided in the respective parameter..
+     * must be extracted seperately and provided in the respective parameter.
      *
      * @param logger Logger to dump HTTP request to.
      * @param res Response to dump.
      * @param entityData Response data to dump if not null.
      */
     public static void dumpHttpResponse(@Nonnull Logger logger, @Nonnull HttpResponse res,
-	    @Nullable byte[] entityData) {
+	    @Nullable String entityData) {
 	if (logger.isDebugEnabled()) {
 	    StringWriter w = new StringWriter();
 	    PrintWriter pw = new PrintWriter(w);
@@ -104,13 +104,27 @@ public class HttpUtils {
 		pw.format("  %s: %s%n", h.getName(), h.getValue());
 	    }
 	    if (entityData != null) {
-		pw.print(new String(entityData));
+		pw.print(entityData);
 	    }
 	    pw.println();
 	    pw.flush();
 
 	    logger.debug(w.toString());
 	}
+    }
+
+    /**
+     * Dump the given HTTP response and log it with the given logger instance.
+     * The response message is not modifyed by the method. If the data contained in the message should be printed, it
+     * must be extracted seperately and provided in the respective parameter.
+     *
+     * @param logger Logger to dump HTTP request to.
+     * @param res Response to dump.
+     * @param entityData Response data to dump if not null.
+     */
+    public static void dumpHttpResponse(@Nonnull Logger logger, @Nonnull HttpResponse res,
+	    @Nullable byte[] entityData) {
+	dumpHttpResponse(logger, res, entityData != null ? new String(entityData) : null);
     }
 
 }

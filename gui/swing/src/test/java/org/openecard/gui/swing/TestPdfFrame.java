@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
  */
 public class TestPdfFrame {
 
-    @Test
+    @Test(enabled = false)
     public void startFrame() throws IOException, InterruptedException, ExecutionException {
 	JFrame f = new JFrame();
 	f.setSize(800, 600);

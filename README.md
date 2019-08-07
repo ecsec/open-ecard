@@ -25,7 +25,6 @@ The simplified build instructions are as follows:
 
     $ git clone git://github.com/ecsec/open-ecard.git
     $ cd open-ecard
-    $ git submodule update --init
     $ mvn clean install
 
 
@@ -35,6 +34,10 @@ as follows:
     $ tar xaf open-ecard-${version}.tar.xz
     $ cd open-ecard-$version
     $ mvn clean install
+
+Finally, you can run the Open eCard App from command line:
+
+    $ ./clients/richclient-jlink/target/open-ecard/bin/openecard 
 
 
 License

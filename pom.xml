@@ -75,8 +75,8 @@
 
 		<version.bouncycastle>1.62</version.bouncycastle>
 		<version.jmockit>1.47</version.jmockit>
-		<version.pmd>6.16.0</version.pmd>
 		<version.openjfx>12.0.1</version.openjfx>
+		<version.pmd>6.17.0</version.pmd>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine></argLine>
 
@@ -571,7 +571,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7.1</version>
+					<version>3.8.2</version>
 				</plugin>
 
 				<plugin>
@@ -583,7 +583,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.16</version>
+					<version>2.0.0</version>
 					<configuration>
 						<licenseFile>LICENSE.Open-eCard</licenseFile>
 						<generateBundle>true</generateBundle>
@@ -650,7 +650,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.22</version>
+							<version>8.23</version>
 						</dependency>
 					</dependencies>
 				</plugin>

@@ -5,7 +5,7 @@
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>richclient-jlink</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jlink</packaging>
+	<packaging>jar</packaging>
 
 	<name>Rich Client (JLink)</name>
 
@@ -56,31 +56,30 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jlink-plugin</artifactId>
-				<version>3.0.0-alpha-2-20190731</version>
-				<extensions>true</extensions>
-				<dependencies>
-					<!-- Use newer version of ASM -->
-					<dependency>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-						<version>7.1</version>
-					</dependency>
-				</dependencies>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>0.0.3</version>
 				<configuration>
-					<excludeModules>
-						<module>javafx.baseEmpty</module>
-						<module>javafx.controlsEmpty</module>
-						<module>javafx.graphicsEmpty</module>
-						<module>javafx.swingEmpty</module>
-					</excludeModules>
-					<launcher>openecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
-					<ignoreSigningInformation>true</ignoreSigningInformation>
+					<jlinkImageName>open-ecard</jlinkImageName>
+					<jlinkZipName>open-ecard</jlinkZipName>
+					<launcher>openecard</launcher>
+					<compress>2</compress>
 					<noHeaderFiles>true</noHeaderFiles>
 					<noManPages>true</noManPages>
 					<stripDebug>true</stripDebug>
+					<ignoreSigningInformation>true</ignoreSigningInformation>
+					<mainClass>org.openecard.richclient/org.openecard.richclient.RichClient</mainClass>
 				</configuration>
+				<executions>
+					<execution>
+						<id>default</id>
+						<phase>package</phase>
+						<goals>
+							<goal>compile</goal>
+							<goal>jlink</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

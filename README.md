@@ -37,7 +37,7 @@ as follows:
 
 Finally, you can run the Open eCard App from command line:
 
-    $ ./clients/richclient-jlink/target/open-ecard/bin/openecard 
+    $ ./packager/richclient-packager/target/open-ecard/bin/open-ecard
 
 
 License

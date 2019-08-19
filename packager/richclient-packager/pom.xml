@@ -10,7 +10,7 @@
 
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>richclient-packager</artifactId>
-	<packaging>jpackager</packaging>
+	<packaging>pom</packaging>
 	<name>Rich Client (Packager)</name>
 
 
@@ -139,49 +139,6 @@
 				<artifactId>jlink-jpackager-maven-plugin</artifactId>
 				<version>1.0.0-SNAPSHOT</version>
 				<extensions>true</extensions>
-				<configuration>
-					<!-- Jpackage arguments -->
-					<name>open-ecard</name>
-					<identifier>org.openecard.richclient</identifier>
-					<appVersion>${project.version}</appVersion>
-					<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
-					<jdkToolchain>
-						<version>[14,)</version>
-					</jdkToolchain>
-					<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
-					<skipModulesInclude>true</skipModulesInclude>
-					<!-- JVM arguments of the application -->
-					<arguments>
-						<argument>-XX:-UsePerfData</argument>
-						<argument>-XX:-Inline</argument>
-						<argument>-XX:+AggressiveOpts</argument>
-						<argument>-Xms16m</argument>
-						<argument>-Xmx64m</argument>
-						<argument>-XX:+UseG1GC</argument>
-						<argument>-XX:MinHeapFreeRatio=1</argument>
-						<argument>-XX:MaxHeapFreeRatio=5</argument>
-						<argument>-XX:G1ReservePercent=5</argument>
-						<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
-						<argument>-Djavax.xml.stream.supportDTD=false</argument>
-					</arguments>
-					<!-- Application package metadata -->
-					<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
-					<copyright>2019 ecsec GmbH</copyright>
-					<linuxOptions>
-						<bundleName>Open eCard App</bundleName>
-						<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
-						<rpmLicenseType>GPL v3</rpmLicenseType>
-						<menuGroup>utilities</menuGroup>
-					</linuxOptions>
-					<macOptions>
-						<bundleName>Open eCard App</bundleName>
-						<bundleIdentifier>Open-eCard-App</bundleIdentifier>
-					</macOptions>
-					<windowsOptions>
-						<dirChooser>true</dirChooser>
-						<menuGroup>misc</menuGroup>
-					</windowsOptions>
-				</configuration>
 				<executions>
 					<execution>
 						<id>jlink</id>
@@ -201,6 +158,56 @@
 							<jdkToolchain>
 								<version>11</version>
 							</jdkToolchain>
+						</configuration>
+					</execution>
+					<execution>
+						<id>jpackage</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jpackager</goal>
+						</goals>
+						<configuration>
+							<!-- Jpackage arguments -->
+							<name>open-ecard</name>
+							<identifier>org.openecard.richclient</identifier>
+							<appVersion>${project.version}</appVersion>
+							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
+							<jdkToolchain>
+								<version>[14,)</version>
+							</jdkToolchain>
+							<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
+							<skipModulesInclude>true</skipModulesInclude>
+							<!-- JVM arguments of the application -->
+							<arguments>
+								<argument>-XX:-UsePerfData</argument>
+								<argument>-XX:-Inline</argument>
+								<argument>-XX:+AggressiveOpts</argument>
+								<argument>-Xms16m</argument>
+								<argument>-Xmx64m</argument>
+								<argument>-XX:+UseG1GC</argument>
+								<argument>-XX:MinHeapFreeRatio=1</argument>
+								<argument>-XX:MaxHeapFreeRatio=5</argument>
+								<argument>-XX:G1ReservePercent=5</argument>
+								<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
+								<argument>-Djavax.xml.stream.supportDTD=false</argument>
+							</arguments>
+							<!-- Application package metadata -->
+							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
+							<copyright>2019 ecsec GmbH</copyright>
+							<linuxOptions>
+								<bundleName>Open eCard App</bundleName>
+								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
+								<rpmLicenseType>GPL v3</rpmLicenseType>
+								<menuGroup>utilities</menuGroup>
+							</linuxOptions>
+							<macOptions>
+								<bundleName>Open eCard App</bundleName>
+								<bundleIdentifier>Open-eCard-App</bundleIdentifier>
+							</macOptions>
+							<windowsOptions>
+								<dirChooser>true</dirChooser>
+								<menuGroup>misc</menuGroup>
+							</windowsOptions>
 						</configuration>
 					</execution>
 				</executions>

@@ -5,18 +5,21 @@
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>richclient-jlink</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>jpackager</packaging>
 
 	<name>Rich Client (JLink)</name>
 
 
 	<properties>
+		<openecard.release.version>1.3.0</openecard.release.version>
+
 		<maven.compiler.release>11</maven.compiler.release>
 
 		<version.bouncycastle>1.62</version.bouncycastle>
 		<version.openjfx>12.0.1</version.openjfx>
 		<version.jaxb.runtime>2.3.2</version.jaxb.runtime>
 	</properties>
+
 
 	<repositories>
 		<repository>
@@ -33,8 +36,77 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+
+	<profiles>
+		<profile>
+			<id>app-bundles-Linux</id>
+			<activation>
+				<os>
+					<family>Unix</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+						<configuration>
+							<icon>src/main/resources/linux/Open-eCard-App.png</icon>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-bundles-win</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+						<configuration>
+							<icon>src/main/resources/windows/Open-eCard-App.ico</icon>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-bundles-mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<version>1.0.0-SNAPSHOT</version>
+						<configuration>
+							<icon>src/main/resources/mac-os/Open-eCard-App.icns</icon>
+							<resourceDir>src/main/resources/mac-os</resourceDir>
+							<type>dmg</type>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
 	<build>
 		<plugins>
+			<!-- Maven compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -55,29 +127,75 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Jpackage plugin to create installers -->
 			<plugin>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-				<version>0.0.3</version>
+				<groupId>net.agilhard.maven.plugins</groupId>
+				<artifactId>jlink-jpackager-maven-plugin</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+				<extensions>true</extensions>
 				<configuration>
-					<jlinkImageName>open-ecard</jlinkImageName>
-					<jlinkZipName>open-ecard</jlinkZipName>
-					<launcher>openecard</launcher>
-					<compress>2</compress>
-					<noHeaderFiles>true</noHeaderFiles>
-					<noManPages>true</noManPages>
-					<stripDebug>true</stripDebug>
-					<ignoreSigningInformation>true</ignoreSigningInformation>
-					<mainClass>org.openecard.richclient/org.openecard.richclient.RichClient</mainClass>
+					<!-- Jpackage arguments -->
+					<name>open-ecard</name>
+					<identifier>org.openecard.richclient</identifier>
+					<appVersion>${openecard.release.version}</appVersion>
+					<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
+					<jdkToolchain>
+						<version>[14,)</version>
+					</jdkToolchain>
+					<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
+					<skipModulesInclude>true</skipModulesInclude>
+					<!-- JVM arguments of the application -->
+					<arguments>
+						<argument>-XX:-UsePerfData</argument>
+						<argument>-XX:-Inline</argument>
+						<argument>-XX:+AggressiveOpts</argument>
+						<argument>-Xms16m</argument>
+						<argument>-Xmx64m</argument>
+						<argument>-XX:+UseG1GC</argument>
+						<argument>-XX:MinHeapFreeRatio=1</argument>
+						<argument>-XX:MaxHeapFreeRatio=5</argument>
+						<argument>-XX:G1ReservePercent=5</argument>
+						<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
+						<argument>-Djavax.xml.stream.supportDTD=false</argument>
+					</arguments>
+					<!-- Application package metadata -->
+					<licenseFile>src/main/resources/licenses/LICENSE.GPL</licenseFile>
+					<copyright>2019 ecsec GmbH</copyright>
+					<linuxOptions>
+						<bundleName>Open eCard App</bundleName>
+						<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
+						<rpmLicenseType>GPL v3</rpmLicenseType>
+						<menuGroup>utilities</menuGroup>
+					</linuxOptions>
+					<macOptions>
+						<bundleName>Open eCard App</bundleName>
+						<bundleIdentifier>Open-eCard-App</bundleIdentifier>
+					</macOptions>
+					<windowsOptions>
+						<dirChooser>true</dirChooser>
+						<menuGroup>misc</menuGroup>
+					</windowsOptions>
 				</configuration>
 				<executions>
 					<execution>
-						<id>default</id>
-						<phase>package</phase>
+						<id>jlink</id>
+						<phase>prepare-package</phase>
 						<goals>
-							<goal>compile</goal>
 							<goal>jlink</goal>
 						</goals>
+						<configuration>
+							<!-- JLink arguments -->
+							<launcher>open-ecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
+							<compress>2</compress>
+							<noHeaderFiles>true</noHeaderFiles>
+							<noManPages>true</noManPages>
+							<stripDebug>true</stripDebug>
+							<ignoreSigningInformation>true</ignoreSigningInformation>
+							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
+							<jdkToolchain>
+								<version>11</version>
+							</jdkToolchain>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

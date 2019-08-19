@@ -2,22 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.openecard.clients</groupId>
-	<artifactId>richclient-jlink</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>jpackager</packaging>
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>packager</artifactId>
+		<version>1.3.1-SNAPSHOT</version>
+	</parent>
 
-	<name>Rich Client (JLink)</name>
+	<groupId>org.openecard.clients</groupId>
+	<artifactId>richclient-packager</artifactId>
+	<packaging>jpackager</packaging>
+	<name>Rich Client (Packager)</name>
 
 
 	<properties>
-		<openecard.release.version>1.3.0</openecard.release.version>
-
 		<maven.compiler.release>11</maven.compiler.release>
-
-		<version.bouncycastle>1.62</version.bouncycastle>
-		<version.openjfx>12.0.1</version.openjfx>
-		<version.jaxb.runtime>2.3.2</version.jaxb.runtime>
 	</properties>
 
 
@@ -127,6 +125,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Skip install step of install-plugin-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 			<!-- Jpackage plugin to create installers -->
 			<plugin>
 				<groupId>net.agilhard.maven.plugins</groupId>
@@ -137,7 +143,7 @@
 					<!-- Jpackage arguments -->
 					<name>open-ecard</name>
 					<identifier>org.openecard.richclient</identifier>
-					<appVersion>${openecard.release.version}</appVersion>
+					<appVersion>${project.version}</appVersion>
 					<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
 					<jdkToolchain>
 						<version>[14,)</version>
@@ -159,7 +165,7 @@
 						<argument>-Djavax.xml.stream.supportDTD=false</argument>
 					</arguments>
 					<!-- Application package metadata -->
-					<licenseFile>src/main/resources/licenses/LICENSE.GPL</licenseFile>
+					<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 					<copyright>2019 ecsec GmbH</copyright>
 					<linuxOptions>
 						<bundleName>Open eCard App</bundleName>
@@ -207,7 +213,7 @@
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>richclient-bundle</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.openecard.clients</groupId>
@@ -220,36 +226,30 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>${version.openjfx}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-swing</artifactId>
-			<version>${version.openjfx}</version>
 		</dependency>
 
 		<!-- BouncyCastle -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>${version.bouncycastle}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bctls-jdk15on</artifactId>
-			<version>${version.bouncycastle}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>${version.bouncycastle}</version>
 		</dependency>
 
 		<!-- JAXB -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
-			<version>${version.jaxb.runtime}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>jakarta.activation</groupId>

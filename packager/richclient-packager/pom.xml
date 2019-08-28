@@ -50,7 +50,7 @@
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
-							<icon>src/main/resources/linux/Open-eCard-App.png</icon>
+							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
 							<type>deb</type>
 						</configuration>
 					</plugin>
@@ -72,7 +72,7 @@
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
-							<icon>src/main/resources/windows/Open-eCard-App.ico</icon>
+							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -92,8 +92,8 @@
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
-							<icon>src/main/resources/mac-os/Open-eCard-App.icns</icon>
-							<resourceDir>src/main/resources/mac-os</resourceDir>
+							<icon>${project.basedir}/src/main/resources/mac-os/Open-eCard-App.icns</icon>
+							<resourceDir>${project.basedir}/src/main/resources/mac-os</resourceDir>
 							<type>dmg</type>
 						</configuration>
 					</plugin>
@@ -169,7 +169,7 @@
 						</goals>
 						<configuration>
 							<!-- Jpackage arguments -->
-							<name>open-ecard</name>
+							<name>Open eCard</name>
 							<identifier>org.openecard.richclient</identifier>
 							<appVersion>${project.version}</appVersion>
 							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
@@ -193,17 +193,19 @@
 								<argument>-Djavax.xml.stream.supportDTD=false</argument>
 							</arguments>
 							<!-- Application package metadata -->
+							<vendor>ecsec GmbH</vendor>
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
 							<linuxOptions>
 								<bundleName>org.openecard.richclient</bundleName>
 								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
 								<rpmLicenseType>GPL v3</rpmLicenseType>
-								<menuGroup>utilities</menuGroup>
+								<menuGroup>Internet;Utility;</menuGroup>
+								<packageDeps>pcscd</packageDeps>
 							</linuxOptions>
 							<macOptions>
-								<bundleName>Open eCard App</bundleName>
-								<bundleIdentifier>Open-eCard-App</bundleIdentifier>
+								<bundleName>Open eCard</bundleName>
+								<bundleIdentifier>org.openecard.richclient</bundleIdentifier>
 							</macOptions>
 							<windowsOptions>
 								<dirChooser>true</dirChooser>

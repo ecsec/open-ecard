@@ -169,7 +169,8 @@
 						</goals>
 						<configuration>
 							<!-- Jpackage arguments -->
-							<name>Open eCard</name>
+							<!-- Don't use spaces in application name, because of problems with install scripts ... -->
+							<name>open-ecard</name>
 							<identifier>org.openecard.richclient</identifier>
 							<appVersion>${project.version}</appVersion>
 							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
@@ -197,7 +198,7 @@
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
 							<linuxOptions>
-								<bundleName>org.openecard.richclient</bundleName>
+								<bundleName>open-ecard</bundleName>
 								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
 								<rpmLicenseType>GPL v3</rpmLicenseType>
 								<menuGroup>Internet;Utility;</menuGroup>

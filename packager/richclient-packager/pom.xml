@@ -51,6 +51,7 @@
 						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
+							<resourceDir>${project.basedir}/src/main/resources/linux</resourceDir>
 							<type>deb</type>
 						</configuration>
 					</plugin>
@@ -202,7 +203,7 @@
 								<bundleName>open-ecard</bundleName>
 								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
 								<rpmLicenseType>GPL v3</rpmLicenseType>
-								<menuGroup>Internet;Utility;</menuGroup>
+								<menuGroup>Network;</menuGroup>
 								<packageDeps>pcscd</packageDeps>
 							</linuxOptions>
 							<macOptions>

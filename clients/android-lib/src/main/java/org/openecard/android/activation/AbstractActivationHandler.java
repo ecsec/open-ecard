@@ -365,8 +365,6 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		try {
 		    LOG.info("Stopping Authentication thread ...");
 		    at.interrupt();
-		    at.join();
-		    LOG.info("Authentication thread has stopped.");
 
 		    // cancel task and handle event
 		    if (showFailure) {
@@ -374,6 +372,10 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
 			handleActivationResult(r);
 		    }
+
+		    at.join();
+		    LOG.info("Authentication thread has stopped.");
+
 		} catch (InterruptedException ex) {
 		    LOG.error("Waiting for Authentication thread interrupted.");
 		} finally {

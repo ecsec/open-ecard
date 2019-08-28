@@ -51,6 +51,7 @@
 						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
 							<icon>src/main/resources/linux/Open-eCard-App.png</icon>
+							<type>deb</type>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -195,7 +196,7 @@
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
 							<linuxOptions>
-								<bundleName>Open eCard App</bundleName>
+								<bundleName>org.openecard.richclient</bundleName>
 								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
 								<rpmLicenseType>GPL v3</rpmLicenseType>
 								<menuGroup>utilities</menuGroup>

@@ -195,6 +195,7 @@
 							</arguments>
 							<!-- Application package metadata -->
 							<vendor>ecsec GmbH</vendor>
+							<description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</description>
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
 							<linuxOptions>

@@ -200,7 +200,11 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     public void onStop() {
 	// make sure nothing is running anymore
-	cancelAuthenticationInt(false, false);
+	Thread at = authThread;
+	if (at != null) {
+	    authThread = null; // prevent calling handler at all, we are shutting down
+	    cancelAuthenticationInt(at, false, false);
+	}
 
 	// remove callback which is set onStart
 	if (octx != null) {
@@ -354,11 +358,10 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     @Override
     public void cancelAuthentication(boolean runInThread) {
-	cancelAuthenticationInt(true, runInThread);
+	cancelAuthenticationInt(authThread, true, runInThread);
     }
 
-    private void cancelAuthenticationInt(boolean showFailure, boolean runInNewThread) {
-	Thread at = authThread;
+    private void cancelAuthenticationInt(Thread at, boolean showFailure, boolean runInNewThread) {
 	if (at != null) {
 	    // define function
 	    Runnable fun = () -> {

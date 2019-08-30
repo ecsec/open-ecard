@@ -48,7 +48,6 @@
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
-						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
 							<resourceDir>${project.basedir}/src/main/resources/linux</resourceDir>
@@ -71,7 +70,6 @@
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
-						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
 						</configuration>
@@ -91,7 +89,6 @@
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
-						<version>1.0.0-SNAPSHOT</version>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/mac-os/Open-eCard-App.icns</icon>
 							<resourceDir>${project.basedir}/src/main/resources/mac-os</resourceDir>
@@ -110,7 +107,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
@@ -139,7 +135,6 @@
 			<plugin>
 				<groupId>net.agilhard.maven.plugins</groupId>
 				<artifactId>jlink-jpackager-maven-plugin</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
 				<extensions>true</extensions>
 				<executions>
 					<execution>

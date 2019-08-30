@@ -689,17 +689,9 @@
 
 				<!-- JLink Plugin -->
 				<plugin>
-					<artifactId>maven-jlink-plugin</artifactId>
-					<version>3.0.0-alpha-1</version>
-					<extensions>true</extensions>
-					<dependencies>
-						<!-- Use newer version of ASM -->
-						<dependency>
-							<groupId>org.ow2.asm</groupId>
-							<artifactId>asm</artifactId>
-							<version>7.1</version>
-						</dependency>
-					</dependencies>
+					<groupId>net.agilhard.maven.plugins</groupId>
+					<artifactId>jlink-jpackager-maven-plugin</artifactId>
+					<version>1.0.0-ec.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

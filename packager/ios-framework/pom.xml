@@ -3,20 +3,20 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.openecard.ifd</groupId>
-		<artifactId>scio-backend</artifactId>
+		<groupId>org.openecard</groupId>
+		<artifactId>packager</artifactId>
 		<version>1.4.0-rc.3-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.openecard.ifd.scio-backend</groupId>
-	<artifactId>ios-nfc</artifactId>
+	<groupId>org.openecard.clients</groupId>
+	<artifactId>ios-framework</artifactId>
 	<packaging>jar</packaging>
-	<name>iOS based NFC SmartcardIO</name>
+	<name>Open eCard iOS Framework</name>
 
 	<dependencies>
 		<dependency>
-			<artifactId>common</artifactId>
-			<groupId>org.openecard</groupId>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>ios-nfc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

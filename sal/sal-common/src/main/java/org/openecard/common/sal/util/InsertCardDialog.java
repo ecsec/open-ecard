@@ -41,6 +41,8 @@ import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,6 +53,8 @@ import org.openecard.gui.executor.StepAction;
  * @author Hans-Martin Haase
  */
 public class InsertCardDialog {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InsertCardDialog.class);
 
     private static final String STEP_ID = "insert-card";
 
@@ -97,6 +101,7 @@ public class InsertCardDialog {
 	    ResultStatus status = exec.process();
 
 	    if (status == ResultStatus.CANCEL) {
+		LOG.info("Waiting for cards dialog has been cancelled.");
 		return null;
 	    }
 	    evDispatcher.del(insertCardAction);

@@ -200,7 +200,11 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     public void onStop() {
 	// make sure nothing is running anymore
-	cancelAuthenticationInt(false, false);
+	Thread at = authThread;
+	if (at != null) {
+	    authThread = null; // prevent calling handler at all, we are shutting down
+	    cancelAuthenticationInt(at, false, false);
+	}
 
 	// remove callback which is set onStart
 	if (octx != null) {
@@ -354,19 +358,16 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     @Override
     public void cancelAuthentication(boolean runInThread) {
-	cancelAuthenticationInt(true, runInThread);
+	cancelAuthenticationInt(authThread, true, runInThread);
     }
 
-    private void cancelAuthenticationInt(boolean showFailure, boolean runInNewThread) {
-	Thread at = authThread;
+    private void cancelAuthenticationInt(Thread at, boolean showFailure, boolean runInNewThread) {
 	if (at != null) {
 	    // define function
 	    Runnable fun = () -> {
 		try {
 		    LOG.info("Stopping Authentication thread ...");
 		    at.interrupt();
-		    at.join();
-		    LOG.info("Authentication thread has stopped.");
 
 		    // cancel task and handle event
 		    if (showFailure) {
@@ -374,6 +375,10 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
 			handleActivationResult(r);
 		    }
+
+		    at.join();
+		    LOG.info("Authentication thread has stopped.");
+
 		} catch (InterruptedException ex) {
 		    LOG.error("Waiting for Authentication thread interrupted.");
 		} finally {

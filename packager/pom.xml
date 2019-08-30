@@ -16,7 +16,15 @@
 
 	<modules>
 		<module>richclient-bundle</module>
-		<module>richclient-packager</module>
 	</modules>
+
+	<profiles>
+		<profile>
+			<id>desktop-package</id>
+			<modules>
+				<module>richclient-packager</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>

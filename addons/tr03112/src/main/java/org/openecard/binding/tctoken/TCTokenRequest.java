@@ -234,6 +234,7 @@ public class TCTokenRequest {
 
 	if (usableCards == null) {
 	    // user aborted the card insertion dialog
+	    LOG.info("Waiting for cards has not returned a result, cancelling process.");
 	    throw new UserCancellationException(null, LANG.translationForKey(CARD_INSERTION_ABORT));
 	}
 

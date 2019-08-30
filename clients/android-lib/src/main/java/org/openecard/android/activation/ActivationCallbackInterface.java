@@ -54,6 +54,20 @@ public interface ActivationCallbackInterface <GUI extends AndroidGui> {
     void onCardInserted(String cardType);
 
     /**
+     * Callback for card removed events.
+     * This method can be used to directly see when a card gets removed from the system.
+     * <p>Causes for removal are either:</p>
+     * <ul>
+     * <li>User removed the card</li>
+     * <li>Card gets disconnected after a finished eID process</li>
+     * <li>Card is removed from the system due to an error</li>
+     * </ul>
+     * <p>Given the various options why a card could have been removed, it is important to take the result of the
+     * eID process (cf. {@link #onAuthenticationSuccess(ActivationResult)} etc.) into consideration.</p>
+     */
+    void onCardRemoved();
+
+    /**
      * This method is called when the specific android GUI is available to the activity.
      * <p>If this method is called the server data can be accessed and the PIN can be entered.</p>
      * <p>This method marks the starting point when interaction between the EAC process and the implementing activity

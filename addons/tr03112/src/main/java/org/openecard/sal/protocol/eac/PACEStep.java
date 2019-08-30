@@ -182,9 +182,6 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 		return response;
 	    }
 
-	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
-	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
-
 	    // get the PACEMarker
 	    CardStateEntry cardState = (CardStateEntry) internalData.get(EACConstants.IDATA_CARD_STATE_ENTRY);
 	    PACEMarkerType paceMarker = getPaceMarker(cardState, passwordType);
@@ -193,13 +190,16 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    // Verify that the certificate description matches the terminal certificate
 	    CardVerifiableCertificate taCert = certChain.getTerminalCertificate();
 	    CardVerifiableCertificateVerifier.verify(taCert, certDescription);
-	    // Verify that the required CHAT matches the terminal certificate's CHAT
+
+	    // get CHAT values
 	    CHAT taCHAT = taCert.getCHAT();
+	    CHAT requiredCHAT = new CHAT(eac1Input.getRequiredCHAT());
+	    CHAT optionalCHAT = new CHAT(eac1Input.getOptionalCHAT());
 
 	    // Check that we got an authentication terminal terminal certificate. We abort the process in case there is
 	    // an other role.
 	    if (taCHAT.getRole() != CHAT.Role.AUTHENTICATION_TERMINAL) {
-		String msg = "Unsupported terminal type in Terminal Certificate referenced. Refernced terminal type is " +
+		String msg = "Unsupported terminal type in Terminal Certificate referenced. Referenced terminal type is " +
 			taCHAT.getRole().toString() + ".";
 		response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg));
 		dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
@@ -207,6 +207,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    }
 
 	    CHATVerifier.verfiy(taCHAT, requiredCHAT);
+	    // enable CAN_ALLOWED value, gets deleted by the restrict afterwards if not allowed
+	    optionalCHAT.setSpecialFunctions(CHAT.SpecialFunction.CAN_ALLOWED, true);
 	    // remove overlapping values from optional chat
 	    optionalCHAT.restrictAccessRights(taCHAT);
 

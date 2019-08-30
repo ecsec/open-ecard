@@ -44,6 +44,7 @@ import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
+import org.openecard.sal.protocol.eac.anytype.PasswordID;
 
 
 /**
@@ -86,27 +87,34 @@ public class CHATStepAction extends StepAction {
 	    byte[] slotHandle = (byte[]) ctx.get(EACProtocol.SLOT_HANDLE);
 	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
 
-	    Step pinStep;
+	    Step nextStep;
 	    assert(status != null);
 	    switch (status) {
 		case BLOCKED:
-		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
+		    nextStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
 			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
 			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
 		    break;
 		case DEACTIVATED:
-		    pinStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
+		    nextStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
 			    LANG.translationForKey("step_error_pin_deactivated"),
 			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
 		    break;
 		default:
-		    pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
+		    PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
+		    nextStep = pinStep;
 		    pinStep.setBackgroundTask(bTask);
-		    StepAction pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, (PINStep) pinStep, status);
+		    StepAction pinAction;
+		    if (eacData.pinID == PasswordID.CAN.getByte()) {
+			pinStep.setStatus(EacPinStatus.RC3);
+			pinAction = new CANStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep);
+		    } else {
+			pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
+		    }
 		    pinStep.setAction(pinAction);
 	    }
 
-	    return new StepActionResult(StepActionResultStatus.NEXT, pinStep);
+	    return new StepActionResult(StepActionResultStatus.NEXT, nextStep);
 	} else {
 	    // cancel can not happen, so only back is left to be handled
 	    return new StepActionResult(StepActionResultStatus.BACK);
@@ -141,6 +149,12 @@ public class CHATStepAction extends StepAction {
 		    selectedCHAT.setWriteAccess(item.getName(), item.isChecked());
 		}
 	    }
+	}
+
+	// change PIN ID to CAN if CAN ALLOWED is used
+	if (eacData.selectedCHAT.getSpecialFunctions().getOrDefault(CHAT.SpecialFunction.CAN_ALLOWED, Boolean.FALSE)) {
+	    eacData.pinID = PasswordID.CAN.getByte();
+	    eacData.passwordType = PasswordID.parse(eacData.pinID).getString();
 	}
     }
 

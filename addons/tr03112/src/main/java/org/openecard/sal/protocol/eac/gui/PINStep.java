@@ -29,6 +29,7 @@ import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.anytype.PasswordID;
 
 
 /**
@@ -38,7 +39,7 @@ import org.openecard.sal.protocol.eac.EACData;
  * @author Tobias Wich
  * @author Moritz Horsch
  */
-public class PINStep extends Step {
+public final class PINStep extends Step {
 
     private static final I18n LANG_EAC = I18n.getTranslation("eac");
     private static final I18n LANG_PACE = I18n.getTranslation("pace");
@@ -60,6 +61,7 @@ public class PINStep extends Step {
 
     private final String pinType;
     private final PACEMarkerType paceMarker;
+    private final boolean hasAttemptsCounter;
 
     private EacPinStatus status;
 
@@ -67,6 +69,7 @@ public class PINStep extends Step {
 	super(STEP_ID, "Dummy-Title");
 	this.pinType = LANG_PACE.translationForKey(eacData.passwordType);
 	this.paceMarker = paceMarker;
+	this.hasAttemptsCounter = eacData.pinID != PasswordID.CAN.getByte();
 	setTitle(LANG_PACE.translationForKey(TITLE, pinType));
 	setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	setReversible(false);
@@ -116,10 +119,12 @@ public class PINStep extends Step {
 	pinInputField.setMaxLength(paceMarker.getMaxLength());
 	getInputInfoUnits().add(pinInputField);
 
-	Text attemptCount = new Text();
-	attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
-	attemptCount.setID(PIN_ATTEMPTS_ID);
-	getInputInfoUnits().add(attemptCount);
+	if (hasAttemptsCounter) {
+	    Text attemptCount = new Text();
+	    attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
+	    attemptCount.setID(PIN_ATTEMPTS_ID);
+	    getInputInfoUnits().add(attemptCount);
+	}
 
 	Text notice = new Text();
 	notice.setText(LANG_EAC.translationForKey(NOTICE, pinType));
@@ -136,10 +141,12 @@ public class PINStep extends Step {
 	notice.setText(LANG_EAC.translationForKey(NOTICE, pinType));
 	getInputInfoUnits().add(notice);
 
-	Text attemptCount = new Text();
-	attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
-	attemptCount.setID(PIN_ATTEMPTS_ID);
-	getInputInfoUnits().add(attemptCount);
+	if (hasAttemptsCounter) {
+	    Text attemptCount = new Text();
+	    attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
+	    attemptCount.setID(PIN_ATTEMPTS_ID);
+	    getInputInfoUnits().add(attemptCount);
+	}
     }
 
     protected void addCANEntry() {

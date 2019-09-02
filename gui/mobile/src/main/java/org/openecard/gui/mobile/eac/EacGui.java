@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.openecard.gui.mobile.MobileGui;
 import org.openecard.gui.mobile.eac.types.BoxItem;
 import org.openecard.gui.mobile.eac.types.PinStatus;
 import org.openecard.gui.mobile.eac.types.ServerData;
-import org.openecard.gui.mobile.MobileGui;
 
 
 /**
@@ -48,7 +48,7 @@ public interface EacGui extends MobileGui {
 
     /**
      * Gets the TransactionInfo from the EAC1Input message.
-     * 
+     *
      * @return The TransactionInfo value, or {@code null} if none is sent by the eID Server.
      * @throws InterruptedException Thrown if waiting for the value has been interrupted.
      */

@@ -23,7 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.gui</groupId>
-			<artifactId>android</artifactId>
+			<artifactId>mobile</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

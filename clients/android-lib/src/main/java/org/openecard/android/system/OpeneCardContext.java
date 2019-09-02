@@ -357,6 +357,8 @@ public class OpeneCardContext {
 	return gui;
     }
 
+    // TODO: provide alternative versions with the new interface which is then used in the new mobile-lib
+
     @Nonnull
     public UserConsentNavigatorFactory<? extends AndroidGui> getGuiNavigatorFactory(Class<? extends AndroidGui> guiClass)
 	    throws IllegalArgumentException {

@@ -19,6 +19,7 @@
 		<module>richclient</module>
 		<module>android-core</module>
 		<module>android-lib</module>
+		<module>mobile-lib</module>
 	</modules>
 
 </project>

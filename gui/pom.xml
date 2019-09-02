@@ -20,6 +20,7 @@
 		<module>gui-common</module>
 		<module>swing</module>
 		<module>android</module>
+		<module>mobile</module>
 	</modules>
 
 	<dependencies>

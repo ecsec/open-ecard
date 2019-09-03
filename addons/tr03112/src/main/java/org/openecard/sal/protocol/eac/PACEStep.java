@@ -302,8 +302,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 					    needsTermination = true;
 				    }
 				}
-				// terminate activation thread
-				if (needsTermination) {
+				// terminate activation thread if it has not been interrupted already
+				if (needsTermination && guiResult != ResultStatus.INTERRUPTED) {
 				    Thread actThread = (Thread) dynCtx2.get(TR03112Keys.ACTIVATION_THREAD);
 				    if (actThread != null) {
 					LOG.debug("Interrupting activation thread.");
@@ -399,6 +399,14 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    LOG.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+	} catch (InterruptedException e) {
+	    LOG.error(e.getMessage(), e);
+	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+	    Thread guiThread = (Thread) dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD);
+	    if (guiThread != null) {
+		guiThread.interrupt();
+	    }
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));

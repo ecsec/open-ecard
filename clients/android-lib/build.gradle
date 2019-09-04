@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'digital.wup:android-maven-publish:3.6.2'
     }
 }
@@ -15,12 +15,12 @@ apply plugin: 'digital.wup.android-maven-publish'
 
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 29
         //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 	    multiDexEnabled true
     }
@@ -74,10 +74,11 @@ configurations {
 
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+    //implementation 'androidx.appcompat:appcompat:1.0.0'
+    //androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+    //    exclude group: 'com.android.support', module: 'support-annotations'
+    //})
     //testImplementation 'junit:junit:4.12'
-    //androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    //androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     // necessary dependencies which are not packed into the aar
     api 'org.slf4j:slf4j-api:1.7.25'

@@ -61,8 +61,7 @@
 			<id>app-bundles-win</id>
 			<activation>
 				<os>
-					<family>Windows</family>
-					<arch>x86</arch>
+					<family>windows</family>
 				</os>
 			</activation>
 			<build>
@@ -72,6 +71,7 @@
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
+							<type>exe</type>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -103,6 +103,20 @@
 
 	<build>
 		<plugins>
+			<!-- Plugin to reuse project version for installers -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>parse-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>parse-version</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Maven compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -168,7 +182,7 @@
 							<!-- Don't use spaces in application name, because of problems with install scripts ... -->
 							<name>open-ecard</name>
 							<identifier>org.openecard.richclient</identifier>
-							<appVersion>${project.version}</appVersion>
+							<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
 							<jdkToolchain>
 								<version>[14,)</version>
@@ -208,6 +222,7 @@
 							<windowsOptions>
 								<dirChooser>true</dirChooser>
 								<menuGroup>misc</menuGroup>
+								<upgradeUUID>CB11CB66-71B5-42C1-8076-15F1FEDCC22A</upgradeUUID>
 							</windowsOptions>
 						</configuration>
 					</execution>

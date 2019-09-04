@@ -16,6 +16,10 @@
 
 	<properties>
 		<maven.compiler.release>11</maven.compiler.release>
+
+		<app.name>Open eCard</app.name>
+		<app.vendor>ecsec GmbH</app.vendor>
+		<app.url>https://openecard.org</app.url>
 	</properties>
 
 
@@ -66,13 +70,56 @@
 			</activation>
 			<build>
 				<plugins>
+					<!-- Resource plugin -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>filtering-resources</id>
+								<goals>
+									<goal>resources</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>src/main/resources/windows/filtering</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Create .msi installer -->
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
-							<type>exe</type>
+							<type>msi</type>
 						</configuration>
+					</plugin>
+					<!-- Create .exe installer -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>create-exe</id>
+								<phase>package</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>ISCC.exe</executable>
+									<workingDirectory>${project.basedir}/target</workingDirectory>
+									<arguments>
+										<argument>classes/Open-eCard-App.iss</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
@@ -205,7 +252,7 @@
 								<argument>-Djavax.xml.stream.supportDTD=false</argument>
 							</arguments>
 							<!-- Application package metadata -->
-							<vendor>ecsec GmbH</vendor>
+							<vendor>${app.vendor}</vendor>
 							<description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</description>
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
@@ -217,7 +264,7 @@
 								<packageDeps>pcscd</packageDeps>
 							</linuxOptions>
 							<macOptions>
-								<bundleName>Open eCard</bundleName>
+								<bundleName>${openecard.app.name}</bundleName>
 								<bundleIdentifier>org.openecard.richclient</bundleIdentifier>
 							</macOptions>
 							<windowsOptions>

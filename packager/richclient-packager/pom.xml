@@ -168,6 +168,7 @@
 							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
 							<jdkToolchain>
 								<version>11</version>
+								<vendor>OpenJDK</vendor>
 							</jdkToolchain>
 						</configuration>
 					</execution>

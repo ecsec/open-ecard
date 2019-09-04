@@ -186,7 +186,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	    for (String type : types) {
 		ConnectionHandleType query = new ConnectionHandleType();
 		ConnectionHandleType.RecognitionInfo rinfo = new ConnectionHandleType.RecognitionInfo();
-		rinfo.setCardType(RETURN_CLASS);
+		rinfo.setCardType(type);
 		query.setRecognitionInfo(rinfo);
 		CardStateEntry entry = octx.getCardStates().getEntry(query);
 		if (entry != null) {

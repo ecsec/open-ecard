@@ -56,13 +56,12 @@ public interface ActivationCallbackInterface <GUI extends AndroidGui> {
     /**
      * Callback for card removed events.
      * This method can be used to directly see when a card gets removed from the system.
-     * <p>Causes for removal are either:
+     * <p>Causes for removal are either:</p>
      * <ul>
      * <li>User removed the card</li>
      * <li>Card gets disconnected after a finished eID process</li>
      * <li>Card is removed from the system due to an error</li>
      * </ul>
-     * </p>
      * <p>Given the various options why a card could have been removed, it is important to take the result of the
      * eID process (cf. {@link #onAuthenticationSuccess(ActivationResult)} etc.) into consideration.</p>
      */

@@ -20,12 +20,11 @@ public class FakeMobileNfcTerminalFactory implements TerminalFactory {
 
     @Override
     public String getType() {
-	return "FakeMobileNFC";
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public SCIOTerminals terminals() {
-	return null;
+	throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }

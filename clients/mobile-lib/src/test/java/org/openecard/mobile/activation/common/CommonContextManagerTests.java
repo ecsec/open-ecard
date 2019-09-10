@@ -9,9 +9,10 @@
  ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.OpeneCardServiceHandler;
@@ -21,6 +22,8 @@ import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -29,16 +32,33 @@ import org.testng.annotations.Test;
  */
 public class CommonContextManagerTests {
 
-    @Injectable
+    @Mock
     NFCCapabilities mockNfc;
 
-    @Injectable()
+    @Mock
     OpeneCardContextConfig config;
 
-    @Tested
-    CommonContextManager sut;
-    @Mocked
+    @Mock
     OpeneCardServiceHandler handler;
+
+    MockitoSession mockito;
+
+    private CommonContextManager sut;
+
+    @BeforeMethod()
+    void setup() {
+	mockito = Mockito.mockitoSession()
+		.initMocks(this)
+		.strictness(Strictness.STRICT_STUBS)
+		.startMocking();
+
+	this.sut = new CommonContextManager(mockNfc, config);
+    }
+
+    @AfterMethod()
+    void teardown() {
+	mockito.finishMocking();
+    }
 
     @Test
     void sutIsContextManager() {

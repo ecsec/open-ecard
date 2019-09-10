@@ -13,13 +13,16 @@ import java.lang.management.ManagementFactory;
 import java.security.Provider;
 import java.security.Security;
 import mockit.Expectations;
-import mockit.Injectable;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
-import mockit.Tested;
 import mockit.Verifications;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.mockito.Mock;
+ import org.mockito.Mockito;
+ import static org.mockito.Mockito.*;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.TerminalWatcher;
@@ -37,7 +40,9 @@ import org.openecard.ws.jaxb.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -50,22 +55,40 @@ public class CommonContextManagerStartTests {
 
     private static final int WAIT_TIMEOUT = isDebug() ? 999000 : 1000;
 
-    @Injectable
+    @Mock
     NFCCapabilities mockNfc;
 
-    @Injectable()
+    @Mock
     OpeneCardContextConfig config;
 
-    @Tested
-    CommonContextManager sut;
-    @Mocked
+    @Mock
     OpeneCardServiceHandler handler;
+
+    MockitoSession mockito;
+
+    @BeforeMethod()
+    void setup() {
+	mockito = Mockito.mockitoSession()
+		.initMocks(this)
+		.strictness(Strictness.STRICT_STUBS)
+		.startMocking();
+
+    }
+
+    @AfterMethod()
+    void teardown() {
+	mockito.finishMocking();
+    }
+
     @Mocked
     FakeMobileNfcTerminalFactory mockTerminalFactory;
-    @Mocked
+
+    @Mock
     SCIOTerminals mockSCIOTerminals;
-    @Mocked
+
+    @Mock
     TerminalWatcher mockTerminalWatcher;
+
     private String providerName;
 
     @BeforeClass
@@ -83,12 +106,17 @@ public class CommonContextManagerStartTests {
 	}
     }
 
+    CommonContextManager createSut() {
+	return new CommonContextManager(mockNfc, config);
+    }
+
     @Test
     void sutStartsCorrectly() throws UnableToInitialize, NfcUnavailable, NfcUnavailable, NfcDisabled, NfcDisabled, ApduExtLengthNotSupported, SCIOException {
+	initializationExpectations();
 
-	initialExpectations();
-
-	sut.start(handler);
+	CommonContextManager sut = this.createSut();
+	sut.start(startHandler);
+	
 	new Verifications() {
 	    {
 		handler.onSuccess();
@@ -177,23 +205,19 @@ public class CommonContextManagerStartTests {
 	};
     }
 
-    private void initialExpectations() {
+ 
+	    
+	
+    
+
+    @Test
+    void sutStartsStopsCorrectly() throws UnableToInitialize, NfcUnavailable, NfcUnavailable, NfcDisabled, NfcDisabled, ApduExtLengthNotSupported, SCIOException {
+	initializationExpectations();
+	CommonContextManager sut = this.createSut();
+
 	new Expectations() {
 	    {
-		config.getIfdFactoryClass();
-		result = FakeMobileNfcTerminalFactory.class.getCanonicalName();
-		config.getWsdefMarshallerClass();
-		result = JAXBMarshaller.class.getCanonicalName();
-		mockNfc.isAvailable();
-		result = true;
-		mockNfc.isEnabled();
-		result = true;
-		mockNfc.checkExtendedLength();
-		result = NfcCapabilityResult.SUPPORTED;
-		mockTerminalFactory.terminals();
-		result = mockSCIOTerminals;
-
-		handler.onSuccess();
+		stopHandler.onSuccess();
 	    }
 	};
     }
@@ -202,6 +226,30 @@ public class CommonContextManagerStartTests {
 	for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
 	    if (arg.contains("jdwp=")) {
 		return true;
+	    }
+	};
+    }
+
+    @Test(expectedExceptions = NfcUnavailable.class)
+    void sutCannotStartWithoutNfc() throws UnableToInitialize, NfcUnavailable, NfcUnavailable, NfcDisabled, NfcDisabled, ApduExtLengthNotSupported, SCIOException {
+	initializationExpectations();
+	CommonContextManager sut = this.createSut();
+
+	sut.start(startHandler);
+    }
+
+    private void initializationExpectations() {
+	when(this.config.getIfdFactoryClass()).thenReturn("org.openecard.mobile.activation.fakes.FakeMobileNfcTerminalFactory");
+	when(this.config.getWsdefMarshallerClass()).thenReturn("org.openecard.ws.jaxb.JAXBMarshaller");
+
+	when(this.mockNfc.isAvailable()).thenReturn(Boolean.TRUE);
+	when(this.mockNfc.isEnabled()).thenReturn(Boolean.TRUE);
+	when(this.mockNfc.checkExtendedLength()).thenReturn(NfcCapabilityResult.SUPPORTED);
+
+	new Expectations() {
+	    {
+		mockTerminalFactory.terminals();
+		result = mockSCIOTerminals;
 	    }
 	}
 	return false;

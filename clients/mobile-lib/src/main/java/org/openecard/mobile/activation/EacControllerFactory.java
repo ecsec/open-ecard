@@ -9,10 +9,19 @@
  ************************************************************************** */
 package org.openecard.mobile.activation;
 
+import java.net.URL;
+import java.util.Set;
+import java.util.function.Predicate;
+
 /**
  *
  * @author Neil Crossley
  */
 public interface EacControllerFactory {
 
+    ActivationController create(URL url, Predicate<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction);
+
+    ActivationController create(URL url, Set<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction);
+
+    void destroy(ActivationController controller);
 }

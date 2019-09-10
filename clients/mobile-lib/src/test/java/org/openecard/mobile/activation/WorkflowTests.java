@@ -13,6 +13,6 @@ package org.openecard.mobile.activation;
  *
  * @author Neil Crossley
  */
-public interface CloseableController extends ActivationController {
-    void done();
+public class WorkflowTests {
+
 }

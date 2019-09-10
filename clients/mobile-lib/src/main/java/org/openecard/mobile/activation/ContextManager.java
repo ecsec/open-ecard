@@ -9,12 +9,17 @@
  ************************************************************************** */
 package org.openecard.mobile.activation;
 
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NfcDisabled;
+import org.openecard.mobile.ex.NfcUnavailable;
+import org.openecard.mobile.ex.UnableToInitialize;
+
 /**
  *
  * @author Neil Crossley
  */
 public interface ContextManager {
-    void start(OpeneCardServiceHandler handler);
+    void start(OpeneCardServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported;
 
     void stop(OpeneCardServiceHandler handler);
 }

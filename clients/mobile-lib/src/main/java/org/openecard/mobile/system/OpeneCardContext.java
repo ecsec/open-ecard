@@ -86,9 +86,7 @@ public class OpeneCardContext {
     private static final Logger LOG = LoggerFactory.getLogger(OpeneCardContext.class);
 
     public static final String IFD_FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
-    public static final String IFD_FACTORY_VALUE = "org.openecard.scio.NFCFactory";
     public static final String WSDEF_MARSHALLER_KEY = "org.openecard.ws.marshaller.impl";
-    public static final String WSDEF_MARSHALLER_VALUE = "org.openecard.ws.mobile.MobileMarshaller";
 
     private ClientEnv env;
 
@@ -114,19 +112,21 @@ public class OpeneCardContext {
     private byte[] contextHandle;
 
     private final NFCCapabilities nfcCapabilities;
+    private final OpeneCardContextConfig config;
 
     // package private so that only this package can use it
-    OpeneCardContext(NFCCapabilities nfcCapabilities) {
+    public OpeneCardContext(NFCCapabilities nfcCapabilities, OpeneCardContextConfig config) {
 	if (nfcCapabilities == null) {
 	    throw new IllegalStateException(NO_NFC_CONTEXT);
 	}
 	this.nfcCapabilities = nfcCapabilities;
+	this.config = config;
     }
 
     ///
     /// Initialization & Shutdown
     ///
-    void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
+    public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	String errorMsg = SERVICE_RESPONSE_FAILED;
 
 	if (initialized) {
@@ -151,8 +151,8 @@ public class OpeneCardContext {
 	gui = new MobileUserConsent(allFactories);
 
 	// set up nfc and mobile marshaller
-	IFDProperties.setProperty(IFD_FACTORY_KEY, IFD_FACTORY_VALUE);
-	WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, WSDEF_MARSHALLER_VALUE);
+	IFDProperties.setProperty(IFD_FACTORY_KEY, this.config.getIfdFactoryClass());
+	WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, this.config.getWsdefMarshallerClass());
 
 	boolean nfcAvailable = this.nfcCapabilities.isAvailable();
 	boolean nfcEnabled = this.nfcCapabilities.isEnabled();
@@ -221,7 +221,7 @@ public class OpeneCardContext {
 	    sal = new SelectorSAL(mainSAL, env);
 	    env.setSAL(sal);
 	    env.setCIFProvider(sal);
-	    LOG.info("SAL initialized.");
+	    LOG.info("SAL prepared.");
 
 	    ViewController viewController = new ViewController() {
 		@Override
@@ -237,6 +237,8 @@ public class OpeneCardContext {
 	    try {
 		manager = new AddonManager(env, gui, cardStates, viewController, new ClasspathRegistry());
 		mainSAL.setAddonManager(manager);
+
+		LOG.info("Addon manager initialized.");
 	    } catch (Exception ex) {
 		errorMsg = ADD_ON_INIT_FAILED;
 		throw ex;
@@ -245,6 +247,7 @@ public class OpeneCardContext {
 	    // initialize SAL
 	    try {
 		WSHelper.checkResult(sal.initialize(new Initialize()));
+		LOG.info("SAL initialized.");
 	    } catch (WSHelper.WSException ex) {
 		errorMsg = ex.getMessage();
 		throw ex;
@@ -254,6 +257,7 @@ public class OpeneCardContext {
 	    try {
 		EstablishContext establishContext = new EstablishContext();
 		EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
+		LOG.info("Established context.");
 		WSHelper.checkResult(establishContextResponse);
 		contextHandle = establishContextResponse.getContextHandle();
 		LOG.info("ContextHandle: {}", ByteUtils.toHexString(contextHandle));
@@ -269,7 +273,7 @@ public class OpeneCardContext {
 	}
     }
 
-    String shutdown() {
+    public String shutdown() {
 	initialized = false;
 	try {
 	    if (ifd != null && contextHandle != null) {

@@ -7,12 +7,15 @@
  * contained in a signed written agreement between you and ecsec GmbH.
  *
  ************************************************************************** */
-package org.openecard.mobile.activation;
+package org.openecard.mobile.activation.common;
+
+import org.openecard.mobile.system.OpeneCardContext;
 
 /**
  *
  * @author Neil Crossley
  */
-public interface CloseableController extends ActivationController {
-    void done();
+interface OpeneCardContextProvider {
+
+    OpeneCardContext getContext();
 }

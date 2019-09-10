@@ -7,12 +7,25 @@
  * contained in a signed written agreement between you and ecsec GmbH.
  *
  ************************************************************************** */
-package org.openecard.mobile.activation;
+package org.openecard.mobile.activation.fakes;
+
+import org.openecard.common.ifd.scio.SCIOTerminals;
+import org.openecard.common.ifd.scio.TerminalFactory;
 
 /**
  *
  * @author Neil Crossley
  */
-public interface CloseableController extends ActivationController {
-    void done();
+public class FakeMobileNfcTerminalFactory implements TerminalFactory {
+
+    @Override
+    public String getType() {
+	return "FakeMobileNFC";
+    }
+
+    @Override
+    public SCIOTerminals terminals() {
+	return null;
+    }
+
 }

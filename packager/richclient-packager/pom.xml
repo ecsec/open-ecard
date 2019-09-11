@@ -17,6 +17,7 @@
 	<properties>
 		<maven.compiler.release>11</maven.compiler.release>
 
+		<app.identifier>open-ecard</app.identifier>
 		<app.name>Open eCard</app.name>
 		<app.vendor>ecsec GmbH</app.vendor>
 		<app.url>https://openecard.org</app.url>
@@ -228,7 +229,7 @@
 						<configuration>
 							<!-- Jpackage arguments -->
 							<!-- Don't use spaces in application name, because of problems with install scripts ... -->
-							<name>open-ecard</name>
+							<name>${app.identifier}</name>
 							<identifier>org.openecard.richclient</identifier>
 							<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>

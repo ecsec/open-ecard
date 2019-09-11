@@ -3,6 +3,7 @@
 #define publisher "${app.vendor}"
 #define appURL "${app.url}"
 #define appExeName "open-ecard.exe"
+#define appIdentifier "${app.identifier}"
 
 [Setup]
 AppId={{CB11CB66-71B5-42C1-8076-15F1FEDCC22A}}
@@ -23,7 +24,7 @@ DefaultGroupName={#appName}{#appVersion}
 LicenseFile=${project.basedir}\src\main\resources\windows\license.txt
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=${project.basedir}\target\jpackager-out
-OutputBaseFilename={#appName}{#appVersion}
+OutputBaseFilename={#appIdentifier}-{#appVersion}
 SetupIconFile=${project.basedir}\src\main\resources\windows\Open-eCard-App.ico
 Compression=lzma
 SolidCompression=yes

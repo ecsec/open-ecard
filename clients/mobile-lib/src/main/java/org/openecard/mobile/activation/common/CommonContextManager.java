@@ -43,26 +43,35 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     }
 
     @Override
-    public void start(OpeneCardServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
+    public void start(OpeneCardServiceHandler handler) {
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null");
 	}
-	try {
-	    synchronized (this.lock) {
-		if (context != null) {
-		    throw new UnableToInitialize("The context has already been initialized");
+	new Thread(() -> {
+	    try {
+		synchronized (lock) {
+		    if (context != null) {
+			handler.onFailure(new ServerErrorResponse());
+			return;
+		    }
+		    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
+
+		    newContext.initialize();
+
+		    context = newContext;
+
+		    handler.onSuccess();
 		}
-		OpeneCardContext newContext = new OpeneCardContext(nfc, this.config);
-
-		newContext.initialize();
-
-		this.context = newContext;
-
-		handler.onSuccess();
+	    } catch (UnableToInitialize e) {
+		handler.onFailure(new ServerErrorResponse());
+	    } catch (NfcUnavailable ex) {
+		handler.onFailure(new ServerErrorResponse());
+	    } catch (NfcDisabled ex) {
+		handler.onFailure(new ServerErrorResponse());
+	    } catch (ApduExtLengthNotSupported ex) {
+		handler.onFailure(new ServerErrorResponse());
 	    }
-	} finally {
-	    handler.onFailure(new ServerErrorResponse());
-	}
+	}).start();
 
     }
 
@@ -71,22 +80,23 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}
-	synchronized (this.lock) {
-	    if (context == null) {
-		handler.onFailure(new ServerErrorResponse());
-	    }
-	    try {
-		String result = this.context.shutdown();
-		if (ServiceConstants.SUCCESS.equalsIgnoreCase(result)) {
-		    handler.onSuccess();
-		} else {
+	new Thread(() -> {
+	    synchronized (this.lock) {
+		if (context == null) {
 		    handler.onFailure(new ServerErrorResponse());
 		}
-	    } finally {
-		this.context = null;
-		handler.onFailure(new ServerErrorResponse());
+		try {
+		    String result = this.context.shutdown();
+		    if (ServiceConstants.SUCCESS.equalsIgnoreCase(result)) {
+			handler.onSuccess();
+		    } else {
+			handler.onFailure(new ServerErrorResponse());
+		    }
+		} finally {
+		    this.context = null;
+		}
 	    }
-	}
+	}).start();
     }
 
 }

@@ -7,7 +7,7 @@
  * contained in a signed written agreement between you and ecsec GmbH.
  *
  ************************************************************************** */
-package org.openecard.mobile.activation.fakes;
+package org.openecard.mobile.activation.model;
 
 import java.util.List;
 import org.openecard.common.ifd.scio.NoSuchTerminal;

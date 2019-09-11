@@ -7,7 +7,7 @@
  * contained in a signed written agreement between you and ecsec GmbH.
  *
  ************************************************************************** */
-package org.openecard.mobile.activation.fakes;
+package org.openecard.mobile.activation.model;
 
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.TerminalFactory;
@@ -16,15 +16,21 @@ import org.openecard.common.ifd.scio.TerminalFactory;
  *
  * @author Neil Crossley
  */
-public class FakeMobileNfcTerminalFactory implements TerminalFactory {
+public class DelegatingMobileNfcTerminalFactory implements TerminalFactory {
+
+    private static TerminalFactory delegate = null;
 
     @Override
     public String getType() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return delegate.getType();
     }
 
     @Override
     public SCIOTerminals terminals() {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return delegate.terminals();
+    }
+
+    public static void setDelegate(TerminalFactory delegate) {
+	DelegatingMobileNfcTerminalFactory.delegate = delegate;
     }
 }

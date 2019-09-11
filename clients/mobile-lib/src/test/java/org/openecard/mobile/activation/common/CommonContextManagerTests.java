@@ -47,6 +47,7 @@ public class CommonContextManagerTests {
 
     @BeforeMethod()
     void setup() {
+
 	mockito = Mockito.mockitoSession()
 		.initMocks(this)
 		.strictness(Strictness.STRICT_STUBS)

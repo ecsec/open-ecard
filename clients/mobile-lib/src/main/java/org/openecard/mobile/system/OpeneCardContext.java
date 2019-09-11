@@ -1,5 +1,5 @@
-/** **************************************************************************
- * Copyright (C) 2017-2019 ecsec GmbH.
+/****************************************************************************
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
+
 package org.openecard.mobile.system;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;

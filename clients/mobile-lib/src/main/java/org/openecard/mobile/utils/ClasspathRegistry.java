@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,11 +22,11 @@
 
 package org.openecard.mobile.utils;
 
+import java.util.Set;
 import org.openecard.addon.AddonException;
 import org.openecard.addon.FileRegistry;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.ws.marshal.WSMarshallerException;
-import java.util.Set;
 
 
 /**

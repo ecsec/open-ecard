@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,35 +18,28 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.scio;
 
+import android.nfc.TagLostException;
 import android.nfc.tech.IsoDep;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOATR;
-import org.openecard.common.ifd.scio.SCIOCard;
-import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.openecard.common.ifd.scio.SCIOProtocol;
-import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * NFC implementation of SCIO API card interface.
  *
  * @author Dirk Petrautzki
  */
-public final class NFCCard implements SCIOCard {
+public final class NFCCard extends AbstractNFCCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
 
-    private final NFCCardChannel nfcCardChannel;
-    private final NFCCardTerminal nfcCardTerminal;
     private final int transceiveTimeout;
     private final byte[] histBytes;
     private final IsoDep isodep;
@@ -54,9 +47,9 @@ public final class NFCCard implements SCIOCard {
     private Thread monitor;
 
     public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
+	super(terminal);
 	isodep = tag;
 	transceiveTimeout = timeout;
-	nfcCardTerminal = terminal;
 
 	byte[] histBytesTmp = isodep.getHistoricalBytes();
 	if (histBytesTmp == null) {
@@ -66,8 +59,6 @@ public final class NFCCard implements SCIOCard {
 
 	isodep.connect();
 	isodep.setTimeout(getTransceiveTimeout());
-
-	this.nfcCardChannel = new NFCCardChannel(this);
 
 	// start thread which is monitoring the availability of the card
 	monitor = startMonitor();
@@ -85,16 +76,6 @@ public final class NFCCard implements SCIOCard {
 
     public synchronized boolean isCardPresent() {
 	return isodep.isConnected();
-    }
-
-    @Override
-    public void beginExclusive() throws SCIOException {
-	LOG.warn("beginExclusive not supported");
-    }
-
-    @Override
-    public void endExclusive() throws SCIOException {
-	LOG.warn("endExclusive not supported");
     }
 
     @Override
@@ -176,40 +157,13 @@ public final class NFCCard implements SCIOCard {
 	}
     }
 
-    @Override
-    public SCIOChannel getBasicChannel() {
-	return this.nfcCardChannel;
-    }
-
-    @Override
-    public SCIOProtocol getProtocol() {
-	// NFC is contactless
-        return SCIOProtocol.TCL;
-    }
-
-    @Override
-    public SCIOChannel openLogicalChannel() throws SCIOException {
-	throw new SCIOException("Logical channels are not supported.", SCIOErrorCode.SCARD_E_UNSUPPORTED_FEATURE);
-    }
-
-    @Override
-    public byte[] transmitControlCommand(int controlCode, byte[] command) throws SCIOException {
-	if (controlCode == (0x42000000 + 3400)) {
-	    // GET_FEATURE_REQUEST_CTLCODE
-	    return new byte[0];
-	} else {
-	    String msg = "Control command not supported.";
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_INVALID_PARAMETER);
+    public byte[] transceive(byte[] apdu) throws IOException {
+	try {
+	    return isodep.transceive(apdu);
+	} catch (TagLostException ex) {
+	    LOG.debug("NFC Tag is not present.", ex);
+	    throw new IllegalStateException("Transmit of apdu command failed, because the card is not present.");
 	}
-    }
-
-    @Override
-    public SCIOTerminal getTerminal() {
-        return nfcCardTerminal;
-    }
-
-    byte[] transceive(byte[] apdu) throws IOException {
-	return isodep.transceive(apdu);
     }
 
 }

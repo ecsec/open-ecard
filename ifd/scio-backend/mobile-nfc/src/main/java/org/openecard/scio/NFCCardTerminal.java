@@ -22,8 +22,6 @@
 
 package org.openecard.scio;
 
-import android.nfc.tech.IsoDep;
-import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -47,7 +45,7 @@ public class NFCCardTerminal implements SCIOTerminal {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminal.class);
 
-    private NFCCard nfcCard;
+    private AbstractNFCCard nfcCard;
 
     private final String terminalName;
     private final Object cardPresent;
@@ -69,12 +67,8 @@ public class NFCCardTerminal implements SCIOTerminal {
 	return nfcCard != null;
     }
 
-    // external management functions
-
-    public synchronized void setTag(IsoDep tag, int timeout) throws IOException {
-	LOG.debug("Set NFC tag on integrated NFC terminal.");
-	LOG.debug("Max Transceive Length: {}.", tag.getMaxTransceiveLength());
-	this.nfcCard = new NFCCard(tag, timeout, this);
+    public synchronized void setNFCCard(AbstractNFCCard card) {
+	this.nfcCard = card;
 	notifyCardPresent();
     }
 

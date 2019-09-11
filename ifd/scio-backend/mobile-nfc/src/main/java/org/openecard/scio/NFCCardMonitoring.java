@@ -38,9 +38,9 @@ public class NFCCardMonitoring implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardMonitoring.class);
 
     private final NFCCardTerminal terminal;
-    private final NFCCard card;
+    private final AbstractNFCCard card;
 
-    public NFCCardMonitoring(NFCCardTerminal terminal, NFCCard card) {
+    public NFCCardMonitoring(NFCCardTerminal terminal, AbstractNFCCard card) {
 	this.terminal = terminal;
 	this.card = card;
     }

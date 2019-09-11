@@ -11,7 +11,7 @@
 	<groupId>org.openecard.ifd.scio-backend</groupId>
 	<artifactId>android-nfc</artifactId>
 	<packaging>jar</packaging>
-	<name>NFC SmartcardIO</name>
+	<name>Android NFC SmartcardIO</name>
 
 	<dependencies>
 		<dependency>
@@ -27,6 +27,11 @@
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>wsdef-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>mobile-nfc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

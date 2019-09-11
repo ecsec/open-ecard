@@ -53,6 +53,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
     private static Context context;
     private static NfcAdapter adapter;
     private static NFCCardTerminals terminals;
+    private static NFCCardTerminal terminal;
 
     public NFCFactory() throws NoSuchTerminal {
 	LOG.info("Create new NFCFactory");
@@ -63,7 +64,8 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 		LOG.error(msg);
 		throw new NoSuchTerminal(msg);
 	    }
-	    terminals = new NFCCardTerminals(adapter);
+	    terminal = new NFCCardTerminal();
+	    terminals = new NFCCardTerminals(terminal);
 	}
     }
 
@@ -114,7 +116,8 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	isoDepTag.setTimeout(timeout);
 	try {
 	    // standard nfc terminal
-	    terminals.getIntegratedNfcTerminal().setTag(isoDepTag, timeout);
+	    NFCCard card = new NFCCard(isoDepTag, timeout, terminal);
+	    terminal.setNFCCard(card);
 	} catch (IOException ex) {
 	    LOG.warn(ex.getMessage(), ex);
 	}

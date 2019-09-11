@@ -22,7 +22,6 @@
 
 package org.openecard.scio;
 
-import android.nfc.TagLostException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.apdu.common.CardCommandAPDU;
@@ -45,9 +44,9 @@ public class NFCCardChannel implements SCIOChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardChannel.class);
 
-    private final NFCCard card;
+    private final AbstractNFCCard card;
 
-    public NFCCardChannel(NFCCard card) {
+    public NFCCardChannel(AbstractNFCCard card) {
 	this.card = card;
     }
 
@@ -76,9 +75,6 @@ public class NFCCardChannel implements SCIOChannel {
 	synchronized (card) {
 	    try {
 		return new CardResponseAPDU(card.transceive(apdu));
-	    } catch (TagLostException ex) {
-		LOG.debug("NFC Tag is not present.", ex);
-		throw new IllegalStateException("Transmit of apdu command failed, because the card is not present.");
 	    } catch (IOException ex) {
 		if (! card.isCardPresent()) {
 		    throw new IllegalStateException("Transmit of apdu command failed, because the card has been removed.");

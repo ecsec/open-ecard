@@ -17,8 +17,8 @@
 	<properties>
 		<maven.compiler.release>11</maven.compiler.release>
 
-		<app.identifier>open-ecard</app.identifier>
-		<app.name>Open eCard</app.name>
+		<app.identifier>Open-eCard-App</app.identifier>
+		<app.name>Open eCard App</app.name>
 		<app.vendor>ecsec GmbH</app.vendor>
 		<app.url>https://openecard.org</app.url>
 	</properties>
@@ -265,7 +265,7 @@
 								<packageDeps>pcscd</packageDeps>
 							</linuxOptions>
 							<macOptions>
-								<bundleName>${openecard.app.name}</bundleName>
+								<bundleName>${app.identifier}</bundleName>
 								<bundleIdentifier>org.openecard.richclient</bundleIdentifier>
 							</macOptions>
 							<windowsOptions>

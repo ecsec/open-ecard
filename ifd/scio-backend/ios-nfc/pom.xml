@@ -3,27 +3,20 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.openecard</groupId>
-		<artifactId>ifd</artifactId>
+		<groupId>org.openecard.ifd</groupId>
+		<artifactId>scio-backend</artifactId>
 		<version>1.4.0-rc.3-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.openecard.ifd</groupId>
-	<artifactId>scio-backend</artifactId>
-	<packaging>pom</packaging>
-	<name>SmartcardIO implementations</name>
-
-	<modules>
-		<module>pcsc</module>
-		<module>android-nfc</module>
-		<module>ios-nfc</module>
-		<module>mobile-nfc</module>
-	</modules>
+	<groupId>org.openecard.ifd.scio-backend</groupId>
+	<artifactId>ios-nfc</artifactId>
+	<packaging>jar</packaging>
+	<name>iOS based NFC SmartcardIO</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openecard.ifd</groupId>
-			<artifactId>ifd-common</artifactId>
+			<artifactId>common</artifactId>
+			<groupId>org.openecard</groupId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

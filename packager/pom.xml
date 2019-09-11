@@ -16,6 +16,7 @@
 
 	<modules>
 		<module>richclient-bundle</module>
+		<module>ios-framework</module>
 	</modules>
 
 	<profiles>

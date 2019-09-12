@@ -20,7 +20,12 @@
 		<app.identifier>Open-eCard-App</app.identifier>
 		<app.name>Open eCard App</app.name>
 		<app.vendor>ecsec GmbH</app.vendor>
+		<app.maintainer>tobias.wich@ecsec.de</app.maintainer>
 		<app.url>https://openecard.org</app.url>
+		<app.description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</app.description>
+
+		<package.identifier>open-ecard-app</package.identifier>
+		<package.deps>pcscd</package.deps>
 	</properties>
 
 
@@ -50,12 +55,35 @@
 			</activation>
 			<build>
 				<plugins>
+					<!-- Resource plugin -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>filtering-resources</id>
+								<goals>
+									<goal>resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.basedir}/target/linux/resources</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/main/resources/linux</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
+							<name>${package.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
-							<resourceDir>${project.basedir}/src/main/resources/linux</resourceDir>
+							<resourceDir>${project.basedir}/target/linux/resources</resourceDir>
 							<type>deb</type>
 						</configuration>
 					</plugin>
@@ -84,7 +112,7 @@
 								<configuration>
 									<resources>
 										<resource>
-											<directory>src/main/resources/windows/filtering</directory>
+											<directory>${project.basedir}/src/main/resources/windows/filtering</directory>
 											<filtering>true</filtering>
 										</resource>
 									</resources>
@@ -97,6 +125,7 @@
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
+							<name>${app.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
 							<type>msi</type>
 						</configuration>
@@ -138,6 +167,7 @@
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
+							<name>${app.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/mac-os/Open-eCard-App.icns</icon>
 							<resourceDir>${project.basedir}/src/main/resources/mac-os</resourceDir>
 							<type>dmg</type>
@@ -229,7 +259,6 @@
 						<configuration>
 							<!-- Jpackage arguments -->
 							<!-- Don't use spaces in application name, because of problems with install scripts ... -->
-							<name>${app.identifier}</name>
 							<identifier>org.openecard.richclient</identifier>
 							<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 							<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
@@ -254,15 +283,15 @@
 							</arguments>
 							<!-- Application package metadata -->
 							<vendor>${app.vendor}</vendor>
-							<description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</description>
+							<description>${app.description}</description>
 							<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
 							<copyright>2019 ecsec GmbH</copyright>
 							<linuxOptions>
-								<bundleName>open-ecard</bundleName>
-								<debMaintainer>tobias.wich@ecsec.de</debMaintainer>
+								<bundleName>${package.identifier}</bundleName>
+								<debMaintainer>${app.maintainer}</debMaintainer>
 								<rpmLicenseType>GPL v3</rpmLicenseType>
 								<menuGroup>Network;</menuGroup>
-								<packageDeps>pcscd</packageDeps>
+								<packageDeps>${package.deps}</packageDeps>
 							</linuxOptions>
 							<macOptions>
 								<bundleName>${app.identifier}</bundleName>

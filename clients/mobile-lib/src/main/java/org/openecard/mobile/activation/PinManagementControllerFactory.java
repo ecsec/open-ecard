@@ -25,11 +25,13 @@ package org.openecard.mobile.activation;
 import java.net.URL;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface PinManagementControllerFactory {
 
     CloseableController create(URL url, Predicate<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction);

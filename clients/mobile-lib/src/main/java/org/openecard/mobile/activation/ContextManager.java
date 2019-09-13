@@ -26,11 +26,13 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface ContextManager {
     void start(OpeneCardServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported;
 

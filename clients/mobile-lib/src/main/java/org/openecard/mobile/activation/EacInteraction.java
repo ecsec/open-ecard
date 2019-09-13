@@ -28,11 +28,13 @@ import java.util.function.Function;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.mobile.eac.types.ServerData;
 import org.openecard.gui.mobile.pinmanagement.PinStatus;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface EacInteraction extends ActivationInteraction {
 
     void onPinRequest(int attempt, Function<String, Boolean> enterPin);

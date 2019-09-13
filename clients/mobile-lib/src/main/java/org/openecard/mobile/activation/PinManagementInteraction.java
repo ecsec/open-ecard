@@ -25,11 +25,13 @@ package org.openecard.mobile.activation;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.openecard.gui.mobile.pinmanagement.PinStatus;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface PinManagementInteraction extends ActivationInteraction {
 
     void onPinChangeable(int attempts, BiFunction<String, String, Boolean> enterOldNewPins);

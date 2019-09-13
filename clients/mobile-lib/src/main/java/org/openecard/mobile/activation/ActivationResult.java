@@ -22,11 +22,14 @@
 
 package org.openecard.mobile.activation;
 
+import org.openecard.robovm.annotations.FrameworkInterface;
+
 
 /**
  *
  * @author Mike
  */
+@FrameworkInterface
 public class ActivationResult {
 
     private final String redirectUrl;

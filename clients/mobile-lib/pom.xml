@@ -75,6 +75,12 @@
 			<version>${project.version}</version>
 		</dependency>
 		
+		<!-- building -->
+		<dependency>
+			<groupId>org.openecard.tools</groupId>
+			<artifactId>roboface-annotation</artifactId>
+		</dependency>
+		
 		<!-- testing -->
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>

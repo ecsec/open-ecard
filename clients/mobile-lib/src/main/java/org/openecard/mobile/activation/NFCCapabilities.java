@@ -22,10 +22,13 @@
 
 package org.openecard.mobile.activation;
 
+import org.openecard.robovm.annotations.FrameworkInterface;
+
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface NFCCapabilities {
 
     boolean isAvailable();

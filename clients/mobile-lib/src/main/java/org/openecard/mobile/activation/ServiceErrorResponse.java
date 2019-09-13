@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.activation;
 
+import org.openecard.mobile.system.ServiceErrorCode;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -31,4 +32,19 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public class ServiceErrorResponse {
 
+    private final ServiceErrorCode statusCode;
+    private final String message;
+
+    public ServiceErrorResponse(ServiceErrorCode statusCode, String message) {
+	this.statusCode = statusCode;
+	this.message = message;
+    }
+
+    public ServiceErrorCode getStatusCode() {
+	return statusCode;
+    }
+
+    public String getMessage() {
+	return message;
+    }
 }

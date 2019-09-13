@@ -19,7 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.mobile.activation.common;
 
 import org.openecard.mobile.activation.ContextManager;
@@ -32,7 +31,8 @@ import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.mobile.system.ServiceConstants;
+import org.openecard.mobile.system.ServiceErrorCode;
+import org.openecard.mobile.system.ServiceMessages;
 
 /**
  *
@@ -40,7 +40,7 @@ import org.openecard.mobile.system.ServiceConstants;
  */
 public class CommonContextManager implements ContextManager, OpeneCardContextProvider {
 
-    private final Object lock = new Object();
+    private final Object contextLock = new Object();
     private final NFCCapabilities nfc;
     private final OpeneCardContextConfig config;
     private OpeneCardContext context;
@@ -62,9 +62,9 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	}
 	new Thread(() -> {
 	    try {
-		synchronized (lock) {
+		synchronized (contextLock) {
 		    if (context != null) {
-			handler.onFailure(new ServiceErrorResponse());
+			handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED));
 			return;
 		    }
 		    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
@@ -76,13 +76,13 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		    handler.onSuccess();
 		}
 	    } catch (UnableToInitialize e) {
-		handler.onFailure(new ServiceErrorResponse());
+		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED));
 	    } catch (NfcUnavailable ex) {
-		handler.onFailure(new ServiceErrorResponse());
+		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL));
 	    } catch (NfcDisabled ex) {
-		handler.onFailure(new ServiceErrorResponse());
+		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL));
 	    } catch (ApduExtLengthNotSupported ex) {
-		handler.onFailure(new ServiceErrorResponse());
+		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT));
 	    }
 	}).start();
 
@@ -94,16 +94,16 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}
 	new Thread(() -> {
-	    synchronized (this.lock) {
+	    synchronized (this.contextLock) {
 		if (context == null) {
-		    handler.onFailure(new ServiceErrorResponse());
+		    handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STOPPED, ServiceMessages.SERVICE_ALREADY_STOPPED));
 		}
 		try {
-		    String result = this.context.shutdown();
-		    if (ServiceConstants.SUCCESS.equalsIgnoreCase(result)) {
+		    boolean result = this.context.shutdown();
+		    if (result) {
 			handler.onSuccess();
 		    } else {
-			handler.onFailure(new ServiceErrorResponse());
+			handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.SHUTDOWN_FAILED, ServiceMessages.SERVICE_TERMINATE_FAILURE));
 		    }
 		} finally {
 		    this.context = null;
@@ -111,5 +111,4 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    }
 	}).start();
     }
-
 }

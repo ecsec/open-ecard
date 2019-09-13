@@ -24,11 +24,48 @@ package org.openecard.mobile.system;
 
 
 /**
+ * This class contains status codes which are used in service responses.
  *
  * @author Mike Prechtl
  */
-public enum ServiceResponseLevel {
+public enum ServiceErrorCode {
 
-    INFO, WARNING, ERROR
+    /**
+     * indicates that nfc is not available on the corresponding device.
+     */
+    NFC_NOT_AVAILABLE(100),
 
+    /**
+     * indicates that nfc is not enabled, please move to the device settings.
+     */
+    NFC_NOT_ENABLED(101),
+
+    /**
+     * indicates that the corresponding smartphone device doesn't support nfc with extended length.
+     */
+    NFC_NO_EXTENDED_LENGTH(103),
+
+    /**
+     * indicates that the corresponding device does not support the required API level.
+     */
+    NOT_REQUIRED_API_LEVEL(102),
+
+    ALREADY_STARTED(104),
+    ALREADY_STOPPED(105),
+    /**
+     * indicates other internal errors.
+     */
+    INTERNAL_ERROR(500),
+
+    /**
+     * indicates that the shutdown of the app failed.
+     */
+    SHUTDOWN_FAILED(501);
+
+
+    int code;
+
+    ServiceErrorCode(int code) {
+	this.code = code;
+    }
 }

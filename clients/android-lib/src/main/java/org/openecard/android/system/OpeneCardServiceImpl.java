@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.android.system;
 
 import android.app.Service;
@@ -28,16 +27,18 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import javax.annotation.Nullable;
+import org.openecard.android.activation.AndroidNfcCapabilities;
+import static org.openecard.android.system.ServiceConstants.*;
+import static org.openecard.android.system.ServiceResponseStatusCodes.*;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NfcDisabled;
+import org.openecard.mobile.ex.NfcUnavailable;
+import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.system.OpeneCardContextConfig;
+import static org.openecard.mobile.system.ServiceMessages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.openecard.android.system.ServiceConstants.*;
-import static org.openecard.android.system.ServiceMessages.*;
-import static org.openecard.android.system.ServiceResponseStatusCodes.*;
-import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.ex.NfcDisabled;
-import org.openecard.android.ex.NfcUnavailable;
-import org.openecard.android.ex.UnableToInitialize;
-
 
 /**
  * Implementation of the Android service managing the Open eCard Stack.
@@ -83,7 +84,6 @@ public class OpeneCardServiceImpl extends Service {
     ///
     /// Service Implementation
     ///
-
     private class OpeneCardServiceInt extends OpeneCardService.Stub {
 
 	@Override
@@ -138,13 +138,12 @@ public class OpeneCardServiceImpl extends Service {
 		return new ServiceResponse(SHUTDOWN_SUCCESS, SERVICE_TERMINATE_SUCCESS);
 	    }
 	}
-	
+
 	private OpeneCardContext initializeContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
-	    OpeneCardContext octx = new OpeneCardContext(getApplicationContext());
+	    AndroidNfcCapabilities nfc = AndroidNfcCapabilities.create(getApplicationContext());
+	    OpeneCardContext octx = new OpeneCardContext(nfc, new OpeneCardContextConfig("org.openecard.scio.NFCFactory", "org.openecard.ws.android.AndroidMarshaller"));
 	    octx.initialize();
 	    return octx;
 	}
-
     }
-
 }

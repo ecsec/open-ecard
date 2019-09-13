@@ -32,9 +32,10 @@ import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
-import static org.openecard.android.activation.ActivationResultCode.*;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.common.util.HttpRequestLineUtils;
+import org.openecard.mobile.activation.ActivationResult;
+import static org.openecard.mobile.activation.ActivationResultCode.*;
+import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

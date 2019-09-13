@@ -24,7 +24,7 @@ package org.openecard.mobile.activation.model;
 
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.OpeneCardServiceHandler;
-import org.openecard.mobile.activation.ServerErrorResponse;
+import org.openecard.mobile.activation.ServiceErrorResponse;
 
 /**
  *
@@ -35,7 +35,7 @@ public final class ServiceHandlerFactory {
     private ServiceHandlerFactory() {
     }
 
-    public static OpeneCardServiceHandler create(Promise<ServerErrorResponse> result) {
+    public static OpeneCardServiceHandler create(Promise<ServiceErrorResponse> result) {
 	return new OpeneCardServiceHandler() {
 	    @Override
 	    public void onSuccess() {
@@ -43,7 +43,7 @@ public final class ServiceHandlerFactory {
 	    }
 
 	    @Override
-	    public void onFailure(ServerErrorResponse response) {
+	    public void onFailure(ServiceErrorResponse response) {
 		result.deliver(response);
 	    }
 	};

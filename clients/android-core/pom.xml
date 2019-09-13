@@ -110,6 +110,11 @@
 			<artifactId>pace</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>mobile-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 </project>

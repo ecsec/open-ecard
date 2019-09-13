@@ -31,7 +31,7 @@ import org.openecard.gui.definition.UserConsentDescription;
  *
  * @author Neil Crossley
  */
-public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<Object> {
+public class InsertCardNavigatorFactory implements org.openecard.gui.mobile.UserConsentNavigatorFactory<Object> {
 
     private final GuiIfaceReceiver<Object> ifaceReceiver = new GuiIfaceReceiver<>();
 

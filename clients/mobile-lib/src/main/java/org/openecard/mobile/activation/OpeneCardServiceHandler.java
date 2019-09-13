@@ -29,5 +29,5 @@ package org.openecard.mobile.activation;
 public interface OpeneCardServiceHandler {
     void onSuccess();
 
-    void onFailure(ServerErrorResponse response);
+    void onFailure(ServiceErrorResponse response);
 }

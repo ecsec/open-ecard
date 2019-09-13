@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import static org.openecard.android.system.ServiceResponseStatusCodes.INTERNAL_ERROR;
 import org.openecard.common.util.Promise;
+import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

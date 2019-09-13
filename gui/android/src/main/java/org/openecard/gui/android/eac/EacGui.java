@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.gui.android.AndroidGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
+import org.openecard.gui.mobile.MobileGui;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public interface EacGui extends AndroidGui {
+public interface EacGui extends MobileGui {
 
     /**
      * Gets the server data according to the CertificateDescription data structure.
@@ -48,7 +48,7 @@ public interface EacGui extends AndroidGui {
 
     /**
      * Gets the TransactionInfo from the EAC1Input message.
-     * 
+     *
      * @return The TransactionInfo value, or {@code null} if none is sent by the eID Server.
      * @throws InterruptedException Thrown if waiting for the value has been interrupted.
      */

@@ -22,6 +22,8 @@
 
 package org.openecard.android.system;
 
+import org.openecard.mobile.system.OpeneCardContext;
+
 
 /**
  *

@@ -29,6 +29,7 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.android.stub.MessageDialogStub;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.UserConsentNavigatorFactory;
 
 
 /**
@@ -45,7 +46,7 @@ public class AndroidUserConsent implements UserConsent {
 
     @Override
     public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
-	
+
 	for (UserConsentNavigatorFactory factory : factories) {
 	    if(factory.canCreateFrom(uc)) {
 		UserConsentNavigator nav = factory.createFrom(uc);

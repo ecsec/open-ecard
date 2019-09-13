@@ -25,7 +25,7 @@ package org.openecard.mobile.activation.common;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.OpeneCardServiceHandler;
-import org.openecard.mobile.activation.ServerErrorResponse;
+import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
@@ -64,7 +64,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    try {
 		synchronized (lock) {
 		    if (context != null) {
-			handler.onFailure(new ServerErrorResponse());
+			handler.onFailure(new ServiceErrorResponse());
 			return;
 		    }
 		    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
@@ -76,13 +76,13 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		    handler.onSuccess();
 		}
 	    } catch (UnableToInitialize e) {
-		handler.onFailure(new ServerErrorResponse());
+		handler.onFailure(new ServiceErrorResponse());
 	    } catch (NfcUnavailable ex) {
-		handler.onFailure(new ServerErrorResponse());
+		handler.onFailure(new ServiceErrorResponse());
 	    } catch (NfcDisabled ex) {
-		handler.onFailure(new ServerErrorResponse());
+		handler.onFailure(new ServiceErrorResponse());
 	    } catch (ApduExtLengthNotSupported ex) {
-		handler.onFailure(new ServerErrorResponse());
+		handler.onFailure(new ServiceErrorResponse());
 	    }
 	}).start();
 
@@ -96,14 +96,14 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	new Thread(() -> {
 	    synchronized (this.lock) {
 		if (context == null) {
-		    handler.onFailure(new ServerErrorResponse());
+		    handler.onFailure(new ServiceErrorResponse());
 		}
 		try {
 		    String result = this.context.shutdown();
 		    if (ServiceConstants.SUCCESS.equalsIgnoreCase(result)) {
 			handler.onSuccess();
 		    } else {
-			handler.onFailure(new ServerErrorResponse());
+			handler.onFailure(new ServiceErrorResponse());
 		    }
 		} finally {
 		    this.context = null;

@@ -42,7 +42,7 @@ import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.common.ifd.scio.TerminalWatcher.StateChangeEvent;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.NFCCapabilities;
-import org.openecard.mobile.activation.ServerErrorResponse;
+import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.model.DelegatingMobileNfcTerminalFactory;
 import org.openecard.mobile.activation.model.NfcConfig;
 import org.openecard.mobile.activation.model.OpeneCardContextConfigFactory;
@@ -154,7 +154,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
-	Promise<ServerErrorResponse> result = new Promise();
+	Promise<ServiceErrorResponse> result = new Promise();
 
 	CommonContextManager sut = this.createSut();
 
@@ -168,7 +168,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
-	Promise<ServerErrorResponse> result = new Promise();
+	Promise<ServiceErrorResponse> result = new Promise();
 
 	Object lock = new Object();
 	StateChangeEvent[] events = new StateChangeEvent[]{
@@ -228,8 +228,8 @@ public class CommonContextManagerWithFakeNfcTests {
 
     @Test
     void sutStartStopCorrectly() throws InterruptedException, TimeoutException, Exception {
-	Promise<ServerErrorResponse> startResult = new Promise();
-	Promise<ServerErrorResponse> stopResult = new Promise();
+	Promise<ServiceErrorResponse> startResult = new Promise();
+	Promise<ServiceErrorResponse> stopResult = new Promise();
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
@@ -263,7 +263,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	Object lock = new Object();
 
 	CommonContextManager sut = this.createSut();
-	Promise<ServerErrorResponse> result = new Promise();
+	Promise<ServiceErrorResponse> result = new Promise();
 
 	synchronized (lock) {
 	    sut.start(ServiceHandlerFactory.create(result));

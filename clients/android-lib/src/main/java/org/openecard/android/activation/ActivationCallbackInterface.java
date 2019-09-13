@@ -23,7 +23,8 @@
 package org.openecard.android.activation;
 
 import java.util.Set;
-import org.openecard.gui.android.AndroidGui;
+import org.openecard.gui.mobile.MobileGui;
+import org.openecard.mobile.activation.ActivationResult;
 
 
 /**
@@ -32,7 +33,7 @@ import org.openecard.gui.android.AndroidGui;
  * @param <GUI> Type of the UI that should be used.
  * @author Tobias Wich
  */
-public interface ActivationCallbackInterface <GUI extends AndroidGui> {
+public interface ActivationCallbackInterface <GUI extends MobileGui> {
 
     /**
      * Gets a set of card types supported by this activity.

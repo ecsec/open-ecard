@@ -24,7 +24,7 @@ package org.openecard.android.activation;
 
 import android.app.Dialog;
 import javax.annotation.Nullable;
-import org.openecard.gui.android.AndroidGui;
+import org.openecard.gui.mobile.MobileGui;
 
 
 /**
@@ -34,7 +34,7 @@ import org.openecard.gui.android.AndroidGui;
  * @author Tobias Wich
  * @param <GUI> Type of the UI that should be used.
  */
-public interface ActivationImplementationInterface <GUI extends AndroidGui> extends ActivationCallbackInterface<GUI> {
+public interface ActivationImplementationInterface <GUI extends MobileGui> extends ActivationCallbackInterface<GUI> {
 
     /**
      * Key for the return class which is used in extra arguments of the Intent used to transport the activation URL.

@@ -28,6 +28,7 @@ import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.EacGuiImpl;
 import org.openecard.gui.android.eac.EacNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.UserConsentNavigatorFactory;
 
 
 /**

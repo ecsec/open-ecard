@@ -28,6 +28,7 @@ import org.openecard.gui.android.pinmanagement.PINManagementGui;
 import org.openecard.gui.android.pinmanagement.PINManagementGuiImpl;
 import org.openecard.gui.android.pinmanagement.PINManagementNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.UserConsentNavigatorFactory;
 
 /**
  *

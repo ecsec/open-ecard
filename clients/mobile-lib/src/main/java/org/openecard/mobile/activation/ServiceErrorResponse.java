@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,23 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.ex;
-
+package org.openecard.mobile.activation;
 
 /**
- * Is thrown if apdu extended length is not supported by the corresponding smartphone device.
  *
- * @author Mike Prechtl
- * @see <a href="https://www.openecard.org/en/ecard-api-framework/extended-length-problem">Extended-length-problem</a>
+ * @author Neil Crossley
  */
-public class ApduExtLengthNotSupported extends Exception {
-
-    public ApduExtLengthNotSupported(String message) {
-	super(message);
-    }
-
-    public ApduExtLengthNotSupported(String message, Throwable cause) {
-	super(message, cause);
-    }
+public class ServiceErrorResponse {
 
 }

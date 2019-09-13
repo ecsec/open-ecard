@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import java.util.Set;
 import org.openecard.gui.android.eac.EacGui;
+import org.openecard.mobile.activation.ActivationResult;
 
 
 /**

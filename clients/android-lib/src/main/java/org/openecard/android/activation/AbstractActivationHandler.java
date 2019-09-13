@@ -35,8 +35,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.android.ex.ApduExtLengthNotSupported;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.system.OpeneCardServiceClient;
 import org.openecard.android.system.ServiceResponse;
 import org.openecard.android.utils.NfcUtils;
@@ -45,8 +43,12 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.util.CombinedPromise;
 import org.openecard.common.util.Promise;
-import org.openecard.gui.android.AndroidGui;
-import org.openecard.gui.android.UserConsentNavigatorFactory;
+import org.openecard.gui.mobile.MobileGui;
+import org.openecard.gui.mobile.UserConsentNavigatorFactory;
+import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * @param <T> Type of the parent activity, so it is convenient to access functions and fields from this class.
  * @param <GUI>
  */
-public abstract class AbstractActivationHandler <T extends Activity, GUI extends AndroidGui>
+public abstract class AbstractActivationHandler <T extends Activity, GUI extends MobileGui>
 	implements ActivationImplementationInterface <GUI> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractActivationHandler.class);
@@ -92,15 +94,15 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     private Thread authThread;
     private boolean cardPresent;
-    private final List<Class<? extends AndroidGui>> androidGuiClasses;
-    private AndroidGui androidGui;
+    private final List<Class<? extends MobileGui>> androidGuiClasses;
+    private MobileGui androidGui;
 
     private OpeneCardServiceClient client;
     private OpeneCardContext octx;
     private Class<?> returnClass;
 
 
-    public AbstractActivationHandler(T parent, Class<? extends AndroidGui>... androidGuiClasses) {
+    public AbstractActivationHandler(T parent, Class<? extends MobileGui>... androidGuiClasses) {
 	this.parent = parent;
 	this.androidGuiClasses = Arrays.asList(androidGuiClasses);
     }
@@ -314,7 +316,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
      */
     private void waitForEacGui() {
 	new Thread(() -> {
-	    List<UserConsentNavigatorFactory<? extends AndroidGui>> eacNavFactories;
+	    List<UserConsentNavigatorFactory<? extends MobileGui>> eacNavFactories;
 	    eacNavFactories = octx.getGuiNavigatorFactories(androidGuiClasses);
 	    try {
 		androidGui = waitForGuiPromise(eacNavFactories);
@@ -326,15 +328,15 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	}, "WaitForEacGuiThread").start();
     }
 
-    private AndroidGui waitForGuiPromise(List<UserConsentNavigatorFactory<? extends AndroidGui>> factories)
+    private MobileGui waitForGuiPromise(List<UserConsentNavigatorFactory<? extends MobileGui>> factories)
 	    throws InterruptedException {
-	ArrayList<Promise<AndroidGui>> promises = new ArrayList<>();
-	for (UserConsentNavigatorFactory<? extends AndroidGui> next : factories) {
-	    Promise<? extends AndroidGui> promise = next.getIfacePromise();
-	    promises.add((Promise<AndroidGui>) promise);
+	ArrayList<Promise<MobileGui>> promises = new ArrayList<>();
+	for (UserConsentNavigatorFactory<? extends MobileGui> next : factories) {
+	    Promise<? extends MobileGui> promise = next.getIfacePromise();
+	    promises.add((Promise<MobileGui>) promise);
 	}
 
-	CombinedPromise<AndroidGui> cp = new CombinedPromise<>(promises);
+	CombinedPromise<MobileGui> cp = new CombinedPromise<>(promises);
 	return cp.retrieveFirst();
     }
 

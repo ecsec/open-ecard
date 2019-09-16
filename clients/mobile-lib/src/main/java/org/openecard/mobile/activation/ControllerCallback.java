@@ -29,11 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface CompletionCallbacks {
+public interface ControllerCallback {
 
-    void onAuthenticationSuccess(ActivationResult result);
-
-    void onAuthenticationInterrupted(ActivationResult result);
-
-    void onAuthenticationFailure(ActivationResult result);
+    void onAuthenticationCompletion(ActivationResult result);
 }

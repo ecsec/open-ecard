@@ -28,7 +28,7 @@ import org.openecard.mobile.system.OpeneCardContext;
  *
  * @author Neil Crossley
  */
-interface OpeneCardContextProvider {
+public interface OpeneCardContextProvider {
 
     OpeneCardContext getContext();
 }

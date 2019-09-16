@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
 import org.openecard.mobile.activation.ContextManager;
@@ -33,6 +33,8 @@ import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.mobile.system.ServiceErrorCode;
 import org.openecard.mobile.system.ServiceMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -40,10 +42,13 @@ import org.openecard.mobile.system.ServiceMessages;
  */
 public class CommonContextManager implements ContextManager, OpeneCardContextProvider {
 
+    private static Logger LOG = LoggerFactory.getLogger(CommonContextManager.class);
+
     private final Object contextLock = new Object();
     private final NFCCapabilities nfc;
     private final OpeneCardContextConfig config;
     private OpeneCardContext context;
+    private boolean isRunning = false;
 
     public CommonContextManager(NFCCapabilities nfc, OpeneCardContextConfig config) {
 	this.nfc = nfc;
@@ -52,7 +57,12 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 
     @Override
     public OpeneCardContext getContext() {
-	return context;
+	synchronized (contextLock) {
+	    if (context == null) {
+		throw new IllegalStateException("The Open eCard context is missing because the context manager has not been successfully started.");
+	    }
+	    return context;
+	}
     }
 
     @Override
@@ -61,30 +71,49 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    throw new IllegalArgumentException("Given handler cannot be null");
 	}
 	new Thread(() -> {
-	    try {
-		synchronized (contextLock) {
-		    if (context != null) {
-			handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED));
-			return;
-		    }
-		    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
-
-		    newContext.initialize();
-
-		    context = newContext;
-
-		    handler.onSuccess();
+	    ServiceErrorResponse error = null;
+	    synchronized (contextLock) {
+		if (context != null || isRunning) {
+		    error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
+		} else {
+		    isRunning = true;
 		}
-	    } catch (UnableToInitialize e) {
-		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED));
-	    } catch (NfcUnavailable ex) {
-		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL));
-	    } catch (NfcDisabled ex) {
-		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL));
-	    } catch (ApduExtLengthNotSupported ex) {
-		handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT));
 	    }
-	}).start();
+	    if (error != null) {
+		handler.onFailure(error);
+		return;
+	    }
+	    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
+	    try {
+		newContext.initialize();
+	    } catch (UnableToInitialize ex) {
+		error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
+	    } catch (NfcUnavailable ex) {
+		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL);
+	    } catch (NfcDisabled ex) {
+		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL);
+	    } catch (ApduExtLengthNotSupported ex) {
+		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT);
+	    } catch (Exception ex) {
+		LOG.error("An unexpected error occurred while initializing the Open eCard service context.", ex);
+		error = new ServiceErrorResponse(ServiceErrorCode.INTERNAL_ERROR, ServiceMessages.UNEXCPECTED_ERROR);
+	    } finally {
+		synchronized (contextLock) {
+		    if (error == null) {
+			context = newContext;
+		    } else {
+			context = null;
+			isRunning = false;
+		    }
+		}
+		if (error == null) {
+		    handler.onSuccess();
+		} else {
+		    handler.onFailure(error);
+		}
+	    }
+	}
+	).start();
 
     }
 
@@ -94,19 +123,31 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}
 	new Thread(() -> {
+	    OpeneCardContext targetContext;
+	    ServiceErrorResponse error = null;
 	    synchronized (this.contextLock) {
-		if (context == null) {
-		    handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.ALREADY_STOPPED, ServiceMessages.SERVICE_ALREADY_STOPPED));
+		targetContext = context;
+		if (targetContext == null || !isRunning) {
+		    error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STOPPED, ServiceMessages.SERVICE_ALREADY_STOPPED);
 		}
-		try {
-		    boolean result = this.context.shutdown();
-		    if (result) {
-			handler.onSuccess();
-		    } else {
-			handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.SHUTDOWN_FAILED, ServiceMessages.SERVICE_TERMINATE_FAILURE));
-		    }
-		} finally {
+	    }
+	    if (error != null) {
+		handler.onFailure(error);
+		return;
+	    }
+	    Boolean result = null;
+	    try {
+
+		result = this.context.shutdown();
+	    } finally {
+		synchronized (this.contextLock) {
 		    this.context = null;
+		    isRunning = false;
+		}
+		if (result != null && result) {
+		    handler.onSuccess();
+		} else {
+		    handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.SHUTDOWN_FAILED, ServiceMessages.SERVICE_TERMINATE_FAILURE));
 		}
 	    }
 	}).start();

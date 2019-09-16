@@ -23,6 +23,8 @@
 package org.openecard.mobile.activation.model;
 
 import org.openecard.common.util.Promise;
+import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.OpeneCardServiceHandler;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 
@@ -30,21 +32,30 @@ import org.openecard.mobile.activation.ServiceErrorResponse;
  *
  * @author Neil Crossley
  */
-public final class ServiceHandlerFactory {
+public final class PromiseDeliveringFactory {
 
-    private ServiceHandlerFactory() {
+    private PromiseDeliveringFactory() {
     }
 
-    public static OpeneCardServiceHandler create(Promise<ServiceErrorResponse> result) {
+    public static OpeneCardServiceHandler createContextServiceDelivery(Promise<ServiceErrorResponse> outcome) {
 	return new OpeneCardServiceHandler() {
 	    @Override
 	    public void onSuccess() {
-		result.deliver(null);
+		outcome.deliver(null);
 	    }
 
 	    @Override
 	    public void onFailure(ServiceErrorResponse response) {
-		result.deliver(response);
+		outcome.deliver(response);
+	    }
+	};
+    }
+
+    public static ControllerCallback createControllerCallbackDelivery(Promise<ActivationResult> outcome) {
+	return new ControllerCallback() {
+	    @Override
+	    public void onAuthenticationCompletion(ActivationResult result) {
+		outcome.deliver(result);
 	    }
 	};
     }

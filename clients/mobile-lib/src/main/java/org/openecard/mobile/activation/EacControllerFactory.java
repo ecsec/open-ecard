@@ -34,9 +34,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacControllerFactory {
 
-    ActivationController create(URL url, Predicate<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction);
+    ActivationController create(URL url, Predicate<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 
-    ActivationController create(URL url, Set<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction);
+    ActivationController create(URL url, Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 
     void destroy(ActivationController controller);
 }

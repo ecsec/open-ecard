@@ -52,4 +52,5 @@ public class ServiceMessages {
     public static final String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
     public static final String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";
     public static final String CARD_NOT_PRESENT = "No NPA identity card present.";
+    public static final String UNEXCPECTED_ERROR = "An unexpected error occurred.";
 }

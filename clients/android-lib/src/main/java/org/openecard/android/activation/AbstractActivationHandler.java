@@ -47,6 +47,7 @@ import org.openecard.gui.mobile.MobileGui;
 import org.openecard.gui.mobile.UserConsentNavigatorFactory;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.common.CommonActivationResult;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
@@ -131,7 +132,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    onOecInitSuccess(client.getContext());
 		    break;
 		default:
-		    onAuthenticationFailure(new ActivationResult(ActivationResultCode.INTERNAL_ERROR, r.getMessage()));
+		    onAuthenticationFailure(new CommonActivationResult(ActivationResultCode.INTERNAL_ERROR, r.getMessage()));
 	    }
 	}, "Oec Service Initializer").start();
     }
@@ -155,7 +156,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	setReturnClass(forClassName(actIntent.getStringExtra(RETURN_CLASS)));
 
 	if (data == null || ! isActivateUrlAllowed(data)) {
-	    handleActivationResult(new ActivationResult(ActivationResultCode.INTERNAL_ERROR,
+	    handleActivationResult(new CommonActivationResult(ActivationResultCode.INTERNAL_ERROR,
 		    "Missing or invalid activation URL received."));
 	} else {
 	    String eIDUrl = data.toString();
@@ -374,7 +375,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    // cancel task and handle event
 		    if (showFailure) {
 			String msg = "";
-			ActivationResult r = new ActivationResult(ActivationResultCode.INTERRUPTED, msg);
+			CommonActivationResult r = new CommonActivationResult(ActivationResultCode.INTERRUPTED, msg);
 			handleActivationResult(r);
 		    }
 

@@ -30,21 +30,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public class ServiceErrorResponse {
+public interface ServiceErrorResponse {
 
-    private final ServiceErrorCode statusCode;
-    private final String message;
+    ServiceErrorCode getStatusCode();
 
-    public ServiceErrorResponse(ServiceErrorCode statusCode, String message) {
-	this.statusCode = statusCode;
-	this.message = message;
-    }
-
-    public ServiceErrorCode getStatusCode() {
-	return statusCode;
-    }
-
-    public String getMessage() {
-	return message;
-    }
+    String getMessage();
 }

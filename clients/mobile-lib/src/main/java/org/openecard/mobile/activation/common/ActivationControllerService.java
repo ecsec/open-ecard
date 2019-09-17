@@ -23,7 +23,6 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.mobile.activation.ActivationInteraction;
-import org.openecard.mobile.activation.ActivationResult;
 import static org.openecard.mobile.activation.ActivationResultCode.CLIENT_ERROR;
 import static org.openecard.mobile.activation.ActivationResultCode.DEPENDING_HOST_UNREACHABLE;
 import static org.openecard.mobile.activation.ActivationResultCode.INTERNAL_ERROR;
@@ -64,7 +63,7 @@ public class ActivationControllerService {
 	}
 
 	new Thread(() -> {
-	    ActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
+	    CommonActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
 	    synchronized (processLock) {
 		if (cancelledCallback == controllerCallback) {
 		    return;
@@ -103,7 +102,7 @@ public class ActivationControllerService {
 		LOG.info("Non-critical error occured while cleaning up the event dispatch hooks.", ex);
 	    }
 	}
-	controllerCallback.onAuthenticationCompletion(new ActivationResult(INTERRUPTED, ""));
+	controllerCallback.onAuthenticationCompletion(new CommonActivationResult(INTERRUPTED, ""));
 
 	cancellableThread.interrupt();
 	try {
@@ -124,9 +123,9 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private ActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback callback, ActivationInteraction interaction) {
+    private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback callback, ActivationInteraction interaction) {
 	if (this.isRunning) {
-	    return new ActivationResult(INTERRUPTED, "The activation process is already running");
+	    return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
 	}
 	// create request uri and extract query strings
 	String path = requestURI.getPath();
@@ -135,7 +134,7 @@ public class ActivationControllerService {
 	    // remove leading '/'
 	    resourceName = path.substring(1, path.length());
 	} catch (IndexOutOfBoundsException ex) {
-	    return new ActivationResult(INTERRUPTED, "The given activation URL is not valid: " + requestURI.toExternalForm());
+	    return new CommonActivationResult(INTERRUPTED, "The given activation URL is not valid: " + requestURI.toExternalForm());
 	}
 
 	// find suitable addon
@@ -178,7 +177,7 @@ public class ActivationControllerService {
 		} catch (Exception ex) {
 		    String interruptMessage = ex.getMessage();
 		    LOG.warn("The activation was interrupted with the following message: {}", interruptMessage, ex);
-		    return new ActivationResult(INTERRUPTED, interruptMessage);
+		    return new CommonActivationResult(INTERRUPTED, interruptMessage);
 		} finally {
 		    synchronized (this.processLock) {
 			this.isRunning = false;
@@ -204,33 +203,33 @@ public class ActivationControllerService {
 
 	LOG.info(
 		"Returning error as INTERRUPTED result.");
-	return new ActivationResult(INTERRUPTED, failureMessage);
+	return new CommonActivationResult(INTERRUPTED, failureMessage);
     }
 
-    private ActivationResult createActivationResult(BindingResult result) {
+    private CommonActivationResult createActivationResult(BindingResult result) {
 	LOG.info("Returning result: {}", result);
-	ActivationResult activationResult;
+	CommonActivationResult activationResult;
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
-		activationResult = new ActivationResult(location, REDIRECT);
+		activationResult = new CommonActivationResult(location, REDIRECT);
 		break;
 	    case OK:
-		activationResult = new ActivationResult(OK);
+		activationResult = new CommonActivationResult(OK);
 		break;
 	    case INTERRUPTED:
-		activationResult = new ActivationResult(INTERRUPTED, result.getResultMessage());
+		activationResult = new CommonActivationResult(INTERRUPTED, result.getResultMessage());
 		break;
 	    case DEPENDING_HOST_UNREACHABLE:
-		activationResult = new ActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
+		activationResult = new CommonActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
 		break;
 	    case WRONG_PARAMETER:
 	    case MISSING_PARAMETER:
 	    case RESOURCE_UNAVAILABLE:
-		activationResult = new ActivationResult(CLIENT_ERROR, result.getResultMessage());
+		activationResult = new CommonActivationResult(CLIENT_ERROR, result.getResultMessage());
 		break;
 	    default:
-		activationResult = new ActivationResult(INTERNAL_ERROR, result.getResultMessage());
+		activationResult = new CommonActivationResult(INTERNAL_ERROR, result.getResultMessage());
 	}
 	return activationResult;
     }

@@ -35,6 +35,7 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.mobile.activation.ActivationResult;
 import static org.openecard.mobile.activation.ActivationResultCode.*;
+import org.openecard.mobile.activation.common.CommonActivationResult;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,33 +112,33 @@ public class ActivationController {
 	}
 
 	LOG.info("Returning error as INTERRUPTED result.");
-	return new ActivationResult(INTERRUPTED, failureMessage);
+	return new CommonActivationResult(INTERRUPTED, failureMessage);
     }
 
-    private ActivationResult createActivationResult(BindingResult result) {
+    private CommonActivationResult createActivationResult(BindingResult result) {
 	LOG.info("Returning result: {}", result);
-	ActivationResult activationResult;
+	CommonActivationResult activationResult;
 	switch (result.getResultCode()) {
 	    case REDIRECT:
 		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
-		activationResult = new ActivationResult(location, REDIRECT);
+		activationResult = new CommonActivationResult(location, REDIRECT);
 		break;
 	    case OK:
-		activationResult = new ActivationResult(OK);
+		activationResult = new CommonActivationResult(OK);
 		break;
 	    case INTERRUPTED:
-		activationResult = new ActivationResult(INTERRUPTED, result.getResultMessage());
+		activationResult = new CommonActivationResult(INTERRUPTED, result.getResultMessage());
 		break;
 	    case DEPENDING_HOST_UNREACHABLE:
-		activationResult = new ActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
+		activationResult = new CommonActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
 		break;
 	    case WRONG_PARAMETER:
 	    case MISSING_PARAMETER:
 	    case RESOURCE_UNAVAILABLE:
-		activationResult = new ActivationResult(CLIENT_ERROR, result.getResultMessage());
+		activationResult = new CommonActivationResult(CLIENT_ERROR, result.getResultMessage());
 		break;
 	    default:
-		activationResult = new ActivationResult(INTERNAL_ERROR, result.getResultMessage());
+		activationResult = new CommonActivationResult(INTERNAL_ERROR, result.getResultMessage());
 	}
 	return activationResult;
     }

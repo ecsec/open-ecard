@@ -74,7 +74,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    ServiceErrorResponse error = null;
 	    synchronized (contextLock) {
 		if (context != null || isRunning) {
-		    error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
+		    error = new CommonServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
 		} else {
 		    isRunning = true;
 		}
@@ -87,16 +87,16 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    try {
 		newContext.initialize();
 	    } catch (UnableToInitialize ex) {
-		error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
+		error = new CommonServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
 	    } catch (NfcUnavailable ex) {
-		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL);
+		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL);
 	    } catch (NfcDisabled ex) {
-		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL);
+		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL);
 	    } catch (ApduExtLengthNotSupported ex) {
-		error = new ServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT);
+		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT);
 	    } catch (Exception ex) {
 		LOG.error("An unexpected error occurred while initializing the Open eCard service context.", ex);
-		error = new ServiceErrorResponse(ServiceErrorCode.INTERNAL_ERROR, ServiceMessages.UNEXCPECTED_ERROR);
+		error = new CommonServiceErrorResponse(ServiceErrorCode.INTERNAL_ERROR, ServiceMessages.UNEXCPECTED_ERROR);
 	    } finally {
 		synchronized (contextLock) {
 		    if (error == null) {
@@ -128,7 +128,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    synchronized (this.contextLock) {
 		targetContext = context;
 		if (targetContext == null || !isRunning) {
-		    error = new ServiceErrorResponse(ServiceErrorCode.ALREADY_STOPPED, ServiceMessages.SERVICE_ALREADY_STOPPED);
+		    error = new CommonServiceErrorResponse(ServiceErrorCode.ALREADY_STOPPED, ServiceMessages.SERVICE_ALREADY_STOPPED);
 		}
 	    }
 	    if (error != null) {
@@ -147,7 +147,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		if (result != null && result) {
 		    handler.onSuccess();
 		} else {
-		    handler.onFailure(new ServiceErrorResponse(ServiceErrorCode.SHUTDOWN_FAILED, ServiceMessages.SERVICE_TERMINATE_FAILURE));
+		    handler.onFailure(new CommonServiceErrorResponse(ServiceErrorCode.SHUTDOWN_FAILED, ServiceMessages.SERVICE_TERMINATE_FAILURE));
 		}
 	    }
 	}).start();

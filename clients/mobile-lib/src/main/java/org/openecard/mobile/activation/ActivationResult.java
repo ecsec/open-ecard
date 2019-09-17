@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,52 +18,22 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
-
 
 /**
  *
  * @author Mike
  */
 @FrameworkInterface
-public class ActivationResult {
+public interface ActivationResult {
 
-    private final String redirectUrl;
-    private final ActivationResultCode resultCode;
-    private final String errorMessage;
+    String getRedirectUrl();
 
-    public ActivationResult(ActivationResultCode resultCode) {
-	this(null, resultCode, null);
-    }
+    ActivationResultCode getResultCode();
 
-    public ActivationResult(ActivationResultCode resultCode, String errorMessage) {
-	this(null, resultCode, errorMessage);
-    }
-
-    public ActivationResult(String redirectUrl, ActivationResultCode resultCode) {
-	this(redirectUrl, resultCode, null);
-    }
-
-    public ActivationResult(String redirectUrl, ActivationResultCode resultCode, String errorMessage) {
-	this.redirectUrl = redirectUrl;
-	this.resultCode = resultCode;
-	this.errorMessage = errorMessage;
-    }
-
-    public String getRedirectUrl() {
-	return redirectUrl;
-    }
-
-    public ActivationResultCode getResultCode() {
-	return resultCode;
-    }
-
-    public String getErrorMessage() {
-	return errorMessage;
-    }
+    String getErrorMessage();
 
 }

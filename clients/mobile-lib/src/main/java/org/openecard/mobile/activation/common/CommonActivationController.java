@@ -10,7 +10,9 @@
 package org.openecard.mobile.activation.common;
 
 import java.net.URL;
+import java.util.Set;
 import org.openecard.mobile.activation.ActivationController;
+import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.ControllerCallback;
 
 /**
@@ -20,20 +22,24 @@ import org.openecard.mobile.activation.ControllerCallback;
 class CommonActivationController implements ActivationController {
 
     private final URL requestURI;
+    private final Set<String> supportedCards;
     private final String protocolType;
     private final ActivationControllerService activationControllerService;
     private final ControllerCallback activation;
+    private final ActivationInteraction interaction;
 
-    public CommonActivationController(URL requestURI, String protocolType, ActivationControllerService activationControllerService, ControllerCallback activation) {
+    public CommonActivationController(URL requestURI, Set<String> supportedCards, String protocolType, ActivationControllerService activationControllerService, ControllerCallback activation, ActivationInteraction interaction) {
 	this.requestURI = requestURI;
+	this.supportedCards = supportedCards;
 	this.protocolType = protocolType;
 	this.activationControllerService = activationControllerService;
 	this.activation = activation;
+	this.interaction = interaction;
     }
 
     @Override
     public void start() {
-	this.activationControllerService.start(this.requestURI, this.activation);
+	this.activationControllerService.start(this.requestURI, supportedCards, this.activation, this.interaction);
     }
 
     @Override

@@ -24,7 +24,6 @@ package org.openecard.mobile.activation;
 
 import java.net.URL;
 import java.util.Set;
-import java.util.function.Predicate;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -33,8 +32,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  */
 @FrameworkInterface
 public interface EacControllerFactory {
-
-    ActivationController create(URL url, Predicate<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 
     ActivationController create(URL url, Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 

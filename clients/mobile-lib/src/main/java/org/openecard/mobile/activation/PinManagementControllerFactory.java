@@ -23,7 +23,6 @@
 package org.openecard.mobile.activation;
 
 import java.util.Set;
-import java.util.function.Predicate;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -32,8 +31,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  */
 @FrameworkInterface
 public interface PinManagementControllerFactory {
-
-    ActivationController create(Predicate<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 
     ActivationController create(Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
 

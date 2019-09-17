@@ -13,13 +13,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
+import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.ActivationResult;
 import static org.openecard.mobile.activation.ActivationResultCode.CLIENT_ERROR;
 import static org.openecard.mobile.activation.ActivationResultCode.DEPENDING_HOST_UNREACHABLE;
@@ -28,6 +31,7 @@ import static org.openecard.mobile.activation.ActivationResultCode.INTERRUPTED;
 import static org.openecard.mobile.activation.ActivationResultCode.OK;
 import static org.openecard.mobile.activation.ActivationResultCode.REDIRECT;
 import org.openecard.mobile.activation.ControllerCallback;
+import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +49,13 @@ public class ActivationControllerService {
     private Thread currentProccess = null;
     private ControllerCallback currentCallback = null;
     private ControllerCallback cancelledCallback = null;
+    private AutoCloseable closable = null;
 
     public ActivationControllerService(OpeneCardContextProvider contextProvider) {
 	this.contextProvider = contextProvider;
     }
 
-    public void start(final URL requestURI, final ControllerCallback controllerCallback) {
+    public void start(final URL requestURI, Set<String> supportedCards, final ControllerCallback controllerCallback, ActivationInteraction interaction) {
 	if (requestURI == null) {
 	    throw new IllegalArgumentException("Request url cannot be null.");
 	}
@@ -59,8 +64,8 @@ public class ActivationControllerService {
 	}
 
 	new Thread(() -> {
-	    ActivationResult result = this.activate(requestURI, controllerCallback);
-	    synchronized(processLock) {
+	    ActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
+	    synchronized (processLock) {
 		if (cancelledCallback == controllerCallback) {
 		    return;
 		}
@@ -74,6 +79,7 @@ public class ActivationControllerService {
 	    throw new IllegalArgumentException("Please pass the controller callback used to start the activation.");
 	}
 	Thread cancellableThread;
+	AutoCloseable currentClosable;
 	synchronized (this.processLock) {
 	    if (!this.isRunning) {
 		LOG.info("The activation could not be cancelled because an activation process is not currently running.");
@@ -87,6 +93,15 @@ public class ActivationControllerService {
 	    cancellableThread = this.currentProccess;
 	    this.currentProccess = null;
 	    this.isRunning = false;
+	    currentClosable = this.closable;
+	    this.closable = null;
+	}
+	if (currentClosable != null) {
+	    try {
+		currentClosable.close();
+	    } catch (Exception ex) {
+		LOG.info("Non-critical error occured while cleaning up the event dispatch hooks.", ex);
+	    }
 	}
 	controllerCallback.onAuthenticationCompletion(new ActivationResult(INTERRUPTED, ""));
 
@@ -109,7 +124,7 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private ActivationResult activate(URL requestURI, ControllerCallback callback) {
+    private ActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback callback, ActivationInteraction interaction) {
 	if (this.isRunning) {
 	    return new ActivationResult(INTERRUPTED, "The activation process is already running");
 	}
@@ -125,7 +140,8 @@ public class ActivationControllerService {
 
 	// find suitable addon
 	String failureMessage;
-	AddonManager manager = this.contextProvider.getContext().getManager();
+	final OpeneCardContext context = this.contextProvider.getContext();
+	AddonManager manager = context.getManager();
 	AddonSelector selector = null;
 	AppPluginAction action = null;
 	try {
@@ -151,7 +167,12 @@ public class ActivationControllerService {
 		    this.cancelledCallback = null;
 		    this.currentProccess = Thread.currentThread();
 		}
+		EventDispatcher eventDispatcher = context.getEventDispatcher();
 		try {
+		    Map.Entry<CardEventHandler, AutoCloseable> entry = CardEventHandler.create(supportedCards, eventDispatcher, interaction);
+
+		    this.closable = entry.getValue();
+
 		    BindingResult result = action.execute(null, queries, null, null);
 		    return createActivationResult(result);
 		} catch (Exception ex) {

@@ -28,7 +28,9 @@ import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.Promise;
+import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ControllerCallback;
@@ -89,6 +91,9 @@ public class ActivationControllerServiceTests {
     @Mock
     AppPluginAction mockPluginAction;
 
+    @Mock
+    EventDispatcher mockEventDispatcher;
+
     @Test
     void canCreateSut() {
 	this.createSut();
@@ -97,11 +102,13 @@ public class ActivationControllerServiceTests {
     @Test
     void sutCanCompleteActivation() throws InterruptedException, TimeoutException {
 	Promise<ActivationResult> outcome = new Promise();
-	ControllerCallback mockCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
-
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 10).createSut();
 
-	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(), mockCallback);
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		anySupportedCards(),
+		mockControllerCallback,
+		anyActivationInteraction());
 
 	ActivationResult result = outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	Assert.assertNotNull(result);
@@ -111,14 +118,15 @@ public class ActivationControllerServiceTests {
     @Test
     void canCancelSut() throws InterruptedException, TimeoutException {
 	Promise<ActivationResult> outcome = new Promise();
-	ControllerCallback mockCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
 
-	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(), mockCallback);
-
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		anySupportedCards(),
+		mockControllerCallback,
+		anyActivationInteraction());
 	Thread.sleep(WAIT_TIMEOUT / 10);
-
-	sut.cancelAuthentication(mockCallback);
+	sut.cancelAuthentication(mockControllerCallback);
 
 	ActivationResult result = outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	Assert.assertNotNull(result);
@@ -127,19 +135,22 @@ public class ActivationControllerServiceTests {
 
     @Test
     void sutCancelsActivationOnlyOnce() throws InterruptedException, TimeoutException {
-	ControllerCallback mockCallback = mock(ControllerCallback.class);
+	ControllerCallback mockControllerCallback = mock(ControllerCallback.class);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
 
-	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(), mockCallback);
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		anySupportedCards(),
+		mockControllerCallback,
+		anyActivationInteraction());
+	Thread.sleep(WAIT_TIMEOUT / 10);
+	sut.cancelAuthentication(mockControllerCallback);
+	Thread.sleep(WAIT_TIMEOUT / 10);
+	sut.cancelAuthentication(mockControllerCallback);
+	Thread.sleep(WAIT_TIMEOUT / 10);
+	sut.cancelAuthentication(mockControllerCallback);
 
-	Thread.sleep(WAIT_TIMEOUT / 10);
-	sut.cancelAuthentication(mockCallback);
-	Thread.sleep(WAIT_TIMEOUT / 10);
-	sut.cancelAuthentication(mockCallback);
-	Thread.sleep(WAIT_TIMEOUT / 10);
-	sut.cancelAuthentication(mockCallback);
-
-	verify(mockCallback).onAuthenticationCompletion(argThat(r -> r.getResultCode() == ActivationResultCode.INTERRUPTED));
+	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> r.getResultCode() == ActivationResultCode.INTERRUPTED));
+	verify(mockControllerCallback, times(1)).onAuthenticationCompletion(any());
     }
 
     public ActivationControllerService createSut() {
@@ -154,7 +165,12 @@ public class ActivationControllerServiceTests {
 		add(mockAddon);
 	    }
 	};
-	return this.withMockContext().withMockAddonManager().withAddonRegistry().withAddons(addonName, addons).withAppPluginAction(mockAddon, addonName);
+	return this.withMockContext()
+		.withMockAddonManager()
+		.withAddonRegistry()
+		.withEventDispatcher()
+		.withAddons(addonName, addons)
+		.withAppPluginAction(mockAddon, addonName);
     }
 
     public ActivationControllerServiceTests withMockContext() {
@@ -172,6 +188,11 @@ public class ActivationControllerServiceTests {
 	return this;
     }
 
+    private ActivationControllerServiceTests withEventDispatcher() {
+	when(this.mockContext.getEventDispatcher()).thenReturn(this.mockEventDispatcher);
+	return this;
+    }
+
     private ActivationControllerServiceTests withAddons(String name, Set<AddonSpecification> addons) {
 	when(this.mockAddonRegistry.searchByResourceName(name)).thenReturn(addons);
 	return this;
@@ -181,7 +202,7 @@ public class ActivationControllerServiceTests {
 	when(this.mockAddonManager.getAppPluginAction(addonSpec, resourceName)).thenReturn(mockPluginAction);
 	return this;
     }
-    
+
     private ActivationControllerServiceTests withActivation(BindingResult result, int sleepDelay) {
 	when(this.mockPluginAction.execute(any(), any(), any(), any())).thenAnswer(new Answer<BindingResult>() {
 	    @Override
@@ -196,5 +217,15 @@ public class ActivationControllerServiceTests {
 
     private ActivationControllerServiceTests withSuccessActivation(int sleepDelay) {
 	return this.withActivation(new BindingResult(), sleepDelay);
+    }
+
+    private ActivationInteraction anyActivationInteraction() {
+	return mock(ActivationInteraction.class);
+    }
+    private Set<String> allSupportedCards() {
+	return new HashSet<String>();
+    }
+    private Set<String> anySupportedCards() {
+	return allSupportedCards();
     }
 }

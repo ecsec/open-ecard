@@ -24,7 +24,6 @@ package org.openecard.mobile.activation.common;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
-import java.util.function.Predicate;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacInteraction;
@@ -42,7 +41,7 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 
     static {
 	try {
-	    ACTIVATION_URL  = new URL("http://localhost:2427/eID-Client?ShowUI=PINManagement");
+	    ACTIVATION_URL = new URL("http://localhost:2427/eID-Client?ShowUI=PINManagement");
 	} catch (MalformedURLException ex) {
 	    throw new IllegalStateException("Could not create PIN management ULR.", ex);
 	}
@@ -57,13 +56,8 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
     }
 
     @Override
-    public ActivationController create(Predicate<String> supportedCard, ControllerCallback controllerCallback, EacInteraction interaction) {
-	return new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, controllerCallback);
-    }
-
-    @Override
     public ActivationController create(Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return new CommonActivationController(activationUrl, supportedCard, PROTOCOL_TYPE, activationControllerService, activation, interaction);
     }
 
     @Override

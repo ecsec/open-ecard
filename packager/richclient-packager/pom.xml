@@ -28,23 +28,6 @@
 		<package.deps>pcscd</package.deps>
 	</properties>
 
-
-	<repositories>
-		<repository>
-			<id>openecard-repos</id>
-			<name>Openecard Repos</name>
-			<url>https://mvn.ecsec.de/repository/openecard-public</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>openecard-repos</id>
-			<url>https://mvn.ecsec.de/repository/openecard-public</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-
 	<profiles>
 		<profile>
 			<id>app-bundles-Linux</id>
@@ -361,7 +344,6 @@
 		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>jakarta.activation</artifactId>
-			<version>1.2.2-20190731</version>
 		</dependency>
 	</dependencies>
 

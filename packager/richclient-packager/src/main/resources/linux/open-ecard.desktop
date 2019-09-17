@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=open-ecard
-Comment=Open eCard
-Exec=/opt/open-ecard/bin/open-ecard
-Icon=/opt/open-ecard/bin/open-ecard.png
-Terminal=false
-Type=Application
-Categories=Network;

@@ -15,9 +15,80 @@
 
 	<properties>
 		<powermock.version>2.0.2</powermock.version>
+		<robovm.version>2.3.7</robovm.version>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>iOS</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<annotationProcessorPaths>
+								<annotationProcessorPath>
+									<groupId>org.openecard.tools</groupId>
+									<artifactId>roboface-processor</artifactId>
+									<version>1.0.0-rc.2-SNAPSHOT</version>
+								</annotationProcessorPath>
+							</annotationProcessorPaths>
+							<annotationProcessors>
+								<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
+							</annotationProcessors>
+							<compilerArgs>
+								<arg>-Aroboface.headername=open-ecard-framework.h</arg>
+							</compilerArgs>
+							<debug>true</debug>
+							<debuglevel>source,lines,vars</debuglevel>
+							<showDeprecation>true</showDeprecation>
+							<showWarnings>true</showWarnings>
+							<!--failOnWarning>true</failOnWarning-->
+						</configuration>
+					</plugin>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<configuration>
+							<classifier>iOS</classifier>
+						</configuration>
+						<!--
+				<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+			</execution>
+		</executions>
+								-->
+		</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencies>
+		<dependency>
+			<groupId>org.openecard.tools</groupId>
+			<artifactId>roboface-annotation</artifactId>
+			<version>1.0.0-rc.2-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<!-- all OeC dependencies -->
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
@@ -73,12 +144,6 @@
 			<groupId>org.openecard.ifd.protocols</groupId>
 			<artifactId>pace</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		
-		<!-- building -->
-		<dependency>
-			<groupId>org.openecard.tools</groupId>
-			<artifactId>roboface-annotation</artifactId>
 		</dependency>
 		
 		<!-- testing -->

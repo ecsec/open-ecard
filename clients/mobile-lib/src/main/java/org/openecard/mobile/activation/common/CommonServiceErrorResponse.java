@@ -10,7 +10,7 @@
 package org.openecard.mobile.activation.common;
 
 import org.openecard.mobile.activation.ServiceErrorResponse;
-import org.openecard.mobile.system.ServiceErrorCode;
+import org.openecard.mobile.activation.ServiceErrorCode;
 
 /**
  *

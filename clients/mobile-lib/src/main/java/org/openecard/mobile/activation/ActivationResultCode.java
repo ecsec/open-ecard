@@ -22,23 +22,15 @@
 
 package org.openecard.mobile.activation;
 
+import org.openecard.robovm.annotations.FrameworkEnum;
+
 
 /**
  *
  * @author Mike Prechtl
  */
+@FrameworkEnum
 public enum ActivationResultCode {
 
-    OK(200), REDIRECT(301), CLIENT_ERROR(400), INTERRUPTED(400), INTERNAL_ERROR(500), DEPENDING_HOST_UNREACHABLE(503);
-
-    private final int statusCode;
-
-    private ActivationResultCode(int statusCode) {
-	this.statusCode = statusCode;
-    }
-
-    public int getHttpStatusCode() {
-	return statusCode;
-    }
-
+    OK, REDIRECT, CLIENT_ERROR, INTERRUPTED, INTERNAL_ERROR, DEPENDING_HOST_UNREACHABLE;
 }

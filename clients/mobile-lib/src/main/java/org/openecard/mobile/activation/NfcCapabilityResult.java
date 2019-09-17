@@ -22,12 +22,15 @@
 
 package org.openecard.mobile.activation;
 
+import org.openecard.robovm.annotations.FrameworkEnum;
+
 
 /**
  * Result of a NFC capability request such as extended length support.
  *
  * @author Tobias Wich
  */
+@FrameworkEnum
 public enum NfcCapabilityResult {
 
     /** The requested capability is supported by the system. */

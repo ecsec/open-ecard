@@ -31,7 +31,7 @@ import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.mobile.system.ServiceErrorCode;
+import org.openecard.mobile.activation.ServiceErrorCode;
 import org.openecard.mobile.system.ServiceMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

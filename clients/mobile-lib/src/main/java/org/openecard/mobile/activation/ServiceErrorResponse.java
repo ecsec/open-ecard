@@ -22,7 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import org.openecard.mobile.system.ServiceErrorCode;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**

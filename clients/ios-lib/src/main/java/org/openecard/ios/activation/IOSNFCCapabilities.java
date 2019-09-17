@@ -19,16 +19,30 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.ios.activation;
 
-package org.openecard.mobile.system;
-
+import org.openecard.mobile.activation.NFCCapabilities;
+import org.openecard.mobile.activation.NfcCapabilityResult;
 
 /**
  *
- * @author Mike Prechtl
+ * @author Neil Crossley
  */
-public enum ServiceResponseLevel {
+public class IOSNFCCapabilities implements NFCCapabilities {
 
-    INFO, WARNING, ERROR
+    @Override
+    public boolean isAvailable() {
+	return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+	return true;
+    }
+
+    @Override
+    public NfcCapabilityResult checkExtendedLength() {
+	return NfcCapabilityResult.QUERY_NOT_ALLOWED;
+    }
 
 }

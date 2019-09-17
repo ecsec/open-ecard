@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,10 +18,10 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
+import java.net.MalformedURLException;
 import org.openecard.mobile.activation.ActivationUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -34,14 +34,16 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
  *
  * @author Neil Crossley
  */
-public class CommonActivationUtils implements ActivationUtils {
+public class CommonActivationUtils implements ActivationUtils, OpeneCardContextProvider {
 
     private CommonContextManager contextManager = null;
-    private final Object lock = new Object();
+    private final Object managerLock = new Object();
     private final OpeneCardContextConfig config;
+    private final ActivationControllerService activationControllerService;
 
-    CommonActivationUtils(OpeneCardContextConfig config) {
+    public CommonActivationUtils(OpeneCardContextConfig config) {
 	this.config = config;
+	this.activationControllerService = new ActivationControllerService(this);
     }
 
     @Override
@@ -51,7 +53,11 @@ public class CommonActivationUtils implements ActivationUtils {
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	try {
+	    return CommonPinManagementControllerFactory.create(activationControllerService);
+	} catch (MalformedURLException ex) {
+	    throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	}
     }
 
     @Override
@@ -62,7 +68,7 @@ public class CommonActivationUtils implements ActivationUtils {
 	if (nfc == null) {
 	    throw new IllegalArgumentException("Given nfc capabilities cannot be null.");
 	}
-	synchronized (lock) {
+	synchronized (managerLock) {
 	    if (this.contextManager != null) {
 		return this.contextManager;
 	    }
@@ -71,12 +77,18 @@ public class CommonActivationUtils implements ActivationUtils {
 	}
     }
 
-    static class LazyOpeneCardContextProvider implements OpeneCardContextProvider {
-
-	@Override
-	public OpeneCardContext getContext() {
-	    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @Override
+    public OpeneCardContext getContext() {
+	if (this.contextManager != null) {
+	    return this.contextManager.getContext();
 	}
-
+	CommonContextManager targetManager;
+	synchronized (managerLock) {
+	    if (contextManager == null) {
+		throw new IllegalStateException("The Open eCard context is missing because the context manager has not been successfully started.");
+	    }
+	    targetManager = contextManager;
+	}
+	return targetManager.getContext();
     }
 }

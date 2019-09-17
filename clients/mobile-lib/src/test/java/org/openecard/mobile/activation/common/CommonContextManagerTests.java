@@ -86,7 +86,7 @@ public class CommonContextManagerTests {
 
     @Test
     void sutStartsWithoutContext() {
-	Assert.assertNull(sut.getContext());
+	Assert.assertThrows(IllegalStateException.class, () -> sut.getContext());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

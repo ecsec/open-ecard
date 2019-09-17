@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,16 +18,14 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
-import java.util.function.Predicate;
 import org.openecard.mobile.activation.ActivationController;
-import org.openecard.mobile.activation.CloseableController;
-import org.openecard.mobile.activation.CompletionCallbacks;
+import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 
@@ -37,21 +35,40 @@ import org.openecard.mobile.activation.PinManagementControllerFactory;
  */
 public class CommonPinManagementControllerFactory implements PinManagementControllerFactory {
 
-    private OpeneCardContextProvider contextProvider;
+    private static final String PROTOCOL_TYPE = "urn:oid:1.3.162.15480.3.0.9";
 
-    @Override
-    public CloseableController create(URL url, Predicate<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public static final URL ACTIVATION_URL;
+
+    static {
+	try {
+	    ACTIVATION_URL = new URL("http://localhost:2427/eID-Client?ShowUI=PINManagement");
+	} catch (MalformedURLException ex) {
+	    throw new IllegalStateException("Could not create PIN management ULR.", ex);
+	}
+    }
+
+    private final ActivationControllerService activationControllerService;
+    private final URL activationUrl;
+
+    public CommonPinManagementControllerFactory(URL activationUrl, ActivationControllerService activationControllerService) {
+	this.activationControllerService = activationControllerService;
+	this.activationUrl = activationUrl;
     }
 
     @Override
-    public CloseableController create(URL url, Set<String> supportedCard, CompletionCallbacks activation, EacInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public ActivationController create(Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction) {
+	return new CommonActivationController(activationUrl, supportedCard, PROTOCOL_TYPE, activationControllerService, activation, interaction);
     }
 
     @Override
     public void destroy(ActivationController controller) {
 
+    }
+
+    static CommonPinManagementControllerFactory create(ActivationControllerService activationControllerService) throws MalformedURLException {
+	return new CommonPinManagementControllerFactory(
+		ACTIVATION_URL,
+		activationControllerService);
     }
 
 }

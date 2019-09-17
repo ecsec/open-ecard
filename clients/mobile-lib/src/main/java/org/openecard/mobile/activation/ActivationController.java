@@ -35,5 +35,5 @@ public interface ActivationController {
 
     void cancelAuthentication();
 
-    boolean isCompleted();
+    String getProtocolType();
 }

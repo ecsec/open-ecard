@@ -33,7 +33,8 @@ public class ServiceMessages {
     public static final String SERVICE_RESPONSE_OK = "Initialization successfully finished.";
     public static final String SERVICE_RESPONSE_FAILED = "Initialization of App context failed.";
     public static final String BELOW_API_LEVEL_21_NOT_SUPPORTED = "API Level below 21 not supported.";
-    public static final String SERVICE_ALREADY_INITIALIZED = "AppContext already initialized.";
+    public static final String SERVICE_ALREADY_INITIALIZED = "App context has already been started.";
+    public static final String SERVICE_ALREADY_STOPPED = "App context has already been stopped.";
     public static final String NO_NFC_CONTEXT = "Please provide NFC capabililties.";
     public static final String NO_APPLICATION_CONTEXT = "Please provide an Application Context.";
     public static final String NFC_NOT_AVAILABLE_FAIL = "NFC not available.";
@@ -51,5 +52,5 @@ public class ServiceMessages {
     public static final String PLEASE_START_OPENECARD_SERVICE = "Please start the Open eCard Service.";
     public static final String PLEASE_PROVIDE_BINDING_RESULT_RECEIVER = "Please provide a receiver for the binding result.";
     public static final String CARD_NOT_PRESENT = "No NPA identity card present.";
-
+    public static final String UNEXCPECTED_ERROR = "An unexpected error occurred.";
 }

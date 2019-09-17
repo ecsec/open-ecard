@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,11 +18,9 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
-import java.lang.management.ManagementFactory;
 import java.security.Provider;
 import java.security.Security;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +44,8 @@ import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.model.DelegatingMobileNfcTerminalFactory;
 import org.openecard.mobile.activation.model.NfcConfig;
 import org.openecard.mobile.activation.model.OpeneCardContextConfigFactory;
-import org.openecard.mobile.activation.model.ServiceHandlerFactory;
+import org.openecard.mobile.activation.model.PromiseDeliveringFactory;
+import org.openecard.mobile.activation.model.Timeout;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.NFCCardTerminal;
 import org.openecard.scio.NFCCardTerminals;
@@ -67,9 +66,9 @@ import org.testng.annotations.Test;
  */
 public class CommonContextManagerWithFakeNfcTests {
 
-    private static Logger log = LoggerFactory.getLogger(CommonContextManagerWithFakeNfcTests.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CommonContextManagerWithFakeNfcTests.class);
 
-    private static final int WAIT_TIMEOUT = isDebug() ? 9999000 : 1000;
+    private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT;
 
     private static final String DUMMY_MOBILE_TERMINAL = "DUMMY MOBILE TERMINAL";
 
@@ -116,7 +115,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	    mockito.finishMocking();
 
 	} catch (Exception e) {
-	    log.warn("Error occured during cleanup.", e);
+	    LOG.warn("Error occured during cleanup.", e);
 	}
 	DelegatingMobileNfcTerminalFactory.setDelegate(null);
     }
@@ -158,7 +157,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(ServiceHandlerFactory.create(result));
+	sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
 
 	Assert.assertNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
@@ -183,7 +182,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	    @Override
 	    public StateChangeEvent answer(InvocationOnMock invocation) throws Throwable {
-		log.debug("XXX - answer!");
+		LOG.debug("XXX - answer!");
 		Object[] args = invocation.getArguments();
 		long time;
 		if (args.length == 0) {
@@ -191,11 +190,11 @@ public class CommonContextManagerWithFakeNfcTests {
 		} else {
 		    time = Math.min(EVENT_DELAY, invocation.getArgument(0, Long.class));
 		}
-		log.debug("XXX - sleeping: {}", time);
+		LOG.debug("XXX - sleeping: {}", time);
 		Thread.sleep(time);
 
 		synchronized (lock) {
-		    log.debug("XXX - notifying of lock");
+		    LOG.debug("XXX - notifying of lock");
 		    lock.notifyAll();
 		    eventIndex = Math.min(eventIndex + 1, events.length - 1);
 
@@ -213,13 +212,13 @@ public class CommonContextManagerWithFakeNfcTests {
 	CommonContextManager sut = this.createSut();
 
 	synchronized (lock) {
-	    log.debug("XXX - creating");
-	    sut.start(ServiceHandlerFactory.create(result));
-	    log.debug("XXX - main thread is waiting creating");
+	    LOG.debug("XXX - creating");
+	    sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
+	    LOG.debug("XXX - main thread is waiting creating");
 	    lock.wait(WAIT_TIMEOUT);
-	    log.debug("XXX - main thread was awoken 1");
+	    LOG.debug("XXX - main thread was awoken 1");
 	    lock.wait(WAIT_TIMEOUT);
-	    log.debug("XXX - main thread was awoken 2");
+	    LOG.debug("XXX - main thread was awoken 2");
 	}
 
 	Assert.assertNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -235,27 +234,18 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(ServiceHandlerFactory.create(startResult));
+	sut.start(PromiseDeliveringFactory.createContextServiceDelivery(startResult));
 
 	Assert.assertNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
-	sut.stop(ServiceHandlerFactory.create(stopResult));
+	sut.stop(PromiseDeliveringFactory.createContextServiceDelivery(stopResult));
 
 	Assert.assertNull(stopResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
-    static boolean isDebug() {
-	for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-	    if (arg.contains("jdwp=")) {
-		return true;
-	    }
-	};
-	return false;
-    }
-
     @Test()
     void sutCannotStartWithoutNfc() throws InterruptedException, TimeoutException, Exception {
-	log.debug("XXX - sutCannotStartWithoutNfc");
+	LOG.debug("XXX - sutCannotStartWithoutNfc");
 	when(this.mockNfc.isAvailable()).thenReturn(Boolean.FALSE);
 	withNfcSupport(NfcConfig.createUnavailable());
 
@@ -266,7 +256,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	Promise<ServiceErrorResponse> result = new Promise();
 
 	synchronized (lock) {
-	    sut.start(ServiceHandlerFactory.create(result));
+	    sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
 	}
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS), "To be null, the start process must have unexpectedly succeeded!");
     }
@@ -280,4 +270,5 @@ public class CommonContextManagerWithFakeNfcTests {
     private void withTerminalSupport() throws SCIOException, NoSuchTerminal {
 	when(this.mockTerminalFactory.terminals()).thenReturn(nfcTerminals);
     }
+
 }

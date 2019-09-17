@@ -63,7 +63,6 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
-import static org.openecard.mobile.system.ServiceConstants.*;
 import static org.openecard.mobile.system.ServiceMessages.*;
 import org.openecard.mobile.utils.ClasspathRegistry;
 import org.openecard.recognition.CardRecognitionImpl;
@@ -274,7 +273,7 @@ public class OpeneCardContext {
 	}
     }
 
-    public String shutdown() {
+    public boolean shutdown() {
 	initialized = false;
 	try {
 	    if (ifd != null && contextHandle != null) {
@@ -293,10 +292,10 @@ public class OpeneCardContext {
 		sal.terminate(terminate);
 	    }
 
-	    return SUCCESS;
+	    return true;
 	} catch (Exception ex) {
 	    LOG.error("Failed to terminate Open eCard instances...", ex);
-	    return FAILURE;
+	    return false;
 	}
     }
 

@@ -120,17 +120,15 @@ public class OpeneCardServiceImpl extends Service {
 	public ServiceResponse stopService() throws RemoteException {
 	    if (context != null) {
 		LOG.info("Stop Open eCard Service...");
-		String resultCode = context.shutdown();
+		boolean resultCode = context.shutdown();
 		context = null;
 		ServiceResponse response = null;
-		switch (resultCode) {
-		    case SUCCESS:
-			response = new ServiceResponse(SHUTDOWN_SUCCESS, SERVICE_TERMINATE_SUCCESS);
-			break;
-		    case FAILURE:
-			response = new ServiceWarningResponse(SHUTDOWN_FAILED, SERVICE_TERMINATE_FAILURE);
-			break;
+		if (resultCode) {
+		    response = new ServiceResponse(SHUTDOWN_SUCCESS, SERVICE_TERMINATE_SUCCESS);
+		} else {
+		    response = new ServiceWarningResponse(SHUTDOWN_FAILED, SERVICE_TERMINATE_FAILURE);
 		}
+
 		stopSelf();
 		return response;
 	    } else {

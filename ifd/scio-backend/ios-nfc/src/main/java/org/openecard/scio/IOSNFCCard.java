@@ -42,6 +42,10 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	super(terminal);
     }
 
+    public void connect() throws SCIOException {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     @Override
     public void disconnect(boolean reset) throws SCIOException {
 	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

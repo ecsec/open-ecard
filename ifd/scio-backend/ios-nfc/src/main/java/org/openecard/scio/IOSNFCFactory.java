@@ -22,6 +22,7 @@
 
 package org.openecard.scio;
 
+import java.io.IOException;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.slf4j.Logger;
@@ -42,9 +43,10 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
     private final NFCCardTerminal terminal;
     private final NFCCardTerminals terminals;
 
-    public IOSNFCFactory() throws NoSuchTerminal {
+    public IOSNFCFactory() throws NoSuchTerminal, IOException {
 	this.terminal = new NFCCardTerminal();
 	this.terminals = new NFCCardTerminals(terminal);
+	this.terminal.setNFCCard(new IOSNFCCard(this.terminal));
     }
 
     @Override

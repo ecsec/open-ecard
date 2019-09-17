@@ -182,13 +182,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<showDeprecation>true</showDeprecation>
-					<showWarnings>true</showWarnings>
-					<debug>true</debug>
-					<debuglevel>source,lines,vars</debuglevel>
-					<optimize>false</optimize>
-				</configuration>
 				<executions>
 					<execution>
 						<id>default-compile</id>

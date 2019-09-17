@@ -59,13 +59,13 @@
 					<groupId>com.mobidevelop.robovm</groupId>
 					<artifactId>robovm-rt</artifactId>
 					<version>${robovm.version}</version>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 				<dependency>
 					<groupId>com.mobidevelop.robovm</groupId>
 					<artifactId>robovm-cocoatouch</artifactId>
 					<version>${robovm.version}</version>
-					<scope>provided</scope>
+					<scope>compile</scope>
 				</dependency>
 			</dependencies>
 		</profile>

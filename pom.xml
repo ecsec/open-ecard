@@ -80,6 +80,8 @@
 		<version.pmd>6.17.0</version.pmd>
 		<version.openjfx>12.0.2</version.openjfx>
 		<version.roboface>1.0.0-rc.1</version.roboface>
+		
+		<robovm.version>2.3.8-SNAPSHOT</robovm.version>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine></argLine>
 
@@ -119,6 +121,16 @@
 			<id>openecard-repos</id>
 			<name>Openecard Repos</name>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
+		</repository>
+		<repository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 

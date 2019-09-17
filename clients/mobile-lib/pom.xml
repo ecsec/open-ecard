@@ -15,7 +15,6 @@
 
 	<properties>
 		<powermock.version>2.0.2</powermock.version>
-		<robovm.version>2.3.7</robovm.version>
 	</properties>
 
 	<profiles>
@@ -53,16 +52,30 @@
 							<classifier>iOS</classifier>
 						</configuration>
 						<!--
-				<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-			</execution>
-		</executions>
-								-->
-		</plugin>
+		<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+	</execution>
+</executions>
+						-->
+						<dependencies>
+							<dependency>
+								<groupId>com.mobidevelop.robovm</groupId>
+								<artifactId>robovm-rt</artifactId>
+								<version>${robovm.version}</version>
+								<scope>provided</scope>
+							</dependency>
+							<dependency>
+								<groupId>com.mobidevelop.robovm</groupId>
+								<artifactId>robovm-cocoatouch</artifactId>
+								<version>${robovm.version}</version>
+								<scope>provided</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -72,23 +85,8 @@
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
-			<version>1.0.0-rc.2-SNAPSHOT</version>
 			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-rt</artifactId>
-			<version>${robovm.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-cocoatouch</artifactId>
-			<version>${robovm.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		
+		</dependency>	
 		<!-- all OeC dependencies -->
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>

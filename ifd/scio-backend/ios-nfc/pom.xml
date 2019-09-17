@@ -13,10 +13,6 @@
 	<packaging>jar</packaging>
 	<name>iOS based NFC SmartcardIO</name>
 
-	<properties>
-		<robovm.version>2.3.8-SNAPSHOT</robovm.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>

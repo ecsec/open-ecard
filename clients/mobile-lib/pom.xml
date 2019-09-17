@@ -54,22 +54,24 @@
 					</plugin>
 				</plugins>
 			</build>
+			<dependencies>
+				<dependency>
+					<groupId>com.mobidevelop.robovm</groupId>
+					<artifactId>robovm-rt</artifactId>
+					<version>${robovm.version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.mobidevelop.robovm</groupId>
+					<artifactId>robovm-cocoatouch</artifactId>
+					<version>${robovm.version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-rt</artifactId>
-			<version>${robovm.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-cocoatouch</artifactId>
-			<version>${robovm.version}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>

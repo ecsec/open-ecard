@@ -30,7 +30,7 @@
 								<annotationProcessorPath>
 									<groupId>org.openecard.tools</groupId>
 									<artifactId>roboface-processor</artifactId>
-									<version>1.0.0-rc.2-SNAPSHOT</version>
+									<version>${version.roboface}</version>
 								</annotationProcessorPath>
 							</annotationProcessorPaths>
 							<annotationProcessors>
@@ -51,30 +51,6 @@
 						<configuration>
 							<classifier>iOS</classifier>
 						</configuration>
-						<!--
-		<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-	</execution>
-</executions>
-						-->
-						<dependencies>
-							<dependency>
-								<groupId>com.mobidevelop.robovm</groupId>
-								<artifactId>robovm-rt</artifactId>
-								<version>${robovm.version}</version>
-								<scope>provided</scope>
-							</dependency>
-							<dependency>
-								<groupId>com.mobidevelop.robovm</groupId>
-								<artifactId>robovm-cocoatouch</artifactId>
-								<version>${robovm.version}</version>
-								<scope>provided</scope>
-							</dependency>
-						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
@@ -82,6 +58,18 @@
 	</profiles>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>

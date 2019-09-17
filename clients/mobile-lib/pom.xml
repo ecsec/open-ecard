@@ -52,17 +52,7 @@
 						<configuration>
 							<classifier>iOS</classifier>
 						</configuration>
-						<!--
-				<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-			</execution>
-		</executions>
-								-->
-		</plugin>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>

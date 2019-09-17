@@ -14,12 +14,12 @@
 	<packaging>pom</packaging>
 	<name>Client Implementations</name>
 
-
 	<modules>
 		<module>richclient</module>
 		<module>android-core</module>
 		<module>android-lib</module>
 		<module>mobile-lib</module>
+		<module>ios-lib</module>
 	</modules>
 
 </project>

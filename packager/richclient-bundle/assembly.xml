@@ -1,7 +1,8 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
 		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-	<id>fat-jar</id>
+	<!-- This JAR bundles all dependencies which are not modularized -->
+	<id>bundle</id>
 	<formats>
 		<format>jar</format>
 	</formats>
@@ -12,6 +13,7 @@
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>true</unpack>
 			<scope>runtime</scope>
+			<!-- Modularized dependencies will be excluded, they will become part of the runtime later -->
 			<excludes>
 				<!-- BouncyCastle dependencies -->
 				<exclude>org.bouncycastle:*</exclude>

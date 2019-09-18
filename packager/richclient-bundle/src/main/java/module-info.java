@@ -26,16 +26,20 @@ module org.openecard.richclient {
     requires java.logging;
     requires java.desktop;
 
+    /* BouncyCastle modules */
     requires org.bouncycastle.provider;
     requires org.bouncycastle.tls;
     requires org.bouncycastle.pkix;
 
+    /* JAXB module */
     requires java.xml.bind;
 
+    /* JavaFX modules */
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
 
+    /* Open JAXB classes for reflection */
     opens de.bund.bsi.ecard.api._1;
     opens iso.std.iso_iec._24727.tech.schema;
     opens oasis.names.tc.dss._1_0.core.schema;

@@ -120,11 +120,11 @@ public class AppTray {
 	    frame.setVisible(false);
 	    status.setInfoPanel(frame);
 
-	    frame.pack();
 	    frame.setResizable(false);
 	    frame.setLocationRelativeTo(null);
 	    frame.setState(Frame.ICONIFIED);
 	    frame.setVisible(true);
+	    frame.pack();
 	}
     }
 

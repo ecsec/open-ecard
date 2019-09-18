@@ -44,7 +44,8 @@
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
-			<version>${project.version}-iOS</version>
+			<version>${project.version}</version>
+			<classifier>iOS</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.ifd.scio-backend</groupId>

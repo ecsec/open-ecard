@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>clients</artifactId>
+		<version>1.4.0-rc.3-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.openecard.clients</groupId>
+	<artifactId>ios-core</artifactId>
+	<packaging>jar</packaging>
+	<name>iOS Core</name>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<relocations>
+								<relocation>
+									<pattern>org.bouncycastle</pattern>
+									<shadedPattern>org.openecard.bc</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+	<dependencies>
+		<!-- all OeC dependencies -->
+		<dependency>
+			<groupId>org.openecard.gui</groupId>
+			<artifactId>ios</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard</groupId>
+			<artifactId>recognition</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard</groupId>
+			<artifactId>management</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>ios-nfc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.sal</groupId>
+			<artifactId>tiny-sal</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard</groupId>
+			<artifactId>addon</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>tr03112</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>pin-management</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>status</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.addons</groupId>
+			<artifactId>genericcryptography</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.protocols</groupId>
+			<artifactId>pace</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>mobile-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+</project>

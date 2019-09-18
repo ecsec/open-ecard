@@ -15,8 +15,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>ios-nfc</artifactId>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>ios-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

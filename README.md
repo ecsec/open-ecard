@@ -42,13 +42,13 @@ Finally, you can run the Open eCard App from command line:
 Packaging
 -----------
 
-Native packages which are based on a modular runtime image can be built with the new [jpackage](https://openjdk.java.net/jeps/343) tool which is a candidate for JDK-14. Early-access builds are already [provided](https://jdk.java.net/jpackage/). Native packages for the Open eCard can be built by downloading the JDK-14 early-access build, referencing it as toolchain and by specifying the following profile:
+Native packages which are based on a modular runtime image can be built with the new [jpackage](https://openjdk.java.net/jeps/343) tool which is a candidate for JDK-14. Early-access builds are already [provided](https://jdk.java.net/jpackage/). Native packages for the Open eCard can be built by downloading the JDK-14 early-access build, referencing it as toolchain and by specifying the following property:
 
-    $ mvn clean install -Pdesktop-package
+    $ mvn clean install -Ddesktop-package
 
 By default, the packager will take the predefined package types, such as dmg for Mac OS and deb for Linux-based systems. The package type can be overridden for Mac and Linux packages by using the following user property:
 
-    $ mvn clean install -Pdesktop-package -Djlink-jpackager.package-type=<type>
+    $ mvn clean install -Ddesktop-package -Djlink-jpackager.package-type=<type>
 
 Thereby, the following types are available:
 

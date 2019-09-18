@@ -24,6 +24,7 @@ package org.openecard.mobile.activation.common;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.OpeneCardServiceHandler;
+import org.openecard.mobile.activation.ServiceErrorCode;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
@@ -31,7 +32,6 @@ import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.mobile.activation.ServiceErrorCode;
 import org.openecard.mobile.system.ServiceMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +71,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    throw new IllegalArgumentException("Given handler cannot be null");
 	}
 	new Thread(() -> {
+	    LOG.debug("Starting");
 	    ServiceErrorResponse error = null;
 	    synchronized (contextLock) {
 		if (context != null || isRunning) {
@@ -107,8 +108,10 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		    }
 		}
 		if (error == null) {
+		    LOG.debug("Started");
 		    handler.onSuccess();
 		} else {
+		    LOG.debug("Started failed");
 		    handler.onFailure(error);
 		}
 	    }
@@ -123,6 +126,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}
 	new Thread(() -> {
+	    LOG.debug("Stopping");
 	    OpeneCardContext targetContext;
 	    ServiceErrorResponse error = null;
 	    synchronized (this.contextLock) {

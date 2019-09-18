@@ -50,7 +50,6 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.NFCCardTerminal;
 import org.openecard.scio.NFCCardTerminals;
 import org.openecard.scio.NFCCardWatcher;
-import org.openecard.ws.jaxb.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -99,10 +98,7 @@ public class CommonContextManagerWithFakeNfcTests {
 		.strictness(Strictness.LENIENT)
 		.startMocking();
 
-	configFactory = OpeneCardContextConfigFactory.instance().withWsdefMarshaller(JAXBMarshaller.class)
-		.withTerminalFactory(DelegatingMobileNfcTerminalFactory.class);
-
-	DelegatingMobileNfcTerminalFactory.setDelegate(mockTerminalFactory);
+	configFactory = OpeneCardContextConfigFactory.mobile(mockTerminalFactory);
 
 	nfcTerminal = new NFCCardTerminal();
 	nfcTerminals = new NFCCardTerminals(nfcTerminal);

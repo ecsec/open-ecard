@@ -9,28 +9,11 @@
  ************************************************************************** */
 package org.openecard.mobile.activation.model;
 
-import java.lang.management.ManagementFactory;
-
 /**
  *
  * @author Neil Crossley
  */
-public final class Timeout {
+public interface Builder<T> {
 
-    public static final int MIN_WAIT_TIMEOUT = 1000;
-    public static final int WAIT_TIMEOUT = isDebug() ? Integer.MAX_VALUE : MIN_WAIT_TIMEOUT;
-
-    private Timeout() {
-
-    }
-
-    static boolean isDebug() {
-	for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-	    if (arg.contains("jdwp=")) {
-		return true;
-	    }
-	};
-	return false;
-    }
-
+    public T build();
 }

@@ -32,7 +32,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface PinManagementControllerFactory {
 
-    ActivationController create(Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
+    ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction);
 
     void destroy(ActivationController controller);
 }

@@ -26,8 +26,8 @@ import java.net.URL;
 import java.util.Set;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
-import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
+import org.openecard.mobile.activation.PinManagementInteraction;
 
 /**
  *
@@ -56,7 +56,7 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
     }
 
     @Override
-    public ActivationController create(Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction) {
+    public ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction) {
 	return new CommonActivationController(activationUrl, supportedCard, PROTOCOL_TYPE, activationControllerService, activation, interaction);
     }
 

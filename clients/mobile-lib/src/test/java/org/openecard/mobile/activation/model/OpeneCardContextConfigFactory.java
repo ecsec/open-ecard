@@ -24,13 +24,14 @@ package org.openecard.mobile.activation.model;
 
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.mobile.system.OpeneCardContextConfig;
+import org.openecard.ws.jaxb.JAXBMarshaller;
 import org.openecard.ws.marshal.WSMarshaller;
 
 /**
  *
  * @author Neil Crossley
  */
-public final class OpeneCardContextConfigFactory {
+public final class OpeneCardContextConfigFactory implements Builder<OpeneCardContextConfig> {
 
     private final String ifdFactoryClass;
     private final String wsdefMarshaller;
@@ -42,6 +43,11 @@ public final class OpeneCardContextConfigFactory {
 
     public OpeneCardContextConfig create() {
 	return new OpeneCardContextConfig(this.ifdFactoryClass, this.wsdefMarshaller);
+    }
+
+    @Override
+    public OpeneCardContextConfig build() {
+	return this.create();
     }
 
     public OpeneCardContextConfigFactory withIdf(String givenIfdFactory) {
@@ -62,5 +68,12 @@ public final class OpeneCardContextConfigFactory {
 
     public static OpeneCardContextConfigFactory instance() {
 	return new OpeneCardContextConfigFactory("dummy.ifdFactory", "dummy.wsdefMarschaller");
+    }
+
+    public static OpeneCardContextConfigFactory mobile(TerminalFactory terminalFactory) {
+	DelegatingMobileNfcTerminalFactory.setDelegate(terminalFactory);
+	
+	return instance().withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
+		.withWsdefMarshaller(JAXBMarshaller.class);
     }
 }

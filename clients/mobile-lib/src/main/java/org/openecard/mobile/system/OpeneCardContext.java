@@ -274,6 +274,7 @@ public class OpeneCardContext {
     }
 
     public boolean shutdown() {
+	LOG.info("Shutting down.");
 	initialized = false;
 	try {
 	    if (ifd != null && contextHandle != null) {

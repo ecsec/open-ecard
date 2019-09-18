@@ -171,8 +171,9 @@ public class ActivationControllerService {
 		    Map.Entry<CardEventHandler, AutoCloseable> entry = CardEventHandler.create(supportedCards, eventDispatcher, interaction);
 
 		    this.closable = entry.getValue();
-
+		    LOG.debug("Found handler for resource {}. Executing", resourceName);
 		    BindingResult result = action.execute(null, queries, null, null);
+		    LOG.debug("Handler completed for resource {}.", resourceName);
 		    return createActivationResult(result);
 		} catch (Exception ex) {
 		    String interruptMessage = ex.getMessage();

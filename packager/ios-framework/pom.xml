@@ -13,12 +13,56 @@
 	<packaging>jar</packaging>
 	<name>Open eCard iOS Framework</name>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>copy-framework-classes</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeArtifactIds>ios-core</includeArtifactIds>
+							<outputDirectory>${basedir}/target/classes/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.mobidevelop.robovm</groupId>
+				<artifactId>robovm-maven-plugin</artifactId>
+				<version>${robovm.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>install</goal>
+						</goals>
+						<phase>install</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>ios-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+		</dependency>
 	</dependencies>
-
 </project>

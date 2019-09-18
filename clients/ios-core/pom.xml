@@ -41,11 +41,6 @@
 	<dependencies>
 		<!-- all OeC dependencies -->
 		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>ios</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard</groupId>
 			<artifactId>recognition</artifactId>
 			<version>${project.version}</version>

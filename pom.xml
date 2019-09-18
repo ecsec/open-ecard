@@ -139,6 +139,17 @@
 			<id>openecard-repos</id>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</pluginRepository>
+		
+		<pluginRepository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
 	</pluginRepositories>
 
 	<profiles>

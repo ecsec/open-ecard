@@ -12,11 +12,40 @@
 
 	<name>iOS Lib</name>
 	<packaging>jar</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<annotationProcessorPath>
+							<groupId>org.openecard.tools</groupId>
+							<artifactId>roboface-processor</artifactId>
+							<version>${version.roboface}</version>
+						</annotationProcessorPath>
+					</annotationProcessorPaths>
+					<annotationProcessors>
+						<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
+					</annotationProcessors>
+					<compilerArgs>
+						<arg>-Aroboface.headername=open-ecard-ios-activation-utils.h</arg>
+					</compilerArgs>
+					<debug>true</debug>
+					<debuglevel>source,lines,vars</debuglevel>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+					<!--failOnWarning>true</failOnWarning-->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
+			<classifier>iOS</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.ifd.scio-backend</groupId>
@@ -27,6 +56,23 @@
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.tools</groupId>
+			<artifactId>roboface-annotation</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

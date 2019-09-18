@@ -27,6 +27,7 @@ import org.openecard.mobile.activation.EacControllerFactory;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
+import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSNFCFactory;
 import org.openecard.ws.jaxb.JAXBMarshaller;
 
@@ -34,14 +35,18 @@ import org.openecard.ws.jaxb.JAXBMarshaller;
  *
  * @author Neil Crossley
  */
-public class IOSActivationUtils {
+@FrameworkObject(factoryMethod = "createActivationUtils")
+public class IOSActivationUtils implements IOSActivationUtilsInterface {
 
     private final IOSNFCCapabilities capabilities;
     private final CommonActivationUtils utils;
 
-    public IOSActivationUtils(IOSNFCCapabilities capabilities, CommonActivationUtils utils) {
+    public IOSActivationUtils() {
+	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
+	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());
+	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
 	this.capabilities = capabilities;
-	this.utils = utils;
+	this.utils = activationUtils;
     }
 
     public ContextManager context() {
@@ -56,10 +61,4 @@ public class IOSActivationUtils {
 	return this.utils.pinManagementFactory();
     }
 
-    public static IOSActivationUtils create() {
-	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
-	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
-	return new IOSActivationUtils(capabilities, activationUtils);
-    }
 }

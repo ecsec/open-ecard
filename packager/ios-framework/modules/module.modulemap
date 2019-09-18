@@ -1,5 +1,5 @@
-framework module MyFrameworkProtocol{
-  umbrella header "my_robo_header.h"
+framework module OpenEcardFramework{
+  umbrella header "open-ecard.h"
 
   export *
   module * { export * }

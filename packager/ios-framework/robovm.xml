@@ -34,8 +34,7 @@
 
     <!-- Force link all classes in the SDK packages. -->
     <forceLinkClasses>
-    	<pattern>roboface.test.**</pattern>
-	<!--
+		<!--
     	<pattern>org.robovm.apple.ext.corenfc.**</pattern>
     	<pattern>org.robovm.apple.corenfc.**</pattern>
 	-->

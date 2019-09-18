@@ -57,6 +57,13 @@
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
 			<classifier>iOS</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+			</exclusions>
+
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>

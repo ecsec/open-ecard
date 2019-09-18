@@ -15,17 +15,26 @@
 
 	<properties>
 		<powermock.version>2.0.2</powermock.version>
+		<iOS.build.classesDirectory>${project.build.outputDirectory}-iOS</iOS.build.classesDirectory>
 	</properties>
 
-	<profiles>
-		<profile>
-			<id>iOS</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+					</execution>
+					<execution>
+						<id>ios-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
 						<configuration>
+							<outputDirectory>${iOS.build.classesDirectory}</outputDirectory>
 							<annotationProcessorPaths>
 								<annotationProcessorPath>
 									<groupId>org.openecard.tools</groupId>
@@ -45,33 +54,45 @@
 							<showWarnings>true</showWarnings>
 							<!--failOnWarning>true</failOnWarning-->
 						</configuration>
-					</plugin>
-					<plugin>
-						<artifactId>maven-jar-plugin</artifactId>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+					</execution>
+					<execution>
+						<id>iOS-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 						<configuration>
+							<classesDirectory>${iOS.build.classesDirectory}</classesDirectory>
 							<classifier>iOS</classifier>
 						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-			<dependencies>
-				<dependency>
-					<groupId>com.mobidevelop.robovm</groupId>
-					<artifactId>robovm-rt</artifactId>
-					<version>${robovm.version}</version>
-					<scope>compile</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.mobidevelop.robovm</groupId>
-					<artifactId>robovm-cocoatouch</artifactId>
-					<version>${robovm.version}</version>
-					<scope>compile</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>

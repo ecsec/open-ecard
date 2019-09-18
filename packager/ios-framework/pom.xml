@@ -48,9 +48,6 @@
 
 		</plugins>
 	</build>
-
-
-
 	<dependencies>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
@@ -62,13 +59,41 @@
 					<groupId>javax.xml.bind</groupId>
 					<artifactId>jaxb-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
 			</exclusions>
-
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>ios-lib</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>ios-nfc</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
@@ -80,11 +105,5 @@
 			<artifactId>robovm-cocoatouch</artifactId>
 			<version>${robovm.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>ios-nfc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
-
 </project>

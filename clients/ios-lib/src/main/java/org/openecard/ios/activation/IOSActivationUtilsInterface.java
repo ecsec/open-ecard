@@ -25,40 +25,19 @@ package org.openecard.ios.activation;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
-import org.openecard.mobile.activation.common.CommonActivationUtils;
-import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.robovm.annotations.FrameworkObject;
-import org.openecard.scio.IOSNFCFactory;
-import org.openecard.ws.jaxb.JAXBMarshaller;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkObject(factoryMethod = "createActivationUtils")
-public class IOSActivationUtils {
+@FrameworkInterface
+public interface IOSActivationUtilsInterface {
 
-    private final IOSNFCCapabilities capabilities;
-    private final CommonActivationUtils utils;
+    ContextManager context();
 
-    public IOSActivationUtils() {
-	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
-	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
-	this.capabilities = capabilities;
-	this.utils = activationUtils;
-    }
+    EacControllerFactory eacFactory();
 
-    public ContextManager context() {
-	return this.utils.context(capabilities);
-    }
-
-    public EacControllerFactory eacFactory() {
-	return this.utils.eacFactory();
-    }
-
-    public PinManagementControllerFactory pinManagementFactory() {
-	return this.utils.pinManagementFactory();
-    }
+    PinManagementControllerFactory pinManagementFactory();
 
 }

@@ -36,7 +36,7 @@ import org.openecard.ws.jaxb.JAXBMarshaller;
  * @author Neil Crossley
  */
 @FrameworkObject(factoryMethod = "createActivationUtils")
-public class IOSActivationUtils {
+public class IOSActivationUtils implements IOSActivationUtilsInterface {
 
     private final IOSNFCCapabilities capabilities;
     private final CommonActivationUtils utils;

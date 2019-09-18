@@ -23,8 +23,18 @@
 package org.openecard.scio;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.util.Promise;
+import org.robovm.apple.dispatch.DispatchQueue;
+import org.robovm.apple.dispatch.DispatchQueueAttr;
+import org.robovm.apple.ext.corenfc.NFCISO7816APDU;
+import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
+import org.robovm.apple.ext.corenfc.NFCPollingOption;
+import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
+import org.robovm.apple.foundation.NSData;
+import org.robovm.apple.foundation.NSError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,33 +42,52 @@ import org.slf4j.LoggerFactory;
 /**
  * NFC implementation of SCIO API card interface.
  *
- * @author Dirk Petrautzki
+ * @author Neil Crossley
+ * @author Florian Otto
  */
 public final class IOSNFCCard extends AbstractNFCCard {
 
+    private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
+    private String dialogMsg = "Please provide card.";
+    private boolean tagPresent;
+
+    public enum DISPATCH_MODE {
+	CONCURRENT,
+	MAINQUEUE;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCCard.class);
+
+    private NFCTagReaderSession nfcSession;
+    private NFCISO7816Tag tag;
 
     public IOSNFCCard(NFCCardTerminal terminal) throws IOException {
 	super(terminal);
+
     }
 
     public void connect() throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
+		DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
+	this.nfcSession.setAlertMessage(this.getDialogMsg());
+	this.nfcSession.beginSession();
+
     }
 
     @Override
     public void disconnect(boolean reset) throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.nfcSession.invalidateSession();
+	this.tagPresent = false;
     }
 
     @Override
     public boolean isCardPresent() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return this.tagPresent;
     }
 
     @Override
     public void terminate(boolean killNfcConnection) throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.disconnect(false);
     }
 
     @Override
@@ -68,8 +97,42 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
+	Promise<byte[]> p = new Promise<>();
+	tag.sendCommandAPDU$completionHandler$(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
+	    ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
+	    bb.put(resp.getBytes(), 0, (int) resp.getLength());
+	    bb.put(sw1);
+	    bb.put(sw2);
+	    p.deliver(bb.array());
+	});
+
+	try {
+	    return p.deref();
+	} catch (InterruptedException ex) {
+	    throw new IOException(ex);
+	}
     }
 
+    public void setConcurrencyMode(DISPATCH_MODE mode) {
+	this.concurrencyMode = mode;
+    }
+
+    public DISPATCH_MODE getConcurrencyMode() {
+	return concurrencyMode;
+    }
+
+    public String getDialogMsg() {
+	return dialogMsg;
+    }
+
+    public void setDialogMsg(String dialogMsg) {
+	this.dialogMsg = dialogMsg;
+    }
+
+    public void setTag(NFCISO7816Tag tag) {
+	this.tag = tag;
+	this.tagPresent = true;
+    }
 
 }

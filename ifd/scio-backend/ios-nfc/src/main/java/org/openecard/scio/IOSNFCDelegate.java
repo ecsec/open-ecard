@@ -21,7 +21,12 @@
  ************************************************************************** */
 package org.openecard.scio;
 
+import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
+import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
 import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
+import org.robovm.apple.foundation.NSArray;
+import org.robovm.apple.foundation.NSError;
+import org.robovm.apple.foundation.NSObject;
 
 /**
  *
@@ -29,8 +34,23 @@ import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
  */
 public class IOSNFCDelegate extends NFCTagReaderSessionDelegateAdapter {
 
-    IOSNFCDelegate(IOSNFCCard aThis) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private final IOSNFCCard cardObj;
+
+    public IOSNFCDelegate(IOSNFCCard cardObj) {
+	super();
+	this.cardObj = cardObj;
+    }
+    @Override
+    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
+
+	for (NSObject t : tags) {
+	    session.connectToTag$completionHandler$(t, (NSError er) -> {
+
+		NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+		cardObj.setTag(tag);
+
+	    });
+	}
     }
 
 }

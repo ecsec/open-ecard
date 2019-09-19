@@ -29,6 +29,10 @@
 									<pattern>org.bouncycastle</pattern>
 									<shadedPattern>org.openecard.bc</shadedPattern>
 								</relocation>
+								<relocation>
+									<pattern>javax.xml.bind</pattern>
+									<shadedPattern>hidden.javax.xml.bind</shadedPattern>
+								</relocation>
 							</relocations>
 							<filters>
 								<filter>
@@ -48,8 +52,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
 	<dependencies>
 		<!-- all OeC dependencies -->
 		<dependency>
@@ -106,6 +108,16 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-rt</artifactId>
+			<version>${robovm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mobidevelop.robovm</groupId>
+			<artifactId>robovm-cocoatouch</artifactId>
+			<version>${robovm.version}</version>
 		</dependency>
 	</dependencies>
 </project>

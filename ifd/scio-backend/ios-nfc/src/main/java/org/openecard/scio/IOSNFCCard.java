@@ -54,7 +54,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private String dialogMsg = "Please provide card.";
-    private boolean tagPresent;
     private byte[] histBytes;
 
     public enum DISPATCH_MODE {
@@ -69,10 +68,14 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     public IOSNFCCard(NFCCardTerminal terminal) throws IOException {
 	super(terminal);
-
     }
 
-    private void startSession() throws SCIOException {
+    private void setTag(NFCISO7816Tag tag) {
+	this.tag = tag;
+	this.setHistBytes();
+    }
+
+    private void initSessionObj() throws SCIOException {
 	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
 	    @Override
 	    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
@@ -102,8 +105,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     public void connect() throws SCIOException {
-	this.startSession();
-	this.nfcSession.setAlertMessage(this.getDialogMsg());
+	this.initSessionObj();
+	this.nfcSession.setAlertMessage(this.dialogMsg);
 	this.nfcSession.beginSession();
 
     }
@@ -111,12 +114,13 @@ public final class IOSNFCCard extends AbstractNFCCard {
     @Override
     public void disconnect(boolean reset) throws SCIOException {
 	this.nfcSession.invalidateSession();
-	this.tagPresent = false;
+	this.nfcSession = null;
+	this.setTag(null);
     }
 
     @Override
     public boolean isCardPresent() {
-	return this.tagPresent;
+	return this.tag != null;
     }
 
     @Override
@@ -184,22 +188,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.concurrencyMode = mode;
     }
 
-    public DISPATCH_MODE getConcurrencyMode() {
-	return concurrencyMode;
-    }
-
-    public String getDialogMsg() {
-	return dialogMsg;
-    }
-
     public void setDialogMsg(String dialogMsg) {
 	this.dialogMsg = dialogMsg;
-    }
-
-    public void setTag(NFCISO7816Tag tag) {
-	this.tag = tag;
-	this.tagPresent = true;
-	this.setHistBytes();
     }
 
 }

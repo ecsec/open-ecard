@@ -35,8 +35,11 @@ import org.robovm.apple.ext.corenfc.NFCISO7816APDU;
 import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
 import org.robovm.apple.ext.corenfc.NFCPollingOption;
 import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
+import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
+import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.foundation.NSError;
+import org.robovm.apple.foundation.NSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,20 +72,37 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     }
 
-    public void connect() throws SCIOException {
+    private void startSession() throws SCIOException {
+	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
+	    @Override
+	    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
+		for (NSObject t : tags) {
+		    session.connectToTag$completionHandler$(t, (NSError er) -> {
+
+			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+			setTag(tag);
+		    });
+		}
+	    }
+	};
+
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
-		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
 			DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
 		break;
 	    case MAINQUEUE:
-		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
 			DispatchQueue.getMainQueue());
 		break;
 	    default:
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 
 	}
+    }
+
+    public void connect() throws SCIOException {
+	this.startSession();
 	this.nfcSession.setAlertMessage(this.getDialogMsg());
 	this.nfcSession.beginSession();
 

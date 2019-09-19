@@ -22,9 +22,24 @@
 
 package org.openecard.scio;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.util.Promise;
+import org.robovm.apple.dispatch.DispatchQueue;
+import org.robovm.apple.dispatch.DispatchQueueAttr;
+import org.robovm.apple.ext.corenfc.NFCISO7816APDU;
+import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
+import org.robovm.apple.ext.corenfc.NFCPollingOption;
+import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
+import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
+import org.robovm.apple.foundation.NSArray;
+import org.robovm.apple.foundation.NSData;
+import org.robovm.apple.foundation.NSError;
+import org.robovm.apple.foundation.NSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,44 +47,157 @@ import org.slf4j.LoggerFactory;
 /**
  * NFC implementation of SCIO API card interface.
  *
- * @author Dirk Petrautzki
+ * @author Neil Crossley
+ * @author Florian Otto
  */
 public final class IOSNFCCard extends AbstractNFCCard {
 
+    private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
+    private String dialogMsg = "Please provide card.";
+    private byte[] histBytes;
+
+    public enum DISPATCH_MODE {
+	CONCURRENT,
+	MAINQUEUE;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCCard.class);
+
+    private NFCTagReaderSession nfcSession;
+    private NFCISO7816Tag tag;
 
     public IOSNFCCard(NFCCardTerminal terminal) throws IOException {
 	super(terminal);
     }
 
+    private void setTag(NFCISO7816Tag tag) {
+	this.tag = tag;
+	this.setHistBytes();
+    }
+
+    private void initSessionObj() throws SCIOException {
+	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
+	    @Override
+	    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
+		for (NSObject t : tags) {
+		    session.connectToTag$completionHandler$(t, (NSError er) -> {
+
+			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+			setTag(tag);
+		    });
+		}
+	    }
+	};
+
+	switch (this.concurrencyMode) {
+	    case CONCURRENT:
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
+			DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
+		break;
+	    case MAINQUEUE:
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
+			DispatchQueue.getMainQueue());
+		break;
+	    default:
+		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
+
+	}
+
+	while (!isCardPresent()) {
+	    try {
+		Thread.sleep(100, 0);
+	    } catch (InterruptedException ex) {
+		//TODO: what todo  now
+	    }
+	}
+    }
+
     public void connect() throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.initSessionObj();
+	this.nfcSession.setAlertMessage(this.dialogMsg);
+	this.nfcSession.beginSession();
+
     }
 
     @Override
     public void disconnect(boolean reset) throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.nfcSession.invalidateSession();
+	this.nfcSession = null;
+	this.setTag(null);
     }
 
     @Override
     public boolean isCardPresent() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return this.tag != null;
     }
 
     @Override
     public void terminate(boolean killNfcConnection) throws SCIOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.disconnect(false);
+    }
+
+    private void setHistBytes() {
+	this.histBytes = this.tag.getHistoricalBytes().getBytes();
     }
 
     @Override
     public SCIOATR getATR() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
+	if (this.histBytes == null) {
+	    return new SCIOATR(new byte[0]);
+	} else {
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    // Initial Header
+	    out.write(0x3B);
+	    // T0
+	    out.write(0x80 | (this.histBytes.length & 0xF));
+	    // TD1
+	    out.write(0x80);
+	    // TD2
+	    out.write(0x01);
+	    // ISO14443A: The historical bytes from ATS response.
+	    // ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
+	    // TODO: check that the HiLayerResponse matches the requirements for ISO14443B
+	    out.write(this.histBytes, 0, this.histBytes.length);
+
+	    // TCK: Exclusive-OR of bytes T0 to Tk
+	    byte[] preATR = out.toByteArray();
+	    byte chkSum = 0;
+	    for (int i = 1; i < preATR.length; i++) {
+		chkSum ^= preATR[i];
+	    }
+	    out.write(chkSum);
+
+	    byte[] atr = out.toByteArray();
+	    return new SCIOATR(atr);
+	}
     }
 
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
+	Promise<byte[]> p = new Promise<>();
+	tag.sendCommandAPDU$completionHandler$(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
+	    ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
+	    bb.put(resp.getBytes(), 0, (int) resp.getLength());
+	    bb.put(sw1);
+	    bb.put(sw2);
+	    p.deliver(bb.array());
+	});
+
+	try {
+	    return p.deref();
+	} catch (InterruptedException ex) {
+	    throw new IOException(ex);
+	}
     }
 
+    public void setConcurrencyMode(DISPATCH_MODE mode) {
+	this.concurrencyMode = mode;
+    }
+
+    public void setDialogMsg(String dialogMsg) {
+	this.dialogMsg = dialogMsg;
+    }
 
 }

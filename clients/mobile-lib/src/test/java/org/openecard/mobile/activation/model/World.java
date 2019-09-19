@@ -56,7 +56,7 @@ public class World implements AutoCloseable {
     public void microSleep() {
 	try {
 	    LOG.debug("Sleeping.");
-	    Thread.sleep(MIN_WAIT_TIMEOUT / 2);
+	    Thread.sleep(MIN_WAIT_TIMEOUT);
 	} catch (InterruptedException ex) {
 	    throw new RuntimeException(ex);
 	}

@@ -89,34 +89,33 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    }
 	};
 
+	DispatchQueue dspqueue;
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
-		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
-			DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
+		dspqueue = DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent());
 		break;
 	    case MAINQUEUE:
-		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate,
-			DispatchQueue.getMainQueue());
+		dspqueue = DispatchQueue.getMainQueue();
 		break;
 	    default:
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
-
 	}
 
-	while (!isCardPresent()) {
-	    try {
-		Thread.sleep(100, 0);
-	    } catch (InterruptedException ex) {
-		//TODO: what todo  now
-	    }
-	}
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate, dspqueue);
+
     }
 
     public void connect() throws SCIOException {
 	this.initSessionObj();
 	this.nfcSession.setAlertMessage(this.dialogMsg);
 	this.nfcSession.beginSession();
-
+	while (!isCardPresent()) {
+	    try {
+		Thread.sleep(100, 0);
+	    } catch (InterruptedException ex) {
+		throw new SCIOException("Error during session initialization", SCIOErrorCode.SCARD_F_INTERNAL_ERROR, ex);
+	    }
+	}
     }
 
     @Override

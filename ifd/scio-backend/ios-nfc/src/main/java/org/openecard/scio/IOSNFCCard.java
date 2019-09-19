@@ -22,6 +22,7 @@
 
 package org.openecard.scio;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.ifd.scio.SCIOATR;
@@ -51,6 +52,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private String dialogMsg = "Please provide card.";
     private boolean tagPresent;
+    private byte[] histBytes;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -102,10 +104,41 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.disconnect(false);
     }
 
+    private void setHistBytes() {
+	this.histBytes = this.tag.getHistoricalBytes().getBytes();
+    }
+
     @Override
     public SCIOATR getATR() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
+	if (this.histBytes == null) {
+	    return new SCIOATR(new byte[0]);
+	} else {
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    // Initial Header
+	    out.write(0x3B);
+	    // T0
+	    out.write(0x80 | (this.histBytes.length & 0xF));
+	    // TD1
+	    out.write(0x80);
+	    // TD2
+	    out.write(0x01);
+	    // ISO14443A: The historical bytes from ATS response.
+	    // ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
+	    // TODO: check that the HiLayerResponse matches the requirements for ISO14443B
+	    out.write(this.histBytes, 0, this.histBytes.length);
 
+	    // TCK: Exclusive-OR of bytes T0 to Tk
+	    byte[] preATR = out.toByteArray();
+	    byte chkSum = 0;
+	    for (int i = 1; i < preATR.length; i++) {
+		chkSum ^= preATR[i];
+	    }
+	    out.write(chkSum);
+
+	    byte[] atr = out.toByteArray();
+	    return new SCIOATR(atr);
+	}
     }
 
     @Override
@@ -146,6 +179,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public void setTag(NFCISO7816Tag tag) {
 	this.tag = tag;
 	this.tagPresent = true;
+	this.setHistBytes();
     }
 
 }

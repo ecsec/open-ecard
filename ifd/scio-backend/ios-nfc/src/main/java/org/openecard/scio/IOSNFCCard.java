@@ -25,6 +25,7 @@ package org.openecard.scio;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.openecard.common.ifd.scio.SCIOATR;
+import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.Promise;
 import org.robovm.apple.dispatch.DispatchQueue;
@@ -67,8 +68,19 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     public void connect() throws SCIOException {
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
-		DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
+	switch (this.concurrencyMode) {
+	    case CONCURRENT:
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
+			DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent()));
+		break;
+	    case MAINQUEUE:
+		this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, new IOSNFCDelegate(this),
+			DispatchQueue.getMainQueue());
+		break;
+	    default:
+		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
+
+	}
 	this.nfcSession.setAlertMessage(this.getDialogMsg());
 	this.nfcSession.beginSession();
 
@@ -93,6 +105,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     @Override
     public SCIOATR getATR() {
 	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     @Override

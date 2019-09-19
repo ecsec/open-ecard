@@ -102,6 +102,14 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 
 	}
+
+	while (!isCardPresent()) {
+	    try {
+		Thread.sleep(100, 0);
+	    } catch (InterruptedException ex) {
+		//TODO: what todo  now
+	    }
+	}
     }
 
     public void connect() throws SCIOException {

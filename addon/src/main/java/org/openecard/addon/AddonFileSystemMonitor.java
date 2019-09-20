@@ -150,7 +150,9 @@ public class AddonFileSystemMonitor {
 		}
 	    } catch (WSMarshallerException ex) {
 		logger.error("Failed to deserialize Addon manifest, Terminating file monitor.");
-	    } catch (ClosedWatchServiceException | InterruptedException ex) {
+	    } catch (ClosedWatchServiceException ex) {
+		logger.info("Watch service closed while waiting for changes.");
+	    } catch (InterruptedException ex) {
 		logger.info("Watch service closed while waiting for changes.");
 	    }
 	}

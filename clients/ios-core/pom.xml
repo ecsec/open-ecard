@@ -24,10 +24,12 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<minimizeJar>true</minimizeJar>
 							<artifactSet>
 								<excludes>
 									<exclude>com.github.markusbernhardt:proxy-vole</exclude>
 									<exclude>org.mozilla:rhino</exclude>
+									<exclude>delight-rhino-sandbox:org.javadelight</exclude>
 									<exclude>org.ini4j</exclude>
 									<exclude>net.java.dev.jna</exclude>
 								</excludes>

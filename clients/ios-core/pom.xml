@@ -26,7 +26,8 @@
 						<configuration>
 							<artifactSet>
 								<excludes>
-									<exclude>com.github.markusbernhardt</exclude>
+									<exclude>com.github.markusbernhardt:proxy-vole</exclude>
+									<exclude>org.mozilla:rhino</exclude>
 									<exclude>org.ini4j</exclude>
 									<exclude>net.java.dev.jna</exclude>
 								</excludes>

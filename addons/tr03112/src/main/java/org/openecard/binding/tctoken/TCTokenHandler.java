@@ -549,6 +549,7 @@ public class TCTokenHandler {
     private String createResponseFromWsEx(WSException ex, TCTokenResponse response) {
 	String errorMsg;
 	switch (ex.getResultMinor()) {
+	    case ECardConstants.Minor.Disp.TIMEOUT:
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
 	    case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 		errorMsg = LANG_TOKEN.translationForKey("cancel");

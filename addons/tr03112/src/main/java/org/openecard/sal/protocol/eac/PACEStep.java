@@ -299,6 +299,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 				    switch (minor) {
 					case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 					case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+					case ECardConstants.Minor.Disp.TIMEOUT:
 					    needsTermination = true;
 				    }
 				}

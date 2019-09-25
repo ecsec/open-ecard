@@ -146,7 +146,7 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public synchronized void cancel() {
-	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
+	LOG.debug("Cancel of Android EAC GUI called.");
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
 	    cancelPromises(false);
 

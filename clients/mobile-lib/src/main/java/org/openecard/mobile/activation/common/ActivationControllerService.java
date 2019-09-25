@@ -73,7 +73,7 @@ public class ActivationControllerService {
 		    this.currentProccess = null;
 		}
 	    }
-	    LOG.info("Notifying callback of authentication results.");
+	    LOG.info("Notifying callback of authentication results {}.", result);
 	    controllerCallback.onAuthenticationCompletion(result);
 	});
 
@@ -117,6 +117,7 @@ public class ActivationControllerService {
 		LOG.info("Non-critical error occured while cleaning up the event dispatch hooks.", ex);
 	    }
 	}
+	LOG.debug("Notifying of interrupted completion.");
 	controllerCallback.onAuthenticationCompletion(new CommonActivationResult(INTERRUPTED, ""));
 
 	cancellableThread.interrupt();

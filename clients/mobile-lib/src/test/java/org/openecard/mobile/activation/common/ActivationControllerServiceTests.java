@@ -54,8 +54,10 @@ public class ActivationControllerServiceTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActivationControllerServiceTests.class);
 
-    private static final int SLEEP_WAIT = Timeout.MIN_WAIT_TIMEOUT / 10;
-    private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT;
+    private static final int SCALING_FACTOR = 20;
+    private static final int SLEEP_WAIT = Timeout.MIN_WAIT_TIMEOUT / 2 / SCALING_FACTOR;
+    private static final int MICRO_WAIT = SLEEP_WAIT / 2;
+    private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT / SCALING_FACTOR;
 
     MockitoSession mockito;
     private boolean hasSlowEacStack;
@@ -66,7 +68,7 @@ public class ActivationControllerServiceTests {
 		.initMocks(this)
 		.strictness(Strictness.LENIENT)
 		.startMocking();
-
+	hasSlowEacStack = false;
     }
 
     @AfterMethod()
@@ -106,7 +108,7 @@ public class ActivationControllerServiceTests {
     void sutCanCompleteActivation() throws InterruptedException, TimeoutException {
 	Promise<ActivationResult> outcome = new Promise();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverCompletion(outcome);
-	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(SLEEP_WAIT / 10).createSut();
+	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -122,7 +124,7 @@ public class ActivationControllerServiceTests {
     void sutNotifiesWhenStarted() throws InterruptedException, TimeoutException {
 	Promise<Void> outcome = new Promise();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
-	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(SLEEP_WAIT / 2).createSut();
+	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -139,7 +141,7 @@ public class ActivationControllerServiceTests {
 	ActivationControllerService sut = this
 		.withSlowEacStack()
 		.withMinimumAddons("eID-Client")
-		.withSuccessActivation(SLEEP_WAIT / 2).createSut();
+		.withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -151,25 +153,48 @@ public class ActivationControllerServiceTests {
     }
 
     @Test
+    void sutDoesNotNotifyStartedAfterDelayedCancel() throws InterruptedException, TimeoutException {
+	Promise<Void> outcome = new Promise();
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
+	ActivationControllerService sut = this
+		.withSlowEacStack()
+		.withMinimumAddons("eID-Client")
+		.withSuccessActivation(SLEEP_WAIT).createSut();
+
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		anySupportedCards(),
+		mockControllerCallback,
+		anyActivationInteraction());
+	Thread.sleep(SLEEP_WAIT / 2);
+	sut.cancelAuthentication(mockControllerCallback);
+
+	Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
     void sutCancelsActivationOnlyOnce() throws InterruptedException, TimeoutException {
 	ControllerCallback mockControllerCallback = mock(ControllerCallback.class);
+
 	ActivationControllerService sut = this
 		.withMinimumAddons("eID-Client")
-		.withSuccessActivation(WAIT_TIMEOUT / 2)
+		.withSuccessActivation(SLEEP_WAIT)
 		.createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
 		mockControllerCallback,
 		anyActivationInteraction());
-	Thread.sleep(SLEEP_WAIT);
+	Thread.sleep(MICRO_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
-	Thread.sleep(SLEEP_WAIT);
+	Thread.sleep(MICRO_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
-	Thread.sleep(SLEEP_WAIT);
+	Thread.sleep(MICRO_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
 
-	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> r.getResultCode() == ActivationResultCode.INTERRUPTED));
+	verify(mockControllerCallback, times(1)).onStarted();
+	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> {
+	    return r.getResultCode() == ActivationResultCode.INTERRUPTED;
+	}));
 	verify(mockControllerCallback, times(1)).onAuthenticationCompletion(any());
     }
 
@@ -204,17 +229,17 @@ public class ActivationControllerServiceTests {
     }
 
     public ActivationControllerServiceTests withMockAddonManager() {
-	withValue(when(this.mockContext.getManager()), mockAddonManager);
+	when(this.mockContext.getManager()).thenReturn(mockAddonManager);
 	return this;
     }
 
     private ActivationControllerServiceTests withAddonRegistry() {
-	withValue(when(this.mockAddonManager.getRegistry()), this.mockAddonRegistry);
+	when(this.mockAddonManager.getRegistry()).thenReturn(this.mockAddonRegistry);
 	return this;
     }
 
     private ActivationControllerServiceTests withEventDispatcher() {
-	withValue(when(this.mockContext.getEventDispatcher()), this.mockEventDispatcher);
+	when(this.mockContext.getEventDispatcher()).thenReturn(this.mockEventDispatcher);
 	return this;
     }
 
@@ -252,6 +277,10 @@ public class ActivationControllerServiceTests {
 	    }
 	});
 	return this;
+    }
+
+    private ActivationControllerServiceTests withSuccessActivation() {
+	return this.withSuccessActivation(MICRO_WAIT);
     }
 
     private ActivationControllerServiceTests withSuccessActivation(int sleepDelay) {

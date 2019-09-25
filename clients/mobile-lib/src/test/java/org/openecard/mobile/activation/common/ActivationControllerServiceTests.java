@@ -23,6 +23,7 @@ import org.mockito.MockitoSession;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.bind.AppPluginAction;
@@ -53,9 +54,11 @@ public class ActivationControllerServiceTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActivationControllerServiceTests.class);
 
+    private static final int SLEEP_WAIT = Timeout.MIN_WAIT_TIMEOUT / 10;
     private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT;
 
     MockitoSession mockito;
+    private boolean hasSlowEacStack;
 
     @BeforeMethod()
     void setup() {
@@ -102,7 +105,7 @@ public class ActivationControllerServiceTests {
     @Test
     void sutCanCompleteActivation() throws InterruptedException, TimeoutException {
 	Promise<ActivationResult> outcome = new Promise();
-	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverCompletion(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 10).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
@@ -116,37 +119,56 @@ public class ActivationControllerServiceTests {
     }
 
     @Test
-    void canCancelSut() throws InterruptedException, TimeoutException {
-	Promise<ActivationResult> outcome = new Promise();
-	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.createControllerCallbackDelivery(outcome);
+    void sutNotifiesWhenStarted() throws InterruptedException, TimeoutException {
+	Promise<Void> outcome = new Promise();
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
 		mockControllerCallback,
 		anyActivationInteraction());
-	Thread.sleep(WAIT_TIMEOUT / 10);
+
+	outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    void sutDoesNotNotifyStartedWhenCancelled() throws InterruptedException, TimeoutException {
+	Promise<Void> outcome = new Promise();
+	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
+	ActivationControllerService sut = this
+		.withSlowEacStack()
+		.withMinimumAddons("eID-Client")
+		.withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
+
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		anySupportedCards(),
+		mockControllerCallback,
+		anyActivationInteraction());
 	sut.cancelAuthentication(mockControllerCallback);
 
-	ActivationResult result = outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	Assert.assertNotNull(result);
-	Assert.assertEquals(result.getResultCode(), ActivationResultCode.INTERRUPTED);
+	outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	Assert.assertFalse(outcome.isDelivered());
+	// Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     @Test
     void sutCancelsActivationOnlyOnce() throws InterruptedException, TimeoutException {
 	ControllerCallback mockControllerCallback = mock(ControllerCallback.class);
-	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
+	ActivationControllerService sut = this
+		.withMinimumAddons("eID-Client")
+		.withSuccessActivation(WAIT_TIMEOUT / 2)
+		.createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
 		mockControllerCallback,
 		anyActivationInteraction());
-	Thread.sleep(WAIT_TIMEOUT / 10);
+	Thread.sleep(SLEEP_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
-	Thread.sleep(WAIT_TIMEOUT / 10);
+	Thread.sleep(SLEEP_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
-	Thread.sleep(WAIT_TIMEOUT / 10);
+	Thread.sleep(SLEEP_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
 
 	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> r.getResultCode() == ActivationResultCode.INTERRUPTED));
@@ -155,6 +177,11 @@ public class ActivationControllerServiceTests {
 
     public ActivationControllerService createSut() {
 	return new ActivationControllerService(mockOpeneCardContextProvider);
+    }
+
+    public ActivationControllerServiceTests withSlowEacStack() {
+	this.hasSlowEacStack = true;
+	return this;
     }
 
     public ActivationControllerServiceTests withMinimumAddons(String addonName) {
@@ -179,28 +206,42 @@ public class ActivationControllerServiceTests {
     }
 
     public ActivationControllerServiceTests withMockAddonManager() {
-	when(this.mockContext.getManager()).thenReturn(mockAddonManager);
+	withValue(when(this.mockContext.getManager()), mockAddonManager);
 	return this;
     }
 
     private ActivationControllerServiceTests withAddonRegistry() {
-	when(this.mockAddonManager.getRegistry()).thenReturn(this.mockAddonRegistry);
+	withValue(when(this.mockAddonManager.getRegistry()), this.mockAddonRegistry);
 	return this;
     }
 
     private ActivationControllerServiceTests withEventDispatcher() {
-	when(this.mockContext.getEventDispatcher()).thenReturn(this.mockEventDispatcher);
+	withValue(when(this.mockContext.getEventDispatcher()), this.mockEventDispatcher);
 	return this;
     }
 
     private ActivationControllerServiceTests withAddons(String name, Set<AddonSpecification> addons) {
-	when(this.mockAddonRegistry.searchByResourceName(name)).thenReturn(addons);
+	withValue(when(this.mockAddonRegistry.searchByResourceName(name)), addons);
 	return this;
     }
 
     private ActivationControllerServiceTests withAppPluginAction(@Nonnull AddonSpecification addonSpec, @Nonnull String resourceName) {
-	when(this.mockAddonManager.getAppPluginAction(addonSpec, resourceName)).thenReturn(mockPluginAction);
+	withValue(when(this.mockAddonManager.getAppPluginAction(addonSpec, resourceName)), mockPluginAction);
 	return this;
+    }
+
+    private <T> OngoingStubbing<T> withValue(OngoingStubbing<T> stubbing, T value) {
+	if (this.hasSlowEacStack) {
+	    return stubbing.thenAnswer(new Answer<T>() {
+		@Override
+		public T answer(InvocationOnMock arg0) throws Throwable {
+		    Thread.sleep(SLEEP_WAIT);
+		    return value;
+		}
+	    });
+	} else {
+	    return stubbing.thenReturn(value);
+	}
     }
 
     private ActivationControllerServiceTests withActivation(BindingResult result, int sleepDelay) {
@@ -222,9 +263,11 @@ public class ActivationControllerServiceTests {
     private ActivationInteraction anyActivationInteraction() {
 	return mock(ActivationInteraction.class);
     }
+
     private Set<String> allSupportedCards() {
 	return new HashSet<String>();
     }
+
     private Set<String> anySupportedCards() {
 	return allSupportedCards();
     }

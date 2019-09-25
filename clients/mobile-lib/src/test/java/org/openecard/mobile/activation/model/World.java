@@ -74,6 +74,7 @@ public class World implements AutoCloseable {
 	private PinManagementControllerFactory _pinManagementFactory;
 	private Set<String> supportedCards;
 	private Promise<ActivationResult> promisedActivationResult;
+	private Promise<Void> promisedStarted;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
 
@@ -87,11 +88,12 @@ public class World implements AutoCloseable {
 	public void startSimplePinManagement() {
 	    LOG.debug("Start simple pin management.");
 	    supportedCards = new HashSet<>();
-	    promisedActivationResult = new Promise<>(); ;
+	    promisedActivationResult = new Promise<>();
+	    promisedStarted = new Promise<>();
 	    interaction = mock(PinManagementInteraction.class);
 	    activationController = pinManagementFactory().create(
 		    supportedCards,
-		    PromiseDeliveringFactory.createControllerCallbackDelivery(promisedActivationResult), interaction);
+		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult), interaction);
 	    activationController.start();
 	}
 

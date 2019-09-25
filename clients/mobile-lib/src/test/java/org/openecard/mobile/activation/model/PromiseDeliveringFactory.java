@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation.model;
 
 import org.openecard.common.util.Promise;
@@ -33,6 +32,8 @@ import org.openecard.mobile.activation.ServiceErrorResponse;
  * @author Neil Crossley
  */
 public final class PromiseDeliveringFactory {
+
+    public static ControllerCallbackDelivery controllerCallback = new ControllerCallbackDelivery();
 
     private PromiseDeliveringFactory() {
     }
@@ -51,12 +52,50 @@ public final class PromiseDeliveringFactory {
 	};
     }
 
-    public static ControllerCallback createControllerCallbackDelivery(Promise<ActivationResult> outcome) {
-	return new ControllerCallback() {
-	    @Override
-	    public void onAuthenticationCompletion(ActivationResult result) {
-		outcome.deliver(result);
-	    }
-	};
+    public static final class ControllerCallbackDelivery {
+
+	private ControllerCallbackDelivery() {
+	}
+
+	public ControllerCallback deliverCompletion(Promise<ActivationResult> outcome) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		    outcome.deliver(result);
+		}
+
+		@Override
+		public void onStarted() {
+		}
+	    };
+	}
+
+	public ControllerCallback deliverStarted(Promise<Void> outcome) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		}
+
+		@Override
+		public void onStarted() {
+		    outcome.deliver(null);
+		}
+	    };
+	}
+
+	public ControllerCallback deliverStartedCompletion(Promise<Void> started, Promise<ActivationResult> completion) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		    completion.deliver(result);
+		}
+
+		@Override
+		public void onStarted() {
+		    started.deliver(null);
+		}
+	    };
+	}
     }
+
 }

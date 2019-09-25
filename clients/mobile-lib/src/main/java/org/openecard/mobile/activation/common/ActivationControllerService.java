@@ -62,7 +62,7 @@ public class ActivationControllerService {
 	    throw new IllegalArgumentException("Controller callback cannot be null.");
 	}
 
-	new Thread(() -> {
+	Thread executingThread = new Thread(() -> {
 	    CommonActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
 	    synchronized (processLock) {
 		if (cancelledCallback == controllerCallback) {
@@ -70,7 +70,18 @@ public class ActivationControllerService {
 		}
 	    }
 	    controllerCallback.onAuthenticationCompletion(result);
-	}).start();
+	});
+
+	synchronized (this.processLock) {
+	    if (this.isRunning) {
+		throw new IllegalStateException("The activation process is already running");
+	    }
+	    this.isRunning = true;
+	    this.currentCallback = controllerCallback;
+	    this.cancelledCallback = null;
+	    this.currentProccess = executingThread;
+	}
+	executingThread.start();
     }
 
     public void cancelAuthentication(final ControllerCallback controllerCallback) {
@@ -123,7 +134,7 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback callback, ActivationInteraction interaction) {
+    private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback givenCallback, ActivationInteraction interaction) {
 	if (this.isRunning) {
 	    return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
 	}
@@ -157,20 +168,30 @@ public class ActivationControllerService {
 		} else {
 		    queries = new HashMap<>(0);
 		}
-		synchronized (this.processLock) {
-		    if (this.isRunning) {
-			throw new IllegalStateException("The activation process is already running");
-		    }
-		    this.isRunning = true;
-		    this.currentCallback = callback;
-		    this.cancelledCallback = null;
-		    this.currentProccess = Thread.currentThread();
-		}
 		EventDispatcher eventDispatcher = context.getEventDispatcher();
 		try {
 		    Map.Entry<CardEventHandler, AutoCloseable> entry = CardEventHandler.create(supportedCards, eventDispatcher, interaction);
 
 		    this.closable = entry.getValue();
+
+		    ControllerCallback startedCallback;
+		    synchronized (this.processLock) {
+			if (this.isRunning && this.currentCallback == givenCallback && this.cancelledCallback == null) {
+			    startedCallback = givenCallback;
+			} else {
+			    startedCallback = null;
+			}
+		    }
+		    if (startedCallback != null) {
+			/*
+			 * TODO: it is possible (but improbable) that this process is cancelled before calling onStarted.
+			 */
+			startedCallback.onStarted();
+		    }
+		    if (Thread.interrupted()) {
+			LOG.debug("Determined thread was interrupted before executing handler for resource {}.", resourceName);
+			throw new InterruptedException();
+		    }
 		    LOG.debug("Found handler for resource {}. Executing", resourceName);
 		    BindingResult result = action.execute(null, queries, null, null);
 		    LOG.debug("Handler completed for resource {}.", resourceName);

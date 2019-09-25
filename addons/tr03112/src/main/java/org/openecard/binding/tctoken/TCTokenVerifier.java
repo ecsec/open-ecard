@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.httpcore.ValidationError;
+import org.openecard.httpcore.CertificateValidator;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
@@ -35,15 +37,18 @@ import java.net.URL;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.binding.tctoken.ex.ActivationError;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.UrlBuilder;
+import org.openecard.httpcore.HttpResourceException;
+import org.openecard.httpcore.InvalidProxyException;
+import org.openecard.httpcore.InvalidUrlException;
+import org.openecard.httpcore.ResourceContext;
 
 
 /**
@@ -376,7 +381,7 @@ public class TCTokenVerifier {
 	if (token.getRefreshAddress() != null) {
 	    try {
 		CertificateValidator validator = new RedirectCertificateValidator(true);
-		ResourceContext newResCtx = ResourceContext.getStream(new URL(token.getRefreshAddress()), validator);
+		ResourceContext newResCtx = new TrResourceContextLoader().getStream(new URL(token.getRefreshAddress()), validator);
 		newResCtx.closeStream();
 		List<Pair<URL, TlsServerCertificate>> resultPoints = newResCtx.getCerts();
 		Pair<URL, TlsServerCertificate> last = resultPoints.get(resultPoints.size() - 1);
@@ -389,11 +394,11 @@ public class TCTokenVerifier {
 			    ex.getMessage());
 		    throw new UserCancellationException(refreshUrlAsUrl.toString(), ex);
 		}
-		
+
 		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl,
 			ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
-	    } catch (IOException | ResourceException | InvalidAddressException | ValidationError | URISyntaxException ex1) {
+	    } catch (IOException | HttpResourceException | InvalidUrlException | InvalidProxyException | ValidationError | URISyntaxException ex1) {
 		String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);
 		throw new InvalidTCTokenElement(errorUrl, INVALID_REFRESH_ADDRESS, ex1);
 	    }

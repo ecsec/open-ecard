@@ -65,7 +65,7 @@ public class WaitForChangeAction implements AppPluginAction {
 	try {
 	    WaitForChangeRequest statusRequest = WaitForChangeRequest.convert(parameters);
 	    StatusChange status = eventHandler.next(statusRequest.getSessionIdentifier());
-	    response = new WaitForChangeResponse(status);
+	    response = new StatusResponseBodyFactory().createWaitForChangeResponse(status);
 	} catch (StatusException e) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
 	    response.setResultMessage(e.getMessage());

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,7 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.httpcore.ValidationError;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
@@ -37,9 +38,15 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Pair;
+import org.openecard.httpcore.HttpResourceException;
+import org.openecard.httpcore.InsecureUrlException;
+import org.openecard.httpcore.InvalidProxyException;
+import org.openecard.httpcore.InvalidRedirectChain;
+import org.openecard.httpcore.InvalidUrlException;
+import org.openecard.httpcore.ResourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +77,13 @@ public class TCTokenContext extends ResourceContext {
 	    InvalidAddressException, UserCancellationException {
 	// Get TCToken from the given url
 	try {
-	    ResourceContext ctx = ResourceContext.getStream(tcTokenURL);
+	    ResourceContext ctx = new TrResourceContextLoader().getStream(tcTokenURL);
 	    return generateTCToken(ctx.getData(), ctx);
-	} catch (IOException | ResourceException | ValidationError ex) {
+	} catch (InsecureUrlException ex) {
+	    throw new InvalidAddressException(INVALID_ADDRESS);
+	} catch (InvalidRedirectChain ex) {
+	    throw new InvalidAddressException(INVALID_REFRESH_ADDRESS_NOSOP);
+	} catch (IOException | HttpResourceException | InvalidProxyException | ValidationError ex) {
 	    throw new TCTokenRetrievalException(RETRIEVAL_FAILED, ex);
 	}
     }

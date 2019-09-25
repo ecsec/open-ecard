@@ -24,6 +24,8 @@ package org.openecard.crypto.tls;
 
 import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import java.io.IOException;
+import java.net.IDN;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -31,21 +33,21 @@ import java.util.List;
 import java.util.Vector;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.bouncycastle.tls.AlertLevel;
-import org.openecard.bouncycastle.tls.CipherSuite;
-import org.openecard.bouncycastle.tls.HashAlgorithm;
-import org.openecard.bouncycastle.tls.NameType;
-import org.openecard.bouncycastle.tls.NamedGroup;
-import org.openecard.bouncycastle.tls.NamedGroupRole;
-import org.openecard.bouncycastle.tls.PSKTlsClient;
-import org.openecard.bouncycastle.tls.ProtocolVersion;
-import org.openecard.bouncycastle.tls.ServerName;
-import org.openecard.bouncycastle.tls.SignatureAlgorithm;
-import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.tls.TlsAuthentication;
-import org.openecard.bouncycastle.tls.TlsPSKIdentity;
-import org.openecard.bouncycastle.tls.TlsUtils;
-import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.bouncycastle.tls.AlertLevel;
+import org.bouncycastle.tls.CipherSuite;
+import org.bouncycastle.tls.HashAlgorithm;
+import org.bouncycastle.tls.NameType;
+import org.bouncycastle.tls.NamedGroup;
+import org.bouncycastle.tls.NamedGroupRole;
+import org.bouncycastle.tls.PSKTlsClient;
+import org.bouncycastle.tls.ProtocolVersion;
+import org.bouncycastle.tls.ServerName;
+import org.bouncycastle.tls.SignatureAlgorithm;
+import org.bouncycastle.tls.SignatureAndHashAlgorithm;
+import org.bouncycastle.tls.TlsAuthentication;
+import org.bouncycastle.tls.TlsPSKIdentity;
+import org.bouncycastle.tls.TlsUtils;
+import org.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.crypto.tls.auth.ContextAware;
 import org.slf4j.Logger;
@@ -108,7 +110,8 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
     }
 
     private ServerName makeServerName(String name) {
-	return new ServerName(NameType.host_name, name);
+	name = IDN.toASCII(name);
+	return new ServerName(NameType.host_name, name.getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override
@@ -210,20 +213,20 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
     @Override
     protected Vector getSupportedGroups(Vector namedGroupRoles) {
-        Vector supportedGroups = new Vector();
+        Vector groups = new Vector();
 
         if (namedGroupRoles.contains(NamedGroupRole.ecdh) || namedGroupRoles.contains(NamedGroupRole.ecdsa)) {
 	    // other possible parameters TR-02102-2 sec. 3.6
-            supportedGroups.add(NamedGroup.brainpoolP512r1);
-	    supportedGroups.add(NamedGroup.brainpoolP384r1);
-	    supportedGroups.add(NamedGroup.secp384r1);
+            groups.add(NamedGroup.brainpoolP512r1);
+	    groups.add(NamedGroup.brainpoolP384r1);
+	    groups.add(NamedGroup.secp384r1);
 	    // required parameters TR-03116-4 sec. 4.1.4
-	    supportedGroups.add(NamedGroup.brainpoolP256r1);
-	    supportedGroups.add(NamedGroup.secp256r1);
-	    supportedGroups.add(NamedGroup.secp224r1);
+	    groups.add(NamedGroup.brainpoolP256r1);
+	    groups.add(NamedGroup.secp256r1);
+	    groups.add(NamedGroup.secp224r1);
         }
 
-        return supportedGroups;
+        return groups;
     }
 
     @Override

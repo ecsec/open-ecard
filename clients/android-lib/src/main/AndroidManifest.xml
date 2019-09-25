@@ -13,7 +13,7 @@
 
 		<service
 			android:name=".system.OpeneCardServiceImpl"
-			android:exported="true"
+			android:exported="false"
 			android:label="Open eCard Service"/>
 
 	</application>

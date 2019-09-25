@@ -32,12 +32,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>http-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-jaxb-annotations</artifactId>
 		</dependency>
@@ -45,12 +39,18 @@
 			<groupId>org.bitbucket.b_c</groupId>
 			<artifactId>jose4j</artifactId>
 		</dependency>
-  
+
 		<dependency>
 			<groupId>org.openecard.gui</groupId>
 			<artifactId>swing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
 		</dependency>
 	</dependencies>
 

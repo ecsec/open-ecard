@@ -15,33 +15,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>http-core-shade</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.crypto</groupId>
-			<artifactId>tls</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard</groupId>
 			<artifactId>addon</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>wsdef-client</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>dispatcher</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard</groupId>
 			<artifactId>recognition</artifactId>
@@ -66,12 +49,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>jaxb-marshaller</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.openecard</groupId>
 			<artifactId>management</artifactId>
@@ -81,18 +59,6 @@
 		<dependency>
 			<groupId>org.openecard.gui</groupId>
 			<artifactId>swing</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>tr03112</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>status</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

@@ -29,12 +29,6 @@
 			<artifactId>sal-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>http-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
 
 </project>

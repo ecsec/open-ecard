@@ -26,16 +26,16 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.params.ECDomainParameters;
-import org.openecard.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
-import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
-import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.openecard.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.ElGamalParameters;
+import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ElGamalParameterSpec;
+import org.bouncycastle.math.ec.ECPoint;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
@@ -52,20 +52,14 @@ import org.slf4j.LoggerFactory;
  */
 public final class CAKey {
 
-    private static final Logger logger;
-    private static final SecureRandom rand;
-    private static long counter;
-
-    static {
-	logger = LoggerFactory.getLogger(CAKey.class);
-	rand = SecureRandomFactory.create(32);
-	counter = 0;
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(CAKey.class);
+    private static final SecureRandom RAND = SecureRandomFactory.create(32);
+    private static long counter = 0;
 
     private static void reseed() {
 	counter++;
-	rand.setSeed(counter);
-	rand.setSeed(System.nanoTime());
+	RAND.setSeed(counter);
+	RAND.setSeed(System.nanoTime());
     }
 
     private AsymmetricKeyParameter sk;
@@ -110,7 +104,7 @@ public final class CAKey {
 	    return getEncodedPublicKey();
 	} else if (cdp.isDH()) {
 	    //TODO
-	    logger.error("Not implemented yet.");
+	    LOG.error("Not implemented yet.");
 	    throw new UnsupportedOperationException("Not implemented yet.");
 	} else {
 	    throw new IllegalArgumentException();
@@ -125,7 +119,7 @@ public final class CAKey {
 	if (cdp.isDH()) {
 	    ElGamalParameterSpec p = (ElGamalParameterSpec) cdp.getParameter();
 	    int numBits = p.getG().bitLength();
-	    BigInteger d = new BigInteger(numBits, rand);
+	    BigInteger d = new BigInteger(numBits, RAND);
 	    ElGamalParameters egp = new ElGamalParameters(p.getP(), p.getG());
 
 	    sk = new ElGamalPrivateKeyParameters(d, egp);
@@ -134,7 +128,7 @@ public final class CAKey {
 	} else if (cdp.isECDH()) {
 	    ECParameterSpec p = (ECParameterSpec) cdp.getParameter();
 	    int numBits = p.getN().bitLength();
-	    BigInteger d = new BigInteger(numBits, rand);
+	    BigInteger d = new BigInteger(numBits, RAND);
 	    ECDomainParameters ecp = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
 
 	    sk = new ECPrivateKeyParameters(d, ecp);
@@ -162,7 +156,7 @@ public final class CAKey {
 	if (cdp.isDH()) {
 	    return ((ElGamalPublicKeyParameters) pk).getY().toByteArray();
 	} else if (cdp.isECDH()) {
-	    return ((ECPublicKeyParameters) pk).getQ().getEncoded();
+	    return ((ECPublicKeyParameters) pk).getQ().getEncoded(false);
 	} else {
 	    throw new IllegalArgumentException();
 	}
@@ -182,7 +176,7 @@ public final class CAKey {
 
 		return compKey;
 	    } catch (NoSuchAlgorithmException e) {
-		logger.error(e.getMessage(), e);
+		LOG.error(e.getMessage(), e);
 		throw new RuntimeException(e);
 	    }
 	} else if (cdp.isECDH()) {

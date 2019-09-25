@@ -21,12 +21,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openecard.transport</groupId>
-			<artifactId>dispatcher</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.ifd</groupId>
 			<artifactId>ifd-core</artifactId>
 			<version>${project.version}</version>

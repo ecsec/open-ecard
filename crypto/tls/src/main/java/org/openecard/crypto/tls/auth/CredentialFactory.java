@@ -24,8 +24,8 @@ package org.openecard.crypto.tls.auth;
 
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.tls.CertificateRequest;
-import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
+import org.bouncycastle.tls.CertificateRequest;
+import org.bouncycastle.tls.TlsCredentialedSigner;
 
 
 /**

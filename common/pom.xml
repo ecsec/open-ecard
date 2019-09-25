@@ -4,8 +4,9 @@
 
 	<parent>
 		<groupId>org.openecard</groupId>
-		<artifactId>app</artifactId>
+		<artifactId>src-parent</artifactId>
 		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<relativePath>../src-parent/</relativePath>
 	</parent>
 
 	<groupId>org.openecard</groupId>
@@ -34,11 +35,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>wsdef-common</artifactId>
 			<version>${project.version}</version>
@@ -48,16 +44,34 @@
 			<artifactId>i18n</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>org.openecard.crypto</groupId>
-			<artifactId>bouncycastle</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
 		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bctls-jdk15on</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>wsdef-client</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>jaxb-marshaller</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

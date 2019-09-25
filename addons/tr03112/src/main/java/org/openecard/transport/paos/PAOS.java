@@ -39,17 +39,17 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.apache.http.HttpEntity;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.entity.ContentType;
-import org.openecard.apache.http.entity.StringEntity;
-import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.openecard.apache.http.protocol.BasicHttpContext;
-import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.apache.http.protocol.HttpRequestExecutor;
-import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestExecutor;
+import org.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -57,9 +57,9 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.binding.tctoken.TlsConnectionHandler;
-import org.openecard.transport.httpcore.HttpRequestHelper;
-import org.openecard.transport.httpcore.HttpUtils;
-import org.openecard.transport.httpcore.StreamHttpClientConnection;
+import org.openecard.httpcore.HttpRequestHelper;
+import org.openecard.httpcore.HttpUtils;
+import org.openecard.httpcore.StreamHttpClientConnection;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
@@ -320,7 +320,7 @@ public class PAOS {
      * @throws PAOSException In case there were errors in the transport layer.
      * @throws PAOSConnectionException
      */
-    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException, 
+    public StartPAOSResponse sendStartPAOS(StartPAOS message) throws DispatcherException, PAOSException,
 	    PAOSConnectionException {
 	Object msg = message;
 	StreamHttpClientConnection conn = null;

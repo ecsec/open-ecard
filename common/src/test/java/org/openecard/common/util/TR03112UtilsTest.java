@@ -26,10 +26,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import javax.security.cert.CertificateException;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -67,8 +66,7 @@ public class TR03112UtilsTest {
     }
 
     @Test
-    public void testInCommCertificates() throws CertificateException,
-	    IOException {
+    public void testInCommCertificates() throws IOException {
 	new Expectations() {{
 	    tlsCert.getCertificate().getCertificateAt(0).getEncoded(); result = x509Certificate;
 	    tlsCert.getCertificate().getCertificateAt(0).getEncoded(); result = x509Certificate;

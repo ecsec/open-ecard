@@ -7,7 +7,6 @@ oasis.names.tc.saml._2_0.assertion.ObjectFactory
 org.etsi.uri._01903.v1_3.ObjectFactory
 org.etsi.uri._02231.v3_1.ObjectFactory
 org.openecard.ws.schema.ObjectFactory
-org.setcce.schemas.ers.ObjectFactory
 org.w3._2000._09.xmldsig_.ObjectFactory
 org.w3._2001._04.xmldsig_more_.ObjectFactory
 org.w3._2001._04.xmlenc_.ObjectFactory

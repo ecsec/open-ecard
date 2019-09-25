@@ -4,8 +4,9 @@
 
 	<parent>
 		<groupId>org.openecard</groupId>
-		<artifactId>app</artifactId>
+		<artifactId>src-parent</artifactId>
 		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<relativePath>../src-parent/</relativePath>
 	</parent>
 
 	<groupId>org.openecard</groupId>
@@ -13,27 +14,11 @@
 	<packaging>pom</packaging>
 	<name>Client Implementations</name>
 
-	<modules>
-		<module>java-version-check</module>
-		<module>richclient</module>
-		<module>richclient-bundle</module>
-	</modules>
 
-	<profiles>
-		<profile>
-			<id>android</id>
-			<activation>
-				<!-- activate android when sdk path is defined -->
-				<property>
-					<name>env.ANDROID_HOME</name>
-				</property>
-				<!-- and this is not JDK 9 as we still have problems there -->
-				<jdk>[1.7,9)</jdk>
-			</activation>
-			<modules>
-				<module>android-lib</module>
-			</modules>
-		</profile>
-	</profiles>
+	<modules>
+		<module>richclient</module>
+		<module>android-core</module>
+		<module>android-lib</module>
+	</modules>
 
 </project>

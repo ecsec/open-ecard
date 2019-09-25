@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,15 +24,14 @@ package org.openecard.gui.swing.components;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.swing.JLabel;
 import org.openecard.gui.definition.OutputInfoUnit;
+import org.openecard.gui.swing.common.SwingUtils;
 
 
 /**
@@ -89,28 +88,8 @@ public class Hyperlink implements StepComponent {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	    try {
-		boolean browserOpened = false;
 		URI uri = new URI(href.toString());
-		// try opening the browser with the recommended java method (should work on windows in any case)
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-		    try {
-			Desktop.getDesktop().browse(uri);
-			browserOpened = true;
-		    } catch (IOException ex) {
-			// opening browser failed
-		    }
-		}
-		// there is a bug which prevents this from working under linux without gnome. big up oracle you guys rock
-		// in a standard linux desktop (freedesktop.org or lsb conforming) there is the xdg-open untility which can open the default browser
-		// if that method also screws up then I'm out of ideas
-		if (! browserOpened) {
-		    ProcessBuilder pb = new ProcessBuilder("xdg-open", uri.toString());
-		    try {
-			pb.start();
-		    } catch (IOException ex) {
-			// failed to execute command
-		    }
-		}
+		SwingUtils.openUrl(uri, false);
 	    } catch (URISyntaxException ex) {
 		// silently fail, its just no use against developer stupidity
 	    }

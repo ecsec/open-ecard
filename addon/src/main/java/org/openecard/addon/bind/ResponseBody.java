@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,8 +22,7 @@
 
 package org.openecard.addon.bind;
 
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
+import java.nio.charset.Charset;
 
 
 /**
@@ -34,20 +33,12 @@ import org.openecard.ws.marshal.WSMarshallerException;
  */
 public class ResponseBody extends Body {
 
-    public ResponseBody() throws WSMarshallerException {
+    public ResponseBody() {
 	super();
     }
 
-    public ResponseBody(WSMarshaller m) {
-	super(m);
-    }
-
-    public ResponseBody(String value, String mimeType, boolean base64Encoded) throws WSMarshallerException {
-	super(value, mimeType, base64Encoded);
-    }
-
-    public ResponseBody(String value, String mimeType, boolean base64Encoded, WSMarshaller m) {
-	super(value, mimeType, base64Encoded, m);
+    public ResponseBody(String value, Charset encoding, String mimeType) {
+	super(value, encoding, mimeType);
     }
 
 }

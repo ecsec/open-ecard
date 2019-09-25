@@ -84,7 +84,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.jws.WebService;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ThreadTerminateException;
@@ -125,7 +124,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-@WebService(endpointInterface = "org.openecard.ws.IFD")
 public class IFD implements org.openecard.ws.IFD {
     // TODO: make all commands cancellable
 

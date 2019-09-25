@@ -30,19 +30,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.List;
-import org.openecard.apache.http.ConnectionClosedException;
-import org.openecard.apache.http.ConnectionReuseStrategy;
-import org.openecard.apache.http.HttpRequestInterceptor;
-import org.openecard.apache.http.HttpResponseFactory;
-import org.openecard.apache.http.HttpResponseInterceptor;
-import org.openecard.apache.http.impl.DefaultBHttpServerConnection;
-import org.openecard.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.openecard.apache.http.impl.DefaultHttpResponseFactory;
-import org.openecard.apache.http.protocol.BasicHttpContext;
-import org.openecard.apache.http.protocol.HttpProcessor;
-import org.openecard.apache.http.protocol.HttpRequestHandler;
-import org.openecard.apache.http.protocol.ImmutableHttpProcessor;
-import org.openecard.apache.http.protocol.UriHttpRequestHandlerMapper;
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseFactory;
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.impl.DefaultBHttpServerConnection;
+import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpProcessor;
+import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.http.protocol.ImmutableHttpProcessor;
+import org.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class HttpService implements Runnable {
     private static final int BACKLOG = 10;
 
     private final Thread thread;
-    private final org.openecard.apache.http.protocol.HttpService service;
+    private final org.apache.http.protocol.HttpService service;
     protected final ServerSocket server;
 
     /**
@@ -89,7 +89,7 @@ public class HttpService implements Runnable {
 	handlerRegistry.register("*", handler);
 
 	// create service instance
-	service = new org.openecard.apache.http.protocol.HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry);
+	service = new org.apache.http.protocol.HttpService(httpProcessor, connectionReuseStrategy, responseFactory, handlerRegistry);
     }
 
     /**
@@ -133,7 +133,7 @@ public class HttpService implements Runnable {
 			    }
 			} catch (ConnectionClosedException ex) {
 			    // connection closed by client, this is the expected outcome
-			} catch (org.openecard.apache.http.HttpException ex) {
+			} catch (org.apache.http.HttpException ex) {
 			    LOG.error("Error processing HTTP request or response.", ex);
 			} catch (IOException ex) {
 			    LOG.error("IO Error while processing HTTP request or response.", ex);

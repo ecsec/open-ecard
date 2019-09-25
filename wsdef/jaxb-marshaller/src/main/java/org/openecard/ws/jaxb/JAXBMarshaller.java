@@ -93,10 +93,18 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    tmpW3Factory = DocumentBuilderFactory.newInstance();
 	    tmpW3Factory.setNamespaceAware(true);
 	    tmpW3Factory.setIgnoringComments(true);
-	    tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    try {
+		tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to enable secure processing for DOM Builder.");
+	    }
 	    // XXE countermeasures
 	    tmpW3Factory.setExpandEntityReferences(false);
-	    tmpW3Factory.setXIncludeAware(false);
+	    try {
+		tmpW3Factory.setXIncludeAware(false);
+	    } catch (UnsupportedOperationException ex) {
+		LOG.warn("Failed to disable XInclude support.");
+	    }
 	    try {
 		tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 	    } catch (IllegalArgumentException ex) {
@@ -107,13 +115,21 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    } catch (ParserConfigurationException ex) {
 		//LOG.debug("Failed to disallow DTDs entirely.");
 	    }
-	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-	    tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+	    try {
+		tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+	    } catch (ParserConfigurationException ex) {
+		LOG.warn("Failed to disable XEE mitigations.");
+	    }
 
 	    tmpW3Builder = tmpW3Factory.newDocumentBuilder();
 
 	    TransformerFactory tfactory = TransformerFactory.newInstance();
-	    tfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    try {
+		tfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    } catch (TransformerConfigurationException ex) {
+		LOG.warn("Failed to enable secure processing for XML Transformer.");
+	    }
 	    // XXE countermeasures
 	    try {
 		tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -132,10 +148,14 @@ public final class JAXBMarshaller implements WSMarshaller {
 	    }
 
 	    tmpSerializer = tfactory.newTransformer();
-	    tmpSerializer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    tmpSerializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-	    tmpSerializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-	    tmpSerializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+	    try {
+		tmpSerializer.setOutputProperty(OutputKeys.INDENT, "yes");
+		tmpSerializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+		tmpSerializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		tmpSerializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Failed to configure output formatting.");
+	    }
 
 	    // instantiate soap stuff
 	    tmpSoapFactory = MessageFactory.newInstance();

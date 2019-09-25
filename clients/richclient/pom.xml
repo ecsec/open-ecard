@@ -14,19 +14,17 @@
 	<name>Rich Client</name>
 
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<properties>
+		<maven.compiler.release>${used.java.version}</maven.compiler.release>
+	</properties>
+
 
 	<dependencies>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>pcsc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>tiny-sal</artifactId>
@@ -73,6 +71,7 @@
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<!-- Dependencies which can be used to test android marshaller -->
 		<!--dependency>
 			<groupId>org.openecard.wsdef</groupId>
@@ -82,10 +81,12 @@
 		<dependency>
 			<groupId>org.ogce</groupId>
 			<artifactId>xpp3</artifactId>
+			<version>1.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
+			<version>2.12.0</version>
 		</dependency-->
 
 		<dependency>
@@ -112,6 +113,16 @@
 			<groupId>org.openecard.addons</groupId>
 			<artifactId>chipgateway</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bitbucket.b_c</groupId>
+			<artifactId>jose4j</artifactId>
 		</dependency>
 
 		<dependency>

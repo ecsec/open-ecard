@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2017 ecsec GmbH.
+ * Copyright (C) 2013-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,6 +22,8 @@
 
 package org.openecard.binding.tctoken;
 
+import org.openecard.httpcore.ValidationError;
+import org.openecard.httpcore.CertificateValidator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.openecard.common.DynamicContext;
@@ -31,7 +33,8 @@ import org.openecard.crypto.common.asn1.cvc.CertificateDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.common.I18n;
 
 
 /**
@@ -43,6 +46,8 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate;
 public class RedirectCertificateValidator implements CertificateValidator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedirectCertificateValidator.class);
+
+    private static final I18n LANG = I18n.getTranslation("tr03112");
 
     private final Promise<Object> descPromise;
     private final boolean redirectChecks;
@@ -75,7 +80,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		if (certDescExists && ! TR03112Utils.isInCommCertificates(cert, desc.getCommCertificates(), host)) {
 		    LOG.error("The retrieved server certificate is NOT contained in the CommCertificates of "
 			    +	"the CertificateDescription extension of the eService certificate.");
-		    throw new ValidationError(INVALID_REDIRECT);
+		    throw new ValidationError(LANG, INVALID_REDIRECT);
 		}
 
 		// check if we match the SOP
@@ -108,7 +113,7 @@ public class RedirectCertificateValidator implements CertificateValidator {
 		return VerifierResult.FINISH;
 	    }
 	} catch (MalformedURLException ex) {
-	    throw new ValidationError(REDIRECT_MALFORMED_URL, ex);
+	    throw new ValidationError(LANG, REDIRECT_MALFORMED_URL, ex);
 	}
     }
 

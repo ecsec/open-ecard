@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,17 +22,11 @@
 
 package org.openecard.addon.bind;
 
-import javax.annotation.Nonnull;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.transform.TransformerException;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
 
 
 /**
@@ -45,66 +39,31 @@ import org.w3c.dom.Node;
  */
 public abstract class Body {
 
-    private static final Logger logger = LoggerFactory.getLogger(Body.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Body.class);
 
-    private String value;
+    private byte[] value;
+    private Charset encoding;
     private String mimeType;
-    private boolean base64Encoded;
-    private WSMarshaller m;
 
-    /**
-     * Creates a body without any content and the default marshaller.
-     *
-     * @throws WSMarshallerException Thrown in case the default marshaller could not be loaded.
-     */
-    protected Body() throws WSMarshallerException {
-	this(loadEmptyMarshaller());
+    protected Body() {
+	this((byte[]) null, null, null);
+    }
+
+    protected Body(String value, Charset encoding, String mimeType) {
+	this(value.getBytes(encoding), encoding, mimeType);
     }
 
     /**
-     * Creates a body without any content and the given marshaller.
-     *
-     * @param m The marshaller which can be used by this instance to serialize and marshal XML. {@code null} values are
-     *   permitted, but then each XML based function throws a {@link NullPointerException} when used.
-     */
-    protected Body(@Nullable WSMarshaller m) {
-	this(null, null, false, m);
-    }
-
-    /**
-     * Creates a body with the given content and the default marshaller.
-     * The marshaller is not initialized with any classes for JAXB serialization to speed up the creation process.
+     * Creates a body with the given content.
      *
      * @param value Value to use as the bodies content, or {@code null} if the body should be empty.
+     * @param encoding Encoding of the value if applicable.
      * @param mimeType MIME type of the value or, {@code null} if the value is {@code null}.
-     * @param base64Encoded Boolean indicating if the content is BASE64 encoded.
-     * @throws WSMarshallerException Thrown in case the default marshaller could not be loaded.
      */
-    protected Body(@Nullable String value, @Nullable String mimeType, boolean base64Encoded)
-	    throws WSMarshallerException {
-	this(value, mimeType, base64Encoded, loadEmptyMarshaller());
-    }
-
-    /**
-     * Creates a body with the given content and the given marshaller.
-     *
-     * @param value Value to use as the bodies content, or {@code null} if the body should be empty.
-     * @param mimeType MIME type of the value or, {@code null} if the value is {@code null}.
-     * @param base64Encoded Boolean indicating if the content is BASE64 encoded.
-     * @param m The marshaller which can be used by this instance to serialize and marshal XML. {@code null} values are
-     *   permitted, but then each XML based function throws a {@link NullPointerException} when used.
-     */
-    protected Body(@Nullable String value, @Nullable String mimeType, boolean base64Encoded, @Nullable WSMarshaller m) {
+    protected Body(@Nullable byte[] value, @Nullable Charset encoding, @Nullable String mimeType) {
 	this.value = value;
+	this.encoding = encoding;
 	this.mimeType = mimeType;
-	this.base64Encoded = base64Encoded;
-	this.m = m;
-    }
-
-    private static WSMarshaller loadEmptyMarshaller() throws WSMarshallerException {
-	WSMarshaller m = WSMarshallerFactory.createInstance();
-	m.removeAllTypeClasses();
-	return m;
     }
 
     /**
@@ -116,14 +75,42 @@ public abstract class Body {
 	return value != null;
     }
 
+    public boolean hasStringValue() {
+	return value != null && encoding != null;
+    }
+
     /**
      * Gets the value of this body instance.
      *
      * @return The value, or {@code null} if no value is set.
      */
     @Nullable
-    public String getValue() {
+    public byte[] getValue() {
 	return value;
+    }
+
+    /**
+     * Gets the value of the nbody as a string.
+     * This method only returns a value if this body is representable by a string.
+     *
+     * @return The value of the string if it is set, {@code null} otherwise.
+     */
+    @Nullable
+    public String getValueString() {
+	if (hasStringValue()) {
+	    return new String(value, encoding);
+	} else {
+	    return null;
+	}
+    }
+
+    /**
+     * Gets the encoding of the
+     * @return
+     */
+    @Nullable
+    public Charset getEncoding() {
+	return encoding;
     }
 
     /**
@@ -137,49 +124,47 @@ public abstract class Body {
     }
 
     /**
-     * Gets whether the value of this body instance is BASE64 encoded, or not.
+     * Sets the value of the body.
      *
-     * @return {@code true} if the body's value is BASE64 encoded, {@code false} otherwise.
+     * @param value The value to be set in the body. {@code null} values are permitted.
+     * @param encoding The encoding of the value, or {@code null} if not used.
+     * @param mimeType The MIME type of the value.  {@code null} values are permitted.
      */
-    public boolean isBase64() {
-	return base64Encoded;
-    }
+    public void setValue(@Nullable byte[] value, @Nullable Charset encoding, @Nullable String mimeType) {
+	if (value == null) {
+	    mimeType = null;
+	    encoding = null;
+	}
 
-    /**
-     * Gets the marshaller managed by this instance.
-     *
-     * @return The marshaller used for this instance. {@code null} if no marshaller has been initialized.
-     */
-    @Nullable
-    protected WSMarshaller getMarshaller() {
-	return m;
+	this.value = value;
+	this.encoding = encoding;
+	this.mimeType = mimeType;
     }
 
     /**
      * Sets the value of the body.
-     * The MIME type and BASE64 encoding flag get corrected accordingly to the value. Note that no detection of the MIME
-     * type is performed.
      *
      * @param value The value to be set in the body. {@code null} values are permitted.
+     * @param encoding The encoding of the value, or {@code null} if not used.
      * @param mimeType The MIME type of the value.  {@code null} values are permitted.
-     * @param base64Encoded {@code true} if the value is BASE64 encoded, false otherwise.
      */
-    public void setValue(@Nullable String value, @Nullable String mimeType, boolean base64Encoded) {
+    public void setValue(@Nullable String value, @Nullable Charset encoding, @Nullable String mimeType) {
 	// use default for mime type if the value is omitted
 	if (value == null) {
 	    mimeType = null;
-	} else if (mimeType == null || "".equals(mimeType)) {
-	    logger.warn("No MIME type specified, falling back to 'text/plain'.");
-	    mimeType = "text/plain";
-	}
-	// preemptively correct base64 if no value is supplied
-	if (value == null) {
-	    base64Encoded = false;
+	    encoding = null;
+	} else {
+	    if (mimeType == null || "".equals(mimeType)) {
+		LOG.warn("No MIME type specified, falling back to 'text/plain'.");
+		mimeType = "text/plain";
+	    }
+	    if (encoding == null) {
+		LOG.warn("No encoding specified, using UTF-8.");
+		encoding = StandardCharsets.UTF_8;
+	    }
 	}
 
-	this.value = value;
-	this.mimeType = mimeType;
-	this.base64Encoded = base64Encoded;
+	setValue(value != null ? value.getBytes(encoding) : null, encoding, mimeType);
     }
 
     /**
@@ -189,7 +174,7 @@ public abstract class Body {
      * @param value The value to be set in the body. {@code null} values are permitted.
      */
     public void setValue(@Nullable String value) {
-	setValue(value, "text/plain");
+	setValue(value, StandardCharsets.UTF_8, "text/plain");
     }
 
     /**
@@ -199,89 +184,17 @@ public abstract class Body {
      * @param mimeType The MIME type of the value.  {@code null} values are permitted.
      */
     public void setValue(@Nullable String value, @Nullable String mimeType) {
-	setValue(value, mimeType, false);
+	setValue(value, StandardCharsets.UTF_8, mimeType);
     }
 
     /**
      * Sets the value of the body.
-     * The given array gets BASE64 encoded before it is saved.
      *
      * @param value The value to be set in the body.
      * @param mimeType The MIME type of the value.  {@code null} values are permitted.
-     * @throws NullPointerException Thrown in case the value or the marshaller is {@code null}.
      */
-    public void setValue(@Nonnull byte[] value, @Nullable String mimeType) {
-	if (value == null) {
-	    throw new NullPointerException("The supplied value is null.");
-	}
-	String encVal = DatatypeConverter.printBase64Binary(value);
-	setValue(encVal, mimeType, true);
-    }
-
-    /**
-     * Sets the value of the body.
-     * The given DOM node is serialized with the marshaller of this instance. The MIME type is set to
-     * {@code application/xml}.
-     *
-     * @param domNode The value to be set in the body.
-     * @throws TransformerException Thrown in case the node could not be serialized.
-     * @throws NullPointerException Thrown in case the node or the marshaller is {@code null}.
-     */
-    @SuppressWarnings("null")
-    public void setValue(@Nonnull Node domNode) throws TransformerException {
-	setValue(domNode, null);
-    }
-
-    /**
-     * Sets the value of the body.
-     * The given DOM node is serialized with the marshaller of this instance.
-     *
-     * @param domNode The value to be set in the body.
-     * @param mimeType The MIME type of the value.  {@code null} values are permitted.
-     * @throws TransformerException Thrown in case the node could not be serialized.
-     * @throws NullPointerException Thrown in case the node or the marshaller is {@code null}.
-     */
-    @SuppressWarnings("null")
-    public void setValue(@Nonnull Node domNode, @Nullable String mimeType) throws TransformerException {
-	String nodeVal = getMarshaller().doc2str(domNode);
-	if (mimeType == null || "".equals(mimeType)) {
-	    setValue(nodeVal, "application/xml");
-	} else {
-	    setValue(nodeVal, mimeType);
-	}
-    }
-
-    /**
-     * Sets the value of the body.
-     * The given JAXB object is serialized with the marshaller of this instance. The MIME type is set to
-     * {@code application/xml} if no value is provided.
-     *
-     * @param jaxbObj The JAXB object to be set in the body.
-     * @throws MarshallingTypeException Thrown in case the object could not be marshalled.
-     * @throws TransformerException Thrown in case the node could not be serialized.
-     * @throws NullPointerException Thrown in case the JAXB element or the marshaller is {@code null}.
-     */
-    @SuppressWarnings("null")
-    public void setJAXBObjectValue(@Nonnull Object jaxbObj) throws MarshallingTypeException, TransformerException {
-	setJAXBObjectValue(jaxbObj, null);
-    }
-
-    /**
-     * Sets the value of the body.
-     * The given JAXB object is serialized with the marshaller of this instance. The MIME type is set to
-     * {@code application/xml}.
-     *
-     * @param jaxbObj The JAXB object to be set in the body.
-     * @param mimeType The MIME type of the value.  {@code null} values are permitted.
-     * @throws MarshallingTypeException Thrown in case the object could not be marshalled.
-     * @throws TransformerException Thrown in case the node could not be serialized.
-     * @throws NullPointerException Thrown in case the JAXB element or the marshaller is {@code null}.
-     */
-    @SuppressWarnings("null")
-    public void setJAXBObjectValue(@Nonnull Object jaxbObj, @Nullable String mimeType) throws MarshallingTypeException,
-	    TransformerException {
-	Node nodeVal = getMarshaller().marshal(jaxbObj);
-	setValue(nodeVal, mimeType);
+    public void setValue(@Nullable byte[] value, @Nullable String mimeType) {
+	setValue(value, null, mimeType);
     }
 
 }

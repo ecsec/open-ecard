@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -41,17 +41,16 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.FutureTask;
-import javafx.embed.swing.JFXPanel;
 import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.entity.ContentType;
-import org.openecard.apache.http.entity.StringEntity;
-import org.openecard.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.openecard.apache.http.protocol.BasicHttpContext;
-import org.openecard.apache.http.protocol.HttpContext;
-import org.openecard.apache.http.protocol.HttpRequestExecutor;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.common.AppVersion;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -63,7 +62,6 @@ import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.event.EventType;
-import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.gui.message.DialogType;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -78,12 +76,13 @@ import org.openecard.mdlw.sal.MiddlewareSAL;
 import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
+import org.openecard.richclient.updater.VersionUpdateChecker;
 import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
-import org.openecard.transport.httpcore.HttpRequestHelper;
-import org.openecard.transport.httpcore.HttpUtils;
-import org.openecard.transport.httpcore.StreamHttpClientConnection;
+import org.openecard.httpcore.HttpRequestHelper;
+import org.openecard.httpcore.HttpUtils;
+import org.openecard.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -325,7 +324,6 @@ public final class RichClient {
 
     private static class UpdateTask extends TimerTask {
 
-	private static boolean javaFxInitialized = false;
 	private final AppTray tray;
 
 	UpdateTask(AppTray tray) {
@@ -344,28 +342,13 @@ public final class RichClient {
 
 	    if (updateChecker.needsUpdate()) {
 		LOG.info("Available update found.");
-		try {
-		    RichClient.class.getClassLoader().loadClass("javafx.embed.swing.JFXPanel");
-		    initJavaFXIfNecessary();
-		    tray.status().showUpdateIcon(updateChecker);
-		} catch (ClassNotFoundException ex) {
-		    LOG.warn("JavaFX is not supported by this platform.");
-		    return;
-		}
+		tray.status().showUpdateIcon(updateChecker);
 	    } else {
 		LOG.info("No update found, trying again later.");
 	    }
 
 	    // repeat every 24 hours
 	    new Timer().schedule(new UpdateTask(tray), 24 * 60 * 60 * 1000);
-	}
-
-	private void initJavaFXIfNecessary() {
-	    if (! javaFxInitialized) {
-		javafx.application.Platform.setImplicitExit(false);
-		new JFXPanel();
-		javaFxInitialized = true;
-	    }
 	}
     }
 
@@ -456,7 +439,7 @@ public final class RichClient {
 		    // send request
 		    HttpUtils.dumpHttpRequest(LOG, req);
 		    HttpResponse response = exec.execute(req, con, httpCtx);
-		    HttpUtils.dumpHttpResponse(LOG, response, null);
+		    HttpUtils.dumpHttpResponse(LOG, response);
 
 		    int statusCode = response.getStatusLine().getStatusCode();
 		    if (statusCode == 204) {

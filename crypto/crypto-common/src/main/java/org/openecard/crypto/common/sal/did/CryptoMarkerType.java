@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.xml.bind.JAXBElement;
-import org.openecard.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Base64;
 import org.openecard.common.util.StringUtils;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;

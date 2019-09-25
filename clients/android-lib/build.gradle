@@ -1,0 +1,145 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'digital.wup:android-maven-publish:3.6.2'
+    }
+}
+
+
+apply plugin: 'com.android.library'
+apply plugin: 'digital.wup.android-maven-publish'
+
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 29
+        //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+	    multiDexEnabled true
+    }
+
+    lintOptions {
+        // disable warnings caused by bouncycastle JCA
+        disable "TrustAllX509TrustManager"
+        // disable warnings caused by jaxb annotations
+        disable "InvalidPackage"
+    }
+
+    packagingOptions {
+        /* Otherwise DuplicateFileException */
+        //exclude 'LICENSE.Open-eCard'
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    sourceSets {
+        main {
+            resources {
+                srcDir("$buildDir/bundleImpl")
+            }
+        }
+    }
+}
+
+
+repositories {
+    google()
+    jcenter()
+    mavenLocal()
+}
+
+
+// get version and groupId from pom.xml
+
+def pomDom = new XmlSlurper()
+        .parse(new File(projectDir, "pom.xml"))
+        .declareNamespace(m: "http://maven.apache.org/POM/4.0.0")
+version = pomDom.'m:parent'.'m:version'.text()
+group pomDom.'m:groupId'.text()
+
+
+configurations {
+    bundleImpl
+}
+
+
+dependencies {
+    //implementation 'androidx.appcompat:appcompat:1.0.0'
+    //androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+    //    exclude group: 'com.android.support', module: 'support-annotations'
+    //})
+    //testImplementation 'junit:junit:4.12'
+
+    // necessary dependencies which are not packed into the aar
+    api 'org.slf4j:slf4j-api:1.7.25'
+    api 'xerces:xercesImpl:2.12.0'
+
+    // compile time dependencies which are not needed at runtime
+    compileOnly 'javax.xml.bind:jaxb-api:2.3.1'
+    compileOnly 'com.google.code.findbugs:annotations:3.0.1u2'
+
+    // Android Oec-Core
+    bundleImpl "org.openecard.clients:android-core:${version}"
+
+    // needed or the thing crashes (should be made an api dependecy)
+    bundleImpl "javax.jws.jsr181-api:jsr181-api:2.1.1"
+
+    // add all bundleImpl deps, so that class files get copied and the deps are available for the compilation
+    implementation configurations.bundleImpl.asFileTree
+}
+
+
+
+// custom tasks to take care of OeC resource files which are excluded by the aar build
+
+task copyLibs(type: Copy) {
+    dependsOn configurations.bundleImpl
+
+    from {
+        configurations.bundleImpl.collect {
+            zipTree(it)
+        }
+    }
+    into "$buildDir/bundleImpl/"
+    exclude '**/*.class'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'cif-repo/repo-config.properties'
+}
+
+preBuild.dependsOn(copyLibs)
+
+
+
+// deployment config
+
+publishing {
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://mvn.ecsec.de/repository/openecard-release"
+            def snapshotsRepoUrl = "https://mvn.ecsec.de/repository/openecard-snapshot"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            // use credentials from globally configured properties
+            credentials {
+                username = ecsecRepoUser
+                password = ecsecRepoPass
+            }
+        }
+    }
+
+    publications {
+        lib(MavenPublication) {
+            from components.android
+        }
+    }
+}

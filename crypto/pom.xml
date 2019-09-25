@@ -4,8 +4,9 @@
 
 	<parent>
 		<groupId>org.openecard</groupId>
-		<artifactId>app</artifactId>
+		<artifactId>src-parent</artifactId>
 		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<relativePath>../src-parent/</relativePath>
 	</parent>
 
 	<groupId>org.openecard</groupId>
@@ -14,7 +15,6 @@
 	<name>Crypto packages</name>
 
 	<modules>
-		<module>bouncycastle</module>
 		<module>crypto-common</module>
 		<module>tls</module>
 	</modules>

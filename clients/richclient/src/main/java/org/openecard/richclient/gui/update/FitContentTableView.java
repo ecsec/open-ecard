@@ -22,9 +22,9 @@
 
 package org.openecard.richclient.gui.update;
 
-import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
+import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.layout.VBox;
 
 

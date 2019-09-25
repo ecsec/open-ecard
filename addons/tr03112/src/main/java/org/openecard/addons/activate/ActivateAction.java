@@ -60,7 +60,7 @@ import org.openecard.gui.definition.ViewController;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
-import org.openecard.transport.httpcore.cookies.CookieManager;
+import org.openecard.httpcore.cookies.CookieManager;
 import org.openecard.common.interfaces.Dispatcher;
 
 

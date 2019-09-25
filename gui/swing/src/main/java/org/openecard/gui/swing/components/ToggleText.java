@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2015 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,28 +25,40 @@ package org.openecard.gui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import javax.activation.MimeType;
+import javax.activation.MimeTypeParseException;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.ChangedCharSetException;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.openecard.common.I18n;
 import org.openecard.common.util.FileUtils;
 import org.openecard.gui.definition.Document;
@@ -63,19 +75,19 @@ import org.slf4j.LoggerFactory;
  */
 public class ToggleText implements StepComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(ToggleText.class);
-    private static final I18n lang = I18n.getTranslation("swing");
+    private static final Logger LOG = LoggerFactory.getLogger(ToggleText.class);
+    private static final I18n LANG = I18n.getTranslation("swing");
 
     private final static String TOGGLETEXT = "ToggleText";
     private final static String TOGGLETEXT_FOREGROUND = TOGGLETEXT + ".foreground";
     private final static String TOGGLETEXT_BACKGROUND = TOGGLETEXT + ".background";
     private final static String TOGGLETEXT_INDICATOR_FOREGROUND = TOGGLETEXT + "Indicator.foreground";
-    private final static Icon openedIndicator = GUIDefaults.getImage("ToggleText.selectedIcon");
-    private final static Icon closedIndicator = GUIDefaults.getImage("ToggleText.icon");
+    private final static Icon OPENED_INDICATOR = GUIDefaults.getImage("ToggleText.selectedIcon");
+    private final static Icon CLOSED_INDOCATOR = GUIDefaults.getImage("ToggleText.icon");
 
     private JPanel rootPanel;
     private JButton button;
-    private JComponent text;
+    private Component text;
     private File tmpDir;
 
     /**
@@ -122,7 +134,7 @@ public class ToggleText implements StepComponent {
 
 	button.setSelected(collapsed);
 	text.setVisible(!collapsed);
-	button.setIcon(!collapsed ? openedIndicator : closedIndicator);
+	button.setIcon(!collapsed ? OPENED_INDICATOR : CLOSED_INDOCATOR);
     }
 
     /**
@@ -137,46 +149,36 @@ public class ToggleText implements StepComponent {
 	String mimeType = content.getMimeType();
 	switch (mimeType) {
 	    case "text/html":
-		ClassLoader loader = ToggleText.class.getClassLoader();
-		try {
-		    loader.loadClass("javafx.embed.swing.JFXPanel");
-		    text = createJfxPanel(mimeType, content.getValue());
-		} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException |
-			IllegalStateException ex) {
-		    logger.error("Failed to initialize JFXPanel", ex);
-		    createJTextArea(new String(content.getValue(), Charset.forName("UTF-8")));
-		}
+		createHtmlPane(content.getValue());
 		break;
 	    case "text/plain":
 		createJTextArea(new String(content.getValue(), Charset.forName("UTF-8")));
 		break;
 	    case "application/pdf":
-		try {
-		    createTmpDir();
-		    String pdfFile = createTmpPdf(content.getValue());
-		    createStartPdfViewButton(pdfFile);
-		} catch (FileNotFoundException | SecurityException ex) {
-		    logger.error("Failed to access the tmp pdf file.", ex);
-		    createJTextArea(lang.translationForKey("pdf.creation.failed"));
-		} catch (IOException ex) {
-		    logger.error("Failed to create the tmp pdf file.", ex);
-		    createJTextArea(lang.translationForKey("pdf.creation.failed"));
-		}
+		createPdfComponent(content.getValue());
+//		try {
+//		    createTmpDir();
+//		    String pdfFile = createTmpPdf(content.getValue());
+//		    createStartPdfViewButton(pdfFile);
+//		} catch (FileNotFoundException | SecurityException ex) {
+//		    LOG.error("Failed to access the tmp pdf file.", ex);
+//		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
+//		} catch (IOException ex) {
+//		    LOG.error("Failed to create the tmp pdf file.", ex);
+//		    createJTextArea(LANG.translationForKey("pdf.creation.failed"));
+//		}
 		break;
 	    default:
-		logger.warn("Unsupported usage of content of type " + mimeType + " in " + ToggleText.class.getName());
-		createJTextArea(lang.translationForKey("unsupported.mimetype", mimeType));
+		LOG.warn("Unsupported usage of content of type " + mimeType + " in " + ToggleText.class.getName());
+		createJTextArea(LANG.translationForKey("unsupported.mimetype", mimeType));
 	}
 
-	button.addActionListener(new ActionListener() {
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		text.setVisible(!text.isVisible());
-		button.setIcon(text.isVisible() ? openedIndicator : closedIndicator);
-		rootPanel.revalidate();
-		rootPanel.doLayout();
-		rootPanel.repaint();
-	    }
+	button.addActionListener((ActionEvent e) -> {
+	    text.setVisible(!text.isVisible());
+	    button.setIcon(text.isVisible() ? OPENED_INDICATOR : CLOSED_INDOCATOR);
+	    rootPanel.revalidate();
+	    rootPanel.doLayout();
+	    rootPanel.repaint();
 	});
     }
 
@@ -259,31 +261,6 @@ public class ToggleText implements StepComponent {
 	return null;
     }
 
-    /**
-     * Creates a JPanel containing a JFXPanel by reflection.
-     *
-     * @param mimeType The MimeType of the content to display. The currently supported MimeTypes are {@code text/html}
-     * and {@code application/pdf}.
-     * @param content The content which shall be displayed in the JFXPanel.
-     * @return A JPanel containing a JFXPanel which displays html oder pdf content.
-     * @throws ClassNotFoundException If the underlying HTMLPanel class is not found but this class is always in the jar
-     * so this should never happen.
-     * @throws IllegalAccessException Should also never happen the createPanel method is public.
-     * @throws IllegalArgumentException Should also never happen.
-     * @throws InvocationTargetException Should also never happen.
-     */
-    private JPanel createJfxPanel(String mimeType, byte[] content) throws ClassNotFoundException, IllegalAccessException,
-	    IllegalArgumentException, InvocationTargetException {
-	ClassLoader loader = ToggleText.class.getClassLoader();
-	Class<?> htmlPanelClass = loader.loadClass("org.openecard.gui.swing.components.HTMLPanel");
-	for (Method m : htmlPanelClass.getMethods()) {
-	    if (m.getName().equals("createPanel")) {
-		return (JPanel) m.invoke(null, mimeType, content);
-	    }
-	}
-
-	throw new IllegalStateException("The required method createPanel was not found.");
-    }
 
     /**
      * Creates a JTextArea containing the given content.
@@ -291,12 +268,53 @@ public class ToggleText implements StepComponent {
      * @param content The content to display in the JTextArea.
      */
     private void createJTextArea(String content) {
-	text = new JTextArea(content);
-	JTextArea textAreaObject = (JTextArea) text;
+	JTextArea textAreaObject = new JTextArea(content);
 	textAreaObject.setMargin(new Insets(0, 13, 0, 0));
 	textAreaObject.setEditable(false);
 	textAreaObject.setLineWrap(true);
 	textAreaObject.setWrapStyleWord(true);
+
+	text = textAreaObject;
+    }
+
+    private void createHtmlPane(byte[] content) {
+	// charset specifications inside the document don't work with the parser
+	// we try to parse the file with UTF-8 and try to determine the actual encoding if the parser chokes
+	// if the determination is not successful we fall back to UTF-8
+	// charset errors are ignored in the
+	Charset charset = StandardCharsets.UTF_8;
+	try {
+	    HTMLEditorKit kit = new HTMLEditorKit();
+	    HTMLDocument doc = (HTMLDocument) kit.createDefaultDocument();
+	    kit.read(new InputStreamReader(new ByteArrayInputStream(content)), doc, 0);
+	} catch (ChangedCharSetException ex) {
+	    try {
+		String spec = ex.getCharSetSpec();
+		MimeType mt = new MimeType(spec);
+		String charsetString = mt.getParameter("charset");
+		if (charsetString != null && ! charsetString.isEmpty()) {
+		    charset = Charset.forName(charsetString);
+		}
+	    } catch (MimeTypeParseException ex2) {
+		LOG.warn("Failed to parse MIME Type specification.", ex2);
+	    } catch (IllegalCharsetNameException | UnsupportedCharsetException ex2) {
+		LOG.warn("Unsupported charset specification inside HTML docuemnt.");
+	    }
+	} catch (BadLocationException | IOException ex) {
+	    LOG.error("Failed to parse HTML document.", ex);
+	}
+
+
+	JTextPane htmlText = new JTextPane();
+	htmlText.setMargin(new Insets(0, 13, 0, 0));
+	htmlText.setEditable(false);
+	htmlText.setContentType("text/html");
+
+	HTMLDocument doc = (HTMLDocument) htmlText.getDocument();
+	doc.putProperty("IgnoreCharsetDirective", true);
+	htmlText.setText(new String(content, charset));
+
+	text = htmlText;
     }
 
     /**
@@ -339,24 +357,47 @@ public class ToggleText implements StepComponent {
     private void createStartPdfViewButton(final String pdfFile) {
 	JPanel contentPane = new JPanel();
 	// TODO translate
-	final JButton pdfButton = new JButton(lang.translationForKey("open.pdf.in.external.viewer"));
-	pdfButton.addActionListener(new ActionListener() {
-
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == pdfButton) {
-		    try {
-			Desktop desktop = Desktop.getDesktop();
-			desktop.open(new File(pdfFile));
-		    } catch (IOException ex) {
-			logger.error("Failed to open pdf file.", ex);
-		    }
+	final JButton pdfButton = new JButton(LANG.translationForKey("open.pdf.in.external.viewer"));
+	pdfButton.addActionListener((ActionEvent e) -> {
+	    if (e.getSource() == pdfButton) {
+		try {
+		    Desktop desktop = Desktop.getDesktop();
+		    desktop.open(new File(pdfFile));
+		} catch (IOException ex) {
+		    LOG.error("Failed to open pdf file.", ex);
 		}
 	    }
-
 	});
 	contentPane.add(pdfButton);
 	text = contentPane;
+    }
+
+    private void createPdfComponent(byte[] pdfData) {
+	try {
+	    PDDocument doc = PDDocument.load(pdfData);
+	    PdfComponent pdfComp = new PdfComponent(doc) {
+		// override so sizing the pdf component works properly in the gridlayout
+		@Override
+		public Dimension getPreferredSize() {
+		    if (!isPreferredSizeSet() && isValidPage()) {
+			int compWidth = getWidth();
+			PDRectangle pdfRect = getPageDim(getCurPage());
+			if (compWidth > 0) {
+			    float scale = compWidth / pdfRect.getWidth();
+			    int prefHeight = (int) Math.ceil(pdfRect.getHeight() * scale);
+			    return new Dimension(compWidth, prefHeight);
+			}
+		    }
+
+		    return super.getPreferredSize();
+		}
+	    };
+	    pdfComp.setCurrentPage(0);
+	    text = pdfComp;
+	} catch (IOException ex) {
+	    LOG.error("Failed to load PDF document.");
+	    text = new JLabel("Failed to load PDF.");
+	}
     }
 
 }

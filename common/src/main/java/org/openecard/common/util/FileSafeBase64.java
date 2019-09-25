@@ -25,9 +25,9 @@ package org.openecard.common.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.openecard.bouncycastle.util.Strings;
-import org.openecard.bouncycastle.util.encoders.Base64Encoder;
-import org.openecard.bouncycastle.util.encoders.Encoder;
+import org.bouncycastle.util.Strings;
+import org.bouncycastle.util.encoders.Base64Encoder;
+import org.bouncycastle.util.encoders.Encoder;
 
 
 /**
@@ -44,7 +44,7 @@ import org.openecard.bouncycastle.util.encoders.Encoder;
  *
  * @author Tobias Wich
  */
-public class FileSafeBase64 extends Base64Encoder {
+public final class FileSafeBase64 extends Base64Encoder {
 
     public FileSafeBase64() {
 	encodingTable[62] = (byte) '-';
@@ -54,7 +54,7 @@ public class FileSafeBase64 extends Base64Encoder {
     }
 
 
-    private static final Encoder encoder = new FileSafeBase64();
+    private static final Encoder ENCODER = new FileSafeBase64();
 
     /**
      * Encode the input data producing a base 64 encoded string.
@@ -95,7 +95,7 @@ public class FileSafeBase64 extends Base64Encoder {
      */
     public static int encodeData(byte[] data, OutputStream out) throws IOException {
 	int inLength = data.length;
-	return encoder.encode(data, 0, inLength, out);
+	return ENCODER.encode(data, 0, inLength, out);
     }
 
 
@@ -127,7 +127,7 @@ public class FileSafeBase64 extends Base64Encoder {
      * @throws java.io.IOException
      */
     public static int decodeData(byte[] data, OutputStream out) throws IOException {
-        return encoder.decode(data, 0, data.length, out);
+        return ENCODER.decode(data, 0, data.length, out);
     }
 
     /**
@@ -158,7 +158,7 @@ public class FileSafeBase64 extends Base64Encoder {
      * @throws java.io.IOException
      */
     public static int decodeData(String data, OutputStream out) throws IOException {
-        return encoder.decode(data, out);
+        return ENCODER.decode(data, out);
     }
 
 }

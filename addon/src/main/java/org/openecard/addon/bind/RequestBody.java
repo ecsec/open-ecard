@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,13 +22,12 @@
 
 package org.openecard.addon.bind;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.openecard.common.util.StringUtils;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +48,8 @@ public class RequestBody extends Body {
      */
     private final String path;
 
-    public RequestBody(String path) throws WSMarshallerException {
+    public RequestBody(String path) {
 	super();
-	this.path = path;
-    }
-
-    public RequestBody(String path, WSMarshaller m) {
-	super(m);
 	this.path = path;
     }
 
@@ -69,23 +63,20 @@ public class RequestBody extends Body {
     }
 
     public Map<String, String> getFormParamValue() {
+	Charset utf8 = StandardCharsets.UTF_8;
 	Map<String, String> result = new HashMap<>();
-	String value = StringUtils.nullToEmpty(getValue()).trim();
+	String value = StringUtils.nullToEmpty(getValueString()).trim();
 
 	String[] entries = value.split("&");
 	for (String entry : entries) {
 	    String[] split = entry.split("=");
-	    try {
-		if (split.length == 1) {
-		    String key = URLDecoder.decode(split[0], "UTF-8");
-		    result.put(key, null);
-		} else if (split.length == 2) {
-		    String key = URLDecoder.decode(split[0], "UTF-8");
-		    String val = URLDecoder.decode(split[1], "UTF-8");
-		    result.put(key, val);
-		}
-	    } catch (UnsupportedEncodingException ex) {
-		LOG.error("Default encoding is not supported by this JVM.", ex);
+	    if (split.length == 1) {
+		String key = URLDecoder.decode(split[0], utf8);
+		result.put(key, null);
+	    } else if (split.length == 2) {
+		String key = URLDecoder.decode(split[0], utf8);
+		String val = URLDecoder.decode(split[1], utf8);
+		result.put(key, val);
 	    }
 	}
 

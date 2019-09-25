@@ -1,0 +1,369 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.openecard</groupId>
+		<artifactId>packager</artifactId>
+		<version>1.4.0-rc.4-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.openecard.clients</groupId>
+	<artifactId>richclient-packager</artifactId>
+	<packaging>pom</packaging>
+	<name>Rich Client (Packager)</name>
+
+
+	<properties>
+		<maven.compiler.release>11</maven.compiler.release>
+
+		<app.identifier>Open-eCard-App</app.identifier>
+		<app.name>Open eCard App</app.name>
+		<app.vendor>ecsec GmbH</app.vendor>
+		<app.maintainer>tobias.wich@ecsec.de</app.maintainer>
+		<app.url>https://openecard.org</app.url>
+		<app.description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</app.description>
+
+		<package.identifier>open-ecard-app</package.identifier>
+		<package.deps>pcscd</package.deps>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>desktop-package</id>
+			<activation>
+				<property>
+					<name>desktop-package</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<executions>
+							<execution>
+								<id>jpackage</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jpackager</goal>
+								</goals>
+								<configuration>
+									<!-- Jpackage arguments -->
+									<!-- Don't use spaces in application name, because of problems with install scripts ... -->
+									<identifier>org.openecard.richclient</identifier>
+									<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
+									<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
+									<jdkToolchain>
+										<version>[14,)</version>
+									</jdkToolchain>
+									<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
+									<skipModulesInclude>true</skipModulesInclude>
+									<!-- JVM arguments of the application -->
+									<arguments>
+										<argument>-XX:-UsePerfData</argument>
+										<argument>-XX:-Inline</argument>
+										<argument>-XX:+AggressiveOpts</argument>
+										<argument>-Xms16m</argument>
+										<argument>-Xmx64m</argument>
+										<argument>-XX:+UseG1GC</argument>
+										<argument>-XX:MinHeapFreeRatio=1</argument>
+										<argument>-XX:MaxHeapFreeRatio=5</argument>
+										<argument>-XX:G1ReservePercent=5</argument>
+										<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
+										<argument>-Djavax.xml.stream.supportDTD=false</argument>
+									</arguments>
+									<!-- Application package metadata -->
+									<vendor>${app.vendor}</vendor>
+									<description>${app.description}</description>
+									<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
+									<copyright>2019 ecsec GmbH</copyright>
+									<linuxOptions>
+										<bundleName>${package.identifier}</bundleName>
+										<debMaintainer>${app.maintainer}</debMaintainer>
+										<rpmLicenseType>GPL v3</rpmLicenseType>
+										<menuGroup>Network;</menuGroup>
+										<packageDeps>${package.deps}</packageDeps>
+									</linuxOptions>
+									<macOptions>
+										<bundleName>${app.identifier}</bundleName>
+										<bundleIdentifier>org.openecard.versioncheck.MainLoader</bundleIdentifier>
+									</macOptions>
+									<windowsOptions>
+										<dirChooser>true</dirChooser>
+										<menuGroup>misc</menuGroup>
+										<upgradeUUID>CB11CB66-71B5-42C1-8076-15F1FEDCC22A</upgradeUUID>
+									</windowsOptions>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-bundles-Linux</id>
+			<activation>
+				<os>
+					<family>Unix</family>
+				</os>
+				<property>
+					<name>desktop-package</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Resource plugin -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>filtering-resources</id>
+								<goals>
+									<goal>resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.basedir}/target/linux/resources</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/main/resources/linux</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<configuration>
+							<name>${package.identifier}</name>
+							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
+							<resourceDir>${project.basedir}/target/linux/resources</resourceDir>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-bundles-win</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+				<property>
+					<name>desktop-package</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Resource plugin -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>filtering-resources</id>
+								<goals>
+									<goal>resources</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/main/resources/windows/filtering</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Create .msi installer -->
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<configuration>
+							<name>${app.identifier}</name>
+							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
+							<type>msi</type>
+						</configuration>
+					</plugin>
+					<!-- Create .exe installer -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>create-exe</id>
+								<phase>package</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>ISCC.exe</executable>
+									<workingDirectory>${project.basedir}/target</workingDirectory>
+									<arguments>
+										<argument>classes/Open-eCard-App.iss</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>app-bundles-mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+				<property>
+					<name>desktop-package</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.agilhard.maven.plugins</groupId>
+						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<configuration>
+							<name>${app.identifier}</name>
+							<icon>${project.basedir}/src/main/resources/mac-os/Open-eCard-App.icns</icon>
+							<resourceDir>${project.basedir}/src/main/resources/mac-os</resourceDir>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
+	<build>
+		<plugins>
+			<!-- Plugin to reuse project version for installers -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>parse-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>parse-version</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Maven compiler plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Skip install step of install-plugin-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<!-- Jpackage plugin to create installers -->
+			<plugin>
+				<groupId>net.agilhard.maven.plugins</groupId>
+				<artifactId>jlink-jpackager-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>jlink</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jlink</goal>
+						</goals>
+						<configuration>
+							<!-- JLink arguments -->
+							<launcher>open-ecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
+							<compress>2</compress>
+							<noHeaderFiles>true</noHeaderFiles>
+							<noManPages>true</noManPages>
+							<stripDebug>true</stripDebug>
+							<ignoreSigningInformation>true</ignoreSigningInformation>
+							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
+							<jdkToolchain>
+								<version>11</version>
+								<vendor>OpenJDK</vendor>
+							</jdkToolchain>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- Open eCard RichClient Bundle -->
+		<dependency>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>richclient-bundle</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openecard.clients</groupId>
+					<artifactId>richclient</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- JavaFX -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+		</dependency>
+
+		<!-- BouncyCastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bctls-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+		</dependency>
+
+		<!-- JAXB -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.activation</groupId>
+					<artifactId>jakarta.activation-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>jakarta.activation</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

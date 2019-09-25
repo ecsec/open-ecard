@@ -23,7 +23,7 @@
 package org.openecard.crypto.common.asn1.utils;
 
 import java.io.IOException;
-import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 

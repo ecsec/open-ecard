@@ -85,9 +85,9 @@ public class PCSCFeatures {
 		    byte tag = nextChunk[0];
 		    byte[] codeData = Arrays.copyOfRange(nextChunk, 2, 6);
 		    int code = ByteUtils.toInteger(codeData);
-		    result.put(new Integer(tag), code);
+		    result.put(Integer.valueOf(tag), code);
 		}
-		i+=6;
+		i += 6;
 	    }
 	}
 

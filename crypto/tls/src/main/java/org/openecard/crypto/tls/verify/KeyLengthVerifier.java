@@ -23,9 +23,9 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
-import org.openecard.bouncycastle.asn1.x509.Certificate;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
-import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.tls.TlsServerCertificate;
+import org.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.common.keystore.KeyLengthException;
 import org.openecard.crypto.common.keystore.KeyTools;
 import org.openecard.crypto.tls.CertificateVerificationException;

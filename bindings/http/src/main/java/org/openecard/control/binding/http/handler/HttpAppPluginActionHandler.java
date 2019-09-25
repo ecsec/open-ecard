@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2018 HS Coburg.
+ * Copyright (C) 2013-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,18 +40,19 @@ import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.openecard.addon.bind.ResponseBody;
-import org.openecard.apache.http.Header;
-import org.openecard.apache.http.HeaderIterator;
-import org.openecard.apache.http.HttpEntity;
-import org.openecard.apache.http.HttpEntityEnclosingRequest;
-import org.openecard.apache.http.HttpException;
-import org.openecard.apache.http.HttpRequest;
-import org.openecard.apache.http.HttpResponse;
-import org.openecard.apache.http.HttpStatus;
-import org.openecard.apache.http.ParseException;
-import org.openecard.apache.http.entity.ContentType;
-import org.openecard.apache.http.entity.StringEntity;
-import org.openecard.apache.http.protocol.HttpContext;
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.control.binding.http.common.DocumentRoot;
@@ -72,13 +73,11 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 
     public static final String METHOD_HDR = "X-OeC-Method";
 
-    private final AddonManager addonManager;
     private final AddonSelector selector;
 
     public HttpAppPluginActionHandler(@Nonnull AddonManager addonManager) {
 	super("*");
 
-	this.addonManager = addonManager;
 	this.selector = new AddonSelector(addonManager);
     }
 
@@ -117,7 +116,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    RequestBody body = null;
 	    if (httpRequest instanceof HttpEntityEnclosingRequest) {
 		LOG.debug("Request contains an entity.");
-		body = getRequestBody(httpRequest, resourceName);
+		body = getRequestBody((HttpEntityEnclosingRequest) httpRequest, resourceName);
 	    }
 
 	    Headers headers = readReqHeaders(httpRequest);
@@ -189,13 +188,10 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	if (responseBody != null && responseBody.hasValue()) {
 	    LOG.debug("BindingResult contains a body.");
 	    // determine content type
-	    ContentType ct = ContentType.create(responseBody.getMimeType(), Charset.forName("UTF-8"));
-	    StringEntity entity = new StringEntity(responseBody.getValue(), ct);
+	    ContentType ct = ContentType.create(responseBody.getMimeType(), responseBody.getEncoding());
+
+	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.getValue(), ct);
 	    response.setEntity(entity);
-	    // evaluate Base64 flag
-	    if (responseBody.isBase64()) {
-		response.setHeader("Content-Transfer-Encoding", "Base64");
-	    }
 	} else {
 	    LOG.debug("BindingResult contains no body.");
 	    if (bindingResult.getResultMessage() != null) {
@@ -256,20 +252,18 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	return response;
     }
 
-    private RequestBody getRequestBody(HttpRequest httpRequest, String resourceName) throws IOException {
+    private RequestBody getRequestBody(HttpEntityEnclosingRequest entityRequest, String resourceName) throws IOException {
 	try {
-	    HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) httpRequest;
 	    HttpEntity entity = entityRequest.getEntity();
 	    InputStream is = entity.getContent();
 
-	    // TODO: This assumes the content is UTF-8. Evaluate what is actually sent.
-	    String value = FileUtils.toString(is);
-	    String mimeType = ContentType.get(entity).getMimeType();
-	    // TODO: find out if we have a Base64 coded value
-	    boolean base64Content = false;
+	    ContentType ct = ContentType.get(entity);
+	    byte[] value = FileUtils.toByteArray(is);
+	    String mimeType = ct.getMimeType();
+	    Charset cs = ct.getCharset();
 
-	    RequestBody body = new RequestBody(resourceName, null);
-	    body.setValue(value, mimeType, base64Content);
+	    RequestBody body = new RequestBody(resourceName);
+	    body.setValue(value, cs, mimeType);
 	    return body;
 	} catch (UnsupportedCharsetException | ParseException e) {
 	    LOG.error("Failed to create request body.", e);

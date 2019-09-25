@@ -22,7 +22,6 @@
 
 package org.openecard.scio;
 
-import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 import javax.smartcardio.CardException;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
@@ -57,23 +56,13 @@ public class PCSCExceptionExtractor {
 	// check the type of the cause over reflections because these classes might not be available (sun internal)
 	if (cause != null) {
 	    try {
-		Class<?> c = cause.getClass();
-		Field f = c.getDeclaredField("code");
-		f.setAccessible(true);
-		int code = f.getInt(cause);
-		return SCIOErrorCode.getErrorCode(code);
-	    } catch (NoSuchFieldException ex) {
-		LOG.error("Failed to find field 'code' in PCSCException.");
-		// fallthrough as this only reduces the quality of the exceptions
-	    } catch (IllegalAccessException ex) {
-		LOG.error("Failed to read field 'code' in PCSCException.");
-		// fallthrough as this only reduces the quality of the exceptions
-	    } catch (SecurityException ex) {
-		LOG.error("Failed access field 'code' in PCSCException or change its accessibility.");
-		// fallthrough as this only reduces the quality of the exceptions
+		return SCIOErrorCode.valueOf(cause.getMessage());
+	    } catch (IllegalArgumentException ex) {
+		return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
 	    }
+	} else {
+	    return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
 	}
-	return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
     }
 
     public static boolean hasPCSCException(Exception mainException) {

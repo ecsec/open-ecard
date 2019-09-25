@@ -24,7 +24,7 @@ package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.bouncycastle.tls.TlsClientProtocol;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;

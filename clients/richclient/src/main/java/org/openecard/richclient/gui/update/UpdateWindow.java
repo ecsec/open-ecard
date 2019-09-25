@@ -46,10 +46,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
-import org.openecard.common.util.SysUtils;
-import org.openecard.common.util.VersionUpdate;
-import org.openecard.common.util.VersionUpdateChecker;
 import org.openecard.gui.swing.common.GUIDefaults;
+import org.openecard.gui.swing.common.SwingUtils;
+import org.openecard.richclient.updater.VersionUpdate;
+import org.openecard.richclient.updater.VersionUpdateChecker;
 
 
 /**
@@ -247,7 +247,7 @@ public class UpdateWindow {
     }
 
     private void openLink(String url){
-	SysUtils.openUrl(URI.create(url), false);
+	SwingUtils.openUrl(URI.create(url), false);
 	stage.close();
     }
 

@@ -11,7 +11,7 @@
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>ios-framework</artifactId>
 	<packaging>jar</packaging>
-	<name>Open eCard iOS Framework</name>
+	<name>iOS Framework</name>
 
 	<build>
 		<plugins>

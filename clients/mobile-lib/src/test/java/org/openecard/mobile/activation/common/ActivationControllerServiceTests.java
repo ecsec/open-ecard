@@ -106,7 +106,7 @@ public class ActivationControllerServiceTests {
     void sutCanCompleteActivation() throws InterruptedException, TimeoutException {
 	Promise<ActivationResult> outcome = new Promise();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverCompletion(outcome);
-	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 10).createSut();
+	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(SLEEP_WAIT / 10).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -122,7 +122,7 @@ public class ActivationControllerServiceTests {
     void sutNotifiesWhenStarted() throws InterruptedException, TimeoutException {
 	Promise<Void> outcome = new Promise();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
-	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
+	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation(SLEEP_WAIT / 2).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -139,7 +139,7 @@ public class ActivationControllerServiceTests {
 	ActivationControllerService sut = this
 		.withSlowEacStack()
 		.withMinimumAddons("eID-Client")
-		.withSuccessActivation(WAIT_TIMEOUT / 2).createSut();
+		.withSuccessActivation(SLEEP_WAIT / 2).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		anySupportedCards(),
@@ -147,9 +147,7 @@ public class ActivationControllerServiceTests {
 		anyActivationInteraction());
 	sut.cancelAuthentication(mockControllerCallback);
 
-	outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	Assert.assertFalse(outcome.isDelivered());
-	// Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     @Test

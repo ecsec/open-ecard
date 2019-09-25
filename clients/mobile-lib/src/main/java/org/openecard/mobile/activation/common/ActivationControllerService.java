@@ -65,21 +65,25 @@ public class ActivationControllerService {
 	Thread executingThread = new Thread(() -> {
 	    CommonActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
 	    synchronized (processLock) {
-		if (cancelledCallback == controllerCallback) {
+		if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
 		    return;
+		} else {
+		    this.isRunning = false;
+		    this.currentCallback = null;
+		    this.currentProccess = null;
 		}
 	    }
+	    LOG.info("Notifying callback of authentication results.");
 	    controllerCallback.onAuthenticationCompletion(result);
 	});
 
 	synchronized (this.processLock) {
-	    if (this.isRunning) {
-		throw new IllegalStateException("The activation process is already running");
+	    if (!this.isRunning) {
+		this.isRunning = true;
+		this.currentCallback = controllerCallback;
+		this.cancelledCallback = null;
+		this.currentProccess = executingThread;
 	    }
-	    this.isRunning = true;
-	    this.currentCallback = controllerCallback;
-	    this.cancelledCallback = null;
-	    this.currentProccess = executingThread;
 	}
 	executingThread.start();
     }
@@ -135,9 +139,12 @@ public class ActivationControllerService {
      * @return
      */
     private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback givenCallback, ActivationInteraction interaction) {
-	if (this.isRunning) {
-	    return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
+	synchronized (this.processLock) {
+	    if (this.currentCallback != givenCallback && this.cancelledCallback != givenCallback) {
+		return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
+	    }
 	}
+
 	// create request uri and extract query strings
 	String path = requestURI.getPath();
 	String resourceName;
@@ -200,12 +207,6 @@ public class ActivationControllerService {
 		    String interruptMessage = ex.getMessage();
 		    LOG.warn("The activation was interrupted with the following message: {}", interruptMessage, ex);
 		    return new CommonActivationResult(INTERRUPTED, interruptMessage);
-		} finally {
-		    synchronized (this.processLock) {
-			this.isRunning = false;
-			this.currentCallback = null;
-			this.currentProccess = null;
-		    }
 		}
 	    }
 	} catch (AddonNotFoundException ex) {

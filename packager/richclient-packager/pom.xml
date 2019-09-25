@@ -88,7 +88,7 @@
 									</linuxOptions>
 									<macOptions>
 										<bundleName>${app.identifier}</bundleName>
-										<bundleIdentifier>org.openecard.richclient</bundleIdentifier>
+										<bundleIdentifier>org.openecard.versioncheck.MainLoader</bundleIdentifier>
 									</macOptions>
 									<windowsOptions>
 										<dirChooser>true</dirChooser>

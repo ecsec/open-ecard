@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -6,7 +6,7 @@
  * This file may be used in accordance with the terms and conditions
  * contained in a signed written agreement between you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.activation.model;
 
 import org.openecard.mobile.activation.common.CommonActivationUtils;
@@ -19,9 +19,9 @@ public class WorldBuilder implements Builder<World> {
 
     private final OpeneCardContextConfigFactory configFactory;
     private final MockNFCCapabilitiesConfigurator capabilities;
-    private final MockMobileTerminalConfigurator terminalConfigurator;
+    private final MobileTerminalConfigurator terminalConfigurator;
 
-    public WorldBuilder(OpeneCardContextConfigFactory configFactory, MockNFCCapabilitiesConfigurator capabilities, MockMobileTerminalConfigurator terminalConfigurator) {
+    public WorldBuilder(OpeneCardContextConfigFactory configFactory, MockNFCCapabilitiesConfigurator capabilities, MobileTerminalConfigurator terminalConfigurator) {
 	this.configFactory = configFactory;
 	this.capabilities = capabilities;
 	this.terminalConfigurator = terminalConfigurator;
@@ -33,15 +33,10 @@ public class WorldBuilder implements Builder<World> {
     }
 
     public static WorldBuilder create() {
-	MockMobileTerminalConfigurator terminalConfigurator = MockMobileTerminalConfigurator.instance();
+	MobileTerminalConfigurator terminalConfigurator = MobileTerminalConfigurator.withMobileNfcStack();
 	return new WorldBuilder(
 		OpeneCardContextConfigFactory.mobile(terminalConfigurator.build()),
 		MockNFCCapabilitiesConfigurator.createWithFullNfc(),
 		terminalConfigurator);
-    }
-
-    public WorldBuilder withMobileNfcStack() {
-	terminalConfigurator.withMobileNfcStack();
-	return this;
     }
 }

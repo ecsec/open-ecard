@@ -66,6 +66,46 @@ public class PinManagementTests extends BaseIntegrationTests {
     }
 
     @Test
+    @Ignore("Pin management has not been reworked.")
+    void canSuccessfullyChangePin() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.pinManagementWorld.startSimplePinManagement();
+
+	    world.pinManagementWorld.expectOnStarted();
+
+	    world.pinManagementWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
+
+	    world.pinManagementWorld.expectSuccessfulPinChange();
+	}
+    }
+
+    @Test
+    @Ignore("Pin management has not been reworked.")
+    void incorrectPinChangeWillFail() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.pinManagementWorld.startSimplePinManagement();
+
+	    world.pinManagementWorld.expectOnStarted();
+
+	    world.pinManagementWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
+
+	    world.pinManagementWorld.expectIncorrectPinChangeToFail();
+	}
+    }
+
+    @Test
     void expectNpaCardRecognition() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

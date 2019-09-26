@@ -22,19 +22,11 @@
 
 package org.openecard.mobile.activation;
 
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
-import org.openecard.robovm.annotations.FrameworkInterface;
-
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface PinManagementInteraction extends ActivationInteraction {
+public interface EnterTwoPasswordsOperation {
 
-    void onPinChangeable(int attempts, EnterTwoPasswordsOperation enterOldNewPins);
-    void onCanRequired(EnterPasswordOperation enterCan);
-    void onPinBlocked(EnterPasswordOperation unblockWithPuk);
-    void onPinStatus(PinStatus status, String cardType);
-
+    boolean enter(String oldPassword, String newPassword);
 }

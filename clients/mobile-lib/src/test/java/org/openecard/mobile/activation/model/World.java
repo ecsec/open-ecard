@@ -23,6 +23,7 @@ import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ContextManager;
+import org.openecard.mobile.activation.EnterTwoPasswordsOperation;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
@@ -116,6 +117,7 @@ public class World implements AutoCloseable {
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
 	private Promise<String> promisedRecognizeCard;
+	private Promise<EnterTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
 
@@ -133,6 +135,7 @@ public class World implements AutoCloseable {
 	    promisedStarted = new Promise<>();
 	    promisedRequestCardInsertion = new Promise();
 	    promisedRecognizeCard = new Promise();
+	    promisedOperationEnterTwoPasswords = new Promise<>();
 	    interaction = mock(PinManagementInteraction.class);
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRequestCardInsertion.isDelivered()) {
@@ -141,6 +144,14 @@ public class World implements AutoCloseable {
 		promisedRequestCardInsertion.deliver(null);
 		return null;
 	    }).when(interaction).requestCardInsertion();
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRequestCardInsertion.isDelivered()) {
+		    promisedRequestCardInsertion = new Promise();
+		}
+		promisedOperationEnterTwoPasswords.deliver((EnterTwoPasswordsOperation)arg0.getArguments()[0]);
+		return null;
+	    }).when(interaction).onPinChangeable(anyInt(), any());
+
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRecognizeCard.isDelivered()) {
 		    promisedRecognizeCard = new Promise();
@@ -193,6 +204,26 @@ public class World implements AutoCloseable {
 	    }
 	}
 
+	private void expectPinChangeWithSuccess(String currentPin, String newPin, boolean expected) {
+	    try {
+		EnterTwoPasswordsOperation operation = promisedOperationEnterTwoPasswords.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		if (operation == null) {
+		    throw new IllegalStateException();
+		}
+		boolean result = operation.enter(currentPin, newPin);
+		Assert.assertEquals(result, expected);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectSuccessfulPinChange() {
+	    expectPinChangeWithSuccess("123123", "123123", true);
+	}
+	public void expectIncorrectPinChangeToFail() {
+	    expectPinChangeWithSuccess("123123", "847826", false);
+	}
+
 	public void cancelPinManagement() {
 	    LOG.debug("Cancel pin management.");
 	    this.activationController.cancelAuthentication();
@@ -214,6 +245,7 @@ public class World implements AutoCloseable {
 		this._pinManagementFactory.destroy(activationController);
 	    }
 	}
+
 
     }
 

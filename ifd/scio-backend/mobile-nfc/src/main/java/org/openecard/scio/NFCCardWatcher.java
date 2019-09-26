@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -6,7 +6,7 @@
  * This file may be used in accordance with the terms and conditions
  * contained in a signed written agreement between you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.scio;
 
 import java.util.Collections;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NFCCardWatcher implements TerminalWatcher {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminals.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NFCCardWatcher.class);
 
     private final SCIOTerminals nfcTerminals;
     private final SCIOTerminal nfcIntegratedTerminal;

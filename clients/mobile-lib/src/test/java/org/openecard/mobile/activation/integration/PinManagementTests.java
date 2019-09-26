@@ -66,7 +66,7 @@ public class PinManagementTests extends BaseIntegrationTests {
     }
 
     @Test
-    void expectCardInserted() throws Exception {
+    void expectNpaCardRecognition() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
 
@@ -78,7 +78,7 @@ public class PinManagementTests extends BaseIntegrationTests {
 
 	    world.givenNpaCardInserted();
 
-	    world.pinManagementWorld.expectActivationResult(ActivationResultCode.INTERRUPTED);
+	    world.pinManagementWorld.expectRecognitionOfNpaCard();
 	}
     }
 }

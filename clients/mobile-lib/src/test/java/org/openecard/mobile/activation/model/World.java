@@ -9,6 +9,7 @@
  ***************************************************************************/
 package org.openecard.mobile.activation.model;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +77,26 @@ public class World implements AutoCloseable {
 
 	this.currentNfcCard = spyCard;
 	doReturn(true).when(currentNfcCard).isCardPresent();
-	doReturn(new SCIOATR(new byte[0])).when(currentNfcCard).getATR();
+	doReturn(new SCIOATR(new byte[]{59, -118, -128, 1, -128, 49, -72, 115, -124, 1, -32, -126, -112, 0, 6})).when(currentNfcCard).getATR();
+	try {
+	    doReturn(new byte[]{59, -118, -128, 1, -128, 49, -72, 115, -124, 1, -32, -126, -112, 0, 6}).when(currentNfcCard).transceive(new byte[]{0, -92, 0, 12, 2, 63, 0});
+	    doReturn(new byte[]{-112, 0}).when(currentNfcCard).transceive(new byte[]{0, -92, 0, 12, 2, 63, 0});
+	    doReturn(new byte[]{106, -126}).when(currentNfcCard).transceive(new byte[]{0, -92, 2, 12, 2, 0, 3});
+	    doReturn(new byte[]{-112, 0}).when(currentNfcCard).transceive(new byte[]{0, -92, 2, 12, 2, 47, 0});
+	    doReturn(new byte[]{109, 0}).when(currentNfcCard).transceive(new byte[]{0, -78, 4, 4, -1});
+
+	    doReturn(new byte[]{109, 0}).when(currentNfcCard).transceive(new byte[]{0, -78, 3, 4, -1});
+	    doReturn(new byte[]{106, -126}).when(currentNfcCard).transceive(new byte[]{0, -92, 4, 12, 15, -16, 69, 115, 116, 69, 73, 68, 32, 118, 101, 114, 32, 49, 46, 48});
+	    doReturn(new byte[]{106, -126}).when(currentNfcCard).transceive(new byte[]{0, -92, 4, 12, 15, -46, 51, 0, 0, 0, 69, 115, 116, 69, 73, 68, 32, 118, 51, 53});
+	    doReturn(new byte[]{106, -126}).when(currentNfcCard).transceive(new byte[]{0, -92, 2, 12, 2, 0, 3});
+	    doReturn(new byte[]{97, 50, 79, 15, -24, 40, -67, 8, 15, -96, 0, 0, 1, 103, 69, 83, 73, 71, 78, 80, 15, 67, 73, 65, 32, 122, 117, 32, 68, 70, 46, 101, 83, 105, 103, 110, 81, 0, 115, 12, 79, 10, -96, 0, 0, 1, 103, 69, 83, 73, 71, 78, 97, 9, 79, 7, -96, 0, 0, 2, 71, 16, 1, 97, 11, 79, 9, -24, 7, 4, 0, 127, 0, 7, 3, 2, 97, 12, 79, 10, -96, 0, 0, 1, 103, 69, 83, 73, 71, 78, 98, -126}).when(currentNfcCard).transceive(new byte[]{0, -80, 0, 0, -1});
+
+	    doReturn(new byte[]{-112, 0}).when(currentNfcCard).transceive(new byte[]{0, 34, -63, -92, 15, -128, 10, 4, 0, 127, 0, 7, 2, 2, 4, 2, 2, -125, 1, 3});
+//	    doReturn(new byte[]{}).when(currentNfcCard).transceive(new byte[]{});
+
+	} catch (IOException ex) {
+	    throw new RuntimeException(ex);
+	}
 
 	this.terminalConfigurator.terminal.setNFCCard(currentNfcCard);
     }
@@ -95,6 +115,7 @@ public class World implements AutoCloseable {
 	private Promise<ActivationResult> promisedActivationResult;
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
+	private Promise<String> promisedRecognizeCard;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
 
@@ -111,6 +132,7 @@ public class World implements AutoCloseable {
 	    promisedActivationResult = new Promise<>();
 	    promisedStarted = new Promise<>();
 	    promisedRequestCardInsertion = new Promise();
+	    promisedRecognizeCard = new Promise();
 	    interaction = mock(PinManagementInteraction.class);
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRequestCardInsertion.isDelivered()) {
@@ -119,9 +141,17 @@ public class World implements AutoCloseable {
 		promisedRequestCardInsertion.deliver(null);
 		return null;
 	    }).when(interaction).requestCardInsertion();
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRecognizeCard.isDelivered()) {
+		    promisedRecognizeCard = new Promise();
+		}
+		promisedRecognizeCard.deliver((String) arg0.getArguments()[0]);
+		return null;
+	    }).when(interaction).onCardRecognized(anyString());
 	    activationController = pinManagementFactory().create(
 		    supportedCards,
-		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult), interaction);
+		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
+		    interaction);
 	    activationController.start();
 	}
 
@@ -148,6 +178,16 @@ public class World implements AutoCloseable {
 	    LOG.debug("Expect on started.");
 	    try {
 		promisedRequestCardInsertion.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectRecognitionOfNpaCard() {
+	    LOG.debug("Expect on started.");
+	    try {
+		String type = promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		Assert.assertEquals(type, "http://bsi.bund.de/cif/npa.xml");
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }

@@ -379,7 +379,7 @@ public class TCTokenHandler {
 		WSException ex = (WSException) innerException;
 		errorMsg = createResponseFromWsEx(ex, response);
 	    } else if (innerException instanceof PAOSConnectionException) {
-		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
+		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
 			w.getLocalizedMessage()));
 	    } else if (innerException instanceof InterruptedException) {
 		response.setResultCode(BindingResultCode.INTERRUPTED);

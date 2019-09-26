@@ -36,5 +36,6 @@ public class AuxDataKeys {
 
     public static final String REDIRECT_LOCATION = PREFIX + "redirect_location" ;
     public static final String RESPONSE_HEADERS = PREFIX + "response_headers";
+    public static final String MINOR_PROCESS_RESULT = PREFIX + "minor_result";
 
 }

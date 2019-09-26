@@ -381,16 +381,20 @@ public class TCTokenHandler {
 	    } else if (innerException instanceof PAOSConnectionException) {
 		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
 			w.getLocalizedMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.Disp.COMM_ERROR);
 	    } else if (innerException instanceof InterruptedException) {
 		response.setResultCode(BindingResultCode.INTERRUPTED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		response.setAdditionalResultMinor(ECardConstants.Minor.App.SESS_TERMINATED);
 	    } else if (innerException instanceof DocumentValidatorException) {
 		errorMsg = LANG_TR.translationForKey(SCHEMA_VALIDATION_FAILED);
 		// it is ridiculous, that this should be a client error, but the test spec demands this
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.SAL.Support.SCHEMA_VAILD_FAILED);
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.App.UNKNOWN_ERROR);
 	    }
 
 	    showErrorMessage(errorMsg);
@@ -548,7 +552,9 @@ public class TCTokenHandler {
 
     private String createResponseFromWsEx(WSException ex, TCTokenResponse response) {
 	String errorMsg;
-	switch (ex.getResultMinor()) {
+	String minor = ex.getResultMinor();
+
+	switch (minor) {
 	    case ECardConstants.Minor.Disp.TIMEOUT:
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
 	    case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
@@ -595,6 +601,9 @@ public class TCTokenHandler {
 		errorMsg = LANG_TR.translationForKey(ERROR_WHILE_AUTHENTICATION);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 	}
+
+	response.setAdditionalResultMinor(minor);
+
 	return errorMsg;
     }
 

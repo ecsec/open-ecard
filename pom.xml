@@ -5,7 +5,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.0-rc.3-SNAPSHOT</version>
+	<version>1.4.0-rc.4-SNAPSHOT</version>
 	<name>Open eCard Client</name>
 
 	<url>http://www.openecard.org/</url>
@@ -715,7 +715,7 @@
 				<plugin>
 					<groupId>net.agilhard.maven.plugins</groupId>
 					<artifactId>jlink-jpackager-maven-plugin</artifactId>
-					<version>1.0.0-ec.1</version>
+					<version>1.0.0-ec.3</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -799,6 +799,12 @@
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>2.3.2</version>
+			</dependency>
+			<!-- more java stuff -->
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>1.2.2-20190731</version>
 			</dependency>
 
 			<!-- JavaFX -->

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>1.4.0-rc.3-SNAPSHOT</version>
+		<version>1.4.0-rc.4-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.clients</groupId>
@@ -103,80 +103,9 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- name all dependencies, so that build is only triggered after these are built -->
 		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>android-nfc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>android-marshaller</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd</groupId>
-			<artifactId>ifd-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd</groupId>
-			<artifactId>ifd-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>management</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.sal</groupId>
-			<artifactId>tiny-sal</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>addon</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>tr03112</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>pin-management</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>status</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.addons</groupId>
-			<artifactId>genericcryptography</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.protocols</groupId>
-			<artifactId>pace</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>android</artifactId>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>android-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

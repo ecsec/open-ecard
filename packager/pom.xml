@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>app</artifactId>
-		<version>1.4.0-rc.3-SNAPSHOT</version>
+		<version>1.4.0-rc.4-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard</groupId>
@@ -16,16 +16,8 @@
 
 	<modules>
 		<module>richclient-bundle</module>
+		<module>richclient-packager</module>
 		<module>ios-framework</module>
 	</modules>
-
-	<profiles>
-		<profile>
-			<id>desktop-package</id>
-			<modules>
-				<module>richclient-packager</module>
-			</modules>
-		</profile>
-	</profiles>
 
 </project>

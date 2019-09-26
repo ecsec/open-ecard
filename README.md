@@ -39,6 +39,30 @@ Finally, you can run the Open eCard App from command line:
 
     $ ./packager/richclient-packager/target/open-ecard/bin/open-ecard
 
+Packaging
+-----------
+
+Native packages which are based on a modular runtime image can be built with the new [jpackage](https://openjdk.java.net/jeps/343) tool which is a candidate for JDK-14. Early-access builds are already [provided](https://jdk.java.net/jpackage/). Native packages for the Open eCard can be built by downloading the JDK-14 early-access build, referencing it as toolchain and by specifying the following property:
+
+    $ mvn clean install -Ddesktop-package
+
+By default, the packager will take the predefined package types, such as dmg for Mac OS and deb for Linux-based systems. The package type can be overridden for Mac and Linux packages by using the following user property:
+
+    $ mvn clean install -Ddesktop-package -Djlink-jpackager.package-type=<type>
+
+Thereby, the following types are available:
+
+ - dmg
+ - pkg
+ - deb
+ - rpm
+
+You have to make sure the required packaging tools are installed. In case of Windows, msi and exe packages are built. For this purpose, two additional tools are required:
+
+ - [WiX toolset](https://wixtoolset.org/) - to create msi installers
+ - [Inno Setup](http://www.jrsoftware.org/isinfo.php) - to create exe installers (Path environment variable must be set)
+
+More information about the required JDK versions and the setup of the toolchain, can be found in the INSTALL.md file.
 
 License
 =======

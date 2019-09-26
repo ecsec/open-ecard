@@ -40,7 +40,9 @@ import org.openecard.android.system.ServiceResponse;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
+import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.util.CombinedPromise;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.mobile.MobileGui;
@@ -147,6 +149,14 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
 	// add callback to this abstract activity when card is removed
 	cardRecognized = false;
+
+	// check card states for already inserted card and call recognised handler
+	CardStateEntry availableCard = getAvailableCard();
+	if (availableCard != null) {
+	    insertionHandler.signalEvent(EventType.CARD_INSERTED, new IfdEventObject(availableCard.handleCopy()));
+	    cardDetectHandler.signalEvent(EventType.RECOGNIZED_CARD_ACTIVE, new IfdEventObject(availableCard.handleCopy()));
+	}
+
 	octx.getEventDispatcher().add(insertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	octx.getEventDispatcher().add(cardDetectHandler, EventType.RECOGNIZED_CARD_ACTIVE);
 	octx.getEventDispatcher().add(removalHandler, EventType.CARD_REMOVED);
@@ -168,6 +178,27 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 	    }, "OeC Activation Process");
 	    authThread.start();
 	    // when app is closed or minimized the authentication process is interrupted and have to startService again
+	}
+    }
+
+    private CardStateEntry getAvailableCard() {
+	// look in card states for a card matching our criteria
+	Set<String> types = getSupportedCards();
+
+	if (types != null) {
+	    for (String type : types) {
+		ConnectionHandleType query = new ConnectionHandleType();
+		ConnectionHandleType.RecognitionInfo rinfo = new ConnectionHandleType.RecognitionInfo();
+		rinfo.setCardType(type);
+		query.setRecognitionInfo(rinfo);
+		CardStateEntry entry = octx.getCardStates().getEntry(query);
+		if (entry != null) {
+		    return entry;
+		}
+	    }
+	    return null;
+	} else {
+	    return octx.getCardStates().getEntry(new ConnectionHandleType());
 	}
     }
 
@@ -203,11 +234,7 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     public void onStop() {
 	// make sure nothing is running anymore
-	Thread at = authThread;
-	if (at != null) {
-	    authThread = null; // prevent calling handler at all, we are shutting down
-	    cancelAuthenticationInt(at, false, false);
-	}
+	cancelAuthenticationInt(authThread, false);
 
 	// remove callback which is set onStart
 	if (octx != null) {
@@ -361,24 +388,24 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 
     @Override
     public void cancelAuthentication(boolean runInThread) {
-	cancelAuthenticationInt(authThread, true, runInThread);
+	cancelAuthenticationInt(authThread, runInThread);
     }
 
-    private void cancelAuthenticationInt(Thread at, boolean showFailure, boolean runInNewThread) {
+    private void cancelAuthenticationInt(Thread at, boolean runInNewThread) {
 	if (at != null) {
+	    if (at == authThread) {
+		authThread = null;
+	    }
 	    // define function
 	    Runnable fun = () -> {
 		try {
+		    // cancel task and handle event
+		    String msg = "";
+		    CommonActivationResult r = new CommonActivationResult(ActivationResultCode.INTERRUPTED, msg);
+		    onAuthenticationInterrupted(r);
+
 		    LOG.info("Stopping Authentication thread ...");
 		    at.interrupt();
-
-		    // cancel task and handle event
-		    if (showFailure) {
-			String msg = "";
-			CommonActivationResult r = new CommonActivationResult(ActivationResultCode.INTERRUPTED, msg);
-			handleActivationResult(r);
-		    }
-
 		    at.join();
 		    LOG.info("Authentication thread has stopped.");
 

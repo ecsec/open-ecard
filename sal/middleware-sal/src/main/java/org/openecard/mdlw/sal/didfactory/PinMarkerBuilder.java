@@ -97,7 +97,7 @@ public class PinMarkerBuilder {
 	if (pwAttributes != null) {
 	    try {
 		JAXBElement<PasswordAttributesType> e;
-		e = new JAXBElement(new QName(ISONS, "PasswordAttributes"), PasswordAttributesType.class, pinRef);
+		e = new JAXBElement(new QName(ISONS, "PasswordAttributes"), PasswordAttributesType.class, pwAttributes);
 		Document d = m.marshal(e);
 		marker.getAny().add(d.getDocumentElement());
 	    } catch (MarshallingTypeException ex) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -42,10 +42,12 @@ import org.openecard.common.util.UrlBuilder;
  *
  * @author Moritz Horsch
  * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
 public class TCTokenResponse extends BindingResult {
 
-    private static final I18n lang = I18n.getTranslation("tr03112");
+    private static final I18n LANG = I18n.getTranslation("tr03112");
+
     private Result result;
     private TCToken token;
     private Future<?> bindingTask;
@@ -69,6 +71,10 @@ public class TCTokenResponse extends BindingResult {
      */
     public void setResult(Result result) {
 	this.result = result;
+    }
+
+    public void setAdditionalResultMinor(String minor) {
+	this.addAuxResultData(AuxDataKeys.MINOR_PROCESS_RESULT, minor);
     }
 
     /**
@@ -151,7 +157,7 @@ public class TCTokenResponse extends BindingResult {
 	} catch (URISyntaxException ex) {
 	    // this is a code failure as the URLs are verified upfront
 	    // TODO: translate when exception changes
-	    throw new IllegalArgumentException(lang.getOriginalMessage(INVALID_URL), ex);
+	    throw new IllegalArgumentException(LANG.getOriginalMessage(INVALID_URL), ex);
 	}
     }
 

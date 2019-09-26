@@ -33,7 +33,7 @@ public class ResultMinor {
     /**
      * Indicates that the eID-Client failed to set up a trusted channel to the eID-Server.
      */
-    public static final String TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED = "trustedChannelEstablishmentFailed";
+    public static final String TRUSTED_CHANNEL_ESTABLISHMENT_FAILED = "trustedChannelEstablishmentFailed";
 
     /**
      * Indicates that the user aborted the authentication.

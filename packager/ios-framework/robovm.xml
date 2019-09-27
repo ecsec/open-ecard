@@ -6,6 +6,7 @@
     devices and the simulator. -->
     <arch>arm64</arch>
     <arch>thumbv7</arch>
+    <mainClass>org.openecard.ios.activation.IOSActivationUtils</mainClass>
 
     <!-- We're building a framework. -->
     <target>framework</target>
@@ -34,9 +35,7 @@
 
     <!-- Force link all classes in the SDK packages. -->
     <forceLinkClasses>
-		<!--
-    	<pattern>org.robovm.apple.ext.corenfc.**</pattern>
     	<pattern>org.robovm.apple.corenfc.**</pattern>
-	-->
+    	<pattern>org.openecard.**</pattern>
     </forceLinkClasses>
 </config>

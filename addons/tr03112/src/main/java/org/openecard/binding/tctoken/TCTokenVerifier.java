@@ -396,7 +396,7 @@ public class TCTokenVerifier {
 		}
 
 		URI refreshUrlAsUrl = createUrlWithErrorParams(refreshUrl,
-			ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED, ex.getMessage());
+			ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED, ex.getMessage());
 		throw new InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex);
 	    } catch (IOException | HttpResourceException | InvalidUrlException | InvalidProxyException | ValidationError | URISyntaxException ex1) {
 		String errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR);

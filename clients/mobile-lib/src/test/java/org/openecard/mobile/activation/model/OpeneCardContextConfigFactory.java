@@ -72,7 +72,7 @@ public final class OpeneCardContextConfigFactory implements Builder<OpeneCardCon
 
     public static OpeneCardContextConfigFactory mobile(TerminalFactory terminalFactory) {
 	DelegatingMobileNfcTerminalFactory.setDelegate(terminalFactory);
-	
+
 	return instance().withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
 		.withWsdefMarshaller(JAXBMarshaller.class);
     }

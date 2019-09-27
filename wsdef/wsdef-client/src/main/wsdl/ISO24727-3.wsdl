@@ -63,6 +63,28 @@
 	<!-- (messages)            -->
 	<!-- ===================== -->
 
+	<wsdl:message name="CreateSessionRequest">
+		<wsdl:part name="parameters"
+			element="iso:CreateSession">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="CreateSessionResponse">
+		<wsdl:part name="parameters"
+			element="iso:CreateSessionResponse">
+		</wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="DestroySessionRequest">
+		<wsdl:part name="parameters"
+			element="iso:DestroySession">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="DestroySessionResponse">
+		<wsdl:part name="parameters"
+			element="iso:DestroySessionResponse">
+		</wsdl:part>
+	</wsdl:message>
+
 	<!-- 7.2 CardApplicationConnect -->
 
 	<wsdl:message name="CardApplicationConnectRequest">
@@ -536,6 +558,16 @@
 		<!-- (portType)            -->
 		<!-- ===================== -->
 
+		<wsdl:operation name="CreateSession">
+			<wsdl:input message="iso:CreateSessionRequest"></wsdl:input>
+			<wsdl:output message="iso:CreateSessionResponse"></wsdl:output>
+		</wsdl:operation>
+
+		<wsdl:operation name="DestroySession">
+			<wsdl:input message="iso:DestroySessionRequest"></wsdl:input>
+			<wsdl:output message="iso:DestroySessionResponse"></wsdl:output>
+		</wsdl:operation>
+
 		<!-- 7.2 CardApplicationConnect -->
 
 		<wsdl:operation name="CardApplicationConnect">
@@ -919,6 +951,28 @@
 		<!-- 7. Connection service -->
 		<!-- (binding)             -->
 		<!-- ===================== -->
+
+		<wsdl:operation name="CreateSession">
+			<soap:operation
+				soapAction="urn:iso:std:iso-iec:24727:tech:schema:CreateSession" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+
+		<wsdl:operation name="DestroySession">
+			<soap:operation
+				soapAction="urn:iso:std:iso-iec:24727:tech:schema:DestroySession" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
 
 		<!-- 7.2 CardApplicationConnect -->
 

@@ -10,6 +10,16 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlSeeAlso({org.w3._2007._05.xmldsig_more_.ObjectFactory.class, org.w3._2001._04.xmlenc_.ObjectFactory.class, de.bund.bsi.ecard.api._1.ObjectFactory.class, org.etsi.uri._01903.v1_3.ObjectFactory.class, oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ObjectFactory.class, org.openecard.ws.schema.ObjectFactory.class, org.openecard.ws.chipgateway.ObjectFactory.class, org.w3._2001._04.xmldsig_more_.ObjectFactory.class, oasis.names.tc.dss._1_0.core.schema.ObjectFactory.class, org.w3._2000._09.xmldsig_.ObjectFactory.class, generated.ObjectFactory.class, iso.std.iso_iec._24727.tech.schema.ObjectFactory.class, org.w3._2009.xmlenc11_.ObjectFactory.class, oasis.names.tc.saml._2_0.assertion.ObjectFactory.class, org.etsi.uri._02231.v3_1.ObjectFactory.class, oasis.names.tc.saml._1_0.assertion.ObjectFactory.class})
 public interface SAL {
 
+    @ECardApiMethod(operationName = "CreateSession", action = "urn:iso:std:iso-iec:24727:tech:schema:CreateSession")
+    public iso.std.iso_iec._24727.tech.schema.CreateSessionResponse createSession(
+        iso.std.iso_iec._24727.tech.schema.CreateSession parameters
+    );
+
+    @ECardApiMethod(operationName = "DestroySession", action = "urn:iso:std:iso-iec:24727:tech:schema:DestroySession")
+    public iso.std.iso_iec._24727.tech.schema.DestroySessionResponse destroySession(
+        iso.std.iso_iec._24727.tech.schema.DestroySession parameters
+    );
+
     @ECardApiMethod(operationName = "CardApplicationList", action = "urn:iso:std:iso-iec:24727:tech:schema:CardApplicationList")
     public iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse cardApplicationList(
         iso.std.iso_iec._24727.tech.schema.CardApplicationList parameters

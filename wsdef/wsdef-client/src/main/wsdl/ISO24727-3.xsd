@@ -533,6 +533,55 @@
 	<!--     Section 7      -->
 	<!-- ================== -->
 
+	<element name="CreateSession">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="SessionIdentifier" type="string" maxOccurs="1" minOccurs="0" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="CreateSessionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence maxOccurs="1" minOccurs="0">
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DestroySession">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ConnectionHandle"
+							type="iso:ConnectionHandleType" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="DestroySessionResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+
 	<!-- 7.2 CardApplicationConnect -->
 
 	<element name="CardApplicationConnect">

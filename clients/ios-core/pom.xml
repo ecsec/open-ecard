@@ -24,7 +24,6 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<minimizeJar>true</minimizeJar>
 							<artifactSet>
 								<excludes>
 									<exclude>com.github.markusbernhardt:proxy-vole</exclude>

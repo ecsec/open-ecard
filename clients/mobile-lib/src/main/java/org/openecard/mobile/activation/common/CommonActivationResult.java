@@ -21,6 +21,7 @@ public class CommonActivationResult implements ActivationResult {
     private final String redirectUrl;
     private final ActivationResultCode resultCode;
     private final String errorMessage;
+    private String processMinor;
 
     public CommonActivationResult(ActivationResultCode resultCode) {
 	this(null, resultCode, null);
@@ -40,16 +41,28 @@ public class CommonActivationResult implements ActivationResult {
 	this.errorMessage = errorMessage;
     }
 
+    public void setProcessMinor(String processMinor) {
+	this.processMinor = processMinor;
+    }
+
+    @Override
     public String getRedirectUrl() {
 	return redirectUrl;
     }
 
+    @Override
     public ActivationResultCode getResultCode() {
 	return resultCode;
     }
 
+    @Override
     public String getErrorMessage() {
 	return errorMessage;
+    }
+
+    @Override
+    public String getProcessResultMinor() {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

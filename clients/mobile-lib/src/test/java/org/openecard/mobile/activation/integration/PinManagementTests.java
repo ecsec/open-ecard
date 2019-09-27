@@ -133,4 +133,34 @@ public class PinManagementTests extends BaseIntegrationTests {
 	    world.pinManagementWorld.expectRecognitionOfNpaCard();
 	}
     }
+
+    @Test
+    @Ignore("Pin management has not been reworked.")
+    void investigateMultipleNpaCardRecognitions() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.pinManagementWorld.startSimplePinManagement();
+
+	    world.pinManagementWorld.expectOnStarted();
+
+	    world.givenNpaCardInserted();
+	    world.pinManagementWorld.expectRecognitionOfNpaCard();
+
+	    world.microSleep();
+
+	    world.givenaCardRemoved();
+	    world.pinManagementWorld.expectRemovalOfCard();
+
+	    world.givenNpaCardInserted();
+	    world.pinManagementWorld.expectRecognitionOfNpaCard();
+
+	    world.microSleep();
+
+	    world.givenaCardRemoved();
+	    world.pinManagementWorld.expectRemovalOfCard();
+	}
+    }
 }

@@ -177,6 +177,16 @@ public class World implements AutoCloseable {
 
     }
 
+    public void givenaCardRemoved() {
+	LOG.debug("Card removed.");
+	if (currentNfcCard == null) {
+	    throw new IllegalStateException("Cannot remove a card when none has been inserted!");
+	}
+
+	doReturn(false).when(currentNfcCard).isCardPresent();
+	terminalConfigurator.terminal.setNFCCard(null);
+    }
+
     public class PinManagementWorld implements AutoCloseable {
 
 	private PinManagementControllerFactory _pinManagementFactory;
@@ -188,6 +198,7 @@ public class World implements AutoCloseable {
 	private Promise<EnterTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
+	private Promise<Void> promisedRemoveCard;
 
 	private PinManagementControllerFactory pinManagementFactory() {
 	    if (_pinManagementFactory == null) {
@@ -203,6 +214,7 @@ public class World implements AutoCloseable {
 	    promisedStarted = new Promise<>();
 	    promisedRequestCardInsertion = new Promise();
 	    promisedRecognizeCard = new Promise();
+	    promisedRemoveCard = new Promise();
 	    promisedOperationEnterTwoPasswords = new Promise<>();
 	    interaction = mock(PinManagementInteraction.class);
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
@@ -212,6 +224,13 @@ public class World implements AutoCloseable {
 		promisedRequestCardInsertion.deliver(null);
 		return null;
 	    }).when(interaction).requestCardInsertion();
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRemoveCard.isDelivered()) {
+		    promisedRemoveCard = new Promise();
+		}
+		promisedRemoveCard.deliver(null);
+		return null;
+	    }).when(interaction).onCardRemoved();
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
@@ -263,7 +282,7 @@ public class World implements AutoCloseable {
 	}
 
 	public void expectRecognitionOfNpaCard() {
-	    LOG.debug("Expect on started.");
+	    LOG.debug("Expect recognition of NPA card.");
 	    try {
 		String type = promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 		Assert.assertEquals(type, "http://bsi.bund.de/cif/npa.xml");
@@ -280,6 +299,15 @@ public class World implements AutoCloseable {
 		}
 		boolean result = operation.enter(currentPin, newPin);
 		Assert.assertEquals(result, expected);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectRemovalOfCard() {
+	    LOG.debug("Expect removal of card.");
+	    try {
+		promisedRemoveCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -314,6 +342,7 @@ public class World implements AutoCloseable {
 		this._pinManagementFactory.destroy(activationController);
 	    }
 	}
+
 
     }
 

@@ -493,12 +493,18 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     }
 
     private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
-	TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
-	if (certificate != null) {
-	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eService");
+	Boolean sameChannel = (Boolean) dynCtx.get(TR03112Keys.SAME_CHANNEL);
+	if (Boolean.TRUE.equals(sameChannel)) {
+	    LOG.debug("eService certificate is not check explicitly due to attached eID-Server case.");
+	    return true;
 	} else {
-	    LOG.error("No eService TLS Certificate set in Dynamic Context.");
-	    return false;
+	    TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
+	    if (certificate != null) {
+		return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eService");
+	    } else {
+		LOG.error("No eService TLS Certificate set in Dynamic Context.");
+		return false;
+	    }
 	}
     }
 

@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
@@ -29,7 +28,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface EnterTwoPasswordsOperation extends EnterTwoValuesOperation<String, String> {
-
-    boolean enter(String oldPassword, String newPassword);
+public interface ConfirmTwoValuesOperation<T1, T2> {
+    boolean enter(T1 oldPassword, T2 newPassword);
 }

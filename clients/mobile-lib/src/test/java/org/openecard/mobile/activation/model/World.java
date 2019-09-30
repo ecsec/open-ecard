@@ -36,8 +36,8 @@ import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.activation.EnterTwoPasswordsOperation;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
@@ -195,7 +195,7 @@ public class World implements AutoCloseable {
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
 	private Promise<String> promisedRecognizeCard;
-	private Promise<EnterTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
+	private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
 	private Promise<Void> promisedRemoveCard;
@@ -235,7 +235,7 @@ public class World implements AutoCloseable {
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
 		}
-		promisedOperationEnterTwoPasswords.deliver((EnterTwoPasswordsOperation) arg0.getArguments()[0]);
+		promisedOperationEnterTwoPasswords.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
 		return null;
 	    }).when(interaction).onPinChangeable(anyInt(), any());
 
@@ -293,7 +293,7 @@ public class World implements AutoCloseable {
 
 	private void expectPinChangeWithSuccess(String currentPin, String newPin, boolean expected) {
 	    try {
-		EnterTwoPasswordsOperation operation = promisedOperationEnterTwoPasswords.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		ConfirmTwoPasswordsOperation operation = promisedOperationEnterTwoPasswords.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 		if (operation == null) {
 		    throw new IllegalStateException();
 		}

@@ -29,7 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface EnterPasswordOperation {
+public interface ConfirmPasswordOperation {
 
     boolean enter(String password);
 }

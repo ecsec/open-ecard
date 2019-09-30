@@ -35,11 +35,11 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacInteraction extends ActivationInteraction {
 
-    void onPinRequest(int attempt, EnterPasswordOperation enterPin);
-    void onPinCanRequest(EnterTwoPasswordsOperation enterPinCan);
+    void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
+    void onPinCanRequest(ConfirmTwoPasswordsOperation enterPinCan);
     void onCardBlocked();
     void onCardDeactivated();
-    void onServerData(ServerData data, EnterTwoValuesOperation<List<BoxItem>, List<BoxItem>> selectReadWrite);
+    void onServerData(ServerData data, ConfirmTwoValuesOperation<List<BoxItem>, List<BoxItem>> selectReadWrite);
     void onTransactionInfo(String data);
     void onPinStatus(PinStatus status, String cardType);
     void onInteractionComplete();

@@ -29,7 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface EnterTwoPasswordsOperation {
+public interface EnterTwoPasswordsOperation extends EnterTwoValuesOperation<String, String> {
 
     boolean enter(String oldPassword, String newPassword);
 }

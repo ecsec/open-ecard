@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,14 +18,9 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation;
 
-import java.util.List;
-import org.openecard.gui.definition.BoxItem;
-import org.openecard.gui.mobile.eac.types.ServerData;
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -33,14 +28,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface EacInteraction extends ActivationInteraction {
-
-    void onPinRequest(int attempt, EnterPasswordOperation enterPin);
-    void onPinCanRequest(EnterTwoPasswordsOperation enterPinCan);
-    void onCardBlocked();
-    void onCardDeactivated();
-    void onServerData(ServerData data, EnterTwoValuesOperation<List<BoxItem>, List<BoxItem>> selectReadWrite);
-    void onTransactionInfo(String data);
-    void onPinStatus(PinStatus status, String cardType);
-    void onInteractionComplete();
+public interface EnterTwoValuesOperation<T1, T2> {
+    boolean enter(T1 oldPassword, T2 newPassword);
 }

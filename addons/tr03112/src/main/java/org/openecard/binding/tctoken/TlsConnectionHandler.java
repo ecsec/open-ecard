@@ -175,7 +175,7 @@ public class TlsConnectionHandler {
 		// make sure nobody changes the server when the connection gets reestablished
 		tlsAuth.addCertificateVerifier(new SameCertVerifier());
 		// save eService certificate for use in EAC
-		tlsAuth.addCertificateVerifier(new SaveEServiceCertHandler());
+		tlsAuth.addCertificateVerifier(new SaveEidServerCertHandler());
 
 		// set the authentication class in the tls client
 		tlsClient.setAuthentication(tlsAuth);

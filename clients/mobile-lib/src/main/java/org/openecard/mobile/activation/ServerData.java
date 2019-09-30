@@ -22,7 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -30,14 +29,22 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface EacInteraction extends ActivationInteraction {
+public interface ServerData {
 
-    void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
-    void onPinCanRequest(ConfirmTwoPasswordsOperation enterPinCan);
-    void onCardBlocked();
-    void onCardDeactivated();
-    void onServerData(ServerData data, ConfirmAttributeSelectionOperation selectReadWrite);
-    void onTransactionInfo(String data);
-    void onPinStatus(PinStatus status, String cardType);
-    void onInteractionComplete();
+    String getIssuer();
+
+    String getIssuerUrl();
+
+    /* List<BoxItem> getReadAccessAttributes(); */
+
+    String getSubject();
+
+    String getSubjectUrl();
+
+    TermsOfUsage getTermsOfUsage();
+
+    String getValidity();
+
+    /* List<BoxItem> getWriteAccessAttributes(); */
+
 }

@@ -23,6 +23,7 @@ package org.openecard.mobile.activation.common;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Set;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
@@ -56,6 +57,10 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
     }
 
     @Override
+    public ActivationController create(ControllerCallback activation, PinManagementInteraction interaction) {
+	return new CommonActivationController(activationUrl, new HashSet<>(), PROTOCOL_TYPE, activationControllerService, activation, interaction);
+    }
+
     public ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction) {
 	return new CommonActivationController(activationUrl, supportedCard, PROTOCOL_TYPE, activationControllerService, activation, interaction);
     }

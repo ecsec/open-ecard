@@ -22,7 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import java.util.Set;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -32,7 +31,12 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacControllerFactory {
 
-    ActivationController create(String url, Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
+    ActivationController create(String url, ControllerCallback activation, EacInteraction interaction);
 
+    /**
+     * TOD: Re-enable the following method when the binding problems are solved:
+     * ActivationController create(String url, Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
+     */
+    
     void destroy(ActivationController controller);
 }

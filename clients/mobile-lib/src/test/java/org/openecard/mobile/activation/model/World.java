@@ -247,7 +247,7 @@ public class World implements AutoCloseable {
 		return null;
 	    }).when(interaction).onCardRecognized(anyString());
 	    activationController = pinManagementFactory().create(
-		    supportedCards,
+		    /* supportedCards, */
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
 		    interaction);
 	    activationController.start();

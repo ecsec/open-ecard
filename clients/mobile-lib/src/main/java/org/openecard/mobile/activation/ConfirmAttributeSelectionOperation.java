@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,8 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
@@ -29,7 +28,10 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ConfirmTwoPasswordsOperation {
-    
-    boolean enter(String oldPassword, String newPassword);
+public interface ConfirmAttributeSelectionOperation {
+
+    /**
+     * TOD: Re-enable the following method when the binding problems are solved:
+     * public boolean enter(BoxItem[] oldPassword, BoxItem[] newPassword);
+     */
 }

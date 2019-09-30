@@ -117,7 +117,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
-			<artifactId>mobile-lib</artifactId>
+			<artifactId>ios-lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

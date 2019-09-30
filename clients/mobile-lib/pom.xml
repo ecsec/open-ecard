@@ -46,7 +46,7 @@
 								<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
 							</annotationProcessors>
 							<compilerArgs>
-								<arg>-Aroboface.headername=open-ecard.h</arg>
+								<arg>-Aroboface.headername=open-ecard-mobile-lib.h</arg>
 							</compilerArgs>
 							<debug>true</debug>
 							<debuglevel>source,lines,vars</debuglevel>

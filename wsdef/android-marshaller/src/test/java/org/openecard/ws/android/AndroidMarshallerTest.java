@@ -35,12 +35,16 @@ import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Conclusion;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
@@ -122,6 +126,10 @@ public class AndroidMarshallerTest {
     private static final String DESTROY_CHANNEL;
     private static final String START_PAOS;
     private static final String TRANSMIT;
+    private static final String CREATE_SESSION;
+    private static final String CREATE_SESSION_RESP;
+    private static final String DESTROY_SESSION;
+    private static final String DESTROY_SESSION_RESP;
 
     private static final String TEST_ADDON_BUNDDLE_DESCRIPTION;
 
@@ -145,7 +153,12 @@ public class AndroidMarshallerTest {
 	    DESTROY_CHANNEL = loadXML("DestroyChannel.xml");
 	    START_PAOS = loadXML("StartPAOS.xml");
 	    TRANSMIT = loadXML("Transmit.xml");
+	    CREATE_SESSION = loadXML("CreateSession.xml");
+	    CREATE_SESSION_RESP = loadXML("CreateSessionResponse.xml");
+	    DESTROY_SESSION = loadXML("DestroySession.xml");
+	    DESTROY_SESSION_RESP = loadXML("DestroySessionResponse.xml");
 	    TEST_ADDON_BUNDDLE_DESCRIPTION = loadXML("TestAddonBundleDescription.xml");
+
 	} catch (IOException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -174,7 +187,7 @@ public class AndroidMarshallerTest {
 	WSMarshaller m = new AndroidMarshaller();
 	Object o = m.unmarshal(m.str2doc(NPA_CIF));
 	if (!(o instanceof CardInfo)) {
-	    throw new Exception("Object should be an instace of CardInfo");
+	    throw new Exception("Object should be an instance of CardInfo");
 	}
 	CardInfo cardInfo = (CardInfo) o;
 	assertEquals("http://bsi.bund.de/cif/npa.xml", cardInfo.getCardType().getObjectIdentifier());
@@ -250,7 +263,7 @@ public class AndroidMarshallerTest {
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof EstablishContext)) {
-	    throw new Exception("Object should be an instace of EstablishContext");
+	    throw new Exception("Object should be an instance of EstablishContext");
 	}
     }
 
@@ -260,7 +273,7 @@ public class AndroidMarshallerTest {
 	Object o = m.unmarshal(m.str2doc(DISCONNECT));
 
 	if (!(o instanceof Disconnect)) {
-	    throw new Exception("Object should be an instace of EstablishContext");
+	    throw new Exception("Object should be an instance of EstablishContext");
 	}
 
 	Disconnect d = (Disconnect) o;
@@ -291,7 +304,7 @@ public class AndroidMarshallerTest {
 	WSMarshaller m = new AndroidMarshaller();
 	Object o = m.unmarshal(m.str2doc(TRANSMIT));
 	if (!(o instanceof Transmit)) {
-	    throw new Exception("Object should be an instace of Transmit");
+	    throw new Exception("Object should be an instance of Transmit");
 	}
 	Transmit t = (Transmit) o;
 	assertEquals(t.getSlotHandle(), StringUtils.toByteArray("7695F667EE2B53824F77544D861236DD"));
@@ -349,7 +362,7 @@ public class AndroidMarshallerTest {
 	Object o = m.unmarshal(m.str2doc(START_PAOS_RESPONSE));
 
 	if (!(o instanceof StartPAOSResponse)) {
-	    throw new Exception("Object should be an instace of StartPAOSResponse");
+	    throw new Exception("Object should be an instance of StartPAOSResponse");
 	}
 
 	StartPAOSResponse stPaosResponse = (StartPAOSResponse) o;
@@ -599,7 +612,7 @@ public class AndroidMarshallerTest {
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
-	    throw new Exception("Object should be an instace of DIDAuthenticate");
+	    throw new Exception("Object should be an instance of DIDAuthenticate");
 	}
 
 	DIDAuthenticate didAuthenticate = (DIDAuthenticate) o;
@@ -639,7 +652,7 @@ public class AndroidMarshallerTest {
 
 	o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
-	    throw new Exception("Object should be an instace of DIDAuthenticate");
+	    throw new Exception("Object should be an instance of DIDAuthenticate");
 	}
 
 	didAuthenticate = (DIDAuthenticate) o;
@@ -660,7 +673,7 @@ public class AndroidMarshallerTest {
 
 	o = m.unmarshal(d);
 	if (!(o instanceof DIDAuthenticate)) {
-	    throw new Exception("Object should be an instace of DIDAuthenticate");
+	    throw new Exception("Object should be an instance of DIDAuthenticate");
 	}
 
 	didAuthenticate = (DIDAuthenticate) o;
@@ -710,7 +723,7 @@ public class AndroidMarshallerTest {
 
 	Object o = m.unmarshal(d);
 	if (!(o instanceof InitializeFramework)) {
-	    throw new Exception("Object should be an instace of InitializeFramework");
+	    throw new Exception("Object should be an instance of InitializeFramework");
 	}
     }
 
@@ -730,7 +743,7 @@ public class AndroidMarshallerTest {
 	    String s = m.doc2str(d);
 	    LOG.debug(s);
 	} else {
-	    throw new Exception("Object should be an instace of GetRecognitionTreeResponse");
+	    throw new Exception("Object should be an instance of GetRecognitionTreeResponse");
 	}
     }
 
@@ -764,7 +777,7 @@ public class AndroidMarshallerTest {
 	WSMarshaller m = new AndroidMarshaller();
 	Object o = m.unmarshal(m.str2doc(GET_STATUS_RESPONSE));
 	if (!(o instanceof GetStatusResponse)) {
-	    throw new Exception("Object should be an instace of GetStatusResponse");
+	    throw new Exception("Object should be an instance of GetStatusResponse");
 	}
     }
 
@@ -795,9 +808,58 @@ public class AndroidMarshallerTest {
 	WSMarshaller m = new AndroidMarshaller();
 	Object o = m.unmarshal(m.str2doc(TEST_ADDON_BUNDDLE_DESCRIPTION));
 	if (!(o instanceof AddonSpecification)) {
-	    throw new Exception("Object should be an instace of AddonSpecification");
+	    throw new Exception("Object should be an instance of AddonSpecification");
 	}
 	marshalLog(o);
+    }
+
+    @Test
+    public void testCreateSession() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(CREATE_SESSION));
+	if (!(o instanceof CreateSession)) {
+	    throw new Exception("Object should be an instance of CreateSession");
+	}
+
+	CreateSession cs = (CreateSession) m.unmarshal(m.marshal(o));
+	Assert.assertEquals(cs.getSessionIdentifier(), "05D4F40AEBD9919383C22216055EA3DB15056C51");
+    }
+
+    @Test
+    public void testCreateSessionResponse() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(CREATE_SESSION_RESP));
+	if (!(o instanceof CreateSessionResponse)) {
+	    throw new Exception("Object should be an instance of CreateSessionResponse");
+	}
+
+	CreateSessionResponse cs = (CreateSessionResponse) m.unmarshal(m.marshal(o));
+	WSHelper.checkResult(cs);
+	Assert.assertEquals(cs.getConnectionHandle().getChannelHandle().getSessionIdentifier(), "05D4F40AEBD9919383C22216055EA3DB15056C51");
+    }
+
+    @Test
+    public void testDestroySession() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(DESTROY_SESSION));
+	if (!(o instanceof DestroySession)) {
+	    throw new Exception("Object should be an instacne of DestroySession");
+	}
+
+	DestroySession ds = (DestroySession) m.unmarshal(m.marshal(o));
+	Assert.assertEquals(ds.getConnectionHandle().getChannelHandle().getSessionIdentifier(), "05D4F40AEBD9919383C22216055EA3DB15056C51");
+    }
+
+    @Test
+    public void testDestroySessionResponse() throws Exception {
+	WSMarshaller m = new AndroidMarshaller();
+	Object o = m.unmarshal(m.str2doc(DESTROY_SESSION_RESP));
+	if (!(o instanceof DestroySessionResponse)) {
+	    throw new Exception("Object should be an instance of DestroySessionResponse");
+	}
+
+	DestroySessionResponse ds = (DestroySessionResponse) m.unmarshal(m.marshal(o));
+	WSHelper.checkResult(ds);
     }
 
 }

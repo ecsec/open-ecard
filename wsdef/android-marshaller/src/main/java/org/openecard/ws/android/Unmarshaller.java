@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 HS Coburg.
+ * Copyright (C) 2012-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -55,6 +55,8 @@ import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
 import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType;
@@ -69,6 +71,8 @@ import iso.std.iso_iec._24727.tech.schema.DataMaskType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityType;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
@@ -582,6 +586,68 @@ public class Unmarshaller {
 		    }
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CardAppPathResultSet")));
+	    return result;
+	} else if (parser.getName().equals("CreateSession")) {
+	    CreateSession result = new CreateSession();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("SessionIdentifier")) {
+			result.setSessionIdentifier(parser.nextText());
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CreateSession")));
+	    return result;
+	} else if (parser.getName().equals("CreateSessionResponse")) {
+	    CreateSessionResponse result = new CreateSessionResponse();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Profile")) {
+			result.setProfile(parser.nextText());
+		    } else if (parser.getName().equals("RequestID")) {
+			result.setRequestID(parser.nextText());
+		    } else if (parser.getName().equals("Result")) {
+			result.setResult(this.parseResult(parser));
+		    } else if (parser.getName().equals("ConnectionHandle")) {
+			result.setConnectionHandle(parseConnectionHandle(parser));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("CreateSessionResponse")));
+	    return result;
+	} else if (parser.getName().equals("DestroySession")) {
+	    DestroySession result = new DestroySession();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ConnectionHandle")) {
+			result.setConnectionHandle(parseConnectionHandle(parser));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("DestroySession")));
+	    return result;
+	} else if (parser.getName().equals("DestroySessionResponse")) {
+	    DestroySessionResponse result = new DestroySessionResponse();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Profile")) {
+			result.setProfile(parser.nextText());
+		    } else if (parser.getName().equals("RequestID")) {
+			result.setRequestID(parser.nextText());
+		    } else if (parser.getName().equals("Result")) {
+			result.setResult(this.parseResult(parser));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("DestroySessionResponse")));
 	    return result;
 	} else if (parser.getName().equals("CardApplicationConnect")) {
 	    CardApplicationConnect result = new CardApplicationConnect();

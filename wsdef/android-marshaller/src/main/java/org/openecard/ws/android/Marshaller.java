@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 HS Coburg.
+ * Copyright (C) 2012-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -40,11 +40,15 @@ import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
@@ -384,6 +388,39 @@ public class Marshaller {
 	    EndTransactionResponse response = (EndTransactionResponse) o;
 	    rootElement = createElementIso(document, "EndTransactionResponse");
 	    appendResponseValues(response, rootElement, document);
+	} else if (o instanceof CreateSession) {
+	    CreateSession cs = (CreateSession) o;
+	    rootElement = createElementIso(document, "CreateSession");
+	    appendRequestValues(cs, rootElement);
+
+	    if (cs.getSessionIdentifier() != null) {
+		Element sessChild = createElementIso(document, "SessionIdentifier");
+		sessChild.appendChild(document.createTextNode(cs.getSessionIdentifier()));
+		rootElement.appendChild(sessChild);
+	    }
+	} else if (o instanceof CreateSessionResponse) {
+	    CreateSessionResponse resp = (CreateSessionResponse) o;
+	    rootElement = createElementIso(document, "CreateSessionResponse");
+	    appendResponseValues(resp, rootElement, document);
+
+	    ConnectionHandleType ch = resp.getConnectionHandle();
+	    if (ch != null) {
+		Element em = marshalConnectionHandle(ch, document);
+		rootElement.appendChild(em);
+	    }
+	} else if (o instanceof DestroySession) {
+	    DestroySession ds = (DestroySession) o;
+	    rootElement = createElementIso(document, "DestroySession");
+	    appendRequestValues(ds, rootElement);
+
+	    if (ds.getConnectionHandle() != null) {
+		rootElement.appendChild(marshalConnectionHandle(ds.getConnectionHandle(), document));
+	    }
+	} else if (o instanceof DestroySessionResponse) {
+	    DestroySessionResponse resp = (DestroySessionResponse) o;
+	    rootElement = createElementIso(document, "DestroySessionResponse");
+	    appendResponseValues(resp, rootElement, document);
+
 	} else if (o instanceof CardApplicationConnect) {
 	    CardApplicationConnect c = (CardApplicationConnect) o;
 	    rootElement = createElementIso(document, "CardApplicationConnect");

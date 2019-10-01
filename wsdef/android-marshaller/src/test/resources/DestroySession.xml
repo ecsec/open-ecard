@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iso:DestroySession xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
+	<iso:ConnectionHandle>
+		<iso:ChannelHandle>
+			<iso:SessionIdentifier>05D4F40AEBD9919383C22216055EA3DB15056C51</iso:SessionIdentifier>
+		</iso:ChannelHandle>
+	</iso:ConnectionHandle>
+</iso:DestroySession>

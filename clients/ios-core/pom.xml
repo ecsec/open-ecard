@@ -36,7 +36,7 @@
 							<relocations>
 								<relocation>
 									<pattern>org.bouncycastle</pattern>
-									<shadedPattern>org.openecard.bc</shadedPattern>
+									<shadedPattern>hidden.org.bouncycastle</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>javax.xml.bind</pattern>
@@ -54,6 +54,11 @@
 										<exclude>META-INF/*.RSA</exclude>
 										<exclude>META-INF/versions/**/*</exclude>
 										<exclude>META-INF/maven/**/*</exclude>
+										<exclude>SQLite/**/*</exclude>
+										<exclude>delight.rhinosandbox/**/*</exclude>
+										<exclude>images/**/*</exclude>
+										<exclude>java/awt.font/**/*</exclude>
+										<exclude>org/apache/harmony/**/*</exclude>
 									</excludes>
 								</filter>
 							</filters>
@@ -123,6 +128,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

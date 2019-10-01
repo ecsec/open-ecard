@@ -35,7 +35,6 @@
 
     <!-- Force link all classes in the SDK packages. -->
     <forceLinkClasses>
-    	<pattern>org.robovm.apple.corenfc.**</pattern>
-    	<pattern>org.openecard.**</pattern>
+    	<!--<pattern>org.openecard.**</pattern>-->
     </forceLinkClasses>
 </config>

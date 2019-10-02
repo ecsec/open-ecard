@@ -24,8 +24,7 @@ public interface TermsOfUsage {
      *
      * @return
      */
-    /* TODO enable as soon as Arrays marshalling is fixed.
-    byte[] getDataBytes(); */
+    byte[] getDataBytes();
 
     /**
      * Retrieve the terms of usage document as a string.

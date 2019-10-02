@@ -30,8 +30,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmAttributeSelectionOperation {
 
-    /**
-     * TOD: Re-enable the following method when the binding problems are solved:
-     * public boolean enter(BoxItem[] oldPassword, BoxItem[] newPassword);
-     */
+     public boolean enter(BoxItem[] oldPassword, BoxItem[] newPassword);
 }

@@ -22,7 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -38,6 +37,7 @@ public interface EacInteraction extends ActivationInteraction {
     void onCardDeactivated();
     void onServerData(ServerData data, ConfirmAttributeSelectionOperation selectReadWrite);
     void onTransactionInfo(String data);
-    void onPinStatus(PinStatus status, String cardType);
+    /* TODO: decide if this is relevant.
+      void onPinStatus(PinStatus status, String cardType); */
     void onInteractionComplete();
 }

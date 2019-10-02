@@ -37,7 +37,6 @@ public interface EacInteraction extends ActivationInteraction {
     void onCardDeactivated();
     void onServerData(ServerData data, ConfirmAttributeSelectionOperation selectReadWrite);
     void onTransactionInfo(String data);
-    /* TODO: decide if this is relevant.
-      void onPinStatus(PinStatus status, String cardType); */
+    void onPinStatus(PinStatus status, String cardType);
     void onInteractionComplete();
 }

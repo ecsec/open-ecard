@@ -19,21 +19,32 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.mobile.activation;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
+import org.openecard.robovm.annotations.FrameworkEnum;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface PinManagementInteraction extends ActivationInteraction {
+@FrameworkEnum
+public enum PinStatus {
+    RC3,
+    RC2,
+    CAN,
+    BLOCKED,
+    DEACTIVATED;
 
-    void onPinChangeable(int attempts, ConfirmTwoPasswordsOperation enterOldNewPins);
-    void onCanRequired(ConfirmPasswordOperation enterCan);
-    void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
-    void onPinStatus(PinStatus status, String cardType);
+    public boolean isBlocked() {
+	return BLOCKED == this;
+    }
+
+    public boolean isOperational() {
+	return !isBlocked() && DEACTIVATED != this;
+    }
+
+    public boolean needsCan() {
+	return CAN == this;
+    }
 
 }

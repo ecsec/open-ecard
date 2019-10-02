@@ -30,6 +30,7 @@
 					</annotationProcessors>
 					<compilerArgs>
 						<arg>-Aroboface.headername=open-ecard.h</arg>
+						<arg>-Aroboface.include.headers=open-ecard-mobile-lib.h</arg>
 					</compilerArgs>
 					<debug>true</debug>
 					<debuglevel>source,lines,vars</debuglevel>

@@ -1,5 +1,5 @@
 framework module OpenEcard{
-  umbrella "OpenEcard"
+  umbrella header "open-ecard.h"
   export *
   module * { export * }
 }

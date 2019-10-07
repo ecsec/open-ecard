@@ -28,10 +28,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
+import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
+import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
+import org.openecard.common.ifd.scio.TerminalState;
+import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.common.util.LinuxLibraryFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +63,8 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
     private final String osName;
     private TerminalFactory terminalFactory;
 
+    private final CompletableFuture<Void> initLock;
+
     /**
      * Default constructor with fixes for the faulty SmartcardIO library.
      *
@@ -63,7 +77,38 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	    File libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1");
 	    System.setProperty("sun.security.smartcardio.library", libFile.getAbsolutePath());
 	}
-	loadPCSC();
+
+	this.initLock = new CompletableFuture<>();
+
+	try {
+	    loadPCSC();
+	    initLock.complete(null);
+	} catch (NoSuchAlgorithmException ex) {
+	    LOG.error("Failed to initialize smartcard system.", ex);
+	    if (isNoServiceException(ex)) {
+		new Thread(() -> {
+		    while (initLock.isDone()) {
+			try {
+			    loadPCSC();
+			    initLock.complete(null);
+			} catch (NoSuchAlgorithmException exInner) {
+			    if (isNoServiceException(exInner)) {
+				try {
+				    Thread.sleep(5000);
+				} catch (InterruptedException ex2) {
+				    return;
+				}
+			    } else {
+				LOG.error("Failed to initialize smartcard system.", exInner);
+				throw new RuntimeException(exInner);
+			    }
+			}
+		    }
+		}).start();
+	    } else {
+		throw ex;
+	    }
+	}
     }
 
     @Override
@@ -73,7 +118,57 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 
     @Override
     public SCIOTerminals terminals() {
-	return new PCSCTerminals(this);
+	if (initLock.isDone()) {
+	    return new PCSCTerminals(this);
+	} else {
+	    // dummy for use while the initialization is not working properly
+	    return new SCIOTerminals() {
+		@Override
+		public List<SCIOTerminal> list(SCIOTerminals.State state) throws SCIOException {
+		    return Collections.emptyList();
+		}
+
+		@Override
+		public List<SCIOTerminal> list() throws SCIOException {
+		    return Collections.emptyList();
+		}
+
+		@Override
+		public SCIOTerminal getTerminal(String name) throws NoSuchTerminal {
+		    throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public TerminalWatcher getWatcher() throws SCIOException {
+		    return new TerminalWatcher() {
+			@Override
+			public SCIOTerminals getTerminals() {
+			    return terminals();
+			}
+
+			@Override
+			public List<TerminalState> start() throws SCIOException {
+			    return Collections.emptyList();
+			}
+
+			@Override
+			public TerminalWatcher.StateChangeEvent waitForChange(long timeout) throws SCIOException {
+			    try {
+				initLock.get(timeout, TimeUnit.MILLISECONDS);
+			    } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+				// ignore
+			    }
+			    return new StateChangeEvent();
+			}
+
+			@Override
+			public TerminalWatcher.StateChangeEvent waitForChange() throws SCIOException {
+			    return waitForChange(Long.MAX_VALUE);
+			}
+		    };
+		}
+	    };
+	}
     }
 
     TerminalFactory getRawFactory() {
@@ -139,21 +234,29 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 		SecurityException ex) {
 	    LOG.error("Failed to perform reflection magic to reload TerminalFactory.", ex);
 	} catch (InvocationTargetException ex) {
-	    if (PCSCExceptionExtractor.hasPCSCException(ex)) {
-		SCIOErrorCode code = PCSCExceptionExtractor.getCode(ex);
-		if (code == SCIOErrorCode.SCARD_E_NO_SERVICE) {
-		    // silent drop after giving the system some time to recover for themselves
-		    try {
-			Thread.sleep(5000);
-		    } catch (InterruptedException ignore) {
-			Thread.currentThread().interrupt();
-		    }
-		    return;
+	    if (isNoServiceException(ex)) {
+		// silent drop after giving the system some time to recover for themselves
+		try {
+		    Thread.sleep(5000);
+		} catch (InterruptedException ignore) {
+		    Thread.currentThread().interrupt();
 		}
+		return;
 	    }
 
 	    LOG.error("Error while invoking PCSC restart functionality.");
 	}
+    }
+
+    private boolean isNoServiceException(Exception mainException) {
+	if (PCSCExceptionExtractor.hasPCSCException(mainException)) {
+	    SCIOErrorCode code = PCSCExceptionExtractor.getCode(mainException);
+	    if (code == SCIOErrorCode.SCARD_E_NO_SERVICE) {
+		return true;
+	    }
+	}
+
+	return false;
     }
 
 }

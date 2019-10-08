@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -252,15 +253,13 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	    long newId = ((Long) SCardEstablishContext.invoke(pcsc, SCARD_SCOPE_USER.getInt(pcsc)));
 	    contextId.setLong(pcscterminal, newId);
 
-	    // Then clear the terminals in cache
 	    loadPCSC();
+	    // Then clear the terminals in cache
 	    CardTerminals terminals = terminalFactory.terminals();
 	    Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
 	    fieldTerminals.setAccessible(true);
-	    Class classMap = Class.forName("java.util.Map");
-	    Method clearMap = classMap.getDeclaredMethod("clear");
-
-	    clearMap.invoke(fieldTerminals.get(terminals));
+	    Map termObj = (Map) fieldTerminals.get(terminals);
+	    termObj.clear();
 	}
     }
 

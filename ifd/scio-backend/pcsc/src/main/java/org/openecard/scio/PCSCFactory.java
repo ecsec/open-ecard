@@ -89,9 +89,9 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 		new Thread(() -> {
 		    while (initLock.isDone()) {
 			try {
-			    loadPCSC();
+			    reloadPCSCInt();
 			    initLock.complete(null);
-			} catch (NoSuchAlgorithmException exInner) {
+			} catch (Exception exInner) {
 			    if (isNoServiceException(exInner)) {
 				try {
 				    Thread.sleep(5000);
@@ -202,33 +202,7 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 
     void reloadPCSC() {
 	try {
-	    // code taken from http://stackoverflow.com/questions/16921785/
-	    Class pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
-	    Field contextId = pcscterminal.getDeclaredField("contextId");
-	    contextId.setAccessible(true);
-
-	    if (contextId.getLong(pcscterminal) != 0L) {
-		// First get a new context value
-		Class pcsc = Class.forName("sun.security.smartcardio.PCSC");
-		Method SCardEstablishContext = pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
-		SCardEstablishContext.setAccessible(true);
-
-		Field SCARD_SCOPE_USER = pcsc.getDeclaredField("SCARD_SCOPE_USER");
-		SCARD_SCOPE_USER.setAccessible(true);
-
-		long newId = ((Long) SCardEstablishContext.invoke(pcsc, SCARD_SCOPE_USER.getInt(pcsc)));
-		contextId.setLong(pcscterminal, newId);
-
-		// Then clear the terminals in cache
-		loadPCSC();
-		CardTerminals terminals = terminalFactory.terminals();
-		Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
-		fieldTerminals.setAccessible(true);
-		Class classMap = Class.forName("java.util.Map");
-		Method clearMap = classMap.getDeclaredMethod("clear");
-
-		clearMap.invoke(fieldTerminals.get(terminals));
-	    }
+	    reloadPCSCInt();
 	} catch (NoSuchAlgorithmException ex) {
 	    // if it worked once it will work again
 	    String msg = "PCSC changed it's algorithm. There is something really wrong.";
@@ -249,6 +223,37 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	    }
 
 	    LOG.error("Error while invoking PCSC restart functionality.");
+	}
+    }
+
+    private void reloadPCSCInt() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException,
+	    NoSuchMethodException, InvocationTargetException, NoSuchAlgorithmException {
+	// code taken from http://stackoverflow.com/questions/16921785/
+	Class pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
+	Field contextId = pcscterminal.getDeclaredField("contextId");
+	contextId.setAccessible(true);
+
+	if (contextId.getLong(pcscterminal) != 0L) {
+	    // First get a new context value
+	    Class pcsc = Class.forName("sun.security.smartcardio.PCSC");
+	    Method SCardEstablishContext = pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
+	    SCardEstablishContext.setAccessible(true);
+
+	    Field SCARD_SCOPE_USER = pcsc.getDeclaredField("SCARD_SCOPE_USER");
+	    SCARD_SCOPE_USER.setAccessible(true);
+
+	    long newId = ((Long) SCardEstablishContext.invoke(pcsc, SCARD_SCOPE_USER.getInt(pcsc)));
+	    contextId.setLong(pcscterminal, newId);
+
+	    // Then clear the terminals in cache
+	    loadPCSC();
+	    CardTerminals terminals = terminalFactory.terminals();
+	    Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
+	    fieldTerminals.setAccessible(true);
+	    Class classMap = Class.forName("java.util.Map");
+	    Method clearMap = classMap.getDeclaredMethod("clear");
+
+	    clearMap.invoke(fieldTerminals.get(terminals));
 	}
     }
 

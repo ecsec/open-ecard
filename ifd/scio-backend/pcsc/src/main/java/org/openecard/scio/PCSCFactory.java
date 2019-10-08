@@ -113,12 +113,16 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 
     @Override
     public String getType() {
-	return terminalFactory.getType();
+	if (terminalFactory != null) {
+	    return terminalFactory.getType();
+	} else {
+	    return "PC/SC";
+	}
     }
 
     @Override
     public SCIOTerminals terminals() {
-	if (initLock.isDone()) {
+	if (terminalFactory != null) {
 	    return new PCSCTerminals(this);
 	} else {
 	    // dummy for use while the initialization is not working properly

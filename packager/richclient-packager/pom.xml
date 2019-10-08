@@ -73,6 +73,8 @@
 										<argument>-XX:G1ReservePercent=5</argument>
 										<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
 										<argument>-Djavax.xml.stream.supportDTD=false</argument>
+										<argument>--add-opens</argument>
+										<argument>java.smartcardio/sun.security.smartcardio=org.openecard.richclient</argument>
 									</arguments>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>

@@ -58,9 +58,6 @@ module org.openecard.richclient {
     opens org.w3._2009.xmlenc11_;
     opens generated;
 
-    // open smartcardio for reflection magic
-    opens java.smartcardio;
-
     opens org.openecard.mdlw.sal.config to java.xml.bind;
     opens org.openecard.addon.manifest to java.xml.bind;
 }

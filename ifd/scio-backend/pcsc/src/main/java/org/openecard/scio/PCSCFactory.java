@@ -81,19 +81,24 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	this.initLock = new CompletableFuture<>();
 
 	try {
+	    LOG.info("Trying to initialize PCSC subsystem.");
 	    loadPCSC();
 	    initLock.complete(null);
+	    LOG.info("Successfully initialized PCSC subsystem");
 	} catch (NoSuchAlgorithmException ex) {
 	    LOG.error("Failed to initialize smartcard system.", ex);
 	    if (isNoServiceException(ex)) {
 		new Thread(() -> {
 		    while (initLock.isDone()) {
 			try {
+			    LOG.debug("Trying to initialize PCSC subsystem again.");
 			    reloadPCSCInt();
 			    initLock.complete(null);
+			    LOG.info("Successfully initialized PCSC subsystem");
 			} catch (Exception exInner) {
 			    if (isNoServiceException(exInner)) {
 				try {
+				    LOG.debug("Retrying PCSC initialization in 5 seconds.");
 				    Thread.sleep(5000);
 				} catch (InterruptedException ex2) {
 				    return;
@@ -158,10 +163,12 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 			@Override
 			public TerminalWatcher.StateChangeEvent waitForChange(long timeout) throws SCIOException {
 			    try {
+				LOG.debug("Fake waiting for terminal changes during PCSC initialization phase.");
 				initLock.get(timeout, TimeUnit.MILLISECONDS);
 			    } catch (InterruptedException | ExecutionException | TimeoutException ex) {
 				// ignore
 			    }
+			    LOG.debug("Returning from fake terminal change wait.");
 			    return new StateChangeEvent();
 			}
 

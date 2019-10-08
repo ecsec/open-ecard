@@ -92,10 +92,10 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 		    while (! initLock.isDone()) {
 			try {
 			    LOG.debug("Trying to initialize PCSC subsystem again.");
-			    reloadPCSCInt();
+			    loadPCSC();
 			    initLock.complete(null);
 			    LOG.info("Successfully initialized PCSC subsystem");
-			} catch (Exception exInner) {
+			} catch (NoSuchAlgorithmException exInner) {
 			    if (isNoServiceException(exInner)) {
 				try {
 				    LOG.debug("Retrying PCSC initialization in 5 seconds.");

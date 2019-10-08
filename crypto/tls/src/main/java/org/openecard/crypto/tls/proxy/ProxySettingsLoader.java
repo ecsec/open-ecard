@@ -25,8 +25,6 @@ package org.openecard.crypto.tls.proxy;
 import com.github.markusbernhardt.proxy.ProxySearch;
 import com.github.markusbernhardt.proxy.selector.fixed.FixedSocksSelector;
 import com.github.markusbernhardt.proxy.selector.misc.ProtocolDispatchSelector;
-import com.github.markusbernhardt.proxy.util.Logger.LogBackEnd;
-import com.github.markusbernhardt.proxy.util.Logger.LogLevel;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
@@ -36,7 +34,6 @@ import java.net.SocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -57,40 +54,8 @@ public class ProxySettingsLoader {
     private static final Logger LOG = LoggerFactory.getLogger(ProxySettingsLoader.class);
 
     static {
-	com.github.markusbernhardt.proxy.util.Logger.setBackend(new LogBackEnd() {
-	    private final HashMap<Class<?>, Logger> loggerCache = new HashMap<>();
-
-	    private synchronized Logger getLogger(Class<?> clazz) {
-		Logger l = loggerCache.get(clazz);
-		if (l == null) {
-		    l = LoggerFactory.getLogger(clazz);
-		    loggerCache.put(clazz, l);
-		}
-		return l;
-	    }
-
-	    @Override
-	    public void log(Class<?> clazz, LogLevel logLevel, String msg, Object... params) {
-		Logger l = getLogger(clazz);
-		switch (logLevel) {
-		    case TRACE:
-			l.trace(msg, params);
-			break;
-		    case DEBUG:
-			l.debug(msg, params);
-			break;
-		    case INFO:
-			l.info(msg, params);
-			break;
-		    case WARNING:
-			l.warn(msg, params);
-			break;
-		    case ERROR:
-			l.error(msg, params);
-			break;
-		}
-	    }
-	});
+	com.github.markusbernhardt.proxy.util.Logger l = new com.github.markusbernhardt.proxy.util.Logger();
+	com.github.markusbernhardt.proxy.util.Logger.setBackend(l.new Slf4jLogBackEnd());
     }
 
     /**

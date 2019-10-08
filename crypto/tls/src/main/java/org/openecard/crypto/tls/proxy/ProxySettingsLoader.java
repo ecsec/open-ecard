@@ -90,12 +90,6 @@ public class ProxySettingsLoader {
 			break;
 		}
 	    }
-
-	    @Override
-	    public boolean isLogginEnabled(LogLevel logLevel) {
-		// can not determine without knowing the class
-		return true;
-	    }
 	});
     }
 

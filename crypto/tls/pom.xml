@@ -30,6 +30,12 @@
 			<groupId>com.github.markusbernhardt</groupId>
 			<artifactId>proxy-vole</artifactId>
 		</dependency>
+		<!-- updated version or there are build problems due to JDK system dependencies which are not present in modern JDKs -->
+		<dependency>
+			<groupId>org.javadelight</groupId>
+			<artifactId>delight-nashorn-sandbox</artifactId>
+			<version>0.1.26</version>
+		</dependency>
 	</dependencies>
 
 </project>

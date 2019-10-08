@@ -89,7 +89,7 @@ public class PCSCFactory implements org.openecard.common.ifd.scio.TerminalFactor
 	    LOG.error("Failed to initialize smartcard system.", ex);
 	    if (isNoServiceException(ex)) {
 		new Thread(() -> {
-		    while (initLock.isDone()) {
+		    while (! initLock.isDone()) {
 			try {
 			    LOG.debug("Trying to initialize PCSC subsystem again.");
 			    reloadPCSCInt();

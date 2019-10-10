@@ -61,21 +61,19 @@
 									<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
 									<skipModulesInclude>true</skipModulesInclude>
 									<!-- JVM arguments of the application -->
-									<arguments>
-										<argument>-XX:-UsePerfData</argument>
-										<argument>-XX:-Inline</argument>
-										<argument>-XX:+AggressiveOpts</argument>
-										<argument>-Xms16m</argument>
-										<argument>-Xmx64m</argument>
-										<argument>-XX:+UseG1GC</argument>
-										<argument>-XX:MinHeapFreeRatio=1</argument>
-										<argument>-XX:MaxHeapFreeRatio=5</argument>
-										<argument>-XX:G1ReservePercent=5</argument>
-										<argument>-Djavax.xml.stream.isSupportingExternalEntities=false</argument>
-										<argument>-Djavax.xml.stream.supportDTD=false</argument>
-										<argument>--add-opens</argument>
-										<argument>java.smartcardio/sun.security.smartcardio=org.openecard.richclient</argument>
-									</arguments>
+									<jvmArgs>
+										<jvmArg>-XX:-UsePerfData</jvmArg>
+										<jvmArg>-XX:-Inline</jvmArg>
+										<jvmArg>-XX:+AggressiveOpts</jvmArg>
+										<jvmArg>-Xms16m</jvmArg>
+										<jvmArg>-Xmx64m</jvmArg>
+										<jvmArg>-XX:+UseG1GC</jvmArg>
+										<jvmArg>-XX:MinHeapFreeRatio=1</jvmArg>
+										<jvmArg>-XX:MaxHeapFreeRatio=5</jvmArg>
+										<jvmArg>-XX:G1ReservePercent=5</jvmArg>
+										<jvmArg>-Djavax.xml.stream.isSupportingExternalEntities=false</jvmArg>
+										<jvmArg>-Djavax.xml.stream.supportDTD=false</jvmArg>
+									</jvmArgs>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>
 									<description>${app.description}</description>

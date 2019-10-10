@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2017 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -47,7 +47,6 @@ import org.openecard.common.interfaces.Environment;
 import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.ValueGenerators;
-import org.openecard.ifd.scio.wrapper.ChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,6 @@ public class IfdEventManager {
     private static final AtomicInteger THREAD_NUM = new AtomicInteger(1);
 
     protected final Environment env;
-    protected final ChannelManager cm;
     protected final byte[] ctx;
     protected final String sessionId;
     private final HandlerBuilder builder;
@@ -77,9 +75,8 @@ public class IfdEventManager {
     private Future<?> watcher;
 
 
-    public IfdEventManager(Environment env, ChannelManager cm, byte[] ctx) {
+    public IfdEventManager(Environment env, byte[] ctx) {
 	this.env = env;
-	this.cm = cm;
 	this.ctx = ctx;
 	this.sessionId = ValueGenerators.genBase64Session();
 	this.builder = HandlerBuilder.create()
@@ -101,7 +98,7 @@ public class IfdEventManager {
 	});
 	// start watcher thread
 	try {
-	    eventRunner = new IfdEventRunner(env, this, builder, cm, ctx);
+	    eventRunner = new IfdEventRunner(env, this, builder, ctx);
 	    watcher = threadPool.submit(eventRunner);
 	} catch (WSException ex) {
 	    throw new RuntimeException("Failed to request initial status from IFD.");
@@ -153,7 +150,7 @@ public class IfdEventManager {
      * @param cHandleIn {@link ConnectionHandleType} object representing a card which shall be inserted.
      * @param ifaceProtocol Interface protocol of the connected card.
      */
-    public void resetCard(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn, String ifaceProtocol) {
+    public void emitResetCardEvent(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn, String ifaceProtocol) {
 	env.getEventDispatcher().notify(EventType.CARD_REMOVED, new IfdEventObject(cHandleRm, null, true)); //signal reset
 
 	// determine if the reader has a protected auth path
@@ -171,16 +168,6 @@ public class IfdEventManager {
 		.setProtectedAuthPath(protectedAuthPath)
 		.buildConnectionHandle();
 	env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(cInNew));
-
-	if (isRecognize()) {
-	    Recognizer rec = new Recognizer(env, cInNew, ifaceProtocol);
-	    Thread recThread = new Thread(rec, "Recoginiton-" + THREAD_NUM.getAndIncrement());
-	    recThread.start();
-	}
-    }
-
-    boolean isRecognize() {
-	return env.getRecognition() != null;
     }
 
     @Nullable

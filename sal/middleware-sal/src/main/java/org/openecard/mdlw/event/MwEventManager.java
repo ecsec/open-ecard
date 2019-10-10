@@ -48,7 +48,6 @@ public class MwEventManager {
 
     private final MiddlewareSAL mwSAL;
     private final Environment env;
-    private final MwStateCallback mwCallback;
 
     private final String sessionId;
     private final HandlerBuilder builder;
@@ -56,10 +55,9 @@ public class MwEventManager {
     private FutureTask<Void> watcher;
 
 
-    public MwEventManager(Environment env, MiddlewareSAL mwSAL, byte[] contextHandle, MwStateCallback mwCallback) {
+    public MwEventManager(Environment env, MiddlewareSAL mwSAL, byte[] contextHandle) {
 	this.env = env;
 	this.mwSAL = mwSAL;
-	this.mwCallback = mwCallback;
 
 	this.sessionId = ValueGenerators.genBase64Session();
 	this.builder = HandlerBuilder.create()
@@ -71,7 +69,7 @@ public class MwEventManager {
 	// start watcher thread
 	try {
 	    DatatypeFactory dataFactory = DatatypeFactory.newInstance();
-	    MwEventRunner runner = new MwEventRunner(env, builder, dataFactory, mwSAL.getMwModule(), mwCallback);
+	    MwEventRunner runner = new MwEventRunner(env, builder, dataFactory, mwSAL.getMwModule());
 	    runner.initRunner();
 	    watcher = new FutureTask<>(runner, null);
 	    Thread t = new Thread(watcher, "MwEventManager");

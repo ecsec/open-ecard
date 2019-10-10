@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2017 ecsec GmbH.
+ * Copyright (C) 2015-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -57,6 +57,8 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDCreate;
@@ -89,6 +91,8 @@ import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.Decipher;
 import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.Encipher;
 import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
 import iso.std.iso_iec._24727.tech.schema.ExecuteAction;
@@ -108,7 +112,11 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -116,6 +124,7 @@ import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Publish;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
+import org.openecard.common.interfaces.SalSelector;
 import org.openecard.common.sal.SpecializedSAL;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.util.ByteUtils;
@@ -130,7 +139,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class SelectorSAL implements SAL, CIFProvider {
+public class SelectorSAL implements SAL, CIFProvider, SalSelector {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectorSAL.class);
 
@@ -152,16 +161,8 @@ public class SelectorSAL implements SAL, CIFProvider {
 	this.special.add(specialSal);
     }
 
-    private SAL getResponsibleSAL(CardApplicationPathType path) {
-	for (SpecializedSAL sal : initializedSpecializedSals) {
-	    if (sal.specializedFor(path)) {
-		return sal;
-	    }
-	}
-	return main;
-    }
-
-    private SAL getResponsibleSAL(ConnectionHandleType handle) {
+    @Override
+    public SAL getSalForHandle(ConnectionHandleType handle) {
 	for (SpecializedSAL sal : initializedSpecializedSals) {
 	    if (sal.specializedFor(handle)) {
 		return sal;
@@ -170,7 +171,29 @@ public class SelectorSAL implements SAL, CIFProvider {
 	return main;
     }
 
-    private SAL getResponsibleSAL(String cardType) {
+    @Override
+    public SAL getSalForPath(CardApplicationPathType path) {
+	for (SpecializedSAL sal : initializedSpecializedSals) {
+	    if (sal.specializedFor(path)) {
+		return sal;
+	    }
+	}
+	return main;
+    }
+
+    @Override
+    public List<SAL> getSalForProtocol(String protocolUri) {
+	ArrayList<SAL> result = new ArrayList<>();
+	for (SAL next : initializedSals) {
+	    if (next.supportedProtocols().contains(protocolUri)) {
+		result.add(next);
+	    }
+	}
+	return result;
+    }
+
+    @Override
+    public SAL getSalForCardType(String cardType) {
         for (SpecializedSAL sal : initializedSpecializedSals) {
             if (sal.specializedFor(cardType)) {
                 return sal;
@@ -179,12 +202,21 @@ public class SelectorSAL implements SAL, CIFProvider {
         return main;
     }
 
+    @Override
+    public Set<String> supportedProtocols() {
+	TreeSet result = new TreeSet<>();
+	for (SAL next : initializedSals) {
+	    result.addAll(next.supportedProtocols());
+	}
+	return result;
+    }
+
 
     @Override
     public CardInfoType getCardInfo(@Nonnull ConnectionHandleType type, String cardType) {
 	LOG.debug("Looking up responsible SAL for handle with, ctx={}, slot={}",
 		ByteUtils.toHexString(type.getContextHandle()), ByteUtils.toHexString(type.getSlotHandle()));
-	SAL sal = getResponsibleSAL(type);
+	SAL sal = getSalForHandle(type);
 	// only ask special SAL when we have a handle and a special SAL which is a CIF provider
 	if (sal instanceof CIFProvider) {
 	    LOG.debug("Requesting CIF from Specialized SAL for type={}.", cardType);
@@ -197,7 +229,7 @@ public class SelectorSAL implements SAL, CIFProvider {
 
     @Override
     public CardInfoType getCardInfo(String cardType) throws RuntimeException {
-        SAL sal = getResponsibleSAL(cardType);
+        SAL sal = getSalForCardType(cardType);
         if (sal instanceof CIFProvider) {
 	    LOG.debug("Requesting CIF from Specialized SAL for type={}.", cardType);
             return ((CIFProvider) sal).getCardInfo(cardType);
@@ -209,7 +241,7 @@ public class SelectorSAL implements SAL, CIFProvider {
 
     @Override
     public InputStream getCardImage(String cardType) {
-        SAL sal = getResponsibleSAL(cardType);
+        SAL sal = getSalForCardType(cardType);
         if (sal instanceof CIFProvider) {
             return ((CIFProvider) sal).getCardImage(cardType);
         } else {
@@ -298,39 +330,53 @@ public class SelectorSAL implements SAL, CIFProvider {
     }
 
     @Override
+    public CreateSessionResponse createSession(CreateSession parameters) {
+	return WSHelper.makeResponse(CreateSessionResponse.class, WSHelper.makeResultError(
+		ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED,
+		"Selector SAL does not implement the CreateSession method."));
+    }
+
+    @Override
+    public DestroySessionResponse destroySession(DestroySession parameters) {
+	return getSalForHandle(parameters.getConnectionHandle())
+		.destroySession(parameters);
+    }
+
+    @Override
     public CardApplicationPathResponse cardApplicationPath(CardApplicationPath parameters) {
-	return main.cardApplicationPath(parameters);
+	return getSalForPath(parameters.getCardAppPathRequest())
+		.cardApplicationPath(parameters);
     }
 
     @Override
     public CardApplicationConnectResponse cardApplicationConnect(CardApplicationConnect parameters) {
-	return getResponsibleSAL(parameters.getCardApplicationPath())
+	return getSalForPath(parameters.getCardApplicationPath())
 		.cardApplicationConnect(parameters);
     }
 
     @Override
     public CardApplicationSelectResponse cardApplicationSelect(CardApplicationSelect parameters) {
-	return getResponsibleSAL(SALUtils.createConnectionHandle(parameters.getSlotHandle()))
+	return getSalForHandle(SALUtils.createConnectionHandle(parameters.getSlotHandle()))
 		.cardApplicationSelect(parameters);
     }
 
     @Override
     public CardApplicationDisconnectResponse cardApplicationDisconnect(CardApplicationDisconnect parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationDisconnect(parameters);
     }
 
     @Publish
     @Override
     public CardApplicationStartSessionResponse cardApplicationStartSession(CardApplicationStartSession parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationStartSession(parameters);
     }
 
     @Publish
     @Override
     public CardApplicationEndSessionResponse cardApplicationEndSession(CardApplicationEndSession parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationEndSession(parameters);
     }
 
@@ -342,51 +388,51 @@ public class SelectorSAL implements SAL, CIFProvider {
 
     @Override
     public CardApplicationCreateResponse cardApplicationCreate(CardApplicationCreate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationCreate(parameters);
     }
 
     @Override
     public CardApplicationDeleteResponse cardApplicationDelete(CardApplicationDelete parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationDelete(parameters);
     }
 
     @Publish
     @Override
     public CardApplicationServiceListResponse cardApplicationServiceList(CardApplicationServiceList parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationServiceList(parameters);
     }
 
     @Override
     public CardApplicationServiceCreateResponse cardApplicationServiceCreate(CardApplicationServiceCreate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationServiceCreate(parameters);
     }
 
     @Override
     public CardApplicationServiceLoadResponse cardApplicationServiceLoad(CardApplicationServiceLoad parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationServiceLoad(parameters);
     }
 
     @Override
     public CardApplicationServiceDeleteResponse cardApplicationServiceDelete(CardApplicationServiceDelete parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationServiceDelete(parameters);
     }
 
     @Publish
     @Override
     public CardApplicationServiceDescribeResponse cardApplicationServiceDescribe(CardApplicationServiceDescribe parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.cardApplicationServiceDescribe(parameters);
     }
 
     @Override
     public ExecuteActionResponse executeAction(ExecuteAction parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.executeAction(parameters);
     }
 
@@ -398,20 +444,20 @@ public class SelectorSAL implements SAL, CIFProvider {
 
     @Override
     public DataSetCreateResponse dataSetCreate(DataSetCreate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dataSetCreate(parameters);
     }
 
     @Publish
     @Override
     public DataSetSelectResponse dataSetSelect(DataSetSelect parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dataSetSelect(parameters);
     }
 
     @Override
     public DataSetDeleteResponse dataSetDelete(DataSetDelete parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dataSetDelete(parameters);
     }
 
@@ -423,128 +469,129 @@ public class SelectorSAL implements SAL, CIFProvider {
 
     @Override
     public DSICreateResponse dsiCreate(DSICreate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dsiCreate(parameters);
     }
 
     //TODO: rewiew function and add @Publish annotation
     @Override
     public DSIDeleteResponse dsiDelete(DSIDelete parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dsiDelete(parameters);
     }
 
     @Publish
     @Override
     public DSIWriteResponse dsiWrite(DSIWrite parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dsiWrite(parameters);
     }
 
     @Publish
     @Override
     public DSIReadResponse dsiRead(DSIRead parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.dsiRead(parameters);
     }
 
     @Publish
     @Override
     public EncipherResponse encipher(Encipher parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.encipher(parameters);
     }
 
     @Publish
     @Override
     public DecipherResponse decipher(Decipher parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.decipher(parameters);
     }
 
     @Publish
     @Override
     public GetRandomResponse getRandom(GetRandom parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.getRandom(parameters);
     }
 
     @Publish
     @Override
     public HashResponse hash(Hash parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.hash(parameters);
     }
 
     @Publish
     @Override
     public SignResponse sign(Sign parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.sign(parameters);
     }
 
     @Publish
     @Override
     public VerifySignatureResponse verifySignature(VerifySignature parameters) {
-	// TODO: check if main sal is better doing this
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.verifySignature(parameters);
     }
 
     @Publish
     @Override
     public VerifyCertificateResponse verifyCertificate(VerifyCertificate parameters) {
-	// TODO: check if main sal is better doing this
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.verifyCertificate(parameters);
     }
 
     @Publish
     @Override
     public DIDListResponse didList(DIDList parameters) {
-	return main.didList(parameters);
+	return getSalForHandle(parameters.getConnectionHandle())
+		.didList(parameters);
     }
 
     @Override
     public DIDCreateResponse didCreate(DIDCreate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.didCreate(parameters);
     }
 
     @Publish
     @Override
     public DIDGetResponse didGet(DIDGet parameters) {
-	return main.didGet(parameters);
+	return getSalForHandle(parameters.getConnectionHandle())
+		.didGet(parameters);
     }
 
     @Override
     public DIDUpdateResponse didUpdate(DIDUpdate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.didUpdate(parameters);
     }
 
     @Override
     public DIDDeleteResponse didDelete(DIDDelete parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.didDelete(parameters);
     }
 
     @Publish
     @Override
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.didAuthenticate(parameters);
     }
 
     @Publish
     @Override
     public ACLListResponse aclList(ACLList parameters) {
-	return main.aclList(parameters);
+	return getSalForHandle(parameters.getConnectionHandle())
+		.aclList(parameters);
     }
 
     @Override
     public ACLModifyResponse aclModify(ACLModify parameters) {
-	return getResponsibleSAL(parameters.getConnectionHandle())
+	return getSalForHandle(parameters.getConnectionHandle())
 		.aclModify(parameters);
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 ecsec GmbH.
+ * Copyright (C) 2018-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -182,24 +182,26 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
     }
 
     private CardStateEntry getAvailableCard() {
-	// look in card states for a card matching our criteria
-	Set<String> types = getSupportedCards();
-
-	if (types != null) {
-	    for (String type : types) {
-		ConnectionHandleType query = new ConnectionHandleType();
-		ConnectionHandleType.RecognitionInfo rinfo = new ConnectionHandleType.RecognitionInfo();
-		rinfo.setCardType(type);
-		query.setRecognitionInfo(rinfo);
-		CardStateEntry entry = octx.getCardStates().getEntry(query);
-		if (entry != null) {
-		    return entry;
-		}
-	    }
-	    return null;
-	} else {
-	    return octx.getCardStates().getEntry(new ConnectionHandleType());
-	}
+	// TODO: change code according to new design, probably remove it as card detection prior to the process makes no sense anymore
+//	// look in card states for a card matching our criteria
+//	Set<String> types = getSupportedCards();
+//
+//	if (types != null) {
+//	    for (String type : types) {
+//		ConnectionHandleType query = new ConnectionHandleType();
+//		ConnectionHandleType.RecognitionInfo rinfo = new ConnectionHandleType.RecognitionInfo();
+//		rinfo.setCardType(type);
+//		query.setRecognitionInfo(rinfo);
+//		CardStateEntry entry = octx.getCardStates().getEntry(query);
+//		if (entry != null) {
+//		    return entry;
+//		}
+//	    }
+//	    return null;
+//	} else {
+//	    return octx.getCardStates().getEntry(new ConnectionHandleType());
+//	}
+	return null;
     }
 
     @Nullable

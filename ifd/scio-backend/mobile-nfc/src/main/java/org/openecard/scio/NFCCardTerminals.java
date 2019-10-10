@@ -53,6 +53,12 @@ public final class NFCCardTerminals implements SCIOTerminals {
     }
 
     @Override
+    public void prepareDevices() {
+	// TODO: implement this functionality
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public List<SCIOTerminal> list(State state) throws SCIOException {
 	switch (state) {
 	    case ALL:

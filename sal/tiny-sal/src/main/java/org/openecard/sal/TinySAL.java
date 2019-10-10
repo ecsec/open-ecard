@@ -67,6 +67,8 @@ import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -110,6 +112,8 @@ import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.Decipher;
 import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.DisconnectResponse;
@@ -142,12 +146,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
 import org.openecard.addon.HighestVersionSelector;
+import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.ECardConstants;
@@ -217,6 +224,7 @@ public class TinySAL implements SAL {
 
     private final Environment env;
     private final CardStateMap states;
+    private AddonManager addonManager;
     private AddonSelector protocolSelector;
     private UserConsent userConsent;
 
@@ -224,17 +232,29 @@ public class TinySAL implements SAL {
      * Creates a new TinySAL.
      *
      * @param env Environment
-     * @param states CardStateMap
      */
-    public TinySAL(Environment env, CardStateMap states) {
+    public TinySAL(Environment env) {
 	this.env = env;
-	this.states = states;
+	// TODO: correct code to work according to new design
+	this.states = null;
     }
 
     public void setAddonManager(AddonManager manager) {
+	this.addonManager = manager;
 	protocolSelector = new AddonSelector(manager);
 	protocolSelector.setStrategy(new HighestVersionSelector());
 	states.setProtocolSelector(protocolSelector);
+    }
+
+    @Override
+    public Set<String> supportedProtocols() {
+	TreeSet<String> protos = new TreeSet<>();
+	for (AddonSpecification aSpec : addonManager.getRegistry().listAddons()) {
+	    for (ProtocolPluginSpecification pSpec : aSpec.getSalActions()) {
+		protos.add(pSpec.getUri());
+	    }
+	}
+	return protos;
     }
 
     /**
@@ -263,6 +283,16 @@ public class TinySAL implements SAL {
     public TerminateResponse terminate(Terminate request) {
 	TerminateResponse res = WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultOK());
 	return res;
+    }
+
+    @Override
+    public CreateSessionResponse createSession(CreateSession parameters) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DestroySessionResponse destroySession(DestroySession parameters) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**

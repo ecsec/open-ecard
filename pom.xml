@@ -53,7 +53,6 @@
 		<module>sal</module>
 		<module>management</module>
 		<module>cifs</module>
-		<module>recognition</module>
 		<module>addon</module>
 		<module>addons</module>
 		<!-- client assemblies -->

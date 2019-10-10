@@ -111,11 +111,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
 			<artifactId>management</artifactId>
 			<version>${project.version}</version>
 		</dependency>

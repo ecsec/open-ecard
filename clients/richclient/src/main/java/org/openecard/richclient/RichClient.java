@@ -57,8 +57,6 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.WSHelper;
-import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.event.EventType;
@@ -73,7 +71,6 @@ import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper;
 import org.openecard.mdlw.sal.MiddlewareSAL;
-import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
 import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.richclient.updater.VersionUpdateChecker;
@@ -116,8 +113,6 @@ public final class RichClient {
     private EventDispatcherImpl eventDispatcher;
     // Card recognition
     private CardRecognitionImpl recognition;
-    // card states
-    private CardStateMap cardStates;
     // ContextHandle determines a specific IFD layer context
     private byte[] contextHandle;
 
@@ -186,12 +181,6 @@ public final class RichClient {
 	    recognition.setGUI(gui);
 	    env.setRecognition(recognition);
 
-	    // Set up StateCallbacks
-	    cardStates = new CardStateMap();
-	    SALStateCallback salCallback = new SALStateCallback(env, cardStates);
-	    eventDispatcher.add(salCallback);
-
-
 	    // Set up the IFD
 	    ifd = new IFD();
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
@@ -200,7 +189,7 @@ public final class RichClient {
 	    env.setIFD(ifd);
 
 	    // Set up SAL
-	    TinySAL mainSal = new TinySAL(env, cardStates);
+	    TinySAL mainSal = new TinySAL(env);
 	    mainSal.setGUI(gui);
 
 	    sal = new SelectorSAL(mainSal, env);
@@ -208,10 +197,9 @@ public final class RichClient {
 	    env.setCIFProvider(sal);
 
 	    // Set up Middleware SAL
-	    MwStateCallback mwCallback = new MwStateCallback(env, cardStates, mwConfigLoader);
 	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
 		if (! mwSALConfig.isDisabled()) {
-		    MiddlewareSAL mwSal = new MiddlewareSAL(env, cardStates, mwSALConfig, mwCallback);
+		    MiddlewareSAL mwSal = new MiddlewareSAL(env, mwSALConfig);
 		    mwSal.setGui(gui);
 		    sal.addSpecializedSAL(mwSal);
 		}
@@ -220,7 +208,7 @@ public final class RichClient {
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
 	    try {
-		manager = new AddonManager(env, gui, cardStates, guiWrapper);
+		manager = new AddonManager(env, gui, guiWrapper);
 		guiWrapper.setAddonManager(manager);
 		mainSal.setAddonManager(manager);
 

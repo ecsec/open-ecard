@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2018 ecsec GmbH.
+ * Copyright (C) 2016-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -28,12 +28,10 @@ import iso.std.iso_iec._24727.tech.schema.Initialize;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.xml.bind.JAXBException;
-import mockit.Mocked;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.exceptions.InitializationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,8 +44,6 @@ import org.testng.annotations.Test;
 public class TestEventManager {
 
     private MiddlewareSALConfig mwConfig;
-    @Mocked
-    private MwStateCallback cb;
 
     @BeforeClass
     public void init() throws IOException, FileNotFoundException, JAXBException {
@@ -57,7 +53,7 @@ public class TestEventManager {
     @Test(enabled = false)
     public void test() throws InterruptedException, InitializationException {
 	Environment env = new ClientEnv();
-	MiddlewareSAL mwSAL = new MiddlewareSAL(env, null, mwConfig, cb);
+	MiddlewareSAL mwSAL = new MiddlewareSAL(env, mwConfig);
 	env.setSAL(mwSAL);
 	EventDispatcher ed = new EventDispatcherImpl();
 	env.setEventDispatcher(ed);

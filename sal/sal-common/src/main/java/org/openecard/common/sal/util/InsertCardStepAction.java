@@ -32,8 +32,6 @@ import javax.annotation.Nonnull;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.event.EventObject;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
@@ -53,7 +51,6 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 
     private final Collection<String> cardTypes;
     private final List<ConnectionHandleType> response = new ArrayList<>();
-    private final CardStateMap cardStates;
     private final List<ConnectionHandleType> insertableCards;
 
     private final Promise<ConnectionHandleType> promise = new Promise<>();
@@ -62,12 +59,10 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      * Creates a new InsertCardStep Action.
      *
      * @param stepName The name of the step this action is run in.
-     * @param cardStates The card states instance to look for a matching ConnectionHandle.
      * @param cardTypes Collection of valid card types.
      */
-    public InsertCardStepAction(String stepName, CardStateMap cardStates, Collection<String> cardTypes) {
+    public InsertCardStepAction(String stepName, Collection<String> cardTypes) {
 	super(stepName);
-	this.cardStates = cardStates;
 	this.cardTypes = cardTypes;
 	insertableCards = createHandleList();
     }
@@ -128,15 +123,17 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      */
     @Nonnull
     private List<ConnectionHandleType> checkAvailability() {
-	List<ConnectionHandleType> available = new ArrayList<>();
-	for (ConnectionHandleType conHandle : insertableCards) {
-	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-	    if (! entries.isEmpty()) {
-		available.add(entries.iterator().next().handleCopy());
-	    }
-	}
-
-	return available;
+	// TODO: make it work again according to redesign
+//	List<ConnectionHandleType> available = new ArrayList<>();
+//	for (ConnectionHandleType conHandle : insertableCards) {
+//	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+//	    if (! entries.isEmpty()) {
+//		available.add(entries.iterator().next().handleCopy());
+//	    }
+//	}
+//
+//	return available;
+	return null;
     }
 
     @Override

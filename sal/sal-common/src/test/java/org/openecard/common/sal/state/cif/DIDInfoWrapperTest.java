@@ -30,7 +30,6 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -61,8 +60,7 @@ public class DIDInfoWrapperTest {
 
 	Environment env = new ClientEnv();
 	env.setCIFProvider(cifp);
-	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
-	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
+	CardInfoType cardInfo = new CifLoader().getNpaCif();
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 
 	CardApplicationWrapper cardApplicationWrapper = cardInfoWrapper.getCardApplication(rootApplication);

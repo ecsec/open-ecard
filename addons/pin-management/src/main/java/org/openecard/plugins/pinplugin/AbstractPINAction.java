@@ -44,7 +44,6 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.sal.util.InsertCardDialog;
@@ -79,7 +78,6 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     protected Dispatcher dispatcher;
     protected UserConsent gui;
     protected CardRecognition recognition;
-    protected CardStateMap cardStates;
     protected EventDispatcher evDispatcher;
 
     /**
@@ -129,7 +127,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	String cardName = recognition.getTranslatedCardName(cardType);
 	Map<String, String> nameAndType = new HashMap<>();
 	nameAndType.put(cardName, cardType);
-	InsertCardDialog uc = new InsertCardDialog(gui, cardStates, nameAndType, evDispatcher);
+	InsertCardDialog uc = new InsertCardDialog(gui, nameAndType, evDispatcher);
 	// get(0) should be sufficient we a looking just for one card. i think the possibility to find 2 is very low.
 	return uc.show().get(0);
     }

@@ -31,11 +31,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>middleware-sal</artifactId>
 			<version>${project.version}</version>

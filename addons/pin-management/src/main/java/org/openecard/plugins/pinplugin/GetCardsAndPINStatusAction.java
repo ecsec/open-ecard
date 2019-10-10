@@ -156,7 +156,6 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	dispatcher = aCtx.getDispatcher();
 	this.gui = aCtx.getUserConsent();
 	this.recognition = aCtx.getRecognition();
-	this.cardStates = aCtx.getCardStates();
 	this.evDispatcher = aCtx.getEventDispatcher();
     }
 

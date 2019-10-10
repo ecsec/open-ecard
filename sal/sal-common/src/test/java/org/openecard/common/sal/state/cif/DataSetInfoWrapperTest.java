@@ -22,15 +22,14 @@
 
 package org.openecard.common.sal.state.cif;
 
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceActionName;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
-import org.openecard.recognition.CardRecognitionImpl;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
@@ -39,7 +38,7 @@ import static org.testng.Assert.*;
  *
  * @author Dirk Petrautzki
  */
-public class CardApplicationWrapperTest {
+public class DataSetInfoWrapperTest {
 
     private static final byte[] rootApplication = StringUtils.toByteArray("3F00");
 
@@ -47,8 +46,8 @@ public class CardApplicationWrapperTest {
     public CIFProvider cifp;
 
     /**
-     * Simple test for CardApplicationWrapper-class. After getting the CardApplicationWrapper for the root application
-     * we check if the get-methods return the expected values.
+     * Simple test for DataSetInfoWrapper-class. After getting the DataSetInfoWrapper for the EF.DIR data set in the
+     * root applicaton of the npa we check if the get-methods return the expected values.
      *
      * @throws Exception when something in this test went unexpectedly wrong
      */
@@ -60,18 +59,15 @@ public class CardApplicationWrapperTest {
 
 	Environment env = new ClientEnv();
 	env.setCIFProvider(cifp);
-	CardRecognitionImpl recognition = new CardRecognitionImpl(env);
-	CardInfoType cardInfo = recognition.getCardInfo("http://bsi.bund.de/cif/npa.xml");
+	CardInfoType cardInfo = new CifLoader().getNpaCif();
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 
-	CardApplicationWrapper cardAppWrapper = cardInfoWrapper.getCardApplication(rootApplication);
+	CardApplicationWrapper cardApplicationWrapper = cardInfoWrapper.getCardApplication(rootApplication);
 
-	assertEquals(cardAppWrapper.getApplicationIdentifier(), rootApplication);
-	assertEquals(cardAppWrapper.getDataSetNameList().getDataSetName().size(), 5);
-	assertEquals(cardAppWrapper.getDIDInfoList().size(), 9);
-	assertEquals(cardAppWrapper.getCardApplicationACL().getAccessRule().size(), 40);
-	assertNotNull(cardAppWrapper.getSecurityCondition(CardApplicationServiceActionName.CARD_APPLICATION_LIST));
-
+	DataSetInfoWrapper dataSetInfoWrapper = cardApplicationWrapper.getDataSetInfo("EF.DIR");
+	assertSame(dataSetInfoWrapper, cardApplicationWrapper.getDataSetInfo("EF.DIR"));
+	assertNotNull(dataSetInfoWrapper.getDataSetInfo());
+	assertNotNull(dataSetInfoWrapper.getSecurityCondition(NamedDataServiceActionName.DSI_READ));
     }
 
 }

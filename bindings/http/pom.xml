@@ -26,12 +26,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.ifd</groupId>
 			<artifactId>ifd-core</artifactId>
 			<version>${project.version}</version>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2018 ecsec GmbH.
+ * Copyright (C) 2015-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -60,6 +60,8 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionServiceActionName;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -97,6 +99,8 @@ import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
 import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse;
 import iso.std.iso_iec._24727.tech.schema.Decipher;
 import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse;
 import iso.std.iso_iec._24727.tech.schema.Encipher;
 import iso.std.iso_iec._24727.tech.schema.EncipherResponse;
 import iso.std.iso_iec._24727.tech.schema.ExecuteAction;
@@ -125,6 +129,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -148,8 +153,6 @@ import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.InternalAppError;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.util.ByteComparator;
@@ -162,7 +165,6 @@ import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.gui.UserConsent;
 import org.openecard.mdlw.event.MwEventManager;
-import org.openecard.mdlw.event.MwStateCallback;
 import org.openecard.mdlw.sal.config.CardSpecType;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;
 import org.openecard.mdlw.sal.enums.Flag;
@@ -188,7 +190,6 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     private static final Logger LOG = LoggerFactory.getLogger(MiddlewareSAL.class);
 
     private final Environment env;
-    private final CardStateMap states;
     private final byte[] ctxHandle;
     private final MwEventManager eventMan;
     private final boolean builtinPinDialog;
@@ -204,16 +205,13 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
      * Creates a new MiddlewareSAL.
      *
      * @param env Environment
-     * @param states CardStateMap
      * @param mwSALConfig MiddlewareSALConfig
-     * @param mwCallback MwStateCallback
      */
-    public MiddlewareSAL(Environment env, CardStateMap states, MiddlewareSALConfig mwSALConfig, MwStateCallback mwCallback) {
+    public MiddlewareSAL(Environment env, MiddlewareSALConfig mwSALConfig) {
         this.env = env;
-        this.states = states;
         this.mwSALConfig = mwSALConfig;
         this.ctxHandle = ValueGenerators.generateRandom(32);
-        this.eventMan = new MwEventManager(env, this, ctxHandle, mwCallback);
+        this.eventMan = new MwEventManager(env, this, ctxHandle);
 	this.builtinPinDialog = mwSALConfig.hasBuiltinPinDialog();
 
         managedSlots = new TreeMap<>(new ByteComparator());
@@ -270,6 +268,15 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     @Override
     public InputStream getCardImage(String cardType) {
         return mwSALConfig.getCardImage(cardType);
+    }
+
+    @Override
+    public Set<String> supportedProtocols() {
+	return new TreeSet<>(Arrays.asList(
+		// PIN Compare
+		"urn:oid:1.3.162.15480.3.0.9",
+		// Generic Crypto
+		"urn:oid:1.3.162.15480.3.0.25"));
     }
 
 
@@ -365,6 +372,16 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     }
 
     @Override
+    public CreateSessionResponse createSession(CreateSession parameters) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DestroySessionResponse destroySession(DestroySession parameters) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public CardApplicationPathResponse cardApplicationPath(CardApplicationPath parameters) {
         throw new UnsupportedOperationException("Not supported, should be handled by main SAL.");
     }
@@ -387,52 +404,53 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         CardApplicationConnectResponse response = WSHelper.makeResponse(CardApplicationConnectResponse.class,
                 WSHelper.makeResultOK());
 
-        try {
-            CardApplicationPathType cardAppPath = request.getCardApplicationPath();
-            Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
-
-            Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath, false);
-            Assert.assertIncorrectParameter(cardStateEntrySet, "The given ConnectionHandle is invalid.");
-
-            /*
-	     * [TR-03112-4] If the provided path fragments are valid for more than one card application
-	     * the eCard-API-Framework SHALL return any of the possible choices.
-             */
-            CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
-            ConnectionHandleType handle = cardStateEntry.handleCopy();
-	    cardStateEntry = cardStateEntry.derive(handle);
-            byte[] applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
-            Assert.securityConditionApplication(cardStateEntry, applicationID,
-                    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
-
-            // find matching slot and associate it with the slotHandle
-	    MwSlot slot = getMatchingSlot(handle.getIFDName(), handle.getSlotIndex());
-            if (slot != null) {
-		// open session
-		MwSession session = slot.openSession();
-		// save values in maps
-		byte[] slotHandle = ValueGenerators.generateRandom(64);
-		handle.setSlotHandle(slotHandle);
-		managedSlots.put(slotHandle, slot);
-		managedSessions.put(slotHandle, session);
-            } else {
-                throw new IncorrectParameterException("No slot found for requestet handle.");
-            }
-
-            cardStateEntry.setSlotHandle(handle.getSlotHandle());
-            // reset the ef FCP
-            cardStateEntry.unsetFCPOfSelectedEF();
-            states.addEntry(cardStateEntry);
-
-            response.setConnectionHandle(cardStateEntry.handleCopy());
-            response.getConnectionHandle().setCardApplication(applicationID);
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (CryptokiException ex) {
-            String msg = "Error in Middleware.";
-            LOG.error(msg, ex);
-            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, msg));
-        }
+	// TODO: change code according to new design
+//        try {
+//            CardApplicationPathType cardAppPath = request.getCardApplicationPath();
+//            Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
+//
+//            Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath, false);
+//            Assert.assertIncorrectParameter(cardStateEntrySet, "The given ConnectionHandle is invalid.");
+//
+//            /*
+//	     * [TR-03112-4] If the provided path fragments are valid for more than one card application
+//	     * the eCard-API-Framework SHALL return any of the possible choices.
+//             */
+//            CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
+//            ConnectionHandleType handle = cardStateEntry.handleCopy();
+//	    cardStateEntry = cardStateEntry.derive(handle);
+//            byte[] applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+//            Assert.securityConditionApplication(cardStateEntry, applicationID,
+//                    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
+//
+//            // find matching slot and associate it with the slotHandle
+//	    MwSlot slot = getMatchingSlot(handle.getIFDName(), handle.getSlotIndex());
+//            if (slot != null) {
+//		// open session
+//		MwSession session = slot.openSession();
+//		// save values in maps
+//		byte[] slotHandle = ValueGenerators.generateRandom(64);
+//		handle.setSlotHandle(slotHandle);
+//		managedSlots.put(slotHandle, slot);
+//		managedSessions.put(slotHandle, session);
+//            } else {
+//                throw new IncorrectParameterException("No slot found for requestet handle.");
+//            }
+//
+//            cardStateEntry.setSlotHandle(handle.getSlotHandle());
+//            // reset the ef FCP
+//            cardStateEntry.unsetFCPOfSelectedEF();
+//            states.addEntry(cardStateEntry);
+//
+//            response.setConnectionHandle(cardStateEntry.handleCopy());
+//            response.getConnectionHandle().setCardApplication(applicationID);
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (CryptokiException ex) {
+//            String msg = "Error in Middleware.";
+//            LOG.error(msg, ex);
+//            response.setResult(WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, msg));
+//        }
 
         return response;
     }
@@ -442,32 +460,33 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         CardApplicationDisconnectResponse response = WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
                 WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            byte[] slotHandle = connectionHandle.getSlotHandle();
-
-            // check existence of required parameters
-            if (slotHandle == null) {
-                return WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
-                        WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
-            }
-
-            managedSlots.remove(slotHandle);
-            MwSession session = managedSessions.remove(slotHandle);
-
-	    if (session != null) {
-		session.closeSession();
-	    }
-
-            // remove entries associated with this handle
-            states.removeSlotHandleEntry(ctxHandle, slotHandle);
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            byte[] slotHandle = connectionHandle.getSlotHandle();
+//
+//            // check existence of required parameters
+//            if (slotHandle == null) {
+//                return WSHelper.makeResponse(CardApplicationDisconnectResponse.class,
+//                        WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
+//            }
+//
+//            managedSlots.remove(slotHandle);
+//            MwSession session = managedSessions.remove(slotHandle);
+//
+//	    if (session != null) {
+//		session.closeSession();
+//	    }
+//
+//            // remove entries associated with this handle
+//            states.removeSlotHandleEntry(ctxHandle, slotHandle);
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
@@ -477,18 +496,19 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         CardApplicationSelectResponse response = WSHelper.makeResponse(CardApplicationSelectResponse.class,
                 WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType handle = SALUtils.createConnectionHandle(parameters.getSlotHandle());
-            CardStateEntry entry = states.getEntry(handle);
-            Assert.assertConnectionHandle(entry, handle);
-
-            // get fully filled handle
-            handle = entry.handleCopy();
-            response.setConnectionHandle(handle);
-            return response;
-        } catch (ECardException ex) {
-            response.setResult(ex.getResult());
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType handle = SALUtils.createConnectionHandle(parameters.getSlotHandle());
+//            CardStateEntry entry = states.getEntry(handle);
+//            Assert.assertConnectionHandle(entry, handle);
+//
+//            // get fully filled handle
+//            handle = entry.handleCopy();
+//            response.setConnectionHandle(handle);
+//            return response;
+//        } catch (ECardException ex) {
+//            response.setResult(ex.getResult());
+//        }
 
         return response;
     }
@@ -562,29 +582,30 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public DataSetSelectResponse dataSetSelect(DataSetSelect request) {
         DataSetSelectResponse response = WSHelper.makeResponse(DataSetSelectResponse.class, WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-            byte[] applicationID = connectionHandle.getCardApplication();
-            String dataSetName = request.getDataSetName();
-
-            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
-
-            CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-            DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationID);
-            Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
-
-            Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName,
-                    NamedDataServiceActionName.DATA_SET_SELECT);
-
-            // nothing else to do, DSI Read works for itself
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+//            byte[] applicationID = connectionHandle.getCardApplication();
+//            String dataSetName = request.getDataSetName();
+//
+//            Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
+//
+//            CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+//            DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationID);
+//            Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
+//
+//            Assert.securityConditionDataSet(cardStateEntry, applicationID, dataSetName,
+//                    NamedDataServiceActionName.DATA_SET_SELECT);
+//
+//            // nothing else to do, DSI Read works for itself
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
@@ -618,42 +639,43 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public DSIReadResponse dsiRead(DSIRead request) {
         DSIReadResponse response = WSHelper.makeResponse(DSIReadResponse.class, WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-            byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
-            String dsiName = request.getDSIName();
-            byte[] slotHandle = connectionHandle.getSlotHandle();
-            Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
-            Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
-
-            MwSession session = managedSessions.get(slotHandle);
-
-            for (MwCertificate cert : session.getCertificates()) {
-		try {
-		    String label = cert.getLabel();
-		    if (label.equals(dsiName)) {
-			// read certificate
-			byte[] certificate = cert.getValue();
-
-			response.setDSIContent(certificate);
-			return response;
-		    }
-		} catch (CryptokiException ex) {
-		    LOG.warn("Skipping certificate due to error.", ex);
-		}
-            }
-
-            String msg = "The given DSIName does not related to any know DSI or DataSet.";
-            throw new IncorrectParameterException(msg);
-
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+//            byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
+//            String dsiName = request.getDSIName();
+//            byte[] slotHandle = connectionHandle.getSlotHandle();
+//            Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
+//            Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
+//
+//            MwSession session = managedSessions.get(slotHandle);
+//
+//            for (MwCertificate cert : session.getCertificates()) {
+//		try {
+//		    String label = cert.getLabel();
+//		    if (label.equals(dsiName)) {
+//			// read certificate
+//			byte[] certificate = cert.getValue();
+//
+//			response.setDSIContent(certificate);
+//			return response;
+//		    }
+//		} catch (CryptokiException ex) {
+//		    LOG.warn("Skipping certificate due to error.", ex);
+//		}
+//            }
+//
+//            String msg = "The given DSIName does not related to any know DSI or DataSet.";
+//            throw new IncorrectParameterException(msg);
+//
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
@@ -686,81 +708,82 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public SignResponse sign(Sign request) {
         SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
-            byte[] slotHandle = connectionHandle.getSlotHandle();
-            String didName = SALUtils.getDIDName(request);
-            byte[] message = request.getMessage();
-            Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
-
-            DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, application);
-            Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
-
-            CryptoMarkerType marker = new CryptoMarkerType(didStructure.getDIDMarker());
-	    byte[] keyLabel = marker.getLegacyKeyName();
-
-	    MwSession session = managedSessions.get(slotHandle);
-	    for (MwPrivateKey key : session.getPrivateKeys()) {
-		byte[] nextLabel = null;
-		try {
-		    nextLabel = key.getKeyID();
-		} catch (CryptokiException ex) {
-		    LOG.warn("Error reading key label.", ex);
-		}
-		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
-		if (Arrays.equals(keyLabel, nextLabel)) {
-		    SignatureAlgorithms sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
-
-		    // If the token has a "protected authentication", then that means that there is some way for a user
-		    // to be authenticated to the token without having to send a PIN through the Cryptoki library.
-		    boolean protectedAuthPath = session.getSlot()
-			    .getTokenInfo().containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
-
-		    // The always authenticate flag is used to force re-authentication for each use of a private key.
-		    // Re-authentication occurs by calling C_Login with userType set to CKU_CONTEXT_SPECIFIC immediately
-		    // after a cryptographic operation using the key has been initiated (e.g. after C_SignInit).
-		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate();
-
-		    key.signInit(sigAlg.getPkcs11Mechanism(), message);
-
-		    // check if context specific login can be skipped based on the card type and DID name.
-		    String cardType = cardStateEntry.getCardType();
-		    Optional<Boolean> skipCtxSpecificLogin = mwSALConfig.canSkipContextSpecificLogin(cardType, didName);
-
-		    if (doContextSpecificLogin && (! skipCtxSpecificLogin.isPresent() || ! skipCtxSpecificLogin.get())) {
-			doContextSpecificLogin(session, cardStateEntry, protectedAuthPath);
-		    }
-
-		    byte[] sig = key.sign(message);
-
-		    // encode EC signatures as ASN.1 structure
-		    if (sigAlg.getKeyType().equals(KeyTypes.CKK_EC)) {
-			sig = encodeECSignature(sig);
-		    }
-
-		    response.setSignature(sig);
-
-		    // set PIN to unauthenticated
-		    setPinNotAuth(cardStateEntry);
-
-		    return response;
-		}
-	    }
-
-            // TODO: use other exception
-            String msg = String.format("The given DIDName %s references an unknown key.", didName);
-            throw new IncorrectParameterException(msg);
-
-	} catch (ECardException e) {
-	    LOG.debug(e.getMessage(), e);
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+//            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+//            byte[] slotHandle = connectionHandle.getSlotHandle();
+//            String didName = SALUtils.getDIDName(request);
+//            byte[] message = request.getMessage();
+//            Assert.assertIncorrectParameter(message, "The parameter Message is empty.");
+//
+//            DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, application);
+//            Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+//
+//            CryptoMarkerType marker = new CryptoMarkerType(didStructure.getDIDMarker());
+//	    byte[] keyLabel = marker.getLegacyKeyName();
+//
+//	    MwSession session = managedSessions.get(slotHandle);
+//	    for (MwPrivateKey key : session.getPrivateKeys()) {
+//		byte[] nextLabel = null;
+//		try {
+//		    nextLabel = key.getKeyID();
+//		} catch (CryptokiException ex) {
+//		    LOG.warn("Error reading key label.", ex);
+//		}
+//		LOG.debug("Try to match keys '{}' == '{}'", keyLabel, nextLabel);
+//		if (Arrays.equals(keyLabel, nextLabel)) {
+//		    SignatureAlgorithms sigAlg = getPKCS11Alg(marker.getAlgorithmInfo());
+//
+//		    // If the token has a "protected authentication", then that means that there is some way for a user
+//		    // to be authenticated to the token without having to send a PIN through the Cryptoki library.
+//		    boolean protectedAuthPath = session.getSlot()
+//			    .getTokenInfo().containsFlag(Flag.CKF_PROTECTED_AUTHENTICATION_PATH);
+//
+//		    // The always authenticate flag is used to force re-authentication for each use of a private key.
+//		    // Re-authentication occurs by calling C_Login with userType set to CKU_CONTEXT_SPECIFIC immediately
+//		    // after a cryptographic operation using the key has been initiated (e.g. after C_SignInit).
+//		    boolean doContextSpecificLogin = key.getAlwaysAuthenticate();
+//
+//		    key.signInit(sigAlg.getPkcs11Mechanism(), message);
+//
+//		    // check if context specific login can be skipped based on the card type and DID name.
+//		    String cardType = cardStateEntry.getCardType();
+//		    Optional<Boolean> skipCtxSpecificLogin = mwSALConfig.canSkipContextSpecificLogin(cardType, didName);
+//
+//		    if (doContextSpecificLogin && (! skipCtxSpecificLogin.isPresent() || ! skipCtxSpecificLogin.get())) {
+//			doContextSpecificLogin(session, cardStateEntry, protectedAuthPath);
+//		    }
+//
+//		    byte[] sig = key.sign(message);
+//
+//		    // encode EC signatures as ASN.1 structure
+//		    if (sigAlg.getKeyType().equals(KeyTypes.CKK_EC)) {
+//			sig = encodeECSignature(sig);
+//		    }
+//
+//		    response.setSignature(sig);
+//
+//		    // set PIN to unauthenticated
+//		    setPinNotAuth(cardStateEntry);
+//
+//		    return response;
+//		}
+//	    }
+//
+//            // TODO: use other exception
+//            String msg = String.format("The given DIDName %s references an unknown key.", didName);
+//            throw new IncorrectParameterException(msg);
+//
+//	} catch (ECardException e) {
+//	    LOG.debug(e.getMessage(), e);
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
@@ -801,60 +824,62 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public DIDUpdateResponse didUpdate(DIDUpdate request) {
         DIDUpdateResponse response = WSHelper.makeResponse(DIDUpdateResponse.class, WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
-            DIDUpdateDataType didUpdateData = request.getDIDUpdateData();
-            Assert.assertIncorrectParameter(didUpdateData, "The parameter DIDUpdateData is empty.");
-
-            String didName = SALUtils.getDIDName(request);
-            DIDStructureType didStruct = cardStateEntry.getDIDStructure(didName, application);
-            if (didStruct == null) {
-                String msg = String.format("DID %s does not exist.", didName);
-                throw new NamedEntityNotFoundException(msg);
-            }
-
-	    Result updateResult;
-            String protocolURI = didUpdateData.getProtocol();
-	    if ("urn:oid:1.3.162.15480.3.0.9".equals(protocolURI)) {
-		updateResult = updatePin(didUpdateData, cardStateEntry, didStruct);
-	    } else {
-                String msg = String.format("Protocol %s is not supported by this SAL.", protocolURI);
-                throw new UnknownProtocolException(msg);
-            }
-
-            // create did authenticate response
-            response.setResult(updateResult);
-
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+//            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+//            DIDUpdateDataType didUpdateData = request.getDIDUpdateData();
+//            Assert.assertIncorrectParameter(didUpdateData, "The parameter DIDUpdateData is empty.");
+//
+//            String didName = SALUtils.getDIDName(request);
+//            DIDStructureType didStruct = cardStateEntry.getDIDStructure(didName, application);
+//            if (didStruct == null) {
+//                String msg = String.format("DID %s does not exist.", didName);
+//                throw new NamedEntityNotFoundException(msg);
+//            }
+//
+//	    Result updateResult;
+//            String protocolURI = didUpdateData.getProtocol();
+//	    if ("urn:oid:1.3.162.15480.3.0.9".equals(protocolURI)) {
+//		updateResult = updatePin(didUpdateData, cardStateEntry, didStruct);
+//	    } else {
+//                String msg = String.format("Protocol %s is not supported by this SAL.", protocolURI);
+//                throw new UnknownProtocolException(msg);
+//            }
+//
+//            // create did authenticate response
+//            response.setResult(updateResult);
+//
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
 
-    private Result updatePin(DIDUpdateDataType didUpdateData, CardStateEntry cardStateEntry, DIDStructureType didStruct) {
-	// make sure the pin is not entered already
-	setPinNotAuth(cardStateEntry);
-
-	ConnectionHandleType connectionHandle = cardStateEntry.handleCopy();
-	MwSession session = managedSessions.get(connectionHandle.getSlotHandle());
-	boolean protectedAuthPath = connectionHandle.getSlotInfo().isProtectedAuthPath();
-
-	try {
-	    PinChangeDialog dialog = new PinChangeDialog(gui, protectedAuthPath, session);
-	    dialog.show();
-	} catch (CryptokiException ex) {
-	    return WSHelper.makeResultUnknownError(ex.getMessage());
-	}
-
-	return WSHelper.makeResultOK();
-    }
+    // TODO: change code according to new design
+//    private Result updatePin(DIDUpdateDataType didUpdateData, CardStateEntry cardStateEntry, DIDStructureType didStruct) {
+//	// make sure the pin is not entered already
+//	setPinNotAuth(cardStateEntry);
+//
+//	ConnectionHandleType connectionHandle = cardStateEntry.handleCopy();
+//	MwSession session = managedSessions.get(connectionHandle.getSlotHandle());
+//	boolean protectedAuthPath = connectionHandle.getSlotInfo().isProtectedAuthPath();
+//
+//	try {
+//	    PinChangeDialog dialog = new PinChangeDialog(gui, protectedAuthPath, session);
+//	    dialog.show();
+//	} catch (CryptokiException ex) {
+//	    return WSHelper.makeResultUnknownError(ex.getMessage());
+//	}
+//
+//	return WSHelper.makeResultOK();
+//    }
 
     @Override
     public DIDDeleteResponse didDelete(DIDDelete parameters) {
@@ -865,93 +890,94 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
     public DIDAuthenticateResponse didAuthenticate(DIDAuthenticate request) {
         DIDAuthenticateResponse response = WSHelper.makeResponse(DIDAuthenticateResponse.class, WSHelper.makeResultOK());
 
-        try {
-            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-	    connectionHandle = cardStateEntry.handleCopy();
-            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
-            byte[] slotHandle = connectionHandle.getSlotHandle();
-            DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
-            Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
-
-            String didName = SALUtils.getDIDName(request);
-            DIDStructureType didStruct = cardStateEntry.getDIDStructure(didName, application);
-            if (didStruct == null) {
-                String msg = String.format("DID %s does not exist.", didName);
-                throw new NamedEntityNotFoundException(msg);
-            }
-	    PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(didStruct.getDIDMarker());
-
-            String protocolURI = didAuthenticationData.getProtocol();
-            if (! "urn:oid:1.3.162.15480.3.0.9".equals(protocolURI)) {
-                String msg = String.format("Protocol %s is not supported by this SAL.", protocolURI);
-                throw new UnknownProtocolException(msg);
-            }
-            PINCompareDIDAuthenticateInputType pinCompareInput = new PINCompareDIDAuthenticateInputType(didAuthenticationData);
-            PINCompareDIDAuthenticateOutputType pinCompareOutput = pinCompareInput.getOutputType();
-
-            // extract pin value from auth data
-            char[] pinValue = pinCompareInput.getPIN();
-	    pinCompareInput.setPIN(null);
-
-            MwSession session = managedSessions.get(slotHandle);
-	    boolean protectedAuthPath = connectionHandle.getSlotInfo().isProtectedAuthPath();
-	    boolean pinAuthenticated;
-	    boolean pinBlocked = false;
-	    if (! (pinValue == null || pinValue.length == 0) && ! protectedAuthPath) {
-		// we don't need a GUI if the PIN is known
-		try {
-		    session.login(UserType.User, pinValue);
-		} finally {
-		    Arrays.fill(pinValue, ' ');
-		}
-		pinAuthenticated = true;
-		// TODO: display error GUI if the PIN entry failed
-	    } else {
-		// omit GUI when Middleware has its own PIN dialog for class 2 readers
-		if (protectedAuthPath && builtinPinDialog) {
-		    session.loginExternal(UserType.User);
-		    pinAuthenticated = true;
-		} else {
-		    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, pinCompareMarker, session);
-		    dialog.show();
-		    pinAuthenticated = dialog.isPinAuthenticated();
-		    pinBlocked = dialog.isPinBlocked();
-		}
-	    }
-
-	    if (pinAuthenticated) {
-		cardStateEntry.addAuthenticated(didName, application);
-	    } else if (pinBlocked) {
-		String msg = "PIN is blocked.";
-		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
-		response.setResult(r);
-	    } else {
-		String msg = "Failed to enter PIN.";
-		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
-		response.setResult(r);
-	    }
-
-            // create did authenticate response
-            response.setAuthenticationProtocolData(pinCompareOutput.getAuthDataType());
-
-	} catch (PinBlockedException ex) {
-	    // TODO: set retry counter
-	    String minor = ECardConstants.Minor.IFD.PASSWORD_BLOCKED;
-	    Result r = WSHelper.makeResultError(minor, ex.getMessage());
-	    response.setResult(r);
-	} catch (PinIncorrectException ex) {
-	    // TODO: set retry counter
-	    String minor = ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED;
-	    Result r = WSHelper.makeResultError(minor, ex.getMessage());
-	    response.setResult(r);
-        } catch (ECardException e) {
-            response.setResult(e.getResult());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-	    throwThreadKillException(e);
-            response.setResult(WSHelper.makeResult(e));
-        }
+	// TODO: change code according to new design
+//        try {
+//            ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
+//            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+//	    connectionHandle = cardStateEntry.handleCopy();
+//            byte[] application = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+//            byte[] slotHandle = connectionHandle.getSlotHandle();
+//            DIDAuthenticationDataType didAuthenticationData = request.getAuthenticationProtocolData();
+//            Assert.assertIncorrectParameter(didAuthenticationData, "The parameter AuthenticationProtocolData is empty.");
+//
+//            String didName = SALUtils.getDIDName(request);
+//            DIDStructureType didStruct = cardStateEntry.getDIDStructure(didName, application);
+//            if (didStruct == null) {
+//                String msg = String.format("DID %s does not exist.", didName);
+//                throw new NamedEntityNotFoundException(msg);
+//            }
+//	    PINCompareMarkerType pinCompareMarker = new PINCompareMarkerType(didStruct.getDIDMarker());
+//
+//            String protocolURI = didAuthenticationData.getProtocol();
+//            if (! "urn:oid:1.3.162.15480.3.0.9".equals(protocolURI)) {
+//                String msg = String.format("Protocol %s is not supported by this SAL.", protocolURI);
+//                throw new UnknownProtocolException(msg);
+//            }
+//            PINCompareDIDAuthenticateInputType pinCompareInput = new PINCompareDIDAuthenticateInputType(didAuthenticationData);
+//            PINCompareDIDAuthenticateOutputType pinCompareOutput = pinCompareInput.getOutputType();
+//
+//            // extract pin value from auth data
+//            char[] pinValue = pinCompareInput.getPIN();
+//	    pinCompareInput.setPIN(null);
+//
+//            MwSession session = managedSessions.get(slotHandle);
+//	    boolean protectedAuthPath = connectionHandle.getSlotInfo().isProtectedAuthPath();
+//	    boolean pinAuthenticated;
+//	    boolean pinBlocked = false;
+//	    if (! (pinValue == null || pinValue.length == 0) && ! protectedAuthPath) {
+//		// we don't need a GUI if the PIN is known
+//		try {
+//		    session.login(UserType.User, pinValue);
+//		} finally {
+//		    Arrays.fill(pinValue, ' ');
+//		}
+//		pinAuthenticated = true;
+//		// TODO: display error GUI if the PIN entry failed
+//	    } else {
+//		// omit GUI when Middleware has its own PIN dialog for class 2 readers
+//		if (protectedAuthPath && builtinPinDialog) {
+//		    session.loginExternal(UserType.User);
+//		    pinAuthenticated = true;
+//		} else {
+//		    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, pinCompareMarker, session);
+//		    dialog.show();
+//		    pinAuthenticated = dialog.isPinAuthenticated();
+//		    pinBlocked = dialog.isPinBlocked();
+//		}
+//	    }
+//
+//	    if (pinAuthenticated) {
+//		cardStateEntry.addAuthenticated(didName, application);
+//	    } else if (pinBlocked) {
+//		String msg = "PIN is blocked.";
+//		Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
+//		response.setResult(r);
+//	    } else {
+//		String msg = "Failed to enter PIN.";
+//		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, msg);
+//		response.setResult(r);
+//	    }
+//
+//            // create did authenticate response
+//            response.setAuthenticationProtocolData(pinCompareOutput.getAuthDataType());
+//
+//	} catch (PinBlockedException ex) {
+//	    // TODO: set retry counter
+//	    String minor = ECardConstants.Minor.IFD.PASSWORD_BLOCKED;
+//	    Result r = WSHelper.makeResultError(minor, ex.getMessage());
+//	    response.setResult(r);
+//	} catch (PinIncorrectException ex) {
+//	    // TODO: set retry counter
+//	    String minor = ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED;
+//	    Result r = WSHelper.makeResultError(minor, ex.getMessage());
+//	    response.setResult(r);
+//        } catch (ECardException e) {
+//            response.setResult(e.getResult());
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//	    throwThreadKillException(e);
+//            response.setResult(WSHelper.makeResult(e));
+//        }
 
         return response;
     }
@@ -966,25 +992,26 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private void setPinNotAuth(CardStateEntry cardStateEntry) {
-	LOG.info("Logout card session.");
-
-	// TODO: implement actual state checking
-	// This method only works in a avery limited way. All PIN DIDs get status unauth here.
-	for (DIDInfoType didInfo : Collections.unmodifiableCollection(cardStateEntry.getAuthenticatedDIDs())) {
-	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
-		cardStateEntry.removeAuthenticated(didInfo);
-	    }
-	}
-
-	// logout from session, or middleware doesn't hear the shot
-	try {
-	    MwSession session = managedSessions.get(cardStateEntry.handleCopy().getSlotHandle());
-	    session.logout();
-	} catch (CryptokiException ex) {
-	    LOG.info("Failed to logout from card.");
-	}
-    }
+    // TODO: change code according to new design
+//    private void setPinNotAuth(CardStateEntry cardStateEntry) {
+//	LOG.info("Logout card session.");
+//
+//	// TODO: implement actual state checking
+//	// This method only works in a avery limited way. All PIN DIDs get status unauth here.
+//	for (DIDInfoType didInfo : Collections.unmodifiableCollection(cardStateEntry.getAuthenticatedDIDs())) {
+//	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
+//		cardStateEntry.removeAuthenticated(didInfo);
+//	    }
+//	}
+//
+//	// logout from session, or middleware doesn't hear the shot
+//	try {
+//	    MwSession session = managedSessions.get(cardStateEntry.handleCopy().getSlotHandle());
+//	    session.logout();
+//	} catch (CryptokiException ex) {
+//	    LOG.info("Failed to logout from card.");
+//	}
+//    }
 
     private void throwThreadKillException(Exception ex) {
 	Throwable cause;
@@ -1026,34 +1053,35 @@ public class MiddlewareSAL implements SpecializedSAL, CIFProvider {
 	return new DERSequence(v).getEncoded(ASN1Encoding.DER);
     }
 
-    /**
-     * This method is used to trigger a context specific login. For this purpose, a PIN dialog is shown.
-     *
-     * @param session Is used to trigger the login functionality.
-     * @param cardStateEntry Is required to extract the PINCompareMarker.
-     * @param protectedAuthPath Indicates if the login is handled by the MW.
-     * @throws CryptokiException
-     */
-    private void doContextSpecificLogin(MwSession session, CardStateEntry cardStateEntry, boolean protectedAuthPath)
-	    throws CryptokiException {
-	// extract PINCompareMarker from authenticated DIDs
-	Optional<PINCompareMarkerType> pinCompareMarker = Optional.empty();
-	for (DIDInfoType didInfo : cardStateEntry.getCurrentCardApplication().getDIDInfoList()) {
-	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
-		PinCompareMarkerType pinCompareMarkerRaw = didInfo.getDifferentialIdentity()
-			.getDIDMarker().getPinCompareMarker();
-		pinCompareMarker = Optional.of(new PINCompareMarkerType(pinCompareMarkerRaw));
-	    }
-	}
-
-	// omit GUI when Middleware has its own PIN dialog for class 2 readers
-	if (protectedAuthPath && builtinPinDialog) {
-	    session.loginExternal(UserType.Context_specific);
-	} else if (pinCompareMarker.isPresent()) {
-	    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,
-		    pinCompareMarker.get(), session);
-	    dialog.show();
-	}
-    }
+    // TODO: change code according to new design
+//    /**
+//     * This method is used to trigger a context specific login. For this purpose, a PIN dialog is shown.
+//     *
+//     * @param session Is used to trigger the login functionality.
+//     * @param cardStateEntry Is required to extract the PINCompareMarker.
+//     * @param protectedAuthPath Indicates if the login is handled by the MW.
+//     * @throws CryptokiException
+//     */
+//    private void doContextSpecificLogin(MwSession session, CardStateEntry cardStateEntry, boolean protectedAuthPath)
+//	    throws CryptokiException {
+//	// extract PINCompareMarker from authenticated DIDs
+//	Optional<PINCompareMarkerType> pinCompareMarker = Optional.empty();
+//	for (DIDInfoType didInfo : cardStateEntry.getCurrentCardApplication().getDIDInfoList()) {
+//	    if ("urn:oid:1.3.162.15480.3.0.9".equals(didInfo.getDifferentialIdentity().getDIDProtocol())) {
+//		PinCompareMarkerType pinCompareMarkerRaw = didInfo.getDifferentialIdentity()
+//			.getDIDMarker().getPinCompareMarker();
+//		pinCompareMarker = Optional.of(new PINCompareMarkerType(pinCompareMarkerRaw));
+//	    }
+//	}
+//
+//	// omit GUI when Middleware has its own PIN dialog for class 2 readers
+//	if (protectedAuthPath && builtinPinDialog) {
+//	    session.loginExternal(UserType.Context_specific);
+//	} else if (pinCompareMarker.isPresent()) {
+//	    PinEntryDialog dialog = new PinEntryDialog(gui, protectedAuthPath, true,
+//		    pinCompareMarker.get(), session);
+//	    dialog.show();
+//	}
+//    }
 
 }

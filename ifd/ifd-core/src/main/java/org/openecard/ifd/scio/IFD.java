@@ -194,7 +194,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    }
 		});
 		asyncWaitThreads = new ConcurrentSkipListMap<>();
-		evManager = new IfdEventManager(env, cm, ctxHandle);
+		evManager = new IfdEventManager(env, ctxHandle);
 		evManager.initialize();
 	    } else {
 		// on second or further calls, increment usage counter
@@ -235,6 +235,11 @@ public class IFD implements org.openecard.ws.IFD {
 	    response = WSHelper.makeResponse(ReleaseContextResponse.class, r);
 	    return response;
 	}
+    }
+
+    @Override
+    public void prepareDevices() {
+	cm.prepareDevices();
     }
 
 
@@ -797,7 +802,7 @@ public class IFD implements org.openecard.ws.IFD {
 
 		    try {
 			master.reconnect();
-			evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+			evManager.emitResetCardEvent(cHandleRm, cHandleIn, card.getProtocol().toUri());
 		    } catch (IllegalStateException ex) {
 			LOG.warn("Card reconnect failed, trying to establish new card connection.", ex);
 			cm.closeMasterChannel(ifdName);
@@ -805,7 +810,7 @@ public class IFD implements org.openecard.ws.IFD {
 			try {
 			    cm.getMasterChannel(ifdName);
 			    LOG.debug("New card connection established successfully.");
-			    evManager.resetCard(cHandleRm, cHandleIn, card.getProtocol().toUri());
+			    evManager.emitResetCardEvent(cHandleRm, cHandleIn, card.getProtocol().toUri());
 			} catch (NoSuchTerminal ex2) {
 			    LOG.error("No terminal present anymore.", ex);
 			}

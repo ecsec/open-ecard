@@ -71,6 +71,11 @@ import org.openecard.ws.IFD;
 public class TestIFD implements IFD {
 
     @Override
+    public void prepareDevices() {
+	// NO-OP
+    }
+
+    @Override
     public EstablishChannelResponse establishChannel(EstablishChannel parameters) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }

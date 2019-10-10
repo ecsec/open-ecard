@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2018 ecsec GmbH.
+ * Copyright (C) 2015-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,7 +22,6 @@
 
 package org.openecard.ifd.scio.wrapper;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,6 +78,10 @@ public class ChannelManager {
 
     public SCIOTerminals getTerminals() {
 	return termFact.terminals();
+    }
+
+    public void prepareDevices() {
+	getTerminals().prepareDevices();
     }
 
     public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,

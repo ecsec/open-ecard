@@ -35,6 +35,7 @@ import org.openecard.common.interfaces.Dispatchable;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.interfaces.SalSelector;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -54,6 +55,7 @@ public class ClientEnv implements Environment {
     private Management management;
     private CardRecognition recognition;
     private CIFProvider cifProvider;
+    private SalSelector salSelector;
     private final Map<String, Object> genericComponents;
 
     public ClientEnv() {
@@ -171,6 +173,16 @@ public class ClientEnv implements Environment {
     @Override
     public CIFProvider getCIFProvider() {
 	return cifProvider;
+    }
+
+    @Override
+    public void setSalSelector(SalSelector salSelect) {
+	this.salSelector = salSelect;
+    }
+
+    @Override
+    public SalSelector getSalSelector() {
+	return this.salSelector;
     }
 
 }

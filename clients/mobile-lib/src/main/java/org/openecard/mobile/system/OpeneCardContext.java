@@ -40,8 +40,6 @@ import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.common.sal.state.SALStateCallback;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
@@ -98,7 +96,6 @@ public class OpeneCardContext {
     private AddonManager manager;
     private EventDispatcher eventDispatcher;
     private CardRecognitionImpl recognition;
-    private CardStateMap cardStates;
     private Dispatcher dispatcher;
     private TerminalFactory terminalFactory;
     private TinyManagement management;
@@ -190,11 +187,6 @@ public class OpeneCardContext {
 	    LOG.info("Event dispatcher started.");
 	    env.setEventDispatcher(eventDispatcher);
 
-	    // set up SALStateCallback
-	    cardStates = new CardStateMap();
-	    SALStateCallback salCallback = new SALStateCallback(env, cardStates);
-	    eventDispatcher.add(salCallback);
-
 	    // set up ifd
 	    ifd = new IFD();
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
@@ -215,7 +207,7 @@ public class OpeneCardContext {
 	    }
 
 	    // set up SAL
-	    TinySAL mainSAL = new TinySAL(env, cardStates);
+	    TinySAL mainSAL = new TinySAL(env);
 	    mainSAL.setGUI(gui);
 
 	    sal = new SelectorSAL(mainSAL, env);
@@ -235,7 +227,7 @@ public class OpeneCardContext {
 
 	    // set up addon manager
 	    try {
-		manager = new AddonManager(env, gui, cardStates, viewController, new ClasspathRegistry());
+		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry());
 		mainSAL.setAddonManager(manager);
 
 		LOG.info("Addon manager initialized.");
@@ -333,10 +325,6 @@ public class OpeneCardContext {
 
     public CardRecognitionImpl getRecognition() {
 	return recognition;
-    }
-
-    public CardStateMap getCardStates() {
-	return cardStates;
     }
 
     public ClientEnv getEnv() {

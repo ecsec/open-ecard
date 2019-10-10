@@ -20,6 +20,13 @@ public interface IFD {
         iso.std.iso_iec._24727.tech.schema.EndTransaction parameters
     );
 
+    /**
+     * Prepare devices, so they can be used and connected to.
+     * This is intended to handle iOS style APIs where the card can only be used for a very short time and no permament
+     * connection is desireable. There one would start a session and once that is present the IFD can connect to the card.
+     */
+    public void prepareDevices();
+
     @ECardApiMethod(operationName = "ListIFDs", action = "urn:iso:std:iso-iec:24727:tech:schema:ListIFDs")
     public iso.std.iso_iec._24727.tech.schema.ListIFDsResponse listIFDs(
         iso.std.iso_iec._24727.tech.schema.ListIFDs parameters

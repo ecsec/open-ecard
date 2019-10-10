@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,9 +24,7 @@ package org.openecard.addon;
 
 import java.util.List;
 import org.openecard.addon.manifest.AddonSpecification;
-import org.openecard.addon.sal.CredentialManager;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Environment;
@@ -50,9 +48,7 @@ public class Context {
     private final String id;
     private final ViewController viewController;
 
-    private CredentialManager credMan;
     private UserConsent userConsent;
-    private CardStateMap cardStates;
     private CardRecognition recognition;
     private EventHandler eventHandler;
 
@@ -88,16 +84,6 @@ public class Context {
      */
     public void setEventHandle(EventHandler eventHandler) {
 	this.eventHandler = eventHandler;
-    }
-
-    /**
-     * Sets the CardStateMap for this Context.
-     *
-     * @param cardStates The {@link CardStateMap} related to this Context.
-     */
-    public void setCardStateMap(CardStateMap cardStates) {
-	this.cardStates = cardStates;
-	credMan = new CredentialManager(cardStates);
     }
 
     /**
@@ -168,18 +154,6 @@ public class Context {
     }
 
     /**
-     * Gets the card states representing the internal state of the SAL.
-     *
-     * @return Current card states.
-     * @deprecated Because this element leaks SAL internals which are better accessed with the SAL functions. Will be
-     *   removed in version 1.2.0.
-     */
-    @Deprecated
-    public CardStateMap getCardStates() {
-	return cardStates;
-    }
-
-    /**
      * Get the CardRecognition implementation of this Context.
      *
      * @return The {@link CardRecognition} implementation of this Context.
@@ -195,15 +169,6 @@ public class Context {
      */
     public EventHandler getEventHandler() {
 	return eventHandler;
-    }
-
-    /**
-     * Get the CredentialManager of this Context object.
-     *
-     * @return The {@link CredentialManager} of this Context.
-     */
-    public CredentialManager getCredentialManager() {
-	return credMan;
     }
 
     /**

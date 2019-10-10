@@ -30,8 +30,6 @@ import java.util.Set;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.event.EventType;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
@@ -62,23 +60,20 @@ public class InsertCardDialog {
 
     private final UserConsent gui;
     private final Map<String, String> cardNameAndType;
-    private final CardStateMap cardStates;
     private final EventDispatcher evDispatcher;
 
     /**
      * Creates a new InsertCardDialog.
      *
      * @param gui The user consent implementation.
-     * @param cardStates The card states instance managing all cards of this client.
      * @param cardNameAndType Map containing the mapping of localized card names to card type URIs of cards which may be
      * inserted.
      * @param manager EventManager to register the EventCallbacks.
      */
-    public InsertCardDialog(UserConsent gui, CardStateMap cardStates, Map<String, String> cardNameAndType,
+    public InsertCardDialog(UserConsent gui, Map<String, String> cardNameAndType,
 	    EventDispatcher manager) {
 	this.gui = gui;
 	this.cardNameAndType = cardNameAndType;
-	this.cardStates = cardStates;
 	this.evDispatcher = manager;
     }
 
@@ -92,8 +87,7 @@ public class InsertCardDialog {
 	if (! availableCards.isEmpty()) {
 	    return availableCards;
 	} else {
-	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardStates, 
-		    cardNameAndType.values());
+	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardNameAndType.values());
 	    evDispatcher.add(insertCardAction, EventType.RECOGNIZED_CARD_ACTIVE);
 	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	    ExecutionEngine exec = new ExecutionEngine(ucr);
@@ -122,10 +116,11 @@ public class InsertCardDialog {
 	    ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
 	    recInfo.setCardType(type);
 	    conHandle.setRecognitionInfo(recInfo);
-	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-	    if (! entries.isEmpty()) {
-		handlesList.add(entries.iterator().next().handleCopy());
-	    }
+	    // TODO: make it work again according to redesign
+//	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
+//	    if (! entries.isEmpty()) {
+//		handlesList.add(entries.iterator().next().handleCopy());
+//	    }
 	}
 
 	return handlesList;

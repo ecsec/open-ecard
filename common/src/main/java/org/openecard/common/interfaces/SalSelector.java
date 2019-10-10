@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,47 +22,25 @@
 
 package org.openecard.common.interfaces;
 
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.List;
-import org.openecard.ws.IFD;
-import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
 
 
 /**
+ * Interface describing the methods of a class capable of selecting a particular SAL instance.
  *
- * @author Johannes Schmoelz
+ * @author Tobias Wich
  */
-public interface Environment {
+public interface SalSelector {
 
-    void setIFD(IFD ifd);
-    IFD getIFD();
+    SAL getSalForCardType(String cardType);
 
-    void addIFDCtx(byte[] ctx);
-    void removeIFDCtx(byte[] ctx);
-    List<byte[]> getIFDCtx();
+    List<SAL> getSalForProtocol(String protocolUri);
 
-    void setSAL(SAL sal);
-    SAL getSAL();
+    SAL getSalForHandle(ConnectionHandleType handle);
 
-    void setEventDispatcher(EventDispatcher manager);
-    EventDispatcher getEventDispatcher();
-
-    void setDispatcher(Dispatcher dispatcher);
-    Dispatcher getDispatcher();
-
-    void setRecognition(CardRecognition recognition);
-    CardRecognition getRecognition();
-
-    void setCIFProvider(CIFProvider provider);
-    CIFProvider getCIFProvider();
-
-    void setSalSelector(SalSelector salSelect);
-    SalSelector getSalSelector();
-
-    void setGenericComponent(String id, Object component);
-    Object getGenericComponent(String id);
-
-    void setManagement(Management management);
-    Management getManagement();
+    SAL getSalForPath(CardApplicationPathType path);
 
 }

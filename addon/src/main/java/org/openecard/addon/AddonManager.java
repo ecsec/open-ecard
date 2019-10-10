@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2018 ecsec GmbH.
+ * Copyright (C) 2013-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,7 +39,6 @@ import org.openecard.addon.manifest.AppPluginSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.addon.sal.SALProtocolProxy;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.FacadeInvocationHandler;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.gui.UserConsent;
@@ -68,7 +67,6 @@ public class AddonManager {
     private final AddonRegistry protectedRegistry;
     private final Environment env;
     private final UserConsent userConsent;
-    private final CardStateMap cardStates;
     private final EventHandler eventHandler;
     private final ViewController viewController;
     // TODO: rework cache to have borrow and return semantic
@@ -79,12 +77,11 @@ public class AddonManager {
      *
      * @param env
      * @param userConsent
-     * @param cardStates
      * @param view
      * @param registry
      * @throws WSMarshallerException
      */
-    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view,
+    public AddonManager(Environment env, UserConsent userConsent, ViewController view,
 	    CombiningRegistry registry) throws WSMarshallerException {
 
 	if (registry == null) {
@@ -95,7 +92,6 @@ public class AddonManager {
 	this.protectedRegistry = getProtectedRegistry(this.registry);
 	this.env = env;
 	this.userConsent = userConsent;
-	this.cardStates = cardStates;
 	this.eventHandler = new EventHandler();
 	this.env.getEventDispatcher().add(eventHandler);
 	this.viewController = view;
@@ -105,9 +101,9 @@ public class AddonManager {
 	}, "Init-Addons").start();
     }
 
-    public AddonManager(Environment env, UserConsent userConsent, CardStateMap cardStates, ViewController view)
+    public AddonManager(Environment env, UserConsent userConsent, ViewController view)
 	    throws WSMarshallerException {
-	this(env, userConsent, cardStates, view, null);
+	this(env, userConsent, view, null);
     }
 
     /**
@@ -411,7 +407,6 @@ public class AddonManager {
     private Context createContext(@Nonnull AddonSpecification addonSpec) {
 	Context aCtx = new Context(this, env, addonSpec, viewController);
 	aCtx.setCardRecognition(env.getRecognition());
-	aCtx.setCardStateMap(cardStates);
 	aCtx.setEventHandle(eventHandler);
 	aCtx.setUserConsent(userConsent);
 

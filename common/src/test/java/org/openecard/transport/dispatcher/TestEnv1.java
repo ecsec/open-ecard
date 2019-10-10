@@ -33,6 +33,7 @@ import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.interfaces.EventFilter;
+import org.openecard.common.interfaces.SalSelector;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -158,6 +159,16 @@ public class TestEnv1 implements Environment {
 
     @Override
     public CIFProvider getCIFProvider() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setSalSelector(SalSelector salSelect) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public SalSelector getSalSelector() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

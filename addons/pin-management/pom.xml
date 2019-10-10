@@ -26,12 +26,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>tiny-sal</artifactId>
 			<version>${project.version}</version>

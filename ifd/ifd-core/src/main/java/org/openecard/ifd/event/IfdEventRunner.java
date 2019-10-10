@@ -45,12 +45,8 @@ import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.event.IfdEventObject;
-import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
-import org.openecard.ifd.scio.wrapper.ChannelManager;
-import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +64,6 @@ public class IfdEventRunner implements Runnable {
     private final Environment env;
     private final IfdEventManager evtManager;
     private final HandlerBuilder builder;
-    private final ChannelManager cm;
     private final byte[] ctxHandle;
 
     private final List<IFDStatusType> initialState;
@@ -76,12 +71,11 @@ public class IfdEventRunner implements Runnable {
 
     private boolean stopped;
 
-    public IfdEventRunner(Environment env, IfdEventManager evtManager, HandlerBuilder builder, ChannelManager cm,
-	    byte[] ctxHandle) throws WSException {
+    public IfdEventRunner(Environment env, IfdEventManager evtManager, HandlerBuilder builder, byte[] ctxHandle)
+	    throws WSException {
 	this.env = env;
 	this.evtManager = evtManager;
 	this.builder = builder;
-	this.cm = cm;
 	this.ctxHandle = ctxHandle;
 	this.initialState = new ArrayList<>(ifdStatus());
 	this.currentState = new ArrayList<>();
@@ -236,15 +230,6 @@ public class IfdEventRunner implements Runnable {
 		    LOG.info("Card with ATR={} inserted.", ByteUtils.toHexString(slot.getATRorATS()));
 		    ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot, slotCapabilities);
 		    env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(handle));
-		    try {
-			SingleThreadChannel ch = cm.openMasterChannel(ifdName);
-			if (evtManager.isRecognize()) {
-			    String proto = ch.getChannel().getCard().getProtocol().toUri();
-			    evtManager.threadPool.submit(new Recognizer(env, handle, proto));
-			}
-		    } catch (NoSuchTerminal | SCIOException ex) {
-			LOG.error("Failed to connect card, nevertheless sending CARD_INSERTED event.", ex);
-		    }
 
 		} else if (! terminalAdded && ! cardPresent && cardWasPresent) {
 		    // this makes only sense when the terminal was already there
@@ -286,17 +271,14 @@ public class IfdEventRunner implements Runnable {
     @Nullable
     private IFDCapabilitiesType getCapabilities(String ifdName) {
 	try {
-	    if (cm.getTerminals().getTerminal(ifdName).isCardPresent()) {
-		GetIFDCapabilities req = new GetIFDCapabilities();
-		req.setContextHandle(ctxHandle);
-		req.setIFDName(ifdName);
-		GetIFDCapabilitiesResponse res = (GetIFDCapabilitiesResponse) env.getDispatcher().safeDeliver(req);
-		return res.getIFDCapabilities();
-	    }
-	} catch (NoSuchTerminal ex) {
-	    LOG.debug("No terminal with the name '{}' available.", ifdName);
-	} catch (SCIOException ex) {
-	    LOG.error("Error requesting card presence status.");
+	    GetIFDCapabilities req = new GetIFDCapabilities();
+	    req.setContextHandle(ctxHandle);
+	    req.setIFDName(ifdName);
+	    GetIFDCapabilitiesResponse res = (GetIFDCapabilitiesResponse) env.getDispatcher().safeDeliver(req);
+	    WSHelper.checkResult(res);
+	    return res.getIFDCapabilities();
+	} catch (WSException ex) {
+	    LOG.error("Error while requesting infos from terminal {}.", ifdName);
 	}
 
 	return null;

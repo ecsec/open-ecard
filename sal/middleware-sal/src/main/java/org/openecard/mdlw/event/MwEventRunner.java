@@ -66,18 +66,16 @@ class MwEventRunner implements Runnable {
     private final HandlerBuilder builder;
     private final DatatypeFactory dataFactory;
     private final MwModule mwModule;
-    private final MwStateCallback mwCallback;
     private final Map<Long, SlotInfo> slots;
 
     private boolean supportsBlockingWait = true;
     private boolean supportsNonBlockingWait = true;
 
-    MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule, MwStateCallback mwCallback) {
+    MwEventRunner(Environment env, HandlerBuilder builder, DatatypeFactory dataFactory, MwModule mwModule) {
 	this.env = env;
 	this.dataFactory = dataFactory;
 	this.builder = builder;
 	this.mwModule = mwModule;
-	this.mwCallback = mwCallback;
 	this.slots = new HashMap<>();
     }
 
@@ -287,17 +285,18 @@ class MwEventRunner implements Runnable {
 	    ConnectionHandleType recHandle = makeKnownCardHandle(ifdName, slotId, cardType, protectedAuthPath);
 	    MwEventObject recEvent = new MwEventObject(recHandle, slot);
 
-	    // recognize card and create card state entry
-	    if (mwCallback.addEntry(recEvent)) {
-		LOG.debug("Sending CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
-		notify(EventType.CARD_RECOGNIZED, recEvent);
-	    } else {
-		LOG.debug("Detected card could not be added to the SAL states, not sending card recognized event.");
-//		recEvent.getHandle().setContextHandle(null);
-//		recEvent.getHandle().setChannelHandle(null);
-//		LOG.debug("Sending SAL-less CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
+	    // TODO: make it work again according to redesign
+//	    // recognize card and create card state entry
+//	    if (mwCallback.addEntry(recEvent)) {
+//		LOG.debug("Sending CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
 //		notify(EventType.CARD_RECOGNIZED, recEvent);
-	    }
+//	    } else {
+//		LOG.debug("Detected card could not be added to the SAL states, not sending card recognized event.");
+////		recEvent.getHandle().setContextHandle(null);
+////		recEvent.getHandle().setChannelHandle(null);
+////		LOG.debug("Sending SAL-less CARD_RECOGNIZED event, ifdName={} id={} type={}.", ifdName, slotId, cardType);
+////		notify(EventType.CARD_RECOGNIZED, recEvent);
+//	    }
 
 	    //For Cache
 	    slots.get(slot.getSlotInfo().getSlotID()).isCardRecognized = true;
@@ -326,8 +325,9 @@ class MwEventRunner implements Runnable {
 	ConnectionHandleType handle = makeConnectionHandle(sl.ifdName, sl.slotId);
 	MwEventObject remEvent = new MwEventObject(handle, null);
 
-	// remove card state entry
-	mwCallback.removeEntry(remEvent);
+	// TODO: make it work again according to redesign
+//	// remove card state entry
+//	mwCallback.removeEntry(remEvent);
 
 	LOG.debug("Sending CARD_REMOVED event, ifdName={} id={} type={}.", sl.ifdName, sl.slotId);
 	notify(EventType.CARD_REMOVED, remEvent);

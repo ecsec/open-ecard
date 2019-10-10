@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,8 +44,6 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.schema.Status;
 import org.openecard.ws.schema.StatusType;
@@ -62,7 +61,6 @@ public class StatusHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusHandler.class);
 
-    private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final EventHandler eventHandler;
     private final List<String> protocols;
@@ -70,7 +68,6 @@ public class StatusHandler {
 
 
     public StatusHandler(Context ctx) {
-	cardStates = ctx.getCardStates();
 	dispatcher = ctx.getDispatcher();
 	eventHandler = ctx.getEventHandler();
 	protocols = getProtocolInfo(ctx.getManager());
@@ -167,15 +164,17 @@ public class StatusHandler {
 
     @Nonnull
     private List<ConnectionHandleType> getCardHandles() {
-	ConnectionHandleType handle = new ConnectionHandleType();
-	Set<CardStateEntry> entries = cardStates.getMatchingEntries(handle, false);
-
-	ArrayList<ConnectionHandleType> result = new ArrayList<>(entries.size());
-	for (CardStateEntry entry : entries) {
-	    result.add(entry.handleCopy());
-	}
-
-	return result;
+	// TODO: reimplement according to redesign
+//	ConnectionHandleType handle = new ConnectionHandleType();
+//	Set<CardStateEntry> entries = cardStates.getMatchingEntries(handle, false);
+//
+//	ArrayList<ConnectionHandleType> result = new ArrayList<>(entries.size());
+//	for (CardStateEntry entry : entries) {
+//	    result.add(entry.handleCopy());
+//	}
+//
+//	return result;
+	return Collections.emptyList();
     }
 
 }

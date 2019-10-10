@@ -54,6 +54,13 @@ public interface SCIOTerminals {
     }
 
     /**
+     * Prepare devices, so they can be used and connected to.
+     * This is intended to handle iOS style APIs where the card can only be used for a very short time and no permament
+     * connection is desireable. There one would start a session and once that is present the IFD can connect to the card.
+     */
+    void prepareDevices();
+
+    /**
      * Gets a list of all terminals satisfying the given state.
      * <p>If state is {@link State#ALL}, this method returns all terminals encapsulated by this object. If state is
      * {@link State#CARD_PRESENT} or {@link State#CARD_ABSENT}, it returns all terminals where a card is currently

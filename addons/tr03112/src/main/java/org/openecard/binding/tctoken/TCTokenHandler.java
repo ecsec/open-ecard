@@ -63,8 +63,6 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.util.Pair;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
@@ -128,7 +126,6 @@ public class TCTokenHandler {
 
     private final String pin;
     private final String puk;
-    private final CardStateMap cardStates;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
     private final AddonManager manager;
@@ -140,7 +137,6 @@ public class TCTokenHandler {
      * @param ctx Context containing instances to the core modules.
      */
     public TCTokenHandler(Context ctx) {
-	this.cardStates = ctx.getCardStates();
 	this.dispatcher = ctx.getDispatcher();
 	this.gui = ctx.getUserConsent();
 	this.manager = ctx.getManager();
@@ -320,10 +316,11 @@ public class TCTokenHandler {
 	requestedHandle.setIFDName(ifdName);
 	requestedHandle.setSlotIndex(requestedSlotIndex);
 
-	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
-	if (!matchingHandles.isEmpty()) {
-	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
-	}
+	// TODO: make it work again according to redesign
+//	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
+//	if (!matchingHandles.isEmpty()) {
+//	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
+//	}
 
 
 	if (connectionHandle == null) {

@@ -28,7 +28,6 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.ifd.scio.IFDException;
-import org.openecard.ifd.scio.wrapper.ChannelManager;
 import org.testng.annotations.Test;
 
 
@@ -45,7 +44,7 @@ public class ManagerTest {
 	EstablishContextResponse ctxR = ifd.establishContext(ctx);
 	Environment env = new ClientEnv();
 	env.setIFD(ifd);
-	IfdEventManager evt = new IfdEventManager(env, new ChannelManager(), ctxR.getContextHandle());
+	IfdEventManager evt = new IfdEventManager(env, ctxR.getContextHandle());
 	evt.initialize();
 	Thread.sleep(1000);
 	//evt.terminate();

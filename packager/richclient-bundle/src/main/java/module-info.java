@@ -25,6 +25,7 @@ module org.openecard.richclient {
     requires java.smartcardio;
     requires java.logging;
     requires java.desktop;
+    requires java.sql; // for jackson serialization
 
     /* BouncyCastle modules */
     requires org.bouncycastle.provider;

@@ -35,16 +35,17 @@ import org.openecard.ws.jaxb.JAXBMarshaller;
  *
  * @author Neil Crossley
  */
-@FrameworkObject(factoryMethod = "createActivationUtils")
-public class IOSActivationUtils implements IOSActivationUtilsInterface {
+@FrameworkObject(factoryMethod = "createOpenEcard")
+public class OpenEcardImp implements OpenEcard {
 
-    private final IOSNFCCapabilities capabilities;
-    private final CommonActivationUtils utils;
+    private IOSNFCCapabilities capabilities;
+    private CommonActivationUtils utils;
 
-    public IOSActivationUtils() {
+    public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
-	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
+	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());	
+	CommonActivationUtils activationUtils = new CommonActivationUtils(config);                                                                  
+	
 	this.capabilities = capabilities;
 	this.utils = activationUtils;
     }

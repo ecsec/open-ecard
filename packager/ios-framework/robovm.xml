@@ -6,7 +6,7 @@
     devices and the simulator. -->
     <arch>arm64</arch>
     <arch>thumbv7</arch>
-    <mainClass>org.openecard.ios.activation.IOSActivationUtils</mainClass>
+    <mainClass>org.openecard.ios.activation.OpenEcardImp</mainClass>
 
     <!-- We're building a framework. -->
     <target>framework</target>

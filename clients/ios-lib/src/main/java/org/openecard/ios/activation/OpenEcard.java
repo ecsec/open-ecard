@@ -32,7 +32,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface IOSActivationUtilsInterface {
+public interface OpenEcard{
 
     ContextManager context();
 

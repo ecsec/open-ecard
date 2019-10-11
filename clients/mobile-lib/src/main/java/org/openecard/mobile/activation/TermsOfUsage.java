@@ -24,7 +24,7 @@ public interface TermsOfUsage {
      *
      * @return
      */
-    byte[] getDataBytes();
+//    byte[] getDataBytes();
 
     /**
      * Retrieve the terms of usage document as a string.

@@ -59,7 +59,7 @@ public class CIFCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(CIFCache.class);
 
-    private static final String PREFIX = "V3_";
+    private static final String PREFIX = "V4_";
     private static final CIFCache INST = new CIFCache();
 
     private final WSMarshaller marshaller;

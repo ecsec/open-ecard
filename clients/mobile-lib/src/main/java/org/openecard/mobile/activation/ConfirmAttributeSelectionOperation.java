@@ -21,6 +21,7 @@
  ************************************************************************** */
 package org.openecard.mobile.activation;
 
+import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -30,5 +31,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmAttributeSelectionOperation {
 
-     public boolean enter(BoxItem[] oldPassword, BoxItem[] newPassword);
+     public boolean enter(List<BoxItem> oldPassword, List<BoxItem> newPassword);
 }

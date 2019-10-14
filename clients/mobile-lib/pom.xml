@@ -158,9 +158,10 @@
 		</dependency>
 		
 		<!-- testing -->
+		
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>jaxb-marshaller</artifactId>
+			<artifactId>android-marshaller</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

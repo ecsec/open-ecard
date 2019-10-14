@@ -55,7 +55,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>jaxb-marshaller</artifactId>
+			<artifactId>android-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

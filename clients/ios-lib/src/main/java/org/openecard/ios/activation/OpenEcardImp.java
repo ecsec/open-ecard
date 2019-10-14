@@ -29,7 +29,7 @@ import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSNFCFactory;
-import org.openecard.ws.jaxb.JAXBMarshaller;
+import org.openecard.ws.android.AndroidMarshaller;
 
 /**
  *
@@ -43,7 +43,7 @@ public class OpenEcardImp implements OpenEcard {
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
-	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), JAXBMarshaller.class.getCanonicalName());	
+	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), AndroidMarshaller.class.getCanonicalName());
 	CommonActivationUtils activationUtils = new CommonActivationUtils(config);                                                                  
 	
 	this.capabilities = capabilities;

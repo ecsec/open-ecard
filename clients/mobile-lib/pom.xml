@@ -97,7 +97,9 @@
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
 			<optional>true</optional>
-		</dependency>	
+			<version>${version.roboface}</version>
+			<type>jar</type>
+		</dependency>
 		<!-- all OeC dependencies -->
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>

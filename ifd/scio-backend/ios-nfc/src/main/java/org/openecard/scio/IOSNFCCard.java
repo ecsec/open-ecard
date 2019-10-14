@@ -29,13 +29,14 @@ import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.Promise;
+import org.robovm.apple.corenfc.NFCISO7816APDU;
+import org.robovm.apple.corenfc.NFCISO7816Tag;
+import org.robovm.apple.corenfc.NFCPollingOption;
+import org.robovm.apple.corenfc.NFCTag;
+import org.robovm.apple.corenfc.NFCTagReaderSession;
+import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
 import org.robovm.apple.dispatch.DispatchQueueAttr;
-import org.robovm.apple.ext.corenfc.NFCISO7816APDU;
-import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
-import org.robovm.apple.ext.corenfc.NFCPollingOption;
-import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
-import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.foundation.NSError;
@@ -78,9 +79,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private void initSessionObj() throws SCIOException {
 	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
 	    @Override
-	    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
+	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
 		for (NSObject t : tags) {
-		    session.connectToTag$completionHandler$(t, (NSError er) -> {
+		    session.connectToTag((NFCTag) t, (NSError er) -> {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			setTag(tag);
@@ -101,7 +102,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 	}
 
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate, dspqueue);
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
 
     }
 
@@ -176,7 +177,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public byte[] transceive(byte[] apdu) throws IOException {
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
-	tag.sendCommandAPDU$completionHandler$(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
+	tag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
 	    bb.put(resp.getBytes(), 0, (int) resp.getLength());
 	    bb.put(sw1);

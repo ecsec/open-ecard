@@ -38,10 +38,10 @@
 									<pattern>org.bouncycastle</pattern>
 									<shadedPattern>hidden.org.bouncycastle</shadedPattern>
 								</relocation>
-								<relocation>
+								<!-- <relocation>
 									<pattern>javax.xml.bind</pattern>
 									<shadedPattern>hidden.javax.xml.bind</shadedPattern>
-								</relocation>
+								</relocation> -->
 							</relocations>
 							<filters>
 								<filter>

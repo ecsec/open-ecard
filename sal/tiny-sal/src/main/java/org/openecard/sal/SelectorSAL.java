@@ -128,6 +128,8 @@ import org.openecard.common.interfaces.SalSelector;
 import org.openecard.common.sal.SpecializedSAL;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.HandlerBuilder;
+import org.openecard.common.util.ValueGenerators;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,7 +291,7 @@ public class SelectorSAL implements SAL, CIFProvider, SalSelector {
 
 		    InitializeResponse res = next.initialize(init);
 		    WSHelper.checkResult(res);
-		    if (WSHelper.resultsInWarn(res)) {
+		    if (WSHelper.resultIsWarn(res)) {
 			WSHelper.createException(res.getResult());
 		    }
 		} catch (WSHelper.WSException ex) {

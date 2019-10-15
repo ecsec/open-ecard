@@ -416,6 +416,10 @@ public class ECardConstants {
 	    public static final String FILE_NOT_FOUND = SAL_PFX + "#fileNotFound";
 	    // Not in TR-03112-1, but GetCardInfoOrACD call ?!?
 	    public static final String UNKNOWN_HANDLE = SAL_PFX + "#unknownConnectionHandle";
+	    /**
+	     * The requested session could not be created as one with the same identifier already exists.
+	     */
+	    public static final String SESSION_EXISTS = SAL_PFX + "#sessionAlreadyExists";
 
 	    /**
 	     * Service-Access layer - Support-Interface minor codes.

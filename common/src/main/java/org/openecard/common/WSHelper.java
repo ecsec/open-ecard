@@ -72,7 +72,7 @@ public class WSHelper {
 	return response;
     }
 
-    public static <T extends ResponseBaseType> boolean resultsInWarn(@Nonnull T response) throws WSException {
+    public static <T extends ResponseBaseType> boolean resultIsWarn(@Nonnull T response) {
 	Result r = response.getResult();
 	return r.getResultMajor().equals(ECardConstants.Major.WARN);
     }

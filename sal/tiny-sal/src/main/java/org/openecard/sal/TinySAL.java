@@ -287,12 +287,12 @@ public class TinySAL implements SAL {
 
     @Override
     public CreateSessionResponse createSession(CreateSession parameters) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public DestroySessionResponse destroySession(DestroySession parameters) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**

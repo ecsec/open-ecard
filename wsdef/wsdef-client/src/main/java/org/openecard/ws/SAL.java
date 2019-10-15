@@ -19,11 +19,47 @@ public interface SAL {
      */
     Set<String> supportedProtocols();
 
+    /**
+     * Creates a new session in the specified SAL.
+     * <p>The following error codes (with prefix {@code http://www.bsi.bund.de/ecard/api/1.1/resultminor/sal}) are
+     * defined for this method.</p>
+     * <dl>
+     * <dt>{@code #notInitialized}</dt>
+     * <dd>The SAL is not initialized and can therefore not create sessions.</dd>
+     * <dt>{@code #sessionAlreadyExists}</dt>
+     * <dd>The requested session already exists.</dd>
+     * <dt>{@code #insufficientResources}</dt>
+     * <dd>Can not create more sessions.</dd>
+     * <dt>/common#incorrectParameter</dt>
+     * <dd>Invalid session ID given.</dd>
+     * </dl>
+     *
+     * @param parameters The request may contain a session ID which shall be created.
+     * @return Response containing the created session ID, or an error.
+     */
     @ECardApiMethod(operationName = "CreateSession", action = "urn:iso:std:iso-iec:24727:tech:schema:CreateSession")
     public iso.std.iso_iec._24727.tech.schema.CreateSessionResponse createSession(
         iso.std.iso_iec._24727.tech.schema.CreateSession parameters
     );
 
+    /**
+     * Destroys an existing session in the specified SAL.
+     * <p>A card connected in the session is automatically disconnected if that didn't happen with a
+     * {@code CardApplicationDisconnect} before. That includes a reset of the card that is being disconnected.</p>
+     * <p>The following error codes (with prefix {@code http://www.bsi.bund.de/ecard/api/1.1/resultminor/sal}) are
+     * defined for this method.</p>
+     * <dl>
+     * <dt>{@code #notInitialized}</dt>
+     * <dd>The SAL is not initialized and can therefore not create sessions.</dd>
+     * <dt>{@code #NO_SESSION}</dt>
+     * <dd>The requested session does not exist.</dd>
+     * <dt>/common#incorrectParameter</dt>
+     * <dd>Invalid connection handle given.</dd>
+     * </dl>
+     *
+     * @param parameters The request must contain a connection handle identifying one session.
+     * @return Response indicating success or failure.
+     */
     @ECardApiMethod(operationName = "DestroySession", action = "urn:iso:std:iso-iec:24727:tech:schema:DestroySession")
     public iso.std.iso_iec._24727.tech.schema.DestroySessionResponse destroySession(
         iso.std.iso_iec._24727.tech.schema.DestroySession parameters

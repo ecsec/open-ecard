@@ -62,7 +62,7 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
 	return terminals;
     }
 
-    public static void triggerNFC() {
+    public static void triggerNFC() throws IOException {
 	staticInstance.terminal.setNFCCard(new IOSNFCCard(staticInstance.terminal));
     }
 

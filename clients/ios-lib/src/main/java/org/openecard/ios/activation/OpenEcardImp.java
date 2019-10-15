@@ -38,8 +38,8 @@ import org.openecard.ws.android.AndroidMarshaller;
 @FrameworkObject(factoryMethod = "createOpenEcard")
 public class OpenEcardImp implements OpenEcard {
 
-    private IOSNFCCapabilities capabilities;
-    private CommonActivationUtils utils;
+    private final IOSNFCCapabilities capabilities;
+    private final CommonActivationUtils utils;
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();

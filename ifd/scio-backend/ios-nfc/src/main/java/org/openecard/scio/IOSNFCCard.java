@@ -91,6 +91,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
 	//TODO:mv Delegateimplementation out of call - atm this only works this way because of a bug in robovm due to classloading stuff
 	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, new NFCTagReaderSessionDelegateAdapter() {
+	    public void tagReaderSessionDidBecomeActive(NFCTagReaderSession session) {
+		LOG.debug("did become active");
+	    }
 	    @Override
 	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
 		for (NSObject t : tags) {

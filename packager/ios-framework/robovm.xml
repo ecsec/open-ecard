@@ -38,7 +38,7 @@
     	<!--<pattern>org.openecard.**</pattern>-->
     	<pattern>org.openecard.**</pattern>
     	<pattern>iso.std.iso_iec._24727.**</pattern>
-    	<pattern>com.sun.xml.**</pattern>
 	<pattern>org.apache.xalan.processor.**</pattern>
+	<pattern>org.apache.xml.serializer.**</pattern>
     </forceLinkClasses>
 </config>

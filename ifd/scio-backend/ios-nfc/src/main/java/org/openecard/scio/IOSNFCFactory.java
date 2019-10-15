@@ -46,7 +46,7 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
     public IOSNFCFactory() throws NoSuchTerminal, IOException {
 	this.terminal = new NFCCardTerminal();
 	this.terminals = new NFCCardTerminals(terminal);
-	this.terminal.setNFCCard(new IOSNFCCard(this.terminal));
+//	this.terminal.setNFCCard(new IOSNFCCard(this.terminal));
     }
 
     @Override

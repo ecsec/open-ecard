@@ -105,6 +105,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 	}
 
+	LOG.debug("Delegate: " + delegate.toString());
+	LOG.debug("QUEUE: " + dspqueue.toString());
+
 	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
 
     }

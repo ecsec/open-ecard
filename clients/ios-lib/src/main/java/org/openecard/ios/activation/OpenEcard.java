@@ -40,4 +40,6 @@ public interface OpenEcard{
 
     PinManagementControllerFactory pinManagementFactory();
 
+    void triggerNFC();
+
 }

@@ -43,10 +43,13 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
     private final NFCCardTerminal terminal;
     private final NFCCardTerminals terminals;
 
+    private static IOSNFCFactory staticInstance;
+
     public IOSNFCFactory() throws NoSuchTerminal, IOException {
 	this.terminal = new NFCCardTerminal();
 	this.terminals = new NFCCardTerminals(terminal);
 //	this.terminal.setNFCCard(new IOSNFCCard(this.terminal));
+	staticInstance = this;
     }
 
     @Override
@@ -57,6 +60,10 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
     @Override
     public SCIOTerminals terminals() {
 	return terminals;
+    }
+
+    public static void triggerNFC() {
+	staticInstance.terminal.setNFCCard(new IOSNFCCard(staticInstance.terminal));
     }
 
 }

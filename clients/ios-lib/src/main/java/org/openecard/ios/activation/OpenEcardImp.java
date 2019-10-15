@@ -22,6 +22,7 @@
 
 package org.openecard.ios.activation;
 
+import java.io.IOException;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
@@ -60,6 +61,14 @@ public class OpenEcardImp implements OpenEcard {
 
     public PinManagementControllerFactory pinManagementFactory() {
 	return this.utils.pinManagementFactory();
+    }
+
+    public void triggerNFC() {
+	try {
+	    IOSNFCFactory.triggerNFC();
+	} catch (IOException ex) {
+	    throw new RuntimeException(ex);
+	}
     }
 
 }

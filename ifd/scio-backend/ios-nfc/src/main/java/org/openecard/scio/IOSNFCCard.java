@@ -80,11 +80,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	DispatchQueue dspqueue;
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
-		LOG.debug("Concurrent");
 		dspqueue = DispatchQueue.create("nfcqueue", DispatchQueueAttr.Concurrent());
 		break;
 	    case MAINQUEUE:
-		LOG.debug("Main");
 		dspqueue = DispatchQueue.getMainQueue();
 		break;
 	    default:

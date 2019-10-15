@@ -72,28 +72,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private void setTag(NFCISO7816Tag tag) {
-	LOG.debug("OETT:setTag");
 	this.tag = tag;
 	this.setHistBytes();
     }
 
     private void initSessionObj() throws SCIOException {
-	LOG.debug("OETT:initSessionObj");
-	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
-	    @Override
-	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
-		LOG.debug("OETT:didDetectTags");
-		for (NSObject t : tags) {
-		    session.connectToTag((NFCTag) t, (NSError er) -> {
-
-			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
-			setTag(tag);
-		    });
-		}
-	    }
-	};
-
-	LOG.debug("Getting queueue");
 	DispatchQueue dspqueue;
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
@@ -108,13 +91,10 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 	}
 
-	LOG.debug("Delegate: " + delegate.toString());
-	LOG.debug("QUEUE: " + dspqueue.toString());
-
+	//TODO:mv Delegateimplementation out of call - atm this only works this way because of a bug in robovm due to classloading stuff
 	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, new NFCTagReaderSessionDelegateAdapter() {
 	    @Override
 	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
-		LOG.debug("OETT:didDetectTags");
 		for (NSObject t : tags) {
 		    session.connectToTag((NFCTag) t, (NSError er) -> {
 
@@ -128,7 +108,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     public void connect() throws SCIOException {
-	LOG.debug("OETT:connect");
 	this.initSessionObj();
 	this.nfcSession.setAlertMessage(this.dialogMsg);
 	this.nfcSession.beginSession();
@@ -150,13 +129,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public boolean isCardPresent() {
-	LOG.debug("OETT:isCardPresent");
 	return this.tag != null;
     }
 
     @Override
     public void terminate(boolean killNfcConnection) throws SCIOException {
-	LOG.debug("OETT:terminate");
 	this.disconnect(false);
     }
 
@@ -199,7 +176,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
-	LOG.debug("OETT:transceive");
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
 	tag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {

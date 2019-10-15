@@ -111,7 +111,19 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	LOG.debug("Delegate: " + delegate.toString());
 	LOG.debug("QUEUE: " + dspqueue.toString());
 
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, new NFCTagReaderSessionDelegateAdapter() {
+	    @Override
+	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
+		LOG.debug("OETT:didDetectTags");
+		for (NSObject t : tags) {
+		    session.connectToTag((NFCTag) t, (NSError er) -> {
+
+			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+			setTag(tag);
+		    });
+		}
+	    }
+	}, dspqueue);
 
     }
 

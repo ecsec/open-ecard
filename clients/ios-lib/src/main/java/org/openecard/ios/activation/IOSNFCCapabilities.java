@@ -23,6 +23,7 @@ package org.openecard.ios.activation;
 
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
+import org.robovm.apple.corenfc.NFCReaderSession;
 
 /**
  *
@@ -32,7 +33,7 @@ public class IOSNFCCapabilities implements NFCCapabilities {
 
     @Override
     public boolean isAvailable() {
-	return true;
+	return NFCReaderSession.isReadingAvailable();
     }
 
     @Override

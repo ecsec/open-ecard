@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2012-2019 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,11 +18,9 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.binding.tctoken;
 
-import org.openecard.httpcore.ValidationError;
 import iso.std.iso_iec._24727.tech.schema.ActionType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
@@ -38,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -50,48 +49,50 @@ import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AuxDataKeys;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.binding.tctoken.ex.ActivationError;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.binding.tctoken.ex.NonGuiException;
+import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
+import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.util.FuturePromise;
+import org.openecard.common.util.HandlerUtils;
+import org.openecard.common.util.JAXPSchemaValidator;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
+import org.openecard.common.util.TR03112Utils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
+import org.openecard.httpcore.HttpResourceException;
+import org.openecard.httpcore.InvalidProxyException;
+import org.openecard.httpcore.InvalidUrlException;
+import org.openecard.httpcore.ResourceContext;
+import org.openecard.httpcore.ValidationError;
+import org.openecard.transport.paos.PAOSConnectionException;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.util.HandlerUtils;
-import org.openecard.common.interfaces.DocumentSchemaValidator;
-import org.openecard.common.interfaces.DocumentValidatorException;
-import org.openecard.common.util.JAXPSchemaValidator;
-import org.openecard.common.util.FuturePromise;
-import org.openecard.common.util.Promise;
-import org.openecard.common.util.TR03112Utils;
-import org.openecard.httpcore.HttpResourceException;
-import org.openecard.httpcore.InvalidProxyException;
-import org.openecard.httpcore.InvalidUrlException;
-import org.openecard.httpcore.ResourceContext;
-import org.openecard.transport.paos.PAOSConnectionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
 
 /**
  * Transport binding agnostic TCToken handler. <br>
@@ -145,7 +146,7 @@ public class TCTokenHandler {
 
 	schemaValidator = new FuturePromise<>(() -> {
 	    boolean noValid = Boolean.valueOf(OpenecardProperties.getProperty("legacy.invalid_schema"));
-	    if (! noValid) {
+	    if (!noValid) {
 		try {
 		    return JAXPSchemaValidator.load("Management.xsd");
 		} catch (SAXException ex) {
@@ -158,6 +159,7 @@ public class TCTokenHandler {
 		@Override
 		public void validate(Document doc) throws DocumentValidatorException {
 		}
+
 		@Override
 		public void validate(Element doc) throws DocumentValidatorException {
 		}
@@ -200,8 +202,8 @@ public class TCTokenHandler {
     }
 
     /**
-     * Performs the actual PAOS procedure.
-     * Connects the given card, establishes the HTTP channel and talks to the server. Afterwards disconnects the card.
+     * Performs the actual PAOS procedure. Connects the given card, establishes the HTTP channel and talks to the
+     * server. Afterwards disconnects the card.
      *
      * @param token The TCToken containing the connection parameters.
      * @param connectionHandle The handle of the card that will be used.
@@ -222,7 +224,7 @@ public class TCTokenHandler {
 
 	    String binding = token.getBinding();
 	    switch (binding) {
-	    	case "urn:liberty:paos:2006-08": {
+		case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
@@ -256,7 +258,7 @@ public class TCTokenHandler {
 	    String msg = "Failed to connect to card.";
 	    LOG.error(msg, ex);
 
-	    if(ECardConstants.Minor.IFD.CANCELLATION_BY_USER.equals(ex.getResultMinor())) {
+	    if (ECardConstants.Minor.IFD.CANCELLATION_BY_USER.equals(ex.getResultMinor())) {
 		throw new PAOSException(ex);
 	    }
 
@@ -272,6 +274,21 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
+    public BindingResult handleActivate(Map<String, String> params, Context ctx) throws InvalidRedirectUrlException,
+	    SecurityViolationException, NonGuiException, ActivationError {
+	TCTokenRequest tcTokenRequest = null;
+	try {
+	    tcTokenRequest  = TCTokenRequest.convert(params, ctx);
+
+	    return this.handleActivate(tcTokenRequest);
+	} finally {
+	    if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
+		// close connection to tctoken server in case PAOS didn't already perform this action
+		tcTokenRequest.getTokenContext().closeStream();
+	    }
+	}
+
+    }
 
     /**
      * Activates the client according to the received TCToken.
@@ -296,13 +313,13 @@ public class TCTokenHandler {
 
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	boolean performChecks = isPerformTR03112Checks(request);
-	if (! performChecks) {
+	if (!performChecks) {
 	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
 	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
 
-	ConnectionHandleType connectionHandle = null;
+	ConnectionHandleType connectionHandle = new ConnectionHandleType();
 	TCTokenResponse response = new TCTokenResponse();
 	response.setTCToken(token);
 
@@ -321,18 +338,16 @@ public class TCTokenHandler {
 //	if (!matchingHandles.isEmpty()) {
 //	    connectionHandle = matchingHandles.toArray(new CardStateEntry[]{})[0].handleCopy();
 //	}
-
-
-	if (connectionHandle == null) {
-	    String msg = LANG_TOKEN.translationForKey("cancel");
-	    LOG.error(msg);
-	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
-	    // fill in values, so it is usuable by the transport module
-	    response = determineRefreshURL(request, response);
-	    response.finishResponse();
-	    return response;
-	}
-
+//
+//	if (connectionHandle == null) {
+//	    String msg = LANG_TOKEN.translationForKey("cancel");
+//	    LOG.error(msg);
+//	    response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, msg));
+//	    // fill in values, so it is usuable by the transport module
+//	    response = determineRefreshURL(request, response);
+//	    response.finishResponse();
+//	    return response;
+//	}
 	try {
 	    // process binding and follow redirect addresses afterwards
 	    response = processBinding(request, connectionHandle);
@@ -455,15 +470,14 @@ public class TCTokenHandler {
     }
 
     /**
-     * Follow the URL in the RefreshAddress and update it in the response.
-     * The redirect is followed as long as the response is a redirect (302, 303 or 307) AND is a
-     * https-URL AND the hash of the retrieved server certificate is contained in the CertificateDescrioption, else
-     * return 400. If the URL and the subjectURL in the CertificateDescription conform to the SOP we reached our final
-     * destination.
+     * Follow the URL in the RefreshAddress and update it in the response. The redirect is followed as long as the
+     * response is a redirect (302, 303 or 307) AND is a https-URL AND the hash of the retrieved server certificate is
+     * contained in the CertificateDescrioption, else return 400. If the URL and the subjectURL in the
+     * CertificateDescription conform to the SOP we reached our final destination.
      *
      * @param request TCToken request used to determine which security checks to perform.
      * @param response The TCToken response in which the original refresh address is defined and where it will be
-     *	 updated.
+     * updated.
      * @return Modified response with the final address the browser should be redirected to.
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
@@ -486,7 +500,6 @@ public class TCTokenHandler {
 //		String msg = "Return-To-Websession yielded a non-redirect response.";
 //		throw new IOException(msg);
 //	    }
-
 	    // determine redirect
 	    List<Pair<URL, TlsServerCertificate>> resultPoints = ctx.getCerts();
 	    Pair<URL, TlsServerCertificate> last = resultPoints.get(resultPoints.size() - 1);
@@ -501,7 +514,7 @@ public class TCTokenHandler {
 	    String code = ECardConstants.Minor.App.COMMUNICATION_ERROR;
 	    String communicationErrorAddress = response.getTCToken().getComErrorAddressWithParams(code);
 
-	    if (communicationErrorAddress != null && ! communicationErrorAddress.isEmpty()) {
+	    if (communicationErrorAddress != null && !communicationErrorAddress.isEmpty()) {
 		throw new SecurityViolationException(communicationErrorAddress, REFRESH_DETERMINATION_FAILED, ex);
 	    }
 	    throw new InvalidRedirectUrlException(REFRESH_DETERMINATION_FAILED, ex);
@@ -532,7 +545,7 @@ public class TCTokenHandler {
     private static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
 	boolean activationChecks = true;
 	// disable checks when not using the nPA
-	if (! tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {
+	if (!tcTokenRequest.getCardType().equals("http://bsi.bund.de/cif/npa.xml")) {
 	    activationChecks = false;
 	} else if (TR03112Utils.DEVELOPER_MODE) {
 	    activationChecks = false;
@@ -614,7 +627,7 @@ public class TCTokenHandler {
     }
 
     /**
-     * Creates an error message from an PAOSException which contains a not handled  inner exception.
+     * Creates an error message from an PAOSException which contains a not handled inner exception.
      *
      * @param w An PAOSException containing a not handled inner exception.
      * @return A sting containing an error message.

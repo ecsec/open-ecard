@@ -22,8 +22,6 @@
 
 package org.openecard.addons.activate;
 
-import org.openecard.binding.tctoken.ex.ActivationError;
-import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -44,24 +42,25 @@ import org.openecard.addon.bind.Headers;
 import org.openecard.addon.bind.RequestBody;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.binding.tctoken.TCTokenHandler;
-import org.openecard.binding.tctoken.TCTokenRequest;
 import org.openecard.binding.tctoken.TCTokenResponse;
 import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.binding.tctoken.ex.ActivationError;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.FatalActivationError;
 import org.openecard.binding.tctoken.ex.NonGuiException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.OpenecardProperties;
-import org.openecard.gui.UserConsent;
-import org.openecard.gui.message.DialogType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.gui.definition.ViewController;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
-import org.openecard.httpcore.cookies.CookieManager;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.gui.UserConsent;
+import org.openecard.gui.definition.ViewController;
+import org.openecard.gui.message.DialogType;
+import org.openecard.httpcore.cookies.CookieManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -401,12 +400,10 @@ public class ActivateAction implements AppPluginAction {
 	BindingResult response;
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	dynCtx.put(TR03112Keys.COOKIE_MANAGER, new CookieManager());
-	
+
 	try {
-	    TCTokenRequest tcTokenRequest = null;
 	    try {
-		tcTokenRequest = TCTokenRequest.convert(params, ctx);
-		response = tokenHandler.handleActivate(tcTokenRequest);
+		response = tokenHandler.handleActivate(params, ctx);
 		// Show success message. If we get here we have a valid StartPAOSResponse and a valid refreshURL
 		showFinishMessage((TCTokenResponse) response);
 	    } catch (ActivationError ex) {
@@ -428,11 +425,6 @@ public class ActivateAction implements AppPluginAction {
 		    LOG.info("Authentication failed, redirecting to with errors attached to the URL.");
 		}
 		response = ex.getBindingResult();
-	    } finally {
-		if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
-		    // close connection to tctoken server in case PAOS didn't already perform this action
-		    tcTokenRequest.getTokenContext().closeStream();
-		}
 	    }
 	} catch (RuntimeException e) {
 

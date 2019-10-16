@@ -548,7 +548,7 @@ public class TinySAL implements SAL {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-	    
+
 	    String didName = SALUtils.getDIDName(request);
 	    Assert.assertIncorrectParameter(didName, "The parameter didName is empty.");
 
@@ -597,7 +597,7 @@ public class TinySAL implements SAL {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-	    String didName = SALUtils.getDIDName(request);    
+	    String didName = SALUtils.getDIDName(request);
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
@@ -726,7 +726,7 @@ public class TinySAL implements SAL {
 	CardApplicationServiceListResponse response = WSHelper.makeResponse(CardApplicationServiceListResponse.class,
 		WSHelper.makeResultOK());
 
-	 try {  
+	 try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
@@ -735,15 +735,15 @@ public class TinySAL implements SAL {
 	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
 
 	    CardApplicationServiceNameList cardApplicationServiceNameList = new CardApplicationServiceNameList();
-                            
+
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
 
             while (it.hasNext()) {
                 CardApplicationType next = it.next();
-            
+
                 byte[] appName = next.getApplicationIdentifier();
-                
+
                 if (Arrays.equals(appName, cardApplicationID)) {
                     Iterator<CardApplicationServiceType> itt = next.getCardApplicationServiceInfo().iterator();
 
@@ -753,7 +753,7 @@ public class TinySAL implements SAL {
                     }
                 }
             }
-            
+
             response.setCardApplicationServiceNameList(cardApplicationServiceNameList);
 
 	} catch (ECardException e) {
@@ -821,18 +821,18 @@ public class TinySAL implements SAL {
 	 CardApplicationServiceDescribeResponse response =
 		 WSHelper.makeResponse(CardApplicationServiceDescribeResponse.class, WSHelper.makeResultOK());
 
-	 try {  
+	 try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-            
+
 	    String cardApplicationServiceName = request.getCardApplicationServiceName();
 	    Assert.assertIncorrectParameter(cardApplicationServiceName,
 		    "The parameter CardApplicationServiceName is empty.");
 
 	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
 	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
-                            
+
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
 
 	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
@@ -840,17 +840,17 @@ public class TinySAL implements SAL {
             while (it.hasNext()) {
                 CardApplicationType next = it.next();
                 byte[] appName = next.getApplicationIdentifier();
-                
+
                 if (Arrays.equals(appName, cardApplicationID)){
-                    
+
                     Iterator<CardApplicationServiceType> itt = next.getCardApplicationServiceInfo().iterator();
-                    
+
                     while (itt.hasNext()) {
                         CardApplicationServiceType nextt = itt.next();
                         if (nextt.getCardApplicationServiceName().equals(cardApplicationServiceName)) {
                             response.setServiceDescription(nextt.getCardApplicationServiceDescription());
 			    return response;
-                        }    
+                        }
                     }
                 }
             }
@@ -999,7 +999,7 @@ public class TinySAL implements SAL {
 	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
-            
+
             String dataSetName = request.getDataSetName();
             Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
 	    Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSetName,
@@ -1175,7 +1175,7 @@ public class TinySAL implements SAL {
 		String msg = "The wrong DataSet for the deletion of DSI " + request.getDSIName() + " is selected.";
 		throw new PrerequisitesNotSatisfiedException(msg);
 	    }
-	    
+
 	    DataSetInfoType dSet =
 		    cardInfoWrapper.getDataSetByFid(cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
 	    Assert.securityConditionDataSet(cardStateEntry, connectionHandle.getCardApplication(), dSet.getDataSetName(),
@@ -1262,7 +1262,7 @@ public class TinySAL implements SAL {
 		throw new PrerequisitesNotSatisfiedException("No EF with DSI selected.");
 	    }
 
-	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(), 
+	    if (! Arrays.equals(dataSetInfo.getDataSetPath().getEfIdOrPath(),
 		    cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
 		String msg = "The currently selected data set does not contain the DSI to be updated.";
 		throw new PrerequisitesNotSatisfiedException(msg);
@@ -1366,7 +1366,7 @@ public class TinySAL implements SAL {
 				cardResponse = allData.transmit(env.getDispatcher(), slotHandle, Collections.EMPTY_LIST);
 				responseData = ByteUtils.concatenate(responseData, cardResponse.getData());
 			    }
-			    
+
 			    response.setDSIContent(responseData);
 			} else if (tag.length == 1) {
 			    // how to determine Simple- or BER-TLV in this case correctly?
@@ -1399,11 +1399,11 @@ public class TinySAL implements SAL {
 			List<byte[]> allowedResponse = new ArrayList<>();
 			allowedResponse.add(new byte[]{(byte) 0x90, (byte) 0x00});
 			allowedResponse.add(new byte[]{(byte) 0x62, (byte) 0x82});
-			
+
 			if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
 			    // in this case we use the index as record number and the length as length of record
 			    ReadRecord readRecord = new ReadRecord(index[0]);
-			    // NOTE: For record based files TR-0312-4 states to ignore the length field in case of records    
+			    // NOTE: For record based files TR-0312-4 states to ignore the length field in case of records
 			    CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle,
 				    allowedResponse);
 			    response.setDSIContent(cardResponse.getData());
@@ -1523,7 +1523,7 @@ public class TinySAL implements SAL {
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
-	    
+
 	    if (protocol.hasNextStep(FunctionType.Decipher)) {
 		response = protocol.decipher(request);
 		removeFinishedProtocol(connectionHandle, protocolURI, protocol);
@@ -2033,10 +2033,10 @@ public class TinySAL implements SAL {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
             CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-                                        
+
 	    String didName = request.getDIDName();
 	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
-	    
+
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 

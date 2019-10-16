@@ -45,7 +45,6 @@ import org.openecard.httpcore.HttpResourceException;
 import org.openecard.httpcore.InsecureUrlException;
 import org.openecard.httpcore.InvalidProxyException;
 import org.openecard.httpcore.InvalidRedirectChain;
-import org.openecard.httpcore.InvalidUrlException;
 import org.openecard.httpcore.ResourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

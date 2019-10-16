@@ -27,11 +27,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.Nonnull;
+import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
-import org.openecard.common.event.EventObject;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
@@ -133,7 +132,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 //	}
 //
 //	return available;
-	return null;
+	return new ArrayList<>();
     }
 
     @Override

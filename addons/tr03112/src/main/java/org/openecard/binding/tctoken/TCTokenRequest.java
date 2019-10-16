@@ -22,13 +22,6 @@
 
 package org.openecard.binding.tctoken;
 
-import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
-import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.AuthServerException;
-import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
@@ -45,12 +38,15 @@ import org.openecard.addon.Context;
 import org.openecard.addons.tr03124.gui.CardMonitorTask;
 import org.openecard.addons.tr03124.gui.CardSelectionAction;
 import org.openecard.addons.tr03124.gui.CardSelectionStep;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.common.util.Pair;
-import org.openecard.common.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openecard.binding.tctoken.ex.AuthServerException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
+import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
+import org.openecard.binding.tctoken.ex.SecurityViolationException;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.AppVersion;
@@ -60,12 +56,16 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.CardRecognition;
 import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.Pair;
+import org.openecard.common.util.StringUtils;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -112,7 +112,7 @@ public class TCTokenRequest {
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
 	    InvalidAddressException, UserCancellationException {
 	TCTokenRequest result;
-	if (parameters.containsKey("tcTokenURL")) {
+	if (parameters.containsKey(TC_TOKEN_URL_KEY)) {
 	    result = parseTCTokenRequestURI(parameters, ctx);
 	    return result;
 	}
@@ -125,6 +125,93 @@ public class TCTokenRequest {
 	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
 	    InvalidAddressException, UserCancellationException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
+	Pair<TCTokenContext, URL> tokenInfo = null;
+
+	for (Map.Entry<String, String> next : queries.entrySet()) {
+	    String k = next.getKey();
+	    k = k == null ? "" : k;
+	    String v = next.getValue();
+
+	    if (v == null || v.isEmpty()) {
+		LOG.info("Skipping query parameter '{}' because it does not contain a value.", k);
+	    } else {
+		switch (k) {
+		    case TC_TOKEN_URL_KEY:
+			tokenInfo = extractTCTokenContext(queries);
+			break;
+		    case "ifdName":
+			tcTokenRequest.ifdName = v;
+			break;
+		    case "contextHandle":
+			tcTokenRequest.contextHandle = StringUtils.toByteArray(v);
+			break;
+		    case "slotIndex":
+			tcTokenRequest.slotIndex = new BigInteger(v);
+			break;
+		    case "cardType":
+			tcTokenRequest.cardType = v;
+			break;
+		    default:
+			LOG.info("Unknown query element: {}", k);
+			break;
+		}
+	    }
+	}
+
+	if (tokenInfo == null) {
+	    throw new MissingActivationParameterException(NO_TOKEN);
+	}
+
+	tcTokenRequest.tokenCtx = tokenInfo.p1;
+	tcTokenRequest.token = tokenInfo.p1.getToken();
+	tcTokenRequest.certificates = tokenInfo.p1.getCerts();
+	tcTokenRequest.tcTokenURL = tokenInfo.p2;
+
+	return tcTokenRequest;
+    }
+
+    /**
+     * Evaluate and extract the TC Token context from the given parameters.
+     * @param queries The request parameters.
+     * @return The TC Token context and the URL from which it was derived.
+     * @throws AuthServerException
+     * @throws InvalidRedirectUrlException
+     * @throws InvalidAddressException
+     * @throws InvalidTCTokenElement
+     * @throws SecurityViolationException
+     * @throws UserCancellationException
+     * @throws MissingActivationParameterException
+     * @throws InvalidTCTokenException
+     * @throws InvalidTCTokenUrlException
+     */
+    public static Pair<TCTokenContext, URL> extractTCTokenContext(Map<String, String> queries) throws AuthServerException,
+	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
+	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
+	String activationTokenUrl = queries.get(TC_TOKEN_URL_KEY);
+
+	return extractTCTokenContext(activationTokenUrl);
+    }
+
+    private static Pair<TCTokenContext, URL> extractTCTokenContext(String activationTokenUrl) throws AuthServerException,
+	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
+	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
+	if (activationTokenUrl == null) {
+	    throw new MissingActivationParameterException(NO_TOKEN);
+	}
+
+	URL tokenUrl;
+	try {
+	    tokenUrl = new URL(activationTokenUrl);
+	} catch(MalformedURLException ex) {
+	    // TODO: check if the error type is correct, was WRONG_PARAMETER before
+	    throw new InvalidTCTokenUrlException(INVALID_TCTOKEN_URL, ex, activationTokenUrl);
+	}
+	TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
+	return new Pair(tokenCtx, tokenUrl);
+    }
+
+    // TODO: migrate this logic and re-introduce the handling of card types. Currently not needed for NPA.
+    private static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx, TCTokenRequest tcTokenRequest) throws MissingActivationParameterException {
 	try {
 	    if (queries.containsKey("cardTypes") || queries.containsKey("cardType")) {
 		String[] types;
@@ -155,61 +242,9 @@ public class TCTokenRequest {
 	    dynCtx.put(TR03112Keys.CARD_SELECTION_CANCELLATION, ex);
 	}
 
-	String activationTokenUrl = null;
-	for (Map.Entry<String, String> next : queries.entrySet()) {
-	    String k = next.getKey();
-	    k = k == null ? "" : k;
-	    String v = next.getValue();
-
-	    if (v == null || v.isEmpty()) {
-		LOG.info("Skipping query parameter '{}' because it does not contain a value.", k);
-	    } else {
-		switch (k) {
-		    case "tcTokenURL":
-			activationTokenUrl = v;
-			break;
-		    case "ifdName":
-			tcTokenRequest.ifdName = v;
-			break;
-		    case "contextHandle":
-			tcTokenRequest.contextHandle = StringUtils.toByteArray(v);
-			break;
-		    case "slotIndex":
-			tcTokenRequest.slotIndex = new BigInteger(v);
-			break;
-		    case "cardType":
-			tcTokenRequest.cardType = v;
-			break;
-		    default:
-			LOG.info("Unknown query element: {}", k);
-			break;
-		}
-	    }
-	}
-
 	// cardType determined! set in dynamic context, so the information is available in ResourceContext
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, tcTokenRequest.cardType);
-
-	if (activationTokenUrl != null) {
-	    try {
-		URL tokenUrl = new URL(activationTokenUrl);
-		TCTokenContext tokenCtx = TCTokenContext.generateTCToken(tokenUrl);
-		tcTokenRequest.tokenCtx = tokenCtx;
-		tcTokenRequest.token = tokenCtx.getToken();
-		tcTokenRequest.certificates = tokenCtx.getCerts();
-		tcTokenRequest.tcTokenURL = tokenUrl;
-	    } catch (MalformedURLException ex) {
-		// TODO: check if the error type is correct, was WRONG_PARAMETER before
-		throw new InvalidTCTokenUrlException(INVALID_TCTOKEN_URL, ex, activationTokenUrl);
-	    }
-	}
-
-	if (tcTokenRequest.token == null) {
-	    throw new MissingActivationParameterException(NO_TOKEN);
-	}
-
-	return tcTokenRequest;
     }
 
     /**
@@ -311,19 +346,20 @@ public class TCTokenRequest {
      * @param recInfo RecognitionInfo object containing the cardType or type parameter.
      */
     private static void addTokenUrlParameter(@Nonnull Map<String, String> queries, @Nonnull RecognitionInfo recInfo) {
-	if (queries.containsKey("tcTokenURL")) {
-	    String tcTokenURL = queries.get("tcTokenURL");
+	if (queries.containsKey(TC_TOKEN_URL_KEY)) {
+	    String tcTokenURL = queries.get(TC_TOKEN_URL_KEY);
 	    try {
 		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
 		// url encoding is done by the builder
 		builder = builder.queryParam("type", recInfo.getCardType(), true);
-		queries.put("tcTokenURL", builder.build().toString());
+		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
 		queries.put("cardType", recInfo.getCardType());
 	    } catch (URISyntaxException ex) {
 		// ignore if this happens the authentication will fail at all.
 	    }
 	}
     }
+    private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
 
     /**
      * Adds the card type given in the given RecognitionInfo object as type to the tcTokenURL contained in the given map.
@@ -332,13 +368,13 @@ public class TCTokenRequest {
      * @param recInfo RecognitionInfo object containing the cardType or type parameter.
      */
     private static void addTokenUrlParameter(@Nonnull Map<String, String> queries, @Nonnull String selectedCardType) {
-	if (queries.containsKey("tcTokenURL")) {
-	    String tcTokenURL = queries.get("tcTokenURL");
+	if (queries.containsKey(TC_TOKEN_URL_KEY)) {
+	    String tcTokenURL = queries.get(TC_TOKEN_URL_KEY);
 	    try {
 		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
 		// url encoding is done by the builder
 		builder = builder.queryParam("type", selectedCardType, true);
-		queries.put("tcTokenURL", builder.build().toString());
+		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
 		queries.put("cardType", selectedCardType);
 	    } catch (URISyntaxException ex) {
 		// ignore if this happens the authentication will fail at all.

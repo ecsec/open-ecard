@@ -297,7 +297,7 @@
 							<compress>2</compress>
 							<noHeaderFiles>true</noHeaderFiles>
 							<noManPages>true</noManPages>
-							<stripDebug>true</stripDebug>
+							<stripDebug>false</stripDebug>
 							<ignoreSigningInformation>true</ignoreSigningInformation>
 							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
 							<jdkToolchain>

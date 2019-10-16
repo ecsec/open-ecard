@@ -67,8 +67,9 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
 	IOSNFCCard card = new IOSNFCCard(staticInstance.terminal);
 	card.connect();
 	staticInstance.terminal.setNFCCard(card);
+	LOG.debug("Sending apdu");
 	byte[] bar = {(byte) 0x00, (byte) 0x4a, (byte) 0x00, (byte) 0x0c};
-	System.out.println("resp: " + card.transceive(bar));
+	LOG.debug("resp: " + card.transceive(bar));
     }
 
 }

@@ -98,7 +98,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    @Override
 	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
 		for (NSObject t : tags) {
-		    session.connectToTag((NFCTag) t, (NSError er) -> {
+		    session.connectToTag(t, (NSError er) -> {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			setTag(tag);

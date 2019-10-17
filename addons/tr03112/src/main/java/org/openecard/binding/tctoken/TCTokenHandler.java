@@ -42,7 +42,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.transform.TransformerException;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
@@ -172,7 +171,7 @@ public class TCTokenHandler {
 	});
     }
 
-    private ConnectionHandleType prepareHandle(ConnectionHandleType connectionHandle) throws WSException {
+    private ConnectionHandleType prepareTlsHandle(ConnectionHandleType connectionHandle) throws WSException {
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath appPath = new CardApplicationPath();
 	appPath.setCardAppPathRequest(connectionHandle);
@@ -196,12 +195,6 @@ public class TCTokenHandler {
 	return connectionHandle;
     }
 
-    private ConnectionHandleType ensureHandleIsUsable(ConnectionHandleType connectionHandle) throws WSException {
-	connectionHandle = prepareHandle(connectionHandle);
-
-	return connectionHandle;
-    }
-
     /**
      * Performs the actual PAOS procedure. Connects the given card, establishes the HTTP channel and talks to the
      * server. Afterwards disconnects the card.
@@ -212,24 +205,17 @@ public class TCTokenHandler {
      * @throws DispatcherException If there was a problem dispatching a request from the server.
      * @throws PAOSException If there was a transport error.
      */
-    private TCTokenResponse processBinding(TCTokenRequest tokenRequest, @Nullable ConnectionHandleType connectionHandle)
+    private TCTokenResponse processBinding(Map<String, String> params, Context ctx, TCTokenRequest tokenRequest)
 	    throws PAOSException, DispatcherException {
 	TCToken token = tokenRequest.getTCToken();
 	try {
-	    TCTokenResponse response = new TCTokenResponse();
-	    response.setTCToken(token);
-	    response.setResult(WSHelper.makeResultOK());
-
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    dynCtx.put(TR03112Keys.ACTIVATION_THREAD, Thread.currentThread());
-
 	    String binding = token.getBinding();
 	    FutureTask<?> taskResult;
 	    String taskName;
 	    switch (binding) {
 		case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
-		    connectionHandle = ensureHandleIsUsable(connectionHandle);
+		    ConnectionHandleType connectionHandle = new ConnectionHandleType();
 		    prepareForTask(tokenRequest, connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
 		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, schemaValidator);
@@ -240,7 +226,16 @@ public class TCTokenHandler {
 		}
 		case "urn:ietf:rfc:2616": {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
-		    connectionHandle = ensureHandleIsUsable(connectionHandle);
+		    byte[] requestedContextHandle = TCTokenRequest.extractContextHandle(params);
+		    String ifdName = TCTokenRequest.extractIFDName(params);
+		    BigInteger requestedSlotIndex = TCTokenRequest.extractSlotIndex(params);
+
+		    // we know exactly which card we want
+		    ConnectionHandleType requestedHandle = new ConnectionHandleType();
+		    requestedHandle.setContextHandle(requestedContextHandle);
+		    requestedHandle.setIFDName(ifdName);
+		    requestedHandle.setSlotIndex(requestedSlotIndex);
+		    ConnectionHandleType connectionHandle = prepareTlsHandle(requestedHandle);
 		    prepareForTask(tokenRequest, connectionHandle);
 		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
 		    taskResult = new FutureTask<>(task);
@@ -255,6 +250,10 @@ public class TCTokenHandler {
 	    taskThread.start();
 	    // wait for computation to finish
 	    waitForTask(taskResult);
+
+	    TCTokenResponse response = new TCTokenResponse();
+	    response.setTCToken(token);
+	    response.setResult(WSHelper.makeResultOK());
 	    response.setBindingTask(taskResult);
 
 	    return response;
@@ -316,19 +315,8 @@ public class TCTokenHandler {
 	    }
 	}
 
-	ConnectionHandleType connectionHandle = new ConnectionHandleType();
 	TCTokenResponse response = new TCTokenResponse();
 	response.setTCToken(token);
-
-	byte[] requestedContextHandle = request.getContextHandle();
-	String ifdName = request.getIFDName();
-	BigInteger requestedSlotIndex = request.getSlotIndex();
-
-	// we know exactly which card we want
-	ConnectionHandleType requestedHandle = new ConnectionHandleType();
-	requestedHandle.setContextHandle(requestedContextHandle);
-	requestedHandle.setIFDName(ifdName);
-	requestedHandle.setSlotIndex(requestedSlotIndex);
 
 	// TODO: make it work again according to redesign
 //	Set<CardStateEntry> matchingHandles = cardStates.getMatchingEntries(requestedHandle);
@@ -347,7 +335,7 @@ public class TCTokenHandler {
 //	}
 	try {
 	    // process binding and follow redirect addresses afterwards
-	    response = processBinding(request, connectionHandle);
+	    response = processBinding(params, ctx, request);
 	    // fill in values, so it is usuable by the transport module
 	    response = determineRefreshURL(request, response);
 	    response.finishResponse();
@@ -452,6 +440,7 @@ public class TCTokenHandler {
 	if (!performChecks) {
 	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
+	dynCtx.put(TR03112Keys.ACTIVATION_THREAD, Thread.currentThread());
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
 	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
 

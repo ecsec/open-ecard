@@ -81,11 +81,18 @@ public class TCTokenRequest {
     private static final Logger LOG = LoggerFactory.getLogger(TCTokenRequest.class);
     private static final I18n LANG = I18n.getTranslation("tr03112");
 
+    private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
+    private static final String CARD_TYPE_KEY = "cardType";
+    private static final String SLOT_INDEX_KEY = "slotIndex";
+    private static final String CONTEXT_HANDLE_KEY = "contextHandle";
+    private static final String IFD_NAME_KEY = "ifdName";
+    private static final String DEFAULT_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+
     private TCToken token;
     private String ifdName;
     private BigInteger slotIndex;
     private byte[] contextHandle;
-    private String cardType = "http://bsi.bund.de/cif/npa.xml";
+    private String cardType = DEFAULT_CARD_TYPE;
     private List<Pair<URL, TlsServerCertificate>> certificates;
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
@@ -137,18 +144,18 @@ public class TCTokenRequest {
 	    } else {
 		switch (k) {
 		    case TC_TOKEN_URL_KEY:
-			tokenInfo = extractTCTokenContext(queries);
+			tokenInfo = extractTCTokenContext(v);
 			break;
-		    case "ifdName":
+		    case IFD_NAME_KEY:
 			tcTokenRequest.ifdName = v;
 			break;
-		    case "contextHandle":
-			tcTokenRequest.contextHandle = StringUtils.toByteArray(v);
+		    case CONTEXT_HANDLE_KEY:
+			tcTokenRequest.contextHandle = extractContextHandle(v);
 			break;
-		    case "slotIndex":
+		    case SLOT_INDEX_KEY:
 			tcTokenRequest.slotIndex = new BigInteger(v);
 			break;
-		    case "cardType":
+		    case CARD_TYPE_KEY:
 			tcTokenRequest.cardType = v;
 			break;
 		    default:
@@ -168,6 +175,36 @@ public class TCTokenRequest {
 	tcTokenRequest.tcTokenURL = tokenInfo.p2;
 
 	return tcTokenRequest;
+    }
+
+    public static String extractIFDName(Map<String, String> queries) {
+	return queries.get(IFD_NAME_KEY);
+    }
+
+    public static String extractCardType(Map<String, String> queries) {
+	return queries.get(CARD_TYPE_KEY);
+    }
+
+    public static BigInteger extractSlotIndex(Map<String, String> queries) {
+	return extractSlotIndex(queries.get(SLOT_INDEX_KEY));
+    }
+
+    public static BigInteger extractSlotIndex(String rawSlotIndex) {
+	if (rawSlotIndex == null || rawSlotIndex.isEmpty()) {
+	    return null;
+	}
+	return new BigInteger(rawSlotIndex);
+    }
+
+    public static byte[] extractContextHandle(Map<String, String> queries) {
+	return extractContextHandle(queries.get(CONTEXT_HANDLE_KEY));
+    }
+
+    public static byte[] extractContextHandle(String rawContextHandle) {
+	if (rawContextHandle == null || rawContextHandle.isEmpty()) {
+	    return null;
+	}
+	return StringUtils.toByteArray(rawContextHandle);
     }
 
     /**
@@ -211,12 +248,14 @@ public class TCTokenRequest {
     }
 
     // TODO: migrate this logic and re-introduce the handling of card types. Currently not needed for NPA.
-    private static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx, TCTokenRequest tcTokenRequest) throws MissingActivationParameterException {
+    private static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx) throws MissingActivationParameterException {
+	final String cardType = extractCardType(queries);
+	final boolean hasCardType = cardType != null;
 	try {
-	    if (queries.containsKey("cardTypes") || queries.containsKey("cardType")) {
+	    if (queries.containsKey("cardTypes") || hasCardType) {
 		String[] types;
-		if (queries.containsKey("cardType")) {
-		    types = new String[]{queries.get("cardType")};
+		if (hasCardType) {
+		    types = new String[]{cardType};
 		} else {
 		    types = queries.get("cardTypes").split(",");
 		}
@@ -227,7 +266,7 @@ public class TCTokenRequest {
 		setSlotIndex(queries, handle.getSlotIndex());
 		addTokenUrlParameter(queries, handle.getRecognitionInfo());
 	    } else {
-		String[] types = new String[]{tcTokenRequest.cardType};
+		String[] types = new String[]{DEFAULT_CARD_TYPE};
 		ConnectionHandleType handle = findCard(types, ctx);
 		setIfdName(queries, handle.getIFDName());
 		setContextHandle(queries, handle.getContextHandle());
@@ -244,7 +283,7 @@ public class TCTokenRequest {
 
 	// cardType determined! set in dynamic context, so the information is available in ResourceContext
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, tcTokenRequest.cardType);
+	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, hasCardType ? cardType : DEFAULT_CARD_TYPE);
     }
 
     /**
@@ -313,7 +352,7 @@ public class TCTokenRequest {
      */
     private static void setIfdName(@Nonnull Map<String, String> queries, @Nonnull String ifdName) {
 	if (! ifdName.isEmpty()) {
-	    queries.put("ifdName", ifdName);
+	    queries.put(IFD_NAME_KEY, ifdName);
 	}
     }
 
@@ -325,7 +364,7 @@ public class TCTokenRequest {
      */
     private static void setContextHandle(@Nonnull Map<String, String> queries, @Nonnull byte[] contextHandle) {
 	if (contextHandle.length > 0) {
-	    queries.put("contextHandle", ByteUtils.toHexString(contextHandle));
+	    queries.put(CONTEXT_HANDLE_KEY, ByteUtils.toHexString(contextHandle));
 	}
     }
 
@@ -336,7 +375,7 @@ public class TCTokenRequest {
      * @param index The new SlotIndex to set.
      */
     private static void setSlotIndex(@Nonnull Map<String, String> queries, @Nonnull BigInteger index) {
-	queries.put("slotIndex", index.toString());
+	queries.put(SLOT_INDEX_KEY, index.toString());
     }
 
     /**
@@ -353,13 +392,12 @@ public class TCTokenRequest {
 		// url encoding is done by the builder
 		builder = builder.queryParam("type", recInfo.getCardType(), true);
 		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
-		queries.put("cardType", recInfo.getCardType());
+		queries.put(CARD_TYPE_KEY, recInfo.getCardType());
 	    } catch (URISyntaxException ex) {
 		// ignore if this happens the authentication will fail at all.
 	    }
 	}
     }
-    private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
 
     /**
      * Adds the card type given in the given RecognitionInfo object as type to the tcTokenURL contained in the given map.
@@ -375,7 +413,7 @@ public class TCTokenRequest {
 		// url encoding is done by the builder
 		builder = builder.queryParam("type", selectedCardType, true);
 		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
-		queries.put("cardType", selectedCardType);
+		queries.put(CARD_TYPE_KEY, selectedCardType);
 	    } catch (URISyntaxException ex) {
 		// ignore if this happens the authentication will fail at all.
 	    }

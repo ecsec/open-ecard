@@ -8,8 +8,8 @@
     <!--
     <arch>thumbv7</arch>
     <arch>x86</arch>
-    -->
     <arch>x86_64</arch>
+    -->
 
     <mainClass>org.openecard.ios.activation.OpenEcardImp</mainClass>
 

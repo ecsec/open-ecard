@@ -32,7 +32,6 @@ import org.openecard.common.util.Promise;
 import org.robovm.apple.corenfc.NFCISO7816APDU;
 import org.robovm.apple.corenfc.NFCISO7816Tag;
 import org.robovm.apple.corenfc.NFCPollingOption;
-import org.robovm.apple.corenfc.NFCTag;
 import org.robovm.apple.corenfc.NFCTagReaderSession;
 import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
@@ -56,6 +55,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private String dialogMsg = "Please provide card.";
     private byte[] histBytes;
+    private NFCTagReaderSessionDelegateAdapter del;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -89,12 +89,20 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 	}
 
-	//TODO:mv Delegateimplementation out of call - atm this only works this way because of a bug in robovm due to classloading stuff
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, new NFCTagReaderSessionDelegateAdapter() {
+	LOG.debug("Initializing new NFCTagReaderSession");
+	this.del = new NFCTagReaderSessionDelegateAdapter() {
+	    @Override
+	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
+		LOG.debug(".didInvalidate()");
+		return;
+	    }
+
 	    @Override
 	    public void tagReaderSessionDidBecomeActive(NFCTagReaderSession session) {
-		LOG.debug("did become active");
+		LOG.debug(".didbecomeActive()");
+		return;
 	    }
+
 	    @Override
 	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
 		for (NSObject t : tags) {
@@ -105,7 +113,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    });
 		}
 	    }
-	}, dspqueue);
+	};
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, del, dspqueue);
 
     }
 

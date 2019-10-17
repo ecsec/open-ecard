@@ -45,5 +45,8 @@
     	<pattern>iso.std.iso_iec._24727.**</pattern>
 	<pattern>org.apache.xalan.processor.**</pattern>
 	<pattern>org.apache.xml.serializer.**</pattern>
+	<pattern>javax.xml.xpath.**</pattern>
+	<pattern>org.apache.xerces.**</pattern>
+	<pattern>org.apache.xpath.jaxp.**</pattern>
     </forceLinkClasses>
 </config>

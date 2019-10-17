@@ -55,6 +55,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private String dialogMsg = "Please provide card.";
     private byte[] histBytes;
+    private NFCTagReaderSessionDelegateAdapter del;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -89,7 +90,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	}
 
 	LOG.debug("Initializing new NFCTagReaderSession");
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, new NFCTagReaderSessionDelegateAdapter() {
+	this.del = new NFCTagReaderSessionDelegateAdapter() {
 	    @Override
 	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
 		LOG.debug(".didInvalidate()");
@@ -112,7 +113,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    });
 		}
 	    }
-	}, dspqueue);
+	};
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, del, dspqueue);
 
     }
 

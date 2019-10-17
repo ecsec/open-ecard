@@ -29,7 +29,6 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -54,11 +53,17 @@ import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.binding.tctoken.ex.ActivationError;
+import org.openecard.binding.tctoken.ex.AuthServerException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
+import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
 import org.openecard.binding.tctoken.ex.NonGuiException;
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.SecurityViolationException;
+import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
@@ -194,10 +199,6 @@ public class TCTokenHandler {
     private ConnectionHandleType ensureHandleIsUsable(ConnectionHandleType connectionHandle) throws WSException {
 	connectionHandle = prepareHandle(connectionHandle);
 
-	// save handle for later use
-	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
-
 	return connectionHandle;
     }
 
@@ -223,35 +224,38 @@ public class TCTokenHandler {
 	    dynCtx.put(TR03112Keys.ACTIVATION_THREAD, Thread.currentThread());
 
 	    String binding = token.getBinding();
+	    FutureTask<?> taskResult;
+	    String taskName;
 	    switch (binding) {
 		case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
+		    prepareForTask(tokenRequest, connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
 		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, schemaValidator);
-		    FutureTask<StartPAOSResponse> paosTask = new FutureTask<>(task);
-		    Thread paosThread = new Thread(paosTask, "PAOS");
-		    paosThread.start();
-		    // wait for computation to finish
-		    waitForTask(paosTask);
-		    response.setBindingTask(paosTask);
+		    taskResult = new FutureTask<>(task);
+		    taskName = "PAOS";
+
 		    break;
 		}
 		case "urn:ietf:rfc:2616": {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
 		    connectionHandle = ensureHandleIsUsable(connectionHandle);
+		    prepareForTask(tokenRequest, connectionHandle);
 		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
-		    FutureTask<StartPAOSResponse> tlsTask = new FutureTask<>(task);
-		    Thread tlsThread = new Thread(tlsTask, "TLS Auth");
-		    tlsThread.start();
-		    waitForTask(tlsTask);
-		    response.setBindingTask(tlsTask);
+		    taskResult = new FutureTask<>(task);
+		    taskName = "TLS Auth";
 		    break;
 		}
 		default:
 		    // unknown binding
 		    throw new RuntimeException("Unsupported binding in TCToken.");
 	    }
+	    Thread taskThread = new Thread(taskResult, taskName);
+	    taskThread.start();
+	    // wait for computation to finish
+	    waitForTask(taskResult);
+	    response.setBindingTask(taskResult);
 
 	    return response;
 	} catch (WSException ex) {
@@ -274,13 +278,22 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
+    /**
+     * Activates the client according to the received TCToken.
+     *
+     * @param params The parameters of the .
+     * @return The response containing the result of the activation process.
+     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
+     * @throws SecurityViolationException
+     * @throws NonGuiException
+     */
     public BindingResult handleActivate(Map<String, String> params, Context ctx) throws InvalidRedirectUrlException,
 	    SecurityViolationException, NonGuiException, ActivationError {
 	TCTokenRequest tcTokenRequest = null;
 	try {
 	    tcTokenRequest  = TCTokenRequest.convert(params, ctx);
 
-	    return this.handleActivate(tcTokenRequest);
+	    return this.handleActivateInner(params, ctx, tcTokenRequest);
 	} finally {
 	    if (tcTokenRequest != null && tcTokenRequest.getTokenContext() != null) {
 		// close connection to tctoken server in case PAOS didn't already perform this action
@@ -290,18 +303,10 @@ public class TCTokenHandler {
 
     }
 
-    /**
-     * Activates the client according to the received TCToken.
-     *
-     * @param request The activation request containing the TCToken.
-     * @return The response containing the result of the activation process.
-     * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
-     * @throws SecurityViolationException
-     * @throws NonGuiException
-     */
-    public TCTokenResponse handleActivate(TCTokenRequest request) throws InvalidRedirectUrlException,
-	    SecurityViolationException, NonGuiException {
-	TCToken token = request.getTCToken();
+    public TCTokenResponse handleActivateInner(Map<String, String> params, Context ctx, TCTokenRequest request) throws InvalidRedirectUrlException,
+	    SecurityViolationException, NonGuiException, AuthServerException, InvalidAddressException, InvalidTCTokenElement, UserCancellationException, MissingActivationParameterException, InvalidTCTokenException {
+	Pair<TCTokenContext, URL> tokenInfo = TCTokenRequest.extractTCTokenContext(params);
+	TCToken token = tokenInfo.p1.getToken();
 	if (LOG.isDebugEnabled()) {
 	    try {
 		WSMarshaller m = WSMarshallerFactory.createInstance();
@@ -310,14 +315,6 @@ public class TCTokenHandler {
 		// it's no use
 	    }
 	}
-
-	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	boolean performChecks = isPerformTR03112Checks(request);
-	if (!performChecks) {
-	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
-	}
-	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
-	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
 
 	ConnectionHandleType connectionHandle = new ConnectionHandleType();
 	TCTokenResponse response = new TCTokenResponse();
@@ -447,6 +444,18 @@ public class TCTokenHandler {
 
 	    return response;
 	}
+    }
+
+    private static void prepareForTask(TCTokenRequest request, ConnectionHandleType connectionHandle) {
+	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	boolean performChecks = isPerformTR03112Checks(request);
+	if (!performChecks) {
+	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
+	}
+	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
+	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
+
+	dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
     }
 
     private static void waitForTask(Future<?> task) throws PAOSException, DispatcherException {

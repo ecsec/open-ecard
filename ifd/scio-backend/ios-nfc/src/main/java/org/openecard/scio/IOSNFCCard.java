@@ -149,15 +149,22 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private void setHistBytes() {
-	this.histBytes = this.tag.getHistoricalBytes().getBytes();
+	NSData hist = this.tag.getHistoricalBytes();
+	if (hist != null) {
+	    this.histBytes = hist.getBytes();
+	} else {
+	    this.histBytes = null;
+	}
     }
 
     @Override
     public SCIOATR getATR() {
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
 	if (this.histBytes == null) {
+	    LOG.debug("hist bytes are null");
 	    return new SCIOATR(new byte[0]);
 	} else {
+	    LOG.debug("hist bytes will be processed ");
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    // Initial Header
 	    out.write(0x3B);

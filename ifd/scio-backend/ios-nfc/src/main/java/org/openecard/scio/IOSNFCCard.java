@@ -196,16 +196,25 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public byte[] transceive(byte[] apdu) throws IOException {
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
+
 	tag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
-	    ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
-	    bb.put(resp.getBytes(), 0, (int) resp.getLength());
-	    bb.put(sw1);
-	    bb.put(sw2);
-	    p.deliver(bb.array());
+	    if (er2 != null) {
+		p.deliver(null);
+	    } else {
+		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
+		bb.put(resp.getBytes(), 0, (int) resp.getLength());
+		bb.put(sw1);
+		bb.put(sw2);
+		p.deliver(bb.array());
+	    }
 	});
 
 	try {
-	    return p.deref();
+	    byte[] response = p.deref();
+	    if (response == null) {
+		throw new IOException();
+	    }
+	    return response;
 	} catch (InterruptedException ex) {
 	    throw new IOException(ex);
 	}

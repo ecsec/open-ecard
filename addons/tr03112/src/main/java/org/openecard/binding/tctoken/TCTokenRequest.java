@@ -98,7 +98,6 @@ public class TCTokenRequest {
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
 
-
     /**
      * Check and evaluate the request parameters and wrap the result in a {@code TCTokenRequest} class.
      *
@@ -269,7 +268,7 @@ public class TCTokenRequest {
     }
 
     // TODO: migrate this logic and re-introduce the handling of card types. Currently not needed for NPA.
-    private static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx) throws MissingActivationParameterException {
+    public static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx) throws MissingActivationParameterException {
 	final String cardType = extractCardType(queries);
 	final boolean hasCardType = cardType != null;
 	try {

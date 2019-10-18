@@ -215,15 +215,13 @@ public class TCTokenHandler {
      * Performs the actual PAOS procedure. Connects the given card, establishes the HTTP channel and talks to the
      * server. Afterwards disconnects the card.
      *
-     * @param token The TCToken containing the connection parameters.
-     * @param connectionHandle The handle of the card that will be used.
      * @return A TCTokenResponse indicating success or failure.
      * @throws DispatcherException If there was a problem dispatching a request from the server.
      * @throws PAOSException If there was a transport error.
      */
     private TCTokenResponse processBinding(Map<String, String> params, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
 	    throws PAOSException, DispatcherException, MissingActivationParameterException {
-	TCToken token = tokenInfo.p1.getToken();
+	final TCToken token = tokenInfo.p1.getToken();
 	try {
 	    String binding = token.getBinding();
 	    final FutureTask<?> taskResult;
@@ -243,6 +241,9 @@ public class TCTokenHandler {
 		}
 		case "urn:ietf:rfc:2616": {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
+		    TCTokenRequest.correctTCTokenRequestURI(params, ctx);
+
+
 		    byte[] requestedContextHandle = TCTokenRequest.extractContextHandle(params);
 		    String ifdName = TCTokenRequest.extractIFDName(params);
 		    BigInteger requestedSlotIndex = TCTokenRequest.extractSlotIndex(params);
@@ -307,16 +308,15 @@ public class TCTokenHandler {
     public BindingResult handleActivate(Map<String, String> params, Context ctx) throws InvalidRedirectUrlException,
 	    SecurityViolationException, NonGuiException, ActivationError {
 	Map<String, String> copyParams = new HashMap<>(params);
-	TCTokenContext tokenContext = null;
+	Pair<TCTokenContext, URL> tokenInfo = null;
 	try {
-	    Pair<TCTokenContext, URL> tokenInfo = TCTokenRequest.removeTCTokenContext(copyParams);
-	    tokenContext = tokenInfo.p1;
+	    tokenInfo = TCTokenRequest.removeTCTokenContext(copyParams);
 
 	    return this.handleActivateInner(copyParams, ctx, tokenInfo);
 	} finally {
-	    if (tokenContext != null) {
+	    if (tokenInfo != null && tokenInfo.p1 != null) {
 		// close connection to tctoken server in case PAOS didn't already perform this action
-		tokenContext.closeStream();
+		tokenInfo.p1.closeStream();
 	    }
 	}
 

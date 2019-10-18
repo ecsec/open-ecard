@@ -48,7 +48,11 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 
     @Override
     public EacControllerFactory eacFactory() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	try {
+	    return CommonEacControllerFactory.create(activationControllerService);
+	} catch (MalformedURLException ex) {
+	    throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	}
     }
 
     @Override

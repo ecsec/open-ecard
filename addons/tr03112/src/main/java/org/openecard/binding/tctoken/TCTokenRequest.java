@@ -58,6 +58,7 @@ import org.openecard.common.sal.util.InsertCardDialog;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
+import org.openecard.common.util.TR03112Utils;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
@@ -86,13 +87,13 @@ public class TCTokenRequest {
     private static final String SLOT_INDEX_KEY = "slotIndex";
     private static final String CONTEXT_HANDLE_KEY = "contextHandle";
     private static final String IFD_NAME_KEY = "ifdName";
-    private static final String DEFAULT_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+    private static final String DEFAULT_NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
     private TCToken token;
     private String ifdName;
     private BigInteger slotIndex;
     private byte[] contextHandle;
-    private String cardType = DEFAULT_CARD_TYPE;
+    private String cardType = DEFAULT_NPA_CARD_TYPE;
     private List<Pair<URL, TlsServerCertificate>> certificates;
     private URL tcTokenURL;
     private TCTokenContext tokenCtx;
@@ -103,36 +104,23 @@ public class TCTokenRequest {
      *
      * @param parameters The request parameters.
      * @param ctx Addon {@link Context} used for the communication with the core.
+     * @param tokenInfo The token.
      * @return A TCTokenRequest wrapping the parameters.
-     * @throws InvalidTCTokenException
      * @throws MissingActivationParameterException
-     * @throws AuthServerException
-     * @throws InvalidRedirectUrlException
-     * @throws InvalidTCTokenElement
-     * @throws InvalidTCTokenUrlException
-     * @throws SecurityViolationException
-     * @throws InvalidAddressException
-     * @throws UserCancellationException
      */
-    public static TCTokenRequest convert(Map<String, String> parameters, Context ctx) throws
-	    InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
-	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    InvalidAddressException, UserCancellationException {
-	TCTokenRequest result;
-	if (parameters.containsKey(TC_TOKEN_URL_KEY)) {
-	    result = parseTCTokenRequestURI(parameters, ctx);
-	    return result;
-	}
-
-	throw new MissingActivationParameterException(NO_PARAMS);
+    public static TCTokenRequest convert(Map<String, String> parameters, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
+	    throws MissingActivationParameterException {
+	TCTokenRequest result = parseTCTokenRequestURI(parameters, ctx, tokenInfo);
+	return result;
     }
 
-    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Context ctx)
-	    throws InvalidTCTokenException, MissingActivationParameterException, AuthServerException,
-	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    InvalidAddressException, UserCancellationException {
+    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
+	    throws MissingActivationParameterException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
-	Pair<TCTokenContext, URL> tokenInfo = null;
+
+	if (tokenInfo != null || tokenInfo.p1 == null || tokenInfo.p2 == null) {
+	    throw new MissingActivationParameterException(NO_TOKEN);
+	}
 
 	for (Map.Entry<String, String> next : queries.entrySet()) {
 	    String k = next.getKey();
@@ -144,7 +132,7 @@ public class TCTokenRequest {
 	    } else {
 		switch (k) {
 		    case TC_TOKEN_URL_KEY:
-			tokenInfo = extractTCTokenContext(v);
+			LOG.info("Skipping given query parameter '{}' because it was already extracted", TC_TOKEN_URL_KEY);
 			break;
 		    case IFD_NAME_KEY:
 			tcTokenRequest.ifdName = v;
@@ -153,7 +141,7 @@ public class TCTokenRequest {
 			tcTokenRequest.contextHandle = extractContextHandle(v);
 			break;
 		    case SLOT_INDEX_KEY:
-			tcTokenRequest.slotIndex = new BigInteger(v);
+			tcTokenRequest.slotIndex = extractSlotIndex(v);
 			break;
 		    case CARD_TYPE_KEY:
 			tcTokenRequest.cardType = v;
@@ -165,15 +153,10 @@ public class TCTokenRequest {
 	    }
 	}
 
-	if (tokenInfo == null) {
-	    throw new MissingActivationParameterException(NO_TOKEN);
-	}
-
 	tcTokenRequest.tokenCtx = tokenInfo.p1;
 	tcTokenRequest.token = tokenInfo.p1.getToken();
 	tcTokenRequest.certificates = tokenInfo.p1.getCerts();
 	tcTokenRequest.tcTokenURL = tokenInfo.p2;
-
 	return tcTokenRequest;
     }
 
@@ -208,6 +191,34 @@ public class TCTokenRequest {
     }
 
     /**
+     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
+     *
+     * @param queries The query parameters of the TC token binding request.
+     * @return {@code true} if checks should be performed, {@code false} otherwise.
+     */
+    public static boolean isPerformTR03112Checks(Map<String, String> queries) {
+	return isPerformTR03112Checks(queries.get(CARD_TYPE_KEY));
+    }
+
+    /**
+     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
+     *
+     * @param cardType The card type.
+     * @return {@code true} if checks should be performed, {@code false} otherwise.
+     */
+   public static boolean isPerformTR03112Checks(String cardType) {
+       boolean activationChecks = true;
+	// disable checks when not using the nPA
+	if (cardType != null && !cardType.equals(DEFAULT_NPA_CARD_TYPE)) {
+	    activationChecks = false;
+	} else if (TR03112Utils.DEVELOPER_MODE) {
+	    activationChecks = false;
+	    LOG.warn("DEVELOPER_MODE: All TR-03124-1 security checks are disabled.");
+	}
+	return activationChecks;
+   }
+
+    /**
      * Evaluate and extract the TC Token context from the given parameters.
      * @param queries The request parameters.
      * @return The TC Token context and the URL from which it was derived.
@@ -226,7 +237,17 @@ public class TCTokenRequest {
 	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
 	String activationTokenUrl = queries.get(TC_TOKEN_URL_KEY);
 
-	return extractTCTokenContext(activationTokenUrl);
+	Pair<TCTokenContext, URL> result = extractTCTokenContext(activationTokenUrl);
+	queries.remove(TC_TOKEN_URL_KEY);
+	return result;
+    }
+
+    public static Pair<TCTokenContext, URL> removeTCTokenContext(Map<String, String> queries) throws AuthServerException,
+	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
+	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
+	Pair<TCTokenContext, URL> result = extractTCTokenContext(queries);
+	queries.remove(TC_TOKEN_URL_KEY);
+	return result;
     }
 
     private static Pair<TCTokenContext, URL> extractTCTokenContext(String activationTokenUrl) throws AuthServerException,
@@ -266,7 +287,7 @@ public class TCTokenRequest {
 		setSlotIndex(queries, handle.getSlotIndex());
 		addTokenUrlParameter(queries, handle.getRecognitionInfo());
 	    } else {
-		String[] types = new String[]{DEFAULT_CARD_TYPE};
+		String[] types = new String[]{DEFAULT_NPA_CARD_TYPE};
 		ConnectionHandleType handle = findCard(types, ctx);
 		setIfdName(queries, handle.getIFDName());
 		setContextHandle(queries, handle.getContextHandle());
@@ -283,7 +304,7 @@ public class TCTokenRequest {
 
 	// cardType determined! set in dynamic context, so the information is available in ResourceContext
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, hasCardType ? cardType : DEFAULT_CARD_TYPE);
+	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, hasCardType ? cardType : DEFAULT_NPA_CARD_TYPE);
     }
 
     /**
@@ -420,7 +441,6 @@ public class TCTokenRequest {
 	}
     }
 
-
     /**
      * Returns the TCToken.
      *
@@ -490,4 +510,12 @@ public class TCTokenRequest {
 	return tokenCtx;
     }
 
+    /**
+     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
+     *
+     * @return {@code true} if checks should be performed, {@code false} otherwise.
+     */
+    public boolean  isPerformTR03112Checks() {
+	return isPerformTR03112Checks(this.cardType);
+    }
 }

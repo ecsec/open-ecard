@@ -29,6 +29,8 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -171,6 +173,20 @@ public class TCTokenHandler {
 	});
     }
 
+    private ConnectionHandleType preparePaosHandle() throws WSException {
+	    // Perform a CreateSession to initialize the SAL.
+	    CreateSession createSession = new CreateSession();
+	    CreateSessionResponse createSessionResp = (CreateSessionResponse) dispatcher.safeDeliver(createSession);
+
+	    // Check CreateSessionResponse
+	    WSHelper.checkResult(createSessionResp);
+
+	    // Update ConnectionHandle.
+	    ConnectionHandleType connectionHandle = createSessionResp.getConnectionHandle();
+
+	    return connectionHandle;
+	}
+
     private ConnectionHandleType prepareTlsHandle(ConnectionHandleType connectionHandle) throws WSException {
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath appPath = new CardApplicationPath();
@@ -210,12 +226,12 @@ public class TCTokenHandler {
 	TCToken token = tokenInfo.p1.getToken();
 	try {
 	    String binding = token.getBinding();
-	    FutureTask<?> taskResult;
-	    String taskName;
+	    final FutureTask<?> taskResult;
+	    final String taskName;
 	    switch (binding) {
 		case "urn:liberty:paos:2006-08": {
 		    // send StartPAOS
-		    ConnectionHandleType connectionHandle = new ConnectionHandleType();
+		    ConnectionHandleType connectionHandle = preparePaosHandle();
 		    TCTokenRequest tokenRequest = TCTokenRequest.convert(params, ctx, tokenInfo);
 		    prepareForTask(tokenRequest, connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();

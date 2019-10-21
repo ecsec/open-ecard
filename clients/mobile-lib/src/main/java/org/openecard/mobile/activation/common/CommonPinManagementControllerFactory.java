@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
@@ -58,11 +59,19 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 
     @Override
     public ActivationController create(ControllerCallback activation, PinManagementInteraction interaction) {
-	return new CommonActivationController(activationUrl, new HashSet<>(), PROTOCOL_TYPE, activationControllerService, activation, interaction);
+
+	return create(new HashSet<>(), activation, interaction);
     }
 
-    public ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction) {
-	return new CommonActivationController(activationUrl, supportedCard, PROTOCOL_TYPE, activationControllerService, activation, interaction);
+    public ActivationController create(Set<String> supportedCards, ControllerCallback activation, PinManagementInteraction interaction) {
+	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
+	    @Override
+	    public AutoCloseable create(EventDispatcher dispatcher) {
+		return CommonCardEventHandler.create(supportedCards, dispatcher, interaction);
+	    }
+	};
+
+	return new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
     }
 
     @Override

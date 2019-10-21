@@ -40,6 +40,8 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
     private final Object managerLock = new Object();
     private final OpeneCardContextConfig config;
     private final ActivationControllerService activationControllerService;
+    private EacControllerFactory eacControllerFactory;
+    private PinManagementControllerFactory pinManagementControllerFactory;
 
     public CommonActivationUtils(OpeneCardContextConfig config) {
 	this.config = config;
@@ -48,20 +50,23 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 
     @Override
     public EacControllerFactory eacFactory() {
-	try {
-	    return CommonEacControllerFactory.create(activationControllerService);
-	} catch (MalformedURLException ex) {
-	    throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	if (eacControllerFactory == null) {
+	    eacControllerFactory = CommonEacControllerFactory.create(activationControllerService);
 	}
+	return eacControllerFactory;
     }
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
-	try {
-	    return CommonPinManagementControllerFactory.create(activationControllerService);
-	} catch (MalformedURLException ex) {
-	    throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	if (pinManagementControllerFactory == null) {
+	    try {
+		pinManagementControllerFactory = CommonPinManagementControllerFactory.create(activationControllerService);
+	    } catch (MalformedURLException ex) {
+		throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	    }
 	}
+	return pinManagementControllerFactory;
+
     }
 
     @Override

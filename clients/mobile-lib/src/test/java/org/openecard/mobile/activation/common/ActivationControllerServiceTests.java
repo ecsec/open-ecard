@@ -43,7 +43,6 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.Promise;
-import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ControllerCallback;
@@ -123,9 +122,8 @@ public class ActivationControllerServiceTests {
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
-		anySupportedCards(),
 		mockControllerCallback,
-		anyActivationInteraction());
+		anyInteractionPreperationFactory());
 
 	ActivationResult result = outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	Assert.assertNotNull(result);
@@ -139,9 +137,8 @@ public class ActivationControllerServiceTests {
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
-		anySupportedCards(),
 		mockControllerCallback,
-		anyActivationInteraction());
+		anyInteractionPreperationFactory());
 
 	outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
     }
@@ -156,9 +153,8 @@ public class ActivationControllerServiceTests {
 		.withSuccessActivation().createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
-		anySupportedCards(),
 		mockControllerCallback,
-		anyActivationInteraction());
+		anyInteractionPreperationFactory());
 	sut.cancelAuthentication(mockControllerCallback);
 
 	Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -174,9 +170,8 @@ public class ActivationControllerServiceTests {
 		.withSuccessActivation(SLEEP_WAIT).createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
-		anySupportedCards(),
 		mockControllerCallback,
-		anyActivationInteraction());
+		anyInteractionPreperationFactory());
 	Thread.sleep(SLEEP_WAIT / 2);
 	sut.cancelAuthentication(mockControllerCallback);
 
@@ -193,9 +188,8 @@ public class ActivationControllerServiceTests {
 		.createSut();
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
-		anySupportedCards(),
 		mockControllerCallback,
-		anyActivationInteraction());
+		anyInteractionPreperationFactory());
 	Thread.sleep(MICRO_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
 	Thread.sleep(MICRO_WAIT);
@@ -299,15 +293,8 @@ public class ActivationControllerServiceTests {
 	return this.withActivation(new BindingResult(), sleepDelay);
     }
 
-    private ActivationInteraction anyActivationInteraction() {
-	return mock(ActivationInteraction.class);
+    private InteractionPreperationFactory anyInteractionPreperationFactory() {
+	return mock(InteractionPreperationFactory.class);
     }
 
-    private Set<String> allSupportedCards() {
-	return new HashSet<String>();
-    }
-
-    private Set<String> anySupportedCards() {
-	return allSupportedCards();
-    }
 }

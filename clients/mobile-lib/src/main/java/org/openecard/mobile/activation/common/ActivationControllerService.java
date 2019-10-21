@@ -13,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -22,7 +21,6 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
-import org.openecard.mobile.activation.ActivationInteraction;
 import static org.openecard.mobile.activation.ActivationResultCode.CLIENT_ERROR;
 import static org.openecard.mobile.activation.ActivationResultCode.DEPENDING_HOST_UNREACHABLE;
 import static org.openecard.mobile.activation.ActivationResultCode.INTERNAL_ERROR;
@@ -54,7 +52,7 @@ public class ActivationControllerService {
 	this.contextProvider = contextProvider;
     }
 
-    public void start(final URL requestURI, Set<String> supportedCards, final ControllerCallback controllerCallback, ActivationInteraction interaction) {
+    public void start(final URL requestURI, final ControllerCallback controllerCallback, InteractionPreperationFactory hooks) {
 	if (requestURI == null) {
 	    throw new IllegalArgumentException("Request url cannot be null.");
 	}
@@ -63,7 +61,7 @@ public class ActivationControllerService {
 	}
 
 	Thread executingThread = new Thread(() -> {
-	    CommonActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
+	    CommonActivationResult result = this.activate(requestURI, controllerCallback, hooks);
 	    synchronized (processLock) {
 		if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
 		    return;
@@ -139,7 +137,7 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback givenCallback, ActivationInteraction interaction) {
+    private CommonActivationResult activate(URL requestURI, ControllerCallback givenCallback, InteractionPreperationFactory hooks) {
 	synchronized (this.processLock) {
 	    if (this.currentCallback != givenCallback && this.cancelledCallback != givenCallback) {
 		return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
@@ -178,9 +176,7 @@ public class ActivationControllerService {
 		}
 		EventDispatcher eventDispatcher = context.getEventDispatcher();
 		try {
-		    Map.Entry<CardEventHandler, AutoCloseable> entry = CardEventHandler.create(supportedCards, eventDispatcher, interaction);
-
-		    this.closable = entry.getValue();
+		    this.closable = hooks.create(eventDispatcher);
 
 		    ControllerCallback startedCallback;
 		    synchronized (this.processLock) {

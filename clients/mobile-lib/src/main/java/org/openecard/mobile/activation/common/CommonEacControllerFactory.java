@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,12 +18,14 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.activation.common;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Set;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -52,14 +54,25 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 	    throw new RuntimeException("The given url string could not be parsed as a URL.", ex);
 	}
 
-	return new CommonActivationController(activationUrl, new HashSet<>(), PROTOCOL_TYPE, activationControllerService, activation, interaction);
+	Set<String> supportedCards = new HashSet<>();
+	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
+	    @Override
+	    public AutoCloseable create(EventDispatcher dispatcher) {
+		return new ArrayBackedAutoCloseable(new AutoCloseable[] {
+		    CommonCardEventHandler.create(supportedCards, dispatcher, interaction),
+		    EacCardEventHandler.hookUp(new EacCardEventHandler(), dispatcher, interaction)
+		});
+	    }
+	};
+
+	return new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
     }
 
     @Override
     public void destroy(ActivationController controller) {
     }
 
-    static CommonEacControllerFactory create(ActivationControllerService activationControllerService) throws MalformedURLException {
+    static CommonEacControllerFactory create(ActivationControllerService activationControllerService) {
 	return new CommonEacControllerFactory(
 		activationControllerService);
     }

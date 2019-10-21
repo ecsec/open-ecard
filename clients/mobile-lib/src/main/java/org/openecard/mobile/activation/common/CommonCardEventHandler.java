@@ -10,8 +10,6 @@
 package org.openecard.mobile.activation.common;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.AbstractMap;
-import java.util.Map;
 import java.util.Set;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
@@ -25,15 +23,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Neil Crossley
  */
-public class CardEventHandler {
+public class CommonCardEventHandler {
 
-    private static Logger LOG = LoggerFactory.getLogger(CardEventHandler.class);
+    private static Logger LOG = LoggerFactory.getLogger(CommonCardEventHandler.class);
 
     private final ActivationInteraction interaction;
     private boolean cardPresent;
     private boolean cardRecognized;
 
-    public CardEventHandler(ActivationInteraction interaction, boolean cardPresent, boolean cardRecognized) {
+    public CommonCardEventHandler(ActivationInteraction interaction, boolean cardPresent, boolean cardRecognized) {
 	this.interaction = interaction;
 	this.cardPresent = cardPresent;
     }
@@ -56,19 +54,17 @@ public class CardEventHandler {
 	interaction.onCardRecognized(type);
     }
 
-    public static Map.Entry<CardEventHandler, AutoCloseable> create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
-
-	CardEventHandler created = new CardEventHandler(interaction, false, false);
+    public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
 
 	EventCallback cardInsertionHandler = new EventCallback() {
 	    @Override
 	    public void signalEvent(EventType eventType, EventObject eventData) {
 		switch (eventType) {
 		    case CARD_REMOVED:
-			created.onCardRemoved();
+			handler.onCardRemoved();
 			break;
 		    case CARD_INSERTED:
-			created.onCardInserted();
+			handler.onCardInserted();
 		    default:
 			LOG.debug("Received an unsupported Event: " + eventType.name());
 			break;
@@ -81,14 +77,21 @@ public class CardEventHandler {
 	    public void signalEvent(EventType eventType, EventObject eventData) {
 		switch (eventType) {
 		    case RECOGNIZED_CARD_ACTIVE:
-			ConnectionHandleType handle = eventData.getHandle();
-			final String type = handle.getRecognitionInfo().getCardType();
+			final ConnectionHandleType handle = eventData.getHandle();
+			if (handle == null) {
+			    break;
+			}
+			final ConnectionHandleType.RecognitionInfo recognitionInfo = handle.getRecognitionInfo();
+			if (recognitionInfo == null) {
+			    break;
+			}
+			final String type = recognitionInfo.getCardType();
 
 			if (supportedCards == null || supportedCards.isEmpty() || supportedCards.contains(type)) {
 			    // remove handler when the correct card is present
 			    eventDispatcher.del(this);
 
-			    created.onCardRecognized(type);
+			    handler.onCardRecognized(type);
 			}
 
 			break;
@@ -101,7 +104,7 @@ public class CardEventHandler {
 	EventCallback removalHandler = new EventCallback() {
 	    @Override
 	    public void signalEvent(EventType eventType, EventObject eventData) {
-		created.onCardRemoved();
+		handler.onCardRemoved();
 	    }
 	};
 
@@ -109,6 +112,21 @@ public class CardEventHandler {
 	eventDispatcher.add(cardDetectHandler, EventType.RECOGNIZED_CARD_ACTIVE);
 	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
 
-	return new AbstractMap.SimpleImmutableEntry<>(created, null);
+	return new AutoCloseable() {
+	    @Override
+	    public void close() throws Exception {
+		eventDispatcher.del(cardInsertionHandler);
+		eventDispatcher.del(cardDetectHandler);
+		eventDispatcher.del(removalHandler);
+	    }
+
+	};
+    }
+
+    public static AutoCloseable create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
+
+	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false);
+
+	return hookUp(created, supportedCards, eventDispatcher, interaction);
     }
 }

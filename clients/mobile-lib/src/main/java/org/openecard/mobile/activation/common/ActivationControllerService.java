@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -6,7 +6,7 @@
  * This file may be used in accordance with the terms and conditions
  * contained in a signed written agreement between you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.activation.common;
 
 import java.io.UnsupportedEncodingException;
@@ -53,6 +53,7 @@ public class ActivationControllerService {
     }
 
     public void start(final URL requestURI, final ControllerCallback controllerCallback, InteractionPreperationFactory hooks) {
+	LOG.debug("Starting new activation process.");
 	if (requestURI == null) {
 	    throw new IllegalArgumentException("Request url cannot be null.");
 	}
@@ -61,7 +62,13 @@ public class ActivationControllerService {
 	}
 
 	Thread executingThread = new Thread(() -> {
-	    CommonActivationResult result = this.activate(requestURI, controllerCallback, hooks);
+	    CommonActivationResult result;
+	    try {
+		result = this.activate(requestURI, controllerCallback, hooks);
+	    } catch (Exception e) {
+		LOG.debug("Activation was interrupted.", e);
+		result = new CommonActivationResult(INTERRUPTED, "Returning error as INTERRUPTED result.");
+	    }
 	    synchronized (processLock) {
 		if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
 		    return;
@@ -73,7 +80,7 @@ public class ActivationControllerService {
 	    }
 	    LOG.info("Notifying callback of authentication results {}.", result);
 	    controllerCallback.onAuthenticationCompletion(result);
-	});
+	}, "ActivationControllerService");
 
 	synchronized (this.processLock) {
 	    if (!this.isRunning) {
@@ -149,6 +156,7 @@ public class ActivationControllerService {
 	String resourceName;
 	try {
 	    // remove leading '/'
+	    LOG.debug("Checking path {}", path);
 	    resourceName = path.substring(1, path.length());
 	} catch (IndexOutOfBoundsException ex) {
 	    return new CommonActivationResult(INTERRUPTED, "The given activation URL is not valid: " + requestURI.toExternalForm());

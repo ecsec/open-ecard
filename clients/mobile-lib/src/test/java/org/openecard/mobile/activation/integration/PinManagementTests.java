@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
  *
  * @author Neil Crossley
  */
-public class PinManagementTests extends BaseIntegrationTests {
+public class PinManagementTests extends BaseIntegrationSetup {
 
     @Test
     void canBeginPinManagement() throws Exception {

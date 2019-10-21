@@ -21,45 +21,146 @@
  ***************************************************************************/
 package org.openecard.mobile.activation.integration;
 
+import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.model.World;
 import org.openecard.mobile.activation.model.WorldBuilder;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 /**
  *
  * @author Neil Crossley
  */
-public class EacContextTests extends BaseIntegrationTests {
+public class EacContextTests extends BaseIntegrationSetup {
 
     @Test
-    void canStartWorld() throws Exception {
+    void canBeginEacActivation() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
+
 	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
 	}
     }
 
     @Test
-    void canStartAndStopWorld() throws Exception {
+    void whenEacActivationCancelsThenEacActivationIsInterrupted() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
-	    world.contextWorld.stopSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.cancelEac();
+
+	    world.eacWorld.expectActivationResult(ActivationResultCode.INTERRUPTED);
 	}
     }
 
     @Test
-    void canStartThenSleepAndStopWorld() throws Exception {
+    @Ignore("Card insertion request is currently not called.")
+    void expectCardRequest() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.eacWorld.expectCardInsertionRequest();
+	}
+    }
+
+    @Test
+    @Ignore("Eac activation has not been reworked.")
+    void canSuccessfullyChangePin() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.eacWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
+
+	    world.eacWorld.expectSuccessfulPinEntry();
+	}
+    }
+
+    @Test
+    @Ignore("Eac activation  has not been reworked.")
+    void incorrectPinChangeWillFail() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.eacWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
+
+	    world.eacWorld.expectIncorrectPinEntryToFail();
+	}
+    }
+
+    @Test
+    void expectNpaCardRecognition() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.givenNpaCardInserted();
+
+	    world.eacWorld.expectRecognitionOfNpaCard();
+	}
+    }
+
+    @Test
+    @Ignore("Eac activation has not been reworked.")
+    void investigateMultipleNpaCardRecognitions() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.givenNpaCardInserted();
+	    world.eacWorld.expectRecognitionOfNpaCard();
 
 	    world.microSleep();
 
-	    world.contextWorld.stopSuccessfully();
+	    world.givenaCardRemoved();
+	    world.eacWorld.expectRemovalOfCard();
+
+	    world.givenNpaCardInserted();
+	    world.eacWorld.expectRecognitionOfNpaCard();
+
+	    world.microSleep();
+
+	    world.givenaCardRemoved();
+	    world.eacWorld.expectRemovalOfCard();
 	}
     }
-
 }

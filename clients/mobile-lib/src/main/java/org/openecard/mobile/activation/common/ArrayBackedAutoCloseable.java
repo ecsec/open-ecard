@@ -55,7 +55,9 @@ public class ArrayBackedAutoCloseable implements AutoCloseable {
 		LOG.debug(errorMessage, e);
 	    }
 	}
-	throw new RuntimeException(errorMessage, firstException);
+	if (firstException != null) {
+	    throw new RuntimeException(errorMessage, firstException);
+	}
     }
 
 }

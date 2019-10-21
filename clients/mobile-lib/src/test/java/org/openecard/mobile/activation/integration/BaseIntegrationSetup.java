@@ -39,9 +39,9 @@ import org.testng.annotations.BeforeMethod;
  *
  * @author Neil Crossley
  */
-public class BaseIntegrationTests {
+public class BaseIntegrationSetup {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BaseIntegrationTests.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseIntegrationSetup.class);
 
     private MockitoSession mockito;
     private String providerName;

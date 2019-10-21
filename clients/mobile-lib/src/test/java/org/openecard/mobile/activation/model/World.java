@@ -36,11 +36,15 @@ import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.ContextManager;
+import org.openecard.mobile.activation.EacControllerFactory;
+import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.common.ArrayBackedAutoCloseable;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import static org.openecard.mobile.activation.model.Timeout.MIN_WAIT_TIMEOUT;
 import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
@@ -66,6 +70,7 @@ public class World implements AutoCloseable {
     private final MobileTerminalConfigurator terminalConfigurator;
     public final ContextWorld contextWorld;
     public final PinManagementWorld pinManagementWorld;
+    public final EacWorld eacWorld;
     private AbstractNFCCard currentNfcCard;
 
     public World(CommonActivationUtils activationUtils, MockNFCCapabilitiesConfigurator capabilities, MobileTerminalConfigurator terminalConfigurator) {
@@ -74,6 +79,7 @@ public class World implements AutoCloseable {
 	this.terminalConfigurator = terminalConfigurator;
 	this.contextWorld = new ContextWorld();
 	this.pinManagementWorld = new PinManagementWorld();
+	this.eacWorld = new EacWorld();
     }
 
     public void microSleep() {
@@ -172,9 +178,11 @@ public class World implements AutoCloseable {
     @Override
     public void close() throws Exception {
 	LOG.debug("Closing.");
-	this.pinManagementWorld.close();
-	this.contextWorld.close();
-
+	new ArrayBackedAutoCloseable(new AutoCloseable[] {
+	    this.pinManagementWorld,
+	    this.eacWorld,
+	    this.contextWorld
+	}).close();
     }
 
     public void givenaCardRemoved() {
@@ -185,6 +193,171 @@ public class World implements AutoCloseable {
 
 	doReturn(false).when(currentNfcCard).isCardPresent();
 	terminalConfigurator.terminal.setNFCCard(null);
+    }
+
+    public class EacWorld implements AutoCloseable {
+
+	private EacControllerFactory _eacControllerFactory;
+	private Set<String> supportedCards;
+	private Promise<ActivationResult> promisedActivationResult;
+	private Promise<Void> promisedStarted;
+	private Promise<Void> promisedRequestCardInsertion;
+	private Promise<String> promisedRecognizeCard;
+	private Promise<ConfirmPasswordOperation> promisedOperationEnterOnePassword;
+	private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
+	private ActivationController activationController;
+	private Promise<Void> promisedRemoveCard;
+	private EacInteraction interaction;
+
+	private EacControllerFactory eacControllerFactory() {
+	    if (_eacControllerFactory == null) {
+		_eacControllerFactory = activationUtils.eacFactory();
+	    }
+	    return _eacControllerFactory;
+	}
+
+	public void startSimpleEac() {
+	    LOG.debug("Start simple eac.");
+	    String url = "http://localhost/eID-Client?session=blabla";
+
+
+	    supportedCards = new HashSet<>();
+	    promisedActivationResult = new Promise<>();
+	    promisedStarted = new Promise<>();
+	    promisedRequestCardInsertion = new Promise();
+	    promisedRecognizeCard = new Promise();
+	    promisedRemoveCard = new Promise();
+	    promisedOperationEnterTwoPasswords = new Promise();
+	    promisedOperationEnterOnePassword = new Promise();
+	    interaction = mock(EacInteraction.class);
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRequestCardInsertion.isDelivered()) {
+		    promisedRequestCardInsertion = new Promise();
+		}
+		promisedRequestCardInsertion.deliver(null);
+		return null;
+	    }).when(interaction).requestCardInsertion();
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRemoveCard.isDelivered()) {
+		    promisedRemoveCard = new Promise();
+		}
+		promisedRemoveCard.deliver(null);
+		return null;
+	    }).when(interaction).onCardRemoved();
+
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRecognizeCard.isDelivered()) {
+		    promisedRecognizeCard = new Promise();
+		}
+		promisedRecognizeCard.deliver((String) arg0.getArguments()[0]);
+		return null;
+	    }).when(interaction).onCardRecognized(anyString());
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRequestCardInsertion.isDelivered()) {
+		    promisedRequestCardInsertion = new Promise();
+		}
+		promisedOperationEnterTwoPasswords.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
+		return null;
+	    }).when(interaction).onPinCanRequest(any());
+	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		if (promisedRequestCardInsertion.isDelivered()) {
+		    promisedRequestCardInsertion = new Promise();
+		}
+		promisedOperationEnterOnePassword.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
+		return null;
+	    }).when(interaction).onPinRequest(anyInt(), any());
+	    activationController = eacControllerFactory().create(
+		    url,
+		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
+		    interaction);
+	    activationController.start();
+	}
+
+	public void expectActivationResult(ActivationResultCode code) {
+	    LOG.debug("Expect activation result {}.", code);
+	    try {
+		ActivationResult result = promisedActivationResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		Assert.assertEquals(result.getResultCode(), code);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectOnStarted() {
+	    LOG.debug("Expect on started.");
+	    try {
+		promisedStarted.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectCardInsertionRequest() {
+	    LOG.debug("Expect card insertion.");
+	    try {
+		promisedRequestCardInsertion.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectRecognitionOfNpaCard() {
+	    LOG.debug("Expect recognition of NPA card.");
+	    try {
+		String type = promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		Assert.assertEquals(type, "http://bsi.bund.de/cif/npa.xml");
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	private void expectPinEntryWithSuccess(String currentPin, boolean expected) {
+	    try {
+		ConfirmPasswordOperation operation = promisedOperationEnterOnePassword.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		if (operation == null) {
+		    throw new IllegalStateException();
+		}
+		boolean result = operation.enter(currentPin);
+		Assert.assertEquals(result, expected);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectRemovalOfCard() {
+	    LOG.debug("Expect removal of card.");
+	    try {
+		promisedRemoveCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	    } catch (InterruptedException | TimeoutException ex) {
+		throw new RuntimeException(ex);
+	    }
+	}
+
+	public void expectSuccessfulPinEntry() {
+	    expectPinEntryWithSuccess("123123", true);
+	}
+
+	public void expectIncorrectPinEntryToFail() {
+	    expectPinEntryWithSuccess("847826", false);
+	}
+
+	public void cancelEac() {
+	    LOG.debug("Cancel EAC.");
+	    this.activationController.cancelAuthentication();
+	}
+
+	@Override
+	public void close() throws Exception {
+
+	    ActivationController oldActivationController = activationController;
+	    if (oldActivationController != null) {
+		oldActivationController.cancelAuthentication();
+		activationController = null;
+	    }
+	    if (this._eacControllerFactory != null && oldActivationController != null) {
+		this._eacControllerFactory.destroy(activationController);
+	    }
+	}
     }
 
     public class PinManagementWorld implements AutoCloseable {
@@ -238,7 +411,6 @@ public class World implements AutoCloseable {
 		promisedOperationEnterTwoPasswords.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
 		return null;
 	    }).when(interaction).onPinChangeable(anyInt(), any());
-
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRecognizeCard.isDelivered()) {
 		    promisedRecognizeCard = new Promise();
@@ -273,7 +445,7 @@ public class World implements AutoCloseable {
 	}
 
 	public void expectCardInsertionRequest() {
-	    LOG.debug("Expect on started.");
+	    LOG.debug("Expect card insertion.");
 	    try {
 		promisedRequestCardInsertion.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    } catch (InterruptedException | TimeoutException ex) {

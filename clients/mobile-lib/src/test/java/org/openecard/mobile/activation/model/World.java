@@ -36,6 +36,7 @@ import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.ContextManager;
@@ -531,9 +532,9 @@ public class World implements AutoCloseable {
 
 	public ContextWorld startSuccessfully() {
 	    LOG.debug("Start successfully.");
-	    Promise<ServiceErrorResponse> resultStart = new Promise<>();
+	    Promise<ActivationSource> resultStart = new Promise<>();
 	    try {
-		contextManager().start(PromiseDeliveringFactory.createContextServiceDelivery(resultStart));
+		contextManager().start(PromiseDeliveringFactory.createStartServiceDelivery(resultStart, null));
 	    } catch (UnableToInitialize | NfcUnavailable | NfcDisabled | ApduExtLengthNotSupported ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -549,7 +550,7 @@ public class World implements AutoCloseable {
 	public ContextWorld stopSuccessfully() {
 	    LOG.debug("Stop successfully.");
 	    Promise<ServiceErrorResponse> resultStart = new Promise<>();
-	    contextManager().stop(PromiseDeliveringFactory.createContextServiceDelivery(resultStart));
+	    contextManager().stop(PromiseDeliveringFactory.createStopServiceDelivery(resultStart));
 
 	    try {
 		Assert.assertNull(resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));

@@ -19,6 +19,7 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
@@ -28,7 +29,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ActivationUtils {
+public interface StartServiceHandler {
+    void onSuccess(ActivationSource source);
 
-    ContextManager context(NFCCapabilities nfc);
+    void onFailure(ServiceErrorResponse response);
 }

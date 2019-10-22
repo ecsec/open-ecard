@@ -29,7 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface OpeneCardServiceHandler {
+public interface StopServiceHandler {
     void onSuccess();
 
     void onFailure(ServiceErrorResponse response);

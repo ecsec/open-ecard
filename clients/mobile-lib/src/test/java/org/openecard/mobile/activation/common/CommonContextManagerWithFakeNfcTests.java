@@ -39,6 +39,7 @@ import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.ifd.scio.TerminalWatcher;
 import org.openecard.common.ifd.scio.TerminalWatcher.StateChangeEvent;
 import org.openecard.common.util.Promise;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.model.DelegatingMobileNfcTerminalFactory;
@@ -120,6 +121,9 @@ public class CommonContextManagerWithFakeNfcTests {
     NFCCapabilities mockNfc;
 
     @Mock
+    ActivationSource source;
+
+    @Mock
     TerminalFactory mockTerminalFactory;
 
     OpeneCardContextConfigFactory configFactory;
@@ -137,11 +141,11 @@ public class CommonContextManagerWithFakeNfcTests {
     }
 
     CommonContextManager createSut(OpeneCardContextConfigFactory factory) {
-	return createSut(mockNfc, factory.create());
+	return createSut(mockNfc, factory.create(), source);
     }
 
-    CommonContextManager createSut(NFCCapabilities nfc, OpeneCardContextConfig config) {
-	return new CommonContextManager(nfc, config);
+    CommonContextManager createSut(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source) {
+	return new CommonContextManager(nfc, config, source);
     }
 
     @Test
@@ -149,11 +153,11 @@ public class CommonContextManagerWithFakeNfcTests {
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
-	Promise<ServiceErrorResponse> result = new Promise();
+	Promise<ActivationSource> result = new Promise();
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
+	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
 
 	Assert.assertNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
@@ -163,7 +167,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
-	Promise<ServiceErrorResponse> result = new Promise();
+	Promise<ActivationSource> result = new Promise();
 
 	Object lock = new Object();
 	StateChangeEvent[] events = new StateChangeEvent[]{
@@ -208,9 +212,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	CommonContextManager sut = this.createSut();
 
 	synchronized (lock) {
-	    LOG.debug("XXX - creating");
-	    sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
-	    LOG.debug("XXX - main thread is waiting creating");
+	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
 	    lock.wait(WAIT_TIMEOUT);
 	    LOG.debug("XXX - main thread was awoken 1");
 	    lock.wait(WAIT_TIMEOUT);
@@ -223,18 +225,18 @@ public class CommonContextManagerWithFakeNfcTests {
 
     @Test
     void sutStartStopCorrectly() throws InterruptedException, TimeoutException, Exception {
-	Promise<ServiceErrorResponse> startResult = new Promise();
+	Promise<ActivationSource> startResult = new Promise();
 	Promise<ServiceErrorResponse> stopResult = new Promise();
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createContextServiceDelivery(startResult));
+	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(startResult, null));
 
 	Assert.assertNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
-	sut.stop(PromiseDeliveringFactory.createContextServiceDelivery(stopResult));
+	sut.stop(PromiseDeliveringFactory.createStopServiceDelivery(stopResult));
 
 	Assert.assertNull(stopResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
@@ -252,7 +254,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	Promise<ServiceErrorResponse> result = new Promise();
 
 	synchronized (lock) {
-	    sut.start(PromiseDeliveringFactory.createContextServiceDelivery(result));
+	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(null, result));
 	}
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS), "To be null, the start process must have unexpectedly succeeded!");
     }

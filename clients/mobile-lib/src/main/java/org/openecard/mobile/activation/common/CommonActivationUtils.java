@@ -22,6 +22,7 @@
 package org.openecard.mobile.activation.common;
 
 import java.net.MalformedURLException;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ActivationUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -34,7 +35,7 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
  *
  * @author Neil Crossley
  */
-public class CommonActivationUtils implements ActivationUtils, OpeneCardContextProvider {
+public class CommonActivationUtils implements ActivationUtils, OpeneCardContextProvider, ActivationSource {
 
     private CommonContextManager contextManager = null;
     private final Object managerLock = new Object();
@@ -81,7 +82,7 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 	    if (this.contextManager != null) {
 		return this.contextManager;
 	    }
-	    this.contextManager = new CommonContextManager(nfc, this.config);
+	    this.contextManager = new CommonContextManager(nfc, this.config, this);
 	    return this.contextManager;
 	}
     }

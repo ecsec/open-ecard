@@ -23,9 +23,11 @@ package org.openecard.mobile.activation.model;
 
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ControllerCallback;
-import org.openecard.mobile.activation.OpeneCardServiceHandler;
 import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.activation.StopServiceHandler;
 
 /**
  *
@@ -38,8 +40,26 @@ public final class PromiseDeliveringFactory {
     private PromiseDeliveringFactory() {
     }
 
-    public static OpeneCardServiceHandler createContextServiceDelivery(Promise<ServiceErrorResponse> outcome) {
-	return new OpeneCardServiceHandler() {
+    public static StartServiceHandler createStartServiceDelivery(Promise<ActivationSource> success, Promise<ServiceErrorResponse> failure) {
+	return new StartServiceHandler() {
+	    @Override
+	    public void onSuccess(ActivationSource source) {
+		if (success != null) {
+		    success.deliver(source);
+		}
+	    }
+
+	    @Override
+	    public void onFailure(ServiceErrorResponse response) {
+		if (failure != null) {
+		    failure.deliver(response);
+		}
+	    }
+	};
+    }
+
+    public static StopServiceHandler createStopServiceDelivery(Promise<ServiceErrorResponse> outcome) {
+	return new StopServiceHandler() {
 	    @Override
 	    public void onSuccess() {
 		outcome.deliver(null);

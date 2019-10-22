@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,17 +18,16 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ ************************************************************************** */
 package org.openecard.mobile.activation;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface ActivationUtils {
+public interface ActivationSource {
 
-    ContextManager context(NFCCapabilities nfc);
+    EacControllerFactory eacFactory();
+
+    PinManagementControllerFactory pinManagementFactory();
 }

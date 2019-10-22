@@ -26,9 +26,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
-import org.openecard.mobile.activation.OpeneCardServiceHandler;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
@@ -38,6 +38,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.openecard.mobile.activation.StopServiceHandler;
 
 /**
  *
@@ -52,7 +53,10 @@ public class CommonContextManagerTests {
     OpeneCardContextConfig config;
 
     @Mock
-    OpeneCardServiceHandler handler;
+    StopServiceHandler handler;
+
+    @Mock
+    ActivationSource source;
 
     MockitoSession mockito;
 
@@ -66,7 +70,7 @@ public class CommonContextManagerTests {
 		.strictness(Strictness.STRICT_STUBS)
 		.startMocking();
 
-	this.sut = new CommonContextManager(mockNfc, config);
+	this.sut = new CommonContextManager(mockNfc, config, source);
     }
 
     @AfterMethod()

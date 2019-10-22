@@ -23,8 +23,6 @@
 package org.openecard.ios.activation;
 
 import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
@@ -38,30 +36,24 @@ import org.openecard.ws.android.AndroidMarshaller;
 @FrameworkObject(factoryMethod = "createOpenEcard")
 public class OpenEcardImp implements OpenEcard {
 
-    private final IOSNFCCapabilities capabilities;
     private final CommonActivationUtils utils;
+    private final ContextManager context;
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), AndroidMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config);                                                                  
-	
-	this.capabilities = capabilities;
+	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
+
 	this.utils = activationUtils;
+	this.context = this.utils.context(capabilities);
     }
 
+    @Override
     public ContextManager context() {
-	return this.utils.context(capabilities);
+	return context;
     }
 
-    public EacControllerFactory eacFactory() {
-	return this.utils.eacFactory();
-    }
-
-    public PinManagementControllerFactory pinManagementFactory() {
-	return this.utils.pinManagementFactory();
-    }
-
+    @Override
     public void triggerNFC() {
 	try {
 	    IOSNFCFactory.triggerNFC();

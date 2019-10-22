@@ -23,8 +23,6 @@
 package org.openecard.ios.activation;
 
 import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -35,10 +33,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 public interface OpenEcard{
 
     ContextManager context();
-
-    EacControllerFactory eacFactory();
-
-    PinManagementControllerFactory pinManagementFactory();
 
     void triggerNFC();
 

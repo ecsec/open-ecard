@@ -22,15 +22,26 @@
 package org.openecard.mobile.activation.model;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import mockit.Expectations;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.openecard.binding.tctoken.TCTokenContext;
+import org.openecard.binding.tctoken.TrResourceContextLoader;
+import org.openecard.binding.tctoken.ex.AuthServerException;
+import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
+import org.openecard.binding.tctoken.ex.SecurityViolationException;
+import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationController;
@@ -209,6 +220,7 @@ public class World implements AutoCloseable {
 	private ActivationController activationController;
 	private Promise<Void> promisedRemoveCard;
 	private EacInteraction interaction;
+	private TrResourceContextLoader resourceLoader;
 
 	private EacControllerFactory eacControllerFactory() {
 	    if (_eacControllerFactory == null) {
@@ -217,9 +229,23 @@ public class World implements AutoCloseable {
 	    return _eacControllerFactory;
 	}
 
-	public void startSimpleEac() {
+	public void startSimpleEac(TrResourceContextLoader resourceLoader) {
 	    LOG.debug("Start simple eac.");
-	    String url = "http://localhost/eID-Client?tcTokenURL=" + "https%3A%2F%2Ftest.governikus-eid.de%3A443%2FAutent-DemoApplication%2FRequestServlet%3B%3Fprovider%3Ddemo_epa_20%26redirect%3Dtrue";
+	    this.resourceLoader = resourceLoader;
+	    String tckTokenUrl = "https://anotherurl.localhost";
+	    new Expectations() {{
+		try {
+		    TCTokenContext.generateTCToken(tckTokenUrl);
+		} catch (InvalidTCTokenException ex) {
+		} catch (AuthServerException ex) {
+		} catch (InvalidRedirectUrlException ex) {
+		} catch (InvalidTCTokenElement ex) {
+		} catch (SecurityViolationException ex) {
+		} catch (UserCancellationException ex) {
+		}
+		result = mock(TCTokenContext.class);
+	    }};
+	    String url = "http://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(tckTokenUrl, Charset.defaultCharset());;
 
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2018 ecsec GmbH.
+ * Copyright (C) 2015-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,9 +24,8 @@ package org.openecard.scio;
 
 import javax.annotation.Nonnull;
 import javax.smartcardio.CardException;
+import jnasmartcardio.Smartcardio.JnaPCSCException;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,50 +35,20 @@ import org.slf4j.LoggerFactory;
  */
 public class PCSCExceptionExtractor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PCSCExceptionExtractor.class);
-
     public static SCIOErrorCode getCode(@Nonnull CardException mainException) {
-	return getCode((Exception) mainException);
+	return getCode((JnaPCSCException) mainException);
     }
 
     /**
-     * Gets the actual error code from the given CardException.
-     * This method uses reflections to access the actual error code which is hidden in the Java SmartcardIO. In case no
-     * error code can be found, {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} is returned.
+     * Gets the actual error code from the given JnaPCSCException.
+     * In case no error code can be found, {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} is returned.
      *
      * @param mainException The exception coming from the Java SmartcardIO.
      * @return The code extracted from the exception, or {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} if no code could be
      *   extracted.
      */
-    public static SCIOErrorCode getCode(@Nonnull Exception mainException) {
-	Throwable cause = getPCSCException(mainException);
-	// check the type of the cause over reflections because these classes might not be available (sun internal)
-	if (cause != null) {
-	    try {
-		return SCIOErrorCode.valueOf(cause.getMessage());
-	    } catch (IllegalArgumentException ex) {
-		return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
-	    }
-	} else {
-	    return SCIOErrorCode.SCARD_F_UNKNOWN_ERROR;
-	}
-    }
-
-    public static boolean hasPCSCException(Exception mainException) {
-	return getPCSCException(mainException) != null;
-    }
-
-    private static Throwable getPCSCException(Exception mainException) {
-	Throwable cause = mainException.getCause();
-	// check the type of the cause over reflections because these classes might not be available (sun internal)
-	if (cause != null) {
-	    Class<?> c = cause.getClass();
-	    if ("sun.security.smartcardio.PCSCException".equals(c.getName())) {
-		return cause;
-	    }
-	}
-
-	return null;
+    public static SCIOErrorCode getCode(@Nonnull JnaPCSCException mainException) {
+	return SCIOErrorCode.getErrorCode(Math.toIntExact(mainException.code));
     }
 
 }

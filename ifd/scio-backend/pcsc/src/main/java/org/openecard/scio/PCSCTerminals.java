@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2014-2019 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -66,7 +66,6 @@ public class PCSCTerminals implements SCIOTerminals {
     }
 
     private void reloadFactory() {
-	terminalFactory.reloadPCSC();
 	loadTerminals();
     }
 

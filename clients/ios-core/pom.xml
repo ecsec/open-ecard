@@ -35,6 +35,10 @@
 							</artifactSet>
 							<relocations>
 								<relocation>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>hidden.org.apache.http</shadedPattern>
+								</relocation>
+								<relocation>
 									<pattern>org.bouncycastle</pattern>
 									<shadedPattern>hidden.org.bouncycastle</shadedPattern>
 								</relocation>

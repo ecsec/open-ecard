@@ -48,5 +48,7 @@
 	<pattern>javax.xml.xpath.**</pattern>
 	<pattern>org.apache.xerces.**</pattern>
 	<pattern>org.apache.xpath.jaxp.**</pattern>
+	<pattern>com.android.okhttp.HttpHandler</pattern>
+	<pattern>com.android.okhttp.HttpsHandler</pattern>
     </forceLinkClasses>
 </config>

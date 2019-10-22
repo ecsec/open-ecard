@@ -540,7 +540,7 @@ public class World implements AutoCloseable {
 	    }
 
 	    try {
-		Assert.assertNull(resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+		Assert.assertNotNull(resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }

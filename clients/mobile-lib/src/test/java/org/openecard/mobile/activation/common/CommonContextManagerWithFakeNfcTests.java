@@ -159,7 +159,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
 
-	Assert.assertNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -219,7 +219,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	    LOG.debug("XXX - main thread was awoken 2");
 	}
 
-	Assert.assertNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
     }
 
@@ -234,7 +234,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(startResult, null));
 
-	Assert.assertNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertNotNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
 	sut.stop(PromiseDeliveringFactory.createStopServiceDelivery(stopResult));
 

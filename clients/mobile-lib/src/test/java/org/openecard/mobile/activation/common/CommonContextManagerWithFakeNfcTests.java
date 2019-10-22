@@ -182,7 +182,6 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	    @Override
 	    public StateChangeEvent answer(InvocationOnMock invocation) throws Throwable {
-		LOG.debug("XXX - answer!");
 		Object[] args = invocation.getArguments();
 		long time;
 		if (args.length == 0) {
@@ -190,11 +189,9 @@ public class CommonContextManagerWithFakeNfcTests {
 		} else {
 		    time = Math.min(EVENT_DELAY, invocation.getArgument(0, Long.class));
 		}
-		LOG.debug("XXX - sleeping: {}", time);
 		Thread.sleep(time);
 
 		synchronized (lock) {
-		    LOG.debug("XXX - notifying of lock");
 		    lock.notifyAll();
 		    eventIndex = Math.min(eventIndex + 1, events.length - 1);
 
@@ -214,9 +211,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	synchronized (lock) {
 	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
 	    lock.wait(WAIT_TIMEOUT);
-	    LOG.debug("XXX - main thread was awoken 1");
 	    lock.wait(WAIT_TIMEOUT);
-	    LOG.debug("XXX - main thread was awoken 2");
 	}
 
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -243,7 +238,6 @@ public class CommonContextManagerWithFakeNfcTests {
 
     @Test()
     void sutCannotStartWithoutNfc() throws InterruptedException, TimeoutException, Exception {
-	LOG.debug("XXX - sutCannotStartWithoutNfc");
 	when(this.mockNfc.isAvailable()).thenReturn(Boolean.FALSE);
 	withNfcSupport(NfcConfig.createUnavailable());
 

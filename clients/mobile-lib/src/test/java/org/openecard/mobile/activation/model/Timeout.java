@@ -29,7 +29,7 @@ import java.lang.management.ManagementFactory;
  */
 public final class Timeout {
 
-    public static final int MIN_WAIT_TIMEOUT = 1000;
+    public static final int MIN_WAIT_TIMEOUT = 1500;
     public static final int WAIT_TIMEOUT = isDebug() ? Integer.MAX_VALUE : MIN_WAIT_TIMEOUT;
 
     private Timeout() {

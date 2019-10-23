@@ -22,6 +22,9 @@
 
 package org.openecard.ios.activation;
 
+import java.security.Provider;
+import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
@@ -35,6 +38,11 @@ import org.openecard.ws.android.AndroidMarshaller;
  */
 @FrameworkObject(factoryMethod = "createOpenEcard")
 public class OpenEcardImp implements OpenEcard {
+
+    static {
+	Provider provider = new BouncyCastleProvider();
+	Security.addProvider(provider);
+    }
 
     private final CommonActivationUtils utils;
     private final ContextManager context;

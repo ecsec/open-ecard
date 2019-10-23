@@ -49,6 +49,7 @@ import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.bouncycastle.tls.crypto.TlsCrypto;
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.openecard.common.DynamicContext;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
@@ -119,6 +120,9 @@ public class TlsConnectionHandler {
 		if (tlsClient instanceof ClientCertDefaultTlsClient) {
 		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
 		}
+		// save the info that we have a same channel situtation
+		DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE);
 	    } else {
 		// kill open channel in tctoken request, it is not needed anymore
 		if (tokenRequest.getTokenContext() != null) {
@@ -171,7 +175,7 @@ public class TlsConnectionHandler {
 		// make sure nobody changes the server when the connection gets reestablished
 		tlsAuth.addCertificateVerifier(new SameCertVerifier());
 		// save eService certificate for use in EAC
-		tlsAuth.addCertificateVerifier(new SaveEServiceCertHandler());
+		tlsAuth.addCertificateVerifier(new SaveEidServerCertHandler());
 
 		// set the authentication class in the tls client
 		tlsClient.setAuthentication(tlsAuth);

@@ -33,7 +33,7 @@ import org.openecard.crypto.tls.CertificateVerifier;
  *
  * @author Tobias Wich
  */
-public class SaveEServiceCertHandler implements CertificateVerifier {
+public class SaveEidServerCertHandler implements CertificateVerifier {
 
     boolean firstCert = true;
 
@@ -42,7 +42,7 @@ public class SaveEServiceCertHandler implements CertificateVerifier {
 	if (firstCert) {
 	    firstCert = false;
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    dynCtx.put(TR03112Keys.ESERVICE_CERTIFICATE, chain);
+	    dynCtx.put(TR03112Keys.EIDSERVER_CERTIFICATE, chain);
 	}
     }
 

@@ -219,8 +219,7 @@ public class World implements AutoCloseable {
 
 	public void startSimpleEac() {
 	    LOG.debug("Start simple eac.");
-	    String url = "http://localhost/eID-Client?session=blabla";
-
+	    String url = "http://localhost/eID-Client?tcTokenURL=" + "https%3A%2F%2Ftest.governikus-eid.de%3A443%2FAutent-DemoApplication%2FRequestServlet%3B%3Fprovider%3Ddemo_epa_20%26redirect%3Dtrue";
 
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();

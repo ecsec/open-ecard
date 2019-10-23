@@ -149,7 +149,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private void setHistBytes() {
-	NSData hist = this.tag.getHistoricalBytes();
+	NSData hist = this.tag != null ? this.tag.getHistoricalBytes() : null;
 	if (hist != null) {
 	    this.histBytes = hist.getBytes();
 	} else {

@@ -25,6 +25,7 @@ package org.openecard.ifd.protocol.pace;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.GeneralAuthenticate;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
@@ -135,7 +136,7 @@ public class PACEImplementation {
 		if (e.getCause() instanceof Exception) {
 		    throw (Exception) e.getCause();
 		} else {
-		    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());
+		    throw new ProtocolException(e.getResultMinor(), e.getMessage());
 		}
 	    }
 

@@ -72,7 +72,7 @@ public class ProcessingStepAction extends StepAction {
 	} catch (TimeoutException ex) {
 	    LOG.info("Timeout while waiting for the authentication to finish.", ex);
 	    ctx.put(EACProtocol.PACE_EXCEPTION, WSHelper.createException(WSHelper.makeResultError(
-		    ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog.")));
+		    ECardConstants.Minor.Disp.TIMEOUT, "Timeout during EAC process.")));
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }

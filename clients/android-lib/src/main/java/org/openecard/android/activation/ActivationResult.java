@@ -32,6 +32,7 @@ public class ActivationResult {
     private final String redirectUrl;
     private final ActivationResultCode resultCode;
     private final String errorMessage;
+    private String processMinor;
 
     public ActivationResult(ActivationResultCode resultCode) {
 	this(null, resultCode, null);
@@ -51,6 +52,10 @@ public class ActivationResult {
 	this.errorMessage = errorMessage;
     }
 
+    public void setProcessMinor(String processMinor) {
+	this.processMinor = processMinor;
+    }
+
     public String getRedirectUrl() {
 	return redirectUrl;
     }
@@ -61,6 +66,16 @@ public class ActivationResult {
 
     public String getErrorMessage() {
 	return errorMessage;
+    }
+
+    /**
+     * If present, represents the minor error code of the error leading to the termination of the process.
+     *
+     * @see ECardConstants.Minor;
+     * @return The minor result code or {@code null} if not present.
+     */
+    public String getProcessResultMinor() {
+	return processMinor;
     }
 
 }

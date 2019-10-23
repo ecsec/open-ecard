@@ -46,6 +46,7 @@ import org.openecard.binding.tctoken.TR03112Keys;
 import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
 import org.openecard.common.I18n;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
@@ -299,6 +300,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 				    switch (minor) {
 					case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 					case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
+					case ECardConstants.Minor.Disp.TIMEOUT:
 					    needsTermination = true;
 				    }
 				}
@@ -391,7 +393,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	} catch (WSHelper.WSException e) {
+	} catch (ECardException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);

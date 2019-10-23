@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.io.UnsupportedEncodingException;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
@@ -121,7 +122,7 @@ public class PACEProtocol implements Protocol {
 	    response.setResult(WSHelper.makeResultError(
 		    ECardConstants.Minor.IFD.IO.UNKNOWN_PIN_FORMAT,
 		    "Cannot encode the PIN in " + PACEConstants.PIN_CHARSET + " charset."));
-	} catch (ProtocolException ex) {
+	} catch (ECardException ex) {
 	    logger.error(ex.getMessage(), ex);
 	    response.setResult(WSHelper.makeResult(ex));
 	} catch (Throwable ex) {

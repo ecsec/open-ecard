@@ -111,7 +111,11 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
 	    return p.sendStartPAOS(sp);
 	} finally {
-	    TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
+	    try {
+		TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
+	    } catch (Exception ex) {
+		LOG.warn("Error disconnecting finished handle.", ex);
+	    }
 	}
     }
 

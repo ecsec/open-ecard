@@ -38,6 +38,8 @@ public class PAOSException extends I18nException {
     private static final long serialVersionUID = 1L;
     private static final I18n lang = I18n.getTranslation("tr03112");
 
+    private String additionalResultMinor;
+
     /**
      * Creates an instance and initializes the exception with a cause.
      *
@@ -76,6 +78,14 @@ public class PAOSException extends I18nException {
      */
     public PAOSException(I18nKey key, Throwable cause, Object... params) {
 	super(lang, key, cause, params);
+    }
+
+    public void setAdditionalResultMinor(String additionalResultMinor) {
+	this.additionalResultMinor = additionalResultMinor;
+    }
+
+    public String getAdditionalResultMinor() {
+	return additionalResultMinor;
     }
 
 }

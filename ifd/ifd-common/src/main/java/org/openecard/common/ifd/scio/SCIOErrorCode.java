@@ -188,8 +188,18 @@ public enum SCIOErrorCode {
 		return next;
 	    }
 	}
-	// no match found, unkown error
+	// no match found, unknown error
 	return SCARD_F_UNKNOWN_ERROR;
+    }
+
+    public static long getLong(SCIOErrorCode code) {
+	for (SCIOErrorCode next : SCIOErrorCode.values()) {
+	    if (next.name().equals(code.name())) {
+		return next.codes[0];
+	    }
+	}
+	// no match found, unknown error (SCARD_F_UNKNOWN_ERROR)
+	return -2146435052;
     }
 
 }

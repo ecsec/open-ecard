@@ -48,7 +48,7 @@ public class PCSCExceptionExtractor {
      *   extracted.
      */
     public static SCIOErrorCode getCode(@Nonnull JnaPCSCException mainException) {
-	return SCIOErrorCode.getErrorCode(Math.toIntExact(mainException.code));
+	return SCIOErrorCode.getErrorCode(mainException.code);
     }
 
 }

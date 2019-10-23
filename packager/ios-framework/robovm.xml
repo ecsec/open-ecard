@@ -36,6 +36,7 @@
             <targetPath>../../Modules</targetPath>
         </resource>
     </resources>
+    <!-- <treeShaker>none</treeShaker> -->
     <treeShaker>aggressive</treeShaker>
 
     <!-- Force link all classes in the SDK packages. -->
@@ -50,5 +51,6 @@
 	<pattern>org.apache.xpath.jaxp.**</pattern>
 	<pattern>com.android.okhttp.HttpHandler</pattern>
 	<pattern>com.android.okhttp.HttpsHandler</pattern>
+	<pattern>org.apache.harmony.xml.ExpatParser</pattern>
     </forceLinkClasses>
 </config>

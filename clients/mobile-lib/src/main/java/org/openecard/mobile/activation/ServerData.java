@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.activation;
 
+import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -35,7 +36,7 @@ public interface ServerData {
 
     String getIssuerUrl();
 
-    /* List<BoxItem> getReadAccessAttributes(); */
+    List<BoxItem> getReadAccessAttributes();
 
     String getSubject();
 
@@ -45,6 +46,6 @@ public interface ServerData {
 
     String getValidity();
 
-    /* List<BoxItem> getWriteAccessAttributes(); */
+    List<BoxItem> getWriteAccessAttributes();
 
 }

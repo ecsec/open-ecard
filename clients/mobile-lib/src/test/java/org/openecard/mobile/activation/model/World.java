@@ -203,7 +203,7 @@ public class World implements AutoCloseable {
 	private Promise<ActivationResult> promisedActivationResult;
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
-	private Promise<String> promisedRecognizeCard;
+	private Promise<Void> promisedRecognizeCard;
 	private Promise<ConfirmPasswordOperation> promisedOperationEnterOnePassword;
 	private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
 	private ActivationController activationController;
@@ -249,9 +249,9 @@ public class World implements AutoCloseable {
 		if (promisedRecognizeCard.isDelivered()) {
 		    promisedRecognizeCard = new Promise();
 		}
-		promisedRecognizeCard.deliver((String) arg0.getArguments()[0]);
+		promisedRecognizeCard.deliver(null);
 		return null;
-	    }).when(interaction).onCardRecognized(anyString());
+	    }).when(interaction).onCardRecognized();
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
@@ -303,8 +303,7 @@ public class World implements AutoCloseable {
 	public void expectRecognitionOfNpaCard() {
 	    LOG.debug("Expect recognition of NPA card.");
 	    try {
-		String type = promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-		Assert.assertEquals(type, "http://bsi.bund.de/cif/npa.xml");
+		promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -366,7 +365,7 @@ public class World implements AutoCloseable {
 	private Promise<ActivationResult> promisedActivationResult;
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
-	private Promise<String> promisedRecognizeCard;
+	private Promise<Void> promisedRecognizeCard;
 	private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
 	private PinManagementInteraction interaction;
 	private ActivationController activationController;
@@ -414,9 +413,9 @@ public class World implements AutoCloseable {
 		if (promisedRecognizeCard.isDelivered()) {
 		    promisedRecognizeCard = new Promise();
 		}
-		promisedRecognizeCard.deliver((String) arg0.getArguments()[0]);
+		promisedRecognizeCard.deliver(null);
 		return null;
-	    }).when(interaction).onCardRecognized(anyString());
+	    }).when(interaction).onCardRecognized();
 	    activationController = pinManagementFactory().create(
 		    /* supportedCards, */
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
@@ -454,8 +453,7 @@ public class World implements AutoCloseable {
 	public void expectRecognitionOfNpaCard() {
 	    LOG.debug("Expect recognition of NPA card.");
 	    try {
-		String type = promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-		Assert.assertEquals(type, "http://bsi.bund.de/cif/npa.xml");
+		promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }

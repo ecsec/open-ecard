@@ -49,9 +49,9 @@ public class CommonCardEventHandler {
 	}
     }
 
-    public void onCardRecognized(String type) {
+    public void onCardRecognized() {
 	cardRecognized = true;
-	interaction.onCardRecognized(type);
+	interaction.onCardRecognized();
     }
 
     public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
@@ -91,7 +91,7 @@ public class CommonCardEventHandler {
 			    // remove handler when the correct card is present
 			    eventDispatcher.del(this);
 
-			    handler.onCardRecognized(type);
+			    handler.onCardRecognized();
 			}
 
 			break;

@@ -31,6 +31,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ActivationInteraction {
     void requestCardInsertion();
-    void onCardRecognized(String type);
+    void onCardRecognized();
     void onCardRemoved();
 }

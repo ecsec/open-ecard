@@ -61,4 +61,6 @@ module org.openecard.richclient {
 
     opens org.openecard.mdlw.sal.config to java.xml.bind;
     opens org.openecard.addon.manifest to java.xml.bind;
+
+    opens jnasmartcardio to java.base;
 }

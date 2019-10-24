@@ -31,6 +31,8 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSNFCFactory;
 import org.openecard.ws.android.AndroidMarshaller;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.scio.IOSConfig;
 
 /**
  *
@@ -50,28 +52,44 @@ public class OpenEcardImp implements OpenEcard {
 
     private final CommonActivationUtils utils;
     private final ContextManager context;
+    private String defaultNFCDialogMsg;
+    private String defaultNFCCardRecognizedMessage;
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), AndroidMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config);
-
+	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter());
 	this.utils = activationUtils;
 	this.context = this.utils.context(capabilities);
     }
 
-    @Override
-    public ContextManager context() {
-	return context;
-    }
 
     @Override
     public void triggerNFC() {
 	try {
-	    IOSNFCFactory.triggerNFC();
+	    IOSNFCFactory.triggerNFC(new IOSConfig() {
+		public String getDefaultProviderCardMSG() {
+
+		    return defaultNFCDialogMsg;
+		}
+
+		public String getDefaultCardRecognizedMSG() {
+
+		    return defaultNFCCardRecognizedMessage;
+		}
+
+
+	    });
 	} catch (Exception ex) {
 	    throw new RuntimeException(ex);
 	}
+    }
+
+    @Override
+    public ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage) {
+	this.defaultNFCDialogMsg = defaultNFCDialgoMsg;
+	this.defaultNFCCardRecognizedMessage = defaultNFCCardRecognizedMessage;
+	return context;
     }
 
 }

@@ -32,7 +32,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface OpenEcard{
 
-    ContextManager context();
+    ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage);
 
     void triggerNFC();
 

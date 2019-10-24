@@ -104,4 +104,8 @@ public abstract class AbstractNFCCard implements SCIOCard {
 
     public abstract byte[] transceive(byte[] apdu) throws IOException;
 
+    void setDialogMsg(String msg) {
+	throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

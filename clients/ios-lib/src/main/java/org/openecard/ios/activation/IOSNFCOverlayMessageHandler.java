@@ -1,5 +1,5 @@
-/****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/** **************************************************************************
+ * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,20 +18,26 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ ************************************************************************** */
+package org.openecard.ios.activation;
 
-package org.openecard.mobile.activation;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
+import org.openecard.scio.NFCCardTerminal;
 
 /**
  *
- * @author Neil Crossley
+ * @author Florian Otto
  */
-@FrameworkInterface
-public interface ActivationInteraction {
-    void requestCardInsertion();
-    void onCardRecognized(String type);
-    void onCardRecognized(String type, NFCOverlayMessageHandler msgHandler);
-    void onCardRemoved();
+public class IOSNFCOverlayMessageHandler implements NFCOverlayMessageHandler {
+
+    private final NFCCardTerminal terminal;
+
+    public IOSNFCOverlayMessageHandler(NFCCardTerminal terminal) {
+	this.terminal = terminal;
+    }
+
+    public void setText(String msg) {
+	this.terminal.setDialogMsg(msg);
+    }
+
 }

@@ -163,4 +163,8 @@ public class NFCCardTerminal implements SCIOTerminal {
 	return isCardPresent();
     }
 
+    public void setDialogMsg(String msg) {
+	this.nfcCard.setDialogMsg(msg);
+    }
+
 }

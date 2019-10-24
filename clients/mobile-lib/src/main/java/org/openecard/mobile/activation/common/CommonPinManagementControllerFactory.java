@@ -51,23 +51,25 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 
     private final ActivationControllerService activationControllerService;
     private final URL activationUrl;
+    private final NFCDialogMsgSetter msgSetter;
 
-    public CommonPinManagementControllerFactory(URL activationUrl, ActivationControllerService activationControllerService) {
+    public CommonPinManagementControllerFactory(URL activationUrl, ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
 	this.activationControllerService = activationControllerService;
 	this.activationUrl = activationUrl;
+	this.msgSetter = msgSetter;
     }
 
     @Override
     public ActivationController create(ControllerCallback activation, PinManagementInteraction interaction) {
 
-	return create(new HashSet<>(), activation, interaction);
+	return create(new HashSet<>(), activation, interaction, msgSetter);
     }
 
-    public ActivationController create(Set<String> supportedCards, ControllerCallback activation, PinManagementInteraction interaction) {
+    public ActivationController create(Set<String> supportedCards, ControllerCallback activation, PinManagementInteraction interaction, NFCDialogMsgSetter msgSetter) {
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override
 	    public AutoCloseable create(EventDispatcher dispatcher) {
-		return CommonCardEventHandler.create(supportedCards, dispatcher, interaction);
+		return CommonCardEventHandler.create(supportedCards, dispatcher, interaction, msgSetter);
 	    }
 	};
 
@@ -79,10 +81,10 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 
     }
 
-    static CommonPinManagementControllerFactory create(ActivationControllerService activationControllerService) throws MalformedURLException {
+    static CommonPinManagementControllerFactory create(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) throws MalformedURLException {
 	return new CommonPinManagementControllerFactory(
 		ACTIVATION_URL,
-		activationControllerService);
+		activationControllerService, msgSetter);
     }
 
 }

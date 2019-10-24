@@ -16,6 +16,7 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,12 @@ public class CommonCardEventHandler {
     private final ActivationInteraction interaction;
     private boolean cardPresent;
     private boolean cardRecognized;
+    private NFCDialogMsgSetter msgSetter;
 
-    public CommonCardEventHandler(ActivationInteraction interaction, boolean cardPresent, boolean cardRecognized) {
+    public CommonCardEventHandler(ActivationInteraction interaction, boolean cardPresent, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
 	this.interaction = interaction;
 	this.cardPresent = cardPresent;
+	this.msgSetter = msgSetter;
     }
 
     public void onCardInserted() {
@@ -51,7 +54,17 @@ public class CommonCardEventHandler {
 
     public void onCardRecognized() {
 	cardRecognized = true;
-	interaction.onCardRecognized();
+
+	if (msgSetter.isSupported()) {
+	    interaction.onCardRecognized(type, new NFCOverlayMessageHandler() {
+		@Override
+		public void setText(String msg) {
+		    msgSetter.setText(msg);
+		}
+	    });
+	} else {
+	    interaction.onCardRecognized(type);
+	}
     }
 
     public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
@@ -123,10 +136,11 @@ public class CommonCardEventHandler {
 	};
     }
 
-    public static AutoCloseable create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
+    public static AutoCloseable create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
 
-	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false);
+	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false, msgSetter);
 
 	return hookUp(created, supportedCards, eventDispatcher, interaction);
     }
+
 }

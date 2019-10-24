@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,20 +18,18 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
- * @author Neil Crossley
+ * @author Florian Otto
  */
 @FrameworkInterface
-public interface ActivationInteraction {
-    void requestCardInsertion();
-    void onCardRecognized(String type);
-    void onCardRecognized(String type, NFCOverlayMessageHandler msgHandler);
-    void onCardRemoved();
+public interface NFCOverlayMessageHandler {
+
+    void setText(String msg);
+
 }

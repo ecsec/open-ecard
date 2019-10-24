@@ -40,9 +40,11 @@ public class CommonEacControllerFactory implements EacControllerFactory {
     private static final String PROTOCOL_TYPE = "urn:oid:1.3.162.15480.3.0.14";
 
     private final ActivationControllerService activationControllerService;
+    private final NFCDialogMsgSetter msgSetter;
 
-    public CommonEacControllerFactory(ActivationControllerService activationControllerService) {
+    public CommonEacControllerFactory(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
 	this.activationControllerService = activationControllerService;
+	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 	    @Override
 	    public AutoCloseable create(EventDispatcher dispatcher) {
 		return new ArrayBackedAutoCloseable(new AutoCloseable[] {
-		    CommonCardEventHandler.hookUp(created, supportedCards, dispatcher, interaction),
+		    CommonCardEventHandler.hookUp(created, supportedCards, dispatcher, interaction, msgSetter),
 		    EacCardEventHandler.hookUp(new EacCardEventHandler(), dispatcher, interaction)
 		});
 	    }
@@ -79,8 +81,8 @@ public class CommonEacControllerFactory implements EacControllerFactory {
     public void destroy(ActivationController controller) {
     }
 
-    static CommonEacControllerFactory create(ActivationControllerService activationControllerService) {
+    static CommonEacControllerFactory create(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
 	return new CommonEacControllerFactory(
-		activationControllerService);
+		activationControllerService, msgSetter);
     }
 }

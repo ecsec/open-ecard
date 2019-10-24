@@ -22,6 +22,7 @@
 package org.openecard.mobile.activation.model;
 
 import org.openecard.mobile.activation.common.CommonActivationUtils;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 
 /**
  *
@@ -40,7 +41,16 @@ public class WorldBuilder implements Builder<World> {
     }
 
     public World build() {
-	CommonActivationUtils activationUtils = new CommonActivationUtils(this.configFactory.build());
+	CommonActivationUtils activationUtils = new CommonActivationUtils(this.configFactory.build(), new NFCDialogMsgSetter() {
+	    @Override
+	    public void setText(String msg) {
+	    }
+
+	    @Override
+	    public boolean isSupported() {
+		return true;
+	    }
+	});
 	return new World(activationUtils, capabilities, terminalConfigurator);
     }
 

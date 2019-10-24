@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 public final class IOSNFCCard extends AbstractNFCCard {
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
-    private String dialogMsg = "Please provide card.";
     private byte[] histBytes;
     private NFCTagReaderSessionDelegateAdapter del;
 
@@ -66,9 +65,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private NFCTagReaderSession nfcSession;
     private NFCISO7816Tag tag;
+    private IOSConfig cfg;
 
-    public IOSNFCCard(NFCCardTerminal terminal) throws IOException {
+    public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) throws IOException {
 	super(terminal);
+	this.cfg = cfg;
     }
 
     private void setTag(NFCISO7816Tag tag) {
@@ -110,6 +111,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			setTag(tag);
+			setDialogMsg(cfg.getDefaultCardRecognizedMSG());
 		    });
 		}
 	    }
@@ -118,9 +120,16 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     }
 
+    @Override
+    public void setDialogMsg(String msg) {
+	if (this.nfcSession != null) {
+	    this.nfcSession.setAlertMessage(msg);
+	}
+    }
+
     public void connect() throws SCIOException {
 	this.initSessionObj();
-	this.nfcSession.setAlertMessage(this.dialogMsg);
+	this.nfcSession.setAlertMessage(cfg.getDefaultProviderCardMSG());
 	this.nfcSession.beginSession();
 	while (!isCardPresent()) {
 	    try {
@@ -222,10 +231,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     public void setConcurrencyMode(DISPATCH_MODE mode) {
 	this.concurrencyMode = mode;
-    }
-
-    public void setDialogMsg(String dialogMsg) {
-	this.dialogMsg = dialogMsg;
     }
 
 }

@@ -55,17 +55,24 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 	}
 
 	Set<String> supportedCards = new HashSet<>();
+
+	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false);
+
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override
 	    public AutoCloseable create(EventDispatcher dispatcher) {
 		return new ArrayBackedAutoCloseable(new AutoCloseable[] {
-		    CommonCardEventHandler.create(supportedCards, dispatcher, interaction),
+		    CommonCardEventHandler.hookUp(created, supportedCards, dispatcher, interaction),
 		    EacCardEventHandler.hookUp(new EacCardEventHandler(), dispatcher, interaction)
 		});
 	    }
 	};
 
-	return new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
+	CommonActivationController controller = new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
+
+	controller.start();
+
+	return controller;
     }
 
     @Override

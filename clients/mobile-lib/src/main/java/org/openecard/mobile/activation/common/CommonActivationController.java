@@ -33,7 +33,6 @@ class CommonActivationController implements ActivationController {
 	this.hooks = hooks;
     }
 
-    @Override
     public void start() {
 	this.activationControllerService.start(this.requestURI, this.activation, this.hooks);
     }

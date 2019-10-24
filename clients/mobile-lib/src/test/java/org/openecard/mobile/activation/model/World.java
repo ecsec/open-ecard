@@ -270,7 +270,6 @@ public class World implements AutoCloseable {
 		    url,
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
 		    interaction);
-	    activationController.start();
 	}
 
 	public void expectActivationResult(ActivationResultCode code) {
@@ -422,7 +421,6 @@ public class World implements AutoCloseable {
 		    /* supportedCards, */
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
 		    interaction);
-	    activationController.start();
 	}
 
 	public void expectActivationResult(ActivationResultCode code) {

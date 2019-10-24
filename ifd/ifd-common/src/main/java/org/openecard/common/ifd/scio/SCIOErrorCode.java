@@ -199,7 +199,7 @@ public enum SCIOErrorCode {
 	    }
 	}
 	// no match found, unknown error (SCARD_F_UNKNOWN_ERROR)
-	return -2146435052;
+	return SCARD_F_UNKNOWN_ERROR.SCARD_F_UNKNOWN_ERROR.codes[0];
     }
 
 }

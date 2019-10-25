@@ -26,5 +26,5 @@ package org.openecard.mobile.activation;
  * @author Neil Crossley
  */
 public interface ConfirmTwoValuesOperation<T1, T2> {
-    boolean enter(T1 oldPassword, T2 newPassword);
+    void enter(T1 oldPassword, T2 newPassword);
 }

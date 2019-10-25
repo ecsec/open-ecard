@@ -151,8 +151,6 @@ public class IfdEventManager {
      * @param ifaceProtocol Interface protocol of the connected card.
      */
     public void emitResetCardEvent(ConnectionHandleType cHandleRm, ConnectionHandleType cHandleIn, String ifaceProtocol) {
-	env.getEventDispatcher().notify(EventType.CARD_REMOVED, new IfdEventObject(cHandleRm, null, true)); //signal reset
-
 	// determine if the reader has a protected auth path
 	IFDCapabilitiesType slotCapabilities = getCapabilities(cHandleRm.getContextHandle(), cHandleRm.getIFDName());
 	boolean protectedAuthPath = slotCapabilities != null ? ! slotCapabilities.getKeyPadCapability().isEmpty() : false;
@@ -167,7 +165,7 @@ public class IfdEventManager {
 		.setSlotHandle(cHandleIn.getSlotHandle())
 		.setProtectedAuthPath(protectedAuthPath)
 		.buildConnectionHandle();
-	env.getEventDispatcher().notify(EventType.CARD_INSERTED, new IfdEventObject(cInNew));
+	env.getEventDispatcher().notify(EventType.CARD_RESET, new IfdEventObject(cInNew, ifaceProtocol, true));
     }
 
     @Nullable

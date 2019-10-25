@@ -37,11 +37,11 @@ import org.openecard.richclient.gui.manage.SettingsPanel;
 public class MiddlewareSelectionPanel extends SettingsPanel{
 
     private static final long serialVersionUID = 1L;
-    private final MiddlewareSelectionGroup middlewares;
-
-    public MiddlewareSelectionPanel() {
-	middlewares = new MiddlewareSelectionGroup();
-	addSettingsGroup(middlewares);
-    }
+//    private final MiddlewareSelectionGroup middlewares;
+//
+//    public MiddlewareSelectionPanel() {
+//	middlewares = new MiddlewareSelectionGroup();
+//	addSettingsGroup(middlewares);
+//    }
 
 }

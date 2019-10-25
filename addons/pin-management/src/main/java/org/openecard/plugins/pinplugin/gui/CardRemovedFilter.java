@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 ecsec GmbH.
+ * Copyright (C) 2018-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  * 
@@ -31,6 +31,7 @@ import org.openecard.common.interfaces.EventFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  *
  * @author Sebastian Schuberth
@@ -53,24 +54,18 @@ public class CardRemovedFilter implements EventFilter {
 	if (t.equals(EventType.CARD_REMOVED)) {
 	    LOG.debug("Received CARD_REMOVED event.");
 	    ConnectionHandleType conHandle = null;
-	    boolean reset = false;
 	    if (o instanceof IfdEventObject) {
 		conHandle = ((IfdEventObject) o).getHandle();
-		reset = ((IfdEventObject) o).cardWasReset();
 	    } else if (o instanceof ConnectionHandleType) {
 		conHandle = (ConnectionHandleType) o;
 	    }
-	    
-	    if(reset){
-		LOG.info("Card was reset -> ignore");
+
+	    if (conHandle != null && ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
+		LOG.info("Card removed during processing of PIN Management GUI.");
+		return true;
 	    } else {
-		if (conHandle != null && ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
-		    LOG.info("Card removed during processing of PIN Management GUI.");
-		    return true;
-		} else {
-		    LOG.debug("An unrelated card has been removed.");
-		    return false;
-		}
+		LOG.debug("An unrelated card has been removed.");
+		return false;
 	    }
 	}
 

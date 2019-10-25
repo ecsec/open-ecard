@@ -34,7 +34,6 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
 import java.io.IOException;
 import java.net.BindException;
-import java.util.List;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
@@ -60,6 +59,7 @@ import org.openecard.common.WSHelper;
 import org.openecard.control.binding.http.HttpBinding;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.event.EventType;
+import org.openecard.common.sal.CombinedCIFProvider;
 import org.openecard.gui.message.DialogType;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -70,16 +70,14 @@ import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.richclient.gui.AppTray;
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper;
-import org.openecard.mdlw.sal.MiddlewareSAL;
-import org.openecard.mdlw.sal.config.MiddlewareConfigLoader;
-import org.openecard.mdlw.sal.config.MiddlewareSALConfig;
 import org.openecard.richclient.updater.VersionUpdateChecker;
-import org.openecard.sal.SelectorSAL;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.openecard.httpcore.HttpRequestHelper;
 import org.openecard.httpcore.HttpUtils;
 import org.openecard.httpcore.StreamHttpClientConnection;
+import org.openecard.recognition.RepoCifProvider;
+import org.openecard.ws.SAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +104,7 @@ public final class RichClient {
     // Interface Device Layer (IFD)
     private IFD ifd;
     // Service Access Layer (SAL)
-    private SelectorSAL sal;
+    private SAL sal;
     // AddonManager
     private AddonManager manager;
     // EventDispatcherImpl
@@ -173,8 +171,8 @@ public final class RichClient {
 	    env.setManagement(management);
 
 	    // Set up MiddlewareConfig
-	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
-	    List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
+//	    MiddlewareConfigLoader mwConfigLoader = new MiddlewareConfigLoader();
+//	    List<MiddlewareSALConfig> mwSALConfigs = mwConfigLoader.getMiddlewareSALConfigs();
 
 	    // Set up CardRecognitionImpl
 	    recognition = new CardRecognitionImpl(env);
@@ -188,22 +186,26 @@ public final class RichClient {
 	    ifd.setEnvironment(env);
 	    env.setIFD(ifd);
 
+	    CombinedCIFProvider cifProv = new CombinedCIFProvider();
+	    env.setCIFProvider(cifProv);
+	    cifProv.addCifProvider(new RepoCifProvider(recognition));
+
 	    // Set up SAL
 	    TinySAL mainSal = new TinySAL(env);
 	    mainSal.setGUI(gui);
 
-	    sal = new SelectorSAL(mainSal, env);
+	    sal = mainSal;
 	    env.setSAL(sal);
-	    env.setCIFProvider(sal);
 
 	    // Set up Middleware SAL
-	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
-		if (! mwSALConfig.isDisabled()) {
-		    MiddlewareSAL mwSal = new MiddlewareSAL(env, mwSALConfig);
-		    mwSal.setGui(gui);
-		    sal.addSpecializedSAL(mwSal);
-		}
-	    }
+//	    for (MiddlewareSALConfig mwSALConfig : mwSALConfigs) {
+//		if (! mwSALConfig.isDisabled()) {
+//		    MiddlewareSAL mwSal = new MiddlewareSAL(env, mwSALConfig);
+//		    mwSal.setGui(gui);
+//		    sal.addSpecializedSAL(mwSal);
+//		}
+//	    }
+
 
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
@@ -269,19 +271,20 @@ public final class RichClient {
 		    EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
 		    EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED);
 
-	    // initialize SAL
-	    WSHelper.checkResult(sal.initialize(new Initialize()));
-
 	    // Perform an EstablishContext to get a ContextHandle
 	    try {
 		EstablishContext establishContext = new EstablishContext();
 		EstablishContextResponse establishContextResponse = ifd.establishContext(establishContext);
 		WSHelper.checkResult(establishContextResponse);
 		contextHandle = establishContextResponse.getContextHandle();
+		mainSal.setIfdCtx(contextHandle);
 	    } catch (WSHelper.WSException ex) {
 		message = LANG.translationForKey("client.startup.failed.nocontext");
 		throw ex;
 	    }
+
+	    // initialize SAL
+	    WSHelper.checkResult(sal.initialize(new Initialize()));
 
 	    // perform GC to bring down originally allocated memory
 	    new Timer("GC-Task").schedule(new GCTask(), 5000);

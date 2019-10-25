@@ -30,11 +30,12 @@
 			<artifactId>tiny-sal</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+		<!-- TODO: reactivate middleware sal -->
+		<!--dependency>
 			<groupId>org.openecard.sal</groupId>
 			<artifactId>middleware-sal</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency-->
 		<dependency>
 			<groupId>org.openecard.ifd.protocols</groupId>
 			<artifactId>pace</artifactId>

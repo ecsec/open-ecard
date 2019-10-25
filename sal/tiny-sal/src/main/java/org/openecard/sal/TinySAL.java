@@ -191,6 +191,7 @@ import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.sal.state.SalStateManager;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
@@ -223,10 +224,14 @@ public class TinySAL implements SAL {
     private static final byte[] MF = new byte[] {(byte) 0x3F, (byte) 0x00};
 
     private final Environment env;
-    private final CardStateMap states;
+    private final SalStateManager salStates;
+    //private final CardStateMap states = null; // TODO: replace with SalStateManager
+    private byte[] ifdCtx;
     private AddonManager addonManager;
     private AddonSelector protocolSelector;
     private UserConsent userConsent;
+
+    private SalEventManager evtMan;
 
     /**
      * Creates a new TinySAL.
@@ -235,8 +240,7 @@ public class TinySAL implements SAL {
      */
     public TinySAL(Environment env) {
 	this.env = env;
-	// TODO: correct code to work according to new design
-	this.states = null;
+	this.salStates = new SalStateManager();
     }
 
     public void setAddonManager(AddonManager manager) {
@@ -257,6 +261,10 @@ public class TinySAL implements SAL {
 	return protos;
     }
 
+    public void setIfdCtx(byte[] ctx) {
+	this.ifdCtx = ByteUtils.clone(ctx);
+    }
+
     /**
      * The Initialize function is executed when the ISO24727-3-Interface is invoked for the first time.
      * The interface is initialised with this function.
@@ -267,6 +275,7 @@ public class TinySAL implements SAL {
      */
     @Override
     public InitializeResponse initialize(Initialize request) {
+	evtMan = new SalEventManager(salStates, env, ifdCtx);
 	InitializeResponse res = WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultOK());
 	return res;
     }
@@ -281,6 +290,7 @@ public class TinySAL implements SAL {
      */
     @Override
     public TerminateResponse terminate(Terminate request) {
+	evtMan.terminate();
 	TerminateResponse res = WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultOK());
 	return res;
     }

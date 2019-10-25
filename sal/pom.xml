@@ -17,7 +17,8 @@
 	<modules>
 		<module>sal-common</module>
 		<module>tiny-sal</module>
-		<module>middleware-sal</module>
+		<!-- TODO: reactivate middleware sal -->
+		<!--module>middleware-sal</module-->
 	</modules>
 
 </project>

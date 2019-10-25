@@ -399,17 +399,19 @@ public class CardRecognitionImpl implements CardRecognition {
     public RecognitionInfo recognizeCard(byte[] ctx, String ifdName, BigInteger slot) throws RecognitionException {
 	// connect card
 	byte[] slotHandle = connect(ctx, ifdName, slot);
-	// recognise card
-	String type = treeCalls(slotHandle, getTree().getCardCall());
-	// disconnect and return
-	disconnect(slotHandle);
-	// build result or throw exception if it is null or unsupported
-	if (type == null || ! isSupportedCard(type)) {
-	    return null;
+	try {
+	    // recognise card
+	    String type = treeCalls(slotHandle, getTree().getCardCall());
+	    // build result or throw exception if it is null or unsupported
+	    if (type == null || ! isSupportedCard(type)) {
+		return null;
+	    }
+	    RecognitionInfo info = new RecognitionInfo();
+	    info.setCardType(type);
+	    return info;
+	} finally {
+	    disconnect(slotHandle);
 	}
-	RecognitionInfo info = new RecognitionInfo();
-	info.setCardType(type);
-	return info;
     }
 
 

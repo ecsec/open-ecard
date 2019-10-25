@@ -111,8 +111,8 @@ public class SignatureVerifier {
 		Collection<X509CertificateHolder> certCollection = certStore.getMatches(signer.getSID());
 		X509CertificateHolder cert = certCollection.iterator().next();
 
-		DigestCalculatorProvider dp = new JcaDigestCalculatorProviderBuilder().setProvider("BC").build();
-		JcaSignerInfoVerifierBuilder verifBuilder = new JcaSignerInfoVerifierBuilder(dp).setProvider("BC");
+		DigestCalculatorProvider dp = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+		JcaSignerInfoVerifierBuilder verifBuilder = new JcaSignerInfoVerifierBuilder(dp).setProvider(BouncyCastleProvider.PROVIDER_NAME);
 		verifBuilder.setSignatureAlgorithmFinder(new DefaultSignatureAlgorithmIdentifierFinder() {
 		    @Override
 		    public AlgorithmIdentifier find(String sigAlgName) {

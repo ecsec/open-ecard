@@ -5,7 +5,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.0-rc.4-SNAPSHOT</version>
+	<version>1.4.0-rc.4</version>
 	<name>Open eCard Client</name>
 
 	<url>http://www.openecard.org/</url>
@@ -20,7 +20,7 @@
 		<connection>scm:git:https://github.com/ecsec/open-ecard.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/ecsec/open-ecard.git</developerConnection>
 		<url>https://github.com/ecsec/open-ecard</url>
-		<tag>1.2.4</tag>
+		<tag>1.4.0-rc.4</tag>
 	</scm>
 	<ciManagement>
 		<system>Jenkins CI</system>
@@ -80,7 +80,7 @@
 		<version.pmd>6.17.0</version.pmd>
 		<version.openjfx>12.0.2</version.openjfx>
 		<!-- preset argLine for Netbeans direct test execution -->
-		<argLine></argLine>
+		<argLine />
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>

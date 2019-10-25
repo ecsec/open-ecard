@@ -63,7 +63,7 @@ public class CommonCardEventHandler {
 	}
     }
 
-    public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction) {
+    public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
 
 	EventCallback cardInsertionHandler = new EventCallback() {
 	    @Override
@@ -136,7 +136,7 @@ public class CommonCardEventHandler {
 
 	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false, msgSetter);
 
-	return hookUp(created, supportedCards, eventDispatcher, interaction);
+	return hookUp(created, supportedCards, eventDispatcher, interaction, msgSetter);
     }
 
 

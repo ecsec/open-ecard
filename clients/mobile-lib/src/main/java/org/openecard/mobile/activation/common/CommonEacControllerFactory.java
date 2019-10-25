@@ -58,7 +58,7 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 
 	Set<String> supportedCards = new HashSet<>();
 
-	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false);
+	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false, msgSetter);
 
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override

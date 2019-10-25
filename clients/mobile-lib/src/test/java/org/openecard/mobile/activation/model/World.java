@@ -309,14 +309,13 @@ public class World implements AutoCloseable {
 	    }
 	}
 
-	private void expectPinEntryWithSuccess(String currentPin, boolean expected) {
+	private void expectPinEntryWithSuccess(String currentPin) {
 	    try {
 		ConfirmPasswordOperation operation = promisedOperationEnterOnePassword.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 		if (operation == null) {
 		    throw new IllegalStateException();
 		}
-		boolean result = operation.enter(currentPin);
-		Assert.assertEquals(result, expected);
+		operation.enter(currentPin);
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -332,11 +331,11 @@ public class World implements AutoCloseable {
 	}
 
 	public void expectSuccessfulPinEntry() {
-	    expectPinEntryWithSuccess("123123", true);
+	    expectPinEntryWithSuccess("123123");
 	}
 
 	public void expectIncorrectPinEntryToFail() {
-	    expectPinEntryWithSuccess("847826", false);
+	    expectPinEntryWithSuccess("847826");
 	}
 
 	public void cancelEac() {
@@ -459,14 +458,13 @@ public class World implements AutoCloseable {
 	    }
 	}
 
-	private void expectPinChangeWithSuccess(String currentPin, String newPin, boolean expected) {
+	private void expectPinChangeWithSuccess(String currentPin, String newPin) {
 	    try {
 		ConfirmTwoPasswordsOperation operation = promisedOperationEnterTwoPasswords.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 		if (operation == null) {
 		    throw new IllegalStateException();
 		}
-		boolean result = operation.enter(currentPin, newPin);
-		Assert.assertEquals(result, expected);
+		operation.enter(currentPin, newPin);
 	    } catch (InterruptedException | TimeoutException ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -482,11 +480,11 @@ public class World implements AutoCloseable {
 	}
 
 	public void expectSuccessfulPinChange() {
-	    expectPinChangeWithSuccess("123123", "123123", true);
+	    expectPinChangeWithSuccess("123123", "123123");
 	}
 
 	public void expectIncorrectPinChangeToFail() {
-	    expectPinChangeWithSuccess("123123", "847826", false);
+	    expectPinChangeWithSuccess("123123", "847826");
 	}
 
 	public void cancelPinManagement() {

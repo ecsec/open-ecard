@@ -12,7 +12,7 @@
 
 package org.openecard.crypto.tls.auth;
 
-import org.bouncycastle.tls.TlsContext;
+import org.openecard.bouncycastle.tls.TlsContext;
 
 
 /**

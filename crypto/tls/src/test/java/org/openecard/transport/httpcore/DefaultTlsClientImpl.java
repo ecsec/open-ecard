@@ -23,12 +23,12 @@
 package org.openecard.transport.httpcore;
 
 import java.io.IOException;
-import org.bouncycastle.tls.CertificateRequest;
-import org.bouncycastle.tls.DefaultTlsClient;
-import org.bouncycastle.tls.TlsAuthentication;
-import org.bouncycastle.tls.TlsCredentials;
-import org.bouncycastle.tls.TlsServerCertificate;
-import org.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.DefaultTlsClient;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 
 
 /**

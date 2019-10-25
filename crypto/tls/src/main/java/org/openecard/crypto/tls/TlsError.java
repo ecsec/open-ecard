@@ -24,8 +24,8 @@ package org.openecard.crypto.tls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.bouncycastle.tls.AlertDescription;
-import org.bouncycastle.tls.AlertLevel;
+import org.openecard.bouncycastle.tls.AlertDescription;
+import org.openecard.bouncycastle.tls.AlertLevel;
 
 
 /**

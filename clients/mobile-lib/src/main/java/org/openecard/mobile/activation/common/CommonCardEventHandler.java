@@ -17,6 +17,7 @@ import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.NFCOverlayMessageHandler;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +57,9 @@ public class CommonCardEventHandler {
 	cardRecognized = true;
 
 	if (msgSetter.isSupported()) {
-	    interaction.onCardRecognized(type, new NFCOverlayMessageHandler() {
-		@Override
-		public void setText(String msg) {
-		    msgSetter.setText(msg);
-		}
-	    });
+	    interaction.onCardRecognized(new NFCOverlayMessageHandlerImpl(msgSetter));
 	} else {
-	    interaction.onCardRecognized(type);
+	    interaction.onCardRecognized();
 	}
     }
 
@@ -142,5 +138,6 @@ public class CommonCardEventHandler {
 
 	return hookUp(created, supportedCards, eventDispatcher, interaction);
     }
+
 
 }

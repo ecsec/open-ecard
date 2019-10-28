@@ -15,11 +15,6 @@
 			<scope>runtime</scope>
 			<!-- Modularized dependencies will be excluded, they will become part of the runtime later -->
 			<excludes>
-				<!-- BouncyCastle dependencies -->
-				<exclude>org.openecard:bcprov-jdk15on</exclude>
-				<exclude>org.openecard:bctls-jdk15on</exclude>
-				<exclude>org.openecard:bcpkix-jdk15on</exclude>
-
 				<!-- JAXB dependencies -->
 				<exclude>javax.xml.bind:jaxb-api</exclude>
 				<exclude>com.sun.istack:istack-commons-runtime</exclude>

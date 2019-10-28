@@ -27,11 +27,6 @@ module org.openecard.richclient {
     requires java.desktop;
     requires java.sql; // for jackson serialization
 
-    /* BouncyCastle modules */
-    requires org.openecard.bouncycastle.provider;
-    requires org.openecard.bouncycastle.tls;
-    requires org.openecard.bouncycastle.pkix;
-
     /* JAXB module */
     requires java.xml.bind;
 

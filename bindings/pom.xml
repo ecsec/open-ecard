@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>src-parent</artifactId>
-		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<version>1.4.0-rc.5-SNAPSHOT</version>
 		<relativePath>../src-parent/</relativePath>
 	</parent>
 

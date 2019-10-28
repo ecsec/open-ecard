@@ -46,6 +46,7 @@ import org.openecard.binding.tctoken.TR03112Keys;
 import org.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
 import org.openecard.common.I18n;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
@@ -392,7 +393,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    String msg = ex.getMessage();
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
-	} catch (WSHelper.WSException e) {
+	} catch (ECardException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(e.getResult());
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
@@ -437,7 +438,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     /**
      * Perform all checks as described in BSI TR-03112-7 3.4.4.
      *
-     * @param certDescription CertificateDescription of the eService Certificate
+     * @param certDescription CertificateDescription of the eService CV Certificate
      * @param dynCtx Dynamic Context
      * @return a {@link Result} set according to the results of the checks
      */
@@ -445,9 +446,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	Object tokenChecks = dynCtx.get(TR03112Keys.TCTOKEN_CHECKS);
 	// omit these checks if explicitly disabled
 	if (convertToBoolean(tokenChecks)) {
-	    boolean checkPassed = checkEserviceCertificate(certDescription, dynCtx);
+	    boolean checkPassed = checkEidServerCertificate(certDescription, dynCtx);
 	    if (! checkPassed) {
-		String msg = "Hash of eService certificate is NOT contained in the CertificateDescription.";
+		String msg = "Hash of eID-Server certificate is NOT contained in the CertificateDescription.";
 		// TODO check for the correct minor type
 		Result r = WSHelper.makeResultError(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, msg);
 		return r;
@@ -493,13 +494,19 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	}
     }
 
-    private boolean checkEserviceCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
-	TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.ESERVICE_CERTIFICATE);
-	if (certificate != null) {
-	    return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eService");
+    private boolean checkEidServerCertificate(CertificateDescription certDescription, DynamicContext dynCtx) {
+	Boolean sameChannel = (Boolean) dynCtx.get(TR03112Keys.SAME_CHANNEL);
+	if (Boolean.TRUE.equals(sameChannel)) {
+	    LOG.debug("eID-Server certificate is not check explicitly due to attached eID-Server case.");
+	    return true;
 	} else {
-	    LOG.error("No eService TLS Certificate set in Dynamic Context.");
-	    return false;
+	    TlsServerCertificate certificate = (TlsServerCertificate) dynCtx.get(TR03112Keys.EIDSERVER_CERTIFICATE);
+	    if (certificate != null) {
+		return TR03112Utils.isInCommCertificates(certificate, certDescription.getCommCertificates(), "eID-Server");
+	    } else {
+		LOG.error("No eID-Server TLS Certificate set in Dynamic Context.");
+		return false;
+	    }
 	}
     }
 

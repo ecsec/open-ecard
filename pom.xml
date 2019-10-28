@@ -5,7 +5,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
 	<packaging>pom</packaging>
-	<version>1.4.0-rc.4-SNAPSHOT</version>
+	<version>1.4.0-rc.5-SNAPSHOT</version>
 	<name>Open eCard Client</name>
 
 	<url>http://www.openecard.org/</url>
@@ -82,7 +82,7 @@
 		<version.roboface>1.0.0-rc.9</version.roboface>
 		<robovm.version>2.3.8-SNAPSHOT</robovm.version>
 		<!-- preset argLine for Netbeans direct test execution -->
-		<argLine></argLine>
+		<argLine />
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>
@@ -884,7 +884,7 @@
 			<dependency>
 				<groupId>com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
-				<version>1.0.4</version>
+				<version>1.0.5</version>
 			</dependency>
 
 			<dependency>
@@ -897,12 +897,12 @@
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna</artifactId>
-				<version>5.4.0</version>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
 				<artifactId>jna-platform</artifactId>
-				<version>5.4.0</version>
+				<version>4.5.2</version>
 			</dependency>
 
 			<!-- BouncyCastle -->

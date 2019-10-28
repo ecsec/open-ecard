@@ -30,9 +30,9 @@ import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.sal.protocol.eac.anytype.EAC2OutputType;
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType;
@@ -92,7 +92,11 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
 	    eac2Output = auth.performAuth(eac2Output, internalData);
 
 	    response.setAuthenticationProtocolData(eac2Output.getAuthDataType());
-	} catch (ParserConfigurationException | ProtocolException | TLVException e) {
+	} catch (ECardException e) {
+	    LOG.error(e.getMessage(), e);
+	    response.setResult(e.getResult());
+	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
+	} catch (ParserConfigurationException | TLVException e) {
 	    LOG.error(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);

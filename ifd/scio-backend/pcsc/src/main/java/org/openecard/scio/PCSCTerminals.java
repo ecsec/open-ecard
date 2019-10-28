@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2014-2019 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
+import jnasmartcardio.Smartcardio;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -62,16 +63,36 @@ public class PCSCTerminals implements SCIOTerminals {
 
     PCSCTerminals(@Nonnull PCSCFactory terminalFactory) {
 	this.terminalFactory = terminalFactory;
-	loadTerminals();
+
+	terminals = new CardTerminals() {
+	    @Override
+	    public List<CardTerminal> list(CardTerminals.State arg0) throws CardException {
+		if (loadTerminals()) {
+		    return terminals.list(arg0);
+		} else {
+		    throw new Smartcardio.JnaPCSCException(SCIOErrorCode.getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.");
+		}
+	    }
+
+	    @Override
+	    public boolean waitForChange(long arg0) throws CardException {
+		if (loadTerminals()) {
+		    return terminals.waitForChange(arg0);
+		} else {
+		    throw new Smartcardio.JnaPCSCException(SCIOErrorCode.getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.");
+		}
+	    }
+	};
     }
 
-    private void reloadFactory() {
-	terminalFactory.reloadPCSC();
-	loadTerminals();
-    }
-
-    private void loadTerminals() {
-	terminals = terminalFactory.getRawFactory().terminals();
+    private boolean loadTerminals() {
+	try {
+	    terminals = terminalFactory.getRawFactory().terminals();
+	    return true;
+	} catch (Smartcardio.EstablishContextException ex) {
+	    LOG.debug("Failed to load PCSC terminals.", ex);
+	    return false;
+	}
     }
 
     @Override
@@ -101,7 +122,7 @@ public class PCSCTerminals implements SCIOTerminals {
 	    } else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED) {
 		if (firstTry) {
 		    LOG.debug("No service available exception, reloading PCSC and trying again.");
-		    reloadFactory();
+		    loadTerminals();
 		    return list(state, false);
 		} else {
 		    LOG.debug("No service available exception, returning empty list.");
@@ -222,11 +243,9 @@ public class PCSCTerminals implements SCIOTerminals {
 		    return Collections.emptyList();
 		} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED || code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 		    LOG.debug("No service available exception, reloading PCSC and returning empty list.");
-		    parent.reloadFactory();
+		    parent.loadTerminals();
 		    own.loadTerminals();
 		    return Collections.emptyList();
-		} else if (code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
-		    // don't log in order to prevent flooding
 		} else {
 		    LOG.error(msg, ex);
 		}
@@ -405,7 +424,7 @@ public class PCSCTerminals implements SCIOTerminals {
 			case SCARD_E_NO_SERVICE:
 			case SCARD_E_SERVICE_STOPPED:
 			    LOG.debug("No service available exception, reloading PCSC.");
-			    parent.reloadFactory();
+			    parent.loadTerminals();
 			    own.loadTerminals();
 			case SCARD_E_NO_READERS_AVAILABLE:
 			    // send events that everything is removed if there are any terminals connected right now

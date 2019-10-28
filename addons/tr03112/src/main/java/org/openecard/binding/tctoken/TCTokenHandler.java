@@ -375,6 +375,7 @@ public class TCTokenHandler {
 		    break;
 	    }
 
+	    LOG.debug("Processing InnerException.", innerException);
 	    if (innerException instanceof WSException) {
 		WSException ex = (WSException) innerException;
 		errorMsg = createResponseFromWsEx(ex, response);
@@ -395,6 +396,14 @@ public class TCTokenHandler {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
 		response.setAdditionalResultMinor(ECardConstants.Minor.App.UNKNOWN_ERROR);
+	    }
+
+	    String paosAdditionalMinor = w.getAdditionalResultMinor();
+	    if (paosAdditionalMinor != null) {
+		LOG.debug("Replacing minor from inner exception with minor from PAOSException.");
+		LOG.debug("InnerException minor: {}", response.getAuxResultData().get(AuxDataKeys.MINOR_PROCESS_RESULT));
+		LOG.debug("PAOSException minor: {}", paosAdditionalMinor);
+		response.setAdditionalResultMinor(paosAdditionalMinor);
 	    }
 
 	    showErrorMessage(errorMsg);

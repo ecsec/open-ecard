@@ -28,7 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

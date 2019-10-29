@@ -82,7 +82,7 @@ import javax.crypto.Cipher;
 import javax.xml.parsers.ParserConfigurationException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.AddonManager;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;

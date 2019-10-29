@@ -22,8 +22,8 @@
 
 package org.openecard.crypto.common.asn1.eac.ef;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
+import org.openecard.bouncycastle.asn1.ASN1Sequence;
+import org.openecard.bouncycastle.asn1.ASN1Set;
 import org.openecard.crypto.common.asn1.eac.CADomainParameterInfo;
 import org.openecard.crypto.common.asn1.eac.CAInfo;
 import org.openecard.crypto.common.asn1.eac.CASecurityInfos;

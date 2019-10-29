@@ -23,11 +23,11 @@
 package org.openecard.crypto.common.asn1.eac;
 
 import java.math.BigInteger;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.math.ec.ECCurve;
+import org.openecard.bouncycastle.asn1.ASN1Integer;
+import org.openecard.bouncycastle.asn1.ASN1Sequence;
+import org.openecard.bouncycastle.asn1.x9.X9ECParameters;
+import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
+import org.openecard.bouncycastle.math.ec.ECCurve;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

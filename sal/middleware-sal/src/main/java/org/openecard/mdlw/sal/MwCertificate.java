@@ -33,7 +33,7 @@ import org.openecard.mdlw.sal.cryptoki.CK_DATE;
 import org.openecard.mdlw.sal.struct.CkAttribute;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
-import org.bouncycastle.util.Arrays;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.cryptoki.CryptokiLibrary;

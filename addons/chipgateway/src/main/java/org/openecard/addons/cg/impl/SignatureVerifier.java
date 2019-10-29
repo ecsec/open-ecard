@@ -49,25 +49,25 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
 import org.openecard.addons.cg.activate.CGTrustStoreLoader;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSVerifierCertificateNotValidException;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DigestCalculatorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.util.Selector;
-import org.bouncycastle.util.Store;
+import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.openecard.bouncycastle.cert.X509CertificateHolder;
+import org.openecard.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.openecard.bouncycastle.cms.CMSException;
+import org.openecard.bouncycastle.cms.CMSProcessable;
+import org.openecard.bouncycastle.cms.CMSProcessableByteArray;
+import org.openecard.bouncycastle.cms.CMSSignedData;
+import org.openecard.bouncycastle.cms.CMSVerifierCertificateNotValidException;
+import org.openecard.bouncycastle.cms.SignerInformation;
+import org.openecard.bouncycastle.cms.SignerInformationStore;
+import org.openecard.bouncycastle.cms.SignerInformationVerifier;
+import org.openecard.bouncycastle.cms.jcajce.JcaSignerInfoVerifierBuilder;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.openecard.bouncycastle.operator.DigestCalculatorProvider;
+import org.openecard.bouncycastle.operator.OperatorCreationException;
+import org.openecard.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.openecard.bouncycastle.util.Selector;
+import org.openecard.bouncycastle.util.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,8 +111,8 @@ public class SignatureVerifier {
 		Collection<X509CertificateHolder> certCollection = certStore.getMatches(signer.getSID());
 		X509CertificateHolder cert = certCollection.iterator().next();
 
-		DigestCalculatorProvider dp = new JcaDigestCalculatorProviderBuilder().setProvider("BC").build();
-		JcaSignerInfoVerifierBuilder verifBuilder = new JcaSignerInfoVerifierBuilder(dp).setProvider("BC");
+		DigestCalculatorProvider dp = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+		JcaSignerInfoVerifierBuilder verifBuilder = new JcaSignerInfoVerifierBuilder(dp).setProvider(BouncyCastleProvider.PROVIDER_NAME);
 		verifBuilder.setSignatureAlgorithmFinder(new DefaultSignatureAlgorithmIdentifierFinder() {
 		    @Override
 		    public AlgorithmIdentifier find(String sigAlgName) {

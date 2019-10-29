@@ -29,14 +29,14 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.bouncycastle.tls.AlertDescription;
-import org.bouncycastle.tls.CertificateRequest;
-import org.bouncycastle.tls.TlsAuthentication;
-import org.bouncycastle.tls.TlsContext;
-import org.bouncycastle.tls.TlsCredentialedSigner;
-import org.bouncycastle.tls.TlsCredentials;
-import org.bouncycastle.tls.TlsFatalAlert;
-import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.AlertDescription;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsContext;
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
+import org.openecard.bouncycastle.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.TlsFatalAlert;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.verify.ExpirationVerifier;
 import org.slf4j.Logger;
@@ -97,7 +97,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the host name for the certificate verification step.
      *
-     * @see #notifyServerCertificate(org.bouncycastle.tls.TlsServerCertificate)
+     * @see #notifyServerCertificate(org.openecard.bouncycastle.tls.TlsServerCertificate)
      * @param hostname Name or IP of the host that will be used for certificate validation, when a verifier is set.
      */
     public void setHostname(@Nonnull String hostname) {
@@ -107,7 +107,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the implementation for the certificate verification step.
      *
-     * @see #notifyServerCertificate(org.bouncycastle.tls.TlsServerCertificate)
+     * @see #notifyServerCertificate(org.openecard.bouncycastle.tls.TlsServerCertificate)
      * @see CertificateVerifier
      * @param certVerifier Verifier to use for server certificate checks.
      */
@@ -131,7 +131,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the factory which is used to find and create a credential reference for the authentication.
      *
-     * @see #getClientCredentials(org.bouncycastle.crypto.tls.CertificateRequest)
+     * @see #getClientCredentials(org.openecard.bouncycastle.crypto.tls.CertificateRequest)
      * @param credentialFactory Factory that provides client credentials when they are requested from the server.
      */
     public void setCredentialFactory(@Nullable CredentialFactory credentialFactory) {

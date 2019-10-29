@@ -24,7 +24,7 @@ package org.openecard.mdlw.sal;
 
 import java.io.IOException;
 import javax.annotation.Nullable;
-import org.bouncycastle.util.Arrays;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.util.Promise;
 import org.openecard.mdlw.sal.exceptions.CryptokiException;
 import org.openecard.mdlw.sal.struct.CkAttribute;

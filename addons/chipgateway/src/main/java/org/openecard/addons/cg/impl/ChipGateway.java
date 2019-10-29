@@ -82,7 +82,7 @@ import org.openecard.addons.cg.ex.PinBlocked;
 import org.openecard.addons.cg.ex.RemotePinException;
 import org.openecard.addons.cg.ex.ResultMinor;
 import org.openecard.addons.cg.ex.SlotHandleInvalid;
-import org.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.SecurityConditionUnsatisfiable;

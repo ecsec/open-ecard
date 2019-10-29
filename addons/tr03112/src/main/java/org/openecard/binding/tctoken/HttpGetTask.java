@@ -37,7 +37,7 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
-import org.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.FileUtils;

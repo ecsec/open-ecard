@@ -32,10 +32,6 @@
 							</artifactSet>
 							<relocations>
 								<relocation>
-									<pattern>org.bouncycastle</pattern>
-									<shadedPattern>org.openecard.bc</shadedPattern>
-								</relocation>
-								<relocation>
 									<pattern>org.apache.http</pattern>
 									<shadedPattern>org.openecard.apache.http</shadedPattern>
 								</relocation>
@@ -121,11 +117,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
+			<groupId>org.openecard</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
+			<groupId>org.openecard</groupId>
 			<artifactId>bctls-jdk15on</artifactId>
 		</dependency>
 	</dependencies>

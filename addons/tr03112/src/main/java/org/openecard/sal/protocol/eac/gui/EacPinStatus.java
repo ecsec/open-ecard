@@ -25,7 +25,7 @@ package org.openecard.sal.protocol.eac.gui;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.bouncycastle.util.Arrays;
+import org.openecard.bouncycastle.util.Arrays;
 
 
 /**

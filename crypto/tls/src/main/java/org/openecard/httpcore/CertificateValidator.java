@@ -23,7 +23,7 @@
 package org.openecard.httpcore;
 
 import java.net.URL;
-import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 
 
 /**

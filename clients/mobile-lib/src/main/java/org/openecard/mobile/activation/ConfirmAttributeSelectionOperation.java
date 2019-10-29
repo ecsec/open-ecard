@@ -31,5 +31,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmAttributeSelectionOperation {
 
-    public void enter(List<BoxItem> oldPassword, List<BoxItem> newPassword);
+    public void enter(List<SelectableItem> oldPassword, List<SelectableItem> newPassword);
 }

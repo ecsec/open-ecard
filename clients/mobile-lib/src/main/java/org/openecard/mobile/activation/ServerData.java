@@ -36,7 +36,7 @@ public interface ServerData {
 
     String getIssuerUrl();
 
-    List<BoxItem> getReadAccessAttributes();
+    List<SelectableItem> getReadAccessAttributes();
 
     String getSubject();
 
@@ -46,6 +46,6 @@ public interface ServerData {
 
     String getValidity();
 
-    List<BoxItem> getWriteAccessAttributes();
+    List<SelectableItem> getWriteAccessAttributes();
 
 }

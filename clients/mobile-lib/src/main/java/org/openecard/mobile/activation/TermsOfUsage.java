@@ -9,6 +9,7 @@
  ************************************************************************** */
 package org.openecard.mobile.activation;
 
+import java.io.Serializable;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -16,7 +17,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface TermsOfUsage {
+public interface TermsOfUsage extends Serializable {
 
     /**
      * Retrieve raw bytes of the terms of usage document.

@@ -22,7 +22,7 @@
 package org.openecard.mobile.activation.common;
 
 import java.util.List;
-import org.openecard.mobile.activation.BoxItem;
+import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.ServerData;
 import org.openecard.mobile.activation.TermsOfUsage;
 
@@ -38,10 +38,10 @@ public class CommonServerData implements ServerData {
     private final String subjectUrl;
     private final TermsOfUsage termsOfUsage;
     private final String validity;
-    private final List<BoxItem> readAccessAttributes;
-    private final List<BoxItem> writeAccessAttributes;
+    private final List<SelectableItem> readAccessAttributes;
+    private final List<SelectableItem> writeAccessAttributes;
 
-    public CommonServerData(String issuer, String issuerUrl, String subject, String subjectUrl, TermsOfUsage termsOfUsage, String validity, List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
+    public CommonServerData(String issuer, String issuerUrl, String subject, String subjectUrl, TermsOfUsage termsOfUsage, String validity, List<SelectableItem> readAccessAttributes, List<SelectableItem> writeAccessAttributes) {
 	this.issuer = issuer;
 	this.issuerUrl = issuerUrl;
 	this.subject = subject;
@@ -83,12 +83,12 @@ public class CommonServerData implements ServerData {
     }
 
     @Override
-    public List<BoxItem> getReadAccessAttributes() {
+    public List<SelectableItem> getReadAccessAttributes() {
 	return readAccessAttributes;
     }
 
     @Override
-    public List<BoxItem> getWriteAccessAttributes() {
+    public List<SelectableItem> getWriteAccessAttributes() {
 	return writeAccessAttributes;
     }
 

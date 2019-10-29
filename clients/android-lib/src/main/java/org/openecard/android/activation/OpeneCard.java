@@ -22,9 +22,12 @@
 package org.openecard.android.activation;
 
 import android.content.Context;
+import android.content.Intent;
+import org.openecard.android.utils.NfcUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.AndroidNFCFactory;
 import org.openecard.ws.android.AndroidMarshaller;
@@ -46,6 +49,10 @@ public class OpeneCard {
 	AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
 	this.context = this.utils.context(capabilities);
 	return this.context;
+    }
+
+    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported {
+	NfcUtils.getInstance().retrievedNFCTag(intent);
     }
 
     public static OpeneCard createInstance() {

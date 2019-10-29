@@ -21,6 +21,7 @@
  ***************************************************************************/
 package org.openecard.mobile.activation;
 
+import java.io.Serializable;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -28,7 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface BoxItem {
+public interface SelectableItem extends Serializable {
 
     /**
      * Gets the name of the item. The name is used to identify the item and thus should be unique in the surrounding
@@ -62,11 +63,10 @@ public interface BoxItem {
     public void setChecked(boolean checked);
 
     /**
-     * Gets whether the item is enabled, or disabled. Disabled items can be used to show a preselected value to the
-     * user, but do not allow modification of the value.
+     * Gets whether the item is optional or has to be allowed.
      *
      * @return {@code true} if the item is disabled, {@code false} otherwise.
      */
-    public boolean isDisabled() ;
+    public boolean isRequired();
 
 }

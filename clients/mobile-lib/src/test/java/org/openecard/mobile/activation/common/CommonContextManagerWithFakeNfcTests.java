@@ -25,7 +25,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.*;

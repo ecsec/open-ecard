@@ -23,7 +23,7 @@ package org.openecard.mobile.activation.integration;
 
 import java.security.Provider;
 import java.security.Security;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;

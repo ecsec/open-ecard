@@ -24,7 +24,7 @@ package org.openecard.ios.activation;
 
 import java.security.Provider;
 import java.security.Security;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;

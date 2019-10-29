@@ -113,11 +113,6 @@
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>android-nfc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
 
 </project>

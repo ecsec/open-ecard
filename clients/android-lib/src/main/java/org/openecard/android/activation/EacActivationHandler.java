@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.openecard.gui.android.eac.EacGui;
 
-
 /**
  * Implementation of the activation handler for EAC.
  *

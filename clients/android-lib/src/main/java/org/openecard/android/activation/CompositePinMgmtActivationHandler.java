@@ -25,7 +25,7 @@ package org.openecard.android.activation;
 import android.app.Activity;
 import android.app.Dialog;
 import java.util.Set;
-import org.openecard.gui.android.pinmanagement.PINManagementGui;
+import org.openecard.gui.mobile.pinmanagement.PINManagementGui;
 import org.openecard.mobile.activation.ActivationResult;
 
 

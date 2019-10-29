@@ -22,9 +22,6 @@
 package org.openecard.android.activation;
 
 import android.content.Context;
-import java.security.Provider;
-import java.security.Security;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
@@ -37,16 +34,6 @@ import org.openecard.ws.android.AndroidMarshaller;
  * @author Neil Crossley
  */
 public class OpeneCard {
-
-
-    static {
-	Provider provider = new BouncyCastleProvider();
-	try {
-	    Security.removeProvider(provider.getName());
-	} catch (Exception e) {
-	}
-	Security.addProvider(provider);
-    }
 
     private final CommonActivationUtils utils;
     private ContextManager context;

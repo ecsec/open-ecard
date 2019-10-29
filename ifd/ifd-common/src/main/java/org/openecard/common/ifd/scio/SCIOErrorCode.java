@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -154,9 +154,9 @@ public enum SCIOErrorCode {
     /** No PIN was presented to the smart card. */
     SCARD_W_CARD_NOT_AUTHENTICATED  (0x8010006F);
 
-    private final int[] codes;
+    private final long[] codes;
 
-    private SCIOErrorCode(int... codes) {
+    private SCIOErrorCode(long... codes) {
 	this.codes = codes;
     }
 
@@ -166,8 +166,8 @@ public enum SCIOErrorCode {
      * @param code Code to test.
      * @return {@code true} if the code represents this enum instance, {@code false} otherwise.
      */
-    public boolean matchesCode(int code) {
-	for (int c : codes) {
+    public boolean matchesCode(long code) {
+	for (long c : codes) {
 	    if (c == code) {
 		return true;
 	    }
@@ -181,15 +181,25 @@ public enum SCIOErrorCode {
      * @param code The code for which to look up the enum entry.
      * @return The entry matching the given code, or {@link #SCARD_F_UNKNOWN_ERROR} if no known code has been given.
      */
-    public static SCIOErrorCode getErrorCode(int code) {
+    public static SCIOErrorCode getErrorCode(long code) {
 	// no index, just walk over each code, doesn't happen so often that performance should be a problem
 	for (SCIOErrorCode next : SCIOErrorCode.values()) {
 	    if (next.matchesCode(code)) {
 		return next;
 	    }
 	}
-	// no match found, unkown error
+	// no match found, unknown error
 	return SCARD_F_UNKNOWN_ERROR;
+    }
+
+    public static long getLong(SCIOErrorCode code) {
+	for (SCIOErrorCode next : SCIOErrorCode.values()) {
+	    if (next.name().equals(code.name())) {
+		return next.codes[0];
+	    }
+	}
+	// no match found, unknown error (SCARD_F_UNKNOWN_ERROR)
+	return SCARD_F_UNKNOWN_ERROR.SCARD_F_UNKNOWN_ERROR.codes[0];
     }
 
 }

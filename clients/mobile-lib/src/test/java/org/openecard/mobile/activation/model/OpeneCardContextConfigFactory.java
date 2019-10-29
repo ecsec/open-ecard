@@ -24,7 +24,7 @@ package org.openecard.mobile.activation.model;
 
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.ws.jaxb.JAXBMarshaller;
+import org.openecard.ws.android.AndroidMarshaller;
 import org.openecard.ws.marshal.WSMarshaller;
 
 /**
@@ -72,8 +72,8 @@ public final class OpeneCardContextConfigFactory implements Builder<OpeneCardCon
 
     public static OpeneCardContextConfigFactory mobile(TerminalFactory terminalFactory) {
 	DelegatingMobileNfcTerminalFactory.setDelegate(terminalFactory);
-	
+
 	return instance().withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
-		.withWsdefMarshaller(JAXBMarshaller.class);
+		.withWsdefMarshaller(AndroidMarshaller.class);
     }
 }

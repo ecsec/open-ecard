@@ -22,12 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import org.openecard.gui.definition.BoxItem;
-import org.openecard.gui.mobile.eac.types.ServerData;
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -37,12 +31,11 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacInteraction extends ActivationInteraction {
 
-    void onPinRequest(int attempt, Function<String, Boolean> enterPin);
-    void onPinCanRequest(BiFunction<String, String, Boolean> enterPinCan);
+    void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
+    void onPinCanRequest(ConfirmTwoPasswordsOperation enterPinCan);
     void onCardBlocked();
     void onCardDeactivated();
-    void onServerData(ServerData data, BiFunction<List<BoxItem>, List<BoxItem>, Boolean> selectReadWrite);
+    void onServerData(ServerData data, ConfirmAttributeSelectionOperation selectReadWrite);
     void onTransactionInfo(String data);
-    void onPinStatus(PinStatus status, String cardType);
     void onInteractionComplete();
 }

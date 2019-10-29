@@ -29,13 +29,14 @@ import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.Promise;
+import org.robovm.apple.corenfc.NFCISO7816APDU;
+import org.robovm.apple.corenfc.NFCISO7816Tag;
+import org.robovm.apple.corenfc.NFCPollingOption;
+import org.robovm.apple.corenfc.NFCTag;
+import org.robovm.apple.corenfc.NFCTagReaderSession;
+import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
 import org.robovm.apple.dispatch.DispatchQueueAttr;
-import org.robovm.apple.ext.corenfc.NFCISO7816APDU;
-import org.robovm.apple.ext.corenfc.NFCISO7816Tag;
-import org.robovm.apple.ext.corenfc.NFCPollingOption;
-import org.robovm.apple.ext.corenfc.NFCTagReaderSession;
-import org.robovm.apple.ext.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.foundation.NSError;
@@ -53,8 +54,8 @@ import org.slf4j.LoggerFactory;
 public final class IOSNFCCard extends AbstractNFCCard {
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
-    private String dialogMsg = "Please provide card.";
     private byte[] histBytes;
+    private NFCTagReaderSessionDelegateAdapter del;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -65,9 +66,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private NFCTagReaderSession nfcSession;
     private NFCISO7816Tag tag;
+    private IOSConfig cfg;
 
-    public IOSNFCCard(NFCCardTerminal terminal) throws IOException {
+    public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) throws IOException {
 	super(terminal);
+	this.cfg = cfg;
     }
 
     private void setTag(NFCISO7816Tag tag) {
@@ -76,19 +79,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private void initSessionObj() throws SCIOException {
-	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
-	    @Override
-	    public void tagReaderSession$didDetectTags$(NFCTagReaderSession session, NSArray<?> tags) {
-		for (NSObject t : tags) {
-		    session.connectToTag$completionHandler$(t, (NSError er) -> {
-
-			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
-			setTag(tag);
-		    });
-		}
-	    }
-	};
-
 	DispatchQueue dspqueue;
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
@@ -101,13 +91,46 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		throw new SCIOException("Bad configuration", SCIOErrorCode.SCARD_W_EOF);
 	}
 
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption._4443, delegate, dspqueue);
+	LOG.debug("Initializing new NFCTagReaderSession");
+	this.del = new NFCTagReaderSessionDelegateAdapter() {
+	    @Override
+	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
+		LOG.debug(".didInvalidate()");
+		return;
+	    }
 
+	    @Override
+	    public void tagReaderSessionDidBecomeActive(NFCTagReaderSession session) {
+		LOG.debug(".didbecomeActive()");
+		return;
+	    }
+
+	    @Override
+	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
+		for (NSObject t : tags) {
+		    session.connectToTag(t, (NSError er) -> {
+
+			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+			setTag(tag);
+			setDialogMsg(cfg.getDefaultCardRecognizedMSG());
+		    });
+		}
+	    }
+	};
+	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, del, dspqueue);
+
+    }
+
+    @Override
+    public void setDialogMsg(String msg) {
+	if (this.nfcSession != null) {
+	    this.nfcSession.setAlertMessage(msg);
+	}
     }
 
     public void connect() throws SCIOException {
 	this.initSessionObj();
-	this.nfcSession.setAlertMessage(this.dialogMsg);
+	this.nfcSession.setAlertMessage(cfg.getDefaultProviderCardMSG());
 	this.nfcSession.beginSession();
 	while (!isCardPresent()) {
 	    try {
@@ -136,15 +159,22 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private void setHistBytes() {
-	this.histBytes = this.tag.getHistoricalBytes().getBytes();
+	NSData hist = this.tag != null ? this.tag.getHistoricalBytes() : null;
+	if (hist != null) {
+	    this.histBytes = hist.getBytes();
+	} else {
+	    this.histBytes = null;
+	}
     }
 
     @Override
     public SCIOATR getATR() {
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
 	if (this.histBytes == null) {
+	    LOG.debug("hist bytes are null");
 	    return new SCIOATR(new byte[0]);
 	} else {
+	    LOG.debug("hist bytes will be processed ");
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    // Initial Header
 	    out.write(0x3B);
@@ -176,16 +206,28 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public byte[] transceive(byte[] apdu) throws IOException {
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
-	tag.sendCommandAPDU$completionHandler$(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
-	    ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
-	    bb.put(resp.getBytes(), 0, (int) resp.getLength());
-	    bb.put(sw1);
-	    bb.put(sw2);
-	    p.deliver(bb.array());
+
+	if (tag == null) {
+	    throw new NullPointerException("Cannot transceive because the tag is null.");
+	}
+	tag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
+	    if (er2 != null) {
+		p.deliver(null);
+	    } else {
+		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
+		bb.put(resp.getBytes(), 0, (int) resp.getLength());
+		bb.put(sw1);
+		bb.put(sw2);
+		p.deliver(bb.array());
+	    }
 	});
 
 	try {
-	    return p.deref();
+	    byte[] response = p.deref();
+	    if (response == null) {
+		throw new IOException();
+	    }
+	    return response;
 	} catch (InterruptedException ex) {
 	    throw new IOException(ex);
 	}
@@ -193,10 +235,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     public void setConcurrencyMode(DISPATCH_MODE mode) {
 	this.concurrencyMode = mode;
-    }
-
-    public void setDialogMsg(String dialogMsg) {
-	this.dialogMsg = dialogMsg;
     }
 
 }

@@ -257,6 +257,8 @@ public class OpeneCardContext {
 		errorMsg = ESTABLISH_IFD_CONTEXT_FAILED;
 		throw ex;
 	    }
+	    // TODO: Hack to ensure registry is loaded before use.
+	    manager.getRegistry().listAddons();
 
 	    initialized = true;
 	} catch (Exception ex) {

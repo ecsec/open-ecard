@@ -1,7 +1,5 @@
-framework module OpenEcardFramework{
+framework module OpenEcard{
   umbrella header "open-ecard.h"
-  umbrella header "open-ecard-ios-activation-utils.h"
-
   export *
   module * { export * }
 }

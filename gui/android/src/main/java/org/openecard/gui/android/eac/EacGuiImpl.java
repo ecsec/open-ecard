@@ -30,10 +30,6 @@ import javax.annotation.Nullable;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
-import org.openecard.gui.android.eac.types.BoxItem;
-import org.openecard.gui.android.eac.types.PinStatus;
-import org.openecard.gui.android.eac.types.ServerData;
-import org.openecard.gui.android.eac.types.TermsOfUsage;
 import org.openecard.gui.definition.Checkbox;
 import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.InputInfoUnit;
@@ -41,6 +37,11 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
+import org.openecard.gui.mobile.eac.EacNavigator;
+import org.openecard.gui.mobile.eac.types.BoxItem;
+import org.openecard.gui.mobile.eac.types.PinStatus;
+import org.openecard.gui.mobile.eac.types.ServerData;
+import org.openecard.gui.mobile.eac.types.TermsOfUsage;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.gui.EacPinStatus;
@@ -227,8 +228,8 @@ public class EacGuiImpl implements EacGui {
 	    }
 	}
 
-	ArrayList<BoxItem> readAccess = new ArrayList<>();
-	ArrayList<BoxItem> writeAccess = new ArrayList<>();
+	List<BoxItem> readAccess = new ArrayList<>();
+	List<BoxItem> writeAccess = new ArrayList<>();
 
 	for (InputInfoUnit next : step2.getInputInfoUnits()) {
 	    if ("ReadCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {

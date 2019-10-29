@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<version>1.4.0-rc.5-SNAPSHOT</version>
 	</parent>
     
 	<groupId>org.openecard.clients</groupId>
@@ -29,7 +29,8 @@
 						<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
 					</annotationProcessors>
 					<compilerArgs>
-						<arg>-Aroboface.headername=open-ecard-ios-activation-utils.h</arg>
+						<arg>-Aroboface.headername=open-ecard.h</arg>
+						<arg>-Aroboface.include.headers=open-ecard-mobile-lib.h</arg>
 					</compilerArgs>
 					<debug>true</debug>
 					<debuglevel>source,lines,vars</debuglevel>
@@ -54,7 +55,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>jaxb-marshaller</artifactId>
+			<artifactId>android-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

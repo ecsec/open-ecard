@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,15 +18,16 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.mobile.activation.model;
 
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ControllerCallback;
-import org.openecard.mobile.activation.OpeneCardServiceHandler;
 import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.activation.StopServiceHandler;
 
 /**
  *
@@ -34,11 +35,31 @@ import org.openecard.mobile.activation.ServiceErrorResponse;
  */
 public final class PromiseDeliveringFactory {
 
+    public static ControllerCallbackDelivery controllerCallback = new ControllerCallbackDelivery();
+
     private PromiseDeliveringFactory() {
     }
 
-    public static OpeneCardServiceHandler createContextServiceDelivery(Promise<ServiceErrorResponse> outcome) {
-	return new OpeneCardServiceHandler() {
+    public static StartServiceHandler createStartServiceDelivery(Promise<ActivationSource> success, Promise<ServiceErrorResponse> failure) {
+	return new StartServiceHandler() {
+	    @Override
+	    public void onSuccess(ActivationSource source) {
+		if (success != null) {
+		    success.deliver(source);
+		}
+	    }
+
+	    @Override
+	    public void onFailure(ServiceErrorResponse response) {
+		if (failure != null) {
+		    failure.deliver(response);
+		}
+	    }
+	};
+    }
+
+    public static StopServiceHandler createStopServiceDelivery(Promise<ServiceErrorResponse> outcome) {
+	return new StopServiceHandler() {
 	    @Override
 	    public void onSuccess() {
 		outcome.deliver(null);
@@ -51,12 +72,50 @@ public final class PromiseDeliveringFactory {
 	};
     }
 
-    public static ControllerCallback createControllerCallbackDelivery(Promise<ActivationResult> outcome) {
-	return new ControllerCallback() {
-	    @Override
-	    public void onAuthenticationCompletion(ActivationResult result) {
-		outcome.deliver(result);
-	    }
-	};
+    public static final class ControllerCallbackDelivery {
+
+	private ControllerCallbackDelivery() {
+	}
+
+	public ControllerCallback deliverCompletion(Promise<ActivationResult> outcome) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		    outcome.deliver(result);
+		}
+
+		@Override
+		public void onStarted() {
+		}
+	    };
+	}
+
+	public ControllerCallback deliverStarted(Promise<Void> outcome) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		}
+
+		@Override
+		public void onStarted() {
+		    outcome.deliver(null);
+		}
+	    };
+	}
+
+	public ControllerCallback deliverStartedCompletion(Promise<Void> started, Promise<ActivationResult> completion) {
+	    return new ControllerCallback() {
+		@Override
+		public void onAuthenticationCompletion(ActivationResult result) {
+		    completion.deliver(result);
+		}
+
+		@Override
+		public void onStarted() {
+		    started.deliver(null);
+		}
+	    };
+	}
     }
+
 }

@@ -26,8 +26,8 @@ import java.math.BigInteger;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
+import org.openecard.bouncycastle.jce.ECNamedCurveTable;
+import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 
 
 /**

@@ -140,6 +140,9 @@ public class ActivationController {
 	    default:
 		activationResult = new CommonActivationResult(INTERNAL_ERROR, result.getResultMessage());
 	}
+
+	activationResult.setProcessMinor(result.getAuxResultData().get(AuxDataKeys.MINOR_PROCESS_RESULT));
+
 	return activationResult;
     }
 

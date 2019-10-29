@@ -256,7 +256,7 @@ public final class EacNavigator extends MobileNavigator {
 	return r;
     }
 
-    synchronized void cancel() {
+    public synchronized void cancel() {
 	Thread curNext = eacNextThread;
 	if (curNext != null) {
 	    LOG.debug("Cancelling step display.");

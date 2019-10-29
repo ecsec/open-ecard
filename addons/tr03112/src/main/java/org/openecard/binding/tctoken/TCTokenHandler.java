@@ -74,7 +74,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.interfaces.DocumentSchemaValidator;
@@ -372,22 +372,35 @@ public class TCTokenHandler {
 		    break;
 	    }
 
+	    LOG.debug("Processing InnerException.", innerException);
 	    if (innerException instanceof WSException) {
 		WSException ex = (WSException) innerException;
 		errorMsg = createResponseFromWsEx(ex, response);
 	    } else if (innerException instanceof PAOSConnectionException) {
-		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISCHMENT_FAILED,
+		response.setResult(WSHelper.makeResultError(ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
 			w.getLocalizedMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.Disp.COMM_ERROR);
 	    } else if (innerException instanceof InterruptedException) {
 		response.setResultCode(BindingResultCode.INTERRUPTED);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg));
+		response.setAdditionalResultMinor(ECardConstants.Minor.App.SESS_TERMINATED);
 	    } else if (innerException instanceof DocumentValidatorException) {
 		errorMsg = LANG_TR.translationForKey(SCHEMA_VALIDATION_FAILED);
 		// it is ridiculous, that this should be a client error, but the test spec demands this
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.SAL.Support.SCHEMA_VAILD_FAILED);
 	    } else {
 		errorMsg = createMessageFromUnknownError(w);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, w.getMessage()));
+		response.setAdditionalResultMinor(ECardConstants.Minor.App.UNKNOWN_ERROR);
+	    }
+
+	    String paosAdditionalMinor = w.getAdditionalResultMinor();
+	    if (paosAdditionalMinor != null) {
+		LOG.debug("Replacing minor from inner exception with minor from PAOSException.");
+		LOG.debug("InnerException minor: {}", response.getAuxResultData().get(AuxDataKeys.MINOR_PROCESS_RESULT));
+		LOG.debug("PAOSException minor: {}", paosAdditionalMinor);
+		response.setAdditionalResultMinor(paosAdditionalMinor);
 	    }
 
 	    showErrorMessage(errorMsg);
@@ -545,7 +558,10 @@ public class TCTokenHandler {
 
     private String createResponseFromWsEx(WSException ex, TCTokenResponse response) {
 	String errorMsg;
-	switch (ex.getResultMinor()) {
+	String minor = ex.getResultMinor();
+
+	switch (minor) {
+	    case ECardConstants.Minor.Disp.TIMEOUT:
 	    case ECardConstants.Minor.SAL.CANCELLATION_BY_USER:
 	    case ECardConstants.Minor.IFD.CANCELLATION_BY_USER:
 		errorMsg = LANG_TOKEN.translationForKey("cancel");
@@ -591,6 +607,9 @@ public class TCTokenHandler {
 		errorMsg = LANG_TR.translationForKey(ERROR_WHILE_AUTHENTICATION);
 		response.setResult(WSHelper.makeResultError(ResultMinor.SERVER_ERROR, errorMsg));
 	}
+
+	response.setAdditionalResultMinor(minor);
+
 	return errorMsg;
     }
 

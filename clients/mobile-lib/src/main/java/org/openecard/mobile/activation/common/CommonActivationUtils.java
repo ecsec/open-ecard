@@ -22,6 +22,7 @@
 package org.openecard.mobile.activation.common;
 
 import java.net.MalformedURLException;
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ActivationUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -34,30 +35,42 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
  *
  * @author Neil Crossley
  */
-public class CommonActivationUtils implements ActivationUtils, OpeneCardContextProvider {
+public class CommonActivationUtils implements ActivationUtils, OpeneCardContextProvider, ActivationSource {
 
     private CommonContextManager contextManager = null;
     private final Object managerLock = new Object();
     private final OpeneCardContextConfig config;
     private final ActivationControllerService activationControllerService;
+    private EacControllerFactory eacControllerFactory;
+    private PinManagementControllerFactory pinManagementControllerFactory;
+    private final NFCDialogMsgSetter msgSetter;
 
-    public CommonActivationUtils(OpeneCardContextConfig config) {
+
+    public CommonActivationUtils(OpeneCardContextConfig config, NFCDialogMsgSetter msgSetter) {
 	this.config = config;
 	this.activationControllerService = new ActivationControllerService(this);
+	this.msgSetter = msgSetter;
     }
 
     @Override
     public EacControllerFactory eacFactory() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	if (eacControllerFactory == null) {
+	    eacControllerFactory = CommonEacControllerFactory.create(activationControllerService, msgSetter);
+	}
+	return eacControllerFactory;
     }
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
-	try {
-	    return CommonPinManagementControllerFactory.create(activationControllerService);
-	} catch (MalformedURLException ex) {
-	    throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	if (pinManagementControllerFactory == null) {
+	    try {
+		pinManagementControllerFactory = CommonPinManagementControllerFactory.create(activationControllerService, msgSetter);
+	    } catch (MalformedURLException ex) {
+		throw new IllegalStateException("The internal activation URL is not parsing.", ex);
+	    }
 	}
+	return pinManagementControllerFactory;
+
     }
 
     @Override
@@ -72,7 +85,7 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 	    if (this.contextManager != null) {
 		return this.contextManager;
 	    }
-	    this.contextManager = new CommonContextManager(nfc, this.config);
+	    this.contextManager = new CommonContextManager(nfc, this.config, this);
 	    return this.contextManager;
 	}
     }

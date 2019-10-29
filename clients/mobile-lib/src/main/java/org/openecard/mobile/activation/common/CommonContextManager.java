@@ -21,11 +21,12 @@
  ************************************************************************** */
 package org.openecard.mobile.activation.common;
 
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
-import org.openecard.mobile.activation.OpeneCardServiceHandler;
 import org.openecard.mobile.activation.ServiceErrorCode;
 import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
@@ -35,6 +36,7 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.mobile.system.ServiceMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.mobile.activation.StopServiceHandler;
 
 /**
  *
@@ -47,12 +49,14 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     private final Object contextLock = new Object();
     private final NFCCapabilities nfc;
     private final OpeneCardContextConfig config;
+    private final ActivationSource source;
     private OpeneCardContext context;
     private boolean isRunning = false;
 
-    public CommonContextManager(NFCCapabilities nfc, OpeneCardContextConfig config) {
+    public CommonContextManager(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source) {
 	this.nfc = nfc;
 	this.config = config;
+	this.source = source;
     }
 
     @Override
@@ -66,7 +70,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     }
 
     @Override
-    public void start(OpeneCardServiceHandler handler) {
+    public void start(StartServiceHandler handler) {
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null");
 	}
@@ -109,7 +113,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		}
 		if (error == null) {
 		    LOG.debug("Started");
-		    handler.onSuccess();
+		    handler.onSuccess(this.source);
 		} else {
 		    LOG.debug("Started failed");
 		    handler.onFailure(error);
@@ -121,7 +125,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     }
 
     @Override
-    public void stop(OpeneCardServiceHandler handler) {
+    public void stop(StopServiceHandler handler) {
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}
@@ -156,4 +160,5 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    }
 	}).start();
     }
+
 }

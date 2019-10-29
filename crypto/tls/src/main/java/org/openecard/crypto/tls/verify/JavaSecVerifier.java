@@ -36,8 +36,8 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.util.ArrayList;
 import java.util.Set;
-import org.bouncycastle.tls.TlsServerCertificate;
-import org.bouncycastle.tls.crypto.TlsCertificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 

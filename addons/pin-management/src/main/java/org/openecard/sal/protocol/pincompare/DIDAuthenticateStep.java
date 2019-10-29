@@ -40,7 +40,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
-import org.bouncycastle.util.Arrays;
+import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;

@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2012-2018 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.scio;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
     protected final NFCCardChannel nfcCardChannel;
     protected final NFCCardTerminal nfcCardTerminal;
 
-    public AbstractNFCCard(NFCCardTerminal terminal) throws IOException {
+    public AbstractNFCCard(NFCCardTerminal terminal) {
 	nfcCardTerminal = terminal;
 
 	this.nfcCardChannel = new NFCCardChannel(this);
@@ -103,5 +103,9 @@ public abstract class AbstractNFCCard implements SCIOCard {
     }
 
     public abstract byte[] transceive(byte[] apdu) throws IOException;
+
+    void setDialogMsg(String msg) {
+	throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }

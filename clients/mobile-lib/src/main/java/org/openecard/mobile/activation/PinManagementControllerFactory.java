@@ -22,7 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import java.util.Set;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -32,7 +31,12 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface PinManagementControllerFactory {
 
-    ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction);
+    ActivationController create(ControllerCallback activation, PinManagementInteraction interaction);
+
+    /**
+     * TOD: Re-enable the following method when the binding problems are solved:
+     * ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction);
+     */
 
     void destroy(ActivationController controller);
 }

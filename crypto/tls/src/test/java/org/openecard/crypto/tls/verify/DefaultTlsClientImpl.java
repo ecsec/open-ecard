@@ -23,11 +23,11 @@
 package org.openecard.crypto.tls.verify;
 
 import java.io.IOException;
-import org.bouncycastle.tls.CertificateRequest;
-import org.bouncycastle.tls.TlsAuthentication;
-import org.bouncycastle.tls.TlsCredentials;
-import org.bouncycastle.tls.TlsServerCertificate;
-import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.openecard.bouncycastle.tls.CertificateRequest;
+import org.openecard.bouncycastle.tls.TlsAuthentication;
+import org.openecard.bouncycastle.tls.TlsCredentials;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;

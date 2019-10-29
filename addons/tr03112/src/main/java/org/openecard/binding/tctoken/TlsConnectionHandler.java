@@ -32,10 +32,10 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.annotation.Nullable;
-import org.bouncycastle.tls.ProtocolVersion;
-import org.bouncycastle.tls.TlsClient;
-import org.bouncycastle.tls.TlsClientProtocol;
-import org.bouncycastle.tls.TlsPSKIdentity;
+import org.openecard.bouncycastle.tls.ProtocolVersion;
+import org.openecard.bouncycastle.tls.TlsClient;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsPSKIdentity;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
@@ -46,9 +46,10 @@ import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.bouncycastle.tls.BasicTlsPSKIdentity;
-import org.bouncycastle.tls.crypto.TlsCrypto;
-import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
+import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.openecard.common.DynamicContext;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.verify.JavaSecVerifier;
 
@@ -119,6 +120,9 @@ public class TlsConnectionHandler {
 		if (tlsClient instanceof ClientCertDefaultTlsClient) {
 		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
 		}
+		// save the info that we have a same channel situtation
+		DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE);
 	    } else {
 		// kill open channel in tctoken request, it is not needed anymore
 		if (tokenRequest.getTokenContext() != null) {
@@ -171,7 +175,7 @@ public class TlsConnectionHandler {
 		// make sure nobody changes the server when the connection gets reestablished
 		tlsAuth.addCertificateVerifier(new SameCertVerifier());
 		// save eService certificate for use in EAC
-		tlsAuth.addCertificateVerifier(new SaveEServiceCertHandler());
+		tlsAuth.addCertificateVerifier(new SaveEidServerCertHandler());
 
 		// set the authentication class in the tls client
 		tlsClient.setAuthentication(tlsAuth);

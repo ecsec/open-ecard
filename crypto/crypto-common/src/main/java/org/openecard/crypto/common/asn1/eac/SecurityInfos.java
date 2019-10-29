@@ -25,9 +25,9 @@ package org.openecard.crypto.common.asn1.eac;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1StreamParser;
+import org.openecard.bouncycastle.asn1.ASN1Encodable;
+import org.openecard.bouncycastle.asn1.ASN1Set;
+import org.openecard.bouncycastle.asn1.ASN1StreamParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

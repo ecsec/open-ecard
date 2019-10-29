@@ -31,5 +31,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ControllerCallback {
 
+    void onStarted();
+
     void onAuthenticationCompletion(ActivationResult result);
 }

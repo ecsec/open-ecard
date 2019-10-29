@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<version>1.4.0-rc.5-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.clients</groupId>
@@ -31,10 +31,6 @@
 								</excludes>
 							</artifactSet>
 							<relocations>
-								<relocation>
-									<pattern>org.bouncycastle</pattern>
-									<shadedPattern>org.openecard.bc</shadedPattern>
-								</relocation>
 								<relocation>
 									<pattern>org.apache.http</pattern>
 									<shadedPattern>org.openecard.apache.http</shadedPattern>
@@ -109,6 +105,19 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>android-nfc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard</groupId>
+			<artifactId>bctls-jdk15on</artifactId>
 		</dependency>
 	</dependencies>
 

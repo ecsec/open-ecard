@@ -30,9 +30,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ActivationUtils {
 
-    EacControllerFactory eacFactory();
-
-    PinManagementControllerFactory pinManagementFactory();
-
     ContextManager context(NFCCapabilities nfc);
 }

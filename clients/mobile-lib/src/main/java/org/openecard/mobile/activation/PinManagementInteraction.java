@@ -22,9 +22,6 @@
 
 package org.openecard.mobile.activation;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import org.openecard.gui.mobile.pinmanagement.PinStatus;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -34,9 +31,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface PinManagementInteraction extends ActivationInteraction {
 
-    void onPinChangeable(int attempts, BiFunction<String, String, Boolean> enterOldNewPins);
-    void onCanRequired(Function<String, Boolean> enterCan);
-    void onPinBlocked(Function<String, Boolean> unblockWithPuk);
-    void onPinStatus(PinStatus status, String cardType);
+    void onPinChangeable(int attempts, ConfirmTwoPasswordsOperation enterOldNewPins);
+    void onCanRequired(ConfirmPasswordOperation enterCan);
+    void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
 
 }

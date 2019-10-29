@@ -25,11 +25,7 @@ module org.openecard.richclient {
     requires java.smartcardio;
     requires java.logging;
     requires java.desktop;
-
-    /* BouncyCastle modules */
-    requires org.bouncycastle.provider;
-    requires org.bouncycastle.tls;
-    requires org.bouncycastle.pkix;
+    requires java.sql; // for jackson serialization
 
     /* JAXB module */
     requires java.xml.bind;
@@ -60,4 +56,6 @@ module org.openecard.richclient {
 
     opens org.openecard.mdlw.sal.config to java.xml.bind;
     opens org.openecard.addon.manifest to java.xml.bind;
+
+    opens jnasmartcardio to java.base;
 }

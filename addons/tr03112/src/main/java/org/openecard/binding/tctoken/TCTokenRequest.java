@@ -52,7 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
-import org.bouncycastle.tls.TlsServerCertificate;
+import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.AppVersion;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;

@@ -206,6 +206,7 @@
 				<iso:Date>2017-11-17</iso:Date>
 				<ATR>3B7D95000080318065B0831100C883009000</ATR>
 				<CardImage>portuguese-eid.png</CardImage>
+				<SkipContextSpecificLogin>true</SkipContextSpecificLogin>
 			</CardSpec>
 		</CardConfig>
 

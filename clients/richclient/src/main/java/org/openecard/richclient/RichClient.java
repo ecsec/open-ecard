@@ -136,6 +136,9 @@ public final class RichClient {
     public static void main(String[] args) {
 	LOG.info("Starting {} {} ...", AppVersion.getName(), AppVersion.getVersion());
 
+	LOG.debug("Running on {} {} {}.", System.getProperty("os.name"), System.getProperty("os.version"),
+		System.getProperty("os.arch"));
+
 	RichClient client = new RichClient();
 	client.setup();
     }

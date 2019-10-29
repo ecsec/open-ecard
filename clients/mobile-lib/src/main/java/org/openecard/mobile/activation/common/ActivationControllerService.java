@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -6,14 +6,13 @@
  * This file may be used in accordance with the terms and conditions
  * contained in a signed written agreement between you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.activation.common;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -22,7 +21,6 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
-import org.openecard.mobile.activation.ActivationInteraction;
 import static org.openecard.mobile.activation.ActivationResultCode.CLIENT_ERROR;
 import static org.openecard.mobile.activation.ActivationResultCode.DEPENDING_HOST_UNREACHABLE;
 import static org.openecard.mobile.activation.ActivationResultCode.INTERNAL_ERROR;
@@ -54,7 +52,8 @@ public class ActivationControllerService {
 	this.contextProvider = contextProvider;
     }
 
-    public void start(final URL requestURI, Set<String> supportedCards, final ControllerCallback controllerCallback, ActivationInteraction interaction) {
+    public void start(final URL requestURI, final ControllerCallback controllerCallback, InteractionPreperationFactory hooks) {
+	LOG.debug("Starting new activation process.");
 	if (requestURI == null) {
 	    throw new IllegalArgumentException("Request url cannot be null.");
 	}
@@ -62,15 +61,36 @@ public class ActivationControllerService {
 	    throw new IllegalArgumentException("Controller callback cannot be null.");
 	}
 
-	new Thread(() -> {
-	    CommonActivationResult result = this.activate(requestURI, supportedCards, controllerCallback, interaction);
+	Thread executingThread = new Thread(() -> {
+	    CommonActivationResult result;
+	    try {
+		result = this.activate(requestURI, controllerCallback, hooks);
+	    } catch (Exception e) {
+		LOG.debug("Activation was interrupted.", e);
+		result = new CommonActivationResult(INTERRUPTED, "Returning error as INTERRUPTED result.");
+	    }
 	    synchronized (processLock) {
-		if (cancelledCallback == controllerCallback) {
+		if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
 		    return;
+		} else {
+		    this.isRunning = false;
+		    this.currentCallback = null;
+		    this.currentProccess = null;
 		}
 	    }
+	    LOG.info("Notifying callback of authentication results {}.", result);
 	    controllerCallback.onAuthenticationCompletion(result);
-	}).start();
+	}, "ActivationControllerService");
+
+	synchronized (this.processLock) {
+	    if (!this.isRunning) {
+		this.isRunning = true;
+		this.currentCallback = controllerCallback;
+		this.cancelledCallback = null;
+		this.currentProccess = executingThread;
+	    }
+	}
+	executingThread.start();
     }
 
     public void cancelAuthentication(final ControllerCallback controllerCallback) {
@@ -102,6 +122,7 @@ public class ActivationControllerService {
 		LOG.info("Non-critical error occured while cleaning up the event dispatch hooks.", ex);
 	    }
 	}
+	LOG.debug("Notifying of interrupted completion.");
 	controllerCallback.onAuthenticationCompletion(new CommonActivationResult(INTERRUPTED, ""));
 
 	cancellableThread.interrupt();
@@ -123,15 +144,19 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private CommonActivationResult activate(URL requestURI, Set<String> supportedCards, ControllerCallback callback, ActivationInteraction interaction) {
-	if (this.isRunning) {
-	    return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
+    private CommonActivationResult activate(URL requestURI, ControllerCallback givenCallback, InteractionPreperationFactory hooks) {
+	synchronized (this.processLock) {
+	    if (this.currentCallback != givenCallback && this.cancelledCallback != givenCallback) {
+		return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
+	    }
 	}
+
 	// create request uri and extract query strings
 	String path = requestURI.getPath();
 	String resourceName;
 	try {
 	    // remove leading '/'
+	    LOG.debug("Checking path {}", path);
 	    resourceName = path.substring(1, path.length());
 	} catch (IndexOutOfBoundsException ex) {
 	    return new CommonActivationResult(INTERRUPTED, "The given activation URL is not valid: " + requestURI.toExternalForm());
@@ -157,20 +182,28 @@ public class ActivationControllerService {
 		} else {
 		    queries = new HashMap<>(0);
 		}
-		synchronized (this.processLock) {
-		    if (this.isRunning) {
-			throw new IllegalStateException("The activation process is already running");
-		    }
-		    this.isRunning = true;
-		    this.currentCallback = callback;
-		    this.cancelledCallback = null;
-		    this.currentProccess = Thread.currentThread();
-		}
 		EventDispatcher eventDispatcher = context.getEventDispatcher();
 		try {
-		    Map.Entry<CardEventHandler, AutoCloseable> entry = CardEventHandler.create(supportedCards, eventDispatcher, interaction);
+		    this.closable = hooks.create(eventDispatcher);
 
-		    this.closable = entry.getValue();
+		    ControllerCallback startedCallback;
+		    synchronized (this.processLock) {
+			if (this.isRunning && this.currentCallback == givenCallback && this.cancelledCallback == null) {
+			    startedCallback = givenCallback;
+			} else {
+			    startedCallback = null;
+			}
+		    }
+		    if (startedCallback != null) {
+			/*
+			 * TODO: it is possible (but improbable) that this process is cancelled before calling onStarted.
+			 */
+			startedCallback.onStarted();
+		    }
+		    if (Thread.interrupted()) {
+			LOG.debug("Determined thread was interrupted before executing handler for resource {}.", resourceName);
+			throw new InterruptedException();
+		    }
 		    LOG.debug("Found handler for resource {}. Executing", resourceName);
 		    BindingResult result = action.execute(null, queries, null, null);
 		    LOG.debug("Handler completed for resource {}.", resourceName);
@@ -179,12 +212,6 @@ public class ActivationControllerService {
 		    String interruptMessage = ex.getMessage();
 		    LOG.warn("The activation was interrupted with the following message: {}", interruptMessage, ex);
 		    return new CommonActivationResult(INTERRUPTED, interruptMessage);
-		} finally {
-		    synchronized (this.processLock) {
-			this.isRunning = false;
-			this.currentCallback = null;
-			this.currentProccess = null;
-		    }
 		}
 	    }
 	} catch (AddonNotFoundException ex) {

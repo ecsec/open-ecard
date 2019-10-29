@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.openecard.gui.android.pinmanagement.PINManagementGui;
+import org.openecard.gui.mobile.pinmanagement.PINManagementGui;
 
 
 /**

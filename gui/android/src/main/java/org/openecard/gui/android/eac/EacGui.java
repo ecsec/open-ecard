@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.openecard.gui.android.eac.types.BoxItem;
-import org.openecard.gui.android.eac.types.PinStatus;
-import org.openecard.gui.android.eac.types.ServerData;
 import org.openecard.gui.mobile.MobileGui;
+import org.openecard.gui.mobile.eac.types.BoxItem;
+import org.openecard.gui.mobile.eac.types.PinStatus;
+import org.openecard.gui.mobile.eac.types.ServerData;
 
 
 /**

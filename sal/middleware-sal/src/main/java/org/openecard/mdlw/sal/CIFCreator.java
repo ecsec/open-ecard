@@ -167,7 +167,7 @@ public class CIFCreator {
 	    PasswordAttributesType pw = new PasswordAttributesType();
 	    MwToken tok = session.getSlot().getTokenInfo();
 	    long minPinLen = tok.getUlMinPinLen();
-	    long maxPinLen = tok.getUlMinPinLen();
+	    long maxPinLen = tok.getUlMaxPinLen();
 	    pw.setMinLength(BigInteger.valueOf(minPinLen));
 	    pw.setMaxLength(BigInteger.valueOf(maxPinLen));
 	    markerBuilder.setPwAttributes(pw);

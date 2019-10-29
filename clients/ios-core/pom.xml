@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>1.4.0-rc.4-SNAPSHOT</version>
+		<version>1.4.0-rc.5-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.openecard.clients</groupId>
@@ -24,21 +24,41 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<artifactSet>
+								<excludes>
+									<exclude>com.github.markusbernhardt:proxy-vole</exclude>
+									<exclude>org.mozilla:rhino</exclude>
+									<exclude>delight-rhino-sandbox:org.javadelight</exclude>
+									<exclude>org.ini4j</exclude>
+									<exclude>net.java.dev.jna</exclude>
+								</excludes>
+							</artifactSet>
 							<relocations>
 								<relocation>
-									<pattern>org.bouncycastle</pattern>
-									<shadedPattern>org.openecard.bc</shadedPattern>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>hidden.org.apache.http</shadedPattern>
 								</relocation>
+								<!-- <relocation>
+									<pattern>javax.xml.bind</pattern>
+									<shadedPattern>hidden.javax.xml.bind</shadedPattern>
+								</relocation> -->
 							</relocations>
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>
 									<excludes>
 										<exclude>module-info.class</exclude>
+										<exclude>package-info.class</exclude>
 										<exclude>META-INF/*.SF</exclude>
 										<exclude>META-INF/*.DSA</exclude>
 										<exclude>META-INF/*.RSA</exclude>
 										<exclude>META-INF/versions/**/*</exclude>
+										<exclude>META-INF/maven/**/*</exclude>
+										<exclude>SQLite/**/*</exclude>
+										<exclude>delight.rhinosandbox/**/*</exclude>
+										<exclude>images/**/*</exclude>
+										<exclude>java/awt.font/**/*</exclude>
+										<exclude>org/apache/harmony/**/*</exclude>
 									</excludes>
 								</filter>
 							</filters>
@@ -48,8 +68,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
 	<dependencies>
 		<!-- all OeC dependencies -->
 		<dependency>
@@ -99,8 +117,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
-			<artifactId>mobile-lib</artifactId>
+			<artifactId>ios-lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>compile</scope>
+		</dependency>
+                <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                </dependency>
+                <dependency>
+                     <groupId>xerces</groupId>
+                     <artifactId>xercesImpl</artifactId>
+		     <version>2.12.0</version>
+                </dependency>
 	</dependencies>
 </project>

@@ -55,7 +55,7 @@ public class ProxySettings {
     private final ProxySelector selector;
 
     static {
-	if (! isAndroid()) {
+	if (! isAndroid() && !isIOS()) {
 	    ProxySettingsLoader psl = new ProxySettingsLoader();
 	    psl.load();
 	}
@@ -74,6 +74,15 @@ public class ProxySettings {
     private static boolean isAndroid() {
 	try {
 	    Class.forName("android.app.Activity");
+	    return true;
+	} catch (ClassNotFoundException e) {
+	    return false;
+	}
+    }
+
+    private static boolean isIOS() {
+	try {
+	    Class.forName("org.robovm.apple.foundation.NSObject");
 	    return true;
 	} catch (ClassNotFoundException e) {
 	    return false;

@@ -22,9 +22,9 @@
 
 package org.openecard.crypto.common.asn1.eac;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Sequence;
+import org.openecard.bouncycastle.asn1.ASN1Object;
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.openecard.bouncycastle.asn1.ASN1Sequence;
 
 
 /**

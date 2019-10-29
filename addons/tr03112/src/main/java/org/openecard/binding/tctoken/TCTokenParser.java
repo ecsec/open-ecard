@@ -39,6 +39,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 
 /**
@@ -95,8 +97,10 @@ public class TCTokenParser {
 	try {
 	    // Parse TCTokens
 	    SAXParser saxParser = saxFactory.newSAXParser();
+	    XMLReader reader = saxParser.getXMLReader();
+	    reader.setContentHandler(saxHandler);
 	    LimitedInputStream stream = new LimitedInputStream(inputStream);
-	    saxParser.parse(stream, saxHandler);
+	    reader.parse(new InputSource(stream));
 
 	    // Get TCTokens
 	    List<TCToken> tokens = saxHandler.getTCTokens();

@@ -49,7 +49,7 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
-import org.bouncycastle.tls.TlsClientProtocol;
+import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
@@ -329,6 +329,7 @@ public class PAOS {
 	DefaultConnectionReuseStrategy reuse = new DefaultConnectionReuseStrategy();
 	boolean connectionDropped = false;
 	ResponseBaseType lastResponse = null;
+	String firstOecMinorError = null;
 
 	try {
 	    // loop and send makes a computer happy
@@ -344,6 +345,16 @@ public class PAOS {
 			// save the last message we sent to the eID-Server.
 			if (msg instanceof ResponseBaseType) {
 			    lastResponse = (ResponseBaseType) msg;
+			    // save first minor code if there is one returned from our stack
+			    if (firstOecMinorError == null) {
+				Result r = lastResponse.getResult();
+				if (r != null) {
+				    String minor = r.getResultMinor();
+				    if (minor != null) {
+					firstOecMinorError = minor;
+				    }
+				}
+			    }
 			}
 			// prepare request
 			String resource = tlsHandler.getResource();
@@ -451,7 +462,11 @@ public class PAOS {
 	} catch (TransformerException ex) {
 	    throw new DispatcherException(ex);
 	} catch (WSException ex) {
-	    throw new PAOSException(ex);
+	    PAOSException newEx = new PAOSException(ex);
+	    if (firstOecMinorError != null) {
+		newEx.setAdditionalResultMinor(firstOecMinorError);
+	    }
+	    throw newEx;
 	} finally {
 	    try {
 		if (conn != null) {

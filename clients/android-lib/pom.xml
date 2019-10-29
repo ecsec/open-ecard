@@ -9,9 +9,9 @@
 	</parent>
 
 	<groupId>org.openecard.clients</groupId>
-	<artifactId>android-lib-builder</artifactId>
+	<artifactId>android-lib</artifactId>
 	<packaging>pom</packaging>
-	<name>Android Client Lib Builder</name>
+	<name>Android Lib</name>
 
 	<properties>
 		<gradle.cmd>./gradlew</gradle.cmd>
@@ -111,6 +111,11 @@
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>android-nfc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

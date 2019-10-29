@@ -44,18 +44,18 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki
  * @author Mike Prechtl
  */
-public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
+public class AndroidNFCFactory implements org.openecard.common.ifd.scio.TerminalFactory {
 
     private static final String ALGORITHM = "AndroidNFC";
 
-    private static final Logger LOG = LoggerFactory.getLogger(NFCFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCFactory.class);
 
     private static Context context;
     private static NfcAdapter adapter;
     private static NFCCardTerminals terminals;
     private static NFCCardTerminal terminal;
 
-    public NFCFactory() throws NoSuchTerminal {
+    public AndroidNFCFactory() throws NoSuchTerminal {
 	LOG.info("Create new NFCFactory");
 	if (adapter == null || terminals == null) {
 	    adapter = getNFCAdapter();
@@ -116,7 +116,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
 	isoDepTag.setTimeout(timeout);
 	try {
 	    // standard nfc terminal
-	    NFCCard card = new NFCCard(isoDepTag, timeout, terminal);
+	    AndroidNFCCard card = new AndroidNFCCard(isoDepTag, timeout, terminal);
 	    terminal.setNFCCard(card);
 	} catch (IOException ex) {
 	    LOG.warn(ex.getMessage(), ex);
@@ -129,7 +129,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
      * @return true if nfc is available, otherwise false
      */
     public static boolean isNFCAvailable() {
-	return NFCFactory.getNFCAdapter() != null;
+	return AndroidNFCFactory.getNFCAdapter() != null;
     }
 
     /**
@@ -139,7 +139,7 @@ public class NFCFactory implements org.openecard.common.ifd.scio.TerminalFactory
      * @return true if nfc is enabled, otherwise false
      */
     public static boolean isNFCEnabled() {
-	return NFCFactory.getNFCAdapter() != null ? NFCFactory.getNFCAdapter().isEnabled() : false;
+	return AndroidNFCFactory.getNFCAdapter() != null ? AndroidNFCFactory.getNFCAdapter().isEnabled() : false;
     }
 
     /**

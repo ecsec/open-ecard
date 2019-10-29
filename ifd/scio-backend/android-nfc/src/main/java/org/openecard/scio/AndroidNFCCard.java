@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dirk Petrautzki
  */
-public final class NFCCard extends AbstractNFCCard {
+public final class AndroidNFCCard extends AbstractNFCCard {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NFCCard.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCCard.class);
 
     private final int transceiveTimeout;
     private final byte[] histBytes;
@@ -46,7 +46,7 @@ public final class NFCCard extends AbstractNFCCard {
 
     private Thread monitor;
 
-    public NFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
+    public AndroidNFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
 	super(terminal);
 	isodep = tag;
 	transceiveTimeout = timeout;

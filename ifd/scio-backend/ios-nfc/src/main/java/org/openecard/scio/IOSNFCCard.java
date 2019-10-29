@@ -32,6 +32,7 @@ import org.openecard.common.util.Promise;
 import org.robovm.apple.corenfc.NFCISO7816APDU;
 import org.robovm.apple.corenfc.NFCISO7816Tag;
 import org.robovm.apple.corenfc.NFCPollingOption;
+import org.robovm.apple.corenfc.NFCTag;
 import org.robovm.apple.corenfc.NFCTagReaderSession;
 import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
@@ -107,7 +108,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    @Override
 	    public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
 		for (NSObject t : tags) {
-		    session.connectToTag(t, (NSError er) -> {
+		    session.connectToTag((NFCTag)(Object)t, (NSError er) -> {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			setTag(tag);

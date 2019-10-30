@@ -46,6 +46,8 @@ public class OpeneCard {
     }
 
     public ContextManager context(Context context) {
+
+	AndroidNFCFactory.setContext(context);
 	AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
 	this.context = this.utils.context(capabilities);
 	return this.context;

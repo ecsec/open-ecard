@@ -40,6 +40,7 @@ import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.sal.CombinedCIFProvider;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
@@ -64,9 +65,10 @@ import org.openecard.mobile.ex.UnableToInitialize;
 import static org.openecard.mobile.system.ServiceMessages.*;
 import org.openecard.mobile.utils.ClasspathRegistry;
 import org.openecard.recognition.CardRecognitionImpl;
-import org.openecard.sal.SelectorSAL;
+import org.openecard.recognition.RepoCifProvider;
 import org.openecard.sal.TinySAL;
 import org.openecard.transport.dispatcher.MessageDispatcher;
+import org.openecard.ws.SAL;
 import org.openecard.ws.marshal.WsdefProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +92,6 @@ public class OpeneCardContext {
 
     // Interface Device Layer (IFD)
     private IFD ifd;
-    // Service Access Layer (SAL)
-    private SelectorSAL sal;
 
     private AddonManager manager;
     private EventDispatcher eventDispatcher;
@@ -99,6 +99,7 @@ public class OpeneCardContext {
     private Dispatcher dispatcher;
     private TerminalFactory terminalFactory;
     private TinyManagement management;
+    private SAL sal;
 
     private UserConsent gui;
     private HashMap<Class<? extends MobileGui>, UserConsentNavigatorFactory<? extends MobileGui>> realFactories;
@@ -187,14 +188,6 @@ public class OpeneCardContext {
 	    LOG.info("Event dispatcher started.");
 	    env.setEventDispatcher(eventDispatcher);
 
-	    // set up ifd
-	    ifd = new IFD();
-	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	    ifd.setGUI(gui);
-	    ifd.setEnvironment(env);
-	    env.setIFD(ifd);
-	    LOG.info("IFD initialized.");
-
 	    // set up card recognition
 	    try {
 		recognition = new CardRecognitionImpl(env);
@@ -206,13 +199,24 @@ public class OpeneCardContext {
 		throw ex;
 	    }
 
+	    // set up ifd
+	    ifd = new IFD();
+	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
+	    ifd.setGUI(gui);
+	    ifd.setEnvironment(env);
+	    env.setIFD(ifd);
+	    LOG.info("IFD initialized.");
+
+	    CombinedCIFProvider cifProv = new CombinedCIFProvider();
+	    env.setCIFProvider(cifProv);
+	    cifProv.addCifProvider(new RepoCifProvider(recognition));
+
 	    // set up SAL
 	    TinySAL mainSAL = new TinySAL(env);
 	    mainSAL.setGUI(gui);
 
-	    sal = new SelectorSAL(mainSAL, env);
+	    sal = mainSAL;
 	    env.setSAL(sal);
-	    env.setCIFProvider(sal);
 	    LOG.info("SAL prepared.");
 
 	    ViewController viewController = new ViewController() {
@@ -253,6 +257,7 @@ public class OpeneCardContext {
 		WSHelper.checkResult(establishContextResponse);
 		contextHandle = establishContextResponse.getContextHandle();
 		LOG.info("ContextHandle: {}", ByteUtils.toHexString(contextHandle));
+		mainSAL.setIfdCtx(contextHandle);
 	    } catch (WSHelper.WSException ex) {
 		errorMsg = ESTABLISH_IFD_CONTEXT_FAILED;
 		throw ex;
@@ -301,7 +306,7 @@ public class OpeneCardContext {
 	return ifd;
     }
 
-    public SelectorSAL getSAL() {
+    public SAL getSAL() {
 	return sal;
     }
 

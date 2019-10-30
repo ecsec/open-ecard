@@ -149,6 +149,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -190,8 +191,8 @@ import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.SalStateManager;
+import org.openecard.common.sal.state.SessionAlreadyExists;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
@@ -247,7 +248,9 @@ public class TinySAL implements SAL {
 	this.addonManager = manager;
 	protocolSelector = new AddonSelector(manager);
 	protocolSelector.setStrategy(new HighestVersionSelector());
-	states.setProtocolSelector(protocolSelector);
+	// TODO: check if returnSALProtocol must be called when the entry is removed.
+	// states.setProtocolSelector(protocolSelector);
+
     }
 
     @Override
@@ -297,12 +300,45 @@ public class TinySAL implements SAL {
 
     @Override
     public CreateSessionResponse createSession(CreateSession parameters) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	Result result;
+	if (parameters == null || parameters.getSessionIdentifier() == null) {
+	    this.salStates.createSession();
+	    result = WSHelper.makeResultOK();
+	} else {
+	    try {
+		this.salStates.createSession(parameters.getSessionIdentifier());
+		result = WSHelper.makeResultOK();
+	    } catch (SessionAlreadyExists ex) {
+		// TODO: Add minor error code and message
+		result = WSHelper.makeResultError("DUPLICATE_SESSION_IDENTIFIER", "The given session identifier is not unique.");
+	    }
+	}
+	CreateSessionResponse response = new CreateSessionResponse();
+	response.setResult(result);
+	return response;
     }
 
     @Override
     public DestroySessionResponse destroySession(DestroySession parameters) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	byte[] contextHandle = null;
+	if (parameters != null) {
+	    ConnectionHandleType connectionHandle = parameters.getConnectionHandle();
+	    if (connectionHandle != null) {
+		contextHandle = connectionHandle.getContextHandle();
+	    }
+	}
+
+	final Result result;
+	boolean didRemoveSession = this.salStates.destroySessionByContextHandle(contextHandle);
+	if (didRemoveSession) {
+	    result = WSHelper.makeResultOK();
+	} else {
+	    result = WSHelper.makeResultError("NO_SESSION_MATCHED_GIVEN_CONTEXT_HANDLE_HANDLE", "No session was found for the given context handle.");
+	}
+
+	DestroySessionResponse response = new DestroySessionResponse();
+	response.setResult(result);
+	return response;
     }
 
     /**
@@ -321,7 +357,7 @@ public class TinySAL implements SAL {
 	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
-	    Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
+	    et<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
 
 	    // Copy entries to result set
 	    CardAppPathResultSet resultSet = new CardAppPathResultSet();

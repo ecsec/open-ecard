@@ -11,6 +11,8 @@
 package org.openecard.common.sal.state;
 
 import org.openecard.addon.sal.SALProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -19,9 +21,12 @@ import org.openecard.addon.sal.SALProtocol;
  */
 public class StateEntry {
 
+    private static Logger LOG = LoggerFactory.getLogger(StateEntry.class);
+
     private final String session;
     private SALProtocol protocol;
     private ConnectedCardEntry cardEntry;
+    private byte[] ctxHandle;
 
     public StateEntry(String session) {
 	this.session = session;
@@ -31,9 +36,12 @@ public class StateEntry {
 	return session;
     }
 
-
     public ConnectedCardEntry setConnectedCard(byte[] slotHandle, CardEntry card) {
+	if (this.cardEntry != null) {
+	    LOG.warn("Session {} already connected to a card {}. Replacing with card {}.", this.cardEntry, card);
+	}
 	this.cardEntry = new ConnectedCardEntry(slotHandle, card);
+	this.ctxHandle = card.ctxHandle;
 	return this.cardEntry;
     }
 
@@ -54,4 +62,7 @@ public class StateEntry {
 	return cardEntry;
     }
 
+    public byte[] getContextHandle() {
+	return ctxHandle;
+    }
 }

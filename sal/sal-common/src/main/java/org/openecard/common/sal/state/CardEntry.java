@@ -35,7 +35,7 @@ public class CardEntry implements Comparable<CardEntry> {
     }
 
     public boolean matches(byte[] ctxHandle, String ifdName, BigInteger slotIdx) {
-	if (! Arrays.equals(this.ctxHandle, ctxHandle)) {
+	if (! matchesContextHandle(ctxHandle)) {
 	    return false;
 	}
 	if (! this.ifdName.equals(ifdName)) {
@@ -62,4 +62,25 @@ public class CardEntry implements Comparable<CardEntry> {
 	}
     }
 
+    public boolean matchesContextHandle(byte[] ctxHandle) {
+	return Arrays.equals(this.ctxHandle, ctxHandle);
+    }
+
+    @Override
+    public String toString() {
+	StringBuilder builder = new StringBuilder();
+	builder.append("CardEntry={");
+	this.toString(builder);
+	builder.append("}");
+	return builder.toString();
+    }
+
+    protected void toString(StringBuilder builder) {
+	builder.append("ctxHandle=");
+	builder.append(ByteUtils.toHexString(ctxHandle));
+	builder.append(", ifdName=");
+	builder.append(ifdName);
+	builder.append(", slotIdx=");
+	builder.append(slotIdx);
+    }
 }

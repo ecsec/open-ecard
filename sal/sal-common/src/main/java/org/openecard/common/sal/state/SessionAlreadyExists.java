@@ -14,7 +14,7 @@ package org.openecard.common.sal.state;
  *
  * @author Tobias Wich
  */
-class SessionAlreadyExists extends Exception {
+public class SessionAlreadyExists extends Exception {
 
     public SessionAlreadyExists(String msg) {
 	super(msg);

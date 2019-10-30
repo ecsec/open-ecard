@@ -139,7 +139,7 @@ public class OpeneCardServiceImpl extends Service {
 
 	private OpeneCardContext initializeContext() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	    AndroidNfcCapabilities nfc = AndroidNfcCapabilities.create(getApplicationContext());
-	    OpeneCardContext octx = new OpeneCardContext(nfc, new OpeneCardContextConfig("org.openecard.scio.NFCFactory", "org.openecard.ws.android.AndroidMarshaller"));
+	    OpeneCardContext octx = new OpeneCardContext(nfc, new OpeneCardContextConfig(org.openecard.scio.AndroidNFCFactory.class.getCanonicalName(), org.openecard.ws.android.AndroidMarshaller.class.getCanonicalName()));
 	    octx.initialize();
 	    return octx;
 	}

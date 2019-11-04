@@ -35,7 +35,6 @@ public class SalStateManager {
 
     private final Set<CardEntry> cards;
     private final Map<String, StateEntry> sessions;
-    private String floatingSession = null;
 
     public SalStateManager() {
 	this.cards = new TreeSet<>();
@@ -50,20 +49,6 @@ public class SalStateManager {
 	    throw new DuplicateCardEntry(String.format("Failed to add duplicate card entry for device=%s.", ifdName));
 	} else {
 	    cards.add(ce);
-	    Map.Entry<String, StateEntry> matchingState = this.getStateEntry(ctx);
-	    StateEntry foundStateEntry;
-	    if (matchingState == null && floatingSession != null) {
-		foundStateEntry = sessions.get(floatingSession);
-		floatingSession = null;
-	    } else {
-		foundStateEntry = matchingState.getValue();
-		if (matchingState.getKey().equals(floatingSession)) {
-		    floatingSession = null;
-		}
-	    }
-	    if (foundStateEntry != null) {
-		foundStateEntry.setConnectedCard(slotIdx.toByteArray(), ce);
-	    }
 	    return ce;
 	}
     }
@@ -139,13 +124,8 @@ public class SalStateManager {
 	if (sessions.containsKey(session)) {
 	    throw new SessionAlreadyExists(String.format("The requested session=%s already exists.", session));
 	} else {
-	    if (this.floatingSession != null) {
-		LOG.debug("Destroying previous floating session while creating new session.");
-		destroySession(this.floatingSession);
-	    }
 	    StateEntry newEntry = new StateEntry(session);
 	    sessions.put(session, newEntry);
-	    this.floatingSession = session;
 	    return newEntry;
 	}
     }
@@ -162,22 +142,13 @@ public class SalStateManager {
     public boolean destroySessionByContextHandle(byte[] contextHandle) {
 	Map.Entry<String, StateEntry> stateEntry = this.getStateEntry(contextHandle);
 	if (stateEntry == null) {
-	    if (floatingSession != null) {
-		String session = floatingSession;
-		floatingSession = null;
-		return destroySession(session);
-	    }
 	    return false;
 	} else {
-	    if (stateEntry.getKey().equals(this.floatingSession)) {
-		this.floatingSession = null;
-	    }
-	    return sessions.remove(stateEntry.getKey()) != null;
+	    return destroySession(stateEntry.getKey());
 	}
     }
 
     private boolean destroySession(String session) {
 	return sessions.remove(session) != null;
     }
-
 }

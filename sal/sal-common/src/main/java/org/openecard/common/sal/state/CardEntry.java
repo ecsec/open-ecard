@@ -71,10 +71,16 @@ public class CardEntry implements Comparable<CardEntry> {
 	return Arrays.equals(this.ctxHandle, ctxHandle);
     }
 
+    public ConnectionHandleType copyHandle() {
+	ConnectionHandleType connectionHandle = new ConnectionHandleType();
+	this.fillConnectionHandle(connectionHandle);
+	return connectionHandle;
+    }
+
     public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
 	connectionHandle.setSlotIndex(slotIdx);
 	connectionHandle.setIFDName(ifdName);
-	connectionHandle.setContextHandle(ctxHandle);
+	connectionHandle.setContextHandle(ByteUtils.clone(ctxHandle));
     }
 
     @Override

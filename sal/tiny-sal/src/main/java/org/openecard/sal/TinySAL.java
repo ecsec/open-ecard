@@ -143,6 +143,7 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -189,6 +190,7 @@ import org.openecard.common.sal.exception.PrerequisitesNotSatisfiedException;
 import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
+import org.openecard.common.sal.state.CardEntry;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.ConnectedCardEntry;
 import org.openecard.common.sal.state.NoSuchSession;
@@ -305,12 +307,12 @@ public class TinySAL implements SAL {
 	CreateSessionResponse response = new CreateSessionResponse();
 	if (parameters == null || parameters.getSessionIdentifier() == null) {
 	    StateEntry entry = this.salStates.createSession();
-	    response.setConnectionHandle(entry.getConnectionHandle());
+	    response.setConnectionHandle(entry.copyHandle());
 	    response.setResult(WSHelper.makeResultOK());
 	} else {
 	    try {
 		StateEntry entry = this.salStates.createSession(parameters.getSessionIdentifier());
-		response.setConnectionHandle(entry.getConnectionHandle());
+		response.setConnectionHandle(entry.copyHandle());
 		response.setResult(WSHelper.makeResultOK());
 	    } catch (SessionAlreadyExists ex) {
 		// TODO: Add minor error code and message
@@ -357,7 +359,7 @@ public class TinySAL implements SAL {
 	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
-	    et<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
+	    Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
 
 	    // Copy entries to result set
 	    CardAppPathResultSet resultSet = new CardAppPathResultSet();
@@ -399,31 +401,35 @@ public class TinySAL implements SAL {
 		WSHelper.makeResultOK());
 
 	try {
+	    Assert.assertIncorrectParameter(request, "The parameter CardApplicationConnect is empty.");
 	    CardApplicationPathType cardAppPath = request.getCardApplicationPath();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
-	    Set<CardStateEntry> cardStateEntrySet = states.getMatchingEntries(cardAppPath, false);
-	    Assert.assertIncorrectParameter(cardStateEntrySet, "The given ConnectionHandle is invalid.");
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 
 	    /*
 	     * [TR-03112-4] If the provided path fragments are valid for more than one card application
 	     * the eCard-API-Framework SHALL return any of the possible choices.
 	     */
-	    CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
+	    CardEntry baseCardStateEntry = SALUtils.getMatchingEntry(cardAppPath, salStates);
+	    Assert.assertIncorrectParameter(baseCardStateEntry, "The given ConnectionHandle is invalid.");
+
 	    byte[] applicationID = cardAppPath.getCardApplication();
 	    if (applicationID == null) {
-		if (cardStateEntry.getImplicitlySelectedApplicationIdentifier() != null) {
-		    applicationID = cardStateEntry.getImplicitlySelectedApplicationIdentifier();
+		 byte[] implicitlySelectedApplication = baseCardStateEntry.getCif().getImplicitlySelectedApplication();
+		if (implicitlySelectedApplication != null) {
+		    applicationID = implicitlySelectedApplication;
 		} else {
 		    applicationID = MF;
 		}
 	    }
-	    Assert.securityConditionApplication(cardStateEntry, applicationID,
+	    Assert.securityConditionApplication(baseCardStateEntry.getCif(), new HashSet<>(), applicationID,
 		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
-	    ConnectionHandleType handle = cardStateEntry.handleCopy();
-	    cardStateEntry = cardStateEntry.derive(handle);
+	    // ConnectionHandleType handle = cardStateEntry.handleCopy();
+	    // cardStateEntry = cardStateEntry.derive(handle);
+	    ConnectionHandleType handle = baseCardStateEntry.copyHandle();
 	    Connect connect = new Connect();
 	    connect.setContextHandle(handle.getContextHandle());
 	    connect.setIFDName(handle.getIFDName());
@@ -434,31 +440,32 @@ public class TinySAL implements SAL {
 
 	    // Select the card application
 	    CardCommandAPDU select;
+	    final byte[] slotHandle = connectResponse.getSlotHandle();
 	    // TODO: proper determination of path, file and app id
 	    if (applicationID.length == 2) {
 		select = new Select.File(applicationID);
 		List<byte[]> responses = new ArrayList<>();
 		responses.add(TrailerConstants.Success.OK());
 		responses.add(TrailerConstants.Error.WRONG_P1_P2());
-		CardResponseAPDU resp = select.transmit(env.getDispatcher(), connectResponse.getSlotHandle(), responses);
+		CardResponseAPDU resp = select.transmit(env.getDispatcher(), slotHandle, responses);
 
 		if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
 		    select = new Select.AbsolutePath(applicationID);
-		    select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
+		    select.transmit(env.getDispatcher(), slotHandle);
 		}
 
 	    } else {
 		select = new Select.Application(applicationID);
-		select.transmit(env.getDispatcher(), connectResponse.getSlotHandle());
+		select.transmit(env.getDispatcher(), slotHandle);
 	    }
 
-	    cardStateEntry.setCurrentCardApplication(applicationID);
-	    cardStateEntry.setSlotHandle(connectResponse.getSlotHandle());
-	    // reset the ef FCP
-	    cardStateEntry.unsetFCPOfSelectedEF();
-	    states.addEntry(cardStateEntry);
+	    ConnectedCardEntry connectedCardEntry = stateEntry.setConnectedCard(slotHandle, applicationID, baseCardStateEntry);
 
-	    response.setConnectionHandle(cardStateEntry.handleCopy());
+	    // reset the ef FCP
+	    connectedCardEntry.unsetFCPOfSelectedEF();
+	    // states.addEntry(baseCardStateEntry);
+
+	    response.setConnectionHandle(stateEntry.copyHandle());
 	    response.getConnectionHandle().setCardApplication(applicationID);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

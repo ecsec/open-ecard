@@ -10,18 +10,20 @@
 
 package org.openecard.common.sal.state;
 
+import org.openecard.common.ECardConstants;
+import org.openecard.common.ECardException;
+import static org.openecard.common.ECardException.makeException;
+
 /**
  *
  * @author Tobias Wich
  */
-public class NoSuchSession extends Exception {
+public class NoSuchSession extends ECardException {
 
-    public NoSuchSession(String msg) {
-	super(msg);
-    }
+    private static final long serialVersionUID = 1L;
 
-    public NoSuchSession(String msg, Throwable cause) {
-	super(msg, cause);
+    public NoSuchSession(String message) {
+	makeException(this, ECardConstants.Minor.SAL.NO_SESSION, message);
     }
 
 }

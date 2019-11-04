@@ -22,9 +22,11 @@
 package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ACLList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDelete;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
@@ -59,6 +61,7 @@ import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownSlotHandleException;
+import org.openecard.common.sal.state.CardEntry;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.ConnectedCardEntry;
@@ -78,6 +81,21 @@ import org.slf4j.LoggerFactory;
 public class SALUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(SALUtils.class);
+
+
+    public static CardEntry getMatchingEntry(CardApplicationConnect request, SalStateManager salStates) throws IncorrectParameterException {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationConnect is empty.");
+
+	return SALUtils.getMatchingEntry(request.getCardApplicationPath(), salStates);
+
+    }
+
+    public static CardEntry getMatchingEntry(CardApplicationPathType cardApplicationPath, SalStateManager salStates) throws IncorrectParameterException {
+	Assert.assertIncorrectParameter(cardApplicationPath, "The parameter CardApplicationPathType is empty.");
+
+	return salStates.getCardEntry(cardApplicationPath.getContextHandle(), cardApplicationPath.getIFDName(), cardApplicationPath.getSlotIndex());
+
+    }
 
     public static ConnectionHandleType getConnectionHandle(Object object) throws IncorrectParameterException, Exception {
 	ConnectionHandleType value = (ConnectionHandleType) get(object, "getConnectionHandle");
@@ -192,13 +210,17 @@ public class SALUtils {
 	Assert.assertIncorrectParameter(request, "The parameter ConnectionHandleType is empty.");
 
 	ChannelHandleType channelHandle = request.getChannelHandle();
-	Assert.assertIncorrectParameter(channelHandle, "The parameter ConnectionHandleType has an empty channel handle.");
+	return getStateBySession(channelHandle, salStates);
+
+    }
+
+    private static StateEntry getStateBySession(ChannelHandleType channelHandle, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(channelHandle, "The parameter has an empty channel handle.");
 
 	String sessionIdentifier = channelHandle.getSessionIdentifier();
-	Assert.assertIncorrectParameter(channelHandle, "The parameter ConnectionHandleType has a channel handle without a session identifier.");
+	Assert.assertIncorrectParameter(channelHandle, "The parameter has a channel handle without a session identifier.");
 
 	return salStates.getSession(sessionIdentifier);
-
     }
 
     public static StateEntry getStateBySession(DSICreate request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
@@ -356,5 +378,16 @@ public class SALUtils {
 
 	return getStateBySession(request.getConnectionHandle(), salStates);
     }
+
+    public static StateEntry getStateBySession(CardApplicationConnect request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationConnect is empty.");
+
+	final CardApplicationPathType cardApplicationPath = request.getCardApplicationPath();
+	Assert.assertIncorrectParameter(cardApplicationPath, "The parameter CardApplicationPathType is empty.");
+
+
+	return getStateBySession(cardApplicationPath.getChannelHandle(), salStates);
+    }
+
 }
 

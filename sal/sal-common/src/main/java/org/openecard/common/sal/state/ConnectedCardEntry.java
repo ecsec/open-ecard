@@ -27,14 +27,15 @@ import org.openecard.common.util.ByteUtils;
  */
 public class ConnectedCardEntry extends CardEntry {
 
-    protected byte[] slotHandle;
+    protected final byte[] slotHandle;
+    protected final byte[] cardApplication;
     private final Set<DIDInfoType> authenticatedDIDs = new HashSet<>();
     private FCP lastSelectedEfFCP;
-    private byte[] cardApplication;
 
-    public ConnectedCardEntry(byte[] slotHandle, CardEntry base) {
+    public ConnectedCardEntry(byte[] slotHandle, byte[] cardApplication, CardEntry base) {
 	super(base.ctxHandle, base.ifdName, base.slotIdx, base.cif);
 	this.slotHandle = ByteUtils.clone(slotHandle);
+	this.cardApplication = ByteUtils.clone(cardApplication);
     }
 
     @Override

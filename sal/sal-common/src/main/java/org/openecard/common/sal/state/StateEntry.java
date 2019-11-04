@@ -39,11 +39,11 @@ public class StateEntry {
 	return session;
     }
 
-    public ConnectedCardEntry setConnectedCard(byte[] slotHandle, CardEntry card) {
+    public ConnectedCardEntry setConnectedCard(byte[] slotHandle, byte[] cardApplication, CardEntry card) {
 	if (this.cardEntry != null) {
 	    LOG.warn("Session {} already connected to a card {}. Replacing with card {}.", this.cardEntry, card);
 	}
-	this.cardEntry = new ConnectedCardEntry(slotHandle, card);
+	this.cardEntry = new ConnectedCardEntry(slotHandle, cardApplication, card);
 	this.ctxHandle = card.ctxHandle;
 	return this.cardEntry;
     }
@@ -81,7 +81,7 @@ public class StateEntry {
 	return ctxHandle;
     }
 
-    public ConnectionHandleType getConnectionHandle() {
+    public ConnectionHandleType copyHandle() {
 	ConnectionHandleType connectionHandle = new ConnectionHandleType();
 	fillConnectionHandle(connectionHandle);
 	return connectionHandle;

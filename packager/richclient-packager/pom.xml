@@ -335,20 +335,6 @@
 			<artifactId>javafx-swing</artifactId>
 		</dependency>
 
-		<!-- BouncyCastle -->
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>bctls-jdk15on</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-		</dependency>
-
 		<!-- JAXB -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>

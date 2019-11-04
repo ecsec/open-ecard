@@ -30,7 +30,7 @@ public class CardEntry implements Comparable<CardEntry> {
     public CardEntry(byte[] ctxHandle, String ifdName, BigInteger slotIdx, CardInfoWrapper cif) {
 	this.ctxHandle = ByteUtils.clone(ctxHandle);
 	this.ifdName = ifdName;
-	this.slotIdx = BigInteger.ZERO;
+	this.slotIdx = slotIdx;
 	this.cif = new CardInfoWrapper(cif);
     }
 
@@ -60,6 +60,10 @@ public class CardEntry implements Comparable<CardEntry> {
 	    int idxComp = this.slotIdx.compareTo(o.slotIdx);
 	    return idxComp;
 	}
+    }
+
+    public CardInfoWrapper getCif() {
+	return cif;
     }
 
     public boolean matchesContextHandle(byte[] ctxHandle) {

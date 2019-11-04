@@ -23,13 +23,19 @@
 package org.openecard.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
+import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.util.Collection;
+import java.util.Set;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.cif.CardApplicationWrapper;
+import org.openecard.common.sal.state.cif.CardInfoWrapper;
+import org.openecard.common.util.ByteArrayWrapper;
 
 
 /**
@@ -105,10 +111,27 @@ public final class Assert {
      */
     public static void securityConditionApplication(CardStateEntry entry, byte[] applicationID, Enum<?> action)
 	    throws SecurityConditionNotSatisfiedException {
-	if (!entry.checkApplicationSecurityCondition(applicationID, action)) {
+	final CardInfoWrapper info = entry.getInfo();
+	final Set<DIDInfoType> authenticatedDIDs = entry.getAuthenticatedDIDs();
+	if (!checkApplicationSecurityCondition(info, authenticatedDIDs, applicationID, action)) {
 	    throw new SecurityConditionNotSatisfiedException();
 	}
     }
+
+    private static boolean checkApplicationSecurityCondition(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs, byte[] applicationIdentifier, Enum<?> serviceAction) {
+	if (applicationIdentifier == null) {
+	    applicationIdentifier = info.getImplicitlySelectedApplication();
+	}
+	CardApplicationWrapper application = info.getCardApplications().get(new ByteArrayWrapper(applicationIdentifier));
+	SecurityConditionType securityCondition = application.getSecurityCondition(serviceAction);
+	if (securityCondition != null) {
+
+	    return CardStateEntry.checkSecurityCondition(info, securityCondition, authenticatedDIDs);
+	} else {
+	    return false;
+	}
+    }
+
 
     /**
      * Checks the Dataset Security Condition.

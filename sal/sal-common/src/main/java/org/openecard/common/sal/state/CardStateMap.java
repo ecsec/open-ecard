@@ -373,7 +373,6 @@ public class CardStateMap {
 	}
     }
 
-
     private static Set<CardStateEntry> mergeSets(ArrayList<Set<CardStateEntry>> setsToMerge) {
 	TreeSet<CardStateEntry> result = new TreeSet<>();
 

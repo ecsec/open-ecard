@@ -196,7 +196,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     public DIDStructureType getDIDStructure(String didName, byte[] cardApplication) {
 	DIDStructureType didStructure = this.infoObject.getDIDStructure(didName, cardApplication);
 	if (didStructure != null) {
-	    didStructure.setAuthenticated(this.isAuthenticated(didName, cardApplication));
+	    didStructure.setAuthenticated(CardStateEntry.isAuthenticated(infoObject, didName, cardApplication, authenticatedDIDs));
 	}
 	return didStructure;
     }
@@ -211,22 +211,22 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     public DIDStructureType getDIDStructure(String didName, DIDScopeType didScope) {
 	DIDStructureType didStructure = this.infoObject.getDIDStructure(didName, didScope);
 	if (didStructure != null) {
-	    didStructure.setAuthenticated(this.isAuthenticated(didName, didScope));
+	    didStructure.setAuthenticated(CardStateEntry.isAuthenticated(infoObject, didName, didScope, authenticatedDIDs));
 	}
 	return didStructure;
     }
 
-    public boolean isAuthenticated(String didName, byte[] cardApplication) {
+    public static boolean isAuthenticated(CardInfoWrapper infoObject, String didName, byte[] cardApplication, Set<DIDInfoType> authenticatedDIDs) {
 	DIDInfoType didInfo = infoObject.getDIDInfo(didName, cardApplication);
-	return getAuthenticatedDIDs().contains(didInfo);
+	return authenticatedDIDs.contains(didInfo);
     }
 
-    public boolean isAuthenticated(String didName, DIDScopeType didScope) {
+    public static boolean isAuthenticated(CardInfoWrapper infoObject, String didName, DIDScopeType didScope, Set<DIDInfoType> authenticatedDIDs) {
 	DIDInfoType didInfo = infoObject.getDIDInfo(didName, didScope);
-	return getAuthenticatedDIDs().contains(didInfo);
+	return authenticatedDIDs.contains(didInfo);
     }
 
-    private boolean checkSecurityCondition(SecurityConditionType securityCondition) {
+    public static boolean checkSecurityCondition(CardInfoWrapper infoObject, SecurityConditionType securityCondition, Set<DIDInfoType> authenticatedDIDs) {
 	byte[] cardApplication;
 	try{
 	    if(securityCondition.isAlways()) {
@@ -237,27 +237,27 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	}
 	if (securityCondition.getDIDAuthentication()!=null) {
 	    DIDAuthenticationStateType didAuthenticationState = securityCondition.getDIDAuthentication();
-	    cardApplication = getInfo().getApplicationIdByDidName(didAuthenticationState.getDIDName(), null);
+	    cardApplication = infoObject.getApplicationIdByDidName(didAuthenticationState.getDIDName(), null);
 	    if (didAuthenticationState.isDIDState()) {
-		return isAuthenticated(didAuthenticationState.getDIDName(), cardApplication);
+		return CardStateEntry.isAuthenticated(infoObject, didAuthenticationState.getDIDName(), cardApplication, authenticatedDIDs);
 	    } else {
-		return !isAuthenticated(didAuthenticationState.getDIDName(), cardApplication);
+		return !CardStateEntry.isAuthenticated(infoObject, didAuthenticationState.getDIDName(), cardApplication, authenticatedDIDs);
 	    }
 	} else if (securityCondition.getOr() != null) {
 	    for (SecurityConditionType securityConditionOR : securityCondition.getOr().getSecurityCondition()) {
-		if (checkSecurityCondition(securityConditionOR)) {
+		if (CardStateEntry.checkSecurityCondition(infoObject, securityConditionOR, authenticatedDIDs)) {
 		    return true;
 		}
 	    }
 	} else if (securityCondition.getAnd() != null) {
 	    for(SecurityConditionType securityConditionAND : securityCondition.getAnd().getSecurityCondition()) {
-		if (!checkSecurityCondition(securityConditionAND)) {
+		if (!CardStateEntry.checkSecurityCondition(infoObject, securityConditionAND, authenticatedDIDs)) {
 		    return false;
 		}
 	    }
 	    return true;
 	} else if (securityCondition.getNot() != null) {
-	    return !checkSecurityCondition(securityCondition.getNot());
+	    return !CardStateEntry.checkSecurityCondition(infoObject, securityCondition.getNot(), authenticatedDIDs);
 	}
 
 	return false;
@@ -268,20 +268,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	DIDInfoWrapper dataSetInfo = application.getDIDInfo(didName);
 	SecurityConditionType securityCondition = dataSetInfo.getSecurityCondition(serviceAction);
 	if (securityCondition != null) {
-	    return checkSecurityCondition(securityCondition);
-	} else {
-	    return false;
-	}
-    }
-
-    public boolean checkApplicationSecurityCondition(byte[] applicationIdentifier, Enum<?> serviceAction) {
-	if (applicationIdentifier == null) {
-	    applicationIdentifier = infoObject.getImplicitlySelectedApplication();
-	}
-	CardApplicationWrapper application = this.infoObject.getCardApplications().get(new ByteArrayWrapper(applicationIdentifier));
-	SecurityConditionType securityCondition = application.getSecurityCondition(serviceAction);
-	if (securityCondition != null) {
-	    return checkSecurityCondition(securityCondition);
+	    return checkSecurityCondition(this.infoObject, securityCondition, this.authenticatedDIDs);
 	} else {
 	    return false;
 	}
@@ -292,7 +279,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	DataSetInfoWrapper dataSetInfo = application.getDataSetInfo(dataSetName);
 	SecurityConditionType securityCondition = dataSetInfo.getSecurityCondition(serviceAction);
 	if (securityCondition != null) {
-	    return checkSecurityCondition(securityCondition);
+	    return checkSecurityCondition(this.infoObject, securityCondition, this.authenticatedDIDs);
 	} else {
 	    return false;
 	}

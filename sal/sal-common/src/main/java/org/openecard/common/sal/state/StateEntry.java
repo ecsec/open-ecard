@@ -56,6 +56,15 @@ public class StateEntry {
 	this.protocol = protocol;
     }
 
+    public void removeProtocol(String protocolName) {
+	if (this.protocolName == null ? protocolName != null : !this.protocolName.equals(protocolName)) {
+	    LOG.warn("Removing protocol with name {} that does not match existing name {}.",
+		    protocolName, this.protocolName);
+	}
+	this.protocol = null;
+	this.protocolName = null;
+    }
+
     public SALProtocol getProtocol() {
 	return protocol;
     }
@@ -74,13 +83,20 @@ public class StateEntry {
 
     public ConnectionHandleType getConnectionHandle() {
 	ConnectionHandleType connectionHandle = new ConnectionHandleType();
-	ChannelHandleType channelHandle = new ChannelHandleType();
-	connectionHandle.setChannelHandle(channelHandle);
+	fillConnectionHandle(connectionHandle);
+	return connectionHandle;
+    }
+
+    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
+	ChannelHandleType channelHandle = connectionHandle.getChannelHandle();
+	if (channelHandle == null) {
+	    channelHandle = new ChannelHandleType();
+	    connectionHandle.setChannelHandle(channelHandle);
+	}
 	channelHandle.setSessionIdentifier(session);
+	connectionHandle.setContextHandle(ctxHandle);
 	if (this.cardEntry != null) {
 	    this.cardEntry.fillConnectionHandle(connectionHandle);
 	}
-
-	return connectionHandle;
     }
 }

@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2012-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,13 +18,39 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.common.sal.util;
 
+import iso.std.iso_iec._24727.tech.schema.ACLList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationDelete;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
+import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDDelete;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDList;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
+import iso.std.iso_iec._24727.tech.schema.DSICreate;
+import iso.std.iso_iec._24727.tech.schema.DSIDelete;
+import iso.std.iso_iec._24727.tech.schema.DSIList;
+import iso.std.iso_iec._24727.tech.schema.DSIRead;
+import iso.std.iso_iec._24727.tech.schema.DSIWrite;
+import iso.std.iso_iec._24727.tech.schema.DataSetDelete;
+import iso.std.iso_iec._24727.tech.schema.DataSetList;
+import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
+import iso.std.iso_iec._24727.tech.schema.Decipher;
+import iso.std.iso_iec._24727.tech.schema.Encipher;
+import iso.std.iso_iec._24727.tech.schema.GetRandom;
+import iso.std.iso_iec._24727.tech.schema.Hash;
+import iso.std.iso_iec._24727.tech.schema.Sign;
+import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
+import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import java.lang.reflect.Method;
 import java.util.Map;
 import org.openecard.common.ECardException;
@@ -35,10 +61,13 @@ import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
 import org.openecard.common.sal.state.CardStateMap;
+import org.openecard.common.sal.state.ConnectedCardEntry;
+import org.openecard.common.sal.state.NoSuchSession;
+import org.openecard.common.sal.state.SalStateManager;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Convenience class for the SAL.
@@ -70,6 +99,29 @@ public class SALUtils {
 	return value;
     }
 
+    public static DIDStructureType getDIDStructure(Object object, String didName, ConnectedCardEntry entry, ConnectionHandleType connectionHandle)
+	    throws NamedEntityNotFoundException, Exception {
+	DIDScopeType didScope = (DIDScopeType) get(object, "getDIDScope");
+	DIDStructureType didStructure = null;
+
+	if (didScope != null && didScope.equals(DIDScopeType.GLOBAL)) {
+	    // search all applications
+	    for (CardApplicationWrapper app : entry.getCif().getCardApplications().values()) {
+		didStructure = entry.getDIDStructure(didName, app.getApplicationIdentifier());
+		// stop when we have a match
+		if (didStructure != null) {
+		    break;
+		}
+	    }
+	} else {
+	    didStructure = entry.getDIDStructure(didName, connectionHandle.getCardApplication());
+	}
+
+	Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
+
+	return didStructure;
+    }
+
     public static DIDStructureType getDIDStructure(Object object, String didName, CardStateEntry entry, ConnectionHandleType connectionHandle)
 	    throws NamedEntityNotFoundException, Exception {
 	DIDScopeType didScope = (DIDScopeType) get(object, "getDIDScope");
@@ -97,6 +149,7 @@ public class SALUtils {
 	    throws UnknownConnectionHandleException {
 	return getCardStateEntry(states, connectionHandle, true);
     }
+
     public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle, boolean filterAppId)
 	    throws UnknownConnectionHandleException {
 	CardStateEntry value = states.getEntry(connectionHandle, filterAppId);
@@ -135,4 +188,173 @@ public class SALUtils {
 	return null;
     }
 
+    public static StateEntry getStateBySession(ConnectionHandleType request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter ConnectionHandleType is empty.");
+
+	ChannelHandleType channelHandle = request.getChannelHandle();
+	Assert.assertIncorrectParameter(channelHandle, "The parameter ConnectionHandleType has an empty channel handle.");
+
+	String sessionIdentifier = channelHandle.getSessionIdentifier();
+	Assert.assertIncorrectParameter(channelHandle, "The parameter ConnectionHandleType has a channel handle without a session identifier.");
+
+	return salStates.getSession(sessionIdentifier);
+
+    }
+
+    public static StateEntry getStateBySession(DSICreate request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DSICreate is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DSIList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DSIList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DataSetDelete request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DataSetDelete is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DataSetSelect request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DataSetSelect is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DataSetList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DataSetList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationServiceDescribe request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationServiceDescribe is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationServiceList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationServiceList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationDelete request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationDelete is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationEndSession request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationEndSession is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(CardApplicationStartSession request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter CardApplicationStartSession is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DSIDelete request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DSIDelete is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DSIWrite request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DSIWrite is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DSIRead request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DSIRead is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(Encipher request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter Encipher is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(Decipher request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter Decipher is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(GetRandom request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter GetRandom is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(Hash request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter Hash is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(Sign request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter Sign is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(VerifySignature request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter VerifySignature is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(VerifyCertificate request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter VerifySignature is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DIDList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DIDList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DIDGet request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DIDGet is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DIDUpdate request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DIDUpdate is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(DIDDelete request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter DIDDelete is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
+
+    public static StateEntry getStateBySession(ACLList request, SalStateManager salStates) throws IncorrectParameterException, NoSuchSession {
+	Assert.assertIncorrectParameter(request, "The parameter ACLList is empty.");
+
+	return getStateBySession(request.getConnectionHandle(), salStates);
+    }
 }
+

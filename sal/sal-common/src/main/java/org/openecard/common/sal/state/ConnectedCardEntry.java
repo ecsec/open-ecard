@@ -11,6 +11,13 @@
 package org.openecard.common.sal.state;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
+import java.util.HashSet;
+import java.util.Set;
+import org.openecard.common.sal.state.cif.CardApplicationWrapper;
+import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteUtils;
 
 
@@ -21,10 +28,76 @@ import org.openecard.common.util.ByteUtils;
 public class ConnectedCardEntry extends CardEntry {
 
     protected byte[] slotHandle;
+    private final Set<DIDInfoType> authenticatedDIDs = new HashSet<>();
+    private FCP lastSelectedEfFCP;
+    private byte[] cardApplication;
 
     public ConnectedCardEntry(byte[] slotHandle, CardEntry base) {
 	super(base.ctxHandle, base.ifdName, base.slotIdx, base.cif);
 	this.slotHandle = ByteUtils.clone(slotHandle);
+    }
+
+    @Override
+    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
+	super.fillConnectionHandle(connectionHandle);
+	connectionHandle.setSlotHandle(slotHandle);
+    }
+
+    public void setFCPOfSelectedEF(FCP fcp) {
+	lastSelectedEfFCP = fcp;
+    }
+    public void unsetFCPOfSelectedEF() {
+	lastSelectedEfFCP = null;
+    }
+
+    public FCP getFCPOfSelectedEF() {
+	return lastSelectedEfFCP;
+    }
+
+    public Set<DIDInfoType> getAuthenticatedDIDs() {
+	return authenticatedDIDs;
+    }
+
+    public void addAuthenticated(String didName, byte[] cardApplication) {
+	this.authenticatedDIDs.add(this.cif.getDIDInfo(didName, cardApplication));
+    }
+
+    public void removeAuthenticated(DIDInfoType didInfo) {
+	this.authenticatedDIDs.remove(didInfo);
+    }
+
+    /**
+     *
+     * @param didName Name of the DID
+     * @param cardApplication Identifier of the cardapplication
+     * @return DIDStructure for the specified didName and cardapplication or null,
+     *         if no such did exists.
+     */
+    public DIDStructureType getDIDStructure(String didName, byte[] cardApplication) {
+	DIDStructureType didStructure = this.cif.getDIDStructure(didName, cardApplication);
+	if (didStructure != null) {
+	    didStructure.setAuthenticated(CardStateEntry.isAuthenticated(cif, didName, cardApplication, authenticatedDIDs));
+	}
+	return didStructure;
+    }
+
+    /**
+     *
+     * @param didName Name of the DID
+     * @param didScope Scope of the DID
+     * @return DIDStructure for the specified didName and cardapplication or null,
+     *         if no such did exists.
+     */
+    public DIDStructureType getDIDStructure(String didName, DIDScopeType didScope) {
+	DIDStructureType didStructure = this.cif.getDIDStructure(didName, didScope);
+	if (didStructure != null) {
+	    didStructure.setAuthenticated(CardStateEntry.isAuthenticated(cif, didName, didScope, authenticatedDIDs));
+	}
+	return didStructure;
+    }
+
+    public CardApplicationWrapper getCurrentCardApplication() {
+	return this.cif.getCardApplication(this.cardApplication);
     }
 
     @Override
@@ -43,12 +116,4 @@ public class ConnectedCardEntry extends CardEntry {
 	builder.append(", ");
 	super.toString(builder);
     }
-
-    @Override
-    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
-	super.fillConnectionHandle(connectionHandle);
-	connectionHandle.setSlotHandle(slotHandle);
-    }
-
-
 }

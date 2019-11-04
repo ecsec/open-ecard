@@ -149,7 +149,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.AddonSelector;
@@ -191,8 +190,11 @@ import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.ConnectedCardEntry;
+import org.openecard.common.sal.state.NoSuchSession;
 import org.openecard.common.sal.state.SalStateManager;
 import org.openecard.common.sal.state.SessionAlreadyExists;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.sal.util.SALUtils;
@@ -300,21 +302,22 @@ public class TinySAL implements SAL {
 
     @Override
     public CreateSessionResponse createSession(CreateSession parameters) {
-	Result result;
+	CreateSessionResponse response = new CreateSessionResponse();
 	if (parameters == null || parameters.getSessionIdentifier() == null) {
-	    this.salStates.createSession();
-	    result = WSHelper.makeResultOK();
+	    StateEntry entry = this.salStates.createSession();
+	    response.setConnectionHandle(entry.getConnectionHandle());
+	    response.setResult(WSHelper.makeResultOK());
 	} else {
 	    try {
-		this.salStates.createSession(parameters.getSessionIdentifier());
-		result = WSHelper.makeResultOK();
+		StateEntry entry = this.salStates.createSession(parameters.getSessionIdentifier());
+		response.setConnectionHandle(entry.getConnectionHandle());
+		response.setResult(WSHelper.makeResultOK());
 	    } catch (SessionAlreadyExists ex) {
 		// TODO: Add minor error code and message
-		result = WSHelper.makeResultError("DUPLICATE_SESSION_IDENTIFIER", "The given session identifier is not unique.");
+		response.setResult(WSHelper.makeResultError("DUPLICATE_SESSION_IDENTIFIER", "The given session identifier is not unique."));
 	    }
 	}
-	CreateSessionResponse response = new CreateSessionResponse();
-	response.setResult(result);
+
 	return response;
     }
 
@@ -328,16 +331,13 @@ public class TinySAL implements SAL {
 	    }
 	}
 
-	final Result result;
+	DestroySessionResponse response = new DestroySessionResponse();
 	boolean didRemoveSession = this.salStates.destroySessionByContextHandle(contextHandle);
 	if (didRemoveSession) {
-	    result = WSHelper.makeResultOK();
+	    response.setResult(WSHelper.makeResultOK());
 	} else {
-	    result = WSHelper.makeResultError("NO_SESSION_MATCHED_GIVEN_CONTEXT_HANDLE_HANDLE", "No session was found for the given context handle.");
+	    response.setResult(WSHelper.makeResultError("NO_SESSION_MATCHED_GIVEN_CONTEXT_HANDLE_HANDLE", "No session was found for the given context handle."));
 	}
-
-	DestroySessionResponse response = new DestroySessionResponse();
-	response.setResult(result);
 	return response;
     }
 
@@ -582,7 +582,12 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(request, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+	    Assert.assertIncorrectParameter(cardStateEntry,
+		    "The parameter session identifier did not identify a session with a connected card.");
+
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
 	    String didName = SALUtils.getDIDName(request);
@@ -594,8 +599,8 @@ public class TinySAL implements SAL {
 
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-		    ConnectionServiceActionName.CARD_APPLICATION_START_SESSION);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(),
+		    cardApplicationID, ConnectionServiceActionName.CARD_APPLICATION_START_SESSION);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, request.getDIDScope(), protocolURI);
@@ -631,14 +636,16 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 	    String didName = SALUtils.getDIDName(request);
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-		    ConnectionServiceActionName.CARD_APPLICATION_END_SESSION);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(),
+		    cardApplicationID, ConnectionServiceActionName.CARD_APPLICATION_END_SESSION);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
@@ -674,8 +681,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    /*
 		TR-03112-4 section 3.3.2 states that the alpha application have to be connected with
 		CardApplicationConnect.
@@ -685,7 +693,7 @@ public class TinySAL implements SAL {
 	    // Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
 	    //	    CardApplicationServiceActionName.CARD_APPLICATION_LIST);
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    CardApplicationNameList cardApplicationNameList = new CardApplicationNameList();
 	    cardApplicationNameList.getCardApplicationName().addAll(cardInfoWrapper.getCardApplicationNameList());
 
@@ -729,11 +737,13 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] cardApplicationName = request.getCardApplicationName();
 	    Assert.assertIncorrectParameter(cardApplicationName, "The parameter CardApplicationName is empty.");
-	    Assert.securityConditionApplication(cardStateEntry, connectionHandle.getCardApplication(),
-		    CardApplicationServiceActionName.CARD_APPLICATION_DELETE);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(),
+		    connectionHandle.getCardApplication(), CardApplicationServiceActionName.CARD_APPLICATION_DELETE);
 	    // TODO: determine how the deletion have to be performed. A card don't have to support the Deletion by
 	    // application identifier. Necessary attributes should be available in the ATR or EF.ATR.
 	    DeleteFile delFile = new DeleteFile.Application(cardApplicationName);
@@ -764,15 +774,18 @@ public class TinySAL implements SAL {
 
 	 try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(), cardApplicationID,
+	    	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_LIST);
 
 	    CardApplicationServiceNameList cardApplicationServiceNameList = new CardApplicationServiceNameList();
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
 
             while (it.hasNext()) {
@@ -859,17 +872,20 @@ public class TinySAL implements SAL {
 
 	 try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
 	    String cardApplicationServiceName = request.getCardApplicationServiceName();
 	    Assert.assertIncorrectParameter(cardApplicationServiceName,
 		    "The parameter CardApplicationServiceName is empty.");
 
-	    //Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
-	    //	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(), cardApplicationID,
+	    	    CardApplicationServiceActionName.CARD_APPLICATION_SERVICE_DESCRIBE);
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 
 	    Iterator<CardApplicationType> it = cardInfoWrapper.getApplicationCapabilities().getCardApplication().iterator();
 
@@ -929,13 +945,16 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
-	    Assert.securityConditionApplication(cardStateEntry, cardApplicationID,
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(), cardApplicationID,
 		    NamedDataServiceActionName.DATA_SET_LIST);
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    DataSetNameListType dataSetNameList = cardInfoWrapper.getDataSetNameList(cardApplicationID);
 
 	    response.setDataSetNameList(dataSetNameList);
@@ -977,13 +996,15 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = connectionHandle.getCardApplication();
 	    String dataSetName = request.getDataSetName();
 
 	    Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSet(dataSetName, applicationID);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DataSet cannot be found.");
 
@@ -1032,9 +1053,12 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 
             String dataSetName = request.getDataSetName();
             Assert.assertIncorrectParameter(dataSetName, "The parameter DataSetName is empty.");
@@ -1081,8 +1105,10 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
 	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
@@ -1130,8 +1156,11 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
 
             byte[] dsiContent = request.getDSIContent();
@@ -1194,8 +1223,10 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    String dsiName = request.getDSIName();
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 
@@ -1280,7 +1311,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = connectionHandle.getCardApplication();
 	    String dsiName = request.getDSIName();
 	    byte[] updateData = request.getDSIContent();
@@ -1288,7 +1321,7 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 	    Assert.assertIncorrectParameter(updateData, "The parameter DSIContent is empty.");
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
 	    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
 	    Assert.assertNamedEntityNotFound(dataSetInfo, "The given DSIName cannot be found.");
@@ -1341,7 +1374,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String dsiName = request.getDSIName();
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -1352,7 +1387,7 @@ public class TinySAL implements SAL {
 		throw new PrerequisitesNotSatisfiedException("No DataSet to read selected.");
 	    }
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
 
 	    if (dataSetInfo == null) {
@@ -1482,7 +1517,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 
@@ -1495,7 +1532,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessaryCardApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessaryCardApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessaryCardApp, applicationID)) {
 		    throw new SecurityConditionNotSatisfiedException("Wrong application selected.");
 		}
@@ -1537,7 +1574,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] cipherText = request.getCipherText();
@@ -1549,7 +1588,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessaryCardApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessaryCardApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessaryCardApp, applicationID)) {
 		    throw new SecurityConditionNotSatisfiedException("Wrong application selected.");
 		}
@@ -1592,7 +1631,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 
@@ -1602,7 +1643,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessaryApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessaryApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessaryApp, applicationID)) {
 		    throw new SecurityConditionNotSatisfiedException("The wrong application is selected for getRandom()");
 		}
@@ -1644,7 +1685,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] message = request.getMessage();
@@ -1656,7 +1699,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necesssaryApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necesssaryApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necesssaryApp, applicationID)) {
 		    String msg = "Wrong application for executing Hash with the specified DID " + didName + ".";
 		    throw new SecurityConditionNotSatisfiedException(msg);
@@ -1696,10 +1739,12 @@ public class TinySAL implements SAL {
     public SignResponse sign(Sign request) {
 	SignResponse response = WSHelper.makeResponse(SignResponse.class, WSHelper.makeResultOK());
 
-	CardStateEntry cardStateEntry = null;
+	ConnectedCardEntry cardStateEntry = null;
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] message = request.getMessage();
@@ -1711,7 +1756,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessarySelectedApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessarySelectedApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessarySelectedApp, applicationID)) {
 		    String msg = "Wrong application selected for the execution of Sign with the DID " + didName + ".";
 		    throw new SecurityConditionNotSatisfiedException(msg);
@@ -1756,7 +1801,10 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] signature = request.getSignature();
@@ -1768,7 +1816,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessarySelectedApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessarySelectedApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessarySelectedApp, applicationID)) {
 		    String msg = "Wrong application selected for the execution of VerifySignature with the DID " +
 			    didName + ".";
@@ -1812,7 +1860,10 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    String didName = SALUtils.getDIDName(request);
 
@@ -1834,7 +1885,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    if (didScope.equals(DIDScopeType.LOCAL)) {
-		byte[] necessarySelectedApp = cardStateEntry.getInfo().getApplicationIdByDidName(didName, didScope);
+		byte[] necessarySelectedApp = cardStateEntry.getCif().getApplicationIdByDidName(didName, didScope);
 		if (! Arrays.equals(necessarySelectedApp, applicationID)) {
 		    String msg = "Wrong application selected for the execution of VerifyCertificate with the DID " +
 			    didName + ".";
@@ -1877,9 +1928,11 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    byte[] appId = connectionHandle.getCardApplication();
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
-	    Assert.securityConditionApplication(cardStateEntry, appId, DifferentialIdentityServiceActionName.DID_LIST);
+	    Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(), appId,
+		    DifferentialIdentityServiceActionName.DID_LIST);
 
 	    byte[] applicationIDFilter = null;
 	    String objectIDFilter = null;
@@ -1900,7 +1953,7 @@ public class TinySAL implements SAL {
 	     */
 	    CardApplicationWrapper cardApplication;
 	    if (applicationIDFilter != null) {
-		cardApplication = cardStateEntry.getInfo().getCardApplication(applicationIDFilter);
+		cardApplication = cardStateEntry.getCif().getCardApplication(applicationIDFilter);
 		Assert.assertIncorrectParameter(cardApplication, "The given CardApplication cannot be found.");
 	    } else {
 		cardApplication = cardStateEntry.getCurrentCardApplication();
@@ -1990,7 +2043,9 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    // handle must be requested without application, as it is irrelevant for this call
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    String didName = SALUtils.getDIDName(request);
 
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
@@ -2021,7 +2076,9 @@ public class TinySAL implements SAL {
 	try {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+            // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
 	    String didName = request.getDIDName();
 	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
@@ -2032,8 +2089,8 @@ public class TinySAL implements SAL {
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName,
-		    DifferentialIdentityServiceActionName.DID_UPDATE);
+            Assert.securityConditionDID(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(), cardApplicationID,
+		    didName, DifferentialIdentityServiceActionName.DID_UPDATE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
@@ -2068,7 +2125,9 @@ public class TinySAL implements SAL {
 	try {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
-            CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+            // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
 	    String didName = request.getDIDName();
 	    Assert.assertIncorrectParameter(didName, "The parameter DIDName is empty.");
@@ -2076,8 +2135,8 @@ public class TinySAL implements SAL {
 	    DIDStructureType didStructure = cardStateEntry.getDIDStructure(didName, cardApplicationID);
 	    Assert.assertNamedEntityNotFound(didStructure, "The given DIDName cannot be found.");
 
-            Assert.securityConditionDID(cardStateEntry, cardApplicationID, didName,
-		    DifferentialIdentityServiceActionName.DID_DELETE);
+            Assert.securityConditionDID(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(),
+		    cardApplicationID, didName, DifferentialIdentityServiceActionName.DID_DELETE);
 
 	    String protocolURI = didStructure.getDIDMarker().getProtocol();
 	    SALProtocol protocol = getProtocol(connectionHandle, null, protocolURI);
@@ -2168,7 +2227,9 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
 	    TargetNameType targetName = request.getTargetName();
 	    Assert.assertIncorrectParameter(targetName, "The parameter TargetName is empty.");
@@ -2178,7 +2239,7 @@ public class TinySAL implements SAL {
 	    String targetDataSet = targetName.getDataSetName();
 	    String targetDid = targetName.getDIDName();
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    byte[] handleAppId = connectionHandle.getCardApplication();
 
 	    if (targetDataSet != null) {
@@ -2193,7 +2254,8 @@ public class TinySAL implements SAL {
 	    } else if (targetAppId != null) {
 		CardApplicationWrapper cardApplication = cardInfoWrapper.getCardApplication(targetAppId);
 		Assert.assertNamedEntityNotFound(cardApplication, "The given CardApplication cannot be found.");
-		Assert.securityConditionApplication(cardStateEntry, targetAppId, AuthorizationServiceActionName.ACL_LIST);
+		Assert.securityConditionApplication(cardStateEntry.getCif(), cardStateEntry.getAuthenticatedDIDs(),
+			targetAppId, AuthorizationServiceActionName.ACL_LIST);
 
 		response.setTargetACL(cardInfoWrapper.getCardApplication(targetAppId).getCardApplicationACL());
 	    } else {
@@ -2241,12 +2303,13 @@ public class TinySAL implements SAL {
      * @throws UnknownConnectionHandleException
      */
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
-	    throws UnknownConnectionHandleException {
+	    throws UnknownConnectionHandleException, IncorrectParameterException, NoSuchSession {
 	if (protocol.isFinished()) {
 	    LOG.debug("SAL Protocol is finished, destroying protocol instance.");
 	    try {
-		CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
-		entry.removeProtocol(protocolURI);
+		// CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
+		StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
+		stateEntry.removeProtocol(protocolURI);
 	    } finally {
 		protocolSelector.returnSALProtocol(protocol, false);
 	    }
@@ -2254,18 +2317,20 @@ public class TinySAL implements SAL {
     }
 
     private SALProtocol getProtocol(@Nonnull ConnectionHandleType handle, @Nullable DIDScopeType scope,
-	    @Nonnull String protocolURI) throws UnknownProtocolException, UnknownConnectionHandleException {
-	CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, scope != DIDScopeType.GLOBAL);
-	SALProtocol protocol = entry.getProtocol(protocolURI);
+	    @Nonnull String protocolURI) throws UnknownProtocolException, UnknownConnectionHandleException,
+	    IncorrectParameterException, NoSuchSession {
+	// CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, scope != DIDScopeType.GLOBAL);
+	StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
+	SALProtocol protocol = stateEntry.getProtocol();
 	if (protocol == null) {
 	    try {
 		protocol = protocolSelector.getSALProtocol(protocolURI);
-		entry.setProtocol(protocolURI, protocol);
+		stateEntry.setProtocol(protocol, protocolURI);
 	    } catch (AddonNotFoundException ex) {
 		throw new UnknownProtocolException("The protocol URI '" + protocolURI + "' is not available.");
 	    }
 	}
-	protocol.getInternalData().put("cardState", entry);
+	protocol.getInternalData().put("cardState", stateEntry);
 
 	return protocol;
     }
@@ -2286,7 +2351,7 @@ public class TinySAL implements SAL {
     }
 
     // TODO: remove function when state tracking is implemented
-    private void setPinNotAuth(@Nullable CardStateEntry cardStateEntry) {
+    private void setPinNotAuth(@Nullable ConnectedCardEntry cardStateEntry) {
 	if (cardStateEntry != null) {
 	    LOG.info("Unauthenticate Card PIN (state=false).");
 

@@ -33,6 +33,7 @@ import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownSlotHandleException;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.ConnectedCardEntry;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.util.ByteArrayWrapper;
@@ -113,12 +114,28 @@ public final class Assert {
 	    throws SecurityConditionNotSatisfiedException {
 	final CardInfoWrapper info = entry.getInfo();
 	final Set<DIDInfoType> authenticatedDIDs = entry.getAuthenticatedDIDs();
+	securityConditionApplication(info, authenticatedDIDs, applicationID, action);
+    }
+
+    /**
+     * Checks the Application Security Condition.
+     *
+     * @param info Card information
+     * @param authenticatedDIDs Authentication information
+     * @param applicationID Application identifier
+     * @param action Service action
+     * @throws SecurityConditionNotSatisfiedException
+     */
+    public static void securityConditionApplication(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs,
+	    byte[] applicationID, Enum<?> action)
+	    throws SecurityConditionNotSatisfiedException {
 	if (!checkApplicationSecurityCondition(info, authenticatedDIDs, applicationID, action)) {
 	    throw new SecurityConditionNotSatisfiedException();
 	}
     }
 
-    private static boolean checkApplicationSecurityCondition(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs, byte[] applicationIdentifier, Enum<?> serviceAction) {
+    private static boolean checkApplicationSecurityCondition(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs,
+	    byte[] applicationIdentifier, Enum<?> serviceAction) {
 	if (applicationIdentifier == null) {
 	    applicationIdentifier = info.getImplicitlySelectedApplication();
 	}
@@ -149,6 +166,22 @@ public final class Assert {
 	}
     }
 
+
+    /**
+     * Checks the Dataset Security Condition.
+     *
+     * @param entry CardStateEntry
+     * @param applicationID Application identifier
+     * @param dataSetName Dataset name
+     * @param action Service action
+     * @throws SecurityConditionNotSatisfiedException
+     */
+    public static void securityConditionDataSet(ConnectedCardEntry entry, byte[] applicationID, String dataSetName, Enum<?> action)
+	    throws SecurityConditionNotSatisfiedException {
+	if (!CardStateEntry.checkDataSetSecurityCondition(entry.getCif(), entry.getAuthenticatedDIDs(), applicationID, dataSetName, action)) {
+	    throw new SecurityConditionNotSatisfiedException();
+	}
+    }
     /**
      * Checks the DID Security Condition.
      *
@@ -161,6 +194,23 @@ public final class Assert {
     public static void securityConditionDID(CardStateEntry entry, byte[] applicationID, String didName, Enum<?> action)
 	    throws SecurityConditionNotSatisfiedException {
 	if (!entry.checkDIDSecurityCondition(applicationID, didName, action)) {
+	    throw new SecurityConditionNotSatisfiedException();
+	}
+    }
+
+    /**
+     * Checks the DID Security Condition.
+     *
+     * @param info Card information
+     * @param authenticatedDIDs authentication information
+     * @param applicationID Application identifier
+     * @param didName DID name
+     * @param action Service action
+     * @throws SecurityConditionNotSatisfiedException
+     */
+    public static void securityConditionDID(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs, byte[] applicationID, String didName, Enum<?> action)
+	    throws SecurityConditionNotSatisfiedException {
+	if (!CardStateEntry.checkDIDSecurityCondition(info, authenticatedDIDs, applicationID, didName, action)) {
 	    throw new SecurityConditionNotSatisfiedException();
 	}
     }

@@ -263,23 +263,33 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
 	return false;
     }
 
-    public boolean checkDIDSecurityCondition(byte[] cardApplication, String didName, Enum<?> serviceAction) {
-	CardApplicationWrapper application = this.infoObject.getCardApplications().get(new ByteArrayWrapper(cardApplication));
+    public static boolean checkDIDSecurityCondition(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs,
+	    byte[] cardApplication, String didName, Enum<?> serviceAction) {
+	CardApplicationWrapper application = info.getCardApplications().get(new ByteArrayWrapper(cardApplication));
 	DIDInfoWrapper dataSetInfo = application.getDIDInfo(didName);
 	SecurityConditionType securityCondition = dataSetInfo.getSecurityCondition(serviceAction);
 	if (securityCondition != null) {
-	    return checkSecurityCondition(this.infoObject, securityCondition, this.authenticatedDIDs);
+	    return checkSecurityCondition(info, securityCondition, authenticatedDIDs);
 	} else {
 	    return false;
 	}
     }
 
+    public boolean checkDIDSecurityCondition(byte[] cardApplication, String didName, Enum<?> serviceAction) {
+	return checkDIDSecurityCondition(this.infoObject, this.authenticatedDIDs, cardApplication, didName, serviceAction);
+    }
+
     public boolean checkDataSetSecurityCondition(byte[] cardApplication, String dataSetName, Enum<?> serviceAction) {
-	CardApplicationWrapper application = this.infoObject.getCardApplications().get(new ByteArrayWrapper(cardApplication));
+	return checkDataSetSecurityCondition(this.infoObject, this.authenticatedDIDs, cardApplication, dataSetName, serviceAction);
+    }
+
+    public static boolean checkDataSetSecurityCondition(CardInfoWrapper info, Set<DIDInfoType> authenticatedDIDs,
+	    byte[] cardApplication, String dataSetName, Enum<?> serviceAction) {
+	CardApplicationWrapper application = info.getCardApplications().get(new ByteArrayWrapper(cardApplication));
 	DataSetInfoWrapper dataSetInfo = application.getDataSetInfo(dataSetName);
 	SecurityConditionType securityCondition = dataSetInfo.getSecurityCondition(serviceAction);
 	if (securityCondition != null) {
-	    return checkSecurityCondition(this.infoObject, securityCondition, this.authenticatedDIDs);
+	    return checkSecurityCondition(info, securityCondition, authenticatedDIDs);
 	} else {
 	    return false;
 	}

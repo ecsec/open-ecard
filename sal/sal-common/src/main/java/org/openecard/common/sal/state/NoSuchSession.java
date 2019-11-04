@@ -14,7 +14,7 @@ package org.openecard.common.sal.state;
  *
  * @author Tobias Wich
  */
-class NoSuchSession extends Exception {
+public class NoSuchSession extends Exception {
 
     public NoSuchSession(String msg) {
 	super(msg);

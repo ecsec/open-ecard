@@ -71,6 +71,12 @@ public class CardEntry implements Comparable<CardEntry> {
 	return Arrays.equals(this.ctxHandle, ctxHandle);
     }
 
+    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
+	connectionHandle.setSlotIndex(slotIdx);
+	connectionHandle.setIFDName(ifdName);
+	connectionHandle.setContextHandle(ctxHandle);
+    }
+
     @Override
     public String toString() {
 	StringBuilder builder = new StringBuilder();
@@ -89,9 +95,4 @@ public class CardEntry implements Comparable<CardEntry> {
 	builder.append(slotIdx);
     }
 
-    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
-	connectionHandle.setSlotIndex(slotIdx);
-	connectionHandle.setIFDName(ifdName);
-	connectionHandle.setContextHandle(ctxHandle);
-    }
 }

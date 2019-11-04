@@ -10,6 +10,7 @@
 
 package org.openecard.common.sal.state;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.common.util.ByteUtils;
 
 
@@ -42,5 +43,12 @@ public class ConnectedCardEntry extends CardEntry {
 	builder.append(", ");
 	super.toString(builder);
     }
+
+    @Override
+    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
+	super.fillConnectionHandle(connectionHandle);
+	connectionHandle.setSlotHandle(slotHandle);
+    }
+
 
 }

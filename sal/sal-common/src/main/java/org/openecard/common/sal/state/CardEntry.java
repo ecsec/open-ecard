@@ -10,6 +10,7 @@
 
 package org.openecard.common.sal.state;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
 import java.util.Arrays;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
@@ -86,5 +87,11 @@ public class CardEntry implements Comparable<CardEntry> {
 	builder.append(ifdName);
 	builder.append(", slotIdx=");
 	builder.append(slotIdx);
+    }
+
+    public void fillConnectionHandle(ConnectionHandleType connectionHandle) {
+	connectionHandle.setSlotIndex(slotIdx);
+	connectionHandle.setIFDName(ifdName);
+	connectionHandle.setContextHandle(ctxHandle);
     }
 }

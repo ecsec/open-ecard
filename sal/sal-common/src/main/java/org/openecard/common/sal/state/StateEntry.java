@@ -10,6 +10,8 @@
 
 package org.openecard.common.sal.state;
 
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.addon.sal.SALProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class StateEntry {
 
     private final String session;
     private SALProtocol protocol;
+    private String protocolName;
     private ConnectedCardEntry cardEntry;
     private byte[] ctxHandle;
 
@@ -49,7 +52,7 @@ public class StateEntry {
 	cardEntry = null;
     }
 
-    public void setProtocol(SALProtocol protocol) {
+    public void setProtocol(SALProtocol protocol, String protocolName) {
 	this.protocol = protocol;
     }
 
@@ -57,6 +60,9 @@ public class StateEntry {
 	return protocol;
     }
 
+    public String getProtocolName() {
+	return this.protocolName;
+    }
 
     public ConnectedCardEntry getCardEntry() {
 	return cardEntry;
@@ -64,5 +70,17 @@ public class StateEntry {
 
     public byte[] getContextHandle() {
 	return ctxHandle;
+    }
+
+    public ConnectionHandleType getConnectionHandle() {
+	ConnectionHandleType connectionHandle = new ConnectionHandleType();
+	ChannelHandleType channelHandle = new ChannelHandleType();
+	connectionHandle.setChannelHandle(channelHandle);
+	channelHandle.setSessionIdentifier(session);
+	if (this.cardEntry != null) {
+	    this.cardEntry.fillConnectionHandle(connectionHandle);
+	}
+
+	return connectionHandle;
     }
 }

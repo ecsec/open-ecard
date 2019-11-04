@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
 import java.util.Collections;
 import java.util.concurrent.Callable;
@@ -39,6 +39,7 @@ import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.StepActionResult;
+import org.openecard.gui.mobile.MobileResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

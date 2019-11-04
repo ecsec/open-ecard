@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile.pinmanagement;
+package org.openecard.mobile.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,13 +29,12 @@ import java.util.concurrent.Future;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.mobile.MobileNavigator;
 import org.openecard.gui.mobile.MobileResult;
-import org.openecard.gui.mobile.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.slf4j.Logger;
@@ -52,16 +51,14 @@ public class PINManagementNavigator extends MobileNavigator {
     private static final Logger LOG = LoggerFactory.getLogger(PINManagementNavigator.class);
 
     private final List<Step> steps;
-    private final GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver;
-    private final PINManagementGuiImpl guiService;
+    private final PinManagementInteraction interaction;
 
     private int idx = -1;
 
 
-    public PINManagementNavigator(UserConsentDescription uc, GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver) {
+    public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction) {
 	this.steps = new ArrayList<>(uc.getSteps());
-	this.ifaceReceiver = ifaceReceiver;
-	this.guiService = ifaceReceiver.getUiInterface().derefNonblocking();
+	this.interaction = interaction;
     }
 
     @Override

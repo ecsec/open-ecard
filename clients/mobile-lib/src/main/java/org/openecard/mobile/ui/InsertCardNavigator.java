@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
 import java.util.Collections;
 import java.util.concurrent.Future;
@@ -29,6 +29,8 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.GuiIfaceReceiver;
+import org.openecard.gui.mobile.MobileResult;
 
 
 /**

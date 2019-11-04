@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile.stub;
+package org.openecard.mobile.ui;
 
 import org.openecard.gui.MessageDialog;
 import org.openecard.gui.message.DialogType;

@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
 import java.util.List;
 import javax.annotation.Nullable;

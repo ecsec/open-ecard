@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,24 +19,29 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.mobile.activation.common;
 
-package org.openecard.gui.mobile;
+import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.UserConsentNavigatorFactory;
 
 
 /**
- * Marker interface for Mobile GUI implementations.
- * The ecard protocol identifier of the GUI can be requested as text.
  *
- * @author Tobias Wich
+ * @author Neil Crossley
  */
-public interface MobileGui {
+public class InteractionRegistrationHandler {
 
-    /**
-     * Gets the ecard protocol identifier handled by this GUI.
-     * This may be the identifier for EAC, Pin Compare, etc.
-     *
-     * @return Protocol identifier.
-     */
-    String getProtocolType();
+    public static <T extends ActivationInteraction> AutoCloseable hookUp(String protocolType, OpeneCardContext context, T interaction) {
+	UserConsentNavigatorFactory<T> fac = context.getGuiNavigatorFactory(protocolType);
+	fac.setInteractionComponent(interaction);
+
+	return new AutoCloseable() {
+	    @Override
+	    public void close() throws Exception {
+		fac.setInteractionComponent(null);
+	    }
+	};
+    }
 
 }

@@ -20,20 +20,28 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.GuiIfaceReceiver;
+import org.openecard.mobile.activation.DummyInteraction;
 
 
 /**
  *
  * @author Neil Crossley
  */
-public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<Object> {
+public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<DummyInteraction> {
 
     private final GuiIfaceReceiver<Object> ifaceReceiver = new GuiIfaceReceiver<>();
+
+    public static final String PROTOCOL_TYPE = "InsertCard";
+
+    @Override
+    public String getProtocolType() {
+	return PROTOCOL_TYPE;
+    }
 
     @Override
     public boolean canCreateFrom(UserConsentDescription uc) {
@@ -49,8 +57,8 @@ public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<O
     }
 
     @Override
-    public Promise<? extends Object> getIfacePromise() {
-	return ifaceReceiver.getUiInterface();
+    public void setInteractionComponent(DummyInteraction interaction) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

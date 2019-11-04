@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017-2018 ecsec GmbH.
+ * Copyright (C) 2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,24 +20,45 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.EacInteraction;
 
 
 /**
  *
  * @author Neil Crossley
- * @param <T> Type of the UI interaction interface.
  */
-public interface UserConsentNavigatorFactory <T> {
+public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacInteraction> {
 
-    boolean canCreateFrom(UserConsentDescription uc);
+    private EacInteraction interaction;
 
-    UserConsentNavigator createFrom(UserConsentDescription uc);
+    public static final String PROTOCOL_TYPE = "EAC";
 
-    Promise<? extends T> getIfacePromise();
+    @Override
+    public String getProtocolType() {
+	return PROTOCOL_TYPE;
+    }
+
+    @Override
+    public boolean canCreateFrom(UserConsentDescription uc) {
+	return "EAC".equals(uc.getDialogType());
+    }
+
+    @Override
+    public UserConsentNavigator createFrom(UserConsentDescription uc) {
+	if (! this.canCreateFrom(uc)) {
+	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
+	}
+
+	return new EacNavigator(uc, interaction);
+    }
+
+    @Override
+    public void setInteractionComponent(EacInteraction interaction) {
+	this.interaction = interaction;
+    }
 
 }

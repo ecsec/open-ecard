@@ -25,11 +25,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.EacNavigatorFactory;
 
 /**
  *
@@ -62,10 +63,10 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override
-	    public AutoCloseable create(EventDispatcher dispatcher) {
+	    public AutoCloseable create(OpeneCardContext context) {
 		return new ArrayBackedAutoCloseable(new AutoCloseable[] {
-		    CommonCardEventHandler.hookUp(created, supportedCards, dispatcher, interaction, msgSetter),
-		    EacCardEventHandler.hookUp(new EacCardEventHandler(), dispatcher, interaction)
+		    CommonCardEventHandler.hookUp(created, supportedCards, context.getEventDispatcher(), interaction, msgSetter),
+		    InteractionRegistrationHandler.hookUp(EacNavigatorFactory.PROTOCOL_TYPE, context, interaction)
 		});
 	    }
 	};
@@ -85,4 +86,5 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 	return new CommonEacControllerFactory(
 		activationControllerService, msgSetter);
     }
+
 }

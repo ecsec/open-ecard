@@ -27,7 +27,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -43,10 +42,7 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.util.CombinedPromise;
-import org.openecard.common.util.Promise;
 import org.openecard.gui.mobile.MobileGui;
-import org.openecard.gui.mobile.UserConsentNavigatorFactory;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.common.CommonActivationResult;
@@ -170,7 +166,6 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		    "Missing or invalid activation URL received."));
 	} else {
 	    String eIDUrl = data.toString();
-	    waitForEacGui();
 	    // startService TR procedure according to [BSI-TR-03124-1]
 	    authThread = new Thread(() -> {
 		ActivationResult result = ac.activate(eIDUrl);
@@ -336,38 +331,6 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		break;
 	}
     }
-
-    /**
-     * This method starts a thread which is waiting for the Android Gui.
-     * If the Gui is available, the {@link #onGuiIfaceSet(org.openecard.gui.android.AndroidGui)} function will be
-     * called.
-     */
-    private void waitForEacGui() {
-	new Thread(() -> {
-	    List<UserConsentNavigatorFactory<? extends MobileGui>> eacNavFactories;
-	    eacNavFactories = octx.getGuiNavigatorFactories(androidGuiClasses);
-	    try {
-		androidGui = waitForGuiPromise(eacNavFactories);
-		// the following cast is an assumption that all classes are compatible to the required generic
-		onGuiIfaceSet((GUI) androidGui);
-	    } catch (InterruptedException ex) {
-		LOG.error("Waiting for Eac Gui was interrupted.", ex);
-	    }
-	}, "WaitForEacGuiThread").start();
-    }
-
-    private MobileGui waitForGuiPromise(List<UserConsentNavigatorFactory<? extends MobileGui>> factories)
-	    throws InterruptedException {
-	ArrayList<Promise<MobileGui>> promises = new ArrayList<>();
-	for (UserConsentNavigatorFactory<? extends MobileGui> next : factories) {
-	    Promise<? extends MobileGui> promise = next.getIfacePromise();
-	    promises.add((Promise<MobileGui>) promise);
-	}
-
-	CombinedPromise<MobileGui> cp = new CombinedPromise<>(promises);
-	return cp.retrieveFirst();
-    }
-
 
     @Override
     public void onCardInserted(String cardType) {

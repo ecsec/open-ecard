@@ -20,22 +20,29 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
 import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.mobile.pinmanagement.PINManagementGui;
 import org.openecard.gui.mobile.pinmanagement.PINManagementGuiImpl;
-import org.openecard.gui.mobile.pinmanagement.PINManagementNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.GuiIfaceReceiver;
+import org.openecard.mobile.activation.PinManagementInteraction;
+
 
 /**
  *
  * @author Sebastian Schuberth
  */
-public class PINManagementNavigatorFactory implements UserConsentNavigatorFactory<PINManagementGui> {
+public class PINManagementNavigatorFactory implements UserConsentNavigatorFactory<PinManagementInteraction> {
 
     private final GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver = new GuiIfaceReceiver<>();
+
+    public static final String PROTOCOL_TYPE = "PIN-Management";
+
+    @Override
+    public String getProtocolType() {
+	return PROTOCOL_TYPE;
+    }
 
     @Override
     public boolean canCreateFrom(UserConsentDescription uc) {
@@ -53,8 +60,8 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
     }
 
     @Override
-    public Promise<? extends PINManagementGui> getIfacePromise() {
-	return ifaceReceiver.getUiInterface();
+    public void setInteractionComponent(PinManagementInteraction interaction) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

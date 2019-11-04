@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile.eac;
+package org.openecard.mobile.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,13 +33,14 @@ import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.mobile.MobileNavigator;
 import org.openecard.gui.mobile.MobileResult;
 import org.openecard.gui.mobile.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.gui.mobile.eac.EacGuiImpl;
+import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
@@ -60,8 +61,7 @@ public final class EacNavigator extends MobileNavigator {
     private static final Logger LOG = LoggerFactory.getLogger(EacNavigator.class);
 
     private final List<Step> steps;
-    private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver;
-    private final EacGuiImpl guiService;
+    private final EacInteraction interaction;
 
     private Future<?> runningAction;
     private Thread eacNextThread;
@@ -71,11 +71,9 @@ public final class EacNavigator extends MobileNavigator {
     private boolean finalPinStatusDelivered = false;
 
 
-    public EacNavigator(UserConsentDescription uc, GuiIfaceReceiver<EacGuiImpl> ifaceReceiver) {
+    public EacNavigator(UserConsentDescription uc, EacInteraction interaction) {
 	this.steps = new ArrayList<>(uc.getSteps());
-	this.ifaceReceiver = ifaceReceiver;
-	this.guiService = ifaceReceiver.getUiInterface().derefNonblocking();
-	this.guiService.setEacNav(this);
+	this.interaction = interaction;
     }
 
     @Override

@@ -20,8 +20,9 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.android.eac;
+package org.openecard.gui.mobile.eac;
 
+import org.openecard.mobile.ui.EacNavigator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,6 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
-import org.openecard.gui.mobile.eac.EacNavigator;
 import org.openecard.gui.mobile.eac.types.BoxItem;
 import org.openecard.gui.mobile.eac.types.PinStatus;
 import org.openecard.gui.mobile.eac.types.ServerData;
@@ -147,7 +147,7 @@ public class EacGuiImpl implements EacGui {
 
     @Override
     public synchronized void cancel() {
-	LOG.debug("Cancel of Android EAC GUI called.");
+	LOG.debug("Cancel of Android EAC GUI called.", new Exception("Print Stacktrace"));
 	if (! cancelPromise.isDelivered() && ! cancelPromise.isCancelled()) {
 	    cancelPromises(false);
 
@@ -228,8 +228,8 @@ public class EacGuiImpl implements EacGui {
 	    }
 	}
 
-	List<BoxItem> readAccess = new ArrayList<>();
-	List<BoxItem> writeAccess = new ArrayList<>();
+	ArrayList<BoxItem> readAccess = new ArrayList<>();
+	ArrayList<BoxItem> writeAccess = new ArrayList<>();
 
 	for (InputInfoUnit next : step2.getInputInfoUnits()) {
 	    if ("ReadCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {

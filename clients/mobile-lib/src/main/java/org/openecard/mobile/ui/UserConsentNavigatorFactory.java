@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,25 +19,27 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.mobile.activation.common;
 
-import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.mobile.activation.EacInteraction;
+package org.openecard.mobile.ui;
+
+import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.ActivationInteraction;
+
 
 /**
  *
  * @author Neil Crossley
+ * @param <T> Type of the UI interaction interface.
  */
-public class EacCardEventHandler {
+public interface UserConsentNavigatorFactory <T extends ActivationInteraction> {
 
-    public static AutoCloseable hookUp(EacCardEventHandler handler, EventDispatcher eventDispatcher, EacInteraction interaction) {
+    String getProtocolType();
 
-	return new AutoCloseable() {
-	    @Override
-	    public void close() throws Exception {
-	    }
+    boolean canCreateFrom(UserConsentDescription uc);
 
-	};
-    }
+    UserConsentNavigator createFrom(UserConsentDescription uc);
+
+    void setInteractionComponent(T interaction);
 
 }

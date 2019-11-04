@@ -20,42 +20,49 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.mobile;
+package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
+import java.util.List;
+import org.openecard.gui.FileDialog;
+import org.openecard.gui.MessageDialog;
+import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.mobile.eac.EacGui;
-import org.openecard.gui.mobile.eac.EacGuiImpl;
-import org.openecard.gui.mobile.eac.EacNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 
 
 /**
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacGui> {
+public class MobileUserConsent implements UserConsent {
 
-    private final GuiIfaceReceiver<EacGuiImpl> ifaceReceiver = new GuiIfaceReceiver<>();
+    private final List<UserConsentNavigatorFactory<?>> factories;
 
-    @Override
-    public boolean canCreateFrom(UserConsentDescription uc) {
-	return "EAC".equals(uc.getDialogType());
+    public MobileUserConsent(List<UserConsentNavigatorFactory<?>> factories) {
+	this.factories = factories;
     }
 
     @Override
-    public UserConsentNavigator createFrom(UserConsentDescription uc) {
-	if (! this.canCreateFrom(uc)) {
-	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
+    public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
+	
+	for (UserConsentNavigatorFactory factory : factories) {
+	    if(factory.canCreateFrom(uc)) {
+		UserConsentNavigator nav = factory.createFrom(uc);
+		return nav;
+	    }
 	}
 
-	ifaceReceiver.setUiInterface(new EacGuiImpl());
-	return new EacNavigator(uc, ifaceReceiver);
+	throw new UnsupportedOperationException("Unsupported UserConsent type.");
     }
 
     @Override
-    public Promise<? extends EacGui> getIfacePromise() {
-	return ifaceReceiver.getUiInterface();
+    public FileDialog obtainFileDialog() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public MessageDialog obtainMessageDialog() {
+	return new MessageDialogStub(); // return stub object
     }
 
 }

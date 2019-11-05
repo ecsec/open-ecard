@@ -24,11 +24,6 @@ package org.openecard.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
-import mockit.Expectations;
-import mockit.Mocked;
-import org.openecard.common.ClientEnv;
-import org.openecard.common.interfaces.CIFProvider;
-import org.openecard.common.interfaces.Environment;
 import org.openecard.common.util.StringUtils;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -43,9 +38,6 @@ public class DIDInfoWrapperTest {
 
     private static final byte[] rootApplication = StringUtils.toByteArray("3F00");
 
-    @Mocked
-    public CIFProvider cifp;
-
     /**
      * Simple test for DIDInfoWrapper-class. After getting the DIDInfoWrapper for the CAN DID in the
      * root applicaton of the npa we check if the get-methods return the expected values.
@@ -54,12 +46,6 @@ public class DIDInfoWrapperTest {
      */
     @Test
     public void test() throws Exception {
-	new Expectations() {{
-	    cifp.getCardInfo(anyString); result = null;
-	}};
-
-	Environment env = new ClientEnv();
-	env.setCIFProvider(cifp);
 	CardInfoType cardInfo = new CifLoader().getNpaCif();
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
 

@@ -411,6 +411,7 @@ public class TinySAL implements SAL {
 	     * [TR-03112-4] If the provided path fragments are valid for more than one card application
 	     * the eCard-API-Framework SHALL return any of the possible choices.
 	     */
+	    // CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
 	    CardEntry baseCardStateEntry = SALUtils.getMatchingEntry(cardAppPath, salStates);
 	    Assert.assertIncorrectParameter(baseCardStateEntry, "The given ConnectionHandle is invalid.");
 
@@ -464,6 +465,7 @@ public class TinySAL implements SAL {
 	    // reset the ef FCP
 	    connectedCardEntry.unsetFCPOfSelectedEF();
 	    // states.addEntry(baseCardStateEntry);
+	    salStates.addCard(connectedCardEntry);
 
 	    response.setConnectionHandle(stateEntry.copyHandle());
 	    response.getConnectionHandle().setCardApplication(applicationID);

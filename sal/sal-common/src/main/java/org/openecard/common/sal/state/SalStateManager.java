@@ -53,6 +53,13 @@ public class SalStateManager {
 	}
     }
 
+    public void addCard(ConnectedCardEntry connectedCardEntry) {
+	if (!this.cards.add(connectedCardEntry)) {
+	    this.cards.remove(connectedCardEntry);
+	    this.cards.add(connectedCardEntry);
+	}
+    }
+
     public boolean removeCard(byte[] ctx, String ifdName, BigInteger idx) {
 	Iterator<CardEntry> it = cards.iterator();
 	boolean removed = false;
@@ -151,4 +158,5 @@ public class SalStateManager {
     private boolean destroySession(String session) {
 	return sessions.remove(session) != null;
     }
+
 }

@@ -18,7 +18,7 @@ import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.ToggleText;
-import org.openecard.mobile.activation.BoxItem;
+import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.ServerData;
 import org.openecard.mobile.activation.TermsOfUsage;
 
@@ -35,8 +35,8 @@ class ServerDataImpl implements ServerData {
     private String issuerUrl;
     private String validity;
     private TermsOfUsage termsOfUsage;
-    private List<BoxItem> readAccessAttributes;
-    private List<BoxItem> writeAccessAttributes;
+    private List<SelectableItem> readAccessAttributes;
+    private List<SelectableItem> writeAccessAttributes;
 
     private Checkbox readBox;
     private Checkbox writeBox;
@@ -78,12 +78,12 @@ class ServerDataImpl implements ServerData {
     }
 
     @Override
-    public List<BoxItem> getReadAccessAttributes() {
+    public List<SelectableItem> getReadAccessAttributes() {
 	return new ArrayList<>(readAccessAttributes);
     }
 
     @Override
-    public List<BoxItem> getWriteAccessAttributes() {
+    public List<SelectableItem> getWriteAccessAttributes() {
 	return new ArrayList<>(writeAccessAttributes);
     }
 
@@ -111,8 +111,8 @@ class ServerDataImpl implements ServerData {
 	    }
 	}
 
-	ArrayList<BoxItem> readAccess = new ArrayList<>();
-	ArrayList<BoxItem> writeAccess = new ArrayList<>();
+	ArrayList<SelectableItem> readAccess = new ArrayList<>();
+	ArrayList<SelectableItem> writeAccess = new ArrayList<>();
     }
 
     private void loadValuesFromChatStep(Step step2) {
@@ -124,21 +124,21 @@ class ServerDataImpl implements ServerData {
 		Checkbox cb = (Checkbox) next;
 		readBox = cb;
 		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {
-		    BoxItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
+		    SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
 		    readAccessAttributes.add(bi);
 		}
 	    } else if ("WriteCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {
 		Checkbox cb = (Checkbox) next;
 		writeBox = cb;
 		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {
-		    BoxItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
+		    SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
 		    writeAccessAttributes.add(bi);
 		}
 	    }
 	}
     }
 
-    public List<OutputInfoUnit> getSelection(List<BoxItem> itemsRead, List<BoxItem> itemsWrite) {
+    public List<OutputInfoUnit> getSelection(List<SelectableItem> itemsRead, List<SelectableItem> itemsWrite) {
 	List<OutputInfoUnit> outInfos = new ArrayList<>();
 
 	copyBox(outInfos, readBox, itemsRead);
@@ -147,7 +147,7 @@ class ServerDataImpl implements ServerData {
 	return outInfos;
     }
 
-    private void copyBox(List<OutputInfoUnit> outInfos, Checkbox oldBox, List<BoxItem> items) {
+    private void copyBox(List<OutputInfoUnit> outInfos, Checkbox oldBox, List<SelectableItem> items) {
 	if (oldBox != null) {
 	    // create copy of the checkbox
 	    Checkbox newBox = new Checkbox(oldBox.getID());
@@ -156,7 +156,7 @@ class ServerDataImpl implements ServerData {
 	    // copy changed values
 	    for (org.openecard.gui.definition.BoxItem next : newBox.getBoxItems()) {
 		String name = next.getName();
-		BoxItem receivedItem = getItem(name, items);
+		SelectableItem receivedItem = getItem(name, items);
 		if (receivedItem != null) {
 		    next.setChecked(receivedItem.isChecked());
 		}
@@ -166,8 +166,8 @@ class ServerDataImpl implements ServerData {
 	}
     }
 
-    private BoxItem getItem(String name, List<BoxItem> items) {
-	for (BoxItem next : items) {
+    private SelectableItem getItem(String name, List<SelectableItem> items) {
+	for (SelectableItem next : items) {
 	    if (name.equals(next.getName())) {
 		return next;
 	    }

@@ -10,23 +10,24 @@
 
 package org.openecard.mobile.ui;
 
-import org.openecard.mobile.activation.BoxItem;
+import org.openecard.mobile.activation.SelectableItem;
+
 
 /**
  *
  * @author Tobias Wich
  */
-public class BoxItemImpl implements BoxItem {
+public class BoxItemImpl implements SelectableItem {
 
     private final String name;
-    private final boolean disabled;
+    private final boolean required;
     private final String text;
     private boolean checked;
 
-    public BoxItemImpl(String name, boolean checked, boolean disabled, String text) {
+    public BoxItemImpl(String name, boolean checked, boolean required, String text) {
 	this.name = name;
 	this.checked = checked;
-	this.disabled = disabled;
+	this.required = required;
 	this.text = text;
     }
 
@@ -51,8 +52,8 @@ public class BoxItemImpl implements BoxItem {
     }
 
     @Override
-    public boolean isDisabled() {
-	return disabled;
+    public boolean isRequired() {
+	return required;
     }
 
 }

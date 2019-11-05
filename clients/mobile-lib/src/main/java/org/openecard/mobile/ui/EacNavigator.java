@@ -39,11 +39,11 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.mobile.activation.BoxItem;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
@@ -149,7 +149,7 @@ public final class EacNavigator extends MobileNavigator {
 		final Promise<List<OutputInfoUnit>> waitForAttributes = new Promise<>();
 		ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperation() {
 		    @Override
-		    public void enter(List<BoxItem> readAttr, List<BoxItem> writeAttr) {
+		    public void enter(List<SelectableItem> readAttr, List<SelectableItem> writeAttr) {
 			List<OutputInfoUnit> outInfo = sd.getSelection(readAttr, writeAttr);
 			waitForAttributes.deliver(outInfo);
 		    }

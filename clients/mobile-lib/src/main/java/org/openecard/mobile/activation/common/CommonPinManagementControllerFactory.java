@@ -73,7 +73,11 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 	    }
 	};
 
-	return new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
+	CommonActivationController controller = new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
+
+	controller.start();
+	
+	return controller;
     }
 
     @Override

@@ -29,10 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface PinManagementInteraction extends ActivationInteraction {
-
-    void onPinChangeable(int attempts, ConfirmOldSetNewPasswordOperation enterOldNewPins);
-    void onCanRequired(ConfirmPasswordOperation enterCan);
-    void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
-
+public interface ConfirmOldSetNewPasswordOperation {
+    
+    void enter(String oldPassword, String newPassword);
 }

@@ -118,6 +118,7 @@ public class PinManagementTests extends BaseIntegrationSetup {
     }
 
     @Test
+    @Ignore("Pin management has not been reworked.")
     void expectNpaCardRecognition() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

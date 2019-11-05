@@ -123,6 +123,7 @@ public class EacContextTests extends BaseIntegrationSetup {
     }
 
     @Test
+    @Ignore("Eac activation has not been reworked.")
     void expectNpaCardRecognition() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

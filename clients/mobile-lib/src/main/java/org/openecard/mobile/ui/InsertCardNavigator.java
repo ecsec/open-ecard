@@ -29,8 +29,6 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.gui.mobile.GuiIfaceReceiver;
-import org.openecard.gui.mobile.MobileResult;
 
 
 /**
@@ -40,13 +38,11 @@ import org.openecard.gui.mobile.MobileResult;
 public class InsertCardNavigator implements UserConsentNavigator {
 
     private final UserConsentDescription uc;
-    private final GuiIfaceReceiver<Object> ifaceReceiver;
 
     private int idx = -1;
 
-    public InsertCardNavigator(UserConsentDescription uc, GuiIfaceReceiver<Object> ifaceReceiver) {
+    public InsertCardNavigator(UserConsentDescription uc) {
 	this.uc = uc;
-	this.ifaceReceiver = ifaceReceiver;
     }
 
 
@@ -95,7 +91,6 @@ public class InsertCardNavigator implements UserConsentNavigator {
     @Override
     public void close() {
 	// nothing to do as there is no UI
-	ifaceReceiver.terminate();
     }
 
 }

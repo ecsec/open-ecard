@@ -27,16 +27,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.mobile.MobileResult;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
+import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
 import org.openecard.plugins.pinplugin.RecognizedState;
+import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,58 +78,54 @@ public class PINManagementNavigator extends MobileNavigator {
 
     @Override
     public StepResult next() {
-	// if cancel call has been issued, abort the whole process
-	if (this.guiService.isCancelled()) {
-	    // prevent index out of bounds
-	    int i = idx == -1 ? 0 : idx > steps.size() ? steps.size() - 1 : idx;
-	    return new MobileResult(steps.get(i), ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	}
-
 	// handle step display
 	idx++;
 	Step pinStep = steps.get(0);
 
-	return displayAndExecuteBackground(pinStep, () -> {
-	    DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
-	    RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
-	    Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
-	    Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
-	    Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
+	// TODO: remove this statement and implement it properly
+	return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
 
-	    if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
-		LOG.error("No pin state received from UI.");
-		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-
-	    // set pin state
-	    this.guiService.sendPinStatus(uiPinState);
-
-	    // set result values if any
-	    if (pinCorrect != null) {
-		this.guiService.setPinCorrect(pinCorrect);
-	    } else if (canCorrect != null) {
-		this.guiService.setCanCorrect(canCorrect);
-	    } else if (pukCorrect != null) {
-		this.guiService.setPukCorrect(pukCorrect);
-	    }
-
-	    // pin accepted or card blocked
-	    if ("success".equals(pinStep.getID())) {
-		return new MobileResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
-	    } else if ("error".equals(pinStep.getID())) {
-		//this.guiService.waitForUserCancel();
-		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-	    }
-
-	    // ask user for the pin
-	    try {
-		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
-		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
-	    } catch (InterruptedException ex) {
-		return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
-	    }
-	});
+//	return displayAndExecuteBackground(pinStep, () -> {
+//	    DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
+//	    RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
+//	    Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
+//	    Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
+//	    Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
+//
+//	    if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
+//		LOG.error("No pin state received from UI.");
+//		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+//	    }
+//
+//	    // set pin state
+//	    this.guiService.sendPinStatus(uiPinState);
+//
+//	    // set result values if any
+//	    if (pinCorrect != null) {
+//		this.guiService.setPinCorrect(pinCorrect);
+//	    } else if (canCorrect != null) {
+//		this.guiService.setCanCorrect(canCorrect);
+//	    } else if (pukCorrect != null) {
+//		this.guiService.setPukCorrect(pukCorrect);
+//	    }
+//
+//	    // pin accepted or card blocked
+//	    if ("success".equals(pinStep.getID())) {
+//		return new MobileResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
+//	    } else if ("error".equals(pinStep.getID())) {
+//		//this.guiService.waitForUserCancel();
+//		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+//	    }
+//
+//	    // ask user for the pin
+//	    try {
+//		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
+//		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+//		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
+//	    } catch (InterruptedException ex) {
+//		return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+//	    }
+//	});
     }
 
     @Override
@@ -159,7 +157,6 @@ public class PINManagementNavigator extends MobileNavigator {
 
     @Override
     public void close() {
-	ifaceReceiver.terminate();
     }
 
     private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
@@ -171,5 +168,84 @@ public class PINManagementNavigator extends MobileNavigator {
 	    }
 	}
     }
+
+
+
+//    public List<OutputInfoUnit> getPinResult(Step step) throws InterruptedException {
+//	// read values
+//	String oldPinValue = this.userPinOld.deref();
+//	String newPinValue = this.userPinNew.deref();
+//	String canValue = this.userCan.deref();
+//	String pukValue = this.userPuk.deref();
+//
+//	if (step instanceof GenericPINStep) {
+//	    ArrayList<OutputInfoUnit> result = new ArrayList<>();
+//	    for (InputInfoUnit nextIn : step.getInputInfoUnits()) {
+//		if (oldPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("OLD_PIN_FIELD")) {
+//		    PasswordField pw = new PasswordField(nextIn.getID());
+//		    pw.copyContentFrom(nextIn);
+//		    pw.setValue(oldPinValue.toCharArray());
+//		    result.add(pw);
+//		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_FIELD")) {
+//		    PasswordField pw = new PasswordField(nextIn.getID());
+//		    pw.copyContentFrom(nextIn);
+//		    pw.setValue(newPinValue.toCharArray());
+//		    result.add(pw);
+//		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_REPEAT_FIELD")) {
+//		    PasswordField pw = new PasswordField(nextIn.getID());
+//		    pw.copyContentFrom(nextIn);
+//		    pw.setValue(newPinValue.toCharArray());
+//		    result.add(pw);
+//		} else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("CAN_FIELD")) {
+//		    PasswordField pw = new PasswordField(nextIn.getID());
+//		    pw.copyContentFrom(nextIn);
+//		    pw.setValue(canValue.toCharArray());
+//		    result.add(pw);
+//		} else if (pukValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PUK_FIELD")) {
+//		    PasswordField pw = new PasswordField(nextIn.getID());
+//		    pw.copyContentFrom(nextIn);
+//		    pw.setValue(pukValue.toCharArray());
+//		    result.add(pw);
+//		}
+//	    }
+//
+//	    return result;
+//	} else {
+//	    throw new InterruptedException("The given step is not a PinStep.");
+//	}
+//    }
+//
+//    public void sendPinStatus(RecognizedState status) {
+//
+//	if (this.pinStatus.isDelivered()) {
+//	   this.pinStatus = new Promise<>();
+//	}
+//
+//	switch (status) {
+//	    case PIN_activated_RC3:
+//		this.pinStatus.deliver(PinStatus.RC3);
+//		break;
+//	    case PIN_activated_RC2:
+//		this.pinStatus.deliver(PinStatus.RC2);
+//		break;
+//	    case PIN_suspended:
+//		this.pinStatus.deliver(PinStatus.CAN);
+//		break;
+//	    case PIN_resumed:
+//		this.pinStatus.deliver(PinStatus.RC1);
+//		break;
+//	    case PIN_blocked:
+//		this.pinStatus.deliver(PinStatus.PIN_BLOCKED);
+//		break;
+//	    case PUK_blocked:
+//		this.pinStatus.deliver(PinStatus.PUK_BLOCKED);
+//		break;
+//	    case PIN_deactivated:
+//		this.pinStatus.deliver(PinStatus.DEACTIVATED);
+//		break;
+//	    default:
+//		throw new IllegalArgumentException("Unhandled PIN status received from UI.");
+//	}
+//    }
 
 }

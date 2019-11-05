@@ -24,17 +24,14 @@ package org.openecard.mobile.ui;
 
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.gui.mobile.GuiIfaceReceiver;
-import org.openecard.mobile.activation.DummyInteraction;
+import org.openecard.mobile.activation.ActivationInteraction;
 
 
 /**
  *
  * @author Neil Crossley
  */
-public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<DummyInteraction> {
-
-    private final GuiIfaceReceiver<Object> ifaceReceiver = new GuiIfaceReceiver<>();
+public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<ActivationInteraction> {
 
     public static final String PROTOCOL_TYPE = "InsertCard";
 
@@ -53,12 +50,12 @@ public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<D
 	if (! this.canCreateFrom(uc)) {
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
-	return new InsertCardNavigator(uc, ifaceReceiver);
+	return new InsertCardNavigator(uc);
     }
 
     @Override
-    public void setInteractionComponent(DummyInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setInteractionComponent(ActivationInteraction interaction) {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

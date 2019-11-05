@@ -23,9 +23,7 @@
 package org.openecard.mobile.ui;
 
 import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.mobile.pinmanagement.PINManagementGuiImpl;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.gui.mobile.GuiIfaceReceiver;
 import org.openecard.mobile.activation.PinManagementInteraction;
 
 
@@ -35,9 +33,9 @@ import org.openecard.mobile.activation.PinManagementInteraction;
  */
 public class PINManagementNavigatorFactory implements UserConsentNavigatorFactory<PinManagementInteraction> {
 
-    private final GuiIfaceReceiver<PINManagementGuiImpl> ifaceReceiver = new GuiIfaceReceiver<>();
-
     public static final String PROTOCOL_TYPE = "PIN-Management";
+
+    private PinManagementInteraction interaction;
 
     @Override
     public String getProtocolType() {
@@ -55,13 +53,12 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
 
-	ifaceReceiver.setUiInterface(new PINManagementGuiImpl());
-	return new PINManagementNavigator(uc, ifaceReceiver);
+	return new PINManagementNavigator(uc, interaction);
     }
 
     @Override
     public void setInteractionComponent(PinManagementInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	this.interaction = interaction;
     }
 
 }

@@ -31,22 +31,26 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.mobile.MobileResult;
-import org.openecard.gui.mobile.GuiIfaceReceiver;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
+import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.gui.mobile.eac.EacGuiImpl;
+import org.openecard.mobile.activation.BoxItem;
+import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
-import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 import org.openecard.sal.protocol.eac.gui.ErrorStep;
 import org.openecard.sal.protocol.eac.gui.PINStep;
+import org.openecard.sal.protocol.eac.gui.PinState;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +72,6 @@ public final class EacNavigator extends MobileNavigator {
 
     private int idx = 0;
     private boolean pinFirstUse = true;
-    private boolean finalPinStatusDelivered = false;
 
 
     public EacNavigator(UserConsentDescription uc, EacInteraction interaction) {
@@ -91,13 +94,6 @@ public final class EacNavigator extends MobileNavigator {
 
     @Override
     public StepResult next() {
-	// if cancel call has been issued, abort the whole process
-	if (this.guiService.isCancelled()) {
-	    // prevent index out of bounds
-	    int i = idx > steps.size() ? steps.size() - 1 : idx;
-	    return new MobileResult(steps.get(i), ResultStatus.CANCEL, Collections.emptyList());
-	}
-
 	// get current step
 	Step curStep = steps.get(idx);
 
@@ -145,10 +141,23 @@ public final class EacNavigator extends MobileNavigator {
 	    idx++;
 	    Step cvcStep = steps.get(0);
 	    Step chatStep = steps.get(1);
+
 	    return displayAndExecuteBackground(chatStep, () -> {
+		ServerDataImpl sd = new ServerDataImpl(cvcStep, chatStep);
+		String tInfo = getTransactionInfo();
+
+		final Promise<List<OutputInfoUnit>> waitForAttributes = new Promise<>();
+		ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperation() {
+		    @Override
+		    public void enter(List<BoxItem> readAttr, List<BoxItem> writeAttr) {
+			List<OutputInfoUnit> outInfo = sd.getSelection(readAttr, writeAttr);
+			waitForAttributes.deliver(outInfo);
+		    }
+		};
+
 		try {
-		    this.guiService.loadValuesFromSteps(cvcStep, chatStep);
-		    List<OutputInfoUnit> outInfo = this.guiService.getSelection();
+		    interaction.onServerData(sd, tInfo, selectionConfirmation);
+		    List<OutputInfoUnit> outInfo = waitForAttributes.deref();
 		    return new MobileResult(chatStep, ResultStatus.OK, outInfo);
 		} catch (InterruptedException ex) {
 		    return new MobileResult(cvcStep, ResultStatus.INTERRUPTED, Collections.emptyList());
@@ -158,48 +167,71 @@ public final class EacNavigator extends MobileNavigator {
 	    idx++;
 	    Step pinStep = curStep;
 
-	    if (pinFirstUse) {
-		pinFirstUse = false;
-	    } else {
-		this.guiService.setPinCorrect(false);
-	    }
-
 	    return displayAndExecuteBackground(pinStep, () -> {
-		// ask user for the pin
-		try {
-		    List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
-		    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-		    return new MobileResult(pinStep, ResultStatus.OK, outInfo);
-		} catch (InterruptedException ex) {
-		    return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.emptyList());
+		if (pinFirstUse) {
+		    pinFirstUse = false;
+		} else {
+		    // tell user the card is not needed anymore prior to capturing the pin again
+		    interaction.onCardInteractionComplete();
 		}
+
+		final Promise<List<OutputInfoUnit>> waitForPin = new Promise<>();
+		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(TR03112Keys.NPA_PIN_STATE);
+		if (ps == null) {
+		    LOG.error("Missing PinState object.");
+		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+		} else if (ps.isRequestCan()) {
+		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperation() {
+			@Override
+			public void enter(String can, String pin) {
+			    interaction.requestCardInsertion();
+			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, can);
+			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+			    waitForPin.deliver(outInfo);
+			}
+		    });
+		} else {
+		    interaction.onPinRequest(ps.getAttempts(), new ConfirmPasswordOperation() {
+			@Override
+			public void enter(String pin) {
+			    interaction.requestCardInsertion();
+			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, null);
+			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
+			    waitForPin.deliver(outInfo);
+			}
+		    });
+		}
+
+		List<OutputInfoUnit> outInfo = waitForPin.deref();
+		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
 	    });
+
 	} else if (ProcessingStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
 		LOG.debug("Delivering final PIN status in ProcessingStep.");
-		// notify user that PIN entry was successful
-		this.finalPinStatusDelivered = true;
-		this.guiService.setPinCorrect(true);
+		interaction.onCardAuthenticationSuccessful();
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
 	} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
-		if (! finalPinStatusDelivered) {
-		    LOG.debug("Delivering final PIN status in ErrorStep.");
-		    finalPinStatusDelivered = true;
-		    // get blocked status from dynamic context
-		    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-		    EacPinStatus blockedStatus = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
-		    LOG.debug("Final PIN status is {}.", blockedStatus);
-		    if (blockedStatus == EacPinStatus.BLOCKED || blockedStatus == EacPinStatus.DEACTIVATED) {
-			this.guiService.setPinCorrect(false);
-			this.guiService.sendPinStatus(blockedStatus);
+		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(TR03112Keys.NPA_PIN_STATE);
+		if (ps == null) {
+		    LOG.error("Missing PinState object.");
+		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+		} else {
+		    if (ps.isBlocked()) {
+			interaction.onCardBlocked();
+		    } else if (ps.isDeactivated()) {
+			interaction.onCardDeactivated();
 		    }
 		}
+		// TODO: check if this is needed here, we might tell the user that the card is not needed anymore at some other place
+		interaction.onCardInteractionComplete();
+
 		// cancel is returned by the step action
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
@@ -238,19 +270,11 @@ public final class EacNavigator extends MobileNavigator {
 
     @Override
     public void close() {
-	ifaceReceiver.terminate();
-	guiService.setIsDone();
     }
 
     @Override
     protected StepResult displayAndExecuteBackground(Step stepObj, Callable<StepResult> step) {
 	StepResult r = super.displayAndExecuteBackground(stepObj, step);
-	switch (r.getStatus()) {
-	    case CANCEL:
-	    case INTERRUPTED:
-		guiService.cancel();
-		break;
-	}
 	return r;
     }
 
@@ -278,6 +302,37 @@ public final class EacNavigator extends MobileNavigator {
 		}
 	    }
 	}
+    }
+
+    private String getTransactionInfo() {
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	EACData eacData = (EACData) ctx.get(EACProtocol.EAC_DATA);
+	String tInfo = null;
+	if (eacData != null) {
+	    tInfo = eacData.transactionInfo;
+	}
+	return tInfo;
+    }
+
+    public List<OutputInfoUnit> getPinResult(Step step, String pinValue, String canValue) {
+	PINStep pinStep = (PINStep) step;
+
+	ArrayList<OutputInfoUnit> result = new ArrayList<>();
+	for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
+	    if (pinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_PIN_FIELD")) {
+		PasswordField pw = new PasswordField(nextIn.getID());
+		pw.copyContentFrom(nextIn);
+		pw.setValue(pinValue.toCharArray());
+		result.add(pw);
+	    } else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
+		PasswordField pw = new PasswordField(nextIn.getID());
+		pw.copyContentFrom(nextIn);
+		pw.setValue(canValue.toCharArray());
+		result.add(pw);
+	    }
+	}
+
+	return result;
     }
 
 }

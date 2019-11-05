@@ -19,10 +19,12 @@
  * you and ecsec GmbH.
  *
  ************************************************************************** */
+
 package org.openecard.mobile.activation;
 
 import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
+
 
 /**
  *
@@ -31,5 +33,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmAttributeSelectionOperation {
 
-    public void enter(List<BoxItem> oldPassword, List<BoxItem> newPassword);
+    void enter(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes);
+
 }

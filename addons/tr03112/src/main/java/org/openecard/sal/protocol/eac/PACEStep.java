@@ -87,6 +87,7 @@ import org.openecard.sal.protocol.eac.gui.CardMonitor;
 import org.openecard.sal.protocol.eac.gui.CardRemovedFilter;
 import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.openecard.sal.protocol.eac.gui.EacPinStatus;
+import org.openecard.sal.protocol.eac.gui.PinState;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.openecard.sal.protocol.eac.gui.ProcessingStepAction;
 import org.slf4j.Logger;
@@ -245,7 +246,9 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    byte[] output = pinCheckResponse.getOutputAPDU().get(0);
 	    CardResponseAPDU outputApdu = new CardResponseAPDU(output);
 	    byte[] status = outputApdu.getStatusBytes();
-	    dynCtx.put(EACProtocol.PIN_STATUS, EacPinStatus.fromCode(status));
+	    PinState pinState = new PinState();
+	    pinState.update(EacPinStatus.fromCode(status));
+	    dynCtx.put(EACProtocol.PIN_STATUS, pinState);
 
 	    // define GUI depending on the PIN status
 	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));

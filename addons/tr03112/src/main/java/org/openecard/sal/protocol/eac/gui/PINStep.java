@@ -63,9 +63,9 @@ public final class PINStep extends Step {
     private final PACEMarkerType paceMarker;
     private final boolean hasAttemptsCounter;
 
-    private EacPinStatus status;
+    private PinState status;
 
-    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker, EacPinStatus status) {
+    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker, PinState status) {
 	super(STEP_ID, "Dummy-Title");
 	this.pinType = LANG_PACE.translationForKey(eacData.passwordType);
 	this.paceMarker = paceMarker;
@@ -92,10 +92,14 @@ public final class PINStep extends Step {
     }
 
     public void setStatus(EacPinStatus status) {
+	this.status.update(status);
+    }
+
+    public void setStatus(PinState status) {
 	this.status = status;
     }
 
-    public EacPinStatus getStatus() {
+    public PinState getStatus() {
 	return status;
     }
 

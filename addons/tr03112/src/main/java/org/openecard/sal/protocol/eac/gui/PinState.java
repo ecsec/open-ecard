@@ -22,43 +22,80 @@ public class PinState {
     private boolean blocked;
     private boolean deactivated;
 
+    private EacPinStatus state;
+
     public PinState() {
+	state = EacPinStatus.RC3;
 	attempts = 2;
 	requestCan = false;
 	blocked = false;
 	deactivated = false;
     }
 
-    public int getAttempts() {
-	return attempts;
+    public void update(EacPinStatus status) {
+	state = status;
+	switch (status) {
+	    case RC3:
+		attempts = 2;
+		requestCan = false;
+		blocked = false;
+		deactivated = false;
+		break;
+	    case RC2:
+		attempts = 1;
+		requestCan = false;
+		blocked = false;
+		deactivated = false;
+		break;
+	    case RC1:
+		attempts = 0;
+		requestCan = true;
+		blocked = false;
+		deactivated = false;
+		break;
+	    case BLOCKED:
+		attempts = 0;
+		requestCan = false;
+		blocked = true;
+		deactivated = false;
+		break;
+	    case DEACTIVATED:
+		attempts = 0;
+		requestCan = false;
+		blocked = false;
+		deactivated = true;
+		break;
+	}
+
     }
 
-    public void setAttempts(int attempts) {
-	this.attempts = attempts;
+    public EacPinStatus getState() {
+	return state;
+    }
+
+    public int getAttempts() {
+	switch (state) {
+	    case RC3:
+		return 2;
+	    case RC2:
+		return 1;
+	    case RC1:
+		return 0;
+	    default:
+		return 0;
+	}
     }
 
     public boolean isRequestCan() {
-	return requestCan;
-    }
-
-    public void setRequestCan(boolean requestCan) {
-	this.requestCan = requestCan;
+	return state == EacPinStatus.RC1;
     }
 
     public boolean isBlocked() {
-	return blocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-	this.blocked = blocked;
+	return state == EacPinStatus.BLOCKED;
     }
 
     public boolean isDeactivated() {
-	return deactivated;
-    }
-
-    public void setDeactivated(boolean deactivated) {
-	this.deactivated = deactivated;
+	return state == EacPinStatus.DEACTIVATED;
     }
 
     public boolean isOperational() {

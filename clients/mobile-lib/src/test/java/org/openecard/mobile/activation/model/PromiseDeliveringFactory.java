@@ -47,12 +47,18 @@ public final class PromiseDeliveringFactory {
 		if (success != null) {
 		    success.deliver(source);
 		}
+		if (failure != null) {
+		    failure.deliver(null);
+		}
 	    }
 
 	    @Override
 	    public void onFailure(ServiceErrorResponse response) {
 		if (failure != null) {
 		    failure.deliver(response);
+		}
+		if (success != null) {
+		    success.deliver(null);
 		}
 	    }
 	};

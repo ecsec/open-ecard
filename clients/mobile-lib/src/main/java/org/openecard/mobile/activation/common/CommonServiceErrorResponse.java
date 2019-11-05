@@ -33,4 +33,9 @@ public class CommonServiceErrorResponse implements ServiceErrorResponse {
     public String getMessage() {
 	return message;
     }
+
+    @Override
+    public String toString() {
+	return String.format("ServiceErrorResponse: statusCode=%s message='%s'", statusCode, message);
+    }
 }

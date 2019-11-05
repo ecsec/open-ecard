@@ -285,6 +285,7 @@ public class TinySAL implements SAL {
     public InitializeResponse initialize(Initialize request) {
 	evtMan = new SalEventManager(salStates, env, ifdCtx);
 	InitializeResponse res = WSHelper.makeResponse(InitializeResponse.class, WSHelper.makeResultOK());
+	evtMan.initialize();
 	return res;
     }
 

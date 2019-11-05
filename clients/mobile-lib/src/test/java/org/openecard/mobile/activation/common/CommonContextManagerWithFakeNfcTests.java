@@ -154,11 +154,13 @@ public class CommonContextManagerWithFakeNfcTests {
 	withTerminalSupport();
 
 	Promise<ActivationSource> result = new Promise();
+	Promise<ServiceErrorResponse> startFailure = new Promise();
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
+	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
 
+	Assert.assertNull(startFailure.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
@@ -168,6 +170,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	withTerminalSupport();
 
 	Promise<ActivationSource> result = new Promise();
+	Promise<ServiceErrorResponse> startFailure = new Promise();
 
 	Object lock = new Object();
 	StateChangeEvent[] events = new StateChangeEvent[]{
@@ -209,11 +212,12 @@ public class CommonContextManagerWithFakeNfcTests {
 	CommonContextManager sut = this.createSut();
 
 	synchronized (lock) {
-	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, null));
+	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
 	    lock.wait(WAIT_TIMEOUT);
 	    lock.wait(WAIT_TIMEOUT);
 	}
 
+	Assert.assertNull(startFailure.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
     }
@@ -221,13 +225,14 @@ public class CommonContextManagerWithFakeNfcTests {
     @Test
     void sutStartStopCorrectly() throws InterruptedException, TimeoutException, Exception {
 	Promise<ActivationSource> startResult = new Promise();
+	Promise<ServiceErrorResponse> startFailure = new Promise();
 	Promise<ServiceErrorResponse> stopResult = new Promise();
 	withNfcSupport(NfcConfig.create());
 	withTerminalSupport();
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(startResult, null));
+	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(startResult, startFailure));
 
 	Assert.assertNotNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 

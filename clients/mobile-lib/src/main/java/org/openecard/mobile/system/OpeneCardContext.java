@@ -240,15 +240,6 @@ public class OpeneCardContext {
 		throw ex;
 	    }
 
-	    // initialize SAL
-	    try {
-		WSHelper.checkResult(sal.initialize(new Initialize()));
-		LOG.info("SAL initialized.");
-	    } catch (WSHelper.WSException ex) {
-		errorMsg = ex.getMessage();
-		throw ex;
-	    }
-
 	    // establish context
 	    try {
 		EstablishContext establishContext = new EstablishContext();
@@ -262,6 +253,17 @@ public class OpeneCardContext {
 		errorMsg = ESTABLISH_IFD_CONTEXT_FAILED;
 		throw ex;
 	    }
+
+	    // initialize SAL
+	    try {
+		WSHelper.checkResult(sal.initialize(new Initialize()));
+		LOG.info("SAL initialized.");
+	    } catch (WSHelper.WSException ex) {
+		errorMsg = ex.getMessage();
+		throw ex;
+	    }
+
+
 	    // TODO: Hack to ensure registry is loaded before use.
 	    manager.getRegistry().listAddons();
 

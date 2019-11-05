@@ -101,9 +101,17 @@ public class SalEventManager {
     }
 
     public synchronized void terminate() {
-	eventRunner.setStoppedFlag();
-	eventRunnerTask.cancel(true);
-	threadPool.shutdownNow();
+	if (eventRunner != null) {
+	    eventRunner.setStoppedFlag();
+	    eventRunner = null;
+	}
+	if (eventRunnerTask != null) {
+	    eventRunnerTask.cancel(true);
+	    eventRunnerTask = null;
+	}
+	if (threadPool != null) {
+	    threadPool.shutdownNow();
+	}
     }
 
 

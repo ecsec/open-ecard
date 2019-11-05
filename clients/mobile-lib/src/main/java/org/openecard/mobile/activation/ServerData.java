@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.activation;
 
+import java.io.Serializable;
 import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
@@ -30,7 +31,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ServerData {
+public interface ServerData extends Serializable {
 
     String getIssuer();
 

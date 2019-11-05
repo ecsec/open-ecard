@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>addons</artifactId>
-		<version>1.4.0-rc.5-SNAPSHOT</version>
+		<version>1.4.0-rc.5+sha1</version>
 	</parent>
 
 	<groupId>org.openecard.addons</groupId>

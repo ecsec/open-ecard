@@ -63,8 +63,24 @@ public class CardEntry implements Comparable<CardEntry> {
 	}
     }
 
+    public byte[] getCtxHandle() {
+	return ctxHandle;
+    }
+
+    public String getIfdName() {
+	return ifdName;
+    }
+
+    public BigInteger getSlotIdx() {
+	return slotIdx;
+    }
+
     public CardInfoWrapper getCif() {
 	return cif;
+    }
+
+    public byte[] getCardApplication() {
+	return null;
     }
 
     public boolean matchesContextHandle(byte[] ctxHandle) {

@@ -192,6 +192,7 @@ import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardEntry;
 import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.ConnectedCardEntry;
 import org.openecard.common.sal.state.NoSuchSession;
 import org.openecard.common.sal.state.SalStateManager;
@@ -230,7 +231,7 @@ public class TinySAL implements SAL {
 
     private final Environment env;
     private final SalStateManager salStates;
-    //private final CardStateMap states = null; // TODO: replace with SalStateManager
+    private final CardStateMap states = null; // TODO: replace with SalStateManager
     private byte[] ifdCtx;
     private AddonManager addonManager;
     private AddonSelector protocolSelector;
@@ -359,18 +360,21 @@ public class TinySAL implements SAL {
 	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
-	    Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
+	    // Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
+	    List<CardEntry> entries =  SALUtils.filterEntries(cardAppPath, salStates.listCardEntries());
 
 	    // Copy entries to result set
 	    CardAppPathResultSet resultSet = new CardAppPathResultSet();
 	    List<CardApplicationPathType> resultPaths = resultSet.getCardApplicationPathResult();
-	    for (CardStateEntry entry : entries) {
-		CardApplicationPathType pathCopy = entry.pathCopy();
-		if (cardAppPath.getCardApplication() != null) {
-		    pathCopy.setCardApplication(cardAppPath.getCardApplication());
+	    for (CardEntry entry : entries) {
+		CardApplicationPathType pathCopy = entry.copyHandle();
+		final byte[] cardApplication = cardAppPath.getCardApplication();
+		if (cardApplication != null) {
+		    pathCopy.setCardApplication(cardApplication);
 		} else {
-		    if (entry.getImplicitlySelectedApplicationIdentifier() != null) {
-			pathCopy.setCardApplication(entry.getImplicitlySelectedApplicationIdentifier());
+		    final byte[] implicitApplication = entry.getCif().getImplicitlySelectedApplication();
+		    if (implicitApplication != null) {
+			pathCopy.setCardApplication(implicitApplication);
 		    } else {
 			LOG.warn("No CardApplication and ImplicitlySelectedApplication available using MF now.");
 			pathCopy.setCardApplication(MF);

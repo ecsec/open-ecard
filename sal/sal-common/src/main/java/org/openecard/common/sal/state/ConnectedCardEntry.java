@@ -97,6 +97,11 @@ public class ConnectedCardEntry extends CardEntry {
 	return didStructure;
     }
 
+    @Override
+    public byte[] getCardApplication() {
+	return this.cardApplication;
+    }
+
     public CardApplicationWrapper getCurrentCardApplication() {
 	return this.cif.getCardApplication(this.cardApplication);
     }

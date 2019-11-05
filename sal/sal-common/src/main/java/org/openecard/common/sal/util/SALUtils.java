@@ -54,7 +54,14 @@ import iso.std.iso_iec._24727.tech.schema.Sign;
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
 import iso.std.iso_iec._24727.tech.schema.VerifySignature;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.openecard.common.ECardException;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.exception.IncorrectParameterException;
@@ -82,6 +89,69 @@ public class SALUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(SALUtils.class);
 
+    public static List<CardEntry> filterEntries(CardApplicationPathType cardAppPath, Collection<CardEntry> listCardEntries) {
+	Collection<Predicate<CardEntry>> predicates = asPredicates(cardAppPath);
+
+	return filterEntries(listCardEntries, predicates);
+    }
+
+    private static List<CardEntry> filterEntries(Collection<CardEntry> listCardEntries, Collection<Predicate<CardEntry>> predicates) {
+	List<CardEntry> results = new ArrayList<>(listCardEntries.size());
+	for (CardEntry currentCardEntry : listCardEntries) {
+	    boolean matched = true;
+	    for (Predicate<CardEntry> predicate : predicates) {
+		if (!predicate.test(currentCardEntry)) {
+		    matched = false;
+		    break;
+		}
+	    }
+	    if (matched) {
+		results.add(currentCardEntry);
+	    }
+	}
+	return results;
+    }
+
+    private static Collection<Predicate<CardEntry>> asPredicates(CardApplicationPathType cardAppPath) {
+	List<Predicate<CardEntry>> predicates = new LinkedList<>();
+	byte[] contextHandle = cardAppPath.getContextHandle();
+	if (contextHandle != null) {
+	    predicates.add(new Predicate<CardEntry>() {
+		@Override
+		public boolean test(CardEntry t) {
+		    return Arrays.equals(contextHandle, t.getCtxHandle());
+		}
+	    });
+	}
+	String ifdName = cardAppPath.getIFDName();
+	if (ifdName != null) {
+	    predicates.add(new Predicate<CardEntry>() {
+		@Override
+		public boolean test(CardEntry t) {
+		    return ifdName.equals(t.getIfdName());
+		}
+	    });
+	}
+	BigInteger slotIndex = cardAppPath.getSlotIndex();
+	if (slotIndex != null) {
+	    predicates.add(new Predicate<CardEntry>() {
+		@Override
+		public boolean test(CardEntry t) {
+		    return slotIndex.equals(t.getSlotIdx());
+		}
+	    });
+	}
+	byte[] cardApplication = cardAppPath.getCardApplication();
+	if (cardApplication != null) {
+	    predicates.add(new Predicate<CardEntry>() {
+		@Override
+		public boolean test(CardEntry t) {
+		    return Arrays.equals(cardApplication, t.getCardApplication());
+		}
+	    });
+	}
+	return predicates;
+    }
 
     public static CardEntry getMatchingEntry(CardApplicationConnect request, SalStateManager salStates) throws IncorrectParameterException {
 	Assert.assertIncorrectParameter(request, "The parameter CardApplicationConnect is empty.");
@@ -388,6 +458,7 @@ public class SALUtils {
 
 	return getStateBySession(cardApplicationPath.getChannelHandle(), salStates);
     }
+
 
 }
 

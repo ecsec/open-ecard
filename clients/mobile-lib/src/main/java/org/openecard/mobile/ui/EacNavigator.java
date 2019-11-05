@@ -46,6 +46,7 @@ import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
+import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
 import org.openecard.sal.protocol.eac.gui.ErrorStep;
@@ -175,12 +176,15 @@ public final class EacNavigator extends MobileNavigator {
 		    interaction.onCardInteractionComplete();
 		}
 
+		EACData eacData = (EACData) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.EAC_DATA);
+		boolean isCanStep = eacData.pinID == PasswordID.CAN.getByte();
+
 		final Promise<List<OutputInfoUnit>> waitForPin = new Promise<>();
 		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(TR03112Keys.NPA_PIN_STATE);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
-		} else if (ps.isRequestCan()) {
+		} else if (! isCanStep && ps.isRequestCan()) {
 		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperation() {
 			@Override
 			public void enter(String can, String pin) {
@@ -191,7 +195,7 @@ public final class EacNavigator extends MobileNavigator {
 			}
 		    });
 		} else {
-		    interaction.onPinRequest(ps.getAttempts(), new ConfirmPasswordOperation() {
+		    ConfirmPasswordOperation op = new ConfirmPasswordOperation() {
 			@Override
 			public void enter(String pin) {
 			    interaction.requestCardInsertion();
@@ -199,7 +203,12 @@ public final class EacNavigator extends MobileNavigator {
 			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 			    waitForPin.deliver(outInfo);
 			}
-		    });
+		    };
+		    if (isCanStep) {
+			interaction.onCanRequest(op);
+		    } else {
+			interaction.onPinRequest(ps.getAttempts(), op);
+		    }
 		}
 
 		List<OutputInfoUnit> outInfo = waitForPin.deref();

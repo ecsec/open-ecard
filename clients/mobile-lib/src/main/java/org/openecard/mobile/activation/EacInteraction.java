@@ -35,7 +35,8 @@ public interface EacInteraction extends ActivationInteraction {
     void onPinCanRequest(ConfirmTwoPasswordsOperation enterPinCan);
     void onCardBlocked();
     void onCardDeactivated();
-    void onServerData(ServerData data, ConfirmAttributeSelectionOperation selectReadWrite);
-    void onTransactionInfo(String data);
-    void onInteractionComplete();
+    void onServerData(ServerData data, String transactionData, ConfirmAttributeSelectionOperation selectReadWrite);
+    void onCardInteractionComplete();
+    void onCardAuthenticationSuccessful();
+
 }

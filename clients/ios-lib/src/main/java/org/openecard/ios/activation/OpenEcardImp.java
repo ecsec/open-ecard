@@ -25,6 +25,7 @@ package org.openecard.ios.activation;
 import java.security.Provider;
 import java.security.Security;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
@@ -42,6 +43,9 @@ import org.openecard.scio.IOSConfig;
 public class OpenEcardImp implements OpenEcard {
 
     static {
+	// define that this system is iOS
+	SysUtils.setIsIOS();
+
 	Provider provider = new BouncyCastleProvider();
 	try {
 	    Security.removeProvider(provider.getName());

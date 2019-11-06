@@ -72,11 +72,34 @@ public class SysUtils {
     public static boolean isSuSEOrDerivate() {
 	return new File("/etc/SuSE-release").exists();
     }
+    
+    public static boolean isAndroid() {
+	return IS_ANDROID;
+    }
+
+    public static boolean isIOS() {
+	return IS_IOS;
+    }
+
+    public static boolean isMobileDevice() {
+	return isAndroid() || isIOS();
+    }
 
 
     private static final Pattern CURLY_VAR_ENV = Pattern.compile("(\\\\)?(\\$\\{([A-Za-z0-9_]+)\\})");
     private static final Pattern PLAIN_VAR_ENV = Pattern.compile("(\\\\)?(\\$([A-Za-z0-9_]+))");
     private static final Pattern CURLY_VAR_SYS = Pattern.compile("(\\\\)?(\\$\\{([A-Za-z0-9_\\.]+)\\})");
+
+    private static boolean IS_ANDROID = false;
+    private static boolean IS_IOS = false;
+
+    public static void setIsIOS() {
+	IS_IOS = true;
+    }
+
+    public static void setIsAndroid() {
+	IS_ANDROID = true;
+    }
 
     /**
      * Expands environment variables in the given text.

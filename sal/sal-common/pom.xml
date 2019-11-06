@@ -42,12 +42,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openecard</groupId>
-			<artifactId>recognition</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>

@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.openecard.common.OpenecardProperties;
+import org.openecard.common.util.SysUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class ProxySettings {
     private final ProxySelector selector;
 
     static {
-	if (! isAndroid() && !isIOS()) {
+	if (! SysUtils.isAndroid() && ! SysUtils.isIOS()) {
 	    ProxySettingsLoader psl = new ProxySettingsLoader();
 	    psl.load();
 	}
@@ -66,26 +67,8 @@ public class ProxySettings {
      * The load must be performed when the settings change while running.
      */
     public static synchronized void load() {
-	if (! isAndroid()) {
+	if (! SysUtils.isAndroid()) {
 	    new ProxySettingsLoader().load();
-	}
-    }
-
-    private static boolean isAndroid() {
-	try {
-	    Class.forName("android.app.Activity");
-	    return true;
-	} catch (ClassNotFoundException e) {
-	    return false;
-	}
-    }
-
-    private static boolean isIOS() {
-	try {
-	    Class.forName("org.robovm.apple.foundation.NSObject");
-	    return true;
-	} catch (ClassNotFoundException e) {
-	    return false;
 	}
     }
 
@@ -157,7 +140,7 @@ public class ProxySettings {
     public Socket getSocket(String protocol, String hostname, int port) throws IOException, URISyntaxException {
 	Proxy p = getProxy(protocol, hostname, port);
 
-	if (isAndroid() && p.type() == Proxy.Type.HTTP) {
+	if (SysUtils.isAndroid() && p.type() == Proxy.Type.HTTP) {
 	    LOG.debug("Replacing proxy implementation for Android system.");
 	    SocketAddress sa = p.address();
 	    if (sa instanceof InetSocketAddress) {

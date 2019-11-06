@@ -217,8 +217,8 @@ public class World implements AutoCloseable {
 	private Promise<Void> promisedStarted;
 	private Promise<Void> promisedRequestCardInsertion;
 	private Promise<Void> promisedRecognizeCard;
-	private Promise<ConfirmPasswordOperation> promisedOperationEnterOnePassword;
-	private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterTwoPasswords;
+	private Promise<ConfirmPasswordOperation> promisedOperationPinRequest;
+	private Promise<ConfirmTwoPasswordsOperation> promisedOperationPinCanRequest;
 	private ActivationController activationController;
 	private Promise<Void> promisedRemoveCard;
 	private EacInteraction interaction;
@@ -298,10 +298,11 @@ public class World implements AutoCloseable {
 	    promisedRequestCardInsertion = new Promise();
 	    promisedRecognizeCard = new Promise();
 	    promisedRemoveCard = new Promise();
-	    promisedOperationEnterTwoPasswords = new Promise();
-	    promisedOperationEnterOnePassword = new Promise();
+	    promisedOperationPinCanRequest = new Promise();
+	    promisedOperationPinRequest = new Promise();
 	    interaction = mock(EacInteraction.class);
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		LOG.debug("mockInteraction.requestCardInsertion().");
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
 		}
@@ -309,6 +310,7 @@ public class World implements AutoCloseable {
 		return null;
 	    }).when(interaction).requestCardInsertion();
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		LOG.debug("mockInteraction.onCardRemoved().");
 		if (promisedRemoveCard.isDelivered()) {
 		    promisedRemoveCard = new Promise();
 		}
@@ -317,6 +319,7 @@ public class World implements AutoCloseable {
 	    }).when(interaction).onCardRemoved();
 
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		LOG.debug("mockInteraction.onCardRecognized().");
 		if (promisedRecognizeCard.isDelivered()) {
 		    promisedRecognizeCard = new Promise();
 		}
@@ -324,17 +327,19 @@ public class World implements AutoCloseable {
 		return null;
 	    }).when(interaction).onCardRecognized();
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		LOG.debug("mockInteraction.onPinCanRequest().");
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
 		}
-		promisedOperationEnterTwoPasswords.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
+		promisedOperationPinCanRequest.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
 		return null;
 	    }).when(interaction).onPinCanRequest(any());
 	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+		LOG.debug("mockInteraction.onPinRequest().");
 		if (promisedRequestCardInsertion.isDelivered()) {
 		    promisedRequestCardInsertion = new Promise();
 		}
-		promisedOperationEnterOnePassword.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
+		promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
 		return null;
 	    }).when(interaction).onPinRequest(anyInt(), any());
 
@@ -383,7 +388,7 @@ public class World implements AutoCloseable {
 
 	private void expectPinEntryWithSuccess(String currentPin) {
 	    try {
-		ConfirmPasswordOperation operation = promisedOperationEnterOnePassword.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+		ConfirmPasswordOperation operation = promisedOperationPinRequest.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 		if (operation == null) {
 		    throw new IllegalStateException();
 		}

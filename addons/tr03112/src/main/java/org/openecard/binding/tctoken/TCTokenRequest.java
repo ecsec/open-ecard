@@ -117,7 +117,7 @@ public class TCTokenRequest {
 	    throws MissingActivationParameterException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
-	if (tokenInfo != null || tokenInfo.p1 == null || tokenInfo.p2 == null) {
+	if (tokenInfo == null || tokenInfo.p1 == null || tokenInfo.p2 == null) {
 	    throw new MissingActivationParameterException(NO_TOKEN);
 	}
 

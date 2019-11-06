@@ -54,7 +54,8 @@ module org.openecard.richclient {
     opens org.w3._2009.xmlenc11_;
     opens generated;
 
-    opens org.openecard.mdlw.sal.config to java.xml.bind;
+    // TODO: add this statement again once middleware sal is working again
+    //opens org.openecard.mdlw.sal.config to java.xml.bind;
     opens org.openecard.addon.manifest to java.xml.bind;
 
     opens jnasmartcardio to java.base;

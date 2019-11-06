@@ -22,6 +22,8 @@
 package org.openecard.mobile.activation.model;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -35,8 +37,8 @@ import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.binding.tctoken.TCTokenContext;
-import org.openecard.binding.tctoken.TrResourceContextLoader;
 import org.openecard.binding.tctoken.ex.AuthServerException;
+import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
 import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
@@ -190,7 +192,7 @@ public class World implements AutoCloseable {
     @Override
     public void close() throws Exception {
 	LOG.debug("Closing.");
-	new ArrayBackedAutoCloseable(new AutoCloseable[] {
+	new ArrayBackedAutoCloseable(new AutoCloseable[]{
 	    this.pinManagementWorld,
 	    this.eacWorld,
 	    this.contextWorld
@@ -220,7 +222,7 @@ public class World implements AutoCloseable {
 	private ActivationController activationController;
 	private Promise<Void> promisedRemoveCard;
 	private EacInteraction interaction;
-	private TrResourceContextLoader resourceLoader;
+	private TCTokenContext mockTcTokenContext;
 
 	private EacControllerFactory eacControllerFactory() {
 	    if (_eacControllerFactory == null) {
@@ -229,23 +231,66 @@ public class World implements AutoCloseable {
 	    return _eacControllerFactory;
 	}
 
-	public void startSimpleEac(TrResourceContextLoader resourceLoader) {
-	    LOG.debug("Start simple eac.");
-	    this.resourceLoader = resourceLoader;
-	    String tckTokenUrl = "https://anotherurl.localhost";
-	    new Expectations() {{
-		try {
-		    TCTokenContext.generateTCToken(tckTokenUrl);
-		} catch (InvalidTCTokenException ex) {
-		} catch (AuthServerException ex) {
-		} catch (InvalidRedirectUrlException ex) {
-		} catch (InvalidTCTokenElement ex) {
-		} catch (SecurityViolationException ex) {
-		} catch (UserCancellationException ex) {
+	public void startSimpleEac() throws InvalidAddressException {
+	    LOG.debug("Start simple eac with test.governikus-eid.");
+	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+
+	    this.startSimpleEac(rawTcTokenUrl);
+	}
+
+	public void startSimpleEac(TCTokenContext jmockitMockTcTokenContext) throws InvalidAddressException {
+	    LOG.debug("Start simple eac mocking TCTokenContext.");
+
+	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+
+	    URL tcTokenUrl;
+	    try {
+		tcTokenUrl = new URL(rawTcTokenUrl);
+	    } catch (MalformedURLException ex) {
+		throw new RuntimeException(ex);
+	    }
+
+	    mockTcTokenContext = mock(TCTokenContext.class);
+	    new Expectations() {
+		{
+		    try {
+			TCTokenContext.generateTCToken(tcTokenUrl);
+			result = mockTcTokenContext;
+		    } catch (InvalidTCTokenException ex) {
+		    } catch (AuthServerException ex) {
+		    } catch (InvalidRedirectUrlException ex) {
+		    } catch (InvalidTCTokenElement ex) {
+		    } catch (SecurityViolationException ex) {
+		    } catch (UserCancellationException ex) {
+		    } catch (InvalidAddressException ex) {
+		    }
 		}
-		result = mock(TCTokenContext.class);
-	    }};
-	    String url = "http://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(tckTokenUrl, Charset.defaultCharset());;
+	    };
+
+	    try {
+		when(mockTcTokenContext.getData()).thenReturn(""
+			+ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+			+ "<TCTokenType>\n"
+			+ "  <ServerAddress>https://testpaos.governikus-eid.de:443/ecardpaos/paosreceiver</ServerAddress>\n"
+			+ "  <SessionIdentifier>fdee6a10-aab2-4fde-b338-648da4f68ef2</SessionIdentifier>\n"
+			+ "  <RefreshAddress>https://test.governikus-eid.de/gov_autent/async?refID=_60ecfc52d2c868b8197575b9a4e7a39bbfc660f7</RefreshAddress>\n"
+			+ "  <CommunicationErrorAddress/>\n"
+			+ "  <Binding>urn:liberty:paos:2006-08</Binding>\n"
+			+ "  <PathSecurity-Protocol>urn:ietf:rfc:4279</PathSecurity-Protocol>\n"
+			+ "  <PathSecurity-Parameters>\n"
+			+ "    <PSK>B810276301EB44D5DD3D9593D85F834B335060F3D0313CD249F76F4F5152C213144608A4C601E2D4B23DB21CB15D5BD81951F9817861AA5F0010D561770A7C0B</PSK>\n"
+			+ "  </PathSecurity-Parameters>\n"
+			+ "</TCTokenType>");
+	    } catch (IOException ex) {
+		throw new RuntimeException();
+	    }
+
+	    this.startSimpleEac(rawTcTokenUrl);
+	}
+
+	private void startSimpleEac(String rawTcTokenUrl) {
+
+	    String url = "http://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, Charset.defaultCharset());;
 
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();
@@ -292,6 +337,7 @@ public class World implements AutoCloseable {
 		promisedOperationEnterOnePassword.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
 		return null;
 	    }).when(interaction).onPinRequest(anyInt(), any());
+
 	    activationController = eacControllerFactory().create(
 		    url,
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
@@ -534,7 +580,6 @@ public class World implements AutoCloseable {
 		this._pinManagementFactory.destroy(activationController);
 	    }
 	}
-
 
     }
 

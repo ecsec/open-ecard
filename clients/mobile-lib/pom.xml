@@ -115,11 +115,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>mobile</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard</groupId>
 			<artifactId>management</artifactId>
 			<version>${project.version}</version>

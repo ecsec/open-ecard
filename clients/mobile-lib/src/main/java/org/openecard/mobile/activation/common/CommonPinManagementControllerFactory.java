@@ -25,11 +25,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
+import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.PINManagementNavigatorFactory;
 
 /**
  *
@@ -68,8 +69,11 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
     public ActivationController create(Set<String> supportedCards, ControllerCallback activation, PinManagementInteraction interaction, NFCDialogMsgSetter msgSetter) {
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override
-	    public AutoCloseable create(EventDispatcher dispatcher) {
-		return CommonCardEventHandler.create(supportedCards, dispatcher, interaction, msgSetter);
+	    public AutoCloseable create(OpeneCardContext context) {
+		return new ArrayBackedAutoCloseable(new AutoCloseable[]{
+		    CommonCardEventHandler.create(supportedCards, context.getEventDispatcher(), interaction, msgSetter),
+		    InteractionRegistrationHandler.hookUp(PINManagementNavigatorFactory.PROTOCOL_TYPE, context, interaction)
+		});
 	    }
 	};
 

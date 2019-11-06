@@ -1,5 +1,5 @@
-/** **************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/****************************************************************************
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,21 +18,28 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 
-package org.openecard.mobile.activation;
+package org.openecard.mobile.ui;
 
-import java.util.List;
-import org.openecard.robovm.annotations.FrameworkInterface;
+import org.openecard.gui.UserConsentNavigator;
+import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.ActivationInteraction;
 
 
 /**
  *
  * @author Neil Crossley
+ * @param <T> Type of the UI interaction interface.
  */
-@FrameworkInterface
-public interface ConfirmAttributeSelectionOperation {
+public interface UserConsentNavigatorFactory <T extends ActivationInteraction> {
 
-    public void enter(List<SelectableItem> readItems, List<SelectableItem> writeItems);
+    String getProtocolType();
+
+    boolean canCreateFrom(UserConsentDescription uc);
+
+    UserConsentNavigator createFrom(UserConsentDescription uc);
+
+    void setInteractionComponent(T interaction);
 
 }

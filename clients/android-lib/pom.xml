@@ -10,89 +10,9 @@
 
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>android-lib</artifactId>
-	<packaging>pom</packaging>
 	<name>Android Lib</name>
 
-	<properties>
-		<gradle.cmd>./gradlew</gradle.cmd>
-	</properties>
-
-	<profiles>
-		<profile>
-			<id>windows_gradle_binary</id>
-			<activation>
-				<os>
-					<family>Windows</family>
-				</os>
-			</activation>
-			<properties>
-				<gradle.cmd>gradlew.bat</gradle.cmd>
-			</properties>
-		</profile>
-		<profile>
-			<id>android</id>
-			<activation>
-				<!-- activate android when sdk path is defined -->
-				<property>
-					<name>env.ANDROID_HOME</name>
-				</property>
-			</activation>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<configuration>
-							<executable>${gradle.cmd}</executable>
-						</configuration>
-						<executions>
-							<execution>
-								<id>gradle-clean</id>
-								<phase>clean</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<commandlineArgs>clean</commandlineArgs>
-								</configuration>
-							</execution>
-							<execution>
-								<id>gradle-compile</id>
-								<phase>package</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<commandlineArgs>build</commandlineArgs>
-								</configuration>
-							</execution>
-							<execution>
-								<id>gradle-install</id>
-								<phase>install</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<commandlineArgs>publishToMavenLocal</commandlineArgs>
-								</configuration>
-							</execution>
-							<execution>
-								<id>gradle-deploy</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>exec</goal>
-								</goals>
-								<configuration>
-									<commandlineArgs>publish</commandlineArgs>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+	<!-- TODO: create fat jar without xerces and slf4j -->
 
 
 	<dependencies>
@@ -105,12 +25,20 @@
 
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
-			<artifactId>android-core</artifactId>
+			<artifactId>mobile-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+
+		<!-- all OeC Android dependencies -->
+		<dependency>
+			<groupId>org.openecard.wsdef</groupId>
+			<artifactId>android-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard.clients</groupId>
-			<artifactId>mobile-lib</artifactId>
+			<groupId>org.openecard.ifd.scio-backend</groupId>
+			<artifactId>android-nfc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

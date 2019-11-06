@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,21 +18,18 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 
 package org.openecard.mobile.activation;
 
-import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
-
 
 /**
  *
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ConfirmAttributeSelectionOperation {
-
-    public void enter(List<SelectableItem> readItems, List<SelectableItem> writeItems);
-
+public interface ConfirmOldSetNewPasswordOperation {
+    
+    void enter(String oldPassword, String newPassword);
 }

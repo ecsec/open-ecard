@@ -184,7 +184,7 @@ public class ActivationControllerService {
 		}
 		EventDispatcher eventDispatcher = context.getEventDispatcher();
 		try {
-		    this.closable = hooks.create(eventDispatcher);
+		    this.closable = hooks.create(context);
 
 		    ControllerCallback startedCallback;
 		    synchronized (this.processLock) {

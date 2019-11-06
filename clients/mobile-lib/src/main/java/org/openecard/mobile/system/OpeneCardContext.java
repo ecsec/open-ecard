@@ -44,18 +44,15 @@ import org.openecard.common.sal.CombinedCIFProvider;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
-import org.openecard.gui.mobile.EacNavigatorFactory;
-import org.openecard.gui.mobile.InsertCardNavigatorFactory;
-import org.openecard.gui.mobile.MobileGui;
-import org.openecard.gui.mobile.MobileUserConsent;
-import org.openecard.gui.mobile.PINManagementNavigatorFactory;
-import org.openecard.gui.mobile.UserConsentNavigatorFactory;
-import org.openecard.gui.mobile.eac.EacGui;
-import org.openecard.gui.mobile.pinmanagement.PINManagementGui;
+import org.openecard.mobile.ui.EacNavigatorFactory;
+import org.openecard.mobile.ui.InsertCardNavigatorFactory;
+import org.openecard.mobile.ui.MobileUserConsent;
+import org.openecard.mobile.ui.PINManagementNavigatorFactory;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.ifd.scio.IFDProperties;
 import org.openecard.management.TinyManagement;
+import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
@@ -63,6 +60,7 @@ import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import static org.openecard.mobile.system.ServiceMessages.*;
+import org.openecard.mobile.ui.UserConsentNavigatorFactory;
 import org.openecard.mobile.utils.ClasspathRegistry;
 import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.recognition.RepoCifProvider;
@@ -102,7 +100,7 @@ public class OpeneCardContext {
     private SAL sal;
 
     private UserConsent gui;
-    private HashMap<Class<? extends MobileGui>, UserConsentNavigatorFactory<? extends MobileGui>> realFactories;
+    private HashMap<String, UserConsentNavigatorFactory<? extends ActivationInteraction>> realFactories;
 
     // true if already initialized
     private boolean initialized = false;
@@ -136,10 +134,10 @@ public class OpeneCardContext {
 	// the key type must match the generic. This can't be enforced so watch it here.
 	// TODO: introduce factory method for the new instance of EacNavigatorFactory.
 	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
-	realFactories.put(EacGui.class, eacNavFac);
+	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
-	realFactories.put(PINManagementGui.class, pinMngFac);
+	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
 
 	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
 		eacNavFac,
@@ -344,30 +342,12 @@ public class OpeneCardContext {
 	return gui;
     }
 
-    // TODO: provide alternative versions with the new interface which is then used in the new mobile-lib
-    @Nonnull
-    public UserConsentNavigatorFactory<? extends MobileGui> getGuiNavigatorFactory(Class<? extends MobileGui> guiClass)
-	    throws IllegalArgumentException {
-	UserConsentNavigatorFactory<? extends MobileGui> fac = realFactories.get(guiClass);
+    public <T extends ActivationInteraction> UserConsentNavigatorFactory<T> getGuiNavigatorFactory(String protocolType) {
+	UserConsentNavigatorFactory fac = realFactories.get(protocolType);
 	if (fac == null) {
 	    throw new IllegalArgumentException("The requested GUI class is not handled by any of the factory objects.");
 	} else {
 	    return fac;
-	}
-    }
-
-    @Nonnull
-    public List<UserConsentNavigatorFactory<? extends MobileGui>> getGuiNavigatorFactories(List<Class<? extends MobileGui>> classes) {
-	if (classes.isEmpty()) {
-	    // return all
-	    return new ArrayList(realFactories.values());
-	} else {
-	    // return filtered
-	    ArrayList<UserConsentNavigatorFactory<? extends MobileGui>> result = new ArrayList<>();
-	    for (Class<? extends MobileGui> next : classes) {
-		result.add(getGuiNavigatorFactory(next));
-	    }
-	    return result;
 	}
     }
 

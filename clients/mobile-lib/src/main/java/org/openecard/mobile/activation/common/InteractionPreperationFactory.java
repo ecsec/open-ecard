@@ -21,7 +21,7 @@
  ***************************************************************************/
 package org.openecard.mobile.activation.common;
 
-import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.mobile.system.OpeneCardContext;
 
 /**
  *
@@ -29,5 +29,5 @@ import org.openecard.common.interfaces.EventDispatcher;
  */
 public interface InteractionPreperationFactory {
 
-    AutoCloseable create(EventDispatcher dispatcher);
+    AutoCloseable create(OpeneCardContext context);
 }

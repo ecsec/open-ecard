@@ -65,10 +65,10 @@ public class PINStepAction extends AbstractPasswordStepAction {
     private int retryCounter;
 
     public PINStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher, PINStep step,
-	    EacPinStatus status) {
+	    PinState status) {
 	super(eacData, capturePin, slotHandle, dispatcher, step);
 
-	switch (status) {
+	switch (status.getState()) {
 	    case RC3:
 		retryCounter = 0;
 		break;
@@ -94,6 +94,8 @@ public class PINStepAction extends AbstractPasswordStepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+	PinState pinState = (PinState) ctx.get(EACProtocol.PIN_STATUS);
+
 	if (retryCounter == 2) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);
@@ -155,7 +157,7 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
-		    ctx.put(EACProtocol.PIN_STATUS, EacPinStatus.BLOCKED);
+		    pinState.update(EacPinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			    new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
 				    lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),

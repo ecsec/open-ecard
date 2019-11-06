@@ -19,20 +19,29 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.mobile.activation.common;
 
-package org.openecard.mobile.activation;
+import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.UserConsentNavigatorFactory;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface PinManagementInteraction extends ActivationInteraction {
+public class InteractionRegistrationHandler {
 
-    void onPinChangeable(int attempts, ConfirmOldSetNewPasswordOperation enterOldNewPins);
-    void onCanRequired(ConfirmPasswordOperation enterCan);
-    void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
+    public static <T extends ActivationInteraction> AutoCloseable hookUp(String protocolType, OpeneCardContext context, T interaction) {
+	UserConsentNavigatorFactory<T> fac = context.getGuiNavigatorFactory(protocolType);
+	fac.setInteractionComponent(interaction);
+
+	return new AutoCloseable() {
+	    @Override
+	    public void close() throws Exception {
+		fac.setInteractionComponent(null);
+	    }
+	};
+    }
 
 }

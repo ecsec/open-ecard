@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.activation;
 
+import java.io.Serializable;
 import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
@@ -30,13 +31,13 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ServerData {
+public interface ServerData extends Serializable {
 
     String getIssuer();
 
     String getIssuerUrl();
 
-    List<BoxItem> getReadAccessAttributes();
+    List<SelectableItem> getReadAccessAttributes();
 
     String getSubject();
 
@@ -46,6 +47,6 @@ public interface ServerData {
 
     String getValidity();
 
-    List<BoxItem> getWriteAccessAttributes();
+    List<SelectableItem> getWriteAccessAttributes();
 
 }

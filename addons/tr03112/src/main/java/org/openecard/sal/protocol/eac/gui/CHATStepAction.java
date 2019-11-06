@@ -83,35 +83,32 @@ public class CHATStepAction extends StepAction {
 	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	    boolean nativePace = (boolean) ctx.get(EACProtocol.IS_NATIVE_PACE);
 	    PACEMarkerType paceMarker = (PACEMarkerType) ctx.get(EACProtocol.PACE_MARKER);
-	    EacPinStatus status = (EacPinStatus) ctx.get(EACProtocol.PIN_STATUS);
+	    PinState status = (PinState) ctx.get(EACProtocol.PIN_STATUS);
 	    byte[] slotHandle = (byte[]) ctx.get(EACProtocol.SLOT_HANDLE);
 	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
 
 	    Step nextStep;
 	    assert(status != null);
-	    switch (status) {
-		case BLOCKED:
-		    nextStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
-			    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
-			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
-		    break;
-		case DEACTIVATED:
-		    nextStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
-			    LANG.translationForKey("step_error_pin_deactivated"),
-			    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
-		    break;
-		default:
-		    PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
-		    nextStep = pinStep;
-		    pinStep.setBackgroundTask(bTask);
-		    StepAction pinAction;
-		    if (eacData.pinID == PasswordID.CAN.getByte()) {
-			pinStep.setStatus(EacPinStatus.RC3);
-			pinAction = new CANStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep);
-		    } else {
-			pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
-		    }
-		    pinStep.setAction(pinAction);
+	    if (status.isBlocked()) {
+		nextStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
+			LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+			WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
+	    } else if (status.isDeactivated()) {
+		nextStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
+			LANG.translationForKey("step_error_pin_deactivated"),
+			WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
+	    } else {
+		PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
+		nextStep = pinStep;
+		pinStep.setBackgroundTask(bTask);
+		StepAction pinAction;
+		if (eacData.pinID == PasswordID.CAN.getByte()) {
+		    pinStep.setStatus(EacPinStatus.RC3);
+		    pinAction = new CANStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep);
+		} else {
+		    pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
+		}
+		pinStep.setAction(pinAction);
 	    }
 
 	    return new StepActionResult(StepActionResultStatus.NEXT, nextStep);

@@ -1,46 +1,92 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.openecard</groupId>
-		<artifactId>clients</artifactId>
-		<version>1.4.0-rc.5-SNAPSHOT</version>
-	</parent>
+    <parent>
+	<groupId>org.openecard</groupId>
+	<artifactId>clients</artifactId>
+	<version>1.4.0-rc.5-SNAPSHOT</version>
+    </parent>
 
-	<groupId>org.openecard.clients</groupId>
-	<artifactId>android-lib</artifactId>
-	<name>Android Lib</name>
+    <groupId>org.openecard.clients</groupId>
+    <artifactId>android-lib</artifactId>
+    <name>Android Lib</name>
+    <build>
+	<plugins>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-shade-plugin</artifactId>
+		<executions>
+		    <execution>
+			<goals>
+			    <goal>shade</goal>
+			</goals>
+			<configuration>
+			    <!--
+				<keepDependenciesWithProvidedScope>
+				false
+				</keepDependenciesWithProvidedScope>
+				<promoteTransitiveDependencies>
+				true
+
+				</promoteTransitiveDependencies>
+			    -->
+				<artifactSet>
+				    <excludes>
+					<exclude>com.github.markusbernhardt</exclude>
+				    </excludes>
+				</artifactSet>
+				<relocations>
+				    <relocation>
+					<pattern>org.apache.http</pattern>
+					<shadedPattern>org.openecard.apache.http</shadedPattern>
+				    </relocation>
+				</relocations>
+			    </configuration>
+			</execution>
+		    </executions>
+		</plugin>
+	    </plugins>
+	</build>
 
 	<!-- TODO: create fat jar without xerces and slf4j -->
-
-
 	<dependencies>
-		<!-- Android Activity Stuff / Support Elements -->
-		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>android</artifactId>
-			<scope>provided</scope>
+	    <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>org.openecard.clients</groupId>
-			<artifactId>mobile-lib</artifactId>
-			<version>${project.version}</version>
+			<groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                        <version>2.12.0</version>
 		</dependency>
 
 
-		<!-- all OeC Android dependencies -->
-		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>android-marshaller</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>android-nfc</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+	    <!-- Android Activity Stuff / Support Elements -->
+	    <dependency>
+		<groupId>com.google.android</groupId>
+		<artifactId>android</artifactId>
+		<scope>provided</scope>
+	    </dependency>
+
+
+	    <dependency>
+		<groupId>org.openecard.clients</groupId>
+		<artifactId>mobile-lib</artifactId>
+		<version>${project.version}</version>
+	    </dependency>
+
+	    <!-- all OeC Android dependencies -->
+	    <dependency>
+		<groupId>org.openecard.wsdef</groupId>
+		<artifactId>android-marshaller</artifactId>
+		<version>${project.version}</version>
+	    </dependency>
+	    <dependency>
+		<groupId>org.openecard.ifd.scio-backend</groupId>
+		<artifactId>android-nfc</artifactId>
+		<version>${project.version}</version>
+	    </dependency>
 	</dependencies>
 
-</project>
+    </project>

@@ -21,8 +21,6 @@
  ***************************************************************************/
 package org.openecard.mobile.activation.integration;
 
-import mockit.Mocked;
-import org.openecard.binding.tctoken.TrResourceContextLoader;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.model.World;
 import org.openecard.mobile.activation.model.WorldBuilder;
@@ -35,9 +33,6 @@ import org.testng.annotations.Test;
  */
 public class EacContextTests extends BaseIntegrationSetup {
 
-    @Mocked
-    TrResourceContextLoader resourceLoader;
-
     @Test
     void canBeginEacActivation() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
@@ -45,7 +40,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 	}
@@ -58,7 +53,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.cancelEac();
 
@@ -67,14 +62,13 @@ public class EacContextTests extends BaseIntegrationSetup {
     }
 
     @Test
-    @Ignore("Card insertion request is currently not called.")
     void expectCardRequest() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 
@@ -90,7 +84,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 
@@ -110,7 +104,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 
@@ -130,7 +124,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 
@@ -148,7 +142,7 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.contextWorld.startSuccessfully();
 
-	    world.eacWorld.startSimpleEac(resourceLoader);
+	    world.eacWorld.startSimpleEac();
 
 	    world.eacWorld.expectOnStarted();
 

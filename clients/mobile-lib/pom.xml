@@ -47,6 +47,7 @@
 							</annotationProcessors>
 							<compilerArgs>
 								<arg>-Aroboface.headername=open-ecard-mobile-lib.h</arg>
+								<arg>-Aroboface.inheritance.blacklist=java.io.Serializable</arg>
 							</compilerArgs>
 							<debug>true</debug>
 							<debuglevel>source,lines,vars</debuglevel>
@@ -76,6 +77,15 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<classpathDependencyExcludes>
+						<classpathDependencyExclude>com.mobidevelop.robovm:robovm-rt</classpathDependencyExclude>
+					</classpathDependencyExcludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -84,12 +94,14 @@
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-rt</artifactId>
 			<version>${robovm.version}</version>
+			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-cocoatouch</artifactId>
 			<version>${robovm.version}</version>
+			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
 		
@@ -164,6 +176,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.ogce</groupId>
+			<artifactId>xpp3</artifactId>
+			<version>1.1.6</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>2.28.2</version>
@@ -187,7 +206,6 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
 	</dependencies>
 
 </project>

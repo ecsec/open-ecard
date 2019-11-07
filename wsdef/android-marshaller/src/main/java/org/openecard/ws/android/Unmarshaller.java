@@ -22,7 +22,6 @@
 
 package org.openecard.ws.android;
 
-import de.bund.bsi.ecard.api._1.ConnectionHandle;
 import de.bund.bsi.ecard.api._1.InitializeFramework;
 import de.bund.bsi.ecard.api._1.InitializeFrameworkResponse;
 import iso.std.iso_iec._24727.tech.schema.APIAccessEntryPointName;
@@ -352,12 +351,10 @@ public class Unmarshaller {
 		if (eventType == XmlPullParser.START_TAG) {
 		    if (parser.getName().equals("DIDName")) {
 			didAuthenticate.setDIDName(parser.nextText());
-		    } else if (parser.getName().equals("SlotHandle")) {
-			ConnectionHandleType cht = new ConnectionHandleType();
-			cht.setSlotHandle(StringUtils.toByteArray(parser.nextText()));
-			didAuthenticate.setConnectionHandle(cht);
 		    } else if (parser.getName().equals("AuthenticationProtocolData")) {
 			didAuthenticate.setAuthenticationProtocolData(this.parseDIDAuthenticationDataType(parser));
+		    }  else if (parser.getName().equals("ConnectionHandle")) {
+			didAuthenticate.setConnectionHandle(parseConnectionHandle(parser));
 		    }
 		}
 	    } while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDAuthenticate")));
@@ -987,7 +984,7 @@ public class Unmarshaller {
 
     private ConnectionHandleType parseConnectionHandle(XmlPullParser parser) throws XmlPullParserException, IOException,
 		ParserConfigurationException, DatatypeConfigurationException {
-	    ConnectionHandle result = new ConnectionHandle();
+	    ConnectionHandleType result = new ConnectionHandleType();
 	    int eventType;
 	    do {
 		parser.next();

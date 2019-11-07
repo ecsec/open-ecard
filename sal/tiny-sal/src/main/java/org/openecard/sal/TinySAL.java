@@ -299,7 +299,9 @@ public class TinySAL implements SAL {
      */
     @Override
     public TerminateResponse terminate(Terminate request) {
-	evtMan.terminate();
+	if (evtMan != null) {
+	    evtMan.terminate();
+	}
 	TerminateResponse res = WSHelper.makeResponse(TerminateResponse.class, WSHelper.makeResultOK());
 	return res;
     }

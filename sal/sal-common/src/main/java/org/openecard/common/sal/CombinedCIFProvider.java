@@ -69,9 +69,13 @@ public class CombinedCIFProvider implements CIFProvider {
     @Override
     public InputStream getCardImage(String cardType) {
 	for (CIFProvider cp : cps) {
-	    InputStream in = cp.getCardImage(cardType);
-	    if (in != null) {
-		return in;
+	    try {
+		InputStream in = cp.getCardImage(cardType);
+		if (in != null) {
+		    return in;
+		}
+	    } catch (RuntimeException ex) {
+		// ignore
 	    }
 	}
 	// nothing found

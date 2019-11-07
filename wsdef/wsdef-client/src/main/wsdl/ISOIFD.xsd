@@ -9,6 +9,30 @@
 
 	<include schemaLocation="ISOCommon.xsd"></include>
 
+
+	<element name="PrepareDevices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="PrepareDevicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
 	<!-- Card terminal related functions -->
 
 	<!-- EstablishContext  -->

@@ -25,7 +25,10 @@ public interface IFD {
      * This is intended to handle iOS style APIs where the card can only be used for a very short time and no permament
      * connection is desireable. There one would start a session and once that is present the IFD can connect to the card.
      */
-    public void prepareDevices();
+    @ECardApiMethod(operationName = "PrepareDevices", action = "urn:iso:std:iso-iec:24727:tech:schema:PrepareDevices")
+    public iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse prepareDevices(
+	iso.std.iso_iec._24727.tech.schema.PrepareDevices parameters
+    );
 
     @ECardApiMethod(operationName = "ListIFDs", action = "urn:iso:std:iso-iec:24727:tech:schema:ListIFDs")
     public iso.std.iso_iec._24727.tech.schema.ListIFDsResponse listIFDs(

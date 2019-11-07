@@ -50,6 +50,8 @@ import iso.std.iso_iec._24727.tech.schema.ModifyVerificationData;
 import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
 import iso.std.iso_iec._24727.tech.schema.Output;
 import iso.std.iso_iec._24727.tech.schema.OutputResponse;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
@@ -71,8 +73,8 @@ import org.openecard.ws.IFD;
 public class TestIFD implements IFD {
 
     @Override
-    public void prepareDevices() {
-	// NO-OP
+    public PrepareDevicesResponse prepareDevices(PrepareDevices parameters) {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

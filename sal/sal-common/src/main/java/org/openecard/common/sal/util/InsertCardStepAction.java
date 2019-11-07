@@ -137,7 +137,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
-	if (eventType == EventType.RECOGNIZED_CARD_ACTIVE && ! promise.isDelivered()) {
+	if (eventType == EventType.CARD_RECOGNIZED && ! promise.isDelivered()) {
 	    ConnectionHandleType handle = eventData.getHandle();
 	    for (String cardType : cardTypes) {
 		if (cardType.equals(handle.getRecognitionInfo().getCardType())) {

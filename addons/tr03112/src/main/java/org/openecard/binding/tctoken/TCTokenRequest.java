@@ -341,7 +341,7 @@ public class TCTokenRequest {
 	    ArrayList<String> types2 = new ArrayList<>();
 	    types2.addAll(namesAndType.values());
 	    CardMonitorTask task = new CardMonitorTask(types2, step);
-	    ctx.getEventDispatcher().add(task, EventType.CARD_REMOVED, EventType.RECOGNIZED_CARD_ACTIVE);
+	    ctx.getEventDispatcher().add(task, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
 	    step.setBackgroundTask(task);
 	    CardSelectionAction action = new CardSelectionAction(step, usableCards, types2, ctx);
 	    step.setAction(action);

@@ -85,7 +85,7 @@ public class CommonCardEventHandler {
 	    @Override
 	    public void signalEvent(EventType eventType, EventObject eventData) {
 		switch (eventType) {
-		    case RECOGNIZED_CARD_ACTIVE:
+		    case CARD_RECOGNIZED:
 			final ConnectionHandleType handle = eventData.getHandle();
 			if (handle == null) {
 			    break;
@@ -118,7 +118,7 @@ public class CommonCardEventHandler {
 	};
 
 	eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
-	eventDispatcher.add(cardDetectHandler, EventType.RECOGNIZED_CARD_ACTIVE);
+	eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
 	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
 
 	return new AutoCloseable() {

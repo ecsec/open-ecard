@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
@@ -161,6 +162,11 @@ public class PaceCardHelper {
 	if (isConnected()) {
 	    return conHandle;
 	} else {
+	    // signal cards to be activated
+	    PrepareDevices pdreq = new PrepareDevices();
+	    pdreq.setContextHandle(conHandle.getContextHandle());
+	    ctx.getDispatcher().safeDeliver(pdreq);
+
 	    // wait for eid card
 	    CardConnectorUtil connectorUtil = new CardConnectorUtil(ctx.getDispatcher(), ctx.getEventDispatcher(), Set.of(NPA_TYPE),
 		    conHandle.getChannelHandle().getSessionIdentifier(), conHandle.getContextHandle(), conHandle.getIFDName());

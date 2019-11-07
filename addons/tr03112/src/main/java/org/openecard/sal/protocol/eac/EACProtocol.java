@@ -54,16 +54,15 @@ public class EACProtocol extends SALProtocolBaseImpl {
     public static final String PACE_MARKER = PREFIX + "pace_marker";
     public static final String PACE_EXCEPTION = PREFIX + "pace_successful";
     public static final String SLOT_HANDLE = PREFIX + "slot_handle";
-    public static final String DISPATCHER = PREFIX + "dispatcher";
     public static final String SCHEMA_VALIDATOR = PREFIX + "schema_validator";
     public static final String AUTHENTICATION_DONE = PREFIX + "authentication_done";
 
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
-	addOrderStep(new PACEStep(ctx.getDispatcher(), ctx.getUserConsent(), ctx.getEventDispatcher()));
-	addOrderStep(new TerminalAuthenticationStep(ctx.getDispatcher()));
-	addOrderStep(new ChipAuthenticationStep(ctx.getDispatcher()));
+	addOrderStep(new PACEStep(ctx));
+	addOrderStep(new TerminalAuthenticationStep(ctx));
+	addOrderStep(new ChipAuthenticationStep(ctx));
     }
 
     @Override

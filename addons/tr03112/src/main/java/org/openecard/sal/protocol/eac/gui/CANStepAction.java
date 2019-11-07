@@ -24,11 +24,11 @@ package org.openecard.sal.protocol.eac.gui;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
+import org.openecard.addon.Context;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepActionResult;
@@ -57,8 +57,8 @@ public class CANStepAction extends AbstractPasswordStepAction {
     private final I18n lang = I18n.getTranslation("pace");
     private final I18n langPin = I18n.getTranslation("pinplugin");
 
-    public CANStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher, PINStep step) {
-	super(eacData, capturePin, slotHandle, dispatcher, step);
+    public CANStepAction(Context addonCtx, EACData eacData, boolean capturePin, PINStep step) {
+	super(addonCtx, eacData, capturePin, step);
     }
 
     @Override
@@ -100,6 +100,9 @@ public class CANStepAction extends AbstractPasswordStepAction {
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),
 			    langPin.translationForKey(ERROR_UNKNOWN), ex));
+	} catch (InterruptedException ex) {
+	    LOG.warn("CAN step action interrupted.", ex);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 

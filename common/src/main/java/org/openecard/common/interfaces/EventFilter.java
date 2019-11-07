@@ -22,6 +22,7 @@
 
 package org.openecard.common.interfaces;
 
+import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 
 
@@ -31,6 +32,6 @@ import org.openecard.common.event.EventType;
  */
 public interface EventFilter {
 
-    boolean matches(EventType t, Object o);
+    boolean matches(EventType t, EventObject o);
 
 }

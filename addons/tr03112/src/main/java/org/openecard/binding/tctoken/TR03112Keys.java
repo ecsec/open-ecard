@@ -35,6 +35,7 @@ public class TR03112Keys {
 
     public static final String TCTOKEN_CHECKS = "tctoken_checks";
     public static final String ACTIVATION_THREAD = "activation_thread";
+    public static final String SESSION_CON_HANDLE = "connection_handle";
     public static final String CONNECTION_HANDLE = "connection_handle";
     public static final String SAME_CHANNEL = "same_channel";
     public static final String ESERVICE_CERTIFICATE_DESC = "eservice_certificate_description";
@@ -46,6 +47,5 @@ public class TR03112Keys {
     public static final String COOKIE_MANAGER = "cookie_mananger";
     public static final String CARD_SELECTION_CANCELLATION = "card_selection_canceld";
     public static final String ACTIVATION_CARD_TYPE = "activation_card_type";
-    public static final String NPA_PIN_STATE = "npa_pin_state";
 
 }

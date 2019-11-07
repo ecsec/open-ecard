@@ -26,6 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.addon.Context;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -57,10 +58,10 @@ public class ChipAuthenticationStep implements ProtocolStep<DIDAuthenticate, DID
     /**
      * Creates a new Chip Authentication step.
      *
-     * @param dispatcher Dispatcher
+     * @param ctx Context
      */
-    public ChipAuthenticationStep(Dispatcher dispatcher) {
-	this.dispatcher = dispatcher;
+    public ChipAuthenticationStep(Context ctx) {
+	this.dispatcher = ctx.getDispatcher();
     }
 
     @Override

@@ -25,6 +25,7 @@ package org.openecard.sal.protocol.eac;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import java.util.Map;
+import org.openecard.addon.Context;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -60,10 +61,10 @@ public class TerminalAuthenticationStep implements ProtocolStep<DIDAuthenticate,
     /**
      * Creates a new Terminal Authentication protocol step.
      *
-     * @param dispatcher Dispatcher
+     * @param ctx Context
      */
-    public TerminalAuthenticationStep(Dispatcher dispatcher) {
-	this.dispatcher = dispatcher;
+    public TerminalAuthenticationStep(Context ctx) {
+	this.dispatcher = ctx.getDispatcher();
     }
 
     @Override

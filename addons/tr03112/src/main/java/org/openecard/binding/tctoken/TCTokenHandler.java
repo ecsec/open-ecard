@@ -463,7 +463,7 @@ public class TCTokenHandler {
 	dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks);
 	dynCtx.put(TR03112Keys.TCTOKEN_SERVER_CERTIFICATES, request.getCertificates());
 
-	dynCtx.put(TR03112Keys.CONNECTION_HANDLE, HandlerUtils.copyHandle(connectionHandle));
+	dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(connectionHandle));
     }
 
     private static void waitForTask(Future<?> task) throws PAOSException, DispatcherException {

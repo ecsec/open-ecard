@@ -153,6 +153,30 @@ public class SALUtils {
 	return predicates;
     }
 
+    public static boolean matchesSession(ConnectionHandleType reference, ConnectionHandleType testHandle) throws IncorrectParameterException {
+	String refSess = getSession(reference);
+	if (refSess == null) {
+	    throw new IncorrectParameterException("No session in reference handle available.");
+	} else {
+	    return matchesSession(refSess, testHandle);
+	}
+    }
+
+    public static boolean matchesSession(String refSess, ConnectionHandleType testHandle) {
+	String testSess = getSession(testHandle);
+	return refSess.equals(testSess);
+    }
+
+    private static String getSession(ConnectionHandleType handle) {
+	if (handle != null) {
+	    ChannelHandleType ch = handle.getChannelHandle();
+	    if (ch != null) {
+		return ch.getSessionIdentifier();
+	    }
+	}
+	return null;
+    }
+
     public static CardEntry getMatchingEntry(CardApplicationConnect request, SalStateManager salStates) throws IncorrectParameterException {
 	Assert.assertIncorrectParameter(request, "The parameter CardApplicationConnect is empty.");
 

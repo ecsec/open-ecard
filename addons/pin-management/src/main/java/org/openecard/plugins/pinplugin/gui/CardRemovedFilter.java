@@ -25,8 +25,8 @@ package org.openecard.plugins.pinplugin.gui;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
 import javax.annotation.Nonnull;
+import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
-import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.EventFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +49,11 @@ public class CardRemovedFilter implements EventFilter {
     }
 
     @Override
-    public boolean matches(EventType t, Object o) {
+    public boolean matches(EventType t, EventObject o) {
 	LOG.debug("Received event.");
 	if (t.equals(EventType.CARD_REMOVED)) {
 	    LOG.debug("Received CARD_REMOVED event.");
-	    ConnectionHandleType conHandle = null;
-	    if (o instanceof IfdEventObject) {
-		conHandle = ((IfdEventObject) o).getHandle();
-	    } else if (o instanceof ConnectionHandleType) {
-		conHandle = (ConnectionHandleType) o;
-	    }
+	    ConnectionHandleType conHandle = o.getHandle();
 
 	    if (conHandle != null && ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
 		LOG.info("Card removed during processing of PIN Management GUI.");

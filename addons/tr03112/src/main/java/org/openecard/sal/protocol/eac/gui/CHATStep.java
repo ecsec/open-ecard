@@ -74,13 +74,6 @@ public class CHATStep extends Step {
 	addElements();
     }
 
-    public static Step createDummy() {
-	Step s = new Step(STEP_ID);
-	s.setTitle(LANG.translationForKey(TITLE));
-	s.setDescription(LANG.translationForKey(STEP_DESCRIPTION));
-	return s;
-    }
-
     private void addElements() {
 	Text decription = new Text();
 	String decriptionText = LANG.translationForKey(DESCRIPTION, eacData.certificateDescription.getSubjectName());

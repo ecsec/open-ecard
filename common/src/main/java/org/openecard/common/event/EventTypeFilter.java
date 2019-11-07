@@ -44,7 +44,7 @@ class EventTypeFilter implements EventFilter {
 
 
     @Override
-    public boolean matches(EventType t, Object o) {
+    public boolean matches(EventType t, EventObject o) {
 	for (EventType next : eventType) {
 	    if (t.equals(next)) {
 		return true;

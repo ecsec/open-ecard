@@ -180,7 +180,7 @@ public final class EacNavigator extends MobileNavigator {
 		boolean isCanStep = eacData.pinID == PasswordID.CAN.getByte();
 
 		final Promise<List<OutputInfoUnit>> waitForPin = new Promise<>();
-		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(TR03112Keys.NPA_PIN_STATE);
+		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.PIN_STATUS);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
@@ -227,7 +227,7 @@ public final class EacNavigator extends MobileNavigator {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
-		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(TR03112Keys.NPA_PIN_STATE);
+		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.PIN_STATUS);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());

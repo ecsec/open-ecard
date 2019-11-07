@@ -24,11 +24,11 @@ package org.openecard.sal.protocol.eac.gui;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
+import org.openecard.addon.Context;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepActionResult;
@@ -64,28 +64,8 @@ public class PINStepAction extends AbstractPasswordStepAction {
 
     private int retryCounter;
 
-    public PINStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher, PINStep step,
-	    PinState status) {
-	super(eacData, capturePin, slotHandle, dispatcher, step);
-
-	switch (status.getState()) {
-	    case RC3:
-		retryCounter = 0;
-		break;
-	    case RC2:
-		retryCounter = 1;
-		step.updateAttemptsDisplay(2);
-		break;
-	    case RC1:
-		retryCounter = 2;
-		step.updateAttemptsDisplay(1);
-		if (capturePin) {
-		    step.addCANEntry();
-		} else {
-		    step.addNativeCANNotice();
-		}
-		break;
-	}
+    public PINStepAction(Context addonCtx, EACData eacData, boolean capturePin, PINStep step) {
+	super(addonCtx, eacData, capturePin, step);
 
 	// get some important translations
 	pin = lang.translationForKey("pin");
@@ -95,8 +75,9 @@ public class PINStepAction extends AbstractPasswordStepAction {
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	PinState pinState = (PinState) ctx.get(EACProtocol.PIN_STATUS);
+	assert(pinState != null);
 
-	if (retryCounter == 2) {
+	if (pinState.isRequestCan()) {
 	    try {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults);
 		if (response == null) {
@@ -127,6 +108,9 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		    return new StepActionResult(StepActionResultStatus.REPEAT, 
 			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED), ex));
 		}
+	    } catch (InterruptedException ex) {
+		LOG.warn("PIN+CAN step action interrupted.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
 	}
 
@@ -135,25 +119,16 @@ public class PINStepAction extends AbstractPasswordStepAction {
 
 	    if (establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {
-		    // increase counters and the related displays
-		    retryCounter++;
-		    step.updateAttemptsDisplay(3 - retryCounter);
-		    // repeat the step
+		    // update step display
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
 		    this.step.setStatus(EacPinStatus.RC2);
+		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
-		    // increase counters and the related displays
-		    retryCounter++;
-		    step.updateAttemptsDisplay(3 - retryCounter);
-		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    // update step display
 		    step.setStatus(EacPinStatus.RC1);
-
-		    if (capturePin) {
-			step.addCANEntry();
-		    } else {
-			step.addNativeCANNotice();
-		    }
+		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
@@ -192,6 +167,9 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),
 			    langPin.translationForKey(ERROR_UNKNOWN), ex));
+	} catch (InterruptedException ex) {
+	    LOG.warn("PIN step action interrupted.", ex);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
     }
 

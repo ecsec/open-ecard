@@ -62,7 +62,6 @@ public class EACData {
     ///
 
     public byte pinID;
-    public String passwordType;
     public String pin;
 
 

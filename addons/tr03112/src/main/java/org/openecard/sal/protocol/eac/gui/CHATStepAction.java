@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,21 +22,22 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
-import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.util.SysUtils;
 import org.openecard.crypto.common.asn1.cvc.CHAT;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.BoxItem;
 import org.openecard.gui.definition.Checkbox;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.executor.BackgroundTask;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
@@ -45,6 +46,8 @@ import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -53,6 +56,8 @@ import org.openecard.sal.protocol.eac.anytype.PasswordID;
  * @author Tobias Wich
  */
 public class CHATStepAction extends StepAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CHATStepAction.class);
 
     static {
 	I18n lang = I18n.getTranslation("pace");
@@ -65,13 +70,13 @@ public class CHATStepAction extends StepAction {
     private static final String PIN;
     private static final String PUK;
 
+    private final Context addonCtx;
     private final EACData eacData;
-    private final BackgroundTask bTask;
 
-    public CHATStepAction(EACData eacData, Step step) {
+    public CHATStepAction(Context addonCtx, EACData eacData, Step step) {
 	super(step);
+	this.addonCtx = addonCtx;
 	this.eacData = eacData;
-	this.bTask = step.getBackgroundTask();
     }
 
 
@@ -80,41 +85,68 @@ public class CHATStepAction extends StepAction {
 	if (result.isOK()) {
 	    processResult(oldResults);
 
-	    DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    boolean nativePace = (boolean) ctx.get(EACProtocol.IS_NATIVE_PACE);
-	    PACEMarkerType paceMarker = (PACEMarkerType) ctx.get(EACProtocol.PACE_MARKER);
-	    PinState status = (PinState) ctx.get(EACProtocol.PIN_STATUS);
-	    byte[] slotHandle = (byte[]) ctx.get(EACProtocol.SLOT_HANDLE);
-	    Dispatcher dispatcher = (Dispatcher) ctx.get(EACProtocol.DISPATCHER);
+	    try {
+		Step nextStep = preparePinStep();
 
-	    Step nextStep;
-	    assert(status != null);
-	    if (status.isBlocked()) {
-		nextStep = new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
-			LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
-			WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
-	    } else if (status.isDeactivated()) {
-		nextStep = new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
-			LANG.translationForKey("step_error_pin_deactivated"),
-			WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
-	    } else {
-		PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker, status);
-		nextStep = pinStep;
-		pinStep.setBackgroundTask(bTask);
-		StepAction pinAction;
-		if (eacData.pinID == PasswordID.CAN.getByte()) {
-		    pinStep.setStatus(EacPinStatus.RC3);
-		    pinAction = new CANStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep);
-		} else {
-		    pinAction = new PINStepAction(eacData, !nativePace, slotHandle, dispatcher, pinStep, status);
-		}
-		pinStep.setAction(pinAction);
+		return new StepActionResult(StepActionResultStatus.NEXT, nextStep);
+	    } catch (WSHelper.WSException ex) {
+		LOG.error("Failed to prepare PIN step.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    } catch (InterruptedException ex) {
+		LOG.warn("CHAT step action interrupted.", ex);
+		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
-
-	    return new StepActionResult(StepActionResultStatus.NEXT, nextStep);
 	} else {
 	    // cancel can not happen, so only back is left to be handled
 	    return new StepActionResult(StepActionResultStatus.BACK);
+	}
+    }
+
+    private Step preparePinStep() throws WSHelper.WSException, InterruptedException {
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+
+	initContextVars(ctx);
+	Step nextStep = buildPinStep(ctx);
+
+	return nextStep;
+    }
+
+    private void initContextVars(DynamicContext ctx) throws WSHelper.WSException, InterruptedException {
+	PinState status = (PinState) ctx.get(EACProtocol.PIN_STATUS);
+
+	// only process once
+	if (status == null) {
+	    status = new PinState();
+	    boolean nativePace;
+	    ConnectionHandleType sessHandle = (ConnectionHandleType) ctx.get(TR03112Keys.SESSION_CON_HANDLE);
+	    ConnectionHandleType cardHandle;
+	    PACEMarkerType paceMarker;
+
+	    PasswordID passwordType = PasswordID.parse(eacData.pinID);
+
+	    PaceCardHelper ph = new PaceCardHelper(addonCtx, sessHandle);
+	    if (! SysUtils.isMobileDevice()) {
+		cardHandle = ph.connectCardIfNeeded();
+		if (passwordType == PasswordID.PIN) {
+		    EacPinStatus pinState = ph.getPinStatus();
+		    status.update(pinState);
+		}
+		nativePace = ph.isNativePinEntry();
+
+		// get the PACEMarker
+		paceMarker = ph.getPaceMarker(passwordType.getString());
+	    } else {
+		// mobile device, pick only available reader and proceed
+		cardHandle = ph.getMobileReader();
+		nativePace = false;
+		paceMarker = ph.getPaceMarker(passwordType.getString());
+	    }
+
+	    // save values in dynctx
+	    ctx.put(EACProtocol.PIN_STATUS, status);
+	    ctx.put(EACProtocol.IS_NATIVE_PACE, nativePace);
+	    ctx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle);
+	    ctx.put(EACProtocol.PACE_MARKER, paceMarker);
 	}
     }
 
@@ -147,12 +179,6 @@ public class CHATStepAction extends StepAction {
 		}
 	    }
 	}
-
-	// change PIN ID to CAN if CAN ALLOWED is used
-	if (eacData.selectedCHAT.getSpecialFunctions().getOrDefault(CHAT.SpecialFunction.CAN_ALLOWED, Boolean.FALSE)) {
-	    eacData.pinID = PasswordID.CAN.getByte();
-	    eacData.passwordType = PasswordID.parse(eacData.pinID).getString();
-	}
     }
 
     /**
@@ -177,6 +203,33 @@ public class CHATStepAction extends StepAction {
 	    dataGroupNames.add(dg.name());
 	}
 	return dataGroupNames;
+    }
+
+    private Step buildPinStep(DynamicContext ctx) {
+	PinState status = (PinState) ctx.get(EACProtocol.PIN_STATUS);
+	boolean nativePace = (boolean) ctx.get(EACProtocol.IS_NATIVE_PACE);
+	PACEMarkerType paceMarker = (PACEMarkerType) ctx.get(EACProtocol.PACE_MARKER);
+	assert(status != null);
+
+	if (status.isBlocked()) {
+	    return new ErrorStep(LANG.translationForKey("step_error_title_blocked", PIN),
+		    LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+		    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")));
+	} else if (status.isDeactivated()) {
+	    return new ErrorStep(LANG.translationForKey("step_error_title_deactivated"),
+		    LANG.translationForKey("step_error_pin_deactivated"),
+		    WSHelper.createException(WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")));
+	} else {
+	    PINStep pinStep = new PINStep(eacData, !nativePace, paceMarker);
+	    StepAction pinAction;
+	    if (eacData.pinID == PasswordID.CAN.getByte()) {
+		pinAction = new CANStepAction(addonCtx, eacData, !nativePace, pinStep);
+	    } else {
+		pinAction = new PINStepAction(addonCtx, eacData, !nativePace, pinStep);
+	    }
+	    pinStep.setAction(pinAction);
+	    return pinStep;
+	}
     }
 
 }

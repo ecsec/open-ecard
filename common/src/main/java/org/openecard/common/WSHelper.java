@@ -72,6 +72,16 @@ public class WSHelper {
 	return response;
     }
 
+    public static <T extends ResponseBaseType> boolean resultIsOk(@Nonnull T response) {
+	Result r = response.getResult();
+	return r.getResultMajor().equals(ECardConstants.Major.OK);
+    }
+
+    public static <T extends ResponseBaseType> boolean resultIsError(@Nonnull T response) {
+	Result r = response.getResult();
+	return r.getResultMajor().equals(ECardConstants.Major.ERROR);
+    }
+
     public static <T extends ResponseBaseType> boolean resultIsWarn(@Nonnull T response) {
 	Result r = response.getResult();
 	return r.getResultMajor().equals(ECardConstants.Major.WARN);

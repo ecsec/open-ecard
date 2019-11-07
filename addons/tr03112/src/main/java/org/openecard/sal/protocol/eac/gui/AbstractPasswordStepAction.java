@@ -10,17 +10,19 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
-import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.executor.ExecutionResults;
@@ -42,25 +44,29 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 
     private static final String PIN_ID_CAN = "2";
 
+    protected final Context addonCtx;
     protected final EACData eacData;
     protected final boolean capturePin;
-    protected final byte[] slotHandle;
-    protected final Dispatcher dispatcher;
     protected final PINStep step;
     protected final DynamicContext ctx;
 
-    public AbstractPasswordStepAction(EACData eacData, boolean capturePin, byte[] slotHandle, Dispatcher dispatcher,
-	    PINStep step) {
+    public AbstractPasswordStepAction(Context addonCtx, EACData eacData, boolean capturePin, PINStep step) {
 	super(step);
+	this.addonCtx = addonCtx;
 	this.eacData = eacData;
 	this.capturePin = capturePin;
-	this.slotHandle = slotHandle;
-	this.dispatcher = dispatcher;
 	this.step = step;
 	this.ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+
+	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
+	// indicate that the card stays connected
     }
 
-    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) {
+    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException {
+	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
+	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
+	conHandle = ph.connectCardIfNeeded();
+
 	DIDAuthenticationDataType protoData = eacData.didRequest.getAuthenticationProtocolData();
 	AuthDataMap paceAuthMap;
 	try {
@@ -90,11 +96,21 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	paceInputMap.addElement(PACEInputType.CHAT, eacData.selectedCHAT.toString());
 	String certDesc = ByteUtils.toHexString(eacData.rawCertificateDescription);
 	paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, certDesc);
-	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
+	EstablishChannel eChannel = createEstablishChannelStructure(conHandle, paceInputMap);
+	EstablishChannelResponse res = (EstablishChannelResponse) addonCtx.getDispatcher().safeDeliver(eChannel);
+
+	if (WSHelper.resultIsError(res)) {
+	    ph.disconnectIfMobile();
+	}
+
+	return res;
     }
 
-    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) {
+    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException {
+	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
+	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
+	conHandle = ph.connectCardIfNeeded();
+
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp;
@@ -121,14 +137,20 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_CAN);
 
 	// perform PACE by EstablishChannelCommand
-	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
-	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);
+	EstablishChannel eChannel = createEstablishChannelStructure(conHandle, paceInputMap);
+	EstablishChannelResponse res = (EstablishChannelResponse) addonCtx.getDispatcher().safeDeliver(eChannel);
+
+	if (WSHelper.resultIsError(res)) {
+	    ph.disconnectIfMobile();
+	}
+
+	return res;
     }
 
-    protected EstablishChannel createEstablishChannelStructure(AuthDataResponse paceInputMap) {
+    private EstablishChannel createEstablishChannelStructure(ConnectionHandleType conHandle, AuthDataResponse paceInputMap) {
 	// EstablishChannel
 	EstablishChannel establishChannel = new EstablishChannel();
-	establishChannel.setSlotHandle(slotHandle);
+	establishChannel.setSlotHandle(conHandle.getSlotHandle());
 	establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
 	establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
 	return establishChannel;

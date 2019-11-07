@@ -22,6 +22,8 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
@@ -29,6 +31,7 @@ import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.sal.protocol.eac.EACData;
+import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
 
 
@@ -62,14 +65,17 @@ public final class PINStep extends Step {
     private final String pinType;
     private final PACEMarkerType paceMarker;
     private final boolean hasAttemptsCounter;
+    private final boolean capturePin;
 
     private PinState status;
+    private boolean hasCanEntry = false;
 
-    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker, PinState status) {
+    public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker) {
 	super(STEP_ID, "Dummy-Title");
-	this.pinType = LANG_PACE.translationForKey(eacData.passwordType);
+	this.pinType = LANG_PACE.translationForKey(PasswordID.parse(eacData.pinID).getString());
 	this.paceMarker = paceMarker;
 	this.hasAttemptsCounter = eacData.pinID != PasswordID.CAN.getByte();
+	this.capturePin = capturePin;
 	setTitle(LANG_PACE.translationForKey(TITLE, pinType));
 	setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	setReversible(false);
@@ -82,30 +88,33 @@ public final class PINStep extends Step {
 	    getInputInfoUnits().add(transactionInfoField);
 	}
 
-	this.status = status;
+	DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	this.status = (PinState) ctx.get(EACProtocol.PIN_STATUS);;
 	// create step elements
 	if (capturePin) {
 	    addSoftwareElements();
 	} else {
 	    addTerminalElements();
 	}
+	updateCanData();
+	updateAttemptsDisplay();
     }
 
     public void setStatus(EacPinStatus status) {
 	this.status.update(status);
+	updateAttemptsDisplay();
+	updateCanData();
     }
 
     public void setStatus(PinState status) {
 	this.status = status;
+	updateAttemptsDisplay();
+	updateCanData();
     }
 
-    public PinState getStatus() {
-	return status;
-    }
-
-    public static Step createDummy(String passwordType) {
+    public static Step createDummy(byte pinId) {
 	Step s = new Step(STEP_ID);
-	String pinType = LANG_PACE.translationForKey(passwordType);
+	String pinType = LANG_PACE.translationForKey(PasswordID.parse(pinId).getString());
 	s.setTitle(LANG_PACE.translationForKey(TITLE, pinType));
 	s.setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	return s;
@@ -153,7 +162,7 @@ public final class PINStep extends Step {
 	}
     }
 
-    protected void addCANEntry() {
+    private void addCANEntry() {
 	PasswordField canField = new PasswordField(CAN_FIELD);
 	canField.setDescription(LANG_PACE.translationForKey("can"));
 	canField.setMaxLength(6);
@@ -166,16 +175,41 @@ public final class PINStep extends Step {
 	getInputInfoUnits().add(canNotice);
     }
 
-    protected void addNativeCANNotice() {
+    private void addNativeCANNotice() {
 	Text canNotice = new Text();
 	canNotice.setText(LANG_EAC.translationForKey("eac_can_notice_native"));
 	canNotice.setID(CAN_NOTICE_ID);
 	getInputInfoUnits().add(canNotice);
     }
 
-    protected void updateAttemptsDisplay(int newValue) {
+    private void updateCanData() {
+	if (! hasCanEntry && status.isRequestCan()) {
+	    if (capturePin) {
+		addCANEntry();
+	    } else {
+		addNativeCANNotice();
+	    }
+	}
+    }
+
+    private void updateAttemptsDisplay() {
 	for (InputInfoUnit unit : getInputInfoUnits()) {
 	    if (unit.getID().equals(PIN_ATTEMPTS_ID)) {
+		int newValue;
+		switch (status.getState()) {
+		    case RC3:
+			newValue = 3;
+			break;
+		    case RC2:
+			newValue = 2;
+			break;
+		    case RC1:
+			newValue = 1;
+			break;
+		    default:
+			newValue = 0;
+		}
+
 		Text text = (Text) unit;
 		text.setText(LANG_PACE.translationForKey("step_pin_retrycount", newValue));
 	    }

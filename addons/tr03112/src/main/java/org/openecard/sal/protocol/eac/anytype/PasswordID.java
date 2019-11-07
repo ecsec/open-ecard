@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,7 +35,8 @@ public enum PasswordID {
     CAN((byte) 0x02),
     PIN((byte) 0x03),
     PUK((byte) 0x04);
-    private byte b;
+
+    private final byte b;
 
     private PasswordID(byte type) {
 	this.b = type;

@@ -78,7 +78,7 @@
 		<version.jmockit>1.47</version.jmockit>
 		<version.pmd>6.17.0</version.pmd>
 		<version.openjfx>12.0.2</version.openjfx>
-		<version.roboface>1.0.0-rc.10</version.roboface>
+		<version.roboface>1.0.0-rc.11</version.roboface>
 		<robovm.version>2.3.8-rc.1</robovm.version>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine />

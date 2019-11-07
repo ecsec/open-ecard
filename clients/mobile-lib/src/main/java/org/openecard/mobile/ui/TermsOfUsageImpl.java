@@ -28,10 +28,10 @@ class TermsOfUsageImpl implements TermsOfUsage {
 	this.mimeType = mimeType;
     }
 
-    @Override
-    public byte[] getDataBytes() {
-	return data;
-    }
+//    @Override
+//    public byte[] getDataBytes() {
+//	return data;
+//    }
 
     @Override
     public String getDataString() {

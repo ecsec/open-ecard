@@ -25,7 +25,8 @@ public interface TermsOfUsage extends Serializable {
      *
      * @return
      */
-    byte[] getDataBytes();
+    //This is not supported in robovm atm - reactivate as soon as it is
+//    byte[] getDataBytes();
 
     /**
      * Retrieve the terms of usage document as a string.

@@ -49,6 +49,7 @@ public class OpenEcardImp implements OpenEcard {
 	Provider provider = new BouncyCastleProvider();
 	try {
 	    Security.removeProvider(provider.getName());
+	    Security.removeProvider("BC");
 	} catch (Exception e) {
 	}
 	Security.addProvider(provider);

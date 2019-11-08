@@ -30,6 +30,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
+import iso.std.iso_iec._24727.tech.schema.Transmit;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +53,7 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -76,9 +78,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.interfaces.DocumentSchemaValidator;
 import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Promise;
+import org.openecard.common.util.ValueGenerators;
 
 
 /**
@@ -335,9 +340,14 @@ public class PAOS {
 	String firstOecMinorError = null;
 	final List<ConnectionHandleType> connectionHandles = message.getConnectionHandle();
 	ConnectionHandleType firstConnectionHandle = null;
+	byte[] fakeSlotHandle = null;
+	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 	if (connectionHandles != null) {
 	    for (ConnectionHandleType connectionHandle : connectionHandles) {
-		connectionHandle.setSlotHandle(new byte[] {0,1,2,3,4,5 } );
+		if (fakeSlotHandle == null) {
+		    fakeSlotHandle = ValueGenerators.generateRandom(32);
+		}
+		connectionHandle.setSlotHandle(fakeSlotHandle);
 		firstConnectionHandle = connectionHandle;
 	    }
 	}
@@ -429,19 +439,29 @@ public class PAOS {
 			    if (requestObj instanceof DIDAuthenticate) {
 				DIDAuthenticate asDidAuthenticate = (DIDAuthenticate)requestObj;
 				ConnectionHandleType currentHandle = asDidAuthenticate.getConnectionHandle();
+				if (currentHandle != null) {
+				    byte[] currentSlotHandle = currentHandle.getSlotHandle();
+				    byte[] fixedSlotHandle = fixSlotHandle(fakeSlotHandle, currentSlotHandle, dynCtx);
+				    currentHandle.setSlotHandle(fixedSlotHandle);
 
-				if (currentHandle != null && firstConnectionHandle != null && firstConnectionHandle.getChannelHandle() != null) {
-				    ChannelHandleType currentChannelHandle = currentHandle.getChannelHandle();
-				    if (currentChannelHandle == null) {
-					currentChannelHandle = new ChannelHandleType();
-					currentHandle.setChannelHandle(currentChannelHandle);
-				    }
-				    String currentSessionIdentifier = currentChannelHandle.getSessionIdentifier();
-				    String firstSessionIdentifier = firstConnectionHandle.getChannelHandle().getSessionIdentifier();
-				    if (currentSessionIdentifier == null || !currentSessionIdentifier.equals(firstSessionIdentifier)) {
-					currentChannelHandle.setSessionIdentifier(firstSessionIdentifier);
+				    if (firstConnectionHandle != null && firstConnectionHandle.getChannelHandle() != null) {
+					ChannelHandleType currentChannelHandle = currentHandle.getChannelHandle();
+					if (currentChannelHandle == null) {
+					    currentChannelHandle = new ChannelHandleType();
+					    currentHandle.setChannelHandle(currentChannelHandle);
+					}
+					String currentSessionIdentifier = currentChannelHandle.getSessionIdentifier();
+					String firstSessionIdentifier = firstConnectionHandle.getChannelHandle().getSessionIdentifier();
+					if (currentSessionIdentifier == null || !currentSessionIdentifier.equals(firstSessionIdentifier)) {
+					    currentChannelHandle.setSessionIdentifier(firstSessionIdentifier);
+					}
 				    }
 				}
+			    } else if (requestObj instanceof Transmit) {
+				Transmit asTransmit = (Transmit)requestObj;
+				byte[] currentSlotHandle = asTransmit.getSlotHandle();
+				byte[] fixedSlotHandle = fixSlotHandle(fakeSlotHandle, currentSlotHandle, dynCtx);
+				asTransmit.setSlotHandle(fixedSlotHandle);
 			    }
 
 			    // send via dispatcher
@@ -504,6 +524,16 @@ public class PAOS {
 //		throw new PAOSException(ex);
 	    }
 	}
+    }
+
+    private byte[] fixSlotHandle(byte[] fakeSlotHandle, byte[] currentSlotHandle, DynamicContext dynCtx) {
+	if (fakeSlotHandle != null && ByteUtils.compare(currentSlotHandle, fakeSlotHandle)) {
+	    ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
+	    if (conHandle != null) {
+		currentSlotHandle = conHandle.getSlotHandle();
+	    }
+	}
+	return currentSlotHandle;
     }
 
 

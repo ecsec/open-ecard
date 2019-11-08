@@ -46,6 +46,7 @@ import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
@@ -187,12 +188,7 @@ public final class EacNavigator extends MobileNavigator {
 			@Override
 			public void enter(String can, String pin) {
 			    if (msgSetter.isSupported()) {
-				interaction.requestCardInsertion(new NFCOverlayMessageHandler() {
-				    @Override
-				    public void setText(String msg) {
-					msgSetter.setText(msg);
-				    }
-				});
+				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
 			    } else {
 				interaction.requestCardInsertion();
 			    }
@@ -206,12 +202,7 @@ public final class EacNavigator extends MobileNavigator {
 			@Override
 			public void enter(String pin) {
 			    if (msgSetter.isSupported()) {
-				interaction.requestCardInsertion(new NFCOverlayMessageHandler() {
-				    @Override
-				    public void setText(String msg) {
-					msgSetter.setText(msg);
-				    }
-				});
+				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
 			    } else {
 				interaction.requestCardInsertion();
 			    }

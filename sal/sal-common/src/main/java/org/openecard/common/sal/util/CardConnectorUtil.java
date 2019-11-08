@@ -110,7 +110,7 @@ public class CardConnectorUtil {
     }
 
     private class CardFound implements EventCallback {
-	Promise<ConnectionHandleType> foundCardHandle;
+	Promise<ConnectionHandleType> foundCardHandle = new Promise<>();
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    try {

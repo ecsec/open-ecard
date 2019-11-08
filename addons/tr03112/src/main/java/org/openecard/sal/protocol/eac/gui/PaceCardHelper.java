@@ -52,7 +52,7 @@ public class PaceCardHelper {
     private static final String NPA_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
     private final Context ctx;
-    private final ConnectionHandleType conHandle;
+    private ConnectionHandleType conHandle;
 
     public PaceCardHelper(Context ctx, ConnectionHandleType conHandle) {
 	this.ctx = ctx;
@@ -178,7 +178,8 @@ public class PaceCardHelper {
 	    conReq.setExclusiveUse(Boolean.TRUE);
 	    CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) ctx.getDispatcher().safeDeliver(conReq);
 	    WSHelper.checkResult(conRes);
-	    return conRes.getConnectionHandle();
+	    this.conHandle = conRes.getConnectionHandle();
+	    return conHandle;
 	}
     }
 

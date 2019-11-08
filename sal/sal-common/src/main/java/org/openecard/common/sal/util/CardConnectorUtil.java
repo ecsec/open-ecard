@@ -19,6 +19,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.Arrays;
 import java.util.Set;
+import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
@@ -29,6 +30,8 @@ import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,6 +40,7 @@ import org.openecard.common.util.Promise;
  */
 public class CardConnectorUtil {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CardConnectorUtil.class);
     private final Set<String> cardTypes;
     private final String session;
     private final byte[] ctxHandle;
@@ -91,7 +95,8 @@ public class CardConnectorUtil {
 		CardApplicationConnect con = new CardApplicationConnect();
 		con.setCardApplicationPath(path);
 		CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) dispatcher.safeDeliver(con);
-		if (WSHelper.resultIsOk(conRes)) {
+		try {
+		    WSHelper.checkResult(conRes);
 		    ConnectionHandleType card = conRes.getConnectionHandle();
 		    try {
 			if (cardTypes.contains(card.getRecognitionInfo().getCardType())) {
@@ -102,6 +107,8 @@ public class CardConnectorUtil {
 			dis.setConnectionHandle(card);
 			dispatcher.safeDeliver(dis);
 		    }
+		} catch(ECardException ex) {
+		    LOG.warn("Error occurred while checking a card.", ex);
 		}
 	    }
 	}

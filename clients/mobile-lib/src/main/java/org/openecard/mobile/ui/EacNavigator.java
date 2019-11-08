@@ -43,7 +43,9 @@ import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
@@ -74,10 +76,12 @@ public final class EacNavigator extends MobileNavigator {
     private int idx = 0;
     private boolean pinFirstUse = true;
 
+    private NFCDialogMsgSetter msgSetter;
 
-    public EacNavigator(UserConsentDescription uc, EacInteraction interaction) {
+    public EacNavigator(UserConsentDescription uc, EacInteraction interaction, NFCDialogMsgSetter msgSetter) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
+	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -182,7 +186,16 @@ public final class EacNavigator extends MobileNavigator {
 		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperation() {
 			@Override
 			public void enter(String can, String pin) {
-			    interaction.requestCardInsertion();
+			    if (msgSetter.isSupported()) {
+				interaction.requestCardInsertion(new NFCOverlayMessageHandler() {
+				    @Override
+				    public void setText(String msg) {
+					msgSetter.setText(msg);
+				    }
+				});
+			    } else {
+				interaction.requestCardInsertion();
+			    }
 			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, can);
 			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 			    waitForPin.deliver(outInfo);
@@ -192,7 +205,16 @@ public final class EacNavigator extends MobileNavigator {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperation() {
 			@Override
 			public void enter(String pin) {
-			    interaction.requestCardInsertion();
+			    if (msgSetter.isSupported()) {
+				interaction.requestCardInsertion(new NFCOverlayMessageHandler() {
+				    @Override
+				    public void setText(String msg) {
+					msgSetter.setText(msg);
+				    }
+				});
+			    } else {
+				interaction.requestCardInsertion();
+			    }
 			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, null);
 			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 			    waitForPin.deliver(outInfo);

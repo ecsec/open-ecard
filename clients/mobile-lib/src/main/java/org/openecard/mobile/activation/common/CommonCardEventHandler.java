@@ -54,12 +54,7 @@ public class CommonCardEventHandler {
 
     public void onCardRecognized() {
 	cardRecognized = true;
-
-	if (msgSetter.isSupported()) {
-	    interaction.onCardRecognized(new NFCOverlayMessageHandlerImpl(msgSetter));
-	} else {
-	    interaction.onCardRecognized();
-	}
+	interaction.onCardRecognized();
     }
 
     public void onRequestCardInsertion() {

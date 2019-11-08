@@ -52,11 +52,13 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     private final ActivationSource source;
     private OpeneCardContext context;
     private boolean isRunning = false;
+    private final NFCDialogMsgSetter msgSetter;
 
-    public CommonContextManager(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source) {
+    public CommonContextManager(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source, NFCDialogMsgSetter msgSetter) {
 	this.nfc = nfc;
 	this.config = config;
 	this.source = source;
+	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		handler.onFailure(error);
 		return;
 	    }
-	    OpeneCardContext newContext = new OpeneCardContext(nfc, config);
+	    OpeneCardContext newContext = new OpeneCardContext(nfc, config, msgSetter);
 	    try {
 		newContext.initialize();
 	    } catch (UnableToInitialize ex) {

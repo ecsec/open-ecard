@@ -85,7 +85,7 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 	    if (this.contextManager != null) {
 		return this.contextManager;
 	    }
-	    this.contextManager = new CommonContextManager(nfc, this.config, this);
+	    this.contextManager = new CommonContextManager(nfc, this.config, this, msgSetter);
 	    return this.contextManager;
 	}
     }

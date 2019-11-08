@@ -32,11 +32,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 public interface ActivationInteraction {
 
     void requestCardInsertion();
+    void requestCardInsertion(NFCOverlayMessageHandler msgHandler);
     void onCardInteractionComplete();
-
     void onCardRecognized();
-
-    void onCardRecognized(NFCOverlayMessageHandler msgHandler);
     void onCardRemoved();
 
 }

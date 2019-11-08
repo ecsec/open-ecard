@@ -58,6 +58,9 @@ public class CommonContextManagerTests {
     @Mock
     ActivationSource source;
 
+    @Mock
+    NFCDialogMsgSetter msgSetter;
+
     MockitoSession mockito;
 
     private CommonContextManager sut;
@@ -70,7 +73,7 @@ public class CommonContextManagerTests {
 		.strictness(Strictness.STRICT_STUBS)
 		.startMocking();
 
-	this.sut = new CommonContextManager(mockNfc, config, source);
+	this.sut = new CommonContextManager(mockNfc, config, source, msgSetter);
     }
 
     @AfterMethod()

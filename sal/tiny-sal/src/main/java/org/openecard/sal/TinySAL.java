@@ -63,6 +63,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.Connect;
 import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
@@ -191,8 +192,6 @@ import org.openecard.common.sal.exception.SecurityConditionNotSatisfiedException
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
 import org.openecard.common.sal.exception.UnknownProtocolException;
 import org.openecard.common.sal.state.CardEntry;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
 import org.openecard.common.sal.state.ConnectedCardEntry;
 import org.openecard.common.sal.state.NoSuchSession;
 import org.openecard.common.sal.state.SalStateManager;
@@ -231,7 +230,7 @@ public class TinySAL implements SAL {
 
     private final Environment env;
     private final SalStateManager salStates;
-    private final CardStateMap states = null; // TODO: replace with SalStateManager
+    // private final CardStateMap states = null; // TODO: replace with SalStateManager
     private byte[] ifdCtx;
     private AddonManager addonManager;
     private AddonSelector protocolSelector;
@@ -310,12 +309,12 @@ public class TinySAL implements SAL {
     public CreateSessionResponse createSession(CreateSession parameters) {
 	CreateSessionResponse response = new CreateSessionResponse();
 	if (parameters == null || parameters.getSessionIdentifier() == null) {
-	    StateEntry entry = this.salStates.createSession();
+	    StateEntry entry = this.salStates.createSession(this.ifdCtx);
 	    response.setConnectionHandle(entry.copyHandle());
 	    response.setResult(WSHelper.makeResultOK());
 	} else {
 	    try {
-		StateEntry entry = this.salStates.createSession(parameters.getSessionIdentifier());
+		StateEntry entry = this.salStates.createSession(parameters.getSessionIdentifier(), this.ifdCtx);
 		response.setConnectionHandle(entry.copyHandle());
 		response.setResult(WSHelper.makeResultOK());
 	    } catch (SessionAlreadyExists ex) {
@@ -363,6 +362,9 @@ public class TinySAL implements SAL {
 	    CardApplicationPathType cardAppPath = request.getCardAppPathRequest();
 	    Assert.assertIncorrectParameter(cardAppPath, "The parameter CardAppPathRequest is empty.");
 
+	    ChannelHandleType reqChannelHandle = cardAppPath.getChannelHandle();
+	    boolean hasSessionIdentifier = reqChannelHandle.getSessionIdentifier() != null;
+
 	    // Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
 	    List<CardEntry> entries =  SALUtils.filterEntries(cardAppPath, salStates.listCardEntries());
 
@@ -383,6 +385,16 @@ public class TinySAL implements SAL {
 			pathCopy.setCardApplication(MF);
 		    }
 		}
+
+		if (hasSessionIdentifier) {
+		    ChannelHandleType copyChannelHandle = pathCopy.getChannelHandle();
+		    if (copyChannelHandle == null) {
+			copyChannelHandle = new ChannelHandleType();
+			pathCopy.setChannelHandle(copyChannelHandle);
+		    }
+		    copyChannelHandle.setSessionIdentifier(reqChannelHandle.getSessionIdentifier());
+		}
+
 		resultPaths.add(pathCopy);
 	    }
 
@@ -471,7 +483,6 @@ public class TinySAL implements SAL {
 
 	    // reset the ef FCP
 	    connectedCardEntry.unsetFCPOfSelectedEF();
-	    // states.addEntry(baseCardStateEntry);
 	    salStates.addCard(connectedCardEntry);
 
 	    response.setConnectionHandle(stateEntry.copyHandle());
@@ -490,18 +501,21 @@ public class TinySAL implements SAL {
 
 	try {
 	    byte[] slotHandle = request.getSlotHandle();
-	    ConnectionHandleType connectionHandle = SALUtils.createConnectionHandle(slotHandle);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
+	    StateEntry stateEntry = salStates.getSessionBySlotHandle(slotHandle);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    byte[] reqApplicationID = request.getCardApplication();
 
 	    Assert.assertIncorrectParameter(reqApplicationID, "The parameter CardApplication is empty.");
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getInfo();
+	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
 	    CardApplicationWrapper appInfo = cardInfoWrapper.getCardApplication(reqApplicationID);
 	    Assert.assertNamedEntityNotFound(appInfo, "The given Application cannot be found.");
 
-	    Assert.securityConditionApplication(cardStateEntry, reqApplicationID,
-		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
+	    Assert.securityConditionApplication(cardInfoWrapper, cardStateEntry.getAuthenticatedDIDs(),
+		    reqApplicationID, ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // check if the currently selected application is already what the caller wants
 	    byte[] curApplicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -531,7 +545,7 @@ public class TinySAL implements SAL {
 		cardStateEntry.unsetFCPOfSelectedEF();
 	    }
 
-	    response.setConnectionHandle(cardStateEntry.handleCopy());
+	    response.setConnectionHandle(stateEntry.copyHandle());
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	}
@@ -561,14 +575,17 @@ public class TinySAL implements SAL {
 			WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, "ConnectionHandle is null"));
 	    }
 
+	    StateEntry stateEntry = salStates.getSessionBySlotHandle(slotHandle);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
+
 	    Disconnect disconnect = new Disconnect();
 	    disconnect.setSlotHandle(slotHandle);
 	    if (request.getAction() != null) {
 		disconnect.setAction(request.getAction());
 	    }
 
+	    stateEntry.removeCard();
 	    // remove entries associated with this handle
-	    states.removeSlotHandleEntry(connectionHandle.getContextHandle(), slotHandle);
 
 	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 	    response.setResult(disconnectResponse.getResult());

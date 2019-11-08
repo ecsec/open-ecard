@@ -22,6 +22,8 @@
 
 package org.openecard.transport.paos;
 
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -33,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
@@ -330,6 +333,14 @@ public class PAOS {
 	boolean connectionDropped = false;
 	ResponseBaseType lastResponse = null;
 	String firstOecMinorError = null;
+	final List<ConnectionHandleType> connectionHandles = message.getConnectionHandle();
+	ConnectionHandleType firstConnectionHandle = null;
+	if (connectionHandles != null) {
+	    for (ConnectionHandleType connectionHandle : connectionHandles) {
+		connectionHandle.setSlotHandle(new byte[] {0,1,2,3,4,5 } );
+		firstConnectionHandle = connectionHandle;
+	    }
+	}
 
 	try {
 	    // loop and send makes a computer happy
@@ -414,6 +425,23 @@ public class PAOS {
 				}
 				WSHelper.checkResult(startPAOSResponse);
 				return startPAOSResponse;
+			    }
+			    if (requestObj instanceof DIDAuthenticate) {
+				DIDAuthenticate asDidAuthenticate = (DIDAuthenticate)requestObj;
+				ConnectionHandleType currentHandle = asDidAuthenticate.getConnectionHandle();
+
+				if (currentHandle != null && firstConnectionHandle != null && firstConnectionHandle.getChannelHandle() != null) {
+				    ChannelHandleType currentChannelHandle = currentHandle.getChannelHandle();
+				    if (currentChannelHandle == null) {
+					currentChannelHandle = new ChannelHandleType();
+					currentHandle.setChannelHandle(currentChannelHandle);
+				    }
+				    String currentSessionIdentifier = currentChannelHandle.getSessionIdentifier();
+				    String firstSessionIdentifier = firstConnectionHandle.getChannelHandle().getSessionIdentifier();
+				    if (currentSessionIdentifier == null || !currentSessionIdentifier.equals(firstSessionIdentifier)) {
+					currentChannelHandle.setSessionIdentifier(firstSessionIdentifier);
+				    }
+				}
 			    }
 
 			    // send via dispatcher

@@ -31,8 +31,9 @@ public class StateEntry {
     private ConnectedCardEntry cardEntry;
     private byte[] ctxHandle;
 
-    public StateEntry(String session) {
+    public StateEntry(String session, byte[] ctxHandle) {
 	this.session = session;
+	this.ctxHandle = ctxHandle;
     }
 
     public String getSession() {

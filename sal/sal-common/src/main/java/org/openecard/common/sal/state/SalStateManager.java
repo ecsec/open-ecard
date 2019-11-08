@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,24 +118,36 @@ public class SalStateManager {
     }
 
     // Session handling
-    public StateEntry createSession() {
-	String session = ValueGenerators.genBase64Session();
-	try {
-	    return createSession(session);
-	} catch (SessionAlreadyExists ex) {
-	    LOG.warn("Randomly chosen session already exists, trying again with a different session.");
-	    return createSession();
-	}
+    public StateEntry createSession(byte[] contextHandle) {
+       String session = ValueGenerators.genBase64Session();
+       try {
+           return createSession(session, contextHandle);
+       } catch (SessionAlreadyExists ex) {
+           LOG.warn("Randomly chosen session already exists, trying again with a different session.");
+           return createSession(contextHandle);
+       }
     }
 
-    public StateEntry createSession(String session) throws SessionAlreadyExists {
+
+    public StateEntry createSession(String session, byte[] contextHandle) throws SessionAlreadyExists {
 	if (sessions.containsKey(session)) {
 	    throw new SessionAlreadyExists(String.format("The requested session=%s already exists.", session));
 	} else {
-	    StateEntry newEntry = new StateEntry(session);
+	    StateEntry newEntry = new StateEntry(session, contextHandle);
 	    sessions.put(session, newEntry);
 	    return newEntry;
 	}
+    }
+
+    public StateEntry getSessionBySlotHandle(byte[] slotHandle) throws NoSuchSession {
+	StateEntry found = null;
+	for (StateEntry currentSession : this.sessions.values()) {
+	    ConnectedCardEntry currentEntry = currentSession.getCardEntry();
+	    if (currentEntry != null && ByteUtils.compare(slotHandle, currentEntry.getSlotHandle())) {
+		return currentSession;
+	    }
+	}
+	throw new NoSuchSession(String.format("The requested session=%s does not exist.", slotHandle));
     }
 
     public StateEntry getSession(String session) throws NoSuchSession {
@@ -158,5 +171,6 @@ public class SalStateManager {
     private boolean destroySession(String session) {
 	return sessions.remove(session) != null;
     }
+
 
 }

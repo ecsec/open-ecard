@@ -97,6 +97,12 @@ public class CardEntry implements Comparable<CardEntry> {
 	connectionHandle.setSlotIndex(slotIdx);
 	connectionHandle.setIFDName(ifdName);
 	connectionHandle.setContextHandle(ByteUtils.clone(ctxHandle));
+	ConnectionHandleType.RecognitionInfo recogInfo = connectionHandle.getRecognitionInfo();
+	if (recogInfo == null) {
+	    recogInfo = new ConnectionHandleType.RecognitionInfo();
+	    connectionHandle.setRecognitionInfo(recogInfo);
+	}
+	recogInfo.setCardType(this.cif.getCardType());
     }
 
     @Override

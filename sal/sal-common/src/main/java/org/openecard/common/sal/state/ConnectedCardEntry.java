@@ -28,7 +28,7 @@ import org.openecard.common.util.ByteUtils;
 public class ConnectedCardEntry extends CardEntry {
 
     protected final byte[] slotHandle;
-    protected final byte[] cardApplication;
+    protected byte[] cardApplication;
     private final Set<DIDInfoType> authenticatedDIDs = new HashSet<>();
     private FCP lastSelectedEfFCP;
 
@@ -53,6 +53,10 @@ public class ConnectedCardEntry extends CardEntry {
 
     public FCP getFCPOfSelectedEF() {
 	return lastSelectedEfFCP;
+    }
+
+    public byte[] getSlotHandle() {
+	return slotHandle;
     }
 
     public Set<DIDInfoType> getAuthenticatedDIDs() {
@@ -102,6 +106,10 @@ public class ConnectedCardEntry extends CardEntry {
 	return this.cardApplication;
     }
 
+    public void setCurrentCardApplication(byte[] applicationID) {
+	this.cardApplication = ByteUtils.clone(applicationID);
+    }
+    
     public CardApplicationWrapper getCurrentCardApplication() {
 	return this.cif.getCardApplication(this.cardApplication);
     }
@@ -122,4 +130,5 @@ public class ConnectedCardEntry extends CardEntry {
 	builder.append(", ");
 	super.toString(builder);
     }
+
 }

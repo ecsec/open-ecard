@@ -108,6 +108,7 @@ import iso.std.iso_iec._24727.tech.schema.PACEMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.RIMarkerType;
 import iso.std.iso_iec._24727.tech.schema.RSAAuthMarkerType;
 import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
@@ -977,6 +978,19 @@ public class Unmarshaller {
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("EstablishChannel")));
 	    return result;
+	} else if (parser.getName().equals("PrepareDevices")) {
+	    PrepareDevices prepareDevices = new PrepareDevices();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ContextHandle")) {
+			prepareDevices.setContextHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("PrepareDevices")));
+	    return prepareDevices;
 	} else {
 	    throw new IOException("Unmarshalling of " + parser.getName() + " is not yet supported.");
 	}

@@ -73,6 +73,7 @@ import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
 import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
@@ -104,7 +105,7 @@ import org.w3c.dom.Node;
  * @author Tobias Wich
  */
 public class Marshaller {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(Marshaller.class);
 
     private final DocumentBuilder documentBuilder;
@@ -113,7 +114,7 @@ public class Marshaller {
 	this.documentBuilder = documentBuilder;
     }
 
-    
+
     public Document marshal(Object o) throws MarshallingTypeException {
 	Document document = documentBuilder.newDocument();
 	document.setXmlStandalone(true);
@@ -471,6 +472,15 @@ public class Marshaller {
 	    CardApplicationDisconnectResponse response = (CardApplicationDisconnectResponse) o;
 	    rootElement = createElementIso(document, "CardApplicationDisconnectResponse");
 	    appendResponseValues(response, rootElement, document);
+	} else if (o instanceof PrepareDevices) {
+	    PrepareDevices prepareDevices = (PrepareDevices) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(prepareDevices, rootElement);
+
+	    Element emContextHandle = createElementIso(document, "ContextHandle");
+	    emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(prepareDevices.getContextHandle())));
+	    rootElement.appendChild(emContextHandle);
+
 	} else {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
@@ -773,7 +783,7 @@ public class Marshaller {
 		emChildOfPS.appendChild(document.createTextNode(ps.getProtocol()));
 		emChildOfCH.appendChild(emChildOfPS);
 		emChild.appendChild(emChildOfCH);
-		
+
 		// TODO: parse parameters element
 	    }
 	}

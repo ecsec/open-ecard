@@ -91,7 +91,7 @@ public class World implements AutoCloseable {
 	this.terminalConfigurator = terminalConfigurator;
 	this.contextWorld = new ContextWorld();
 	this.pinManagementWorld = new PinManagementWorld();
-	this.eacWorld = new EacWorld();
+	this.eacWorld = new EacWorld(this);
     }
 
     public void microSleep() {
@@ -207,7 +207,7 @@ public class World implements AutoCloseable {
 	terminalConfigurator.terminal.setNFCCard(null);
     }
 
-    public class EacWorld implements AutoCloseable {
+    public static class EacWorld implements AutoCloseable {
 
 	private EacControllerFactory _eacControllerFactory;
 	private Set<String> supportedCards;
@@ -216,10 +216,15 @@ public class World implements AutoCloseable {
 	private ActivationController activationController;
 	private TCTokenContext mockTcTokenContext;
 	private EacCallbackReceiver eacInteraction;
+	private final World world;
+
+	public EacWorld(World world) {
+	    this.world = world;
+	}
 
 	private EacControllerFactory eacControllerFactory() {
 	    if (_eacControllerFactory == null) {
-		_eacControllerFactory = activationUtils.eacFactory();
+		_eacControllerFactory = this.world.activationUtils.eacFactory();
 	    }
 	    return _eacControllerFactory;
 	}
@@ -290,7 +295,7 @@ public class World implements AutoCloseable {
 	    promisedActivationResult = new Promise<>();
 	    promisedStarted = new Promise<>();
 
-	    this.eacInteraction = new EacCallbackReceiver();
+	    this.eacInteraction = new EacCallbackReceiver(world);
 
 	    activationController = eacControllerFactory().create(
 		    url,
@@ -360,6 +365,15 @@ public class World implements AutoCloseable {
 
 	public void givenConfirmationOfServerData() {
 	    LOG.debug("Confirming server data");
+	    if (!promisedStarted.isDelivered()) {
+		world.microSleep();
+		world.microSleep();
+		world.microSleep();
+		
+		this.expectOnStarted();
+	    }
+
+
 	    this.eacInteraction.givenConfirmationOfServerData();
 	}
 

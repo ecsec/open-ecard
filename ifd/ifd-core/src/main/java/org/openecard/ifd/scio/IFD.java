@@ -90,6 +90,8 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
+import org.openecard.common.event.EventType;
+import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.ifd.PACECapabilities;
 import org.openecard.common.ifd.Protocol;
 import org.openecard.common.ifd.ProtocolFactory;
@@ -242,6 +244,13 @@ public class IFD implements org.openecard.ws.IFD {
     @Override
     public PrepareDevicesResponse prepareDevices(PrepareDevices parameters) {
 	cm.prepareDevices();
+
+	ConnectionHandleType handle = HandlerBuilder.create()
+		.setContextHandle(parameters.getContextHandle())
+		.buildConnectionHandle();
+
+	env.getEventDispatcher().notify(EventType.PREPARE_DEVICES, new IfdEventObject(handle));
+
 	return WSHelper.makeResponse(PrepareDevicesResponse.class, WSHelper.makeResultOK());
     }
 
@@ -297,7 +306,7 @@ public class IFD implements org.openecard.ws.IFD {
 		SCIOTerminal term = cm.getTerminals().getTerminal(ifdName);
 		info = new TerminalInfo(cm, term);
 	    }
-	    
+
 	    IFDCapabilitiesType cap = new IFDCapabilitiesType();
 
 	    // slot capability
@@ -994,7 +1003,7 @@ public class IFD implements org.openecard.ws.IFD {
 		} catch (InterruptedException ex) {
 		    String msg = String.format("Cancellation by user.");
 		    LOG.error(msg, ex);
-		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg); 
+		    result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 		}
 
 		response.setResult(result);

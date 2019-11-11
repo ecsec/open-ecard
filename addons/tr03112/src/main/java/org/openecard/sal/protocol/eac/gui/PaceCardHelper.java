@@ -17,6 +17,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
@@ -166,11 +167,20 @@ public class PaceCardHelper {
 	    PrepareDevices pdreq = new PrepareDevices();
 	    pdreq.setContextHandle(conHandle.getContextHandle());
 	    ctx.getDispatcher().safeDeliver(pdreq);
+	    final String sessionIdentifier = conHandle.getChannelHandle().getSessionIdentifier();
 
 	    // wait for eid card
 	    CardConnectorUtil connectorUtil = new CardConnectorUtil(ctx.getDispatcher(), ctx.getEventDispatcher(), Set.of(NPA_TYPE),
-		    conHandle.getChannelHandle().getSessionIdentifier(), conHandle.getContextHandle(), conHandle.getIFDName());
+		    sessionIdentifier, conHandle.getContextHandle(), conHandle.getIFDName());
 	    CardApplicationPathType path = connectorUtil.waitForCard();
+	    ChannelHandleType channelHandle = path.getChannelHandle();
+	    if (channelHandle == null) {
+		channelHandle = new ChannelHandleType();
+		path.setChannelHandle(channelHandle);
+	    }
+	    if (channelHandle.getSessionIdentifier() == null) {
+		channelHandle.setSessionIdentifier(sessionIdentifier);
+	    }
 
 	    // connect eid card
 	    CardApplicationConnect conReq = new CardApplicationConnect();

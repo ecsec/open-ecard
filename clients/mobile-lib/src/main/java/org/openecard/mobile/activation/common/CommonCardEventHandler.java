@@ -16,7 +16,6 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationInteraction;
-import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +60,10 @@ public class CommonCardEventHandler {
 	} else {
 	    interaction.onCardRecognized();
 	}
+    }
+
+    public void onRequestCardInsertion() {
+	interaction.requestCardInsertion();
     }
 
     public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
@@ -116,10 +119,17 @@ public class CommonCardEventHandler {
 		handler.onCardRemoved();
 	    }
 	};
+	EventCallback prepareDevices = new EventCallback() {
+	    @Override
+	    public void signalEvent(EventType eventType, EventObject eventData) {
+		handler.onRequestCardInsertion();
+	    }
+	};
 
 	eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
 	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
+	eventDispatcher.add(prepareDevices, EventType.PREPARE_DEVICES);
 
 	return new AutoCloseable() {
 	    @Override
@@ -127,6 +137,7 @@ public class CommonCardEventHandler {
 		eventDispatcher.del(cardInsertionHandler);
 		eventDispatcher.del(cardDetectHandler);
 		eventDispatcher.del(removalHandler);
+		eventDispatcher.del(prepareDevices);
 	    }
 
 	};

@@ -60,9 +60,10 @@ public class EacCallbackReceiver {
     private Promise<String> promisedTransactionData;
     private Promise<ConfirmAttributeSelectionOperation> promisedOperationConfirmAttributes;
     public final EacInteraction interaction;
+    private final World world;
 
-    public EacCallbackReceiver() {
-
+    public EacCallbackReceiver(World world) {
+	this.world = world;
 	interaction = mock(EacInteraction.class);
 	promisedRequestCardInsertion = new Promise();
 	promisedRecognizeCard = new Promise();
@@ -100,16 +101,16 @@ public class EacCallbackReceiver {
 	}).when(interaction).onCardRecognized();
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onPinCanRequest().");
-	    if (promisedRequestCardInsertion.isDelivered()) {
-		promisedRequestCardInsertion = new Promise();
+	    if (promisedOperationPinCanRequest.isDelivered()) {
+		promisedOperationPinCanRequest = new Promise();
 	    }
 	    promisedOperationPinCanRequest.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
 	    return null;
 	}).when(interaction).onPinCanRequest(any());
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onPinRequest().");
-	    if (promisedRequestCardInsertion.isDelivered()) {
-		promisedRequestCardInsertion = new Promise();
+	    if (promisedOperationPinRequest.isDelivered()) {
+		promisedOperationPinRequest = new Promise();
 	    }
 	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
 	    return null;
@@ -188,6 +189,8 @@ public class EacCallbackReceiver {
 	LOG.debug("Confirming server data.");
 	if (!promisedServerData.isCancelled() && !promisedOperationConfirmAttributes.isDelivered()) {
 	    this.expectOnServerData();
+	    world.microSleep();
+	    world.microSleep();
 	}
 	try {
 	    ServerData serverData = promisedServerData.deref();
@@ -205,6 +208,5 @@ public class EacCallbackReceiver {
 	} catch (InterruptedException ex) {
 	    throw new RuntimeException(ex);
 	}
-
     }
 }

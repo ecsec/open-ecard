@@ -88,28 +88,14 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.eacWorld.startSimpleEac();
 
-	    world.eacWorld.expectOnStarted();
-
-	    world.microSleep();
-	    world.microSleep();
-	    world.microSleep();
-
-	    world.eacWorld.expectOnServerData();
-
-	    world.microSleep();
-	    world.microSleep();
-
 	    world.eacWorld.givenConfirmationOfServerData();
-
-	    world.microSleep();
-	    world.microSleep();
 
 	    world.eacWorld.expectCardInsertionRequest();
 	}
     }
 
     @Test
-    void canSuccessfullyChangePin() throws Exception {
+    void canSuccessfullyEnterPin() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
 
@@ -117,10 +103,10 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.eacWorld.startSimpleEac();
 
-	    world.eacWorld.expectOnStarted();
+	    world.eacWorld.givenConfirmationOfServerData();
 
 	    world.eacWorld.expectCardInsertionRequest();
-
+	    
 	    world.givenNpaCardInserted();
 
 	    world.eacWorld.expectSuccessfulPinEntry();

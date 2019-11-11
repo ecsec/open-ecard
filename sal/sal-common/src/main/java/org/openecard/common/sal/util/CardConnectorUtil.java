@@ -124,6 +124,7 @@ public class CardConnectorUtil {
 		foundCardHandle.deliver(eventData.getHandle());
 	    } catch (IllegalStateException ex) {
 		// caused if callback is called multiple times, but this is fine
+		LOG.warn("Card in an illegal state.", ex);
 	    }
 	}
     }

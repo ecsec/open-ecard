@@ -19,12 +19,8 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.scio;
 
-import android.content.Context;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
@@ -36,7 +32,6 @@ import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * NFC specific implementation of the TerminalFactory
@@ -50,23 +45,13 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCFactory.class);
 
-    private static Context context;
-    private static NfcAdapter adapter;
     private static NFCCardTerminals terminals;
-    private static NFCCardTerminal terminal;
+    private static AndroidNFCCardTerminal terminal;
 
     public AndroidNFCFactory() throws NoSuchTerminal {
 	LOG.info("Create new NFCFactory");
-	if (adapter == null || terminals == null) {
-	    adapter = getNFCAdapter();
-	    if(adapter == null) {
-		String msg = "NFC not available";
-		LOG.error(msg);
-		throw new NoSuchTerminal(msg);
-	    }
-	    terminal = new NFCCardTerminal();
-	    terminals = new NFCCardTerminals(terminal);
-	}
+	terminal = new AndroidNFCCardTerminal();
+	terminals = new NFCCardTerminals(terminal);
     }
 
     @Override
@@ -77,10 +62,6 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
     @Override
     public SCIOTerminals terminals() {
 	return terminals;
-    }
-
-    public static void setContext(Context c){
-	context = c;
     }
 
     /**
@@ -101,8 +82,14 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
 	return terminalNames;
     }
 
-    public static void setNFCTag(Tag tag) {
-	setNFCTag(tag, IsoDep.get(tag).getTimeout());
+    public static void setNFCTag(Tag tag) throws IOException {
+	AndroidNFCCardTerminal staticInstance = terminal;
+	if (staticInstance != null) {
+	    final IsoDep isoTag = IsoDep.get(tag);
+
+	    final int timeout = isoTag.getTimeout();
+	    staticInstance.setNFCTag(isoTag, timeout);
+	}
     }
 
     /**
@@ -111,49 +98,14 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
      * @param tag
      * @param timeout current timeout for transceive(byte[]) in milliseconds.
      */
-    public static void setNFCTag(Tag tag, int timeout) {
-	IsoDep isoDepTag = IsoDep.get(tag);
-	isoDepTag.setTimeout(timeout);
-	try {
-	    // standard nfc terminal
-	    AndroidNFCCard card = new AndroidNFCCard(isoDepTag, timeout, terminal);
-	    terminal.setNFCCard(card);
-	} catch (IOException ex) {
-	    LOG.warn(ex.getMessage(), ex);
+    public static void setNFCTag(Tag tag, int timeout) throws IOException {
+	AndroidNFCCardTerminal staticInstance = terminal;
+	if (staticInstance != null) {
+	    IsoDep isoDepTag = IsoDep.get(tag);
+	    isoDepTag.setTimeout(timeout);
+	    staticInstance.setNFCTag(isoDepTag, timeout);
+
 	}
-    }
-
-    /**
-     * Proof if NFC is available on the corresponding device.
-     *
-     * @return true if nfc is available, otherwise false
-     */
-    public static boolean isNFCAvailable() {
-	return AndroidNFCFactory.getNFCAdapter() != null;
-    }
-
-    /**
-     * Proof if NFC is enabled on the corresponding device. If this method return {@code false} nfc should be activated
-     * in the device settings.
-     *
-     * @return true if nfc is enabled, otherwise false
-     */
-    public static boolean isNFCEnabled() {
-	return AndroidNFCFactory.getNFCAdapter() != null ? AndroidNFCFactory.getNFCAdapter().isEnabled() : false;
-    }
-
-    /**
-     * Return the adapter for NFC.
-     *
-     * @return nfc adapter.
-     */
-    public static NfcAdapter getNFCAdapter() {
-	if (adapter == null) {
-	    LOG.info("Try to create new NFCAdapter...");
-	    NfcManager nfcManager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
-	    adapter = nfcManager.getDefaultAdapter();
-	}
-	return adapter;
     }
 
 }

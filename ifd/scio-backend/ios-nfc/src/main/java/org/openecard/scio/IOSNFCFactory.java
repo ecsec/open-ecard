@@ -24,7 +24,6 @@ package org.openecard.scio;
 
 import java.io.IOException;
 import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,17 +40,21 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
     private static final String ALGORITHM = "IOSNFC";
 
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCFactory.class);
-    private final NFCCardTerminal terminal;
+    private final IOSNFCCardTerminal terminal;
     private final NFCCardTerminals terminals;
 
     private static IOSNFCFactory staticInstance;
+    private static IOSConfig staticConfig;
 
 
     public IOSNFCFactory() throws NoSuchTerminal, IOException {
-	this.terminal = new NFCCardTerminal();
+	this.terminal = new IOSNFCCardTerminal();
 	this.terminals = new NFCCardTerminals(terminal);
-//	this.terminal.setNFCCard(new IOSNFCCard(this.terminal));
 	staticInstance = this;
+	IOSConfig givenConfig = staticConfig;
+	if (givenConfig != null) {
+	    this.terminal.setConfig(givenConfig);
+	}
     }
 
     @Override
@@ -64,15 +67,23 @@ public class IOSNFCFactory implements org.openecard.common.ifd.scio.TerminalFact
 	return terminals;
     }
 
-    public static void triggerNFC(IOSConfig cfg) throws IOException, SCIOException {
-	IOSNFCCard card = new IOSNFCCard(staticInstance.terminal, cfg);
-	card.connect();
-	staticInstance.terminal.setNFCCard(card);
+    public void setConfig(IOSConfig config) {
+	this.terminal.setConfig(config);
+    }
+
+    public static void setStaticConfig(IOSConfig config) {
+	staticConfig = config;
+	IOSNFCFactory givenInstance = staticInstance;
+	if (givenInstance != null) {
+	    givenInstance.setConfig(config);
+	}
     }
 
     public static void setDialogMsg(String dialogMsg) {
-	staticInstance.terminal.setDialogMsg(dialogMsg);
-
+	IOSNFCFactory givenInstance = staticInstance;
+	if (givenInstance != null) {
+	    givenInstance.terminal.setDialogMsg(dialogMsg);
+	}
     }
 
 }

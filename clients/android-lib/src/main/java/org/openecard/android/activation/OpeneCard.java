@@ -23,6 +23,7 @@ package org.openecard.android.activation;
 
 import android.content.Context;
 import android.content.Intent;
+import java.io.IOException;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ContextManager;
@@ -52,14 +53,15 @@ public class OpeneCard {
     }
 
     public ContextManager context(Context context) {
-
-	AndroidNFCFactory.setContext(context);
-	AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
-	this.context = this.utils.context(capabilities);
+	if (this.context != null) {
+	    NfcUtils.setContext(context);
+	    AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
+	    this.context = this.utils.context(capabilities);
+	}
 	return this.context;
     }
 
-    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported {
+    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, IOException {
 	NfcUtils.getInstance().retrievedNFCTag(intent);
     }
 

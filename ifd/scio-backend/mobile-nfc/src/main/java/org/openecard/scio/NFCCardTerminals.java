@@ -46,16 +46,15 @@ public final class NFCCardTerminals implements SCIOTerminals {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminals.class);
 
-    private final SCIOTerminal nfcTerminal;
+    private final NFCCardTerminal nfcTerminal;
 
-    public NFCCardTerminals(SCIOTerminal terminal) {
+    public NFCCardTerminals(NFCCardTerminal terminal) {
 	this.nfcTerminal = terminal;
     }
 
     @Override
     public void prepareDevices() {
-	// TODO: implement this functionality
-	throw new UnsupportedOperationException("Not supported yet.");
+	this.nfcTerminal.prepareDevices();
     }
 
     @Override

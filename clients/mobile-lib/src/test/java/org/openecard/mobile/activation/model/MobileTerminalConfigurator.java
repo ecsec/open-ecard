@@ -48,7 +48,7 @@ public class MobileTerminalConfigurator implements Builder<TerminalFactory> {
     }
 
     public static MobileTerminalConfigurator withMobileNfcStack() {
-	NFCCardTerminal terminal = new NFCCardTerminal();
+	FakeNFCCardTerminal terminal = new FakeNFCCardTerminal();
 	NFCCardTerminals terminals = new NFCCardTerminals(terminal);
 	TerminalFactory mockTerminalFactory = mock(TerminalFactory.class);
 	when(mockTerminalFactory.terminals()).thenReturn(terminals);
@@ -56,7 +56,4 @@ public class MobileTerminalConfigurator implements Builder<TerminalFactory> {
 	return new MobileTerminalConfigurator(mockTerminalFactory, terminal, terminals);
     }
 
-    public class FakeNFCCardTerminals extends NFCCardTerminals {
-
-    }
 }

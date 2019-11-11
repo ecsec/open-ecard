@@ -27,11 +27,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.TagTechnology;
 import android.os.Build;
 import android.provider.Settings;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,6 +54,9 @@ public class NfcUtils {
     private static final Logger LOG = LoggerFactory.getLogger(NfcUtils.class);
 
     private static NfcUtils nfcUtils;
+
+    private Context context;
+    private NfcAdapter adapter;
 
     public static NfcUtils getInstance() {
 	synchronized (NfcUtils.class) {
@@ -90,7 +95,7 @@ public class NfcUtils {
 	}
     }
 
-    public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
+    public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported, IOException {
 	// indicates that a nfc tag is there
 	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	if (tagFromIntent != null) {
@@ -104,15 +109,21 @@ public class NfcUtils {
     }
 
     public static boolean isNfcEnabled(Context ctx) {
-	AndroidNFCFactory.setContext(ctx);
-	return AndroidNFCFactory.isNFCEnabled();
+	setContext(ctx);
+	return getInstance().isNFCEnabled();
     }
 
     public static boolean isNfcAvailable(Context ctx) {
-	AndroidNFCFactory.setContext(ctx);
-	return AndroidNFCFactory.isNFCAvailable();
+	setContext(ctx);
+	return getInstance().isNFCAvailable();
     }
 
+    public static void setContext(Context ctx) {
+	final NfcUtils instance = getInstance();
+	instance.context = ctx;
+	instance.adapter = null;
+
+    }
 
     @Deprecated
     public static boolean supportsExtendedLength(Context context) {
@@ -243,6 +254,38 @@ public class NfcUtils {
 	}
 
 	return null;
+    }
+    /**
+     * Proof if NFC is available on the corresponding device.
+     *
+     * @return true if nfc is available, otherwise false
+     */
+    public static boolean isNFCAvailable() {
+       return getInstance().getNFCAdapter() != null;
+    }
+
+    /**
+     * Proof if NFC is enabled on the corresponding device. If this method return {@code false} nfc should be activated
+     * in the device settings.
+     *
+     * @return true if nfc is enabled, otherwise false
+     */
+    public static boolean isNFCEnabled() {
+       return getInstance().getNFCAdapter() != null ? getInstance().getNFCAdapter().isEnabled() : false;
+    }
+
+    /**
+     * Return the adapter for NFC.
+     *
+     * @return nfc adapter.
+     */
+    public NfcAdapter getNFCAdapter() {
+       if (adapter == null) {
+           LOG.info("Try to create new NFCAdapter...");
+           NfcManager nfcManager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
+           adapter = nfcManager.getDefaultAdapter();
+       }
+       return adapter;
     }
 
 }

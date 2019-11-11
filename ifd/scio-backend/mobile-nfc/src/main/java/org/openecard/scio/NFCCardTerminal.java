@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Dirk Petrautzki
  * @author Mike Prechtl
  */
-public class NFCCardTerminal implements SCIOTerminal {
+public abstract class NFCCardTerminal implements SCIOTerminal {
 
     public static final String STD_TERMINAL_NAME = "Integrated NFC";
 
@@ -60,6 +60,16 @@ public class NFCCardTerminal implements SCIOTerminal {
     @Override
     public String getName() {
 	return terminalName;
+    }
+
+
+    public abstract void prepareDevices();
+
+    public void setDialogMsg(String dialogMsg) {
+	AbstractNFCCard currentCard = this.nfcCard;
+	if (currentCard != null) {
+	    currentCard.setDialogMsg(dialogMsg);
+	}
     }
 
     @Override
@@ -161,10 +171,6 @@ public class NFCCardTerminal implements SCIOTerminal {
 	    LOG.warn("Waiting for card present interrupted.");
 	}
 	return isCardPresent();
-    }
-
-    public void setDialogMsg(String msg) {
-	this.nfcCard.setDialogMsg(msg);
     }
 
 }

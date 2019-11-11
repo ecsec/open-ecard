@@ -43,12 +43,12 @@ import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.model.DelegatingMobileNfcTerminalFactory;
+import org.openecard.mobile.activation.model.FakeNFCCardTerminal;
 import org.openecard.mobile.activation.model.NfcConfig;
 import org.openecard.mobile.activation.model.OpeneCardContextConfigFactory;
 import org.openecard.mobile.activation.model.PromiseDeliveringFactory;
 import org.openecard.mobile.activation.model.Timeout;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.scio.NFCCardTerminal;
 import org.openecard.scio.NFCCardTerminals;
 import org.openecard.scio.NFCCardWatcher;
 import org.slf4j.Logger;
@@ -101,7 +101,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	configFactory = OpeneCardContextConfigFactory.mobile(mockTerminalFactory);
 
-	nfcTerminal = new NFCCardTerminal();
+	nfcTerminal = new FakeNFCCardTerminal();
 	nfcTerminals = new NFCCardTerminals(nfcTerminal);
 	nfcTerminalWatcher = new NFCCardWatcher(nfcTerminals, nfcTerminal);
     }
@@ -128,7 +128,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
     OpeneCardContextConfigFactory configFactory;
 
-    NFCCardTerminal nfcTerminal;
+    FakeNFCCardTerminal nfcTerminal;
 
     NFCCardTerminals nfcTerminals;
 

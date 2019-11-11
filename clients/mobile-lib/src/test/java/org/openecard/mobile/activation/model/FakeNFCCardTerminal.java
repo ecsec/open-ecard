@@ -19,20 +19,19 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.mobile.activation.model;
 
-package org.openecard.ios.activation;
-
-import org.openecard.mobile.activation.ContextManager;
-import org.openecard.robovm.annotations.FrameworkInterface;
+import org.openecard.scio.NFCCardTerminal;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface OpenEcard{
+public class FakeNFCCardTerminal extends NFCCardTerminal {
 
-    ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage);
+    @Override
+    public void prepareDevices() {
 
+    }
 
 }

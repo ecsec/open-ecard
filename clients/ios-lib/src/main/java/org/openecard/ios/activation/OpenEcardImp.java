@@ -32,7 +32,6 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSNFCFactory;
 import org.openecard.ws.android.AndroidMarshaller;
-import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.scio.IOSConfig;
 
 /**
@@ -66,13 +65,7 @@ public class OpenEcardImp implements OpenEcard {
 	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter());
 	this.utils = activationUtils;
 	this.context = this.utils.context(capabilities);
-    }
-
-
-    @Override
-    public void triggerNFC() {
-	try {
-	    IOSNFCFactory.triggerNFC(new IOSConfig() {
+	IOSNFCFactory.setStaticConfig(new IOSConfig() {
 		public String getDefaultProviderCardMSG() {
 
 		    return defaultNFCDialogMsg;
@@ -82,12 +75,7 @@ public class OpenEcardImp implements OpenEcard {
 
 		    return defaultNFCCardRecognizedMessage;
 		}
-
-
 	    });
-	} catch (Exception ex) {
-	    throw new RuntimeException(ex);
-	}
     }
 
     @Override

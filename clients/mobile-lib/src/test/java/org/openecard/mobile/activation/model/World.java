@@ -50,11 +50,9 @@ import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ActivationSource;
-import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
@@ -215,14 +213,9 @@ public class World implements AutoCloseable {
 	private Set<String> supportedCards;
 	private Promise<ActivationResult> promisedActivationResult;
 	private Promise<Void> promisedStarted;
-	private Promise<Void> promisedRequestCardInsertion;
-	private Promise<Void> promisedRecognizeCard;
-	private Promise<ConfirmPasswordOperation> promisedOperationPinRequest;
-	private Promise<ConfirmTwoPasswordsOperation> promisedOperationPinCanRequest;
 	private ActivationController activationController;
-	private Promise<Void> promisedRemoveCard;
-	private EacInteraction interaction;
 	private TCTokenContext mockTcTokenContext;
+	private EacCallbackReceiver eacInteraction;
 
 	private EacControllerFactory eacControllerFactory() {
 	    if (_eacControllerFactory == null) {
@@ -249,6 +242,7 @@ public class World implements AutoCloseable {
 	    } catch (MalformedURLException ex) {
 		throw new RuntimeException(ex);
 	    }
+
 
 	    mockTcTokenContext = mock(TCTokenContext.class);
 	    new Expectations() {
@@ -295,58 +289,13 @@ public class World implements AutoCloseable {
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();
 	    promisedStarted = new Promise<>();
-	    promisedRequestCardInsertion = new Promise();
-	    promisedRecognizeCard = new Promise();
-	    promisedRemoveCard = new Promise();
-	    promisedOperationPinCanRequest = new Promise();
-	    promisedOperationPinRequest = new Promise();
-	    interaction = mock(EacInteraction.class);
-	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-		LOG.debug("mockInteraction.requestCardInsertion().");
-		if (promisedRequestCardInsertion.isDelivered()) {
-		    promisedRequestCardInsertion = new Promise();
-		}
-		promisedRequestCardInsertion.deliver(null);
-		return null;
-	    }).when(interaction).requestCardInsertion();
-	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-		LOG.debug("mockInteraction.onCardRemoved().");
-		if (promisedRemoveCard.isDelivered()) {
-		    promisedRemoveCard = new Promise();
-		}
-		promisedRemoveCard.deliver(null);
-		return null;
-	    }).when(interaction).onCardRemoved();
 
-	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-		LOG.debug("mockInteraction.onCardRecognized().");
-		if (promisedRecognizeCard.isDelivered()) {
-		    promisedRecognizeCard = new Promise();
-		}
-		promisedRecognizeCard.deliver(null);
-		return null;
-	    }).when(interaction).onCardRecognized();
-	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-		LOG.debug("mockInteraction.onPinCanRequest().");
-		if (promisedRequestCardInsertion.isDelivered()) {
-		    promisedRequestCardInsertion = new Promise();
-		}
-		promisedOperationPinCanRequest.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
-		return null;
-	    }).when(interaction).onPinCanRequest(any());
-	    doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-		LOG.debug("mockInteraction.onPinRequest().");
-		if (promisedRequestCardInsertion.isDelivered()) {
-		    promisedRequestCardInsertion = new Promise();
-		}
-		promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
-		return null;
-	    }).when(interaction).onPinRequest(anyInt(), any());
+	    this.eacInteraction = new EacCallbackReceiver();
 
 	    activationController = eacControllerFactory().create(
 		    url,
 		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
-		    interaction);
+		    eacInteraction.interaction);
 	}
 
 	public void expectActivationResult(ActivationResultCode code) {
@@ -370,41 +319,21 @@ public class World implements AutoCloseable {
 
 	public void expectCardInsertionRequest() {
 	    LOG.debug("Expect card insertion.");
-	    try {
-		promisedRequestCardInsertion.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    this.eacInteraction.expectCardInsertionRequest();
 	}
 
 	public void expectRecognitionOfNpaCard() {
 	    LOG.debug("Expect recognition of NPA card.");
-	    try {
-		promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    this.eacInteraction.expectRecognitionOfNpaCard();
 	}
 
 	private void expectPinEntryWithSuccess(String currentPin) {
-	    try {
-		ConfirmPasswordOperation operation = promisedOperationPinRequest.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-		if (operation == null) {
-		    throw new IllegalStateException();
-		}
-		operation.enter(currentPin);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    this.eacInteraction.expectPinEntryWithSuccess(currentPin);
 	}
 
 	public void expectRemovalOfCard() {
 	    LOG.debug("Expect removal of card.");
-	    try {
-		promisedRemoveCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    this.eacInteraction.expectRemovalOfCard();
 	}
 
 	public void expectSuccessfulPinEntry() {
@@ -418,6 +347,20 @@ public class World implements AutoCloseable {
 	public void cancelEac() {
 	    LOG.debug("Cancel EAC.");
 	    this.activationController.cancelAuthentication();
+	}
+
+	public void expectOnServerData() {
+	    LOG.debug("Expect on server data.");
+	    if (!promisedStarted.isDelivered()) {
+		this.expectOnStarted();
+	    }
+
+	    this.eacInteraction.expectOnServerData();
+	}
+
+	public void givenConfirmationOfServerData() {
+	    LOG.debug("Confirming server data");
+	    this.eacInteraction.givenConfirmationOfServerData();
 	}
 
 	@Override
@@ -568,6 +511,7 @@ public class World implements AutoCloseable {
 	    LOG.debug("Cancel pin management.");
 	    this.activationController.cancelAuthentication();
 	}
+
 
 	@Override
 	public void close() throws Exception {

@@ -62,6 +62,24 @@ public class EacContextTests extends BaseIntegrationSetup {
     }
 
     @Test
+    void expectServerData() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.expectOnStarted();
+
+	    world.microSleep();
+	    world.microSleep();
+
+	    world.eacWorld.expectOnServerData();
+	}
+    }
+
+    @Test
     void expectCardRequest() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {
@@ -72,12 +90,25 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.eacWorld.expectOnStarted();
 
+	    world.microSleep();
+	    world.microSleep();
+	    world.microSleep();
+
+	    world.eacWorld.expectOnServerData();
+
+	    world.microSleep();
+	    world.microSleep();
+
+	    world.eacWorld.givenConfirmationOfServerData();
+
+	    world.microSleep();
+	    world.microSleep();
+
 	    world.eacWorld.expectCardInsertionRequest();
 	}
     }
 
     @Test
-    @Ignore("Eac activation has not been reworked.")
     void canSuccessfullyChangePin() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

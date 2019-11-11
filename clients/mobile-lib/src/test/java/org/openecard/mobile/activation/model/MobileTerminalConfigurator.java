@@ -55,4 +55,8 @@ public class MobileTerminalConfigurator implements Builder<TerminalFactory> {
 
 	return new MobileTerminalConfigurator(mockTerminalFactory, terminal, terminals);
     }
+
+    public class FakeNFCCardTerminals extends NFCCardTerminals {
+
+    }
 }

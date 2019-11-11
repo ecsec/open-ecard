@@ -45,6 +45,7 @@ import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroySession;
@@ -74,6 +75,7 @@ import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
 import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
@@ -481,7 +483,30 @@ public class Marshaller {
 	    emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(prepareDevices.getContextHandle())));
 	    rootElement.appendChild(emContextHandle);
 
-	} else {
+	} else if (o instanceof PrepareDevicesResponse) {
+	    PrepareDevicesResponse resp = (PrepareDevicesResponse) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendResponseValues(resp, rootElement, document);
+	} else if (o instanceof DIDGet) {
+	    DIDGet dIDGet = (DIDGet)o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(dIDGet, rootElement);
+
+	    if (dIDGet.getConnectionHandle() != null) {
+		rootElement.appendChild(marshalConnectionHandle(dIDGet.getConnectionHandle(), document));
+	    }
+
+	    if (dIDGet.getDIDName() != null) {
+		Element e = createElementIso(document, "DIDName");
+		e.appendChild(document.createTextNode(dIDGet.getDIDName()));
+		rootElement.appendChild(e);
+	    }
+	    if (dIDGet.getDIDScope() != null) {
+		Element e = createElementIso(document, "DIDScope");
+		e.appendChild(document.createTextNode(dIDGet.getDIDScope().value()));
+		rootElement.appendChild(e);
+	    }
+	}else {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
 

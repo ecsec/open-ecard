@@ -184,33 +184,9 @@ public final class EacNavigator extends MobileNavigator {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else if (! isCanStep && ps.isRequestCan()) {
-		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperation() {
-			@Override
-			public void enter(String can, String pin) {
-			    if (msgSetter.isSupported()) {
-				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
-			    } else {
-				interaction.requestCardInsertion();
-			    }
-			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, can);
-			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-			    waitForPin.deliver(outInfo);
-			}
-		    });
+		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperationImpl(this, interaction, msgSetter, pinStep, waitForPin));
 		} else {
-		    ConfirmPasswordOperation op = new ConfirmPasswordOperation() {
-			@Override
-			public void enter(String pin) {
-			    if (msgSetter.isSupported()) {
-				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
-			    } else {
-				interaction.requestCardInsertion();
-			    }
-			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, null);
-			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-			    waitForPin.deliver(outInfo);
-			}
-		    };
+		    ConfirmPasswordOperation op = new ConfirmPasswordOperationImpl(this, interaction, msgSetter, pinStep, waitForPin);
 		    if (isCanStep) {
 			interaction.onCanRequest(op);
 		    } else {
@@ -310,7 +286,7 @@ public final class EacNavigator extends MobileNavigator {
     }
 
 
-    private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
+    public void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
 	for (InputInfoUnit infoInUnit : inInfo) {
 	    for (OutputInfoUnit infoOutUnit : outInfo) {
 		if (infoInUnit.getID().equals(infoOutUnit.getID())) {

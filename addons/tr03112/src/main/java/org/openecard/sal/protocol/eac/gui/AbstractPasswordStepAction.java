@@ -66,6 +66,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
 	conHandle = ph.connectCardIfNeeded();
+	this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
 	DIDAuthenticationDataType protoData = eacData.didRequest.getAuthenticationProtocolData();
 	AuthDataMap paceAuthMap;
@@ -110,6 +111,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
 	conHandle = ph.connectCardIfNeeded();
+	this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);

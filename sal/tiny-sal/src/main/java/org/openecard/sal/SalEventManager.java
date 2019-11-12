@@ -318,15 +318,18 @@ public class SalEventManager {
 			if (handle.getRecognitionInfo() != null) {
 			    String type = handle.getRecognitionInfo().getCardType();
 			    LOG.info("Recognised card type={}", type);
-			    env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(handle));
 			    CardInfoType cif = env.getRecognition().getCardInfo(type);
 			    // add card to SAL state
 			    // TODO: add interface protocol, but it looks like it was never used so probably ok to leave it null
 			    try {
+				// Register card before triggering events.
 				salStates.addCard(ctx, ifdName, handle.getSlotIndex(), new CardInfoWrapper(cif, null));
 			    } catch (DuplicateCardEntry ex) {
 				LOG.error("Duplicate card entry detected, ignoring new card.");
 			    }
+
+			    env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(handle));
+
 			}
 
 		    } else if (!terminalAdded && !cardPresent && cardWasPresent) {

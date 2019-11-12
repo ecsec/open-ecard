@@ -28,6 +28,7 @@ import generated.TCTokenType;
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction;
 import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse;
 import iso.std.iso_iec._24727.tech.schema.BioSensorCapabilityType;
+import iso.std.iso_iec._24727.tech.schema.CAMarkerType;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
@@ -42,10 +43,14 @@ import iso.std.iso_iec._24727.tech.schema.ConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.CreateSession;
 import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
+import iso.std.iso_iec._24727.tech.schema.CryptoMarkerType;
+import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroySession;
@@ -58,6 +63,7 @@ import iso.std.iso_iec._24727.tech.schema.EAC1OutputType;
 import iso.std.iso_iec._24727.tech.schema.EAC2InputType;
 import iso.std.iso_iec._24727.tech.schema.EAC2OutputType;
 import iso.std.iso_iec._24727.tech.schema.EACAdditionalInputType;
+import iso.std.iso_iec._24727.tech.schema.EACMarkerType;
 import iso.std.iso_iec._24727.tech.schema.EmptyResponseDataType;
 import iso.std.iso_iec._24727.tech.schema.EndTransaction;
 import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse;
@@ -72,14 +78,20 @@ import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
+import iso.std.iso_iec._24727.tech.schema.MutualAuthMarkerType;
 import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
+import iso.std.iso_iec._24727.tech.schema.PACEMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
+import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
+import iso.std.iso_iec._24727.tech.schema.RIMarkerType;
+import iso.std.iso_iec._24727.tech.schema.RSAAuthMarkerType;
 import iso.std.iso_iec._24727.tech.schema.RecognitionTree;
 import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
+import iso.std.iso_iec._24727.tech.schema.TAMarkerType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import iso.std.iso_iec._24727.tech.schema.Wait;
@@ -506,7 +518,17 @@ public class Marshaller {
 		e.appendChild(document.createTextNode(dIDGet.getDIDScope().value()));
 		rootElement.appendChild(e);
 	    }
-	}else {
+	} else if (o instanceof DIDGetResponse) {
+	    DIDGetResponse dIDGetResponse = (DIDGetResponse) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendResponseValues(dIDGetResponse, rootElement, document);
+
+	    final DIDStructureType didStructure = dIDGetResponse.getDIDStructure();
+	    if (didStructure != null) {
+		final Element em = marshalDIDStructure(didStructure, document);
+		rootElement.appendChild(em);
+	    }
+	} else {
 	    throw new IllegalArgumentException("Cannot marshal " + o.getClass().getSimpleName());
 	}
 
@@ -1198,6 +1220,103 @@ public class Marshaller {
 	}
 
 	return rootElement;
+    }
+
+    private Element marshalDIDStructure(DIDStructureType didStructure, Document document) throws MarshallingTypeException {
+	Element root = createElementIso(document, "DIDStructure");
+
+	{
+	    Element em = createElementIso(document, "Authenticated");
+	    em.appendChild(document.createTextNode(Boolean.toString(didStructure.isAuthenticated())));
+	    root.appendChild(em);
+	}
+	if (didStructure.getDIDName() != null) {
+	    Element em = createElementIso(document, "DIDName");
+	    em.appendChild(document.createTextNode(didStructure.getDIDName()));
+	    root.appendChild(em);
+	}
+
+	if (didStructure.getDIDScope()!= null) {
+	    Element em = createElementIso(document, "DIDScope");
+	    em.appendChild(document.createTextNode(didStructure.getDIDScope().value()));
+	    root.appendChild(em);
+	}
+
+	final DIDAbstractMarkerType didMarker = didStructure.getDIDMarker();
+
+	if (didMarker != null) {
+	    Element em = marshalDIDMarker(didMarker, document);
+	    root.appendChild(em);
+
+	    for (Element e : didMarker.getAny()) {
+		Element elemCopy = createElementIso(document, e.getLocalName());
+		elemCopy.setTextContent(e.getTextContent());
+		em.appendChild(elemCopy);
+	    }
+	}
+
+
+	return root;
+    }
+
+    private Element marshalDIDMarker(DIDAbstractMarkerType didMarker, Document document) throws MarshallingTypeException {
+	Element root = createElementIso(document, "DIDMarker");
+
+	root.setAttribute("Protocol", didMarker.getProtocol());
+
+	for (Map.Entry<QName, String> next : didMarker.getOtherAttributes().entrySet()) {
+	    QName key = next.getKey();
+	    String val = next.getValue();
+
+	    if (! key.getNamespaceURI().isEmpty()) {
+		String qn = key.getPrefix().isEmpty() ? "" : key.getPrefix() + ":";
+		qn += key.getLocalPart();
+		root.setAttributeNS(key.getNamespaceURI(), qn, val);
+	    } else {
+		if (key.getPrefix().isEmpty()) {
+		    root.setAttribute(key.getPrefix() + ":" + key.getLocalPart(), val);
+		} else {
+		    root.setAttribute(key.getLocalPart(), val);
+		}
+	    }
+	}
+
+	// check if we should synthesize the xsi:type element
+	boolean synthesize = true;
+	for (Map.Entry<QName, String> entries : didMarker.getOtherAttributes().entrySet()) {
+	    QName key = entries.getKey();
+	    if (XSI_NS.equals(key.getNamespaceURI()) && "type".equals(key.getLocalPart())) {
+		synthesize = false;
+	    }
+	}
+	if (synthesize) {
+	    String abstractType;
+	    if (didMarker instanceof PinCompareMarkerType) {
+		abstractType = "PinCompareMarkerType";
+	    } else if (didMarker instanceof MutualAuthMarkerType) {
+		abstractType = "MutualAuthMarkerType";
+	    } else if (didMarker instanceof EACMarkerType) {
+		abstractType = "EACMarkerType";
+	    } else if (didMarker instanceof PACEMarkerType) {
+		abstractType = "PACEMarkerType";
+		PACEMarkerType marker = (PACEMarkerType)didMarker;
+
+	    } else if (didMarker instanceof CAMarkerType) {
+		abstractType = "CAMarkerType";
+	    } else if (didMarker instanceof TAMarkerType) {
+		abstractType = "TAMarkerType";
+	    } else if (didMarker instanceof RIMarkerType) {
+		abstractType = "RIMarkerType";
+	    } else if (didMarker instanceof RSAAuthMarkerType) {
+		abstractType = "RSAAuthMarkerType";
+	    } else if (didMarker instanceof CryptoMarkerType) {
+		abstractType = "CryptoMarkerType";
+	    } else {
+		throw new MarshallingTypeException(didMarker.getClass().getCanonicalName() + " is not a supported DIDAbstractMarkerType");
+	    }
+	    root.setAttributeNS(XSI_NS, XSI_PFX + ":type", ISO_PFX + ":" + abstractType);
+	}
+	return root;
     }
 
 }

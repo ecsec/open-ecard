@@ -63,9 +63,13 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
+import iso.std.iso_iec._24727.tech.schema.DIDGet;
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDMarkerType;
+import iso.std.iso_iec._24727.tech.schema.DIDQualifierType;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
 import iso.std.iso_iec._24727.tech.schema.DataMaskType;
 import iso.std.iso_iec._24727.tech.schema.DataSetInfoType;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
@@ -1005,6 +1009,39 @@ public class Unmarshaller {
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("PrepareDevicesResponse")));
 	    return prepareDevicesResponse;
+	}  else if (parser.getName().equals("DIDGet")) {
+	    DIDGet dIDGet = new DIDGet();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("DIDName")) {
+			dIDGet.setDIDName(parser.nextText());
+		    } else if (parser.getName().equals("DIDScope")) {
+			dIDGet.setDIDScope(DIDScopeType.fromValue(parser.nextText()));
+		    } else if (parser.getName().equals("ConnectionHandle")) {
+			dIDGet.setConnectionHandle(parseConnectionHandle(parser));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDGet")));
+	    return dIDGet;
+	} else if (parser.getName().equals("DIDGetResponse")) {
+	    DIDGetResponse dIDGetResponse = new DIDGetResponse();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Result")) {
+			dIDGetResponse.setResult(this.parseResult(parser));
+		    } else if (parser.getName().equals("DIDStructureType")) {
+			dIDGetResponse.setDIDStructure(parseDIDStructureType(parser));
+		    }
+
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDGetResponse")));
+	    return dIDGetResponse;
 	} else {
 	    throw new IOException("Unmarshalling of " + parser.getName() + " is not yet supported.");
 	}
@@ -2038,6 +2075,84 @@ public class Unmarshaller {
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("InitializeFrameworkResponse")));
 	return ifr;
+    }
+
+    private DIDStructureType parseDIDStructureType(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DIDStructureType result = new DIDStructureType();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("Authenticated")) {
+		    result.setAuthenticated(Boolean.getBoolean(parser.nextText()));
+		} else if (parser.getName().equals("DIDMarker")) {
+		    result.setDIDMarker(this.parseDIDAbstractMarkerType(parser));
+		} else if (parser.getName().equals("DIDName")) {
+		    result.setDIDName(parser.nextText());
+		} else if (parser.getName().equals("DIDQualifier(")) {
+		    result.setDIDQualifier(this.parseDIDQualifier(parser));
+		} else if (parser.getName().equals("DIDScope")) {
+		    result.setDIDScope(DIDScopeType.fromValue(parser.nextText()));
+		} else if (parser.getName().equals("Authenticated")) {
+		    result.setAuthenticated(Boolean.getBoolean(parser.nextText()));
+		} else {
+		    throw new IOException(parser.getName() + " not yet implemented");
+		}
+	    }
+	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("ConnectionHandle")));
+	return result;
+    }
+
+    private DIDAbstractMarkerType parseDIDAbstractMarkerType(XmlPullParser parser) throws XmlPullParserException, IOException {
+
+	int eventType;
+	String elementType = parser.getAttributeValue("xsi", "type");
+	LOG.debug(elementType);
+	LOG.debug(parser.getNamespace("urn:iso:std:iso-iec:24727:tech:schema"));
+
+	DIDAbstractMarkerType didMarker;
+	if (elementType.equals("PACEMarker")) {
+	    didMarker = this.parseMarker(parser, PACEMarkerType.class);
+	} else if (elementType.equals("TAMarker")) {
+	    didMarker = this.parseMarker(parser, TAMarkerType.class);
+	} else if (elementType.equals("CAMarker")) {
+	     didMarker = this.parseMarker(parser, CAMarkerType.class);
+	} else if (elementType.equals("RIMarker")) {
+	     didMarker = this.parseMarker(parser, RIMarkerType.class);
+	} else if (elementType.equals("CryptoMarker")) {
+	     didMarker = this.parseMarker(parser, CryptoMarkerType.class);
+	} else if (elementType.equals("PinCompareMarker")) {
+	     didMarker = this.parseMarker(parser, PinCompareMarkerType.class);
+	} else if (elementType.equals("RSAAuthMarker")) {
+	     didMarker = this.parseMarker(parser, RSAAuthMarkerType.class);
+	} else if (elementType.equals("MutualAuthMarker")) {
+	     didMarker = this.parseMarker(parser, MutualAuthMarkerType.class);
+	} else if (elementType.equals("EACMarker")) {
+	     didMarker = this.parseMarker(parser, EACMarkerType.class);
+	} else {
+	    throw new XmlPullParserException(elementType + " not yet supported.");
+	}
+	return didMarker;
+    }
+
+    private DIDQualifierType parseDIDQualifier(XmlPullParser parser) throws XmlPullParserException, IOException {
+	DIDQualifierType result = new DIDQualifierType();
+	int eventType;
+	do {
+	    parser.next();
+	    eventType = parser.getEventType();
+	    if (eventType == XmlPullParser.START_TAG) {
+		if (parser.getName().equals("ApplicationFunction(")) {
+		    result.setApplicationFunction(parser.nextText());
+		} else if (parser.getName().equals("ApplicationIdentifier")) {
+		    result.setApplicationIdentifier(StringUtils.toByteArray(parser.nextText()));
+		} else if (parser.getName().equals("ObjectIdentifier")) {
+		    result.setObjectIdentifier(parser.nextText());
+		}
+	    }
+	} while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("Output")));
+	return result;
     }
 
 }

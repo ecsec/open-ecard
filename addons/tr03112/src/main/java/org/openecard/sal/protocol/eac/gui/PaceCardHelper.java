@@ -32,6 +32,7 @@ import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.openecard.addon.Context;
@@ -169,8 +170,10 @@ public class PaceCardHelper {
 	    ctx.getDispatcher().safeDeliver(pdreq);
 	    final String sessionIdentifier = conHandle.getChannelHandle().getSessionIdentifier();
 
+	    Set<String> npaType = new HashSet<>();
+	    npaType.add(NPA_TYPE);
 	    // wait for eid card
-	    CardConnectorUtil connectorUtil = new CardConnectorUtil(ctx.getDispatcher(), ctx.getEventDispatcher(), Set.of(NPA_TYPE),
+	    CardConnectorUtil connectorUtil = new CardConnectorUtil(ctx.getDispatcher(), ctx.getEventDispatcher(), npaType,
 		    sessionIdentifier, conHandle.getContextHandle(), conHandle.getIFDName());
 	    CardApplicationPathType path = connectorUtil.waitForCard();
 	    ChannelHandleType channelHandle = path.getChannelHandle();

@@ -351,21 +351,4 @@ public final class EacNavigator extends MobileNavigator {
 	return result;
     }
 
-    private static class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeSelectionOperation {
-
-	private final ServerDataImpl sd;
-	private final Promise<List<OutputInfoUnit>> waitForAttributes;
-
-	public ConfirmAttributeSelectionOperationImpl(ServerDataImpl sd, Promise<List<OutputInfoUnit>> waitForAttributes) {
-	    this.sd = sd;
-	    this.waitForAttributes = waitForAttributes;
-	}
-
-	@Override
-	public void enter(List<SelectableItem> readAttr, List<SelectableItem> writeAttr) {
-	    List<OutputInfoUnit> outInfo = sd.getSelection(readAttr, writeAttr);
-	    waitForAttributes.deliver(outInfo);
-	}
-    }
-
 }

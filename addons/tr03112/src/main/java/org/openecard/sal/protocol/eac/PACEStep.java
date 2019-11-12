@@ -311,7 +311,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    // get challenge from card
 	    ConnectionHandleType conHandle = (ConnectionHandleType) dynCtx.get(TR03112Keys.CONNECTION_HANDLE);
 	    if (conHandle.getSlotHandle() == null) {
-		throw new RuntimeException("The connection handle stored in TR03112Keys.CONNECTION_HANDLE does not have a slot hand!");
+		throw new RuntimeException("The connection handle stored in TR03112Keys.CONNECTION_HANDLE does not have a slot handle!");
 	    }
 	    TerminalAuthentication ta = new TerminalAuthentication(dispatcher, conHandle.getSlotHandle());
 	    byte[] challenge = ta.getChallenge();

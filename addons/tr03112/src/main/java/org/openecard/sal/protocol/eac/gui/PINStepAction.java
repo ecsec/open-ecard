@@ -25,6 +25,7 @@ package org.openecard.sal.protocol.eac.gui;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
 import org.openecard.addon.Context;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -105,7 +106,7 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		// for people which think they have to remove the card in the process
 		if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
 		    LOG.error("The SlotHandle was invalid so probably the user removed the card or an reset occurred.", ex);
-		    return new StepActionResult(StepActionResultStatus.REPEAT, 
+		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			    new ErrorStep(lang.translationForKey(ERROR_TITLE), langPin.translationForKey(ERROR_CARD_REMOVED), ex));
 		}
 	    } catch (InterruptedException ex) {
@@ -122,12 +123,14 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		    // update step display
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
 		    this.step.setStatus(EacPinStatus.RC2);
+		    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, this.ctx.get(TR03112Keys.SESSION_CON_HANDLE));
 		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
 		    // update step display
 		    step.setStatus(EacPinStatus.RC1);
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
+		    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, this.ctx.get(TR03112Keys.SESSION_CON_HANDLE));
 		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {

@@ -590,6 +590,7 @@ public class TinySAL implements SAL {
 	    DisconnectResponse disconnectResponse = (DisconnectResponse) env.getDispatcher().safeDeliver(disconnect);
 	    response.setResult(disconnectResponse.getResult());
 	} catch (ECardException e) {
+	    LOG.debug("Could not process CardApplicationDisconnectResponse", e);
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);

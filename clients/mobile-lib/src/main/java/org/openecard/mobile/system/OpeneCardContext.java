@@ -55,6 +55,7 @@ import org.openecard.management.TinyManagement;
 import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
@@ -109,14 +110,16 @@ public class OpeneCardContext {
 
     private final NFCCapabilities nfcCapabilities;
     private final OpeneCardContextConfig config;
+    private NFCDialogMsgSetter msgSetter;
 
     // package private so that only this package can use it
-    public OpeneCardContext(NFCCapabilities nfcCapabilities, OpeneCardContextConfig config) {
+    public OpeneCardContext(NFCCapabilities nfcCapabilities, OpeneCardContextConfig config, NFCDialogMsgSetter msgSetter) {
 	if (nfcCapabilities == null) {
 	    throw new IllegalStateException(NO_NFC_CONTEXT);
 	}
 	this.nfcCapabilities = nfcCapabilities;
 	this.config = config;
+	this.msgSetter = msgSetter;
     }
 
     ///
@@ -134,6 +137,7 @@ public class OpeneCardContext {
 	// the key type must match the generic. This can't be enforced so watch it here.
 	// TODO: introduce factory method for the new instance of EacNavigatorFactory.
 	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
+	eacNavFac.setDialogMsgSetter(msgSetter);
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();

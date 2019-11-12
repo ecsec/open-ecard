@@ -22,8 +22,12 @@
 
 package org.openecard.ios.activation;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.Provider;
 import java.security.Security;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ContextManager;
@@ -83,6 +87,15 @@ public class OpenEcardImp implements OpenEcard {
 	this.defaultNFCDialogMsg = defaultNFCDialgoMsg;
 	this.defaultNFCCardRecognizedMessage = defaultNFCCardRecognizedMessage;
 	return context;
+    }
+
+    @Override
+    public String prepareTCTokenURL(String tcTokenURL) {
+	try {
+	    return URLEncoder.encode(tcTokenURL, "UTF-8");
+	} catch (UnsupportedEncodingException ex) {
+	    return "ERROR ";
+	}
     }
 
 }

@@ -43,7 +43,10 @@ import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
@@ -74,10 +77,12 @@ public final class EacNavigator extends MobileNavigator {
     private int idx = 0;
     private boolean pinFirstUse = true;
 
+    private NFCDialogMsgSetter msgSetter;
 
-    public EacNavigator(UserConsentDescription uc, EacInteraction interaction) {
+    public EacNavigator(UserConsentDescription uc, EacInteraction interaction, NFCDialogMsgSetter msgSetter) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
+	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -182,7 +187,11 @@ public final class EacNavigator extends MobileNavigator {
 		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperation() {
 			@Override
 			public void enter(String can, String pin) {
-			    interaction.requestCardInsertion();
+			    if (msgSetter.isSupported()) {
+				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
+			    } else {
+				interaction.requestCardInsertion();
+			    }
 			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, can);
 			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 			    waitForPin.deliver(outInfo);
@@ -192,7 +201,11 @@ public final class EacNavigator extends MobileNavigator {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperation() {
 			@Override
 			public void enter(String pin) {
-			    interaction.requestCardInsertion();
+			    if (msgSetter.isSupported()) {
+				interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
+			    } else {
+				interaction.requestCardInsertion();
+			    }
 			    List<OutputInfoUnit> outInfo = getPinResult(pinStep, pin, null);
 			    writeBackValues(pinStep.getInputInfoUnits(), outInfo);
 			    waitForPin.deliver(outInfo);
@@ -336,23 +349,6 @@ public final class EacNavigator extends MobileNavigator {
 	}
 
 	return result;
-    }
-
-    private static class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeSelectionOperation {
-
-	private final ServerDataImpl sd;
-	private final Promise<List<OutputInfoUnit>> waitForAttributes;
-
-	public ConfirmAttributeSelectionOperationImpl(ServerDataImpl sd, Promise<List<OutputInfoUnit>> waitForAttributes) {
-	    this.sd = sd;
-	    this.waitForAttributes = waitForAttributes;
-	}
-
-	@Override
-	public void enter(List<SelectableItem> readAttr, List<SelectableItem> writeAttr) {
-	    List<OutputInfoUnit> outInfo = sd.getSelection(readAttr, writeAttr);
-	    waitForAttributes.deliver(outInfo);
-	}
     }
 
 }

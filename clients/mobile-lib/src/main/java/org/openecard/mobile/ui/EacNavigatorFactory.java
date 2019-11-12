@@ -25,6 +25,7 @@ package org.openecard.mobile.ui;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 
 
 /**
@@ -34,8 +35,13 @@ import org.openecard.mobile.activation.EacInteraction;
 public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacInteraction> {
 
     private EacInteraction interaction;
+    private NFCDialogMsgSetter msgSetter;
 
     public static final String PROTOCOL_TYPE = "EAC";
+
+    public void setDialogMsgSetter(NFCDialogMsgSetter msgSetter) {
+	this.msgSetter = msgSetter;
+    }
 
     @Override
     public String getProtocolType() {
@@ -53,7 +59,7 @@ public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacInter
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
 
-	return new EacNavigator(uc, interaction);
+	return new EacNavigator(uc, interaction, msgSetter);
     }
 
     @Override

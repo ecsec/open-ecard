@@ -133,6 +133,7 @@ public class CommonContextManagerWithFakeNfcTests {
     NFCCardTerminals nfcTerminals;
 
     NFCCardWatcher nfcTerminalWatcher;
+    NFCDialogMsgSetter mockMsgSetter;
 
     private String providerName;
 
@@ -141,11 +142,11 @@ public class CommonContextManagerWithFakeNfcTests {
     }
 
     CommonContextManager createSut(OpeneCardContextConfigFactory factory) {
-	return createSut(mockNfc, factory.create(), source);
+	return createSut(mockNfc, factory.create(), source, mockMsgSetter);
     }
 
-    CommonContextManager createSut(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source) {
-	return new CommonContextManager(nfc, config, source);
+    CommonContextManager createSut(NFCCapabilities nfc, OpeneCardContextConfig config, ActivationSource source, NFCDialogMsgSetter msgSetter) {
+	return new CommonContextManager(nfc, config, source, msgSetter);
     }
 
     @Test

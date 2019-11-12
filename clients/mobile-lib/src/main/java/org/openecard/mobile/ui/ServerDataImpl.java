@@ -167,9 +167,11 @@ class ServerDataImpl implements ServerData {
     }
 
     private SelectableItem getItem(String name, List<SelectableItem> items) {
-	for (SelectableItem next : items) {
-	    if (name.equals(next.getName())) {
-		return next;
+	if (items != null) {
+	    for (SelectableItem next : items) {
+		if (name.equals(next.getName())) {
+		    return next;
+		}
 	    }
 	}
 	return null;

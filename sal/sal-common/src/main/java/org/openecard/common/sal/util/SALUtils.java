@@ -61,7 +61,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import org.openecard.common.ECardException;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.exception.IncorrectParameterException;
@@ -90,16 +89,16 @@ public class SALUtils {
     private static final Logger LOG = LoggerFactory.getLogger(SALUtils.class);
 
     public static List<CardEntry> filterEntries(CardApplicationPathType cardAppPath, Collection<CardEntry> listCardEntries) {
-	Collection<Predicate<CardEntry>> predicates = asPredicates(cardAppPath);
+	Collection<TinyPredicate<CardEntry>> predicates = asPredicates(cardAppPath);
 
 	return filterEntries(listCardEntries, predicates);
     }
 
-    private static List<CardEntry> filterEntries(Collection<CardEntry> listCardEntries, Collection<Predicate<CardEntry>> predicates) {
+    private static List<CardEntry> filterEntries(Collection<CardEntry> listCardEntries, Collection<TinyPredicate<CardEntry>> predicates) {
 	List<CardEntry> results = new ArrayList<>(listCardEntries.size());
 	for (CardEntry currentCardEntry : listCardEntries) {
 	    boolean matched = true;
-	    for (Predicate<CardEntry> predicate : predicates) {
+	    for (TinyPredicate<CardEntry> predicate : predicates) {
 		if (!predicate.test(currentCardEntry)) {
 		    matched = false;
 		    break;
@@ -112,12 +111,12 @@ public class SALUtils {
 	return results;
     }
 
-    private static Collection<Predicate<CardEntry>> asPredicates(CardApplicationPathType cardAppPath) {
-	List<Predicate<CardEntry>> predicates = new LinkedList<>();
+    private static Collection<TinyPredicate<CardEntry>> asPredicates(CardApplicationPathType cardAppPath) {
+	List<TinyPredicate<CardEntry>> predicates = new LinkedList<>();
 	byte[] contextHandle = cardAppPath.getContextHandle();
 	if (contextHandle != null) {
-	    predicates.add(new Predicate<CardEntry>() {
-		@Override
+	    predicates.add(new TinyPredicate<CardEntry>() {
+
 		public boolean test(CardEntry t) {
 		    return Arrays.equals(contextHandle, t.getCtxHandle());
 		}
@@ -125,8 +124,7 @@ public class SALUtils {
 	}
 	String ifdName = cardAppPath.getIFDName();
 	if (ifdName != null) {
-	    predicates.add(new Predicate<CardEntry>() {
-		@Override
+	    predicates.add(new TinyPredicate<CardEntry>() {
 		public boolean test(CardEntry t) {
 		    return ifdName.equals(t.getIfdName());
 		}
@@ -134,8 +132,7 @@ public class SALUtils {
 	}
 	BigInteger slotIndex = cardAppPath.getSlotIndex();
 	if (slotIndex != null) {
-	    predicates.add(new Predicate<CardEntry>() {
-		@Override
+	    predicates.add(new TinyPredicate<CardEntry>() {
 		public boolean test(CardEntry t) {
 		    return slotIndex.equals(t.getSlotIdx());
 		}
@@ -143,8 +140,7 @@ public class SALUtils {
 	}
 	byte[] cardApplication = cardAppPath.getCardApplication();
 	if (cardApplication != null) {
-	    predicates.add(new Predicate<CardEntry>() {
-		@Override
+	    predicates.add(new TinyPredicate<CardEntry>() {
 		public boolean test(CardEntry t) {
 		    return Arrays.equals(cardApplication, t.getCardApplication());
 		}

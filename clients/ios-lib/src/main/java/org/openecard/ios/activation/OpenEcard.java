@@ -34,5 +34,7 @@ public interface OpenEcard{
 
     ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage);
 
+    String prepareTCTokenURL(String tcTokenURL);
+
 
 }

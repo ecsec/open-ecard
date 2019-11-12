@@ -112,7 +112,9 @@ public class EacCallbackReceiver {
 	    if (promisedOperationPinRequest.isDelivered()) {
 		promisedOperationPinRequest = new Promise();
 	    }
-	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arg0.getArguments()[0]);
+	    final Object[] arguments = arg0.getArguments();
+
+	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arguments[1]);
 	    return null;
 	}).when(interaction).onPinRequest(anyInt(), any());
 

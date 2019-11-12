@@ -369,8 +369,10 @@ public class World implements AutoCloseable {
 		world.microSleep();
 		world.microSleep();
 		world.microSleep();
-		
+
 		this.expectOnStarted();
+
+		world.microSleep();
 	    }
 
 

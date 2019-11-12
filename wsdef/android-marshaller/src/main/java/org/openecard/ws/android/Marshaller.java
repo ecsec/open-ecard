@@ -1160,10 +1160,13 @@ public class Marshaller {
 	Element rootElement = createElementIso(document, "Transmit");
 	appendRequestValues(t, rootElement);
 
-	Element em = createElementIso(document, "SlotHandle");
-	em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
-	rootElement.appendChild(em);
-
+	Element em;
+	if (t.getSlotHandle() != null) {
+	    em = createElementIso(document, "SlotHandle");
+	    em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
+	    rootElement.appendChild(em);
+	}
+	
 	for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
 	    em = createElementIso(document, "InputAPDUInfo");
 	    rootElement.appendChild(em);

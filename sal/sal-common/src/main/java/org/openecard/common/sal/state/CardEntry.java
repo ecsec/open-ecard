@@ -50,7 +50,7 @@ public class CardEntry implements Comparable<CardEntry> {
 	if (this == o) {
 	    return 0;
 	} else {
-	    int ctxComp = Arrays.compare(this.ctxHandle, o.ctxHandle);
+	    int ctxComp = ByteUtils.compareUnsigned(this.ctxHandle, o.ctxHandle);
 	    if (ctxComp != 0) {
 		return ctxComp;
 	    }

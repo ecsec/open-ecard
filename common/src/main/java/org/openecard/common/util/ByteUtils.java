@@ -178,6 +178,17 @@ public class ByteUtils {
     /**
      * Compare two byte arrays.
      *
+     * @param x byte array
+     * @param y byte array
+     * @return true if x = y, otherwise false
+     */
+    public static int compareUnsigned(byte[] x, byte[] y) {
+	return Arrays.compareUnsigned(x, y);
+    }
+
+    /**
+     * Compare two byte arrays.
+     *
      * @param x byte
      * @param y byte array
      * @return true if x = y, otherwise false

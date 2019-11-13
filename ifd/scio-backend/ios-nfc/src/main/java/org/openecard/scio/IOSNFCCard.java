@@ -97,6 +97,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
 		LOG.debug(".didInvalidate()");
 		setTag(null);
+
 		return;
 	    }
 
@@ -136,6 +137,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	while (!isTagPresent()) {
 	    try {
 		Thread.sleep(100, 0);
+		tagPresentFlag = true;
 	    } catch (InterruptedException ex) {
 		throw new SCIOException("Error during session initialization", SCIOErrorCode.SCARD_F_INTERNAL_ERROR, ex);
 	    }
@@ -144,22 +146,27 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public void disconnect(boolean reset) throws SCIOException {
+
+	if (this.nfcSession != null) {
+	    this.nfcSession.invalidateSession();
+	    this.nfcSession = null;
+	}
+
 	if (reset) {
 	    LOG.debug("disconnect with reset - doing nothing");
-	    return;
+	    tagPresentFlag = true;
 	} else {
 	    LOG.debug("disconnect without reset - invalidate Session and remove tag");
-	    if (this.nfcSession != null) {
-		this.nfcSession.invalidateSession();
-		this.nfcSession = null;
-	    }
+	    tagPresentFlag = false;
 	}
     }
 
+    private boolean tagPresentFlag = false;
     @Override
     public boolean isTagPresent() {
 	LOG.debug("isTag present was called");
-	return this.tag != null;
+//	return this.tag != null;
+	return tagPresentFlag;
     }
 
     @Override

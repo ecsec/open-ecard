@@ -46,22 +46,19 @@ public class OpeneCard {
     }
 
     private final CommonActivationUtils utils;
-    private ContextManager context;
 
     OpeneCard(CommonActivationUtils utils) {
 	this.utils = utils;
     }
 
     public ContextManager context(Context context) {
-	if (this.context != null) {
-	    NfcUtils.setContext(context);
-	    AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
-	    this.context = this.utils.context(capabilities);
-	}
-	return this.context;
+	AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
+
+	return this.utils.context(capabilities);
     }
 
-    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, IOException {
+    public void onNewIntent(Context context, Intent intent) throws ApduExtLengthNotSupported, IOException {
+	NfcUtils.setContext(context);
 	NfcUtils.getInstance().retrievedNFCTag(intent);
     }
 

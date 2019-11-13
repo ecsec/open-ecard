@@ -72,6 +72,7 @@ public class AndroidNfcCapabilities implements NFCCapabilities  {
     }
 
     public static AndroidNfcCapabilities create(Context context) {
+	NfcUtils.setContext(context);
 	NfcAdapter adapter = getNfcAdapter(context);
 	return new AndroidNfcCapabilities(context, adapter);
     }

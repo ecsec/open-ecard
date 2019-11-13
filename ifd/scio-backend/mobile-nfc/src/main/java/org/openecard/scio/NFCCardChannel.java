@@ -53,6 +53,7 @@ public class NFCCardChannel implements SCIOChannel {
     @Override
     public void close() throws SCIOException {
 	// we only have one channel and this will be open as long as we are connected to the tag
+	card.disconnect(true);
     }
 
     @Override

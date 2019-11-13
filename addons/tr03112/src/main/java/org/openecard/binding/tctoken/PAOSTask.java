@@ -23,6 +23,7 @@
 package org.openecard.binding.tctoken;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
 import iso.std.iso_iec._24727.tech.schema.StartPAOS;
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse;
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +37,7 @@ import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherException;
 import org.openecard.common.interfaces.DocumentSchemaValidator;
+import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Promise;
 import org.openecard.transport.paos.PAOS;
@@ -68,7 +70,6 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	this.tokenRequest = tokenRequest;
 	this.schemaValidator = schemaValidator;
     }
-
 
     @Override
     public StartPAOSResponse call()
@@ -117,11 +118,16 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    } catch (Exception ex) {
 		LOG.warn("Error disconnecting finished handle.", ex);
 	    }
-	    try {
-		TCTokenHandler.destroySession(dispatcher, connectionHandle);
-	    } catch (Exception ex) {
-		LOG.warn("Error disconnecting destroying session.", ex);
-	    }
+	    destroySession();
+	    powerDownDevices();
+	}
+    }
+
+    private void destroySession() {
+	try {
+	    TCTokenHandler.destroySession(dispatcher, connectionHandle);
+	} catch (Exception ex) {
+	    LOG.warn("Error disconnecting destroying session.", ex);
 	}
     }
 
@@ -130,6 +136,17 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	// this is our own extension and servers might not understand it
 	result.setSlotInfo(null);
 	return result;
+    }
+
+    private void powerDownDevices() {
+	try {
+	    PowerDownDevices powerDownDevices = new PowerDownDevices();
+	    powerDownDevices.setContextHandle(ByteUtils.clone(connectionHandle.getContextHandle()));
+	    dispatcher.safeDeliver(powerDownDevices);
+	} catch (Exception ex) {
+	    LOG.warn("Error powering down devices.", ex);
+	}
+
     }
 
 }

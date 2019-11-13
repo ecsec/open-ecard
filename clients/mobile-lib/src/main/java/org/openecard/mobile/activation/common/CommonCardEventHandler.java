@@ -16,7 +16,6 @@ import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationInteraction;
-import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +58,10 @@ public class CommonCardEventHandler {
 
     public void onRequestCardInsertion() {
 	interaction.requestCardInsertion();
+    }
+
+    public void onCardInteractionComplete() {
+	interaction.onCardInteractionComplete();
     }
 
     public static AutoCloseable hookUp(CommonCardEventHandler handler, Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
@@ -120,11 +123,18 @@ public class CommonCardEventHandler {
 		handler.onRequestCardInsertion();
 	    }
 	};
+	EventCallback powerDownDevices = new EventCallback() {
+	    @Override
+	    public void signalEvent(EventType eventType, EventObject eventData) {
+		handler.onCardInteractionComplete();
+	    }
+	};
 
 	eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
 	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
 	eventDispatcher.add(prepareDevices, EventType.PREPARE_DEVICES);
+	eventDispatcher.add(powerDownDevices, EventType.POWER_DOWN_DEVICES);
 
 	return new AutoCloseable() {
 	    @Override

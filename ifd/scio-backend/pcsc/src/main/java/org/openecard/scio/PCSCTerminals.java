@@ -101,6 +101,11 @@ public class PCSCTerminals implements SCIOTerminals {
     }
 
     @Override
+    public void powerDownDevices() {
+	// no-op in the PCSC world
+    }
+
+    @Override
     public List<SCIOTerminal> list() throws SCIOException {
 	return list(State.ALL);
     }

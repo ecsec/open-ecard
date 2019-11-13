@@ -65,6 +65,10 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 
     public abstract void prepareDevices();
 
+    public void powerDownDevices() {
+	this.removeTag();
+    }
+
     public void setDialogMsg(String dialogMsg) {
 	AbstractNFCCard currentCard = this.nfcCard;
 	if (currentCard != null) {
@@ -79,7 +83,11 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 
     public synchronized void setNFCCard(AbstractNFCCard card) {
 	this.nfcCard = card;
-	notifyCardPresent();
+	if (card == null) {
+	    notifyCardAbsent();
+	} else {
+	    notifyCardPresent();
+	}
     }
 
     public synchronized void removeTag() {

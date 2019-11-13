@@ -83,6 +83,8 @@ import iso.std.iso_iec._24727.tech.schema.OutputInfoType;
 import iso.std.iso_iec._24727.tech.schema.PACEMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.RIMarkerType;
@@ -497,6 +499,19 @@ public class Marshaller {
 
 	} else if (o instanceof PrepareDevicesResponse) {
 	    PrepareDevicesResponse resp = (PrepareDevicesResponse) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendResponseValues(resp, rootElement, document);
+	} else if (o instanceof PowerDownDevices) {
+	    PowerDownDevices powerDownDevices = (PowerDownDevices) o;
+	    rootElement = createElementIso(document, o.getClass().getSimpleName());
+	    appendRequestValues(powerDownDevices, rootElement);
+
+	    Element emContextHandle = createElementIso(document, "ContextHandle");
+	    emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(powerDownDevices.getContextHandle())));
+	    rootElement.appendChild(emContextHandle);
+
+	} else if (o instanceof PowerDownDevicesResponse) {
+	    PowerDownDevicesResponse resp = (PowerDownDevicesResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    appendResponseValues(resp, rootElement, document);
 	} else if (o instanceof DIDGet) {
@@ -1166,7 +1181,7 @@ public class Marshaller {
 	    em.appendChild(document.createTextNode(ByteUtils.toHexString(t.getSlotHandle())));
 	    rootElement.appendChild(em);
 	}
-	
+
 	for (int i = 0; i < t.getInputAPDUInfo().size(); i++) {
 	    em = createElementIso(document, "InputAPDUInfo");
 	    rootElement.appendChild(em);

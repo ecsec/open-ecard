@@ -112,6 +112,8 @@ import iso.std.iso_iec._24727.tech.schema.PACEMarkerType;
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType;
 import iso.std.iso_iec._24727.tech.schema.PathType;
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.RIMarkerType;
@@ -1009,7 +1011,33 @@ public class Unmarshaller {
 		}
 	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("PrepareDevicesResponse")));
 	    return prepareDevicesResponse;
-	}  else if (parser.getName().equals("DIDGet")) {
+	} else if (parser.getName().equals("PowerDownDevices")) {
+	    PowerDownDevices powerDownDevices = new PowerDownDevices();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("ContextHandle")) {
+			powerDownDevices.setContextHandle(StringUtils.toByteArray(parser.nextText()));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("PowerDownDevices")));
+	    return powerDownDevices;
+	} else if (parser.getName().equals("PowerDownDevicesResponse")) {
+	    PowerDownDevicesResponse powerDownDevicesResponse = new PowerDownDevicesResponse();
+	    int eventType;
+	    do {
+		parser.next();
+		eventType = parser.getEventType();
+		if (eventType == XmlPullParser.START_TAG) {
+		    if (parser.getName().equals("Result")) {
+			powerDownDevicesResponse.setResult(this.parseResult(parser));
+		    }
+		}
+	    } while (! (eventType == XmlPullParser.END_TAG && parser.getName().equals("PowerDownDevicesResponse")));
+	    return powerDownDevicesResponse;
+	} else if (parser.getName().equals("DIDGet")) {
 	    DIDGet dIDGet = new DIDGet();
 	    int eventType;
 	    do {

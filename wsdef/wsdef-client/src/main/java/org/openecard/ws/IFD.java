@@ -30,6 +30,15 @@ public interface IFD {
 	iso.std.iso_iec._24727.tech.schema.PrepareDevices parameters
     );
 
+    /**
+     * Power down any previously prepared devices.
+     * This is the companion operation to PrepareDevices.
+     */
+    @ECardApiMethod(operationName = "PowerDownDevices", action = "urn:iso:std:iso-iec:24727:tech:schema:PowerDownDevices")
+    public iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse powerDownDevices(
+	iso.std.iso_iec._24727.tech.schema.PowerDownDevices parameters
+    );
+
     @ECardApiMethod(operationName = "ListIFDs", action = "urn:iso:std:iso-iec:24727:tech:schema:ListIFDs")
     public iso.std.iso_iec._24727.tech.schema.ListIFDsResponse listIFDs(
         iso.std.iso_iec._24727.tech.schema.ListIFDs parameters

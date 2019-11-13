@@ -58,6 +58,11 @@ public final class NFCCardTerminals implements SCIOTerminals {
     }
 
     @Override
+    public void powerDownDevices() {
+	this.nfcTerminal.powerDownDevices();
+    }
+
+    @Override
     public List<SCIOTerminal> list(State state) throws SCIOException {
 	switch (state) {
 	    case ALL:

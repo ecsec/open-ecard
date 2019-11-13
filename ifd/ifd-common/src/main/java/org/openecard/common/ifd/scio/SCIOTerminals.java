@@ -61,6 +61,12 @@ public interface SCIOTerminals {
     void prepareDevices();
 
     /**
+     * Power down any previously prepared devices.
+     * This is the companion operation to PrepareDevices.
+     */
+    void powerDownDevices();
+    
+    /**
      * Gets a list of all terminals satisfying the given state.
      * <p>If state is {@link State#ALL}, this method returns all terminals encapsulated by this object. If state is
      * {@link State#CARD_PRESENT} or {@link State#CARD_ABSENT}, it returns all terminals where a card is currently

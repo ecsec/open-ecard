@@ -60,6 +60,8 @@ import iso.std.iso_iec._24727.tech.schema.ModifyVerificationData;
 import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse;
 import iso.std.iso_iec._24727.tech.schema.Output;
 import iso.std.iso_iec._24727.tech.schema.OutputResponse;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
@@ -254,6 +256,18 @@ public class IFD implements org.openecard.ws.IFD {
 	return WSHelper.makeResponse(PrepareDevicesResponse.class, WSHelper.makeResultOK());
     }
 
+    @Override
+    public PowerDownDevicesResponse powerDownDevices(PowerDownDevices parameters) {
+	cm.powerDownDevices();
+
+	ConnectionHandleType handle = HandlerBuilder.create()
+		.setContextHandle(parameters.getContextHandle())
+		.buildConnectionHandle();
+
+	env.getEventDispatcher().notify(EventType.POWER_DOWN_DEVICES, new IfdEventObject(handle));
+
+	return WSHelper.makeResponse(PowerDownDevicesResponse.class, WSHelper.makeResultOK());
+    }
 
     @Override
     public ListIFDsResponse listIFDs(ListIFDs parameters) {

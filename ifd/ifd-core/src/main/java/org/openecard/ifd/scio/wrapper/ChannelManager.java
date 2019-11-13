@@ -84,6 +84,9 @@ public class ChannelManager {
 	getTerminals().prepareDevices();
     }
 
+    public void powerDownDevices() {
+	getTerminals().powerDownDevices();
+    }
     public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,
 	    SCIOException {
 	if (baseChannels.containsKey(ifdName)) {

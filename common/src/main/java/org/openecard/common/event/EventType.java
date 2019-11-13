@@ -38,6 +38,7 @@ public enum EventType {
     TERMINAL_ADDED("http://openecard.org/event/terminal_added"),
     TERMINAL_REMOVED("http://openecard.org/event/terminal_removed"),
     PREPARE_DEVICES("http://openecard.org/event/prepare_devices"),
+    POWER_DOWN_DEVICES("http://openecard.org/event/power_down_devices"),
     API_CALL_STARTED("http://openecard.org/event/api_call_started"),
     API_CALL_FINISHED("http://openecard.org/event/api_call_finished");
 

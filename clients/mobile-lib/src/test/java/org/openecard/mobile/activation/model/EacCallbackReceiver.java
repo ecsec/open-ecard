@@ -29,7 +29,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.common.util.Promise;
@@ -51,54 +50,23 @@ public class EacCallbackReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
-    private Promise<Void> promisedRequestCardInsertion;
-    private Promise<Void> promisedRecognizeCard;
     private Promise<ConfirmPasswordOperation> promisedOperationPinRequest;
     private Promise<ConfirmTwoPasswordsOperation> promisedOperationPinCanRequest;
-    private Promise<Void> promisedRemoveCard;
     private Promise<ServerData> promisedServerData;
     private Promise<String> promisedTransactionData;
     private Promise<ConfirmAttributeSelectionOperation> promisedOperationConfirmAttributes;
     public final EacInteraction interaction;
     private final World world;
 
-    public EacCallbackReceiver(World world) {
+    public EacCallbackReceiver(World world, EacInteraction interaction) {
 	this.world = world;
-	interaction = mock(EacInteraction.class);
-	promisedRequestCardInsertion = new Promise();
-	promisedRecognizeCard = new Promise();
-	promisedRemoveCard = new Promise();
+	this.interaction = interaction;
 	promisedOperationPinCanRequest = new Promise();
 	promisedOperationPinRequest = new Promise();
 	promisedServerData = new Promise();
 	promisedTransactionData = new Promise();
 	promisedOperationConfirmAttributes = new Promise();
 
-	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-	    LOG.debug("mockInteraction.requestCardInsertion().");
-	    if (promisedRequestCardInsertion.isDelivered()) {
-		promisedRequestCardInsertion = new Promise();
-	    }
-	    promisedRequestCardInsertion.deliver(null);
-	    return null;
-	}).when(interaction).requestCardInsertion();
-	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-	    LOG.debug("mockInteraction.onCardRemoved().");
-	    if (promisedRemoveCard.isDelivered()) {
-		promisedRemoveCard = new Promise();
-	    }
-	    promisedRemoveCard.deliver(null);
-	    return null;
-	}).when(interaction).onCardRemoved();
-
-	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
-	    LOG.debug("mockInteraction.onCardRecognized().");
-	    if (promisedRecognizeCard.isDelivered()) {
-		promisedRecognizeCard = new Promise();
-	    }
-	    promisedRecognizeCard.deliver(null);
-	    return null;
-	}).when(interaction).onCardRecognized();
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onPinCanRequest().");
 	    if (promisedOperationPinCanRequest.isDelivered()) {
@@ -117,7 +85,6 @@ public class EacCallbackReceiver {
 	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arguments[1]);
 	    return null;
 	}).when(interaction).onPinRequest(anyInt(), any());
-
 
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onServerData().");
@@ -138,23 +105,6 @@ public class EacCallbackReceiver {
 	}).when(interaction).onServerData(any(), anyString(), any());
     }
 
-    public void expectCardInsertionRequest() {
-	LOG.debug("Expect card insertion.");
-	try {
-	    promisedRequestCardInsertion.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	} catch (InterruptedException | TimeoutException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
-
-    public void expectRecognitionOfNpaCard() {
-	LOG.debug("Expect recognition of NPA card.");
-	try {
-	    promisedRecognizeCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	} catch (InterruptedException | TimeoutException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
 
     public void expectPinEntryWithSuccess(String currentPin) {
 	try {
@@ -163,15 +113,6 @@ public class EacCallbackReceiver {
 		throw new IllegalStateException();
 	    }
 	    operation.enter(currentPin);
-	} catch (InterruptedException | TimeoutException ex) {
-	    throw new RuntimeException(ex);
-	}
-    }
-
-    public void expectRemovalOfCard() {
-	LOG.debug("Expect removal of card.");
-	try {
-	    promisedRemoveCard.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	} catch (InterruptedException | TimeoutException ex) {
 	    throw new RuntimeException(ex);
 	}

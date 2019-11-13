@@ -62,7 +62,6 @@ public class PinManagementTests extends BaseIntegrationSetup {
     }
 
     @Test
-    @Ignore("Card insertion request is currently not called.")
     void expectCardRequest() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

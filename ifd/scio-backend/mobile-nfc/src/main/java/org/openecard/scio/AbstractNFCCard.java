@@ -50,7 +50,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
 	this.nfcCardChannel = new NFCCardChannel(this);
     }
 
-    public abstract boolean isCardPresent();
+    public abstract boolean isTagPresent();
 
     public abstract void terminate(boolean killNfcConnection) throws SCIOException;
 

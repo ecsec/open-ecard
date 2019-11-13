@@ -132,7 +132,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.initSessionObj();
 	this.nfcSession.setAlertMessage(cfg.getDefaultProviderCardMSG());
 	this.nfcSession.beginSession();
-	while (!isCardPresent()) {
+	while (!isTagPresent()) {
 	    try {
 		Thread.sleep(100, 0);
 	    } catch (InterruptedException ex) {
@@ -149,7 +149,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     @Override
-    public boolean isCardPresent() {
+    public boolean isTagPresent() {
 	return this.tag != null;
     }
 

@@ -50,7 +50,7 @@ public class NFCCardMonitoring implements Runnable {
 	LOG.debug("Starting monitor thread.");
 	while (true) {
 	    try {
-		if (! card.isCardPresent()) {
+		if (!card.isTagPresent()) {
 		    // remove tag if card is no longer available/connected to terminal
 		    terminal.removeTag();
 		    LOG.debug("Stopping monitor thread.");

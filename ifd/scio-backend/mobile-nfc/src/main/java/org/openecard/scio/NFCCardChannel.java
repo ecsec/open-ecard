@@ -77,7 +77,7 @@ public class NFCCardChannel implements SCIOChannel {
 	    try {
 		return new CardResponseAPDU(card.transceive(apdu));
 	    } catch (IOException ex) {
-		if (! card.isCardPresent()) {
+		if (!card.isTagPresent()) {
 		    throw new IllegalStateException("Transmit of apdu command failed, because the card has been removed.");
 		} else {
 		    // TODO: check if the error code can be chosen more specifically

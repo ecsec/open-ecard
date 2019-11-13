@@ -74,7 +74,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	return transceiveTimeout;
     }
 
-    public synchronized boolean isCardPresent() {
+    public synchronized boolean isTagPresent() {
 	return isodep.isConnected();
     }
 

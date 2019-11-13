@@ -109,7 +109,7 @@ public class World implements AutoCloseable {
 		.useConstructor(this.terminalConfigurator.terminal).defaultAnswer(CALLS_REAL_METHODS));
 
 	this.currentNfcCard = spyCard;
-	doReturn(true).when(currentNfcCard).isCardPresent();
+	doReturn(true).when(currentNfcCard).isTagPresent();
 	doReturn(new SCIOATR(new byte[]{59, -118, -128, 1, -128, 49, -72, 115, -124, 1, -32, -126, -112, 0, 6})).when(currentNfcCard).getATR();
 	try {
 	    Map.Entry<byte[], byte[]>[] behaviour = new Map.Entry[]{
@@ -203,7 +203,7 @@ public class World implements AutoCloseable {
 	    throw new IllegalStateException("Cannot remove a card when none has been inserted!");
 	}
 
-	doReturn(false).when(currentNfcCard).isCardPresent();
+	doReturn(false).when(currentNfcCard).isTagPresent();
 	terminalConfigurator.terminal.setNFCCard(null);
     }
 

@@ -31,6 +31,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.CreateSession;
 import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -296,6 +297,11 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
+    public static void destroySession(Dispatcher dispatcher, ConnectionHandleType connectionHandle) {
+	DestroySession destroySession = new DestroySession();
+	destroySession.setConnectionHandle(connectionHandle);
+	dispatcher.safeDeliver(destroySession);
+    }
     /**
      * Activates the client according to the received TCToken.
      *

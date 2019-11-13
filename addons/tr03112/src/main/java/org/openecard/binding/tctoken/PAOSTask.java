@@ -111,10 +111,16 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    sp.getSupportedDIDProtocols().addAll(supportedDIDs);
 	    return p.sendStartPAOS(sp);
 	} finally {
+
 	    try {
 		TCTokenHandler.disconnectHandle(dispatcher, connectionHandle);
 	    } catch (Exception ex) {
 		LOG.warn("Error disconnecting finished handle.", ex);
+	    }
+	    try {
+		TCTokenHandler.destroySession(dispatcher, connectionHandle);
+	    } catch (Exception ex) {
+		LOG.warn("Error disconnecting destroying session.", ex);
 	    }
 	}
     }

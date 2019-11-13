@@ -143,9 +143,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public void disconnect(boolean reset) throws SCIOException {
-	this.nfcSession.invalidateSession();
-	this.nfcSession = null;
-	this.setTag(null);
+	if (this.nfcSession != null) {
+	    this.nfcSession.invalidateSession();
+	    this.nfcSession = null;
+	    this.setTag(null);
+	}
     }
 
     @Override

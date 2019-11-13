@@ -96,6 +96,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    @Override
 	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
 		LOG.debug(".didInvalidate()");
+		setTag(null);
 		return;
 	    }
 
@@ -146,7 +147,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	if (this.nfcSession != null) {
 	    this.nfcSession.invalidateSession();
 	    this.nfcSession = null;
-	    this.setTag(null);
 	}
     }
 

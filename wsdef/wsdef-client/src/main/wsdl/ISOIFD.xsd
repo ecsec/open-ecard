@@ -32,6 +32,29 @@
 			</complexContent>
 		</complexType>
 	</element>
+	
+	<element name="PowerDownDevices">
+		<complexType>
+			<complexContent>
+				<extension base="iso:RequestType">
+					<sequence>
+						<element name="ContextHandle"
+							type="iso:ContextHandleType" maxOccurs="1" minOccurs="1" />
+					</sequence>
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
+
+	<element name="PowerDownDevicesResponse">
+		<complexType>
+			<complexContent>
+				<extension base="iso:ResponseType">
+					<sequence />
+				</extension>
+			</complexContent>
+		</complexType>
+	</element>
 
 	<!-- Card terminal related functions -->
 

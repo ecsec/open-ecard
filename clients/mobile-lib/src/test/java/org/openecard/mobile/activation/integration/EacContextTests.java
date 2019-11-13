@@ -105,11 +105,26 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.eacWorld.givenConfirmationOfServerData();
 
-	    world.eacWorld.expectCardInsertionRequest();
-	    
-	    world.givenNpaCardInserted();
+	    world.eacWorld.expectSuccessfulPinEntry();
+	}
+    }
+
+    @Test
+    void canSuccessfullyEnterPinWithCorrectCard() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.givenConfirmationOfServerData();
 
 	    world.eacWorld.expectSuccessfulPinEntry();
+
+	    world.eacWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
 	}
     }
 

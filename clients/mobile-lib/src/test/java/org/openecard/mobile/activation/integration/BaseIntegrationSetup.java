@@ -27,6 +27,7 @@ import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.model.DelegatingMobileNfcTerminalFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,9 @@ public class BaseIntegrationSetup {
 	    Security.addProvider(provider);
 	    this.providerName = provider.getName();
 	}
+	// HACK: this cannot be reset by design.
+	// All following tests in the same JVM instance are 'also' running on the iOS platform.
+	SysUtils.setIsIOS();
     }
 
     @AfterClass()

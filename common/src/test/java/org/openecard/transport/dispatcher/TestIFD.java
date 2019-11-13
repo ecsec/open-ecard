@@ -52,6 +52,8 @@ import iso.std.iso_iec._24727.tech.schema.Output;
 import iso.std.iso_iec._24727.tech.schema.OutputResponse;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
@@ -75,6 +77,11 @@ public class TestIFD implements IFD {
     @Override
     public PrepareDevicesResponse prepareDevices(PrepareDevices parameters) {
 	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public PowerDownDevicesResponse powerDownDevices(PowerDownDevices parameters) {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -166,5 +173,4 @@ public class TestIFD implements IFD {
     public OutputResponse output(Output parameters) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }

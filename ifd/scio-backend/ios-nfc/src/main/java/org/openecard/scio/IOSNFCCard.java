@@ -175,6 +175,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public void close(boolean reset) {
+	LOG.debug("closing : reset is {}", reset);
 	if (reset) {
 	    return;
 	}

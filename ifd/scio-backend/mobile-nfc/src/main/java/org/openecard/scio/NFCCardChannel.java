@@ -51,7 +51,7 @@ public class NFCCardChannel implements SCIOChannel {
     }
 
     public void close(boolean reset) throws SCIOException {
-	LOG.debug("SCIOChannel: closing");
+	LOG.debug("SCIOChannel: closing with reset set to {}", reset);
 	card.close(reset);
     }
 

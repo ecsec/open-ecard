@@ -146,17 +146,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     @Override
-    public void disconnect(boolean reset) throws SCIOException {
-	if (reset) {
-	    LOG.debug("disconnect with reset - doing nothing");
-	    return;
-	}
-
-	LOG.debug("disconnect without reset - invalidate Session and remove tag");
-	this.terminateTag();
-    }
-
-    @Override
     public boolean isTagPresent() {
 	LOG.debug("isTag present was called");
 	return this.tag != null;

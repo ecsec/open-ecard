@@ -68,7 +68,8 @@ public abstract class AbstractNFCCard implements SCIOCard {
     }
 
     @Override
-    public abstract void disconnect(boolean reset) throws SCIOException;
+    public void disconnect(boolean reset) throws SCIOException {
+    }
 
     @Override
     public abstract SCIOATR getATR();

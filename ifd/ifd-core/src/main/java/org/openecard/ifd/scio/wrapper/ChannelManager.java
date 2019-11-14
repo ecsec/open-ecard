@@ -129,6 +129,7 @@ public class ChannelManager {
     }
 
     public synchronized void closeMasterChannel(String ifdName) {
+	LOG.debug("Closing MasterChannel");
 	Set<byte[]> slotHandles = ifdNameToHandles.get(ifdName);
 	if (slotHandles != null) {
 	    // iterate over copy of the list as the closeSlaveHandle call modifies the original slotHandles list
@@ -155,6 +156,7 @@ public class ChannelManager {
     }
 
     public synchronized void closeSlaveChannel(@Nonnull byte[] slotHandle) throws NoSuchChannel, SCIOException {
+	LOG.debug("Closing SlaveChannel");
 	SingleThreadChannel ch = handledChannels.remove(slotHandle);
 	if (ch == null) {
 	    throw new NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.");

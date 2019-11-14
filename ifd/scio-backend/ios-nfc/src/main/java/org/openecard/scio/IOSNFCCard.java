@@ -32,7 +32,6 @@ import org.openecard.common.util.Promise;
 import org.robovm.apple.corenfc.NFCISO7816APDU;
 import org.robovm.apple.corenfc.NFCISO7816Tag;
 import org.robovm.apple.corenfc.NFCPollingOption;
-import org.robovm.apple.corenfc.NFCTag;
 import org.robovm.apple.corenfc.NFCTagReaderSession;
 import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
@@ -55,7 +54,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private byte[] histBytes;
-    private NFCTagReaderSessionDelegateAdapter delegate;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -64,7 +62,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCCard.class);
 
-    private NFCTagReaderSession nfcSession;
+    private NFCSessionContext sessionContext;
+
     private NFCISO7816Tag tag;
     private IOSConfig cfg;
 
@@ -78,7 +77,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.setHistBytes();
     }
 
-    private void initSessionObj() throws SCIOException {
+    private NFCSessionContext initSessionObj() throws SCIOException {
 	DispatchQueue dspqueue;
 	switch (this.concurrencyMode) {
 	    case CONCURRENT:
@@ -92,7 +91,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	}
 
 	LOG.debug("Initializing new NFCTagReaderSession");
-	this.delegate = new NFCTagReaderSessionDelegateAdapter() {
+	NFCTagReaderSessionDelegateAdapter delegate = new NFCTagReaderSessionDelegateAdapter() {
 	    @Override
 	    public void didInvalidate(NFCTagReaderSession session, NSError err) {
 		LOG.debug(".didInvalidate()");
@@ -119,25 +118,27 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		}
 	    }
 	};
-	this.nfcSession = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
+	NFCTagReaderSession session = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
+	session.setAlertMessage(cfg.getDefaultProviderCardMSG());
 
+	return new NFCSessionContext(delegate, session);
     }
 
     @Override
     public void setDialogMsg(String msg) {
-	if (this.nfcSession != null) {
-	    this.nfcSession.setAlertMessage(msg);
+	NFCSessionContext context = this.sessionContext;
+	if (context != null) {
+	    context.session.setAlertMessage(msg);
 	}
     }
 
     public void connect() throws SCIOException {
-	this.initSessionObj();
-	this.nfcSession.setAlertMessage(cfg.getDefaultProviderCardMSG());
-	this.nfcSession.beginSession();
+	NFCSessionContext context = this.initSessionObj();
+	this.sessionContext = context;
+	context.session.beginSession();
 	while (!isTagPresent()) {
 	    try {
 		Thread.sleep(100, 0);
-		tagPresentFlag = true;
 	    } catch (InterruptedException ex) {
 		throw new SCIOException("Error during session initialization", SCIOErrorCode.SCARD_F_INTERNAL_ERROR, ex);
 	    }
@@ -146,36 +147,47 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public void disconnect(boolean reset) throws SCIOException {
-
-	if (this.nfcSession != null) {
-	    this.nfcSession.invalidateSession();
-	    this.nfcSession = null;
-	}
-
 	if (reset) {
 	    LOG.debug("disconnect with reset - doing nothing");
-	    tagPresentFlag = true;
-	} else {
-	    LOG.debug("disconnect without reset - invalidate Session and remove tag");
-	    tagPresentFlag = false;
+	    return;
 	}
+
+	LOG.debug("disconnect without reset - invalidate Session and remove tag");
+	this.terminateTag();
     }
 
-    private boolean tagPresentFlag = false;
     @Override
     public boolean isTagPresent() {
 	LOG.debug("isTag present was called");
-//	return this.tag != null;
-	return tagPresentFlag;
+	return this.tag != null;
     }
 
     @Override
-    public void terminate(boolean killNfcConnection) throws SCIOException {
-	this.disconnect(false);
+    public void terminateTag() throws SCIOException {
+	final NFCSessionContext currentSession = this.sessionContext;
+	if (currentSession != null) {
+	    currentSession.session.invalidateSession();
+	    this.sessionContext = null;
+	    this.tag = null;
+	    setHistBytes();
+	}
+    }
+
+    @Override
+    public void close(boolean reset) {
+	if (reset) {
+	    return;
+	}
+	try {
+	    this.terminateTag();
+	} catch (SCIOException ex) {
+	    LOG.warn("Error occurred while closing the NFC session.", ex);
+	}
     }
 
     private void setHistBytes() {
-	NSData hist = this.tag != null ? this.tag.getHistoricalBytes() : null;
+	final NFCISO7816Tag currentTag = this.tag;
+	NSData hist = currentTag != null ? currentTag.getHistoricalBytes() : null;
 	if (hist != null) {
 	    this.histBytes = hist.getBytes();
 	} else {
@@ -185,8 +197,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public SCIOATR getATR() {
+	final byte[] currentHistBytes = this.histBytes;
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
-	if (this.histBytes == null) {
+	if (currentHistBytes == null) {
 	    LOG.debug("hist bytes are null");
 	    return new SCIOATR(new byte[0]);
 	} else {
@@ -195,7 +208,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    // Initial Header
 	    out.write(0x3B);
 	    // T0
-	    out.write(0x80 | (this.histBytes.length & 0xF));
+	    out.write(0x80 | (currentHistBytes.length & 0xF));
 	    // TD1
 	    out.write(0x80);
 	    // TD2
@@ -203,7 +216,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    // ISO14443A: The historical bytes from ATS response.
 	    // ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
 	    // TODO: check that the HiLayerResponse matches the requirements for ISO14443B
-	    out.write(this.histBytes, 0, this.histBytes.length);
+	    out.write(currentHistBytes, 0, currentHistBytes.length);
 
 	    // TCK: Exclusive-OR of bytes T0 to Tk
 	    byte[] preATR = out.toByteArray();
@@ -222,11 +235,12 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public byte[] transceive(byte[] apdu) throws IOException {
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
+	final NFCISO7816Tag currentTag = tag;
 
-	if (tag == null) {
+	if (currentTag == null) {
 	    throw new NullPointerException("Cannot transceive because the tag is null.");
 	}
-	tag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
+	currentTag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    if (er2 != null) {
 		p.deliver(null);
 	    } else {

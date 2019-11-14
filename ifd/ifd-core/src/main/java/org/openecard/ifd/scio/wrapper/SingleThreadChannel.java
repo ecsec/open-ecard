@@ -114,7 +114,7 @@ public class SingleThreadChannel implements IfdChannel {
     @Override
     public void shutdown() throws SCIOException {
 	exec.shutdown();
-	channel.close();
+	channel.close(false);
     }
 
     private static SCIOCard connectCard(SCIOTerminal term) throws SCIOException {
@@ -145,7 +145,7 @@ public class SingleThreadChannel implements IfdChannel {
 	if (channel.isBasicChannel()) {
 	    SCIOCard card = channel.getCard();
 	    SCIOTerminal term = card.getTerminal();
-	    channel.close();
+	    channel.close(true);
 	    card.disconnect(true);
 	    card = connectCard(term);
 

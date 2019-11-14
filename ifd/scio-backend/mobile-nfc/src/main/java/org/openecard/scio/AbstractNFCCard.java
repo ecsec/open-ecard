@@ -42,6 +42,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNFCCard.class);
 
     protected final NFCCardChannel nfcCardChannel;
+
     protected final NFCCardTerminal nfcCardTerminal;
 
     public AbstractNFCCard(NFCCardTerminal terminal) {
@@ -52,7 +53,9 @@ public abstract class AbstractNFCCard implements SCIOCard {
 
     public abstract boolean isTagPresent();
 
-    public abstract void terminate(boolean killNfcConnection) throws SCIOException;
+    public abstract void terminateTag() throws SCIOException;
+
+    public abstract void close(boolean reset);
 
     @Override
     public void beginExclusive() throws SCIOException {
@@ -107,5 +110,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
     void setDialogMsg(String msg) {
 	throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
     }
+
+
 
 }

@@ -114,7 +114,7 @@ public class PCSCChannel implements SCIOChannel {
     }
 
     @Override
-    public void close() throws SCIOException {
+    public void close(boolean reset) throws SCIOException {
 	// only close logical channels
 	if (isLogicalChannel()) {
 	    try {

@@ -50,11 +50,9 @@ public class NFCCardChannel implements SCIOChannel {
 	this.card = card;
     }
 
-    @Override
-    public void close() throws SCIOException {
-	// we only have one channel and this will be open as long as we are connected to the tag
+    public void close(boolean reset) throws SCIOException {
 	LOG.debug("SCIOChannel: closing");
-	card.disconnect(true);
+	card.close(reset);
     }
 
     @Override
@@ -87,7 +85,6 @@ public class NFCCardChannel implements SCIOChannel {
 	    }
 	}
     }
-
 
     @Override
     public int transmit(ByteBuffer command, ByteBuffer response) throws SCIOException, IllegalStateException {

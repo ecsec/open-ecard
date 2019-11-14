@@ -109,7 +109,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	return res;
     }
 
-    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException {
+    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException, CanLengthInvalidException {
 	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
 	conHandle = ph.connectCardIfNeeded();
@@ -122,6 +122,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("Failed to read empty Protocol data.", ex);
+	    ph.disconnectIfMobile();
 	    return null;
 	}
 
@@ -133,7 +134,8 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 
 	    if (canValue.length() != 6) {
 		// let the user enter the can again, when input verification failed
-		return null;
+		ph.disconnectIfMobile();
+		throw new CanLengthInvalidException("Can does not contain 6 digits.");
 	    } else {
 		paceInputMap.addElement(PACEInputType.PIN, canValue);
 	    }

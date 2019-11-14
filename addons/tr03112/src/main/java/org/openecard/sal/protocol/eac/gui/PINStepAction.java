@@ -24,6 +24,7 @@ package org.openecard.sal.protocol.eac.gui;
 
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
+import java.util.logging.Level;
 import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
@@ -112,6 +113,9 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	    } catch (InterruptedException ex) {
 		LOG.warn("PIN+CAN step action interrupted.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
+	    } catch (CanLengthInvalidException ex) {
+		LOG.warn("Can did  not contain 6 digits.");
+		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 	}
 

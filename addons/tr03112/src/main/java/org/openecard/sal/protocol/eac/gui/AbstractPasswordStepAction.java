@@ -62,7 +62,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	// indicate that the card stays connected
     }
 
-    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException {
+    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException, PinOrCanEmptyException {
 	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
 	conHandle = ph.connectCardIfNeeded();
@@ -74,6 +74,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    paceAuthMap = new AuthDataMap(protoData);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("Failed to read EAC Protocol data.", ex);
+	    ph.disconnectIfMobile();
 	    return null;
 	}
 	AuthDataResponse paceInputMap = paceAuthMap.createResponse(protoData);
@@ -85,7 +86,8 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    // let the user enter the pin again, when there is none entered
 	    // TODO: check pin length and possibly allowed charset with CardInfo file
 	    if (pinIn.length == 0) {
-		return null;
+		ph.disconnectIfMobile();
+		throw new PinOrCanEmptyException("PIN must not be empty");
 	    } else {
 		// NOTE: saving pin as string prevents later removal of the value from memory !!!
 		paceInputMap.addElement(PACEInputType.PIN, new String(pinIn));

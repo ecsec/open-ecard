@@ -173,7 +173,11 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	} catch (InterruptedException ex) {
 	    LOG.warn("PIN step action interrupted.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (PinOrCanEmptyException ex) {
+	    LOG.warn("PIN was empty", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
+
     }
 
 }

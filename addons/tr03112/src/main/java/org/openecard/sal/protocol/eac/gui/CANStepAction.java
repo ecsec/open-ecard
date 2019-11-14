@@ -103,6 +103,9 @@ public class CANStepAction extends AbstractPasswordStepAction {
 	} catch (InterruptedException ex) {
 	    LOG.warn("CAN step action interrupted.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	} catch (PinOrCanEmptyException ex) {
+	    LOG.warn("CAN was empty", ex);
+	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
     }
 

@@ -19,7 +19,8 @@ import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 public class NFCSessionContext {
     public final NFCTagReaderSessionDelegateAdapter adapter;
     public final NFCTagReaderSession session;
-
+    public final Object tagLock = new Object();
+    
     public NFCSessionContext(NFCTagReaderSessionDelegateAdapter adapter, NFCTagReaderSession session) {
 	this.adapter = adapter;
 	this.session = session;

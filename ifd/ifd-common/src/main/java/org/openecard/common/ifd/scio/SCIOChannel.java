@@ -155,9 +155,8 @@ public interface SCIOChannel {
      * <p>Note that the basic logical channel cannot be closed using this method. It can be closed by calling
      * {@link SCIOCard#disconnect(boolean)}. Calling this method on a basic channel does nothing.
      *
-     * @param reset {@code true} if the card will be reset in a following disconnect operation.
      * @throws SCIOException Thrown if the operation failed.
      */
-    void close(boolean reset) throws SCIOException;
+    void close() throws SCIOException;
 
 }

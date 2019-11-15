@@ -50,8 +50,9 @@ public class NFCCardChannel implements SCIOChannel {
 	this.card = card;
     }
 
-    public void close(boolean reset) throws SCIOException {
-	LOG.debug("SCIOChannel: closing with reset set to {}", reset);
+    @Override
+    public void close() throws SCIOException {
+	LOG.debug("Channels for NFC cards do not close on demand.");
     }
 
     @Override

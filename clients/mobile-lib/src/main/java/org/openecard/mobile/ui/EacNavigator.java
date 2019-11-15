@@ -225,13 +225,15 @@ public final class EacNavigator extends MobileNavigator {
 		final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 		PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
 
-		this.pauseExecution(context);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else {
 		    if (ps.isBlocked()) {
+			this.pauseExecution(context);
+			interaction.onCardBlocked();
 		    } else if (ps.isDeactivated()) {
+			this.pauseExecution(context);
 			interaction.onCardDeactivated();
 		    }
 		}

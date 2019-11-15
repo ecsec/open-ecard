@@ -193,6 +193,7 @@ public final class EacNavigator extends MobileNavigator {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else if (! isCanStep && ps.isRequestCan()) {
+		    this.pauseExecution(context);
 		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperationImpl(this, interaction, msgSetter, pinStep, waitForPin));
 		} else {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperationImpl(this, interaction, msgSetter, pinStep, waitForPin);

@@ -197,9 +197,11 @@ public final class EacNavigator extends MobileNavigator {
 		} else {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperationImpl(this, interaction, msgSetter, pinStep, waitForPin);
 		    if (isCanStep) {
+			LOG.debug("Notifying need to enter pin and can");
 			this.pauseExecution(context);
 			interaction.onCanRequest(op);
 		    } else {
+			LOG.debug("Notifying need to enter pin");
 			this.pauseExecution(context);
 			interaction.onPinRequest(ps.getAttempts(), op);
 		    }
@@ -214,7 +216,6 @@ public final class EacNavigator extends MobileNavigator {
 
 	    return displayAndExecuteBackground(curStep, () -> {
 		LOG.debug("Delivering final PIN status in ProcessingStep.");
-		this.pauseExecution();
 		interaction.onCardAuthenticationSuccessful();
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });

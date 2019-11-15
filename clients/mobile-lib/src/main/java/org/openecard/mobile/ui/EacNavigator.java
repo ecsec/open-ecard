@@ -31,22 +31,25 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
+import org.openecard.gui.definition.Checkbox;
+import org.openecard.gui.definition.Document;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
+import org.openecard.gui.definition.ToggleText;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
-import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
+import org.openecard.mobile.activation.ServerData;
+import org.openecard.mobile.activation.TermsOfUsage;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
-import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
@@ -149,14 +152,14 @@ public final class EacNavigator extends MobileNavigator {
 	    Step chatStep = steps.get(1);
 
 	    return displayAndExecuteBackground(chatStep, () -> {
-		ServerDataImpl sd = new ServerDataImpl(cvcStep, chatStep);
 		String tInfo = getTransactionInfo();
 
 		final Promise<List<OutputInfoUnit>> waitForAttributes = new Promise<>();
-		ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperationImpl(sd, waitForAttributes);
+
+		Pair<ServerData, ConfirmAttributeSelectionOperation> selection = createSelection(cvcStep, chatStep, waitForAttributes);
 
 		try {
-		    interaction.onServerData(sd, tInfo, selectionConfirmation);
+		    interaction.onServerData(selection.p1, tInfo, selection.p2);
 		    List<OutputInfoUnit> outInfo = waitForAttributes.deref();
 		    return new MobileResult(chatStep, ResultStatus.OK, outInfo);
 		} catch (InterruptedException ex) {
@@ -327,4 +330,68 @@ public final class EacNavigator extends MobileNavigator {
 	return result;
     }
 
+    private static Pair<ServerData, ConfirmAttributeSelectionOperation> createSelection(Step cvcStep, Step chatStep, final Promise<List<OutputInfoUnit>> waitForAttributes) {
+	String subject = null;
+	String subjectUrl = null;
+	TermsOfUsage termsOfUsage = null;
+	String validity = null;
+	String issuer = null;
+	String issuerUrl = null;
+
+	for (InputInfoUnit next : cvcStep.getInputInfoUnits()) {
+	    if ("SubjectName".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		subject = tt.getText();
+	    } else if ("SubjectURL".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		subjectUrl = tt.getText();
+	    } else if ("TermsOfUsage".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		Document d = tt.getDocument();
+		termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), d.getValue());
+	    } else if ("Validity".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		validity = tt.getText();
+	    } else if ("IssuerName".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		issuer = tt.getText();
+	    } else if ("IssuerURL".equals(next.getID()) && next instanceof ToggleText) {
+		ToggleText tt = (ToggleText) next;
+		issuerUrl = tt.getText();
+	    }
+	}
+
+	Checkbox readBox = null;
+	Checkbox writeBox = null;
+
+	for (InputInfoUnit next : chatStep.getInputInfoUnits()) {
+	    if (CHATStep.READ_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
+		readBox = (Checkbox) next;
+	    } else if (CHATStep.WRITE_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
+		writeBox = (Checkbox) next;
+	    }
+	}
+	List<SelectableItem> readAccessAttributes = asSelectableItems(readBox);
+	List<SelectableItem> writeAccessAttribute = asSelectableItems(writeBox);
+
+	ServerDataImpl sd = new ServerDataImpl(subject, issuer, subjectUrl, issuerUrl, validity, termsOfUsage, readAccessAttributes, writeAccessAttribute);
+	ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperationImpl(
+		sd,
+		waitForAttributes,
+		readBox,
+		writeBox);
+	Pair<ServerData, ConfirmAttributeSelectionOperation> selection = new Pair<>(sd, selectionConfirmation);
+	return selection;
+    }
+
+    private static List<SelectableItem> asSelectableItems(Checkbox readBox) {
+	List<SelectableItem> accessAttributes = new ArrayList<>();
+	if (readBox != null) {
+	    for (org.openecard.gui.definition.BoxItem nb : readBox.getBoxItems()) {
+		SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
+		accessAttributes.add(bi);
+	    }
+	}
+	return accessAttributes;
+    }
 }

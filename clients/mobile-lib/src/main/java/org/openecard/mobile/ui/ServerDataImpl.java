@@ -10,14 +10,7 @@
 
 package org.openecard.mobile.ui;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.openecard.gui.definition.Checkbox;
-import org.openecard.gui.definition.Document;
-import org.openecard.gui.definition.InputInfoUnit;
-import org.openecard.gui.definition.OutputInfoUnit;
-import org.openecard.gui.definition.Step;
-import org.openecard.gui.definition.ToggleText;
 import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.ServerData;
 import org.openecard.mobile.activation.TermsOfUsage;
@@ -38,14 +31,16 @@ class ServerDataImpl implements ServerData {
     private List<SelectableItem> readAccessAttributes;
     private List<SelectableItem> writeAccessAttributes;
 
-    private Checkbox readBox;
-    private Checkbox writeBox;
-
-    public ServerDataImpl(Step cvcStep, Step chatStep) {
-	loadValuesFromCVCStep(cvcStep);
-	loadValuesFromChatStep(chatStep);
+    public ServerDataImpl(String subject, String issuer, String subjectUrl, String issuerUrl, String validity, TermsOfUsage termsOfUsage, List<SelectableItem> readAccessAttributes, List<SelectableItem> writeAccessAttributes) {
+	this.subject = subject;
+	this.issuer = issuer;
+	this.subjectUrl = subjectUrl;
+	this.issuerUrl = issuerUrl;
+	this.validity = validity;
+	this.termsOfUsage = termsOfUsage;
+	this.readAccessAttributes = readAccessAttributes;
+	this.writeAccessAttributes = writeAccessAttributes;
     }
-
 
     @Override
     public String getSubject() {
@@ -79,102 +74,11 @@ class ServerDataImpl implements ServerData {
 
     @Override
     public List<SelectableItem> getReadAccessAttributes() {
-	return new ArrayList<>(readAccessAttributes);
+	return readAccessAttributes;
     }
 
     @Override
     public List<SelectableItem> getWriteAccessAttributes() {
-	return new ArrayList<>(writeAccessAttributes);
+	return writeAccessAttributes;
     }
-
-    private void loadValuesFromCVCStep(Step step1) {
-	for (InputInfoUnit next : step1.getInputInfoUnits()) {
-	    if ("SubjectName".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		subject = tt.getText();
-	    } else if ("SubjectURL".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		subjectUrl = tt.getText();
-	    } else if ("TermsOfUsage".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		Document d = tt.getDocument();
-		termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), d.getValue());
-	    } else if ("Validity".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		validity = tt.getText();
-	    } else if ("IssuerName".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		issuer = tt.getText();
-	    } else if ("IssuerURL".equals(next.getID()) && next instanceof ToggleText) {
-		ToggleText tt = (ToggleText) next;
-		issuerUrl = tt.getText();
-	    }
-	}
-
-	ArrayList<SelectableItem> readAccess = new ArrayList<>();
-	ArrayList<SelectableItem> writeAccess = new ArrayList<>();
-    }
-
-    private void loadValuesFromChatStep(Step step2) {
-	readAccessAttributes = new ArrayList<>();
-	writeAccessAttributes = new ArrayList<>();
-
-	for (InputInfoUnit next : step2.getInputInfoUnits()) {
-	    if ("ReadCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {
-		Checkbox cb = (Checkbox) next;
-		readBox = cb;
-		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {
-		    SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
-		    readAccessAttributes.add(bi);
-		}
-	    } else if ("WriteCHATCheckBoxes".equals(next.getID()) && next instanceof Checkbox) {
-		Checkbox cb = (Checkbox) next;
-		writeBox = cb;
-		for (org.openecard.gui.definition.BoxItem nb : cb.getBoxItems()) {
-		    SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
-		    writeAccessAttributes.add(bi);
-		}
-	    }
-	}
-    }
-
-    public List<OutputInfoUnit> getSelection(List<SelectableItem> itemsRead, List<SelectableItem> itemsWrite) {
-	List<OutputInfoUnit> outInfos = new ArrayList<>();
-
-	copyBox(outInfos, readBox, itemsRead);
-	copyBox(outInfos, writeBox, itemsWrite);
-
-	return outInfos;
-    }
-
-    private void copyBox(List<OutputInfoUnit> outInfos, Checkbox oldBox, List<SelectableItem> items) {
-	if (oldBox != null) {
-	    // create copy of the checkbox
-	    Checkbox newBox = new Checkbox(oldBox.getID());
-	    newBox.copyContentFrom(oldBox);
-
-	    // copy changed values
-	    for (org.openecard.gui.definition.BoxItem next : newBox.getBoxItems()) {
-		String name = next.getName();
-		SelectableItem receivedItem = getItem(name, items);
-		if (receivedItem != null) {
-		    next.setChecked(receivedItem.isChecked());
-		}
-	    }
-
-	    outInfos.add(newBox);
-	}
-    }
-
-    private SelectableItem getItem(String name, List<SelectableItem> items) {
-	if (items != null) {
-	    for (SelectableItem next : items) {
-		if (name.equals(next.getName())) {
-		    return next;
-		}
-	    }
-	}
-	return null;
-    }
-
 }

@@ -65,6 +65,13 @@ public class PinState {
 		blocked = false;
 		deactivated = true;
 		break;
+	    default:
+		if (status == null) {
+		    attempts = 0;
+		    requestCan = false;
+		    blocked = false;
+		    deactivated = false;
+		}
 	}
 
     }
@@ -100,6 +107,10 @@ public class PinState {
 
     public boolean isOperational() {
 	return ! isBlocked() && ! isDeactivated();
+    }
+
+    public boolean isUnknown() {
+	return state == null;
     }
 
 }

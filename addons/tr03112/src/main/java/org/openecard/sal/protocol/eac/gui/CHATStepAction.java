@@ -137,6 +137,7 @@ public class CHATStepAction extends StepAction {
 		paceMarker = ph.getPaceMarker(passwordType.getString());
 	    } else {
 		// mobile device, pick only available reader and proceed
+		status.update(null);
 		cardHandle = ph.getMobileReader();
 		nativePace = false;
 		paceMarker = ph.getPaceMarker(passwordType.getString());

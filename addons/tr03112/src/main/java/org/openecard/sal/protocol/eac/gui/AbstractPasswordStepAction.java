@@ -57,24 +57,16 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	this.capturePin = capturePin;
 	this.step = step;
 	this.ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-
-	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	// indicate that the card stays connected
     }
 
-    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException, PinOrCanEmptyException {
-	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
-	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
-	conHandle = ph.connectCardIfNeeded();
-	this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
-
+    protected EstablishChannelResponse performPACEWithPIN(Map<String, ExecutionResults> oldResults, ConnectionHandleType conHandle) throws WSHelper.WSException, InterruptedException, PinOrCanEmptyException {
 	DIDAuthenticationDataType protoData = eacData.didRequest.getAuthenticationProtocolData();
 	AuthDataMap paceAuthMap;
 	try {
 	    paceAuthMap = new AuthDataMap(protoData);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("Failed to read EAC Protocol data.", ex);
-	    ph.disconnectIfMobile();
 	    return null;
 	}
 	AuthDataResponse paceInputMap = paceAuthMap.createResponse(protoData);
@@ -86,7 +78,6 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    // let the user enter the pin again, when there is none entered
 	    // TODO: check pin length and possibly allowed charset with CardInfo file
 	    if (pinIn.length == 0) {
-		ph.disconnectIfMobile();
 		throw new PinOrCanEmptyException("PIN must not be empty");
 	    } else {
 		// NOTE: saving pin as string prevents later removal of the value from memory !!!
@@ -102,19 +93,10 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	EstablishChannel eChannel = createEstablishChannelStructure(conHandle, paceInputMap);
 	EstablishChannelResponse res = (EstablishChannelResponse) addonCtx.getDispatcher().safeDeliver(eChannel);
 
-	if (WSHelper.resultIsError(res)) {
-	    ph.disconnectIfMobile();
-	}
-
 	return res;
     }
 
-    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults) throws WSHelper.WSException, InterruptedException, CanLengthInvalidException {
-	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
-	PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
-	conHandle = ph.connectCardIfNeeded();
-	this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
-
+    protected EstablishChannelResponse performPACEWithCAN(Map<String, ExecutionResults> oldResults, ConnectionHandleType conHandle) throws WSHelper.WSException, InterruptedException, CanLengthInvalidException {
 	DIDAuthenticationDataType paceInput = new DIDAuthenticationDataType();
 	paceInput.setProtocol(ECardConstants.Protocol.PACE);
 	AuthDataMap tmp;
@@ -122,7 +104,6 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    tmp = new AuthDataMap(paceInput);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("Failed to read empty Protocol data.", ex);
-	    ph.disconnectIfMobile();
 	    return null;
 	}
 
@@ -134,7 +115,6 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 
 	    if (canValue.length() != 6) {
 		// let the user enter the can again, when input verification failed
-		ph.disconnectIfMobile();
 		throw new CanLengthInvalidException("Can does not contain 6 digits.");
 	    } else {
 		paceInputMap.addElement(PACEInputType.PIN, canValue);
@@ -145,10 +125,6 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(conHandle, paceInputMap);
 	EstablishChannelResponse res = (EstablishChannelResponse) addonCtx.getDispatcher().safeDeliver(eChannel);
-
-	if (WSHelper.resultIsError(res)) {
-	    ph.disconnectIfMobile();
-	}
 
 	return res;
     }

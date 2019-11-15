@@ -416,6 +416,8 @@ public final class EacNavigator extends MobileNavigator {
     private void pauseExecution(DynamicContext context) {
 	if (context != null) {
 	    context.put(TR03112Keys.CONNECTION_HANDLE, context.get(TR03112Keys.SESSION_CON_HANDLE));
+	    PinState status = (PinState) context.get(EACProtocol.PIN_STATUS);
+	    status.update(null);
 	}
 	this.pauseExecution();
     }

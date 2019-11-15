@@ -19,12 +19,13 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.sal.protocol.eac.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
 import org.openecard.addon.Context;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -37,7 +38,6 @@ import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * StepAction for capturing the user PIN on the EAC GUI.
@@ -75,11 +75,33 @@ public class PINStepAction extends AbstractPasswordStepAction {
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 	PinState pinState = (PinState) ctx.get(EACProtocol.PIN_STATUS);
-	assert(pinState != null);
+	assert (pinState != null);
 
+	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
+	try {
+	    PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
+	    conHandle = ph.connectCardIfNeeded();
+	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
+
+	    if (pinState.isUnknown()) {
+		EacPinStatus currentState;
+		currentState = ph.getPinStatus();
+
+		pinState.update(currentState);
+	    }
+	} catch (WSException ex) {
+	    // repeat the step
+	    LOG.error("An unknown error occured while trying to verify the PIN.");
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),
+			    langPin.translationForKey(ERROR_UNKNOWN), ex));
+	} catch (InterruptedException ex) {
+	    LOG.warn("PIN step action interrupted.", ex);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
+	}
 	if (pinState.isRequestCan()) {
 	    try {
-		EstablishChannelResponse response = performPACEWithCAN(oldResults);
+		EstablishChannelResponse response = performPACEWithCAN(oldResults, conHandle);
 		if (response == null) {
 		    LOG.debug("The CAN does not meet the format requirements.");
 		    step.setStatus(EacPinStatus.RC1);
@@ -118,7 +140,7 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	}
 
 	try {
-	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults);
+	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults, conHandle);
 
 	    if (establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {

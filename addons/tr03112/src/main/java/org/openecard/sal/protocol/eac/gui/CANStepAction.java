@@ -22,9 +22,11 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
 import org.openecard.addon.Context;
+import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
@@ -63,8 +65,14 @@ public class CANStepAction extends AbstractPasswordStepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
+
 	try {
-	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults);
+	    ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
+	    PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
+	    conHandle = ph.connectCardIfNeeded();
+	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
+
+	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults, conHandle);
 
 	    if (establishChannelResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {

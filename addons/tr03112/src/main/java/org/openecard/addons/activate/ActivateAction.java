@@ -22,6 +22,7 @@
 
 package org.openecard.addons.activate;
 
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -125,6 +126,10 @@ public class ActivateAction implements AppPluginAction {
 		try {
 		    response = checkRequestParameters(body, params, headers, attachments);
 		} finally {
+		    try {
+			this.dispatcher.safeDeliver(new PowerDownDevices());
+		    } catch(Exception e) {
+		    }
 		    SEMAPHORE.release();
 		}
 	    } else {

@@ -27,11 +27,9 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -110,7 +108,7 @@ public class OpeneCardContext {
 
     private final NFCCapabilities nfcCapabilities;
     private final OpeneCardContextConfig config;
-    private NFCDialogMsgSetter msgSetter;
+    private final NFCDialogMsgSetter msgSetter;
 
     // package private so that only this package can use it
     public OpeneCardContext(NFCCapabilities nfcCapabilities, OpeneCardContextConfig config, NFCDialogMsgSetter msgSetter) {
@@ -132,23 +130,6 @@ public class OpeneCardContext {
 	    throw new UnableToInitialize(SERVICE_ALREADY_INITIALIZED);
 	}
 
-	// initialize gui
-	realFactories = new HashMap<>();
-	// the key type must match the generic. This can't be enforced so watch it here.
-	// TODO: introduce factory method for the new instance of EacNavigatorFactory.
-	EacNavigatorFactory eacNavFac = new EacNavigatorFactory();
-	eacNavFac.setDialogMsgSetter(msgSetter);
-	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
-
-	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
-	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
-
-	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
-		eacNavFac,
-		pinMngFac,
-		new InsertCardNavigatorFactory());
-
-	gui = new MobileUserConsent(allFactories);
 
 	// set up nfc and mobile marshaller
 	IFDProperties.setProperty(IFD_FACTORY_KEY, this.config.getIfdFactoryClass());
@@ -177,6 +158,8 @@ public class OpeneCardContext {
 	    dispatcher = new MessageDispatcher(env);
 	    env.setDispatcher(dispatcher);
 	    LOG.info("Message Dispatcher initialized.");
+
+	    gui = createUserConsent(dispatcher);
 
 	    // set up management
 	    management = new TinyManagement(env);
@@ -208,6 +191,7 @@ public class OpeneCardContext {
 	    ifd.setEnvironment(env);
 	    env.setIFD(ifd);
 	    LOG.info("IFD initialized.");
+
 
 	    CombinedCIFProvider cifProv = new CombinedCIFProvider();
 	    env.setCIFProvider(cifProv);
@@ -274,6 +258,26 @@ public class OpeneCardContext {
 	    LOG.error(errorMsg, ex);
 	    throw new UnableToInitialize(errorMsg, ex);
 	}
+    }
+
+    private MobileUserConsent createUserConsent(Dispatcher dispatcher) {
+	// initialize gui
+	realFactories = new HashMap<>();
+	// the key type must match the generic. This can't be enforced so watch it here.
+	// TODO: introduce factory method for the new instance of EacNavigatorFactory.
+	EacNavigatorFactory eacNavFac = EacNavigatorFactory.create(msgSetter, dispatcher);
+
+	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
+
+	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
+	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
+
+	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
+		eacNavFac,
+		pinMngFac,
+		new InsertCardNavigatorFactory());
+
+	return new MobileUserConsent(allFactories);
     }
 
     public boolean shutdown() {

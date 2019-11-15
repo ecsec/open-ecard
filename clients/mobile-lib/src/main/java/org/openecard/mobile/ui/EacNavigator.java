@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.ui;
 
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.concurrent.FutureTask;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Pair;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
@@ -81,11 +83,14 @@ public final class EacNavigator extends MobileNavigator {
     private boolean pinFirstUse = true;
 
     private NFCDialogMsgSetter msgSetter;
+    private final Dispatcher dispatcher;
 
-    public EacNavigator(UserConsentDescription uc, EacInteraction interaction, NFCDialogMsgSetter msgSetter) {
+    public EacNavigator(UserConsentDescription uc, EacInteraction interaction, NFCDialogMsgSetter msgSetter,
+	    Dispatcher dispatcher) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
 	this.msgSetter = msgSetter;
+	this.dispatcher = dispatcher;
     }
 
     @Override
@@ -177,12 +182,13 @@ public final class EacNavigator extends MobileNavigator {
 		    // tell user the card is not needed anymore prior to capturing the pin again
 		    interaction.onCardInteractionComplete();
 		}
+		final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
-		EACData eacData = (EACData) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.EAC_DATA);
+		EACData eacData = (EACData) context.get(EACProtocol.EAC_DATA);
 		boolean isCanStep = eacData.pinID == PasswordID.CAN.getByte();
 
 		final Promise<List<OutputInfoUnit>> waitForPin = new Promise<>();
-		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.PIN_STATUS);
+		PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
@@ -191,8 +197,10 @@ public final class EacNavigator extends MobileNavigator {
 		} else {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperationImpl(this, interaction, msgSetter, pinStep, waitForPin);
 		    if (isCanStep) {
+			this.pauseExecution(context);
 			interaction.onCanRequest(op);
 		    } else {
+			this.pauseExecution(context);
 			interaction.onPinRequest(ps.getAttempts(), op);
 		    }
 		}
@@ -206,6 +214,7 @@ public final class EacNavigator extends MobileNavigator {
 
 	    return displayAndExecuteBackground(curStep, () -> {
 		LOG.debug("Delivering final PIN status in ProcessingStep.");
+		this.pauseExecution();
 		interaction.onCardAuthenticationSuccessful();
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
@@ -213,19 +222,19 @@ public final class EacNavigator extends MobileNavigator {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
-		PinState ps = (PinState) DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY).get(EACProtocol.PIN_STATUS);
+		final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+		PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
+
+		this.pauseExecution(context);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else {
 		    if (ps.isBlocked()) {
-			interaction.onCardBlocked();
 		    } else if (ps.isDeactivated()) {
 			interaction.onCardDeactivated();
 		    }
 		}
-		// TODO: check if this is needed here, we might tell the user that the card is not needed anymore at some other place
-		interaction.onCardInteractionComplete();
 
 		// cancel is returned by the step action
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
@@ -393,5 +402,17 @@ public final class EacNavigator extends MobileNavigator {
 	    }
 	}
 	return accessAttributes;
+    }
+
+    private void pauseExecution() {
+	interaction.onCardInteractionComplete();
+	this.dispatcher.safeDeliver(new PowerDownDevices());
+    }
+
+    private void pauseExecution(DynamicContext context) {
+	if (context != null) {
+	    context.put(TR03112Keys.CONNECTION_HANDLE, context.get(TR03112Keys.SESSION_CON_HANDLE));
+	}
+	this.pauseExecution();
     }
 }

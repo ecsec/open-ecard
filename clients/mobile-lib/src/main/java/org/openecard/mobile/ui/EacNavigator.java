@@ -405,8 +405,8 @@ public final class EacNavigator extends MobileNavigator {
     }
 
     private void pauseExecution() {
-	interaction.onCardInteractionComplete();
 	this.dispatcher.safeDeliver(new PowerDownDevices());
+	interaction.onCardInteractionComplete();
     }
 
     private void pauseExecution(DynamicContext context) {

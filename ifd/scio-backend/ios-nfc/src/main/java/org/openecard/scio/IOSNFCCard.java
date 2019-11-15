@@ -162,19 +162,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	}
     }
 
-    @Override
-    public void close(boolean reset) {
-	LOG.debug("closing : reset is {}", reset);
-	if (reset) {
-	    return;
-	}
-	try {
-	    this.terminateTag();
-	} catch (SCIOException ex) {
-	    LOG.warn("Error occurred while closing the NFC session.", ex);
-	}
-    }
-
     private void setHistBytes() {
 	final NFCISO7816Tag currentTag = this.tag;
 	NSData hist = currentTag != null ? currentTag.getHistoricalBytes() : null;

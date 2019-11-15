@@ -100,18 +100,6 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     }
 
     @Override
-    public void close(boolean reset) {
-	if (reset) {
-	    return;
-	}
-	try {
-	    terminateTag();
-	} catch (SCIOException ex) {
-	    LOG.warn("Error occurred while closing.", ex);
-	}
-    }
-
-    @Override
     public SCIOATR getATR() {
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
 	if (histBytes == null) {

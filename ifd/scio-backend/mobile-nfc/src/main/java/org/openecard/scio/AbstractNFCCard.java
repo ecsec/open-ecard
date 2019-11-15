@@ -55,8 +55,6 @@ public abstract class AbstractNFCCard implements SCIOCard {
 
     public abstract void terminateTag() throws SCIOException;
 
-    public abstract void close(boolean reset);
-
     @Override
     public void beginExclusive() throws SCIOException {
 	LOG.warn("beginExclusive not supported");

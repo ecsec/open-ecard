@@ -90,6 +90,10 @@ public class EacContextTests extends BaseIntegrationSetup {
 
 	    world.eacWorld.givenConfirmationOfServerData();
 
+	    world.eacWorld.expectPinEntryRequest();
+
+	    world.eacWorld.givenPinEntryEntry();
+
 	    world.eacWorld.expectCardInsertionRequest();
 	}
     }
@@ -129,6 +133,27 @@ public class EacContextTests extends BaseIntegrationSetup {
     }
 
     @Test
+    void expectNpaCardRecognition() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEac();
+
+	    world.eacWorld.givenConfirmationOfServerData();
+
+	    world.eacWorld.expectSuccessfulPinEntry();
+
+	    world.eacWorld.expectCardInsertionRequest();
+
+	    world.givenNpaCardInserted();
+
+	    world.eacWorld.expectRecognitionOfNpaCard();
+	}
+    }
+
+    @Test
     @Ignore("Eac activation  has not been reworked.")
     void incorrectPinChangeWillFail() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
@@ -148,51 +173,4 @@ public class EacContextTests extends BaseIntegrationSetup {
 	}
     }
 
-    @Test
-    @Ignore("Eac activation has not been reworked.")
-    void expectNpaCardRecognition() throws Exception {
-	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
-
-	    world.contextWorld.startSuccessfully();
-
-	    world.eacWorld.startSimpleEac();
-
-	    world.eacWorld.expectOnStarted();
-
-	    world.givenNpaCardInserted();
-
-	    world.eacWorld.expectRecognitionOfNpaCard();
-	}
-    }
-
-    @Test
-    @Ignore("Eac activation has not been reworked.")
-    void investigateMultipleNpaCardRecognitions() throws Exception {
-	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
-
-	    world.contextWorld.startSuccessfully();
-
-	    world.eacWorld.startSimpleEac();
-
-	    world.eacWorld.expectOnStarted();
-
-	    world.givenNpaCardInserted();
-	    world.eacWorld.expectRecognitionOfNpaCard();
-
-	    world.microSleep();
-
-	    world.givenaCardRemoved();
-	    world.eacWorld.expectRemovalOfCard();
-
-	    world.givenNpaCardInserted();
-	    world.eacWorld.expectRecognitionOfNpaCard();
-
-	    world.microSleep();
-
-	    world.givenaCardRemoved();
-	    world.eacWorld.expectRemovalOfCard();
-	}
-    }
 }

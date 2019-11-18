@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.junit.Assert;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -106,7 +107,7 @@ public class EacCallbackReceiver {
     }
 
 
-    public void expectPinEntryWithSuccess(String currentPin) {
+    public void expectPinEntry(String currentPin) {
 	try {
 	    ConfirmPasswordOperation operation = promisedOperationPinRequest.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    if (operation == null) {
@@ -151,5 +152,17 @@ public class EacCallbackReceiver {
 	} catch (InterruptedException ex) {
 	    throw new RuntimeException(ex);
 	}
+    }
+
+    void expectPinEntryRequest() {
+	try {
+	    Assert.assertNotNull(promisedOperationPinRequest.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	} catch (InterruptedException | TimeoutException ex) {
+	    throw new RuntimeException(ex);
+	}
+    }
+
+    void givenSomePinEntryEntry() {
+	this.expectPinEntry("123456");
     }
 }

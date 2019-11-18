@@ -336,7 +336,7 @@ public class World implements AutoCloseable {
 	}
 
 	private void expectPinEntryWithSuccess(String currentPin) {
-	    this.eacInteraction.expectPinEntryWithSuccess(currentPin);
+	    this.eacInteraction.expectPinEntry(currentPin);
 	}
 
 	public void expectRemovalOfCard() {
@@ -382,6 +382,14 @@ public class World implements AutoCloseable {
 	    this.eacInteraction.givenConfirmationOfServerData();
 	}
 
+	public void expectPinEntryRequest() {
+	    this.eacInteraction.expectPinEntryRequest();
+	}
+
+	public void givenPinEntryEntry() {
+	    this.eacInteraction.givenSomePinEntryEntry();
+	}
+	
 	@Override
 	public void close() throws Exception {
 
@@ -394,6 +402,7 @@ public class World implements AutoCloseable {
 		this._eacControllerFactory.destroy(activationController);
 	    }
 	}
+
     }
 
     public class PinManagementWorld implements AutoCloseable {

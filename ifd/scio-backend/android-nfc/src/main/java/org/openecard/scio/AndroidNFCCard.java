@@ -75,6 +75,24 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     }
 
     @Override
+    public void disconnect(boolean reset) throws SCIOException {
+	if (reset) {
+	    terminateTag();
+
+	    try {
+		isodep.connect();
+		isodep.setTimeout(getTransceiveTimeout());
+
+		// start thread which is monitoring the availability of the card
+		monitor = startMonitor();
+	    } catch (IOException ex) {
+		LOG.error("Failed to connect NFC tag.", ex);
+		throw new SCIOException("Failed to reset channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+	    }
+	}
+    }
+
+    @Override
     public synchronized boolean isTagPresent() {
 	return isodep.isConnected();
     }

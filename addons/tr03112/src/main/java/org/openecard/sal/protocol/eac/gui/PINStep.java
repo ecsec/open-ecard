@@ -22,6 +22,7 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import java.util.List;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
@@ -163,16 +164,30 @@ public final class PINStep extends Step {
     }
 
     private void addCANEntry() {
-	PasswordField canField = new PasswordField(CAN_FIELD);
-	canField.setDescription(LANG_PACE.translationForKey("can"));
-	canField.setMaxLength(6);
-	canField.setMinLength(6);
-	getInputInfoUnits().add(canField);
-
-	Text canNotice = new Text();
-	canNotice.setText(LANG_EAC.translationForKey("eac_can_notice"));
-	canNotice.setID(CAN_NOTICE_ID);
-	getInputInfoUnits().add(canNotice);
+	final List<InputInfoUnit> inputInfoUnits = getInputInfoUnits();
+	boolean hasCanField = false;
+	boolean hasCanNotice = false;
+	for (InputInfoUnit inputInfoUnit : inputInfoUnits) {
+	    if (CAN_FIELD.equals(inputInfoUnit.getID())) {
+		hasCanField = true;
+	    }
+	    if (CAN_NOTICE_ID.equals(inputInfoUnit.getID())) {
+		hasCanNotice = true;
+	    }
+	}
+	if (!hasCanField) {
+	    PasswordField canField = new PasswordField(CAN_FIELD);
+	    canField.setDescription(LANG_PACE.translationForKey("can"));
+	    canField.setMaxLength(6);
+	    canField.setMinLength(6);
+	    inputInfoUnits.add(canField);
+	}
+	if (!hasCanNotice) {
+	    Text canNotice = new Text();
+	    canNotice.setText(LANG_EAC.translationForKey("eac_can_notice"));
+	    canNotice.setID(CAN_NOTICE_ID);
+	    inputInfoUnits.add(canNotice);
+	}
     }
 
     private void addNativeCANNotice() {
@@ -184,11 +199,15 @@ public final class PINStep extends Step {
 
     private void updateCanData() {
 	if (! hasCanEntry && status.isRequestCan()) {
-	    if (capturePin) {
-		addCANEntry();
-	    } else {
-		addNativeCANNotice();
-	    }
+	    ensureCanData();
+	}
+    }
+
+    public void ensureCanData() {
+	if (capturePin) {
+	    addCANEntry();
+	} else {
+	    addNativeCANNotice();
 	}
     }
 

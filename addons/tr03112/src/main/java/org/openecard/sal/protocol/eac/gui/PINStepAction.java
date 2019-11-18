@@ -134,6 +134,7 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		LOG.warn("PIN+CAN step action interrupted.", ex);
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    } catch (CanLengthInvalidException ex) {
+		step.ensureCanData();
 		LOG.warn("Can did  not contain 6 digits.");
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }

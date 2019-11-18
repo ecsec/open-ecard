@@ -81,7 +81,7 @@ public class ConfirmTwoPasswordsOperationImpl implements ConfirmTwoPasswordsOper
     }
 
     @Override
-    public void enter(String can, String pin) {
+    public void enter(String pin, String can) {
 	if (msgSetter.isSupported()) {
 	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
 	} else {

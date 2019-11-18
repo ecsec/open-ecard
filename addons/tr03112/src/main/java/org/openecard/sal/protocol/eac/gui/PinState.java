@@ -34,6 +34,13 @@ public class PinState {
 
     public void update(EacPinStatus status) {
 	state = status;
+	if (status == null) {
+	    attempts = 0;
+	    requestCan = false;
+	    blocked = false;
+	    deactivated = false;
+	    return;
+	}
 	switch (status) {
 	    case RC3:
 		attempts = 2;

@@ -74,6 +74,9 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField p = (PasswordField) executionResults.getResult(PINStep.PIN_FIELD);
+	    if (p == null) {
+		throw new PinOrCanEmptyException("The PIN field is missing");
+	    }
 	    char[] pinIn = p.getValue();
 	    // let the user enter the pin again, when there is none entered
 	    // TODO: check pin length and possibly allowed charset with CardInfo file
@@ -111,6 +114,9 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	if (capturePin) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(PINStep.CAN_FIELD);
+	    if (canField == null) {
+		throw new CanLengthInvalidException("The CAN field is missing");
+	    }
 	    String canValue = new String(canField.getValue());
 
 	    if (canValue.length() != 6) {

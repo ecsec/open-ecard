@@ -44,7 +44,7 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.mobile.ui.EacNavigatorFactory;
 import org.openecard.mobile.ui.InsertCardNavigatorFactory;
-import org.openecard.mobile.ui.MobileUserConsent;
+import org.openecard.mobile.ui.CompositeUserConsent;
 import org.openecard.mobile.ui.PINManagementNavigatorFactory;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
@@ -59,6 +59,7 @@ import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import static org.openecard.mobile.system.ServiceMessages.*;
+import org.openecard.mobile.ui.MessageDialogStub;
 import org.openecard.mobile.ui.UserConsentNavigatorFactory;
 import org.openecard.mobile.utils.ClasspathRegistry;
 import org.openecard.recognition.CardRecognitionImpl;
@@ -260,7 +261,7 @@ public class OpeneCardContext {
 	}
     }
 
-    private MobileUserConsent createUserConsent(Dispatcher dispatcher) {
+    private CompositeUserConsent createUserConsent(Dispatcher dispatcher) {
 	// initialize gui
 	realFactories = new HashMap<>();
 	// the key type must match the generic. This can't be enforced so watch it here.
@@ -276,8 +277,10 @@ public class OpeneCardContext {
 		eacNavFac,
 		pinMngFac,
 		new InsertCardNavigatorFactory());
-
-	return new MobileUserConsent(allFactories);
+ 
+	return new CompositeUserConsent(
+		allFactories,
+		new MessageDialogStub());
     }
 
     public boolean shutdown() {

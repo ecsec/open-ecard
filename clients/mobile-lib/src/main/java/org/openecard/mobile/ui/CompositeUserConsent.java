@@ -34,17 +34,19 @@ import org.openecard.gui.definition.UserConsentDescription;
  *
  * @author Tobias Wich
  */
-public class MobileUserConsent implements UserConsent {
+public class CompositeUserConsent implements UserConsent {
 
     private final List<UserConsentNavigatorFactory<?>> factories;
+    private final MessageDialog messageDialog;
 
-    public MobileUserConsent(List<UserConsentNavigatorFactory<?>> factories) {
+    public CompositeUserConsent(List<UserConsentNavigatorFactory<?>> factories, MessageDialog messageDialog) {
 	this.factories = factories;
+	this.messageDialog = messageDialog;
     }
 
     @Override
     public UserConsentNavigator obtainNavigator(UserConsentDescription uc) {
-	
+
 	for (UserConsentNavigatorFactory factory : factories) {
 	    if(factory.canCreateFrom(uc)) {
 		UserConsentNavigator nav = factory.createFrom(uc);
@@ -62,7 +64,7 @@ public class MobileUserConsent implements UserConsent {
 
     @Override
     public MessageDialog obtainMessageDialog() {
-	return new MessageDialogStub(); // return stub object
+	return this.messageDialog;
     }
 
 }

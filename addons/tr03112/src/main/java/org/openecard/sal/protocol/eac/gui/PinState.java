@@ -33,14 +33,10 @@ public class PinState {
     }
 
     public void update(EacPinStatus status) {
-	state = status;
 	if (status == null) {
-	    attempts = 0;
-	    requestCan = false;
-	    blocked = false;
-	    deactivated = false;
-	    return;
+	    status = EacPinStatus.UNKNOWN;
 	}
+	state = status;
 	switch (status) {
 	    case RC3:
 		attempts = 2;
@@ -72,13 +68,11 @@ public class PinState {
 		blocked = false;
 		deactivated = true;
 		break;
-	    default:
-		if (status == null) {
-		    attempts = 0;
-		    requestCan = false;
-		    blocked = false;
-		    deactivated = false;
-		}
+	    case UNKNOWN:
+		attempts = 0;
+		requestCan = false;
+		blocked = false;
+		deactivated = false;
 	}
 
     }
@@ -117,7 +111,7 @@ public class PinState {
     }
 
     public boolean isUnknown() {
-	return state == null;
+	return state == EacPinStatus.UNKNOWN;
     }
 
 }

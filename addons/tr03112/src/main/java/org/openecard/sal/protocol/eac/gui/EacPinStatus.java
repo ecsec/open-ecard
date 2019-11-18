@@ -34,6 +34,7 @@ import org.openecard.bouncycastle.util.Arrays;
  */
 public enum EacPinStatus {
 
+    UNKNOWN(new byte[] {(byte) 0x00, (byte) 0x00}),
     /**
      * PIN activated, 3 tries left.
      */

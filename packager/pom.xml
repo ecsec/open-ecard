@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>richclient-bundle</module>
-		<module>richclient-packager</module>
 	</modules>
 
 	<profiles>

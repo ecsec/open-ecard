@@ -134,7 +134,8 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    EAC1OutputType eac1Output = eac1Input.getOutputType();
 
 	    AuthenticatedAuxiliaryData aad = new AuthenticatedAuxiliaryData(eac1Input.getAuthenticatedAuxiliaryData());
-	    final PasswordID pwId = PasswordID.valueOf(didAuthenticate.getDIDName());
+	    PasswordID pwId = PasswordID.PIN;
+
 
 	    // Certificate chain
 	    CardVerifiableCertificateChain certChain = new CardVerifiableCertificateChain(eac1Input.getCertificates());
@@ -176,6 +177,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    if (taCHAT.getSpecialFunctions().get(CHAT.SpecialFunction.CAN_ALLOWED)) {
 		requiredCHAT.setSpecialFunctions(CHAT.SpecialFunction.CAN_ALLOWED, true);
 		optionalCHAT.setSpecialFunctions(CHAT.SpecialFunction.CAN_ALLOWED, true);
+		pwId = PasswordID.CAN;
 	    }
 
 	    // verify that required chat does not contain any prohibited values
@@ -183,6 +185,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // remove overlapping values from optional chat
 	    optionalCHAT.restrictAccessRights(taCHAT);
+
 
 	    // Prepare data in DIDAuthenticate for GUI
 	    byte pinID = pwId.getByte();

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import jdk.internal.org.jline.utils.Log;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
@@ -37,10 +38,13 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.openecard.plugins.pinplugin.gui.GenericPINStep;
+import org.openecard.sal.protocol.eac.gui.PinState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,12 +170,94 @@ public class PINManagementNavigator extends MobileNavigator {
 //	});
     }
 
-    private StepResult nextInt(Step curStep) {
+    private StepResult askForPIN(Step curStep, int attempt) throws InterruptedException {
+	interaction.requestCardInsertion();
+	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
+	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperation() {
+	    @Override
+	    public void enter(String oldPassword, String newPassword) {
+		List<OutputInfoUnit> lst = new ArrayList<>();
+		PasswordField opwd = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
+		opwd.setValue(oldPassword.toCharArray());
+		PasswordField npwd = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
+		npwd.setValue(newPassword.toCharArray());
+		PasswordField ncpwd = new PasswordField(GenericPINStep.NEW_PIN_REPEAT_FIELD);
+		ncpwd.setValue(newPassword.toCharArray());
+		lst.add(opwd);
+		lst.add(npwd);
+		lst.add(ncpwd);
+		waitForPIN.deliver(lst);
+	    }
+	});
+	return new MobileResult(curStep, ResultStatus.OK, waitForPIN.deref());
+
+    }
+
+    private StepResult askForCAN(Step curStep) throws InterruptedException {
+	interaction.requestCardInsertion();
+	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
+	interaction.onCanRequired(new ConfirmPasswordOperation() {
+	    @Override
+	    public void enter(String password) {
+		List<OutputInfoUnit> lst = new ArrayList<>();
+		PasswordField pwd = new PasswordField(GenericPINStep.CAN_FIELD);
+		pwd.setValue(password.toCharArray());
+		lst.add(pwd);
+		waitForCAN.deliver(lst);
+	    }
+	});
+	return new MobileResult(curStep, ResultStatus.OK, waitForCAN.deref());
+
+    }
+
+    private StepResult askForPUK(Step curStep) throws InterruptedException {
+	interaction.requestCardInsertion();
+	Promise<List<OutputInfoUnit>> waitForPUK = new Promise<>();
+	interaction.onPinBlocked(new ConfirmPasswordOperation() {
+	    @Override
+	    public void enter(String password) {
+		List<OutputInfoUnit> lst = new ArrayList<>();
+		PasswordField pwd = new PasswordField(GenericPINStep.PUK_FIELD);
+		pwd.setValue(password.toCharArray());
+		lst.add(pwd);
+		waitForPUK.deliver(lst);
+	    }
+	});
+	return new MobileResult(curStep, ResultStatus.OK, waitForPUK.deref());
+    }
+
+    private StepResult nextInt(Step curStep) throws InterruptedException {
 	idx++;
+	if (!(curStep instanceof GenericPINStep)) {
+	    LOG.debug("nextINTswitch: return");
+	    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	} else {
+	    GenericPINStep genPINStp = (GenericPINStep) curStep;
+	    RecognizedState recPinState = genPINStp.getPinState();
 
-
-
-	return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+	    switch (recPinState) {
+		case PIN_activated_RC3:
+		    return askForPIN(curStep, 2);
+		case PIN_activated_RC2:
+		    return askForPIN(curStep, 1);
+		case PIN_suspended:
+		    return askForCAN(curStep);
+		case PIN_resumed:
+		    return askForPIN(curStep, 1);
+		case PIN_blocked:
+		    return askForPUK(curStep);
+		case PIN_deactivated:
+		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+		case PUK_blocked:
+		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+		case UNKNOWN:
+		    LOG.debug("nextINTswitch: UNKNOWN");
+		    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+		default:
+		    LOG.debug("nextINTswitch: default");
+		    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	    }
+	}
     }
 
     @Override

@@ -78,11 +78,11 @@ public class GenericPINStep extends Step {
     private static final String ERRORSTEP_UNKNOWN = "action.changepin.userconsent.errorstep.unknown";
 
     // protected GUI element IDs
-    protected static final String OLD_PIN_FIELD = "OLD_PIN_FIELD";
-    protected static final String NEW_PIN_FIELD = "NEW_PIN_FIELD";
-    protected static final String NEW_PIN_REPEAT_FIELD = "NEW_PIN_REPEAT_FIELD";
-    protected static final String PUK_FIELD = "PUK_FIELD";
-    protected static final String CAN_FIELD = "CAN_FIELD";
+    public static final String OLD_PIN_FIELD = "OLD_PIN_FIELD";
+    public static final String NEW_PIN_FIELD = "NEW_PIN_FIELD";
+    public static final String NEW_PIN_REPEAT_FIELD = "NEW_PIN_REPEAT_FIELD";
+    public static final String PUK_FIELD = "PUK_FIELD";
+    public static final String CAN_FIELD = "CAN_FIELD";
 
     // indicators set by the action
     private boolean wrongPINFormat;
@@ -104,6 +104,10 @@ public class GenericPINStep extends Step {
 	this.capturePin = capturePin;
 	pinState = state;
 	generateGenericGui();
+    }
+
+    public RecognizedState getPinState() {
+	return pinState;
     }
 
     private void generateGenericGui() {

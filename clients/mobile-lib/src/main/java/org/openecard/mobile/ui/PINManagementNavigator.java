@@ -173,22 +173,7 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForPIN(Step curStep, int attempt) throws InterruptedException {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
-	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperation() {
-	    @Override
-	    public void enter(String oldPassword, String newPassword) {
-		List<OutputInfoUnit> lst = new ArrayList<>();
-		PasswordField opwd = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
-		opwd.setValue(oldPassword.toCharArray());
-		PasswordField npwd = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
-		npwd.setValue(newPassword.toCharArray());
-		PasswordField ncpwd = new PasswordField(GenericPINStep.NEW_PIN_REPEAT_FIELD);
-		ncpwd.setValue(newPassword.toCharArray());
-		lst.add(opwd);
-		lst.add(npwd);
-		lst.add(ncpwd);
-		waitForPIN.deliver(lst);
-	    }
-	});
+	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperationPINMgmtImpl(waitForPIN));
 	return new MobileResult(curStep, ResultStatus.OK, waitForPIN.deref());
 
     }
@@ -196,16 +181,7 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForCAN(Step curStep) throws InterruptedException {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
-	interaction.onCanRequired(new ConfirmPasswordOperation() {
-	    @Override
-	    public void enter(String password) {
-		List<OutputInfoUnit> lst = new ArrayList<>();
-		PasswordField pwd = new PasswordField(GenericPINStep.CAN_FIELD);
-		pwd.setValue(password.toCharArray());
-		lst.add(pwd);
-		waitForCAN.deliver(lst);
-	    }
-	});
+	interaction.onCanRequired(new ConfirmPasswordOperationPINMgmtImpl(waitForCAN, GenericPINStep.CAN_FIELD));
 	return new MobileResult(curStep, ResultStatus.OK, waitForCAN.deref());
 
     }
@@ -213,16 +189,7 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForPUK(Step curStep) throws InterruptedException {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForPUK = new Promise<>();
-	interaction.onPinBlocked(new ConfirmPasswordOperation() {
-	    @Override
-	    public void enter(String password) {
-		List<OutputInfoUnit> lst = new ArrayList<>();
-		PasswordField pwd = new PasswordField(GenericPINStep.PUK_FIELD);
-		pwd.setValue(password.toCharArray());
-		lst.add(pwd);
-		waitForPUK.deliver(lst);
-	    }
-	});
+	interaction.onPinBlocked(new ConfirmPasswordOperationPINMgmtImpl(waitForPUK, GenericPINStep.PUK_FIELD));
 	return new MobileResult(curStep, ResultStatus.OK, waitForPUK.deref());
     }
 

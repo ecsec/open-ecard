@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class ConfirmPasswordOperationImpl implements ConfirmPasswordOperation {
+public class ConfirmPasswordOperationEACImpl implements ConfirmPasswordOperation {
 
     private final Step pinStep;
     private final Promise<List<OutputInfoUnit>> waitForPin;
@@ -72,7 +72,7 @@ public class ConfirmPasswordOperationImpl implements ConfirmPasswordOperation {
     private final NFCDialogMsgSetter msgSetter;
     private final EacNavigator eacNavigator;
 
-    public ConfirmPasswordOperationImpl(EacNavigator eacNavigator, EacInteraction interaction, NFCDialogMsgSetter msgSetter, Step pinStep, Promise<List<OutputInfoUnit>> waitForPin) {
+    public ConfirmPasswordOperationEACImpl(EacNavigator eacNavigator, EacInteraction interaction, NFCDialogMsgSetter msgSetter, Step pinStep, Promise<List<OutputInfoUnit>> waitForPin) {
 	this.eacNavigator = eacNavigator;
 	this.interaction = interaction;
 	this.msgSetter = msgSetter;

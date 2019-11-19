@@ -34,6 +34,7 @@ import org.openecard.mobile.activation.ActivationInteraction;
 public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<ActivationInteraction> {
 
     public static final String PROTOCOL_TYPE = "InsertCard";
+    private ActivationInteraction interaction;
 
     @Override
     public String getProtocolType() {
@@ -50,12 +51,12 @@ public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<A
 	if (! this.canCreateFrom(uc)) {
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
-	return new InsertCardNavigator(uc);
+	return new InsertCardNavigator(uc, interaction);
     }
 
     @Override
     public void setInteractionComponent(ActivationInteraction interaction) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	this.interaction = interaction;
     }
 
 }

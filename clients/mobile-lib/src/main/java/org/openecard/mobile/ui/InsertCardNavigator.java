@@ -29,6 +29,7 @@ import org.openecard.gui.StepResult;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
+import org.openecard.mobile.activation.ActivationInteraction;
 
 
 /**
@@ -38,11 +39,13 @@ import org.openecard.gui.definition.UserConsentDescription;
 public class InsertCardNavigator implements UserConsentNavigator {
 
     private final UserConsentDescription uc;
+    private ActivationInteraction interaction;
 
     private int idx = -1;
 
-    public InsertCardNavigator(UserConsentDescription uc) {
+    public InsertCardNavigator(UserConsentDescription uc, ActivationInteraction interaction) {
 	this.uc = uc;
+	this.interaction = interaction;
     }
 
 
@@ -60,6 +63,7 @@ public class InsertCardNavigator implements UserConsentNavigator {
     public StepResult next() {
 	idx++;
 	Step s = uc.getSteps().get(idx);
+	interaction.requestCardInsertion();
 	return new MobileResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
     }
 

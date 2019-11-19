@@ -25,7 +25,9 @@ package org.openecard.mobile.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
@@ -56,6 +58,7 @@ public class PINManagementNavigator extends MobileNavigator {
     private final PinManagementInteraction interaction;
 
     private int idx = -1;
+    private Thread pMgmtNextThread;
 
 
     public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction) {
@@ -78,12 +81,47 @@ public class PINManagementNavigator extends MobileNavigator {
 
     @Override
     public StepResult next() {
+	LOG.debug("started");
 	// handle step display
-	idx++;
-	Step pinStep = steps.get(0);
+	Step curStep = steps.get(idx);
+
+	for (Step s : this.steps) {
+	    LOG.debug("Step: {}", s.getDescription());
+	}
 
 	// TODO: remove this statement and implement it properly
-	return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+//	return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
+	FutureTask<StepResult> pMgmtNext = new FutureTask<>(() -> nextInt(curStep));
+	try {
+	    // run next in thread and wait for completion
+	    // note that promise does not allow to access the result in case of a cancellation
+	    pMgmtNextThread = new Thread(pMgmtNext, "PIN-Mgmt-Next");
+	    pMgmtNextThread.start();
+	    LOG.debug("Waiting for next GUI step to finish.");
+	    pMgmtNextThread.join();
+	    LOG.debug("Next GUI step finished.");
+	    return pMgmtNext.get();
+	} catch (InterruptedException ex) {
+	    LOG.debug("Waiting for next GUI step interrupted, interrupting the GUI step processing.");
+	    pMgmtNextThread.interrupt();
+	    try {
+		// wait again after interrupting the thread
+		LOG.debug("Waiting again for next GUI step to finish.");
+		pMgmtNextThread.join();
+		LOG.debug("Next GUI step finished.");
+		return pMgmtNext.get();
+	    } catch (InterruptedException exIn) {
+		return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+	    } catch (ExecutionException exIn) {
+		LOG.error("Unexpected exception occurred in UI Step.", ex);
+		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	    }
+	} catch (ExecutionException ex) {
+	    LOG.error("Unexpected exception occurred in UI Step.", ex);
+	    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	} finally {
+	    pMgmtNextThread = null;
+	}
 
 //	return displayAndExecuteBackground(pinStep, () -> {
 //	    DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
@@ -126,6 +164,14 @@ public class PINManagementNavigator extends MobileNavigator {
 //		return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
 //	    }
 //	});
+    }
+
+    private StepResult nextInt(Step curStep) {
+	idx++;
+
+
+
+	return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
     }
 
     @Override

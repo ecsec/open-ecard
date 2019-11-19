@@ -30,6 +30,7 @@ import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.InsertCardNavigatorFactory;
 import org.openecard.mobile.ui.PINManagementNavigatorFactory;
 
 /**
@@ -72,8 +73,10 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
 	    public AutoCloseable create(OpeneCardContext context) {
 		return new ArrayBackedAutoCloseable(new AutoCloseable[]{
 		    CommonCardEventHandler.create(supportedCards, context.getEventDispatcher(), interaction, msgSetter),
-		    InteractionRegistrationHandler.hookUp(PINManagementNavigatorFactory.PROTOCOL_TYPE, context, interaction)
-		});
+		    InteractionRegistrationHandler.hookUp(PINManagementNavigatorFactory.PROTOCOL_TYPE, context, interaction),
+		    InteractionRegistrationHandler.hookUp(InsertCardNavigatorFactory.PROTOCOL_TYPE, context, interaction)
+	    }
+	);
 	    }
 	};
 

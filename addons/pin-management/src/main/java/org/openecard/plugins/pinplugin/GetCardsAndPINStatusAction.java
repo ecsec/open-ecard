@@ -2,9 +2,9 @@
  * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- * 
+ *
  * This file is part of the Open eCard App.
- * 
+ *
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,19 +12,23 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- * 
+ *
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- * 
+ *
  ***************************************************************************/
 
 package org.openecard.plugins.pinplugin;
 
 import iso.std.iso_iec._24727.tech.schema.ActionType;
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.CreateSession;
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
+import iso.std.iso_iec._24727.tech.schema.DestroySession;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -36,10 +40,13 @@ import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppExtensionException;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
+import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventFilter;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.gui.ResultStatus;
 import org.openecard.plugins.pinplugin.gui.CardRemovedFilter;
 import org.openecard.plugins.pinplugin.gui.PINDialog;
@@ -62,7 +69,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     public static final String PIN_CORRECT = "pin-correct";
     public static final String CAN_CORRECT = "can-correct";
     public static final String PUK_CORRECT = "puk-correct";
-    
+
     private EventCallback disconnectEventSink;
     private ConnectionHandleType cHandle;
     private Future<ResultStatus> pinManagement;
@@ -73,7 +80,10 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	// init dyn ctx
 	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
 
+	ConnectionHandleType sessionHandle = null;
 	try {
+	    sessionHandle = createSessionHandle();
+
 	    // check if a german identity card is inserted, if not wait for it
 	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
 
@@ -81,6 +91,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		LOG.debug("User cancelled card insertion.");
 		return;
 	    }
+	    copySession(sessionHandle, cHandle);
 
 	    cHandle = connectToRootApplication(cHandle);
 
@@ -92,7 +103,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    final ConnectionHandleType handle = cHandle;
 	    final boolean capturePin = ! nativePace;
 
-	    try { 
+	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
 		pinManagement = es.submit(() -> {
@@ -114,7 +125,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		ResultStatus result = pinManagement.get();
 		if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
 		    throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
-		}   
+		}
 
 	    } catch (InterruptedException ex) {
 		LOG.info("waiting for PIN management to stop interrupted.", ex);
@@ -122,9 +133,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } catch (ExecutionException ex) {
 		LOG.warn("Pin Management failed", ex);
 	    } catch (CancellationException ex) {
-		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");  
+		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
 	    } finally {
-		if(disconnectEventSink != null) {   
+		if(disconnectEventSink != null) {
 		    evDispatcher.del(disconnectEventSink);
 		}
 
@@ -145,10 +156,26 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	} catch (WSException ex){
 	    LOG.debug("Error while executing PIN Management.", ex);
 	    throw new AppExtensionException(ex.getResultMinor(), ex.getMessage());
-	
+
 	} finally {
+	    try {
+		if (sessionHandle != null) {
+		    DestroySession request = new DestroySession();
+		    request.setConnectionHandle(sessionHandle);
+		    this.dispatcher.safeDeliver(request);
+		}
+	    } catch(Exception e) {
+	    }
 	    ctx.clear();
 	}
+    }
+
+    private ConnectionHandleType createSessionHandle() throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, WSException {
+	CreateSessionResponse response = (CreateSessionResponse)this.dispatcher.safeDeliver(new CreateSession());
+	WSHelper.checkResult(response);
+
+	ConnectionHandleType sessionHandle = response.getConnectionHandle();
+	return sessionHandle;
     }
 
     @Override
@@ -162,6 +189,16 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     @Override
     public void destroy(boolean force) {
 	//ignore
+    }
+
+    private void copySession(ConnectionHandleType source, ConnectionHandleType target) {
+	ChannelHandleType sourceChannel = source.getChannelHandle();
+	ChannelHandleType targetChannel = target.getChannelHandle();
+	if (targetChannel == null) {
+	    targetChannel = new ChannelHandleType();
+	    target.setChannelHandle(targetChannel);
+	}
+	targetChannel.setSessionIdentifier(sourceChannel.getSessionIdentifier());
     }
 
 }

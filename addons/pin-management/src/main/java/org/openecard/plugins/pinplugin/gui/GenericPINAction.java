@@ -586,6 +586,7 @@ public class GenericPINAction extends StepAction {
     private void updateConnectionHandle() {
 	CardApplicationPath cPath = new CardApplicationPath();
 	CardApplicationPathType cPathType = new CardApplicationPathType();
+	cPathType.setChannelHandle(this.cHandle.getChannelHandle());
 	cPath.setCardAppPathRequest(cPathType);
 
 	CardApplicationPathResponse cPathResp = (CardApplicationPathResponse) dispatcher.safeDeliver(cPath);

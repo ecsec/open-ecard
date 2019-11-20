@@ -493,10 +493,12 @@ public class Marshaller {
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());
 	    appendRequestValues(prepareDevices, rootElement);
 
-	    Element emContextHandle = createElementIso(document, "ContextHandle");
-	    emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(prepareDevices.getContextHandle())));
-	    rootElement.appendChild(emContextHandle);
-
+	    final byte[] contextHandle = prepareDevices.getContextHandle();
+	    if (contextHandle != null) {
+		Element emContextHandle = createElementIso(document, "ContextHandle");
+		emContextHandle.appendChild(document.createTextNode(ByteUtils.toHexString(contextHandle)));
+		rootElement.appendChild(emContextHandle);
+	    }
 	} else if (o instanceof PrepareDevicesResponse) {
 	    PrepareDevicesResponse resp = (PrepareDevicesResponse) o;
 	    rootElement = createElementIso(document, o.getClass().getSimpleName());

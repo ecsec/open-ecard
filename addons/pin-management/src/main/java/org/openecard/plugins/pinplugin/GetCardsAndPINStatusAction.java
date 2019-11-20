@@ -111,11 +111,13 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    final ConnectionHandleType handle = cHandle;
 	    final boolean capturePin = ! nativePace;
 
+	    CapturedCardState cardState = new CapturedCardState(capturePin, handle, pinState);
+
 	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
 		pinManagement = es.submit(() -> {
-		    PINDialog uc = new PINDialog(gui, dispatcher, handle , pinState, capturePin);
+		    PINDialog uc = new PINDialog(gui, dispatcher, cardState);
 		    return uc.show();
 		});
 

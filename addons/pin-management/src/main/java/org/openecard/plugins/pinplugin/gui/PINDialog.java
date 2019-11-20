@@ -2,9 +2,9 @@
  * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- * 
+ *
  * This file is part of the Open eCard App.
- * 
+ *
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,12 +12,12 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- * 
+ *
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- * 
+ *
  ***************************************************************************/
 
 package org.openecard.plugins.pinplugin.gui;
@@ -30,6 +30,7 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.plugins.pinplugin.CapturedCardState;
 import org.openecard.plugins.pinplugin.RecognizedState;
 
 
@@ -44,19 +45,20 @@ public class PINDialog {
     private final RecognizedState state;
     private final boolean capturePin;
     private final Dispatcher dispatcher;
+    private final CapturedCardState cardState;
 
-    public PINDialog(UserConsent gui, Dispatcher dispatcher, ConnectionHandleType cHandle, RecognizedState pinState,
-	    boolean capturePin) {
+    public PINDialog(UserConsent gui, Dispatcher dispatcher, CapturedCardState cardState) {
 	this.gui = gui;
-	this.conHandle = cHandle;
-	this.state = pinState;
-	this.capturePin = capturePin;
 	this.dispatcher = dispatcher;
+	this.conHandle = cardState.getHandle();
+	this.state = cardState.getPinState();
+	this.capturePin = cardState.isCapturePin();
+	this.cardState = cardState;
     }
 
     /**
      * Shows this Dialog.
-     * @return 
+     * @return
      */
     public ResultStatus show() {
 	UserConsentNavigator ucr = gui.obtainNavigator(createUserConsentDescription());

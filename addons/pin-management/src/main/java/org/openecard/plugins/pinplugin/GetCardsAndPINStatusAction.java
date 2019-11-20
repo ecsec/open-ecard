@@ -49,6 +49,7 @@ import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.plugins.pinplugin.gui.CardRemovedFilter;
 import org.openecard.plugins.pinplugin.gui.PINDialog;
@@ -121,8 +122,11 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
 		disconnectEventSink = (eventType, eventData) -> {
 		    if (eventType == EventType.CARD_REMOVED) {
-			LOG.info("Card has been removed. Shutting down PIN Management process.");
-			pinManagement.cancel(true);
+			//ignore that in case of mobile devices
+			if (!SysUtils.isMobileDevice()) {
+			    LOG.info("Card has been removed. Shutting down PIN Management process.");
+			    pinManagement.cancel(true);
+			}
 		    }
 		};
 

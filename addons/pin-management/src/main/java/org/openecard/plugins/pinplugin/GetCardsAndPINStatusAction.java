@@ -88,7 +88,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
 	    LOG.debug("Call prepare devices");
 	    PrepareDevices pd = new PrepareDevices();
-	    pd.setContextHandle(cHandle.getContextHandle());
+	    pd.setContextHandle(sessionHandle.getContextHandle());
 	    this.dispatcher.safeDeliver(pd);
 
 	    // check if a german identity card is inserted, if not wait for it
@@ -174,7 +174,11 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } catch(Exception e) {
 	    }
 	    try {
-		this.dispatcher.safeDeliver(new PowerDownDevices());
+		PowerDownDevices pdd = new PowerDownDevices();
+		if (sessionHandle != null) {
+		    pdd.setContextHandle(sessionHandle.getContextHandle());
+		}
+		this.dispatcher.safeDeliver(pdd);
 	    } catch (Exception e) {
 		LOG.error("Error while powering down devices: ", e);
 	    }

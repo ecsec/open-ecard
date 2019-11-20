@@ -231,7 +231,9 @@ public class PINManagementNavigator extends MobileNavigator {
 	    GenericPINStep genPINStp = (GenericPINStep) curStep;
 	    RecognizedState recPinState = genPINStp.getPinState();
 
-	    this.dispatcher.safeDeliver(new PowerDownDevices());
+	    PowerDownDevices pdd = new PowerDownDevices();
+	    pdd.setContextHandle(genPINStp.getConHandle().getContextHandle());
+	    this.dispatcher.safeDeliver(pdd);
 
 	    switch (recPinState) {
 		case PIN_activated_RC3:

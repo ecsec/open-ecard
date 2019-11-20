@@ -30,6 +30,8 @@ import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
 import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroySession;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -83,6 +85,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	ConnectionHandleType sessionHandle = null;
 	try {
 	    sessionHandle = createSessionHandle();
+
+	    LOG.debug("Call prepare devices");
+	    this.dispatcher.safeDeliver(new PrepareDevices());
 
 	    // check if a german identity card is inserted, if not wait for it
 	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
@@ -165,6 +170,11 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		    this.dispatcher.safeDeliver(request);
 		}
 	    } catch(Exception e) {
+	    }
+	    try {
+		this.dispatcher.safeDeliver(new PowerDownDevices());
+	    } catch (Exception e) {
+		LOG.error("Error while powering down devices: ", e);
 	    }
 	    ctx.clear();
 	}

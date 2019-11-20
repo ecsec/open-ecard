@@ -270,7 +270,7 @@ public class OpeneCardContext {
 
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
-	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory();
+	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(dispatcher);
 	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
 
 	InsertCardNavigatorFactory insertFac = new InsertCardNavigatorFactory();

@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.ui;
 
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
@@ -36,6 +37,11 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
     public static final String PROTOCOL_TYPE = "PIN-Management";
 
     private PinManagementInteraction interaction;
+    private final Dispatcher dispatcher;
+
+    public PINManagementNavigatorFactory(Dispatcher dispatcher) {
+	this.dispatcher = dispatcher;
+    }
 
     @Override
     public String getProtocolType() {
@@ -53,7 +59,7 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
 
-	return new PINManagementNavigator(uc, interaction);
+	return new PINManagementNavigator(uc, interaction, dispatcher);
     }
 
     @Override

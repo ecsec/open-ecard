@@ -22,6 +22,8 @@
 
 package org.openecard.mobile.ui;
 
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import jdk.internal.org.jline.utils.Log;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
@@ -63,11 +66,13 @@ public class PINManagementNavigator extends MobileNavigator {
 
     private int idx = -1;
     private Thread pMgmtNextThread;
+    private Dispatcher dispatcher;
 
 
-    public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction) {
+    public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction, Dispatcher dispatcher) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
+	this.dispatcher = dispatcher;
     }
 
     @Override
@@ -174,33 +179,43 @@ public class PINManagementNavigator extends MobileNavigator {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
 	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperationPINMgmtImpl(waitForPIN));
-	return new MobileResult(curStep, ResultStatus.OK, waitForPIN.deref());
 
+	List<OutputInfoUnit> result = waitForPIN.deref();
+	this.dispatcher.safeDeliver(new PrepareDevices());
+	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 
     private StepResult askForCAN(Step curStep) throws InterruptedException {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
 	interaction.onCanRequired(new ConfirmPasswordOperationPINMgmtImpl(waitForCAN, GenericPINStep.CAN_FIELD));
-	return new MobileResult(curStep, ResultStatus.OK, waitForCAN.deref());
 
+	List<OutputInfoUnit> result = waitForCAN.deref();
+	this.dispatcher.safeDeliver(new PrepareDevices());
+	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 
     private StepResult askForPUK(Step curStep) throws InterruptedException {
 	interaction.requestCardInsertion();
 	Promise<List<OutputInfoUnit>> waitForPUK = new Promise<>();
 	interaction.onPinBlocked(new ConfirmPasswordOperationPINMgmtImpl(waitForPUK, GenericPINStep.PUK_FIELD));
-	return new MobileResult(curStep, ResultStatus.OK, waitForPUK.deref());
+
+	List<OutputInfoUnit> result = waitForPUK.deref();
+	this.dispatcher.safeDeliver(new PrepareDevices());
+	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 
     private StepResult nextInt(Step curStep) throws InterruptedException {
 	idx++;
+
 	if (!(curStep instanceof GenericPINStep)) {
 	    LOG.debug("nextINTswitch: return");
 	    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
 	} else {
 	    GenericPINStep genPINStp = (GenericPINStep) curStep;
 	    RecognizedState recPinState = genPINStp.getPinState();
+
+	    this.dispatcher.safeDeliver(new PowerDownDevices());
 
 	    switch (recPinState) {
 		case PIN_activated_RC3:

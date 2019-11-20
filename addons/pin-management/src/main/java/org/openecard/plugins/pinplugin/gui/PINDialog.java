@@ -70,7 +70,7 @@ public class PINDialog {
 
     private UserConsentDescription createUserConsentDescription() {
 	UserConsentDescription uc = new UserConsentDescription("PIN Operation", "pin_change_dialog");
-	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", capturePin, state);
+	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", capturePin, state, conHandle);
 	gPINStep.setAction(new GenericPINAction("PIN Management", state, conHandle, dispatcher, gPINStep, capturePin));
 	uc.getSteps().add(gPINStep);
 

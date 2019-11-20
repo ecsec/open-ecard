@@ -22,6 +22,7 @@
 
 package org.openecard.plugins.pinplugin.gui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.PasswordField;
@@ -97,17 +98,23 @@ public class GenericPINStep extends Step {
     private int retryCounterPUK = 10;
 
     private RecognizedState pinState;
+    private final ConnectionHandleType conHandle;
 
 
-    public GenericPINStep(String id, String title, boolean capturePin, RecognizedState state) {
+    public GenericPINStep(String id, String title, boolean capturePin, RecognizedState state, ConnectionHandleType conHandle) {
 	super(id, title);
 	this.capturePin = capturePin;
 	pinState = state;
+	this.conHandle = conHandle;
 	generateGenericGui();
     }
 
     public RecognizedState getPinState() {
 	return pinState;
+    }
+
+    public ConnectionHandleType getConHandle() {
+	return this.conHandle;
     }
 
     private void generateGenericGui() {

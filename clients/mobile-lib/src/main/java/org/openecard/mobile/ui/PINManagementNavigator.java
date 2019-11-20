@@ -33,6 +33,8 @@ import java.util.concurrent.FutureTask;
 import jdk.internal.org.jline.utils.Log;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
@@ -44,6 +46,8 @@ import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.PinManagementInteraction;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.openecard.plugins.pinplugin.gui.GenericPINStep;
@@ -67,12 +71,14 @@ public class PINManagementNavigator extends MobileNavigator {
     private int idx = -1;
     private Thread pMgmtNextThread;
     private Dispatcher dispatcher;
+    private NFCDialogMsgSetter msgSetter;
 
 
-    public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction, Dispatcher dispatcher) {
+    public PINManagementNavigator(UserConsentDescription uc, PinManagementInteraction interaction, Dispatcher dispatcher, NFCDialogMsgSetter msgSetter) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
 	this.dispatcher = dispatcher;
+	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -175,33 +181,43 @@ public class PINManagementNavigator extends MobileNavigator {
 //	});
     }
 
-    private StepResult askForPIN(Step curStep, int attempt) throws InterruptedException {
-	interaction.requestCardInsertion();
+    private StepResult askForPIN(GenericPINStep curStep, int attempt) throws InterruptedException {
+	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
 	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperationPINMgmtImpl(waitForPIN));
 
-	List<OutputInfoUnit> result = waitForPIN.deref();
-	this.dispatcher.safeDeliver(new PrepareDevices());
-	return new MobileResult(curStep, ResultStatus.OK, result);
+	return createResult(waitForPIN, curStep);
     }
 
-    private StepResult askForCAN(Step curStep) throws InterruptedException {
-	interaction.requestCardInsertion();
+    private StepResult askForCAN(GenericPINStep curStep) throws InterruptedException {
+	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
 	interaction.onCanRequired(new ConfirmPasswordOperationPINMgmtImpl(waitForCAN, GenericPINStep.CAN_FIELD));
 
-	List<OutputInfoUnit> result = waitForCAN.deref();
-	this.dispatcher.safeDeliver(new PrepareDevices());
-	return new MobileResult(curStep, ResultStatus.OK, result);
+	return createResult(waitForCAN, curStep);
     }
 
-    private StepResult askForPUK(Step curStep) throws InterruptedException {
-	interaction.requestCardInsertion();
+    private StepResult askForPUK(GenericPINStep curStep) throws InterruptedException {
+	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForPUK = new Promise<>();
 	interaction.onPinBlocked(new ConfirmPasswordOperationPINMgmtImpl(waitForPUK, GenericPINStep.PUK_FIELD));
 
-	List<OutputInfoUnit> result = waitForPUK.deref();
-	this.dispatcher.safeDeliver(new PrepareDevices());
+	return createResult(waitForPUK, curStep);
+    }
+
+    private void callRequestCardInsert() {
+	if (msgSetter.isSupported()) {
+	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
+	} else {
+	    interaction.requestCardInsertion();
+	}
+    }
+
+    private StepResult createResult(Promise<List<OutputInfoUnit>> wait, GenericPINStep curStep) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, InterruptedException {
+	List<OutputInfoUnit> result = wait.deref();
+	PrepareDevices pd = new PrepareDevices();
+	pd.setContextHandle(curStep.getConHandle().getContextHandle());
+	this.dispatcher.safeDeliver(pd);
 	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 
@@ -219,25 +235,25 @@ public class PINManagementNavigator extends MobileNavigator {
 
 	    switch (recPinState) {
 		case PIN_activated_RC3:
-		    return askForPIN(curStep, 2);
+		    return askForPIN(genPINStp, 2);
 		case PIN_activated_RC2:
-		    return askForPIN(curStep, 1);
+		    return askForPIN(genPINStp, 1);
 		case PIN_suspended:
-		    return askForCAN(curStep);
+		    return askForCAN(genPINStp);
 		case PIN_resumed:
-		    return askForPIN(curStep, 1);
+		    return askForPIN(genPINStp, 1);
 		case PIN_blocked:
-		    return askForPUK(curStep);
+		    return askForPUK(genPINStp);
 		case PIN_deactivated:
-		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+		    return new MobileResult(genPINStp, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 		case PUK_blocked:
-		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+		    return new MobileResult(genPINStp, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 		case UNKNOWN:
 		    LOG.debug("nextINTswitch: UNKNOWN");
-		    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+		    return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
 		default:
 		    LOG.debug("nextINTswitch: default");
-		    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+		    return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
 	    }
 	}
     }

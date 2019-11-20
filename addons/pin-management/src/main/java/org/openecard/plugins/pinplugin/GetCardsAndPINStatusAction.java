@@ -87,7 +87,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    sessionHandle = createSessionHandle();
 
 	    LOG.debug("Call prepare devices");
-	    this.dispatcher.safeDeliver(new PrepareDevices());
+	    PrepareDevices pd = new PrepareDevices();
+	    pd.setContextHandle(cHandle.getContextHandle());
+	    this.dispatcher.safeDeliver(pd);
 
 	    // check if a german identity card is inserted, if not wait for it
 	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);

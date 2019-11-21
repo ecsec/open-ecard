@@ -30,11 +30,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 /**
  *
@@ -44,7 +44,7 @@ public class PinManagementCallbackReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
-    private Promise<ConfirmTwoPasswordsOperation> promisedOperationEnterOldNewPassword;
+    private Promise<ConfirmPinCanOperation> promisedOperationEnterOldNewPassword;
     private Promise<ConfirmPasswordOperation> promisedOperationUnblock;
     private Promise<ConfirmPasswordOperation> promisedOperationEnterCan;
 
@@ -87,7 +87,7 @@ public class PinManagementCallbackReceiver {
 
     private void expectPinChangeWithSuccess(String currentPin, String newPin) {
 	try {
-	    ConfirmTwoPasswordsOperation operation = promisedOperationEnterOldNewPassword.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	    ConfirmPinCanOperation operation = promisedOperationEnterOldNewPassword.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	    if (operation == null) {
 		throw new IllegalStateException();
 	    }

@@ -41,7 +41,6 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
@@ -58,13 +57,14 @@ import org.openecard.sal.protocol.eac.gui.PinState;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class ConfirmTwoPasswordsOperationEACImpl implements ConfirmTwoPasswordsOperation {
+public class ConfirmPinCanOperationEACImpl implements ConfirmPinCanOperation {
 
     private final Step pinStep;
     private final Promise<List<OutputInfoUnit>> waitForPin;
@@ -72,7 +72,7 @@ public class ConfirmTwoPasswordsOperationEACImpl implements ConfirmTwoPasswordsO
     private final NFCDialogMsgSetter msgSetter;
     private final EacNavigator eacNavigator;
 
-    public ConfirmTwoPasswordsOperationEACImpl(EacNavigator eacNavigator, EacInteraction interaction, NFCDialogMsgSetter msgSetter, Step pinStep, Promise<List<OutputInfoUnit>> waitForPin) {
+    public ConfirmPinCanOperationEACImpl(EacNavigator eacNavigator, EacInteraction interaction, NFCDialogMsgSetter msgSetter, Step pinStep, Promise<List<OutputInfoUnit>> waitForPin) {
 	this.eacNavigator = eacNavigator;
 	this.interaction = interaction;
 	this.msgSetter = msgSetter;

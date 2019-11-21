@@ -29,7 +29,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface ConfirmTwoPasswordsOperation {
-    
-    void enter(String firstPassword, String secondPassword);
+public interface ConfirmPinCanOperation {
+
+    void enter(String pin, String can);
 }

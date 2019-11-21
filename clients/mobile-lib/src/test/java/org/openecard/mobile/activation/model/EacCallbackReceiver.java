@@ -35,13 +35,13 @@ import org.mockito.stubbing.Answer;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.ServerData;
 import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 /**
  *
@@ -52,7 +52,7 @@ public class EacCallbackReceiver {
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
     private Promise<ConfirmPasswordOperation> promisedOperationPinRequest;
-    private Promise<ConfirmTwoPasswordsOperation> promisedOperationPinCanRequest;
+    private Promise<ConfirmPinCanOperation> promisedOperationPinCanRequest;
     private Promise<ServerData> promisedServerData;
     private Promise<String> promisedTransactionData;
     private Promise<ConfirmAttributeSelectionOperation> promisedOperationConfirmAttributes;
@@ -73,7 +73,7 @@ public class EacCallbackReceiver {
 	    if (promisedOperationPinCanRequest.isDelivered()) {
 		promisedOperationPinCanRequest = new Promise();
 	    }
-	    promisedOperationPinCanRequest.deliver((ConfirmTwoPasswordsOperation) arg0.getArguments()[0]);
+	    promisedOperationPinCanRequest.deliver((ConfirmPinCanOperation) arg0.getArguments()[0]);
 	    return null;
 	}).when(interaction).onPinCanRequest(any());
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {

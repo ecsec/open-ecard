@@ -33,7 +33,7 @@ public interface EacInteraction extends ActivationInteraction {
 
     void onCanRequest(ConfirmPasswordOperation enterCan);
     void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
-    void onPinCanRequest(ConfirmTwoPasswordsOperation enterPinCan);
+    void onPinCanRequest(ConfirmPinCanOperation enterPinCan);
     void onCardBlocked();
     void onCardDeactivated();
     void onServerData(ServerData data, String transactionData, ConfirmAttributeSelectionOperation selectReadWrite);

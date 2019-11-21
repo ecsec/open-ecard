@@ -195,7 +195,7 @@ public final class EacNavigator extends MobileNavigator {
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else if (! isCanStep && ps.isRequestCan()) {
 		    this.pauseExecution(context);
-		    interaction.onPinCanRequest(new ConfirmTwoPasswordsOperationEACImpl(this, interaction, msgSetter, pinStep, waitForPin));
+		    interaction.onPinCanRequest(new ConfirmPinCanOperationEACImpl(this, interaction, msgSetter, pinStep, waitForPin));
 		} else {
 		    ConfirmPasswordOperation op = new ConfirmPasswordOperationEACImpl(this, interaction, msgSetter, pinStep, waitForPin);
 		    if (isCanStep) {

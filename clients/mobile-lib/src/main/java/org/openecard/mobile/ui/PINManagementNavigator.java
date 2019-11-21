@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import jdk.internal.org.jline.utils.Log;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
@@ -40,18 +38,13 @@ import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
-import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
-import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
-import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.openecard.plugins.pinplugin.gui.GenericPINStep;
-import org.openecard.sal.protocol.eac.gui.PinState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,10 +182,12 @@ public class PINManagementNavigator extends MobileNavigator {
 	return createResult(waitForPIN, curStep);
     }
 
-    private StepResult askForCAN(GenericPINStep curStep) throws InterruptedException {
+    private StepResult askForPinCan(GenericPINStep curStep) throws InterruptedException {
 	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
-	interaction.onCanRequired(new ConfirmPasswordOperationPINMgmtImpl(waitForCAN, GenericPINStep.CAN_FIELD));
+	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForCAN,
+		GenericPINStep.NEW_PIN_REPEAT_FIELD,
+		GenericPINStep.CAN_FIELD));
 
 	return createResult(waitForCAN, curStep);
     }
@@ -241,7 +236,7 @@ public class PINManagementNavigator extends MobileNavigator {
 		case PIN_activated_RC2:
 		    return askForPIN(genPINStp, 1);
 		case PIN_suspended:
-		    return askForCAN(genPINStp);
+		    return askForPinCan(genPINStp);
 		case PIN_resumed:
 		    return askForPIN(genPINStp, 1);
 		case PIN_blocked:

@@ -41,7 +41,6 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
 import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.SelectableItem;
@@ -58,6 +57,7 @@ import org.openecard.sal.protocol.eac.gui.PinState;
 import org.openecard.sal.protocol.eac.gui.ProcessingStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 
 /**

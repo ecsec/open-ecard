@@ -74,7 +74,7 @@ public class PinManagementCallbackReceiver {
 	    }
 	    promisedOperationEnterCan.deliver(arg0.getArgument(0));
 	    return null;
-	}).when(interaction).onCanRequired(any());
+	}).when(interaction).onPinCanRequired(any());
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onCanRequired().");
 	    if (promisedOperationUnblock.isDelivered()) {

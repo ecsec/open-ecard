@@ -30,7 +30,7 @@ import org.openecard.common.interfaces.EventFilter;
  *
  * @author Tobias Wich
  */
-class EventTypeFilter implements EventFilter {
+public class EventTypeFilter implements EventFilter {
 
     private final ArrayList<EventType> eventType;
 

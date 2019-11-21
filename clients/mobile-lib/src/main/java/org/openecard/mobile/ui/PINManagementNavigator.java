@@ -23,7 +23,6 @@
 package org.openecard.mobile.ui;
 
 import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
-import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -210,9 +209,6 @@ public class PINManagementNavigator extends MobileNavigator {
 
     private StepResult createResult(Promise<List<OutputInfoUnit>> wait, GenericPINStep curStep) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, InterruptedException {
 	List<OutputInfoUnit> result = wait.deref();
-	PrepareDevices pd = new PrepareDevices();
-	pd.setContextHandle(curStep.getConHandle().getContextHandle());
-	this.dispatcher.safeDeliver(pd);
 	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 

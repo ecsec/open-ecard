@@ -22,17 +22,20 @@ public class ReadOnlyCardStateView implements CardStateView {
     private final boolean capturePin;
     private final boolean removed;
     private final boolean disconnected;
+    private final int preparedDeviceSession;
 
     public ReadOnlyCardStateView(ConnectionHandleType connectionHandle,
 	    RecognizedState pinState,
 	    boolean capturePin,
 	    boolean removed,
-	    boolean disconnected) {
+	    boolean disconnected,
+	    int preparedDeviceSession) {
 	this.connectionHandle = connectionHandle;
 	this.pinState = pinState;
 	this.capturePin = capturePin;
 	this.removed = removed;
 	this.disconnected = disconnected;
+	this.preparedDeviceSession = preparedDeviceSession;
     }
 
     @Override
@@ -58,6 +61,11 @@ public class ReadOnlyCardStateView implements CardStateView {
     @Override
     public boolean isDisconnected() {
 	return disconnected;
+    }
+
+    @Override
+    public int preparedDeviceSession() {
+	return this.preparedDeviceSession;
     }
 
 

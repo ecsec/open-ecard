@@ -48,13 +48,14 @@ public class CardCapturer {
     private final Object devicesLock = new Object();
     private final DelegatingCardStateView cardStateView;
     private boolean areDevicesPoweredDown;
+    private int deviceSessionCount = 0;
 
     CardCapturer(ConnectionHandleType sessionHandle, Dispatcher dispatcher, AbstractPINAction pinAction, boolean areDevicesPoweredDown) {
 	this.sessionHandle = sessionHandle;
 	this.dispatcher = dispatcher;
 	this.pinAction = pinAction;
 
-	this.emptyState = new ReadOnlyCardStateView(sessionHandle, RecognizedState.UNKNOWN, true, true, true);
+	this.emptyState = new ReadOnlyCardStateView(sessionHandle, RecognizedState.UNKNOWN, true, true, true, deviceSessionCount);
 	this.cardStateView = new DelegatingCardStateView(emptyState);
 	this.areDevicesPoweredDown = areDevicesPoweredDown;
     }
@@ -64,8 +65,9 @@ public class CardCapturer {
     }
 
     public boolean updateCardState() throws WSHelper.WSException {
+
 	synchronized (cardViewLock) {
-	    if (areDevicesPoweredDown) {
+	    if (areDevicesPoweredDown || this.cardStateView.preparedDeviceSession() != deviceSessionCount) {
 		DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
 		ReadOnlyCardStateView createdState = initialState(ctx);
 		boolean success;
@@ -75,6 +77,7 @@ public class CardCapturer {
 		} else {
 		    success = true;
 		}
+
 		this.cardStateView.setDelegate(createdState);
 		return success;
 	    }
@@ -112,7 +115,12 @@ public class CardCapturer {
 	ctx.put(PIN_STATUS, pinState);
 	boolean nativePace = pinAction.genericPACESupport(cHandle);
 	final boolean capturePin = !nativePace;
-	ReadOnlyCardStateView cardState = new ReadOnlyCardStateView(cHandle, pinState, capturePin, false, false);
+	ReadOnlyCardStateView cardState = new ReadOnlyCardStateView(cHandle,
+		pinState,
+		capturePin,
+		false,
+		false,
+		deviceSessionCount);
 	return cardState;
     }
 
@@ -145,7 +153,8 @@ public class CardCapturer {
 			    this.cardStateView.getPinState(),
 			    this.cardStateView.capturePin(),
 			    this.cardStateView.isRemoved(),
-			    this.cardStateView.isRemoved()));
+			    this.cardStateView.isRemoved(),
+			    this.cardStateView.preparedDeviceSession()));
 		    break;
 		  // also end if the connection handle found as before than it is still valid
 		} else if (cHandleNew.getIFDName().equals(handle.getIFDName()) &&
@@ -180,7 +189,8 @@ public class CardCapturer {
 		    pinState,
 		    this.cardStateView.capturePin(),
 		    this.cardStateView.isRemoved(),
-		    this.cardStateView.isDisconnected()
+		    this.cardStateView.isDisconnected(),
+		    this.cardStateView.preparedDeviceSession()
 		);
 	    this.cardStateView.setDelegate(newView);
 	}
@@ -204,7 +214,8 @@ public class CardCapturer {
 			    currentView.getPinState(),
 			    currentView.capturePin(),
 			    true,
-			    currentView.isDisconnected());
+			    currentView.isDisconnected(),
+			    this.cardStateView.preparedDeviceSession());
 		    this.cardStateView.setDelegate(newView);
 		}
 	    }
@@ -229,7 +240,8 @@ public class CardCapturer {
 			    currentView.getPinState(),
 			    currentView.capturePin(),
 			    currentView.isRemoved(),
-			    true);
+			    true,
+			    this.cardStateView.preparedDeviceSession());
 		    this.cardStateView.setDelegate(newView);
 		}
 	    }
@@ -245,6 +257,7 @@ public class CardCapturer {
     void onPrepareDevices(EventObject eventData) {
 	synchronized (devicesLock) {
 	    this.areDevicesPoweredDown = false;
+	    this.deviceSessionCount += 1;
 	}
     }
 }

@@ -59,6 +59,11 @@ public class DelegatingCardStateView implements CardStateView {
     public boolean isDisconnected() {
 	return this.delegate.isDisconnected();
     }
+
+    @Override
+    public int preparedDeviceSession() {
+	return this.delegate.preparedDeviceSession();
+    }
     
     public void setDelegate(CardStateView delegate) {
 	this.delegate = delegate;
@@ -67,5 +72,6 @@ public class DelegatingCardStateView implements CardStateView {
     public CardStateView getDelegate() {
 	return this.delegate;
     }
+
 
 }

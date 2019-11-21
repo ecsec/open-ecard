@@ -22,14 +22,6 @@
 
 package org.openecard.plugins.pinplugin.gui;
 
-import iso.std.iso_iec._24727.tech.schema.ActionType;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ControlIFD;
 import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
@@ -69,6 +61,8 @@ import org.openecard.gui.executor.StepActionResultStatus;
 import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ifd.scio.reader.PCSCPinModify;
+import org.openecard.plugins.pinplugin.CardCapturer;
+import org.openecard.plugins.pinplugin.CardStateView;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.CAN_CORRECT;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_CORRECT;
@@ -105,24 +99,19 @@ public class GenericPINAction extends StepAction {
     private static final String ERROR_UNKNOWN = "action.error.unknown";
 
     private final I18n lang = I18n.getTranslation("pinplugin");
-    private final boolean capturePin;
     private final Dispatcher dispatcher;
     private final GenericPINStep gPINStep;
 
-    private ConnectionHandleType cHandle;
-    private RecognizedState state;
-    private byte[] slotHandle;
+    private final CardStateView cardView;
+    private final CardCapturer cardCapturer;
 
 
-    public GenericPINAction(String stepID, RecognizedState state, ConnectionHandleType cHandle, Dispatcher dispatcher,
-	    GenericPINStep gPINStep, boolean capturePin) {
+    public GenericPINAction(String stepID, Dispatcher dispatcher, GenericPINStep gPINStep, CardCapturer cardCapturer) {
 	super(gPINStep);
 	this.gPINStep = gPINStep;
-	this.capturePin = capturePin;
-	this.cHandle = cHandle;
 	this.dispatcher = dispatcher;
-	this.state = state;
-	slotHandle = cHandle.getSlotHandle();
+	this.cardView = cardCapturer.aquireView();
+	this.cardCapturer = cardCapturer;
     }
 
     @Override
@@ -131,15 +120,17 @@ public class GenericPINAction extends StepAction {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
-	// do not update in case of status resumed, it destroys the the pace channel and there is no disconnect after
-	// the verification of the CAN so the handle stays the same
-	if (state != RecognizedState.PIN_resumed) {
-	    updateConnectionHandle();
+	try {
+	    cardCapturer.updateCardState();
+	} catch (WSHelper.WSException ex) {
+	    LOG.error("Failed to prepare Generic PIN step.", ex);
+	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
 	// clean up values
 	clearCorrectValues();
 
+	RecognizedState state = cardView.getPinState();
 	switch (state) {
 	    case PIN_activated_RC3:
 	    case PIN_activated_RC2:
@@ -167,7 +158,7 @@ public class GenericPINAction extends StepAction {
 	AuthDataMap tmp = new AuthDataMap(paceInput);
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
-	if (capturePin) {
+	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField oldPINField = (PasswordField) executionResults.getResult(GenericPINStep.OLD_PIN_FIELD);
 	    char[] oldPINValue = oldPINField.getValue();
@@ -193,7 +184,7 @@ public class GenericPINAction extends StepAction {
 	AuthDataMap tmp = new AuthDataMap(paceInput);
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
-	if (capturePin) {
+	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(GenericPINStep.CAN_FIELD);
 	    String canValue = new String(canField.getValue());
@@ -219,7 +210,7 @@ public class GenericPINAction extends StepAction {
 	AuthDataMap tmp = new AuthDataMap(paceInput);
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
-	if (capturePin) {
+	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField pukField = (PasswordField) executionResults.getResult(GenericPINStep.PUK_FIELD);
 	    String pukValue = new String(pukField.getValue());
@@ -242,7 +233,7 @@ public class GenericPINAction extends StepAction {
     private EstablishChannel createEstablishChannelStructure(AuthDataResponse paceInputMap) {
 	// EstablishChannel
 	EstablishChannel establishChannel = new EstablishChannel();
-	establishChannel.setSlotHandle(slotHandle);
+	establishChannel.setSlotHandle(this.cardView.getHandle().getSlotHandle());
 	establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse());
 	establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE);
 	return establishChannel;
@@ -251,7 +242,7 @@ public class GenericPINAction extends StepAction {
     private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults) {
 	String newPINValue = null;
 	String newPINRepeatValue = null;
- 	if (capturePin) {
+ 	if (this.cardView.capturePin()) {
 	    try {
 		ExecutionResults executionResults = oldResults.get(getStepID());
 		PasswordField newPINField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_FIELD);
@@ -265,13 +256,13 @@ public class GenericPINAction extends StepAction {
 
 		if (! ByteUtils.compare(pin1, pin2)) {
 		    LOG.warn("New PIN does not match the value from the confirmation field.");
-		    gPINStep.updateState(state); // to reset the text fields
+		    gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 	    } catch (UnsupportedEncodingException ex) {
 		LOG.error("ISO_8859_1 charset is not support.", ex);
-		gPINStep.updateState(state); // to reset the text fields
+		gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		gPINStep.setFailedPINVerify(true, false);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
@@ -285,6 +276,7 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
+		RecognizedState state;
 	    if (pinResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		switch (pinResponse.getResult().getResultMinor()) {
 		    case ECardConstants.Minor.IFD.PASSWORD_ERROR:
@@ -308,7 +300,7 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
-	    if (capturePin) {
+	    if (this.cardView.capturePin()) {
 		// pace with the old pin was successful now modify the pin
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
 		    // no result check necessary everything except a 9000 leads to an APDU exception
@@ -374,14 +366,14 @@ public class GenericPINAction extends StepAction {
 
 	    if (canResponse == null) {
 		gPINStep.setFailedCANVerify(true, false);
-		gPINStep.updateState(state); // to reset the text fields
+		gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
 	    if (canResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		if (canResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
 		    gPINStep.setFailedCANVerify(false, true);
-		    gPINStep.updateState(state); // to reset the text fields
+		    gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else {
 		    WSHelper.checkResult(canResponse);
@@ -389,7 +381,7 @@ public class GenericPINAction extends StepAction {
 	    }
 
 	    gPINStep.setFailedCANVerify(false, false);
-	    state = RecognizedState.PIN_resumed;
+	    RecognizedState state = RecognizedState.PIN_resumed;
 	    gPINStep.updateState(state);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (ParserConfigurationException ex) {
@@ -431,7 +423,7 @@ public class GenericPINAction extends StepAction {
 
 	    if (pukResponse == null) {
 		gPINStep.setFailedPUKVerify(true, false);
-		gPINStep.updateState(state); // to reset the text fields
+		gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
@@ -440,7 +432,7 @@ public class GenericPINAction extends StepAction {
 		    // i think we should not display the counter
 		    //gPINStep.decreasePUKCounter();
 		    gPINStep.setFailedPUKVerify(false, true);
-		    gPINStep.updateState(state); // to reset the text fields
+		    gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else {
 		     WSHelper.checkResult(pukResponse);
@@ -453,7 +445,10 @@ public class GenericPINAction extends StepAction {
 	    responses.add(new byte[] {(byte) 0x90, (byte) 0x00});
 	    responses.add(new byte[] {(byte) 0x69, (byte) 0x84});
 
-	    CardResponseAPDU resetCounterResponse = resetRetryCounter.transmit(dispatcher, slotHandle, responses);
+	    CardResponseAPDU resetCounterResponse = resetRetryCounter.transmit(
+		    dispatcher,
+		    this.cardView.getHandle().getSlotHandle(),
+		    responses);
 	    if (Arrays.equals(resetCounterResponse.getTrailer(), new byte[] {(byte) 0x69, (byte) 0x84})) {
 		gPINStep.updateState(RecognizedState.PUK_blocked);
 		gPINStep.setFailedPUKVerify(false, true);
@@ -516,7 +511,7 @@ public class GenericPINAction extends StepAction {
 
 	ControlIFD controlIFD = new ControlIFD();
 	controlIFD.setCommand(ByteUtils.concatenate((byte) PCSCFeatures.MODIFY_PIN_DIRECT, structData));
-	controlIFD.setSlotHandle(slotHandle);
+	controlIFD.setSlotHandle(this.cardView.getHandle().getSlotHandle());
 	return (ControlIFDResponse) dispatcher.safeDeliver(controlIFD);
     }
 
@@ -527,7 +522,7 @@ public class GenericPINAction extends StepAction {
      */
     private CardResponseAPDU sendResetRetryCounter(byte[] newPIN) throws APDUException {
 	ResetRetryCounter apdu = new ResetRetryCounter(newPIN, (byte) 0x03);
-	return apdu.transmit(dispatcher, cHandle.getSlotHandle());
+	return apdu.transmit(dispatcher, this.cardView.getHandle().getSlotHandle());
     }
 
     private static PasswordAttributesType create(boolean needsPadding, PasswordTypeType pwdType, int minLen,
@@ -577,46 +572,6 @@ public class GenericPINAction extends StepAction {
 	}
 
 	WSHelper.checkResult(response);
-    }
-
-    /**
-     * Update the connection handle.
-     * This is necessary after every step because we Disconnect the card with a reset if we have success or not.
-     */
-    private void updateConnectionHandle() {
-	CardApplicationPath cPath = new CardApplicationPath();
-	CardApplicationPathType cPathType = new CardApplicationPathType();
-	cPathType.setChannelHandle(this.cHandle.getChannelHandle());
-	cPath.setCardAppPathRequest(cPathType);
-
-	CardApplicationPathResponse cPathResp = (CardApplicationPathResponse) dispatcher.safeDeliver(cPath);
-	List<CardApplicationPathType> cRes = cPathResp.getCardAppPathResultSet().getCardApplicationPathResult();
-	for (CardApplicationPathType capt : cRes) {
-	    CardApplicationConnect cConn = new CardApplicationConnect();
-	    cConn.setCardApplicationPath(capt);
-	    CardApplicationConnectResponse conRes = (CardApplicationConnectResponse) dispatcher.safeDeliver(cConn);
-
-	    String cardType = conRes.getConnectionHandle().getRecognitionInfo().getCardType();
-	    ConnectionHandleType cHandleNew = conRes.getConnectionHandle();
-	    if (cardType.equals("http://bsi.bund.de/cif/npa.xml")) {
-		// ensure same terminal and get the new slothandle
-		if (cHandleNew.getIFDName().equals(cHandle.getIFDName())
-			&& ! Arrays.equals(cHandleNew.getSlotHandle(), slotHandle)) {
-		    cHandle = cHandleNew;
-		    slotHandle = cHandle.getSlotHandle();
-		    break;
-		  // also end if the connection handle found as before than it is still valid
-		} else if (cHandleNew.getIFDName().equals(cHandle.getIFDName()) &&
-			Arrays.equals(cHandleNew.getSlotHandle(), slotHandle)) {
-		    break;
-		}
-	    } else {
-		CardApplicationDisconnect disconnect = new CardApplicationDisconnect();
-		disconnect.setConnectionHandle(conRes.getConnectionHandle());
-		disconnect.setAction(ActionType.RESET);
-		dispatcher.safeDeliver(disconnect);
-	    }
-	}
     }
 
     private void clearCorrectValues() {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,24 +19,23 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.plugins.pinplugin;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 
 /**
- * Enumeration for recognized PIN states.
  *
- * @author Dirk Petrautzki
+ * @author Neil Crossley
  */
-public enum RecognizedState {
+public interface CardStateView {
 
-    PIN_activated_RC3, // RESPONSE_RC3
-    PIN_activated_RC2, // RESPONSE_RC2
-    PIN_suspended, // RESPONSE_SUSPENDED
-    PIN_resumed,
-    PIN_deactivated, // RESPONSE_DEACTIVATED
-    PIN_blocked, // RESPONSE_BLOCKED
-    PUK_blocked,
-    UNKNOWN
+    ConnectionHandleType getHandle();
 
+    RecognizedState getPinState();
+
+    boolean capturePin();
+
+    boolean isRemoved();
+
+    boolean isDisconnected();
 }

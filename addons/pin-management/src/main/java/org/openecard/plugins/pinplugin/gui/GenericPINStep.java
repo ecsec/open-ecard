@@ -2,9 +2,9 @@
  * Copyright (C) 2014-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- * 
+ *
  * This file is part of the Open eCard App.
- * 
+ *
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,12 +12,12 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- * 
+ *
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
- * 
+ *
  ***************************************************************************/
 
 package org.openecard.plugins.pinplugin.gui;
@@ -28,6 +28,8 @@ import org.openecard.common.I18n;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
+import org.openecard.plugins.pinplugin.CardCapturer;
+import org.openecard.plugins.pinplugin.CardStateView;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.CAN_CORRECT;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_CORRECT;
@@ -43,7 +45,6 @@ import org.openecard.plugins.pinplugin.RecognizedState;
  */
 public class GenericPINStep extends Step {
 
-    private final boolean capturePin;
     private final I18n lang = I18n.getTranslation("pinplugin");
 
     // translation constants PIN Change
@@ -97,32 +98,33 @@ public class GenericPINStep extends Step {
     private int retryCounterPIN;
     private int retryCounterPUK = 10;
 
-    private RecognizedState pinState;
-    private final ConnectionHandleType conHandle;
+    private final CardStateView capturedState;
 
 
-    public GenericPINStep(String id, String title, boolean capturePin, RecognizedState state, ConnectionHandleType conHandle) {
+    public GenericPINStep(String id, String title, CardCapturer cardCapturer) {
 	super(id, title);
-	this.capturePin = capturePin;
-	pinState = state;
-	this.conHandle = conHandle;
+	this.capturedState = cardCapturer.aquireView();
 	generateGenericGui();
     }
 
     public RecognizedState getPinState() {
-	return pinState;
+	return this.capturedState.getPinState();
+    }
+
+    public boolean capturePin() {
+	return this.capturedState.capturePin();
     }
 
     public ConnectionHandleType getConHandle() {
-	return this.conHandle;
+	return this.capturedState.getHandle();
     }
 
     private void generateGenericGui() {
-	switch(pinState) {
+	switch(getPinState()) {
 	    case PIN_activated_RC3:
 		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 3;
-		if (capturePin) {
+		if (capturePin()) {
 		    createPINChangeGui();
 		} else {
 		    createPINChangeGuiNativ();
@@ -131,7 +133,7 @@ public class GenericPINStep extends Step {
 	    case PIN_activated_RC2:
 		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 2;
-		if (capturePin) {
+		if (capturePin()) {
 		    createPINChangeGui();
 		} else {
 		    createPINChangeGuiNativ();
@@ -140,7 +142,7 @@ public class GenericPINStep extends Step {
 	    case PIN_blocked:
 		setTitle(lang.translationForKey(PUKSTEP_TITLE));
 		retryCounterPIN = 0;
-		if (capturePin) {
+		if (capturePin()) {
 		    createPUKGui();
 		} else {
 		    createPUKGuiNativ();
@@ -149,7 +151,7 @@ public class GenericPINStep extends Step {
 	    case PIN_suspended:
 		setTitle(lang.translationForKey(CANSTEP_TITLE));
 		retryCounterPIN = 1;
-		if (capturePin) {
+		if (capturePin()) {
 		    createCANGui();
 		} else {
 		    createCANGuiNativ();
@@ -159,7 +161,7 @@ public class GenericPINStep extends Step {
 		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 1;
 		canSuccess = true;
-		if (capturePin) {
+		if (capturePin()) {
 		    createPINChangeGui();
 		} else {
 		    createPINChangeGuiNativ();
@@ -183,7 +185,6 @@ public class GenericPINStep extends Step {
     }
 
     protected void updateState(RecognizedState newState) {
-	pinState = newState;
 	getInputInfoUnits().clear();
 	generateGenericGui();
 
@@ -351,7 +352,7 @@ public class GenericPINStep extends Step {
 	setID("error");
 	setReversible(false);
 	Text errorText = new Text();
-	switch (pinState) {
+	switch (this.getPinState()) {
 	    case PIN_deactivated:
 		errorText.setText(lang.translationForKey(ERRORSTEP_DEACTIVATED));
 		break;

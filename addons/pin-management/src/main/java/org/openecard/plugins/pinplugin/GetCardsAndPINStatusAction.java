@@ -23,7 +23,6 @@
 package org.openecard.plugins.pinplugin;
 
 import iso.std.iso_iec._24727.tech.schema.ActionType;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.CreateSession;
 import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
@@ -31,7 +30,6 @@ import iso.std.iso_iec._24727.tech.schema.DestroyChannel;
 import iso.std.iso_iec._24727.tech.schema.DestroySession;
 import iso.std.iso_iec._24727.tech.schema.Disconnect;
 import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
-import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -73,8 +71,6 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     public static final String CAN_CORRECT = "can-correct";
     public static final String PUK_CORRECT = "puk-correct";
 
-    private EventCallback disconnectEventSink;
-    private ConnectionHandleType cHandle;
     private Future<ResultStatus> pinManagement;
 
 
@@ -87,59 +83,36 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	try {
 	    sessionHandle = createSessionHandle();
 
-	    LOG.debug("Call prepare devices");
-	    PrepareDevices pd = new PrepareDevices();
-	    pd.setContextHandle(sessionHandle.getContextHandle());
-	    this.dispatcher.safeDeliver(pd);
+	    boolean devicesStartPoweredDown = SysUtils.isMobileDevice();
+	    CardCapturer cardCapturer = new CardCapturer(sessionHandle, this.dispatcher, this, devicesStartPoweredDown);
+	    boolean success = cardCapturer.updateCardState();
 
-	    // check if a german identity card is inserted, if not wait for it
-	    cHandle = waitForCardType(GERMAN_IDENTITY_CARD);
-
-	    if (cHandle == null) {
-		LOG.debug("User cancelled card insertion.");
+	    CardStateView cardView = cardCapturer.aquireView();
+	    if (!success) {
+		// User cancelled card insertion.
 		return;
 	    }
-	    copySession(sessionHandle, cHandle);
-
-	    cHandle = connectToRootApplication(cHandle);
-
-	    final RecognizedState pinState = recognizeState(cHandle);
-	    ctx.put(PIN_STATUS, pinState);
-
-	    boolean nativePace = genericPACESupport(cHandle);
-
-	    final ConnectionHandleType handle = cHandle;
-	    final boolean capturePin = ! nativePace;
-
-	    CapturedCardState cardState = new CapturedCardState(capturePin, handle, pinState);
 
 	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
 		pinManagement = es.submit(() -> {
-		    PINDialog uc = new PINDialog(gui, dispatcher, cardState);
+		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer);
 		    return uc.show();
 		});
 
+		EventCallback disconnectEventSink = registerListeners(cardCapturer, cardView);
 
-		disconnectEventSink = (eventType, eventData) -> {
-		    if (eventType == EventType.CARD_REMOVED) {
-			//ignore that in case of mobile devices
-			if (!SysUtils.isMobileDevice()) {
-			    LOG.info("Card has been removed. Shutting down PIN Management process.");
-			    pinManagement.cancel(true);
-			}
+		try {
+		    ResultStatus result = pinManagement.get();
+		    if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
+			throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
 		    }
-		};
-
-		EventFilter evFilter = new CardRemovedFilter(cHandle.getIFDName(), cHandle.getSlotIndex());
-		evDispatcher.add(disconnectEventSink, evFilter);
-
-		ResultStatus result = pinManagement.get();
-		if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
-		    throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+		} finally {
+		    if (disconnectEventSink != null) {
+			evDispatcher.del(disconnectEventSink);
+		    }
 		}
-
 	    } catch (InterruptedException ex) {
 		LOG.info("waiting for PIN management to stop interrupted.", ex);
 		pinManagement.cancel(true);
@@ -148,28 +121,23 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } catch (CancellationException ex) {
 		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
 	    } finally {
-		if(disconnectEventSink != null) {
-		    evDispatcher.del(disconnectEventSink);
-		}
-
 		pinManagement = null;
 
 		// destroy the pace channel
 		DestroyChannel destChannel = new DestroyChannel();
-		destChannel.setSlotHandle(cHandle.getSlotHandle());
+		destChannel.setSlotHandle(cardView.getHandle().getSlotHandle());
 		dispatcher.safeDeliver(destChannel);
 
 		// Transaction based communication does not work on java 8 so the PACE channel is not closed after an
 		// EndTransaction call. So do a reset of the card to close the PACE channel.
 		Disconnect disconnect = new Disconnect();
-		disconnect.setSlotHandle(cHandle.getSlotHandle());
+		disconnect.setSlotHandle(cardView.getHandle().getSlotHandle());
 		disconnect.setAction(ActionType.RESET);
 		dispatcher.safeDeliver(disconnect);
 	    }
 	} catch (WSException ex){
 	    LOG.debug("Error while executing PIN Management.", ex);
 	    throw new AppExtensionException(ex.getResultMinor(), ex.getMessage());
-
 	} finally {
 	    try {
 		if (sessionHandle != null) {
@@ -192,6 +160,44 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	}
     }
 
+    private EventCallback registerListeners(CardCapturer cardCapturer, CardStateView cardView) {
+	EventCallback disconnectEventSink;
+	if (SysUtils.isMobileDevice()) {
+	    disconnectEventSink = (eventType, eventData) -> {
+		if (null != eventType) {
+		    switch (eventType) {
+			case CARD_REMOVED:
+			    cardCapturer.onCardRemoved(eventData);
+			    break;
+			case POWER_DOWN_DEVICES:
+			    cardCapturer.onPowerDownDevices(eventData);
+			    break;
+			case PREPARE_DEVICES:
+			    cardCapturer.onPrepareDevices(eventData);
+			    break;
+			default:
+			    break;
+		    }
+		}
+
+	    };
+	    evDispatcher.add(disconnectEventSink);
+	}
+	else {
+	    disconnectEventSink = (eventType, eventData) -> {
+		if (eventType == EventType.CARD_REMOVED) {
+		    LOG.info("Card has been removed. Shutting down PIN Management process.");
+		    pinManagement.cancel(true);
+		}
+	    };
+
+	    EventFilter evFilter = new CardRemovedFilter(cardView.getHandle().getIFDName(),
+		    cardView.getHandle().getSlotIndex());
+	    evDispatcher.add(disconnectEventSink, evFilter);
+	}
+	return disconnectEventSink;
+    }
+
     private ConnectionHandleType createSessionHandle() throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, WSException {
 	CreateSessionResponse response = (CreateSessionResponse)this.dispatcher.safeDeliver(new CreateSession());
 	WSHelper.checkResult(response);
@@ -211,16 +217,6 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     @Override
     public void destroy(boolean force) {
 	//ignore
-    }
-
-    private void copySession(ConnectionHandleType source, ConnectionHandleType target) {
-	ChannelHandleType sourceChannel = source.getChannelHandle();
-	ChannelHandleType targetChannel = target.getChannelHandle();
-	if (targetChannel == null) {
-	    targetChannel = new ChannelHandleType();
-	    target.setChannelHandle(targetChannel);
-	}
-	targetChannel.setSessionIdentifier(sourceChannel.getSessionIdentifier());
     }
 
 }

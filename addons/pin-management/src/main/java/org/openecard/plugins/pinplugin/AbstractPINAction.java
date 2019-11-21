@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Common superclass for {@code ChangePINAction} and {@code UnblockPINAction}.
  * Bundles methods needed in both actions.
- * 
+ *
  * @author Dirk Petrautzki
  */
 public abstract class AbstractPINAction implements AppExtensionAction {
@@ -68,7 +68,8 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 
     // constants
     protected static final String GERMAN_IDENTITY_CARD = "http://bsi.bund.de/cif/npa.xml";
-    private static final byte[] RECOGNIZE_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103");
+    private static final byte[] RECOGNIZE_PIN_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103");
+    private static final byte[] RECOGNIZE_PUK_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830104");
     private static final byte[] RESPONSE_RC3 = new byte[] { (byte) 0x90, 0x00 };
     private static final byte[] RESPONSE_BLOCKED = new byte[] { (byte) 0x63, (byte) 0xC0 };
     private static final byte[] RESPONSE_SUSPENDED = new byte[] { (byte) 0x63, (byte) 0xC1 };
@@ -82,7 +83,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 
     /**
      * Recognize the PIN state of the card given through the connection handle.
-     * 
+     *
      * @param cHandle The connection handle for the card for which the pin state should be recognized.
      * @return The recognized State (may be {@code RecognizedState.UNKNOWN}).
      */
@@ -91,7 +92,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	Transmit t = new Transmit();
 	t.setSlotHandle(cHandle.getSlotHandle());
 	InputAPDUInfoType inputAPDU = new InputAPDUInfoType();
-	inputAPDU.setInputAPDU(RECOGNIZE_APDU);
+	inputAPDU.setInputAPDU(RECOGNIZE_PIN_APDU);
 	t.getInputAPDUInfo().add(inputAPDU);
 	TransmitResponse response = (TransmitResponse) dispatcher.safeDeliver(t);
 
@@ -117,9 +118,23 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	return state;
     }
 
+    public void getPUKStatus(ConnectionHandleType cHandle) throws WSHelper.WSException {
+
+	Transmit t = new Transmit();
+	t.setSlotHandle(cHandle.getSlotHandle());
+	InputAPDUInfoType inputAPDU = new InputAPDUInfoType();
+	inputAPDU.setInputAPDU(RECOGNIZE_PUK_APDU);
+	t.getInputAPDUInfo().add(inputAPDU);
+	TransmitResponse response = (TransmitResponse) dispatcher.safeDeliver(t);
+
+	byte[] responseAPDU = response.getOutputAPDU().get(0);
+	LOG.debug("PUK response is {}", ByteUtils.toHexString(responseAPDU));
+
+    }
+
     /**
      * Wait until a card of the specified card type was inserted.
-     * 
+     *
      * @param cardType The type of the card that should be inserted.
      * @return The ConnectionHandle of the inserted card or null if no card was inserted.
      */
@@ -135,7 +150,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     /**
      * Connect to the root application of the card specified with a connection handle using a empty CardApplicationPath
      * and afterwards a CardApplicationConnect.
-     * 
+     *
      * @param cHandle
      *            The connection handle for the card to connect to root application.
      * @return The updated connection handle (now including a SlotHandle) or null if connecting went wrong.
@@ -146,7 +161,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 	CardApplicationPath cardApplicationPath = new CardApplicationPath();
 	cardApplicationPath.setCardAppPathRequest(cHandle);
-	CardApplicationPathResponse cardApplicationPathResponse = 
+	CardApplicationPathResponse cardApplicationPathResponse =
 		(CardApplicationPathResponse) dispatcher.safeDeliver(cardApplicationPath);
 
 	// Check CardApplicationPathResponse
@@ -157,18 +172,18 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	if (cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().isEmpty()){
 	    LOG.error("CardApplicationPath failed.");
 	    Result result = WSHelper.makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Card was removed.");
-	    WSException ex = WSHelper.createException(result);    
+	    WSException ex = WSHelper.createException(result);
 	    throw ex;
-	} 
-	
+	}
+
 	CardApplicationConnect cardApplicationConnect = new CardApplicationConnect();
 	cardApplicationConnect.setCardApplicationPath(
 		cardApplicationPathResponse.getCardAppPathResultSet().getCardApplicationPathResult().get(0));
-	CardApplicationConnectResponse cardApplicationConnectResponse = 
+	CardApplicationConnectResponse cardApplicationConnectResponse =
 		(CardApplicationConnectResponse) dispatcher.safeDeliver(cardApplicationConnect);
 
 	// Check CardApplicationConnectResponse
-	
+
 	WSHelper.checkResult(cardApplicationConnectResponse);
 
 	// Update ConnectionHandle. It now includes a SlotHandle.

@@ -22,7 +22,6 @@
 
 package org.openecard.plugins.pinplugin.gui;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.gui.ResultStatus;
@@ -30,8 +29,7 @@ import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
-import org.openecard.plugins.pinplugin.CapturedCardState;
-import org.openecard.plugins.pinplugin.RecognizedState;
+import org.openecard.plugins.pinplugin.CardCapturer;
 
 
 /**
@@ -41,19 +39,13 @@ import org.openecard.plugins.pinplugin.RecognizedState;
 public class PINDialog {
 
     private final UserConsent gui;
-    private final ConnectionHandleType conHandle;
-    private final RecognizedState state;
-    private final boolean capturePin;
     private final Dispatcher dispatcher;
-    private final CapturedCardState cardState;
+    private final CardCapturer cardCapturer;
 
-    public PINDialog(UserConsent gui, Dispatcher dispatcher, CapturedCardState cardState) {
+    public PINDialog(UserConsent gui, Dispatcher dispatcher, CardCapturer cardCapturer) {
 	this.gui = gui;
 	this.dispatcher = dispatcher;
-	this.conHandle = cardState.getHandle();
-	this.state = cardState.getPinState();
-	this.capturePin = cardState.isCapturePin();
-	this.cardState = cardState;
+	this.cardCapturer = cardCapturer;
     }
 
     /**
@@ -72,8 +64,8 @@ public class PINDialog {
 
     private UserConsentDescription createUserConsentDescription() {
 	UserConsentDescription uc = new UserConsentDescription("PIN Operation", "pin_change_dialog");
-	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", capturePin, state, conHandle);
-	gPINStep.setAction(new GenericPINAction("PIN Management", state, conHandle, dispatcher, gPINStep, capturePin));
+	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", this.cardCapturer);
+	gPINStep.setAction(new GenericPINAction("PIN Management", dispatcher, gPINStep, this.cardCapturer));
 	uc.getSteps().add(gPINStep);
 
 	return uc;

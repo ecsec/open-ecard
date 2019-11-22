@@ -43,10 +43,13 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.DispatcherExceptionUnchecked;
 import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
+import org.openecard.common.util.Pair;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.plugins.pinplugin.gui.CardRemovedFilter;
@@ -80,14 +83,17 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
 
 	ConnectionHandleType sessionHandle = null;
+
+	Pair<CardCapturer, AutoCloseable> managedCardCapturer = null;
 	try {
 	    sessionHandle = createSessionHandle();
 
-	    boolean devicesStartPoweredDown = SysUtils.isMobileDevice();
-	    CardCapturer cardCapturer = new CardCapturer(sessionHandle, this.dispatcher, this, devicesStartPoweredDown);
+	    managedCardCapturer = createCardCapturer(sessionHandle, dispatcher, evDispatcher, this);
+
+	    CardCapturer cardCapturer = managedCardCapturer.p1;
+
 	    boolean success = cardCapturer.updateCardState();
 
-	    CardStateView cardView = cardCapturer.aquireView();
 	    if (!success) {
 		// User cancelled card insertion.
 		return;
@@ -101,7 +107,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		    return uc.show();
 		});
 
-		EventCallback disconnectEventSink = registerListeners(cardCapturer, cardView);
+		EventCallback disconnectEventSink = registerListeners(cardCapturer.aquireView());
 
 		try {
 		    ResultStatus result = pinManagement.get();
@@ -123,6 +129,8 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } finally {
 		pinManagement = null;
 
+		CardStateView cardView = cardCapturer.aquireView();
+		
 		// destroy the pace channel
 		DestroyChannel destChannel = new DestroyChannel();
 		destChannel.setSlotHandle(cardView.getHandle().getSlotHandle());
@@ -139,13 +147,21 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    LOG.debug("Error while executing PIN Management.", ex);
 	    throw new AppExtensionException(ex.getResultMinor(), ex.getMessage());
 	} finally {
-	    try {
-		if (sessionHandle != null) {
+	    if (managedCardCapturer != null && managedCardCapturer.p2 != null) {
+		try {
+		    managedCardCapturer.p2.close();
+		} catch(Exception e) {
+		    LOG.error("Error while cleaning up card management.", e);
+		}
+	    }
+	    if (sessionHandle != null) {
+		try {
 		    DestroySession request = new DestroySession();
 		    request.setConnectionHandle(sessionHandle);
 		    this.dispatcher.safeDeliver(request);
+		} catch (Exception e) {
+		    LOG.error("Error while cleaning up card management.", e);
 		}
-	    } catch(Exception e) {
 	    }
 	    try {
 		PowerDownDevices pdd = new PowerDownDevices();
@@ -160,10 +176,16 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	}
     }
 
-    private EventCallback registerListeners(CardCapturer cardCapturer, CardStateView cardView) {
-	EventCallback disconnectEventSink;
-	if (SysUtils.isMobileDevice()) {
-	    disconnectEventSink = (eventType, eventData) -> {
+    private static Pair<CardCapturer, AutoCloseable> createCardCapturer(
+	    ConnectionHandleType sessionHandle,
+	    Dispatcher dispatcher,
+	    EventDispatcher eventDispatcher,
+	    AbstractPINAction pinAction) {
+	boolean isMobileDevice = SysUtils.isMobileDevice();
+	CardCapturer cardCapturer = new CardCapturer(sessionHandle, dispatcher, pinAction, true);
+
+	if (isMobileDevice) {
+	    EventCallback disconnectEventSink = (eventType, eventData) -> {
 		if (null != eventType) {
 		    switch (eventType) {
 			case CARD_REMOVED:
@@ -181,9 +203,22 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		}
 
 	    };
-	    evDispatcher.add(disconnectEventSink);
+	    eventDispatcher.add(disconnectEventSink);
+
+	    return new Pair(cardCapturer, (AutoCloseable) () -> {
+		eventDispatcher.del(disconnectEventSink);
+	    });
+	} else {
+
+	    return new Pair(cardCapturer, (AutoCloseable) () -> {
+	    });
 	}
-	else {
+    }
+
+    private EventCallback registerListeners(CardStateView cardView) {
+	EventCallback disconnectEventSink;
+
+	if (!SysUtils.isMobileDevice()) {
 	    disconnectEventSink = (eventType, eventData) -> {
 		if (eventType == EventType.CARD_REMOVED) {
 		    LOG.info("Card has been removed. Shutting down PIN Management process.");
@@ -194,6 +229,8 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    EventFilter evFilter = new CardRemovedFilter(cardView.getHandle().getIFDName(),
 		    cardView.getHandle().getSlotIndex());
 	    evDispatcher.add(disconnectEventSink, evFilter);
+	} else {
+	    disconnectEventSink = null;
 	}
 	return disconnectEventSink;
     }

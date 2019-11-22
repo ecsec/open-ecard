@@ -84,7 +84,7 @@ public class CardCapturer {
 		return success;
 	    }
 	    else {
-		if (this.cardStateView.getPinState() != RecognizedState.PIN_resumed || this.cardStateView.isDisconnected()) {
+		if (this.cardStateView.getPinState() != RecognizedState.PIN_resumed && this.cardStateView.isDisconnected()) {
 		    // do not update in case of status resumed, it destroys the the pace channel and there is no disconnect after
 		    // the verification of the CAN so the handle stays the same
 		    updateConnectionHandle();

@@ -49,6 +49,7 @@ public class CardCapturer {
     private final DelegatingCardStateView cardStateView;
     private boolean areDevicesPoweredDown;
     private int deviceSessionCount = 0;
+    private boolean hasInitialized = false;
 
     CardCapturer(ConnectionHandleType sessionHandle, Dispatcher dispatcher, AbstractPINAction pinAction, boolean areDevicesPoweredDown) {
 	this.sessionHandle = sessionHandle;
@@ -67,7 +68,7 @@ public class CardCapturer {
     public boolean updateCardState() throws WSHelper.WSException {
 
 	synchronized (cardViewLock) {
-	    if (areDevicesPoweredDown || this.cardStateView.preparedDeviceSession() != deviceSessionCount) {
+	    if (!hasInitialized || areDevicesPoweredDown || this.cardStateView.preparedDeviceSession() != deviceSessionCount) {
 		DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
 		ReadOnlyCardStateView createdState = initialState(ctx);
 		boolean success;
@@ -79,6 +80,7 @@ public class CardCapturer {
 		}
 
 		this.cardStateView.setDelegate(createdState);
+		this.hasInitialized = true;
 		return success;
 	    }
 	    else {

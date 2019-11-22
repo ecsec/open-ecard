@@ -81,6 +81,7 @@ public class GenericPINAction extends StepAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericPINAction.class);
 
+    public static final String ERROR_STEP_ID = "error";
     private static final String PIN_ID_CAN = "2";
     private static final String PIN_ID_PIN = "3";
     private static final String PIN_ID_PUK = "4";
@@ -542,7 +543,7 @@ public class GenericPINAction extends StepAction {
     }
 
     private Step generateErrorStep(String errorMessage) {
-	Step errorStep = new Step("error", lang.translationForKey(ERROR_TITLE));
+	Step errorStep = new Step(ERROR_STEP_ID, lang.translationForKey(ERROR_TITLE));
 	errorStep.setReversible(false);
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);

@@ -48,6 +48,7 @@ import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.plugins.pinplugin.RecognizedState;
+import org.openecard.plugins.pinplugin.gui.GenericPINAction;
 import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -270,7 +271,11 @@ public class PINManagementNavigator extends MobileNavigator {
 
 	if (!(curStep instanceof GenericPINStep)) {
 	    LOG.debug("nextINTswitch: return");
-	    return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	    if (GenericPINAction.ERROR_STEP_ID.equals(curStep.getID())) {
+		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
+	    } else {
+		return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);
+	    }
 	} else {
 	    GenericPINStep genPINStp = (GenericPINStep) curStep;
 	    RecognizedState recPinState = genPINStp.getPinState();

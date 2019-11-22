@@ -113,6 +113,7 @@ public class CardCapturer {
 	copySession(sessionHandle, cHandle);
 	cHandle = pinAction.connectToRootApplication(cHandle);
 	final RecognizedState pinState = pinAction.recognizeState(cHandle);
+
 	pinAction.getPUKStatus(cHandle);
 	ctx.put(PIN_STATUS, pinState);
 	boolean nativePace = pinAction.genericPACESupport(cHandle);

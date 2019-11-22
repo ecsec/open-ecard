@@ -83,7 +83,7 @@ public final class EacNavigator extends MobileNavigator {
     private int idx = 0;
     private boolean pinFirstUse = true;
 
-    private NFCDialogMsgSetter msgSetter;
+    private final NFCDialogMsgSetter msgSetter;
     private final Dispatcher dispatcher;
 
     public EacNavigator(UserConsentDescription uc, EacInteraction interaction, NFCDialogMsgSetter msgSetter,

@@ -136,11 +136,11 @@ public class GenericPINAction extends StepAction {
 	switch (state) {
 	    case PIN_activated_RC3:
 	    case PIN_activated_RC2:
-		return performPINChange(oldResults);
+		return performPINChange(oldResults, false);
 	    case PIN_suspended:
 		return performResumePIN(oldResults);
 	    case PIN_resumed:
-		return performPINChange(oldResults);
+		return performPINChange(oldResults, SysUtils.isMobileDevice());
 	    case PIN_blocked:
 		return performUnblockPIN(oldResults);
 	    case PIN_deactivated:
@@ -241,7 +241,7 @@ public class GenericPINAction extends StepAction {
 	return establishChannel;
     }
 
-    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults) {
+    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults, boolean onlyPACEWithPin) {
 	String newPINValue = null;
 	String newPINRepeatValue = null;
  	if (this.cardView.capturePin()) {
@@ -298,7 +298,7 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
-	    if (SysUtils.isMobileDevice()) {
+	    if (onlyPACEWithPin) {
 		gPINStep.setFailedPINVerify(false, false);
 		gPINStep.updateState(RecognizedState.PIN_activated_RC3);
 		return new StepActionResult(StepActionResultStatus.REPEAT);

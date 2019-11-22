@@ -276,23 +276,19 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 
-		RecognizedState state;
 	    if (pinResponse.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		switch (pinResponse.getResult().getResultMinor()) {
 		    case ECardConstants.Minor.IFD.PASSWORD_ERROR:
 			gPINStep.setFailedPINVerify(false, true);
-			state = RecognizedState.PIN_activated_RC2;
-			gPINStep.updateState(state);
+			gPINStep.updateState(RecognizedState.PIN_activated_RC2);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    case ECardConstants.Minor.IFD.PASSWORD_SUSPENDED:
 			gPINStep.setFailedPINVerify(false, true);
-			state = RecognizedState.PIN_suspended;
-			gPINStep.updateState(state);
+			gPINStep.updateState(RecognizedState.PIN_suspended);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    case ECardConstants.Minor.IFD.PASSWORD_BLOCKED:
 			gPINStep.setFailedPINVerify(false, true);
-			state = RecognizedState.PIN_blocked;
-			gPINStep.updateState(state);
+			gPINStep.updateState(RecognizedState.PIN_blocked);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    default:
 			WSHelper.checkResult(pinResponse);
@@ -381,8 +377,7 @@ public class GenericPINAction extends StepAction {
 	    }
 
 	    gPINStep.setFailedCANVerify(false, false);
-	    RecognizedState state = RecognizedState.PIN_resumed;
-	    gPINStep.updateState(state);
+	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to resume the PIN.", ex);

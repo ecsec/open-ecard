@@ -33,7 +33,6 @@ import org.openecard.plugins.pinplugin.CardStateView;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.CAN_CORRECT;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_CORRECT;
-import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_STATUS;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PUK_CORRECT;
 import org.openecard.plugins.pinplugin.RecognizedState;
 
@@ -99,10 +98,12 @@ public class GenericPINStep extends Step {
     private int retryCounterPUK = 10;
 
     private final CardStateView capturedState;
+    private final CardCapturer cardCapturer;
 
 
     public GenericPINStep(String id, String title, CardCapturer cardCapturer) {
 	super(id, title);
+	this.cardCapturer = cardCapturer;
 	this.capturedState = cardCapturer.aquireView();
 	generateGenericGui();
     }
@@ -185,12 +186,9 @@ public class GenericPINStep extends Step {
     }
 
     protected void updateState(RecognizedState newState) {
+	cardCapturer.notifyCardStateChange(newState);
 	getInputInfoUnits().clear();
 	generateGenericGui();
-
-	// update state
-	DynamicContext ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY);
-	ctx.put(PIN_STATUS, newState);
     }
 
     private void createPINChangeGuiNativ() {

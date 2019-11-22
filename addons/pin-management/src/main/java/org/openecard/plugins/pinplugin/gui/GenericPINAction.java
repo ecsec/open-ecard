@@ -241,7 +241,7 @@ public class GenericPINAction extends StepAction {
 	return establishChannel;
     }
 
-    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults, boolean onlyPACEWithPin) {
+    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults, boolean repeatOnSuccess) {
 	String newPINValue = null;
 	String newPINRepeatValue = null;
  	if (this.cardView.capturePin()) {
@@ -298,12 +298,6 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
-	    if (onlyPACEWithPin) {
-		gPINStep.setFailedPINVerify(false, false);
-		gPINStep.updateState(RecognizedState.PIN_activated_RC3);
-		return new StepActionResult(StepActionResultStatus.REPEAT);
-	    }
-
 	    if (this.cardView.capturePin()) {
 		// pace with the old pin was successful now modify the pin
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
@@ -315,11 +309,16 @@ public class GenericPINAction extends StepAction {
 		evaluateControlIFDResponse(resp);
 	    }
 
-	    // PIN modified successfully, proceed with next step
 	    gPINStep.setFailedPINVerify(false, false);
 	    gPINStep.updateState(RecognizedState.PIN_activated_RC3);
-	    return new StepActionResult(StepActionResultStatus.REPEAT,
-		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
+	    if (repeatOnSuccess) {
+		return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
+	    else {
+		// PIN modified successfully, proceed with next step
+		return new StepActionResult(StepActionResultStatus.REPEAT,
+			generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
+	    }
 	} catch (APDUException | IFDException | ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to change the PIN", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,

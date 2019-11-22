@@ -296,7 +296,7 @@ public class PINManagementNavigator extends MobileNavigator {
 		case PIN_suspended:
 		    return askForPinCan(genPINStp);
 		case PIN_resumed:
-		    return askForPIN(genPINStp, 1);
+		    return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
 		case PIN_blocked:
 		    return askForPUK(genPINStp);
 		case PIN_deactivated:

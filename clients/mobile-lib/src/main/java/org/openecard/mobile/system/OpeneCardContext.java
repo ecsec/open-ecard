@@ -273,10 +273,10 @@ public class OpeneCardContext {
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(
-		dispatcher, eventDispatcher, msgSetter);
+		dispatcher, eventDispatcher);
 	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
 
-	InsertCardNavigatorFactory insertFac = new InsertCardNavigatorFactory();
+	InsertCardNavigatorFactory insertFac = new InsertCardNavigatorFactory(msgSetter);
 	realFactories.put(insertFac.getProtocolType(), insertFac);
 
 	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(

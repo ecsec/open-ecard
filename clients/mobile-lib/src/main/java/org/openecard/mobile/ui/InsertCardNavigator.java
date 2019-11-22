@@ -30,6 +30,8 @@ import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 
 
 /**
@@ -39,13 +41,18 @@ import org.openecard.mobile.activation.ActivationInteraction;
 public class InsertCardNavigator implements UserConsentNavigator {
 
     private final UserConsentDescription uc;
-    private ActivationInteraction interaction;
+    private final ActivationInteraction interaction;
+    private final NFCDialogMsgSetter msgSetter;
 
     private int idx = -1;
 
-    public InsertCardNavigator(UserConsentDescription uc, ActivationInteraction interaction) {
+    public InsertCardNavigator(
+	    UserConsentDescription uc,
+	    ActivationInteraction interaction,
+	    NFCDialogMsgSetter msgSetter) {
 	this.uc = uc;
 	this.interaction = interaction;
+	this.msgSetter = msgSetter;
     }
 
 
@@ -63,8 +70,17 @@ public class InsertCardNavigator implements UserConsentNavigator {
     public StepResult next() {
 	idx++;
 	Step s = uc.getSteps().get(idx);
-	interaction.requestCardInsertion();
+	callRequestCardInsert();
+
 	return new MobileResult(s, ResultStatus.OK, Collections.EMPTY_LIST);
+    }
+
+    private void callRequestCardInsert() {
+	if (msgSetter.isSupported()) {
+	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
+	} else {
+	    interaction.requestCardInsertion();
+	}
     }
 
     @Override

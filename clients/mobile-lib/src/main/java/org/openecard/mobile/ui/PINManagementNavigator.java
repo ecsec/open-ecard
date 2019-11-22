@@ -47,8 +47,6 @@ import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
-import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
-import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.openecard.plugins.pinplugin.RecognizedState;
 import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 import org.slf4j.Logger;
@@ -71,19 +69,16 @@ public class PINManagementNavigator extends MobileNavigator {
     private Thread pMgmtNextThread;
     private final Dispatcher dispatcher;
     private final EventDispatcher eventDispatcher;
-    private final NFCDialogMsgSetter msgSetter;
 
 
     public PINManagementNavigator(UserConsentDescription uc,
 	    PinManagementInteraction interaction,
 	    Dispatcher dispatcher,
-	    EventDispatcher eventDispatcher,
-	    NFCDialogMsgSetter msgSetter) {
+	    EventDispatcher eventDispatcher) {
 	this.steps = new ArrayList<>(uc.getSteps());
 	this.interaction = interaction;
 	this.dispatcher = dispatcher;
 	this.eventDispatcher = eventDispatcher;
-	this.msgSetter = msgSetter;
     }
 
     @Override
@@ -189,7 +184,6 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForPIN(GenericPINStep curStep, int attempt) throws InterruptedException {
 	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
 
-	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
 	interaction.onPinChangeable(attempt, new ConfirmOldSetNewPasswordOperationPINMgmtImpl(waitForPIN));
 
@@ -199,7 +193,6 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForPinCan(GenericPINStep curStep) throws InterruptedException {
 	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
 
-	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
 	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForCAN,
 		GenericPINStep.NEW_PIN_REPEAT_FIELD,
@@ -211,7 +204,6 @@ public class PINManagementNavigator extends MobileNavigator {
     private StepResult askForPUK(GenericPINStep curStep) throws InterruptedException {
 	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
 
-	callRequestCardInsert();
 	Promise<List<OutputInfoUnit>> waitForPUK = new Promise<>();
 	interaction.onPinBlocked(new ConfirmPasswordOperationPINMgmtImpl(waitForPUK, GenericPINStep.PUK_FIELD));
 
@@ -223,7 +215,9 @@ public class PINManagementNavigator extends MobileNavigator {
 	    EventCallback callback = new EventCallback() {
 		@Override
 		public void signalEvent(EventType eventType, EventObject eventData) {
-		    powerDownDevices(connectionHandle);
+		    if (eventType == EventType.CARD_REMOVED) {
+			powerDownDevices(connectionHandle);
+		    }
 		}
 	    };
 	    this.eventDispatcher.add(callback, EventType.CARD_REMOVED);
@@ -231,6 +225,7 @@ public class PINManagementNavigator extends MobileNavigator {
 	    results.add(callback);
 	    return results;
 	} else {
+	    powerDownDevices(connectionHandle);
 	    return Collections.EMPTY_LIST;
 	}
     }
@@ -258,14 +253,6 @@ public class PINManagementNavigator extends MobileNavigator {
 	interaction.onCardPukBlocked();
 
 	return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-    }
-
-    private void callRequestCardInsert() {
-	if (msgSetter.isSupported()) {
-	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
-	} else {
-	    interaction.requestCardInsertion();
-	}
     }
 
     private StepResult createResult(Promise<List<OutputInfoUnit>> wait,

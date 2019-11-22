@@ -62,12 +62,10 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	return terminalName;
     }
 
-
     public abstract void prepareDevices();
 
     public void powerDownDevices() {
 	this.removeTag();
-	this.nfcCard = null;
     }
 
     public void setDialogMsg(String dialogMsg) {
@@ -93,6 +91,13 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 
     public synchronized void removeTag() {
 	final AbstractNFCCard currentCard = nfcCard;
+	if (currentCard != null) {
+	    nfcCard = null;
+	    removeTag(currentCard);
+	}
+    }
+
+    private void removeTag(final AbstractNFCCard currentCard) {
 	if (currentCard != null) { // maybe nfc tag is already removed
 	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
@@ -153,7 +158,9 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	} catch (InterruptedException ex) {
 	    LOG.warn("Waiting for card absent interrupted.");
 	}
-	return ! isCardPresent();
+	final boolean nowAbsent = ! isCardPresent();
+	LOG.debug("Notifying card is absent: {}", nowAbsent);
+	return nowAbsent;
     }
 
     @Override
@@ -180,7 +187,9 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	} catch (InterruptedException ex) {
 	    LOG.warn("Waiting for card present interrupted.");
 	}
-	return isCardPresent();
+	final boolean nowPresent = isCardPresent();
+	LOG.debug("Notifying card is present: {}", nowPresent);
+	return nowPresent;
     }
 
 }

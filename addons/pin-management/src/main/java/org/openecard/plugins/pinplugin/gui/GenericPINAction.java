@@ -50,6 +50,7 @@ import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
@@ -297,6 +298,12 @@ public class GenericPINAction extends StepAction {
 		}
 	    }
 
+	    if (SysUtils.isMobileDevice()) {
+		gPINStep.setFailedPINVerify(false, false);
+		gPINStep.updateState(RecognizedState.PIN_activated_RC3);
+		return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
+
 	    if (this.cardView.capturePin()) {
 		// pace with the old pin was successful now modify the pin
 		if (newPINValue.equals(newPINRepeatValue) && newPINValue.length() == 6) {
@@ -310,6 +317,7 @@ public class GenericPINAction extends StepAction {
 
 	    // PIN modified successfully, proceed with next step
 	    gPINStep.setFailedPINVerify(false, false);
+	    gPINStep.updateState(RecognizedState.PIN_activated_RC3);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (APDUException | IFDException | ParserConfigurationException ex) {

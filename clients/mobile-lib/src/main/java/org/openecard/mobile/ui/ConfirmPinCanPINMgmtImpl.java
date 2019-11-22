@@ -27,6 +27,7 @@ import org.openecard.common.util.Promise;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
+import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 
 /**
  *
@@ -35,24 +36,22 @@ import org.openecard.mobile.activation.ConfirmPinCanOperation;
 public class ConfirmPinCanPINMgmtImpl implements ConfirmPinCanOperation {
 
     private Promise<List<OutputInfoUnit>> waitForPWD = new Promise<>();
-    private String PWD_ID;
     private String CAN_ID;
+    private final GenericPINStep curStep;
 
-    public ConfirmPinCanPINMgmtImpl(Promise<List<OutputInfoUnit>> waitForPWD, String PIN_ID, String CAN_ID) {
+    public ConfirmPinCanPINMgmtImpl(Promise<List<OutputInfoUnit>> waitForPWD, GenericPINStep curStep, String CAN_ID) {
 	this.waitForPWD = waitForPWD;
-	this.PWD_ID = PWD_ID;
 	this.CAN_ID = CAN_ID;
+	this.curStep = curStep;
     }
 
     @Override
     public void enter(String pin, String can) {
 	List<OutputInfoUnit> lst = new ArrayList<>();
-	PasswordField pinField = new PasswordField(PWD_ID);
-	pinField.setValue(pin.toCharArray());
-	lst.add(pinField);
 	PasswordField canField = new PasswordField(CAN_ID);
 	canField.setValue(can.toCharArray());
 	lst.add(canField);
+	curStep.setResumePin(pin);
 	waitForPWD.deliver(lst);
 
     }

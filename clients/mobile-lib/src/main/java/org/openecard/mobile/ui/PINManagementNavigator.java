@@ -42,8 +42,8 @@ import org.openecard.common.util.Promise;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
-import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
+import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
@@ -196,7 +196,7 @@ public class PINManagementNavigator extends MobileNavigator {
 
 	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
 	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForCAN,
-		GenericPINStep.NEW_PIN_REPEAT_FIELD,
+		curStep,
 		GenericPINStep.CAN_FIELD));
 
 	return createResult(waitForCAN, curStep, hooks);
@@ -268,7 +268,6 @@ public class PINManagementNavigator extends MobileNavigator {
 
     private StepResult nextInt(Step curStep) throws InterruptedException {
 	idx++;
-
 	if (!(curStep instanceof GenericPINStep)) {
 	    LOG.debug("nextINTswitch: return");
 	    if (GenericPINAction.ERROR_STEP_ID.equals(curStep.getID())) {
@@ -288,7 +287,23 @@ public class PINManagementNavigator extends MobileNavigator {
 		case PIN_suspended:
 		    return askForPinCan(genPINStp);
 		case PIN_resumed:
-		    return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
+		final String resumePin = genPINStp.getResumePin();
+		    if(resumePin != null) {
+			List<OutputInfoUnit> lst = new ArrayList<>();
+			PasswordField newPin = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
+			newPin.setValue(resumePin.toCharArray());
+			lst.add(newPin);
+			PasswordField newPinRepeat = new PasswordField(GenericPINStep.NEW_PIN_REPEAT_FIELD);
+			newPinRepeat.setValue(resumePin.toCharArray());
+			lst.add(newPinRepeat);
+			PasswordField oldPin = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
+			oldPin.setValue(resumePin.toCharArray());
+			lst.add(oldPin);
+			return new MobileResult(genPINStp, ResultStatus.OK, lst);
+		    }
+		    else {
+			return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
+		    }
 		case PIN_blocked:
 		    return askForPUK(genPINStp);
 		case PIN_deactivated:
@@ -335,18 +350,6 @@ public class PINManagementNavigator extends MobileNavigator {
     @Override
     public void close() {
     }
-
-    private void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
-	for (InputInfoUnit infoInUnit : inInfo) {
-	    for (OutputInfoUnit infoOutUnit : outInfo) {
-		if (infoInUnit.getID().equals(infoOutUnit.getID())) {
-		    infoInUnit.copyContentFrom(infoOutUnit);
-		}
-	    }
-	}
-    }
-
-
 
 //    public List<OutputInfoUnit> getPinResult(Step step) throws InterruptedException {
 //	// read values

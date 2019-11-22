@@ -34,5 +34,7 @@ public interface PinManagementInteraction extends ActivationInteraction {
     void onPinChangeable(int attempts, ConfirmOldSetNewPasswordOperation enterOldNewPins);
     void onPinCanRequired(ConfirmPinCanOperation enterCan);
     void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
+    void onCardPukBlocked();
+    void onCardDeactivated();
 
 }

@@ -23,6 +23,7 @@
 package org.openecard.mobile.ui;
 
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.PinManagementInteraction;
@@ -39,10 +40,15 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
 
     private PinManagementInteraction interaction;
     private final Dispatcher dispatcher;
+    private final EventDispatcher eventDispatcher;
     private final NFCDialogMsgSetter msgSetter;
 
-    public PINManagementNavigatorFactory(Dispatcher dispatcher, NFCDialogMsgSetter msgSetter) {
+    public PINManagementNavigatorFactory(
+	    Dispatcher dispatcher,
+	    EventDispatcher eventDispatcher,
+	    NFCDialogMsgSetter msgSetter) {
 	this.dispatcher = dispatcher;
+	this.eventDispatcher = eventDispatcher;
 	this.msgSetter = msgSetter;
     }
 
@@ -62,7 +68,7 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
 	    throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 	}
 
-	return new PINManagementNavigator(uc, interaction, dispatcher, msgSetter);
+	return new PINManagementNavigator(uc, interaction, dispatcher, eventDispatcher, msgSetter);
     }
 
     @Override

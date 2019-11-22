@@ -160,7 +160,6 @@ public class OpeneCardContext {
 	    env.setDispatcher(dispatcher);
 	    LOG.info("Message Dispatcher initialized.");
 
-	    gui = createUserConsent(dispatcher);
 
 	    // set up management
 	    management = new TinyManagement(env);
@@ -173,6 +172,9 @@ public class OpeneCardContext {
 	    eventDispatcher.start();
 	    LOG.info("Event dispatcher started.");
 	    env.setEventDispatcher(eventDispatcher);
+
+
+	    gui = createUserConsent(dispatcher, eventDispatcher);
 
 	    // set up card recognition
 	    try {
@@ -261,7 +263,7 @@ public class OpeneCardContext {
 	}
     }
 
-    private CompositeUserConsent createUserConsent(Dispatcher dispatcher) {
+    private CompositeUserConsent createUserConsent(Dispatcher dispatcher, EventDispatcher eventDispatcher) {
 	// initialize gui
 	realFactories = new HashMap<>();
 	// the key type must match the generic. This can't be enforced so watch it here.
@@ -270,7 +272,8 @@ public class OpeneCardContext {
 
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
-	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(dispatcher, msgSetter);
+	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(
+		dispatcher, eventDispatcher, msgSetter);
 	realFactories.put(pinMngFac.getProtocolType(), pinMngFac);
 
 	InsertCardNavigatorFactory insertFac = new InsertCardNavigatorFactory();
@@ -280,7 +283,7 @@ public class OpeneCardContext {
 		eacNavFac,
 		pinMngFac,
 		insertFac);
- 
+
 	return new CompositeUserConsent(
 		allFactories,
 		new MessageDialogStub());

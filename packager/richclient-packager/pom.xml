@@ -15,7 +15,7 @@
 
 
 	<properties>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.release>${used.java.version}</maven.compiler.release>
 
 		<app.identifier>Open-eCard-App</app.identifier>
 		<app.name>Open eCard App</app.name>
@@ -309,7 +309,7 @@
 							<ignoreSigningInformation>true</ignoreSigningInformation>
 							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
 							<jdkToolchain>
-								<version>11</version>
+								<version>${used.java.version}</version>
 								<vendor>OpenJDK</vendor>
 							</jdkToolchain>
 						</configuration>

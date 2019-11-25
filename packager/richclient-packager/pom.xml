@@ -287,6 +287,14 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
 			<!-- Jpackage plugin to create installers -->
 			<plugin>
 				<groupId>net.agilhard.maven.plugins</groupId>

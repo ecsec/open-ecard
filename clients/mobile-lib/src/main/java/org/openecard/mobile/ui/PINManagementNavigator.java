@@ -213,6 +213,8 @@ public class PINManagementNavigator extends MobileNavigator {
 	}
 	lst.add(canField);
 
+	this.tempResumePin = password.getPin();
+
 	return createResult(lst, curStep, hooks);
     }
 

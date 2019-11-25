@@ -22,41 +22,13 @@
 
 package org.openecard.mobile.ui;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import org.openecard.binding.tctoken.TR03112Keys;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Promise;
-import org.openecard.gui.ResultStatus;
-import org.openecard.gui.StepResult;
-import org.openecard.gui.definition.InputInfoUnit;
 import org.openecard.gui.definition.OutputInfoUnit;
-import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
-import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
-import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.EacInteraction;
-import org.openecard.mobile.activation.NFCOverlayMessageHandler;
-import org.openecard.mobile.activation.SelectableItem;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
-import org.openecard.sal.protocol.eac.EACData;
-import org.openecard.sal.protocol.eac.EACProtocol;
-import org.openecard.sal.protocol.eac.anytype.PasswordID;
-import org.openecard.sal.protocol.eac.gui.CHATStep;
-import org.openecard.sal.protocol.eac.gui.CVCStep;
-import org.openecard.sal.protocol.eac.gui.ErrorStep;
-import org.openecard.sal.protocol.eac.gui.PINStep;
-import org.openecard.sal.protocol.eac.gui.PinState;
-import org.openecard.sal.protocol.eac.gui.ProcessingStep;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 

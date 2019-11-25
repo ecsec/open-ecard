@@ -390,7 +390,6 @@ public final class EacNavigator extends MobileNavigator {
 
 	ServerDataImpl sd = new ServerDataImpl(subject, issuer, subjectUrl, issuerUrl, validity, termsOfUsage, readAccessAttributes, writeAccessAttribute);
 	ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperationImpl(
-		sd,
 		waitForAttributes,
 		readBox,
 		writeBox);

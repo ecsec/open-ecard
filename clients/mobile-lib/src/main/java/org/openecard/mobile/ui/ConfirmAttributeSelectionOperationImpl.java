@@ -40,13 +40,11 @@ import org.openecard.mobile.activation.SelectableItem;
  */
 public class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeSelectionOperation {
 
-    private final ServerDataImpl sd;
     private final Promise<List<OutputInfoUnit>> waitForAttributes;
     private final Checkbox readBox;
     private final Checkbox writeBox;
 
-    ConfirmAttributeSelectionOperationImpl(ServerDataImpl sd, Promise<List<OutputInfoUnit>> waitForAttributes, Checkbox readBox, Checkbox writeBox) {
-	this.sd = sd;
+    ConfirmAttributeSelectionOperationImpl(Promise<List<OutputInfoUnit>> waitForAttributes, Checkbox readBox, Checkbox writeBox) {
 	this.waitForAttributes = waitForAttributes;
 	this.readBox = readBox;
 	this.writeBox = writeBox;

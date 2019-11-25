@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.ui;
 
 import org.openecard.common.util.Promise;

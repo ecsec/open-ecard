@@ -1,4 +1,4 @@
-/** **************************************************************************
+/****************************************************************************
  * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.ui;
 
 import java.util.ArrayList;
@@ -26,9 +26,7 @@ import java.util.List;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.definition.OutputInfoUnit;
 import org.openecard.gui.definition.PasswordField;
-import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.plugins.pinplugin.gui.GenericPINStep;
 
 /**
  *
@@ -36,8 +34,8 @@ import org.openecard.plugins.pinplugin.gui.GenericPINStep;
  */
 public class ConfirmPasswordOperationPINMgmtImpl implements ConfirmPasswordOperation {
 
-    private Promise<List<OutputInfoUnit>> waitForPWD = new Promise<>();
-    private String PWD_ID;
+    private final Promise<List<OutputInfoUnit>> waitForPWD;
+    private final String PWD_ID;
 
     public ConfirmPasswordOperationPINMgmtImpl(Promise<List<OutputInfoUnit>> waitForPWD, String PWD_ID) {
 	this.waitForPWD = waitForPWD;

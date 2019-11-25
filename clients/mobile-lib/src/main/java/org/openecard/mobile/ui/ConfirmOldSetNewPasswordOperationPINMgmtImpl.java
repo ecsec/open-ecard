@@ -35,7 +35,7 @@ import org.openecard.plugins.pinplugin.gui.GenericPINStep;
  */
 public class ConfirmOldSetNewPasswordOperationPINMgmtImpl implements ConfirmOldSetNewPasswordOperation {
 
-    private Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
+    private final Promise<List<OutputInfoUnit>> waitForPIN;
 
     public ConfirmOldSetNewPasswordOperationPINMgmtImpl(Promise<List<OutputInfoUnit>> waitForPIN) {
 	this.waitForPIN = waitForPIN;

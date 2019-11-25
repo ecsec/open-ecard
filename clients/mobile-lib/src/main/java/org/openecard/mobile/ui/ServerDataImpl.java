@@ -3,8 +3,20 @@
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
- * This file may be used in accordance with the terms and conditions
- * contained in a signed written agreement between you and ecsec GmbH.
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
  *
  ***************************************************************************/
 
@@ -22,14 +34,14 @@ import org.openecard.mobile.activation.TermsOfUsage;
  */
 class ServerDataImpl implements ServerData {
 
-    private String subject;
-    private String issuer;
-    private String subjectUrl;
-    private String issuerUrl;
-    private String validity;
-    private TermsOfUsage termsOfUsage;
-    private List<SelectableItem> readAccessAttributes;
-    private List<SelectableItem> writeAccessAttributes;
+    private final String subject;
+    private final String issuer;
+    private final String subjectUrl;
+    private final String issuerUrl;
+    private final String validity;
+    private final TermsOfUsage termsOfUsage;
+    private final List<SelectableItem> readAccessAttributes;
+    private final List<SelectableItem> writeAccessAttributes;
 
     public ServerDataImpl(String subject, String issuer, String subjectUrl, String issuerUrl, String validity, TermsOfUsage termsOfUsage, List<SelectableItem> readAccessAttributes, List<SelectableItem> writeAccessAttributes) {
 	this.subject = subject;

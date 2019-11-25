@@ -552,6 +552,7 @@
 							org.openecard.apache.http.*:
 							javax.smartcardio:sun.security.smartcardio
 						</excludePackageNames>
+						<javadocExecutable>${java.home}/bin/</javadocExecutable>
 					</configuration>
 				</plugin>
 

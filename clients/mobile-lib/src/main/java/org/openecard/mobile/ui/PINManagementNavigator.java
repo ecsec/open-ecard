@@ -70,6 +70,8 @@ public class PINManagementNavigator extends MobileNavigator {
     private Thread pMgmtNextThread;
     private final Dispatcher dispatcher;
     private final EventDispatcher eventDispatcher;
+    private String tempResumePin = null;
+    private StepPostProcessor stepCleanup = null;
 
 
     public PINManagementNavigator(UserConsentDescription uc,
@@ -192,14 +194,26 @@ public class PINManagementNavigator extends MobileNavigator {
     }
 
     private StepResult askForPinCan(GenericPINStep curStep) throws InterruptedException {
+	this.stepCleanup = (Step step) -> {
+	    if (curStep != step || curStep.getPinState() != RecognizedState.PIN_resumed) {
+		tempResumePin = null;
+	    }
+	};
 	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
 
-	Promise<List<OutputInfoUnit>> waitForCAN = new Promise<>();
-	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForCAN,
-		curStep,
-		GenericPINStep.CAN_FIELD));
+	Promise<PinCanContainer> waitForPinCan = new Promise<>();
+	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForPinCan));
 
-	return createResult(waitForCAN, curStep, hooks);
+	PinCanContainer password = waitForPinCan.deref();
+	List<OutputInfoUnit> lst = new ArrayList<>();
+	PasswordField canField = new PasswordField(GenericPINStep.CAN_FIELD);
+	final String can = password.getCan();
+	if (can != null) {
+	    canField.setValue(can.toCharArray());
+	}
+	lst.add(canField);
+
+	return createResult(lst, curStep, hooks);
     }
 
     private StepResult askForPUK(GenericPINStep curStep) throws InterruptedException {
@@ -260,14 +274,24 @@ public class PINManagementNavigator extends MobileNavigator {
 	    GenericPINStep curStep,
 	    List<EventCallback> temporaryHooks) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, InterruptedException {
 	List<OutputInfoUnit> result = wait.deref();
+	return createResult(wait.deref(), curStep, temporaryHooks);
+    }
+
+    private StepResult createResult(List<OutputInfoUnit> result,
+	    GenericPINStep curStep,
+	    List<EventCallback> temporaryHooks) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked, InterruptedException {
 	for (EventCallback hook : temporaryHooks) {
 	    this.eventDispatcher.del(hook);
 	}
 	return new MobileResult(curStep, ResultStatus.OK, result);
     }
 
-    private StepResult nextInt(Step curStep) throws InterruptedException {
+    private StepResult nextInt(Step curStep) throws InterruptedException, Exception {
 	idx++;
+	if (stepCleanup != null) {
+	    stepCleanup.process(curStep);
+	    stepCleanup = null;
+	}
 	if (!(curStep instanceof GenericPINStep)) {
 	    LOG.debug("nextINTswitch: return");
 	    if (GenericPINAction.ERROR_STEP_ID.equals(curStep.getID())) {
@@ -287,8 +311,9 @@ public class PINManagementNavigator extends MobileNavigator {
 		case PIN_suspended:
 		    return askForPinCan(genPINStp);
 		case PIN_resumed:
-		final String resumePin = genPINStp.getResumePin();
+		    final String resumePin = this.tempResumePin;
 		    if(resumePin != null) {
+			this.tempResumePin = null;
 			List<OutputInfoUnit> lst = new ArrayList<>();
 			PasswordField newPin = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
 			newPin.setValue(resumePin.toCharArray());

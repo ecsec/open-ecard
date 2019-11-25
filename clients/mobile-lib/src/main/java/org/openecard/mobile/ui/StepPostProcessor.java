@@ -1,5 +1,5 @@
 /** **************************************************************************
- * Copyright (C) 2017-2018 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -21,23 +21,12 @@
  ************************************************************************** */
 package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
-import org.openecard.mobile.activation.ConfirmPinCanOperation;
+import org.openecard.gui.definition.Step;
 
 /**
  *
- * @author Florian Otto
+ * @author Neil Crossley
  */
-public class ConfirmPinCanPINMgmtImpl implements ConfirmPinCanOperation {
-
-    private final Promise<PinCanContainer> waitForPWD;
-
-    public ConfirmPinCanPINMgmtImpl(Promise<PinCanContainer> waitForPWD) {
-	this.waitForPWD = waitForPWD;
-    }
-
-    @Override
-    public void enter(String pin, String can) {
-	waitForPWD.deliver(new PinCanContainer(pin, can));
-    }
+public interface StepPostProcessor {
+    void process(Step step);
 }

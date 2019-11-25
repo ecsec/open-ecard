@@ -100,8 +100,6 @@ public class GenericPINStep extends Step {
     private final CardStateView capturedState;
     private final CardCapturer cardCapturer;
 
-    private String resumePin = null;
-
     public GenericPINStep(String id, String title, CardCapturer cardCapturer) {
 	super(id, title);
 	this.cardCapturer = cardCapturer;
@@ -119,14 +117,6 @@ public class GenericPINStep extends Step {
 
     public ConnectionHandleType getConHandle() {
 	return this.capturedState.getHandle();
-    }
-
-    public String getResumePin() {
-	return resumePin;
-    }
-
-    public void setResumePin(String resumePin) {
-	this.resumePin = resumePin;
     }
 
     private void generateGenericGui() {
@@ -197,9 +187,6 @@ public class GenericPINStep extends Step {
     protected void updateState(RecognizedState newState) {
 	cardCapturer.notifyCardStateChange(newState);
 	getInputInfoUnits().clear();
-	if (newState != RecognizedState.PIN_resumed)  {
-	    resumePin = null;
-	}
 	generateGenericGui();
     }
 

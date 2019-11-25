@@ -50,7 +50,6 @@ import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
-import org.openecard.common.util.SysUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
@@ -136,11 +135,11 @@ public class GenericPINAction extends StepAction {
 	switch (state) {
 	    case PIN_activated_RC3:
 	    case PIN_activated_RC2:
-		return performPINChange(oldResults, false);
+		return performPINChange(oldResults);
 	    case PIN_suspended:
 		return performResumePIN(oldResults);
 	    case PIN_resumed:
-		return performPINChange(oldResults, SysUtils.isMobileDevice());
+		return performPINChange(oldResults);
 	    case PIN_blocked:
 		return performUnblockPIN(oldResults);
 	    case PIN_deactivated:
@@ -241,7 +240,7 @@ public class GenericPINAction extends StepAction {
 	return establishChannel;
     }
 
-    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults, boolean repeatOnSuccess) {
+    private StepActionResult performPINChange(Map<String, ExecutionResults> oldResults) {
 	String newPINValue = null;
 	String newPINRepeatValue = null;
  	if (this.cardView.capturePin()) {
@@ -311,14 +310,9 @@ public class GenericPINAction extends StepAction {
 
 	    gPINStep.setFailedPINVerify(false, false);
 	    gPINStep.updateState(RecognizedState.PIN_activated_RC3);
-	    if (repeatOnSuccess) {
-		return new StepActionResult(StepActionResultStatus.REPEAT);
-	    }
-	    else {
-		// PIN modified successfully, proceed with next step
-		return new StepActionResult(StepActionResultStatus.REPEAT,
-			generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
-	    }
+	    // PIN modified successfully, proceed with next step
+	    return new StepActionResult(StepActionResultStatus.REPEAT,
+		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (APDUException | IFDException | ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to change the PIN", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,

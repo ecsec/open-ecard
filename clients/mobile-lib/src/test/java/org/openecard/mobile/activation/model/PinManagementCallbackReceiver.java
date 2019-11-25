@@ -30,6 +30,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class PinManagementCallbackReceiver {
 
     private Promise<ConfirmPinCanOperation> promisedOperationEnterOldNewPassword;
     private Promise<ConfirmPasswordOperation> promisedOperationUnblock;
-    private Promise<ConfirmPasswordOperation> promisedOperationEnterCan;
+    private Promise<ConfirmPinCanNewPinOperation> promisedOperationEnterCan;
 
     private final World world;
     public final PinManagementInteraction interaction;
@@ -74,7 +75,7 @@ public class PinManagementCallbackReceiver {
 	    }
 	    promisedOperationEnterCan.deliver(arg0.getArgument(0));
 	    return null;
-	}).when(interaction).onPinCanRequired(any());
+	}).when(interaction).onPinCanNewPinRequired(any());
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onCanRequired().");
 	    if (promisedOperationUnblock.isDelivered()) {

@@ -70,7 +70,8 @@ public class PINManagementNavigator extends MobileNavigator {
     private Thread pMgmtNextThread;
     private final Dispatcher dispatcher;
     private final EventDispatcher eventDispatcher;
-    private String tempResumePin = null;
+    private String tempCurrentPin = null;
+    private String tempNewPin = null;
     private StepPostProcessor stepCleanup = null;
 
 
@@ -193,18 +194,19 @@ public class PINManagementNavigator extends MobileNavigator {
 	return createResult(waitForPIN, curStep, hooks);
     }
 
-    private StepResult askForPinCan(GenericPINStep curStep) throws InterruptedException {
+    private StepResult askForPinCanNewPin(GenericPINStep curStep) throws InterruptedException {
 	this.stepCleanup = (Step step) -> {
 	    if (curStep != step || curStep.getPinState() != RecognizedState.PIN_resumed) {
-		tempResumePin = null;
+		tempCurrentPin = null;
+		tempNewPin = null;
 	    }
 	};
 	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
 
-	Promise<PinCanContainer> waitForPinCan = new Promise<>();
-	interaction.onPinCanRequired(new ConfirmPinCanPINMgmtImpl(waitForPinCan));
+	Promise<PinCanNewPinContainer> waitForPinCan = new Promise<>();
+	interaction.onPinCanNewPinRequired(new ConfirmPinCanNewPinPINMgmtImpl(waitForPinCan));
 
-	PinCanContainer password = waitForPinCan.deref();
+	PinCanNewPinContainer password = waitForPinCan.deref();
 	List<OutputInfoUnit> lst = new ArrayList<>();
 	PasswordField canField = new PasswordField(GenericPINStep.CAN_FIELD);
 	final String can = password.getCan();
@@ -213,7 +215,8 @@ public class PINManagementNavigator extends MobileNavigator {
 	}
 	lst.add(canField);
 
-	this.tempResumePin = password.getPin();
+	this.tempCurrentPin = password.getCurrentPin();
+	this.tempNewPin = password.getNewPin();
 
 	return createResult(lst, curStep, hooks);
     }
@@ -311,26 +314,23 @@ public class PINManagementNavigator extends MobileNavigator {
 		case PIN_activated_RC2:
 		    return askForPIN(genPINStp, 1);
 		case PIN_suspended:
-		    return askForPinCan(genPINStp);
+		    return askForPinCanNewPin(genPINStp);
 		case PIN_resumed:
-		    final String resumePin = this.tempResumePin;
-		    if(resumePin != null) {
-			this.tempResumePin = null;
-			List<OutputInfoUnit> lst = new ArrayList<>();
-			PasswordField newPin = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
-			newPin.setValue(resumePin.toCharArray());
-			lst.add(newPin);
-			PasswordField newPinRepeat = new PasswordField(GenericPINStep.NEW_PIN_REPEAT_FIELD);
-			newPinRepeat.setValue(resumePin.toCharArray());
-			lst.add(newPinRepeat);
-			PasswordField oldPin = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
-			oldPin.setValue(resumePin.toCharArray());
-			lst.add(oldPin);
-			return new MobileResult(genPINStp, ResultStatus.OK, lst);
-		    }
-		    else {
-			return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
-		    }
+		    final char[] oldPinChars = this.tempCurrentPin == null ? new char[0] : this.tempCurrentPin.toCharArray();
+		    final char[] newPinChars = this.tempNewPin == null ? new char[0] : this.tempNewPin.toCharArray();
+		    this.tempCurrentPin = null;
+		    this.tempNewPin = null;
+		    List<OutputInfoUnit> lst = new ArrayList<>();
+		    PasswordField newPinField = new PasswordField(GenericPINStep.NEW_PIN_FIELD);
+		    newPinField.setValue(newPinChars);
+		    lst.add(newPinField);
+		    PasswordField newPinRepeat = new PasswordField(GenericPINStep.NEW_PIN_REPEAT_FIELD);
+		    newPinRepeat.setValue(newPinChars);
+		    lst.add(newPinRepeat);
+		    PasswordField oldPinField = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
+		    oldPinField.setValue(oldPinChars);
+		    lst.add(oldPinField);
+		    return new MobileResult(genPINStp, ResultStatus.OK, lst);
 		case PIN_blocked:
 		    return askForPUK(genPINStp);
 		case PIN_deactivated:

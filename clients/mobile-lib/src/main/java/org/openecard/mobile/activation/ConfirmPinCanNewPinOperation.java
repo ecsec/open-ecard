@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017-2018 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,25 +19,17 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.mobile.ui;
 
-import org.openecard.common.util.Promise;
-import org.openecard.mobile.activation.ConfirmPinCanOperation;
+package org.openecard.mobile.activation;
+
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
- * @author Florian Otto
+ * @author Neil Crossley
  */
-public class ConfirmPinCanPINMgmtImpl implements ConfirmPinCanOperation {
+@FrameworkInterface
+public interface ConfirmPinCanNewPinOperation {
 
-    private final Promise<PinCanContainer> waitForPWD;
-
-    public ConfirmPinCanPINMgmtImpl(Promise<PinCanContainer> waitForPWD) {
-	this.waitForPWD = waitForPWD;
-    }
-
-    @Override
-    public void enter(String pin, String can) {
-	waitForPWD.deliver(new PinCanContainer(pin, can));
-    }
+    void enter(String pin, String can, String newPin);
 }

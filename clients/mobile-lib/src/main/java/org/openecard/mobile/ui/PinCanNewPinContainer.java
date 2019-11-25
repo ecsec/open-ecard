@@ -19,22 +19,33 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.mobile.activation;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
+package org.openecard.mobile.ui;
 
 /**
  *
  * @author Neil Crossley
  */
-@FrameworkInterface
-public interface PinManagementInteraction extends ActivationInteraction {
+public class PinCanNewPinContainer {
 
-    void onPinChangeable(int attempts, ConfirmOldSetNewPasswordOperation enterOldNewPins);
-    void onPinCanNewPinRequired(ConfirmPinCanNewPinOperation enterPinCanNewPin);
-    void onPinBlocked(ConfirmPasswordOperation unblockWithPuk);
-    void onCardPukBlocked();
-    void onCardDeactivated();
+    private final String currentPin;
+    private final String can;
+    private final String newPin;
 
+    public PinCanNewPinContainer(String currentPin, String can, String newPin) {
+	this.currentPin = currentPin;
+	this.can = can;
+	this.newPin = newPin;
+    }
+
+    public String getCurrentPin() {
+	return currentPin;
+    }
+
+    public String getCan() {
+	return can;
+    }
+
+    public String getNewPin() {
+	return newPin;
+    }
 }

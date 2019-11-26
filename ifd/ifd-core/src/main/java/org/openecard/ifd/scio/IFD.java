@@ -152,7 +152,7 @@ public class IFD implements org.openecard.ws.IFD {
     private ExecutorService threadPool;
     private ConcurrentSkipListMap<String, Future<List<IFDStatusType>>> asyncWaitThreads;
     private Future<List<IFDStatusType>> syncWaitThread;
-
+    private IFDTerminalFactory terminalFactoryBuilder;
 
     protected synchronized void removeAsnycTerminal(String session) {
 	if (asyncWaitThreads != null) { // be sure the list still exists
@@ -178,6 +178,18 @@ public class IFD implements org.openecard.ws.IFD {
 	return protocolFactories.add(proto, factory);
     }
 
+    private IFDTerminalFactory getTerminalFactoryBuilder() throws IFDException {
+	IFDTerminalFactory currentBuilder = this.terminalFactoryBuilder;
+	if (currentBuilder == null) {
+	    currentBuilder = IFDTerminalFactory.configBackedInstance();
+	    this.terminalFactoryBuilder = currentBuilder;
+	}
+	return currentBuilder;
+    }
+
+    public void setTerminalFactoryBuilder(IFDTerminalFactory terminalFactoryBuilder) {
+	this.terminalFactoryBuilder = terminalFactoryBuilder;
+    }
 
     @Override
     public synchronized EstablishContextResponse establishContext(EstablishContext parameters) {
@@ -185,14 +197,8 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    // on first call, create a new unique handle
 	    if (ctxHandle == null) {
-		TerminalFactory termFactory;
-		try {
-		    final IFDTerminalFactory terminalFactoryBuilder = IFDTerminalFactory.instance();
-		    termFactory = terminalFactoryBuilder.getInstance();
-		} catch (GenericFactoryException ex) {
-		    throw new IFDException(ex);
-		}
-		cm = new ChannelManager(termFactory);
+		TerminalFactory currentTermFactory = getTermFactory();
+		cm = new ChannelManager(currentTermFactory);
 		ctxHandle = ChannelManager.createCtxHandle();
 		env.addIFDCtx(ctxHandle);
 		numClients = new AtomicInteger(1);
@@ -224,6 +230,17 @@ public class IFD implements org.openecard.ws.IFD {
 	    LOG.warn(ex.getMessage(), ex);
 	    return WSHelper.makeResponse(EstablishContextResponse.class, ex.getResult());
 	}
+    }
+
+    private TerminalFactory getTermFactory() throws IFDException {
+	IFDTerminalFactory factoryBuilder = this.getTerminalFactoryBuilder();
+	TerminalFactory currentTermFactory;
+	try {
+	    currentTermFactory = factoryBuilder.getInstance();
+	} catch (GenericFactoryException ex) {
+	    throw new IFDException(ex);
+	}
+	return currentTermFactory;
     }
 
     @Override

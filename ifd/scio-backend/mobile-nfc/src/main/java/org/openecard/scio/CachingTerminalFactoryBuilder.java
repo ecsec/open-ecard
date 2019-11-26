@@ -19,33 +19,33 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.mobile.system;
+package org.openecard.scio;
 
 import org.openecard.common.ifd.scio.TerminalFactory;
+import org.openecard.ws.common.GenericFactoryException;
 import org.openecard.ws.common.GenericInstanceProvider;
 
 /**
  *
  * @author Neil Crossley
  */
-public class OpeneCardContextConfig {
+public class CachingTerminalFactoryBuilder<T extends TerminalFactory> implements GenericInstanceProvider<TerminalFactory> {
 
-    private final String wsdefMarshallerClass;
-    private final GenericInstanceProvider<TerminalFactory> terminFactoryBuilder;
+    private final GenericInstanceProvider<T> delegate;
 
-    public OpeneCardContextConfig(
-	    GenericInstanceProvider<TerminalFactory> terminFactoryBuilder,
-	    String wsdefMarshallerClass) {
-	this.terminFactoryBuilder = terminFactoryBuilder;
-	this.wsdefMarshallerClass = wsdefMarshallerClass;
+    private T previousInstance = null;
+
+    public CachingTerminalFactoryBuilder(GenericInstanceProvider<T> delegate) {
+	this.delegate = delegate;
     }
 
-    public GenericInstanceProvider<TerminalFactory> getTerminalFactoryBuilder() {
-	return this.terminFactoryBuilder;
+    @Override
+    public T getInstance() throws GenericFactoryException {
+	previousInstance = this.delegate.getInstance();
+	return previousInstance;
     }
 
-    public String getWsdefMarshallerClass() {
-	return this.wsdefMarshallerClass;
+    public T getPreviousInstance() {
+	return this.previousInstance;
     }
 }

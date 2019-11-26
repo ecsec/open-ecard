@@ -41,7 +41,7 @@ public class IFDTerminalFactory implements GenericInstanceProvider<TerminalFacto
 
     private final GenericInstanceProvider<TerminalFactory> factory;
 
-    private IFDTerminalFactory(GenericInstanceProvider<TerminalFactory> factory) {
+    public IFDTerminalFactory(GenericInstanceProvider<TerminalFactory> factory) {
 	this.factory = factory;
     }
 
@@ -62,7 +62,7 @@ public class IFDTerminalFactory implements GenericInstanceProvider<TerminalFacto
 	return new IFDTerminalFactory(factory);
     }
 
-    public static synchronized IFDTerminalFactory instance() throws IFDException {
+    public static synchronized IFDTerminalFactory configBackedInstance() throws IFDException {
 	if (factoryInst == null) {
 	    factoryInst = createDefaultCongirationFactory();
 	}

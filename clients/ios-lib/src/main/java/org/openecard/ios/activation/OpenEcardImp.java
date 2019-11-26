@@ -1,4 +1,4 @@
-/****************************************************************************
+/** **************************************************************************
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
@@ -18,22 +18,20 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.ios.activation;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Provider;
 import java.security.Security;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
+import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.scio.IOSNFCFactory;
 import org.openecard.ws.android.AndroidMarshaller;
 import org.openecard.scio.IOSConfig;
@@ -65,21 +63,25 @@ public class OpenEcardImp implements OpenEcard {
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
-	OpeneCardContextConfig config = new OpeneCardContextConfig(IOSNFCFactory.class.getCanonicalName(), AndroidMarshaller.class.getCanonicalName());
-	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter());
+	IOSConfig currentConfig = new IOSConfig() {
+	    @Override
+	    public String getDefaultProviderCardMSG() {
+
+		return defaultNFCDialogMsg;
+	    }
+
+	    @Override
+	    public String getDefaultCardRecognizedMSG() {
+
+		return defaultNFCCardRecognizedMessage;
+	    }
+	};
+
+	CachingTerminalFactoryBuilder<IOSNFCFactory> builder = new CachingTerminalFactoryBuilder(() -> new IOSNFCFactory(currentConfig));
+	OpeneCardContextConfig config = new OpeneCardContextConfig(builder, AndroidMarshaller.class.getCanonicalName());
+	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter(builder));
 	this.utils = activationUtils;
 	this.context = this.utils.context(capabilities);
-	IOSNFCFactory.setStaticConfig(new IOSConfig() {
-		public String getDefaultProviderCardMSG() {
-
-		    return defaultNFCDialogMsg;
-		}
-
-		public String getDefaultCardRecognizedMSG() {
-
-		    return defaultNFCCardRecognizedMessage;
-		}
-	    });
     }
 
     @Override

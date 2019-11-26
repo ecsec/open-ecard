@@ -19,12 +19,14 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.mobile.activation.model;
 
+import java.lang.reflect.InvocationTargetException;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.ws.android.AndroidMarshaller;
+import org.openecard.ws.common.GenericFactoryException;
+import org.openecard.ws.common.GenericInstanceProvider;
 import org.openecard.ws.marshal.WSMarshaller;
 
 /**
@@ -33,16 +35,18 @@ import org.openecard.ws.marshal.WSMarshaller;
  */
 public final class OpeneCardContextConfigFactory implements Builder<OpeneCardContextConfig> {
 
-    private final String ifdFactoryClass;
+    private final GenericInstanceProvider<TerminalFactory> terminFactoryBuilder;
     private final String wsdefMarshaller;
 
-    private OpeneCardContextConfigFactory(String ifdFactoryClass, String wsdefMarshaller) {
-	this.ifdFactoryClass = ifdFactoryClass;
+    private OpeneCardContextConfigFactory(
+	    GenericInstanceProvider<TerminalFactory> terminFactoryBuilder,
+	    String wsdefMarshaller) {
+	this.terminFactoryBuilder = terminFactoryBuilder;
 	this.wsdefMarshaller = wsdefMarshaller;
     }
 
     public OpeneCardContextConfig create() {
-	return new OpeneCardContextConfig(this.ifdFactoryClass, this.wsdefMarshaller);
+	return new OpeneCardContextConfig(this.terminFactoryBuilder, this.wsdefMarshaller);
     }
 
     @Override
@@ -50,30 +54,38 @@ public final class OpeneCardContextConfigFactory implements Builder<OpeneCardCon
 	return this.create();
     }
 
-    public OpeneCardContextConfigFactory withIdf(String givenIfdFactory) {
-	return new OpeneCardContextConfigFactory(givenIfdFactory, this.wsdefMarshaller);
+    public OpeneCardContextConfigFactory withIdf(GenericInstanceProvider<TerminalFactory> terminFactoryBuilder) {
+	return new OpeneCardContextConfigFactory(terminFactoryBuilder, this.wsdefMarshaller);
     }
 
     public <T extends TerminalFactory> OpeneCardContextConfigFactory withTerminalFactory(Class<T> givenIfdFactory) {
-	return new OpeneCardContextConfigFactory(givenIfdFactory.getCanonicalName(), this.wsdefMarshaller);
+	return new OpeneCardContextConfigFactory(() -> {
+	    try {
+		return givenIfdFactory.getConstructor().newInstance();
+	    } catch (NoSuchMethodException
+		    | SecurityException
+		    | InstantiationException
+		    | IllegalAccessException
+		    | IllegalArgumentException
+		    | InvocationTargetException ex) {
+		throw new GenericFactoryException(ex);
+	    }
+	}, this.wsdefMarshaller);
     }
 
     public <T extends WSMarshaller> OpeneCardContextConfigFactory withWsdefMarshaller(Class<T> givenWsdefMarshaller) {
-	return new OpeneCardContextConfigFactory(this.ifdFactoryClass, givenWsdefMarshaller.getCanonicalName());
+	return new OpeneCardContextConfigFactory(this.terminFactoryBuilder, givenWsdefMarshaller.getCanonicalName());
     }
 
     public OpeneCardContextConfigFactory withWsdefMarshaller(String givenWsdefMarshaller) {
-	return new OpeneCardContextConfigFactory(this.ifdFactoryClass, givenWsdefMarshaller);
-    }
-
-    public static OpeneCardContextConfigFactory instance() {
-	return new OpeneCardContextConfigFactory("dummy.ifdFactory", "dummy.wsdefMarschaller");
+	return new OpeneCardContextConfigFactory(this.terminFactoryBuilder, givenWsdefMarshaller);
     }
 
     public static OpeneCardContextConfigFactory mobile(TerminalFactory terminalFactory) {
 	DelegatingMobileNfcTerminalFactory.setDelegate(terminalFactory);
 
-	return instance().withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
+	return new OpeneCardContextConfigFactory(null, null)
+		.withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
 		.withWsdefMarshaller(AndroidMarshaller.class);
     }
 }

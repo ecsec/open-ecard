@@ -28,18 +28,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
-import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import android.nfc.tech.TagTechnology;
 import android.os.Build;
 import android.provider.Settings;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.openecard.mobile.activation.NfcCapabilityResult;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.scio.AndroidNFCFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,19 +90,6 @@ public class NfcUtils {
 	}
     }
 
-    public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported, IOException {
-	// indicates that a nfc tag is there
-	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	if (tagFromIntent != null) {
-	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
-		// set nfc tag with timeout of five seconds
-		AndroidNFCFactory.setNFCTag(tagFromIntent, 5000);
-	    } else {
-		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
-	    }
-	}
-    }
-
     public static boolean isNfcEnabled(Context ctx) {
 	setContext(ctx);
 	return getInstance().isNFCEnabled();
@@ -122,7 +104,6 @@ public class NfcUtils {
 	final NfcUtils instance = getInstance();
 	instance.context = ctx;
 	instance.adapter = null;
-
     }
 
     @Deprecated

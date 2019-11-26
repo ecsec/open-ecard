@@ -19,33 +19,20 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.android.activation;
 
-package org.openecard.mobile.system;
-
-import org.openecard.common.ifd.scio.TerminalFactory;
-import org.openecard.ws.common.GenericInstanceProvider;
+import android.content.Context;
+import android.content.Intent;
+import java.io.IOException;
+import org.openecard.mobile.activation.ContextManager;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 
 /**
  *
  * @author Neil Crossley
  */
-public class OpeneCardContextConfig {
+public interface AndroidContextManager extends ContextManager {
 
-    private final String wsdefMarshallerClass;
-    private final GenericInstanceProvider<TerminalFactory> terminFactoryBuilder;
+    public void onNewIntent(Context context, Intent intent) throws ApduExtLengthNotSupported, IOException;
 
-    public OpeneCardContextConfig(
-	    GenericInstanceProvider<TerminalFactory> terminFactoryBuilder,
-	    String wsdefMarshallerClass) {
-	this.terminFactoryBuilder = terminFactoryBuilder;
-	this.wsdefMarshallerClass = wsdefMarshallerClass;
-    }
-
-    public GenericInstanceProvider<TerminalFactory> getTerminalFactoryBuilder() {
-	return this.terminFactoryBuilder;
-    }
-
-    public String getWsdefMarshallerClass() {
-	return this.wsdefMarshallerClass;
-    }
 }

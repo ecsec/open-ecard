@@ -22,16 +22,12 @@
 package org.openecard.android.activation;
 
 import android.content.Context;
-import android.content.Intent;
-import java.io.IOException;
-import org.openecard.android.utils.NfcUtils;
 import org.openecard.common.util.SysUtils;
-import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.AndroidNFCFactory;
+import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.ws.android.AndroidMarshaller;
 
 /**
@@ -46,25 +42,24 @@ public class OpeneCard {
     }
 
     private final CommonActivationUtils utils;
+    private final CachingTerminalFactoryBuilder<AndroidNFCFactory> builder;
 
-    OpeneCard(CommonActivationUtils utils) {
+    OpeneCard(CommonActivationUtils utils, CachingTerminalFactoryBuilder<AndroidNFCFactory> builder) {
 	this.utils = utils;
+	this.builder = builder;
     }
 
-    public ContextManager context(Context context) {
+    public AndroidContextManager context(Context context) {
 	AndroidNfcCapabilities capabilities = AndroidNfcCapabilities.create(context);
 
-	return this.utils.context(capabilities);
-    }
-
-    public void onNewIntent(Context context, Intent intent) throws ApduExtLengthNotSupported, IOException {
-	NfcUtils.setContext(context);
-	NfcUtils.getInstance().retrievedNFCTag(intent);
+	return new DelegatingAndroidContextManager(this.utils.context(capabilities), this.builder);
     }
 
     public static OpeneCard createInstance() {
 
-	OpeneCardContextConfig config = new OpeneCardContextConfig(AndroidNFCFactory.class.getCanonicalName(), AndroidMarshaller.class.getCanonicalName());
+	CachingTerminalFactoryBuilder<AndroidNFCFactory> factory = new CachingTerminalFactoryBuilder<>(() -> new AndroidNFCFactory());
+
+	OpeneCardContextConfig config = new OpeneCardContextConfig(factory, AndroidMarshaller.class.getCanonicalName());
 	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new NFCDialogMsgSetter() {
 	    @Override
 	    public void setText(String msg) {
@@ -76,6 +71,6 @@ public class OpeneCard {
 	    }
 
 	});
-	return new OpeneCard(activationUtils);
+	return new OpeneCard(activationUtils, factory);
     }
 }

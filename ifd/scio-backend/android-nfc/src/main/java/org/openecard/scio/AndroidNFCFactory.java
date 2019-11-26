@@ -24,11 +24,6 @@ package org.openecard.scio;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOException;
-import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +40,13 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCFactory.class);
 
-    private static NFCCardTerminals terminals;
-    private static AndroidNFCCardTerminal terminal;
+    private final NFCCardTerminals terminals;
+    private final AndroidNFCCardTerminal terminal;
 
-    public AndroidNFCFactory() throws NoSuchTerminal {
+    public AndroidNFCFactory() {
 	LOG.info("Create new NFCFactory");
-	terminal = new AndroidNFCCardTerminal();
-	terminals = new NFCCardTerminals(terminal);
+	this.terminal = new AndroidNFCCardTerminal();
+	this.terminals = new NFCCardTerminals(terminal);
     }
 
     @Override
@@ -64,32 +59,11 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
 	return terminals;
     }
 
-    /**
-     * Return the names of the nfc terminals. Should return at least one card terminal (the integrated one).
-     *
-     * @return list of terminal names.
-     */
-    public static List<String> getTerminalNames() {
-	List<String> terminalNames = new ArrayList<>();
-	try {
-	    List<SCIOTerminal> nfcTerminals = terminals.list();
-	    for (SCIOTerminal nfcTerminal : nfcTerminals) {
-		terminalNames.add(nfcTerminal.getName());
-	    }
-	} catch (SCIOException ex) {
-	    LOG.warn(ex.getMessage(), ex);
-	}
-	return terminalNames;
-    }
+    public void setNFCTag(Tag tag) throws IOException {
+	final IsoDep isoTag = IsoDep.get(tag);
 
-    public static void setNFCTag(Tag tag) throws IOException {
-	AndroidNFCCardTerminal staticInstance = terminal;
-	if (staticInstance != null) {
-	    final IsoDep isoTag = IsoDep.get(tag);
-
-	    final int timeout = isoTag.getTimeout();
-	    staticInstance.setNFCTag(isoTag, timeout);
-	}
+	final int timeout = isoTag.getTimeout();
+	terminal.setNFCTag(isoTag, timeout);
     }
 
     /**
@@ -98,14 +72,10 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
      * @param tag
      * @param timeout current timeout for transceive(byte[]) in milliseconds.
      */
-    public static void setNFCTag(Tag tag, int timeout) throws IOException {
-	AndroidNFCCardTerminal staticInstance = terminal;
-	if (staticInstance != null) {
-	    IsoDep isoDepTag = IsoDep.get(tag);
-	    isoDepTag.setTimeout(timeout);
-	    staticInstance.setNFCTag(isoDepTag, timeout);
-
-	}
+    public void setNFCTag(Tag tag, int timeout) throws IOException {
+	IsoDep isoDepTag = IsoDep.get(tag);
+	isoDepTag.setTimeout(timeout);
+	terminal.setNFCTag(isoDepTag, timeout);
     }
 
 }

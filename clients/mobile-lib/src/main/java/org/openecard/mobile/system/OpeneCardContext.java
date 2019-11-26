@@ -35,7 +35,6 @@ import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventDispatcherImpl;
-import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.sal.CombinedCIFProvider;
@@ -48,7 +47,7 @@ import org.openecard.mobile.ui.CompositeUserConsent;
 import org.openecard.mobile.ui.PINManagementNavigatorFactory;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
-import org.openecard.ifd.scio.IFDProperties;
+import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.management.TinyManagement;
 import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.NFCCapabilities;
@@ -95,7 +94,6 @@ public class OpeneCardContext {
     private EventDispatcher eventDispatcher;
     private CardRecognitionImpl recognition;
     private Dispatcher dispatcher;
-    private TerminalFactory terminalFactory;
     private TinyManagement management;
     private SAL sal;
 
@@ -133,7 +131,6 @@ public class OpeneCardContext {
 
 
 	// set up nfc and mobile marshaller
-	IFDProperties.setProperty(IFD_FACTORY_KEY, this.config.getIfdFactoryClass());
 	WsdefProperties.setProperty(WSDEF_MARSHALLER_KEY, this.config.getWsdefMarshallerClass());
 
 	boolean nfcAvailable = this.nfcCapabilities.isAvailable();
@@ -192,6 +189,7 @@ public class OpeneCardContext {
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
 	    ifd.setGUI(gui);
 	    ifd.setEnvironment(env);
+	    ifd.setTerminalFactoryBuilder(new IFDTerminalFactory(this.config.getTerminalFactoryBuilder()));
 	    env.setIFD(ifd);
 	    LOG.info("IFD initialized.");
 
@@ -337,10 +335,6 @@ public class OpeneCardContext {
 
     public TinyManagement getTinyManagement() {
 	return management;
-    }
-
-    public TerminalFactory getTerminalFactory() {
-	return terminalFactory;
     }
 
     public Dispatcher getDispatcher() {

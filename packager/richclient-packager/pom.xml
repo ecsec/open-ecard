@@ -15,7 +15,7 @@
 
 
 	<properties>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.release>${target.java.version}</maven.compiler.release>
 
 		<app.identifier>Open-eCard-App</app.identifier>
 		<app.name>Open eCard App</app.name>
@@ -287,6 +287,14 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
 			<!-- Jpackage plugin to create installers -->
 			<plugin>
 				<groupId>net.agilhard.maven.plugins</groupId>
@@ -309,7 +317,7 @@
 							<ignoreSigningInformation>true</ignoreSigningInformation>
 							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
 							<jdkToolchain>
-								<version>11</version>
+								<version>${bundled.java.version}</version>
 								<vendor>OpenJDK</vendor>
 							</jdkToolchain>
 						</configuration>

@@ -221,6 +221,10 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    eacData.certificateDescription = certDescription;
 	    eacData.rawCertificateDescription = rawCertificateDescription;
 	    eacData.transactionInfo = eac1Input.getTransactionInfo();
+	    // remove transaction info again if it is empty
+	    if (eacData.transactionInfo != null && eacData.transactionInfo.trim().isEmpty()) {
+		eacData.transactionInfo = null;
+	    }
 	    eacData.requiredCHAT = requiredCHAT;
 	    eacData.optionalCHAT = optionalCHAT;
 	    eacData.selectedCHAT = new CHAT(requiredCHAT.toByteArray());

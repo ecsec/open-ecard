@@ -70,7 +70,9 @@
 		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<used.java.version>11</used.java.version>
+		<bundled.java.version>[11,14)</bundled.java.version>
+		<target.java.version>11</target.java.version>
+		<min.jkd.version>12</min.jkd.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
@@ -362,7 +364,7 @@
 								<version>[${maven.min.version},)</version>
 							</requireMavenVersion>
 							<requireJavaVersion>
-								<version>[${used.java.version},)</version>
+								<version>[${min.jkd.version},)</version>
 							</requireJavaVersion>
 						</rules>
 					</configuration>
@@ -530,6 +532,7 @@
 							org.openecard.apache.http.*:
 							javax.smartcardio:sun.security.smartcardio
 						</excludePackageNames>
+						<javadocExecutable>${java.home}/bin/</javadocExecutable>
 					</configuration>
 				</plugin>
 

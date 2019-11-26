@@ -26,6 +26,7 @@ module org.openecard.richclient {
     requires java.logging;
     requires java.desktop;
     requires java.sql; // for jackson serialization
+    requires java.naming;
 
     /* JAXB module */
     requires java.xml.bind;

@@ -15,7 +15,7 @@
 
 
 	<properties>
-		<maven.compiler.release>${used.java.version}</maven.compiler.release>
+		<maven.compiler.release>${target.java.version}</maven.compiler.release>
 	</properties>
 
 

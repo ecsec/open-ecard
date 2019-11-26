@@ -4,7 +4,7 @@ Prerequisites
 In order to build the Open eCard project, some additional tools are needed.
 
 Required dependencies are:
-* Java JDK 11 or higher - Oracle JDK and OpenJDK are working correctly (jlink is required for building modular runtime images)
+* Java JDK 12 or higher - Oracle JDK and OpenJDK are working correctly (jlink is required for building modular runtime images)
 
 * Maven in at least version 3.6.1
 
@@ -55,12 +55,12 @@ Native packages can be created with an early-access build of JDK-14 which contai
         <toolchain>
                 <type>jdk</type>
                 <provides>
-                        <version>11</version>
+                        <version>12</version>
                         <vendor>OpenJDK</vendor>
-                        <id>JavaSE-11</id>
+                        <id>JavaSE-12</id>
                 </provides>
                 <configuration>
-			<jdkHome>/usr/lib/jvm/java-11-openjdk-amd64/</jdkHome>
+			<jdkHome>/usr/lib/jvm/java-12-openjdk-amd64/</jdkHome>
                 </configuration>
         </toolchain>
 </toolchains>

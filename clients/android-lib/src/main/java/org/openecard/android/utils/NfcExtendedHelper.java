@@ -22,15 +22,10 @@
 
 package org.openecard.android.utils;
 
-import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
 import android.nfc.tech.TagTechnology;
 import android.os.Build;
-import android.provider.Settings;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,95 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-/**
- * Provides methods to enable/disable the nfc dispatch or to jump to the nfc settings, ...
- *
- * @author Mike Prechtl
- */
-public class NfcUtils {
+public class NfcExtendedHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NfcUtils.class);
-
-    private static NfcUtils nfcUtils;
-
-    private Context context;
-    private NfcAdapter adapter;
-
-    public static NfcUtils getInstance() {
-	synchronized (NfcUtils.class) {
-	    if (nfcUtils == null) {
-		nfcUtils = new NfcUtils();
-	    }
-	}
-	return nfcUtils;
-    }
-
-    /**
-     * This method opens the nfc settings on the corresponding device. Now, the user can enable nfc.
-     *
-     * @param activity
-     */
-    public void goToNFCSettings(Activity activity) {
-	Intent intent = new Intent(Settings.ACTION_NFC_SETTINGS);
-	activity.startActivityForResult(intent, 0);
-    }
-
-    public void enableNFCDispatch(Activity activity) {
-	if (isNfcEnabled(activity)) {
-	    LOG.debug("Enable NFC foreground dispatch...");
-	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
-	    // enable dispatch of messages with nfc tag
-	    NfcAdapter.getDefaultAdapter(activity).enableForegroundDispatch(activity, pendingIntent, null, null);
-	}
-    }
-
-    public void disableNFCDispatch(Activity activity) {
-	if (isNfcEnabled(activity)) {
-	    LOG.debug("Disable NFC foreground dispatch...");
-	    // disable dispatch of messages with nfc tag
-	    NfcAdapter.getDefaultAdapter(activity).disableForegroundDispatch(activity);
-	}
-    }
-
-    public static boolean isNfcEnabled(Context ctx) {
-	setContext(ctx);
-	return getInstance().isNFCEnabled();
-    }
-
-    public static boolean isNfcAvailable(Context ctx) {
-	setContext(ctx);
-	return getInstance().isNFCAvailable();
-    }
-
-    public static void setContext(Context ctx) {
-	final NfcUtils instance = getInstance();
-	instance.context = ctx;
-	instance.adapter = null;
-    }
-
-    @Deprecated
-    public static boolean supportsExtendedLength(Context context) {
-	NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
-	if (nfcAdapter != null) {
-	    Object tagObj = getTagObject(nfcAdapter);
-	    if (tagObj != null) {
-		Boolean extSup = isExtendedLengthSupported(tagObj);
-		if (extSup != null) {
-		    return extSup;
-		}
-		Integer maxLen = getMaxTransceiveLength(tagObj);
-		if (maxLen != null) {
-		    return maxLen > 370; // This is roughly the size of the biggest APDU observed in EAC
-		}
-		LOG.info("maxLen = {} ; extSup = {}", maxLen, extSup);
-	    }
-	} else {
-	    LOG.warn("NfcAdapter is not available.");
-	}
-
-	return false;
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(NfcExtendedHelper.class);
 
     /**
      * Checks the support of extended length APDUs of the system.
@@ -235,38 +144,6 @@ public class NfcUtils {
 	}
 
 	return null;
-    }
-    /**
-     * Proof if NFC is available on the corresponding device.
-     *
-     * @return true if nfc is available, otherwise false
-     */
-    public static boolean isNFCAvailable() {
-       return getInstance().getNFCAdapter() != null;
-    }
-
-    /**
-     * Proof if NFC is enabled on the corresponding device. If this method return {@code false} nfc should be activated
-     * in the device settings.
-     *
-     * @return true if nfc is enabled, otherwise false
-     */
-    public static boolean isNFCEnabled() {
-       return getInstance().getNFCAdapter() != null ? getInstance().getNFCAdapter().isEnabled() : false;
-    }
-
-    /**
-     * Return the adapter for NFC.
-     *
-     * @return nfc adapter.
-     */
-    public NfcAdapter getNFCAdapter() {
-       if (adapter == null) {
-           LOG.info("Try to create new NFCAdapter...");
-           NfcManager nfcManager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
-           adapter = nfcManager.getDefaultAdapter();
-       }
-       return adapter;
     }
 
 }

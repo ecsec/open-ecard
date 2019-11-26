@@ -22,13 +22,9 @@
 package org.openecard.android.activation;
 
 import android.content.Context;
-import android.nfc.NfcAdapter;
-import android.nfc.NfcManager;
-import org.openecard.android.utils.NfcUtils;
+import org.openecard.android.utils.NfcCapabilityHelper;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -36,56 +32,29 @@ import org.slf4j.LoggerFactory;
  */
 public class AndroidNfcCapabilities implements NFCCapabilities  {
 
-    private final Context context;
+    private final NfcCapabilityHelper capabilityHelper;
 
-    private static final Logger LOG = LoggerFactory.getLogger(AndroidNfcCapabilities.class);
-    private NfcAdapter adapter;
-
-    AndroidNfcCapabilities(Context context, NfcAdapter adapter) {
-	this.context = context;
-	this.adapter = adapter;
+    AndroidNfcCapabilities(NfcCapabilityHelper capabilityHelper) {
+	this.capabilityHelper = capabilityHelper;
     }
 
     @Override
     public boolean isAvailable() {
-	return adapter != null;
+	return capabilityHelper.isNFCAvailable();
     }
 
     @Override
     public boolean isEnabled() {
-	return adapter != null ? adapter.isEnabled() : false;
+	return capabilityHelper.isNFCEnabled();
     }
 
     @Override
     public NfcCapabilityResult checkExtendedLength() {
-	return NfcUtils.checkExtendedLength(this.context);
-    }
-
-
-    /**
-     * Proof if NFC is available on the corresponding device.
-     *
-     * @return true if nfc is available, otherwise false
-     */
-    public boolean isNFCAvailable() {
-	return adapter != null;
+	return capabilityHelper.checkExtendedLength();
     }
 
     public static AndroidNfcCapabilities create(Context context) {
-	NfcUtils.setContext(context);
-	NfcAdapter adapter = getNfcAdapter(context);
-	return new AndroidNfcCapabilities(context, adapter);
-    }
-
-    private static NfcAdapter getNfcAdapter(Context context) {
-	NfcManager nfcManager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
-	NfcAdapter adapter;
-	if (nfcManager != null) {
-	    adapter = nfcManager.getDefaultAdapter();
-	} else {
-	    adapter = null;
-	}
-	return adapter;
+	return new AndroidNfcCapabilities(NfcCapabilityHelper.create(context));
     }
 
 }

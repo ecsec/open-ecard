@@ -65,7 +65,7 @@ public class ActivationControllerServiceTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActivationControllerServiceTests.class);
 
-    private static final int SCALING_FACTOR = 20;
+    private static final int SCALING_FACTOR = 15;
     private static final int SLEEP_WAIT = Timeout.MIN_WAIT_TIMEOUT / 2 / SCALING_FACTOR;
     private static final int MICRO_WAIT = SLEEP_WAIT / 2;
     private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT / SCALING_FACTOR;

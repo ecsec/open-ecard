@@ -21,8 +21,8 @@
  ***************************************************************************/
 package org.openecard.android.activation;
 
-import android.content.Context;
 import android.content.Intent;
+import android.nfc.Tag;
 import java.io.IOException;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
@@ -33,6 +33,8 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
  */
 public interface AndroidContextManager extends ContextManager {
 
-    public void onNewIntent(Context context, Intent intent) throws ApduExtLengthNotSupported, IOException;
+    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, IOException;
+
+    public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, IOException;
 
 }

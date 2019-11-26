@@ -21,7 +21,6 @@
  ************************************************************************** */
 package org.openecard.android.activation;
 
-import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -52,19 +51,26 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
     }
 
     @Override
-    public void onNewIntent(Context context, Intent intent) throws ApduExtLengthNotSupported, IOException {
-	AndroidNFCFactory nfcFactory = this.builder.getPreviousInstance();
+    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, IOException {
 	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	if (nfcFactory != null && tagFromIntent != null) {
-	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
+	if (tagFromIntent != null) {
+	    this.onNewIntent(tagFromIntent);
+	}
+    }
+
+    @Override
+    public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, IOException {
+	AndroidNFCFactory nfcFactory = this.builder.getPreviousInstance();
+	if (nfcFactory != null && intent != null) {
+	    if (IsoDep.get(intent).isExtendedLengthApduSupported()) {
 		// set nfc tag with timeout of five seconds
-		nfcFactory.setNFCTag(tagFromIntent, 5000);
+		nfcFactory.setNFCTag(intent, 5000);
 	    } else {
 		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
 	    }
 	}
     }
-
+    
     @Override
     public void start(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	this.contextManager.start(handler);
@@ -74,4 +80,5 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
     public void stop(StopServiceHandler handler) {
 	this.contextManager.stop(handler);
     }
+
 }

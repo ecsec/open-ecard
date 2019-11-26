@@ -37,7 +37,7 @@ import java.util.Properties;
  *
  * @author Tobias Wich
  */
-public class GenericFactory <T> {
+public class GenericFactory <T> implements GenericInstanceProvider<T> {
 
     private final Class<T> typeClass;
     private final Class<? extends T> actualClass;
@@ -62,6 +62,7 @@ public class GenericFactory <T> {
     }
 
 
+    @Override
     public T getInstance() throws GenericFactoryException {
 	try {
 	    T o = constructor.newInstance(); // default constructor

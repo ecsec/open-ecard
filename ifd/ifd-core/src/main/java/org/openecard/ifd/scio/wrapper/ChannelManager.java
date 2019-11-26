@@ -57,8 +57,8 @@ public class ChannelManager {
     private final TreeMap<byte[], SingleThreadChannel> handledChannels;
     private final HashMap<String, Set<byte[]>> ifdNameToHandles;
 
-    public ChannelManager() throws IFDException {
-	this.termFact = IFDTerminalFactory.getInstance();
+    public ChannelManager(TerminalFactory termFact) throws IFDException {
+	this.termFact = termFact;
 	this.baseChannels = new HashMap<>();
 	this.handledChannels = new TreeMap<>(new ByteArrayComparator());
 	this.ifdNameToHandles = new HashMap<>();

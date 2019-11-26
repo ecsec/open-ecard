@@ -104,6 +104,7 @@ import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOTerminal;
+import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.interfaces.Publish;
@@ -118,9 +119,11 @@ import org.openecard.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.ifd.scio.reader.ExecutePACEResponse;
 import org.openecard.ifd.scio.reader.PCSCFeatures;
 import org.openecard.ifd.scio.wrapper.ChannelManager;
+import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
 import org.openecard.ifd.scio.wrapper.NoSuchChannel;
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel;
 import org.openecard.ifd.scio.wrapper.TerminalInfo;
+import org.openecard.ws.common.GenericFactoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,8 +185,14 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    // on first call, create a new unique handle
 	    if (ctxHandle == null) {
-		//scwrapper = new SCWrapper();
-		cm = new ChannelManager();
+		TerminalFactory termFactory;
+		try {
+		    final IFDTerminalFactory terminalFactoryBuilder = IFDTerminalFactory.instance();
+		    termFactory = terminalFactoryBuilder.getInstance();
+		} catch (GenericFactoryException ex) {
+		    throw new IFDException(ex);
+		}
+		cm = new ChannelManager(termFactory);
 		ctxHandle = ChannelManager.createCtxHandle();
 		env.addIFDCtx(ctxHandle);
 		numClients = new AtomicInteger(1);

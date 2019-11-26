@@ -27,6 +27,7 @@ import org.openecard.ifd.scio.IFDException;
 import org.openecard.ifd.scio.IFDProperties;
 import org.openecard.ws.common.GenericFactory;
 import org.openecard.ws.common.GenericFactoryException;
+import org.openecard.ws.common.GenericInstanceProvider;
 
 
 /**
@@ -34,33 +35,38 @@ import org.openecard.ws.common.GenericFactoryException;
  *
  * @author Tobias Wich
  */
-public class IFDTerminalFactory {
+public class IFDTerminalFactory implements GenericInstanceProvider<TerminalFactory> {
 
     private static final String FACTORY_KEY = "org.openecard.ifd.scio.factory.impl";
 
-    private GenericFactory<TerminalFactory> factory;
+    private final GenericInstanceProvider<TerminalFactory> factory;
 
-    private IFDTerminalFactory() throws IFDException {
+    private IFDTerminalFactory(GenericInstanceProvider<TerminalFactory> factory) {
+	this.factory = factory;
+    }
+
+    @Override
+    public TerminalFactory getInstance() throws GenericFactoryException {
+	return this.factory.getInstance();
+    }
+
+    private static IFDTerminalFactory factoryInst = null;
+
+    private static IFDTerminalFactory createDefaultCongirationFactory() throws IFDException {
+	GenericInstanceProvider<TerminalFactory> factory;
 	try {
 	    factory = new GenericFactory<>(TerminalFactory.class, IFDProperties.properties(), FACTORY_KEY);
 	} catch (GenericFactoryException ex) {
 	    throw new IFDException(ex);
 	}
+	return new IFDTerminalFactory(factory);
     }
 
-
-    private static IFDTerminalFactory factoryInst = null;
-
-    public static synchronized TerminalFactory getInstance() throws IFDException {
+    public static synchronized IFDTerminalFactory instance() throws IFDException {
 	if (factoryInst == null) {
-	    factoryInst = new IFDTerminalFactory();
+	    factoryInst = createDefaultCongirationFactory();
 	}
-
-	try {
-	    return factoryInst.factory.getInstance();
-	} catch (GenericFactoryException ex) {
-	    throw new IFDException(ex);
-	}
+	return factoryInst;
     }
 
 }

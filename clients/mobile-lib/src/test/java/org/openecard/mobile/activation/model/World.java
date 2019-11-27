@@ -230,6 +230,14 @@ public class World implements AutoCloseable {
 	    return _eacControllerFactory;
 	}
 
+
+	public void startSimpleEacWithEidScheme() {
+	    LOG.debug("Start simple eac with test.governikus-eid.");
+	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+
+	    this.startSimpleEac(rawTcTokenUrl, "eid");
+	}
+
 	public void startSimpleEac() throws InvalidAddressException {
 	    LOG.debug("Start simple eac with test.governikus-eid.");
 	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
@@ -289,8 +297,13 @@ public class World implements AutoCloseable {
 	}
 
 	private void startSimpleEac(String rawTcTokenUrl) {
+	    startSimpleEac(rawTcTokenUrl, "http");
+	}
 
-	    String url = "http://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, Charset.defaultCharset());;
+	private void startSimpleEac(String rawTcTokenUrl, String scheme) {
+
+
+	    String url = scheme + "://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, Charset.defaultCharset());;
 
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();
@@ -389,7 +402,7 @@ public class World implements AutoCloseable {
 	public void givenPinEntryEntry() {
 	    this.eacInteraction.givenSomePinEntryEntry();
 	}
-	
+
 	@Override
 	public void close() throws Exception {
 

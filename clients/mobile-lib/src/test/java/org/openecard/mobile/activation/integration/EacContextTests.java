@@ -47,6 +47,18 @@ public class EacContextTests extends BaseIntegrationSetup {
     }
 
     @Test
+    void canBeginEacActivationWithEidScheme() throws Exception {
+	WorldBuilder worldBuilder = WorldBuilder.create();
+	try ( World world = worldBuilder.build()) {
+
+	    world.contextWorld.startSuccessfully();
+
+	    world.eacWorld.startSimpleEacWithEidScheme();
+
+	    world.eacWorld.expectOnStarted();
+	}
+    }
+    @Test
     void whenEacActivationCancelsThenEacActivationIsInterrupted() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
 	try ( World world = worldBuilder.build()) {

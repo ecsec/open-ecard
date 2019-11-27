@@ -50,9 +50,18 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 
     @Override
     public ActivationController create(String url, ControllerCallback activation, EacInteraction interaction) {
+	if (url == null) {
+	    throw new IllegalArgumentException("The given URL cannot be null");
+	}
+	if (activation == null) {
+	    throw new IllegalArgumentException("The given controller callbacks cannot be null");
+	}
+	if (interaction == null) {
+	    throw new IllegalArgumentException("The given interaction callbacks cannot be null");
+	}
 	URL activationUrl;
 	try {
-	    activationUrl = new URL(url);
+	    activationUrl = new URL(prepareURL(url));
 	} catch (MalformedURLException ex) {
 	    throw new RuntimeException("The given url string could not be parsed as a URL.", ex);
 	}
@@ -87,4 +96,7 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 		activationControllerService, msgSetter);
     }
 
+    String prepareURL(String inputUrl) {
+	return inputUrl.replaceFirst("^eid:\\/\\/", "http://");
+    }
 }

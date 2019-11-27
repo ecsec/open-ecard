@@ -98,8 +98,6 @@ public class CommonCardEventHandler {
 			final String type = recognitionInfo.getCardType();
 
 			if (supportedCards == null || supportedCards.isEmpty() || supportedCards.contains(type)) {
-			    // remove handler when the correct card is present
-			    eventDispatcher.del(this);
 
 			    handler.onCardRecognized();
 			}

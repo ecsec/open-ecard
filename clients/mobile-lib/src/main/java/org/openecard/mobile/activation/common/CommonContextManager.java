@@ -44,7 +44,7 @@ import org.openecard.mobile.activation.StopServiceHandler;
  */
 public class CommonContextManager implements ContextManager, OpeneCardContextProvider {
 
-    private static Logger LOG = LoggerFactory.getLogger(CommonContextManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CommonContextManager.class);
 
     private final Object contextLock = new Object();
     private final NFCCapabilities nfc;

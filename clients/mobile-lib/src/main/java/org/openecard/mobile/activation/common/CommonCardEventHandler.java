@@ -28,22 +28,18 @@ public class CommonCardEventHandler {
     private static Logger LOG = LoggerFactory.getLogger(CommonCardEventHandler.class);
 
     private final ActivationInteraction interaction;
-    private boolean cardPresent;
     private boolean cardRecognized;
-    private NFCDialogMsgSetter msgSetter;
+    private final NFCDialogMsgSetter msgSetter;
 
-    public CommonCardEventHandler(ActivationInteraction interaction, boolean cardPresent, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
+    public CommonCardEventHandler(ActivationInteraction interaction, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
 	this.interaction = interaction;
-	this.cardPresent = cardPresent;
 	this.msgSetter = msgSetter;
     }
 
     public void onCardInserted() {
-	this.cardPresent = true;
     }
 
     public void onCardRemoved() {
-	this.cardPresent = false;
 	boolean wasRecognized = this.cardRecognized;
 	this.cardRecognized = false;
 	if (wasRecognized) {
@@ -148,7 +144,7 @@ public class CommonCardEventHandler {
 
     public static AutoCloseable create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
 
-	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, false, msgSetter);
+	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, msgSetter);
 
 	return hookUp(created, supportedCards, eventDispatcher, interaction, msgSetter);
     }

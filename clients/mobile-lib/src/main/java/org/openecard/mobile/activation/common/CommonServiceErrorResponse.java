@@ -26,10 +26,12 @@ public class CommonServiceErrorResponse implements ServiceErrorResponse {
 	this.message = message;
     }
 
+    @Override
     public ServiceErrorCode getStatusCode() {
 	return statusCode;
     }
 
+    @Override
     public String getMessage() {
 	return message;
     }

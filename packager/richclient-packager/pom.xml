@@ -52,7 +52,6 @@
 								<configuration>
 									<!-- Jpackage arguments -->
 									<!-- Don't use spaces in application name, because of problems with install scripts ... -->
-									<identifier>org.openecard.richclient</identifier>
 									<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 									<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
 									<jdkToolchain>

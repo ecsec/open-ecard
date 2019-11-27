@@ -10,6 +10,7 @@
 
 package org.openecard.mobile.ui;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.openecard.mobile.activation.TermsOfUsage;
 
@@ -20,22 +21,22 @@ import org.openecard.mobile.activation.TermsOfUsage;
  */
 class TermsOfUsageImpl implements TermsOfUsage {
 
-    private final byte[] data;
+    private final ByteBuffer data;
     private final String mimeType;
 
-    public TermsOfUsageImpl(String mimeType, byte[] data) {
+    public TermsOfUsageImpl(String mimeType, ByteBuffer data) {
 	this.data = data;
 	this.mimeType = mimeType;
     }
 
-//    @Override
-//    public byte[] getDataBytes() {
-//	return data;
-//    }
+    @Override
+    public ByteBuffer getDataBytes() {
+	return data;
+    }
 
     @Override
     public String getDataString() {
-	return new String(data, StandardCharsets.UTF_8);
+	return new String(data.array(), StandardCharsets.UTF_8);
     }
 
     @Override

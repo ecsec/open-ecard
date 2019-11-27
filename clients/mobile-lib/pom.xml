@@ -109,15 +109,13 @@
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
 			<optional>true</optional>
-			<version>${version.roboface}</version>
 			<type>jar</type>
 		</dependency>
-		
+                
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-marshaller</artifactId>
 			<optional>true</optional>
-			<version>${version.roboface}</version>
 			<type>jar</type>
 		</dependency>
 		<!-- all OeC dependencies -->

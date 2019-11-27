@@ -125,6 +125,12 @@
 			<artifactId>logback-classic</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.openecard.tools</groupId>
+			<artifactId>roboface-marshaller</artifactId>
+		</dependency>
+		
                 <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>

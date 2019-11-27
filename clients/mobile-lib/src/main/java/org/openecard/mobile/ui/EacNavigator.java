@@ -23,6 +23,7 @@
 package org.openecard.mobile.ui;
 
 import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -362,7 +363,7 @@ public final class EacNavigator extends MobileNavigator {
 	    } else if ("TermsOfUsage".equals(next.getID()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		Document d = tt.getDocument();
-		termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), d.getValue());
+		termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), ByteBuffer.wrap(d.getValue()));
 	    } else if ("Validity".equals(next.getID()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		validity = tt.getText();

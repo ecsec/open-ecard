@@ -10,6 +10,7 @@
 package org.openecard.mobile.activation;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -25,8 +26,7 @@ public interface TermsOfUsage extends Serializable {
      *
      * @return
      */
-    //This is not supported in robovm atm - reactivate as soon as it is
-//    byte[] getDataBytes();
+    ByteBuffer getDataBytes();
 
     /**
      * Retrieve the terms of usage document as a string.

@@ -63,7 +63,6 @@
 									<jvmArgs>
 										<jvmArg>-XX:-UsePerfData</jvmArg>
 										<jvmArg>-XX:-Inline</jvmArg>
-										<jvmArg>-XX:+AggressiveOpts</jvmArg>
 										<jvmArg>-Xms16m</jvmArg>
 										<jvmArg>-Xmx64m</jvmArg>
 										<jvmArg>-XX:+UseG1GC</jvmArg>

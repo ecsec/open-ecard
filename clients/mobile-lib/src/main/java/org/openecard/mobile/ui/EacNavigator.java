@@ -206,7 +206,11 @@ public final class EacNavigator extends MobileNavigator {
 		    } else {
 			LOG.debug("Notifying need to enter pin");
 			this.pauseExecution(context);
-			interaction.onPinRequest(ps.getAttempts(), op);
+			if (ps.isUnknown()) {
+			    interaction.onPinRequest(op);
+			} else {
+			    interaction.onPinRequest(ps.getAttempts(), op);
+			}
 		    }
 		}
 

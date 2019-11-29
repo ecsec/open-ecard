@@ -67,7 +67,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private NSError error;
     private NFCISO7816Tag tag;
 
-    private IOSConfig cfg;
+    private final IOSConfig cfg;
 
     public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) throws IOException {
 	super(terminal);
@@ -97,9 +97,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	NFCTagReaderSession session = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
 	session.setAlertMessage(cfg.getDefaultProviderCardMSG());
 
-	NFCSessionContext sessionContext = new NFCSessionContext(delegate, session);
-	delegate.currentContext = sessionContext;
-	return sessionContext;
+	NFCSessionContext resultSessionContext = new NFCSessionContext(delegate, session);
+	delegate.currentContext = resultSessionContext;
+	return resultSessionContext;
     }
 
     @Override
@@ -111,9 +111,18 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     public void connect() throws SCIOException {
+
+	connect(0);
+    }
+
+    private void connect(int attempts) throws SCIOException {
+	if (attempts >= 3) {
+	    throw new IllegalStateException(String.format("Could not create a new NFC session after %d attempts ", attempts));
+	}
+
 	NFCSessionContext context = this.initSessionObj();
 
-	synchronized(this.tagLock) {
+	synchronized (this.tagLock) {
 	    this.error = null;
 	    this.sessionContext = context;
 	    context.session.beginSession();
@@ -125,11 +134,16 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		}
 	    }
 	    if (this.error != null) {
-		LOG.error("Could not create a new NFC session. {}", this.error);
-		this.error = null;
-		this.sessionContext = null;
-		this.terminateTag();
-		throw new IllegalStateException("Cou");
+		if (this.error.getCode() != 203) {
+		    LOG.error("Could not create a new NFC session. {}", this.error);
+		    this.error = null;
+		    this.sessionContext = null;
+		    this.terminateTag();
+		    throw new IllegalStateException("Could not create a new NFC session.");
+		} else {
+		    connect(attempts + 1);
+		}
+
 	    }
 	}
     }

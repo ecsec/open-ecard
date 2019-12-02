@@ -86,6 +86,16 @@ public class EacCallbackReceiver {
 	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arguments[1]);
 	    return null;
 	}).when(interaction).onPinRequest(anyInt(), any());
+	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+	    LOG.debug("mockInteraction.onPinRequest().");
+	    if (promisedOperationPinRequest.isDelivered()) {
+		promisedOperationPinRequest = new Promise();
+	    }
+	    final Object[] arguments = arg0.getArguments();
+
+	    promisedOperationPinRequest.deliver((ConfirmPasswordOperation) arguments[0]);
+	    return null;
+	}).when(interaction).onPinRequest(any());
 
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onServerData().");

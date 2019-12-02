@@ -32,6 +32,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 public interface EacInteraction extends ActivationInteraction {
 
     void onCanRequest(ConfirmPasswordOperation enterCan);
+    void onPinRequest(ConfirmPasswordOperation enterPin);
     void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
     void onPinCanRequest(ConfirmPinCanOperation enterPinCan);
     void onCardBlocked();

@@ -205,11 +205,12 @@ public final class EacNavigator extends MobileNavigator {
 			interaction.onCanRequest(op);
 		    } else {
 			LOG.debug("Notifying need to enter pin");
-			final int attempts = ps.getAttempts();
-			this.pauseExecution(context);
 			if (ps.isUnknown()) {
+			    this.pauseExecution(context);
 			    interaction.onPinRequest(op);
 			} else {
+			    final int attempts = ps.getAttempts();
+			    this.pauseExecution(context);
 			    interaction.onPinRequest(attempts, op);
 			}
 		    }

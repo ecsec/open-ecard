@@ -23,9 +23,12 @@
 package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
@@ -96,17 +99,20 @@ public class InsertCardDialog {
 		    cardNameAndType.values(),
 		    this.salStateView);
 	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
-	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
-	    ExecutionEngine exec = new ExecutionEngine(ucr);
-	    // run gui
-	    ResultStatus status = exec.process();
+	    try {
+		UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
+		ExecutionEngine exec = new ExecutionEngine(ucr);
+		// run gui
+		ResultStatus status = exec.process();
 
-	    if (status == ResultStatus.CANCEL) {
-		LOG.info("Waiting for cards dialog has been cancelled.");
-		return null;
+		if (status == ResultStatus.CANCEL) {
+		    LOG.info("Waiting for cards dialog has been cancelled.");
+		    return null;
+		}
+		return insertCardAction.getResponse();
+	    } finally {
+		evDispatcher.del(insertCardAction);
 	    }
-	    evDispatcher.del(insertCardAction);
-	    return insertCardAction.getResponse();
 	}
     }
 
@@ -118,16 +124,18 @@ public class InsertCardDialog {
      */
     private List<ConnectionHandleType> checkAlreadyAvailable() {
 	List<ConnectionHandleType> handlesList = new ArrayList<>();
-	for (String type : cardNameAndType.values()) {
-	    ConnectionHandleType conHandle = new ConnectionHandleType();
-	    ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
-	    recInfo.setCardType(type);
-	    conHandle.setRecognitionInfo(recInfo);
-	    // TODO: make it work again according to redesign
-//	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-//	    if (! entries.isEmpty()) {
-//		handlesList.add(entries.iterator().next().handleCopy());
-//	    }
+
+	Set<String> targetCardTypes = new HashSet<>(cardNameAndType.values());
+
+	for (ConnectionHandleType currentHandle : this.salStateView.listCardHandles()) {
+	    RecognitionInfo currentRecogInfo = currentHandle.getRecognitionInfo();
+
+	    if (currentRecogInfo != null) {
+		 String currentCardType = currentRecogInfo.getCardType();
+		 if (currentCardType != null && targetCardTypes.contains(currentCardType)) {
+		     handlesList.add(currentHandle);
+		 }
+	    }
 	}
 
 	return handlesList;

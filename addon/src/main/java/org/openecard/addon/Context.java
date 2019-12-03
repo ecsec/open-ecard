@@ -24,6 +24,7 @@ package org.openecard.addon;
 
 import java.util.List;
 import org.openecard.addon.manifest.AddonSpecification;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.interfaces.CardRecognition;
@@ -47,6 +48,7 @@ public class Context {
     private final Environment env;
     private final String id;
     private final ViewController viewController;
+    private final SalStateView salStateView;
 
     private UserConsent userConsent;
     private CardRecognition recognition;
@@ -59,10 +61,13 @@ public class Context {
      * @param env {@link Environment} to use for this Context object.
      * @param spec {@link AddonSpecification} for the generation of the {@link AddonProperties} object.
      * @param addView {@link ViewController} to use for this Context object.
+     * @param salStateView {@link SalStateView} to use for this Context object.
      */
-    public Context(AddonManager manager, Environment env, AddonSpecification spec, ViewController addView) {
+    public Context(AddonManager manager, Environment env, AddonSpecification spec, ViewController addView,
+	    SalStateView salStateView) {
 	this.manager = manager;
 	this.env = env;
+	this.salStateView = salStateView;
 	this.id = spec.getId();
 	addonProperties = new AddonProperties(spec);
 	viewController = addView;
@@ -180,4 +185,7 @@ public class Context {
 	return id;
     }
 
+    public SalStateView getSalStateView() {
+	return this.salStateView;
+    }
 }

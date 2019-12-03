@@ -26,7 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.event.EventType;
@@ -61,6 +61,7 @@ public class InsertCardDialog {
     private final UserConsent gui;
     private final Map<String, String> cardNameAndType;
     private final EventDispatcher evDispatcher;
+    private final SalStateView salStateView;
 
     /**
      * Creates a new InsertCardDialog.
@@ -69,12 +70,16 @@ public class InsertCardDialog {
      * @param cardNameAndType Map containing the mapping of localized card names to card type URIs of cards which may be
      * inserted.
      * @param manager EventManager to register the EventCallbacks.
+     * @param salStateView
      */
-    public InsertCardDialog(UserConsent gui, Map<String, String> cardNameAndType,
-	    EventDispatcher manager) {
+    public InsertCardDialog(UserConsent gui,
+	    Map<String, String> cardNameAndType,
+	    EventDispatcher manager,
+	    SalStateView salStateView) {
 	this.gui = gui;
 	this.cardNameAndType = cardNameAndType;
 	this.evDispatcher = manager;
+	this.salStateView = salStateView;
     }
 
     /**
@@ -87,7 +92,9 @@ public class InsertCardDialog {
 	if (! availableCards.isEmpty()) {
 	    return availableCards;
 	} else {
-	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardNameAndType.values());
+	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID,
+		    cardNameAndType.values(),
+		    this.salStateView);
 	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
 	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 	    ExecutionEngine exec = new ExecutionEngine(ucr);

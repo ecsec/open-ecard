@@ -323,7 +323,8 @@ public class TCTokenRequest {
 	}
 
 	InsertCardDialog insCardDiag =
-		new InsertCardDialog(ctx.getUserConsent(), namesAndType, ctx.getEventDispatcher());
+		new InsertCardDialog(ctx.getUserConsent(), namesAndType, ctx.getEventDispatcher(),
+			ctx.getSalStateView());
 	List<ConnectionHandleType> usableCards = insCardDiag.show();
 
 	if (usableCards == null) {

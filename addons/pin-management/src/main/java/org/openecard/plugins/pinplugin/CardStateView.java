@@ -37,7 +37,5 @@ public interface CardStateView {
 
     boolean isRemoved();
 
-    boolean isDisconnected();
-
     int preparedDeviceSession();
 }

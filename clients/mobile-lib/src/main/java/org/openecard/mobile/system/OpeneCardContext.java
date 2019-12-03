@@ -218,7 +218,8 @@ public class OpeneCardContext {
 
 	    // set up addon manager
 	    try {
-		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry());
+		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry(),
+			mainSAL.getSalStateView());
 		mainSAL.setAddonManager(manager);
 
 		LOG.info("Addon manager initialized.");

@@ -33,6 +33,7 @@ import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
+import org.openecard.addon.sal.SalStateView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     protected UserConsent gui;
     protected CardRecognition recognition;
     protected EventDispatcher evDispatcher;
+    protected SalStateView salStateView;
 
     /**
      * Recognize the PIN state of the card given through the connection handle.
@@ -142,7 +144,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	String cardName = recognition.getTranslatedCardName(cardType);
 	Map<String, String> nameAndType = new HashMap<>();
 	nameAndType.put(cardName, cardType);
-	InsertCardDialog uc = new InsertCardDialog(gui, nameAndType, evDispatcher);
+	InsertCardDialog uc = new InsertCardDialog(gui, nameAndType, evDispatcher, salStateView);
 	// get(0) should be sufficient we a looking just for one card. i think the possibility to find 2 is very low.
 	return uc.show().get(0);
     }

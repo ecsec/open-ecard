@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
@@ -53,17 +54,20 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     private final List<ConnectionHandleType> insertableCards;
 
     private final Promise<ConnectionHandleType> promise = new Promise<>();
+    private final SalStateView salStateView;
 
     /**
      * Creates a new InsertCardStep Action.
      *
      * @param stepName The name of the step this action is run in.
      * @param cardTypes Collection of valid card types.
+     * @param salStateView The manager of card states
      */
-    public InsertCardStepAction(String stepName, Collection<String> cardTypes) {
+    public InsertCardStepAction(String stepName, Collection<String> cardTypes, SalStateView salStateView) {
 	super(stepName);
 	this.cardTypes = cardTypes;
 	insertableCards = createHandleList();
+	this.salStateView = salStateView;
     }
 
     @Override
@@ -132,7 +136,8 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 //	}
 //
 //	return available;
-	return new ArrayList<>();
+
+	return this.salStateView.listCardHandles();
     }
 
     @Override

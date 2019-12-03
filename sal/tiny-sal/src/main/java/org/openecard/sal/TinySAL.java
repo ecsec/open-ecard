@@ -159,6 +159,7 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocol;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.ThreadTerminateException;
@@ -255,6 +256,10 @@ public class TinySAL implements SAL {
 	// TODO: check if returnSALProtocol must be called when the entry is removed.
 	// states.setProtocolSelector(protocolSelector);
 
+    }
+
+    public SalStateView getSalStateView() {
+	return this.salStates;
     }
 
     @Override

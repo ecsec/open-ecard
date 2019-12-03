@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Action processing Status messages.
- * 
+ *
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */

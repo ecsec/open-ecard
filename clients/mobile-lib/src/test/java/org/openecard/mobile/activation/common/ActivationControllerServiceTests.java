@@ -70,6 +70,8 @@ public class ActivationControllerServiceTests {
     private static final int MICRO_WAIT = SLEEP_WAIT / 2;
     private static final int WAIT_TIMEOUT = Timeout.WAIT_TIMEOUT / SCALING_FACTOR;
 
+    private static final int NEVER_WAKE_UP = Timeout.WAIT_TIMEOUT * 1000;
+
     MockitoSession mockito;
     private boolean hasSlowEacStack;
 
@@ -204,6 +206,100 @@ public class ActivationControllerServiceTests {
 	verify(mockControllerCallback, times(1)).onAuthenticationCompletion(any());
     }
 
+    @Test
+    void sutStartsOnlyFirstActivation() throws InterruptedException, TimeoutException {
+	Promise<Void> startSuccess1 = new Promise<>();
+	Promise<Void> startSuccess2 = new Promise<>();
+	Promise<Void> startSuccess3 = new Promise<>();
+	Promise<Void> startSuccess4 = new Promise<>();
+
+
+	ActivationControllerService sut = this
+		.withMinimumAddons("eID-Client")
+		.withBlockingSuccessActivation()
+		.createSut();
+
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess1),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess2),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess3),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess4),
+		anyInteractionPreperationFactory());
+
+	startSuccess1.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	Assert.assertThrows(() -> startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertThrows(() -> startSuccess3.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertThrows(() -> startSuccess4.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void sutNeverNotifiesOnStartForOnConsecutiveActivations() throws InterruptedException, TimeoutException {
+	Promise<Void> startSuccess1 = new Promise<>();
+	Promise<Void> startSuccess2 = new Promise<>();
+	Promise<Void> startSuccess3 = new Promise<>();
+	Promise<Void> startSuccess4 = new Promise<>();
+
+
+	ActivationControllerService sut = this
+		.withMinimumAddons("eID-Client")
+		.withBlockingSuccessActivation()
+		.createSut();
+
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess1),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess2),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess3),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess4),
+		anyInteractionPreperationFactory());
+
+	Assert.assertThrows(() -> startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertThrows(() -> startSuccess3.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	Assert.assertThrows(() -> startSuccess4.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void givenMultipleStartsThenNotifiesMultipleFailures() throws InterruptedException, TimeoutException {
+	Promise<ActivationResult> startSuccess1 = new Promise<>();
+	Promise<ActivationResult> startSuccess2 = new Promise<>();
+	Promise<ActivationResult> startSuccess3 = new Promise<>();
+	Promise<ActivationResult> startSuccess4 = new Promise<>();
+
+	ActivationControllerService sut = this
+		.withMinimumAddons("eID-Client")
+		.withBlockingSuccessActivation()
+		.createSut();
+
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess1),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess2),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess3),
+		anyInteractionPreperationFactory());
+	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
+		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess4),
+		anyInteractionPreperationFactory());
+
+	Assert.assertThrows(() -> startSuccess1.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+	startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	startSuccess3.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	startSuccess4.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+
     public ActivationControllerService createSut() {
 	return new ActivationControllerService(mockOpeneCardContextProvider);
     }
@@ -291,6 +387,10 @@ public class ActivationControllerServiceTests {
 
     private ActivationControllerServiceTests withSuccessActivation(int sleepDelay) {
 	return this.withActivation(new BindingResult(), sleepDelay);
+    }
+
+    private ActivationControllerServiceTests withBlockingSuccessActivation() {
+	return this.withActivation(new BindingResult(), NEVER_WAKE_UP);
     }
 
     private InteractionPreperationFactory anyInteractionPreperationFactory() {

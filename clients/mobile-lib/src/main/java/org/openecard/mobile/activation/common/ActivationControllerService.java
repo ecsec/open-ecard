@@ -21,6 +21,7 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
+import org.openecard.common.util.Promise;
 import static org.openecard.mobile.activation.ActivationResultCode.*;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.system.OpeneCardContext;
@@ -55,7 +56,7 @@ public class ActivationControllerService {
 	if (controllerCallback == null) {
 	    throw new IllegalArgumentException("Controller callback cannot be null.");
 	}
-
+	Promise<Boolean> wasAssignedToRun = new Promise<>();
 	Thread executingThread = new Thread(() -> {
 	    CommonActivationResult result;
 	    try {
@@ -64,15 +65,26 @@ public class ActivationControllerService {
 		LOG.debug("Activation was interrupted.", e);
 		result = new CommonActivationResult(INTERRUPTED, "Returning error as INTERRUPTED result.");
 	    }
-	    synchronized (processLock) {
-		if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
-		    return;
-		} else {
-		    this.isRunning = false;
-		    this.currentCallback = null;
-		    this.currentProccess = null;
+	    boolean wasRunning;
+	    try {
+		wasRunning = wasAssignedToRun.deref();
+	    } catch (InterruptedException ex) {
+		wasRunning = false;
+	    }
+	    if (wasRunning) {
+		    synchronized (processLock) {
+		    if (cancelledCallback == controllerCallback || currentCallback != controllerCallback) {
+
+			LOG.info("Not notifying callback of authentication results {}.", result);
+			return;
+		    } else {
+			this.isRunning = false;
+			this.currentCallback = null;
+			this.currentProccess = null;
+		    }
 		}
 	    }
+
 	    LOG.info("Notifying callback of authentication results {}.", result);
 	    controllerCallback.onAuthenticationCompletion(result);
 	}, "ActivationControllerService");
@@ -83,6 +95,9 @@ public class ActivationControllerService {
 		this.currentCallback = controllerCallback;
 		this.cancelledCallback = null;
 		this.currentProccess = executingThread;
+		wasAssignedToRun.deliver(true);
+	    } else {
+		wasAssignedToRun.deliver(false);
 	    }
 	}
 	executingThread.start();

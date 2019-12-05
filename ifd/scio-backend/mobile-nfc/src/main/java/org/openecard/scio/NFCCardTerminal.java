@@ -45,11 +45,12 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminal.class);
 
-    private AbstractNFCCard nfcCard;
+    private volatile AbstractNFCCard nfcCard;
 
     private final String terminalName;
     private final Object cardPresent;
     private final Object cardAbsent;
+    private final Object cardLock = new Object();
 
     public NFCCardTerminal() {
 	this.terminalName = STD_TERMINAL_NAME;
@@ -76,28 +77,35 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
     }
 
     @Override
-    public synchronized boolean isCardPresent() {
-	return nfcCard != null;
-    }
-
-    public synchronized void setNFCCard(AbstractNFCCard card) {
-	this.nfcCard = card;
-	if (card == null) {
-	    notifyCardAbsent();
-	} else {
-	    notifyCardPresent();
+    public boolean isCardPresent() {
+	synchronized(cardLock) {
+	    return nfcCard != null;
 	}
     }
 
-    public synchronized void removeTag() {
-	final AbstractNFCCard currentCard = nfcCard;
-	if (currentCard != null) {
-	    nfcCard = null;
-	    removeTag(currentCard);
+    public void setNFCCard(AbstractNFCCard card) {
+	synchronized(cardLock) {
+	    this.nfcCard = card;
+	    if (card == null) {
+		notifyCardAbsent();
+	    } else {
+		notifyCardPresent();
+	    }
 	}
     }
 
-    private void removeTag(final AbstractNFCCard currentCard) {
+    public void removeTag() {
+	synchronized (cardLock) {
+	    final AbstractNFCCard currentCard = nfcCard;
+	    if (currentCard != null) {
+		nfcCard = null;
+		terminateTag(currentCard);
+		notifyCardAbsent();
+	    }
+	}
+    }
+
+    private void terminateTag(final AbstractNFCCard currentCard) {
 	if (currentCard != null) { // maybe nfc tag is already removed
 	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
@@ -105,7 +113,6 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
 	    }
-	    notifyCardAbsent();
 	} else {
 	    LOG.warn("Double invocation of removeTag function.");
 	}
@@ -124,14 +131,16 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
     }
 
     @Override
-    public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
-	final AbstractNFCCard currentCard = nfcCard;
-	if (currentCard == null) {
-	    String msg = "No tag present.";
-	    LOG.warn(msg);
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
+    public SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
+	synchronized (cardLock) {
+	    final AbstractNFCCard currentCard = nfcCard;
+	    if (currentCard == null) {
+		String msg = "No tag present.";
+		LOG.warn(msg);
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
+	    }
+	    return currentCard;
 	}
-	return currentCard;
     }
 
     @Override

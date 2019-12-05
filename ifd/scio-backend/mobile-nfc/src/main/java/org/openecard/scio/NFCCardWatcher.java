@@ -12,7 +12,6 @@ package org.openecard.scio;
 import java.util.Collections;
 import java.util.List;
 import org.openecard.common.ifd.scio.SCIOException;
-import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.openecard.common.ifd.scio.SCIOTerminals;
 import org.openecard.common.ifd.scio.TerminalState;
 import org.openecard.common.ifd.scio.TerminalWatcher;
@@ -28,12 +27,13 @@ public class NFCCardWatcher implements TerminalWatcher {
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardWatcher.class);
 
     private final SCIOTerminals nfcTerminals;
-    private final SCIOTerminal nfcIntegratedTerminal;
+    private final NFCCardTerminal nfcIntegratedTerminal;
+    private final Object lock = new Object();
 
-    private boolean initialized = false;
+    private volatile boolean initialized = false;
     private volatile boolean isCardPresent = false;
 
-    public NFCCardWatcher(SCIOTerminals terminals, SCIOTerminal terminal) {
+    public NFCCardWatcher(SCIOTerminals terminals, NFCCardTerminal terminal) {
 	this.nfcTerminals = terminals;
 	this.nfcIntegratedTerminal = terminal;
     }
@@ -47,23 +47,28 @@ public class NFCCardWatcher implements TerminalWatcher {
     public List<TerminalState> start() throws SCIOException {
 	LOG.debug("Entering start of nfc card watcher.");
 
-	// allow this method to be called only once
 	if (initialized) {
 	    throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
 	}
-	initialized = true;
 
-	String name = nfcIntegratedTerminal.getName();
-	// check if card present at integrated terminal
-	if (nfcIntegratedTerminal.isCardPresent()) {
-	    LOG.debug("Card is present.");
-	    isCardPresent = true;
-	    return Collections.singletonList(new TerminalState(name, true));
-	    // otherwise card is not present at integrated terminal
-	} else {
-	    LOG.debug("No card is present.");
-	    isCardPresent = false;
-	    return Collections.singletonList(new TerminalState(name, false));
+	synchronized(lock) {
+	    // allow this method to be called only once
+	    if (initialized) {
+		throw new IllegalStateException("Trying to initialize already initialized watcher instance.");
+	    }
+	    initialized = true;
+	    String name = nfcIntegratedTerminal.getName();
+	    // check if card present at integrated terminal
+	    if (nfcIntegratedTerminal.isCardPresent()) {
+		LOG.debug("Card is present.");
+		isCardPresent = true;
+		return Collections.singletonList(new TerminalState(name, true));
+		// otherwise card is not present at integrated terminal
+	    } else {
+		LOG.debug("No card is present.");
+		isCardPresent = false;
+		return Collections.singletonList(new TerminalState(name, false));
+	    }
 	}
     }
 
@@ -76,7 +81,6 @@ public class NFCCardWatcher implements TerminalWatcher {
     public TerminalWatcher.StateChangeEvent waitForChange(long timeout) throws SCIOException {
 	LOG.debug("NFCCardWatcher wait for change ...");
 
-	// check if watcher is initialized
 	if (!initialized) {
 	    throw new IllegalStateException("Calling wait on uninitialized watcher instance.");
 	}

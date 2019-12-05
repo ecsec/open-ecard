@@ -310,9 +310,9 @@ public class PINManagementNavigator extends MobileNavigator {
 
 	    switch (recPinState) {
 		case PIN_activated_RC3:
-		    return askForPIN(genPINStp, 2);
+		    return askForPIN(genPINStp, 3);
 		case PIN_activated_RC2:
-		    return askForPIN(genPINStp, 1);
+		    return askForPIN(genPINStp, 2);
 		case PIN_suspended:
 		    return askForPinCanNewPin(genPINStp);
 		case PIN_resumed:

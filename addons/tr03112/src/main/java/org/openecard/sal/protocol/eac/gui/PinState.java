@@ -84,11 +84,11 @@ public class PinState {
     public int getAttempts() {
 	switch (state) {
 	    case RC3:
-		return 2;
+		return 3;
 	    case RC2:
-		return 1;
+		return 2;
 	    case RC1:
-		return 0;
+		return 1;
 	    default:
 		return 0;
 	}

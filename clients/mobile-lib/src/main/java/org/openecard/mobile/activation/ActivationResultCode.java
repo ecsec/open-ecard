@@ -32,5 +32,5 @@ import org.openecard.robovm.annotations.FrameworkEnum;
 @FrameworkEnum
 public enum ActivationResultCode {
 
-    OK, REDIRECT, CLIENT_ERROR, INTERRUPTED, INTERNAL_ERROR, DEPENDING_HOST_UNREACHABLE;
+    OK, REDIRECT, CLIENT_ERROR, INTERRUPTED, INTERNAL_ERROR, DEPENDING_HOST_UNREACHABLE, BAD_REQUEST;
 }

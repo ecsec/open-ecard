@@ -21,12 +21,7 @@ import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
-import static org.openecard.mobile.activation.ActivationResultCode.CLIENT_ERROR;
-import static org.openecard.mobile.activation.ActivationResultCode.DEPENDING_HOST_UNREACHABLE;
-import static org.openecard.mobile.activation.ActivationResultCode.INTERNAL_ERROR;
-import static org.openecard.mobile.activation.ActivationResultCode.INTERRUPTED;
-import static org.openecard.mobile.activation.ActivationResultCode.OK;
-import static org.openecard.mobile.activation.ActivationResultCode.REDIRECT;
+import static org.openecard.mobile.activation.ActivationResultCode.*;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
@@ -246,14 +241,18 @@ public class ActivationControllerService {
 		activationResult = new CommonActivationResult(OK);
 		break;
 	    case INTERRUPTED:
+	    case TIMEOUT:
 		activationResult = new CommonActivationResult(INTERRUPTED, result.getResultMessage());
 		break;
 	    case DEPENDING_HOST_UNREACHABLE:
+	    case RESOURCE_UNAVAILABLE:
 		activationResult = new CommonActivationResult(DEPENDING_HOST_UNREACHABLE, result.getResultMessage());
 		break;
 	    case WRONG_PARAMETER:
 	    case MISSING_PARAMETER:
-	    case RESOURCE_UNAVAILABLE:
+		activationResult = new CommonActivationResult(BAD_REQUEST, result.getResultMessage());
+		break;
+	    case RESOURCE_LOCKED:
 		activationResult = new CommonActivationResult(CLIENT_ERROR, result.getResultMessage());
 		break;
 	    default:

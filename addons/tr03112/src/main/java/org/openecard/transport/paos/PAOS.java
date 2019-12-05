@@ -338,17 +338,25 @@ public class PAOS {
 	boolean connectionDropped = false;
 	ResponseBaseType lastResponse = null;
 	String firstOecMinorError = null;
-	final List<ConnectionHandleType> connectionHandles = message.getConnectionHandle();
-	ConnectionHandleType firstConnectionHandle = null;
 	byte[] fakeSlotHandle = null;
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+	String internalSessionIdentifier = null;
+	final List<ConnectionHandleType> connectionHandles = message.getConnectionHandle();
 	if (connectionHandles != null) {
 	    for (ConnectionHandleType connectionHandle : connectionHandles) {
 		if (fakeSlotHandle == null) {
 		    fakeSlotHandle = ValueGenerators.generateRandom(32);
 		}
 		connectionHandle.setSlotHandle(fakeSlotHandle);
-		firstConnectionHandle = connectionHandle;
+
+		ChannelHandleType channelHandle = connectionHandle.getChannelHandle();
+		if (channelHandle != null) {
+		    String currentSessionIdentifier = channelHandle.getSessionIdentifier();
+		    if (currentSessionIdentifier != null) {
+			internalSessionIdentifier = currentSessionIdentifier;
+			channelHandle.setSessionIdentifier(null);
+		    }
+		}
 	    }
 	}
 
@@ -444,16 +452,15 @@ public class PAOS {
 				    byte[] fixedSlotHandle = fixSlotHandle(fakeSlotHandle, currentSlotHandle, dynCtx);
 				    currentHandle.setSlotHandle(fixedSlotHandle);
 
-				    if (firstConnectionHandle != null && firstConnectionHandle.getChannelHandle() != null) {
+				    if (internalSessionIdentifier != null) {
 					ChannelHandleType currentChannelHandle = currentHandle.getChannelHandle();
 					if (currentChannelHandle == null) {
 					    currentChannelHandle = new ChannelHandleType();
 					    currentHandle.setChannelHandle(currentChannelHandle);
 					}
 					String currentSessionIdentifier = currentChannelHandle.getSessionIdentifier();
-					String firstSessionIdentifier = firstConnectionHandle.getChannelHandle().getSessionIdentifier();
-					if (currentSessionIdentifier == null || !currentSessionIdentifier.equals(firstSessionIdentifier)) {
-					    currentChannelHandle.setSessionIdentifier(firstSessionIdentifier);
+					if (!internalSessionIdentifier.equals(currentSessionIdentifier)) {
+					    currentChannelHandle.setSessionIdentifier(internalSessionIdentifier);
 					}
 				    }
 				}

@@ -137,6 +137,7 @@ public class CommonCardEventHandler {
 		eventDispatcher.del(cardDetectHandler);
 		eventDispatcher.del(removalHandler);
 		eventDispatcher.del(prepareDevices);
+		eventDispatcher.del(powerDownDevices);
 	    }
 
 	};

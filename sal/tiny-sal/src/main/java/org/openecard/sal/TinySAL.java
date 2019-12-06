@@ -159,6 +159,7 @@ import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.SALProtocol;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.ThreadTerminateException;
@@ -230,7 +231,6 @@ public class TinySAL implements SAL {
 
     private final Environment env;
     private final SalStateManager salStates;
-    // private final CardStateMap states = null; // TODO: replace with SalStateManager
     private byte[] ifdCtx;
     private AddonManager addonManager;
     private AddonSelector protocolSelector;
@@ -255,6 +255,10 @@ public class TinySAL implements SAL {
 	// TODO: check if returnSALProtocol must be called when the entry is removed.
 	// states.setProtocolSelector(protocolSelector);
 
+    }
+
+    public SalStateView getSalStateView() {
+	return this.salStates;
     }
 
     @Override
@@ -365,7 +369,6 @@ public class TinySAL implements SAL {
 	    ChannelHandleType reqChannelHandle = cardAppPath.getChannelHandle();
 	    boolean hasSessionIdentifier = reqChannelHandle.getSessionIdentifier() != null;
 
-	    // Set<CardStateEntry> entries = states.getMatchingEntries(cardAppPath);
 	    List<CardEntry> entries =  SALUtils.filterEntries(cardAppPath, salStates.listCardEntries());
 
 	    // Copy entries to result set
@@ -430,7 +433,6 @@ public class TinySAL implements SAL {
 	     * [TR-03112-4] If the provided path fragments are valid for more than one card application
 	     * the eCard-API-Framework SHALL return any of the possible choices.
 	     */
-	    // CardStateEntry cardStateEntry = cardStateEntrySet.iterator().next();
 	    CardEntry baseCardStateEntry = SALUtils.getMatchingEntry(cardAppPath, salStates);
 	    Assert.assertIncorrectParameter(baseCardStateEntry, "The given ConnectionHandle is invalid.");
 
@@ -447,8 +449,6 @@ public class TinySAL implements SAL {
 		    ConnectionServiceActionName.CARD_APPLICATION_CONNECT);
 
 	    // Connect to the card
-	    // ConnectionHandleType handle = cardStateEntry.handleCopy();
-	    // cardStateEntry = cardStateEntry.derive(handle);
 	    ConnectionHandleType handle = baseCardStateEntry.copyHandle();
 	    Connect connect = new Connect();
 	    connect.setContextHandle(handle.getContextHandle());
@@ -501,7 +501,6 @@ public class TinySAL implements SAL {
 
 	try {
 	    byte[] slotHandle = request.getSlotHandle();
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
 
 	    StateEntry stateEntry = salStates.getSessionBySlotHandle(slotHandle);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
@@ -616,7 +615,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(request, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    Assert.assertIncorrectParameter(cardStateEntry,
@@ -670,7 +669,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] cardApplicationID = connectionHandle.getCardApplication();
@@ -714,7 +713,6 @@ public class TinySAL implements SAL {
 		WSHelper.makeResultOK());
 
 	try {
-	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
@@ -771,7 +769,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] cardApplicationName = request.getCardApplicationName();
@@ -808,7 +806,7 @@ public class TinySAL implements SAL {
 
 	 try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -979,7 +977,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -1030,7 +1028,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = connectionHandle.getCardApplication();
@@ -1087,7 +1085,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -1139,7 +1137,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
@@ -1190,7 +1188,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -1257,7 +1255,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
@@ -1345,7 +1343,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = connectionHandle.getCardApplication();
@@ -1408,7 +1406,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1551,7 +1549,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1608,7 +1606,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1665,7 +1663,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1719,7 +1717,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1776,7 +1774,7 @@ public class TinySAL implements SAL {
 	ConnectedCardEntry cardStateEntry = null;
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    cardStateEntry = stateEntry.getCardEntry();
 	    byte[] applicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
@@ -1835,7 +1833,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -1894,7 +1892,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -2077,7 +2075,6 @@ public class TinySAL implements SAL {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    // handle must be requested without application, as it is irrelevant for this call
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    String didName = SALUtils.getDIDName(request);
@@ -2110,7 +2107,7 @@ public class TinySAL implements SAL {
 	try {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
-            // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -2159,7 +2156,7 @@ public class TinySAL implements SAL {
 	try {
             ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
             byte[] cardApplicationID = connectionHandle.getCardApplication();
-            // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -2261,7 +2258,7 @@ public class TinySAL implements SAL {
 
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
-	    // CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(states, connectionHandle, false);
+
 	    StateEntry stateEntry = SALUtils.getStateBySession(request, salStates);
 	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 
@@ -2341,7 +2338,6 @@ public class TinySAL implements SAL {
 	if (protocol.isFinished()) {
 	    LOG.debug("SAL Protocol is finished, destroying protocol instance.");
 	    try {
-		// CardStateEntry entry = SALUtils.getCardStateEntry(states, handle, false);
 		StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
 		stateEntry.removeProtocol(protocolURI);
 	    } finally {

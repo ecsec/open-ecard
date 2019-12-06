@@ -10,6 +10,7 @@
 
 package org.openecard.common.sal.state;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,13 +25,14 @@ import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ValueGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.openecard.addon.sal.SalStateView;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class SalStateManager {
+public class SalStateManager implements SalStateView {
 
     private static final Logger LOG = LoggerFactory.getLogger(SalStateManager.class);
 
@@ -82,6 +84,22 @@ public class SalStateManager {
 
     public List<CardEntry> listCardEntries() {
 	return new ArrayList<>(cards);
+    }
+
+    @Override
+    public boolean isDisconnected(byte[] contextHandle, String givenIfdName, byte[] givenSlotIndex) {
+	if (contextHandle == null || givenSlotIndex == null || givenIfdName == null) {
+	    return true;
+	}
+
+	for (ConnectionHandleType cardHandle : this.listCardHandles()) {
+	    if (ByteUtils.compare(contextHandle, cardHandle.getContextHandle())
+		    &&  givenIfdName.equals(cardHandle.getIFDName())
+		    && ByteUtils.compare(givenSlotIndex, cardHandle.getSlotHandle())) {
+		return false;
+	    }
+	}
+	return true;
     }
 
     public CardEntry getCardEntry(byte[] ctx, String ifdName, BigInteger slotIdx) {
@@ -170,6 +188,16 @@ public class SalStateManager {
 
     private boolean destroySession(String session) {
 	return sessions.remove(session) != null;
+    }
+
+    @Override
+    public List<ConnectionHandleType> listCardHandles() {
+	List<ConnectionHandleType> results = new ArrayList<>(this.cards.size());
+
+	for (CardEntry card : this.cards) {
+	    results.add(card.copyHandle());
+	}
+	return results;
     }
 
 

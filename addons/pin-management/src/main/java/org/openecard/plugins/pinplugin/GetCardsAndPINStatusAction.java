@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
 import org.openecard.addon.ActionInitializationException;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppExtensionException;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
@@ -88,7 +89,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	try {
 	    sessionHandle = createSessionHandle();
 
-	    managedCardCapturer = createCardCapturer(sessionHandle, dispatcher, evDispatcher, this);
+	    managedCardCapturer = createCardCapturer(sessionHandle, dispatcher, evDispatcher, this, this.salStateView);
 
 	    CardCapturer cardCapturer = managedCardCapturer.p1;
 
@@ -130,7 +131,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		pinManagement = null;
 
 		CardStateView cardView = cardCapturer.aquireView();
-		
+
 		// destroy the pace channel
 		DestroyChannel destChannel = new DestroyChannel();
 		destChannel.setSlotHandle(cardView.getHandle().getSlotHandle());
@@ -180,9 +181,15 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    ConnectionHandleType sessionHandle,
 	    Dispatcher dispatcher,
 	    EventDispatcher eventDispatcher,
-	    AbstractPINAction pinAction) {
+	    AbstractPINAction pinAction,
+	    SalStateView salStateView) {
 	boolean isMobileDevice = SysUtils.isMobileDevice();
-	CardCapturer cardCapturer = new CardCapturer(sessionHandle, dispatcher, pinAction, true);
+	CardCapturer cardCapturer = new CardCapturer(
+		sessionHandle,
+		dispatcher,
+		pinAction,
+		isMobileDevice,
+		salStateView);
 
 	if (isMobileDevice) {
 	    EventCallback disconnectEventSink = (eventType, eventData) -> {
@@ -209,7 +216,6 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		eventDispatcher.del(disconnectEventSink);
 	    });
 	} else {
-
 	    return new Pair(cardCapturer, (AutoCloseable) () -> {
 	    });
 	}
@@ -249,6 +255,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	this.gui = aCtx.getUserConsent();
 	this.recognition = aCtx.getRecognition();
 	this.evDispatcher = aCtx.getEventDispatcher();
+	this.salStateView = aCtx.getSalStateView();
     }
 
     @Override

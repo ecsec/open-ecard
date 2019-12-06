@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
@@ -50,20 +51,21 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 
     private final Collection<String> cardTypes;
     private final List<ConnectionHandleType> response = new ArrayList<>();
-    private final List<ConnectionHandleType> insertableCards;
 
     private final Promise<ConnectionHandleType> promise = new Promise<>();
+    private final SalStateView salStateView;
 
     /**
      * Creates a new InsertCardStep Action.
      *
      * @param stepName The name of the step this action is run in.
      * @param cardTypes Collection of valid card types.
+     * @param salStateView The manager of card states
      */
-    public InsertCardStepAction(String stepName, Collection<String> cardTypes) {
+    public InsertCardStepAction(String stepName, Collection<String> cardTypes, SalStateView salStateView) {
 	super(stepName);
 	this.cardTypes = cardTypes;
-	insertableCards = createHandleList();
+	this.salStateView = salStateView;
     }
 
     @Override
@@ -94,26 +96,6 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     }
 
     /**
-     * Creates a list of {@link ConnectionHandleType} objects created from the card types.
-     *
-     * @return List {@link ConnectionHandleType} objects created from the card types.
-     */
-    @Nonnull
-    private List<ConnectionHandleType> createHandleList() {
-	List<ConnectionHandleType> handles = new ArrayList<>();
-
-	for (String type : cardTypes) {
-	    ConnectionHandleType conHandle = new ConnectionHandleType();
-	    ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
-	    recInfo.setCardType(type);
-	    conHandle.setRecognitionInfo(recInfo);
-	    handles.add(conHandle);
-	}
-
-	return handles;
-    }
-
-    /**
      * Checks whether a card according to the input list is connected.
      *
      * @param insertableCards List of {@link ConnectionHandleType} object which identify card which may be present in the
@@ -122,17 +104,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      */
     @Nonnull
     private List<ConnectionHandleType> checkAvailability() {
-	// TODO: make it work again according to redesign
-//	List<ConnectionHandleType> available = new ArrayList<>();
-//	for (ConnectionHandleType conHandle : insertableCards) {
-//	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-//	    if (! entries.isEmpty()) {
-//		available.add(entries.iterator().next().handleCopy());
-//	    }
-//	}
-//
-//	return available;
-	return new ArrayList<>();
+	return this.salStateView.listCardHandles();
     }
 
     @Override

@@ -23,10 +23,13 @@
 package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.event.EventType;
@@ -61,6 +64,7 @@ public class InsertCardDialog {
     private final UserConsent gui;
     private final Map<String, String> cardNameAndType;
     private final EventDispatcher evDispatcher;
+    private final SalStateView salStateView;
 
     /**
      * Creates a new InsertCardDialog.
@@ -69,12 +73,16 @@ public class InsertCardDialog {
      * @param cardNameAndType Map containing the mapping of localized card names to card type URIs of cards which may be
      * inserted.
      * @param manager EventManager to register the EventCallbacks.
+     * @param salStateView
      */
-    public InsertCardDialog(UserConsent gui, Map<String, String> cardNameAndType,
-	    EventDispatcher manager) {
+    public InsertCardDialog(UserConsent gui,
+	    Map<String, String> cardNameAndType,
+	    EventDispatcher manager,
+	    SalStateView salStateView) {
 	this.gui = gui;
 	this.cardNameAndType = cardNameAndType;
 	this.evDispatcher = manager;
+	this.salStateView = salStateView;
     }
 
     /**
@@ -87,19 +95,24 @@ public class InsertCardDialog {
 	if (! availableCards.isEmpty()) {
 	    return availableCards;
 	} else {
-	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID, cardNameAndType.values());
+	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID,
+		    cardNameAndType.values(),
+		    this.salStateView);
 	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
-	    UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
-	    ExecutionEngine exec = new ExecutionEngine(ucr);
-	    // run gui
-	    ResultStatus status = exec.process();
+	    try {
+		UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
+		ExecutionEngine exec = new ExecutionEngine(ucr);
+		// run gui
+		ResultStatus status = exec.process();
 
-	    if (status == ResultStatus.CANCEL) {
-		LOG.info("Waiting for cards dialog has been cancelled.");
-		return null;
+		if (status == ResultStatus.CANCEL) {
+		    LOG.info("Waiting for cards dialog has been cancelled.");
+		    return null;
+		}
+		return insertCardAction.getResponse();
+	    } finally {
+		evDispatcher.del(insertCardAction);
 	    }
-	    evDispatcher.del(insertCardAction);
-	    return insertCardAction.getResponse();
 	}
     }
 
@@ -111,16 +124,18 @@ public class InsertCardDialog {
      */
     private List<ConnectionHandleType> checkAlreadyAvailable() {
 	List<ConnectionHandleType> handlesList = new ArrayList<>();
-	for (String type : cardNameAndType.values()) {
-	    ConnectionHandleType conHandle = new ConnectionHandleType();
-	    ConnectionHandleType.RecognitionInfo recInfo = new ConnectionHandleType.RecognitionInfo();
-	    recInfo.setCardType(type);
-	    conHandle.setRecognitionInfo(recInfo);
-	    // TODO: make it work again according to redesign
-//	    Set<CardStateEntry> entries = cardStates.getMatchingEntries(conHandle);
-//	    if (! entries.isEmpty()) {
-//		handlesList.add(entries.iterator().next().handleCopy());
-//	    }
+
+	Set<String> targetCardTypes = new HashSet<>(cardNameAndType.values());
+
+	for (ConnectionHandleType currentHandle : this.salStateView.listCardHandles()) {
+	    RecognitionInfo currentRecogInfo = currentHandle.getRecognitionInfo();
+
+	    if (currentRecogInfo != null) {
+		 String currentCardType = currentRecogInfo.getCardType();
+		 if (currentCardType != null && targetCardTypes.contains(currentCardType)) {
+		     handlesList.add(currentHandle);
+		 }
+	    }
 	}
 
 	return handlesList;

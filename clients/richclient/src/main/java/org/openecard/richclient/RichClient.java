@@ -213,7 +213,7 @@ public final class RichClient {
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
 	    try {
-		manager = new AddonManager(env, gui, guiWrapper);
+		manager = new AddonManager(env, gui, guiWrapper, mainSal.getSalStateView());
 		guiWrapper.setAddonManager(manager);
 		mainSal.setAddonManager(manager);
 

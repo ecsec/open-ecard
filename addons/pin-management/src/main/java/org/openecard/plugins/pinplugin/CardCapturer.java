@@ -22,6 +22,7 @@ import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventObject;
@@ -50,13 +51,17 @@ public class CardCapturer {
     private boolean areDevicesPoweredDown;
     private int deviceSessionCount = 0;
     private boolean hasInitialized = false;
+    private final SalStateView salStateView;
 
-    CardCapturer(ConnectionHandleType sessionHandle, Dispatcher dispatcher, AbstractPINAction pinAction, boolean areDevicesPoweredDown) {
+    CardCapturer(ConnectionHandleType sessionHandle, Dispatcher dispatcher, AbstractPINAction pinAction,
+	    boolean areDevicesPoweredDown,
+	    SalStateView salStateView) {
 	this.sessionHandle = sessionHandle;
 	this.dispatcher = dispatcher;
 	this.pinAction = pinAction;
+	this.salStateView = salStateView;
 
-	this.emptyState = new ReadOnlyCardStateView(sessionHandle, RecognizedState.UNKNOWN, true, true, true, deviceSessionCount);
+	this.emptyState = new ReadOnlyCardStateView(sessionHandle, RecognizedState.UNKNOWN, true, true, deviceSessionCount);
 	this.cardStateView = new DelegatingCardStateView(emptyState);
 	this.areDevicesPoweredDown = areDevicesPoweredDown;
     }
@@ -84,7 +89,7 @@ public class CardCapturer {
 		return success;
 	    }
 	    else {
-		if (this.cardStateView.getPinState() != RecognizedState.PIN_resumed && this.cardStateView.isDisconnected()) {
+		if (this.cardStateView.getPinState() != RecognizedState.PIN_resumed && isDisconnected(this.cardStateView)) {
 		    // do not update in case of status resumed, it destroys the the pace channel and there is no disconnect after
 		    // the verification of the CAN so the handle stays the same
 		    updateConnectionHandle();
@@ -122,7 +127,6 @@ public class CardCapturer {
 		pinState,
 		capturePin,
 		false,
-		false,
 		deviceSessionCount);
 	return cardState;
     }
@@ -155,7 +159,6 @@ public class CardCapturer {
 		    this.cardStateView.setDelegate(new ReadOnlyCardStateView(cHandleNew,
 			    this.cardStateView.getPinState(),
 			    this.cardStateView.capturePin(),
-			    this.cardStateView.isRemoved(),
 			    this.cardStateView.isRemoved(),
 			    this.cardStateView.preparedDeviceSession()));
 		    break;
@@ -192,7 +195,6 @@ public class CardCapturer {
 		    pinState,
 		    this.cardStateView.capturePin(),
 		    this.cardStateView.isRemoved(),
-		    this.cardStateView.isDisconnected(),
 		    this.cardStateView.preparedDeviceSession()
 		);
 	    this.cardStateView.setDelegate(newView);
@@ -217,33 +219,6 @@ public class CardCapturer {
 			    currentView.getPinState(),
 			    currentView.capturePin(),
 			    true,
-			    currentView.isDisconnected(),
-			    this.cardStateView.preparedDeviceSession());
-		    this.cardStateView.setDelegate(newView);
-		}
-	    }
-	}
-    }
-
-    public void onCardDisconnected(EventObject eventData) {
-	synchronized (cardViewLock) {
-	    CardStateView currentView = this.cardStateView.getDelegate();
-
-	    ConnectionHandleType eventConnHandle = eventData.getHandle();
-	    ConnectionHandleType viewConnHandle = currentView.getHandle();
-
-	    if (eventConnHandle != null && viewConnHandle != null) {
-		String viewIfdName = viewConnHandle.getIFDName();
-		BigInteger viewSlotIndex = viewConnHandle.getSlotIndex();
-
-		if (viewIfdName != null && viewIfdName.equals(eventConnHandle.getIFDName()) &&
-			viewSlotIndex != null && viewSlotIndex.equals(eventConnHandle.getSlotIndex())) {
-
-		    CardStateView newView = new ReadOnlyCardStateView(viewConnHandle,
-			    currentView.getPinState(),
-			    currentView.capturePin(),
-			    currentView.isRemoved(),
-			    true,
 			    this.cardStateView.preparedDeviceSession());
 		    this.cardStateView.setDelegate(newView);
 		}
@@ -263,4 +238,13 @@ public class CardCapturer {
 	    this.deviceSessionCount += 1;
 	}
     }
+
+    private boolean isDisconnected(CardStateView cardStateView) {
+	ConnectionHandleType givenHandle = cardStateView.getHandle();
+	String givenIfdName = givenHandle.getIFDName();
+	byte[] givenSlotIndex = givenHandle.getSlotHandle();
+	byte[] givenContextHandle = givenHandle.getContextHandle();
+	return this.salStateView.isDisconnected(givenContextHandle, givenIfdName, givenSlotIndex);
+    }
+
 }

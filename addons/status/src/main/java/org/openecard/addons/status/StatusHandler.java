@@ -28,7 +28,6 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,6 +39,7 @@ import org.openecard.addon.EventHandler;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
+import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.AppVersion;
 import org.openecard.common.interfaces.CardRecognition;
@@ -65,12 +65,14 @@ public class StatusHandler {
     private final EventHandler eventHandler;
     private final List<String> protocols;
     private final CardRecognition rec;
+    private final SalStateView salStateView;
 
 
     public StatusHandler(Context ctx) {
 	dispatcher = ctx.getDispatcher();
 	eventHandler = ctx.getEventHandler();
 	protocols = getProtocolInfo(ctx.getManager());
+	this.salStateView = ctx.getSalStateView();
 	rec = ctx.getRecognition();
     }
 
@@ -164,7 +166,8 @@ public class StatusHandler {
 
     @Nonnull
     private List<ConnectionHandleType> getCardHandles() {
-	// TODO: reimplement according to redesign
+	// TODO: reimplement according to redesign.
+	// TODO: verify done
 //	ConnectionHandleType handle = new ConnectionHandleType();
 //	Set<CardStateEntry> entries = cardStates.getMatchingEntries(handle, false);
 //
@@ -174,7 +177,7 @@ public class StatusHandler {
 //	}
 //
 //	return result;
-	return Collections.emptyList();
+	return this.salStateView.listCardHandles();
     }
 
 }

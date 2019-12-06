@@ -218,7 +218,8 @@ public class OpeneCardContext {
 
 	    // set up addon manager
 	    try {
-		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry());
+		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry(),
+			mainSAL.getSalStateView());
 		mainSAL.setAddonManager(manager);
 
 		LOG.info("Addon manager initialized.");
@@ -265,9 +266,7 @@ public class OpeneCardContext {
 	// initialize gui
 	realFactories = new HashMap<>();
 	// the key type must match the generic. This can't be enforced so watch it here.
-	// TODO: introduce factory method for the new instance of EacNavigatorFactory.
 	EacNavigatorFactory eacNavFac = EacNavigatorFactory.create(msgSetter, dispatcher);
-
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
 
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(

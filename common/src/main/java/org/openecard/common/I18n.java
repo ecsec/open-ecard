@@ -115,7 +115,6 @@ public class I18n {
 	return Locale.getDefault();
     }
 
-
     private I18n(Class<?> loaderReference, String component) {
 	this.loaderReference = loaderReference;
 	Locale userLocale = getLocale();
@@ -124,18 +123,44 @@ public class I18n {
 	// load applicable language files
 	// the order is: C -> lang -> lang_country
 	Properties defaults = loadFile(component, "C");
+	final boolean loadedDefaults = defaults != null;
+	if (!loadedDefaults) {
+	    defaults = new Properties();
+	}
 	this.original = (Properties) defaults.clone();
+	final boolean loadedLang;
 	if (!lang.isEmpty()) {
 	    Properties target = loadFile(component, lang);
-	    defaults = mergeProperties(defaults, target);
+	    loadedLang = target != null;
+	    if (loadedLang) {
+		defaults = mergeProperties(defaults, target);
+	    }
+	} else {
+	    loadedLang = false;
 	}
+	final boolean loadedCountry;
 	if (!lang.isEmpty() && !country.isEmpty()) {
 	    Properties target = loadFile(component, lang + "_" + country);
-	    defaults = mergeProperties(defaults, target);
+	    loadedCountry = target != null;
+	    if (loadedCountry) {
+		defaults = mergeProperties(defaults, target);
+	    }
+	} else {
+	    loadedCountry = false;
 	}
 
 	this.component = component;
 	this.translation = defaults;
+	if (!loadedDefaults && !loadedLang && !loadedCountry) {
+	    logger.warn("The loaded resource '{}' does not contain any translation resources for 'C', '{}' or '{}'."
+		    , component, lang, country);
+	} else if (loadedDefaults && !(loadedLang || loadedCountry)) {
+	    logger.warn("The loaded resource '{}' contains only standard text for 'C' but not translations for '{}' or '{}'."
+		    , component, lang, country);
+	} else if (!loadedDefaults && (loadedLang || loadedCountry)) {
+	    logger.warn("The loaded resource '{}' contains translations for '{}' or '{}', but no standard text for 'C'."
+		    , component, lang, country);
+	}
 	this.translatedFiles = new TreeMap<>();
     }
 
@@ -149,8 +174,7 @@ public class I18n {
 	    props.load(r);
 	    return props;
 	} catch (IOException | RuntimeException ex) {
-	    logger.warn("Failed to load resource {} for lang {}.", component, locale);
-	    return new Properties();
+	    return null;
 	}
     }
 

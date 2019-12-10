@@ -66,9 +66,11 @@ public class NFCCardMonitoring implements Runnable {
 		}
 	    }
 	}
+	LOG.debug("Stopping monitor thread.");
     }
 
     public void notifyStopMonitoring() {
+	LOG.debug("Notifying stop monitor thread.");
 	synchronized (lock) {
 	    wasSignalled = true;
 	    lock.notifyAll();

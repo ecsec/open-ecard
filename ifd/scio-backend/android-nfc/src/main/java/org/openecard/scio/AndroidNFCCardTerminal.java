@@ -18,18 +18,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Neil Crossley
  */
-public class AndroidNFCCardTerminal extends NFCCardTerminal {
+public class AndroidNFCCardTerminal extends NFCCardTerminal<AndroidNFCCard> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCCardTerminal.class);
 
     @Override
     public void prepareDevices() {
-	LOG.info("Preparing devices on android does nothing.");
+	AndroidNFCCard card = new AndroidNFCCard(this);
+	this.setNFCCard(card);
     }
 
     void setNFCTag(IsoDep tag, int timeout) throws IOException {
-
-	AndroidNFCCard card = new AndroidNFCCard(tag, timeout, this);
-	this.setNFCCard(card);
+	synchronized(this.cardLock) {
+	    AndroidNFCCard card = getNFCCard();
+	    if (card == null) {
+		throw new IOException("The NFC stack was not initialized and cannot prematurely accept the NFC tag.");
+	    }
+	    card.setTag(tag, timeout);
+	}
     }
 }

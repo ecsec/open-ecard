@@ -40,42 +40,55 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCCard.class);
 
-    private final int transceiveTimeout;
-    private final byte[] histBytes;
-    private final IsoDep isodep;
-    private NFCCardMonitoring cardMonitor;
     private final Object connectLock = new Object();
 
-    private Thread monitor;
+    private volatile int transceiveTimeout;
+    private volatile byte[] histBytes;
+    private volatile IsoDep isodep;
+    private volatile NFCCardMonitoring cardMonitor;
+    private volatile boolean tagPending;
 
-    public AndroidNFCCard(IsoDep tag, int timeout, NFCCardTerminal terminal) throws IOException {
+    private volatile Thread monitor;
+
+    public AndroidNFCCard(NFCCardTerminal terminal) {
 	super(terminal);
-	isodep = tag;
-	transceiveTimeout = timeout;
 
-	byte[] histBytesTmp = isodep.getHistoricalBytes();
-	if (histBytesTmp == null) {
-	    histBytesTmp = isodep.getHiLayerResponse();
-	}
-	this.histBytes = histBytesTmp;
-
-	connectTag();
-
-	// start thread which monitors the availability of the card
-	startCardMonitor();
+	tagPending = true;
     }
 
-    private void connectTag() throws IOException {
-	isodep.connect();
-	isodep.setTimeout(getTransceiveTimeout());
+    public void setTag(IsoDep tag, int timeout) throws IOException {
+	LOG.debug("Assigning tag {} with timeout {}", tag, timeout);
+	synchronized(connectLock) {
+	    isodep = tag;
+	    transceiveTimeout = timeout;
+
+	    byte[] histBytesTmp = isodep.getHistoricalBytes();
+	    if (histBytesTmp == null) {
+		histBytesTmp = isodep.getHiLayerResponse();
+	    }
+	    this.histBytes = histBytesTmp;
+
+	    connectTag();
+
+	    tagPending = false;
+	    connectLock.notifyAll();
+
+	    startCardMonitor();
+	}
     }
 
     private void startCardMonitor() {
 	NFCCardMonitoring createdMonitor = new NFCCardMonitoring(nfcCardTerminal, this);
-	Thread executionThread = new Thread();
+	Thread executionThread = new Thread(createdMonitor);
 	executionThread.start();
 	this.monitor = executionThread;
 	this.cardMonitor = createdMonitor;
+    }
+
+
+    private void connectTag() throws IOException {
+	isodep.connect();
+	isodep.setTimeout(getTransceiveTimeout());
     }
 
     private int getTransceiveTimeout() {
@@ -86,16 +99,18 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     public void disconnect(boolean reset) throws SCIOException {
 	if (reset) {
 	    synchronized(connectLock) {
-		terminateTag();
+		boolean wasConnected = this.isTagPresent();
+		innerTerminateTag();
 
-		try {
-		    connectTag();
+		if (wasConnected) {
+		    try {
+			connectTag();
 
-		    // start thread which is monitoring the availability of the card
-		    startCardMonitor();
-		} catch (IOException ex) {
-		    LOG.error("Failed to connect NFC tag.", ex);
-		    throw new SCIOException("Failed to reset channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+			startCardMonitor();
+		    } catch (IOException ex) {
+			LOG.error("Failed to connect NFC tag.", ex);
+			throw new SCIOException("Failed to reset channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+		    }
 		}
 	    }
 	}
@@ -103,41 +118,75 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
     @Override
     public boolean isTagPresent() {
-	return isodep.isConnected();
+	final boolean isTagPresent = !tagPending && isodep != null && isodep.isConnected();
+	return isTagPresent;
     }
 
     @Override
     public void terminateTag() throws SCIOException {
+	synchronized(connectLock) {
+	    this.innerTerminateTag();
+	    this.isodep = null;
+	    this.histBytes = null;
+	    this.tagPending = false;
+	    connectLock.notifyAll();
+	}
+    }
+
+    public void innerTerminateTag() throws SCIOException {
 	try {
-	    this.terminateTag(this.monitor, cardMonitor);
+	    this.terminateTag(this.monitor, this.cardMonitor);
 	} catch (IOException ex) {
 	    LOG.error("Failed to close NFC tag.");
 	    throw new SCIOException("Failed to close NFC channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
+	} finally {
+	    this.monitor = null;
+	    this.cardMonitor = null;
 	}
     }
 
     private void terminateTag(Thread monitor, NFCCardMonitoring cardMonitor) throws IOException {
 	synchronized(connectLock) {
-	    if (monitor != null) {
+	    if (cardMonitor != null) {
 		LOG.debug("Killing the monitor");
 		cardMonitor.notifyStopMonitoring();
 	    }
 
-	    this.isodep.close();
+	    if (this.isodep != null) {
+		LOG.debug("Closing the tag");
+		this.isodep.close();
+	    }
 	}
     }
 
     @Override
     public SCIOATR getATR() {
+	byte[] currentHistBytes;
+	synchronized (connectLock) {
+	    boolean interrupted = false;
+	    while (tagPending && !interrupted) {
+		try {
+		    connectLock.wait();
+		} catch (InterruptedException ex) {
+		    interrupted = true;
+		}
+	    }
+	    if (interrupted) {
+		currentHistBytes = null;
+	    } else {
+		currentHistBytes = this.histBytes;
+	    }
+	}
+
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
-	if (histBytes == null) {
+	if (currentHistBytes == null) {
 	    return new SCIOATR(new byte[0]);
 	} else {
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    // Initial Header
 	    out.write(0x3B);
 	    // T0
-	    out.write(0x80 | (histBytes.length & 0xF));
+	    out.write(0x80 | (currentHistBytes.length & 0xF));
 	    // TD1
 	    out.write(0x80);
 	    // TD2
@@ -145,7 +194,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	    // ISO14443A: The historical bytes from ATS response.
 	    // ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
 	    // TODO: check that the HiLayerResponse matches the requirements for ISO14443B
-	    out.write(histBytes, 0, histBytes.length);
+	    out.write(currentHistBytes, 0, currentHistBytes.length);
 
 	    // TCK: Exclusive-OR of bytes T0 to Tk
 	    byte[] preATR = out.toByteArray();
@@ -163,11 +212,29 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
 	try {
-	    return isodep.transceive(apdu);
+	    IsoDep currentTag;
+	    synchronized(connectLock) {
+		while(tagPending) {
+		    try {
+			connectLock.wait();
+		    } catch (InterruptedException ex) {
+			throw new IOException(ex);
+		    }
+		}
+		currentTag = isodep;
+	    }
+	    if (currentTag == null) {
+		throw new IllegalStateException("Transmit of apdu command failed, because the tag is not present.");
+	    }
+	    return currentTag.transceive(apdu);
 	} catch (TagLostException ex) {
 	    LOG.debug("NFC Tag is not present.", ex);
-	    this.nfcCardTerminal.removeTag();
-	    throw new IllegalStateException("Transmit of apdu command failed, because the card is not present.");
+	    try {
+		this.terminateTag();
+	    } catch (SCIOException ex1) {
+		LOG.debug("Error occurred while terminating the tag.", ex1);
+	    }
+	    throw new IllegalStateException("Transmit of apdu command failed, because the tag was lost.");
 	}
     }
 

@@ -33,24 +33,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * NFC implementation of smartcardio's CardTerminal interface.
- * Implemented as singleton because we only have one nfc-interface. Only
- * activitys can react on a new intent, so they must set the tag via setTag()
+ * Implemented as singleton because we only have one nfc-interface.
+ * Only activitys can react on a new intent, so they must set the tag via setTag()
  *
  * @author Dirk Petrautzki
  * @author Mike Prechtl
+ * @param <T>
  */
-public abstract class NFCCardTerminal implements SCIOTerminal {
+public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIOTerminal {
 
     public static final String STD_TERMINAL_NAME = "Integrated NFC";
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminal.class);
 
-    private volatile AbstractNFCCard nfcCard;
+    private volatile T nfcCard;
 
     private final String terminalName;
     private final Object cardPresent;
     private final Object cardAbsent;
-    private final Object cardLock = new Object();
+    protected final Object cardLock = new Object();
 
     public NFCCardTerminal() {
 	this.terminalName = STD_TERMINAL_NAME;
@@ -70,7 +71,7 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
     }
 
     public void setDialogMsg(String dialogMsg) {
-	AbstractNFCCard currentCard = this.nfcCard;
+	T currentCard = this.nfcCard;
 	if (currentCard != null) {
 	    currentCard.setDialogMsg(dialogMsg);
 	}
@@ -83,8 +84,16 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	}
     }
 
-    public void setNFCCard(AbstractNFCCard card) {
+    public void setNFCCard(T card) {
 	synchronized(cardLock) {
+	    T oldCard = this.nfcCard;
+	    if (oldCard != null) {
+		try {
+		    oldCard.terminateTag();
+		} catch(Exception e) {
+		    LOG.debug("Exception occurred while cleaning up previous nfc card");
+		}
+	    }
 	    this.nfcCard = card;
 	    if (card == null) {
 		notifyCardAbsent();
@@ -94,9 +103,13 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	}
     }
 
+    public T getNFCCard() {
+	return this.nfcCard;
+    }
+
     public void removeTag() {
 	synchronized (cardLock) {
-	    final AbstractNFCCard currentCard = nfcCard;
+	    final T currentCard = nfcCard;
 	    if (currentCard != null) {
 		nfcCard = null;
 		terminateTag(currentCard);
@@ -105,7 +118,7 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	}
     }
 
-    private void terminateTag(final AbstractNFCCard currentCard) {
+    private void terminateTag(final T currentCard) {
 	if (currentCard != null) { // maybe nfc tag is already removed
 	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
@@ -118,13 +131,13 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	}
     }
 
-    private void notifyCardPresent() {
+    protected void notifyCardPresent() {
 	synchronized (cardPresent) {
 	    cardPresent.notifyAll();
 	}
     }
 
-    private void notifyCardAbsent() {
+    protected void notifyCardAbsent() {
 	synchronized (cardAbsent) {
 	    cardAbsent.notifyAll();
 	}

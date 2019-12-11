@@ -19,7 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.scio;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +31,7 @@ import org.openecard.common.util.Promise;
 import org.robovm.apple.corenfc.NFCISO7816APDU;
 import org.robovm.apple.corenfc.NFCISO7816Tag;
 import org.robovm.apple.corenfc.NFCPollingOption;
+import org.robovm.apple.corenfc.NFCReaderError;
 import org.robovm.apple.corenfc.NFCTagReaderSession;
 import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
 import org.robovm.apple.dispatch.DispatchQueue;
@@ -42,7 +42,6 @@ import org.robovm.apple.foundation.NSError;
 import org.robovm.apple.foundation.NSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * NFC implementation of SCIO API card interface.
@@ -65,7 +64,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public final Object tagLock = new Object();
     private NFCSessionContext sessionContext;
     private NSError error;
-    private NFCISO7816Tag tag;
+    private volatile NFCISO7816Tag tag;
 
     private final IOSConfig cfg;
 
@@ -74,9 +73,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.cfg = cfg;
     }
 
-    private void setTag(NFCISO7816Tag tag) {
-	this.tag = tag;
-	this.setHistBytes();
+    private void setTag(NFCISO7816Tag tag, NFCSessionContext givenContext) {
+	if (givenContext == sessionContext || (tag == null && givenContext == null)) {
+	    this.tag = tag;
+	    this.setHistBytes();
+	}
     }
 
     private NFCSessionContext initSessionObj() throws SCIOException {
@@ -134,8 +135,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		}
 	    }
 	    if (this.error != null) {
-		if (this.error.getCode() != 203) {
+		if (this.error.getCode() != NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
 		    LOG.error("Could not create a new NFC session. {}", this.error);
+		    context.session.invalidateSession();
 		    this.error = null;
 		    this.sessionContext = null;
 		    this.terminateTag();
@@ -179,7 +181,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     @Override
     public SCIOATR getATR() {
 	final byte[] currentHistBytes;
-	synchronized(this.tagLock) {
+	synchronized (this.tagLock) {
 	    currentHistBytes = this.histBytes;
 	}
 	// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
@@ -220,12 +222,13 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	final NFCISO7816Tag currentTag = tag;
 
 	if (currentTag == null) {
-	    throw new NullPointerException("Cannot transceive because the tag is null.");
+	    throw new IllegalStateException("Cannot transceive because the tag is null.");
 	}
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
 	currentTag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    if (er2 != null) {
+		LOG.error("Following error occurred while transmitting the APDU: {}", er2);
 		p.deliver(null);
 	    } else {
 		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
@@ -239,7 +242,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	try {
 	    byte[] response = p.deref();
 	    if (response == null) {
-		throw new IOException();
+		throw new IllegalStateException();
 	    }
 	    return response;
 	} catch (InterruptedException ex) {
@@ -252,17 +255,33 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     private class NFCTagReaderSessionDelegateAdapterImpl extends NFCTagReaderSessionDelegateAdapter {
+
 	public NFCSessionContext currentContext = null;
+	private final Object notifyErrorLock = new Object();
+	private volatile boolean hasNotifiedError = false;
 
 	@Override
 	public void didInvalidate(NFCTagReaderSession session, NSError err) {
 	    LOG.debug(".didInvalidate()");
-	    synchronized(tagLock) {
+	    notifyError(err);
+	    return;
+	}
+
+	private void notifyError(NSError err) {
+
+	    synchronized (notifyErrorLock) {
+		if (hasNotifiedError) {
+		    return;
+		} else {
+		    hasNotifiedError = true;
+		}
+	    }
+
+	    synchronized (tagLock) {
 		error = err;
-		setTag(null);
+		setTag(null, currentContext);
 		tagLock.notifyAll();
 	    }
-	    return;
 	}
 
 	@Override
@@ -277,16 +296,12 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		session.connectToTag(t, (NSError err) -> {
 
 		    if (err != null) {
-			synchronized (tagLock) {
-			    error = err;
-			    setTag(null);
-			    tagLock.notifyAll();
-			}
+			notifyError(err);
 		    } else {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			synchronized (tagLock) {
-			    setTag(tag);
+			    setTag(tag, currentContext);
 			    setDialogMsg(cfg.getDefaultCardRecognizedMSG());
 			    tagLock.notifyAll();
 			}

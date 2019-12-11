@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Neil Crossley
  */
-public class IOSNFCCardTerminal extends NFCCardTerminal {
+public class IOSNFCCardTerminal extends NFCCardTerminal<IOSNFCCard> {
 
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCCardTerminal.class);
 

@@ -33,23 +33,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * NFC implementation of smartcardio's CardTerminal interface.
- * Implemented as singleton because we only have one nfc-interface. Only
- * activitys can react on a new intent, so they must set the tag via setTag()
+ * Implemented as singleton because we only have one nfc-interface.
+ * Only activitys can react on a new intent, so they must set the tag via setTag()
  *
  * @author Dirk Petrautzki
  * @author Mike Prechtl
+ * @param <T>
  */
-public abstract class NFCCardTerminal implements SCIOTerminal {
+public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIOTerminal {
 
     public static final String STD_TERMINAL_NAME = "Integrated NFC";
 
     private static final Logger LOG = LoggerFactory.getLogger(NFCCardTerminal.class);
 
-    private AbstractNFCCard nfcCard;
+    private volatile T nfcCard;
 
     private final String terminalName;
     private final Object cardPresent;
     private final Object cardAbsent;
+    protected final Object cardLock = new Object();
 
     public NFCCardTerminal() {
 	this.terminalName = STD_TERMINAL_NAME;
@@ -69,35 +71,54 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
     }
 
     public void setDialogMsg(String dialogMsg) {
-	AbstractNFCCard currentCard = this.nfcCard;
+	T currentCard = this.nfcCard;
 	if (currentCard != null) {
 	    currentCard.setDialogMsg(dialogMsg);
 	}
     }
 
     @Override
-    public synchronized boolean isCardPresent() {
-	return nfcCard != null;
-    }
-
-    public synchronized void setNFCCard(AbstractNFCCard card) {
-	this.nfcCard = card;
-	if (card == null) {
-	    notifyCardAbsent();
-	} else {
-	    notifyCardPresent();
+    public boolean isCardPresent() {
+	synchronized(cardLock) {
+	    return nfcCard != null;
 	}
     }
 
-    public synchronized void removeTag() {
-	final AbstractNFCCard currentCard = nfcCard;
-	if (currentCard != null) {
-	    nfcCard = null;
-	    removeTag(currentCard);
+    public void setNFCCard(T card) {
+	synchronized(cardLock) {
+	    T oldCard = this.nfcCard;
+	    if (oldCard != null) {
+		try {
+		    oldCard.terminateTag();
+		} catch(Exception e) {
+		    LOG.debug("Exception occurred while cleaning up previous nfc card");
+		}
+	    }
+	    this.nfcCard = card;
+	    if (card == null) {
+		notifyCardAbsent();
+	    } else {
+		notifyCardPresent();
+	    }
 	}
     }
 
-    private void removeTag(final AbstractNFCCard currentCard) {
+    public T getNFCCard() {
+	return this.nfcCard;
+    }
+
+    public void removeTag() {
+	synchronized (cardLock) {
+	    final T currentCard = nfcCard;
+	    if (currentCard != null) {
+		nfcCard = null;
+		terminateTag(currentCard);
+		notifyCardAbsent();
+	    }
+	}
+    }
+
+    private void terminateTag(final T currentCard) {
 	if (currentCard != null) { // maybe nfc tag is already removed
 	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
@@ -105,33 +126,34 @@ public abstract class NFCCardTerminal implements SCIOTerminal {
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
 	    }
-	    notifyCardAbsent();
 	} else {
 	    LOG.warn("Double invocation of removeTag function.");
 	}
     }
 
-    private void notifyCardPresent() {
+    protected void notifyCardPresent() {
 	synchronized (cardPresent) {
 	    cardPresent.notifyAll();
 	}
     }
 
-    private void notifyCardAbsent() {
+    protected void notifyCardAbsent() {
 	synchronized (cardAbsent) {
 	    cardAbsent.notifyAll();
 	}
     }
 
     @Override
-    public synchronized SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
-	final AbstractNFCCard currentCard = nfcCard;
-	if (currentCard == null) {
-	    String msg = "No tag present.";
-	    LOG.warn(msg);
-	    throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
+    public SCIOCard connect(SCIOProtocol protocol) throws SCIOException, IllegalStateException {
+	synchronized (cardLock) {
+	    final AbstractNFCCard currentCard = nfcCard;
+	    if (currentCard == null) {
+		String msg = "No tag present.";
+		LOG.warn(msg);
+		throw new SCIOException(msg, SCIOErrorCode.SCARD_E_NO_SMARTCARD);
+	    }
+	    return currentCard;
 	}
-	return currentCard;
     }
 
     @Override

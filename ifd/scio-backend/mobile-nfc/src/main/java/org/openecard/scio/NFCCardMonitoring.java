@@ -19,16 +19,14 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
 package org.openecard.scio;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Task which checks if the received nfc tag is still available. If the nfc tag is no longer available, then the nfc
- * tag is removed and the card object is removed from the NFCCardTerminal, see
+ * Task which checks if the received nfc tag is still available. If the nfc tag is no longer available, then the nfc tag
+ * is removed and the card object is removed from the NFCCardTerminal, see
  * {@link org.openecard.scio.NFCCardTerminal#removeTag()}.
  *
  * @author Mike Prechtl
@@ -39,6 +37,8 @@ public class NFCCardMonitoring implements Runnable {
 
     private final NFCCardTerminal terminal;
     private final AbstractNFCCard card;
+    private final Object lock = new Object();
+    private volatile boolean wasSignalled = false;
 
     public NFCCardMonitoring(NFCCardTerminal terminal, AbstractNFCCard card) {
 	this.terminal = terminal;
@@ -48,21 +48,32 @@ public class NFCCardMonitoring implements Runnable {
     @Override
     public void run() {
 	LOG.debug("Starting monitor thread.");
-	while (true) {
-	    try {
-		if (!card.isTagPresent()) {
-		    // remove tag if card is no longer available/connected to terminal
-		    terminal.removeTag();
+
+	synchronized (lock) {
+	    while (!wasSignalled) {
+		try {
+		    if (!card.isTagPresent()) {
+			// remove tag if card is no longer available/connected to terminal
+			terminal.removeTag();
+			LOG.debug("Stopping monitor thread.");
+			return;
+		    }
+		    lock.wait(250);
+		} catch (InterruptedException ex) {
+		    LOG.warn("Task which checks the availability of the nfc card is interrupted.", ex);
 		    LOG.debug("Stopping monitor thread.");
 		    return;
 		}
-		Thread.sleep(250);
-	    } catch (InterruptedException ex) {
-		LOG.warn("Task which checks the availability of the nfc card is interrupted.", ex);
-		LOG.debug("Stopping monitor thread.");
-		return;
 	    }
 	}
+	LOG.debug("Stopping monitor thread.");
     }
 
+    public void notifyStopMonitoring() {
+	LOG.debug("Notifying stop monitor thread.");
+	synchronized (lock) {
+	    wasSignalled = true;
+	    lock.notifyAll();
+	}
+    }
 }

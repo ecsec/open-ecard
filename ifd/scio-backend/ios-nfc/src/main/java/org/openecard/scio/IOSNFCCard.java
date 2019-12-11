@@ -64,7 +64,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     public final Object tagLock = new Object();
     private NFCSessionContext sessionContext;
     private NSError error;
-    private NFCISO7816Tag tag;
+    private volatile NFCISO7816Tag tag;
 
     private final IOSConfig cfg;
 
@@ -222,12 +222,13 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	final NFCISO7816Tag currentTag = tag;
 
 	if (currentTag == null) {
-	    throw new NullPointerException("Cannot transceive because the tag is null.");
+	    throw new IllegalStateException("Cannot transceive because the tag is null.");
 	}
 	NFCISO7816APDU isoapdu = new NFCISO7816APDU(new NSData(apdu));
 	Promise<byte[]> p = new Promise<>();
 	currentTag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    if (er2 != null) {
+		LOG.error("Following error occurred while transmitting the APDU: {}", er2);
 		p.deliver(null);
 	    } else {
 		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
@@ -241,7 +242,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	try {
 	    byte[] response = p.deref();
 	    if (response == null) {
-		throw new IOException();
+		throw new IllegalStateException();
 	    }
 	    return response;
 	} catch (InterruptedException ex) {

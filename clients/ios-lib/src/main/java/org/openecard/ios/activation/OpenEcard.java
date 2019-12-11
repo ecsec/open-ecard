@@ -36,5 +36,5 @@ public interface OpenEcard{
 
     String prepareTCTokenURL(String tcTokenURL);
 
-
+    void setDebugLogLevel();
 }

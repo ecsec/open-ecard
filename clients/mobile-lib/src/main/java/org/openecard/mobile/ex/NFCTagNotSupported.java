@@ -19,23 +19,23 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.android.activation;
 
-import android.content.Intent;
-import android.nfc.Tag;
-import java.io.IOException;
-import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.mobile.ex.NFCTagNotSupported;
+package org.openecard.mobile.ex;
+
 
 /**
+ * Is thrown if tag from intent cannot be used as IsoDep.
  *
- * @author Neil Crossley
+ * @author Florian Otto
  */
-public interface AndroidContextManager extends ContextManager {
+public class NFCTagNotSupported extends Exception {
 
-	public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException;
+    public NFCTagNotSupported(String message) {
+	super(message);
+    }
 
-	public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException;
+    public NFCTagNotSupported(String message, Throwable cause) {
+	super(message, cause);
+    }
 
 }

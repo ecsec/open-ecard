@@ -230,7 +230,6 @@ public class World implements AutoCloseable {
 	    return _eacControllerFactory;
 	}
 
-
 	public void startSimpleEacWithEidScheme() {
 	    LOG.debug("Start simple eac with test.governikus-eid.");
 	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
@@ -256,7 +255,6 @@ public class World implements AutoCloseable {
 	    } catch (MalformedURLException ex) {
 		throw new RuntimeException(ex);
 	    }
-
 
 	    mockTcTokenContext = mock(TCTokenContext.class);
 	    new Expectations() {
@@ -302,7 +300,6 @@ public class World implements AutoCloseable {
 
 	private void startSimpleEac(String rawTcTokenUrl, String scheme) {
 
-
 	    String url = scheme + "://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, Charset.defaultCharset());;
 
 	    supportedCards = new HashSet<>();
@@ -331,11 +328,7 @@ public class World implements AutoCloseable {
 
 	public void expectOnStarted() {
 	    LOG.debug("Expect on started.");
-	    try {
-		promisedStarted.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    waitFor(promisedStarted);
 	}
 
 	public void expectCardInsertionRequest() {
@@ -391,7 +384,6 @@ public class World implements AutoCloseable {
 		world.microSleep();
 	    }
 
-
 	    this.eacInteraction.givenConfirmationOfServerData();
 	}
 
@@ -441,7 +433,6 @@ public class World implements AutoCloseable {
 	    promisedActivationResult = new Promise<>();
 	    promisedStarted = new Promise<>();
 
-
 	    PinManagementInteraction interaction = mock(PinManagementInteraction.class);
 
 	    this.interaction = new PinManagementCallbackReceiver(World.this, interaction);
@@ -465,18 +456,13 @@ public class World implements AutoCloseable {
 
 	public void expectOnStarted() {
 	    LOG.debug("Expect on started.");
-	    try {
-		promisedStarted.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    waitFor(promisedStarted);
 	}
 
 	public void cancelPinManagement() {
 	    LOG.debug("Cancel pin management.");
 	    this.activationController.cancelAuthentication();
 	}
-
 
 	@Override
 	public void close() throws Exception {
@@ -537,11 +523,7 @@ public class World implements AutoCloseable {
 		throw new RuntimeException(ex);
 	    }
 
-	    try {
-		Assert.assertNotNull(resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    Assert.assertNotNull(waitFor(resultStart));
 	    return this;
 	}
 
@@ -550,11 +532,7 @@ public class World implements AutoCloseable {
 	    Promise<ServiceErrorResponse> resultStart = new Promise<>();
 	    contextManager().stop(PromiseDeliveringFactory.createStopServiceDelivery(resultStart));
 
-	    try {
-		Assert.assertNull(resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
-	    } catch (InterruptedException | TimeoutException ex) {
-		throw new RuntimeException(ex);
-	    }
+	    Assert.assertNull(waitFor(resultStart));
 	    return this;
 	}
 
@@ -569,6 +547,16 @@ public class World implements AutoCloseable {
 	    }
 	}
 
+    }
+
+    private static <T> T waitFor(Promise<T> resultStart) throws RuntimeException {
+	try {
+	    return resultStart.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+	} catch (TimeoutException ex) {
+	    throw new RuntimeException(String.format("Time occurred while waiting %s milliseconds", WAIT_TIMEOUT), ex);
+	} catch (InterruptedException ex) {
+	    throw new RuntimeException(ex);
+	}
     }
 
     private static <T> void releasePromise(Promise<T> promise) {

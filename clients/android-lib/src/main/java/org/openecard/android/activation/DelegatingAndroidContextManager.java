@@ -30,6 +30,7 @@ import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.StartServiceHandler;
 import org.openecard.mobile.activation.StopServiceHandler;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NFCTagNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
@@ -51,7 +52,7 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
     }
 
     @Override
-    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, IOException {
+	public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException {
 	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 	if (tagFromIntent != null) {
 	    this.onNewIntent(tagFromIntent);
@@ -59,16 +60,21 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
     }
 
     @Override
-    public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, IOException {
+	public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException {
 	AndroidNFCFactory nfcFactory = this.builder.getPreviousInstance();
-	if (nfcFactory != null && intent != null) {
-	    if (IsoDep.get(intent).isExtendedLengthApduSupported()) {
-		// set nfc tag with timeout of five seconds
-		nfcFactory.setNFCTag(intent, 5000);
-	    } else {
-		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
-	    }
-	}
+		if (nfcFactory != null && intent != null) {
+			IsoDep isoDep = IsoDep.get(intent);
+			if (isoDep != null) {
+				if (IsoDep.get(intent).isExtendedLengthApduSupported()) {
+					// set nfc tag with timeout of five seconds
+					nfcFactory.setNFCTag(intent, 5000);
+				} else {
+					throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
+				}
+			} else {
+				throw new NFCTagNotSupported("The tag is not supported");
+			}
+		}
     }
     
     @Override

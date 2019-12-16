@@ -18,7 +18,9 @@ import org.testng.annotations.Test;
  */
 public class NFCCardMonitoringTest {
 
-    @Test(timeOut = 1000)
+    private static final long TIMEOUT_MILLISECONDS = 3000;
+
+    @Test(timeOut = TIMEOUT_MILLISECONDS)
     public void sutShouldNotWaitIfStoppedBeforeRunning() {
 	NFCCardTerminal terminal = createTerminal();
 
@@ -28,7 +30,7 @@ public class NFCCardMonitoringTest {
 	sut.run();
     }
 
-    @Test(timeOut = 1000)
+    @Test(timeOut = TIMEOUT_MILLISECONDS)
     public void sutShouldRemoveCardWhenTagIsMissing() {
 	AbstractNFCCard nfcCard = createNfcCard();
 	when(nfcCard.isTagPresent()).thenReturn(Boolean.FALSE);

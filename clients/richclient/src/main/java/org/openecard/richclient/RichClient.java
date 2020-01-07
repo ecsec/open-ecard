@@ -230,27 +230,27 @@ public final class RichClient {
 		// initialize http binding
 		int port = 24727;
 		boolean dispatcherMode = false;
-		WinReg.HKEY hk = WinReg.HKEY_LOCAL_MACHINE;
 		String regPath = "SOFTWARE\\" + OpenecardProperties.getProperty("registry.app_name");
 		if (Platform.isWindows()) {
-		    LOG.debug("Checking if dispatcher mode should be used.");
-		    try {
-			if (regKeyExists(hk, regPath, "Dispatcher_Mode")) {
-			    String value = Advapi32Util.registryGetStringValue(hk, regPath, "Dispatcher_Mode");
-			    dispatcherMode = Boolean.valueOf(value);
-			    // let socket chose its port
-			    port = 0;
+			LOG.debug("Checking if dispatcher mode should be used.");
+			try {
+				WinReg.HKEY hk = WinReg.HKEY_LOCAL_MACHINE;
+				if (regKeyExists(hk, regPath, "Dispatcher_Mode")) {
+					String value = Advapi32Util.registryGetStringValue(hk, regPath, "Dispatcher_Mode");
+					dispatcherMode = Boolean.valueOf(value);
+					// let socket chose its port
+					port = 0;
+				}
+			} catch (Win32Exception ex) {
+				LOG.warn("Failed to read 'Dispatcher_Mode' registry key. Using normal operation mode.", ex);
 			}
-		    } catch (Win32Exception ex) {
-			LOG.warn("Failed to read 'Dispatcher_Mode' registry key. Using normal operation mode.", ex);
-		    }
 		}
 		if (! dispatcherMode) {
-		    try {
-			port = Integer.parseInt(OpenecardProperties.getProperty("http-binding.port"));
-		    } catch (NumberFormatException ex) {
-			LOG.warn("Error in config file, HTTP binding port is malformed.");
-		    }
+			try {
+				port = Integer.parseInt(OpenecardProperties.getProperty("http-binding.port"));
+			} catch (NumberFormatException ex) {
+				LOG.warn("Error in config file, HTTP binding port is malformed.");
+			}
 		}
 
 		// start HTTP server
@@ -259,8 +259,13 @@ public final class RichClient {
 		httpBinding.start();
 
 		if (dispatcherMode) {
-		    long waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", 5000L);
-		    long timeout = getRegInt(hk, regPath, "DP_Timeout", 3600000L);
+		    long waitTime = 5000L;
+		    long timeout = 3600000L;
+			if (Platform.isWindows()) {
+				WinReg.HKEY hk = WinReg.HKEY_LOCAL_MACHINE;
+				waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", waitTime);
+				timeout = getRegInt(hk, regPath, "DP_Timeout", timeout);
+			}
 		    // try to register with dispatcher service
 		    LOG.debug("Trying to register HTTP binding port with dispatcher service.");
 		    final int realPort = httpBinding.getPort();

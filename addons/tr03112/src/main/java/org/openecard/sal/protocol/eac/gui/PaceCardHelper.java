@@ -29,6 +29,7 @@ import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
 import iso.std.iso_iec._24727.tech.schema.ListIFDs;
 import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
@@ -167,7 +168,8 @@ public class PaceCardHelper {
 	    // signal cards to be activated
 	    PrepareDevices pdreq = new PrepareDevices();
 	    pdreq.setContextHandle(conHandle.getContextHandle());
-	    ctx.getDispatcher().safeDeliver(pdreq);
+	    PrepareDevicesResponse response = (PrepareDevicesResponse)ctx.getDispatcher().safeDeliver(pdreq);
+	    WSHelper.checkResult(response);
 	    final String sessionIdentifier = conHandle.getChannelHandle().getSessionIdentifier();
 
 	    Set<String> npaType = new HashSet<>();

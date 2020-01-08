@@ -693,7 +693,7 @@
 				<plugin>
 					<groupId>net.agilhard.maven.plugins</groupId>
 					<artifactId>jlink-jpackager-maven-plugin</artifactId>
-					<version>1.0.0-ec.3</version>
+					<version>1.0.0-ec.4</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

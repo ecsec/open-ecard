@@ -54,18 +54,19 @@ public interface SCIOTerminals {
     }
 
     /**
-     * Prepare devices, so they can be used and connected to.
-     * This is intended to handle iOS style APIs where the card can only be used for a very short time and no permament
-     * connection is desireable. There one would start a session and once that is present the IFD can connect to the card.
+     * Prepare devices, so they can be used and connected to. This is intended to handle iOS style APIs where the
+     * card can only be used for a very short time and no permament connection is desireable.
+     * There one would start a session and once that is present the IFD can connect to the card.
+     * @throws org.openecard.common.ifd.scio.SCIOException
      */
-    void prepareDevices();
+    void prepareDevices() throws SCIOException;
 
     /**
      * Power down any previously prepared devices.
      * This is the companion operation to PrepareDevices.
      */
     void powerDownDevices();
-    
+
     /**
      * Gets a list of all terminals satisfying the given state.
      * <p>If state is {@link State#ALL}, this method returns all terminals encapsulated by this object. If state is

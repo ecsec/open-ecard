@@ -362,7 +362,7 @@ public class ECardConstants {
 	 * Errors caused by the identity layer of the eCard-API-Framework are assigned to the identity layer.
 	 */
 	public static class Ident {
-	    
+
 	    private static final String IL_PREFIX   = MINOR_PREFIX + "il";
 	    private static final String ALG_PFX     = IL_PREFIX + "/algorithm#";
 	    private static final String CR_PFX      = IL_PREFIX + "/certificateRequest#";
@@ -947,7 +947,10 @@ public class ECardConstants {
 		 * Access Error.
 		 */
 		public static final String ACCESS_ERROR = TERM_PREFIX + "accessError";
-
+		/**
+		 * Access Error.
+		 */
+		public static final String PREPARE_DEVICES_ERROR = TERM_PREFIX + "prepareDevicesError";
 	    };
 
 	};

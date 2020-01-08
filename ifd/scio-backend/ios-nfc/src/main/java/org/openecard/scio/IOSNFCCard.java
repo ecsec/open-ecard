@@ -63,12 +63,12 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     public final Object tagLock = new Object();
     private NFCSessionContext sessionContext;
-    private NSError error;
+    private volatile NSError error;
     private volatile NFCISO7816Tag tag;
 
     private final IOSConfig cfg;
 
-    public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) throws IOException {
+    public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) {
 	super(terminal);
 	this.cfg = cfg;
     }
@@ -118,7 +118,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     private void connect(int attempts) throws SCIOException {
 	if (attempts >= 3) {
-	    throw new IllegalStateException(String.format("Could not create a new NFC session after %d attempts ", attempts));
+	    throw new SCIOException(
+		    String.format("Could not create a new NFC session after %d attempts ", attempts),
+		    SCIOErrorCode.SCARD_E_NOT_READY);
 	}
 
 	NFCSessionContext context = this.initSessionObj();
@@ -134,18 +136,21 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    throw new SCIOException("", SCIOErrorCode.SCARD_E_TIMEOUT, ex);
 		}
 	    }
-	    if (this.error != null) {
+	    NSError currentError = this.error;
+	    if (currentError != null) {
+		this.tag = null;
+		this.sessionContext = null;
+		this.histBytes = null;
+		this.error = null;
+		context.session.invalidateSession();
+
 		if (this.error.getCode() != NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
-		    LOG.error("Could not create a new NFC session. {}", this.error);
-		    context.session.invalidateSession();
-		    this.error = null;
-		    this.sessionContext = null;
-		    this.terminateTag();
-		    throw new IllegalStateException("Could not create a new NFC session.");
+		    LOG.error("Could not create a new NFC session. {}", currentError);
+
+		    throw new SCIOException("Could not create a new NFC session.", SCIOErrorCode.SCARD_E_NOT_READY);
 		} else {
 		    connect(attempts + 1);
 		}
-
 	    }
 	}
     }

@@ -9,7 +9,6 @@
  ************************************************************************** */
 package org.openecard.scio;
 
-import java.io.IOException;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,10 @@ public class IOSNFCCardTerminal extends NFCCardTerminal<IOSNFCCard> {
     private IOSConfig config;
 
     @Override
-    public void prepareDevices() {
-	try {
-	    IOSNFCCard card = new IOSNFCCard(this, config);
-	    card.connect();
-	    this.setNFCCard(card);
-	} catch (IOException ex) {
-	    throw new RuntimeException(ex);
-	} catch (SCIOException ex) {
-	    throw new RuntimeException(ex);
-	}
+    public void prepareDevices() throws SCIOException {
+	IOSNFCCard card = new IOSNFCCard(this, config);
+	card.connect();
+	this.setNFCCard(card);
     }
 
     public void setConfig(IOSConfig config) {

@@ -64,7 +64,7 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	return terminalName;
     }
 
-    public abstract void prepareDevices();
+    public abstract void prepareDevices() throws SCIOException;
 
     public void powerDownDevices() {
 	this.removeTag();
@@ -91,7 +91,7 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 		try {
 		    oldCard.terminateTag();
 		} catch(Exception e) {
-		    LOG.debug("Exception occurred while cleaning up previous nfc card");
+		    LOG.warn("Exception occurred while cleaning up previous nfc card", e);
 		}
 	    }
 	    this.nfcCard = card;

@@ -22,6 +22,13 @@
 
 
 module org.openecard.richclient {
+
+	/* 
+	add this if you want to use a debugger on the client like this in ./bin/openecard:
+	JLINK_VM_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=8000,server=n,suspend=y"
+	*/
+    //requires javafx.graphics;
+
     requires java.smartcardio;
     requires java.logging;
     requires java.desktop;
@@ -59,4 +66,7 @@ module org.openecard.richclient {
     opens org.openecard.addon.manifest to java.xml.bind;
 
     opens jnasmartcardio to java.base;
+
+	/* JNA needs access to the jnidispatch lib on osx*/
+	opens com.sun.jna.darwin;
 }

@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.ex.NFCTagNotSupported;
 import org.openecard.scio.NFCFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,16 +90,21 @@ public class NfcUtils {
 	}
     }
 
-    public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported {
+	public void retrievedNFCTag(Intent intent) throws ApduExtLengthNotSupported, NFCTagNotSupported {
 	// indicates that a nfc tag is there
 	Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-	if (tagFromIntent != null) {
-	    if (IsoDep.get(tagFromIntent).isExtendedLengthApduSupported()) {
-		// set nfc tag with timeout of five seconds
-		NFCFactory.setNFCTag(tagFromIntent, 5000);
-	    } else {
-		throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
-	    }
+		if (tagFromIntent != null) {
+			IsoDep isoDep = IsoDep.get(tagFromIntent);
+			if (isoDep != null) {
+				if (isoDep.isExtendedLengthApduSupported()) {
+					// set nfc tag with timeout of five seconds
+					NFCFactory.setNFCTag(tagFromIntent, 5000);
+				} else {
+					throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
+				}
+			} else {
+				throw new NFCTagNotSupported("The NFC chip is not supported");
+			}
 	}
     }
 

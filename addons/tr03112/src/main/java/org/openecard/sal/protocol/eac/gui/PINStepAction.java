@@ -90,7 +90,10 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		pinState.update(currentState);
 	    }
 	} catch (WSException ex) {
-	    // repeat the step
+	    if (ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR.equals(ex.getResultMinor())) {
+		// repeat the step
+		return new StepActionResult(StepActionResultStatus.REPEAT);
+	    }
 	    LOG.error("An unknown error occured while trying to verify the PIN.");
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    new ErrorStep(langPin.translationForKey(ERROR_TITLE),

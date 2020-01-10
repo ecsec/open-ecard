@@ -19,6 +19,7 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.PrepareDevices;
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -105,7 +106,8 @@ public class CardCapturer {
 		LOG.debug("Call prepare devices");
 		PrepareDevices pd = new PrepareDevices();
 		pd.setContextHandle(sessionHandle.getContextHandle());
-		dispatcher.safeDeliver(pd);
+		PrepareDevicesResponse response = (PrepareDevicesResponse)dispatcher.safeDeliver(pd);
+		WSHelper.checkResult(response);
 	    }
 	}
 

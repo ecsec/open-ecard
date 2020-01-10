@@ -80,7 +80,7 @@ public class ChannelManager {
 	return termFact.terminals();
     }
 
-    public void prepareDevices() {
+    public void prepareDevices() throws SCIOException {
 	getTerminals().prepareDevices();
     }
 

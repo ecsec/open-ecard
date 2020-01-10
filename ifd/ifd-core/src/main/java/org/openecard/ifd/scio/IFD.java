@@ -271,7 +271,12 @@ public class IFD implements org.openecard.ws.IFD {
 
     @Override
     public PrepareDevicesResponse prepareDevices(PrepareDevices parameters) {
-	cm.prepareDevices();
+	try {
+	    cm.prepareDevices();
+	} catch (SCIOException ex) {
+	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR, ex.getMessage());
+	    return WSHelper.makeResponse(PrepareDevicesResponse.class, r);
+	}
 
 	ConnectionHandleType handle = HandlerBuilder.create()
 		.setContextHandle(parameters.getContextHandle())

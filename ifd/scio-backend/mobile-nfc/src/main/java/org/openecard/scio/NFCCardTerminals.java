@@ -53,7 +53,7 @@ public final class NFCCardTerminals implements SCIOTerminals {
     }
 
     @Override
-    public void prepareDevices() {
+    public void prepareDevices() throws SCIOException {
 	this.nfcTerminal.prepareDevices();
     }
 

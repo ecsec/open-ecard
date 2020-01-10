@@ -9,6 +9,8 @@
  ************************************************************************** */
 package org.openecard.scio;
 
+import java.util.concurrent.TimeUnit;
+import static org.awaitility.Awaitility.*;
 import static org.mockito.Mockito.*;
 import org.testng.annotations.Test;
 
@@ -18,19 +20,22 @@ import org.testng.annotations.Test;
  */
 public class NFCCardMonitoringTest {
 
-    private static final long TIMEOUT_MILLISECONDS = 3000;
+    private static final long TIMEOUT_MILLISECONDS = 1000;
 
-    @Test(timeOut = TIMEOUT_MILLISECONDS)
+    @Test
     public void sutShouldNotWaitIfStoppedBeforeRunning() {
 	NFCCardTerminal terminal = createTerminal();
 
 	NFCCardMonitoring sut = createSut(terminal);
 
 	sut.notifyStopMonitoring();
-	sut.run();
+
+	await().dontCatchUncaughtExceptions()
+		.atMost(TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS)
+		.untilAsserted(() -> sut.run());
     }
 
-    @Test(timeOut = TIMEOUT_MILLISECONDS)
+    @Test
     public void sutShouldRemoveCardWhenTagIsMissing() {
 	AbstractNFCCard nfcCard = createNfcCard();
 	when(nfcCard.isTagPresent()).thenReturn(Boolean.FALSE);
@@ -38,7 +43,9 @@ public class NFCCardMonitoringTest {
 
 	NFCCardMonitoring sut = createSut(terminal, nfcCard);
 
-	sut.run();
+	await().dontCatchUncaughtExceptions()
+		.atMost(TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS)
+		.untilAsserted(() -> sut.run());
 
 	verify(terminal).removeTag();
     }

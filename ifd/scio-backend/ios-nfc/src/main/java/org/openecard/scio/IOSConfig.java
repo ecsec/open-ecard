@@ -10,5 +10,8 @@ public interface IOSConfig {
 
     String getDefaultCardRecognizedMSG();
 
+    String getDefaultCancelNFCMessage();
+
+    String getDefaultNFCErrorMessage();
 
 }

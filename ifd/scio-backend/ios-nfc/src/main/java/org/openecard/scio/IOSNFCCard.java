@@ -166,7 +166,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	synchronized (this.tagLock) {
 	    final NFCSessionContext currentSession = this.sessionContext;
 	    if (currentSession != null) {
-		currentSession.session.invalidateSession();
+		currentSession.session.invalidateSession(this.cfg.getDefaultCancelNFCMessage());
 		this.sessionContext = null;
 		setHistBytes();
 		return true;

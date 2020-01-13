@@ -32,7 +32,10 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface OpenEcard{
 
-    ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage);
+    ContextManager context(String defaultNFCDialgoMsg,
+	    String defaultNFCCardRecognizedMessage,
+	    String defaultCancelNFCMessage,
+	    String defaultNFCErrorMessage);
 
     String prepareTCTokenURL(String tcTokenURL);
 

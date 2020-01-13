@@ -69,6 +69,8 @@ public class OpenEcardImp implements OpenEcard {
     private final ContextManager context;
     private String defaultNFCDialogMsg;
     private String defaultNFCCardRecognizedMessage;
+    private String defaultCancelNFCMessage;
+    private String defaultNFCErrorMessage;
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
@@ -84,6 +86,17 @@ public class OpenEcardImp implements OpenEcard {
 
 		return defaultNFCCardRecognizedMessage;
 	    }
+
+	    @Override
+	    public String getDefaultCancelNFCMessage() {
+		return defaultCancelNFCMessage;
+	    }
+
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return defaultNFCErrorMessage;
+	    }
 	};
 
 	CachingTerminalFactoryBuilder<IOSNFCFactory> builder = new CachingTerminalFactoryBuilder(() -> new IOSNFCFactory(currentConfig));
@@ -94,9 +107,14 @@ public class OpenEcardImp implements OpenEcard {
     }
 
     @Override
-    public ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage) {
+    public ContextManager context(String defaultNFCDialgoMsg,
+	    String defaultNFCCardRecognizedMessage,
+	    String defaultCancelNFCMessage,
+	    String defaultNFCErrorMessage) {
 	this.defaultNFCDialogMsg = defaultNFCDialgoMsg;
 	this.defaultNFCCardRecognizedMessage = defaultNFCCardRecognizedMessage;
+	this.defaultCancelNFCMessage = defaultCancelNFCMessage;
+	this.defaultNFCErrorMessage = defaultNFCErrorMessage;
 	return context;
     }
 

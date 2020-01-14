@@ -28,7 +28,8 @@ public class CommonCardEventHandler {
     private static Logger LOG = LoggerFactory.getLogger(CommonCardEventHandler.class);
 
     private final ActivationInteraction interaction;
-    private boolean cardRecognized;
+    private final Object recognizedLock = new Object();
+    private volatile boolean cardRecognized;
     private final NFCDialogMsgSetter msgSetter;
 
     public CommonCardEventHandler(ActivationInteraction interaction, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
@@ -40,16 +41,25 @@ public class CommonCardEventHandler {
     }
 
     public void onCardRemoved() {
-	boolean wasRecognized = this.cardRecognized;
-	this.cardRecognized = false;
+	boolean wasRecognized;
+	synchronized(recognizedLock) {
+	    wasRecognized = this.cardRecognized;
+	    this.cardRecognized = false;
+	}
 	if (wasRecognized) {
 	    this.interaction.onCardRemoved();
 	}
     }
 
     public void onCardRecognized() {
-	cardRecognized = true;
-	interaction.onCardRecognized();
+	boolean wasRecognized;
+	synchronized(recognizedLock) {
+	    wasRecognized = this.cardRecognized;
+	    cardRecognized = true;
+	}
+	if (!wasRecognized) {
+	    interaction.onCardRecognized();
+	}
     }
 
     public void onCardInteractionComplete() {

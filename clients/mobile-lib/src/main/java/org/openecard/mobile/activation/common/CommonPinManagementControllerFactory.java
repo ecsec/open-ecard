@@ -25,6 +25,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.EventCallback;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
@@ -68,22 +72,42 @@ public class CommonPinManagementControllerFactory implements PinManagementContro
     }
 
     public ActivationController create(Set<String> supportedCards, ControllerCallback activation, PinManagementInteraction interaction, NFCDialogMsgSetter msgSetter) {
+
 	InteractionPreperationFactory hooks = new InteractionPreperationFactory() {
 	    @Override
 	    public AutoCloseable create(OpeneCardContext context) {
+		final EventDispatcher eventDispatcher = context.getEventDispatcher();
+		CommonCardEventHandler handler = new CommonCardEventHandler(interaction, false, msgSetter);
+
+		EventCallback powerDownDevices = new EventCallback() {
+		    @Override
+		    public void signalEvent(EventType eventType, EventObject eventData) {
+			handler.onCardInteractionComplete();
+		    }
+		};
+
+		eventDispatcher.add(powerDownDevices, EventType.POWER_DOWN_DEVICES);
+
 		return new ArrayBackedAutoCloseable(new AutoCloseable[]{
-		    CommonCardEventHandler.create(supportedCards, context.getEventDispatcher(), interaction, msgSetter),
+		    CommonCardEventHandler.hookUp(handler, supportedCards, eventDispatcher, interaction, msgSetter),
 		    InteractionRegistrationHandler.hookUp(PINManagementNavigatorFactory.PROTOCOL_TYPE, context, interaction),
-		    InteractionRegistrationHandler.hookUp(InsertCardNavigatorFactory.PROTOCOL_TYPE, context, interaction)
-	    }
-	);
+		    InteractionRegistrationHandler.hookUp(InsertCardNavigatorFactory.PROTOCOL_TYPE, context, interaction),
+		    new AutoCloseable() {
+			@Override
+			public void close() throws Exception {
+			    eventDispatcher.del(powerDownDevices);
+			}
+
+		    }
+		}
+		);
 	    }
 	};
 
 	CommonActivationController controller = new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
 
 	controller.start();
-	
+
 	return controller;
     }
 

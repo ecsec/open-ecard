@@ -101,22 +101,14 @@ public class CommonCardEventHandler {
 		}
 	    }
 	};
-	EventCallback removalHandler = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		handler.onCardRemoved();
-	    }
-	};
 	eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
-	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
 
 	return new AutoCloseable() {
 	    @Override
 	    public void close() throws Exception {
 		eventDispatcher.del(cardInsertionHandler);
 		eventDispatcher.del(cardDetectHandler);
-		eventDispatcher.del(removalHandler);
 	    }
 
 	};

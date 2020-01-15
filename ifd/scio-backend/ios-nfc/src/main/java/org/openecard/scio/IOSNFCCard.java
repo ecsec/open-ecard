@@ -142,14 +142,25 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		this.sessionContext = null;
 		this.histBytes = null;
 		this.error = null;
-		context.session.invalidateSession();
+		final long errorCode = currentError.getCode();
 
-		if (currentError.getCode() != NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
+		if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
+		    context.session.invalidateSession();
+
+		    connect(attempts + 1);
+		} else {
 		    LOG.error("Could not create a new NFC session. {}", currentError);
 
+		    if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
+			context.session.setAlertMessage("There was a timeout!");
+		    } else if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorUserCanceled.value()) {
+			context.session.setAlertMessage("Cancelled by user!");
+		    }
+		    else {
+			context.session.setAlertMessage("Some unknown error!");
+		    }
+
 		    throw new SCIOException("Could not create a new NFC session.", SCIOErrorCode.SCARD_E_NOT_READY);
-		} else {
-		    connect(attempts + 1);
 		}
 	    }
 	}

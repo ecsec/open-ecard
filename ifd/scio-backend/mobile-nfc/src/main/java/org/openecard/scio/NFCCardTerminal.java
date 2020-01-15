@@ -64,10 +64,10 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	return terminalName;
     }
 
-    public abstract void prepareDevices() throws SCIOException;
+    public abstract boolean prepareDevices() throws SCIOException;
 
-    public void powerDownDevices() {
-	this.removeTag();
+    public boolean powerDownDevices() {
+	return this.removeTag();
     }
 
     public void setDialogMsg(String dialogMsg) {
@@ -84,7 +84,7 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	}
     }
 
-    public void setNFCCard(T card) {
+    public boolean setNFCCard(T card) {
 	synchronized(cardLock) {
 	    T oldCard = this.nfcCard;
 	    if (oldCard != null) {
@@ -97,8 +97,10 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	    this.nfcCard = card;
 	    if (card == null) {
 		notifyCardAbsent();
+		return card != null;
 	    } else {
 		notifyCardPresent();
+		return true;
 	    }
 	}
     }
@@ -107,27 +109,32 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	return this.nfcCard;
     }
 
-    public void removeTag() {
+    public boolean removeTag() {
 	synchronized (cardLock) {
 	    final T currentCard = nfcCard;
 	    if (currentCard != null) {
 		nfcCard = null;
-		terminateTag(currentCard);
+		boolean changed = terminateTag(currentCard);
 		notifyCardAbsent();
+		return changed;
+	    } else {
+		return false;
 	    }
 	}
     }
 
-    private void terminateTag(final T currentCard) {
+    private boolean terminateTag(final T currentCard) {
 	if (currentCard != null) { // maybe nfc tag is already removed
 	    LOG.info("Removing NFC Tag and terminating card connection.");
 	    try {
-		currentCard.terminateTag();
+		return currentCard.terminateTag();
 	    } catch (SCIOException ex) {
 		LOG.error("Disconnect failed.", ex);
+		return true;
 	    }
 	} else {
 	    LOG.warn("Double invocation of removeTag function.");
+	    return false;
 	}
     }
 

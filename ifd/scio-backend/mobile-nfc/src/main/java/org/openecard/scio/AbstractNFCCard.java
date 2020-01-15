@@ -53,7 +53,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
 
     public abstract boolean isTagPresent();
 
-    public abstract void terminateTag() throws SCIOException;
+    public abstract boolean terminateTag() throws SCIOException;
 
     @Override
     public void beginExclusive() throws SCIOException {

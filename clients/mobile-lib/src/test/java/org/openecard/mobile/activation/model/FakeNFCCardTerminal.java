@@ -30,8 +30,8 @@ import org.openecard.scio.NFCCardTerminal;
 public class FakeNFCCardTerminal extends NFCCardTerminal {
 
     @Override
-    public void prepareDevices() {
-
+    public boolean prepareDevices() {
+	return true;
     }
 
 }

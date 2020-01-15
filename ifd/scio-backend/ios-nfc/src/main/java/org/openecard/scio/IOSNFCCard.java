@@ -162,13 +162,16 @@ public final class IOSNFCCard extends AbstractNFCCard {
     }
 
     @Override
-    public void terminateTag() throws SCIOException {
+    public boolean terminateTag() throws SCIOException {
 	synchronized (this.tagLock) {
 	    final NFCSessionContext currentSession = this.sessionContext;
 	    if (currentSession != null) {
 		currentSession.session.invalidateSession();
 		this.sessionContext = null;
 		setHistBytes();
+		return true;
+	    } else {
+		return false;
 	    }
 	}
     }

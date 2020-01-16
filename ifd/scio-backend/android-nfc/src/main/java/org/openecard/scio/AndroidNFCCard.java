@@ -123,19 +123,20 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     }
 
     @Override
-    public void terminateTag() throws SCIOException {
+    public boolean terminateTag() throws SCIOException {
 	synchronized(connectLock) {
-	    this.innerTerminateTag();
+	    boolean changed = this.innerTerminateTag();
 	    this.isodep = null;
 	    this.histBytes = null;
 	    this.tagPending = false;
 	    connectLock.notifyAll();
+	    return changed;
 	}
     }
 
-    public void innerTerminateTag() throws SCIOException {
+    public boolean innerTerminateTag() throws SCIOException {
 	try {
-	    this.terminateTag(this.monitor, this.cardMonitor);
+	    return this.terminateTag(this.monitor, this.cardMonitor);
 	} catch (IOException ex) {
 	    LOG.error("Failed to close NFC tag.");
 	    throw new SCIOException("Failed to close NFC channel.", SCIOErrorCode.SCARD_E_UNEXPECTED, ex);
@@ -145,7 +146,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	}
     }
 
-    private void terminateTag(Thread monitor, NFCCardMonitoring cardMonitor) throws IOException {
+    private boolean terminateTag(Thread monitor, NFCCardMonitoring cardMonitor) throws IOException {
 	synchronized(connectLock) {
 	    if (cardMonitor != null) {
 		LOG.debug("Killing the monitor");
@@ -154,7 +155,11 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
 	    if (this.isodep != null) {
 		LOG.debug("Closing the tag");
+		boolean wasClosed = this.isodep.isConnected();
 		this.isodep.close();
+		return wasClosed;
+	    } else {
+		return false;
 	    }
 	}
     }

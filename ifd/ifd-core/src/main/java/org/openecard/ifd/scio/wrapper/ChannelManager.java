@@ -80,12 +80,12 @@ public class ChannelManager {
 	return termFact.terminals();
     }
 
-    public void prepareDevices() throws SCIOException {
-	getTerminals().prepareDevices();
+    public boolean prepareDevices() throws SCIOException {
+	return getTerminals().prepareDevices();
     }
 
-    public void powerDownDevices() {
-	getTerminals().powerDownDevices();
+    public boolean powerDownDevices() {
+	return getTerminals().powerDownDevices();
     }
     public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,
 	    SCIOException {

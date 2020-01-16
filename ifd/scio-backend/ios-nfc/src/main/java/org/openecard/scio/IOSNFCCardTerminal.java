@@ -24,10 +24,10 @@ public class IOSNFCCardTerminal extends NFCCardTerminal<IOSNFCCard> {
     private IOSConfig config;
 
     @Override
-    public void prepareDevices() throws SCIOException {
+    public boolean prepareDevices() throws SCIOException {
 	IOSNFCCard card = new IOSNFCCard(this, config);
 	card.connect();
-	this.setNFCCard(card);
+	return this.setNFCCard(card);
     }
 
     public void setConfig(IOSConfig config) {

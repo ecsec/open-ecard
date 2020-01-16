@@ -23,9 +23,9 @@ public class AndroidNFCCardTerminal extends NFCCardTerminal<AndroidNFCCard> {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNFCCardTerminal.class);
 
     @Override
-    public void prepareDevices() {
+    public boolean prepareDevices() {
 	AndroidNFCCard card = new AndroidNFCCard(this);
-	this.setNFCCard(card);
+	return this.setNFCCard(card);
     }
 
     void setNFCTag(IsoDep tag, int timeout) throws IOException {

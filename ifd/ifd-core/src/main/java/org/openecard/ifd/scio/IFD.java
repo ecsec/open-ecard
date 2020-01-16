@@ -271,31 +271,36 @@ public class IFD implements org.openecard.ws.IFD {
 
     @Override
     public PrepareDevicesResponse prepareDevices(PrepareDevices parameters) {
+	boolean wasPrepared;
 	try {
-	    cm.prepareDevices();
+	    wasPrepared = cm.prepareDevices();
 	} catch (SCIOException ex) {
 	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR, ex.getMessage());
 	    return WSHelper.makeResponse(PrepareDevicesResponse.class, r);
 	}
 
-	ConnectionHandleType handle = HandlerBuilder.create()
-		.setContextHandle(parameters.getContextHandle())
-		.buildConnectionHandle();
+	if (wasPrepared) {
+	    ConnectionHandleType handle = HandlerBuilder.create()
+		    .setContextHandle(parameters.getContextHandle())
+		    .buildConnectionHandle();
 
-	env.getEventDispatcher().notify(EventType.PREPARE_DEVICES, new IfdEventObject(handle));
+	    env.getEventDispatcher().notify(EventType.PREPARE_DEVICES, new IfdEventObject(handle));
+	}
 
 	return WSHelper.makeResponse(PrepareDevicesResponse.class, WSHelper.makeResultOK());
     }
 
     @Override
     public PowerDownDevicesResponse powerDownDevices(PowerDownDevices parameters) {
-	cm.powerDownDevices();
+	boolean wasPoweredDown = cm.powerDownDevices();
 
-	ConnectionHandleType handle = HandlerBuilder.create()
-		.setContextHandle(parameters.getContextHandle())
-		.buildConnectionHandle();
+	if (wasPoweredDown) {
+	    ConnectionHandleType handle = HandlerBuilder.create()
+		    .setContextHandle(parameters.getContextHandle())
+		    .buildConnectionHandle();
 
-	env.getEventDispatcher().notify(EventType.POWER_DOWN_DEVICES, new IfdEventObject(handle));
+	    env.getEventDispatcher().notify(EventType.POWER_DOWN_DEVICES, new IfdEventObject(handle));
+	}
 
 	return WSHelper.makeResponse(PowerDownDevicesResponse.class, WSHelper.makeResultOK());
     }

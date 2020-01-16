@@ -28,7 +28,8 @@ public class CommonCardEventHandler {
     private static Logger LOG = LoggerFactory.getLogger(CommonCardEventHandler.class);
 
     private final ActivationInteraction interaction;
-    private boolean cardRecognized;
+    private final Object recognizedLock = new Object();
+    private volatile boolean cardRecognized;
     private final NFCDialogMsgSetter msgSetter;
 
     public CommonCardEventHandler(ActivationInteraction interaction, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
@@ -40,20 +41,25 @@ public class CommonCardEventHandler {
     }
 
     public void onCardRemoved() {
-	boolean wasRecognized = this.cardRecognized;
-	this.cardRecognized = false;
+	boolean wasRecognized;
+	synchronized(recognizedLock) {
+	    wasRecognized = this.cardRecognized;
+	    this.cardRecognized = false;
+	}
 	if (wasRecognized) {
 	    this.interaction.onCardRemoved();
 	}
     }
 
     public void onCardRecognized() {
-	cardRecognized = true;
-	interaction.onCardRecognized();
-    }
-
-    public void onRequestCardInsertion() {
-	interaction.requestCardInsertion();
+	boolean wasRecognized;
+	synchronized(recognizedLock) {
+	    wasRecognized = this.cardRecognized;
+	    cardRecognized = true;
+	}
+	if (!wasRecognized) {
+	    interaction.onCardRecognized();
+	}
     }
 
     public void onCardInteractionComplete() {
@@ -105,50 +111,17 @@ public class CommonCardEventHandler {
 		}
 	    }
 	};
-	EventCallback removalHandler = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		handler.onCardRemoved();
-	    }
-	};
-	EventCallback prepareDevices = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		handler.onRequestCardInsertion();
-	    }
-	};
-	EventCallback powerDownDevices = new EventCallback() {
-	    @Override
-	    public void signalEvent(EventType eventType, EventObject eventData) {
-		handler.onCardInteractionComplete();
-	    }
-	};
-
 	eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
 	eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
-	eventDispatcher.add(removalHandler, EventType.CARD_REMOVED);
-	eventDispatcher.add(prepareDevices, EventType.PREPARE_DEVICES);
-	eventDispatcher.add(powerDownDevices, EventType.POWER_DOWN_DEVICES);
 
 	return new AutoCloseable() {
 	    @Override
 	    public void close() throws Exception {
 		eventDispatcher.del(cardInsertionHandler);
 		eventDispatcher.del(cardDetectHandler);
-		eventDispatcher.del(removalHandler);
-		eventDispatcher.del(prepareDevices);
-		eventDispatcher.del(powerDownDevices);
 	    }
 
 	};
     }
-
-    public static AutoCloseable create(Set<String> supportedCards, EventDispatcher eventDispatcher, ActivationInteraction interaction, NFCDialogMsgSetter msgSetter) {
-
-	CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, msgSetter);
-
-	return hookUp(created, supportedCards, eventDispatcher, interaction, msgSetter);
-    }
-
 
 }

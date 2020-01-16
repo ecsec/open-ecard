@@ -96,13 +96,15 @@ public class PCSCTerminals implements SCIOTerminals {
     }
 
     @Override
-    public void prepareDevices() {
+    public boolean prepareDevices() {
 	// no-op in the PCSC world
+	return false;
     }
 
     @Override
-    public void powerDownDevices() {
+    public boolean powerDownDevices() {
 	// no-op in the PCSC world
+	return false;
     }
 
     @Override

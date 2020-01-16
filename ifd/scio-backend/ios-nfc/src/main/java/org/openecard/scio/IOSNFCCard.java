@@ -151,18 +151,24 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		} else {
 		    LOG.error("Could not create a new NFC session. {}", currentError);
 
-		    if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
-			context.session.setAlertMessage("There was a timeout!");
-		    } else if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorUserCanceled.value()) {
-			context.session.setAlertMessage("Cancelled by user!");
-		    }
-		    else {
-			context.session.setAlertMessage("Some unknown error!");
-		    }
+		    String message = getErrorMessage(errorCode);
+		    context.session.setAlertMessage("connect:AlertMessage1:" + message);
+		    // context.session.invalidateSession("connect:InvSessionMessage1:" + message);
 
 		    throw new SCIOException("Could not create a new NFC session.", SCIOErrorCode.SCARD_E_NOT_READY);
 		}
 	    }
+	}
+    }
+
+    private String getErrorMessage(final long errorCode) {
+	if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
+	    return "There was a timeout!" ;
+	} else if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorUserCanceled.value()) {
+	    return "Cancelled by user!" + this.cfg.getDefaultCancelNFCMessage();
+	}
+	else {
+	    return "Some unknown error!";
 	}
     }
 
@@ -177,7 +183,15 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	synchronized (this.tagLock) {
 	    final NFCSessionContext currentSession = this.sessionContext;
 	    if (currentSession != null) {
-		currentSession.session.invalidateSession(this.cfg.getDefaultCancelNFCMessage());
+		if(this.error != null) {
+
+		    String message = getErrorMessage(error.getCode());
+		    currentSession.session.setAlertMessage("terminateTag:AlertMessage1:" + message);
+		    currentSession.session.invalidateSession("terminateTag:InvSessionMessage1:" + message);
+		} else {
+		    currentSession.session.setAlertMessage("terminateTag() no error");
+		    currentSession.session.invalidateSession();
+		}
 		this.sessionContext = null;
 		setHistBytes();
 		return true;
@@ -249,6 +263,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    if (er2 != null) {
 		LOG.error("Following error occurred while transmitting the APDU: {}", er2);
 		p.deliver(null);
+		synchronized (this.tagLock) {
+		    this.error = er2;
+		}
 	    } else {
 		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
 		bb.put(resp.getBytes(), 0, (int) resp.getLength());

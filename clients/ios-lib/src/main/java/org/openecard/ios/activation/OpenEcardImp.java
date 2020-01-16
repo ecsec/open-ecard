@@ -67,35 +67,46 @@ public class OpenEcardImp implements OpenEcard {
 
     private final CommonActivationUtils utils;
     private final ContextManager context;
-    private String defaultNFCDialogMsg;
-    private String defaultNFCCardRecognizedMessage;
-    private String defaultCancelNFCMessage;
-    private String defaultNFCErrorMessage;
+    private NFCConfig nfcConfig;
 
     public OpenEcardImp() {
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {
 	    @Override
-	    public String getDefaultProviderCardMSG() {
+	    public String getDefaultProvideCardMessage() {
 
-		return defaultNFCDialogMsg;
+		return nfcConfig.getProvideCardMessage();
 	    }
 
 	    @Override
-	    public String getDefaultCardRecognizedMSG() {
+	    public String getDefaultCardRecognizedMessage() {
 
-		return defaultNFCCardRecognizedMessage;
+		return nfcConfig.getDefaultNFCCardRecognizedMessage();
 	    }
-
-	    @Override
-	    public String getDefaultCancelNFCMessage() {
-		return defaultCancelNFCMessage;
-	    }
-
 
 	    @Override
 	    public String getDefaultNFCErrorMessage() {
-		return defaultNFCErrorMessage;
+		return nfcConfig.getDefaultNFCErrorMessage();
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutErrorMessage() {
+		return nfcConfig.getAquireNFCTagTimeoutMessage();
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return nfcConfig.getNFCCompletionMessage();
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return nfcConfig.getTagLostErrorMessage();
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return nfcConfig.getDefaultCardConnectedMessage();
 	    }
 	};
 
@@ -108,13 +119,50 @@ public class OpenEcardImp implements OpenEcard {
 
     @Override
     public ContextManager context(String defaultNFCDialgoMsg,
-	    String defaultNFCCardRecognizedMessage,
-	    String defaultCancelNFCMessage,
-	    String defaultNFCErrorMessage) {
-	this.defaultNFCDialogMsg = defaultNFCDialgoMsg;
-	this.defaultNFCCardRecognizedMessage = defaultNFCCardRecognizedMessage;
-	this.defaultCancelNFCMessage = defaultCancelNFCMessage;
-	this.defaultNFCErrorMessage = defaultNFCErrorMessage;
+	    String defaultNFCCardRecognizedMessage) {
+	this.nfcConfig = new NFCConfig() {
+	    @Override
+	    public String getProvideCardMessage() {
+		return defaultNFCDialgoMsg;
+	    }
+
+	    @Override
+	    public String getDefaultNFCCardRecognizedMessage() {
+		return null;
+	    }
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return "Communication with the card ended.";
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutMessage() {
+		return "No longer ";
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return "Finished communicating with the card.";
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return "Lost communication with the card.";
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return "Connected to the card.";
+	    }
+	};
+
+	return context;
+    }
+
+    @Override
+    public ContextManager context(NFCConfig nfcConfig) {
+	this.nfcConfig = nfcConfig;
 	return context;
     }
 

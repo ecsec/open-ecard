@@ -24,10 +24,10 @@
 module org.openecard.richclient {
 
 	/* 
-	add this if you want to use a debugger on the client like this in ./bin/openecard:
-	JLINK_VM_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=8000,server=n,suspend=y"
+	add module if you want to use a debugger on the client like this in the ./bin/openecard file
+	JLINK_VM_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=5000,server=n,suspend=y"
 	*/
-    //requires javafx.graphics;
+    //requires jdk.jdwp.agent;
 
     requires java.smartcardio;
     requires java.logging;

@@ -30,8 +30,11 @@ import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.RectangularShape;
 import javax.swing.JDialog;
 
 
@@ -107,6 +110,9 @@ public class InfoPopup extends JDialog implements StatusContainer {
 
 	private Point calculatePosition(Container c, Point p) {
 
+		// we will get a transform matrix from the graphicsConfig below
+		// it represents a possible screen scaling
+		AffineTransform tx = new AffineTransform();
 		// the size of the popup
 		Dimension winSize = c.getPreferredSize();
 		//bounds based on the click which happend on screen
@@ -118,12 +124,19 @@ public class InfoPopup extends JDialog implements StatusContainer {
 		try {
 			GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gDevices = gEnv.getScreenDevices();
+			deviceLoop:
 			for (GraphicsDevice gDevice : gDevices) {
 				GraphicsConfiguration[] gConfigs = gDevice.getConfigurations();
 				for (GraphicsConfiguration gConfig : gConfigs) {
-					Rectangle bounds = gConfig.getBounds();
+					// get the AffineTransform matrix of the config
+					// which represents the screen scale factor
+					tx = gConfig.getDefaultTransform();
+					// get the bounds with scale factor in mind
+					Rectangle bounds = tx.createTransformedShape(gConfig.getBounds()).getBounds();
+					//if click is in screen, remember the bounds and break the loops
 					if (bounds.contains(p)) {
 						screenBounds = bounds;
+						break deviceLoop;
 					}
 				}
 			} 
@@ -147,8 +160,13 @@ public class InfoPopup extends JDialog implements StatusContainer {
 			// use click cord as y limit for the popup
 			winBounds.y = p.y - winSize.height;
 		}
+		
+		// use the AffineTransorm Matrix from the graphicsConfiguration
+		// to take screen scale into the calculation
+		double x = winBounds.x/tx.getScaleX();
+		double y = winBounds.y/tx.getScaleY();
 
-		return new Point(winBounds.x, winBounds.y);
+		return new Point((int)x, (int)y);
 	}
 
 	/**

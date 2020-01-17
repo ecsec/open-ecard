@@ -21,10 +21,13 @@
  ************************************************************************** */
 package org.openecard.ios.activation;
 
+import org.openecard.robovm.annotations.FrameworkInterface;
+
 /**
  *
  * @author Neil Crossley
  */
+@FrameworkInterface
 public interface NFCConfig {
 
     public String getProvideCardMessage();

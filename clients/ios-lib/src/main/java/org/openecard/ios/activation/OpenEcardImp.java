@@ -67,9 +67,11 @@ public class OpenEcardImp implements OpenEcard {
 
     private final CommonActivationUtils utils;
     private final ContextManager context;
+    private final DeveloperOptions developerOptions;
     private NFCConfig nfcConfig;
 
     public OpenEcardImp() {
+	this.developerOptions = new DeveloperOptionsImpl();
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {
 	    @Override
@@ -180,6 +182,11 @@ public class OpenEcardImp implements OpenEcard {
 	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
 	rootLogger.setLevel(Level.DEBUG);
+    }
+
+    @Override
+    public DeveloperOptions developerOptions() {
+	return this.developerOptions;
     }
 
 }

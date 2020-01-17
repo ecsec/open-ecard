@@ -28,6 +28,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.common.util.Promise;
 import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class ActivationCallbackReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
-    private Promise<Void> promisedRequestCardInsertion;
+    private Promise<NFCOverlayMessageHandler> promisedRequestCardInsertion;
     private Promise<Void> promisedRecognizeCard;
     private Promise<Void> promisedRemoveCard;
     public final ActivationInteraction interaction;
@@ -62,6 +63,14 @@ public class ActivationCallbackReceiver {
 	    promisedRequestCardInsertion.deliver(null);
 	    return null;
 	}).when(interaction).requestCardInsertion();
+	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
+	    LOG.debug("mockInteraction.requestCardInsertion(NFCOverlayMessageHandler).");
+	    if (promisedRequestCardInsertion.isDelivered()) {
+		promisedRequestCardInsertion = new Promise();
+	    }
+	    promisedRequestCardInsertion.deliver(null);
+	    return null;
+	}).when(interaction).requestCardInsertion(null);
 	doAnswer((Answer<Void>) (InvocationOnMock arg0) -> {
 	    LOG.debug("mockInteraction.onCardRecognized().");
 	    if (promisedRecognizeCard.isDelivered()) {

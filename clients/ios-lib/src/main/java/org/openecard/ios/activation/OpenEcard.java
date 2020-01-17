@@ -34,12 +34,14 @@ public interface OpenEcard{
 
     ContextManager context(NFCConfig nfcConfig);
 
+    @Deprecated
     ContextManager context(String defaultNFCDialgoMsg,
 	    String defaultNFCCardRecognizedMessage);
 
 
     String prepareTCTokenURL(String tcTokenURL);
 
+    @Deprecated
     void setDebugLogLevel();
 
     DeveloperOptions developerOptions();

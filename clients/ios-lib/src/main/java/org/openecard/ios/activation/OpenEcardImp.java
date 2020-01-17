@@ -130,7 +130,7 @@ public class OpenEcardImp implements OpenEcard {
 
 	    @Override
 	    public String getDefaultNFCCardRecognizedMessage() {
-		return null;
+		return defaultNFCCardRecognizedMessage;
 	    }
 
 	    @Override
@@ -140,7 +140,7 @@ public class OpenEcardImp implements OpenEcard {
 
 	    @Override
 	    public String getAquireNFCTagTimeoutMessage() {
-		return "No longer ";
+		return "Could not connect to a card.";
 	    }
 
 	    @Override
@@ -179,9 +179,7 @@ public class OpenEcardImp implements OpenEcard {
 
     @Override
     public void setDebugLogLevel() {
-	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-	rootLogger.setLevel(Level.DEBUG);
+	this.developerOptions.setDebugLogLevel();
     }
 
     @Override

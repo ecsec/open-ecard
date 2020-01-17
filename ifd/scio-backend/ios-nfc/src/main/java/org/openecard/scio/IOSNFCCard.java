@@ -325,7 +325,6 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	public NFCSessionContext currentContext = null;
 	private final Object notifyErrorLock = new Object();
 	private volatile boolean hasNotifiedError = false;
-	private final Object timeoutLock = new Object();
 
 	@Override
 	public void didInvalidate(NFCTagReaderSession session, NSError err) {

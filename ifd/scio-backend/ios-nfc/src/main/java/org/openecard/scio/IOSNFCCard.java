@@ -39,6 +39,7 @@ import org.robovm.apple.dispatch.DispatchQueueAttr;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.foundation.NSError;
+import org.robovm.apple.foundation.NSErrorUserInfo;
 import org.robovm.apple.foundation.NSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,9 @@ import org.slf4j.LoggerFactory;
  * @author Florian Otto
  */
 public final class IOSNFCCard extends AbstractNFCCard {
+
+    private final int EXPECTED_IOS_NFC_TIMEOUT_MILLISECONDS = 20 * 1000;
+    private final int EXPECTED_REQUIRED_NFC_SESSION_MILLISECONDS = 5 * 1000;
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
     private byte[] histBytes;
@@ -96,7 +100,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	LOG.debug("Initializing new NFCTagReaderSession");
 	NFCTagReaderSessionDelegateAdapterImpl delegate = new NFCTagReaderSessionDelegateAdapterImpl();
 	NFCTagReaderSession session = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
-	session.setAlertMessage(cfg.getDefaultProviderCardMSG());
+	session.setAlertMessage(cfg.getDefaultProvideCardMessage());
 
 	NFCSessionContext resultSessionContext = new NFCSessionContext(delegate, session);
 	delegate.currentContext = resultSessionContext;
@@ -106,7 +110,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     @Override
     public void setDialogMsg(String msg) {
 	NFCSessionContext context = this.sessionContext;
-	if (context != null) {
+	if (context != null && msg != null) {
 	    context.session.setAlertMessage(msg);
 	}
     }
@@ -129,6 +133,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    this.error = null;
 	    this.sessionContext = context;
 	    context.session.beginSession();
+
+	    Thread timeoutDetection = beginTimeoutDetection(context);
+
 	    while (this.tag == null && this.error == null) {
 		try {
 		    this.tagLock.wait();
@@ -136,22 +143,64 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    throw new SCIOException("", SCIOErrorCode.SCARD_E_TIMEOUT, ex);
 		}
 	    }
+	    timeoutDetection.interrupt();
+
 	    NSError currentError = this.error;
 	    if (currentError != null) {
 		this.tag = null;
 		this.sessionContext = null;
 		this.histBytes = null;
 		this.error = null;
-		context.session.invalidateSession();
+		final long errorCode = currentError.getCode();
 
-		if (currentError.getCode() != NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
-		    LOG.error("Could not create a new NFC session. {}", currentError);
+		if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSystemIsBusy.value()) {
+		    context.session.invalidateSession();
+
+		    connect(attempts + 1);
+		} else {
+		    LOG.debug("Could not create a new NFC session. {}", currentError);
+		    String message = getErrorMessage(errorCode);
+		    context.session.invalidateSession(message);
 
 		    throw new SCIOException("Could not create a new NFC session.", SCIOErrorCode.SCARD_E_NOT_READY);
-		} else {
-		    connect(attempts + 1);
 		}
 	    }
+	}
+    }
+
+    private Thread beginTimeoutDetection(NFCSessionContext context) {
+	Thread timeoutDetection = new Thread(() -> {
+	    try {
+		Thread.sleep(EXPECTED_IOS_NFC_TIMEOUT_MILLISECONDS - EXPECTED_REQUIRED_NFC_SESSION_MILLISECONDS);
+
+		LOG.debug("Triggering manual NFC timeout.");
+		String currentDomain = "IOS NFC Open eCard";
+		synchronized (this.tagLock) {
+		    if (this.sessionContext == context) {
+			NSError err = new NSError(
+				currentDomain,
+				NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value(),
+				new NSErrorUserInfo());
+			this.error = err;
+			this.tagLock.notifyAll();
+		    }
+		}
+	    } catch (InterruptedException ex) {
+		LOG.debug("NFC timeout detection was interrupted.");
+	    }
+	});
+	timeoutDetection.start();
+	return timeoutDetection;
+    }
+
+    private String getErrorMessage(final long errorCode) {
+	if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
+	    return this.cfg.getAquireNFCTagTimeoutErrorMessage();
+	} else if (errorCode == NFCReaderError.ReaderTransceiveErrorTagConnectionLost.value()) {
+	    return "Tag lost" + this.cfg.getTagLostErrorMessage();
+	}
+	else {
+	    return this.cfg.getDefaultNFCErrorMessage();
 	}
     }
 
@@ -166,7 +215,13 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	synchronized (this.tagLock) {
 	    final NFCSessionContext currentSession = this.sessionContext;
 	    if (currentSession != null) {
-		currentSession.session.invalidateSession();
+		if(this.error != null) {
+		    String message = getErrorMessage(error.getCode());
+		    currentSession.session.invalidateSession(message);
+		} else {
+		    currentSession.session.setAlertMessage(cfg.getNFCCompletionMessage());
+		    currentSession.session.invalidateSession();
+		}
 		this.sessionContext = null;
 		setHistBytes();
 		return true;
@@ -236,8 +291,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	Promise<byte[]> p = new Promise<>();
 	currentTag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    if (er2 != null) {
-		LOG.error("Following error occurred while transmitting the APDU: {}", er2);
+		LOG.debug("Following error occurred while transmitting the APDU: {}", er2);
 		p.deliver(null);
+		synchronized (this.tagLock) {
+		    this.error = er2;
+		}
 	    } else {
 		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
 		bb.put(resp.getBytes(), 0, (int) resp.getLength());
@@ -300,7 +358,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
 	@Override
 	public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
+
 	    for (NSObject t : tags) {
+
+		setDialogMsg(cfg.getDefaultCardRecognizedMessage());
+
 		session.connectToTag(t, (NSError err) -> {
 
 		    if (err != null) {
@@ -310,7 +372,8 @@ public final class IOSNFCCard extends AbstractNFCCard {
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			synchronized (tagLock) {
 			    setTag(tag, currentContext);
-			    setDialogMsg(cfg.getDefaultCardRecognizedMSG());
+
+			    setDialogMsg(cfg.getDefaultCardConnectedMessage());
 			    tagLock.notifyAll();
 			}
 		    }

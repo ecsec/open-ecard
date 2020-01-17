@@ -6,9 +6,17 @@ package org.openecard.scio;
  */
 public interface IOSConfig {
 
-    String getDefaultProviderCardMSG();
+    String getDefaultProvideCardMessage();
 
-    String getDefaultCardRecognizedMSG();
+    String getDefaultCardRecognizedMessage();
 
+    String getTagLostErrorMessage();
 
+    String getDefaultNFCErrorMessage();
+
+    String getAquireNFCTagTimeoutErrorMessage();
+
+    String getNFCCompletionMessage();
+
+    String getDefaultCardConnectedMessage();
 }

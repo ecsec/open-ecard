@@ -1,5 +1,5 @@
-/****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/** **************************************************************************
+ * Copyright (C) 2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,11 +18,9 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
+ ************************************************************************** */
 package org.openecard.ios.activation;
 
-import org.openecard.mobile.activation.ContextManager;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -30,19 +28,20 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Neil Crossley
  */
 @FrameworkInterface
-public interface OpenEcard{
+public interface NFCConfig {
 
-    ContextManager context(NFCConfig nfcConfig);
+    public String getProvideCardMessage();
 
-    @Deprecated
-    ContextManager context(String defaultNFCDialgoMsg,
-	    String defaultNFCCardRecognizedMessage);
+    public String getDefaultNFCCardRecognizedMessage();
 
+    public String getDefaultNFCErrorMessage();
 
-    String prepareTCTokenURL(String tcTokenURL);
+    public String getAquireNFCTagTimeoutMessage();
 
-    @Deprecated
-    void setDebugLogLevel();
+    public String getNFCCompletionMessage();
 
-    DeveloperOptions developerOptions();
+    public String getTagLostErrorMessage();
+
+    public String getDefaultCardConnectedMessage();
+
 }

@@ -67,22 +67,48 @@ public class OpenEcardImp implements OpenEcard {
 
     private final CommonActivationUtils utils;
     private final ContextManager context;
-    private String defaultNFCDialogMsg;
-    private String defaultNFCCardRecognizedMessage;
+    private final DeveloperOptions developerOptions;
+    private NFCConfig nfcConfig;
 
     public OpenEcardImp() {
+	this.developerOptions = new DeveloperOptionsImpl();
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {
 	    @Override
-	    public String getDefaultProviderCardMSG() {
+	    public String getDefaultProvideCardMessage() {
 
-		return defaultNFCDialogMsg;
+		return nfcConfig.getProvideCardMessage();
 	    }
 
 	    @Override
-	    public String getDefaultCardRecognizedMSG() {
+	    public String getDefaultCardRecognizedMessage() {
 
-		return defaultNFCCardRecognizedMessage;
+		return nfcConfig.getDefaultNFCCardRecognizedMessage();
+	    }
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return nfcConfig.getDefaultNFCErrorMessage();
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutErrorMessage() {
+		return nfcConfig.getAquireNFCTagTimeoutMessage();
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return nfcConfig.getNFCCompletionMessage();
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return nfcConfig.getTagLostErrorMessage();
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return nfcConfig.getDefaultCardConnectedMessage();
 	    }
 	};
 
@@ -94,9 +120,51 @@ public class OpenEcardImp implements OpenEcard {
     }
 
     @Override
-    public ContextManager context(String defaultNFCDialgoMsg, String defaultNFCCardRecognizedMessage) {
-	this.defaultNFCDialogMsg = defaultNFCDialgoMsg;
-	this.defaultNFCCardRecognizedMessage = defaultNFCCardRecognizedMessage;
+    public ContextManager context(String defaultNFCDialgoMsg,
+	    String defaultNFCCardRecognizedMessage) {
+	this.nfcConfig = new NFCConfig() {
+	    @Override
+	    public String getProvideCardMessage() {
+		return defaultNFCDialgoMsg;
+	    }
+
+	    @Override
+	    public String getDefaultNFCCardRecognizedMessage() {
+		return defaultNFCCardRecognizedMessage;
+	    }
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return "Communication with the card ended.";
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutMessage() {
+		return "Could not connect to a card.";
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return "Finished communicating with the card.";
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return "Lost communication with the card.";
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return "Connected to the card.";
+	    }
+	};
+
+	return context;
+    }
+
+    @Override
+    public ContextManager context(NFCConfig nfcConfig) {
+	this.nfcConfig = nfcConfig;
 	return context;
     }
 
@@ -111,9 +179,12 @@ public class OpenEcardImp implements OpenEcard {
 
     @Override
     public void setDebugLogLevel() {
-	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-	rootLogger.setLevel(Level.DEBUG);
+	this.developerOptions.setDebugLogLevel();
+    }
+
+    @Override
+    public DeveloperOptions developerOptions() {
+	return this.developerOptions;
     }
 
 }

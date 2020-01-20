@@ -48,8 +48,6 @@ public class InfoPopup extends JDialog implements StatusContainer {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int DISTANCE_TO_TASKBAR = 2; // in px
-
 	private Point point;
 
 	/**
@@ -155,17 +153,18 @@ public class InfoPopup extends JDialog implements StatusContainer {
 			//fit fallback
 			winBounds = fitWindowToScreen(winSize, screenBounds);
 		}
-		//if click is in lower half of screen
-		if (p.y > screenBounds.height/2) {
-			// use click cord as y limit for the popup
-			winBounds.y = p.y - winSize.height;
-		}
-		
+
 		// use the AffineTransorm Matrix from the graphicsConfiguration
 		// to take screen scale into the calculation
 		double x = winBounds.x/tx.getScaleX();
 		double y = winBounds.y/tx.getScaleY();
 
+		//if click is in lower half of screen
+		if (p.y > screenBounds.height/2) {
+			// use click cord as y limit for the popup
+			y = p.y/tx.getScaleY() - winSize.height;
+		}
+		
 		return new Point((int)x, (int)y);
 	}
 

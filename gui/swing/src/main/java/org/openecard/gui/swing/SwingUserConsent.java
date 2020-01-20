@@ -80,7 +80,7 @@ public class SwingUserConsent implements UserConsent {
 	if (isPinEntryDialog) {
 	    dialogWrapper.setSize(350, 284);
 	} else if (isPinChangeDialog) {
-	    dialogWrapper.setSize(570, 430);
+	    dialogWrapper.setSize(570, 530);
 	} else if (isUpdateDialog) {
 	    dialogWrapper.setSize(480, 330);
 	}

@@ -25,10 +25,36 @@
 		<app.description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</app.description>
 
 		<package.identifier>open-ecard-app</package.identifier>
-		<package.deps>pcscd</package.deps>
 	</properties>
 
 	<profiles>
+		<!-- set the correct dependecy names for deb based systems -->
+		<profile>
+			<id>deps-deb</id>
+			<activation>
+				<property>
+					<name>jlink-jpackager.package-type</name>
+					<value>deb</value>
+				</property>
+			</activation>
+			<properties>
+				<package.deps>pcscd</package.deps>
+			</properties>
+		</profile>
+		<!-- set the correct dependecy names for rpm based systems -->
+		<profile>
+			<id>deps-rpm</id>
+			<activation>
+				<property>
+					<name>jlink-jpackager.package-type</name>
+					<value>rpm</value>
+				</property>
+			</activation>
+			<properties>
+				<package.deps>pcsc-lite</package.deps>
+			</properties>
+		</profile>
+		<!-- set common stuff for desktop-package -->
 		<profile>
 			<id>desktop-package</id>
 			<activation>
@@ -38,6 +64,24 @@
 			</activation>
 			<build>
 				<plugins>
+					<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.12</version>
+					<executions>
+						<execution>
+						<id>timestamp-property</id>
+						<goals>
+							<goal>timestamp-property</goal>
+						</goals>
+						<phase>validate</phase>
+						<configuration>
+							<name>current.year</name>
+							<pattern>yyyy</pattern>
+						</configuration>
+						</execution>
+					</executions>
+					</plugin>
 					<plugin>
 						<groupId>net.agilhard.maven.plugins</groupId>
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
@@ -78,7 +122,7 @@
 									<vendor>${app.vendor}</vendor>
 									<description>${app.description}</description>
 									<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
-									<copyright>2019 ecsec GmbH</copyright>
+									<copyright>${current.year} ecsec GmbH</copyright>
 									<linuxOptions>
 										<bundleName>${package.identifier}</bundleName>
 										<debMaintainer>${app.maintainer}</debMaintainer>

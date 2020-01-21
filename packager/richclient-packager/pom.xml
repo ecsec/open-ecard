@@ -61,6 +61,7 @@
 									<skipModulesInclude>true</skipModulesInclude>
 									<!-- JVM arguments of the application -->
 									<jvmArgs>
+										<jvmArg>-Xdock:name=${app.identifier}</jvmArg>
 										<jvmArg>-XX:-UsePerfData</jvmArg>
 										<jvmArg>-XX:-Inline</jvmArg>
 										<jvmArg>-Xms16m</jvmArg>
@@ -71,6 +72,7 @@
 										<jvmArg>-XX:G1ReservePercent=5</jvmArg>
 										<jvmArg>-Djavax.xml.stream.isSupportingExternalEntities=false</jvmArg>
 										<jvmArg>-Djavax.xml.stream.supportDTD=false</jvmArg>
+										<jvmArg>-XX:+IgnoreUnrecognizedVMOptions</jvmArg>
 									</jvmArgs>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>

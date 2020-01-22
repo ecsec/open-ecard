@@ -362,7 +362,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 	    response.setResult(WSHelper.makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	} catch (InterruptedException e) {
-	    LOG.error(e.getMessage(), e);
+	    LOG.warn(e.getMessage(), e);
 	    response.setResult(WSHelper.makeResultUnknownError(e.getMessage()));
 	    dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false);
 	    Thread guiThread = (Thread) dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD);

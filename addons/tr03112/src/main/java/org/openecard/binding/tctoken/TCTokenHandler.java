@@ -480,7 +480,7 @@ public class TCTokenHandler {
 	    task.cancel(true);
 	    throw new PAOSException(ex);
 	} catch (ExecutionException ex) {
-	    LOG.error(ex.getMessage(), ex);
+	    LOG.warn("The result of PAOS Task could not be retieved.", ex);
 	    // perform conversion of ExecutionException from the Future to the really expected exceptions
 	    if (ex.getCause() instanceof PAOSException) {
 		throw (PAOSException) ex.getCause();

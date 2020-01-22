@@ -133,7 +133,7 @@ public class PINManagementNavigator extends MobileNavigator {
 	    } catch (InterruptedException exIn) {
 		return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 	    } catch (ExecutionException exIn) {
-		LOG.error("Unexpected exception occurred in UI Step.", ex);
+		LOG.error("Unexpected exception occurred in UI Step.", exIn);
 		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 	    }
 	} catch (ExecutionException ex) {

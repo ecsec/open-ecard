@@ -145,7 +145,7 @@ public class ChannelManager {
 
 	SingleThreadChannel ch = baseChannels.remove(ifdName);
 	if (ch == null) {
-	    LOG.error("No master channel for terminal '" + ifdName + "' available.");
+	    LOG.warn("No master channel for terminal '" + ifdName + "' available.");
 	} else {
 	    try {
 		ch.shutdown();

@@ -278,7 +278,7 @@ public class IfdEventRunner implements Runnable {
 	    WSHelper.checkResult(res);
 	    return res.getIFDCapabilities();
 	} catch (WSException ex) {
-	    LOG.error("Error while requesting infos from terminal {}.", ifdName);
+	    LOG.warn("Error while requesting infos from terminal {}.", ifdName);
 	}
 
 	return null;

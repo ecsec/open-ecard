@@ -128,4 +128,16 @@ public abstract class MobileNavigator implements UserConsentNavigator {
 	};
     }
 
+    protected StepResult evaluateExecutionException(ExecutionException outer, ExecutionException exIn, Step curStep) {
+	Throwable givenCause = exIn.getCause();
+	if (givenCause instanceof InterruptedException) {
+	    return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+	} else if (givenCause instanceof ExecutionException) {
+	    return evaluateExecutionException(outer, (ExecutionException)givenCause, curStep);
+	} else {
+	    LOG.error("Unexpected exception occurred in UI Step.", outer);
+	    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+	}
+    }
+
 }

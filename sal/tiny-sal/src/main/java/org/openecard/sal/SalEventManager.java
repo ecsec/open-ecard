@@ -378,7 +378,7 @@ public class SalEventManager {
 		WSHelper.checkResult(res);
 		return res.getIFDCapabilities();
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Error while requesting infos from terminal {}.", ifdName);
+		LOG.warn("Error while requesting infos from terminal {}.", ifdName);
 	    }
 
 	    return null;

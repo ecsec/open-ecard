@@ -79,7 +79,7 @@ public final class EacNavigator extends MobileNavigator {
     private final EacInteraction interaction;
 
     private Future<?> runningAction;
-    private Thread eacNextThread;
+    private volatile Thread eacNextThread;
 
     private int idx = 0;
     private boolean pinFirstUse = true;
@@ -115,35 +115,38 @@ public final class EacNavigator extends MobileNavigator {
 
 
 	FutureTask<StepResult> eacNext = new FutureTask<>(() -> nextInt(curStep));
+	Thread nextThread = new Thread(eacNext, "EAC-GUI-Next");
+	eacNextThread = nextThread;
 	try {
 	    // run next in thread and wait for completion
 	    // note that promise does not allow to access the result in case of a cancellation
-	    eacNextThread = new Thread(eacNext, "EAC-GUI-Next");
-	    eacNextThread.start();
+	    nextThread.start();
 	    LOG.debug("Waiting for next GUI step to finish.");
-	    eacNextThread.join();
+	    nextThread.join();
 	    LOG.debug("Next GUI step finished.");
 	    return eacNext.get();
 	} catch (InterruptedException ex) {
 	    LOG.debug("Waiting for next GUI step interrupted, interrupting the GUI step processing.");
-	    eacNextThread.interrupt();
+	    nextThread.interrupt();
 	    try {
 		// wait again after interrupting the thread
 		LOG.debug("Waiting again for next GUI step to finish.");
-		eacNextThread.join();
+		nextThread.join();
 		LOG.debug("Next GUI step finished.");
 		return eacNext.get();
 	    } catch (InterruptedException exIn) {
 		return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 	    } catch (ExecutionException exIn) {
-		LOG.error("Unexpected exception occurred in UI Step.", ex);
-		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+		return evaluateExecutionException(exIn, exIn, curStep);
 	    }
 	} catch (ExecutionException ex) {
 	    LOG.error("Unexpected exception occurred in UI Step.", ex);
 	    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 	} finally {
-	    eacNextThread = null;
+	    if (eacNextThread == nextThread) {
+		eacNextThread = null;
+	    }
+
 	}
     }
 

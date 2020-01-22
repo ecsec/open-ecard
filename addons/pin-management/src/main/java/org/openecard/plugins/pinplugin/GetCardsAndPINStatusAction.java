@@ -75,9 +75,6 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
     public static final String CAN_CORRECT = "can-correct";
     public static final String PUK_CORRECT = "puk-correct";
 
-    private Future<ResultStatus> pinManagement;
-
-
     @Override
     public void execute() throws AppExtensionException {
 	// init dyn ctx
@@ -86,6 +83,8 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	ConnectionHandleType sessionHandle = null;
 
 	Pair<CardCapturer, AutoCloseable> managedCardCapturer = null;
+
+	Future<ResultStatus> pinManagement = null;
 	try {
 	    sessionHandle = createSessionHandle();
 
@@ -108,7 +107,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		    return uc.show();
 		});
 
-		EventCallback disconnectEventSink = registerListeners(cardCapturer.aquireView());
+		EventCallback disconnectEventSink = registerListeners(cardCapturer.aquireView(), pinManagement);
 
 		try {
 		    ResultStatus result = pinManagement.get();
@@ -122,7 +121,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		}
 	    } catch (InterruptedException ex) {
 		LOG.info("waiting for PIN management to stop interrupted.", ex);
-		pinManagement.cancel(true);
+		if (pinManagement != null) {
+		    pinManagement.cancel(true);
+		}
 	    } catch (ExecutionException ex) {
 		LOG.warn("Pin Management failed", ex);
 	    } catch (CancellationException ex) {
@@ -221,7 +222,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	}
     }
 
-    private EventCallback registerListeners(CardStateView cardView) {
+    private EventCallback registerListeners(CardStateView cardView, Future<ResultStatus> pinManagement) {
 	EventCallback disconnectEventSink;
 
 	if (!SysUtils.isMobileDevice()) {

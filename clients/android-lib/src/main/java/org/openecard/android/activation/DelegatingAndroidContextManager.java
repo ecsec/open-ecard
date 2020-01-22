@@ -65,9 +65,9 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
 		if (nfcFactory != null && intent != null) {
 			IsoDep isoDep = IsoDep.get(intent);
 			if (isoDep != null) {
-				if (IsoDep.get(intent).isExtendedLengthApduSupported()) {
+				if (isoDep.isExtendedLengthApduSupported()) {
 					// set nfc tag with timeout of five seconds
-					nfcFactory.setNFCTag(intent, 5000);
+					nfcFactory.setNFCTag(isoDep, 5000);
 				} else {
 					throw new ApduExtLengthNotSupported("APDU Extended Length is not supported.");
 				}
@@ -76,7 +76,7 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
 			}
 		}
     }
-    
+
     @Override
     public void start(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	this.contextManager.start(handler);

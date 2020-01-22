@@ -67,7 +67,7 @@ public class PINManagementNavigator extends MobileNavigator {
     private final PinManagementInteraction interaction;
 
     private int idx = -1;
-    private Thread pMgmtNextThread;
+    private volatile Thread pMgmtNextThread;
     private final Dispatcher dispatcher;
     private final EventDispatcher eventDispatcher;
     private String tempCurrentPin = null;
@@ -111,78 +111,38 @@ public class PINManagementNavigator extends MobileNavigator {
 	// TODO: remove this statement and implement it properly
 //	return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
 	FutureTask<StepResult> pMgmtNext = new FutureTask<>(() -> nextInt(curStep));
+	Thread nextThread = new Thread(pMgmtNext, "PIN-Mgmt-Next");
+	pMgmtNextThread = nextThread;
 	try {
 	    // run next in thread and wait for completion
-	    // note that promise does not allow to access the result in case of a cancellation
-	    pMgmtNextThread = new Thread(pMgmtNext, "PIN-Mgmt-Next");
-	    pMgmtNextThread.start();
+	    // note that promise does not allow to access the result in case of a cancellation#
+	    nextThread.start();
 	    LOG.debug("Waiting for next GUI step to finish.");
-	    pMgmtNextThread.join();
+	    nextThread.join();
 	    LOG.debug("Next GUI step finished.");
 	    return pMgmtNext.get();
 	} catch (InterruptedException ex) {
 	    LOG.debug("Waiting for next GUI step interrupted, interrupting the GUI step processing.");
-	    pMgmtNextThread.interrupt();
+	    nextThread.interrupt();
 	    try {
 		// wait again after interrupting the thread
 		LOG.debug("Waiting again for next GUI step to finish.");
-		pMgmtNextThread.join();
+		nextThread.join();
 		LOG.debug("Next GUI step finished.");
 		return pMgmtNext.get();
 	    } catch (InterruptedException exIn) {
 		return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 	    } catch (ExecutionException exIn) {
-		LOG.error("Unexpected exception occurred in UI Step.", ex);
-		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
+		return evaluateExecutionException(exIn, exIn, curStep);
 	    }
 	} catch (ExecutionException ex) {
-	    LOG.error("Unexpected exception occurred in UI Step.", ex);
+	    LOG.debug("Unexpected exception occurred in UI Step.", ex);
 	    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 	} finally {
-	    pMgmtNextThread = null;
+	    if (pMgmtNextThread == nextThread) {
+		pMgmtNextThread = null;
+	    }
 	}
-
-//	return displayAndExecuteBackground(pinStep, () -> {
-//	    DynamicContext ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY);
-//	    RecognizedState uiPinState = (RecognizedState) ctx.get(GetCardsAndPINStatusAction.PIN_STATUS);
-//	    Boolean pinCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PIN_CORRECT);
-//	    Boolean canCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.CAN_CORRECT);
-//	    Boolean pukCorrect = (Boolean) ctx.get(GetCardsAndPINStatusAction.PUK_CORRECT);
-//
-//	    if (uiPinState == null || uiPinState == RecognizedState.UNKNOWN) {
-//		LOG.error("No pin state received from UI.");
-//		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-//	    }
-//
-//	    // set pin state
-//	    this.guiService.sendPinStatus(uiPinState);
-//
-//	    // set result values if any
-//	    if (pinCorrect != null) {
-//		this.guiService.setPinCorrect(pinCorrect);
-//	    } else if (canCorrect != null) {
-//		this.guiService.setCanCorrect(canCorrect);
-//	    } else if (pukCorrect != null) {
-//		this.guiService.setPukCorrect(pukCorrect);
-//	    }
-//
-//	    // pin accepted or card blocked
-//	    if ("success".equals(pinStep.getID())) {
-//		return new MobileResult(pinStep, ResultStatus.OK, Collections.EMPTY_LIST);
-//	    } else if ("error".equals(pinStep.getID())) {
-//		//this.guiService.waitForUserCancel();
-//		return new MobileResult(pinStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
-//	    }
-//
-//	    // ask user for the pin
-//	    try {
-//		List<OutputInfoUnit> outInfo = this.guiService.getPinResult(pinStep);
-//		writeBackValues(pinStep.getInputInfoUnits(), outInfo);
-//		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
-//	    } catch (InterruptedException ex) {
-//		return new MobileResult(pinStep, ResultStatus.INTERRUPTED, Collections.EMPTY_LIST);
-//	    }
-//	});
     }
 
     private StepResult askForPIN(GenericPINStep curStep, int attempt) throws InterruptedException {
@@ -377,85 +337,5 @@ public class PINManagementNavigator extends MobileNavigator {
     @Override
     public void close() {
     }
-
-//    public List<OutputInfoUnit> getPinResult(Step step) throws InterruptedException {
-//	// read values
-//	String oldPinValue = this.userPinOld.deref();
-//	String newPinValue = this.userPinNew.deref();
-//	String canValue = this.userCan.deref();
-//	String pukValue = this.userPuk.deref();
-//
-//	if (step instanceof GenericPINStep) {
-//	    ArrayList<OutputInfoUnit> result = new ArrayList<>();
-//	    for (InputInfoUnit nextIn : step.getInputInfoUnits()) {
-//		if (oldPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("OLD_PIN_FIELD")) {
-//		    PasswordField pw = new PasswordField(nextIn.getID());
-//		    pw.copyContentFrom(nextIn);
-//		    pw.setValue(oldPinValue.toCharArray());
-//		    result.add(pw);
-//		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_FIELD")) {
-//		    PasswordField pw = new PasswordField(nextIn.getID());
-//		    pw.copyContentFrom(nextIn);
-//		    pw.setValue(newPinValue.toCharArray());
-//		    result.add(pw);
-//		} else if (newPinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("NEW_PIN_REPEAT_FIELD")) {
-//		    PasswordField pw = new PasswordField(nextIn.getID());
-//		    pw.copyContentFrom(nextIn);
-//		    pw.setValue(newPinValue.toCharArray());
-//		    result.add(pw);
-//		} else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("CAN_FIELD")) {
-//		    PasswordField pw = new PasswordField(nextIn.getID());
-//		    pw.copyContentFrom(nextIn);
-//		    pw.setValue(canValue.toCharArray());
-//		    result.add(pw);
-//		} else if (pukValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PUK_FIELD")) {
-//		    PasswordField pw = new PasswordField(nextIn.getID());
-//		    pw.copyContentFrom(nextIn);
-//		    pw.setValue(pukValue.toCharArray());
-//		    result.add(pw);
-//		}
-//	    }
-//
-//	    return result;
-//	} else {
-//	    throw new InterruptedException("The given step is not a PinStep.");
-//	}
-//    }
-//
-//    public void sendPinStatus(RecognizedState status) {
-//
-//	if (this.pinStatus.isDelivered()) {
-//	   this.pinStatus = new Promise<>();
-//	}
-//
-//	switch (status) {
-//	    case PIN_activated_RC3:
-//		this.pinStatus.deliver(PinStatus.RC3);
-//		break;
-//	    case PIN_activated_RC2:
-//		this.pinStatus.deliver(PinStatus.RC2);
-//		break;
-//	    case PIN_suspended:
-//		this.pinStatus.deliver(PinStatus.CAN);
-//		break;
-//	    case PIN_resumed:
-//		this.pinStatus.deliver(PinStatus.RC1);
-//		break;
-//	    case PIN_blocked:
-//		this.pinStatus.deliver(PinStatus.PIN_BLOCKED);
-//		break;
-//	    case PUK_blocked:
-//		this.pinStatus.deliver(PinStatus.PUK_BLOCKED);
-//		break;
-//	    case PIN_deactivated:
-//		this.pinStatus.deliver(PinStatus.DEACTIVATED);
-//		break;
-//	    default:
-//		throw new IllegalArgumentException("Unhandled PIN status received from UI.");
-//	}
-//    }
-
-
-
 
 }

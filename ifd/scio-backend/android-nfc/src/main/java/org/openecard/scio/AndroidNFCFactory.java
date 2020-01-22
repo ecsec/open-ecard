@@ -72,10 +72,9 @@ public class AndroidNFCFactory implements org.openecard.common.ifd.scio.Terminal
      * @param tag
      * @param timeout current timeout for transceive(byte[]) in milliseconds.
      */
-    public void setNFCTag(Tag tag, int timeout) throws IOException {
-	IsoDep isoDepTag = IsoDep.get(tag);
-	isoDepTag.setTimeout(timeout);
-	terminal.setNFCTag(isoDepTag, timeout);
+    public void setNFCTag(IsoDep tag, int timeout) throws IOException {
+	tag.setTimeout(timeout);
+	terminal.setNFCTag(tag, timeout);
     }
 
 }

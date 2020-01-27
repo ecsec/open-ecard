@@ -162,7 +162,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    String message = getErrorMessage(errorCode);
 		    context.session.invalidateSession(message);
 
-		    throw new SCIOException("Could not create a new NFC session.", SCIOErrorCode.SCARD_E_NOT_READY);
+		    SCIOErrorCode code = getError(errorCode);
+
+		    throw new SCIOException("Could not create a new NFC session.", code);
 		}
 	    }
 	}
@@ -201,6 +203,17 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	}
 	else {
 	    return this.cfg.getDefaultNFCErrorMessage();
+	}
+    }
+
+    private SCIOErrorCode getError(final long errorCode) {
+	if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
+	    return SCIOErrorCode.SCARD_E_TIMEOUT;
+	} else if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorUserCanceled.value()) {
+	    return SCIOErrorCode.SCARD_W_CANCELLED_BY_USER;
+	}
+	else {
+	    return SCIOErrorCode.SCARD_E_NOT_READY;
 	}
     }
 

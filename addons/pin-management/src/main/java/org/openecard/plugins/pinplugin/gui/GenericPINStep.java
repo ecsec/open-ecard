@@ -122,13 +122,7 @@ public class GenericPINStep extends Step {
     private void generateGenericGui() {
 	switch(getPinState()) {
 	    case PIN_activated_RC3:
-		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
-		retryCounterPIN = 3;
-		if (capturePin()) {
-		    createPINChangeGui();
-		} else {
-		    createPINChangeGuiNativ();
-		}
+		generateGuiPinActivatedRc3();
 		break;
 	    case PIN_activated_RC2:
 		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
@@ -181,6 +175,16 @@ public class GenericPINStep extends Step {
 		setTitle(lang.translationForKey(ERROR_TITLE));
 		createErrorGui();
 		retryCounterPUK = 0;
+	}
+    }
+
+    public void generateGuiPinActivatedRc3() {
+	setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
+	retryCounterPIN = 3;
+	if (capturePin()) {
+	    createPINChangeGui();
+	} else {
+	    createPINChangeGuiNativ();
 	}
     }
 

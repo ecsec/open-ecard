@@ -146,6 +146,10 @@ public class GenericPINAction extends StepAction {
 		// nothing todo here the error message was displayed so just return next.
 		return new StepActionResult(StepActionResultStatus.NEXT);
 	    case UNKNOWN:
+		gPINStep.updateState(RecognizedState.UNKNOWN);
+		gPINStep.setFailedPUKVerify(false, true);
+		gPINStep.setFailedCANVerify(false, true);
+		gPINStep.setFailedPINVerify(false, true);
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
 

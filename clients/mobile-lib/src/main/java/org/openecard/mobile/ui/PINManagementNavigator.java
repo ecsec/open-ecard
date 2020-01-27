@@ -154,6 +154,15 @@ public class PINManagementNavigator extends MobileNavigator {
 	return createResult(waitForPIN, curStep, hooks);
     }
 
+    private StepResult askForPIN(GenericPINStep curStep) throws InterruptedException {
+	List<EventCallback> hooks = pauseExecution(curStep.getConHandle());
+
+	Promise<List<OutputInfoUnit>> waitForPIN = new Promise<>();
+	interaction.onPinChangeable(new ConfirmOldSetNewPasswordOperationPINMgmtImpl(waitForPIN));
+
+	return createResult(waitForPIN, curStep, hooks);
+    }
+
     private StepResult askForPinCanNewPin(GenericPINStep curStep) throws InterruptedException {
 	this.stepCleanup = (Step step) -> {
 	    if (curStep != step || curStep.getPinState() != RecognizedState.PIN_resumed) {
@@ -299,7 +308,8 @@ public class PINManagementNavigator extends MobileNavigator {
 		    return notifyPukBlocked(genPINStp);
 		case UNKNOWN:
 		    LOG.debug("nextINTswitch: UNKNOWN");
-		    return new MobileResult(genPINStp, ResultStatus.OK, Collections.EMPTY_LIST);
+		    genPINStp.generateGuiPinActivatedRc3();
+		    return askForPIN(genPINStp);
 		default:
 		    LOG.debug("nextINTswitch: default");
 		    return new MobileResult(genPINStp, ResultStatus.CANCEL, Collections.EMPTY_LIST);

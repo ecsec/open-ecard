@@ -115,8 +115,10 @@ public class CardCapturer {
 		    if (WSHelper.minorIsOneOf(ex,
 			    ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
 			    ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT)) {
+			LOG.debug("Device was not prepared.");
 			return null;
 		    } else {
+			LOG.warn("Could not prepare device.", ex);
 			throw ex;
 		    }
 		}

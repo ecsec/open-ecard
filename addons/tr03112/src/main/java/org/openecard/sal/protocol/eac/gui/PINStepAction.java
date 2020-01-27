@@ -30,6 +30,7 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepActionResult;
@@ -90,7 +91,11 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		pinState.update(currentState);
 	    }
 	} catch (WSException ex) {
-	    if (ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR.equals(ex.getResultMinor())) {
+	    if (SysUtils.isMobileDevice() &&
+		    WSHelper.minorIsOneOf(ex,
+			    ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR,
+			    ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
+			    ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT)) {
 		// repeat the step
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }

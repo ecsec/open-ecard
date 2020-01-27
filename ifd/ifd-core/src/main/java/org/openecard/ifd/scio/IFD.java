@@ -275,7 +275,7 @@ public class IFD implements org.openecard.ws.IFD {
 	try {
 	    wasPrepared = cm.prepareDevices();
 	} catch (SCIOException ex) {
-	    ECardConstants minorError;
+	    String minorError;
 	    switch (ex.getCode()) {
 	    	case SCARD_W_CANCELLED_BY_USER:
 		    minorError = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
@@ -287,7 +287,7 @@ public class IFD implements org.openecard.ws.IFD {
 		    minorError = ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR;
 		    break;
 	    }
-	    Result r = WSHelper.makeResultError(ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR, ex.getMessage());
+	    Result r = WSHelper.makeResultError(minorError, ex.getMessage());
 	    return WSHelper.makeResponse(PrepareDevicesResponse.class, r);
 	}
 

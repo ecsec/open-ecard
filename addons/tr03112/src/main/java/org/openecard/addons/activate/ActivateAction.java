@@ -356,6 +356,9 @@ public class ActivateAction implements AppPluginAction {
 			ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		    LOG.info("PIN Management got cancelled.");
 		    return new BindingResult(BindingResultCode.INTERRUPTED);
+		} else if (WSHelper.minorIsOneOf(appEx, ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT)) {
+		    LOG.info("PIN Management could not wait for a device any longer.");
+		    return new BindingResult(BindingResultCode.TIMEOUT);
 		}
 	    } else if (cause instanceof ThreadTerminateException) {
 		return new BindingResult(BindingResultCode.INTERRUPTED);

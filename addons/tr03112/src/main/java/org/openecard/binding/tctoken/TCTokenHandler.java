@@ -627,6 +627,10 @@ public class TCTokenHandler {
 		errorMsg = LANG_PACE.translationForKey("step_error_pin_blocked", pin, pin, puk, pin);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
 		break;
+	    case ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED:
+		errorMsg = LANG_PACE.translationForKey("step_error_pin_deactivated", pin, pin, puk, pin);
+		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));
+		break;
 	    case ECardConstants.Minor.IFD.UNKNOWN_ERROR:
 		errorMsg = LANG_TR.translationForKey(ERROR_WHILE_AUTHENTICATION);
 		response.setResult(WSHelper.makeResultError(ResultMinor.CLIENT_ERROR, errorMsg));

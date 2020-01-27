@@ -951,6 +951,8 @@ public class ECardConstants {
 		 * Access Error.
 		 */
 		public static final String PREPARE_DEVICES_ERROR = TERM_PREFIX + "prepareDevicesError";
+
+		public static final String WAIT_FOR_DEVICE_TIMEOUT = TERM_PREFIX + "waitForDeviceTimeout";
 	    };
 
 	};

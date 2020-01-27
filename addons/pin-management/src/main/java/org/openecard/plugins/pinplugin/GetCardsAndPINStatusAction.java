@@ -94,7 +94,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
 	    boolean success = cardCapturer.updateCardState();
 
-	    if (!success) {
+	    if (!SysUtils.isMobileDevice() && !success) {
 		// User cancelled card insertion.
 		return;
 	    }

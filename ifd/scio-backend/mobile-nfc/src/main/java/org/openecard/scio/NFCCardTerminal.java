@@ -67,7 +67,7 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
     public abstract boolean prepareDevices() throws SCIOException;
 
     public boolean powerDownDevices() {
-	return this.removeTag();
+	return this.setNFCCard(null);
     }
 
     public void setDialogMsg(String dialogMsg) {
@@ -97,11 +97,10 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	    this.nfcCard = card;
 	    if (card == null) {
 		notifyCardAbsent();
-		return card != null;
 	    } else {
 		notifyCardPresent();
-		return true;
 	    }
+	    return card != oldCard;
 	}
     }
 
@@ -113,7 +112,6 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
 	synchronized (cardLock) {
 	    final T currentCard = nfcCard;
 	    if (currentCard != null) {
-		nfcCard = null;
 		boolean changed = terminateTag(currentCard);
 		notifyCardAbsent();
 		return changed;

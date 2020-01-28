@@ -122,6 +122,10 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	return isTagPresent;
     }
 
+    public boolean tagWasPresent() {
+	final boolean isTagPresent = !tagPending && (isodep == null || !isodep.isConnected());
+	return isTagPresent;
+    }
     @Override
     public boolean terminateTag() throws SCIOException {
 	synchronized(connectLock) {

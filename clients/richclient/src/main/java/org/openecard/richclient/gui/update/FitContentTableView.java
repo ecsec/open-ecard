@@ -27,11 +27,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.skin.TableHeaderRow;
 import javafx.scene.layout.VBox;
 
-
 /**
  *
  * @author Sebastian Schuberth
- * @param <T>
  */
 public class FitContentTableView<T> extends TableView<T> {
 

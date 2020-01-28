@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * The implementation blocks until the value is set or a timeout occured.
  *
  * @param <T> Type returned by the promise.
- * @see <tt><a href="http://clojuredocs.org/clojure_core/clojure.core/promise#source">clojure.core/promise</a></tt>
+ * @see <a href="http://clojuredocs.org/clojure_core/clojure.core/promise#source">clojure.core/promise</a>
  * @author Tobias Wich
  */
 public class Promise <T> {

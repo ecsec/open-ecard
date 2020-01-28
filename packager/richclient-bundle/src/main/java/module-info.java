@@ -43,6 +43,9 @@ module org.openecard.richclient {
     requires javafx.controls;
     requires javafx.graphics;
 
+    /* EC ciphers for JSSE */
+    requires jdk.crypto.ec;
+
     /* Open JAXB classes for reflection */
     opens de.bund.bsi.ecard.api._1;
     opens iso.std.iso_iec._24727.tech.schema;

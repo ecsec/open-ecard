@@ -25,7 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.DynamicContext;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
+import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.interfaces.Dispatcher;
 import static org.openecard.plugins.pinplugin.AbstractPINAction.GERMAN_IDENTITY_CARD;
@@ -100,14 +102,26 @@ public class CardCapturer {
 	}
     }
 
-    private ReadOnlyCardStateView initialState(DynamicContext ctx) throws WSHelper.WSException {
+    private ReadOnlyCardStateView initialState(DynamicContext ctx) throws WSException {
 	synchronized (devicesLock) {
 	    if (areDevicesPoweredDown) {
 		LOG.debug("Call prepare devices");
 		PrepareDevices pd = new PrepareDevices();
 		pd.setContextHandle(sessionHandle.getContextHandle());
-		PrepareDevicesResponse response = (PrepareDevicesResponse)dispatcher.safeDeliver(pd);
-		WSHelper.checkResult(response);
+		PrepareDevicesResponse response = (PrepareDevicesResponse) dispatcher.safeDeliver(pd);
+		try {
+		    WSHelper.checkResult(response);
+		} catch (WSException ex) {
+		    if (WSHelper.minorIsOneOf(ex,
+			    ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
+			    ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT)) {
+			LOG.debug("Device was not prepared.");
+			return null;
+		    } else {
+			LOG.warn("Could not prepare device.", ex);
+			throw ex;
+		    }
+		}
 	    }
 	}
 

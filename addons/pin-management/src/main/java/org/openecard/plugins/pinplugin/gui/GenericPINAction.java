@@ -127,7 +127,6 @@ public class GenericPINAction extends StepAction {
 	    LOG.error("Failed to prepare Generic PIN step.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
-
 	// clean up values
 	clearCorrectValues();
 
@@ -144,9 +143,14 @@ public class GenericPINAction extends StepAction {
 		return performUnblockPIN(oldResults);
 	    case PIN_deactivated:
 	    case PUK_blocked:
-	    case UNKNOWN:
 		// nothing todo here the error message was displayed so just return next.
 		return new StepActionResult(StepActionResultStatus.NEXT);
+	    case UNKNOWN:
+		gPINStep.updateState(RecognizedState.UNKNOWN);
+		gPINStep.setFailedPUKVerify(false, true);
+		gPINStep.setFailedCANVerify(false, true);
+		gPINStep.setFailedPINVerify(false, true);
+		return new StepActionResult(StepActionResultStatus.REPEAT);
 	}
 
 	return null;

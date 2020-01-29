@@ -94,8 +94,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
 	    boolean success = cardCapturer.updateCardState();
 
-	    if (!success) {
+	    if (!success && !SysUtils.isMobileDevice()) {
 		// User cancelled card insertion.
+		LOG.debug("User cancelled card insertion");
 		return;
 	    }
 
@@ -133,17 +134,21 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 
 		CardStateView cardView = cardCapturer.aquireView();
 
-		// destroy the pace channel
-		DestroyChannel destChannel = new DestroyChannel();
-		destChannel.setSlotHandle(cardView.getHandle().getSlotHandle());
-		dispatcher.safeDeliver(destChannel);
+		final byte[] slotHandle = cardView.getHandle().getSlotHandle();
 
-		// Transaction based communication does not work on java 8 so the PACE channel is not closed after an
-		// EndTransaction call. So do a reset of the card to close the PACE channel.
-		Disconnect disconnect = new Disconnect();
-		disconnect.setSlotHandle(cardView.getHandle().getSlotHandle());
-		disconnect.setAction(ActionType.RESET);
-		dispatcher.safeDeliver(disconnect);
+		if (slotHandle != null && slotHandle.length > 0) {
+		    // destroy the pace channel
+		    DestroyChannel destChannel = new DestroyChannel();
+		    destChannel.setSlotHandle(slotHandle);
+		    dispatcher.safeDeliver(destChannel);
+
+		    // Transaction based communication does not work on java 8 so the PACE channel is not closed after an
+		    // EndTransaction call. So do a reset of the card to close the PACE channel.
+		    Disconnect disconnect = new Disconnect();
+		    disconnect.setSlotHandle(cardView.getHandle().getSlotHandle());
+		    disconnect.setAction(ActionType.RESET);
+		    dispatcher.safeDeliver(disconnect);
+		}
 	    }
 	} catch (WSException ex){
 	    LOG.debug("Error while executing PIN Management.", ex);

@@ -1,5 +1,5 @@
-/****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/** **************************************************************************
+ * Copyright (C) 2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,36 +18,46 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ ************************************************************************** */
 package org.openecard.mobile.activation.model;
 
+import java.io.IOException;
+import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOException;
+import org.openecard.scio.AbstractNFCCard;
 import org.openecard.scio.NFCCardTerminal;
 
 /**
  *
  * @author Neil Crossley
  */
-public class FakeNFCCardTerminal extends NFCCardTerminal {
+public class FakeNFCCard extends AbstractNFCCard {
 
-    private final NFCCardTerminal delegate;
+    private final AbstractNFCCard delegate;
 
-    public FakeNFCCardTerminal(NFCCardTerminal delegate) {
+    public FakeNFCCard(AbstractNFCCard delegate, NFCCardTerminal terminal) {
+	super(terminal);
 	this.delegate = delegate;
     }
 
-    public FakeNFCCardTerminal() {
-	this(null);
+    @Override
+    public boolean isTagPresent() {
+	return delegate.isTagPresent();
     }
 
     @Override
-    public boolean prepareDevices() throws SCIOException {
-	if (this.delegate != null) {
-	    return this.delegate.prepareDevices();
-	} else {
-	    return true;
-	}
+    public boolean terminateTag() throws SCIOException {
+	return delegate.terminateTag();
     }
 
+    @Override
+    public SCIOATR getATR() {
+	return delegate.getATR();
+    }
+
+    @Override
+    public byte[] transceive(byte[] apdu) throws IOException {
+	return delegate.transceive(apdu);
+    }
 
 }

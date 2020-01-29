@@ -22,7 +22,11 @@
 package org.openecard.mobile.activation.model;
 
 import static org.mockito.Mockito.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.TerminalFactory;
+import org.openecard.scio.AbstractNFCCard;
 import org.openecard.scio.NFCCardTerminal;
 import org.openecard.scio.NFCCardTerminals;
 
@@ -48,12 +52,29 @@ public class MobileTerminalConfigurator implements Builder<TerminalFactory> {
     }
 
     public static MobileTerminalConfigurator withMobileNfcStack() {
-	FakeNFCCardTerminal terminal = new FakeNFCCardTerminal();
-	NFCCardTerminals terminals = new NFCCardTerminals(terminal);
+	AbstractNFCCard mockNfcCard = mock(AbstractNFCCard.class);
+	NFCCardTerminal mockTerminal = mock(NFCCardTerminal.class);
+	FakeNFCCardTerminal fakeTerminalTerminal = new FakeNFCCardTerminal(mockTerminal);
+	FakeNFCCard fakeNfcCard = new FakeNFCCard(mockNfcCard, fakeTerminalTerminal);
+	NFCCardTerminals terminals = new NFCCardTerminals(fakeTerminalTerminal);
 	TerminalFactory mockTerminalFactory = mock(TerminalFactory.class);
-	when(mockTerminalFactory.terminals()).thenReturn(terminals);
 
-	return new MobileTerminalConfigurator(mockTerminalFactory, terminal, terminals);
+	try {
+	    when(mockTerminalFactory.terminals()).thenReturn(terminals);
+	    when(mockTerminal.prepareDevices()).thenAnswer(new Answer() {
+		@Override
+		public Object answer(InvocationOnMock invocation) throws Throwable {
+
+		    fakeTerminalTerminal.setNFCCard(fakeNfcCard);
+
+		    return true;
+		}
+
+	    });
+
+	    return new MobileTerminalConfigurator(mockTerminalFactory, mockTerminal, terminals);
+	} catch (SCIOException ex) {
+	    throw new RuntimeException("Such an exception should not by thrown when initializing a mock.", ex);
+	}
     }
-
 }

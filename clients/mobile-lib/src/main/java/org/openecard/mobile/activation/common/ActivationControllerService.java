@@ -19,7 +19,6 @@ import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
-import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Promise;
 import static org.openecard.mobile.activation.ActivationResultCode.*;
@@ -38,11 +37,11 @@ public class ActivationControllerService {
 
     private final Object processLock = new Object();
     private final OpeneCardContextProvider contextProvider;
-    private boolean isRunning = false;
-    private Thread currentProccess = null;
-    private ControllerCallback currentCallback = null;
-    private ControllerCallback cancelledCallback = null;
-    private AutoCloseable closable = null;
+    private volatile boolean isRunning = false;
+    private volatile Thread currentProccess = null;
+    private volatile ControllerCallback currentCallback = null;
+    private volatile ControllerCallback cancelledCallback = null;
+    private volatile AutoCloseable closable = null;
 
     public ActivationControllerService(OpeneCardContextProvider contextProvider) {
 	this.contextProvider = contextProvider;
@@ -192,9 +191,10 @@ public class ActivationControllerService {
 		} else {
 		    queries = new HashMap<>(0);
 		}
-		EventDispatcher eventDispatcher = context.getEventDispatcher();
+		AutoCloseable currentHooks = null;
 		try {
-		    this.closable = hooks.create(context);
+		    currentHooks = new RunOnceAutoCloseable(hooks.create(context));
+		    this.closable = currentHooks;
 
 		    ControllerCallback startedCallback;
 		    synchronized (this.processLock) {
@@ -222,6 +222,13 @@ public class ActivationControllerService {
 		    String interruptMessage = ex.getMessage();
 		    LOG.warn("The activation was interrupted with the following message: {}", interruptMessage, ex);
 		    return new CommonActivationResult(INTERRUPTED, interruptMessage);
+		} finally {
+		    if (currentHooks != null) {
+			currentHooks.close();
+		    }
+		    if (this.closable == currentHooks) {
+			this.closable = null;
+		    }
 		}
 	    }
 	} catch (AddonNotFoundException ex) {

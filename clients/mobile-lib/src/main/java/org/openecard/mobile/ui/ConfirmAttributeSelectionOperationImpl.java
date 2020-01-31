@@ -51,7 +51,7 @@ public class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeS
     }
 
     @Override
-    public void enter(List<SelectableItem> readAttr, List<SelectableItem> writeAttr) {
+    public void enterAttributeSelection(List<SelectableItem> readAttr, List<SelectableItem> writeAttr) {
 	List<OutputInfoUnit> outInfo = convertSelection(readAttr, writeAttr);
 	waitForAttributes.deliver(outInfo);
     }

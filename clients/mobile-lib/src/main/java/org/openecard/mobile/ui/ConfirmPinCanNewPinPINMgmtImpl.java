@@ -37,7 +37,7 @@ public class ConfirmPinCanNewPinPINMgmtImpl implements ConfirmPinCanNewPinOperat
     }
 
     @Override
-    public void enter(String pin, String can, String newPin) {
+    public void confirmChangePassword(String pin, String can, String newPin) {
 	waitForPWD.deliver(new PinCanNewPinContainer(pin, can, newPin));
     }
 }

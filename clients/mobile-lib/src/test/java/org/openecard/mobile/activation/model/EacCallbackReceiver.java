@@ -123,7 +123,7 @@ public class EacCallbackReceiver {
 	    if (operation == null) {
 		throw new IllegalStateException();
 	    }
-	    operation.enter(currentPin);
+	    operation.confirmPassword(currentPin);
 	} catch (InterruptedException | TimeoutException ex) {
 	    throw new RuntimeException(ex);
 	}
@@ -158,7 +158,7 @@ public class EacCallbackReceiver {
 	    for (SelectableItem writeAttribute : writeAttributes) {
 		writeAttribute.setChecked(true);
 	    }
-	    confirmOperation.enter(readAttributes, writeAttributes);
+	    confirmOperation.enterAttributeSelection(readAttributes, writeAttributes);
 	} catch (InterruptedException ex) {
 	    throw new RuntimeException(ex);
 	}

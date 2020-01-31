@@ -360,7 +360,7 @@ public class World implements AutoCloseable {
 
 	public void cancelEac() {
 	    LOG.debug("Cancel EAC.");
-	    this.activationController.cancelAuthentication();
+	    this.activationController.cancelOngoingAuthentication();
 	}
 
 	public void expectOnServerData() {
@@ -400,7 +400,7 @@ public class World implements AutoCloseable {
 
 	    ActivationController oldActivationController = activationController;
 	    if (oldActivationController != null) {
-		oldActivationController.cancelAuthentication();
+		oldActivationController.cancelOngoingAuthentication();
 		activationController = null;
 	    }
 	    if (this._eacControllerFactory != null && oldActivationController != null) {
@@ -461,7 +461,7 @@ public class World implements AutoCloseable {
 
 	public void cancelPinManagement() {
 	    LOG.debug("Cancel pin management.");
-	    this.activationController.cancelAuthentication();
+	    this.activationController.cancelOngoingAuthentication();
 	}
 
 	@Override
@@ -473,7 +473,7 @@ public class World implements AutoCloseable {
 
 	    ActivationController oldActivationController = activationController;
 	    if (oldActivationController != null) {
-		oldActivationController.cancelAuthentication();
+		oldActivationController.cancelOngoingAuthentication();
 		activationController = null;
 	    }
 	    if (this._pinManagementFactory != null && oldActivationController != null) {
@@ -518,7 +518,7 @@ public class World implements AutoCloseable {
 	    LOG.debug("Start successfully.");
 	    Promise<ActivationSource> resultStart = new Promise<>();
 	    try {
-		contextManager().start(PromiseDeliveringFactory.createStartServiceDelivery(resultStart, null));
+		contextManager().initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(resultStart, null));
 	    } catch (UnableToInitialize | NfcUnavailable | NfcDisabled | ApduExtLengthNotSupported ex) {
 		throw new RuntimeException(ex);
 	    }
@@ -530,7 +530,7 @@ public class World implements AutoCloseable {
 	public ContextWorld stopSuccessfully() {
 	    LOG.debug("Stop successfully.");
 	    Promise<ServiceErrorResponse> resultStart = new Promise<>();
-	    contextManager().stop(PromiseDeliveringFactory.createStopServiceDelivery(resultStart));
+	    contextManager().terminateContext(PromiseDeliveringFactory.createStopServiceDelivery(resultStart));
 
 	    Assert.assertNull(waitFor(resultStart));
 	    return this;

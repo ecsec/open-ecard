@@ -92,7 +92,7 @@ public class PinManagementCallbackReceiver {
 	    if (operation == null) {
 		throw new IllegalStateException();
 	    }
-	    operation.enter(currentPin, newPin);
+	    operation.confirmPassword(currentPin, newPin);
 	} catch (InterruptedException | TimeoutException ex) {
 	    throw new RuntimeException(ex);
 	}

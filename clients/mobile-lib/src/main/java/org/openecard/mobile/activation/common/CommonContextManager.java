@@ -72,7 +72,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     }
 
     @Override
-    public void start(StartServiceHandler handler) {
+    public void initializeContext(StartServiceHandler handler) {
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null");
 	}
@@ -127,7 +127,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
     }
 
     @Override
-    public void stop(StopServiceHandler handler) {
+    public void terminateContext(StopServiceHandler handler) {
 	if (handler == null) {
 	    throw new IllegalArgumentException("Given handler cannot be null.");
 	}

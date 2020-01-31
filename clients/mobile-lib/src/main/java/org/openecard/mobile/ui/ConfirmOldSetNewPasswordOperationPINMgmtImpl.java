@@ -42,7 +42,7 @@ public class ConfirmOldSetNewPasswordOperationPINMgmtImpl implements ConfirmOldS
     }
 
     @Override
-    public void enter(String oldPassword, String newPassword) {
+    public void confirmPassword(String oldPassword, String newPassword) {
 	List<OutputInfoUnit> lst = new ArrayList<>();
 	PasswordField opwd = new PasswordField(GenericPINStep.OLD_PIN_FIELD);
 	opwd.setValue(oldPassword.toCharArray());

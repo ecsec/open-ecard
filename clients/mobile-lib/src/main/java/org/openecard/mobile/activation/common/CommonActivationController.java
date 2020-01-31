@@ -38,7 +38,7 @@ class CommonActivationController implements ActivationController {
     }
 
     @Override
-    public void cancelAuthentication() {
+    public void cancelOngoingAuthentication() {
 	this.activationControllerService.cancelAuthentication(this.activation);
     }
 

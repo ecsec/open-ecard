@@ -33,5 +33,5 @@ public interface ServiceErrorResponse {
 
     ServiceErrorCode getStatusCode();
 
-    String getMessage();
+    String getErrorMessage();
 }

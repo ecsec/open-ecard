@@ -53,7 +53,7 @@ public class ConfirmPinCanOperationEACImpl implements ConfirmPinCanOperation {
     }
 
     @Override
-    public void enter(String pin, String can) {
+    public void confirmPassword(String pin, String can) {
 	if (msgSetter.isSupported()) {
 	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
 	} else {

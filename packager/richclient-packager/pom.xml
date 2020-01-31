@@ -132,6 +132,8 @@
 									<macOptions>
 										<bundleName>${app.identifier}</bundleName>
 										<bundleIdentifier>org.openecard.versioncheck.MainLoader</bundleIdentifier>
+										<sign>true</sign>
+										<signingKeyUserName>ecsec GmbH</signingKeyUserName>
 									</macOptions>
 									<windowsOptions>
 										<dirChooser>true</dirChooser>

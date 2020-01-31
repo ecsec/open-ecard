@@ -34,7 +34,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  */
 @FrameworkInterface
 public interface ContextManager {
-    void start(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported;
+    void initializeContext(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported;
 
-    void stop(StopServiceHandler handler);
+    void terminateContext(StopServiceHandler handler);
 }

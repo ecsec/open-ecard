@@ -159,7 +159,7 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
+	sut.initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
 
 	Assert.assertNull(startFailure.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -213,7 +213,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	CommonContextManager sut = this.createSut();
 
 	synchronized (lock) {
-	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
+	    sut.initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(result, startFailure));
 	    lock.wait(WAIT_TIMEOUT);
 	    lock.wait(WAIT_TIMEOUT);
 	}
@@ -233,11 +233,11 @@ public class CommonContextManagerWithFakeNfcTests {
 
 	CommonContextManager sut = this.createSut();
 
-	sut.start(PromiseDeliveringFactory.createStartServiceDelivery(startResult, startFailure));
+	sut.initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(startResult, startFailure));
 
 	Assert.assertNotNull(startResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 
-	sut.stop(PromiseDeliveringFactory.createStopServiceDelivery(stopResult));
+	sut.terminateContext(PromiseDeliveringFactory.createStopServiceDelivery(stopResult));
 
 	Assert.assertNull(stopResult.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
     }
@@ -254,7 +254,7 @@ public class CommonContextManagerWithFakeNfcTests {
 	Promise<ServiceErrorResponse> result = new Promise();
 
 	synchronized (lock) {
-	    sut.start(PromiseDeliveringFactory.createStartServiceDelivery(null, result));
+	    sut.initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(null, result));
 	}
 	Assert.assertNotNull(result.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS), "To be null, the start process must have unexpectedly succeeded!");
     }

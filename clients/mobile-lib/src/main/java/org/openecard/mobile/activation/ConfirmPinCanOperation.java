@@ -31,5 +31,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmPinCanOperation {
 
-    void enter(String pin, String can);
+    void confirmPassword(String pin, String can);
 }

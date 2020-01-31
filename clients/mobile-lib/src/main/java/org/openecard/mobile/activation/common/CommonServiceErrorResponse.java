@@ -32,7 +32,7 @@ public class CommonServiceErrorResponse implements ServiceErrorResponse {
     }
 
     @Override
-    public String getMessage() {
+    public String getErrorMessage() {
 	return message;
     }
 

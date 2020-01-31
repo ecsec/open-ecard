@@ -31,7 +31,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ActivationController {
 
-    void cancelAuthentication();
+    void cancelOngoingAuthentication();
 
     String getProtocolType();
 }

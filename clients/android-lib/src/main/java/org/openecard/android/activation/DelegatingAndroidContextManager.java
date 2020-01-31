@@ -78,13 +78,13 @@ public class DelegatingAndroidContextManager implements AndroidContextManager {
     }
 
     @Override
-    public void start(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
-	this.contextManager.start(handler);
+    public void initializeContext(StartServiceHandler handler) throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
+	this.contextManager.initializeContext(handler);
     }
 
     @Override
-    public void stop(StopServiceHandler handler) {
-	this.contextManager.stop(handler);
+    public void terminateContext(StopServiceHandler handler) {
+	this.contextManager.terminateContext(handler);
     }
 
 }

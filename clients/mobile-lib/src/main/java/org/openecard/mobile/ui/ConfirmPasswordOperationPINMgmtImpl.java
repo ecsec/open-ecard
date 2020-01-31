@@ -43,7 +43,7 @@ public class ConfirmPasswordOperationPINMgmtImpl implements ConfirmPasswordOpera
     }
 
     @Override
-    public void enter(String password) {
+    public void confirmPassword(String password) {
 	List<OutputInfoUnit> lst = new ArrayList<>();
 	PasswordField pwd = new PasswordField(PWD_ID);
 	pwd.setValue(password.toCharArray());

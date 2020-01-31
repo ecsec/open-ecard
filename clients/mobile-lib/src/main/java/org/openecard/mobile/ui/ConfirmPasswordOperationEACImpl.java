@@ -52,7 +52,7 @@ public class ConfirmPasswordOperationEACImpl implements ConfirmPasswordOperation
 	this.waitForPin = waitForPin;
     }
     @Override
-    public void enter(String pin) {
+    public void confirmPassword(String pin) {
 	if (msgSetter.isSupported()) {
 	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
 	} else {

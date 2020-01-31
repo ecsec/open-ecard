@@ -98,7 +98,7 @@ public class CommonContextManagerTests {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     void startRequiresHandler() throws UnableToInitialize, NfcUnavailable, NfcUnavailable, NfcDisabled, NfcDisabled, ApduExtLengthNotSupported {
-	sut.start(null);
+	sut.initializeContext(null);
     }
 
 }

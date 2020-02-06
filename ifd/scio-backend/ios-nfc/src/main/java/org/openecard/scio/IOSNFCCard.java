@@ -199,7 +199,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	if (errorCode == NFCReaderError.ReaderSessionInvalidationErrorSessionTimeout.value()) {
 	    return this.cfg.getAquireNFCTagTimeoutErrorMessage();
 	} else if (errorCode == NFCReaderError.ReaderTransceiveErrorTagConnectionLost.value()) {
-	    return "Tag lost" + this.cfg.getTagLostErrorMessage();
+	    return this.cfg.getTagLostErrorMessage();
 	}
 	else {
 	    return this.cfg.getDefaultNFCErrorMessage();

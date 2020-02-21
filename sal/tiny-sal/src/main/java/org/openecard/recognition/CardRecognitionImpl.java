@@ -272,7 +272,7 @@ public class CardRecognitionImpl implements CardRecognition {
     public CardInfoType getCardInfoFromRepo(String type) {
         CardInfoType cif = null;
         // only do something when a repo is specified
-	if (cif == null && cifRepo != null) {
+	if (cifRepo != null) {
 	    GetCardInfoOrACD req = new GetCardInfoOrACD();
 	    req.setAction(ECardConstants.CIF.GET_SPECIFIED);
 	    req.getCardTypeIdentifier().add(type);

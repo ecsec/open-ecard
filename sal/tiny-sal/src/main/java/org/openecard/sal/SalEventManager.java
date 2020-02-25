@@ -338,25 +338,11 @@ public class SalEventManager {
 
 			} else {
 			    LOG.debug("No card regonition for terminal {}.", ifdName);
+			    handleCardRemoved(oldSlot, oldTerm, ifdName, slotCapabilities);
 			}
 
 		    } else if (!terminalAdded && !cardPresent && cardWasPresent) {
-			// this makes only sense when the terminal was already there
-			// CARD REMOVED
-			// remove slot entry
-			BigInteger idx = oldSlot.getIndex();
-			Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
-			while (it.hasNext()) {
-			    SlotStatusType next = it.next();
-			    if (idx.equals(next.getIndex())) {
-				it.remove();
-				break;
-			    }
-			}
-			LOG.debug("Found a card removed event ({}).", ifdName);
-			ConnectionHandleType h = makeConnectionHandle(ifdName, idx, slotCapabilities);
-			// remove information from SAL state
-			salStates.removeCard(ctx, ifdName, idx);
+			handleCardRemoved(oldSlot, oldTerm, ifdName, slotCapabilities);
 		    }
 		}
 
@@ -374,6 +360,25 @@ public class SalEventManager {
 		    LOG.debug("Found a terminal removed event ({}).", ifdName);
 		}
 	    }
+	}
+
+	private void handleCardRemoved(SlotStatusType oldSlot, IFDStatusType oldTerm, String ifdName, IFDCapabilitiesType slotCapabilities) {
+	    // this makes only sense when the terminal was already there
+	    // CARD REMOVED
+	    // remove slot entry
+	    BigInteger idx = oldSlot.getIndex();
+	    Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
+	    while (it.hasNext()) {
+		SlotStatusType next = it.next();
+		if (idx.equals(next.getIndex())) {
+		    it.remove();
+		    break;
+		}
+	    }
+	    LOG.debug("Found a card removed event ({}).", ifdName);
+	    ConnectionHandleType h = makeConnectionHandle(ifdName, idx, slotCapabilities);
+	    // remove information from SAL state
+	    salStates.removeCard(ctx, ifdName, idx);
 	}
 
 	@Nullable

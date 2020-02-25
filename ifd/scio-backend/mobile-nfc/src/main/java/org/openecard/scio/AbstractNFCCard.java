@@ -28,7 +28,6 @@ import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.ifd.scio.SCIOProtocol;
-import org.openecard.common.ifd.scio.SCIOTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +51,8 @@ public abstract class AbstractNFCCard implements SCIOCard {
     }
 
     public abstract boolean isTagPresent();
+
+    public abstract boolean tagWasPresent();
 
     public abstract boolean terminateTag() throws SCIOException;
 
@@ -100,7 +101,7 @@ public abstract class AbstractNFCCard implements SCIOCard {
     }
 
     @Override
-    public SCIOTerminal getTerminal() {
+    public NFCCardTerminal getTerminal() {
 	return nfcCardTerminal;
     }
 

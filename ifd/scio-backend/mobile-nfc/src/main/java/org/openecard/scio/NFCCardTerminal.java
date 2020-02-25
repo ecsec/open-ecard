@@ -80,10 +80,10 @@ public abstract class NFCCardTerminal<T extends AbstractNFCCard> implements SCIO
     @Override
     public boolean isCardPresent() {
 	synchronized(cardLock) {
-	    return nfcCard != null;
+	    return nfcCard != null && !nfcCard.tagWasPresent();
 	}
     }
-
+    
     public boolean setNFCCard(T card) {
 	synchronized(cardLock) {
 	    T oldCard = this.nfcCard;

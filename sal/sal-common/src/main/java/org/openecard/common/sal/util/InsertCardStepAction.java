@@ -52,7 +52,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     private final Collection<String> cardTypes;
     private final List<ConnectionHandleType> response = new ArrayList<>();
 
-    private final Promise<ConnectionHandleType> promise = new Promise<>();
+    private final Promise<ConnectionHandleType> promise;
     private final SalStateView salStateView;
 
     /**
@@ -61,11 +61,17 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      * @param stepName The name of the step this action is run in.
      * @param cardTypes Collection of valid card types.
      * @param salStateView The manager of card states
+     * @param promise The promise used to communicate the recognized card handle.
      */
-    public InsertCardStepAction(String stepName, Collection<String> cardTypes, SalStateView salStateView) {
+    public InsertCardStepAction(
+	    String stepName,
+	    Collection<String> cardTypes,
+	    SalStateView salStateView,
+	    Promise<ConnectionHandleType> promise) {
 	super(stepName);
 	this.cardTypes = cardTypes;
 	this.salStateView = salStateView;
+	this.promise = promise;
     }
 
     @Override

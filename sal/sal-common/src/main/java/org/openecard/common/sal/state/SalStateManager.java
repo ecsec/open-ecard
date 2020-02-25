@@ -26,6 +26,7 @@ import org.openecard.common.util.ValueGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openecard.addon.sal.SalStateView;
+import org.openecard.common.sal.util.HexShim;
 
 
 /**
@@ -69,14 +70,26 @@ public class SalStateManager implements SalStateView {
 	while (it.hasNext()) {
 	    CardEntry next = it.next();
 	    if (next.matches(ctx, ifdName, idx)) {
+		LOG.debug("Removing known matching card [{}, {}, {}]", new HexShim(ctx), ifdName, idx);
 		it.remove();
 
 		removed = true;
+	    } else {
+		LOG.debug("Did not match for removal: [{}, {}, {}]", new HexShim(next.ctxHandle), next.ifdName, next.slotIdx);
 	    }
 	}
 	Map.Entry<String, StateEntry> matchingState = this.getStateEntry(ctx);
 	if (matchingState != null) {
-	    matchingState.getValue().removeCard();
+	    LOG.debug("Removing known matching state {}", new HexShim(ctx));
+	    final StateEntry stateEntry = matchingState.getValue();
+	    final ConnectedCardEntry connectedCard = stateEntry.getCardEntry();
+	    if (connectedCard != null) {
+		stateEntry.removeCard();
+		this.removeCard(connectedCard.ctxHandle, connectedCard.ifdName, connectedCard.slotIdx);
+	    }
+	}
+	if (!removed) {
+	    LOG.debug("No matching for card [{}, {}, {}]", new HexShim(ctx), ifdName, idx);
 	}
 	// nothing removed
 	return removed;

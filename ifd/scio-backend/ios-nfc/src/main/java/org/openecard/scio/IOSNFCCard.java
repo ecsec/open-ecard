@@ -56,7 +56,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private final int EXPECTED_REQUIRED_NFC_SESSION_MILLISECONDS = 5 * 1000;
 
     private DISPATCH_MODE concurrencyMode = DISPATCH_MODE.CONCURRENT;
-    private byte[] histBytes;
+    private volatile byte[] histBytes;
 
     public enum DISPATCH_MODE {
 	CONCURRENT,
@@ -66,21 +66,26 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private static final Logger LOG = LoggerFactory.getLogger(IOSNFCCard.class);
 
     public final Object tagLock = new Object();
-    private NFCSessionContext sessionContext;
+    private volatile NFCSessionContext sessionContext;
     private volatile NSError error;
     private volatile NFCISO7816Tag tag;
 
     private final IOSConfig cfg;
+    private volatile boolean tagWasPresent = false;
 
     public IOSNFCCard(NFCCardTerminal terminal, IOSConfig cfg) {
 	super(terminal);
 	this.cfg = cfg;
     }
 
-    private void setTag(NFCISO7816Tag tag, NFCSessionContext givenContext) {
-	if (givenContext == sessionContext || (tag == null && givenContext == null)) {
+    private void setTag(NFCISO7816Tag tag, NFCSessionContext givenContext, NSError err, boolean notifyRemoveTag) {
+	boolean givenEmptyTag = tag == null;
+	if (givenContext == sessionContext || (givenEmptyTag && givenContext == null)) {
+	    this.tagWasPresent = this.tag != null && givenEmptyTag;
+	    this.error = err;
 	    this.tag = tag;
-	    this.setHistBytes();
+	    this.setHistBytes(tag);
+	    LOG.debug("New tag state: [tagWasPresent={}, error={}, tag={}]", tagWasPresent, this.error, this.tag);
 	}
     }
 
@@ -130,6 +135,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	NFCSessionContext context = this.initSessionObj();
 
 	synchronized (this.tagLock) {
+	    this.tagWasPresent = false;
 	    this.error = null;
 	    this.sessionContext = context;
 	    context.session.beginSession();
@@ -219,15 +225,26 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
     @Override
     public boolean isTagPresent() {
-	LOG.debug("isTag present was called");
 	return this.tag != null;
     }
 
     @Override
+    public boolean tagWasPresent() {
+
+	return this.tagWasPresent;
+    }
+
+    @Override
     public boolean terminateTag() throws SCIOException {
+	return innerTerminateMethod();
+    }
+
+    private boolean innerTerminateMethod() {
+	LOG.debug("Beginning to terminate the NFC tag.");
 	synchronized (this.tagLock) {
 	    final NFCSessionContext currentSession = this.sessionContext;
 	    if (currentSession != null) {
+		LOG.debug("Terminating the NFC tag.");
 		if(this.error != null) {
 		    String message = getErrorMessage(error.getCode());
 		    currentSession.session.invalidateSession(message);
@@ -236,16 +253,16 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		    currentSession.session.invalidateSession();
 		}
 		this.sessionContext = null;
-		setHistBytes();
+		setTag(null, null, null, false);
 		return true;
 	    } else {
+		LOG.debug("Nothing to terminate.");
 		return false;
 	    }
 	}
     }
 
-    private void setHistBytes() {
-	final NFCISO7816Tag currentTag = this.tag;
+    private void setHistBytes(NFCISO7816Tag currentTag) {
 	final NSData hist = currentTag != null ? currentTag.getHistoricalBytes() : null;
 	if (hist != null) {
 	    this.histBytes = hist.getBytes();
@@ -305,10 +322,11 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	currentTag.sendCommandAPDU(isoapdu, (NSData resp, Byte sw1, Byte sw2, NSError er2) -> {
 	    if (er2 != null) {
 		LOG.debug("Following error occurred while transmitting the APDU: {}", er2);
-		p.deliver(null);
 		synchronized (this.tagLock) {
 		    this.error = er2;
 		}
+		p.deliver(null);
+		this.getTerminal().removeTag();
 	    } else {
 		ByteBuffer bb = ByteBuffer.allocate((int) resp.getLength() + 2);
 		bb.put(resp.getBytes(), 0, (int) resp.getLength());
@@ -357,8 +375,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	    }
 
 	    synchronized (tagLock) {
-		error = err;
-		setTag(null, currentContext);
+		setTag(null, currentContext, err, true);
 		tagLock.notifyAll();
 	    }
 	}
@@ -384,7 +401,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
 			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
 			synchronized (tagLock) {
-			    setTag(tag, currentContext);
+			    setTag(tag, currentContext, null, false);
 
 			    setDialogMsg(cfg.getDefaultCardConnectedMessage());
 			    tagLock.notifyAll();

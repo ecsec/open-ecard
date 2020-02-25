@@ -28,14 +28,6 @@ public class AndroidNFCCardTerminal extends NFCCardTerminal<AndroidNFCCard> {
 	return this.setNFCCard(card);
     }
 
-    @Override
-    public boolean isCardPresent() {
-	synchronized(cardLock) {
-	    AndroidNFCCard card = this.getNFCCard();
-	    return card != null && !card.tagWasPresent();
-	}
-    }
-
     void setNFCTag(IsoDep tag, int timeout) throws IOException {
 	synchronized(this.cardLock) {
 	    AndroidNFCCard card = getNFCCard();

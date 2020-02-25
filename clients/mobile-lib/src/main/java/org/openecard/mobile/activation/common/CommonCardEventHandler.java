@@ -78,7 +78,7 @@ public class CommonCardEventHandler {
 		    case CARD_INSERTED:
 			handler.onCardInserted();
 		    default:
-			LOG.debug("Received an unsupported Event: " + eventType.name());
+			LOG.debug("Card presence handler received an unsupported event: {}", eventType.name());
 			break;
 		}
 	    }
@@ -106,7 +106,7 @@ public class CommonCardEventHandler {
 
 			break;
 		    default:
-			LOG.debug("Received an unsupported Event: " + eventType.name());
+			LOG.debug("Card recognition handler received an unsupported event: {}", eventType.name());
 			break;
 		}
 	    }

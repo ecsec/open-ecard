@@ -221,7 +221,7 @@ public class MarshallerImpl {
 			    classes.add(c);
 			}
 		    } catch (ClassNotFoundException ex) {
-			LOG.error("Failed to load class: " + next, ex);
+			LOG.error("Failed to load class: {}", next, ex);
 		    }
 		}
 	    }

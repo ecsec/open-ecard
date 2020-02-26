@@ -144,11 +144,11 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 			    credentials.add(cred);
 			}
 		    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
-			LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
+			LOG.error("Failed to read certificates from card. Skipping DID {}.", info.getDidName(), ex);
 		    } catch (UnsupportedAlgorithmException ex) {
-			LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
+			LOG.error("Unsupported algorithm used in CIF. Skipping DID {}.", info.getDidName(), ex);
 		    } catch (WSHelper.WSException ex) {
-			LOG.error("Unknown error accessing DID " + info.getDidName() + ".", ex);
+			LOG.error("Unknown error accessing DID {}.", info.getDidName(), ex);
 		    }
 		}
 
@@ -179,11 +179,11 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 				return credentials;
 			    }
 			} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
-			    LOG.error("Failed to read certificates from card. Skipping DID " + info.getDidName() + ".", ex);
+			    LOG.error("Failed to read certificates from card. Skipping DID {}.", info.getDidName(), ex);
 			} catch (UnsupportedAlgorithmException ex) {
-			    LOG.error("Unsupported algorithm used in CIF. Skipping DID " + info.getDidName() + ".", ex);
+			    LOG.error("Unsupported algorithm used in CIF. Skipping DID {}.", info.getDidName(), ex);
 			} catch (WSHelper.WSException ex) {
-			    LOG.error("Unknown error accessing DID " + info.getDidName() + ".", ex);
+			    LOG.error("Unknown error accessing DID {}.", info.getDidName(), ex);
 			}
 		    }
 		}
@@ -373,9 +373,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		    }
 		}
 	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException ex) {
-		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+		LOG.error("Failed to read certificates from card. Skipping DID {}.", next.getDidName(), ex);
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+		LOG.error("Unknown error accessing DID {}.", next.getDidName(), ex);
 	    }
 	}
 
@@ -402,9 +402,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		    result.add(next);
 		}
 	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException ex) {
-		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+		LOG.error("Failed to read certificates from card. Skipping DID {}.", next.getDidName(), ex);
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+		LOG.error("Unknown error accessing DID {}.", next.getDidName(), ex);
 	    }
 	}
 
@@ -421,9 +421,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		    result.add(next);
 		}
 	    } catch (SecurityConditionUnsatisfiable ex) {
-		LOG.error("Failed to get ACL for certificates of DID " + next.getDidName() + ".", ex);
+		LOG.error("Failed to get ACL for certificates of DID {}.", next.getDidName(), ex);
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+		LOG.error("Unknown error accessing DID {}.", next.getDidName(), ex);
 	    }
 	}
 
@@ -446,9 +446,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		    }
 		}
 	    } catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
-		LOG.error("Failed to read certificates from card. Skipping DID " + next.getDidName() + ".", ex);
+		LOG.error("Failed to read certificates from card. Skipping DID {}.", next.getDidName(), ex);
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+		LOG.error("Unknown error accessing DID {}.", next.getDidName(), ex);
 	    }
 	}
     }
@@ -476,9 +476,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 			result.add(next);
 		}
 	    } catch (UnsupportedAlgorithmException ex) {
-		LOG.error("Unsupported algorithm used in CIF. Skipping DID " + next.getDidName() + ".", ex);
+		LOG.error("Unsupported algorithm used in CIF. Skipping DID {}.", next.getDidName(), ex);
 	    } catch (WSHelper.WSException ex) {
-		LOG.error("Unknown error accessing DID " + next.getDidName() + ".", ex);
+		LOG.error("Unknown error accessing DID {}.", next.getDidName(), ex);
 	    }
 	}
 

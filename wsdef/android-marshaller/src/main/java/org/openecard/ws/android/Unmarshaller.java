@@ -1644,7 +1644,7 @@ public class Unmarshaller {
 		} else if (parser.getName().equals("EACMarker")) {
 		    didMarker.setEACMarker((EACMarkerType) this.parseMarker(parser, EACMarkerType.class));
 		} else {
-		    LOG.error(parser.getName() + " not yet implemented");
+		    LOG.error("{} not yet implemented", parser.getName());
 		}
 	    }
 	} while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals("DIDMarker")));

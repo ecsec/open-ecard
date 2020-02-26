@@ -90,7 +90,7 @@ public class ChannelManager {
     public synchronized SingleThreadChannel openMasterChannel(@Nonnull String ifdName) throws NoSuchTerminal,
 	    SCIOException {
 	if (baseChannels.containsKey(ifdName)) {
-	    LOG.warn("Terminal '" + ifdName + "' is already connected.");
+	    LOG.warn("Terminal '{}' is already connected.", ifdName);
 	    return baseChannels.get(ifdName);
 	}
 	SCIOTerminal t = getTerminals().getTerminal(ifdName);
@@ -137,7 +137,7 @@ public class ChannelManager {
 		try {
 		    closeSlaveChannel(slotHandle);
 		} catch (NoSuchChannel | SCIOException ex) {
-		    LOG.warn("Failed to close channel for terminal '" + ifdName + "'.", ex);
+		    LOG.warn("Failed to close channel for terminal '{}'.", ifdName, ex);
 		}
 	    }
 	    ifdNameToHandles.remove(ifdName);
@@ -145,12 +145,12 @@ public class ChannelManager {
 
 	SingleThreadChannel ch = baseChannels.remove(ifdName);
 	if (ch == null) {
-	    LOG.warn("No master channel for terminal '" + ifdName + "' available.");
+	    LOG.warn("No master channel for terminal '{}' available.", ifdName);
 	} else {
 	    try {
 		ch.shutdown();
 	    } catch (SCIOException ex) {
-		LOG.warn("Failed to shut down master channel for terminal '" + ifdName + "'.");
+		LOG.warn("Failed to shut down master channel for terminal '{}'.", ifdName);
 	    }
 	}
     }

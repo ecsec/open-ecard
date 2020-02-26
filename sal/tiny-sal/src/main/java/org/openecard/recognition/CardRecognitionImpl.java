@@ -378,7 +378,7 @@ public class CardRecognitionImpl implements CardRecognition {
 	try {
 	    return FileUtils.resolveResourceAsStream(CardRecognitionImpl.class, "/card-images/" + filename);
 	} catch (IOException ex) {
-	    LOG.info("Failed to load card image '" + filename + "'.", ex);
+	    LOG.info("Failed to load card image '{}'.", filename, ex);
 	    return null;
 	}
     }

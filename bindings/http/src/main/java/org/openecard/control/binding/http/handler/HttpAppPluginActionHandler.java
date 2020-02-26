@@ -244,7 +244,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 		response = new Http11Response(429);
 		break;
 	    default:
-		LOG.error("Untreated result code: " + resultCode);
+		LOG.error("Untreated result code: {}", resultCode);
 		response = new Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 	}
 

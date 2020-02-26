@@ -127,11 +127,11 @@ public class GUIDefaults {
     public static ImageIcon getImage(String identifier) {
 	return getImage(identifier, -1, -1);
     }
-    
+
     public static InputStream getImageStream(String identifier, int width, int height) {
 	return getImageStream(getImage(identifier, width, height));
     }
-    
+
     public static InputStream getImageStream(String identifier) {
 	return getImageStream(getImage(identifier));
     }
@@ -194,7 +194,7 @@ public class GUIDefaults {
 		    else if (ICON_PROPERTIES.contains(propertyAttribute)) {
 			URL url = FileUtils.resolveResourceAsURL(guiProps.getClass(), value);
 			if (url == null) {
-			    LOG.error("Cannot parse the property: " + property);
+			    LOG.error("Cannot parse the property: {}", property);
 			} else {
 			    Image image = toolkit.getImage(url);
 			    ImageIcon icon = new ImageIcon(image);
@@ -203,7 +203,7 @@ public class GUIDefaults {
 			}
 		    }
 		} catch (Exception e) {
-		    LOG.error("Cannot parse the property: " + property);
+		    LOG.error("Cannot parse the property: {}", property);
 		}
 	    }
 	} catch (Exception e) {

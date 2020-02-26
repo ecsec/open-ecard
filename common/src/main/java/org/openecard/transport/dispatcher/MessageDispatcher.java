@@ -200,7 +200,7 @@ public class MessageDispatcher implements Dispatcher {
 			returnTypeImpl = result.getClass();
 		    }
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-		    LOG.error("Actual type could not be retrieved from method " + nextAccessor + ".", ex);
+		    LOG.error("Actual type could not be retrieved from method {}.", nextAccessor, ex);
 		    continue;
 		}
 

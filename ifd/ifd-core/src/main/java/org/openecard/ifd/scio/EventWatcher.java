@@ -131,7 +131,7 @@ public class EventWatcher implements Callable<List<IFDStatusType>> {
 				slot.setCardAvailable(true);
 				slot.setATRorATS(ch.getChannel().getCard().getATR().getBytes());
 			    } catch (NoSuchTerminal | SCIOException ex) {
-				LOG.error("Failed to open master channel for terminal '" + name + "'.", ex);
+				LOG.error("Failed to open master channel for terminal '{}'.", name, ex);
 				slot.setCardAvailable(false);
 				cm.closeMasterChannel(name);
 			    }

@@ -23,18 +23,11 @@ public class CardRemovalFilter implements EventFilter {
 
     private static Logger LOG = LoggerFactory.getLogger(CardRemovalFilter.class);
 
-    private boolean wasInserted = false;
-
     @Override
     public boolean matches(EventType t, EventObject o) {
-	if (t == EventType.CARD_INSERTED) {
-	    LOG.debug("Card insertion detected.");
-	    wasInserted = true;
-	    return false;
-	}
 	if (t == EventType.CARD_REMOVED) {
 	    LOG.debug("Card removal detected.");
-	    return wasInserted;
+	    return true;
 	}
 
 	return false;

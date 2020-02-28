@@ -81,6 +81,7 @@ public class CardCapturer {
 		ReadOnlyCardStateView createdState = initialState(ctx);
 		boolean success;
 		if (createdState == null) {
+		    LOG.debug("Could not initialize initial state");
 		    createdState = emptyState;
 		    success = false;
 		} else {

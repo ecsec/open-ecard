@@ -216,7 +216,10 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		}
 
 	    };
-	    eventDispatcher.add(disconnectEventSink);
+	    eventDispatcher.add(disconnectEventSink,
+		    EventType.CARD_REMOVED,
+		    EventType.POWER_DOWN_DEVICES,
+		    EventType.PREPARE_DEVICES);
 
 	    return new Pair(cardCapturer, (AutoCloseable) () -> {
 		eventDispatcher.del(disconnectEventSink);

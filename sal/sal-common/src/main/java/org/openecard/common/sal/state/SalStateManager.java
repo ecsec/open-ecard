@@ -61,10 +61,12 @@ public class SalStateManager implements SalStateView {
 	if (!this.cards.add(connectedCardEntry)) {
 	    this.cards.remove(connectedCardEntry);
 	    this.cards.add(connectedCardEntry);
+	    LOG.debug("Added card: {}", connectedCardEntry);
 	}
     }
 
     public boolean removeCard(byte[] ctx, String ifdName, BigInteger idx) {
+	LOG.debug("Request remove card: {}", new HexShim(ctx), ifdName, idx);
 	Iterator<CardEntry> it = cards.iterator();
 	boolean removed = false;
 	while (it.hasNext()) {

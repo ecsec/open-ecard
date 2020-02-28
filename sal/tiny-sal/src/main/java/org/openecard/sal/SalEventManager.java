@@ -176,6 +176,7 @@ public class SalEventManager {
 
 	@Nonnull
 	private List<IFDStatusType> wait(@Nonnull List<IFDStatusType> lastKnown) throws WSHelper.WSException {
+	    LOG.info("Waiting for IFD changes");
 	    Wait wait = new Wait();
 	    wait.setContextHandle(ctxHandle);
 	    wait.getIFDStatus().addAll(lastKnown);

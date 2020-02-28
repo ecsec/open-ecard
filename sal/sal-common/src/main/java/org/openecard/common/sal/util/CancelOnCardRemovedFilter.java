@@ -34,6 +34,7 @@ public class CancelOnCardRemovedFilter<T> implements EventCallback {
     public void signalEvent(EventType eventType, EventObject eventData) {
 	try {
 	    if (eventType == EventType.CARD_REMOVED) {
+		LOG.debug("Cancelling the given promise due to removal");
 		foundCardHandle.cancel();
 	    }
 	} catch (IllegalStateException ex) {

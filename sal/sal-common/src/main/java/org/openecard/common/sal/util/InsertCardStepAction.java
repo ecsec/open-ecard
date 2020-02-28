@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
-import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
@@ -38,6 +37,8 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -49,11 +50,13 @@ import org.openecard.gui.executor.StepActionResultStatus;
  */
 public class InsertCardStepAction extends StepAction implements EventCallback {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InsertCardStepAction.class);
+
     private final Collection<String> cardTypes;
     private final List<ConnectionHandleType> response = new ArrayList<>();
 
     private final Promise<ConnectionHandleType> promise;
-    private final SalStateView salStateView;
+    private final List<ConnectionHandleType> knownCards;
 
     /**
      * Creates a new InsertCardStep Action.
@@ -66,11 +69,11 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
     public InsertCardStepAction(
 	    String stepName,
 	    Collection<String> cardTypes,
-	    SalStateView salStateView,
+	    List<ConnectionHandleType> knownCards,
 	    Promise<ConnectionHandleType> promise) {
 	super(stepName);
 	this.cardTypes = cardTypes;
-	this.salStateView = salStateView;
+	this.knownCards = knownCards;
 	this.promise = promise;
     }
 
@@ -80,12 +83,15 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
 	// create session for wait for change
 
 	availableCards.addAll(checkAvailability());
-	while (availableCards.isEmpty()) {
+	if (availableCards.isEmpty()) {
+	    LOG.debug("Waiting for cards.");
 	    try {
 		availableCards.add(promise.deref());
 	    } catch (InterruptedException ex) {
 		return new StepActionResult(StepActionResultStatus.CANCEL);
 	    }
+	} else {
+	    LOG.debug("Reusing found cards.");
 	}
 
 	response.addAll(availableCards);
@@ -110,7 +116,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      */
     @Nonnull
     private List<ConnectionHandleType> checkAvailability() {
-	return this.salStateView.listCardHandles();
+	return knownCards;
     }
 
     @Override

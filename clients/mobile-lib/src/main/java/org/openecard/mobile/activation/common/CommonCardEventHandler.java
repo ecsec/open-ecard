@@ -77,6 +77,7 @@ public class CommonCardEventHandler {
 			break;
 		    case CARD_INSERTED:
 			handler.onCardInserted();
+			break;
 		    default:
 			LOG.debug("Card presence handler received an unsupported event: {}", eventType.name());
 			break;

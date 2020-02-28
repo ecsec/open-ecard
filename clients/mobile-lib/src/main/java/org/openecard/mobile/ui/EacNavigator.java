@@ -181,12 +181,6 @@ public final class EacNavigator extends MobileNavigator {
 	    Step pinStep = curStep;
 
 	    return displayAndExecuteBackground(pinStep, () -> {
-		if (pinFirstUse) {
-		    pinFirstUse = false;
-		} else {
-		    // tell user the card is not needed anymore prior to capturing the pin again
-		    interaction.onCardInteractionComplete();
-		}
 		final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 		EACData eacData = (EACData) context.get(EACProtocol.EAC_DATA);
@@ -196,6 +190,7 @@ public final class EacNavigator extends MobileNavigator {
 		PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
 		if (ps == null) {
 		    LOG.error("Missing PinState object.");
+		    interaction.onCardInteractionComplete();
 		    return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else if (! isCanStep && ps.isRequestCan()) {
 		    this.pauseExecution(context);

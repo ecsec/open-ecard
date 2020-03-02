@@ -20,5 +20,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 public interface ProviderInfo {
 
     String displayName();
+    String displayName(String lang);
 
 }

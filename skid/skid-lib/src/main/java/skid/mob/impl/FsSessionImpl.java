@@ -42,9 +42,11 @@ public class FsSessionImpl implements FsSession {
     }
 
     void load() throws NetworkError, ServerError, InvalidServerData {
-	// TODO: load SP infos and options
+	// load SP infos and options
 	Object spMdObj = apiClient.broker().getOptions(fsSessionId);
 	SpMetadata spMdModel = new SpMetadata(spMdObj);
+	spMdModel.load();
+
 	infoImpl = new InfoImpl(spMdModel);
 	infoImpl.load();
     }

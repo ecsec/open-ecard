@@ -10,7 +10,9 @@
 
 package skid.mob.lib;
 
+import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
+
 
 /**
  *
@@ -21,6 +23,6 @@ public interface Info {
 
     ProviderInfo getProviderInfo();
 
-    // TODO: add result type
-    void getOptions();
+    List<Option> getOptions();
+
 }

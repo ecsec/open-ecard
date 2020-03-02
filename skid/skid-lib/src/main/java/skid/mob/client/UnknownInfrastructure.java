@@ -8,26 +8,20 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
-
+package skid.mob.client;
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface Option {
+public class UnknownInfrastructure extends Exception {
 
-    String optionId();
+    public UnknownInfrastructure(String msg) {
+	super(msg);
+    }
 
-    String type();
-
-    String protocol();
-
-    String issuer();
-
-    ActivationType activationType();
+    public UnknownInfrastructure(String msg, Throwable cause) {
+	super(msg, cause);
+    }
 
 }

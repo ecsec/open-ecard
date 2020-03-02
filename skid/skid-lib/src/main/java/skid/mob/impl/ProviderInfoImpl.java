@@ -10,18 +10,35 @@
 
 package skid.mob.impl;
 
+import skid.mob.client.model.UiInfo;
+import skid.mob.lib.ProviderInfo;
+
 /**
  *
  * @author Tobias Wich
  */
-public class UnknownInfrastructure extends Exception {
+public class ProviderInfoImpl implements ProviderInfo {
 
-    public UnknownInfrastructure(String msg) {
-	super(msg);
+    private final UiInfo uii;
+
+    ProviderInfoImpl(UiInfo uii) {
+	this.uii = uii;
     }
 
-    public UnknownInfrastructure(String msg, Throwable cause) {
-	super(msg, cause);
+    public void load() {
+	
     }
+
+    @Override
+    public String displayName() {
+	return uii.displayName();
+    }
+
+    @Override
+    public String displayName(String lang) {
+	return uii.displayName(lang);
+    }
+
+
 
 }

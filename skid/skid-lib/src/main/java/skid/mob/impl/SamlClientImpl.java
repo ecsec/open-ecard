@@ -10,6 +10,7 @@
 
 package skid.mob.impl;
 
+import skid.mob.client.UnknownInfrastructure;
 import com.jayway.jsonpath.JsonPath;
 import skid.mob.client.ServerError;
 import java.io.IOException;

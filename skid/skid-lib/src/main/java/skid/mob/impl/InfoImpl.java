@@ -10,9 +10,16 @@
 
 package skid.mob.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import skid.mob.client.InvalidServerData;
+import skid.mob.client.model.AuthOption;
 import skid.mob.client.model.SpMetadata;
 import skid.mob.lib.Info;
+import skid.mob.lib.Option;
 import skid.mob.lib.ProviderInfo;
+
 
 /**
  *
@@ -21,24 +28,39 @@ import skid.mob.lib.ProviderInfo;
 public class InfoImpl implements Info {
 
     private final SpMetadata spMeta;
+    private boolean loaded = false;
+    private ProviderInfoImpl pi;
+    private List<Option> aos;
 
     InfoImpl(SpMetadata spMeta) {
 	this.spMeta = spMeta;
     }
 
-    void load() {
-	spMeta.getUiInfo();
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized void load() throws InvalidServerData {
+	if (! loaded) {
+	    // load objects
+	    pi = new ProviderInfoImpl(spMeta.getUiInfo());
+	    pi.load();
+
+	    aos = new ArrayList<>();
+	    for (AuthOption next : spMeta.getAuthOptions().list()) {
+		OptionImpl opt = new OptionImpl(next);
+		opt.load();
+		aos.add(opt);
+	    }
+
+	    loaded = true;
+	}
     }
 
     @Override
     public ProviderInfo getProviderInfo() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	return pi;
     }
 
     @Override
-    public void getOptions() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Option> getOptions() {
+	return Collections.unmodifiableList(aos);
     }
 
 }

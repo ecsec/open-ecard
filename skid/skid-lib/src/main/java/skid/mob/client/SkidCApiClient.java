@@ -11,9 +11,7 @@
 package skid.mob.client;
 
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.InvalidJsonException;
-import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,7 +20,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
-import org.json.JSONObject;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.UrlBuilder;
 import org.slf4j.Logger;

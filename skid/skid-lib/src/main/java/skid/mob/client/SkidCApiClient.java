@@ -14,11 +14,15 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.InvalidJsonException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.UrlBuilder;
@@ -41,6 +45,8 @@ public class SkidCApiClient {
 
     private static final String BROKER_PATH = "broker/api/";
     private static final String OPTIONS_PATH = BROKER_PATH + "options";
+    private static final String OPTIONS_SELECT_PATH = OPTIONS_PATH + "/select";
+    private static final String OPTIONS_CANCEL_PATH = OPTIONS_PATH + "/cancel";
 
     private final String skidBaseUri;
 
@@ -85,22 +91,51 @@ public class SkidCApiClient {
 	return con;
     }
 
-    public static String fetch(URL url, String mimeType) throws NetworkError, ServerError {
+    public static String fetch(String method, URL url, String reqMimeType, String payload, String resMimeType) throws NetworkError, ServerError {
+	boolean doInput = reqMimeType != null && payload != null;
+	boolean doOutput = resMimeType != null;
+
 	try {
 	    HttpURLConnection con = getClient(url);
-	    con.setRequestProperty("Accept", mimeType);
+	    con.setRequestMethod(method);
+
+	    if (doInput) {
+		con.setDoInput(true);
+		con.setRequestProperty("Content-Type", reqMimeType + "; charset=UTF-8");
+	    } else {
+		con.setDoInput(false);
+	    }
+
+	    if (doOutput) {
+		con.setDoOutput(true);
+		con.setRequestProperty("Accept", resMimeType);
+	    } else {
+		con.setDoOutput(false);
+	    }
 
 	    con.connect();
-	    int resCode = con.getResponseCode();
-	    if (resCode == HttpURLConnection.HTTP_OK) {
-		// get session id
-		InputStream objStream = con.getInputStream();
-		// TODO: read content encoding from header (Content-Type: application/json; charset=UTF-8
-		String objString = FileUtils.toString(objStream, "UTF-8");
 
-		return objString;
+	    // send payload
+	    if (doInput) {
+		try (OutputStream out = con.getOutputStream()) {
+		    assert(payload != null); // not null due to doInput boolean
+		    out.write(payload.getBytes("UTF-8"));
+		}
+	    }
+
+	    int resCode = con.getResponseCode();
+	    if (doOutput && resCode == HttpURLConnection.HTTP_OK) {
+		// get session id
+		try (InputStream objStream = con.getInputStream()) {
+		    // TODO: read content encoding from header (Content-Type: application/json; charset=UTF-8
+		    String objString = FileUtils.toString(objStream, "UTF-8");
+
+		    return objString;
+		}
+	    } else if (! doOutput && resCode == HttpURLConnection.HTTP_NO_CONTENT) {
+		return null;
 	    } else {
-		throw new ServerError(resCode, "Failed to retrieve session from SAML FS.");
+		throw new ServerError(resCode, "Failed to retrieve session from SkIDentity server.");
 	    }
 	} catch (IOException ex) {
 	    throw new NetworkError("Failed execute HTTP request.", ex);
@@ -117,6 +152,25 @@ public class SkidCApiClient {
 	}
     }
 
+    private String formUrlEncode(Map<String,String> formData) {
+	StringBuilder sb = new StringBuilder();
+	boolean first = true;
+	for (Map.Entry<String, String> e : formData.entrySet()) {
+	    String k = e.getKey();
+	    String v = URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8);
+
+	    if (first) {
+		first = false;
+	    } else {
+		sb.append("&");
+	    }
+	    sb.append(k);
+	    sb.append("=");
+	    sb.append(v);
+	}
+	return sb.toString();
+    }
+
     public Broker broker() {
 	return new Broker();
     }
@@ -124,8 +178,27 @@ public class SkidCApiClient {
     public class Broker {
 
 	public Object getOptions(String session) throws NetworkError, ServerError, InvalidServerData {
-	    String objString = fetch(makeUrl(OPTIONS_PATH, Collections.singletonMap("session", session)), "application/json");
+	    String objString = fetch("GET", makeUrl(OPTIONS_PATH, Collections.singletonMap("session", session)), null, null, "application/json");
 	    return toJson(objString);
+	}
+
+	public String selectOption(String session, String optionId) throws NetworkError, ServerError {
+	    HashMap<String, String> formData = new HashMap<>();
+	    formData.put("session", session);
+	    formData.put("option", optionId);
+	    String formDataEnc = formUrlEncode(formData);
+
+	    String activateUrl = fetch("POST", makeUrl(OPTIONS_SELECT_PATH), "application/x-www-form-urlencoded", formDataEnc, "text/plain");
+	    return activateUrl;
+	}
+
+	public String cancelSession(String session) throws NetworkError, ServerError {
+	    HashMap<String, String> formData = new HashMap<>();
+	    formData.put("session", session);
+	    String formDataEnc = formUrlEncode(formData);
+
+	    String finishUrl = fetch("POST", makeUrl(OPTIONS_CANCEL_PATH), "application/x-www-form-urlencoded", formDataEnc, "text/plain");
+	    return finishUrl;
 	}
 
     }

@@ -10,6 +10,7 @@
 
 package skid.mob.lib;
 
+import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -19,7 +20,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacResult {
 
-    void getResultCode();
+    ActivationResultCode getResultCode();
     String getErrorMessage();
 
 }

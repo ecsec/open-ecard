@@ -8,17 +8,22 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
+package skid.mob.impl;
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface AuthModule {
+public class ThreadUtils {
 
-    void start(AuthCallback cb);
+    public static void ifNotInterrupted(VoidCallback cb) {
+	if (! Thread.currentThread().isInterrupted()) {
+	    cb.fun();
+	}
+    }
+
+    public static interface VoidCallback {
+	void fun();
+    }
 
 }

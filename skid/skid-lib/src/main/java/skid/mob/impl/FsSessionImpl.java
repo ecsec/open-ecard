@@ -10,16 +10,23 @@
 
 package skid.mob.impl;
 
+import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.client.InvalidServerData;
 import skid.mob.client.NetworkError;
 import skid.mob.client.ServerError;
 import skid.mob.client.SkidCApiClient;
 import skid.mob.client.model.SpMetadata;
-import skid.mob.lib.AuthModule;
+import skid.mob.lib.ActivationType;
+import skid.mob.lib.AuthCallback;
+import skid.mob.lib.Cancellable;
 import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.FsSession;
 import skid.mob.lib.Info;
+import skid.mob.lib.InitFailedCallback;
 import skid.mob.lib.Option;
+import skid.mob.lib.SkidErrorCodes;
+import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
+import skid.mob.lib.SelectedOption;
 
 
 /**
@@ -28,6 +35,7 @@ import skid.mob.lib.Option;
  */
 public class FsSessionImpl implements FsSession {
 
+    private final EacControllerFactory eacFac = null; // TODO: get this from somewhere
     private final SkidCApiClient apiClient;
 
     private final String fsSessionId;
@@ -57,8 +65,63 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public AuthModule select(Option o) {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Cancellable cancelSession(InitFailedCallback failedCb) {
+	Runnable r = () -> {
+	    try {
+		String actUrl = apiClient.broker().cancelSession(fsSessionId);
+		ifNotInterrupted(() -> finishedCb.done(fsSessionId));
+	    } catch (NetworkError ex) {
+		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+	    } catch (ServerError ex) {
+		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+	    }
+	};
+
+	Thread t = new Thread(r, "FsSession-Cancel");
+	t.start();
+	return t::interrupt;
+    }
+
+    @Override
+    public Cancellable select(SelectedOption o, InitFailedCallback failedCb, AuthCallback authCb) {
+	Runnable r = () -> {
+	    try {
+		if (isNpa(o.getOption())) {
+		    // select option
+		    String actUrl = sendSelect(o);
+		    // start authentication
+		    ifNotInterrupted(() -> {
+			EacAuthModule authMod = new EacAuthModule(eacFac, actUrl, finishedCb);
+			authCb.doAuth(authMod);
+		    });
+		} else {
+		    ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.UNSUPPORTED_FEATURE,
+			    "The selected option is currently not supported."));
+		}
+	    } catch (NetworkError ex) {
+		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+	    } catch (ServerError ex) {
+		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+	    }
+	};
+
+	Thread t = new Thread(r, "FsSession-Select");
+	t.start();
+	return t::interrupt;
+    }
+
+    private String sendSelect(SelectedOption o) throws NetworkError, ServerError {
+	String optionId = o.getOption().optionId();
+	// TODO: add selection
+	String actUrl = apiClient.broker().selectOption(fsSessionId, optionId);
+	return actUrl;
+    }
+
+    private boolean isNpa(Option o) {
+	boolean eidClientActivation = o.activationType() == ActivationType.EID_CLIENT;
+	boolean isNpa = "http://bsi.bund.de/cif/npa.xml".equals(o.type());
+	boolean isTr03124 = "urn:oid:1.3.162.15480.3.0.14".equals(o.protocol());
+	return eidClientActivation && isNpa && isTr03124;
     }
 
 }

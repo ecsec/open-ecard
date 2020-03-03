@@ -10,7 +10,6 @@
 
 package skid.mob.lib;
 
-import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -18,8 +17,10 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface EacModule {
+public interface SelectedOption {
 
-    Cancellable runEac(EacInteraction interactionComponent, ResultHandler resultHandler);
+    Option getOption();
+
+    // TODO: add attribute functions
 
 }

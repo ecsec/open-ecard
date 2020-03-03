@@ -30,6 +30,7 @@ import skid.mob.lib.SamlClient;
 import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.InitFailedCallback;
 import skid.mob.lib.SkidErrorCodes;
+import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 
 
 /**
@@ -110,16 +111,6 @@ public class SamlClientImpl implements SamlClient {
 	    String msg = String.format("The SkIDentity base URL could not be determined based on the SAML FS URL (%s).", uri);
 	    throw new UnknownInfrastructure(msg);
 	}
-    }
-
-    private void ifNotInterrupted(VoidCallback cb) {
-	if (! Thread.currentThread().isInterrupted()) {
-	    cb.fun();
-	}
-    }
-
-    private static interface VoidCallback {
-	void fun();
     }
 
     private final class AuthReqResp {

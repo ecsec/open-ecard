@@ -8,18 +8,27 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
+package skid.mob.impl;
 
-import org.openecard.mobile.activation.EacInteraction;
-import org.openecard.robovm.annotations.FrameworkInterface;
+import skid.mob.lib.Option;
+import skid.mob.lib.SelectedOption;
+
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface EacModule {
+public class SelectedOptionImpl implements SelectedOption {
 
-    Cancellable runEac(EacInteraction interactionComponent, ResultHandler resultHandler);
+    private final OptionImpl option;
+
+    SelectedOptionImpl(OptionImpl option) {
+	this.option = option;
+    }
+
+    @Override
+    public Option getOption() {
+	return option;
+    }
 
 }

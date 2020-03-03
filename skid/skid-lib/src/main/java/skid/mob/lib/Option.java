@@ -20,6 +20,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface Option {
 
+    SelectedOption createSelection();
+
     String optionId();
 
     String type();

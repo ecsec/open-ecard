@@ -14,6 +14,7 @@ import skid.mob.client.InvalidServerData;
 import skid.mob.client.model.AuthOption;
 import skid.mob.lib.ActivationType;
 import skid.mob.lib.Option;
+import skid.mob.lib.SelectedOption;
 
 
 /**
@@ -36,6 +37,11 @@ public class OptionImpl implements Option {
 
 	    this.loaded = true;
 	}
+    }
+
+    @Override
+    public SelectedOption createSelection() {
+	return new SelectedOptionImpl(this);
     }
 
     @Override

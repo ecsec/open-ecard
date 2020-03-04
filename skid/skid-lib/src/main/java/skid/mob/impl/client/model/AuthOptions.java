@@ -8,14 +8,14 @@
  *
  ***************************************************************************/
 
-package skid.mob.client.model;
+package skid.mob.impl.client.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import skid.mob.client.InvalidServerData;
+import skid.mob.impl.client.InvalidServerData;
 
 
 /**

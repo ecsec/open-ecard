@@ -10,7 +10,7 @@
 
 package skid.mob.impl;
 
-import skid.mob.client.model.UiInfo;
+import skid.mob.impl.client.model.UiInfo;
 import skid.mob.lib.ProviderInfo;
 
 /**

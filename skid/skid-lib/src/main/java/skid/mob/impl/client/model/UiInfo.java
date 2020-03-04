@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.client.model;
+package skid.mob.impl.client.model;
 
 import com.jayway.jsonpath.DocumentContext;
 import static com.jayway.jsonpath.Filter.*;

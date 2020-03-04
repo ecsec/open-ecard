@@ -24,7 +24,7 @@ public class SamlClientTest {
 
     @Test
     public void testFetchSession() throws InterruptedException, ExecutionException {
-	SamlClientImpl client = new SamlClientImpl();
+	SamlClientImpl client = new SamlClientImpl(null);
 	CompletableFuture<String> cb = new CompletableFuture<>();
 	Cancellable c = client.startSession("https://lif-test.fifty-fifty.taxi/fifty-fifty-service/api/oauth/authorize?response_type=token&client_id=fifty-fifty&scope=auth&state=",
 		v -> {cb.complete("init");}, (v1, v2) -> {cb.complete("error");}, v -> {cb.complete("finished");});

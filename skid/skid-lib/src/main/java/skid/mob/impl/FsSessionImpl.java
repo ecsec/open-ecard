@@ -10,12 +10,13 @@
 
 package skid.mob.impl;
 
+import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.EacControllerFactory;
-import skid.mob.client.InvalidServerData;
-import skid.mob.client.NetworkError;
-import skid.mob.client.ServerError;
-import skid.mob.client.SkidCApiClient;
-import skid.mob.client.model.SpMetadata;
+import skid.mob.impl.client.InvalidServerData;
+import skid.mob.impl.client.NetworkError;
+import skid.mob.impl.client.ServerError;
+import skid.mob.impl.client.SkidCApiClient;
+import skid.mob.impl.client.model.SpMetadata;
 import skid.mob.lib.ActivationType;
 import skid.mob.lib.AuthCallback;
 import skid.mob.lib.Cancellable;
@@ -35,7 +36,7 @@ import skid.mob.lib.SelectedOption;
  */
 public class FsSessionImpl implements FsSession {
 
-    private final EacControllerFactory eacFac = null; // TODO: get this from somewhere
+    private final ActivationSource oecActivationSource;
     private final SkidCApiClient apiClient;
 
     private final String fsSessionId;
@@ -43,7 +44,8 @@ public class FsSessionImpl implements FsSession {
 
     private InfoImpl infoImpl;
 
-    FsSessionImpl(String fsSessionId, String skidBaseUri, FinishedCallback finishedCb) {
+    FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri, FinishedCallback finishedCb) {
+	this.oecActivationSource = oecActivationSource;
 	this.apiClient = new SkidCApiClient(skidBaseUri);
 	this.fsSessionId = fsSessionId;
 	this.finishedCb = finishedCb;
@@ -91,7 +93,8 @@ public class FsSessionImpl implements FsSession {
 		    String actUrl = sendSelect(o);
 		    // start authentication
 		    ifNotInterrupted(() -> {
-			EacAuthModule authMod = new EacAuthModule(eacFac, actUrl, finishedCb);
+			EacControllerFactory fact = oecActivationSource.eacFactory();
+			EacAuthModule authMod = new EacAuthModule(fact, actUrl, finishedCb);
 			authCb.doAuth(authMod);
 		    });
 		} else {

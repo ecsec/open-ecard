@@ -10,8 +10,8 @@
 
 package skid.mob.impl;
 
-import skid.mob.client.InvalidServerData;
-import skid.mob.client.model.AuthOption;
+import skid.mob.impl.client.InvalidServerData;
+import skid.mob.impl.client.model.AuthOption;
 import skid.mob.lib.ActivationType;
 import skid.mob.lib.Option;
 import skid.mob.lib.SelectedOption;

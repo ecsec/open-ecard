@@ -1,0 +1,1238 @@
+{
+  "name": "{urn:oasis:names:tc:SAML:2.0:metadata}EntityDescriptor",
+  "declaredType": "oasis.names.tc.saml._2_0.metadata.EntityDescriptorType",
+  "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+  "value": {
+    "ID": null,
+    "Signature": null,
+    "Extensions": null,
+    "roleDescriptorOrIDPSSODescriptorOrSPSSODescriptor": [
+      {
+        "SPSSODescriptor": {
+          "ID": null,
+          "AssertionConsumerService": [
+            {
+              "any": null,
+              "otherAttributes": {},
+              "Binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+              "Location": "https://lif-test.fifty-fifty.taxi/fifty-fifty-service/api/saml/acs",
+              "ResponseLocation": null,
+              "index": 0,
+              "isDefault": true
+            },
+            {
+              "any": null,
+              "otherAttributes": {},
+              "Binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+              "Location": "https://lif-test.fifty-fifty.taxi/fifty-fifty-service/api/saml/acs",
+              "ResponseLocation": null,
+              "index": 1,
+              "isDefault": false
+            }
+          ],
+          "AttributeConsumingService": [],
+          "otherAttributes": {},
+          "Signature": null,
+          "Extensions": {
+            "any": [
+              {
+                "name": "{urn:oasis:names:tc:SAML:metadata:ui}UIInfo",
+                "declaredType": "oasis.names.tc.saml.metadata.ui.UIInfoType",
+                "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                "value": {
+                  "displayNameOrDescriptionOrKeywords": [
+                    {
+                      "JAXBElement": {
+                        "name": "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName",
+                        "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedNameType",
+                        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                        "value": {
+                          "value": "Fifty-Fifty-Service (lif-test)",
+                          "lang": "en"
+                        },
+                        "nil": false,
+                        "globalScope": true,
+                        "typeSubstituted": false
+                      }
+                    },
+                    {
+                      "JAXBElement": {
+                        "name": "{urn:oasis:names:tc:SAML:metadata:ui}InformationURL",
+                        "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedURIType",
+                        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                        "value": {
+                          "value": "https://www.ecsec.de",
+                          "lang": "en"
+                        },
+                        "nil": false,
+                        "globalScope": true,
+                        "typeSubstituted": false
+                      }
+                    },
+                    {
+                      "JAXBElement": {
+                        "name": "{urn:oasis:names:tc:SAML:metadata:ui}PrivacyStatementURL",
+                        "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedURIType",
+                        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                        "value": {
+                          "value": "https://www.ecsec.de",
+                          "lang": "en"
+                        },
+                        "nil": false,
+                        "globalScope": true,
+                        "typeSubstituted": false
+                      }
+                    },
+                    {
+                      "JAXBElement": {
+                        "name": "{urn:oasis:names:tc:SAML:metadata:ui}Logo",
+                        "declaredType": "oasis.names.tc.saml.metadata.ui.LogoType",
+                        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                        "value": {
+                          "value": "https://sp.skidentity.de/management-backend/api/images/ADC564707DA283A1.png",
+                          "height": 65,
+                          "width": 100,
+                          "lang": "en"
+                        },
+                        "nil": false,
+                        "globalScope": true,
+                        "typeSubstituted": false
+                      }
+                    },
+                    {
+                      "JAXBElement": {
+                        "name": "{urn:oasis:names:tc:SAML:profile:privacy}AuthenticationOptionGroups",
+                        "declaredType": "oasis.names.tc.saml.profile.privacy.AuthenticationOptionGroupsType",
+                        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                        "value": {
+                          "AuthenticationOptionGroup": [
+                            {
+                              "Extensions": null,
+                              "UIInfo": {
+                                "displayNameOrDescriptionOrKeywords": [
+                                  {
+                                    "JAXBElement": {
+                                      "name": "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName",
+                                      "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedNameType",
+                                      "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                                      "value": {
+                                        "value": "Cloud Identity",
+                                        "lang": "en"
+                                      },
+                                      "nil": false,
+                                      "globalScope": true,
+                                      "typeSubstituted": false
+                                    }
+                                  },
+                                  {
+                                    "JAXBElement": {
+                                      "name": "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName",
+                                      "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedNameType",
+                                      "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                                      "value": {
+                                        "value": "Cloud Identität",
+                                        "lang": "de"
+                                      },
+                                      "nil": false,
+                                      "globalScope": true,
+                                      "typeSubstituted": false
+                                    }
+                                  },
+                                  {
+                                    "JAXBElement": {
+                                      "name": "{urn:oasis:names:tc:SAML:metadata:ui}Logo",
+                                      "declaredType": "oasis.names.tc.saml.metadata.ui.LogoType",
+                                      "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                                      "value": {
+                                        "value": "https://cdn.skidentity.de/images/auth-types/nPA.jpg",
+                                        "height": 198,
+                                        "width": 200,
+                                        "lang": null
+                                      },
+                                      "nil": false,
+                                      "globalScope": true,
+                                      "typeSubstituted": false
+                                    }
+                                  }
+                                ]
+                              },
+                              "authenticationOptionRefOrAuthenticationOptionGroup": [
+                                "cloudid"
+                              ],
+                              "Attribute": null,
+                              "RequestedAttribute": [
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/FirstName",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "FirstName",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/LastName",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "LastName",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/Street",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "Street",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/StreetNumber",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "StreetNumber",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/City",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "City",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/ZipCode",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "ZipCode",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/Country",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "Country",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/DateOfBirth",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "DateOfBirth",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/eIdentifier",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "eIdentifier",
+                                  "isRequired": true,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/PlaceOfBirth",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "PlaceOfBirth",
+                                  "isRequired": false,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                },
+                                {
+                                  "otherAttributes": {},
+                                  "AttributeValue": null,
+                                  "Name": "http://www.skidentity.de/att/Age",
+                                  "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                                  "FriendlyName": "Age",
+                                  "isRequired": false,
+                                  "AuthenticationOptionRef": [
+                                    "npa"
+                                  ]
+                                }
+                              ],
+                              "otherAttributes": {},
+                              "AuthenticationOptionGroupID": "cloudid"
+                            }
+                          ]
+                        },
+                        "nil": false,
+                        "globalScope": true,
+                        "typeSubstituted": false
+                      }
+                    }
+                  ]
+                },
+                "nil": false,
+                "globalScope": true,
+                "typeSubstituted": false
+              },
+              {
+                "name": "{urn:oasis:names:tc:SAML:profile:privacy}Accepts",
+                "declaredType": "oasis.names.tc.saml.profile.privacy.AcceptsType",
+                "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                "value": {
+                  "IDPEntry": null,
+                  "AuthenticationOption": [
+                    {
+                      "Extensions": null,
+                      "Type": "http://ws.skidentity.de/ci/v2.0",
+                      "Protocol": "http://ws.skidentity.de/ci/v2.0",
+                      "Issuer": null,
+                      "DerivedCredential": [
+                        {
+                          "Extensions": null,
+                          "Type": "http://bsi.bund.de/cif/npa.xml",
+                          "Protocol": "urn:oid:1.3.162.15480.3.0.14",
+                          "Issuer": [
+                            "O=Bundesrepublik Deutschland, OU=Bundesministerium des Innern, C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "npa"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://cif.chipkarte.at/e-card/g3",
+                          "Protocol": "urn:oid:1.3.162.15480.3.0.25",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "ecard-austria"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://cif.id.ee/eid",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "est-eid"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://cif.id.ee/eidV3.5.8+",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "e-residency"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://opencard.org/cif/rub-card",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "RUB"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://gemalto.com/safenet/eToken",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "multicert"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://www.linkedin.com",
+                          "Protocol": "urn:ietf:rfc:6749",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "linkedin"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://www.facebook.com",
+                          "Protocol": "urn:ietf:rfc:6749",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "facebook"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://eid.belgium.be/cif/v1-7-0",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=Citizen CA, C=BE",
+                            "CN=Foreigner CA, C=BE",
+                            "CN=Government CA, C=BE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "beid"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://www.datev.de/smartcard",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=CA DATEV BT 02,O=DATEV eG,C=DE",
+                            "CN=CA DATEV BT 03,O=DATEV eG,C=DE",
+                            "CN=CA DATEV BT 97,O=DATEV eG,C=DE",
+                            "CN=CA DATEV BT 98,O=DATEV eG,C=DE",
+                            "CN=CA DATEV DSI 01,O=DATEV eG,C=DE",
+                            "CN=CA DATEV EM 01,O=DATEV eG,C=DE",
+                            "CN=CA DATEV EM 02,O=DATEV eG,C=DE",
+                            "CN=CA DATEV INT 02,O=DATEV eG,C=DE",
+                            "CN=CA DATEV INT 03,O=DATEV eG,C=DE",
+                            "CN=CA DATEV INT 97,O=DATEV eG,C=DE",
+                            "CN=CA DATEV INT 98,O=DATEV eG,C=DE",
+                            "CN=CA DATEV STD 02,O=DATEV eG,C=DE",
+                            "CN=CA DATEV STD 03,O=DATEV eG,C=DE",
+                            "CN=CA DATEV STD 97,O=DATEV eG,C=DE",
+                            "CN=CA DATEV STD 98,O=DATEV eG,C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "datev"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://www.d-trust.net/produkte/d-trust-signaturkarten/d-trust-card/standard_v3",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=D-TRUST Advanced Class 2 CA 1 2012,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Advanced Class 3 CA 1 2009,O=D-TRUST GmbH,C=DE",
+                            "CN=D-TRUST CA 2-1 2015,O=D-Trust GmbH,L=Berlin,C=DE",
+                            "CN=D-TRUST Corporate Root CA 1 2013,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root CA 1 2013,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root CA 2 2013,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root CA 3 2013,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root Class 1 CA 2007,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root Class 2 CA 2007,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root Class 3 CA 2007,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root Class 3 CA 2 2009,O=D-Trust GmbH,C=DE",
+                            "CN=D-TRUST Root Class 3 CA 2 EV 2009,O=D-Trust GmbH,C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "dtrust"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://cif.chipkarte.at/e-card/g3",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=A-Trust-nQUal-01,OU=A-Trust-nQUal-01,O=A-Trust,C=AT",
+                            "CN=A-Trust-nQual-03,OU=A-Trust-nQual-03,O=A-Trust Ges. f. Sicherheitssysteme im elektr. Datenverkehr GmbH,C=AT",
+                            "CN=A-Trust-Qual-01,OU=A-Trust-Qual-01,O=A-Trust Ges. für Sicherheitssysteme im elektr. Datenverkehr GmbH,C=AT",
+                            "CN=A-Trust-Qual-02,OU=A-Trust-Qual-02,O=A-Trust Ges. f. Sicherheitssysteme im elektr. Datenverkehr GmbH,C=AT",
+                            "CN=A-Trust-Qual-03,OU=A-Trust-Qual-03,O=A-Trust Ges. f. Sicherheitssysteme im elektr. Datenverkehr GmbH,C=AT",
+                            "CN=A-Trust-Root-05,OU=A-Trust-Root-05,O=A-Trust Ges. f. Sicherheitssysteme im elektr. Datenverkehr GmbH,C=AT"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "ecard-austria"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://pki.fraunhofer.de/card",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=Fraunhofer User CA - G01,OU=Fraunhofer Corporate PKI,O=Fraunhofer,L=Muenchen,ST=Bayern,C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "fraunhofer-card"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://id.ge/card-v1",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "C=GE,O=Ministry of Justice of Georgia,OU=Civil Registry Agency,CN=GEO Authentication CA"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "georgia"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://public.lu/cif/Lux-eID",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=LuxTrust Global Qualified CA,O=LuxTrust S.A.,C=LU",
+                            "CN=LuxTrust Global Qualified CA 2,O=LuxTrust S.A.,C=LU",
+                            "CN=LuxTrust Global Qualified CA 3,O=LuxTrust S.A.,C=LU"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "luxtrust-eID"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://luxtrust.lu/cif/LuxTrust-V3",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=LuxTrust Global Qualified CA,O=LuxTrust S.A.,C=LU",
+                            "CN=LuxTrust Global Qualified CA 2,O=LuxTrust S.A.,C=LU",
+                            "CN=LuxTrust Global Qualified CA 3,O=LuxTrust S.A.,C=LU"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "luxtrust-v3"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://pki.cartaodecidadao.pt/eid-card",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=EC de Autenticação do Cartão de Cidadão 0006,OU=subECEstado,O=Cartão de Cidadão,C=PT",
+                            "CN=EC de Autenticação do Cartão de Cidadão 0007,OU=subECEstado,O=Cartão de Cidadão,C=PT",
+                            "CN=EC de Autenticação do Cartão de Cidadão 0008,OU=subECEstado,O=Cartão de Cidadão,C=PT",
+                            "CN=EC de Autenticação do Cartão de Cidadão 0009,OU=subECEstado,O=Cartão de Cidadão,C=PT",
+                            "CN=EC de Autenticação do Cartão de Cidadão 0010,OU=subECEstado,O=Cartão de Cidadão,C=PT",
+                            "CN=EC de Autenticação do Cartão de Cidadão 0011,OU=subECEstado,O=Cartão de Cidadão,C=PT"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "portugal"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://mup.gov.rs/eid-card",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=MUPCA Root 3,OU=MUPCA,O=MUP Republike Srbije,C=RS"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "Browser",
+                          "AuthenticationOptionID": "serbia"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://cif.id.ee/eidV3.5",
+                          "Protocol": "urn:oid:1.3.162.15480.3.0.25",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "vrbank"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "dummy-hba-group",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": null,
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "hba"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://www.aekno.de/eAT-light",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=eA-light CA 1:PN,O=eA-light-ArGe,C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "ealight"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://www.baek.de/cif/HPC-G2",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            ""
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "hpcg2"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "http://www.dgn.de/cif/HPCqSIG",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            "CN=dgnservice CA 4 Type C:PN,O=DGN Deutsches Gesundheitsnetz Service GmbH,C=DE",
+                            "CN=dgnservice CA 5 Type C:PN,O=DGN Deutsches Gesundheitsnetz Service GmbH,C=DE",
+                            "CN=dgnservice CA 6 Type C:PN,O=DGN Deutsches Gesundheitsnetz Service GmbH,C=DE"
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "hpcqsig"
+                        },
+                        {
+                          "Extensions": null,
+                          "Type": "https://www.ihk.de/cif/ChamberCard",
+                          "Protocol": "urn:ietf:rfc:5246",
+                          "Issuer": [
+                            ""
+                          ],
+                          "DerivedCredential": null,
+                          "UIInfo": null,
+                          "AuthnContextClassRef": null,
+                          "AuthnContextDeclRef": null,
+                          "Attribute": null,
+                          "ActivateURL": null,
+                          "RequestedAttribute": null,
+                          "otherAttributes": {},
+                          "ActivationType": "eID-Client",
+                          "AuthenticationOptionID": "ihk"
+                        }
+                      ],
+                      "UIInfo": {
+                        "displayNameOrDescriptionOrKeywords": [
+                          {
+                            "JAXBElement": {
+                              "name": "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName",
+                              "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedNameType",
+                              "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                              "value": {
+                                "value": "Cloud Identity",
+                                "lang": "en"
+                              },
+                              "nil": false,
+                              "globalScope": true,
+                              "typeSubstituted": false
+                            }
+                          },
+                          {
+                            "JAXBElement": {
+                              "name": "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName",
+                              "declaredType": "oasis.names.tc.saml._2_0.metadata.LocalizedNameType",
+                              "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                              "value": {
+                                "value": "Cloud Identität",
+                                "lang": "de"
+                              },
+                              "nil": false,
+                              "globalScope": true,
+                              "typeSubstituted": false
+                            }
+                          },
+                          {
+                            "JAXBElement": {
+                              "name": "{urn:oasis:names:tc:SAML:metadata:ui}Logo",
+                              "declaredType": "oasis.names.tc.saml.metadata.ui.LogoType",
+                              "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                              "value": {
+                                "value": "https://cdn.skidentity.de/images/skidentity/ID-Button_200px.png",
+                                "height": 198,
+                                "width": 200,
+                                "lang": null
+                              },
+                              "nil": false,
+                              "globalScope": true,
+                              "typeSubstituted": false
+                            }
+                          }
+                        ]
+                      },
+                      "AuthnContextClassRef": "urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified",
+                      "AuthnContextDeclRef": null,
+                      "Attribute": [
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/eIdentifier",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/FirstName",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/LastName",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/AcademicTitle",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Age",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/City",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/CommonName",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Country",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/DateOfBirth",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/email",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Gender",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Nationality",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Organization",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/OrganizationUnit",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/phone",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/PlaceOfBirth",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/profile-uri",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/State",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/Street",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/StreetNumber",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/website-uri",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/ZipCode",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDNumber",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDType",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDAuthProtocol",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDIssuer",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IssuingState",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDValidFrom",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDValidUntil",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/IDSerial",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/CredentialHash",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        },
+                        {
+                          "AttributeValue": null,
+                          "otherAttributes": {},
+                          "Name": "http://www.skidentity.de/att/PublicCredentialData",
+                          "NameFormat": null,
+                          "FriendlyName": null
+                        }
+                      ],
+                      "ActivateURL": null,
+                      "RequestedAttribute": [
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/FirstName",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "FirstName",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/LastName",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "LastName",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/Street",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "Street",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/StreetNumber",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "StreetNumber",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/City",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "City",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/ZipCode",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "ZipCode",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/Country",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "Country",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/DateOfBirth",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "DateOfBirth",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/eIdentifier",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "eIdentifier",
+                          "isRequired": true,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/PlaceOfBirth",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "PlaceOfBirth",
+                          "isRequired": false,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        },
+                        {
+                          "otherAttributes": {},
+                          "AttributeValue": null,
+                          "Name": "http://www.skidentity.de/att/Age",
+                          "NameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                          "FriendlyName": "Age",
+                          "isRequired": false,
+                          "AuthenticationOptionRef": [
+                            "npa"
+                          ]
+                        }
+                      ],
+                      "otherAttributes": {},
+                      "ActivationType": "Browser-XHR",
+                      "AuthenticationOptionID": "cloudid"
+                    }
+                  ]
+                },
+                "nil": false,
+                "globalScope": true,
+                "typeSubstituted": false
+              }
+            ]
+          },
+          "KeyDescriptor": null,
+          "Organization": null,
+          "ContactPerson": null,
+          "validUntil": null,
+          "cacheDuration": null,
+          "protocolSupportEnumeration": [
+            "urn:oasis:names:tc:SAML:2.0:protocol"
+          ],
+          "errorURL": null,
+          "ArtifactResolutionService": null,
+          "SingleLogoutService": null,
+          "ManageNameIDService": null,
+          "NameIDFormat": [
+            "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+          ],
+          "AuthnRequestsSigned": null,
+          "WantAssertionsSigned": null
+        }
+      }
+    ],
+    "AffiliationDescriptor": null,
+    "Organization": {
+      "Extensions": null,
+      "OrganizationName": [
+        {
+          "value": "ecsec GmbH",
+          "lang": "en"
+        }
+      ],
+      "OrganizationDisplayName": [
+        {
+          "value": "ecsec GmbH",
+          "lang": "en"
+        }
+      ],
+      "OrganizationURL": [
+        {
+          "value": "",
+          "lang": "en"
+        }
+      ],
+      "otherAttributes": {}
+    },
+    "ContactPerson": null,
+    "AdditionalMetadataLocation": null,
+    "otherAttributes": {},
+    "entityID": "https://lif-test.fifty-fifty.taxi/fifty-fifty-service/",
+    "validUntil": null,
+    "cacheDuration": null
+  },
+  "nil": false,
+  "globalScope": true,
+  "typeSubstituted": false
+}

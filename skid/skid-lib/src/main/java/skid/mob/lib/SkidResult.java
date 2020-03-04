@@ -8,24 +8,20 @@
  *
  ***************************************************************************/
 
-package skid.mob.client;
+package skid.mob.lib;
+
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Tobias Wich
  */
-public class ServerError extends Exception {
+@FrameworkInterface
+public interface SkidResult {
 
-    public final int responseCode;
-
-    public ServerError(int responseCode, String msg) {
-	super(msg);
-	this.responseCode = responseCode;
-    }
-
-    public ServerError(int responseCode, String msg, Throwable cause) {
-	super(msg, cause);
-	this.responseCode = responseCode;
-    }
+    boolean isError();
+    boolean isOk();
+    SkidErrorCodes resultCode();
+    String msg();
 
 }

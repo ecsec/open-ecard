@@ -10,9 +10,9 @@
 
 package skid.mob.impl;
 
-import skid.mob.client.UnknownInfrastructure;
+import skid.mob.impl.client.UnknownInfrastructure;
 import com.jayway.jsonpath.JsonPath;
-import skid.mob.client.ServerError;
+import skid.mob.impl.client.ServerError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,8 +22,9 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import org.json.JSONException;
 import org.openecard.common.util.FileUtils;
-import skid.mob.client.InvalidServerData;
-import skid.mob.client.NetworkError;
+import org.openecard.mobile.activation.ActivationSource;
+import skid.mob.impl.client.InvalidServerData;
+import skid.mob.impl.client.NetworkError;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.InitiatedCallback;
 import skid.mob.lib.SamlClient;
@@ -43,12 +44,18 @@ public class SamlClientImpl implements SamlClient {
 	JsonConfig.assertInitialized();
     }
 
+    private final ActivationSource oecActivationSource;
+
+    public SamlClientImpl(ActivationSource oecActivationSource) {
+	this.oecActivationSource = oecActivationSource;
+    }
+
     @Override
     public Cancellable startSession(String startUrl, InitiatedCallback initCb, InitFailedCallback failCb, FinishedCallback cb) {
 	Runnable r = () -> {
 	    try {
 		AuthReqResp samlFsResp = authnReq(startUrl);
-		FsSessionImpl fsSess = new FsSessionImpl(samlFsResp.fsSessionId, samlFsResp.skidBaseUri, cb);
+		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri, cb);
 		fsSess.load();
 		// signal success
 		ifNotInterrupted(() -> initCb.done(fsSess));

@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.client;
+package skid.mob.impl.client;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.InvalidJsonException;

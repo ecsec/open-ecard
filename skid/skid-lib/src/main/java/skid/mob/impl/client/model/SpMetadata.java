@@ -8,12 +8,12 @@
  *
  ***************************************************************************/
 
-package skid.mob.client.model;
+package skid.mob.impl.client.model;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.json.JSONArray;
-import skid.mob.client.InvalidServerData;
+import skid.mob.impl.client.InvalidServerData;
 
 
 /**

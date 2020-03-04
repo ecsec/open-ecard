@@ -20,6 +20,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface SkidLib {
 
+    SkidResult initialize();
+    SkidResult terminate();
+
     SamlClient createSamlClient();
     PinManagementControllerFactory pinManagementFactory();
 

@@ -10,6 +10,7 @@
 
 	<modules>
 		<module>skid-lib</module>
+	 <module>skid-lib-android</module>
 	</modules>
 
 	<properties>
@@ -115,6 +116,12 @@
 							<version>3.0.0-M4</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.2.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

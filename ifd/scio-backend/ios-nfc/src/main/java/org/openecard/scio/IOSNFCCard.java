@@ -81,7 +81,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
     private void setTag(NFCISO7816Tag tag, NFCSessionContext givenContext, NSError err, boolean notifyRemoveTag) {
 	boolean givenEmptyTag = tag == null;
 	if (givenContext == sessionContext || (givenEmptyTag && givenContext == null)) {
-	    this.tagWasPresent = this.tag != null && givenEmptyTag;
+	    this.tagWasPresent = (this.tag != null && givenEmptyTag) || this.tagWasPresent;
 	    this.error = err;
 	    this.tag = tag;
 	    this.setHistBytes(tag);

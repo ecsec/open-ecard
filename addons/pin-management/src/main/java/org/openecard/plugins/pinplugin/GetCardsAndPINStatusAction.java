@@ -104,7 +104,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
-		Promise<WSHelper.WSException> errorPromise = new Promise<>();
+		Promise<Throwable> errorPromise = new Promise<>();
 
 		pinManagement = es.submit(() -> {
 		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer, errorPromise);
@@ -116,11 +116,16 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		try {
 		    ResultStatus result = pinManagement.get();
 		    if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
-			WSHelper.WSException paceError = errorPromise.derefNonblocking();
+			Object pinChangeError = errorPromise.derefNonblocking();
 			String minor;
-			if (paceError instanceof WSHelper.WSException) {
-				minor = paceError.getResultMinor();
-			} else {
+			if (pinChangeError instanceof WSHelper.WSException) {
+			    minor = ((WSHelper.WSException)pinChangeError).getResultMinor();
+			} else if (pinChangeError instanceof CancellationException) {
+			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
+			} else if (pinChangeError != null) {
+			    minor = ECardConstants.Minor.App.INT_ERROR;
+			}
+			else {
 			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
 			}
 

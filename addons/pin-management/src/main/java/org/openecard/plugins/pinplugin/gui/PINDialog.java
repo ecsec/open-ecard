@@ -23,7 +23,6 @@
 package org.openecard.plugins.pinplugin.gui;
 
 import org.openecard.common.ThreadTerminateException;
-import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
@@ -43,9 +42,9 @@ public class PINDialog {
     private final UserConsent gui;
     private final Dispatcher dispatcher;
     private final CardCapturer cardCapturer;
-    private final Promise<WSHelper.WSException> errorPromise;
+    private final Promise<Throwable> errorPromise;
 
-    public PINDialog(UserConsent gui, Dispatcher dispatcher, CardCapturer cardCapturer, Promise<WSHelper.WSException> errorPromise) {
+    public PINDialog(UserConsent gui, Dispatcher dispatcher, CardCapturer cardCapturer, Promise<Throwable> errorPromise) {
 	this.gui = gui;
 	this.dispatcher = dispatcher;
 	this.cardCapturer = cardCapturer;

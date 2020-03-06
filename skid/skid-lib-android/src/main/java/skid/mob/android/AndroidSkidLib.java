@@ -10,11 +10,15 @@
 
 package skid.mob.android;
 
+import android.content.Intent;
+import android.nfc.Tag;
+import java.io.IOException;
+import org.openecard.android.activation.AndroidContextManager;
+import org.openecard.android.activation.DelegatingAndroidContextManager;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ActivationUtils;
-import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
@@ -24,6 +28,7 @@ import org.openecard.mobile.activation.StopServiceHandler;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NFCTagNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
@@ -53,7 +58,7 @@ public class AndroidSkidLib implements SkidLib {
     private final ActivationUtils utils;
     private final CachingTerminalFactoryBuilder<AndroidNFCFactory> builder;
 
-    private ContextManager oecCtx;
+    private AndroidContextManager oecCtx;
     private ActivationSource oecActivationSource;
 
     AndroidSkidLib(CommonActivationUtils utils, CachingTerminalFactoryBuilder<AndroidNFCFactory> builder) {
@@ -83,7 +88,7 @@ public class AndroidSkidLib implements SkidLib {
     @Override
     public SkidResult initialize() {
 	// pretend NFC is fully functional, the actual check must be done by the application beforehand and eid actions must be prevented if necessary
-	ContextManager ctx = utils.context(new NFCCapabilities() {
+	oecCtx = new DelegatingAndroidContextManager(utils.context(new NFCCapabilities() {
 	    @Override
 	    public boolean isAvailable() {
 		return true;
@@ -98,13 +103,13 @@ public class AndroidSkidLib implements SkidLib {
 	    public NfcCapabilityResult checkExtendedLength() {
 		return NfcCapabilityResult.SUPPORTED;
 	    }
-	});
+	}), builder);
 
 	Promise<ActivationSource> finished = new Promise<>();
 	Promise<ServiceErrorResponse> error = new Promise<>();
 
 	try {
-	    ctx.initializeContext(new StartServiceHandler() {
+	    oecCtx.initializeContext(new StartServiceHandler() {
 		@Override
 		public void onSuccess(ActivationSource source) {
 		    error.cancel();
@@ -166,6 +171,13 @@ public class AndroidSkidLib implements SkidLib {
 	}
     }
 
+    public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException {
+	oecCtx.onNewIntent(intent);
+    }
+
+    public void onNewIntent(Tag tag) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException {
+	oecCtx.onNewIntent(tag);
+    }
 
     @Override
     public SamlClient createSamlClient() {

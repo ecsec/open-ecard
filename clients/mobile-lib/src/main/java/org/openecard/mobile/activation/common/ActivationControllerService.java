@@ -19,6 +19,7 @@ import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Promise;
 import static org.openecard.mobile.activation.ActivationResultCode.*;
@@ -132,7 +133,9 @@ public class ActivationControllerService {
 	    }
 	}
 	LOG.debug("Notifying of interrupted completion.");
-	controllerCallback.onAuthenticationCompletion(new CommonActivationResult(INTERRUPTED, ""));
+	CommonActivationResult result = new CommonActivationResult(INTERRUPTED, "");
+	result.setProcessMinor(ECardConstants.Minor.SAL.CANCELLATION_BY_USER);
+	controllerCallback.onAuthenticationCompletion(result);
 
 	cancellableThread.interrupt();
 	try {
@@ -254,9 +257,11 @@ public class ActivationControllerService {
     private CommonActivationResult createActivationResult(BindingResult result) {
 	LOG.info("Returning result: {}", result);
 	CommonActivationResult activationResult;
+	final Map<String, String> auxResultData = result.getAuxResultData();
+	
 	switch (result.getResultCode()) {
 	    case REDIRECT:
-		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
+		String location = auxResultData.get(AuxDataKeys.REDIRECT_LOCATION);
 		activationResult = new CommonActivationResult(location, REDIRECT);
 		break;
 	    case OK:
@@ -279,7 +284,11 @@ public class ActivationControllerService {
 		break;
 	    default:
 		activationResult = new CommonActivationResult(INTERNAL_ERROR, result.getResultMessage());
+
 	}
+
+	activationResult.setProcessMinor(auxResultData.get(AuxDataKeys.MINOR_PROCESS_RESULT));
+
 	return activationResult;
     }
 

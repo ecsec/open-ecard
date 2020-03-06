@@ -25,6 +25,7 @@
 		<app.description>Client side implementation of the eCard-API-Framework (BSI TR-03112)</app.description>
 
 		<package.identifier>open-ecard-app</package.identifier>
+		<mac.os.sign.package>false</mac.os.sign.package>
 	</properties>
 
 	<profiles>
@@ -132,7 +133,7 @@
 									<macOptions>
 										<bundleName>${app.identifier}</bundleName>
 										<bundleIdentifier>org.openecard.versioncheck.MainLoader</bundleIdentifier>
-										<sign>true</sign>
+										<sign>${mac.os.sign.package}</sign>
 										<signingKeyUserName>ecsec GmbH</signingKeyUserName>
 									</macOptions>
 									<windowsOptions>

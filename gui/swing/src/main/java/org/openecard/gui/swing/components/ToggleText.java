@@ -169,7 +169,7 @@ public class ToggleText implements StepComponent {
 //		}
 		break;
 	    default:
-		LOG.warn("Unsupported usage of content of type " + mimeType + " in " + ToggleText.class.getName());
+		LOG.warn("Unsupported usage of content of type {} in {}", mimeType, ToggleText.class);
 		createJTextArea(LANG.translationForKey("unsupported.mimetype", mimeType));
 	}
 

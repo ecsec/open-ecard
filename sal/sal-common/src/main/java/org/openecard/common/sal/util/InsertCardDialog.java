@@ -33,7 +33,10 @@ import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
 import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.util.Promise;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -93,12 +96,24 @@ public class InsertCardDialog {
     public List<ConnectionHandleType> show() {
 	List<ConnectionHandleType> availableCards = checkAlreadyAvailable();
 	if (! availableCards.isEmpty()) {
+	    LOG.debug("Required card already available");
 	    return availableCards;
 	} else {
+	    Promise<ConnectionHandleType> promise = new Promise();
+	    List<EventCallback> callbacks = new ArrayList<>(2);
 	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID,
 		    cardNameAndType.values(),
-		    this.salStateView);
+		    availableCards,
+		    promise);
+	    callbacks.add(insertCardAction);
 	    evDispatcher.add(insertCardAction, EventType.CARD_RECOGNIZED);
+
+	    if (SysUtils.isIOS()) {
+		CancelOnCardRemovedFilter cancelCallback = new CancelOnCardRemovedFilter(promise);
+		callbacks.add(cancelCallback);
+		evDispatcher.add(cancelCallback, new CardRemovalFilter());
+	    }
+
 	    try {
 		UserConsentNavigator ucr = gui.obtainNavigator(createInsertCardUserConsent(insertCardAction));
 		ExecutionEngine exec = new ExecutionEngine(ucr);
@@ -111,7 +126,9 @@ public class InsertCardDialog {
 		}
 		return insertCardAction.getResponse();
 	    } finally {
-		evDispatcher.del(insertCardAction);
+		for (EventCallback callback : callbacks) {
+		    evDispatcher.del(callback);
+		}
 	    }
 	}
     }

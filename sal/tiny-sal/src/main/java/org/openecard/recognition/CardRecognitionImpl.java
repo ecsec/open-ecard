@@ -272,7 +272,7 @@ public class CardRecognitionImpl implements CardRecognition {
     public CardInfoType getCardInfoFromRepo(String type) {
         CardInfoType cif = null;
         // only do something when a repo is specified
-	if (cif == null && cifRepo != null) {
+	if (cifRepo != null) {
 	    GetCardInfoOrACD req = new GetCardInfoOrACD();
 	    req.setAction(ECardConstants.CIF.GET_SPECIFIED);
 	    req.getCardTypeIdentifier().add(type);
@@ -378,7 +378,7 @@ public class CardRecognitionImpl implements CardRecognition {
 	try {
 	    return FileUtils.resolveResourceAsStream(CardRecognitionImpl.class, "/card-images/" + filename);
 	} catch (IOException ex) {
-	    LOG.info("Failed to load card image '" + filename + "'.", ex);
+	    LOG.info("Failed to load card image '{}'.", filename, ex);
 	    return null;
 	}
     }

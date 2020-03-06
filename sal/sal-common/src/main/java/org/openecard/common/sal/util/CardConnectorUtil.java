@@ -17,7 +17,9 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
@@ -30,6 +32,7 @@ import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.Promise;
+import org.openecard.common.util.SysUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +63,18 @@ public class CardConnectorUtil {
 
 
     public CardApplicationPathType waitForCard() throws InterruptedException {
-	CardFound cb = new CardFound();
-	eventHandler.add(cb, new TypeFilter());
+	Promise<ConnectionHandleType> foundCardHandle = new Promise();
+	List<EventCallback> callbacks = new ArrayList<>(2);
+
+	CardFound commonCallback = new CardFound(foundCardHandle);
+	callbacks.add(commonCallback);
+	eventHandler.add(commonCallback, new TypeFilter());
+
+	if (SysUtils.isIOS()) {
+	    CancelOnCardRemovedFilter cancelCallback = new CancelOnCardRemovedFilter(foundCardHandle);
+	    callbacks.add(cancelCallback);
+	    eventHandler.add(cancelCallback, new CardRemovalFilter());
+	}
 
 	try {
 	    // check if there is a card already present
@@ -72,10 +85,12 @@ public class CardConnectorUtil {
 		}
 	    }
 
-	    ConnectionHandleType eventCardHandle = cb.foundCardHandle.deref();
+	    ConnectionHandleType eventCardHandle = foundCardHandle.deref();
 	    return HandlerUtils.copyPath(eventCardHandle);
 	} finally {
-	    eventHandler.del(cb);
+	    for (EventCallback callback : callbacks) {
+		eventHandler.del(callback);
+	    }
 	}
     }
 
@@ -117,11 +132,18 @@ public class CardConnectorUtil {
     }
 
     private class CardFound implements EventCallback {
-	Promise<ConnectionHandleType> foundCardHandle = new Promise<>();
+	private final Promise<ConnectionHandleType> foundCardHandle;
+
+	public CardFound(Promise<ConnectionHandleType> foundCardHandle) {
+	    this.foundCardHandle = foundCardHandle;
+	}
+
 	@Override
 	public void signalEvent(EventType eventType, EventObject eventData) {
 	    try {
-		foundCardHandle.deliver(eventData.getHandle());
+		if (eventType == EventType.CARD_RECOGNIZED) {
+		    foundCardHandle.deliver(eventData.getHandle());
+		}
 	    } catch (IllegalStateException ex) {
 		// caused if callback is called multiple times, but this is fine
 		LOG.warn("Card in an illegal state.", ex);
@@ -130,6 +152,7 @@ public class CardConnectorUtil {
     }
 
     private class TypeFilter implements EventFilter {
+
 	@Override
 	public boolean matches(EventType t, EventObject o) {
 	    if (t == EventType.CARD_RECOGNIZED) {
@@ -142,9 +165,7 @@ public class CardConnectorUtil {
 		    return cardTypes.contains(h.getRecognitionInfo().getCardType());
 		}
 	    }
-
 	    return false;
 	}
     }
-
 }

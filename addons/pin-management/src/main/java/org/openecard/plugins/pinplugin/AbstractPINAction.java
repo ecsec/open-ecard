@@ -145,8 +145,13 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	Map<String, String> nameAndType = new HashMap<>();
 	nameAndType.put(cardName, cardType);
 	InsertCardDialog uc = new InsertCardDialog(gui, nameAndType, evDispatcher, salStateView);
+
+	List<ConnectionHandleType> results = uc.show();
+	if (results == null || results.isEmpty()) {
+	    return null;
+	}
 	// get(0) should be sufficient we a looking just for one card. i think the possibility to find 2 is very low.
-	return uc.show().get(0);
+	return results.get(0);
     }
 
     /**

@@ -60,4 +60,9 @@ public class FakeNFCCard extends AbstractNFCCard {
 	return delegate.transceive(apdu);
     }
 
+    @Override
+    public boolean tagWasPresent() {
+	return delegate.tagWasPresent();
+    }
+
 }

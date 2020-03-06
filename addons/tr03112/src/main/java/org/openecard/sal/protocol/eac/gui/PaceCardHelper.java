@@ -89,14 +89,16 @@ public class PaceCardHelper {
 
     private PACEMarkerType getPaceMarkerFromCif(String pinType) {
 	CardInfoType cif = ctx.getRecognition().getCardInfo(NPA_TYPE);
-	for (CardApplicationType app : cif.getApplicationCapabilities().getCardApplication()) {
-	    for (DIDInfoType did : app.getDIDInfo()) {
-		if (pinType.equals(did.getDifferentialIdentity().getDIDName())) {
-		    // convert marker
-		    iso.std.iso_iec._24727.tech.schema.PACEMarkerType marker;
-		    marker = did.getDifferentialIdentity().getDIDMarker().getPACEMarker();
-		    PACEMarkerType wrappedMarker = new PACEMarkerType(marker);
-		    return wrappedMarker;
+	if (cif != null) {
+	    for (CardApplicationType app : cif.getApplicationCapabilities().getCardApplication()) {
+		for (DIDInfoType did : app.getDIDInfo()) {
+		    if (pinType.equals(did.getDifferentialIdentity().getDIDName())) {
+			// convert marker
+			iso.std.iso_iec._24727.tech.schema.PACEMarkerType marker;
+			marker = did.getDifferentialIdentity().getDIDMarker().getPACEMarker();
+			PACEMarkerType wrappedMarker = new PACEMarkerType(marker);
+			return wrappedMarker;
+		    }
 		}
 	    }
 	}

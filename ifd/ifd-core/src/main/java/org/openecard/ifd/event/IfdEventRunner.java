@@ -208,11 +208,14 @@ public class IfdEventRunner implements Runnable {
 		env.getEventDispatcher().notify(EventType.TERMINAL_ADDED, new IfdEventObject(h));
 	    }
 
+
 	    // check each slot
 	    for (SlotStatusType slot : term.getSlotStatus()) {
 		SlotStatusType oldSlot = getCorresponding(slot.getIndex(), oldTerm.getSlotStatus());
 		boolean cardPresent = slot.isCardAvailable();
 		boolean cardWasPresent = oldSlot != null && oldSlot.isCardAvailable();
+
+		LOG.debug("Slot status: [terminalAdded: {}, cardPresent: {}, cardWasPresent: {}].", terminalAdded, cardPresent, cardWasPresent);
 
 		if (cardPresent && ! cardWasPresent) {
 		    // CARD INSERTED

@@ -166,6 +166,9 @@ public class GenericPINAction extends StepAction {
 	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField oldPINField = (PasswordField) executionResults.getResult(GenericPINStep.OLD_PIN_FIELD);
+	    if (oldPINField == null) {
+		return null;
+	    }
 	    char[] oldPINValue = oldPINField.getValue();
 
 	    if (oldPINValue.length > 6 && oldPINValue.length < 5) {
@@ -192,6 +195,9 @@ public class GenericPINAction extends StepAction {
 	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(GenericPINStep.CAN_FIELD);
+	    if (canField == null) {
+		return null;
+	    }
 	    String canValue = new String(canField.getValue());
 
 	    if (canValue.length() != 6) {
@@ -218,6 +224,9 @@ public class GenericPINAction extends StepAction {
 	if (this.cardView.capturePin()) {
 	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField pukField = (PasswordField) executionResults.getResult(GenericPINStep.PUK_FIELD);
+	    if (pukField == null) {
+		return null;
+	    }
 	    String pukValue = new String(pukField.getValue());
 
 	    if (pukValue.length() != 10) {
@@ -251,9 +260,14 @@ public class GenericPINAction extends StepAction {
 	    try {
 		ExecutionResults executionResults = oldResults.get(getStepID());
 		PasswordField newPINField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_FIELD);
-		newPINValue = new String(newPINField.getValue());
-
 		PasswordField newPINRepeatField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_REPEAT_FIELD);
+		if (newPINField == null || newPINRepeatField == null) {
+		    LOG.warn("Expected pin fields were incomplete.");
+		    gPINStep.updateState(this.cardView.getPinState()); // to reset the text fields
+		    gPINStep.setFailedPINVerify(true, false);
+		    return new StepActionResult(StepActionResultStatus.REPEAT);
+		}
+		newPINValue = new String(newPINField.getValue());
 		newPINRepeatValue = new String(newPINRepeatField.getValue());
 
 		byte[] pin1 = newPINValue.getBytes(ISO_8859_1);

@@ -12,6 +12,7 @@ package org.openecard.sal;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
 import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
 import iso.std.iso_iec._24727.tech.schema.GetStatus;
@@ -46,7 +47,6 @@ import org.openecard.common.sal.state.SalStateManager;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
-import org.openecard.common.util.HandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,6 +176,7 @@ public class SalEventManager {
 
 	@Nonnull
 	private List<IFDStatusType> wait(@Nonnull List<IFDStatusType> lastKnown) throws WSHelper.WSException {
+	    LOG.info("Waiting for IFD changes");
 	    Wait wait = new Wait();
 	    wait.setContextHandle(ctxHandle);
 	    wait.getIFDStatus().addAll(lastKnown);
@@ -312,43 +313,37 @@ public class SalEventManager {
 			LOG.info("Card with ATR={} inserted.", ByteUtils.toHexString(slot.getATRorATS()));
 			ConnectionHandleType handle = makeUnknownCardHandle(ifdName, newSlot, slotCapabilities);
 
-			LOG.debug("Starting recognition for terminal {}.", ifdName);
 			// perform recognition
-			handle = recogniseCard(handle);
-			if (handle.getRecognitionInfo() != null) {
-			    String type = handle.getRecognitionInfo().getCardType();
+			RecognitionInfo recognitionInfo = recogniseCard(handle);
+			if (recognitionInfo != null) {
+			    LOG.debug("Starting recognition for terminal {}.", ifdName);
+			    handle.setRecognitionInfo(recognitionInfo);
+
+			    String type = recognitionInfo.getCardType();
 			    LOG.info("Recognised card type={}", type);
 			    CardInfoType cif = env.getRecognition().getCardInfo(type);
-			    // add card to SAL state
-			    // TODO: add interface protocol, but it looks like it was never used so probably ok to leave it null
-			    try {
-				// Register card before triggering events.
-				salStates.addCard(ctx, ifdName, handle.getSlotIndex(), new CardInfoWrapper(cif, null));
-			    } catch (DuplicateCardEntry ex) {
-				LOG.error("Duplicate card entry detected, ignoring new card.");
+			    if (cif != null) {
+				// add card to SAL state
+				// TODO: add interface protocol, but it looks like it was never used so probably ok to leave it null
+				try {
+				    // Register card before triggering events.
+				    salStates.addCard(ctx, ifdName, handle.getSlotIndex(), new CardInfoWrapper(cif, null));
+				} catch (DuplicateCardEntry ex) {
+				    LOG.error("Duplicate card entry detected, ignoring new card.");
+				}
+
+				env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(handle));
+			    } else {
+				LOG.info("No card info evailable for type={}", type);
 			    }
 
-			    env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED, new IfdEventObject(handle));
-
+			} else {
+			    LOG.debug("No card regonition for terminal {}.", ifdName);
+			    handleCardRemoved(oldSlot, oldTerm, ifdName, slotCapabilities);
 			}
 
 		    } else if (!terminalAdded && !cardPresent && cardWasPresent) {
-			// this makes only sense when the terminal was already there
-			// CARD REMOVED
-			// remove slot entry
-			BigInteger idx = oldSlot.getIndex();
-			Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
-			while (it.hasNext()) {
-			    SlotStatusType next = it.next();
-			    if (idx.equals(next.getIndex())) {
-				it.remove();
-				break;
-			    }
-			}
-			LOG.debug("Found a card removed event ({}).", ifdName);
-			ConnectionHandleType h = makeConnectionHandle(ifdName, idx, slotCapabilities);
-			// remove information from SAL state
-			salStates.removeCard(ctx, ifdName, idx);
+			handleCardRemoved(oldSlot, oldTerm, ifdName, slotCapabilities);
 		    }
 		}
 
@@ -366,6 +361,25 @@ public class SalEventManager {
 		    LOG.debug("Found a terminal removed event ({}).", ifdName);
 		}
 	    }
+	}
+
+	private void handleCardRemoved(SlotStatusType oldSlot, IFDStatusType oldTerm, String ifdName, IFDCapabilitiesType slotCapabilities) {
+	    // this makes only sense when the terminal was already there
+	    // CARD REMOVED
+	    // remove slot entry
+	    BigInteger idx = oldSlot.getIndex();
+	    Iterator<SlotStatusType> it = oldTerm.getSlotStatus().iterator();
+	    while (it.hasNext()) {
+		SlotStatusType next = it.next();
+		if (idx.equals(next.getIndex())) {
+		    it.remove();
+		    break;
+		}
+	    }
+	    LOG.debug("Found a card removed event ({}).", ifdName);
+	    ConnectionHandleType h = makeConnectionHandle(ifdName, idx, slotCapabilities);
+	    // remove information from SAL state
+	    salStates.removeCard(ctx, ifdName, idx);
 	}
 
 	@Nullable
@@ -395,21 +409,14 @@ public class SalEventManager {
 	    return false;
 	}
 
-	private ConnectionHandleType recogniseCard(ConnectionHandleType handle) {
-	    ConnectionHandleType result = handle;
+	private RecognitionInfo recogniseCard(ConnectionHandleType handle) {
 	    try {
-		ConnectionHandleType.RecognitionInfo type;
-		type = env.getRecognition().recognizeCard(ctx, handle.getIFDName(), handle.getSlotIndex());
-		if (type != null) {
-		    result = HandlerUtils.copyHandle(handle);
-		    result.setRecognitionInfo(type);
-		}
+		return env.getRecognition().recognizeCard(ctx, handle.getIFDName(), handle.getSlotIndex());
 	    } catch (RecognitionException ex) {
 		LOG.error("Error during card recognition.", ex);
+		return null;
 	    }
-	    return result;
 	}
-
     }
 
 }

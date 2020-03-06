@@ -8,18 +8,20 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
-
-import org.openecard.robovm.annotations.FrameworkInterface;
+package skid.mob.impl.client;
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface AuthCallback {
+public class NotFound extends ServerError {
 
-    void doAuth(EacModule m);
-    // void doAuth(CidModule m);
+    public NotFound(String msg) {
+	super(404, msg);
+    }
+
+    public NotFound(String msg, Throwable cause) {
+	super(404, msg, cause);
+    }
 
 }

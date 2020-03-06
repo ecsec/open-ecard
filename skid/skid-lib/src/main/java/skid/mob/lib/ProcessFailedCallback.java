@@ -17,8 +17,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface InitiatedCallback {
+public interface ProcessFailedCallback {
 
-    void initDone(FsSession newSession);
+    void processFailed(SkidErrorCodes code, String msg);
 
 }

@@ -61,7 +61,7 @@ public class EacAuthModule implements EacModule {
 		    }
 		});
 		if (result.getRedirectUrl() != null) {
-		    finishedCb.done(actUrl);
+		    finishedCb.finished(actUrl);
 		}
 	    }
 	}, interactionComponent);

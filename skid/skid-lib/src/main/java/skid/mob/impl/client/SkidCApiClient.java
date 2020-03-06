@@ -134,6 +134,8 @@ public class SkidCApiClient {
 		}
 	    } else if (! doOutput && resCode == HttpURLConnection.HTTP_NO_CONTENT) {
 		return null;
+	    } else if (resCode == HttpURLConnection.HTTP_NOT_FOUND) {
+		throw new NotFound("The requested resource does not exist on the server.");
 	    } else {
 		throw new ServerError(resCode, "Failed to retrieve session from SkIDentity server.");
 	    }
@@ -177,12 +179,12 @@ public class SkidCApiClient {
 
     public class Broker {
 
-	public Object getOptions(String session) throws NetworkError, ServerError, InvalidServerData {
+	public Object getOptions(String session) throws NetworkError, NotFound, ServerError, InvalidServerData {
 	    String objString = fetch("GET", makeUrl(OPTIONS_PATH, Collections.singletonMap("session", session)), null, null, "application/json");
 	    return toJson(objString);
 	}
 
-	public String selectOption(String session, String optionId) throws NetworkError, ServerError {
+	public String selectOption(String session, String optionId) throws NetworkError, NotFound, ServerError {
 	    HashMap<String, String> formData = new HashMap<>();
 	    formData.put("session", session);
 	    formData.put("option", optionId);
@@ -192,7 +194,7 @@ public class SkidCApiClient {
 	    return activateUrl;
 	}
 
-	public String cancelSession(String session) throws NetworkError, ServerError {
+	public String cancelSession(String session) throws NetworkError, NotFound, ServerError {
 	    HashMap<String, String> formData = new HashMap<>();
 	    formData.put("session", session);
 	    String formDataEnc = formUrlEncode(formData);

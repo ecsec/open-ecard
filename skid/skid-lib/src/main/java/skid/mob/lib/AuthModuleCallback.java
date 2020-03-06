@@ -17,8 +17,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface InitFailedCallback {
+public interface AuthModuleCallback {
 
-    void failed(SkidErrorCodes code, String msg);
+    void doAuth(EacModule m);
+    // void doAuth(CidModule m);
 
 }

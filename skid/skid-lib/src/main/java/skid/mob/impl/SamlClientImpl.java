@@ -29,9 +29,9 @@ import skid.mob.lib.Cancellable;
 import skid.mob.lib.InitiatedCallback;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.FinishedCallback;
-import skid.mob.lib.InitFailedCallback;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
+import skid.mob.lib.ProcessFailedCallback;
 
 
 /**
@@ -51,27 +51,27 @@ public class SamlClientImpl implements SamlClient {
     }
 
     @Override
-    public Cancellable startSession(String startUrl, InitiatedCallback initCb, InitFailedCallback failCb, FinishedCallback cb) {
+    public Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb, FinishedCallback cb) {
 	Runnable r = () -> {
 	    try {
 		AuthReqResp samlFsResp = authnReq(startUrl);
 		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri, cb);
 		fsSess.load();
 		// signal success
-		ifNotInterrupted(() -> initCb.done(fsSess));
+		ifNotInterrupted(() -> initCb.initDone(fsSess));
 	    } catch (MalformedURLException | ClassCastException ex) {
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.INVALID_INPUT, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INVALID_INPUT, ex.getMessage()));
 	    } catch (ServerError ex) {
 		// TODO: error handling for unknown SP and all other cases
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
 	    } catch (InvalidServerData ex) {
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
 	    } catch (UnsupportedEncodingException | JSONException |  UnknownInfrastructure ex) {
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
 	    } catch (IOException | NetworkError ex) {
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
 	    } catch (RuntimeException ex) {
-		ifNotInterrupted(() -> failCb.failed(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage()));
 	    }
 	};
 

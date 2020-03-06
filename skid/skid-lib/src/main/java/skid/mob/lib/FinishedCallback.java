@@ -19,6 +19,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface FinishedCallback {
 
-    void done(String assertionUrl);
+    void finished(String assertionUrl);
 
 }

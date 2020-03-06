@@ -18,16 +18,16 @@ import skid.mob.impl.client.ServerError;
 import skid.mob.impl.client.SkidCApiClient;
 import skid.mob.impl.client.model.SpMetadata;
 import skid.mob.lib.ActivationType;
-import skid.mob.lib.AuthCallback;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.FsSession;
 import skid.mob.lib.Info;
-import skid.mob.lib.InitFailedCallback;
 import skid.mob.lib.Option;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.SelectedOption;
+import skid.mob.lib.AuthModuleCallback;
+import skid.mob.lib.ProcessFailedCallback;
 
 
 /**
@@ -67,15 +67,15 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable cancelSession(InitFailedCallback failedCb) {
+    public Cancellable cancelSession(ProcessFailedCallback failedCb) {
 	Runnable r = () -> {
 	    try {
 		String actUrl = apiClient.broker().cancelSession(fsSessionId);
-		ifNotInterrupted(() -> finishedCb.done(fsSessionId));
+		ifNotInterrupted(() -> finishedCb.finished(fsSessionId));
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
 	    }
 	};
 
@@ -85,7 +85,7 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, InitFailedCallback failedCb, AuthCallback authCb) {
+    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {
@@ -98,13 +98,13 @@ public class FsSessionImpl implements FsSession {
 			authCb.doAuth(authMod);
 		    });
 		} else {
-		    ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.UNSUPPORTED_FEATURE,
+		    ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.UNSUPPORTED_FEATURE,
 			    "The selected option is currently not supported."));
 		}
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.failed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
 	    }
 	};
 

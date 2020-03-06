@@ -128,6 +128,7 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 			else {
 			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
 			}
+			LOG.debug("Pin management completed with {} from {}", minor, pinChangeError);
 
 			throw new AppExtensionException(minor, "PIN Management was cancelled.");
 		    }

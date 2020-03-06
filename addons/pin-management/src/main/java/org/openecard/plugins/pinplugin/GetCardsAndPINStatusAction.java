@@ -145,7 +145,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } catch (ExecutionException ex) {
 		LOG.warn("Pin Management failed", ex);
 	    } catch (CancellationException ex) {
-		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+		final String msg = "PIN Management was cancelled.";
+		LOG.warn(msg, ex);
+		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    } finally {
 		pinManagement = null;
 

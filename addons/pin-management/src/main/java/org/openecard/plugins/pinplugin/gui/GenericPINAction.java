@@ -49,6 +49,7 @@ import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
@@ -105,14 +106,17 @@ public class GenericPINAction extends StepAction {
 
     private final CardStateView cardView;
     private final CardCapturer cardCapturer;
+    private final Promise<WSHelper.WSException> errorPromise;
 
 
-    public GenericPINAction(String stepID, Dispatcher dispatcher, GenericPINStep gPINStep, CardCapturer cardCapturer) {
+    public GenericPINAction(String stepID, Dispatcher dispatcher, GenericPINStep gPINStep, CardCapturer cardCapturer,
+	    Promise<WSHelper.WSException> errorPromise) {
 	super(gPINStep);
 	this.gPINStep = gPINStep;
 	this.dispatcher = dispatcher;
 	this.cardView = cardCapturer.aquireView();
 	this.cardCapturer = cardCapturer;
+	this.errorPromise = errorPromise;
     }
 
     @Override
@@ -340,6 +344,11 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.setFailedPINVerify(true, false);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (WSHelper.WSException ex) {
+	    try {
+		errorPromise.deliver(ex);
+	    } catch (IllegalStateException illegalState) {
+		LOG.error("Cannot re-deliver error", illegalState);
+	    }
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		LOG.error("User canceled the authentication manually or removed the card.", ex);
@@ -566,6 +575,7 @@ public class GenericPINAction extends StepAction {
 	errorStep.setReversible(false);
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);
+
 	return errorStep;
     }
 

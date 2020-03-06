@@ -51,6 +51,7 @@ import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.plugins.pinplugin.gui.CardRemovedFilter;
@@ -103,8 +104,10 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
+		Promise<WSHelper.WSException> errorPromise = new Promise<>();
+
 		pinManagement = es.submit(() -> {
-		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer);
+		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer, errorPromise);
 		    return uc.show();
 		});
 
@@ -113,7 +116,15 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		try {
 		    ResultStatus result = pinManagement.get();
 		    if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
-			throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+			WSHelper.WSException paceError = errorPromise.derefNonblocking();
+			String minor;
+			if (paceError instanceof WSHelper.WSException) {
+				minor = paceError.getResultMinor();
+			} else {
+			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
+			}
+
+			throw new AppExtensionException(minor, "PIN Management was cancelled.");
 		    }
 		} finally {
 		    if (disconnectEventSink != null) {

@@ -51,6 +51,7 @@ import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.interfaces.EventFilter;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.util.Pair;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.plugins.pinplugin.gui.CardRemovedFilter;
@@ -103,8 +104,10 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    try {
 		ExecutorService es = Executors.newSingleThreadExecutor(action -> new Thread(action, "ShowPINManagementDialog"));
 
+		Promise<Throwable> errorPromise = new Promise<>();
+
 		pinManagement = es.submit(() -> {
-		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer);
+		    PINDialog uc = new PINDialog(gui, dispatcher, cardCapturer, errorPromise);
 		    return uc.show();
 		});
 
@@ -113,7 +116,21 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 		try {
 		    ResultStatus result = pinManagement.get();
 		    if (result == ResultStatus.CANCEL || result == ResultStatus.INTERRUPTED) {
-			throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+			Object pinChangeError = errorPromise.derefNonblocking();
+			String minor;
+			if (pinChangeError instanceof WSHelper.WSException) {
+			    minor = ((WSHelper.WSException)pinChangeError).getResultMinor();
+			} else if (pinChangeError instanceof CancellationException) {
+			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
+			} else if (pinChangeError != null) {
+			    minor = ECardConstants.Minor.App.INT_ERROR;
+			}
+			else {
+			    minor = ECardConstants.Minor.IFD.CANCELLATION_BY_USER;
+			}
+			LOG.debug("Pin management completed with {} from {}", minor, pinChangeError);
+
+			throw new AppExtensionException(minor, "PIN Management was cancelled.");
 		    }
 		} finally {
 		    if (disconnectEventSink != null) {
@@ -128,7 +145,9 @@ public class GetCardsAndPINStatusAction extends AbstractPINAction {
 	    } catch (ExecutionException ex) {
 		LOG.warn("Pin Management failed", ex);
 	    } catch (CancellationException ex) {
-		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "PIN Management was cancelled.");
+		final String msg = "PIN Management was cancelled.";
+		LOG.warn(msg, ex);
+		throw new AppExtensionException(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg);
 	    } finally {
 		pinManagement = null;
 

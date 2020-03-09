@@ -49,6 +49,7 @@ import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.Promise;
 import org.openecard.common.util.StringUtils;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.PasswordField;
@@ -105,14 +106,17 @@ public class GenericPINAction extends StepAction {
 
     private final CardStateView cardView;
     private final CardCapturer cardCapturer;
+    private final Promise<Throwable> errorPromise;
 
 
-    public GenericPINAction(String stepID, Dispatcher dispatcher, GenericPINStep gPINStep, CardCapturer cardCapturer) {
+    public GenericPINAction(String stepID, Dispatcher dispatcher, GenericPINStep gPINStep, CardCapturer cardCapturer,
+	    Promise<Throwable> errorPromise) {
 	super(gPINStep);
 	this.gPINStep = gPINStep;
 	this.dispatcher = dispatcher;
 	this.cardView = cardCapturer.aquireView();
 	this.cardCapturer = cardCapturer;
+	this.errorPromise = errorPromise;
     }
 
     @Override
@@ -124,6 +128,7 @@ public class GenericPINAction extends StepAction {
 	try {
 	    cardCapturer.updateCardState();
 	} catch (WSHelper.WSException ex) {
+	    storeTerminationError(ex);
 	    LOG.error("Failed to prepare Generic PIN step.", ex);
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
@@ -333,6 +338,7 @@ public class GenericPINAction extends StepAction {
 		    generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)));
 	} catch (APDUException | IFDException | ParserConfigurationException ex) {
 	    LOG.error("An internal error occurred while trying to change the PIN", ex);
+	    storeTerminationError(ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (UnsupportedEncodingException ex) {
@@ -340,6 +346,7 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.setFailedPINVerify(true, false);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (WSHelper.WSException ex) {
+	    storeTerminationError(ex);
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		LOG.error("User canceled the authentication manually or removed the card.", ex);
@@ -376,6 +383,14 @@ public class GenericPINAction extends StepAction {
 	}
     }
 
+    private void storeTerminationError(Throwable ex) {
+	try {
+	    errorPromise.deliver(ex);
+	} catch (IllegalStateException illegalState) {
+	    LOG.error("Cannot re-deliver error", illegalState);
+	}
+    }
+
     private StepActionResult performResumePIN(Map<String, ExecutionResults> oldResults) {
 	try {
 	    EstablishChannelResponse canResponse = performPACEWithCAN(oldResults);
@@ -400,10 +415,12 @@ public class GenericPINAction extends StepAction {
 	    gPINStep.updateState(RecognizedState.PIN_resumed);
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	} catch (ParserConfigurationException ex) {
+	    storeTerminationError(ex);
 	    LOG.error("An internal error occurred while trying to resume the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
+	    this.storeTerminationError(ex);
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		LOG.error("User canceled the authentication manually or removed the card.", ex);
@@ -479,10 +496,12 @@ public class GenericPINAction extends StepAction {
 		return new StepActionResult(StepActionResultStatus.REPEAT);
 	    }
 	} catch (APDUException | ParserConfigurationException ex) {
+	    storeTerminationError(ex);
 	    LOG.error("An internal error occurred while trying to unblock the PIN.", ex);
 	    return new StepActionResult(StepActionResultStatus.REPEAT,
 		    generateErrorStep(lang.translationForKey(ERROR_INTERNAL)));
 	} catch (WSHelper.WSException ex) {
+	    this.storeTerminationError(ex);
 	    // This is for PIN Pad Readers in case the user pressed the cancel button on the reader.
 	    if (ex.getResultMinor().equals(ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		LOG.error("User canceled the authentication manually or removed the card.", ex);
@@ -566,6 +585,7 @@ public class GenericPINAction extends StepAction {
 	errorStep.setReversible(false);
 	Text errorText = new Text(errorMessage);
 	errorStep.getInputInfoUnits().add(errorText);
+
 	return errorStep;
     }
 

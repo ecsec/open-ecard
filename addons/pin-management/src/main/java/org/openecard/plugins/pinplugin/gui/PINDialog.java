@@ -24,6 +24,7 @@ package org.openecard.plugins.pinplugin.gui;
 
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
@@ -41,11 +42,13 @@ public class PINDialog {
     private final UserConsent gui;
     private final Dispatcher dispatcher;
     private final CardCapturer cardCapturer;
+    private final Promise<Throwable> errorPromise;
 
-    public PINDialog(UserConsent gui, Dispatcher dispatcher, CardCapturer cardCapturer) {
+    public PINDialog(UserConsent gui, Dispatcher dispatcher, CardCapturer cardCapturer, Promise<Throwable> errorPromise) {
 	this.gui = gui;
 	this.dispatcher = dispatcher;
 	this.cardCapturer = cardCapturer;
+	this.errorPromise = errorPromise;
     }
 
     /**
@@ -65,7 +68,7 @@ public class PINDialog {
     private UserConsentDescription createUserConsentDescription() {
 	UserConsentDescription uc = new UserConsentDescription("PIN Operation", "pin_change_dialog");
 	GenericPINStep gPINStep = new GenericPINStep("GenericPINStepID", "GenericPINStep", this.cardCapturer);
-	gPINStep.setAction(new GenericPINAction("PIN Management", dispatcher, gPINStep, this.cardCapturer));
+	gPINStep.setAction(new GenericPINAction("PIN Management", dispatcher, gPINStep, this.cardCapturer, this.errorPromise));
 	uc.getSteps().add(gPINStep);
 
 	return uc;

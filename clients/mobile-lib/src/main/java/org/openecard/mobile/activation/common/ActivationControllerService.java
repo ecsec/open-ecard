@@ -19,6 +19,7 @@ import org.openecard.addon.AddonSelector;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
+import org.openecard.common.ECardConstants;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.common.util.Promise;
 import static org.openecard.mobile.activation.ActivationResultCode.*;
@@ -62,7 +63,7 @@ public class ActivationControllerService {
 		result = this.activate(requestURI, controllerCallback, hooks);
 	    } catch (Exception e) {
 		LOG.debug("Activation was interrupted.", e);
-		result = new CommonActivationResult(INTERRUPTED, "Returning error as INTERRUPTED result.");
+		result = createInterruptResult();
 	    }
 	    boolean wasRunning;
 	    try {
@@ -132,7 +133,8 @@ public class ActivationControllerService {
 	    }
 	}
 	LOG.debug("Notifying of interrupted completion.");
-	controllerCallback.onAuthenticationCompletion(new CommonActivationResult(INTERRUPTED, ""));
+	CommonActivationResult result = createInterruptResult();
+	controllerCallback.onAuthenticationCompletion(result);
 
 	cancellableThread.interrupt();
 	try {
@@ -140,6 +142,12 @@ public class ActivationControllerService {
 	} catch (InterruptedException ex) {
 	    LOG.warn("Could not interrupt the thread running the interuppted exception.", ex);
 	}
+    }
+
+    private CommonActivationResult createInterruptResult() {
+	CommonActivationResult result = new CommonActivationResult(INTERRUPTED, "");
+	result.setProcessMinor(ECardConstants.Minor.SAL.CANCELLATION_BY_USER);
+	return result;
     }
 
     public boolean isRunning() {
@@ -254,9 +262,11 @@ public class ActivationControllerService {
     private CommonActivationResult createActivationResult(BindingResult result) {
 	LOG.info("Returning result: {}", result);
 	CommonActivationResult activationResult;
+	final Map<String, String> auxResultData = result.getAuxResultData();
+
 	switch (result.getResultCode()) {
 	    case REDIRECT:
-		String location = result.getAuxResultData().get(AuxDataKeys.REDIRECT_LOCATION);
+		String location = auxResultData.get(AuxDataKeys.REDIRECT_LOCATION);
 		activationResult = new CommonActivationResult(location, REDIRECT);
 		break;
 	    case OK:
@@ -279,7 +289,11 @@ public class ActivationControllerService {
 		break;
 	    default:
 		activationResult = new CommonActivationResult(INTERNAL_ERROR, result.getResultMessage());
+
 	}
+
+	activationResult.setProcessMinor(auxResultData.get(AuxDataKeys.MINOR_PROCESS_RESULT));
+
 	return activationResult;
     }
 

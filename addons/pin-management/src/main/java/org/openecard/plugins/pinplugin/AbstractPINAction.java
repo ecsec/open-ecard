@@ -89,7 +89,7 @@ public abstract class AbstractPINAction implements AppExtensionAction {
      * @param cHandle The connection handle for the card for which the pin state should be recognized.
      * @return The recognized State (may be {@code RecognizedState.UNKNOWN}).
      */
-    protected RecognizedState recognizeState(ConnectionHandleType cHandle) {
+    protected RecognizedState recognizeState(ConnectionHandleType cHandle) throws WSException {
 
 	Transmit t = new Transmit();
 	t.setSlotHandle(cHandle.getSlotHandle());
@@ -97,6 +97,8 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	inputAPDU.setInputAPDU(RECOGNIZE_PIN_APDU);
 	t.getInputAPDUInfo().add(inputAPDU);
 	TransmitResponse response = (TransmitResponse) dispatcher.safeDeliver(t);
+
+	WSHelper.checkResult(response);
 
 	byte[] responseAPDU = response.getOutputAPDU().get(0);
 
@@ -129,6 +131,8 @@ public abstract class AbstractPINAction implements AppExtensionAction {
 	t.getInputAPDUInfo().add(inputAPDU);
 	TransmitResponse response = (TransmitResponse) dispatcher.safeDeliver(t);
 
+	WSHelper.checkResult(response);
+	
 	byte[] responseAPDU = response.getOutputAPDU().get(0);
 	LOG.debug("PUK response is {}", ByteUtils.toHexString(responseAPDU));
 

@@ -92,31 +92,26 @@ public class SkidCApiClient {
     }
 
     public static String fetch(String method, URL url, String reqMimeType, String payload, String resMimeType) throws NetworkError, ServerError {
-	boolean doInput = reqMimeType != null && payload != null;
-	boolean doOutput = resMimeType != null;
+	boolean doSend = reqMimeType != null && payload != null;
+	boolean doReceive = resMimeType != null;
 
 	try {
 	    HttpURLConnection con = getClient(url);
-	    con.setRequestMethod(method);
 
-	    if (doInput) {
-		con.setDoInput(true);
-		con.setRequestProperty("Content-Type", reqMimeType + "; charset=UTF-8");
-	    } else {
-		con.setDoInput(false);
-	    }
-
-	    if (doOutput) {
+	    if (doSend) {
 		con.setDoOutput(true);
-		con.setRequestProperty("Accept", resMimeType);
-	    } else {
-		con.setDoOutput(false);
+		con.setRequestProperty("Content-Type", reqMimeType + "; charset=UTF-8");
 	    }
 
+	    if (doReceive) {
+		con.setRequestProperty("Accept", resMimeType);
+	    }
+
+	    con.setRequestMethod(method);
 	    con.connect();
 
 	    // send payload
-	    if (doInput) {
+	    if (doSend) {
 		try (OutputStream out = con.getOutputStream()) {
 		    assert(payload != null); // not null due to doInput boolean
 		    out.write(payload.getBytes("UTF-8"));
@@ -124,7 +119,7 @@ public class SkidCApiClient {
 	    }
 
 	    int resCode = con.getResponseCode();
-	    if (doOutput && resCode == HttpURLConnection.HTTP_OK) {
+	    if (doReceive && resCode == HttpURLConnection.HTTP_OK) {
 		// get session id
 		try (InputStream objStream = con.getInputStream()) {
 		    // TODO: read content encoding from header (Content-Type: application/json; charset=UTF-8
@@ -132,12 +127,12 @@ public class SkidCApiClient {
 
 		    return objString;
 		}
-	    } else if (! doOutput && resCode == HttpURLConnection.HTTP_NO_CONTENT) {
+	    } else if (! doReceive && resCode == HttpURLConnection.HTTP_NO_CONTENT) {
 		return null;
 	    } else if (resCode == HttpURLConnection.HTTP_NOT_FOUND) {
 		throw new NotFound("The requested resource does not exist on the server.");
 	    } else {
-		throw new ServerError(resCode, "Failed to retrieve session from SkIDentity server.");
+		throw new ServerError(resCode, "Failed to retrieve resource from SkIDentity server.");
 	    }
 	} catch (IOException ex) {
 	    throw new NetworkError("Failed execute HTTP request.", ex);

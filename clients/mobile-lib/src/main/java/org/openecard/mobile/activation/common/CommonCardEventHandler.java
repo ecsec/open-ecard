@@ -15,7 +15,9 @@ import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
+import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ActivationInteraction;
+import org.openecard.mobile.activation.common.anonymous.NFCOverlayMessageHandlerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +33,12 @@ public class CommonCardEventHandler {
     private final Object recognizedLock = new Object();
     private volatile boolean cardRecognized;
     private final NFCDialogMsgSetter msgSetter;
+    private final boolean isAndroid;
 
     public CommonCardEventHandler(ActivationInteraction interaction, boolean cardRecognized, NFCDialogMsgSetter msgSetter) {
 	this.interaction = interaction;
 	this.msgSetter = msgSetter;
+	this.isAndroid = SysUtils.isAndroid();
     }
 
     public void onCardInserted() {
@@ -48,6 +52,18 @@ public class CommonCardEventHandler {
 	}
 	if (wasRecognized) {
 	    this.interaction.onCardRemoved();
+	} else {
+	    if (isAndroid) {
+		requestCardInsertion();
+	    }
+	}
+    }
+
+    private void requestCardInsertion() {
+	if (msgSetter.isSupported()) {
+	    interaction.requestCardInsertion(new NFCOverlayMessageHandlerImpl(msgSetter));
+	} else {
+	    interaction.requestCardInsertion();
 	}
     }
 

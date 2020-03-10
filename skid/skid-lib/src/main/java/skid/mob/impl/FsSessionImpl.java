@@ -10,6 +10,8 @@
 
 package skid.mob.impl;
 
+import java.net.URISyntaxException;
+import org.openecard.common.util.UrlBuilder;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.impl.client.InvalidServerData;
@@ -71,7 +73,7 @@ public class FsSessionImpl implements FsSession {
 	Runnable r = () -> {
 	    try {
 		String actUrl = apiClient.broker().cancelSession(fsSessionId);
-		ifNotInterrupted(() -> finishedCb.finished(fsSessionId));
+		ifNotInterrupted(() -> finishedCb.finished(actUrl));
 	    } catch (NetworkError ex) {
 		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
 	    } catch (ServerError ex) {
@@ -91,10 +93,11 @@ public class FsSessionImpl implements FsSession {
 		if (isNpa(o.getOption())) {
 		    // select option
 		    String actUrl = sendSelect(o);
+		    String localUrl = buildEidClientUrl(actUrl);
 		    // start authentication
 		    ifNotInterrupted(() -> {
 			EacControllerFactory fact = oecActivationSource.eacFactory();
-			EacAuthModule authMod = new EacAuthModule(fact, actUrl, finishedCb);
+			EacAuthModule authMod = new EacAuthModule(fact, localUrl, finishedCb);
 			authCb.doAuth(authMod);
 		    });
 		} else {
@@ -125,6 +128,17 @@ public class FsSessionImpl implements FsSession {
 	boolean isNpa = "http://bsi.bund.de/cif/npa.xml".equals(o.type());
 	boolean isTr03124 = "urn:oid:1.3.162.15480.3.0.14".equals(o.protocol());
 	return eidClientActivation && isNpa && isTr03124;
+    }
+
+    private String buildEidClientUrl(String authUrl) {
+	try {
+	    String localUrl = UrlBuilder.fromUrl("http://localhost:24727/eID-Client")
+		    .queryParam("tcTokenURL", authUrl)
+		    .build().toString();
+	    return localUrl;
+	} catch (URISyntaxException ex) {
+	    throw new IllegalStateException("Unexpected error while building localhost URL.");
+	}
     }
 
 }

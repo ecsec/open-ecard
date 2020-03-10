@@ -15,6 +15,7 @@ import com.jayway.jsonpath.InvalidJsonException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -150,22 +151,26 @@ public class SkidCApiClient {
     }
 
     private String formUrlEncode(Map<String,String> formData) {
-	StringBuilder sb = new StringBuilder();
-	boolean first = true;
-	for (Map.Entry<String, String> e : formData.entrySet()) {
-	    String k = e.getKey();
-	    String v = URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8);
+	try {
+	    StringBuilder sb = new StringBuilder();
+	    boolean first = true;
+	    for (Map.Entry<String, String> e : formData.entrySet()) {
+		String k = e.getKey();
+		String v = URLEncoder.encode(e.getValue(), "UTF_8");
 
-	    if (first) {
-		first = false;
-	    } else {
-		sb.append("&");
+		if (first) {
+		    first = false;
+		} else {
+		    sb.append("&");
+		}
+		sb.append(k);
+		sb.append("=");
+		sb.append(v);
 	    }
-	    sb.append(k);
-	    sb.append("=");
-	    sb.append(v);
+	    return sb.toString();
+	} catch (UnsupportedEncodingException ex) {
+	    throw new UnsupportedOperationException("UTF-8 encoding is missing, there must be something wrong with the platform.");
 	}
-	return sb.toString();
     }
 
     public Broker broker() {

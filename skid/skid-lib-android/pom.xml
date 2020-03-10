@@ -36,6 +36,10 @@
 							<artifactSet>
 								<excludes>
 									<exclude>com.github.markusbernhardt</exclude>
+									<exclude>net.java.dev.jna</exclude>
+									<exclude>org.javadelight</exclude>
+									<exclude>org.ini4j</exclude>
+									<exclude>org.webjars.bower:js-beautify</exclude>
 								</excludes>
 							</artifactSet>
 							<relocations>
@@ -72,7 +76,11 @@
             <version>4.1.1.4</version>
 			<scope>provided</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.4.13</version>
+		</dependency>
 
 		<dependency>
 			<groupId>de.ecsec.skid.client</groupId>

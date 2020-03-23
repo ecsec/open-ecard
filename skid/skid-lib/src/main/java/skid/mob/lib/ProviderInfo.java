@@ -12,6 +12,7 @@ package skid.mob.lib;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
+
 /**
  *
  * @author Tobias Wich
@@ -21,5 +22,14 @@ public interface ProviderInfo {
 
     String displayName();
     String displayName(String lang);
+
+    String informationUrl();
+    String informationUrl(String lang);
+
+    String privacyStatementUrl();
+    String privacyStatementUrl(String lang);
+
+    String logoUrl();
+    String logoUrl(String lang);
 
 }

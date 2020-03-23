@@ -13,6 +13,7 @@ package skid.mob.impl;
 import skid.mob.impl.client.model.UiInfo;
 import skid.mob.lib.ProviderInfo;
 
+
 /**
  *
  * @author Tobias Wich
@@ -39,6 +40,34 @@ public class ProviderInfoImpl implements ProviderInfo {
 	return uii.displayName(lang);
     }
 
+    @Override
+    public String informationUrl() {
+	return uii.informationUrl();
+    }
 
+    @Override
+    public String informationUrl(String lang) {
+	return uii.informationUrl(lang);
+    }
+
+    @Override
+    public String privacyStatementUrl() {
+	return uii.privacyStatementUrl();
+    }
+
+    @Override
+    public String privacyStatementUrl(String lang) {
+	return uii.privacyStatementUrl(lang);
+    }
+
+    @Override
+    public String logoUrl() {
+	return uii.logoUrl();
+    }
+
+    @Override
+    public String logoUrl(String lang) {
+	return uii.logoUrl(lang);
+    }
 
 }

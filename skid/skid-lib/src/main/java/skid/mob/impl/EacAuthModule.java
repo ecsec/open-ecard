@@ -18,7 +18,6 @@ import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.EacModule;
 import skid.mob.lib.EacResult;
-import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.ResultHandler;
 import skid.mob.lib.SkidEacInteraction;
 
@@ -31,12 +30,10 @@ public class EacAuthModule implements EacModule {
 
     private final EacControllerFactory eacFac;
     private final String actUrl;
-    private final FinishedCallback finishedCb;
 
-    EacAuthModule(EacControllerFactory eacFac, String actUrl, FinishedCallback finishedCb) {
+    EacAuthModule(EacControllerFactory eacFac, String actUrl) {
 	this.eacFac = eacFac;
 	this.actUrl = actUrl;
-	this.finishedCb = finishedCb;
     }
 
     @Override

@@ -85,7 +85,7 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb, FinishedCallback finishedCb) {
+    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {
@@ -95,7 +95,7 @@ public class FsSessionImpl implements FsSession {
 		    // start authentication
 		    ifNotInterrupted(() -> {
 			EacControllerFactory fact = oecActivationSource.eacFactory();
-			EacAuthModule authMod = new EacAuthModule(fact, localUrl, finishedCb);
+			EacAuthModule authMod = new EacAuthModule(fact, localUrl);
 			authCb.doAuth(authMod);
 		    });
 		} else {

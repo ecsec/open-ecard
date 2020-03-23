@@ -59,10 +59,17 @@ public class EacAuthModule implements EacModule {
 		    public String getErrorMessage() {
 			return result.getErrorMessage();
 		    }
+
+		    @Override
+		    public String getRedirectUrl() {
+			return result.getRedirectUrl();
+		    }
+
+		    @Override
+		    public String getProcessResultMinor() {
+			return result.getProcessResultMinor();
+		    }
 		});
-		if (result.getRedirectUrl() != null) {
-		    finishedCb.finished(actUrl);
-		}
 	    }
 	}, new EacInteractionWrapper(interactionComponent));
 

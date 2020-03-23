@@ -27,7 +27,7 @@ public class SamlClientTest {
 	SamlClientImpl client = new SamlClientImpl(null);
 	CompletableFuture<String> cb = new CompletableFuture<>();
 	Cancellable c = client.startSession("https://cc-demo.skidentity.de/app-start",
-		v -> {cb.complete("init");}, (v1, v2) -> {cb.complete("error");}, v -> {cb.complete("finished");});
+		v -> {cb.complete("init");}, (v1, v2) -> {cb.complete("error");});
 	//Thread.sleep(200);
 	//c.cancel();
 	cb.get();

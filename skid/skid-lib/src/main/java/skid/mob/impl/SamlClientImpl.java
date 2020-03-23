@@ -28,7 +28,6 @@ import skid.mob.impl.client.NetworkError;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.InitiatedCallback;
 import skid.mob.lib.SamlClient;
-import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.ProcessFailedCallback;
@@ -51,11 +50,11 @@ public class SamlClientImpl implements SamlClient {
     }
 
     @Override
-    public Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb, FinishedCallback cb) {
+    public Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb) {
 	Runnable r = () -> {
 	    try {
 		AuthReqResp samlFsResp = authnReq(startUrl);
-		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri, cb);
+		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri);
 		fsSess.load();
 		// signal success
 		ifNotInterrupted(() -> initCb.initDone(fsSess));

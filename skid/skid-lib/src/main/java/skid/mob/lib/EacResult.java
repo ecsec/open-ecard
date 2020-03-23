@@ -20,7 +20,18 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacResult {
 
+    String getRedirectUrl();
+
     ActivationResultCode getResultCode();
+
     String getErrorMessage();
+
+    /**
+     * If present, represents the minor error code of the error leading to the termination of the process.
+     *
+     * @see ECardConstants.Minor;
+     * @return The minor result code or {@code null} if not present.
+     */
+    String getProcessResultMinor();
 
 }

@@ -42,15 +42,13 @@ public class FsSessionImpl implements FsSession {
     private final SkidCApiClient apiClient;
 
     private final String fsSessionId;
-    private final FinishedCallback finishedCb;
 
     private InfoImpl infoImpl;
 
-    FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri, FinishedCallback finishedCb) {
+    FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri) {
 	this.oecActivationSource = oecActivationSource;
 	this.apiClient = new SkidCApiClient(skidBaseUri);
 	this.fsSessionId = fsSessionId;
-	this.finishedCb = finishedCb;
     }
 
     void load() throws NetworkError, ServerError, InvalidServerData {
@@ -69,11 +67,11 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable cancelSession(ProcessFailedCallback failedCb) {
+    public Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb) {
 	Runnable r = () -> {
 	    try {
-		String actUrl = apiClient.broker().cancelSession(fsSessionId);
-		ifNotInterrupted(() -> finishedCb.finished(actUrl));
+		String finishUrl = apiClient.broker().cancelSession(fsSessionId);
+		ifNotInterrupted(() -> finishedCb.finished(finishUrl));
 	    } catch (NetworkError ex) {
 		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
 	    } catch (ServerError ex) {
@@ -87,7 +85,7 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb) {
+    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb, FinishedCallback finishedCb) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {
@@ -101,8 +99,10 @@ public class FsSessionImpl implements FsSession {
 			authCb.doAuth(authMod);
 		    });
 		} else {
-		    ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.UNSUPPORTED_FEATURE,
-			    "The selected option is currently not supported."));
+		    ifNotInterrupted(() -> {
+			failedCb.processFailed(SkidErrorCodes.UNSUPPORTED_FEATURE,
+			    "The selected option is currently not supported.");
+		    });
 		}
 	    } catch (NetworkError ex) {
 		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));

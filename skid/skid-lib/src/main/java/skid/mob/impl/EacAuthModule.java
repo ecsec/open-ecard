@@ -12,12 +12,10 @@ package skid.mob.impl;
 
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
-import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.EacModule;
-import skid.mob.lib.EacResult;
 import skid.mob.lib.ResultHandler;
 import skid.mob.lib.SkidEacInteraction;
 
@@ -46,27 +44,7 @@ public class EacAuthModule implements EacModule {
 
 	    @Override
 	    public void onAuthenticationCompletion(ActivationResult result) {
-		resultHandler.done(new EacResult() {
-		    @Override
-		    public ActivationResultCode getResultCode() {
-			return result.getResultCode();
-		    }
-
-		    @Override
-		    public String getErrorMessage() {
-			return result.getErrorMessage();
-		    }
-
-		    @Override
-		    public String getRedirectUrl() {
-			return result.getRedirectUrl();
-		    }
-
-		    @Override
-		    public String getProcessResultMinor() {
-			return result.getProcessResultMinor();
-		    }
-		});
+		resultHandler.done(new EacResultImpl(result));
 	    }
 	}, new EacInteractionWrapper(interactionComponent));
 

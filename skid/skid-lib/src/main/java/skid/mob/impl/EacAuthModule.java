@@ -15,12 +15,12 @@ import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.EacInteraction;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.EacModule;
 import skid.mob.lib.EacResult;
 import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.ResultHandler;
+import skid.mob.lib.SkidEacInteraction;
 
 
 /**
@@ -40,7 +40,7 @@ public class EacAuthModule implements EacModule {
     }
 
     @Override
-    public Cancellable runEac(EacInteraction interactionComponent, ResultHandler resultHandler) {
+    public Cancellable runEac(SkidEacInteraction interactionComponent, ResultHandler resultHandler) {
 	ActivationController controller = eacFac.create(actUrl, new ControllerCallback() {
 	    @Override
 	    public void onStarted() {
@@ -64,7 +64,7 @@ public class EacAuthModule implements EacModule {
 		    finishedCb.finished(actUrl);
 		}
 	    }
-	}, interactionComponent);
+	}, new EacInteractionWrapper(interactionComponent));
 
 	return controller::cancelOngoingAuthentication;
     }

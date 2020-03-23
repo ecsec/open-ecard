@@ -10,7 +10,6 @@
 
 package skid.mob.lib;
 
-import org.openecard.mobile.activation.EacInteraction;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -20,6 +19,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacModule {
 
-    Cancellable runEac(EacInteraction interactionComponent, ResultHandler resultHandler);
+    Cancellable runEac(SkidEacInteraction interactionComponent, ResultHandler resultHandler);
 
 }

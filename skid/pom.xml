@@ -11,6 +11,7 @@
 	<modules>
 		<module>skid-lib</module>
 		<module>skid-lib-android</module>
+		<module>skid-lib-ios</module>
 	</modules>
 
 	<properties>

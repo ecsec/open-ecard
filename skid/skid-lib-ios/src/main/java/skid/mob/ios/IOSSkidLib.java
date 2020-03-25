@@ -51,8 +51,7 @@ import skid.mob.lib.SkidResult;
 public class IOSSkidLib implements SkidLib {
 
     static {
-	// define that this system is Android
-	SysUtils.setIsAndroid();
+	SysUtils.setIsIOS();
     }
 
     private final ActivationUtils utils;

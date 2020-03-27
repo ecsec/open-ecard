@@ -26,4 +26,6 @@ public interface SkidLib {
     SamlClient createSamlClient();
     PinManagementControllerFactory pinManagementFactory();
 
+    AuthModuleCallbackBuilder createAuthModuleBuilder();
+
 }

@@ -18,8 +18,10 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface AuthModuleCallback extends AuthModuleEacCallback {
+public interface AuthModuleCallbackBuilder {
 
-    // void doAuth(CidModule m);
+    AuthModuleCallbackBuilder setCallback(AuthModuleEacCallback cb);
+
+    AuthModuleCallback build();
 
 }

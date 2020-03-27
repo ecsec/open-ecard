@@ -36,12 +36,14 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.AndroidNFCFactory;
 import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.ws.android.AndroidMarshaller;
+import skid.mob.impl.AuthModuleCallbackBuilderImpl;
 import skid.mob.impl.SamlClientImpl;
 import skid.mob.impl.SkidResultImpl;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidErrorCodes;
 import skid.mob.lib.SkidLib;
 import skid.mob.lib.SkidResult;
+import skid.mob.lib.AuthModuleCallbackBuilder;
 
 
 /**
@@ -188,6 +190,11 @@ public class AndroidSkidLib implements SkidLib {
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
 	return oecActivationSource.pinManagementFactory();
+    }
+
+    @Override
+    public AuthModuleCallbackBuilder createAuthModuleBuilder() {
+	return new AuthModuleCallbackBuilderImpl();
     }
 
 }

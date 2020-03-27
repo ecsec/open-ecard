@@ -12,14 +12,13 @@ package skid.mob.lib;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
-
 /**
  *
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface AuthModuleCallback extends AuthModuleEacCallback {
+public interface AuthModuleEacCallback {
 
-    // void doAuth(CidModule m);
+    void doAuth(EacModule m);
 
 }

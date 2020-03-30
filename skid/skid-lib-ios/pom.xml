@@ -30,7 +30,7 @@
 						<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
 					</annotationProcessors>
 					<compilerArgs>
-						<arg>-Aroboface.headername=open-ecard.h</arg>
+						<arg>-Aroboface.include.headers=skid-mobile-lib.h</arg>
 						<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
 					</compilerArgs>
 					<debug>true</debug>
@@ -68,6 +68,7 @@
 			<groupId>de.ecsec.skid.client</groupId>
 			<artifactId>skid-lib</artifactId>
 			<version>${project.version}</version>
+			<classifier>iOS</classifier>
 		</dependency>
 
 		<!-- all OeC dependencies -->

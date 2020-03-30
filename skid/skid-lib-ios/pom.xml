@@ -17,40 +17,28 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<!--
-							<keepDependenciesWithProvidedScope>
-							false
-							</keepDependenciesWithProvidedScope>
-							<promoteTransitiveDependencies>
-							true
-
-							</promoteTransitiveDependencies>
-							-->
-							<artifactSet>
-								<excludes>
-									<exclude>com.github.markusbernhardt</exclude>
-									<exclude>net.java.dev.jna</exclude>
-									<exclude>org.javadelight</exclude>
-									<exclude>org.ini4j</exclude>
-									<exclude>org.webjars.bower:js-beautify</exclude>
-								</excludes>
-							</artifactSet>
-							<relocations>
-								<relocation>
-									<pattern>org.apache.http</pattern>
-									<shadedPattern>org.openecard.apache.http</shadedPattern>
-								</relocation>
-							</relocations>
-						</configuration>
-					</execution>
-				</executions>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<annotationProcessorPath>
+							<groupId>org.openecard.tools</groupId>
+							<artifactId>roboface-processor</artifactId>
+							<version>${version.roboface}</version>
+						</annotationProcessorPath>
+					</annotationProcessorPaths>
+					<annotationProcessors>
+						<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
+					</annotationProcessors>
+					<compilerArgs>
+						<arg>-Aroboface.headername=open-ecard.h</arg>
+						<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
+					</compilerArgs>
+					<debug>true</debug>
+					<debuglevel>source,lines,vars</debuglevel>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+					<!--failOnWarning>true</failOnWarning-->
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -101,6 +89,7 @@
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
+			<version>${version.roboface}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

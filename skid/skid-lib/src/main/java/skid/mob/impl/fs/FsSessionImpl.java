@@ -25,7 +25,6 @@ import skid.mob.impl.client.SkidCApiClient;
 import skid.mob.impl.client.model.SpMetadata;
 import skid.mob.lib.ActivationType;
 import skid.mob.lib.Cancellable;
-import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.FsSession;
 import skid.mob.lib.Info;
 import skid.mob.lib.Option;
@@ -35,6 +34,7 @@ import skid.mob.lib.SelectedOption;
 import skid.mob.lib.AuthModuleCallback;
 import skid.mob.lib.ProcessFailedCallback;
 import skid.mob.lib.FsResultCallback;
+import skid.mob.lib.FsFinishedCallback;
 
 
 /**
@@ -72,7 +72,7 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb) {
+    public Cancellable cancelSession(ProcessFailedCallback failedCb, FsFinishedCallback finishedCb) {
 	Runnable r = () -> {
 	    try {
 		String finishUrl = apiClient.broker().cancelSession(fsSessionId);

@@ -76,7 +76,7 @@ public class FsSessionImpl implements FsSession {
 	Runnable r = () -> {
 	    try {
 		String finishUrl = apiClient.broker().cancelSession(fsSessionId);
-		ifNotInterrupted(() -> finishedCb.finished(finishUrl));
+		ifNotInterrupted(() -> finishedCb.done(finishUrl));
 	    } catch (NetworkError ex) {
 		ifNotInterrupted(() -> failedCb.failed(new SkidResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (ServerError ex) {

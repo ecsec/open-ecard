@@ -11,6 +11,7 @@
 package skid.mob.impl;
 
 import skid.mob.impl.client.model.UiInfo;
+import skid.mob.lib.LogoUrl;
 import skid.mob.lib.ProviderInfo;
 
 
@@ -61,12 +62,12 @@ public class ProviderInfoImpl implements ProviderInfo {
     }
 
     @Override
-    public String logoUrl() {
+    public LogoUrl logoUrl() {
 	return uii.logoUrl();
     }
 
     @Override
-    public String logoUrl(String lang) {
+    public LogoUrl logoUrl(String lang) {
 	return uii.logoUrl(lang);
     }
 

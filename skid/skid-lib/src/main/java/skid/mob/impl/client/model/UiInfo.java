@@ -17,6 +17,7 @@ import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import skid.mob.lib.LogoUrl;
 
 
 /**
@@ -55,13 +56,13 @@ public class UiInfo {
 	return extractValue(fetchBestValue("PrivacyStatementURL", lang));
     }
 
-    public String logoUrl() {
+    public LogoUrl logoUrl() {
 	return logoUrl("en");
     }
 
-    public String logoUrl(String lang) {
+    public LogoUrl logoUrl(String lang) {
 	// TODO: get proper logo object
-	return extractValue(fetchBestValue("Logo", lang));
+	return createLogo(fetchBestValue("Logo", lang));
     }
 
     private JSONObject fetchBestValue(String objName, String lang) {
@@ -109,6 +110,33 @@ public class UiInfo {
 	    result = obj.optString("value");
 	}
 	return result;
+    }
+
+    private LogoUrl createLogo(JSONObject obj) {
+	if (obj != null) {
+	    String url = obj.optString("value");
+	    int width = obj.optInt("width");
+	    int height = obj.optInt("height");
+
+	    return new LogoUrl() {
+		@Override
+		public String url() {
+		    return url;
+		}
+
+		@Override
+		public int width() {
+		    return width;
+		}
+
+		@Override
+		public int height() {
+		    return height;
+		}
+	    };
+	} else {
+	    return null;
+	}
     }
 
 }

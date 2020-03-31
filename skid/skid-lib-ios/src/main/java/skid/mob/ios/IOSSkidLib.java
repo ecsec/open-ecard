@@ -31,6 +31,7 @@ import org.openecard.ios.activation.DeveloperOptions;
 import org.openecard.ios.activation.NFCConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.slf4j.LoggerFactory;
+import skid.mob.lib.AuthModuleCallbackBuilder;
 import skid.mob.lib.SkidResult;
 
 
@@ -192,6 +193,11 @@ public class IOSSkidLib implements SkidLib {
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
 	return oecActivationSource.pinManagementFactory();
+    }
+
+    @Override
+    public AuthModuleCallbackBuilder createAuthModuleBuilder() {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -17,7 +17,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface InitiatedCallback {
+public interface FsSessionCallback {
 
     void initDone(FsSession newSession);
 

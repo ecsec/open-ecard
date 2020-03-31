@@ -27,11 +27,11 @@ import org.openecard.mobile.activation.ActivationSource;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.lib.Cancellable;
-import skid.mob.lib.InitiatedCallback;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.ProcessFailedCallback;
+import skid.mob.lib.FsSessionCallback;
 
 
 /**
@@ -51,7 +51,7 @@ public class SamlClientImpl implements SamlClient {
     }
 
     @Override
-    public Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb) {
+    public Cancellable startSession(String startUrl, FsSessionCallback initCb, ProcessFailedCallback failCb) {
 	Runnable r = () -> {
 	    try {
 		AuthReqResp samlFsResp = authnReq(startUrl);

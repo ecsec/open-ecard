@@ -58,7 +58,7 @@ public class SamlClientImpl implements SamlClient {
 		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri);
 		fsSess.load();
 		// signal success
-		ifNotInterrupted(() -> initCb.initDone(fsSess));
+		ifNotInterrupted(() -> initCb.done(fsSess));
 	    } catch (MalformedURLException | ClassCastException ex) {
 		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INVALID_INPUT, ex.getMessage()));
 	    } catch (ServerError ex) {

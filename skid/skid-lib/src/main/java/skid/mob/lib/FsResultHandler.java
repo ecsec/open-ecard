@@ -12,18 +12,13 @@ package skid.mob.lib;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
-
 /**
  *
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface FsSession {
+public interface FsResultHandler {
 
-    Info getInfo();
-
-    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler);
-
-    Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb);
+    void done(FsAuthResult result);
 
 }

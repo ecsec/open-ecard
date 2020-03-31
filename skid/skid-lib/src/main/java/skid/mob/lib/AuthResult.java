@@ -10,26 +10,21 @@
 
 package skid.mob.lib;
 
-import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.common.ECardConstants.Minor;
 import org.openecard.robovm.annotations.FrameworkInterface;
+
 
 /**
  *
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface EacResult {
-
-    String getRedirectUrl();
-
-    ActivationResultCode getResultCode();
-
-    String getErrorMessage();
+public interface AuthResult extends SkidResult {
 
     /**
      * If present, represents the minor error code of the error leading to the termination of the process.
+     * This value is specific to the used AuthModule. In case of an EAC process this is a value from {@link Minor}
      *
-     * @see ECardConstants.Minor;
      * @return The minor result code or {@code null} if not present.
      */
     String getProcessResultMinor();

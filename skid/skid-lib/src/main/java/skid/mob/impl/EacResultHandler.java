@@ -8,22 +8,16 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
+package skid.mob.impl;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
-
+import org.openecard.mobile.activation.ActivationResult;
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface FsSession {
+public interface EacResultHandler {
 
-    Info getInfo();
-
-    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler);
-
-    Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb);
+    void done(ActivationResult result);
 
 }

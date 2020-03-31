@@ -19,6 +19,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface EacModule {
 
-    Cancellable runEac(SkidEacInteraction interactionComponent, ResultHandler resultHandler);
+    Cancellable runEac(SkidEacInteraction interactionComponent);
 
 }

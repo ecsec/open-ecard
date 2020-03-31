@@ -18,12 +18,15 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface FsSession {
+public interface FsAuthResult extends AuthResult {
 
-    Info getInfo();
+    /**
+     * The redirect URL transmitting the Authentication Response to the SP.
+     *
+     * @return Response URL to the SP, or {@code null} in case no URL could be determined.
+     */
+    String getRedirectUrl();
 
-    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler);
-
-    Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb);
+    boolean hasRedirectUrl();
 
 }

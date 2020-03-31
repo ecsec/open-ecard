@@ -29,6 +29,7 @@ import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.SelectedOption;
 import skid.mob.lib.AuthModuleCallback;
+import skid.mob.lib.FsResultHandler;
 import skid.mob.lib.ProcessFailedCallback;
 
 
@@ -85,29 +86,33 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb) {
+    public Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {
 		    // select option
 		    String actUrl = sendSelect(o);
 		    String localUrl = buildEidClientUrl(actUrl);
+		    EacResultHandler eacResultHandler = ar -> {
+			// call resultHandler with result from EAC process
+			resultHandler.done(FsAuthResultImpl.fromActivationResult(ar));
+		    };
 		    // start authentication
 		    ifNotInterrupted(() -> {
 			EacControllerFactory fact = oecActivationSource.eacFactory();
-			EacAuthModule authMod = new EacAuthModule(fact, localUrl);
+			EacAuthModule authMod = new EacAuthModule(fact, localUrl, eacResultHandler);
 			authCb.doAuth(authMod);
 		    });
 		} else {
 		    ifNotInterrupted(() -> {
-			failedCb.processFailed(SkidErrorCodes.UNSUPPORTED_FEATURE,
-			    "The selected option is currently not supported.");
+			resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.UNSUPPORTED_FEATURE,
+				"The selected option is currently not supported."));
 		    });
 		}
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    }
 	};
 

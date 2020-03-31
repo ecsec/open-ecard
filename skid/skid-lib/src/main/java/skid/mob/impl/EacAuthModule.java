@@ -16,7 +16,6 @@ import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.EacModule;
-import skid.mob.lib.ResultHandler;
 import skid.mob.lib.SkidEacInteraction;
 
 
@@ -28,14 +27,16 @@ public class EacAuthModule implements EacModule {
 
     private final EacControllerFactory eacFac;
     private final String actUrl;
+    private final EacResultHandler resultHandler;
 
-    EacAuthModule(EacControllerFactory eacFac, String actUrl) {
+    EacAuthModule(EacControllerFactory eacFac, String actUrl, EacResultHandler resultHandler) {
 	this.eacFac = eacFac;
 	this.actUrl = actUrl;
+	this.resultHandler = resultHandler;
     }
 
     @Override
-    public Cancellable runEac(SkidEacInteraction interactionComponent, ResultHandler resultHandler) {
+    public Cancellable runEac(SkidEacInteraction interactionComponent) {
 	ActivationController controller = eacFac.create(actUrl, new ControllerCallback() {
 	    @Override
 	    public void onStarted() {
@@ -44,7 +45,7 @@ public class EacAuthModule implements EacModule {
 
 	    @Override
 	    public void onAuthenticationCompletion(ActivationResult result) {
-		resultHandler.done(new EacResultImpl(result));
+		resultHandler.done(result);
 	    }
 	}, new EacInteractionWrapper(interactionComponent));
 

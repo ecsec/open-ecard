@@ -8,17 +8,28 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
+package skid.mob.impl;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
+import skid.mob.lib.AuthResult;
+import skid.mob.lib.SkidErrorCodes;
+
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface ResultHandler {
+public class AuthResultImpl extends SkidResultImpl implements AuthResult {
 
-    void done(EacResult result);
+    protected final String minor;
+
+    public AuthResultImpl(String minor, SkidErrorCodes code, String msg) {
+	super(code, msg);
+	this.minor = minor;
+    }
+
+    @Override
+    public String getProcessResultMinor() {
+	return minor;
+    }
 
 }

@@ -21,7 +21,6 @@ import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.scio.IOSNFCFactory;
-import skid.mob.impl.SamlClientImpl;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidLib;
 import ch.qos.logback.classic.Level;
@@ -58,11 +57,12 @@ public class IOSSkidLib implements SkidLib {
 	rootLogger.setLevel(Level.ERROR);
     }
 
-    private /* final */ ActivationUtils utils;
+    private /* final */ CommonActivationUtils utils;
     private /* final */ CachingTerminalFactoryBuilder<IOSNFCFactory> builder;
 
     private ContextManager oecCtx;
     private ActivationSource oecActivationSource;
+    private CommonActivationUtils actUtils;
 
     private /*final*/ DeveloperOptions developerOptions;
     private NFCConfig nfcConfig;
@@ -186,13 +186,14 @@ public class IOSSkidLib implements SkidLib {
 
     @Override
     public SamlClient createSamlClient() {
-	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
-	return samlClient;
+//	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
+//	return samlClient;
+	return null;
     }
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
-	return oecActivationSource.pinManagementFactory();
+	return this.utils.pinManagementFactory();
     }
 
     @Override

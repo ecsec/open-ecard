@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth;
 
 import java.util.HashMap;
 import org.slf4j.Logger;

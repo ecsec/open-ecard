@@ -8,27 +8,16 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth.eac;
 
-import skid.mob.lib.Option;
-import skid.mob.lib.SelectedOption;
-
+import org.openecard.mobile.activation.ActivationResult;
 
 /**
  *
  * @author Tobias Wich
  */
-public class SelectedOptionImpl implements SelectedOption {
+public interface EacResultHandler {
 
-    private final OptionImpl option;
-
-    SelectedOptionImpl(OptionImpl option) {
-	this.option = option;
-    }
-
-    @Override
-    public Option getOption() {
-	return option;
-    }
+    void done(ActivationResult result);
 
 }

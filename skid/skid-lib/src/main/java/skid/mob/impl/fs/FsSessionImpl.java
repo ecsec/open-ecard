@@ -8,12 +8,15 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.fs;
 
 import java.net.URISyntaxException;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.EacControllerFactory;
+import skid.mob.impl.auth.eac.EacAuthModule;
+import skid.mob.impl.auth.eac.EacResultHandler;
+import skid.mob.impl.InfoImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.impl.client.ServerError;
@@ -46,13 +49,13 @@ public class FsSessionImpl implements FsSession {
 
     private InfoImpl infoImpl;
 
-    FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri) {
+    public FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri) {
 	this.oecActivationSource = oecActivationSource;
 	this.apiClient = new SkidCApiClient(skidBaseUri);
 	this.fsSessionId = fsSessionId;
     }
 
-    void load() throws NetworkError, ServerError, InvalidServerData {
+    public void load() throws NetworkError, ServerError, InvalidServerData {
 	// load SP infos and options
 	Object spMdObj = apiClient.broker().getOptions(fsSessionId);
 	SpMetadata spMdModel = new SpMetadata(spMdObj);

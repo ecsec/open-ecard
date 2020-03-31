@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.opt;
 
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.model.AuthOption;
@@ -27,7 +27,7 @@ public class OptionImpl implements Option {
     private boolean loaded = false;
     private ActivationType actType;
 
-    OptionImpl(AuthOption ao) {
+    public OptionImpl(AuthOption ao) {
 	this.ao = ao;
     }
 

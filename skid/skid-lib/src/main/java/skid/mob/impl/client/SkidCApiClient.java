@@ -21,7 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.UrlBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import skid.mob.impl.JsonConfig;
 
 
 /**

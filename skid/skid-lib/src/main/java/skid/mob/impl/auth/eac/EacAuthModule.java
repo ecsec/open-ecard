@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth.eac;
 
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
@@ -29,7 +29,7 @@ public class EacAuthModule implements EacModule {
     private final String actUrl;
     private final EacResultHandler resultHandler;
 
-    EacAuthModule(EacControllerFactory eacFac, String actUrl, EacResultHandler resultHandler) {
+    public EacAuthModule(EacControllerFactory eacFac, String actUrl, EacResultHandler resultHandler) {
 	this.eacFac = eacFac;
 	this.actUrl = actUrl;
 	this.resultHandler = resultHandler;

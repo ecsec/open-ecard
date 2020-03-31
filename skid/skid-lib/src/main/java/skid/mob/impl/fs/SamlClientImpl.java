@@ -8,8 +8,9 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.fs;
 
+import skid.mob.impl.client.JsonConfig;
 import skid.mob.impl.client.UnknownInfrastructure;
 import com.jayway.jsonpath.JsonPath;
 import skid.mob.impl.client.ServerError;

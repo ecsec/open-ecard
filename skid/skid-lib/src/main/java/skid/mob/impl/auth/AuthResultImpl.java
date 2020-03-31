@@ -8,8 +8,9 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth;
 
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.lib.AuthResult;
 import skid.mob.lib.SkidErrorCodes;
 

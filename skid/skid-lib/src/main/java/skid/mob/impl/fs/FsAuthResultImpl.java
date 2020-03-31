@@ -8,9 +8,10 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.fs;
 
 import org.openecard.mobile.activation.ActivationResult;
+import skid.mob.impl.auth.AuthResultImpl;
 import skid.mob.impl.auth.AuthUtils;
 import skid.mob.lib.FsAuthResult;
 import skid.mob.lib.SkidErrorCodes;

@@ -24,6 +24,7 @@ import java.net.URL;
 import org.json.JSONException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.mobile.activation.ActivationSource;
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.lib.Cancellable;
@@ -60,18 +61,18 @@ public class SamlClientImpl implements SamlClient {
 		// signal success
 		ifNotInterrupted(() -> initCb.done(fsSess));
 	    } catch (MalformedURLException | ClassCastException ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INVALID_INPUT, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.INVALID_INPUT, ex.getMessage())));
 	    } catch (ServerError ex) {
 		// TODO: error handling for unknown SP and all other cases
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (InvalidServerData ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (UnsupportedEncodingException | JSONException |  UnknownInfrastructure ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (IOException | NetworkError ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (RuntimeException ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage())));
 	    }
 	};
 

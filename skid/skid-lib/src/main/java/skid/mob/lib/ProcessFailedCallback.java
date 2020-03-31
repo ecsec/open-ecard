@@ -19,6 +19,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ProcessFailedCallback {
 
-    void processFailed(SkidErrorCodes code, String msg);
+    void failed(SkidResult result);
 
 }

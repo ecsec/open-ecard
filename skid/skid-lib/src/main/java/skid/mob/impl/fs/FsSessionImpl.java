@@ -17,6 +17,7 @@ import org.openecard.mobile.activation.EacControllerFactory;
 import skid.mob.impl.auth.eac.EacAuthModule;
 import skid.mob.impl.auth.eac.EacResultHandler;
 import skid.mob.impl.InfoImpl;
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.impl.client.ServerError;
@@ -77,9 +78,9 @@ public class FsSessionImpl implements FsSession {
 		String finishUrl = apiClient.broker().cancelSession(fsSessionId);
 		ifNotInterrupted(() -> finishedCb.finished(finishUrl));
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.failed(new SkidResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    }
 	};
 

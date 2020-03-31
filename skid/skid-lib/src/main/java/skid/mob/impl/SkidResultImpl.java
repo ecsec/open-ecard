@@ -20,7 +20,7 @@ import skid.mob.lib.SkidResult;
  * @author Tobias Wich
  */
 public class SkidResultImpl implements SkidResult {
-    
+
     private final SkidErrorCodes code;
     private final String msg;
 

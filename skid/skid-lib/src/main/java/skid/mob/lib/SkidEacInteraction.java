@@ -22,6 +22,7 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  */
 @FrameworkInterface
 public interface SkidEacInteraction extends ActivationInteraction {
+
     void onCanRequest(ConfirmPasswordOperation enterCan);
     void onPinRequest(ConfirmPasswordOperation enterPin);
     void onPinRequest(int attempt, ConfirmPasswordOperation enterPin);
@@ -29,4 +30,5 @@ public interface SkidEacInteraction extends ActivationInteraction {
     void onCardBlocked();
     void onCardDeactivated();
     void onCardAuthenticationSuccessful();
+
 }

@@ -23,11 +23,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.UrlBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import skid.mob.lib.AttributeSelection;
 
 
 /**
@@ -171,6 +173,27 @@ public class SkidCApiClient {
 	}
     }
 
+    private String stringifySelection(List<AttributeSelection> selection) {
+	StringBuilder s = new StringBuilder();
+	s.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+	s.append("<RequestedAttributes xmlns=\"urn:oasis:names:tc:SAML:profile:privacy\" xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\">");
+
+	for (AttributeSelection a : selection) {
+	    if (a.isSelected()) {
+		s.append("<md:RequestedAttribute Name=\"");
+		// TODO: escape name, so it doesn't break the parse process
+		s.append(a.getName());
+		s.append("\" isRequired=\"");
+		s.append(a.isRequired());
+		s.append("\"></md:RequestedAttribute>");
+	    }
+	}
+
+	s.append("</RequestedAttributes>");
+
+	return s.toString();
+    }
+
     public Broker broker() {
 	return new Broker();
     }
@@ -182,10 +205,11 @@ public class SkidCApiClient {
 	    return toJson(objString);
 	}
 
-	public String selectOption(String session, String optionId) throws NetworkError, NotFound, ServerError {
+	public String selectOption(String session, String optionId, List<AttributeSelection> selection) throws NetworkError, NotFound, ServerError {
 	    HashMap<String, String> formData = new HashMap<>();
 	    formData.put("session", session);
 	    formData.put("option", optionId);
+	    formData.put("user-selection", stringifySelection(selection));
 	    String formDataEnc = formUrlEncode(formData);
 
 	    String activateUrl = fetch("POST", makeUrl(OPTIONS_SELECT_PATH), "application/x-www-form-urlencoded", formDataEnc, "text/plain");

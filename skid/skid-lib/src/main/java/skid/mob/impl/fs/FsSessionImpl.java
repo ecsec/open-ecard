@@ -11,6 +11,7 @@
 package skid.mob.impl.fs;
 
 import java.net.URISyntaxException;
+import java.util.List;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -30,6 +31,7 @@ import skid.mob.lib.Info;
 import skid.mob.lib.Option;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
+import skid.mob.lib.AttributeSelection;
 import skid.mob.lib.SelectedOption;
 import skid.mob.lib.AuthModuleCallback;
 import skid.mob.lib.ProcessFailedCallback;
@@ -127,8 +129,9 @@ public class FsSessionImpl implements FsSession {
 
     private String sendSelect(SelectedOption o) throws NetworkError, ServerError {
 	String optionId = o.getOption().optionId();
+	List<AttributeSelection> selection = o.attributeSelection();
 	// TODO: add selection
-	String actUrl = apiClient.broker().selectOption(fsSessionId, optionId);
+	String actUrl = apiClient.broker().selectOption(fsSessionId, optionId, selection);
 	return actUrl;
     }
 

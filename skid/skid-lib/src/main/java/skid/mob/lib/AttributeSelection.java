@@ -10,29 +10,13 @@
 
 package skid.mob.lib;
 
-import java.util.List;
-import org.openecard.robovm.annotations.FrameworkInterface;
-
-
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface Option {
+public interface AttributeSelection extends Attribute {
 
-    SelectedOption createSelection();
-
-    String optionId();
-
-    String type();
-
-    String protocol();
-
-    String issuer();
-
-    ActivationType activationType();
-
-    List<Attribute> attributes();
+    boolean isSelected();
+    void select(boolean selectValue);
 
 }

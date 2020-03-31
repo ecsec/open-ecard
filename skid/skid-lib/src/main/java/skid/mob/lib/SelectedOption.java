@@ -10,6 +10,7 @@
 
 package skid.mob.lib;
 
+import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -21,6 +22,7 @@ public interface SelectedOption {
 
     Option getOption();
 
-    // TODO: add attribute functions
+    List<AttributeSelection> attributeSelection();
+    void selectAttributes(List<Attribute> selection);
 
 }

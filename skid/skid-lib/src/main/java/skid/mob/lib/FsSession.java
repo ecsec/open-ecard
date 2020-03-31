@@ -22,8 +22,8 @@ public interface FsSession {
 
     Info getInfo();
 
-    Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb);
+    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsAuthResultCallback resultHandler);
 
-    Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb);
+    Cancellable cancelSession(ProcessFailedCallback failedCb, FsFinishedCallback finishedCb);
 
 }

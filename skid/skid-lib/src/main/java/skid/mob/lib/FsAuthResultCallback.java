@@ -17,8 +17,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface FinishedCallback {
+public interface FsAuthResultCallback {
 
-    void finished(String assertionUrl);
+    void done(FsAuthResult result);
 
 }

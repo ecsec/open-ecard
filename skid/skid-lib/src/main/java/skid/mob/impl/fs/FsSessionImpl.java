@@ -8,12 +8,16 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.fs;
 
 import java.net.URISyntaxException;
 import org.openecard.common.util.UrlBuilder;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.EacControllerFactory;
+import skid.mob.impl.auth.eac.EacAuthModule;
+import skid.mob.impl.auth.eac.EacResultHandler;
+import skid.mob.impl.InfoImpl;
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.impl.client.ServerError;
@@ -21,7 +25,6 @@ import skid.mob.impl.client.SkidCApiClient;
 import skid.mob.impl.client.model.SpMetadata;
 import skid.mob.lib.ActivationType;
 import skid.mob.lib.Cancellable;
-import skid.mob.lib.FinishedCallback;
 import skid.mob.lib.FsSession;
 import skid.mob.lib.Info;
 import skid.mob.lib.Option;
@@ -30,6 +33,8 @@ import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.SelectedOption;
 import skid.mob.lib.AuthModuleCallback;
 import skid.mob.lib.ProcessFailedCallback;
+import skid.mob.lib.FsFinishedCallback;
+import skid.mob.lib.FsAuthResultCallback;
 
 
 /**
@@ -45,13 +50,13 @@ public class FsSessionImpl implements FsSession {
 
     private InfoImpl infoImpl;
 
-    FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri) {
+    public FsSessionImpl(ActivationSource oecActivationSource, String fsSessionId, String skidBaseUri) {
 	this.oecActivationSource = oecActivationSource;
 	this.apiClient = new SkidCApiClient(skidBaseUri);
 	this.fsSessionId = fsSessionId;
     }
 
-    void load() throws NetworkError, ServerError, InvalidServerData {
+    public void load() throws NetworkError, ServerError, InvalidServerData {
 	// load SP infos and options
 	Object spMdObj = apiClient.broker().getOptions(fsSessionId);
 	SpMetadata spMdModel = new SpMetadata(spMdObj);
@@ -67,15 +72,15 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb) {
+    public Cancellable cancelSession(ProcessFailedCallback failedCb, FsFinishedCallback finishedCb) {
 	Runnable r = () -> {
 	    try {
 		String finishUrl = apiClient.broker().cancelSession(fsSessionId);
-		ifNotInterrupted(() -> finishedCb.finished(finishUrl));
+		ifNotInterrupted(() -> finishedCb.done(finishUrl));
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.failed(new SkidResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failedCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    }
 	};
 
@@ -85,29 +90,33 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, ProcessFailedCallback failedCb, AuthModuleCallback authCb) {
+    public Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsAuthResultCallback resultHandler) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {
 		    // select option
 		    String actUrl = sendSelect(o);
 		    String localUrl = buildEidClientUrl(actUrl);
+		    EacResultHandler eacResultHandler = ar -> {
+			// call resultHandler with result from EAC process
+			resultHandler.done(FsAuthResultImpl.fromActivationResult(ar));
+		    };
 		    // start authentication
 		    ifNotInterrupted(() -> {
 			EacControllerFactory fact = oecActivationSource.eacFactory();
-			EacAuthModule authMod = new EacAuthModule(fact, localUrl);
+			EacAuthModule authMod = new EacAuthModule(fact, localUrl, eacResultHandler);
 			authCb.doAuth(authMod);
 		    });
 		} else {
 		    ifNotInterrupted(() -> {
-			failedCb.processFailed(SkidErrorCodes.UNSUPPORTED_FEATURE,
-			    "The selected option is currently not supported.");
+			resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.UNSUPPORTED_FEATURE,
+				"The selected option is currently not supported."));
 		    });
 		}
 	    } catch (NetworkError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (ServerError ex) {
-		ifNotInterrupted(() -> failedCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> resultHandler.done(new FsAuthResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    }
 	};
 

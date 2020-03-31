@@ -17,8 +17,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface ResultHandler {
+public interface FsSessionCallback {
 
-    void done(EacResult result);
+    void done(FsSession newSession);
 
 }

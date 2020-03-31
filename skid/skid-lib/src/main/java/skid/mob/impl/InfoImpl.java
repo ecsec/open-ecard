@@ -10,6 +10,7 @@
 
 package skid.mob.impl;
 
+import skid.mob.impl.opt.OptionImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class InfoImpl implements Info {
     private ProviderInfoImpl pi;
     private List<Option> aos;
 
-    InfoImpl(SpMetadata spMeta) {
+    public InfoImpl(SpMetadata spMeta) {
 	this.spMeta = spMeta;
     }
 

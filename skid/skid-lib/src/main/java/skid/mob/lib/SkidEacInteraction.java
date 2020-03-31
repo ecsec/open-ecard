@@ -11,10 +11,8 @@
 package skid.mob.lib;
 
 import org.openecard.mobile.activation.ActivationInteraction;
-import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
-import org.openecard.mobile.activation.ServerData;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 
@@ -30,6 +28,5 @@ public interface SkidEacInteraction extends ActivationInteraction {
     void onPinCanRequest(ConfirmPinCanOperation enterPinCan);
     void onCardBlocked();
     void onCardDeactivated();
-    void onServerData(ServerData data, String transactionData, ConfirmAttributeSelectionOperation selectReadWrite);
     void onCardAuthenticationSuccessful();
 }

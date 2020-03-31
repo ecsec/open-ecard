@@ -14,12 +14,13 @@ import org.openecard.mobile.activation.ServiceErrorResponse;
 import skid.mob.lib.SkidErrorCodes;
 import skid.mob.lib.SkidResult;
 
+
 /**
  *
  * @author Tobias Wich
  */
 public class SkidResultImpl implements SkidResult {
-    
+
     private final SkidErrorCodes code;
     private final String msg;
 
@@ -57,6 +58,5 @@ public class SkidResultImpl implements SkidResult {
     public String msg() {
 	return msg;
     }
-
 
 }

@@ -8,17 +8,16 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
+package skid.mob.impl.auth.eac;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
+import org.openecard.mobile.activation.ActivationResult;
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface ProcessFailedCallback {
+public interface EacResultHandler {
 
-    void failed(SkidResult result);
+    void done(ActivationResult result);
 
 }

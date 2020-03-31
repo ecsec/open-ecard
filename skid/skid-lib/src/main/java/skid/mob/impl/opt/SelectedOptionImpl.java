@@ -8,17 +8,27 @@
  *
  ***************************************************************************/
 
-package skid.mob.lib;
+package skid.mob.impl.opt;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
+import skid.mob.lib.Option;
+import skid.mob.lib.SelectedOption;
+
 
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface InitiatedCallback {
+public class SelectedOptionImpl implements SelectedOption {
 
-    void initDone(FsSession newSession);
+    private final OptionImpl option;
+
+    SelectedOptionImpl(OptionImpl option) {
+	this.option = option;
+    }
+
+    @Override
+    public Option getOption() {
+	return option;
+    }
 
 }

@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.client;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;

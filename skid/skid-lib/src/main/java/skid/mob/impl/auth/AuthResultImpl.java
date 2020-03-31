@@ -8,27 +8,29 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth;
 
-import skid.mob.lib.Option;
-import skid.mob.lib.SelectedOption;
+import skid.mob.impl.SkidResultImpl;
+import skid.mob.lib.AuthResult;
+import skid.mob.lib.SkidErrorCodes;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class SelectedOptionImpl implements SelectedOption {
+public class AuthResultImpl extends SkidResultImpl implements AuthResult {
 
-    private final OptionImpl option;
+    protected final String minor;
 
-    SelectedOptionImpl(OptionImpl option) {
-	this.option = option;
+    public AuthResultImpl(String minor, SkidErrorCodes code, String msg) {
+	super(code, msg);
+	this.minor = minor;
     }
 
     @Override
-    public Option getOption() {
-	return option;
+    public String getProcessResultMinor() {
+	return minor;
     }
 
 }

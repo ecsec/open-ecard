@@ -8,8 +8,9 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.fs;
 
+import skid.mob.impl.client.JsonConfig;
 import skid.mob.impl.client.UnknownInfrastructure;
 import com.jayway.jsonpath.JsonPath;
 import skid.mob.impl.client.ServerError;
@@ -23,14 +24,15 @@ import java.net.URL;
 import org.json.JSONException;
 import org.openecard.common.util.FileUtils;
 import org.openecard.mobile.activation.ActivationSource;
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.NetworkError;
 import skid.mob.lib.Cancellable;
-import skid.mob.lib.InitiatedCallback;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.ProcessFailedCallback;
+import skid.mob.lib.FsSessionCallback;
 
 
 /**
@@ -50,27 +52,27 @@ public class SamlClientImpl implements SamlClient {
     }
 
     @Override
-    public Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb) {
+    public Cancellable startSession(String startUrl, FsSessionCallback initCb, ProcessFailedCallback failCb) {
 	Runnable r = () -> {
 	    try {
 		AuthReqResp samlFsResp = authnReq(startUrl);
 		FsSessionImpl fsSess = new FsSessionImpl(oecActivationSource, samlFsResp.fsSessionId, samlFsResp.skidBaseUri);
 		fsSess.load();
 		// signal success
-		ifNotInterrupted(() -> initCb.initDone(fsSess));
+		ifNotInterrupted(() -> initCb.done(fsSess));
 	    } catch (MalformedURLException | ClassCastException ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INVALID_INPUT, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.INVALID_INPUT, ex.getMessage())));
 	    } catch (ServerError ex) {
 		// TODO: error handling for unknown SP and all other cases
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (InvalidServerData ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (UnsupportedEncodingException | JSONException |  UnknownInfrastructure ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.SERVER_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.SERVER_ERROR, ex.getMessage())));
 	    } catch (IOException | NetworkError ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.NETWORK_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.NETWORK_ERROR, ex.getMessage())));
 	    } catch (RuntimeException ex) {
-		ifNotInterrupted(() -> failCb.processFailed(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage()));
+		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.INTERNAL_ERROR, ex.getMessage())));
 	    }
 	};
 

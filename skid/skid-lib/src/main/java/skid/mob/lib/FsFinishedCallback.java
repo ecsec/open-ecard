@@ -17,8 +17,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface ProcessFailedCallback {
+public interface FsFinishedCallback {
 
-    void failed(SkidResult result);
+    void done(String assertionUrl);
 
 }

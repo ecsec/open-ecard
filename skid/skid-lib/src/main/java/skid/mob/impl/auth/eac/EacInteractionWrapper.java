@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl;
+package skid.mob.impl.auth.eac;
 
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;

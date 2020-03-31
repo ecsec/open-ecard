@@ -19,6 +19,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface SamlClient {
 
-    Cancellable startSession(String startUrl, InitiatedCallback initCb, ProcessFailedCallback failCb);
+    Cancellable startSession(String startUrl, FsSessionCallback initCb, ProcessFailedCallback failCb);
 
 }

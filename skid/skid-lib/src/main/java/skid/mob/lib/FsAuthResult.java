@@ -12,13 +12,21 @@ package skid.mob.lib;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
+
 /**
  *
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface ProcessFailedCallback {
+public interface FsAuthResult extends AuthResult {
 
-    void failed(SkidResult result);
+    /**
+     * The redirect URL transmitting the Authentication Response to the SP.
+     *
+     * @return Response URL to the SP, or {@code null} in case no URL could be determined.
+     */
+    String getRedirectUrl();
+
+    boolean hasRedirectUrl();
 
 }

@@ -33,8 +33,8 @@ import skid.mob.lib.SkidErrorCodes;
 import static skid.mob.impl.ThreadUtils.ifNotInterrupted;
 import skid.mob.lib.SelectedOption;
 import skid.mob.lib.AuthModuleCallback;
-import skid.mob.lib.FsResultHandler;
 import skid.mob.lib.ProcessFailedCallback;
+import skid.mob.lib.FsResultCallback;
 
 
 /**
@@ -90,7 +90,7 @@ public class FsSessionImpl implements FsSession {
     }
 
     @Override
-    public Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler) {
+    public Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultCallback resultHandler) {
 	Runnable r = () -> {
 	    try {
 		if (isNpa(o.getOption())) {

@@ -22,7 +22,7 @@ public interface FsSession {
 
     Info getInfo();
 
-    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultHandler resultHandler);
+    Cancellable select(SelectedOption o, AuthModuleCallback authCb, FsResultCallback resultHandler);
 
     Cancellable cancelSession(ProcessFailedCallback failedCb, FinishedCallback finishedCb);
 

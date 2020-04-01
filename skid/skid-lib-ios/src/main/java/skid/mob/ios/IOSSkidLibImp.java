@@ -16,17 +16,27 @@ import skid.mob.lib.SkidLib;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import org.openecard.common.util.Promise;
 import org.openecard.ios.activation.DeveloperOptions;
 import org.openecard.ios.activation.DeveloperOptionsImpl;
 import org.openecard.ios.activation.IOSNFCCapabilities;
 import org.openecard.ios.activation.IOSNFCDialogMsgSetter;
 import org.openecard.ios.activation.NFCConfig;
+import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.activation.StopServiceHandler;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NfcDisabled;
+import org.openecard.mobile.ex.NfcUnavailable;
+import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSConfig;
 import org.openecard.ws.android.AndroidMarshaller;
 import org.slf4j.LoggerFactory;
+import skid.mob.impl.SkidResultImpl;
 import skid.mob.lib.AuthModuleCallbackBuilder;
+import skid.mob.lib.SkidErrorCodes;
 import skid.mob.lib.SkidResult;
 
 
@@ -113,111 +123,73 @@ public class IOSSkidLibImp implements IOSSkidLib {
 
     }
 
-//    public static IOSSkidLibImp createSkidLib() {
-//	CachingTerminalFactoryBuilder<IOSNFCFactory> factory = new CachingTerminalFactoryBuilder<>(() -> new IOSNFCFactory());
-//
-//	OpeneCardContextConfig config = new OpeneCardContextConfig(factory, AndroidMarshaller.class.getCanonicalName());
-//	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new NFCDialogMsgSetter() {
-//	    @Override
-//	    public void setText(String msg) {
-//	    }
-//
-//	    @Override
-//	    public boolean isSupported() {
-//		return false;
-//	    }
-//	});
-//
-//	return new IOSSkidLibImp(activationUtils, factory);
-//    }
-
-
     @Override
     public SkidResult initialize() {
-//	// pretend NFC is fully functional, the actual check must be done by the application beforehand and eid actions must be prevented if necessary
-//	oecCtx = new DelegatingAndroidContextManager(utils.context(new NFCCapabilities() {
-//	    @Override
-//	    public boolean isAvailable() {
-//		return true;
-//	    }
-//
-//	    @Override
-//	    public boolean isEnabled() {
-//		return true;
-//	    }
-//
-//	    @Override
-//	    public NfcCapabilityResult checkExtendedLength() {
-//		return NfcCapabilityResult.SUPPORTED;
-//	    }
-//	}), builder);
-//
-//	Promise<ActivationSource> finished = new Promise<>();
-//	Promise<ServiceErrorResponse> error = new Promise<>();
-//
-//	try {
-//	    oecCtx.initializeContext(new StartServiceHandler() {
-//		@Override
-//		public void onSuccess(ActivationSource source) {
-//		    error.cancel();
-//		    finished.deliver(source);
-//		}
-//
-//		@Override
-//		public void onFailure(ServiceErrorResponse response) {
-//		    error.deliver(response);
-//		    finished.cancel();
-//		}
-//	    });
-//
-//	    oecActivationSource = finished.deref();
-//	    return new SkidResultImpl();
-//	} catch (InterruptedException ex) {
-//	    if (error.isDelivered()) {
-//		ServiceErrorResponse res = error.derefNonblocking();
-//		SkidResult skidRes = SkidResultImpl.fromOecServiceError(res);
-//		return skidRes;
-//	    } else {
-//		return new SkidResultImpl(SkidErrorCodes.INTERRUPTED, "Initialization has been interrupted.");
-//	    }
-//	} catch (ApduExtLengthNotSupported | NfcDisabled | NfcUnavailable | UnableToInitialize ex) {
-//	    return new SkidResultImpl(SkidErrorCodes.INTERNAL_ERROR, "Failed to initialize Open eCard Stack.");
-//	}
-	return null;
+
+	Promise<ActivationSource> finished = new Promise<>();
+	Promise<ServiceErrorResponse> error = new Promise<>();
+
+	try {
+	    oecCtx.initializeContext(new StartServiceHandler() {
+		@Override
+		public void onSuccess(ActivationSource source) {
+		    error.cancel();
+		    finished.deliver(source);
+		}
+
+		@Override
+		public void onFailure(ServiceErrorResponse response) {
+		    error.deliver(response);
+		    finished.cancel();
+		}
+	    });
+
+	    oecActivationSource = finished.deref();
+	    return new SkidResultImpl();
+	} catch (InterruptedException ex) {
+	    if (error.isDelivered()) {
+		ServiceErrorResponse res = error.derefNonblocking();
+		SkidResult skidRes = SkidResultImpl.fromOecServiceError(res);
+		return skidRes;
+	    } else {
+		return new SkidResultImpl(SkidErrorCodes.INTERRUPTED, "Initialization has been interrupted.");
+	    }
+	} catch (ApduExtLengthNotSupported | NfcDisabled | NfcUnavailable | UnableToInitialize ex) {
+	    return new SkidResultImpl(SkidErrorCodes.INTERNAL_ERROR, "Failed to initialize Open eCard Stack.");
+	}
     }
 
     @Override
     public SkidResult terminate() {
-//	Promise<Object> finished = new Promise<>();
-//	Promise<ServiceErrorResponse> error = new Promise<>();
-//
-//	try {
-//	    oecCtx.terminateContext(new StopServiceHandler() {
-//		@Override
-//		public void onSuccess() {
-//		    error.cancel();
-//		    finished.deliver(true);
-//		}
-//
-//		@Override
-//		public void onFailure(ServiceErrorResponse response) {
-//		    error.deliver(response);
-//		    finished.cancel();
-//		}
-//	    });
-//
-//	    finished.deref();
-//	    return new SkidResultImpl();
-//	} catch (InterruptedException ex) {
-//	    if (error.isDelivered()) {
-//		ServiceErrorResponse res = error.derefNonblocking();
-//		SkidResult skidRes = SkidResultImpl.fromOecServiceError(res);
-//		return skidRes;
-//	    } else {
-//		return new SkidResultImpl(SkidErrorCodes.INTERRUPTED, "Termination has been interrupted.");
-//	    }
-//	}
-	return null;
+	Promise<Object> finished = new Promise<>();
+	Promise<ServiceErrorResponse> error = new Promise<>();
+
+	try {
+	    oecCtx.terminateContext(new StopServiceHandler() {
+		@Override
+		public void onSuccess() {
+		    error.cancel();
+		    finished.deliver(true);
+		}
+
+		@Override
+		public void onFailure(ServiceErrorResponse response) {
+		    error.deliver(response);
+		    finished.cancel();
+		}
+	    });
+
+	    finished.deref();
+	    return new SkidResultImpl();
+	} catch (InterruptedException ex) {
+	    if (error.isDelivered()) {
+		ServiceErrorResponse res = error.derefNonblocking();
+		SkidResult skidRes = SkidResultImpl.fromOecServiceError(res);
+		return skidRes;
+	    } else {
+		return new SkidResultImpl(SkidErrorCodes.INTERRUPTED, "Termination has been interrupted.");
+	    }
+	}
     }
 
     @Override

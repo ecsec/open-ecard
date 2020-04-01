@@ -17,8 +17,14 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import org.openecard.ios.activation.DeveloperOptions;
+import org.openecard.ios.activation.DeveloperOptionsImpl;
+import org.openecard.ios.activation.IOSNFCCapabilities;
+import org.openecard.ios.activation.IOSNFCDialogMsgSetter;
 import org.openecard.ios.activation.NFCConfig;
+import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
+import org.openecard.scio.IOSConfig;
+import org.openecard.ws.android.AndroidMarshaller;
 import org.slf4j.LoggerFactory;
 import skid.mob.lib.AuthModuleCallbackBuilder;
 import skid.mob.lib.SkidResult;
@@ -47,25 +53,65 @@ public class IOSSkidLibImp implements IOSSkidLib {
 	rootLogger.setLevel(Level.ERROR);
     }
 
-    private /* final */ CommonActivationUtils utils;
-    private /* final */ CachingTerminalFactoryBuilder<IOSNFCFactory> builder;
+    private final CommonActivationUtils utils;
+//    private /* final */ CachingTerminalFactoryBuilder<IOSNFCFactory> builder;
 
-    private ContextManager oecCtx;
+    private final ContextManager oecCtx;
     private ActivationSource oecActivationSource;
-    private CommonActivationUtils actUtils;
 
-    private /*final*/ DeveloperOptions developerOptions;
+    private final DeveloperOptions developerOptions;
     private NFCConfig nfcConfig;
 
     public IOSSkidLibImp() {
+	this.developerOptions = new DeveloperOptionsImpl();
+	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
+	IOSConfig currentConfig = new IOSConfig() {
+	    @Override
+	    public String getDefaultProvideCardMessage() {
+
+		return nfcConfig.getProvideCardMessage();
+	    }
+
+	    @Override
+	    public String getDefaultCardRecognizedMessage() {
+
+		return nfcConfig.getDefaultNFCCardRecognizedMessage();
+	    }
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return nfcConfig.getDefaultNFCErrorMessage();
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutErrorMessage() {
+		return nfcConfig.getAquireNFCTagTimeoutMessage();
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return nfcConfig.getNFCCompletionMessage();
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return nfcConfig.getTagLostErrorMessage();
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return nfcConfig.getDefaultCardConnectedMessage();
+	    }
+	};
+
+	CachingTerminalFactoryBuilder<IOSNFCFactory> builder = new CachingTerminalFactoryBuilder(() -> new IOSNFCFactory(currentConfig));
+	OpeneCardContextConfig config = new OpeneCardContextConfig(builder, AndroidMarshaller.class.getCanonicalName());
+	CommonActivationUtils activationUtils;
+	activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter(builder));
+	this.utils = activationUtils;
+	this.oecCtx = this.utils.context(capabilities);
 
     }
-
-    IOSSkidLibImp(CommonActivationUtils utils, CachingTerminalFactoryBuilder<IOSNFCFactory> builder) {
-	this.utils = utils;
-	this.builder = builder;
-    }
-//in constructor cause create method gets done via roboface
 
 //    public static IOSSkidLibImp createSkidLib() {
 //	CachingTerminalFactoryBuilder<IOSNFCFactory> factory = new CachingTerminalFactoryBuilder<>(() -> new IOSNFCFactory());

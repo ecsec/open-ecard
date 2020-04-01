@@ -9,7 +9,7 @@
     <arch>x86</arch>
     <arch>x86_64</arch>
 
-    <mainClass>skid.mob.lib.SkidLib</mainClass>
+    <mainClass>skid.mob.ios.IOSSkidLibImp</mainClass>
 
     <!-- We're building a framework. -->
     <target>framework</target>

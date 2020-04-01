@@ -12,7 +12,7 @@ public class IOSNFCDialogMsgSetter implements NFCDialogMsgSetter {
 
     private final CachingTerminalFactoryBuilder<IOSNFCFactory> builder;
 
-    IOSNFCDialogMsgSetter(CachingTerminalFactoryBuilder<IOSNFCFactory> builder) {
+    public IOSNFCDialogMsgSetter(CachingTerminalFactoryBuilder<IOSNFCFactory> builder) {
 	this.builder = builder;
     }
 

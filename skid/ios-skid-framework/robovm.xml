@@ -5,9 +5,6 @@
     <!-- Build a fat binary containing 32-bit and 64-bit machine code for both
     devices and the simulator. -->
     <arch>arm64</arch>
-    <arch>thumbv7</arch>
-    <arch>x86</arch>
-    <arch>x86_64</arch>
 
     <mainClass>skid.mob.ios.IOSSkidLibImp</mainClass>
 

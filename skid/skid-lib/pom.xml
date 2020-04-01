@@ -47,6 +47,7 @@
 							</annotationProcessors>
 							<compilerArgs>
 								<arg>-Aroboface.headername=skid-mobile-lib.h</arg>
+								<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
 								<arg>-Aroboface.inheritance.blacklist=java.io.Serializable</arg>
 							</compilerArgs>
 							<debug>true</debug>

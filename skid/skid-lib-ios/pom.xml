@@ -32,7 +32,6 @@
 					<compilerArgs>
 						<arg>-Aroboface.headername=skidlib.h</arg>
 						<arg>-Aroboface.include.headers=skid-mobile-lib.h</arg>
-						<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
 					</compilerArgs>
 					<debug>true</debug>
 					<debuglevel>source,lines,vars</debuglevel>

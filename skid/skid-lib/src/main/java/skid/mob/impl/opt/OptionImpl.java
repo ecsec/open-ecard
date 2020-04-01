@@ -10,9 +10,15 @@
 
 package skid.mob.impl.opt;
 
+import java.util.ArrayList;
+import java.util.List;
+import skid.mob.impl.AttributeImpl;
 import skid.mob.impl.client.InvalidServerData;
 import skid.mob.impl.client.model.AuthOption;
+import skid.mob.impl.client.model.RequestedAttribute;
+import skid.mob.impl.client.model.RequestedAttributes;
 import skid.mob.lib.ActivationType;
+import skid.mob.lib.Attribute;
 import skid.mob.lib.Option;
 import skid.mob.lib.SelectedOption;
 
@@ -34,6 +40,10 @@ public class OptionImpl implements Option {
     public synchronized void load() throws InvalidServerData {
 	if (! loaded) {
 	    this.actType = actTypeFromString(ao.activationType());
+
+	    if (ao.requestedAttributes() == null) {
+		throw new InvalidServerData("No RequestedAttributes defined for the AuthOption.");
+	    }
 
 	    this.loaded = true;
 	}
@@ -67,6 +77,19 @@ public class OptionImpl implements Option {
     @Override
     public ActivationType activationType() {
 	return actType;
+    }
+
+    @Override
+    public List<Attribute> attributes() {
+	ArrayList<Attribute> result = new ArrayList<>();
+
+	RequestedAttributes ras = ao.requestedAttributes();
+	for (RequestedAttribute ra : ras.getReqAttrs()) {
+	    Attribute a = AttributeImpl.fromRequestedAttribute(ra);
+	    result.add(a);
+	}
+
+	return result;
     }
 
     private static ActivationType actTypeFromString(String actType) throws InvalidServerData {

@@ -10,26 +10,13 @@
 
 package skid.mob.lib;
 
-import org.openecard.robovm.annotations.FrameworkInterface;
-
-
 /**
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
-public interface ProviderInfo {
+public interface AttributeSelection extends Attribute {
 
-    String displayName();
-    String displayName(String lang);
-
-    String informationUrl();
-    String informationUrl(String lang);
-
-    String privacyStatementUrl();
-    String privacyStatementUrl(String lang);
-
-    LogoUrl logoUrl();
-    LogoUrl logoUrl(String lang);
+    boolean isSelected();
+    void select(boolean selectValue);
 
 }

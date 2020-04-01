@@ -10,6 +10,7 @@
 
 package skid.mob.lib;
 
+import java.util.List;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 
@@ -31,5 +32,7 @@ public interface Option {
     String issuer();
 
     ActivationType activationType();
+
+    List<Attribute> attributes();
 
 }

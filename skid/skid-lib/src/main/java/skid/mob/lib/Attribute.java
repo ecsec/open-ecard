@@ -17,6 +17,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  * @author Tobias Wich
  */
 @FrameworkInterface
-public interface Attributes {
+public interface Attribute {
+
+    String getName();
+    boolean isRequired();
 
 }

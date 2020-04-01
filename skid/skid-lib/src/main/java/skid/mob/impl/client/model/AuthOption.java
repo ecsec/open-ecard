@@ -25,6 +25,7 @@ public class AuthOption {
 
     private final DocumentContext jsonCtx;
     private AuthOptions derived;
+    private RequestedAttributes reqAttrs;
 
     public AuthOption(JSONObject jsonObj) {
 	this.jsonCtx = JsonPath.parse(jsonObj);
@@ -36,6 +37,12 @@ public class AuthOption {
 	if (derivedArray.length() > 0) {
 	    derived = new AuthOptions(derivedArray);
 	    derived.load();
+	}
+
+	JSONArray reqAttrsArray = jsonCtx.read("$.RequestedAttribute.*");
+	if (reqAttrsArray.length() > 0) {
+	    reqAttrs = new RequestedAttributes(reqAttrsArray);
+	    reqAttrs.load();
 	}
     }
     
@@ -88,8 +95,11 @@ public class AuthOption {
 	return derived;
     }
 
+    public RequestedAttributes requestedAttributes() {
+	return reqAttrs;
+    }
+
     // TODO: AuthnContextDeclRef
     // TODO: Attribute
-    // TODO: RequestedAttribute
 
 }

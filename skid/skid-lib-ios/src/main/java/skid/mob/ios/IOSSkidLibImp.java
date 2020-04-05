@@ -35,6 +35,7 @@ import org.openecard.scio.IOSConfig;
 import org.openecard.ws.android.AndroidMarshaller;
 import org.slf4j.LoggerFactory;
 import skid.mob.impl.SkidResultImpl;
+import skid.mob.impl.fs.SamlClientImpl;
 import skid.mob.lib.AuthModuleCallbackBuilder;
 import skid.mob.lib.SkidErrorCodes;
 import skid.mob.lib.SkidResult;
@@ -194,9 +195,8 @@ public class IOSSkidLibImp implements IOSSkidLib {
 
     @Override
     public SamlClient createSamlClient() {
-//	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
-//	return samlClient;
-	return null;
+	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
+	return samlClient;
     }
 
     @Override

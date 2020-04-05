@@ -1,4 +1,4 @@
-framework module SkidLib{
+framework module Skidentity{
   umbrella header "skidlib.h"
   export *
   module * { export * }

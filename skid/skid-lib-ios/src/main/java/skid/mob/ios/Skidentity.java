@@ -46,7 +46,7 @@ import skid.mob.lib.SkidResult;
  * @author Florian Otto
  */
 @FrameworkObject(factoryMethod = "createSkidLib")
-public class IOSSkidLibImp implements IOSSkidLib {
+public class Skidentity implements IOSSkidLib {
 
     static {
 	SysUtils.setIsIOS();
@@ -73,7 +73,7 @@ public class IOSSkidLibImp implements IOSSkidLib {
     private final DeveloperOptions developerOptions;
     private NFCConfig nfcConfig;
 
-    public IOSSkidLibImp() {
+    public Skidentity() {
 	this.developerOptions = new DeveloperOptionsImpl();
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {

@@ -6,7 +6,7 @@
     devices and the simulator. -->
     <arch>arm64</arch>
 
-    <mainClass>skid.mob.ios.IOSSkidLibImp</mainClass>
+    <mainClass>skid.mob.ios.Skidentity</mainClass>
 
     <!-- We're building a framework. -->
     <target>framework</target>

@@ -200,16 +200,16 @@ public class Skidentity implements IOSSkidLib {
     }
 
     @Override
-    public PinManagementControllerFactory pinManagementFactory() {
+    public PinManagementControllerFactory pinManagementFactory(String defaultNFCDialogMsg, String defaultNFCCardRecognizedMessage) {
 	this.nfcConfig = new NFCConfig() {
 	    @Override
 	    public String getProvideCardMessage() {
-		return "defaultNFCDialgoMsg";
+		return defaultNFCDialogMsg;
 	    }
 
 	    @Override
 	    public String getDefaultNFCCardRecognizedMessage() {
-		return "defaultNFCCardRecognizedMessage";
+		return defaultNFCCardRecognizedMessage;
 	    }
 
 	    @Override
@@ -238,6 +238,10 @@ public class Skidentity implements IOSSkidLib {
 	    }
 	};
 	return this.utils.pinManagementFactory();
+    }
+    @Override
+    public PinManagementControllerFactory pinManagementFactory() {
+	return pinManagementFactory("Please provide card", "Card recognized");
     }
 
     @Override

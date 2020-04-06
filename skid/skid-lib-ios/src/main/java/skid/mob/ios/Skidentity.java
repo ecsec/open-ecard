@@ -200,6 +200,12 @@ public class Skidentity implements IOSSkidLib {
     }
 
     @Override
+    public PinManagementControllerFactory pinManagementFactory(NFCConfig nfcConfig) {
+	this.nfcConfig = nfcConfig;
+	return this.utils.pinManagementFactory();
+    }
+
+    @Override
     public PinManagementControllerFactory pinManagementFactory(String defaultNFCDialogMsg, String defaultNFCCardRecognizedMessage) {
 	this.nfcConfig = new NFCConfig() {
 	    @Override

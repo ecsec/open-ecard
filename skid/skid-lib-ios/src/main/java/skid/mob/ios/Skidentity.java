@@ -201,6 +201,42 @@ public class Skidentity implements IOSSkidLib {
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {
+	this.nfcConfig = new NFCConfig() {
+	    @Override
+	    public String getProvideCardMessage() {
+		return "defaultNFCDialgoMsg";
+	    }
+
+	    @Override
+	    public String getDefaultNFCCardRecognizedMessage() {
+		return "defaultNFCCardRecognizedMessage";
+	    }
+
+	    @Override
+	    public String getDefaultNFCErrorMessage() {
+		return "Communication with the card ended.";
+	    }
+
+	    @Override
+	    public String getAquireNFCTagTimeoutMessage() {
+		return "Could not connect to a card.";
+	    }
+
+	    @Override
+	    public String getNFCCompletionMessage() {
+		return "Finished communicating with the card.";
+	    }
+
+	    @Override
+	    public String getTagLostErrorMessage() {
+		return "Lost communication with the card.";
+	    }
+
+	    @Override
+	    public String getDefaultCardConnectedMessage() {
+		return "Connected to the card.";
+	    }
+	};
 	return this.utils.pinManagementFactory();
     }
 

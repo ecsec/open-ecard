@@ -78,7 +78,7 @@ public class SamlClientImpl implements SamlClient {
 
 	Thread t = new Thread(r, "SamlClient-Start");
 	t.start();
-	return t::interrupt;
+	return new ThreadCancelImp(t);
     }
 
     private AuthReqResp authnReq(String startUrl) throws MalformedURLException, IOException, ClassCastException,

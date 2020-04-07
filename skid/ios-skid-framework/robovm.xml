@@ -48,5 +48,6 @@
 	<pattern>com.android.okhttp.HttpHandler</pattern>
 	<pattern>com.android.okhttp.HttpsHandler</pattern>
 	<pattern>org.apache.harmony.xml.ExpatParser</pattern>
+	<pattern>com.android.**</pattern>
     </forceLinkClasses>
 </config>

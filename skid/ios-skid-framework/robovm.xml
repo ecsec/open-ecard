@@ -43,11 +43,11 @@
 	<pattern>org.apache.xml.serializer.**</pattern>
 	<pattern>javax.xml.xpath.**</pattern>
 	<pattern>org.apache.xerces.**</pattern>
-	<pattern>org.apache.harmony.security.**</pattern>
 	<pattern>org.apache.xpath.jaxp.**</pattern>
 	<pattern>com.android.okhttp.HttpHandler</pattern>
 	<pattern>com.android.okhttp.HttpsHandler</pattern>
-	<pattern>org.apache.harmony.xml.ExpatParser</pattern>
+	<pattern>org.apache.harmony.**</pattern>
 	<pattern>com.android.**</pattern>
+	<pattern>com.android.org.conscrypt.**</pattern>
     </forceLinkClasses>
 </config>

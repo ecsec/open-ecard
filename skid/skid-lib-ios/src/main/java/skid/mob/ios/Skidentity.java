@@ -16,6 +16,11 @@ import skid.mob.lib.SkidLib;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import com.android.org.bouncycastle.jcajce.provider.digest.MD5;
+import com.android.org.conscrypt.OpenSSLSocketImpl;
+import com.android.org.conscrypt.OpenSSLSocketImplWrapper;
+import java.util.HashMap;
+import org.openecard.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.openecard.common.util.Promise;
 import org.openecard.ios.activation.DeveloperOptions;
 import org.openecard.ios.activation.DeveloperOptionsImpl;
@@ -51,17 +56,17 @@ public class Skidentity implements IOSSkidLib {
     static {
 	SysUtils.setIsIOS();
 
-	Provider provider = new BouncyCastleProvider();
-	try {
-	    Security.removeProvider(provider.getName());
-	    Security.removeProvider("BC");
-	} catch (Exception e) {
+	for (Provider p : Security.getProviders()) {
+	    Security.removeProvider(p.getName());
 	}
+	Provider provider = new BouncyCastleProvider();
+	BouncyCastleJsseProvider bcjp = new BouncyCastleJsseProvider();
 	Security.addProvider(provider);
+	Security.addProvider(bcjp);
 
-	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-	rootLogger.setLevel(Level.ERROR);
+//	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+//	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
+//	rootLogger.setLevel(Level.ERROR);
     }
 
     private final CommonActivationUtils utils;

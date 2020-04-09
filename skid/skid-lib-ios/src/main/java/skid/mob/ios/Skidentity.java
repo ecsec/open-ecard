@@ -19,7 +19,22 @@ import ch.qos.logback.classic.LoggerContext;
 import com.android.org.bouncycastle.jcajce.provider.digest.MD5;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.OpenSSLSocketImplWrapper;
+import com.android.org.conscrypt.TrustManagerImpl;
+import java.net.Socket;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import javax.net.SocketFactory;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedTrustManager;
+import org.openecard.bouncycastle.jcajce.provider.keystore.BC;
+import org.openecard.bouncycastle.jcajce.provider.keystore.BC.Mappings;
+import org.openecard.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi;
 import org.openecard.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.openecard.common.util.Promise;
 import org.openecard.ios.activation.DeveloperOptions;
@@ -56,13 +71,41 @@ public class Skidentity implements IOSSkidLib {
     static {
 	SysUtils.setIsIOS();
 
-	for (Provider p : Security.getProviders()) {
-	    Security.removeProvider(p.getName());
+	try {
+	    for (Provider p : Security.getProviders()) {
+		Security.removeProvider(p.getName());
+	    }
+	    BouncyCastleProvider provider = new BouncyCastleProvider();
+	    BouncyCastleJsseProvider bcjp = new BouncyCastleJsseProvider();
+
+	    Mappings map = new BC.Mappings();
+	    map.configure(provider);
+
+	    Security.insertProviderAt(provider, 0);
+	    Security.insertProviderAt(bcjp, 0);
+	    //Security.setProperty("ssl.SocketFactory.provider", "org.openecard.bouncycastle.jsse.provider.SSLSocketFactoryImpl");
+		//	    Security.setProperty("ssl.SocketFactory.provider", "");
+
+	    for (Provider p : Security.getProviders()) {
+		System.out.println("Avail Provider:" + p.getName());
+	    }
+	    SSLContext ctx = SSLContext.getDefault();
+
+	    TrustManager t = null;
+	    ctx.init(null, new TrustManager[]{t}, null);
+	    
+
+
+	    SSLSocketFactory fact = ctx.getSocketFactory();
+
+	    System.out.println("sslfact:" + fact.getClass().toString());
+	    System.out.println("sslctx:" + ctx.getClass().toString());
+
+	    HttpsURLConnection.setDefaultSSLSocketFactory(fact);
+	} catch (Throwable t) {
+	    System.out.println("Message from throwable in static block:" + t.getMessage());
+	    t.printStackTrace();
 	}
-	Provider provider = new BouncyCastleProvider();
-	BouncyCastleJsseProvider bcjp = new BouncyCastleJsseProvider();
-	Security.addProvider(provider);
-	Security.addProvider(bcjp);
 
 //	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 //	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);

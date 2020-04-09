@@ -46,8 +46,7 @@
 	<pattern>org.apache.xpath.jaxp.**</pattern>
 	<pattern>com.android.okhttp.HttpHandler</pattern>
 	<pattern>com.android.okhttp.HttpsHandler</pattern>
-	<pattern>org.apache.harmony.**</pattern>
 	<pattern>com.android.**</pattern>
-	<pattern>com.android.org.conscrypt.**</pattern>
+	<pattern>java.util.logging.**</pattern>
     </forceLinkClasses>
 </config>

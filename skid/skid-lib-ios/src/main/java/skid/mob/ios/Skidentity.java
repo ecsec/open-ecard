@@ -21,6 +21,7 @@ import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.OpenSSLSocketImplWrapper;
 import com.android.org.conscrypt.TrustManagerImpl;
 import java.net.Socket;
+import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -91,8 +92,11 @@ public class Skidentity implements IOSSkidLib {
 	    }
 	    SSLContext ctx = SSLContext.getDefault();
 
-	    TrustManager t = null;
-	    ctx.init(null, new TrustManager[]{t}, null);
+	    KeyStore trustAnchors = AppleTrustStore.getTrustStore();
+	    TrustManagerFactory tmFac = TrustManagerFactory.getInstance("PKIX");
+	    tmFac.init(trustAnchors);
+	    TrustManager[] tms = tmFac.getTrustManagers();
+	    ctx.init(null, tms, null);
 	    
 
 

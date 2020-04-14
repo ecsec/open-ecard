@@ -77,7 +77,7 @@
 										<exclude>META-INF/LICENSE*</exclude>
 										<exclude>META-INF/NOTICE</exclude>
 										<exclude>META-INF/MANIFEST.MF</exclude>
-										<exclude>org/openecard/bouncycastle/pqc/**</exclude>
+										<!--exclude>org/openecard/bouncycastle/pqc/**</exclude-->
 										<exclude>**/module-info.class</exclude>
 										<exclude>**/package-info.class</exclude>
 									</excludes>

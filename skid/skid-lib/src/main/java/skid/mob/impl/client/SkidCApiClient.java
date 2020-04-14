@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.UrlBuilder;
 import org.slf4j.Logger;
@@ -64,8 +65,9 @@ public class SkidCApiClient {
     private URL makeUrl(String path, Map<String, String> queryParams) {
 	UrlBuilder ub = getBuilder();
 	ub = ub.addPathSegment(path);
-	ub = queryParams.entrySet().stream()
-		.reduce(ub, (u, e) -> u.queryParamUrl(e.getKey(), e.getValue()), (id, u) -> u);
+	for (Map.Entry<String, String> qp : queryParams.entrySet()) {
+	    ub = ub.queryParamUrl(qp.getKey(), qp.getValue());
+	}
 	return buildUrl(ub);
     }
 

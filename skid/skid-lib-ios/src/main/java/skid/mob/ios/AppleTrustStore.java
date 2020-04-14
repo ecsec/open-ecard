@@ -11,9 +11,12 @@
 package skid.mob.ios;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,8 +39,9 @@ public class AppleTrustStore {
 	}
     }
 
-    public static KeyStore getTrustStore() throws KeyStoreException {
+    public static KeyStore getTrustStore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
 	KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+	ks.load(null);
 	for (Map.Entry<String, Certificate> e : certs.entrySet()) {
 	    ks.setCertificateEntry(e.getKey(), e.getValue());
 	}

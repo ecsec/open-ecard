@@ -5,37 +5,20 @@ import java.security.Security;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.util.SysUtils;
 import org.openecard.mobile.activation.ActivationSource;
-import org.openecard.mobile.activation.ActivationUtils;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
 import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.scio.IOSNFCFactory;
 import skid.mob.lib.SamlClient;
-import skid.mob.lib.SkidLib;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import com.android.org.bouncycastle.jcajce.provider.digest.MD5;
-import com.android.org.conscrypt.OpenSSLSocketImpl;
-import com.android.org.conscrypt.OpenSSLSocketImplWrapper;
-import com.android.org.conscrypt.TrustManagerImpl;
-import java.net.Socket;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import javax.net.SocketFactory;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedTrustManager;
 import org.openecard.bouncycastle.jcajce.provider.keystore.BC;
 import org.openecard.bouncycastle.jcajce.provider.keystore.BC.Mappings;
-import org.openecard.bouncycastle.jcajce.provider.keystore.bc.BcKeyStoreSpi;
 import org.openecard.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
 import org.openecard.common.util.Promise;
 import org.openecard.ios.activation.DeveloperOptions;
@@ -54,7 +37,6 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.IOSConfig;
 import org.openecard.ws.android.AndroidMarshaller;
-import org.slf4j.LoggerFactory;
 import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.fs.SamlClientImpl;
 import skid.mob.lib.AuthModuleCallbackBuilder;
@@ -90,9 +72,10 @@ public class Skidentity implements IOSSkidLib {
 	    for (Provider p : Security.getProviders()) {
 		System.out.println("Avail Provider:" + p.getName());
 	    }
-	    SSLContext ctx = SSLContext.getDefault();
+	    SSLContext ctx = SSLContext.getInstance("TLS");
 
 	    KeyStore trustAnchors = AppleTrustStore.getTrustStore();
+	    //here we have to use our BC not the other
 	    TrustManagerFactory tmFac = TrustManagerFactory.getInstance("PKIX");
 	    tmFac.init(trustAnchors);
 	    TrustManager[] tms = tmFac.getTrustManagers();

@@ -40,28 +40,67 @@
 					<!--failOnWarning>true</failOnWarning-->
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<excludes>
+									<exclude>org.json:json</exclude>
+								</excludes>
+							</artifactSet>
+
+							<relocations>
+								<relocation>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>org.openecard.apache.http</shadedPattern>
+								</relocation>
+
+								<!-- relocation>
+									<pattern>javax.xml.validation</pattern>
+									<shadedPattern>hidden.javax.xml.validation</shadedPattern>
+								</relocation-->
+							</relocations>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/maven/**</exclude>
+										<exclude>META-INF/versions/**</exclude>
+										<exclude>META-INF/DEPENDENCIES</exclude>
+										<exclude>META-INF/LICENSE*</exclude>
+										<exclude>META-INF/NOTICE</exclude>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+										<exclude>org/openecard/bouncycastle/pqc/**</exclude>
+										<exclude>**/module-info.class</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
-	<!-- TODO: create fat jar without xerces and slf4j -->
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
+			<artifactId>slf4j-jdk14</artifactId>
 			<version>1.7.30</version>
 		</dependency>
+
+
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 			<version>2.12.0</version>
-		</dependency>
-
-
-		<!-- Android Activity Stuff / Support Elements -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.4.13</version>
 		</dependency>
 
 		<dependency>
@@ -76,12 +115,23 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
+
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${oec.version}</version>
 			<classifier>iOS</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.markusbernhardt</groupId>
+					<artifactId>proxy-vole</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.javadelight</groupId>
+					<artifactId>delight-nashorn-sandbox</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- all OeC dependencies -->
@@ -99,24 +149,32 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>ios-common</artifactId>
 			<version>${oec.version}</version>
+		 <exclusions>
+		  <exclusion>
+		   <groupId>ch.qos.logback</groupId>
+		   <artifactId>logback-classic</artifactId>
+		  </exclusion>
+		 </exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
 			<version>${version.roboface}</version>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-rt</artifactId>
 			<version>${robovm.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-cocoatouch</artifactId>
 			<version>${robovm.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

@@ -28,6 +28,7 @@
 						<configuration>
 							<includeArtifactIds>skid-lib-ios-bundle</includeArtifactIds>
 							<outputDirectory>${basedir}/target/classes/</outputDirectory>
+							<includes>skid/mob/**,org/openecard/**,/roboheaders/*</includes>
 						</configuration>
 					</execution>
 				</executions>

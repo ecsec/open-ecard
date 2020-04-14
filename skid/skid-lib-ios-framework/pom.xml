@@ -28,7 +28,6 @@
 						<configuration>
 							<includeArtifactIds>skid-lib-ios</includeArtifactIds>
 							<outputDirectory>${basedir}/target/classes/</outputDirectory>
-							<includes>skid/mob/**,org/openecard/**</includes>
 						</configuration>
 					</execution>
 				</executions>

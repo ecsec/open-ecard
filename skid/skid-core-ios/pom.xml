@@ -59,6 +59,7 @@
 										<exclude>images/**/*</exclude>
 										<exclude>java/awt.font/**/*</exclude>
 										<exclude>org/apache/harmony/**/*</exclude>
+										<exclude>org/apache/**</exclude>
 									</excludes>
 								</filter>
 							</filters>

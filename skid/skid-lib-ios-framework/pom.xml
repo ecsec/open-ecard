@@ -26,7 +26,7 @@
 							<goal>unpack-dependencies</goal>
 						</goals>
 						<configuration>
-							<includeArtifactIds>skid-lib-ios-bundle</includeArtifactIds>
+							<includeArtifactIds>skid-lib-ios</includeArtifactIds>
 							<outputDirectory>${basedir}/target/classes/</outputDirectory>
 							<includes>skid/mob/**,org/openecard/**</includes>
 						</configuration>
@@ -67,7 +67,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.ecsec.skid.client</groupId>
-			<artifactId>skid-lib-ios-bundle</artifactId>
+			<artifactId>skid-lib-ios</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

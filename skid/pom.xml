@@ -12,7 +12,6 @@
 		<module>skid-lib</module>
 		<module>skid-lib-android</module>
 		<module>skid-lib-ios</module>
-		<module>skid-lib-ios-bundle</module>
 		<module>skid-lib-ios-framework</module>
 	</modules>
 

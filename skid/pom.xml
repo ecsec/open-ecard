@@ -12,8 +12,7 @@
 		<module>skid-lib</module>
 		<module>skid-lib-android</module>
 		<module>skid-lib-ios</module>
-		<module>skid-core-ios</module>
-		<module>ios-skid-framework</module>
+		<module>skid-lib-ios-framework</module>
 	</modules>
 
 	<properties>

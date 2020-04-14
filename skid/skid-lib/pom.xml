@@ -11,7 +11,7 @@
 	<groupId>de.ecsec.skid.client</groupId>
 	<artifactId>skid-lib</artifactId>
 	<packaging>jar</packaging>
-	<name>SkID-lib</name>
+	<name>SkID-lib Java Implementation</name>
 
 	<properties>
 		<powermock.version>2.0.2</powermock.version>

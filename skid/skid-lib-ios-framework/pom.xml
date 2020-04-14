@@ -11,7 +11,7 @@
 	<groupId>de.ecsec.skid.clients</groupId>
 	<artifactId>ios-skid-framework</artifactId>
 	<packaging>jar</packaging>
-	<name>iOS Framework</name>
+	<name>SkID-lib iOS Framework</name>
 
 	<dependencies>
 		<dependency>

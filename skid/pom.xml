@@ -27,7 +27,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
 
-		<version.roboface>1.0.0-rc.13</version.roboface>
+		<version.roboface>1.0.0</version.roboface>
 		<robovm.version>2.3.8-rc.2</robovm.version>
 		<oec.version>2.0.5-SNAPSHOT</oec.version>
 

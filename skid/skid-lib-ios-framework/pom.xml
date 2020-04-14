@@ -26,7 +26,7 @@
 							<goal>unpack-dependencies</goal>
 						</goals>
 						<configuration>
-							<includeArtifactIds>skid-lib-ios</includeArtifactIds>
+							<includeArtifactIds>skid-lib-ios-bundle</includeArtifactIds>
 							<outputDirectory>${basedir}/target/classes/</outputDirectory>
 						</configuration>
 					</execution>
@@ -66,19 +66,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.ecsec.skid.client</groupId>
-			<artifactId>skid-lib-ios</artifactId>
+			<artifactId>skid-lib-ios-bundle</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-rt</artifactId>
-			<version>${robovm.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mobidevelop.robovm</groupId>
-			<artifactId>robovm-cocoatouch</artifactId>
-			<version>${robovm.version}</version>
 		</dependency>
 	</dependencies>
 

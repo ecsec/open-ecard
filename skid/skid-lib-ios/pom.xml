@@ -160,6 +160,12 @@
 
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
+			<artifactId>roboface-marshaller</artifactId>
+			<version>${version.roboface}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
 			<version>${version.roboface}</version>
 			<scope>provided</scope>

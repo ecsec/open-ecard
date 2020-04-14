@@ -14,6 +14,7 @@ import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
+import skid.mob.impl.auth.ActivationControllerCancellable;
 import skid.mob.lib.Cancellable;
 import skid.mob.lib.EacModule;
 import skid.mob.lib.SkidEacInteraction;
@@ -49,7 +50,7 @@ public class EacAuthModule implements EacModule {
 	    }
 	}, new EacInteractionWrapper(interactionComponent));
 
-	return controller::cancelOngoingAuthentication;
+	return new ActivationControllerCancellable(controller);
     }
 
 }

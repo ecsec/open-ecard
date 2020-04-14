@@ -38,10 +38,10 @@
 									<pattern>org.apache.http</pattern>
 									<shadedPattern>hidden.org.apache.http</shadedPattern>
 								</relocation>
-								<!-- <relocation>
-									<pattern>javax.xml.bind</pattern>
-									<shadedPattern>hidden.javax.xml.bind</shadedPattern>
-								</relocation> -->
+								<relocation>
+									<pattern>javax.xml.validation</pattern>
+									<shadedPattern>hidden.javax.xml.validation</shadedPattern>
+								</relocation> 
 							</relocations>
 							<filters>
 								<filter>

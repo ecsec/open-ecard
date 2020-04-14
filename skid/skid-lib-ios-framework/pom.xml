@@ -9,7 +9,7 @@
 	</parent>
 
 	<groupId>de.ecsec.skid.client</groupId>
-	<artifactId>ios-skid-framework</artifactId>
+	<artifactId>skid-lib-ios-framework</artifactId>
 	<packaging>jar</packaging>
 	<name>SkID-lib iOS Framework</name>
 

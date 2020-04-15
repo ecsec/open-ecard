@@ -11,7 +11,7 @@
 	<groupId>de.ecsec.skid.client</groupId>
 	<artifactId>skid-lib</artifactId>
 	<packaging>jar</packaging>
-	<name>SkID-lib</name>
+	<name>SkID-lib Java Implementation</name>
 
 	<properties>
 		<powermock.version>2.0.2</powermock.version>
@@ -47,6 +47,7 @@
 							</annotationProcessors>
 							<compilerArgs>
 								<arg>-Aroboface.headername=skid-mobile-lib.h</arg>
+								<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
 								<arg>-Aroboface.inheritance.blacklist=java.io.Serializable</arg>
 							</compilerArgs>
 							<debug>true</debug>
@@ -58,6 +59,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -78,6 +80,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -95,31 +98,31 @@
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-rt</artifactId>
 			<version>${robovm.version}</version>
-			<optional>true</optional>
+			<!--optional>true</optional-->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-cocoatouch</artifactId>
 			<version>${robovm.version}</version>
-			<optional>true</optional>
+			<!--optional>true</optional-->
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
-			<optional>true</optional>
 			<version>${version.roboface}</version>
-			<type>jar</type>
+			<!--optional>true</optional-->
+			<scope>provided</scope>
 		</dependency>
-                
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-marshaller</artifactId>
-			<optional>true</optional>
 			<version>${version.roboface}</version>
-			<type>jar</type>
+			<!--optional>true</optional-->
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- OeC dependencies -->

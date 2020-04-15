@@ -24,30 +24,27 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<!--
-							<keepDependenciesWithProvidedScope>
-							false
-							</keepDependenciesWithProvidedScope>
-							<promoteTransitiveDependencies>
-							true
-
-							</promoteTransitiveDependencies>
-							-->
-							<artifactSet>
-								<excludes>
-									<exclude>com.github.markusbernhardt</exclude>
-									<exclude>net.java.dev.jna</exclude>
-									<exclude>org.javadelight</exclude>
-									<exclude>org.ini4j</exclude>
-									<exclude>org.webjars.bower:js-beautify</exclude>
-								</excludes>
-							</artifactSet>
 							<relocations>
 								<relocation>
 									<pattern>org.apache.http</pattern>
 									<shadedPattern>org.openecard.apache.http</shadedPattern>
 								</relocation>
 							</relocations>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/maven/**</exclude>
+										<exclude>META-INF/versions/**</exclude>
+										<exclude>META-INF/DEPENDENCIES</exclude>
+										<exclude>META-INF/LICENSE*</exclude>
+										<exclude>META-INF/NOTICE</exclude>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+										<!--exclude>org/openecard/bouncycastle/pqc/**</exclude-->
+										<exclude>**/module-info.class</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
@@ -76,29 +73,24 @@
             <version>4.1.1.4</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.4.13</version>
-		</dependency>
 
 		<dependency>
 			<groupId>de.ecsec.skid.client</groupId>
 			<artifactId>skid-lib</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.markusbernhardt</groupId>
+					<artifactId>proxy-vole</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.javadelight</groupId>
+					<artifactId>delight-nashorn-sandbox</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- all OeC Android dependencies -->
-		<dependency>
-			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>android-marshaller</artifactId>
-			<version>${oec.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.ifd.scio-backend</groupId>
-			<artifactId>android-nfc</artifactId>
-			<version>${oec.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>android-common</artifactId>

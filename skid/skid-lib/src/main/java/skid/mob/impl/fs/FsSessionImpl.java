@@ -88,7 +88,7 @@ public class FsSessionImpl implements FsSession {
 
 	Thread t = new Thread(r, "FsSession-Cancel");
 	t.start();
-	return t::interrupt;
+	return new ThreadCancelImp(t);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class FsSessionImpl implements FsSession {
 
 	Thread t = new Thread(r, "FsSession-Select");
 	t.start();
-	return t::interrupt;
+	return new ThreadCancelImp(t);
     }
 
     private String sendSelect(SelectedOption o) throws NetworkError, ServerError {

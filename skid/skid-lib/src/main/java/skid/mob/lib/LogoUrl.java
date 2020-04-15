@@ -10,11 +10,13 @@
 
 package skid.mob.lib;
 
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  *
  * @author Tobias Wich
  */
+@FrameworkInterface
 public interface LogoUrl {
 
     String url();

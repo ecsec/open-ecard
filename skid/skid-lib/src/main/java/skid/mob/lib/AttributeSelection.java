@@ -10,10 +10,13 @@
 
 package skid.mob.lib;
 
+import org.openecard.robovm.annotations.FrameworkInterface;
+
 /**
  *
  * @author Tobias Wich
  */
+@FrameworkInterface
 public interface AttributeSelection extends Attribute {
 
     boolean isSelected();

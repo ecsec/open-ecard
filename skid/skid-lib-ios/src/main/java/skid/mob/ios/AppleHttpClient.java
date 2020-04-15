@@ -27,7 +27,7 @@ import org.robovm.apple.foundation.NSURLSession;
 import org.robovm.apple.foundation.NSURLSessionConfiguration;
 import org.robovm.apple.foundation.NSURLSessionDataTask;
 import org.robovm.objc.block.VoidBlock3;
-import skid.mob.impl.fs.NativeHttpClient;
+import skid.mob.lib.NativeHttpClient;
 
 
 /**

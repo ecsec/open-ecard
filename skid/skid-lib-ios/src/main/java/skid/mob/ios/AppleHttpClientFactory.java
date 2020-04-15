@@ -13,8 +13,8 @@ package skid.mob.ios;
 import org.robovm.apple.foundation.NSHTTPCookieStorage;
 import org.robovm.apple.foundation.NSURLSession;
 import org.robovm.apple.foundation.NSURLSessionConfiguration;
-import skid.mob.impl.fs.NativeHttpClient;
-import skid.mob.impl.fs.NativeHttpClientFactory;
+import skid.mob.lib.NativeHttpClient;
+import skid.mob.lib.NativeHttpClientFactory;
 
 
 /**

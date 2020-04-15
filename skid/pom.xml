@@ -29,7 +29,7 @@
 
 		<version.roboface>1.0.0</version.roboface>
 		<robovm.version>2.3.8-rc.2</robovm.version>
-		<oec.version>2.0.5-SNAPSHOT</oec.version>
+		<oec.version>2.0.7</oec.version>
 
 		<!-- Netbeans config properties -->
 		<org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>8</org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.tab-size>

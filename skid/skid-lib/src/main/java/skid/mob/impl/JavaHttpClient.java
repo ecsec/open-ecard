@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl.fs;
+package skid.mob.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import skid.mob.lib.NativeHttpClient;
 
 
 /**

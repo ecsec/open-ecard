@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl.fs;
+package skid.mob.lib;
 
 import java.io.IOException;
 import java.io.InputStream;

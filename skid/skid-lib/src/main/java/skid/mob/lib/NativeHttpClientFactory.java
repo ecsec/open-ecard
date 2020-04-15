@@ -8,18 +8,18 @@
  *
  ***************************************************************************/
 
-package skid.mob.impl.fs;
+package skid.mob.lib;
+
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class JavaHttpClientFactory implements NativeHttpClientFactory {
+@FrameworkInterface
+public interface NativeHttpClientFactory {
 
-    @Override
-    public NativeHttpClient forUrl(String url) {
-	return new JavaHttpClient(url);
-    }
+    NativeHttpClient forUrl(String url);
 
 }

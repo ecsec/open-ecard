@@ -39,7 +39,7 @@ import org.openecard.ws.android.AndroidMarshaller;
 import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.fs.SamlClientImpl;
 import skid.mob.impl.auth.AuthModuleCallbackBuilderImpl;
-import skid.mob.impl.fs.JavaHttpClientFactory;
+import skid.mob.impl.JavaHttpClientFactory;
 import skid.mob.lib.AuthModuleCallbackBuilder;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidErrorCodes;

@@ -75,6 +75,11 @@
 		<artifactId>mobile-lib</artifactId>
 		<version>${project.version}</version>
 	    </dependency>
+		<dependency>
+			<groupId>org.openecard.clients</groupId>
+			<artifactId>android-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 	    <!-- all OeC Android dependencies -->
 	    <dependency>

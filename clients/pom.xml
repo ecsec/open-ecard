@@ -16,8 +16,10 @@
 
 	<modules>
 		<module>richclient</module>
+		<module>android-common</module>
 		<module>android-lib</module>
 		<module>mobile-lib</module>
+		<module>ios-common</module>
 		<module>ios-lib</module>
 		<module>ios-core</module>
 	</modules>

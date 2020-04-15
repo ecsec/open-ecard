@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>2.0.6-SNAPSHOT</version>
+		<version>2.0.5-SNAPSHOT</version>
 	</parent>
     
 	<groupId>org.openecard.clients</groupId>
-	<artifactId>ios-lib</artifactId>
+	<artifactId>ios-common</artifactId>
 
-	<name>iOS Lib</name>
+	<name>iOS Common</name>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
@@ -29,8 +29,8 @@
 						<proc>org.openecard.robovm.processor.RobofaceProcessor</proc>
 					</annotationProcessors>
 					<compilerArgs>
-						<arg>-Aroboface.headername=open-ecard.h</arg>
-						<arg>-Aroboface.include.headers=open-ecard-ios-common.h</arg>
+						<arg>-Aroboface.headername=open-ecard-ios-common.h</arg>
+						<arg>-Aroboface.include.headers=open-ecard-mobile-lib.h</arg>
 					</compilerArgs>
 					<debug>true</debug>
 					<debuglevel>source,lines,vars</debuglevel>
@@ -47,11 +47,6 @@
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
 			<classifier>iOS</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openecard.clients</groupId>
-			<artifactId>ios-common</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.ifd.scio-backend</groupId>

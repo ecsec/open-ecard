@@ -234,6 +234,12 @@ public class Skidentity implements IOSSkidLib {
 
     @Override
     public SamlClient createSamlClient() {
+	return createSamlClient(defaultNFCConfig());
+    }
+
+    @Override
+    public SamlClient createSamlClient(NFCConfig nfcConfig) {
+	this.nfcConfig = nfcConfig;
 	SamlClientImpl samlClient = new SamlClientImpl(httpClientFac, oecActivationSource);
 	return samlClient;
     }
@@ -245,16 +251,24 @@ public class Skidentity implements IOSSkidLib {
     }
 
     @Override
-    public PinManagementControllerFactory pinManagementFactory(String defaultNFCDialogMsg, String defaultNFCCardRecognizedMessage) {
-	this.nfcConfig = new NFCConfig() {
+    public PinManagementControllerFactory pinManagementFactory() {
+	return pinManagementFactory(defaultNFCConfig());
+    }
+
+    @Override
+    public AuthModuleCallbackBuilder createAuthModuleBuilder() {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    private NFCConfig defaultNFCConfig() {
+	return new NFCConfig() {
 	    @Override
 	    public String getProvideCardMessage() {
-		return defaultNFCDialogMsg;
+		return "Please provide card.";
 	    }
 
 	    @Override
 	    public String getDefaultNFCCardRecognizedMessage() {
-		return defaultNFCCardRecognizedMessage;
+		return "Card recognized.";
 	    }
 
 	    @Override
@@ -281,17 +295,9 @@ public class Skidentity implements IOSSkidLib {
 	    public String getDefaultCardConnectedMessage() {
 		return "Connected to the card.";
 	    }
-	};
-	return this.utils.pinManagementFactory();
-    }
-    @Override
-    public PinManagementControllerFactory pinManagementFactory() {
-	return pinManagementFactory("Please provide card", "Card recognized");
-    }
 
-    @Override
-    public AuthModuleCallbackBuilder createAuthModuleBuilder() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	};
+
     }
 
 }

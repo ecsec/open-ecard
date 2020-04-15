@@ -14,6 +14,7 @@ import skid.mob.impl.fs.SamlClientImpl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.testng.annotations.Test;
+import skid.mob.impl.fs.JavaHttpClientFactory;
 import skid.mob.lib.Cancellable;
 
 
@@ -25,7 +26,7 @@ public class SamlClientTest {
 
     @Test
     public void testFetchSession() throws InterruptedException, ExecutionException {
-	SamlClientImpl client = new SamlClientImpl(null);
+	SamlClientImpl client = new SamlClientImpl(new JavaHttpClientFactory(), null);
 	CompletableFuture<String> cb = new CompletableFuture<>();
 	Cancellable c = client.startSession("https://cc-demo.skidentity.de/app-start",
 		v -> {v.getInfo(); cb.complete("init");}, r -> {cb.complete("error");});

@@ -39,6 +39,7 @@ import org.openecard.ws.android.AndroidMarshaller;
 import skid.mob.impl.SkidResultImpl;
 import skid.mob.impl.fs.SamlClientImpl;
 import skid.mob.impl.auth.AuthModuleCallbackBuilderImpl;
+import skid.mob.impl.fs.JavaHttpClientFactory;
 import skid.mob.lib.AuthModuleCallbackBuilder;
 import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidErrorCodes;
@@ -57,6 +58,8 @@ public class AndroidSkidLib implements SkidLib {
 	SysUtils.setIsAndroid();
     }
 
+    private final JavaHttpClientFactory httpClientFac;
+
     private final ActivationUtils utils;
     private final CachingTerminalFactoryBuilder<AndroidNFCFactory> builder;
 
@@ -64,6 +67,7 @@ public class AndroidSkidLib implements SkidLib {
     private ActivationSource oecActivationSource;
 
     AndroidSkidLib(CommonActivationUtils utils, CachingTerminalFactoryBuilder<AndroidNFCFactory> builder) {
+	this.httpClientFac = new JavaHttpClientFactory();
 	this.utils = utils;
 	this.builder = builder;
     }
@@ -183,7 +187,7 @@ public class AndroidSkidLib implements SkidLib {
 
     @Override
     public SamlClient createSamlClient() {
-	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
+	SamlClientImpl samlClient = new SamlClientImpl(httpClientFac, oecActivationSource);
 	return samlClient;
     }
 

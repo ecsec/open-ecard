@@ -99,6 +99,8 @@ public class Skidentity implements IOSSkidLib {
 //	rootLogger.setLevel(Level.ERROR);
     }
 
+    private final AppleHttpClientFactory httpClientFac;
+
     private final CommonActivationUtils utils;
 //    private /* final */ CachingTerminalFactoryBuilder<IOSNFCFactory> builder;
 
@@ -109,6 +111,8 @@ public class Skidentity implements IOSSkidLib {
     private NFCConfig nfcConfig;
 
     public Skidentity() {
+	this.httpClientFac = new AppleHttpClientFactory();
+
 	this.developerOptions = new DeveloperOptionsImpl();
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {
@@ -230,7 +234,7 @@ public class Skidentity implements IOSSkidLib {
 
     @Override
     public SamlClient createSamlClient() {
-	SamlClientImpl samlClient = new SamlClientImpl(oecActivationSource);
+	SamlClientImpl samlClient = new SamlClientImpl(httpClientFac, oecActivationSource);
 	return samlClient;
     }
 

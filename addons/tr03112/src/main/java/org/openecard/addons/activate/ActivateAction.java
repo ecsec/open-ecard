@@ -30,13 +30,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
+import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
 import org.openecard.addon.Context;
 import org.openecard.addon.bind.AppExtensionAction;
-import org.openecard.addon.bind.AppExtensionException;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.Attachment;
+import org.openecard.addon.bind.AuxDataKeys;
 import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.bind.Headers;
@@ -235,6 +236,7 @@ public class ActivateAction implements AppPluginAction {
 	if (emptyParms || !(tokenUrl || status || showUI)) {
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
+	    response.getAuxResultData().put(AuxDataKeys.MINOR_PROCESS_RESULT, ECardConstants.Minor.App.INCORRECT_PARM);
 	    showErrorMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
 	    return response;
 	}
@@ -243,6 +245,7 @@ public class ActivateAction implements AppPluginAction {
 	if ((tokenUrl && showUI) || (tokenUrl && status) || (showUI && status)) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_PARAMS));
+	    response.getAuxResultData().put(AuxDataKeys.MINOR_PROCESS_RESULT, ECardConstants.Minor.App.INCORRECT_PARM);
 	    showErrorMessage(lang.translationForKey(NO_PARAMS));
 	    return response;
 	}
@@ -347,21 +350,33 @@ public class ActivateAction implements AppPluginAction {
 	    return new BindingResult(BindingResultCode.OK);
 	} catch (InterruptedException ex) {
 	    guiThread.cancel(true);
-	    return new BindingResult(BindingResultCode.INTERRUPTED);
+	    BindingResult result = createInterruptedResult();
+	    return result;
 	} catch (ExecutionException ex) {
 	    Throwable cause = ex.getCause();
-	    if (cause instanceof AppExtensionException) {
-		AppExtensionException appEx = (AppExtensionException) cause;
-		if (WSHelper.minorIsOneOf(appEx, ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
+	    if (cause instanceof WSHelper.WSException) {
+		WSHelper.WSException appEx = (WSHelper.WSException) cause;
+		Result result = appEx.getResult();
+		if (WSHelper.minorIsOneOf(result,
+			ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
 			ECardConstants.Minor.IFD.CANCELLATION_BY_USER)) {
 		    LOG.info("PIN Management got cancelled.");
-		    return new BindingResult(BindingResultCode.INTERRUPTED);
-		} else if (WSHelper.minorIsOneOf(appEx, ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT)) {
+		    return asBindingResult(BindingResultCode.INTERRUPTED, result);
+		} else if (WSHelper.minorIsOneOf(result, ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT,
+			ECardConstants.Minor.IFD.TIMEOUT_ERROR)) {
 		    LOG.info("PIN Management could not wait for a device any longer.");
-		    return new BindingResult(BindingResultCode.TIMEOUT);
+		    return asBindingResult(BindingResultCode.TIMEOUT, result);
+		} else if (WSHelper.minorIsOneOf(result, ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)) {
+		    LOG.info("PIN Management lost access via the defining slot.");
+
+		    return asBindingResult(BindingResultCode.INTERRUPTED, result);
+		} else {
+		    LOG.warn("PIN Management completed with an unknown/internal error.", ex);
+		    return asBindingResult(BindingResultCode.INTERNAL_ERROR, result);
 		}
+
 	    } else if (cause instanceof ThreadTerminateException) {
-		return new BindingResult(BindingResultCode.INTERRUPTED);
+		return createInterruptedResult();
 	    }
 
 	    // just count as normal error
@@ -373,6 +388,25 @@ public class ActivateAction implements AppPluginAction {
 	}
     }
 
+    private BindingResult createInterruptedResult() {
+	return asBindingResult(BindingResultCode.INTERRUPTED, ECardConstants.Minor.SAL.CANCELLATION_BY_USER);
+    }
+
+    private BindingResult asBindingResult(BindingResultCode code, Result source) {
+	BindingResult result = new BindingResult(code);
+	setMinorResult(result, source.getResultMinor());
+	return result;
+    }
+
+    private BindingResult asBindingResult(BindingResultCode code, String minor) {
+	BindingResult result = new BindingResult(code);
+	setMinorResult(result, minor);
+	return result;
+    }
+
+    private void setMinorResult(BindingResult result, String minorReason) {
+	result.getAuxResultData().put(AuxDataKeys.MINOR_PROCESS_RESULT, minorReason);
+    }
     /**
      * Opens the Settings dialog.
      *
@@ -437,7 +471,7 @@ public class ActivateAction implements AppPluginAction {
 	} catch (RuntimeException e) {
 
 	    if(e instanceof ThreadTerminateException){
-		response = new BindingResult(BindingResultCode.INTERRUPTED);
+		response = this.createInterruptedResult();
 	    } else {
 		response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    }

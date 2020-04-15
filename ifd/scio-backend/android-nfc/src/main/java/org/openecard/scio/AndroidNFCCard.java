@@ -240,11 +240,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	    return currentTag.transceive(apdu);
 	} catch (TagLostException ex) {
 	    LOG.debug("NFC Tag is not present.", ex);
-	    try {
-		this.terminateTag();
-	    } catch (SCIOException ex1) {
-		LOG.debug("Error occurred while terminating the tag.", ex1);
-	    }
+	    this.nfcCardTerminal.removeTag();
 	    throw new IllegalStateException("Transmit of apdu command failed, because the tag was lost.");
 	}
     }

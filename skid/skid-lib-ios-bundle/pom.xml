@@ -13,6 +13,11 @@
     <packaging>jar</packaging>
 	<name>SkID-lib iOS Bundle</name>
 
+	<properties>
+		<!-- prevent deployment of this artifact as it is not properly built when the build is performed in one run -->
+		<maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>

@@ -8,6 +8,7 @@ package skid.mob.ios;
 import org.openecard.ios.activation.NFCConfig;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.robovm.annotations.FrameworkInterface;
+import skid.mob.lib.SamlClient;
 import skid.mob.lib.SkidLib;
 
 /**
@@ -17,7 +18,7 @@ import skid.mob.lib.SkidLib;
 @FrameworkInterface
 public interface IOSSkidLib extends SkidLib {
 
-    public PinManagementControllerFactory pinManagementFactory(String defaultNFCDialogMsg, String defaultNFCCardRecognizedMessage);
     public PinManagementControllerFactory pinManagementFactory(NFCConfig nfcConfig);
 
+    public SamlClient createSamlClient(NFCConfig nfcConfig);
 }

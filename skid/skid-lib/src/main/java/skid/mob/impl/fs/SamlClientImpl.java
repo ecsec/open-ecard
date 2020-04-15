@@ -10,6 +10,8 @@
 
 package skid.mob.impl.fs;
 
+import skid.mob.lib.NativeHttpClientFactory;
+import skid.mob.lib.NativeHttpClient;
 import skid.mob.impl.client.JsonConfig;
 import skid.mob.impl.client.UnknownInfrastructure;
 import com.jayway.jsonpath.JsonPath;
@@ -45,9 +47,11 @@ public class SamlClientImpl implements SamlClient {
 	JsonConfig.assertInitialized();
     }
 
+    private final NativeHttpClientFactory httpClientFac;
     private final ActivationSource oecActivationSource;
 
-    public SamlClientImpl(ActivationSource oecActivationSource) {
+    public SamlClientImpl(NativeHttpClientFactory httpClientFac, ActivationSource oecActivationSource) {
+	this.httpClientFac = httpClientFac;
 	this.oecActivationSource = oecActivationSource;
     }
 
@@ -60,7 +64,7 @@ public class SamlClientImpl implements SamlClient {
 		fsSess.load();
 		// signal success
 		ifNotInterrupted(() -> initCb.done(fsSess));
-	    } catch (MalformedURLException | ClassCastException ex) {
+	    } catch (MalformedURLException ex) {
 		ifNotInterrupted(() -> failCb.failed(new SkidResultImpl(SkidErrorCodes.INVALID_INPUT, ex.getMessage())));
 	    } catch (ServerError ex) {
 		// TODO: error handling for unknown SP and all other cases
@@ -81,33 +85,35 @@ public class SamlClientImpl implements SamlClient {
 	return new ThreadCancelImp(t);
     }
 
-    private AuthReqResp authnReq(String startUrl) throws MalformedURLException, IOException, ClassCastException,
-	    SocketTimeoutException, UnsupportedEncodingException, JSONException, UnknownInfrastructure, ServerError,
-	    InvalidServerData {
-	HttpURLConnection con = HttpURLConnection.class.cast(new URL(startUrl).openConnection());
-	con.setInstanceFollowRedirects(true);
-	con.setRequestProperty("X-XHR-Client", "true");
-	con.setRequestProperty("Accept", "application/json");
+    private AuthReqResp authnReq(String startUrl) throws MalformedURLException, IOException, SocketTimeoutException,
+	    UnsupportedEncodingException, JSONException, UnknownInfrastructure, ServerError, InvalidServerData {
+	try {
+	    NativeHttpClient con = httpClientFac.forUrl(startUrl);
+	    con.setHeader("X-XHR-Client", "true");
+	    con.setHeader("Accept", "application/json");
 
-	con.connect();
-	int resCode = con.getResponseCode();
-	if (resCode == HttpURLConnection.HTTP_OK) {
-	    // get session id
-	    InputStream objStream = con.getInputStream();
-	    // TODO: read content encoding from header (Content-Type: application/json; charset=UTF-8
-	    String objString = FileUtils.toString(objStream, "UTF-8");
+	    con.performRequest();
+	    int resCode = con.getResponseCode();
+	    if (resCode == HttpURLConnection.HTTP_OK) {
+		// get session id
+		InputStream objStream = con.getContent();
+		// TODO: read content encoding from header (Content-Type: application/json; charset=UTF-8
+		String objString = FileUtils.toString(objStream, "UTF-8");
 
-	    String session = JsonPath.read(objString, "$.session");
-	    if (session == null) {
-		throw new InvalidServerData("No session ID returned from server.");
+		String session = JsonPath.read(objString, "$.session");
+		if (session == null) {
+		    throw new InvalidServerData("No session ID returned from server.");
+		}
+
+		// get FS URL, so we can determine the SkIDentity base URL
+		String skidUri = getSkidUri(con.getFinalUrl());
+
+		return new AuthReqResp(skidUri, session);
+	    } else {
+		throw new ServerError(resCode, "Failed to retrieve session from SAML FS.");
 	    }
-
-	    // get FS URL, so we can determine the SkIDentity base URL
-	    String skidUri = getSkidUri(con.getURL().toString());
-
-	    return new AuthReqResp(skidUri, session);
-	} else {
-	    throw new ServerError(resCode, "Failed to retrieve session from SAML FS.");
+	} catch (ClassCastException ex) {
+	    throw new MalformedURLException(ex.getMessage());
 	}
     }
 

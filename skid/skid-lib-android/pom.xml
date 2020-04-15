@@ -70,8 +70,15 @@
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
-            <version>4.1.1.4</version>
+			<version>4.1.1.4</version>
 			<scope>provided</scope>
+			<exclusions>
+				<!-- exclude so our version definition is used -->
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

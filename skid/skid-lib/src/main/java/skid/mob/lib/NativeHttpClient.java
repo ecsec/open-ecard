@@ -20,7 +20,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
 public interface NativeHttpClient {
 
     void setHeader(String key, String value);

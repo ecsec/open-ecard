@@ -17,7 +17,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
  *
  * @author Tobias Wich
  */
-@FrameworkInterface
 public interface NativeHttpClientFactory {
 
     NativeHttpClient forUrl(String url);

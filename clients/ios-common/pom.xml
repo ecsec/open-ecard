@@ -9,9 +9,9 @@
     
 	<groupId>org.openecard.clients</groupId>
 	<artifactId>ios-common</artifactId>
-
-	<name>iOS Common</name>
 	<packaging>jar</packaging>
+	<name>iOS Common</name>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -41,44 +41,64 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
 			<classifier>iOS</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.markusbernhardt</groupId>
+					<artifactId>proxy-vole</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.javadelight</groupId>
+					<artifactId>delight-nashorn-sandbox</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.openecard.ifd.scio-backend</groupId>
 			<artifactId>ios-nfc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>android-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-rt</artifactId>
 			<version>${robovm.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>
 			<artifactId>robovm-cocoatouch</artifactId>
 			<version>${robovm.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
 </project>

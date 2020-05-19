@@ -12,17 +12,16 @@
     <artifactId>android-common</artifactId>
     <name>Android Common</name>
 
-	<!-- TODO: create fat jar without xerces and slf4j -->
 	<dependencies>
-	    <!--dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                        <version>2.12.0</version>
-		</dependency-->
+			<artifactId>xercesImpl</artifactId>
+		</dependency>
 
 
 	    <!-- Android Activity Stuff / Support Elements -->
@@ -37,6 +36,16 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>mobile-lib</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.markusbernhardt</groupId>
+					<artifactId>proxy-vole</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.javadelight</groupId>
+					<artifactId>delight-nashorn-sandbox</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	    <!-- all OeC Android dependencies -->
@@ -52,4 +61,4 @@
 		</dependency>
 	</dependencies>
 
-    </project>
+</project>

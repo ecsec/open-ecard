@@ -21,11 +21,10 @@
  ************************************************************************** */
 package org.openecard.ios.activation;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import org.openecard.common.util.TR03112Utils;
-import org.slf4j.LoggerFactory;
+import org.openecard.ios.logging.JulConfigHelper;
+import org.openecard.ios.logging.LogLevel;
+
 
 /**
  *
@@ -35,9 +34,7 @@ public class DeveloperOptionsImpl implements DeveloperOptions {
 
     @Override
     public void setDebugLogLevel() {
-	LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-	Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-	rootLogger.setLevel(Level.DEBUG);
+	JulConfigHelper.setLogLevel("", LogLevel.DEBUG);
     }
 
     @Override

@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.mobile.utils;
+package org.openecard.ios.logging;
 
 import org.openecard.robovm.annotations.FrameworkEnum;
 

@@ -60,7 +60,7 @@ public interface SpecializedSAL extends SAL {
     boolean specializedFor(String cardType);
 
     /**
-     * Returns the name of the specialized Middleware SAL, for example 'LuxTrust'.
+     * Returns the name of the specialized Middleware SAL, for example 'OpenSC'.
      * 
      * @return the Name of the Middleware-SAL.
      */

@@ -162,7 +162,7 @@ public class SignatureTest {
 
     // disabled due to incompatible truststores
     @Test(enabled = false)
-    public void testLuxTrustSignature() throws IOException, KeyStoreException, NoSuchAlgorithmException,
+    public void testLTSignature() throws IOException, KeyStoreException, NoSuchAlgorithmException,
 	    CertificateException, SignatureInvalid {
 	System.setProperty("java.security.debug", "certpath");
 

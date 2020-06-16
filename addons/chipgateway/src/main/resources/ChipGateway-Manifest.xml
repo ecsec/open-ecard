@@ -3,11 +3,11 @@
 	<ID>ChipGateway</ID>
 	<Version>1.0.0</Version>
 	<License/>
-	<LocalizedName xml:lang="EN">LuxTrust ChipGateway</LocalizedName>
+	<LocalizedName xml:lang="EN">ChipGateway</LocalizedName>
 	<LocalizedDescription xml:lang="EN">
-		LuxTrust ChipGateway activation and protocol Add-On.
+		ChipGateway activation and protocol Add-On.
 	</LocalizedDescription>
-	<About xml:lang="EN">The LuxTrust Chipgateway provides a browser based activation interface and a backend protocol
+	<About xml:lang="EN">The Chipgateway Add-On provides a browser based activation interface and a backend protocol
 	capable of signature creation.</About>
 	<Logo/>
 	<ConfigDescription/>

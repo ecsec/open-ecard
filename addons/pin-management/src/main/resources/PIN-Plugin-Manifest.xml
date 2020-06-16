@@ -7,7 +7,7 @@
 	<LocalizedName xml:lang="DE">PIN Verwaltung</LocalizedName>
 	<LocalizedDescription xml:lang="EN">Management of PIN/ PUK and possibly other secrets of the smart-card.</LocalizedDescription>
 	<LocalizedDescription xml:lang="DE">Verwaltung von PIN/ PUK und gegebenenfalls anderen Geheimnissen der Chipkarte.</LocalizedDescription>
-	<About xml:lang="EN">PIN management functionality belonging to the LuxTrust Middleware.</About>
+	<About xml:lang="EN">PIN management functionality for smart-cards.</About>
 	<Logo>images/pin-management.png</Logo>
 	<ConfigDescription/>
 	<BindingActions/>

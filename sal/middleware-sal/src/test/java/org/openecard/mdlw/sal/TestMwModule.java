@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  *
  * @author Jan Mannsbart
  */
-@Test(groups = { "luxtrust" })
+@Test(groups = { "cards" })
 public class TestMwModule {
 
     final byte[] dummyData = "test".getBytes();

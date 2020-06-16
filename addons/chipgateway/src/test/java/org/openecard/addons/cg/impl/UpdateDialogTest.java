@@ -37,7 +37,7 @@ public class UpdateDialogTest {
 
     @Test(enabled = false)
     public void testUpdateDialog() throws MalformedURLException, InterruptedException {
-	String dlUrl = "https://drivers.luxtrust.lu";
+	String dlUrl = "https://www.openecard.org";
 	UserConsent gui =  new SwingUserConsent(new SwingDialogWrapper());
 
 	final UpdateDialog ud = new UpdateDialog(gui, dlUrl, true);

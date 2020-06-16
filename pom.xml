@@ -80,7 +80,7 @@
 		<version.jmockit>1.47</version.jmockit>
 		<version.pmd>6.17.0</version.pmd>
 		<version.openjfx>12.0.2</version.openjfx>
-		<version.roboface>1.0.0-rc.13</version.roboface>
+		<version.roboface>1.0.0</version.roboface>
 		<robovm.version>2.3.8-rc.2</robovm.version>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine />
@@ -620,7 +620,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.1</version>
+					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -789,6 +789,11 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.2.3</version>
 			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-jdk14</artifactId>
+				<version>1.7.30</version>
+			</dependency>
 
 			<!-- JAXB API and implementation -->
 			<dependency>
@@ -806,6 +811,12 @@
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
 				<version>1.2.2-20190731</version>
+			</dependency>
+
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.12.0</version>
 			</dependency>
 
 			<!-- JavaFX -->

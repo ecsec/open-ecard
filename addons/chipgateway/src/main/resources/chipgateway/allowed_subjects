@@ -1,4 +1,1 @@
-# Allowed subjects for the application signing certificates, one per line
-CN=ChipGateway Server Development,O=LuxTrust S.A.,L=Capellen,C=LU
-CN=ChipGateway Server Integration,O=LuxTrust S.A.,L=Capellen,C=LU
-CN=ChipGateway Server,O=LuxTrust S.A.,L=Capellen,C=LU
+# Allowed X500 subjects for the application signing certificates, one per line

@@ -32,12 +32,15 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import iso.std.iso_iec._24727.tech.schema.Initialize;
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Terminate;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.BindException;
 import java.util.List;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.FutureTask;
@@ -137,6 +140,14 @@ public final class RichClient {
 	}
 	LOG = LoggerFactory.getLogger(RichClient.class.getName());
 	LANG = I18n.getTranslation("richclient");
+	// try to set the JNA runtime directory because the default value /tmp
+	// may be mounted as 'noexec' on some systems
+	try {
+	    setJnaRuntimeDiretory();
+	} catch (IOException ex) {
+	    System.err.println("Failed to setup runtime directory for JNA");
+	    ex.printStackTrace(System.err);
+	}
     }
 
 
@@ -490,6 +501,63 @@ public final class RichClient {
 	    LOG.debug("Registry key {}\\{} does not exist or has wrong type.", key, value);
 	}
 	return defaultValue;
+    }
+
+    private static void setJnaRuntimeDiretory() throws IOException {
+	// read value of jna.tmpdir property
+	Properties properties = new Properties(System.getProperties());
+	String propJnaTmpDir = properties.getProperty("jna.tmpdir");
+
+	// if the property has been set externally don't change it
+	if (propJnaTmpDir != null) {
+	    return;
+	}
+
+	//check if we are on Linux
+	String osName = properties.getProperty("os.name");
+	if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
+
+	    // we are on linux, first read "XDG_RUNTIME_DIR" to see if a user run dir is set
+	    String userRuntimeDir = System.getenv("XDG_RUNTIME_DIR");
+	    boolean canUseNormalTempDir = true;
+	    // if it is not set, we cannot use it
+	    boolean canUseUserRunDir = (userRuntimeDir != null);
+
+	    // then read "/proc/mounts"
+	    try (BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/mounts"))) {
+		String line;
+
+		while ((line = bufferedReader.readLine()) != null) {
+		    // split by whitespace to get the 6 parts individually
+		    String[] parts = line.split(" ");
+		    String mountPath = parts[1]; // get the path where the file system is mounted
+		    String mountOptions = parts[3]; // get the mount options
+
+		    if (mountPath.equals("/tmp")) {
+			// we can only use /tmp if the mountOptions do not contain "noexec"
+			canUseNormalTempDir = (!mountOptions.contains("noexec"));
+		    } else if (mountPath.equals(userRuntimeDir)) {
+			// same for the user run dir; if the user run dir is not set, then the equals above will be false
+			canUseUserRunDir = (!mountOptions.contains("noexec"));
+		    }
+		}
+	    }
+
+	    if (canUseNormalTempDir) {
+		// we can use /tmp directly and as JNA uses it as default anyway, nothing more to do here
+		return;
+	    }
+
+	    if (canUseUserRunDir) {
+		// the user run dir is set and executable, set jna.tempdir to XDG_RUNTIME_DIR
+		LOG.debug("setting jna.tmpdir to user run dir at {}", userRuntimeDir);
+		System.getProperties().putIfAbsent("jna.tmpdir", userRuntimeDir);
+	    } else {
+		// user run dir is not set or noexec as well, use '~/.openecard/run' as last ressort
+		LOG.debug("setting jna.tmpdir to be '~/.openecard/run' as last ressort");
+		System.getProperties().putIfAbsent("jna.tmpdir", "~/.openecard/run");
+	    }
+	}
     }
 
 }

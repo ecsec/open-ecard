@@ -22,8 +22,11 @@
 
 package org.openecard.richclient;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,48 +65,91 @@ public class JnaRuntimeDirectoryFix {
 
 	// if the property has been set externally don't change it
 	if (propJnaTmpDir != null) {
+	    LOG.info("Use {} from jna.tmpdir as tmp directory for JNA");
 	    return;
 	}
 
 	//check if we are on Linux
 	String osName = properties.getProperty("os.name");
 	if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-
-	    // we are on linux, first read "XDG_RUNTIME_DIR" to see if a user run dir is set
-	    String userRuntimeDir = System.getenv("XDG_RUNTIME_DIR");
-	    boolean canUseNormalTempDir = true;
-	    // if it is not set, we cannot use it
-	    boolean canUseUserRunDir = (userRuntimeDir != null);
-
-	    // then parse "/proc/mounts"
+	    // parse "/proc/mounts"
 	    List<MountInfo> mountInfos = MountInfo.getMounts();
-	    for (MountInfo mountInfo : mountInfos) {
-		String mountPath = mountInfo.getMountPath();
 
-		if (mountPath.equals("/tmp")) {
-		    // we can only use /tmp if "noexec" flag is not set in the mountOptions
-		    canUseNormalTempDir = !mountInfo.checkIfFlagIsSet(NOEXEC_FLAG);
-		} else if (mountPath.equals(userRuntimeDir)) {
-		    // same for the user run dir; if the user run dir is not set, then the equals above will be false
-		    canUseUserRunDir = !mountInfo.checkIfFlagIsSet(NOEXEC_FLAG);
-		}
+	    // convert mountInfos to mapping from mount path to MountInfo to speed up lookup of mount paths
+	    Map<String, MountInfo> map = new HashMap<>();
+	    for (MountInfo mountInfo : mountInfos) {
+		map.put(mountInfo.getMountPath(), mountInfo);
 	    }
 
-	    if (canUseNormalTempDir) {
-		// we can use /tmp directly and as JNA uses it as default anyway, nothing more to do here
+	    // get tmp directory
+	    String tmpDirPath = properties.getProperty("java.io.tmpdir");
+	    // get canonical file for tmp directory, as it might be a symlink
+	    File tmpDirectory = new File(tmpDirPath).getCanonicalFile();
+	    // check if noexec flag is set for tmp directory
+	    boolean noexecSetForTmp = checkIfNoexecFlagIsSetForLongestMatchingMountPath(map, tmpDirectory);
+
+	    if (!noexecSetForTmp) {
+		// we can use tmp directly and as JNA uses it as default anyway, nothing more to do here
+		LOG.info("Use default {} as tmp directory for JNA", tmpDirPath);
 		return;
 	    }
 
-	    if (canUseUserRunDir) {
-		// the user run dir is set and executable, set jna.tempdir to XDG_RUNTIME_DIR
-		LOG.debug("setting jna.tmpdir to user run dir at {}", userRuntimeDir);
-		System.getProperties().putIfAbsent(JNA_TMP_DIR, userRuntimeDir);
-	    } else {
-		// user run dir is not set or noexec as well, use '~/.openecard/run' as last ressort
-		LOG.debug("setting jna.tmpdir to be '~/.openecard/run' as last ressort");
-		System.getProperties().putIfAbsent(JNA_TMP_DIR, "~/.openecard/run");
+	    // we cannot use tmp directly, check the user run dir next
+	    // first read "XDG_RUNTIME_DIR" to see if a user run dir is set
+	    String userRuntimeDirPath = System.getenv("XDG_RUNTIME_DIR");
+
+	    // if it is set, then check for "noexec" flag like with tmp before
+	    boolean userRunDirSet = (userRuntimeDirPath != null);
+	    if (userRunDirSet) {
+		// get canonical file for user run time directory, as it might be a symlink
+		File userRuntimeDirectory = new File(userRuntimeDirPath).getCanonicalFile();
+		boolean noexecSetForUserRuntimeDir = checkIfNoexecFlagIsSetForLongestMatchingMountPath(map, userRuntimeDirectory);
+
+		if (!noexecSetForUserRuntimeDir) {
+		    // the user run dir is set and executable, set jna.tempdir to XDG_RUNTIME_DIR
+		    LOG.info("Setting jna.tmpdir to user run dir at {}", userRuntimeDirPath);
+		    System.getProperties().put(JNA_TMP_DIR, userRuntimeDirPath);
+		    return;
+		}
 	    }
+	    // neither tmp nor user run dir are usable,  use '~/.openecard/run' as last ressort
+	    LOG.info("Setting jna.tmpdir to be '~/.openecard/run' as last ressort");
+	    String homeDir = properties.getProperty("user.home");
+	    String openEcardRunDirectory = homeDir + "/.openecard/run";
+	    System.getProperties().put(JNA_TMP_DIR, openEcardRunDirectory);
 	}
+    }
+
+    /**
+     * Checks if for the provided File the longest matching mount path in the provided Map has the "noexec" flag set
+     *
+     * @param map a mapping from mount paths to their corresponding {@link MountInfo}
+     * @param file the {@link File} to check
+     * @return true, if the "noexec" flag for the provided File is set; false, if the "noexec" flag is not set or if the
+     * file does not have a matching mount path in the Mapping
+     * @throws IOException if an I/O error occurs during the construction of the canonical pathname
+     */
+    private static boolean checkIfNoexecFlagIsSetForLongestMatchingMountPath(Map<String, MountInfo> map, File file)
+	    throws IOException {
+
+	// Default case: if the provided dir is not in /proc/mounts, then the "noexec" flag is not set
+	boolean noexecFlagSet = false;
+
+	// find the closest parent to the directory and 
+	// see if it is in /proc/mounts and if so, if it has the "noexec" flag
+	while (file != null) {
+	    String path = file.getCanonicalPath();
+	    if (map.containsKey(path)) {
+		// we found the longest matching mount path
+		MountInfo mountInfo = map.get(path);
+		// check if "noexec" flag is set in the mountOptions
+		noexecFlagSet = mountInfo.checkIfFlagIsSet(NOEXEC_FLAG);
+		break;
+	    }
+	    // continue with parent of current file
+	    file = file.getParentFile();
+	}
+	return noexecFlagSet;
     }
 
 }

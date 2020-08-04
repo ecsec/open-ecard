@@ -24,19 +24,28 @@ package org.openecard.scio;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
 import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.Promise;
+import org.robovm.apple.corenfc.NFCFeliCaTag;
+import org.robovm.apple.corenfc.NFCISO15693Tag;
 import org.robovm.apple.corenfc.NFCISO7816APDU;
 import org.robovm.apple.corenfc.NFCISO7816Tag;
+import org.robovm.apple.corenfc.NFCMiFareTag;
 import org.robovm.apple.corenfc.NFCPollingOption;
 import org.robovm.apple.corenfc.NFCReaderError;
+import org.robovm.apple.corenfc.NFCReaderSession;
+import org.robovm.apple.corenfc.NFCTag;
+import org.robovm.apple.corenfc.NFCTagAdapter;
 import org.robovm.apple.corenfc.NFCTagReaderSession;
 import org.robovm.apple.corenfc.NFCTagReaderSessionDelegateAdapter;
+import org.robovm.apple.corenfc.NFCTagType;
 import org.robovm.apple.dispatch.DispatchQueue;
 import org.robovm.apple.dispatch.DispatchQueueAttr;
 import org.robovm.apple.foundation.NSArray;
+import org.robovm.apple.foundation.NSCoder;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.foundation.NSError;
 import org.robovm.apple.foundation.NSErrorUserInfo;
@@ -351,65 +360,61 @@ public final class IOSNFCCard extends AbstractNFCCard {
 	this.concurrencyMode = mode;
     }
 
+//    @org.robovm.rt.bro.annotation.Marshaler(NSArray.AsListMarshaler.class)
+//	List<NFCTag> tags
     private class NFCTagReaderSessionDelegateAdapterImpl extends NFCTagReaderSessionDelegateAdapter {
 
-	public NFCSessionContext currentContext = null;
-	private final Object notifyErrorLock = new Object();
-	private volatile boolean hasNotifiedError = false;
+		public NFCSessionContext currentContext = null;
+		private final Object notifyErrorLock = new Object();
+		private volatile boolean hasNotifiedError = false;
 
-	@Override
-	public void didInvalidate(NFCTagReaderSession session, NSError err) {
-	    LOG.debug(".didInvalidate()");
-	    notifyError(err);
-	    return;
-	}
-
-	private void notifyError(NSError err) {
-
-	    synchronized (notifyErrorLock) {
-		if (hasNotifiedError) {
-		    return;
-		} else {
-		    hasNotifiedError = true;
-		}
-	    }
-
-	    synchronized (tagLock) {
-		setTag(null, currentContext, err, true);
-		tagLock.notifyAll();
-	    }
-	}
-
-	@Override
-	public void tagReaderSessionDidBecomeActive(NFCTagReaderSession session) {
-	    LOG.debug(".didbecomeActive()");
-	    return;
-	}
-
-	@Override
-	public void didDetectTags(NFCTagReaderSession session, NSArray<?> tags) {
-
-	    for (NSObject t : tags) {
-
-		setDialogMsg(cfg.getDefaultCardRecognizedMessage());
-
-		session.connectToTag(t, (NSError err) -> {
-
-		    if (err != null) {
+		@Override
+		public void didInvalidate(NFCTagReaderSession session, NSError err) {
+			LOG.debug(".didInvalidate()");
 			notifyError(err);
-		    } else {
+			return;
+		}
 
-			NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
-			synchronized (tagLock) {
-			    setTag(tag, currentContext, null, false);
+		private void notifyError(NSError err) {
 
-			    setDialogMsg(cfg.getDefaultCardConnectedMessage());
-			    tagLock.notifyAll();
+			synchronized (notifyErrorLock) {
+				if (hasNotifiedError) {
+					return;
+				} else {
+					hasNotifiedError = true;
+				}
 			}
-		    }
-		});
-	    }
-	}
-    }
 
+			synchronized (tagLock) {
+				setTag(null, currentContext, err, true);
+				tagLock.notifyAll();
+			}
+		}
+
+		@Override
+		public void didBecomeActive(NFCTagReaderSession session) {
+			LOG.debug(".didbecomeActive()");
+			return;
+		}
+
+		@Override
+		public void didDetectTags(NFCTagReaderSession session, @org.robovm.rt.bro.annotation.Marshaler(NSArray.AsListMarshaler.class) List<NFCTag> tags) {
+
+			for (NFCTag t : tags) {
+				setDialogMsg(cfg.getDefaultCardRecognizedMessage());
+				session.connectToTag(t, (NSError err) -> {
+					if (err != null) {
+						notifyError(err);
+					} else {
+						NFCISO7816Tag tag = session.getConnectedTag().asNFCISO7816Tag();
+						synchronized (tagLock) {
+							setTag(tag, currentContext, null, false);
+							setDialogMsg(cfg.getDefaultCardConnectedMessage());
+							tagLock.notifyAll();
+						}
+					}
+				});
+			}
+		}
+	}
 }

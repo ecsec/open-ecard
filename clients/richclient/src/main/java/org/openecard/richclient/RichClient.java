@@ -137,6 +137,14 @@ public final class RichClient {
 	}
 	LOG = LoggerFactory.getLogger(RichClient.class.getName());
 	LANG = I18n.getTranslation("richclient");
+	// try to set the JNA runtime directory because the default value /tmp
+	// may be mounted as 'noexec' on some systems
+	try {
+	    JnaRuntimeDirectoryFix.setJnaRuntimeDirectory();
+	} catch (IOException ex) {
+	    System.err.println("Failed to setup runtime directory for JNA");
+	    ex.printStackTrace(System.err);
+	}
     }
 
 

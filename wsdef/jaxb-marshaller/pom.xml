@@ -28,9 +28,9 @@
 
 		<!-- JAXB Runtime -->
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-			<exclusions>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<!--exclusions>
 				<exclusion>
 					<groupId>jakarta.activation</groupId>
 					<artifactId>jakarta.activation-api</artifactId>
@@ -51,7 +51,7 @@
 					<groupId>org.jvnet.staxex</groupId>
 					<artifactId>stax-ex</artifactId>
 				</exclusion>
-			</exclusions>
+			</exclusions-->
 		</dependency>
 	</dependencies>
 

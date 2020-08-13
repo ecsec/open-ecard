@@ -47,8 +47,8 @@
 
 		<!-- jaxb as test reference -->
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

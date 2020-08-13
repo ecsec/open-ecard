@@ -16,10 +16,10 @@
 			<!-- Modularized dependencies will be excluded, they will become part of the runtime later -->
 			<excludes>
 				<!-- JAXB dependencies -->
-				<exclude>javax.xml.bind:jaxb-api</exclude>
+				<exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+				<exclude>com.sun.xml.bind:jaxb-impl</exclude>
+				<exclude>com.sun.activation:jakarta.activation</exclude>
 				<exclude>com.sun.istack:istack-commons-runtime</exclude>
-				<exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
-				<exclude>javax.activation:*</exclude>
 
 				<!-- JavaFX dependencies -->
 				<exclude>org.openjfx:*</exclude>

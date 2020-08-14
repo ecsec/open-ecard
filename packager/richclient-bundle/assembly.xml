@@ -19,6 +19,7 @@
 				<exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
 				<exclude>com.sun.xml.bind:jaxb-impl</exclude>
 				<exclude>com.sun.activation:jakarta.activation</exclude>
+				<exclude>jakarta.activation:jakarta.activation-api</exclude>
 				<exclude>com.sun.istack:istack-commons-runtime</exclude>
 
 				<!-- JavaFX dependencies -->

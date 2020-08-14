@@ -767,17 +767,7 @@
 				<version>1.2.3</version>
 			</dependency>
 
-			<!-- JAXB API and implementation -->
-			<!--dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.4.0-b180830.0359</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>2.4.0-b180830.0438</version>
-			</dependency-->
+			<!-- JAXB API, it's implementation and dep -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
@@ -788,7 +778,6 @@
 				<artifactId>jaxb-impl</artifactId>
 				<version>2.3.3</version>
 			</dependency>
-			<!-- more java stuff -->
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>

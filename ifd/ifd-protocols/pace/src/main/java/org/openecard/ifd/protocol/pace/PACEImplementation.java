@@ -349,8 +349,9 @@ public class PACEImplementation {
 			    "The password is wrong.");
 		}
 	    } else {
-		throw new ProtocolException(
-			ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, "Authentication failed.");
+		String msg = String.format("PACE Mutual Authentication failed (SW=0x%04X).", sw);
+		LOG.warn(msg);
+		throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, msg);
 	    }
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);

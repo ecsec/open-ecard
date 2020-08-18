@@ -75,7 +75,8 @@ public class PACEProtocol implements Protocol {
 		content.add(GUIContentMap.ELEMENT.PIN_ID, pinID);
 		PACEUserConsent paceUserConsent = new PACEUserConsent(gui);
 		paceUserConsent.show(content);
-		pin = ((String) content.get(GUIContentMap.ELEMENT.PIN)).getBytes(PACEConstants.PIN_CHARSET);
+		char[] pinChars = (char[]) content.get(GUIContentMap.ELEMENT.PIN);
+		pin = new String(pinChars).getBytes(PACEConstants.PIN_CHARSET);
 	    } else {
 		pin = paceInput.getPIN().getBytes(PACEConstants.PIN_CHARSET);
 	    }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 ecsec GmbH.
+ * Copyright (C) 2018-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -22,11 +22,16 @@
 
 package org.openecard.richclient.gui.update;
 
+import java.awt.BorderLayout;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -37,61 +42,96 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.openecard.common.AppVersion;
 import org.openecard.common.I18n;
+import org.openecard.common.util.Promise;
 import org.openecard.gui.swing.common.GUIDefaults;
 import org.openecard.gui.swing.common.SwingUtils;
 import org.openecard.richclient.updater.VersionUpdate;
 import org.openecard.richclient.updater.VersionUpdateChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  *
  * @author Sebastian Schuberth
  */
-public class UpdateWindow {
+public class UpdateWindow extends javax.swing.JDialog {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateWindow.class);
 
     private final I18n lang = I18n.getTranslation("update");
     private final VersionUpdateChecker updateChecker;
-    private final Stage stage;
-    private double width;
+    private double width, height;
 
-    public UpdateWindow(VersionUpdateChecker checker, Stage stage) {
+    public UpdateWindow(VersionUpdateChecker checker) {
 	this.updateChecker = checker;
-	this.stage = stage;
     }
 
-    public void init() {
-	VBox sp = new VBox();
-	// get a list of all needed elements for the window and add it to VBox
-	List<Node> nodes = getElements();
-	sp.getChildren().addAll(nodes);
+    public void init() throws RuntimeException {
+	try {
+	    JFXPanel panel = new JFXPanel();
+	    setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45).getImage());
+	    setTitle(lang.translationForKey("tooltip_msg", AppVersion.getName()));
+	    //setResizable(false);
+	    add(panel, BorderLayout.CENTER);
 
-	// set width to table.getPrefWidth() + 20 to avoid scrolling bars (bug with getPrefWidth() ?)	
-	sp.setMaxSize(width+20, VBox.USE_PREF_SIZE);
+	    final Promise done = new Promise();
+	    Platform.runLater(() -> {
+		try {
+		    VBox sp = new VBox();
+		    // get a list of all needed elements for the window and add it to VBox
+		    List<Node> nodes = getElements();
+		    sp.getChildren().addAll(nodes);
 
-	// create new scene and apply the corresponding CSS rules
-	sp.getStyleClass().add("update");
-	Scene scene = new Scene(sp, sp.getMaxWidth(), sp.getMaxHeight());
-	String css = getClass().getResource("/update.css").toExternalForm();
-	scene.getStylesheets().add(css);
+		    // set width to table.getPrefWidth() + 20 to avoid scrolling bars (bug with getPrefWidth() ?)
+		    //sp.setMaxSize(width + 20, VBox.USE_PREF_SIZE);
 
-	stage.getIcons().add(new Image(GUIDefaults.getImageStream("Frame.icon", 45, 45)));
-	stage.setTitle(lang.translationForKey("tooltip_msg", AppVersion.getName()));
-	stage.setScene(scene);
-	stage.setResizable(false);
-	stage.show();
+		    // create new scene and apply the corresponding CSS rules
+		    sp.getStyleClass().add("update");
+		    Scene scene = new Scene(sp, sp.getMaxWidth(), sp.getMaxHeight());
+		    //Scene scene = new Scene(sp, sp.getMaxWidth(), 200);
+		    String css = getClass().getResource("/update.css").toExternalForm();
+		    scene.getStylesheets().add(css);
+
+		    panel.setScene(scene);
+
+		    height = sp.getHeight() + 40;
+		    width = sp.getWidth() + 40;
+
+		    done.deliver(true);
+		} catch (Throwable ex) {
+		    LOG.error("Failed to initialise UpdateWindow.");
+		    done.cancel();
+		}
+	    });
+	    done.deref();
+
+	    // TODO: fix this hack to use the best size reported by the scene
+	    //pack();
+	    setSize((int) width, (int) height);
+	} catch (InterruptedException ex) {
+	    throw new RuntimeException("Failed to initialize update dialog.");
+	}
     }
 
-    public void toFront() {
-	stage.toFront();
+    public void showDialog() {
+	if (! isVisible()) {
+	    // center on screen
+	    Point screenCenter = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+	    screenCenter.translate((int) (-width/2), (int) (-height/2));
+	    setLocation(screenCenter);
+
+	    setVisible(true);
+	}
+
+	toFront();
     }
 
     private List<Node> getElements() {
@@ -187,6 +227,7 @@ public class UpdateWindow {
 	table.setItems(updateList);
 	table.makeTableFitContent();
 	width = table.getPrefWidth();
+	height = table.getPrefHeight();
 
 	// get current app version as String
 	String currentVersion;
@@ -248,7 +289,7 @@ public class UpdateWindow {
 
     private void openLink(String url){
 	SwingUtils.openUrl(URI.create(url), false);
-	stage.close();
+	setVisible(false);
     }
 
 }

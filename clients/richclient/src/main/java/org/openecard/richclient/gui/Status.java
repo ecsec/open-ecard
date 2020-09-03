@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -44,8 +44,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -455,22 +453,13 @@ public class Status implements EventCallback {
 
     private synchronized void openUpdateWindow(VersionUpdateChecker checker) {
 	if (uw == null) {
-	    // no window displayed, start it up	    
-
-	    Platform.runLater(() -> {
-		Stage stage = new Stage();
-		stage.setOnHidden(event -> {
-		    synchronized (this) {
-			uw = null;
-		    }
-		});
-		uw = new UpdateWindow(checker, stage);
-		uw.init();
-	    });
-	} else {
-	    // window is already displayed, just bring it to the front
-	    Platform.runLater(uw::toFront);
+	    // init update window
+	    UpdateWindow uwTmp = new UpdateWindow(checker);
+	    uwTmp.init();
+	    uw = uwTmp;
 	}
+
+	uw.showDialog();
     }
 
 }

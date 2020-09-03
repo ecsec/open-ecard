@@ -144,7 +144,7 @@ public class UpdateWindow {
 
 	if (majUpdate != null) {
 	    String version = majUpdate.getVersion().toString();
-	    String type = "major";
+	    String type = lang.translationForKey("major");
 	    String link = majUpdate.getDownloadLink().toString();
 	    Hyperlink hyperlink = generateHyperLink(link);
 
@@ -158,7 +158,7 @@ public class UpdateWindow {
 
 	if (minUpdate != null) {
 	    String version = minUpdate.getVersion().toString();
-	    String type = "minor";
+	    String type = lang.translationForKey("minor");
 	    String link = minUpdate.getDownloadLink().toString();
 	    Hyperlink hyperlink = generateHyperLink(link);
 
@@ -172,7 +172,7 @@ public class UpdateWindow {
 
 	if (secUpdate != null) {
 	    String version = secUpdate.getVersion().toString();
-	    String type = "security";
+	    String type = lang.translationForKey("patch");
 	    String link = secUpdate.getDownloadLink().toString();
 	    Hyperlink hyperlink = generateHyperLink(link);
 	    updateList.add(new VersionUpdateTableItem(version, type, hyperlink));

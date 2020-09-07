@@ -42,6 +42,7 @@ module org.openecard.richclient {
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
+    requires javafx.swing;
 
     /* EC ciphers for JSSE */
     requires jdk.crypto.ec;

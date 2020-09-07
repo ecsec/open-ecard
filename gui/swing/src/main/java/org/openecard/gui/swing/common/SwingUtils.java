@@ -46,7 +46,7 @@ public class SwingUtils {
 	    }
 
 	    boolean browserOpened = false;
-	    if (Desktop.isDesktopSupported()) {
+	    if (Desktop.isDesktopSupported() && !SysUtils.isUnix()) {
 		if ("file".equals(uri.getScheme()) && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
 		    try {
 			Desktop.getDesktop().open(new File(uri));

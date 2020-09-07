@@ -80,7 +80,7 @@
 		<version.bouncycastle>1.62</version.bouncycastle>
 		<version.jmockit>1.47</version.jmockit>
 		<version.pmd>6.25.0</version.pmd>
-		<version.openjfx>12.0.2</version.openjfx>
+		<version.openjfx>14.0.2.1</version.openjfx>
 		<!-- preset argLine for Netbeans direct test execution -->
 		<argLine />
 

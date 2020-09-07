@@ -42,6 +42,7 @@ module org.openecard.richclient {
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
+    requires javafx.swing;
 
     /* EC ciphers for JSSE */
     requires jdk.crypto.ec;
@@ -67,6 +68,8 @@ module org.openecard.richclient {
 
     opens org.openecard.mdlw.sal.config to java.xml.bind;
     opens org.openecard.addon.manifest to java.xml.bind;
+
+    opens org.openecard.richclient.gui.update;
 
     opens jnasmartcardio to java.base;
 

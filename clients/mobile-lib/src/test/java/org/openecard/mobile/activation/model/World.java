@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import mockit.Expectations;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -257,21 +256,21 @@ public class World implements AutoCloseable {
 	    }
 
 	    mockTcTokenContext = mock(TCTokenContext.class);
-	    new Expectations() {
-		{
-		    try {
-			TCTokenContext.generateTCToken(tcTokenUrl);
-			result = mockTcTokenContext;
-		    } catch (InvalidTCTokenException ex) {
-		    } catch (AuthServerException ex) {
-		    } catch (InvalidRedirectUrlException ex) {
-		    } catch (InvalidTCTokenElement ex) {
-		    } catch (SecurityViolationException ex) {
-		    } catch (UserCancellationException ex) {
-		    } catch (InvalidAddressException ex) {
-		    }
-		}
-	    };
+//	    new Expectations() {
+//		{
+//		    try {
+//			TCTokenContext.generateTCToken(tcTokenUrl);
+//			result = mockTcTokenContext;
+//		    } catch (InvalidTCTokenException ex) {
+//		    } catch (AuthServerException ex) {
+//		    } catch (InvalidRedirectUrlException ex) {
+//		    } catch (InvalidTCTokenElement ex) {
+//		    } catch (SecurityViolationException ex) {
+//		    } catch (UserCancellationException ex) {
+//		    } catch (InvalidAddressException ex) {
+//		    }
+//		}
+//	    };
 
 	    try {
 		when(mockTcTokenContext.getData()).thenReturn(""

@@ -22,17 +22,10 @@
 
 package org.openecard.richclient.updater;
 
-import org.openecard.richclient.updater.VersionUpdate;
-import org.openecard.richclient.updater.VersionUpdateList;
-import org.openecard.richclient.updater.VersionUpdateChecker;
-import org.openecard.richclient.updater.VersionUpdateLoader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import mockit.Expectations;
-import mockit.Mocked;
-import org.openecard.common.AppVersion;
 import org.openecard.common.SemanticVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,16 +44,11 @@ public class TestMockedVersionUpdate {
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
 
-    @Mocked
-    AppVersion appVersion;
-    @Mocked
-    VersionUpdateLoader loader;
 
     @Test(enabled = true)
     public void testNoUpdateAvailable() throws MalformedURLException {
-	expectUpdateInVersions(loader);
-
-	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
+	final VersionUpdateList updateList = createInput();
+	VersionUpdateChecker result = new VersionUpdateChecker(currentVersion, updateList);
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertNull(result.getSecurityUpgrade());
@@ -73,9 +61,8 @@ public class TestMockedVersionUpdate {
     public void testUpdateMajorVersionAvailable() throws MalformedURLException {
 	VersionUpdate nextMajorUpdate = newVersionUpdate(incrementPatch(incrementMajor(currentVersion)));
 
-	expectUpdateInVersions(loader, nextMajorUpdate);
-
-	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
+	final VersionUpdateList updateList = createInput(nextMajorUpdate);
+	VersionUpdateChecker result = new VersionUpdateChecker(currentVersion, updateList);
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertNull(result.getSecurityUpgrade());
@@ -88,9 +75,8 @@ public class TestMockedVersionUpdate {
     public void testUpdateSecurityVersionAvailable() throws MalformedURLException {
 	VersionUpdate nextPatchUpdate = newVersionUpdate(incrementPatch(incrementPatch(currentVersion)));
 
-	expectUpdateInVersions(loader, nextPatchUpdate);
-
-	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
+	final VersionUpdateList updateList = createInput(nextPatchUpdate);
+	VersionUpdateChecker result = new VersionUpdateChecker(currentVersion, updateList);
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertTrue(result.needsUpdate());
@@ -103,39 +89,14 @@ public class TestMockedVersionUpdate {
     public void testUpdateMinorVersionAvailable() throws MalformedURLException {
 	VersionUpdate nextMinorUpdate = newVersionUpdate(incrementPatch(incrementMinor(currentVersion)));
 
-	expectUpdateInVersions(loader, nextMinorUpdate);
-
-	VersionUpdateChecker result = VersionUpdateChecker.loadCurrentVersionList();
+	final VersionUpdateList updateList = createInput(nextMinorUpdate);
+	VersionUpdateChecker result = new VersionUpdateChecker(currentVersion, updateList);
 
 	Assert.assertTrue(result.isCurrentMaintained());
 	Assert.assertNull(result.getSecurityUpgrade());
 	Assert.assertNull(result.getMajorUpgrade());
 	Assert.assertEquals(nextMinorUpdate, result.getMinorUpgrade());
 	Assert.assertTrue(result.needsUpdate());
-    }
-    private void expectUpdateInVersions(final VersionUpdateLoader loader) {
-	final VersionUpdateList updateList = createInput();
-
-	expectUpdateInVersions(loader, updateList);
-    }
-
-    private void expectUpdateInVersions(final VersionUpdateLoader loader, VersionUpdate nextMajorUpdate) {
-	final VersionUpdateList updateList = createInput(nextMajorUpdate);
-
-	expectUpdateInVersions(loader, updateList);
-    }
-
-    private void expectUpdateInVersions(final VersionUpdateLoader loader, final VersionUpdateList updateList) {
-	new Expectations() {
-	    {
-		VersionUpdateLoader.createWithDefaults();
-		result = loader;
-		loader.loadVersionUpdateList();
-		result = updateList;
-		AppVersion.getVersion();
-		result = currentVersion;
-	    }
-	};
     }
 
     private SemanticVersion incrementMajor(SemanticVersion currentVersion) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -82,15 +82,21 @@ public class SignatureVerifier {
 
     private final KeyStore trustStore;
     private final byte[] challenge;
+    private boolean isRevocationCheck;
 
     public SignatureVerifier(@Nonnull KeyStore trustStore, @Nonnull byte[] challenge) {
 	this.trustStore = trustStore;
 	this.challenge = challenge;
+	this.isRevocationCheck = ChipGatewayProperties.isRevocationCheck();
     }
 
     public SignatureVerifier(@Nonnull byte[] challenge) throws IOException, KeyStoreException,
 	    NoSuchAlgorithmException, CertificateException {
 	this(new CGTrustStoreLoader().getTrustStore(), challenge);
+    }
+
+    void setIsRevocationCheck(boolean isRevocationCheck) {
+	this.isRevocationCheck = isRevocationCheck;
     }
 
     public void validate(@Nonnull byte[] signature) throws KeyStoreException, SignatureInvalid {

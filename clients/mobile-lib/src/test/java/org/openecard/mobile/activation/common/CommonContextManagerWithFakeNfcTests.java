@@ -191,7 +191,7 @@ public class CommonContextManagerWithFakeNfcTests {
 		if (args.length == 0) {
 		    time = EVENT_DELAY;
 		} else {
-		    time = Math.min(EVENT_DELAY, invocation.getArgument(0, Long.class));
+		    time = Math.min(EVENT_DELAY, invocation.getArgument(0));
 		}
 		Thread.sleep(time);
 

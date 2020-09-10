@@ -77,7 +77,7 @@
 		<!--maven.compiler.release>11</maven.compiler.release-->
 
 		<version.bouncycastle>1.62</version.bouncycastle>
-		<version.jmockit>1.47</version.jmockit>
+		<powermock.version>2.0.7</powermock.version>
 		<version.pmd>6.17.0</version.pmd>
 		<version.openjfx>12.0.2</version.openjfx>
 		<version.roboface>1.0.2</version.roboface>
@@ -477,18 +477,8 @@
 							<artifactId>surefire-testng</artifactId>
 							<version>3.0.0-M3</version>
 						</dependency>
-						<dependency>
-							<groupId>org.jmockit</groupId>
-							<artifactId>jmockit</artifactId>
-							<version>${version.jmockit}</version>
-						</dependency>
 					</dependencies>
 					<configuration>
-						<!-- https://stackoverflow.com/questions/53437819/maven-surefire-and-jdk-11 -->
-						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
-						<systemPropertyVariables>
-							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
-						</systemPropertyVariables>
 						<trimStackTrace>false</trimStackTrace>
 						<excludedGroups>.*</excludedGroups>
 					</configuration>
@@ -503,17 +493,8 @@
 							<artifactId>surefire-testng</artifactId>
 							<version>3.0.0-M3</version>
 						</dependency>
-						<dependency>
-							<groupId>org.jmockit</groupId>
-							<artifactId>jmockit</artifactId>
-							<version>${version.jmockit}</version>
-						</dependency>
 					</dependencies>
 					<configuration>
-						<argLine>@{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar</argLine>
-						<systemPropertyVariables>
-							<coverage-output>none</coverage-output> <!-- disable jmockit coverage -->
-						</systemPropertyVariables>
 						<trimStackTrace>false</trimStackTrace>
 						<includes>
 							<includes>**/*.java</includes>
@@ -848,17 +829,6 @@
 
 			<!-- testing -->
 			<dependency>
-				<groupId>org.jmockit</groupId>
-				<artifactId>jmockit</artifactId>
-				<version>${version.jmockit}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>jsr305</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>6.14.3</version>
@@ -878,12 +848,24 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>2.28.2</version>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-module-testng</artifactId>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito2</artifactId>
+				<version>${powermock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!--dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>3.5.7</version>
+			</dependency-->
 
 			<!-- other third party libs -->
 			<dependency>

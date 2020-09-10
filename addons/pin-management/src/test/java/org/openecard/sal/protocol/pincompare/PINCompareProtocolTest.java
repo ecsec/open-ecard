@@ -50,7 +50,7 @@ import java.math.BigInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import mockit.Mocked;
+import org.mockito.Mockito;
 import org.openecard.addon.AddonManager;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
@@ -87,11 +87,10 @@ public class PINCompareProtocolTest {
     byte[] appIdentifier_ROOT = StringUtils.toByteArray("D2760001448000");
     byte[] appIdentifier_ESIGN = StringUtils.toByteArray("A000000167455349474E");
 
-    @Mocked
-    private UserConsent uc;
-
     @BeforeMethod
     public void setUp() throws Exception {
+	UserConsent uc = Mockito.mock(UserConsent.class);
+
 	env = new ClientEnv();
 	Dispatcher d = new MessageDispatcher(env);
 	env.setDispatcher(d);

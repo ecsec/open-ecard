@@ -27,11 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import mockit.Expectations;
-import mockit.Mocked;
 import org.jose4j.json.internal.json_simple.JSONObject;
-import org.openecard.common.AppVersion;
-import org.openecard.common.OpenecardProperties;
 import org.openecard.common.SemanticVersion;
 import org.openecard.common.util.InvalidUpdateDefinition;
 import org.openecard.richclient.updater.VersionUpdate.Status;
@@ -52,11 +48,6 @@ public class TestRealVersionUpdate {
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
 
-    @Mocked
-    AppVersion appVersion;
-    @Mocked
-    OpenecardProperties props;
-
     @Test(enabled = true)
     public void foo() {
 	Assert.assertTrue(true);
@@ -64,39 +55,11 @@ public class TestRealVersionUpdate {
 
     @Test(enabled = true)
     public void validDefaultCreationOfVersionUpdateLoader() throws MalformedURLException {
-	final String updateListUrl = url;
+	final URL updateListUrl = new URL(url);
 	final String sysPkg = "deb";
 
-	new Expectations(VersionUpdateLoader.class) {
-	    {
-		OpenecardProperties.getProperty("update-list.location");
-		result = updateListUrl;
-		VersionUpdateLoader.getPkgType();
-		result = sysPkg;
-	    }
-	};
-
-	VersionUpdateLoader result = VersionUpdateLoader.createWithDefaults();
+	VersionUpdateLoader result = new VersionUpdateLoader(updateListUrl, sysPkg);
 	Assert.assertNotNull(result);
-    }
-
-    @Test(enabled = false)
-    public void defaultCreationOfVersionUpdateLoaderWithBadURL() throws MalformedURLException {
-	final String updateListUrl = "test";
-
-	new Expectations(VersionUpdateLoader.class) {
-	    {
-		OpenecardProperties.getProperty("update-list.location");
-		result = updateListUrl;
-	    }
-	};
-
-	try {
-	    VersionUpdateLoader result = VersionUpdateLoader.createWithDefaults();
-	    Assert.fail();
-	} catch (IllegalArgumentException ex) {
-	    Assert.assertEquals(ex.getMessage(), "Update URL value is not a valid URL.");
-	}
     }
 
     @Test(enabled = true)

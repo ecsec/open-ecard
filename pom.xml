@@ -459,11 +459,9 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.3</version>
 					<configuration>
-						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<tagNameFormat>@{project.version}</tagNameFormat>
 						<localCheckout>true</localCheckout>
 						<goals>deploy</goals>
-						<releaseProfiles>submodule-update</releaseProfiles>
 					</configuration>
 				</plugin>
 

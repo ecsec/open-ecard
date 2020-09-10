@@ -67,7 +67,7 @@ import org.testng.annotations.Test;
 public class SignatureTest {
 
     private final String pass = "1";
-    private final String caSignedAlias = "cms sign cert (cms intermediate ca)";
+    private final String caSignedAlias = "cms sign cert (cg test intermediate ca)";
     private final String selfSignedAlias = "self signed";
 
     private KeyStore trustStore;
@@ -85,7 +85,7 @@ public class SignatureTest {
 	signStore.load(signStoreStream, pass.toCharArray());
     }
 
-    private CMSSignedData createSignature(String alias, byte[] challenge) throws KeyStoreException, NoSuchAlgorithmException,
+    private CMSSignedData createSignature(String sigAlg, String alias, byte[] challenge) throws KeyStoreException, NoSuchAlgorithmException,
 	    UnrecoverableKeyException, InvalidKeyException, SignatureException, OperatorCreationException,
 	    CertificateEncodingException, CMSException {
 	PrivateKey privKey = (PrivateKey) signStore.getKey(alias, pass.toCharArray());
@@ -100,7 +100,7 @@ public class SignatureTest {
 
 	CMSTypedData msg = new CMSProcessableByteArray(challenge);
 	CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-	ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(privKey);
+	ContentSigner signer = new JcaContentSignerBuilder(sigAlg).build(privKey);
 	DigestCalculatorProvider dgProv = new JcaDigestCalculatorProviderBuilder().build();
         gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(dgProv).build(signer, cert));
         gen.addCertificates(certs);
@@ -114,7 +114,7 @@ public class SignatureTest {
 	    CMSException, IOException, CertificateException {
 	byte[] challenge = "Hello World!".getBytes(StandardCharsets.UTF_8);
 
-	CMSSignedData sigData = createSignature(caSignedAlias, challenge);
+	CMSSignedData sigData = createSignature("SHA256withECDSA", caSignedAlias, challenge);
 	byte[] sigBytes = sigData.getEncoded();
 
 	SignatureVerifier validator = new SignatureVerifier(trustStore, challenge);
@@ -131,7 +131,7 @@ public class SignatureTest {
 	    CMSException, IOException, CertificateException {
 	byte[] challenge = "Hello World!".getBytes(StandardCharsets.UTF_8);
 
-	CMSSignedData sigData = createSignature(caSignedAlias, challenge);
+	CMSSignedData sigData = createSignature("SHA256withECDSA", caSignedAlias, challenge);
 	byte[] sigBytes = sigData.getEncoded();
 
 	challenge[0] = 1; // flip a bit in the challenge and see if it still verifies
@@ -149,7 +149,7 @@ public class SignatureTest {
 	    CMSException, IOException, CertificateException, CMSSignerDigestMismatchException, InvalidAlgorithmParameterException {
 	byte[] challenge = "Hello World!".getBytes(StandardCharsets.UTF_8);
 
-	CMSSignedData sigData = createSignature(selfSignedAlias, challenge);
+	CMSSignedData sigData = createSignature("SHA256withRSA", selfSignedAlias, challenge);
 	byte[] sigBytes = sigData.getEncoded();
 
 	SignatureVerifier validator = new SignatureVerifier(trustStore, challenge);

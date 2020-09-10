@@ -1,0 +1,2 @@
+# Allowed X500 subjects for the application signing certificates, one per line
+CN=ChipGateway Server Development,O=ecsec GmbH,L=Michelau,C=DE

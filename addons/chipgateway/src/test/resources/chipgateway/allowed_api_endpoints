@@ -1,0 +1,2 @@
+# Allowed X500 subjects for the TLS server certificates, one per line
+CN=cg.openecard.org,O=ecsec GmbH,L=Michelau,C=DE

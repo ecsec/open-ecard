@@ -58,7 +58,6 @@ import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.CHATStep;
 import org.openecard.sal.protocol.eac.gui.CVCStep;
-import org.openecard.sal.protocol.eac.gui.EacPinStatus;
 import org.openecard.sal.protocol.eac.gui.ErrorStep;
 import org.openecard.sal.protocol.eac.gui.PINStep;
 import org.openecard.sal.protocol.eac.gui.PinState;
@@ -421,8 +420,6 @@ public final class EacNavigator extends MobileNavigator {
     private void pauseExecution(DynamicContext context) {
 	if (context != null) {
 	    context.put(TR03112Keys.CONNECTION_HANDLE, context.get(TR03112Keys.SESSION_CON_HANDLE));
-	    PinState status = (PinState) context.get(EACProtocol.PIN_STATUS);
-	    status.update(EacPinStatus.UNKNOWN);
 	}
 	this.pauseExecution();
     }

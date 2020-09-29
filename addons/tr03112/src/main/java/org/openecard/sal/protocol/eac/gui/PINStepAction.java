@@ -84,12 +84,10 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	    conHandle = ph.connectCardIfNeeded();
 	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
-	    if (pinState.isUnknown()) {
-		EacPinStatus currentState;
-		currentState = ph.getPinStatus();
+	    EacPinStatus currentState;
+	    currentState = ph.getPinStatus();
 
-		pinState.update(currentState);
-	    }
+	    pinState.update(currentState);
 	} catch (WSException ex) {
 	    if (SysUtils.isMobileDevice() &&
 		    WSHelper.minorIsOneOf(ex,

@@ -8,8 +8,9 @@ which arbitrary applications can utilize authentication and signatures with
 arbitrary chip cards.
 
 The artifacts of the project consist of modularized, and to some extent
-extensible, libraries as well as client implementations such as a Desktop
-application (richclient), an Android app and a Java Applet.
+extensible, libraries for usage in desktop, Android and iOS applications, 
+as well as client implementations such as a Desktop
+application (richclient) and a Java Applet.
 
 
 Build Instructions
@@ -63,6 +64,30 @@ You have to make sure the required packaging tools are installed. In case of Win
  - [Inno Setup](http://www.jrsoftware.org/isinfo.php) - to create exe installers (Path environment variable must be set)
 
 More information about the required JDK versions and the setup of the toolchain, can be found in the INSTALL.md file.
+
+Mobile libs
+-----------
+
+Open eCard supports building of libraries for Android and iOS for usage in arbitrary mobile apps. 
+
+### Android
+After a successfull build the library for android can be found in `android-lib` sub project. 
+It also can be used as prebuild dependency via gradle dependency management. 
+See [open-ecard-android](https://github.com/ecsec/open-ecard-android) for further information.
+
+### iOS (>2.x)
+If building on MacOS a ready to use framework gets generated and can be found in 
+`./packager/ios-framework/target/robovm`.  
+The framework can also be found as asset of the release.
+
+It also can be installed as a cocoapod dependency.
+```
+pod 'open-ecard'
+```
+See [open-ecard-ios](https://github.com/ecsec/open-ecard-ios) for further information.
+
+
+
 
 License
 =======

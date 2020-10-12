@@ -23,7 +23,7 @@ copyright = '2020, ecsec GmbH'
 author = 'Tobias Wich, Florian Otto'
 
 # The full version, including alpha/beta/rc tags
-pom = ET.parse('../pom.xml')
+pom = ET.parse('./src/pom.xml')
 pomVersion = pom.find('./pom:version', {'pom': 'http://maven.apache.org/POM/4.0.0'}).text
 release = pomVersion
 

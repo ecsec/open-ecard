@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   sphinx:
-    image: public.docker.ecsec.de/ecsec/tools/sphinx:1.0
+    image: public.docker.ecsec.de/ecsec/tools/sphinx:1.1
     volumes:
     - .:/docs
-    - ..:/docs/src
+    - ..:/src

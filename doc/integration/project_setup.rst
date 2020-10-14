@@ -35,8 +35,8 @@ Schema validation of the processed eCard API Messages is done with the Xerces XM
   
   implementation 'xerces:xercesImpl:2.12.0'
 
-Logging is performed with the SLF4J API [SLF4J]_.
-In order to actually emit log messages, an implementation of the API such as Logback [LOGBACK]_ or a wrapper for another logging system can be provided in the application.
+Logging is performed with the `SLF4J API <https://www.slf4j.org/>`_.
+In order to actually emit log messages, an implementation of the API such as `Logback <https://logback.qos.ch/>`_ or a wrapper for another logging system can be provided in the application.
 Details can be found in the SLF4J or Logback documentation.
 SLF4J must be added as a dependency, as it is not packed into the aar in order to not raise conflicts in case it is already used in the app.
 Logback is optional in case no logging of the Open eCard Framework is needed:

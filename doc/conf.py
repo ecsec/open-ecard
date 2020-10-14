@@ -49,6 +49,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 numfig = True
 
+# variable substitution in sphinx_substitution_extensions
+rst_prolog = """
+.. |release| replace:: {release}
+""".format(release=release)
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -63,7 +68,12 @@ html_static_path = ['_static']
 
 html_use_index = False
 
-# variable substitution in sphinx_substitution_extensions
-rst_prolog = """
-.. |release| replace:: {release}
-""".format(release=release)
+
+# -- Options for LaTeX output -------------------------------------------------
+
+latex_logo = 'oec-logo.png'
+latex_show_urls = 'footnote'
+
+latex_elements = {
+    'extrapackages': r'\usepackage{pdflscape}',
+}

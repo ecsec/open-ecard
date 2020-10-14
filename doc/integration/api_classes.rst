@@ -1,11 +1,20 @@
 API Classes
 ===========
 
+.. raw:: latex
+
+   \begin{landscape}
+   
 .. _fig_api_classes:
 .. figure:: img/api_classes.*
 	   :width: 100%
 
 	   API Classes
+
+.. raw:: latex
+
+   \end{landscape}
+
 
 :numref:`fig_api_classes` shows a complete overview of the defined interfaces and data objects, which are used within a Custom App.
 

@@ -8,16 +8,14 @@ The Open eCard Framework for iOS is delivered as a Swift and ObjC compatible fra
 The framework must then be "embedded and signed" during the build phase of XCode.
 
 
-As an alternative the framework is also available as cocoapod_ named open-ecard.
+As an alternative the framework is also available via `CocoaPods <https://cocoapods.org/>`_.
 Within the Podfile the following has to be specified: 
 
-.. _cocoapod: https://cocoapods.org/
-
-.. code-block:: 
+.. code-block::
 
    use_frameworks!
    pod 'open-ecard', '>= 2.1.1'
-   
+
 
 Since the framework uses NFC technology, within "Capabilities and Signing" the "Near field communication" capability has to be activated.
 

@@ -20,7 +20,7 @@ done
 
 # replace docker with podman if possible
 DOCKER="docker"
-if [ -f $(which podman) ]; then
+if [ -f "$(which podman)" ]; then
     DOCKER="podman"
 fi
 

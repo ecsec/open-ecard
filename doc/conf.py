@@ -76,4 +76,5 @@ latex_show_urls = 'footnote'
 
 latex_elements = {
     'extrapackages': r'\usepackage{pdflscape}',
+    'papersize': r'a4paper',
 }

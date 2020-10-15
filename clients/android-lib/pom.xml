@@ -72,6 +72,12 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>android-common</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>

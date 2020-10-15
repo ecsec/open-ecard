@@ -12,9 +12,10 @@ As an alternative the framework is also available via `CocoaPods <https://cocoap
 Within the Podfile the following has to be specified: 
 
 .. code-block::
+   :substitutions:
 
    use_frameworks!
-   pod 'open-ecard', '>= 2.1.1'
+   pod 'open-ecard', '~> |releaseMinor|'
 
 
 Since the framework uses NFC technology, within "Capabilities and Signing" the "Near field communication" capability has to be activated.

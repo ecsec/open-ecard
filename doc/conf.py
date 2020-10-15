@@ -12,6 +12,7 @@
 #
 # import os
 # import sys
+import re
 import xml.etree.ElementTree as ET
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -27,6 +28,8 @@ pom = ET.parse('../src/pom.xml')
 pomVersion = pom.find('./pom:version', {'pom': 'http://maven.apache.org/POM/4.0.0'}).text
 version = pomVersion
 release = pomVersion
+
+releaseMinor = re.match('^([1-9][0-9]*\.[1-9][0-9]*)\.[1-9][0-9]*.*', pomVersion).group(1)
 
 
 # -- General configuration ---------------------------------------------------
@@ -52,7 +55,8 @@ numfig = True
 # variable substitution in sphinx_substitution_extensions
 rst_prolog = """
 .. |release| replace:: {release}
-""".format(release=release)
+.. |releaseMinor| replace:: {releaseMinor}
+""".format(release=release, releaseMinor=releaseMinor)
 
 # -- Options for HTML output -------------------------------------------------
 

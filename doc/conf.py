@@ -20,7 +20,7 @@ import xml.etree.ElementTree as ET
 
 project = 'Open eCard'
 copyright = '2020, ecsec GmbH'
-author = 'Tobias Wich, Florian Otto'
+author = 'ecsec gmbH'
 
 # The full version, including alpha/beta/rc tags
 pom = ET.parse('../src/pom.xml')

@@ -891,6 +891,14 @@
 				<artifactId>bcpkix-jdk15on</artifactId>
 				<version>${version.bouncycastle}</version>
 			</dependency>
+
+			<!-- JNA SmartcardIO -->
+			<dependency>
+				<groupId>io.github.jnasmartcardio</groupId>
+				<artifactId>jnasmartcardio</artifactId>
+				<version>0.2.7</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

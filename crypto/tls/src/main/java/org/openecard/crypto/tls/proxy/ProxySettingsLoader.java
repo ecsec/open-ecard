@@ -55,7 +55,14 @@ public class ProxySettingsLoader {
 
     static {
 	com.github.markusbernhardt.proxy.util.Logger l = new com.github.markusbernhardt.proxy.util.Logger();
-	com.github.markusbernhardt.proxy.util.Logger.setBackend(l.new Slf4jLogBackEnd());
+	com.github.markusbernhardt.proxy.util.Logger.setBackend(l.new Slf4jLogBackEnd() {
+	    @Override
+	    public void log(Class<?> clazz, com.github.markusbernhardt.proxy.util.Logger.LogLevel loglevel, String msg, Object... params) {
+		// rewrite {0}, {1}, ... textmarkers to use the SLF4J syntax without numbers
+		msg = msg.replaceAll("\\{[0-9]+\\}", "{}");
+		super.log(clazz, loglevel, msg, params);
+	    }
+	});
     }
 
     /**

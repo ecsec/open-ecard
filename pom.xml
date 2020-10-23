@@ -933,6 +933,14 @@
 				<version>4.0.2</version>
 				<scope>test</scope>
 			</dependency>
+
+			<!-- JNA SmartcardIO -->
+			<dependency>
+				<groupId>io.github.jnasmartcardio</groupId>
+				<artifactId>jnasmartcardio</artifactId>
+				<version>0.2.7</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

@@ -81,18 +81,14 @@ import java.security.cert.X509Certificate;
 import javax.crypto.Cipher;
 import javax.xml.parsers.ParserConfigurationException;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.addon.AddonManager;
 import org.openecard.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
-import org.openecard.common.event.EventType;
-import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.StringUtils;
-import org.openecard.gui.UserConsent;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
@@ -145,7 +141,8 @@ public class GenericCryptographyProtocolTest {
 	Dispatcher d = new MessageDispatcher(env);
 	env.setDispatcher(d);
 	ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setEnvironment(env);
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	env.setIFD(ifd);
 
 	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());

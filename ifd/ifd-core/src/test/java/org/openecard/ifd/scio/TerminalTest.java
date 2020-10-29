@@ -32,6 +32,7 @@ import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.math.BigInteger;
+import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
 import org.openecard.gui.swing.SwingDialogWrapper;
 import org.openecard.gui.swing.SwingUserConsent;
@@ -53,7 +54,12 @@ public class TerminalTest {
 
 
     public void init() {
+	ClientEnv env = new ClientEnv();
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+
 	ifd = new IFD();
+	ifd.setEnvironment(env);
+
 	EstablishContext eCtx = new EstablishContext();
 	ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 
@@ -99,7 +105,6 @@ public class TerminalTest {
     @Test(enabled=false)
     public void testFeatures() {
 	init();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 
 	Connect con = new Connect();
 	con.setContextHandle(ctxHandle);

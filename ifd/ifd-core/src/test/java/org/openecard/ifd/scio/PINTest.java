@@ -55,6 +55,7 @@ import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 import static iso.std.iso_iec._24727.tech.schema.PasswordTypeType.*;
 import java.util.Locale;
+import org.openecard.common.ClientEnv;
 import static org.testng.Assert.*;
 
 
@@ -166,7 +167,9 @@ public class PINTest {
     @Test(enabled=false)
     public void testModifyPin() throws IFDException, WSMarshallerException, SAXException {
 	IFD ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ClientEnv env = new ClientEnv();
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setEnvironment(env);
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 
@@ -216,7 +219,9 @@ public class PINTest {
     @Test(enabled=false)
     public void verifyeGK() {
 	IFD ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ClientEnv env = new ClientEnv();
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setEnvironment(env);
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 
@@ -247,7 +252,9 @@ public class PINTest {
     @Test(enabled=false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	IFD ifd = new IFD();
-	ifd.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ClientEnv env = new ClientEnv();
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
+	ifd.setEnvironment(env);
 	EstablishContext eCtx = new EstablishContext();
 	byte[] ctxHandle = ifd.establishContext(eCtx).getContextHandle();
 

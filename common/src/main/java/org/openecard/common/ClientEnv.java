@@ -36,6 +36,7 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.interfaces.SalSelector;
+import org.openecard.gui.UserConsent;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -47,6 +48,7 @@ import org.openecard.ws.SAL;
  */
 public class ClientEnv implements Environment {
 
+    private UserConsent gui;
     private IFD ifd;
     private final LinkedHashSet<byte[]> ifdCtx;
     private SAL sal;
@@ -63,6 +65,16 @@ public class ClientEnv implements Environment {
 	ifdCtx = new LinkedHashSet<>();
     }
 
+
+    @Override
+    public void setGUI(UserConsent gui) {
+	this.gui = gui;
+    }
+
+    @Override
+    public UserConsent getGUI() {
+	return this.gui;
+    }
 
     @Override
     public void setIFD(IFD ifd) {

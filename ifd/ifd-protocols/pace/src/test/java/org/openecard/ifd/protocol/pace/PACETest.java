@@ -56,11 +56,10 @@ public class PACETest {
     @Test(enabled = false)
     public void executePACE_PIN() throws UnsupportedDataTypeException, JAXBException, SAXException, WSMarshallerException {
 	ClientEnv env = new ClientEnv();
+	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
 	MessageDispatcher dispatcher = new MessageDispatcher(env);
 	IFD ifd = new IFD();
-
-	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-	ifd.setGUI(gui);
+	ifd.setEnvironment(env);
 
 	env.setIFD(ifd);
 	env.setDispatcher(dispatcher);

@@ -111,7 +111,6 @@ import org.openecard.common.interfaces.Publish;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.HandlerBuilder;
 import org.openecard.common.util.ValueGenerators;
-import org.openecard.gui.UserConsent;
 import org.openecard.ifd.event.IfdEventManager;
 import org.openecard.ifd.scio.reader.EstablishPACERequest;
 import org.openecard.ifd.scio.reader.EstablishPACEResponse;
@@ -143,7 +142,6 @@ public class IFD implements org.openecard.ws.IFD {
     private ChannelManager cm;
 
     private Environment env;
-    private UserConsent gui = null;
 
     private final ProtocolFactories protocolFactories = new ProtocolFactories();
     private IfdEventManager evManager;
@@ -168,10 +166,6 @@ public class IFD implements org.openecard.ws.IFD {
 
     public void setEnvironment(Environment env) {
 	this.env = env;
-    }
-
-    public void setGUI(UserConsent gui) {
-	this.gui = gui;
     }
 
     public boolean addProtocol(String proto, ProtocolFactory factory) {
@@ -1099,7 +1093,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    }
 
 	    SingleThreadChannel channel = cm.getSlaveChannel(parameters.getSlotHandle());
-	    AbstractTerminal aTerm = new AbstractTerminal(this, cm, channel, gui, ctxHandle, parameters.getDisplayIndex());
+	    AbstractTerminal aTerm = new AbstractTerminal(this, cm, channel, env.getGUI(), ctxHandle, parameters.getDisplayIndex());
 	    try {
 		response = aTerm.verifyUser(parameters);
 		return response;
@@ -1204,7 +1198,7 @@ public class IFD implements org.openecard.ws.IFD {
 	    if (this.protocolFactories.contains(protocol)) {
 		ProtocolFactory factory = this.protocolFactories.get(protocol);
 		Protocol protoImpl = factory.createInstance();
-		EstablishChannelResponse response = protoImpl.establish(parameters, env.getDispatcher(), this.gui);
+		EstablishChannelResponse response = protoImpl.establish(parameters, env.getDispatcher(), env.getGUI());
 		// register protocol instance for secure messaging when protocol was processed successful
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.OK)) {
 		    channel.addSecureMessaging(protoImpl);

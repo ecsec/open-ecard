@@ -20,11 +20,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>gui-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>wsdef-client</artifactId>
 			<version>${project.version}</version>

@@ -16,8 +16,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openecard.gui</groupId>
-			<artifactId>gui-common</artifactId>
+			<groupId>org.openecard</groupId>
+			<artifactId>common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

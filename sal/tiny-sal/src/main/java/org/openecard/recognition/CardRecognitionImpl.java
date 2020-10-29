@@ -106,7 +106,6 @@ public class CardRecognitionImpl implements CardRecognition {
     private final Properties cardImagesMap = new Properties();
 
     private final Environment env;
-    private UserConsent gui;
 
     /**
      * Create recognizer with tree from local (file based) repository.
@@ -208,10 +207,6 @@ public class CardRecognitionImpl implements CardRecognition {
 	}
 
 	return oids;
-    }
-
-    public void setGUI(UserConsent gui) {
-	this.gui = gui;
     }
 
     private RecognitionTree getTree() {
@@ -498,8 +493,8 @@ public class CardRecognitionImpl implements CardRecognition {
 		    long waitInSeconds = fibonacci(i);
 		    i++;
 		    LOG.debug("Could not get exclusive card access. Trying again in {} seconds.", waitInSeconds);
-		    if (i == 6 && gui != null) {
-			MessageDialog dialog = gui.obtainMessageDialog();
+		    if (i == 6 && env.getGUI() != null) {
+			MessageDialog dialog = env.getGUI().obtainMessageDialog();
 			String message = LANG.translationForKey("message", AppVersion.getName(), ifdName);
 			String title = LANG.translationForKey("error", ifdName);
 			dialog.showMessageDialog(message, title, DialogType.WARNING_MESSAGE);

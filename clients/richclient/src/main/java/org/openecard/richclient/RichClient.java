@@ -158,6 +158,8 @@ public final class RichClient {
 	    // Set up client environment
 	    env = new ClientEnv();
 
+	    env.setGUI(gui);
+
 	    // Set up the Dispatcher
 	    MessageDispatcher dispatcher = new MessageDispatcher(env);
 	    env.setDispatcher(dispatcher);
@@ -179,13 +181,11 @@ public final class RichClient {
 
 	    // Set up CardRecognitionImpl
 	    recognition = new CardRecognitionImpl(env);
-	    recognition.setGUI(gui);
 	    env.setRecognition(recognition);
 
 	    // Set up the IFD
 	    ifd = new IFD();
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	    ifd.setGUI(gui);
 	    ifd.setEnvironment(env);
 	    env.setIFD(ifd);
 
@@ -195,8 +195,6 @@ public final class RichClient {
 
 	    // Set up SAL
 	    TinySAL mainSal = new TinySAL(env);
-	    mainSal.setGUI(gui);
-
 	    sal = mainSal;
 	    env.setSAL(sal);
 
@@ -213,7 +211,7 @@ public final class RichClient {
 	    // Start up control interface
 	    SettingsAndDefaultViewWrapper guiWrapper = new SettingsAndDefaultViewWrapper();
 	    try {
-		manager = new AddonManager(env, gui, guiWrapper, mainSal.getSalStateView());
+		manager = new AddonManager(env, guiWrapper, mainSal.getSalStateView());
 		guiWrapper.setAddonManager(manager);
 		mainSal.setAddonManager(manager);
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 HS Coburg.
+ * Copyright (C) 2012-2020 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -179,6 +179,7 @@ import org.openecard.common.apdu.WriteRecord;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.common.TrailerConstants;
+import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
@@ -459,25 +460,9 @@ public class TinySAL implements SAL {
 	    WSHelper.checkResult(connectResponse);
 
 	    // Select the card application
-	    CardCommandAPDU select;
 	    final byte[] slotHandle = connectResponse.getSlotHandle();
 	    // TODO: proper determination of path, file and app id
-	    if (applicationID.length == 2) {
-		select = new Select.File(applicationID);
-		List<byte[]> responses = new ArrayList<>();
-		responses.add(TrailerConstants.Success.OK());
-		responses.add(TrailerConstants.Error.WRONG_P1_P2());
-		CardResponseAPDU resp = select.transmit(env.getDispatcher(), slotHandle, responses);
-
-		if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
-		    select = new Select.AbsolutePath(applicationID);
-		    select.transmit(env.getDispatcher(), slotHandle);
-		}
-
-	    } else {
-		select = new Select.Application(applicationID);
-		select.transmit(env.getDispatcher(), slotHandle);
-	    }
+	    selectApplication(slotHandle, applicationID);
 
 	    ConnectedCardEntry connectedCardEntry = stateEntry.setConnectedCard(slotHandle, applicationID, baseCardStateEntry);
 
@@ -520,24 +505,7 @@ public class TinySAL implements SAL {
 	    byte[] curApplicationID = cardStateEntry.getCurrentCardApplication().getApplicationIdentifier();
 	    if (! ByteUtils.compare(reqApplicationID, curApplicationID)) {
 		// Select the card application
-		CardCommandAPDU select;
-		// TODO: proper determination of path, file and app id
-		if (reqApplicationID.length == 2) {
-		    select = new Select.File(reqApplicationID);
-		    List<byte[]> responses = new ArrayList<>();
-		    responses.add(TrailerConstants.Success.OK());
-		    responses.add(TrailerConstants.Error.WRONG_P1_P2());
-		    CardResponseAPDU resp = select.transmit(env.getDispatcher(), slotHandle, responses);
-
-		    if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
-			select = new Select.AbsolutePath(reqApplicationID);
-			select.transmit(env.getDispatcher(), slotHandle);
-		    }
-
-		} else {
-		    select = new Select.Application(reqApplicationID);
-		    select.transmit(env.getDispatcher(), slotHandle);
-		}
+		selectApplication(slotHandle, reqApplicationID);
 
 		cardStateEntry.setCurrentCardApplication(reqApplicationID);
 		// reset the ef FCP
@@ -551,6 +519,28 @@ public class TinySAL implements SAL {
 
 	return response;
     }
+
+    public void selectApplication(byte[] slotHandle, byte[] reqApplicationID) throws APDUException {
+	CardCommandAPDU select;
+	// TODO: proper determination of path, file and app id
+	if (reqApplicationID.length == 2) {
+	    select = new Select.File(reqApplicationID);
+	    List<byte[]> responses = new ArrayList<>();
+	    responses.add(TrailerConstants.Success.OK());
+	    responses.add(TrailerConstants.Error.WRONG_P1_P2());
+	    CardResponseAPDU resp = select.transmit(env.getDispatcher(), slotHandle, responses);
+
+	    if (Arrays.equals(resp.getTrailer(), TrailerConstants.Error.WRONG_P1_P2())) {
+		select = new Select.AbsolutePath(reqApplicationID);
+		select.transmit(env.getDispatcher(), slotHandle);
+	    }
+
+	} else {
+	    select = new Select.Application(reqApplicationID);
+	    select.transmit(env.getDispatcher(), slotHandle);
+	}
+    }
+
 
     /**
      * The CardApplicationDisconnect function terminates the connection to a card application.

@@ -20,6 +20,13 @@ Within the Podfile the following has to be specified:
 
 Since the framework uses NFC technology, within "Capabilities and Signing" the "Near field communication" capability has to be activated.
 
+As described in the `Apple Developer documentation <https://developer.apple.com/documentation/corenfc/nfciso7816tag>`_
+the app must include the following to be able to detect and communicate with ISO7816 tags:
+ - The Near Field Communication Tag Reader Session Formats Entitlement
+ - A list of supported application identifiers 
+
+Examples can be found in the `reference implementation for ios <https://github.com/ecsec/open-ecard-ios>`_.
+
 The corresponding protocol definitions of the API described in this document can be found within the bundle in the "Headers" folder.
 
 Android

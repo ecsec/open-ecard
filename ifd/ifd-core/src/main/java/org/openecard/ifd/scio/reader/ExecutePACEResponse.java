@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,6 +27,7 @@ import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardCommandStatus;
+import org.openecard.common.ifd.PacePinStatus;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.IntegerUtils;
 import org.slf4j.Logger;
@@ -88,21 +89,21 @@ public class ExecutePACEResponse {
 			case 0xF002: return WSHelper.makeResultUnknownError("MSE Set AT: " + msg);
 			case 0xF003: return WSHelper.makeResultUnknownError("General Authenticat Step 1-4: " + msg);
 		    }
-		} else if ((result & 0xFFFC0000) == 0xf0040000) {
-		    // codes for wrong PIN
-                    switch (ByteUtils.toInteger(sw))  {
-			case 0x6300: return WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, msg);
-                        case 0x63C0: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
-                        case 0x63C1: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, msg);
-                        case 0x63C2: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_ERROR, msg);
-                        case 0x6283: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED, msg);
-                    }
-                }
+		} else if (ByteUtils.toInteger(sw) == 0x6300) {
+		    return WSHelper.makeResultError(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, msg);
+		}
 
-		// unknown error
-		String hexStringResult = ByteUtils.toHexString(IntegerUtils.toByteArray(result));
-		LOG.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);
-		return WSHelper.makeResultUnknownError(null);
+		switch (PacePinStatus.fromCode(sw)) {
+		    case RC2: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_ERROR, msg);
+		    case RC1: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, msg);
+		    case BLOCKED: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, msg);
+		    case DEACTIVATED: return WSHelper.makeResultError(ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED, msg);
+		    default:
+			// unknown error
+			String hexStringResult = ByteUtils.toHexString(IntegerUtils.toByteArray(result));
+			LOG.warn("Unknown error in ExecutePACEResponse: {}", hexStringResult);
+			return WSHelper.makeResultUnknownError(null);
+		}
 	    }
 	}
     }

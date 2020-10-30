@@ -22,6 +22,7 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,7 +129,7 @@ public class CHATStepAction extends StepAction {
 	    if (! SysUtils.isMobileDevice()) {
 		cardHandle = ph.connectCardIfNeeded();
 		if (passwordType == PasswordID.PIN) {
-		    EacPinStatus pinState = ph.getPinStatus();
+		    PacePinStatus pinState = ph.getPinStatus();
 		    status.update(pinState);
 		}
 		nativePace = ph.isNativePinEntry();
@@ -137,7 +138,7 @@ public class CHATStepAction extends StepAction {
 		paceMarker = ph.getPaceMarker(passwordType.getString());
 	    } else {
 		// mobile device, pick only available reader and proceed
-		status.update(EacPinStatus.UNKNOWN);
+		status.update(PacePinStatus.UNKNOWN);
 		cardHandle = ph.getMobileReader();
 		nativePace = false;
 		paceMarker = ph.getPaceMarker(passwordType.getString());

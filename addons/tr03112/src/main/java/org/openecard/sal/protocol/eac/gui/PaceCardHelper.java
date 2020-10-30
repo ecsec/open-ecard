@@ -10,6 +10,7 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
@@ -143,12 +144,12 @@ public class PaceCardHelper {
 	return false;
     }
 
-    public EacPinStatus getPinStatus() throws WSHelper.WSException {
+    public PacePinStatus getPinStatus() throws WSHelper.WSException {
 	InputAPDUInfoType input = new InputAPDUInfoType();
 	input.setInputAPDU(new byte[]{(byte) 0x00, (byte) 0x22, (byte) 0xC1, (byte) 0xA4, (byte) 0x0F, (byte) 0x80,
 	    (byte) 0x0A, (byte) 0x04, (byte) 0x00, (byte) 0x7F, (byte) 0x00, (byte) 0x07, (byte) 0x02, (byte) 0x02,
 	    (byte) 0x04, (byte) 0x02, (byte) 0x02, (byte) 0x83, (byte) 0x01, (byte) 0x03});
-	input.getAcceptableStatusCode().addAll(EacPinStatus.getCodes());
+	input.getAcceptableStatusCode().addAll(PacePinStatus.getCodes());
 
 	Transmit transmit = new Transmit();
 	transmit.setSlotHandle(conHandle.getSlotHandle());
@@ -159,7 +160,7 @@ public class PaceCardHelper {
 	byte[] output = pinCheckResponse.getOutputAPDU().get(0);
 	CardResponseAPDU outputApdu = new CardResponseAPDU(output);
 	byte[] status = outputApdu.getStatusBytes();
-	return EacPinStatus.fromCode(status);
+	return PacePinStatus.fromCode(status);
     }
 
     public ConnectionHandleType connectCardIfNeeded() throws WSHelper.WSException, InterruptedException {

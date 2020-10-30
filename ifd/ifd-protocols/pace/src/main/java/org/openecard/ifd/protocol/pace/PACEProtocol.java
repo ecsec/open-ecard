@@ -33,7 +33,6 @@ import org.openecard.common.apdu.utils.CardUtils;
 import org.openecard.common.ifd.Protocol;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
-import org.openecard.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.iso7816.FCP;

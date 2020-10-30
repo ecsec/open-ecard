@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2019-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -10,6 +10,8 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.common.ifd.PacePinStatus;
+
 
 /**
  *
@@ -17,67 +19,20 @@ package org.openecard.sal.protocol.eac.gui;
  */
 public class PinState {
 
-    private int attempts;
-    private boolean requestCan;
-    private boolean blocked;
-    private boolean deactivated;
-
-    private EacPinStatus state;
+    private PacePinStatus state;
 
     public PinState() {
-	state = EacPinStatus.RC3;
-	attempts = 2;
-	requestCan = false;
-	blocked = false;
-	deactivated = false;
+	state = PacePinStatus.RC3;
     }
 
-    public void update(EacPinStatus status) {
+    public void update(PacePinStatus status) {
 	if (status == null) {
-	    status = EacPinStatus.UNKNOWN;
+	    status = PacePinStatus.UNKNOWN;
 	}
 	state = status;
-	switch (status) {
-	    case RC3:
-		attempts = 2;
-		requestCan = false;
-		blocked = false;
-		deactivated = false;
-		break;
-	    case RC2:
-		attempts = 1;
-		requestCan = false;
-		blocked = false;
-		deactivated = false;
-		break;
-	    case RC1:
-		attempts = 0;
-		requestCan = true;
-		blocked = false;
-		deactivated = false;
-		break;
-	    case BLOCKED:
-		attempts = 0;
-		requestCan = false;
-		blocked = true;
-		deactivated = false;
-		break;
-	    case DEACTIVATED:
-		attempts = 0;
-		requestCan = false;
-		blocked = false;
-		deactivated = true;
-		break;
-	    case UNKNOWN:
-		attempts = 0;
-		requestCan = false;
-		blocked = false;
-		deactivated = false;
-	}
-
     }
 
-    public EacPinStatus getState() {
+    public PacePinStatus getState() {
 	return state;
     }
 
@@ -95,15 +50,15 @@ public class PinState {
     }
 
     public boolean isRequestCan() {
-	return state == EacPinStatus.RC1;
+	return state == PacePinStatus.RC1;
     }
 
     public boolean isBlocked() {
-	return state == EacPinStatus.BLOCKED;
+	return state == PacePinStatus.BLOCKED;
     }
 
     public boolean isDeactivated() {
-	return state == EacPinStatus.DEACTIVATED;
+	return state == PacePinStatus.DEACTIVATED;
     }
 
     public boolean isOperational() {
@@ -111,7 +66,7 @@ public class PinState {
     }
 
     public boolean isUnknown() {
-	return state == EacPinStatus.UNKNOWN;
+	return state == PacePinStatus.UNKNOWN;
     }
 
 }

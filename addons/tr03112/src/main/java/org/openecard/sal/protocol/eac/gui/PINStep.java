@@ -22,6 +22,7 @@
 
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.common.ifd.PacePinStatus;
 import java.util.List;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
@@ -101,7 +102,7 @@ public final class PINStep extends Step {
 	updateAttemptsDisplay();
     }
 
-    public void setStatus(EacPinStatus status) {
+    public void setStatus(PacePinStatus status) {
 	this.status.update(status);
 	updateAttemptsDisplay();
 	updateCanData();

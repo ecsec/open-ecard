@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2019 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -21,6 +21,7 @@
  ***************************************************************************/
 package org.openecard.sal.protocol.eac.gui;
 
+import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	    conHandle = ph.connectCardIfNeeded();
 	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
-	    EacPinStatus currentState;
+	    PacePinStatus currentState;
 	    currentState = ph.getPinStatus();
 
 	    pinState.update(currentState);
@@ -110,14 +111,14 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		EstablishChannelResponse response = performPACEWithCAN(oldResults, conHandle);
 		if (response == null) {
 		    LOG.debug("The CAN does not meet the format requirements.");
-		    step.setStatus(EacPinStatus.RC1);
+		    step.setStatus(PacePinStatus.RC1);
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		}
 
 		if (response.getResult().getResultMajor().equals(ECardConstants.Major.ERROR)) {
 		    if (response.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED)) {
 			LOG.error("Failed to authenticate with the given CAN.");
-			step.setStatus(EacPinStatus.RC1);
+			step.setStatus(PacePinStatus.RC1);
 			return new StepActionResult(StepActionResultStatus.REPEAT);
 		    } else {
 			WSHelper.checkResult(response);
@@ -153,18 +154,18 @@ public class PINStepAction extends AbstractPasswordStepAction {
 		if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_ERROR)) {
 		    // update step display
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
-		    this.step.setStatus(EacPinStatus.RC2);
+		    this.step.setStatus(PacePinStatus.RC2);
 		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED)) {
 		    // update step display
-		    step.setStatus(EacPinStatus.RC1);
+		    step.setStatus(PacePinStatus.RC1);
 		    LOG.info("Wrong PIN entered, trying again (try number {}).", retryCounter);
 		    // repeat the step
 		    return new StepActionResult(StepActionResultStatus.REPEAT);
 		} else if (establishChannelResponse.getResult().getResultMinor().equals(ECardConstants.Minor.IFD.PASSWORD_BLOCKED)) {
 		    LOG.warn("Wrong PIN entered. The PIN is blocked.");
-		    pinState.update(EacPinStatus.BLOCKED);
+		    pinState.update(PacePinStatus.BLOCKED);
 		    return new StepActionResult(StepActionResultStatus.REPEAT,
 			    new ErrorStep(lang.translationForKey("step_error_title_blocked", pin),
 				    lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),

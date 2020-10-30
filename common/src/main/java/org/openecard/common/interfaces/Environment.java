@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,6 +23,7 @@
 package org.openecard.common.interfaces;
 
 import java.util.List;
+import org.openecard.gui.UserConsent;
 import org.openecard.ws.IFD;
 import org.openecard.ws.Management;
 import org.openecard.ws.SAL;
@@ -33,6 +34,9 @@ import org.openecard.ws.SAL;
  * @author Johannes Schmoelz
  */
 public interface Environment {
+
+    void setGUI(UserConsent gui);
+    UserConsent getGUI();
 
     void setIFD(IFD ifd);
     IFD getIFD();

@@ -67,8 +67,8 @@ public class TestTransactions {
 
 	// Set up GUI and card recognition
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
+	env.setGUI(gui);
 	final CardRecognitionImpl recog = new CardRecognitionImpl(env);
-	recog.setGUI(gui);
 
 	// get the first reader
 	ListIFDs listIFDs = new ListIFDs();

@@ -235,7 +235,6 @@ public class TinySAL implements SAL {
     private byte[] ifdCtx;
     private AddonManager addonManager;
     private AddonSelector protocolSelector;
-    private UserConsent userConsent;
 
     private SalEventManager evtMan;
 
@@ -2303,15 +2302,6 @@ public class TinySAL implements SAL {
     @Override
     public ACLModifyResponse aclModify(ACLModify request) {
 	return WSHelper.makeResponse(ACLModifyResponse.class, WSHelper.makeResultUnknownError("Not supported yet."));
-    }
-
-    /**
-     * Sets the GUI.
-     *
-     * @param uc User consent
-     */
-    public void setGUI(UserConsent uc) {
-	this.userConsent = uc;
     }
 
 

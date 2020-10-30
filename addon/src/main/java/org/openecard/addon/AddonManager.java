@@ -42,7 +42,6 @@ import org.openecard.addon.sal.SALProtocolProxy;
 import org.openecard.addon.sal.SalStateView;
 import org.openecard.common.util.FacadeInvocationHandler;
 import org.openecard.common.interfaces.Environment;
-import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.slf4j.Logger;
@@ -67,7 +66,6 @@ public class AddonManager {
     private final CombiningRegistry registry;
     private final AddonRegistry protectedRegistry;
     private final Environment env;
-    private final UserConsent userConsent;
     private final EventHandler eventHandler;
     private final ViewController viewController;
     private final SalStateView salStateView;
@@ -78,13 +76,12 @@ public class AddonManager {
      * Creates a new AddonManager.
      *
      * @param env
-     * @param userConsent
      * @param view
      * @param registry
      * @param salStateView
      * @throws WSMarshallerException
      */
-    public AddonManager(Environment env, UserConsent userConsent, ViewController view,
+    public AddonManager(Environment env, ViewController view,
 	    CombiningRegistry registry,
 	    SalStateView salStateView) throws WSMarshallerException {
 
@@ -95,7 +92,6 @@ public class AddonManager {
 	}
 	this.protectedRegistry = getProtectedRegistry(this.registry);
 	this.env = env;
-	this.userConsent = userConsent;
 	this.eventHandler = new EventHandler();
 	this.env.getEventDispatcher().add(eventHandler);
 	this.viewController = view;
@@ -106,9 +102,9 @@ public class AddonManager {
 	}, "Init-Addons").start();
     }
 
-    public AddonManager(Environment env, UserConsent userConsent, ViewController view, SalStateView salStateView)
+    public AddonManager(Environment env, ViewController view, SalStateView salStateView)
 	    throws WSMarshallerException {
-	this(env, userConsent, view, null, salStateView);
+	this(env, view, null, salStateView);
     }
 
     /**
@@ -413,7 +409,7 @@ public class AddonManager {
 	Context aCtx = new Context(this, env, addonSpec, viewController, salStateView);
 	aCtx.setCardRecognition(env.getRecognition());
 	aCtx.setEventHandle(eventHandler);
-	aCtx.setUserConsent(userConsent);
+	aCtx.setUserConsent(env.getGUI());
 
 	return aCtx;
     }

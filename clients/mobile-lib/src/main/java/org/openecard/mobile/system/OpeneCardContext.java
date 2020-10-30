@@ -172,11 +172,11 @@ public class OpeneCardContext {
 
 
 	    gui = createUserConsent(dispatcher, eventDispatcher);
+	    env.setGUI(gui);
 
 	    // set up card recognition
 	    try {
 		recognition = new CardRecognitionImpl(env);
-		recognition.setGUI(gui);
 		env.setRecognition(recognition);
 		LOG.info("CardRecognition initialized.");
 	    } catch (Exception ex) {
@@ -187,7 +187,6 @@ public class OpeneCardContext {
 	    // set up ifd
 	    ifd = new IFD();
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
-	    ifd.setGUI(gui);
 	    ifd.setEnvironment(env);
 	    ifd.setTerminalFactoryBuilder(new IFDTerminalFactory(this.config.getTerminalFactoryBuilder()));
 	    env.setIFD(ifd);
@@ -200,8 +199,6 @@ public class OpeneCardContext {
 
 	    // set up SAL
 	    TinySAL mainSAL = new TinySAL(env);
-	    mainSAL.setGUI(gui);
-
 	    sal = mainSAL;
 	    env.setSAL(sal);
 	    LOG.info("SAL prepared.");
@@ -218,8 +215,7 @@ public class OpeneCardContext {
 
 	    // set up addon manager
 	    try {
-		manager = new AddonManager(env, gui, viewController, new ClasspathRegistry(),
-			mainSAL.getSalStateView());
+		manager = new AddonManager(env, viewController, new ClasspathRegistry(), mainSAL.getSalStateView());
 		mainSAL.setAddonManager(manager);
 
 		LOG.info("Addon manager initialized.");

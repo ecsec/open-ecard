@@ -236,7 +236,7 @@ public class ActivateAction implements AppPluginAction {
 	if (emptyParms || !(tokenUrl || status || showUI)) {
 	    response = new BindingResult(BindingResultCode.MISSING_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
-	    response.getAuxResultData().put(AuxDataKeys.MINOR_PROCESS_RESULT, ECardConstants.Minor.App.INCORRECT_PARM);
+	    setMinorResult(response, ECardConstants.Minor.App.INCORRECT_PARM);
 	    showErrorMessage(lang.translationForKey(NO_ACTIVATION_PARAMETERS));
 	    return response;
 	}
@@ -245,7 +245,7 @@ public class ActivateAction implements AppPluginAction {
 	if ((tokenUrl && showUI) || (tokenUrl && status) || (showUI && status)) {
 	    response = new BindingResult(BindingResultCode.WRONG_PARAMETER);
 	    response.setResultMessage(lang.translationForKey(NO_PARAMS));
-	    response.getAuxResultData().put(AuxDataKeys.MINOR_PROCESS_RESULT, ECardConstants.Minor.App.INCORRECT_PARM);
+	    setMinorResult(response, ECardConstants.Minor.App.INCORRECT_PARM);
 	    showErrorMessage(lang.translationForKey(NO_PARAMS));
 	    return response;
 	}

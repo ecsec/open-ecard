@@ -27,6 +27,8 @@ the app must include the following to be able to detect and communicate with ISO
 
 Examples can be found in the `reference implementation for ios <https://github.com/ecsec/open-ecard-ios>`_.
 
+In addition, the Info.plist file has to contain the <NFCReaderUsageDescription> key with a value properly explaining the need for the NFC usage. 
+
 The corresponding protocol definitions of the API described in this document can be found within the bundle in the "Headers" folder.
 
 Android

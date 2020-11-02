@@ -20,6 +20,40 @@ Within the Podfile the following has to be specified:
 
 Since the framework uses NFC technology, within "Capabilities and Signing" the "Near field communication" capability has to be activated.
 
+As described in the `Apple Developer documentation <https://developer.apple.com/documentation/corenfc/nfciso7816tag>`_
+the app must include the following to be able to detect and communicate with ISO7816 tags:
+
+The Near Field Communication Tag Reader Session Formats Entitlement:
+
+.. code-block:: xml
+   
+   <key>com.apple.developer.nfc.readersession.formats</key>
+   <array>
+     <string>TAG</string>
+   </array>
+
+
+A list of supported application identifiers of ISO7816 tags within the Info.plist file:
+
+.. code-block:: xml
+
+    <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+    <array>
+      <!-- ICAO ePassport compatible token such as the German eID -->
+      <string>A0000002471001</string>
+    </array>
+
+
+The Info.plist must also contain the ``<NFCReaderUsageDescription>`` key with a value properly explaining the need for the NFC usage. 
+
+.. code-block:: xml
+
+    <key>NFCReaderUsageDescription</key>
+    <string>Communication with NFC enabled eID cards for authentication processes</string>
+
+Find a full example at the `reference implementation for ios <https://github.com/ecsec/open-ecard-ios>`_.
+
+
 The corresponding protocol definitions of the API described in this document can be found within the bundle in the "Headers" folder.
 
 Android

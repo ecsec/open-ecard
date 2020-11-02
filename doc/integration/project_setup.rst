@@ -25,8 +25,7 @@ the app must include the following to be able to detect and communicate with ISO
 
 The Near Field Communication Tag Reader Session Formats Entitlement:
 
-.. code-block:: XML
-   :substitutions:
+.. code-block:: xml
    
    <key>com.apple.developer.nfc.readersession.formats</key>
    <array>
@@ -36,20 +35,18 @@ The Near Field Communication Tag Reader Session Formats Entitlement:
 
 A list of supported application identifiers of ISO7816 tags within the Info.plist file:
 
-.. code-block:: XML
-   :substitutions:
+.. code-block:: xml
 
     <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
     <array>
-        <!-- Electronic passports -->
+        <!-- ICAO ePassport compatible token such as the German eID -->
     	<string>A0000002471001</string>
     </array>
 
 
-The Info.plist must also contain the <NFCReaderUsageDescription> key with a value properly explaining the need for the NFC usage. 
+The Info.plist must also contain the ``<NFCReaderUsageDescription>`` key with a value properly explaining the need for the NFC usage. 
 
-.. code-block:: XML
-   :substitutions:
+.. code-block:: xml
 
     <key>NFCReaderUsageDescription</key>
     <string>Communication with NFC enabled eID cards for authentication processes</string>

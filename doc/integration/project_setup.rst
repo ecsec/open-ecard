@@ -29,7 +29,7 @@ The Near Field Communication Tag Reader Session Formats Entitlement:
    
    <key>com.apple.developer.nfc.readersession.formats</key>
    <array>
-        <string>TAG</string>
+     <string>TAG</string>
    </array>
 
 
@@ -39,8 +39,8 @@ A list of supported application identifiers of ISO7816 tags within the Info.plis
 
     <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
     <array>
-        <!-- ICAO ePassport compatible token such as the German eID -->
-    	<string>A0000002471001</string>
+      <!-- ICAO ePassport compatible token such as the German eID -->
+      <string>A0000002471001</string>
     </array>
 
 

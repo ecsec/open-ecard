@@ -137,15 +137,17 @@ public class TCTokenResponse extends BindingResult {
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);
 	    } else {
 		boolean isRefreshAddressValid = (Boolean) dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID);
+		String minor = result.getResultMinor();
 		setResultCode(BindingResultCode.REDIRECT);
 		String refreshURL;
-		String fixedMinor = TCTokenHacks.fixResultMinor(result.getResultMinor());
+
 		if (isRefreshAddressValid) {
+		    String fixedMinor = TCTokenHacks.fixResultMinor(minor);
 		    refreshURL = ub.queryParam("ResultMajor", "error")
 			    .queryParamUrl("ResultMinor", fixedMinor)
 			    .build().toString();
 		} else {
-		    refreshURL = token.getComErrorAddressWithParams(result.getResultMinor());
+		    refreshURL = token.getComErrorAddressWithParams(minor);
 		}
 
 		getAuxResultData().put(AuxDataKeys.REDIRECT_LOCATION, refreshURL);

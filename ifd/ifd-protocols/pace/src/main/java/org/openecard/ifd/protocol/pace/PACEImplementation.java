@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,11 +25,11 @@ package org.openecard.ifd.protocol.pace;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.GeneralAuthenticate;
 import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
+import org.openecard.common.ifd.PacePinStatus;
 import org.openecard.common.ifd.protocol.exception.ProtocolException;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteUtils;
@@ -326,33 +326,36 @@ public class PACEImplementation {
 	    }
 
 	    LOG.error(e.getMessage(), e);
-	    int sw = e.getResponseAPDU().getSW();
-
-	    if ((sw & (short) 0xFFF0) == (short) 0x63C0) {
-		retryCounter = (byte) (sw & (short) 0x000F);
-		if (retryCounter == (byte) 0x00) {
-		    // The password is blocked.
-		    LOG.warn("The password is blocked. The password MUST be unblocked.");
-		    throw new ProtocolException(
-			    ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
-			    "The password is blocked. The password MUST be unblocked.");
-		} else if (retryCounter == (byte) 0x01) {
-		    // The password is suspended.
-		    LOG.warn("The password is suspended. The password MUST be resumed.");
-		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED,
-			    "The password is suspended. The password MUST be resumed.");
-		} else if (retryCounter == (byte) 0x02) {
+	    switch (PacePinStatus.fromCode(e.getResponseAPDU().getStatusBytes())) {
+		case RC2:
 		    // The password is wrong.
 		    LOG.warn("The password is wrong.");
 		    throw new ProtocolException(
 			    ECardConstants.Minor.IFD.PASSWORD_ERROR,
 			    "The password is wrong.");
-		}
-	    } else {
-		String msg = String.format("PACE Mutual Authentication failed (SW=0x%04X).", sw);
+		case RC1:
+		    // The password is suspended.
+		    LOG.warn("The password is suspended. The password MUST be resumed.");
+		    throw new ProtocolException(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED,
+			    "The password is suspended. The password MUST be resumed.");
+		case BLOCKED:
+		    // The password is blocked.
+		    LOG.warn("The password is blocked. The password MUST be unblocked.");
+		    throw new ProtocolException(
+			    ECardConstants.Minor.IFD.PASSWORD_BLOCKED,
+			    "The password is blocked. The password MUST be unblocked.");
+		case DEACTIVATED:
+		    // The password is dactivated.
+		    LOG.warn("The password is deactivated. The password MUST be activated at the citizen bureau.");
+		    throw new ProtocolException(
+			    ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED,
+			    "The password is deactivated. The password MUST be activated at the citizen bureau.");
+		default:
+		String msg = String.format("PACE Mutual Authentication failed (SW=0x%04X).", e.getResponseAPDU().getSW());
 		LOG.warn(msg);
 		throw new ProtocolException(ECardConstants.Minor.IFD.AUTHENTICATION_FAILED, msg);
 	    }
+
 	} catch (Exception e) {
 	    LOG.error(e.getMessage(), e);
 	    throw new ProtocolException(ECardConstants.Minor.IFD.UNKNOWN_ERROR, e.getMessage());

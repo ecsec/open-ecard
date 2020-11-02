@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2018 ecsec GmbH.
+ * Copyright (C) 2018-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,56 +20,59 @@
  *
  ***************************************************************************/
 
-package org.openecard.sal.protocol.eac.gui;
+package org.openecard.common.ifd;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.openecard.bouncycastle.util.Arrays;
+import static org.openecard.common.util.StringUtils.toByteArray;
 
 
 /**
+ * Eac PIN Status calls.
+ * See BSI TR-03130-3, B.14.2
  *
  * @author Tobias Wich
  */
-public enum EacPinStatus {
+public enum PacePinStatus {
 
-    UNKNOWN(new byte[] {(byte) 0x00, (byte) 0x00}),
+    UNKNOWN(),
     /**
      * PIN activated, 3 tries left.
      */
-    RC3(new byte[] {(byte) 0x90, (byte) 0x00}),
+    RC3(toByteArray("9000"), toByteArray("63C3")),
     /**
      * PIN activated, 2 tries left.
      */
-    RC2(new byte[] {(byte) 0x63, (byte) 0xC2}),
+    RC2(toByteArray("63C2")),
     /**
      * PIN suspended, 1 try left, CAN needs to be entered.
      */
-    RC1(new byte[] {(byte) 0x63, (byte) 0xC1}),
+    RC1(toByteArray("63C1"), toByteArray("6985")),
     /**
      * PIN blocked, 0 tries left.
      */
-    BLOCKED(new byte[] {(byte) 0x63, (byte) 0xC0}),
+    BLOCKED(
+	toByteArray("63C0"),
+	// blocked, deactivated or suspended, we hope the best and pretend it is blocked, so the user has a chance to fix it
+	toByteArray("6982"),
+	toByteArray("6983")
+    ),
     /**
      * PIN/Card not activated.
      */
-    DEACTIVATED(new byte[] {(byte) 0x62, (byte) 0x83});
+    DEACTIVATED(toByteArray("6984"));
 
-    private final byte[] code;
+    private final byte[][] codes;
 
-    private EacPinStatus(byte[] code) {
-	this.code = code;
-    }
-
-    public byte[] getCode() {
-	return Arrays.clone(code);
+    private PacePinStatus(byte[]... codes) {
+	this.codes = codes;
     }
 
     public static List<byte[]> getCodes() {
-	ArrayList<byte[]> result = new ArrayList<>(values().length);
-	for (EacPinStatus ps : values()) {
-	    result.add(ps.getCode());
+	List<byte[]> result = new LinkedList<>();
+	for (PacePinStatus ps : values()) {
+	    result.addAll(java.util.Arrays.asList(ps.codes));
 	}
 	return result;
     }
@@ -82,14 +85,16 @@ public enum EacPinStatus {
      * @throws IllegalArgumentException Thrown in case the given code is not a specified status code.
      */
     @Nonnull
-    public static EacPinStatus fromCode(byte[] code) throws IllegalArgumentException {
-	for (EacPinStatus ps : values()) {
-	    if (java.util.Arrays.equals(ps.code, code)) {
-		return ps;
+    public static PacePinStatus fromCode(byte[] code) throws IllegalArgumentException {
+	for (PacePinStatus ps : values()) {
+	    for (byte[] refCode : ps.codes) {
+		if (java.util.Arrays.equals(refCode, code)) {
+		    return ps;
+		}
 	    }
 	}
 	// no status found
-	throw new IllegalArgumentException("The given value is not a valid PIN status code.");
+	return UNKNOWN;
     }
 
 }

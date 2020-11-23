@@ -1,17 +1,17 @@
-About Open eCard
-================
+About Open eCard and MOBILE-X
+=============================
 
-In the context of the Open eCard Project, industrial as well as academic
-experts have decided to work together on providing an open source and cross
-platform implementation of the eCard-API-Framework (BSI-TR-03112), through
-which arbitrary applications can utilize authentication and signatures with
-arbitrary chip cards.
+The **Open eCard** project was started in 2012 by industrial and academic experts to provide an open source and cross platform implementation of the eCard-API-Framework ([BSI TR-03112](https://www.bsi.bund.de/DE/Publikationen/TechnischeRichtlinien/tr03112/TR-03112_node.html)) and the related international standard [ISO/IEC 24727](https://www.iso.org/standard/61066.html), through which arbitrary applications can utilize electronic identification (eID), authentication and signatures with suitable smart cards (eCards).
+In a high-level perspective the architecture of the eCard-API-Framework consists of the following [layers](https://www.openecard.org/en/ecard-api-framework/overview/):
 
-The artifacts of the project consist of modularized, and to some extent
-extensible, libraries for usage in desktop, Android and iOS applications, 
-as well as client implementations such as a Desktop
-application (richclient) and a Java Applet.
+* Application-Layer
+* Identity-Layer
+* Service-Access-Layer
+* Terminal-Layer
 
+Against the background of the [eIDAS](https://www.eid.as/)-Regulation, the General Data Protection Regulation ([GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj)), the [GAIA-X](https://data-infrastructure.eu/) initiative and the ongoing trend towards increased mobility, the Identity-Layer has been subject to an ongoing revision to form **MOBILE-X**, which integrates the [ChipGateway](https://www.oasis-open.org/committees/download.php/60049/ChipGateway-Specification-OASIS.pdf) protocol as well as aspects of Identity Management [ISO/IEC 24760](https://www.iso.org/standard/77582.html) and Privacy Management [ISO/IEC 29101](https://www.iso.org/standard/75293.html) in order to enable electronic signatures and "Self Sovereign Identity".
+
+The artifacts of the project consist of modularized, and to some extent extensible, libraries as well as client implementations such as a Desktop application (richclient) an smartphone apps for Android and iOS.
 
 Build Instructions
 ==================

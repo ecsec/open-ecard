@@ -29,7 +29,7 @@ pomVersion = pom.find('./pom:version', {'pom': 'http://maven.apache.org/POM/4.0.
 version = pomVersion
 release = pomVersion
 
-releaseMinor = re.match('^([1-9][0-9]*\.[1-9][0-9]*)\.[1-9][0-9]*.*', pomVersion).group(1)
+releaseMinor = re.match('^([1-9][0-9]*\.[0-9]+)\.[0-9]+.*', pomVersion).group(1)
 
 
 # -- General configuration ---------------------------------------------------

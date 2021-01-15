@@ -54,6 +54,7 @@ public class NFCCardMonitoring implements Runnable {
 	    while (!wasSignalled) {
 		try {
 		    if (!isTranceiving && !card.isTagPresent()) {
+			LOG.debug("Detected card absence.");
 			// remove tag if card is no longer available/connected to terminal
 			terminal.removeTag();
 			LOG.debug("Stopping monitor thread due to card absence.");
@@ -80,15 +81,21 @@ public class NFCCardMonitoring implements Runnable {
 
     public void notifyStartTranceiving() {
 	synchronized (lock) {
-	    isTranceiving = true;
-	    lock.notifyAll();
+	    if(!isTranceiving) {
+		isTranceiving = true;
+	    } else {
+		LOG.warn("Received consecutive start tranceive notifications without stopping!");
+	    }
 	}
     }
 
     public void notifyStopTranceiving() {
 	synchronized (lock) {
-	    isTranceiving = false;
-	    lock.notifyAll();
+	    if(isTranceiving) {
+		isTranceiving = false;
+	    } else {
+		LOG.warn("Received consecutive stop tranceive notifications without starting!");
+	    }
 	}
     }
 }

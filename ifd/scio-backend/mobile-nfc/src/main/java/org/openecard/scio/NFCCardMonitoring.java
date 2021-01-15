@@ -56,18 +56,18 @@ public class NFCCardMonitoring implements Runnable {
 		    if (!isTranceiving && !card.isTagPresent()) {
 			// remove tag if card is no longer available/connected to terminal
 			terminal.removeTag();
-			LOG.debug("Stopping monitor thread.");
+			LOG.debug("Stopping monitor thread due to card absence.");
 			return;
 		    }
 		    lock.wait(250);
 		} catch (InterruptedException ex) {
 		    LOG.warn("Task which checks the availability of the nfc card is interrupted.", ex);
-		    LOG.debug("Stopping monitor thread.");
+		    LOG.debug("Stopping monitor thread due to interrupt.");
 		    return;
 		}
 	    }
 	}
-	LOG.debug("Stopping monitor thread.");
+	LOG.debug("Stopping monitor thread due to signalling.");
     }
 
     public void notifyStopMonitoring() {

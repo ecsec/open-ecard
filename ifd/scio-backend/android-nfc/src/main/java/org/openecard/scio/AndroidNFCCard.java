@@ -222,10 +222,11 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
+	this.cardMonitor.notifyStartTranceiving();
 	try {
 	    IsoDep currentTag;
-	    synchronized(connectLock) {
-		while(tagPending) {
+	    synchronized (connectLock) {
+		while (tagPending) {
 		    try {
 			connectLock.wait();
 		    } catch (InterruptedException ex) {
@@ -237,11 +238,16 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	    if (currentTag == null) {
 		throw new IllegalStateException("Transmit of apdu command failed, because the tag is not present.");
 	    }
-	    return currentTag.transceive(apdu);
-	} catch (TagLostException ex) {
-	    LOG.debug("NFC Tag is not present.", ex);
-	    this.nfcCardTerminal.removeTag();
-	    throw new IllegalStateException("Transmit of apdu command failed, because the tag was lost.");
+	    try {
+		return currentTag.transceive(apdu);
+	    } catch (TagLostException ex) {
+		LOG.debug("NFC Tag is not present.", ex);
+		this.nfcCardTerminal.removeTag();
+		throw new IllegalStateException("Transmit of apdu command failed, because the tag was lost.");
+	    }
+	}
+	finally {
+	    this.cardMonitor.notifyStopTranceiving();
 	}
     }
 

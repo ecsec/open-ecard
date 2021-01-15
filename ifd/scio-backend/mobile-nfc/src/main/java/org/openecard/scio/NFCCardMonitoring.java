@@ -39,6 +39,7 @@ public class NFCCardMonitoring implements Runnable {
     private final AbstractNFCCard card;
     private final Object lock = new Object();
     private volatile boolean wasSignalled = false;
+    private volatile boolean isTranceiving = false;
 
     public NFCCardMonitoring(NFCCardTerminal terminal, AbstractNFCCard card) {
 	this.terminal = terminal;
@@ -52,7 +53,7 @@ public class NFCCardMonitoring implements Runnable {
 	synchronized (lock) {
 	    while (!wasSignalled) {
 		try {
-		    if (!card.isTagPresent()) {
+		    if (!isTranceiving && !card.isTagPresent()) {
 			// remove tag if card is no longer available/connected to terminal
 			terminal.removeTag();
 			LOG.debug("Stopping monitor thread.");
@@ -73,6 +74,20 @@ public class NFCCardMonitoring implements Runnable {
 	LOG.debug("Notifying stop monitor thread.");
 	synchronized (lock) {
 	    wasSignalled = true;
+	    lock.notifyAll();
+	}
+    }
+
+    public void notifyStartTranceiving() {
+	synchronized (lock) {
+	    isTranceiving = true;
+	    lock.notifyAll();
+	}
+    }
+
+    public void notifyStopTranceiving() {
+	synchronized (lock) {
+	    isTranceiving = false;
 	    lock.notifyAll();
 	}
     }

@@ -12,7 +12,7 @@ addMount() {
 IMG_VERSION="1.1"
 IMAGE="public.docker.ecsec.de/ecsec/tools/sphinx:$IMG_VERSION"
 # format of MOUNTS is "<src1>:<dest1> <src2>:<dest2>"
-MOUNTS=".:/docs ..:/src"
+MOUNTS="..:/src"
 
 
 # create mount options
@@ -26,7 +26,7 @@ if [ -f "$(which podman)" ]; then
     DOCKER="podman"
 fi
 
-RUN_CMD="$DOCKER run -it --rm $MOUNT_OPTS $IMAGE"
+RUN_CMD="$DOCKER run -w /src/doc -it --rm $MOUNT_OPTS $IMAGE"
 
 for arg in $@; do
     case $arg in

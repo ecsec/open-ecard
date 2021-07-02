@@ -122,23 +122,8 @@ public class ActivateAction implements AppPluginAction {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
-	    BindingResult response;
-	    if (SEMAPHORE.tryAcquire()) {
-		try {
-		    response = checkRequestParameters(body, params, headers, attachments);
-		} finally {
-		    try {
-			this.dispatcher.safeDeliver(new PowerDownDevices());
-		    } catch(Exception e) {
-		    }
-		    SEMAPHORE.release();
-		}
-	    } else {
-		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
-		response.setResultMessage("An authentication process is already running.");
-	    }
+	    return checkRequestParameters(body, params, headers, attachments);
 
-	    return response;
 	} catch (Throwable t) {
 	    LOG.error("Unexpected error returned from eID-Client Activation.", t);
 	    if (t instanceof Error) {
@@ -148,6 +133,11 @@ public class ActivateAction implements AppPluginAction {
 		return new BindingResult(BindingResultCode.INTERNAL_ERROR);
 	    }
 	} finally {
+	    // TODO: move this code to a location where it is explicitly called by the invoker (mobile case only)
+	    try {
+		this.dispatcher.safeDeliver(new PowerDownDevices());
+	    } catch (Exception e) { }
+
 	    // clean up context
 	    dynCtx.clear();
 	    DynamicContext.remove();
@@ -266,23 +256,36 @@ public class ActivateAction implements AppPluginAction {
      */
     private BindingResult processRequest(RequestBody body, Map<String, String> params, Headers headers,
 	    List<Attachment> attachments, boolean tokenUrl, boolean showUI, boolean status) {
-	BindingResult response = null;
-
-	if (tokenUrl) {
-	    response = processTcToken(params);
-	    return response;
-	}
+	BindingResult response;
 
 	if (status) {
 	    response = processStatus(body, params, headers, attachments);
 	    return response;
 	}
 
-	if (showUI) {
-	    String requestedUI = params.get("ShowUI");
-	    response = processShowUI(requestedUI);
+	if (SEMAPHORE.tryAcquire()) {
+	    try {
+		if (tokenUrl) {
+		    response = processTcToken(params);
+		    return response;
+		}
+
+		if (showUI) {
+		    String requestedUI = params.get("ShowUI");
+		    response = processShowUI(requestedUI);
+		    return response;
+		}
+	    } finally {
+		SEMAPHORE.release();
+	    }
+	} else {
+	    response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
+	    response.setResultMessage("An authentication process is already running.");
 	    return response;
 	}
+
+	response = new BindingResult(BindingResultCode.INTERNAL_ERROR);
+	response.setResultMessage("Failed to handle request parameters correctly.");
 	return response;
     }
 

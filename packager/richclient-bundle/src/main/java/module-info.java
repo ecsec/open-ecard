@@ -59,6 +59,15 @@ module org.openecard.richclient {
     opens org.openecard.ws;
     opens org.openecard.ws.chipgateway;
     opens org.openecard.ws.schema;
+    opens org.openecard.addon.bind;
+    opens org.openecard.common;
+    opens org.openecard.addon;
+    opens org.openecard.common.sal.state;
+    opens org.openecard.common.event;
+    opens org.openecard.common.interfaces;
+    opens org.openecard.crypto.common.sal.did;
+    opens org.openecard.common.util;
+    opens org.openecard.bouncycastle.util.encoders;
     opens org.w3._2000._09.xmldsig_;
     opens org.w3._2001._04.xmldsig_more_;
     opens org.w3._2001._04.xmlenc_;
@@ -73,6 +82,8 @@ module org.openecard.richclient {
 
     opens jnasmartcardio to java.base;
 
+    opens org.jose4j.json.internal.json_simple;
+    opens org.slf4j;
 	/* JNA needs access to the jnidispatch lib on osx*/
 	opens com.sun.jna.darwin;
 }

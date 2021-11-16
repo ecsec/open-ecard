@@ -94,9 +94,12 @@ public final class ActionEntryPanel extends JPanel {
 	    new SwingWorker<Void, Void>() {
 		@Override
 		protected Void doInBackground() throws Exception {
-		    AppExtensionAction action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
-		    actionBtn.setEnabled(false);
+		    AppExtensionAction action = null;
 		    try {
+			LOG.info("Preparing plugin action: {}", actionSpec.getId());
+			action = manager.getAppExtensionAction(addonSpec, actionSpec.getId());
+			actionBtn.setEnabled(false);
+			LOG.info("Executing plugin action: {}, {}", actionSpec.getId(), action);
 			action.execute();
 			return null;
 		    } catch (Throwable t) {
@@ -104,7 +107,10 @@ public final class ActionEntryPanel extends JPanel {
 			LOG.error("Execution ended with an error.", t);
 			throw t;
 		    } finally {
-			manager.returnAppExtensionAction(action);
+			LOG.info("Returning from plugin action: {}", actionSpec.getId());
+			if (action != null) {
+			    manager.returnAppExtensionAction(action);
+			}
 			actionBtn.setEnabled(true);
 		    }
 		}

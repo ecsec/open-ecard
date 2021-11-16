@@ -203,6 +203,45 @@
 							<iso:Trailer>9000</iso:Trailer>
 							<iso:Conclusion>
 								<iso:CardCall>
+									<!-- EF.DIR-Rec#2: CL='00', INS='B2'=READ RECORD, P1=Record-Nr=02, P2=Read-P1=04, Le='FF' restriction in ResponseAPDU -->
+									<iso:CommandAPDU>00B20204FF</iso:CommandAPDU>
+									<iso:ResponseAPDU>
+										<!-- HCA-AID -->
+										<iso:Body>
+											<iso:DataObject>
+												<iso:Tag>61</iso:Tag>
+												<iso:DataObject>
+													<iso:MatchingData>
+														<iso:Offset>00</iso:Offset>
+														<iso:Length>08</iso:Length>
+														<iso:MatchingValue>4F06D27600000102</iso:MatchingValue>
+													</iso:MatchingData>
+												</iso:DataObject>
+											</iso:DataObject>
+										</iso:Body>
+										<iso:Trailer>6282</iso:Trailer>
+										<iso:Conclusion>
+											<iso:RecognizedCardType>http://ws.gematik.de/egk/1.0.0</iso:RecognizedCardType>
+										</iso:Conclusion>
+									</iso:ResponseAPDU>
+								</iso:CardCall>
+							</iso:Conclusion>
+						</iso:ResponseAPDU>
+					</iso:CardCall>
+				</iso:Conclusion>
+			</iso:ResponseAPDU>
+		</iso:CardCall>
+		<iso:CardCall>
+			<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+				<iso:Trailer>9000</iso:Trailer>
+				<iso:Conclusion>
+					<iso:CardCall>
+						<iso:CommandAPDU>00A4020C022F00</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+							<iso:Trailer>9000</iso:Trailer>
+							<iso:Conclusion>
+								<iso:CardCall>
 									<iso:CommandAPDU>00B20304FF</iso:CommandAPDU>
 									<iso:ResponseAPDU>
 										<iso:Body>

@@ -36,6 +36,7 @@ import java.util.concurrent.FutureTask;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.android.ex.ApduExtLengthNotSupported;
+import org.openecard.android.ex.NFCTagNotSupported;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.system.OpeneCardServiceClient;
 import org.openecard.android.system.ServiceResponse;
@@ -223,6 +224,8 @@ public abstract class AbstractActivationHandler <T extends Activity, GUI extends
 		// extract nfc tag
 		NfcUtils.getInstance().retrievedNFCTag(intent);
 	    } catch (ApduExtLengthNotSupported ex) {
+		LOG.error(ex.getMessage());
+	    } catch (NFCTagNotSupported ex) {
 		LOG.error(ex.getMessage());
 	    }
 	}

@@ -860,7 +860,7 @@
 			<dependency>
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>pdfbox</artifactId>
-				<version>2.0.20</version>
+				<version>2.0.24</version>
 			</dependency>
 
 			<!-- Java Native Access -->
@@ -891,6 +891,14 @@
 				<artifactId>bcpkix-jdk15on</artifactId>
 				<version>${version.bouncycastle}</version>
 			</dependency>
+
+			<!-- JNA SmartcardIO -->
+			<dependency>
+				<groupId>io.github.jnasmartcardio</groupId>
+				<artifactId>jnasmartcardio</artifactId>
+				<version>0.2.7</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

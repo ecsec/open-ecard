@@ -548,7 +548,7 @@
 			</iso:ResponseAPDU>
 		</iso:CardCall>
 
-		<iso:CardCall>
+		<!--iso:CardCall>
 			<iso:CommandAPDU>00A4040C0CA000000063504B43532D3135</iso:CommandAPDU>
 			<iso:ResponseAPDU>
 				<iso:Body>
@@ -563,7 +563,7 @@
 					<iso:RecognizedCardType>http://www.ekds.gov.tr/2.5</iso:RecognizedCardType>
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
-		</iso:CardCall>
+		</iso:CardCall-->
 
 	</iso:RecognitionTree>
 </iso:GetRecognitionTreeResponse>

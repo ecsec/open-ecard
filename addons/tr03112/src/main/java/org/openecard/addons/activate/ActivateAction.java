@@ -22,8 +22,6 @@
 
 package org.openecard.addons.activate;
 
-import org.openecard.binding.tctoken.ex.ActivationError;
-import org.openecard.binding.tctoken.ex.FatalActivationError;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -47,21 +45,23 @@ import org.openecard.binding.tctoken.TCTokenHandler;
 import org.openecard.binding.tctoken.TCTokenRequest;
 import org.openecard.binding.tctoken.TCTokenResponse;
 import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.binding.tctoken.ex.ActivationError;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import org.openecard.binding.tctoken.ex.FatalActivationError;
 import org.openecard.binding.tctoken.ex.NonGuiException;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
 import org.openecard.common.OpenecardProperties;
-import org.openecard.gui.UserConsent;
-import org.openecard.gui.message.DialogType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.gui.definition.ViewController;
-import org.openecard.common.DynamicContext;
 import org.openecard.common.ThreadTerminateException;
 import org.openecard.common.WSHelper;
-import org.openecard.httpcore.cookies.CookieManager;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.gui.UserConsent;
+import org.openecard.gui.definition.ViewController;
+import org.openecard.gui.message.DialogType;
+import org.openecard.httpcore.cookies.CookieManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -121,19 +121,8 @@ public class ActivateAction implements AppPluginAction {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
-	    BindingResult response;
-	    if (SEMAPHORE.tryAcquire()) {
-		try {
-		    response = checkRequestParameters(body, params, headers, attachments);
-		} finally {
-		    SEMAPHORE.release();
-		}
-	    } else {
-		response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
-		response.setResultMessage("An authentication process is already running.");
-	    }
+	    return checkRequestParameters(body, params, headers, attachments);
 
-	    return response;
 	} catch (Throwable t) {
 	    LOG.error("Unexpected error returned from eID-Client Activation.", t);
 	    if (t instanceof Error) {
@@ -260,23 +249,28 @@ public class ActivateAction implements AppPluginAction {
     private BindingResult processRequest(RequestBody body, Map<String, String> params, Headers headers,
 	    List<Attachment> attachments, boolean tokenUrl, boolean showUI, boolean status) {
 	BindingResult response = null;
-
-	if (tokenUrl) {
-	    response = processTcToken(params);
-	    return response;
-	}
-
 	if (status) {
 	    response = processStatus(body, params, headers, attachments);
 	    return response;
 	}
-
-	if (showUI) {
-	    String requestedUI = params.get("ShowUI");
-	    response = processShowUI(requestedUI);
-	    return response;
+	if (SEMAPHORE.tryAcquire()) {
+	    try {
+		if (tokenUrl) {
+		    response = processTcToken(params);
+		}
+		if (showUI) {
+		    String requestedUI = params.get("ShowUI");
+		    response = processShowUI(requestedUI);
+		}
+	    } finally {
+		SEMAPHORE.release();
+	    }
+	} else {
+	    response = new BindingResult(BindingResultCode.RESOURCE_LOCKED);
+	    response.setResultMessage("An authentication process is already running.");
 	}
 	return response;
+
     }
 
     /**

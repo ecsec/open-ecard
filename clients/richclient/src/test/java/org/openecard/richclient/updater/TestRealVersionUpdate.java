@@ -30,7 +30,6 @@ import java.util.List;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.jose4j.json.internal.json_simple.JSONObject;
-import org.openecard.common.AppVersion;
 import org.openecard.common.OpenecardProperties;
 import org.openecard.common.SemanticVersion;
 import org.openecard.common.util.InvalidUpdateDefinition;
@@ -52,8 +51,6 @@ public class TestRealVersionUpdate {
     private final String url = "http://www.google.de";
     private final SemanticVersion currentVersion = new SemanticVersion("1.2.0");
 
-    @Mocked
-    AppVersion appVersion;
     @Mocked
     OpenecardProperties props;
 

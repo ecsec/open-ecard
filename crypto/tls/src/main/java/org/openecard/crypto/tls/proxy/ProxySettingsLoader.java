@@ -55,7 +55,14 @@ public class ProxySettingsLoader {
 
     static {
 	com.github.markusbernhardt.proxy.util.Logger l = new com.github.markusbernhardt.proxy.util.Logger();
-	com.github.markusbernhardt.proxy.util.Logger.setBackend(l.new Slf4jLogBackEnd());
+	com.github.markusbernhardt.proxy.util.Logger.setBackend(l.new Slf4jLogBackEnd() {
+	    @Override
+	    public void log(Class<?> clazz, com.github.markusbernhardt.proxy.util.Logger.LogLevel loglevel, String msg, Object... params) {
+		// rewrite {0}, {1}, ... textmarkers to use the SLF4J syntax without numbers
+		msg = msg.replaceAll("\\{[0-9]+\\}", "{}");
+		super.log(clazz, loglevel, msg, params);
+	    }
+	});
     }
 
     /**
@@ -82,10 +89,20 @@ public class ProxySettingsLoader {
 
 	    clearSystemProperties();
 
+	    // convert port to an integer
+	    Integer portInt = null;
+	    try {
+		if (port != null) {
+		    portInt = Integer.parseInt(port);
+		}
+	    } catch (NumberFormatException ex) {
+		LOG.warn("Failed to convert port string '{}' to a number. Using to proxy.", port);
+	    }
+
 	    switch (scheme) {
 		case "SOCKS":
 		    // try to load SOCKS proxy
-		    if (host != null && port != null) {
+		    if (host != null && portInt != null) {
 			setSystemProperty("socksProxyHost", host);
 			setSystemProperty("socksProxyPort", port);
 			setSystemProperty("socksProxyVersion", "5");
@@ -98,7 +115,7 @@ public class ProxySettingsLoader {
     //		    ps.addStrategy(ProxySearch.Strategy.JAVA);
     //		    selector = ps.getProxySelector();
 			ProtocolDispatchSelector ps = new ProtocolDispatchSelector();
-			ps.setFallbackSelector(new FixedSocksSelector(host, Integer.parseInt(port)));
+			ps.setFallbackSelector(new FixedSocksSelector(host, portInt));
 			selector = ps;
 
 			List<Pattern> exclusions = parseExclusionHosts(excl);
@@ -108,43 +125,39 @@ public class ProxySettingsLoader {
 		case "HTTP":
 		case "HTTPS":
 		    // try to load HTTP proxy
-		    if (host != null && port != null) {
-			try {
-			    if ("HTTP".equals(scheme)) {
-				setSystemProperty("http.proxyHost", host);
-				setSystemProperty("http.proxyPort", port);
-				setSystemProperty("https.proxyHost", host);
-				setSystemProperty("https.proxyPort", port);
+		    if (host != null && portInt != null) {
+			if ("HTTP".equals(scheme)) {
+			    setSystemProperty("http.proxyHost", host);
+			    setSystemProperty("http.proxyPort", port);
+			    setSystemProperty("https.proxyHost", host);
+			    setSystemProperty("https.proxyPort", port);
 
-				if (user != null && pass != null) {
-				    try {
-					Authenticator.setDefault(createAuthenticator(user, pass));
-				    } catch (SecurityException ignore) {
-					LOG.error("Failed to set new Proxy Authenticator.");
-				    }
+			    if (user != null && pass != null) {
+				try {
+				    Authenticator.setDefault(createAuthenticator(user, pass));
+				} catch (SecurityException ignore) {
+				    LOG.error("Failed to set new Proxy Authenticator.");
 				}
-
-				ProxySearch ps = new ProxySearch();
-				ps.addStrategy(ProxySearch.Strategy.JAVA);
-				selector = ps.getProxySelector();
-			    } else {
-				// use our own HTTP CONNECT Proxy
-				// the default is always validate
-				boolean valid = true;
-				if (validate != null) {
-				    valid = Boolean.parseBoolean(validate);
-				}
-
-				// use our connect proxy with an empty parent selector
-				Proxy proxy = new HttpConnectProxy(scheme, valid, host, Integer.parseInt(port), user, pass);
-				selector = new SingleProxySelector(proxy);
 			    }
 
-			    List<Pattern> exclusions = parseExclusionHosts(excl);
-			    selector = new RegexProxySelector(selector, exclusions);
-			} catch (NumberFormatException ex) {
-			    LOG.error("Invalid port specified for HTTPS proxy, using system defaults.");
+			    ProxySearch ps = new ProxySearch();
+			    ps.addStrategy(ProxySearch.Strategy.JAVA);
+			    selector = ps.getProxySelector();
+			} else {
+			    // use our own HTTP CONNECT Proxy
+			    // the default is always validate
+			    boolean valid = true;
+			    if (validate != null) {
+				valid = Boolean.parseBoolean(validate);
+			    }
+
+			    // use our connect proxy with an empty parent selector
+			    Proxy proxy = new HttpConnectProxy(scheme, valid, host, portInt, user, pass);
+			    selector = new SingleProxySelector(proxy);
 			}
+
+			List<Pattern> exclusions = parseExclusionHosts(excl);
+			selector = new RegexProxySelector(selector, exclusions);
 		    }
 		    break;
 		case "NO PROXY":

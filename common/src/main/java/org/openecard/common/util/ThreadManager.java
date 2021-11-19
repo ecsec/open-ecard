@@ -17,9 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
+ * Runs submitted jobs as threads and maintains a list of the running threads.
+ *
+ * Each job is associated with a given key, so it possible to address this specific jobs' thread.
+ * A job can be cancelled individually, or all threads can be cancelled at once.
  *
  * @author Tobias Wich
- * @param <Key>
+ * @param <Key> Type of the key used to map the threads. Must implement {@link #equals(java.lang.Object)}.
  */
 public class ThreadManager <Key> {
 
@@ -35,6 +39,13 @@ public class ThreadManager <Key> {
 	this.threads = new HashMap<>();
     }
 
+    /**
+     * Submits a job to run as a thread in the background.
+     *
+     * @param key Key value identifying the thread.
+     * @param job Job implementation that will run as a thread.
+     * @throws IllegalStateException Thrown in case a job for the given key already exists.
+     */
     public void submit(Key key, Runnable job) {
 	synchronized (threads) {
 	    if (threads.containsKey(key)) {
@@ -48,10 +59,25 @@ public class ThreadManager <Key> {
 	}
     }
 
+    /**
+     * Stops the thread for the given key.
+     * This method uses a default wait timeout defined in {@link #DEFAULT_WAIT}.
+     *
+     * @param key Key identifying the running job.
+     * @throws InterruptedException Thrown in case waiting for the thread to terminate is interrupted or timed out.
+     * @see #stopThread(java.lang.Object, long)
+     */
     public void stopThread(Key key) throws InterruptedException {
 	stopThread(key, DEFAULT_WAIT);
     }
 
+    /**
+     * Stops the thread for the given key.
+     *
+     * @param key Key identifying the running job.
+     * @param maxWaitTime Time in milliseconds to wait for the thread to die before raising an exception.
+     * @throws InterruptedException Thrown in case waiting for the thread to terminate is interrupted or timed out.
+     */
     public void stopThread(Key key, long maxWaitTime) throws InterruptedException {
 	Thread t;
 	synchronized (threads) {
@@ -67,10 +93,23 @@ public class ThreadManager <Key> {
 	t.join(maxWaitTime);
     }
 
+    /**
+     * Stops all threads managed in this instance.
+     *
+     * @throws InterruptedException Thrown in case waiting for any thread to terminate is interrupted or timed out.
+     * @see #stopThreads(long)
+     */
     public void stopThreads() throws InterruptedException {
 	stopThreads(DEFAULT_WAIT);
     }
 
+    /**
+     * Stops all threads managed in this instance.
+     * This method uses a default wait timeout defined in {@link #DEFAULT_WAIT}.
+     *
+     * @param maxWaitTime Time in milliseconds to wait for any thread to die before raising an exception.
+     * @throws InterruptedException Thrown in case waiting for any thread to terminate is interrupted or timed out.
+     */
     public void stopThreads(long maxWaitTime) throws InterruptedException {
 	synchronized (threads) {
 	    Iterator<Map.Entry<Key, Thread>> i = threads.entrySet().iterator();

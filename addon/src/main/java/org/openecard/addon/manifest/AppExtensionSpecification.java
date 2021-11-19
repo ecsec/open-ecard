@@ -39,7 +39,7 @@ import org.openecard.addon.utils.LocalizedStringExtractor;
  * @author Hans-Martin Haase
  */
 @XmlRootElement(name = "AppExtensionSpecification")
-@XmlType(propOrder = { "id", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })
+@XmlType(propOrder = { "id", "className", "loadOnStartup", "backgroundJob", "autoRestartBackgroundJob", "localizedName", "localizedDescription", "configDescription" })
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AppExtensionSpecification {
 

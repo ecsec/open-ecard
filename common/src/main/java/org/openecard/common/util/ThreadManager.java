@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ThreadManager <Key> {
 
-    private static final long DEFAULT_WAIT = 5000;
+    public static final long DEFAULT_WAIT = 5000;
 
     private final AtomicInteger threadNumber;
     private final ThreadGroup tg;
@@ -37,6 +37,10 @@ public class ThreadManager <Key> {
 
     public void submit(Key key, Runnable job) {
 	synchronized (threads) {
+	    if (threads.containsKey(key)) {
+		throw new IllegalStateException(String.format("A job for key %s already exists.", key.toString()));
+	    }
+
 	    String name = String.format("%s-%d", key.toString(), threadNumber.incrementAndGet());
 	    Thread t = new Thread(tg, job, name);
 	    t.start();
@@ -61,6 +65,10 @@ public class ThreadManager <Key> {
     private void stopThread(Thread t, long maxWaitTime) throws InterruptedException {
 	t.interrupt();
 	t.join(maxWaitTime);
+    }
+
+    public void stopThreads() throws InterruptedException {
+	stopThreads(DEFAULT_WAIT);
     }
 
     public void stopThreads(long maxWaitTime) throws InterruptedException {

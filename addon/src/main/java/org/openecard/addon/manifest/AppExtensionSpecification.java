@@ -39,7 +39,7 @@ import org.openecard.addon.utils.LocalizedStringExtractor;
  * @author Hans-Martin Haase
  */
 @XmlRootElement(name = "AppExtensionSpecification")
-@XmlType(propOrder = { "id", "className", "loadOnStartup", "localizedName", "localizedDescription", "configDescription" })
+@XmlType(propOrder = { "id", "className", "loadOnStartup", "backgroundJob", "autoRestartBackgroundJob", "localizedName", "localizedDescription", "configDescription" })
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AppExtensionSpecification {
 
@@ -49,6 +49,10 @@ public class AppExtensionSpecification {
     private String className;
     @XmlElement(name = "LoadOnStartup", required = false, defaultValue = "false")
     private Boolean loadOnStartup;
+    @XmlElement(name = "BackgroundJob", required = false, defaultValue = "false")
+    private Boolean backgroundJob;
+    @XmlElement(name = "AutoRestartBackgroundJob", required = false, defaultValue = "false")
+    private Boolean autoRestartBackgroundJob;
     @XmlElement(name = "LocalizedName", required = false)
     private final List<LocalizedString> localizedName = new ArrayList<>();
     @XmlElement(name = "LocalizedDescription", required = false)
@@ -69,6 +73,20 @@ public class AppExtensionSpecification {
 	    return false;
 	}
 	return loadOnStartup;
+    }
+
+    public Boolean isBackgroundJob() {
+	if (backgroundJob == null) {
+	    return false;
+	}
+	return backgroundJob;
+    }
+
+    public Boolean isAutoRestartBackgroundJob() {
+	if (autoRestartBackgroundJob == null) {
+	    return false;
+	}
+	return autoRestartBackgroundJob;
     }
 
     public List<LocalizedString> getLocalizedName() {
@@ -93,6 +111,14 @@ public class AppExtensionSpecification {
 
     public void setLoadOnStartup(boolean loadOnStartup) {
 	this.loadOnStartup = loadOnStartup;
+    }
+
+    public void setBackgroundJob(Boolean backgroundJob) {
+	this.backgroundJob = backgroundJob;
+    }
+
+    public void setAutoRestartBackgroundJob(Boolean autoRestartBackgroundJob) {
+	this.autoRestartBackgroundJob = autoRestartBackgroundJob;
     }
 
     public void setConfigDescription(Configuration configDescription) {

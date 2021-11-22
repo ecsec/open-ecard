@@ -1173,6 +1173,8 @@ public class Unmarshaller {
 		    protocolPluginDescription.setUri(parser.nextText());
 		} else if (parser.getName().equals("ConfigDescription")) {
 		    protocolPluginDescription.setConfigDescription(parseConfigDescription(parser));
+		} else if (parser.getName().equals("LoadOnStartup")) {
+		    protocolPluginDescription.setLoadOnStartup(Boolean.parseBoolean(parser.nextText()));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
@@ -1223,6 +1225,12 @@ public class Unmarshaller {
 		    appExtensionActionDescription.setId(parser.nextText());
 		} else if (parser.getName().equals("ConfigDescription")) {
 		    appExtensionActionDescription.setConfigDescription(parseConfigDescription(parser));
+		} else if (parser.getName().equals("LoadOnStartup")) {
+		    appExtensionActionDescription.setLoadOnStartup(Boolean.parseBoolean(parser.nextText()));
+		} else if (parser.getName().equals("BackgroundJob")) {
+		    appExtensionActionDescription.setBackgroundJob(Boolean.parseBoolean(parser.nextText()));
+		} else if (parser.getName().equals("AutoRestartBackgroundJob")) {
+		    appExtensionActionDescription.setAutoRestartBackgroundJob(Boolean.parseBoolean(parser.nextText()));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}
@@ -1273,6 +1281,8 @@ public class Unmarshaller {
 		    appPluginActionDescription.setResourceName(parser.nextText());
 		} else if (parser.getName().equals("ConfigDescription")) {
 		    appPluginActionDescription.setConfigDescription(parseConfigDescription(parser));
+		} else if (parser.getName().equals("LoadOnStartup")) {
+		    appPluginActionDescription.setLoadOnStartup(Boolean.parseBoolean(parser.nextText()));
 		} else {
 		    throw new IllegalArgumentException("Unexpected Tag found: " + parser.getName());
 		}

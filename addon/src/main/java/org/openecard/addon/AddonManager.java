@@ -22,6 +22,7 @@
 
 package org.openecard.addon;
 
+import org.openecard.common.util.ThreadManager;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import org.openecard.addon.bind.AppExtensionAction;
 import org.openecard.addon.bind.AppExtensionActionProxy;
+import org.openecard.addon.bind.AppExtensionException;
 import org.openecard.addon.bind.AppPluginAction;
 import org.openecard.addon.bind.AppPluginActionProxy;
 import org.openecard.addon.ifd.IFDProtocol;
@@ -71,6 +73,7 @@ public class AddonManager {
     private final CardStateMap cardStates;
     private final EventHandler eventHandler;
     private final ViewController viewController;
+    private final ThreadManager<ActionBackgroundTaskKey> backgroundActionManager;
     // TODO: rework cache to have borrow and return semantic
     private final Cache cache = new Cache();
 
@@ -100,8 +103,11 @@ public class AddonManager {
 	this.env.getEventDispatcher().add(eventHandler);
 	this.viewController = view;
 
+	this.backgroundActionManager = new ThreadManager<>("BackgroundActions");
+
 	new Thread(() -> {
 	    loadLoadOnStartAddons();
+	    runAddonsBackgroundJobs();
 	}, "Init-Addons").start();
     }
 
@@ -120,6 +126,13 @@ public class AddonManager {
 	Set<AddonSpecification> specs = protectedRegistry.listAddons();
 	for (AddonSpecification addonSpec : specs) {
 	    loadLoadOnStartupActions(addonSpec);
+	}
+    }
+
+    private void runAddonsBackgroundJobs() {
+	Set<AddonSpecification> specs = protectedRegistry.listAddons();
+	for (AddonSpecification addonSpec : specs) {
+	    runBackgroundJobsAction(addonSpec);
 	}
     }
 
@@ -162,6 +175,40 @@ public class AddonManager {
 	}
     }
 
+    protected void runBackgroundJobsAction(AddonSpecification addonSpec) {
+	for (AppExtensionSpecification appExSpec : addonSpec.getApplicationActions()) {
+	    if (appExSpec.isBackgroundJob()) {
+		ActionBackgroundTaskKey key = new ActionBackgroundTaskKey(addonSpec, appExSpec);
+		AppExtensionAction action = getAppExtensionAction(addonSpec, appExSpec.getId());
+
+		if (action != null) {
+		    LOG.info("Starting action ({}) as background job.", key.toString());
+
+		    backgroundActionManager.submit(key, new Runnable() {
+			@Override
+			public void run() {
+			    boolean autoRestart = appExSpec.isAutoRestartBackgroundJob();
+			    boolean runAgain = true;
+
+			    while (runAgain) {
+				// set the flag, so we run again if autoRestart is set
+				runAgain = autoRestart;
+
+				try {
+				    action.execute();
+				} catch (AppExtensionException ex) {
+				    LOG.warn("Failed to execute action.", ex);
+				}
+			    }
+			}
+		    });
+		} else {
+		    LOG.error("Failed to load action ({}) for background execution.", key.toString());
+		}
+	    }
+	}
+    }
+
     /**
      * Unload all add-ons.
      */
@@ -178,6 +225,16 @@ public class AddonManager {
      * @param addonSpec The {@link AddonSpecification} of the add-on to unload.
      */
     protected void unloadAddon(AddonSpecification addonSpec) {
+	// stop background jobs
+	for (AppExtensionSpecification appExSpec : addonSpec.getApplicationActions()) {
+	    ActionBackgroundTaskKey key = new ActionBackgroundTaskKey(addonSpec, appExSpec);
+	    try {
+		backgroundActionManager.stopThread(key);
+	    } catch (InterruptedException ex) {
+		LOG.error(String.format("Failed to stop background action (%s).", key), ex);
+	    }
+	}
+
 	Collection<? extends LifecycleTrait> actionsAndProtocols = cache.getAllAddonData(addonSpec);
 	for (LifecycleTrait obj : actionsAndProtocols) {
 	    obj.destroy(true);

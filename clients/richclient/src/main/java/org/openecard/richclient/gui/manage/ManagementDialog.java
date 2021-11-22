@@ -450,8 +450,10 @@ public final class ManagementDialog extends JFrame {
 	if (!desc.getApplicationActions().isEmpty()) {
 	    actionPanel = new ActionPanel();
 	    for (AppExtensionSpecification appExtSpec : desc.getApplicationActions()) {
-		ActionEntryPanel entry = new ActionEntryPanel(desc, appExtSpec, manager);
-		actionPanel.addActionEntry(entry);
+		if (!appExtSpec.isBackgroundJob()) {
+		    ActionEntryPanel entry = new ActionEntryPanel(desc, appExtSpec, manager);
+		    actionPanel.addActionEntry(entry);
+		}
 	    }
 	}
 

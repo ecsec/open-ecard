@@ -76,7 +76,7 @@ module org.openecard.richclient {
     opens generated;
 
     opens org.openecard.mdlw.sal.config to java.xml.bind;
-    opens org.openecard.addon.manifest to java.xml.bind;
+    opens org.openecard.addon.manifest;
 
     opens org.openecard.richclient.gui.update;
 

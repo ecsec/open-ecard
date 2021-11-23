@@ -187,7 +187,7 @@
 						<artifactId>jlink-jpackager-maven-plugin</artifactId>
 						<configuration>
 							<name>${package.identifier}</name>
-							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
+							<icon>${project.basedir}/src/main/resources/linux/open-ecard-app.png</icon>
 							<resourceDir>${project.basedir}/target/linux/resources</resourceDir>
 						</configuration>
 					</plugin>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2018 ecsec GmbH.
+ * Copyright (C) 2015-2022 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -39,6 +39,8 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
     private static final String	TLS1_DESC        = "addon.list.core.general.legacy.tls1.desc";
     private static final String NS               = "addon.list.core.general.legacy.invalid_schema";
     private static final String	NS_DESC          = "addon.list.core.general.legacy.invalid_schema.desc";
+    private static final String PATH_CASE        = "addon.list.core.general.legacy.case_insensitive_path";
+    private static final String PATH_CASE_DESC   = "addon.list.core.general.legacy.case_insensitive_path.desc";
 
 
     public GeneralSettingsLegacyGroup() {
@@ -46,6 +48,7 @@ public class GeneralSettingsLegacyGroup extends OpenecardPropertiesSettingsGroup
 
 	addBoolItem(LANG.translationForKey(TLS1), LANG.translationForKey(TLS1_DESC), "legacy.tls1");
 	addBoolItem(LANG.translationForKey(NS), LANG.translationForKey(NS_DESC), "legacy.invalid_schema");
+	addBoolItem(LANG.translationForKey(PATH_CASE), LANG.translationForKey(PATH_CASE_DESC), "legacy.case_insensitive_path");
     }
 
 }

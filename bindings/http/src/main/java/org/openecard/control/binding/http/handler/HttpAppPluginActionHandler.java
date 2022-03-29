@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2019 HS Coburg.
+ * Copyright (C) 2013-2022 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -27,8 +27,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonNotFoundException;
@@ -53,6 +55,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.openecard.common.OpenecardProperties;
 import org.openecard.common.util.FileUtils;
 import org.openecard.common.util.HttpRequestLineUtils;
 import org.openecard.control.binding.http.common.DocumentRoot;
@@ -108,9 +111,9 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    action = selector.getAppPluginAction(resourceName);
 
 	    String rawQuery = requestURI.getRawQuery();
-	    Map<String, String> queries = new HashMap<>(0);
+	    Map<String, String> queries = createQueryMap();
 	    if (rawQuery != null) {
-		queries = HttpRequestLineUtils.transform(rawQuery);
+		queries.putAll(HttpRequestLineUtils.transform(rawQuery));
 	    }
 
 	    RequestBody body = null;
@@ -270,6 +273,20 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	}
 
 	return null;
+    }
+
+    private Map<String, String> createQueryMap() {
+	boolean caseInsensitivePath = Boolean.valueOf(OpenecardProperties.getProperty("legacy.case_insensitive_path"));
+	if (! caseInsensitivePath) {
+	    return new HashMap<>(0);
+	} else {
+	    return new TreeMap<>(new Comparator<String>() {
+		@Override
+		public int compare(String o1, String o2) {
+		    return o1.compareToIgnoreCase(o2);
+		}
+	    });
+	}
     }
 
 }

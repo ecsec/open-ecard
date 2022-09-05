@@ -139,7 +139,7 @@
 			<id>openecard-repos</id>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</pluginRepository>
-		
+
 		<pluginRepository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -691,11 +691,16 @@
 					<version>0.8.5</version>
 				</plugin>
 
-				<!-- JLink Plugin -->
+				<!-- JLink & Jpackage Plugin -->
 				<plugin>
 					<groupId>net.agilhard.maven.plugins</groupId>
 					<artifactId>jlink-jpackager-maven-plugin</artifactId>
 					<version>1.0.0-ec.3</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.akman</groupId>
+					<artifactId>jpackage-maven-plugin</artifactId>
+					<version>0.1.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

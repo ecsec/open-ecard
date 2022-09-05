@@ -26,6 +26,7 @@
 
 		<package.identifier>open-ecard-app</package.identifier>
 		<package.deps>pcscd</package.deps>
+		<package.type>PLATFORM</package.type>
 	</properties>
 
 	<profiles>
@@ -39,62 +40,33 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>net.agilhard.maven.plugins</groupId>
-						<artifactId>jlink-jpackager-maven-plugin</artifactId>
-						<extensions>true</extensions>
+						<groupId>com.github.akman</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>jpackage</id>
-								<phase>package</phase>
+								<phase>verify</phase>
 								<goals>
-									<goal>jpackager</goal>
+									<goal>jpackage</goal>
 								</goals>
 								<configuration>
-									<!-- Jpackage arguments -->
 									<!-- Don't use spaces in application name, because of problems with install scripts ... -->
-									<identifier>org.openecard.richclient</identifier>
-									<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
+									<!--<name>org.openecard.richclient</name>-->
+									<appversion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appversion>
 									<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
 									<jdkToolchain>
 										<version>[14,)</version>
 									</jdkToolchain>
-									<runtimeImage>${project.build.directory}/open-ecard</runtimeImage>
-									<skipModulesInclude>true</skipModulesInclude>
+									<runtimeimage>${project.build.directory}/open-ecard</runtimeimage>
 									<!-- JVM arguments of the application -->
-									<jvmArgs>
-										<jvmArg>-XX:-UsePerfData</jvmArg>
-										<jvmArg>-XX:-Inline</jvmArg>
-										<jvmArg>-XX:+AggressiveOpts</jvmArg>
-										<jvmArg>-Xms16m</jvmArg>
-										<jvmArg>-Xmx64m</jvmArg>
-										<jvmArg>-XX:+UseG1GC</jvmArg>
-										<jvmArg>-XX:MinHeapFreeRatio=1</jvmArg>
-										<jvmArg>-XX:MaxHeapFreeRatio=5</jvmArg>
-										<jvmArg>-XX:G1ReservePercent=5</jvmArg>
-										<jvmArg>-Djavax.xml.stream.isSupportingExternalEntities=false</jvmArg>
-										<jvmArg>-Djavax.xml.stream.supportDTD=false</jvmArg>
-									</jvmArgs>
+									<javaoptions>
+										-XX:-UsePerfData -XX:-Inline -XX:+AggressiveOpts -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false
+									</javaoptions>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>
 									<description>${app.description}</description>
-									<licenseFile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licenseFile>
+									<licensefile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licensefile>
 									<copyright>2019 ecsec GmbH</copyright>
-									<linuxOptions>
-										<bundleName>${package.identifier}</bundleName>
-										<debMaintainer>${app.maintainer}</debMaintainer>
-										<rpmLicenseType>GPL v3</rpmLicenseType>
-										<menuGroup>Network;</menuGroup>
-										<packageDeps>${package.deps}</packageDeps>
-									</linuxOptions>
-									<macOptions>
-										<bundleName>${app.identifier}</bundleName>
-										<bundleIdentifier>org.openecard.versioncheck.MainLoader</bundleIdentifier>
-									</macOptions>
-									<windowsOptions>
-										<dirChooser>true</dirChooser>
-										<menuGroup>misc</menuGroup>
-										<upgradeUUID>CB11CB66-71B5-42C1-8076-15F1FEDCC22A</upgradeUUID>
-									</windowsOptions>
+									<type>${package.type}</type>
 								</configuration>
 							</execution>
 						</executions>
@@ -137,12 +109,16 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<groupId>net.agilhard.maven.plugins</groupId>
-						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<groupId>com.github.akman</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
 						<configuration>
 							<name>${package.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/linux/Open-eCard-App.png</icon>
-							<resourceDir>${project.basedir}/target/linux/resources</resourceDir>
+							<resourcedir>${project.basedir}/target/linux/resources</resourcedir>
+							<linuxdebmaintainer>${app.maintainer}</linuxdebmaintainer>
+							<linuxrpmlicensetype>GPL v3</linuxrpmlicensetype>
+							<linuxmenugroup>Network;</linuxmenugroup>
+							<linuxpackagedeps>${package.deps}</linuxpackagedeps>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -183,12 +159,15 @@
 					</plugin>
 					<!-- Create .msi installer -->
 					<plugin>
-						<groupId>net.agilhard.maven.plugins</groupId>
-						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<groupId>com.github.akman</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
 						<configuration>
 							<name>${app.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
-							<type>msi</type>
+							<type>MSI</type>
+							<windirchooser>true</windirchooser>
+							<winmenugroup>misc</winmenugroup>
+							<winupgradeuuid>B11CB66-71B5-42C1-8076-15F1FEDCC22A</winupgradeuuid>
 						</configuration>
 					</plugin>
 					<!-- Create .exe installer -->
@@ -228,12 +207,14 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>net.agilhard.maven.plugins</groupId>
-						<artifactId>jlink-jpackager-maven-plugin</artifactId>
+						<groupId>com.github.akman</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
 						<configuration>
 							<name>${app.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/mac-os/Open-eCard-App.icns</icon>
-							<resourceDir>${project.basedir}/src/main/resources/mac-os</resourceDir>
+							<resourcedir>${project.basedir}/src/main/resources/mac-os</resourcedir>
+							<macpackagename>${app.identifier}</macpackagename>
+							<macpackageidentifier>org.openecard.versioncheck.MainLoader</macpackageidentifier>
 						</configuration>
 					</plugin>
 				</plugins>

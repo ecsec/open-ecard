@@ -27,3 +27,13 @@ package-linux-rpm:
       - packager/richclient-packager/target/jpackage
   script:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=RPM
+
+package-osx-pkg:
+  stage: package
+  tags:
+    - "mac"
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/jpackage
+  script:
+    - mvn install -DskipTests

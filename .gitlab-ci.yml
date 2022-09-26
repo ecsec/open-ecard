@@ -1,9 +1,33 @@
 workflow:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_MERGE_REQUEST_TITLE =~ /^WIP.*$/
+      when: never
+    - if: $CI_MERGE_REQUEST_TITLE =~ /^Draft.*$/
+      when: never
 
 stages:
+  - analyze
   - package
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+sast:
+  stage: analyze
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == "master"
 
 package-linux-deb:
   stage: package
@@ -15,6 +39,8 @@ package-linux-deb:
       - packager/richclient-packager/target/jpackage
   script:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DEB
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
 
 package-linux-rpm:
   stage: package
@@ -26,6 +52,8 @@ package-linux-rpm:
       - packager/richclient-packager/target/jpackage
   script:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=RPM
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
 
 package-osx-pkg:
   stage: package
@@ -41,6 +69,8 @@ package-osx-pkg:
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/ecsec.keychain-db
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=PKG
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
 
 package-osx-dmg:
   stage: package
@@ -54,6 +84,8 @@ package-osx-dmg:
       - packager/richclient-packager/target/jpackage
   script:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DMG
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
 
 notarize-osx-pkg:
   stage: package
@@ -71,7 +103,8 @@ notarize-osx-pkg:
         --wait
   needs: [ "package-osx-pkg", "package-osx-dmg" ]
   rules:
-    - when: manual
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+      when: manual
 
 package-win:
   stage: package
@@ -96,3 +129,5 @@ package-win:
         /td SHA256
         /fd SHA256
         .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

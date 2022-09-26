@@ -1,0 +1,29 @@
+workflow:
+  rules:
+    #- if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "v2-installers"
+
+stages:
+  - package
+
+package-linux-deb:
+  stage: package
+  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  tags:
+    - "linux"
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/jpackage
+  script:
+    - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DEB
+
+package-linux-rpm:
+  stage: package
+  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  tags:
+    - "linux"
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/jpackage
+  script:
+    - mvn install -DskipTests -Ddesktop-package -Dpackage.type=RPM

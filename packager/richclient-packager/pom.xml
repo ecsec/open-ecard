@@ -40,6 +40,25 @@
 			<build>
 				<plugins>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-toolchains-plugin</artifactId>
+						<version>3.0.0</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>toolchain</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<toolchains>
+								<jdk>
+									<version>[14,)</version>
+								</jdk>
+							</toolchains>
+						</configuration>
+					</plugin>
+					<plugin>
 						<groupId>com.github.akman</groupId>
 						<artifactId>jpackage-maven-plugin</artifactId>
 						<executions>
@@ -53,9 +72,6 @@
 									<!--<name>org.openecard.richclient</name>-->
 									<appversion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appversion>
 									<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
-									<jdkToolchain>
-										<version>[14,)</version>
-									</jdkToolchain>
 									<runtimeimage>${project.build.directory}/open-ecard</runtimeimage>
 									<!-- JVM arguments of the application -->
 									<javaoptions>

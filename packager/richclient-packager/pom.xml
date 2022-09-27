@@ -53,10 +53,17 @@
 									<!--<name>org.openecard.richclient</name>-->
 									<appversion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appversion>
 									<module>org.openecard.richclient/org.openecard.richclient.RichClient</module>
-									<runtimeimage>${project.build.directory}/open-ecard</runtimeimage>
+									<modulepath>
+										<dependencysets>
+											<dependencyset>
+												<includeoutput>true</includeoutput>
+												<excludeautomatic>true</excludeautomatic>
+											</dependencyset>
+										</dependencysets>
+									</modulepath>
 									<!-- JVM arguments of the application -->
 									<javaoptions>
-										-XX:-UsePerfData -XX:-Inline -XX:+AggressiveOpts -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false
+										-XX:-UsePerfData -XX:-Inline -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false
 									</javaoptions>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>
@@ -263,32 +270,6 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
-
-			<!-- Jpackage plugin to create installers -->
-			<plugin>
-				<groupId>net.agilhard.maven.plugins</groupId>
-				<artifactId>jlink-jpackager-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<executions>
-					<execution>
-						<id>jlink</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>jlink</goal>
-						</goals>
-						<configuration>
-							<!-- JLink arguments -->
-							<launcher>open-ecard=org.openecard.richclient/org.openecard.richclient.RichClient</launcher>
-							<compress>2</compress>
-							<noHeaderFiles>true</noHeaderFiles>
-							<noManPages>true</noManPages>
-							<stripDebug>false</stripDebug>
-							<ignoreSigningInformation>true</ignoreSigningInformation>
-							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

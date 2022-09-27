@@ -691,12 +691,7 @@
 					<version>0.8.5</version>
 				</plugin>
 
-				<!-- JLink & Jpackage Plugin -->
-				<plugin>
-					<groupId>net.agilhard.maven.plugins</groupId>
-					<artifactId>jlink-jpackager-maven-plugin</artifactId>
-					<version>1.0.0-ec.3</version>
-				</plugin>
+				<!-- Jpackage Plugin -->
 				<plugin>
 					<groupId>com.github.akman</groupId>
 					<artifactId>jpackage-maven-plugin</artifactId>

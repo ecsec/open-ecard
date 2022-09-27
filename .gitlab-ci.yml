@@ -54,3 +54,12 @@ package-osx-dmg:
   script:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DMG
 
+package-win:
+  stage: package
+  tags:
+    - "win"
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/jpackage
+  script:
+    - mvn install -DskipTests -Ddesktop-package

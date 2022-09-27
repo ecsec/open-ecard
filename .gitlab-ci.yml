@@ -33,8 +33,24 @@ package-osx-pkg:
   tags:
     - "mac"
     - "dev-cert"
+  variables:
+    JAVA_HOME: /Users/ecsec-ci/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home/
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage
   script:
-    - mvn install -DskipTests
+    - mvn install -DskipTests -Ddesktop-package -Dpackage.type=PKG
+
+package-osx-dmg:
+  stage: package
+  tags:
+    - "mac"
+    - "dev-cert"
+  variables:
+    JAVA_HOME: /Users/ecsec-ci/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home/
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/jpackage
+  script:
+    - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DMG
+

@@ -82,6 +82,7 @@
 			<id>app-bundles-Linux</id>
 			<activation>
 				<os>
+					<name>Linux</name>
 					<family>Unix</family>
 				</os>
 				<property>

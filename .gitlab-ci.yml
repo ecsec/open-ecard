@@ -32,6 +32,7 @@ package-osx-pkg:
   stage: package
   tags:
     - "mac"
+    - "dev-cert"
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage

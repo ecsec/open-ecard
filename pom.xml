@@ -71,7 +71,7 @@
 
 		<bundled.java.version>[11,14)</bundled.java.version>
 		<target.java.version>11</target.java.version>
-		<min.jkd.version>12</min.jkd.version>
+		<min.jkd.version>11</min.jkd.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->

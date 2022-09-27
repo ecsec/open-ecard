@@ -104,14 +104,14 @@
 			<optional>true</optional>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-annotation</artifactId>
 			<optional>true</optional>
 			<type>jar</type>
 		</dependency>
-                
+
 		<dependency>
 			<groupId>org.openecard.tools</groupId>
 			<artifactId>roboface-marshaller</artifactId>
@@ -164,9 +164,9 @@
 			<artifactId>pace</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<!-- testing -->
-		
+
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
 			<artifactId>android-marshaller</artifactId>

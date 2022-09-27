@@ -13,6 +13,7 @@ Against the background of the [eIDAS](https://www.eid.as/)-Regulation, the Gener
 
 The artifacts of the project consist of modularized, and to some extent extensible, libraries as well as client implementations such as a Desktop application (richclient) an smartphone apps for Android and iOS.
 
+
 Build Instructions
 ==================
 
@@ -68,7 +69,11 @@ More information about the required JDK versions and the setup of the toolchain,
 Mobile libs
 -----------
 
-Open eCard supports building of libraries for Android and iOS for usage in arbitrary mobile apps. 
+Open eCard supports building of libraries for Android and iOS for usage in arbitrary mobile apps.
+For this purpose, Java JDK 11 is required.
+Building the Open eCard with those mobile libraries can look like the following:
+
+    $ mvn clean install -P build-mobile-libs
 
 ### Android
 After a successfull build the library for android can be found in `android-lib` sub project. 
@@ -85,8 +90,6 @@ It also can be installed as a cocoapod dependency.
 pod 'open-ecard'
 ```
 See [open-ecard-ios](https://github.com/ecsec/open-ecard-ios) for further information.
-
-
 
 
 License

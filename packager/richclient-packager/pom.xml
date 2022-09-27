@@ -40,25 +40,6 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-toolchains-plugin</artifactId>
-						<version>3.0.0</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>toolchain</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<toolchains>
-								<jdk>
-									<version>[14,)</version>
-								</jdk>
-							</toolchains>
-						</configuration>
-					</plugin>
-					<plugin>
 						<groupId>com.github.akman</groupId>
 						<artifactId>jpackage-maven-plugin</artifactId>
 						<executions>
@@ -305,10 +286,6 @@
 							<stripDebug>false</stripDebug>
 							<ignoreSigningInformation>true</ignoreSigningInformation>
 							<outputDirectoryImage>${project.build.directory}/open-ecard</outputDirectoryImage>
-							<jdkToolchain>
-								<version>${bundled.java.version}</version>
-								<vendor>OpenJDK</vendor>
-							</jdkToolchain>
 						</configuration>
 					</execution>
 				</executions>

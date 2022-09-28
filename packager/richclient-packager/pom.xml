@@ -220,6 +220,9 @@
 							<resourcedir>${project.basedir}/src/main/resources/mac-os</resourcedir>
 							<macpackagename>${app.identifier}</macpackagename>
 							<macpackageidentifier>org.openecard.versioncheck.MainLoader</macpackageidentifier>
+							<macsign>true</macsign>
+							<macsigningkeyusername>ecsec GmbH (72RMQ6K75Z)</macsigningkeyusername>
+							<macsigningkeychain>/Users/ecsec-ci/Library/Keychains/ecsec.keychain-db</macsigningkeychain>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -297,6 +300,10 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-swing</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
 		</dependency>
 
 		<!-- JAXB -->

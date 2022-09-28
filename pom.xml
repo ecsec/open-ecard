@@ -809,7 +809,12 @@
 				<artifactId>javafx-controls</artifactId>
 				<version>${version.openjfx}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-base</artifactId>
+				<version>${version.openjfx}</version>
+			</dependency>
+
 			<!-- iOS building -->
 			<dependency>
 				<groupId>org.openecard.tools</groupId>

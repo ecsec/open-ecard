@@ -39,7 +39,17 @@ package-osx-pkg:
     paths:
       - packager/richclient-packager/target/jpackage
   script:
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/ecsec.keychain-db
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=PKG
+    # Notarization Process
+    - PKG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.pkg')
+    - xcrun altool --notarize-app
+      --primary-bundle-id "org.openecard.versioncheck.MainLoader"
+      --username "${MAC_OS_NOTARIZATION_USERNAME}"
+      --password "${MAC_OS_NOTARIZATION_PASSWORD}"
+      --asc-provider "72RMQ6K75Z"
+      --file $PKG_FILE_PATH
 
 package-osx-dmg:
   stage: package

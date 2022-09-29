@@ -74,7 +74,7 @@ notarize-osx-pkg:
   rules:
     - when: manual
 
-package-win:
+package-win-msi:
   stage: package
   tags:
     - "win"
@@ -82,4 +82,14 @@ package-win:
     paths:
       - packager/richclient-packager/target/jpackage
   script:
-    - .\mvnw.cmd install -DskipTests -Ddesktop-package
+    - .\mvnw.cmd install -DskipTests -Ddesktop-package "-Dpackage.type=MSI"
+
+package-win-exe:
+  stage: package
+  tags:
+    - "win"
+  artifacts:
+    paths:
+      - packager/richclient-packager/target/iscc
+  script:
+    - .\mvnw.cmd install -DskipTests -Ddesktop-package "-Dpackage.type=EXE"

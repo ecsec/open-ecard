@@ -82,4 +82,4 @@ package-win:
     paths:
       - packager/richclient-packager/target/jpackage
   script:
-    - mvn install -DskipTests -Ddesktop-package
+    - .\mvnw.cmd install -DskipTests -Ddesktop-package

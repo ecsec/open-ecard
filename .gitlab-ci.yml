@@ -88,8 +88,22 @@ package-win-exe:
   stage: package
   tags:
     - "win"
+  variables:
+    WIN_KEYSTORE: C:\gitlab-runner\assets\openecard_cs.p12
   artifacts:
     paths:
       - packager/richclient-packager/target/iscc
   script:
     - .\mvnw.cmd install -DskipTests -Ddesktop-package "-Dpackage.type=EXE"
+    - $EXE_FILE_PATH = $(Get-Childitem
+        -Path .\packager\richclient-packager\target\iscc\
+        -Include Open-eCard-App-*.exe
+        -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()                                          
+    - signtool.exe sign 
+        /debug 
+        /p ${WIN_KEYCHAIN_PW}
+        /f "${WIN_KEYSTORE}"
+        /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp
+        /td SHA256
+        /fd SHA256
+        .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH

@@ -1,7 +1,7 @@
 package org.openecard.ws;
 
 import java.util.Set;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 
 
 /**

@@ -29,7 +29,7 @@ import iso.std.iso_iec._24727.tech.schema.CertificateRefType;
 import iso.std.iso_iec._24727.tech.schema.CryptoKeyInfoType;
 import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import iso.std.iso_iec._24727.tech.schema.KeyRefType;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import org.openecard.common.ECardConstants;
 import org.openecard.ws.marshal.WSMarshaller;

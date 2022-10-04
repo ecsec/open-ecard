@@ -22,7 +22,7 @@
 
 package org.openecard.addon.manifest;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  *

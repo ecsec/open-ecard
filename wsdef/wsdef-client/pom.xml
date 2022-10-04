@@ -81,14 +81,54 @@
 						</configuration>
 					</execution>
 				</executions>
-            </plugin>
+			</plugin>
+
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>replace-for-jakarta</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<configuration>
+							<filesToInclude>target/**/*.java</filesToInclude>
+							<preserveDir>true</preserveDir>
+							<replacements>
+								<replacement>
+									<token>javax.xml.bind</token>
+									<value>jakarta.xml.bind</value>
+								</replacement>
+								<replacement>
+									<token>javax.annotation</token>
+									<value>jakarta.annotation</value>
+								</replacement>
+								<replacement>
+									<token>javax.jws</token>
+									<value>jakarta.jws</value>
+								</replacement>
+								<replacement>
+									<token>javax.xml.ws</token>
+									<value>jakarta.xml.ws</value>
+								</replacement>
+							</replacements>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.ws</groupId>
+			<artifactId>jakarta.xml.ws-api</artifactId>
 		</dependency>
 	</dependencies>
 

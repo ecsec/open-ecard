@@ -11,9 +11,9 @@
 package org.openecard.common.sal.state.cif;
 
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
+import jakarta.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.xml.bind.JAXBElement;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;
 import org.openecard.ws.marshal.WSMarshallerFactory;

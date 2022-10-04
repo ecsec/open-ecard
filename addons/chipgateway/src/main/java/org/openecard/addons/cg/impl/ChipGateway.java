@@ -27,7 +27,7 @@ import org.openecard.addons.cg.activate.TlsConnectionHandler;
 import org.openecard.addons.cg.ex.VersionTooOld;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import java.io.IOException;
@@ -185,7 +185,7 @@ public class ChipGateway {
 	    this.terminateUrl = addrBuilder.addPathSegment("Terminate").build();
 
             this.mapper = new ObjectMapper();
-            this.mapper.registerModule(new JaxbAnnotationModule());
+            this.mapper.registerModule(new JakartaXmlBindAnnotationModule());
 
 	    this.connectedSlots = new TreeSet<>(new ByteComparator());
 	    this.tokenCache = new TokenCache(dispatcher);

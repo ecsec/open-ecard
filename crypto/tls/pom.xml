@@ -27,7 +27,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.github.markusbernhardt</groupId>
+			<groupId>org.bidib.com.github.markusbernhardt</groupId>
 			<artifactId>proxy-vole</artifactId>
 		</dependency>
 		<!-- updated version or there are build problems due to JDK system dependencies which are not present in modern JDKs -->

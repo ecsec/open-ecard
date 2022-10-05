@@ -898,9 +898,9 @@
 				<version>0.6.5</version>
 			</dependency>
 			<dependency>
-				<groupId>com.github.markusbernhardt</groupId>
+				<groupId>org.bidib.com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
-				<version>1.0.5</version>
+				<version>1.0.17</version>
 			</dependency>
 
 			<dependency>

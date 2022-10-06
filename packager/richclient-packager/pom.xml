@@ -63,7 +63,7 @@
 									</modulepath>
 									<!-- JVM arguments of the application -->
 									<javaoptions>
-										-XX:-UsePerfData -XX:-Inline -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false
+										-XX:-UsePerfData -XX:-Inline -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false --add-exports=org.openecard.richclient/com.github.markusbernhardt.proxy.jna.win=com.sun.jna
 									</javaoptions>
 									<!-- Application package metadata -->
 									<vendor>${app.vendor}</vendor>

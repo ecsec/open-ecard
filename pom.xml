@@ -123,6 +123,11 @@
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</repository>
 		<repository>
+			<id>javacard-pro</id>
+			<name>javacard.pro</name>
+			<url>https://javacard.pro/maven/</url>
+		</repository>
+		<repository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
@@ -901,6 +906,16 @@
 				<groupId>org.bidib.com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
 				<version>1.0.17</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna-platform</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -912,12 +927,12 @@
 			<!-- Java Native Access -->
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna</artifactId>
+				<artifactId>jna-jpms</artifactId>
 				<version>5.12.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna-platform</artifactId>
+				<artifactId>jna-platform-jpms</artifactId>
 				<version>5.12.1</version>
 			</dependency>
 
@@ -946,9 +961,15 @@
 
 			<!-- JNA SmartcardIO -->
 			<dependency>
-				<groupId>io.github.jnasmartcardio</groupId>
-				<artifactId>jnasmartcardio</artifactId>
-				<version>0.2.7</version>
+				<groupId>com.github.martinpaljak</groupId>
+				<artifactId>apdu4j-jnasmartcardio</artifactId>
+				<version>0.2.7+220204</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 		</dependencies>

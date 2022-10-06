@@ -25,8 +25,8 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.github.jnasmartcardio</groupId>
-			<artifactId>jnasmartcardio</artifactId>
+			<groupId>com.github.martinpaljak</groupId>
+			<artifactId>apdu4j-jnasmartcardio</artifactId>
 		</dependency>
 	</dependencies>
 

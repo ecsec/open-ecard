@@ -36,6 +36,10 @@ module org.openecard.richclient {
     requires javafx.controls;
     requires javafx.graphics;
 
+    /* JNA Smartcardio */
+    requires apdu4j.jnasmartcardio;
+    requires com.sun.jna.platform;
+
     /* Open JAXB classes for reflection */
     opens de.bund.bsi.ecard.api._1;
     opens iso.std.iso_iec._24727.tech.schema;
@@ -59,6 +63,4 @@ module org.openecard.richclient {
     //opens org.openecard.mdlw.sal.config to java.xml.bind;
 
     opens org.openecard.addon.manifest to jakarta.xml.bind;
-
-    opens jnasmartcardio to java.base;
 }

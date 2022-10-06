@@ -26,6 +26,10 @@
 				<exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>
 				<exclude>jakarta.activation:jakarta.activation-api</exclude>
 
+				<!-- JNA / SmartcardIO -->
+				<exclude>com.github.martinpaljak:apdu4j-jnasmartcardio</exclude>
+				<exclude>net.java.dev.jna:*</exclude>
+
 				<!-- JavaFX dependencies -->
 				<exclude>org.openjfx:*</exclude>
 			</excludes>

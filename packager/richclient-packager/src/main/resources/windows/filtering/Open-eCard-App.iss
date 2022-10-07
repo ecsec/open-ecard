@@ -3,7 +3,7 @@
 #define publisher "${app.vendor}"
 #define appURL "${app.url}"
 #define appSupportURL "https://dev.openecard.org/projects/open-ecard/boards"
-#define appExeName "Open-eCard-App-${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.exe"
+#define appExeName "Open-eCard-App.exe"
 #define appIdentifier "${app.identifier}"
 #define dirName "Open-eCard-App"
 
@@ -50,7 +50,8 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "${project.basedir}\target\jpackage\{#appExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "${project.basedir}\target\jpackage-build\images\win-msi.image\{#dirName}\{#appExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "${project.basedir}\target\jpackage-build\images\win-msi.image\{#dirName}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

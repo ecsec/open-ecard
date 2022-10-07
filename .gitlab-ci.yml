@@ -74,17 +74,7 @@ notarize-osx-pkg:
   rules:
     - when: manual
 
-package-win-msi:
-  stage: package
-  tags:
-    - "win"
-  artifacts:
-    paths:
-      - packager/richclient-packager/target/jpackage
-  script:
-    - .\mvnw.cmd install -DskipTests -Ddesktop-package "-Dpackage.type=MSI"
-
-package-win-exe:
+package-win:
   stage: package
   tags:
     - "win"
@@ -94,7 +84,7 @@ package-win-exe:
     paths:
       - packager/richclient-packager/target/iscc
   script:
-    - .\mvnw.cmd install -DskipTests -Ddesktop-package "-Dpackage.type=EXE"
+    - .\mvnw.cmd install -DskipTests -Ddesktop-package
     - $EXE_FILE_PATH = $(Get-Childitem
         -Path .\packager\richclient-packager\target\iscc\
         -Include Open-eCard-App-*.exe

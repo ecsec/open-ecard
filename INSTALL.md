@@ -48,7 +48,7 @@ By default, only a modular runtime image is created. However, a native applicati
 
     $ mvn clean install -Ddesktop-package
 
-Usually, the predefined package formats are used: dmg for Mac OS, deb for Linux and EXE for Windows. An additional property `package.type` can replace the predefined format of the native application package (only for Mac and Linux). The possible formats are:
+Usually, the predefined package formats are used: dmg for Mac OS, deb for Linux and EXE & MSI for Windows. An additional property `package.type` can replace the predefined format of the native application package (only for Mac and Linux). The possible formats are:
 
 Thereby, the following types are available:
 
@@ -56,8 +56,6 @@ Thereby, the following types are available:
  - PKG
  - DEB
  - RPM
- - MSI
- - EXE
 
 A native package with the `pkg` format can be created by using the following command:
 

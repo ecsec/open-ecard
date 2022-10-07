@@ -48,7 +48,7 @@ Native packages which are based on a modular runtime image can be built with the
 
     $ mvn clean install -Ddesktop-package
 
-By default, the packager will take the predefined package types, such as dmg for Mac OS and deb for Linux-based systems. The package type can be overridden for Mac, Linux and Windows packages by using the following user property:
+By default, the packager will take the predefined package types, such as dmg for Mac OS and deb for Linux-based systems. The package type can be overridden for Mac and Linux packages by using the following user property:
 
     $ mvn clean install -Ddesktop-package -Dpackage.type=<type>
 
@@ -58,8 +58,6 @@ Thereby, the following types are available:
  - PKG
  - DEB
  - RPM
- - MSI
- - EXE
 
 You have to make sure the required packaging tools are installed. In case of Windows, msi and exe packages are built. For this purpose, two additional tools are required:
 

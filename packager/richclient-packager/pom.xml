@@ -71,6 +71,7 @@
 									<licensefile>${project.basedir}/src/main/resources/licenses/LICENSE.GPL</licensefile>
 									<copyright>2019 ecsec GmbH</copyright>
 									<type>${package.type}</type>
+									<verbose>true</verbose>
 								</configuration>
 							</execution>
 						</executions>
@@ -130,42 +131,13 @@
 			</build>
 		</profile>
 		<profile>
-			<id>app-bundles-win-msi</id>
+			<id>app-bundles-win</id>
 			<activation>
 				<os>
 					<family>windows</family>
 				</os>
 				<property>
-					<name>package.type</name>
-					<value>MSI</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.akman</groupId>
-						<artifactId>jpackage-maven-plugin</artifactId>
-						<configuration>
-							<name>${app.identifier}</name>
-							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
-							<type>MSI</type>
-							<windirchooser>true</windirchooser>
-							<winmenugroup>misc</winmenugroup>
-							<winupgradeuuid>B11CB66-71B5-42C1-8076-15F1FEDCC22A</winupgradeuuid>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>app-bundles-win-exe</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-				<property>
-					<name>package.type</name>
-					<value>EXE</value>
+					<name>desktop-package</name>
 				</property>
 			</activation>
 			<build>
@@ -198,10 +170,12 @@
 						<configuration>
 							<name>${app.identifier}</name>
 							<icon>${project.basedir}/src/main/resources/windows/Open-eCard-App.ico</icon>
-							<type>EXE</type>
+							<resourcedir>${project.basedir}/src/main/resources/windows</resourcedir>
 							<windirchooser>true</windirchooser>
 							<winmenugroup>misc</winmenugroup>
+							<type>MSI</type>
 							<winupgradeuuid>B11CB66-71B5-42C1-8076-15F1FEDCC22A</winupgradeuuid>
+							<temp>${project.basedir}/target/jpackage-build</temp>
 						</configuration>
 					</plugin>
 					<!-- Create .exe installer -->

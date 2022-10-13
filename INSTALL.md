@@ -4,9 +4,9 @@ Prerequisites
 In order to build the Open eCard project, some additional tools are needed.
 
 Required dependencies are:
-* Java JDK 12 or higher - Oracle JDK and OpenJDK are working correctly (jlink is required for building modular runtime images)
+* Java JDK 17 or higher - Oracle JDK and OpenJDK are working correctly (jlink is required for building modular runtime images)
 
-* Maven in at least version 3.6.1
+* Maven in at least version 3.8.6
 
   https://maven.apache.org/download.html
 
@@ -15,9 +15,7 @@ Required dependencies are:
   http://git-scm.com/downloads
 
 Optional dependencies are:
-* Java JDK 14 with the new jpackage tool for creating native packages (early-access builds are available)
-
-  https://jdk.java.net/jpackage/)
+* Java JDK 11 to build mobile libraries
 
 * Android SDK
   The Android SDK dependent modules are built when the environment variable
@@ -35,39 +33,6 @@ Optional dependencies are:
 
   https://developer.android.com/tools/sdk/ndk/index.html
 
-Native packages can be created with an early-access build of JDK-14 which contains the new jpackage tool. For this purpose, JDK-14 must be managed independently of other JDK versions. This can be done with Maven toolchains. For this purpose, a `toolchains.xml` file is required on the building machine. The default location of this file is `~/.m2/toolchains.xml`. It should look similar to this one (JDK paths must be 	adjusted):
-
-```xml
-<?xml version="1.0" encoding="UTF8"?>
-<toolchains>
-	<!-- JDK toolchains -->
-        <toolchain>
-                <type>jdk</type>
-                <provides>
-                        <version>14</version>
-                        <vendor>OpenJDK</vendor>
-                        <id>JavaSE-14</id>
-                </provides>
-                <configuration>
-			<jdkHome>/usr/lib/jvm/jdk-14/</jdkHome>
-                </configuration>
-        </toolchain>
-        <toolchain>
-                <type>jdk</type>
-                <provides>
-                        <version>12</version>
-                        <vendor>OpenJDK</vendor>
-                        <id>JavaSE-12</id>
-                </provides>
-                <configuration>
-			<jdkHome>/usr/lib/jvm/java-12-openjdk-amd64/</jdkHome>
-                </configuration>
-        </toolchain>
-</toolchains>
-```
-
-If native packages are not created on the building machine, the first toolchain is not required.
-
 Build Sources
 =============
 
@@ -79,20 +44,22 @@ In order to create Javadoc and source artifacts, perform the following command:
 
     $ mvn clean javadoc:javadoc javadoc:jar source:jar install
 
-By default, only a modular runtime image is created. However, if the early-access build of JDK-14 with the new jpackage tool is added to the toolchains, a native application package can be created by using the property `desktop-package`:
+By default, only a modular runtime image is created. However, a native application package can be created by using the property `desktop-package`:
 
     $ mvn clean install -Ddesktop-package
 
-Usually, the predefined package formats are used: dmg for Mac OS, deb for Linux and msi and exe for Windows. An additional property `jlink-jpackager.package-type` can replace the predefined format of the native application package (only for Mac and Linux). The possible formats are:
+Usually, the predefined package formats are used: dmg for Mac OS, deb for Linux and EXE & MSI for Windows. An additional property `package.type` can replace the predefined format of the native application package (only for Mac and Linux). The possible formats are:
 
- - dmg
- - pkg
- - deb
- - rpm
+Thereby, the following types are available:
+
+ - DMG
+ - PKG
+ - DEB
+ - RPM
 
 A native package with the `pkg` format can be created by using the following command:
 
-    $ mvn clean install -Ddesktop-package -Djlink-jpackager.package-type=pkg
+    $ mvn clean install -Ddesktop-package -Dpackage.type=PKG
 
 The developer has to make sure that all necessary packaging tools are installed. In case of Windows, msi and exe packages are built. For this purpose, two additional tools are required:
 
@@ -126,6 +93,11 @@ Module `clients/richclient`
   Usually the cifs are provided by a seperate artifact. This profile creates
   a 'contains everything' jar file for direct execution.
 
+Modules `clients/android-common`, `clients/android-lib`, `clients/mobile-lib`, `clients/ios-common`, `clients/ios-lib`
+and `packager/ios-framework`
+* `build-mobile-libs`
+  Usually, in the Open eCard build the mobile modules are excluded. If you want
+  to build the mobile libraries, make sure that Java JDK 11 is used.
 
 Code Signing
 ------------

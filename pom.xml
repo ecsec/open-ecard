@@ -71,7 +71,7 @@
 
 		<bundled.java.version>[11,14)</bundled.java.version>
 		<target.java.version>11</target.java.version>
-		<min.jkd.version>12</min.jkd.version>
+		<min.jkd.version>11</min.jkd.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
@@ -123,6 +123,11 @@
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</repository>
 		<repository>
+			<id>javacard-pro</id>
+			<name>javacard.pro</name>
+			<url>https://javacard.pro/maven/</url>
+		</repository>
+		<repository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 			<releases>
@@ -139,7 +144,7 @@
 			<id>openecard-repos</id>
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</pluginRepository>
-		
+
 		<pluginRepository>
 			<id>snapshots-repo</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -565,7 +570,7 @@
 				<plugin>
 					<groupId>org.apache.cxf</groupId>
 					<artifactId>cxf-codegen-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.5.0</version>
 					<configuration>
 						<defaultOptions>
 							<suppressGeneratedDate>true</suppressGeneratedDate>
@@ -688,14 +693,20 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.5</version>
+					<version>0.8.7</version>
 				</plugin>
 
-				<!-- JLink Plugin -->
 				<plugin>
-					<groupId>net.agilhard.maven.plugins</groupId>
-					<artifactId>jlink-jpackager-maven-plugin</artifactId>
-					<version>1.0.0-ec.3</version>
+					<groupId>com.google.code.maven-replacer-plugin</groupId>
+					<artifactId>maven-replacer-plugin</artifactId>
+					<version>1.4.1</version>
+				</plugin>
+
+				<!-- Jpackage Plugin -->
+				<plugin>
+					<groupId>com.github.akman</groupId>
+					<artifactId>jpackage-maven-plugin</artifactId>
+					<version>0.1.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -776,20 +787,19 @@
 
 			<!-- JAXB API and implementation -->
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>4.0.0</version>
 			</dependency>
 			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>2.3.2</version>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>4.0.0</version>
 			</dependency>
-			<!-- more java stuff -->
 			<dependency>
-				<groupId>com.sun.activation</groupId>
-				<artifactId>jakarta.activation</artifactId>
-				<version>1.2.2-20190731</version>
+				<groupId>jakarta.xml.ws</groupId>
+				<artifactId>jakarta.xml.ws-api</artifactId>
+				<version>4.0.0</version>
 			</dependency>
 
 			<dependency>
@@ -809,7 +819,12 @@
 				<artifactId>javafx-controls</artifactId>
 				<version>${version.openjfx}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-base</artifactId>
+				<version>${version.openjfx}</version>
+			</dependency>
+
 			<!-- iOS building -->
 			<dependency>
 				<groupId>org.openecard.tools</groupId>
@@ -879,8 +894,8 @@
 
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.9</version>
+				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+				<version>2.13.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
@@ -888,9 +903,19 @@
 				<version>0.6.5</version>
 			</dependency>
 			<dependency>
-				<groupId>com.github.markusbernhardt</groupId>
+				<groupId>org.bidib.com.github.markusbernhardt</groupId>
 				<artifactId>proxy-vole</artifactId>
-				<version>1.0.5</version>
+				<version>1.0.17</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna-platform</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -902,13 +927,13 @@
 			<!-- Java Native Access -->
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna</artifactId>
-				<version>4.5.2</version>
+				<artifactId>jna-jpms</artifactId>
+				<version>5.12.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna-platform</artifactId>
-				<version>4.5.2</version>
+				<artifactId>jna-platform-jpms</artifactId>
+				<version>5.12.1</version>
 			</dependency>
 
 			<!-- BouncyCastle -->
@@ -936,9 +961,15 @@
 
 			<!-- JNA SmartcardIO -->
 			<dependency>
-				<groupId>io.github.jnasmartcardio</groupId>
-				<artifactId>jnasmartcardio</artifactId>
-				<version>0.2.7</version>
+				<groupId>com.github.martinpaljak</groupId>
+				<artifactId>apdu4j-jnasmartcardio</artifactId>
+				<version>0.2.7+220204</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.java.dev.jna</groupId>
+						<artifactId>jna</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 		</dependencies>

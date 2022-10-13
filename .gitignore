@@ -12,7 +12,7 @@ target
 nb-configuration.xml
 nbactions-*.xml
 dependency-reduced-pom.xml
-/.idea/
+**/.idea/
 *.iml
 test-output
 .deps/

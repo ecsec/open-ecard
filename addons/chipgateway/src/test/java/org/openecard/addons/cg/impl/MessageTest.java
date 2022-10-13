@@ -24,7 +24,7 @@ package org.openecard.addons.cg.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 import java.io.IOException;
 import org.openecard.ws.chipgateway.HelloRequestType;
 import org.testng.Assert;
@@ -40,7 +40,7 @@ public class MessageTest {
     @Test
     public void testHelloRequest() throws JsonProcessingException, IOException {
 	ObjectMapper mapper = new ObjectMapper();
-	mapper.registerModule(new JaxbAnnotationModule());
+	mapper.registerModule(new JakartaXmlBindAnnotationModule());
 
 	HelloRequestType req = new HelloRequestType();
 	req.setSessionIdentifier("1234abcd");

@@ -23,11 +23,11 @@
 package org.openecard.common.anytype.pin;
 
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.math.BigInteger;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import org.openecard.common.ECardConstants;
 import org.testng.annotations.Test;

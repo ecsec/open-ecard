@@ -22,9 +22,9 @@
 
 package org.openecard.ws.marshal;
 
+import jakarta.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.xml.bind.JAXBElement;
 import javax.xml.transform.TransformerException;
 import org.openecard.ws.soap.SOAPException;
 import org.openecard.ws.soap.SOAPMessage;

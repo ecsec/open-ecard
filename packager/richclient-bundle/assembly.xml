@@ -16,10 +16,19 @@
 			<!-- Modularized dependencies will be excluded, they will become part of the runtime later -->
 			<excludes>
 				<!-- JAXB dependencies -->
-				<exclude>javax.xml.bind:jaxb-api</exclude>
-				<exclude>com.sun.istack:istack-commons-runtime</exclude>
-				<exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
-				<exclude>javax.activation:*</exclude>
+				<exclude>com.sun.xml.bind:jaxb-impl</exclude>
+				<exclude>com.sun.xml.bind:jaxb-core</exclude>
+				<exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+				<exclude>jakarta.xml.ws:jakarta.xml.ws-api</exclude>
+				<exclude>jakarta.xml.soap:jakarta.xml.soap-api</exclude>
+				<exclude>jakarta.xml.soap:jakarta.xml.soap-api</exclude>
+				<exclude>org.eclipse.angus:angus-activation</exclude>
+				<exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>
+				<exclude>jakarta.activation:jakarta.activation-api</exclude>
+
+				<!-- JNA / SmartcardIO -->
+				<exclude>com.github.martinpaljak:apdu4j-jnasmartcardio</exclude>
+				<exclude>net.java.dev.jna:*</exclude>
 
 				<!-- JavaFX dependencies -->
 				<exclude>org.openjfx:*</exclude>

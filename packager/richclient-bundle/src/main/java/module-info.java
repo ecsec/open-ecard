@@ -29,12 +29,16 @@ module org.openecard.richclient {
     requires java.naming;
 
     /* JAXB module */
-    requires java.xml.bind;
+    requires com.sun.xml.bind;
 
     /* JavaFX modules */
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
+
+    /* JNA Smartcardio */
+    requires apdu4j.jnasmartcardio;
+    requires com.sun.jna.platform;
 
     /* Open JAXB classes for reflection */
     opens de.bund.bsi.ecard.api._1;
@@ -57,7 +61,6 @@ module org.openecard.richclient {
 
     // TODO: add this statement again once middleware sal is working again
     //opens org.openecard.mdlw.sal.config to java.xml.bind;
-    opens org.openecard.addon.manifest to java.xml.bind;
 
-    opens jnasmartcardio to java.base;
+    opens org.openecard.addon.manifest to jakarta.xml.bind;
 }

@@ -3,10 +3,6 @@ workflow:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_MERGE_REQUEST_TITLE =~ /^WIP.*$/
-      when: never
-    - if: $CI_MERGE_REQUEST_TITLE =~ /^Draft.*$/
-      when: never
 
 stages:
   - compile

@@ -60,10 +60,6 @@ test:
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 sast:
   stage: analyze
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
-    - if: $CI_MERGE_REQUEST_IID
-    - if: $CI_COMMIT_BRANCH == "master"
 
 package-linux-deb:
   stage: package

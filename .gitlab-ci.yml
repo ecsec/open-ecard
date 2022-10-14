@@ -44,6 +44,10 @@ test:
     paths:
       - .m2/repository/
     policy: pull-push
+  artifacts:
+    reports:
+      junit:
+        - "**/target/surefire-reports/TEST-*.xml"
   script:
     - MAVEN_OPTS=$MAVEN_OPTS mvn verify -Dci.env
   rules:

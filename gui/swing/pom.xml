@@ -13,6 +13,28 @@
 	<packaging>jar</packaging>
 	<name>Swing GUI</name>
 
+	<profiles>
+		<profile>
+			<id>ci.env</id>
+			<activation>
+				<property>
+					<name>ci.env</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<dependencies>
 		<dependency>

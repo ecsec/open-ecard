@@ -18,13 +18,13 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/ecsec/open-ecard.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/ecsec/open-ecard.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@git.ecsec.de/oec/open-ecard.git</developerConnection>
 		<url>https://github.com/ecsec/open-ecard</url>
 		<tag>1.2.4</tag>
 	</scm>
 	<ciManagement>
-		<system>Jenkins CI</system>
-		<url>https://ci.openecard.org</url>
+		<system>Gitlab CI</system>
+		<url>https://git.ecsec.de/oec/open-ecard/-/pipelines</url>
 	</ciManagement>
 	<issueManagement>
 		<system>Redmine</system>

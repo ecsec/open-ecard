@@ -28,6 +28,12 @@ module org.openecard.richclient {
     requires java.sql; // for jackson serialization
     requires java.naming;
 
+    /* Slf4j */
+    requires org.slf4j;
+    requires ch.qos.logback.classic;
+    uses org.slf4j.spi.SLF4JServiceProvider;
+    uses ch.qos.logback.classic.spi.Configurator;
+
     /* JAXB module */
     requires com.sun.xml.bind;
 

@@ -23,6 +23,4 @@
 
 module org.openecard.richclient.bundle {
     requires org.openecard.richclient;
-    /* JAXB-Runtime */
-    requires com.sun.xml.bind;
 }

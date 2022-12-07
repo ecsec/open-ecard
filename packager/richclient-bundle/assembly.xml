@@ -15,6 +15,10 @@
 			<scope>runtime</scope>
 			<!-- Modularized dependencies will be excluded, they will become part of the runtime later -->
 			<excludes>
+				<!-- SLF4J -->
+				<exclude>org.slf4j:slf4j-api</exclude>
+				<exclude>ch.qos.logback:logback-*</exclude>
+
 				<!-- JAXB dependencies -->
 				<exclude>com.sun.xml.bind:jaxb-impl</exclude>
 				<exclude>com.sun.xml.bind:jaxb-core</exclude>

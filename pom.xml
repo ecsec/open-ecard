@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openecard</groupId>
@@ -66,7 +68,9 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.min.version>3.6.1</maven.min.version>
 		<license.licenseName>gpl_v3</license.licenseName>
-		<findbugs.packages>org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-</findbugs.packages>
+		<findbugs.packages>
+			org.openecard.clients.-,org.openecard.android.-,org.openecard.richclient.-,org.openecard.common.-,org.openecard.control.-,org.openecard.crypto.-,org.openecard.esign.-,org.openecard.event.-,org.openecard.scio.-,org.openecard.management.-,org.openecard.recognition.-,org.openecard.sal.-,org.openecard.saml.-,org.openecard.transport.-,org.openecard.ws.android.-,org.openecard.ws.jaxb.-,org.openecard.ws.marshal.-,org.openecard.ws.common.-,org.openecard.ws.,org.openecard.i18n.-,org.openecard.gui.-,org.openecard.ifd.-,org.openecard.browser.-,org.openecard.maven.-
+		</findbugs.packages>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
 		<bundled.java.version>[11,14)</bundled.java.version>

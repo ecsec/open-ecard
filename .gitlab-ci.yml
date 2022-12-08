@@ -9,6 +9,7 @@ stages:
   - test
   - analyze
   - package
+  - post-package
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -174,6 +175,43 @@ package-win:
         /td SHA256
         /fd SHA256
         .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+
+collect-installers:
+  stage: post-package
+  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  tags:
+    - "linux"
+  artifacts:
+    paths:
+      - "*.deb"
+      - "*.rpm"
+      - "*.dmg"
+      - "*.pkg"
+      - "*.exe"
+  script:
+    - >-
+      cp  packager/richclient-packager/target/jpackage/*.pkg \
+          packager/richclient-packager/target/jpackage/*.dmg \
+          packager/richclient-packager/target/jpackage/*.deb \
+          packager/richclient-packager/target/jpackage/*.rpm \
+          packager/richclient-packager/target/iscc/*.exe \
+          .
+  dependencies:
+    - "package-linux-deb"
+    - "package-linux-rpm"
+    - "package-osx-pkg"
+    - "package-osx-dmg"
+    - "package-win"
+  needs:
+    - "package-linux-deb"
+    - "package-linux-rpm"
+    - "package-osx-pkg"
+    - "package-osx-dmg"
+    - "package-win"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"

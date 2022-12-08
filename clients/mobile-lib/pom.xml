@@ -16,7 +16,6 @@
 	<name>Mobile Lib</name>
 
 	<properties>
-		<powermock.version>2.0.2</powermock.version>
 		<iOS.build.classesDirectory>${project.build.outputDirectory}-iOS</iOS.build.classesDirectory>
 	</properties>
 

@@ -15,6 +15,10 @@
 	<packaging>jar</packaging>
 	<name>Swing GUI</name>
 
+	<properties>
+		<maven.compiler.release>${target.java.version}</maven.compiler.release>
+	</properties>
+
 	<profiles>
 		<profile>
 			<id>ci.env</id>

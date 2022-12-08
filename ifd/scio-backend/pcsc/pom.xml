@@ -15,6 +15,10 @@
 	<packaging>jar</packaging>
 	<name>PCSC SmartcardIO</name>
 
+	<properties>
+		<maven.compiler.release>${target.java.version}</maven.compiler.release>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<artifactId>common</artifactId>

@@ -148,7 +148,6 @@ notarize-osx-pkg:
   needs: [ "package-osx-pkg", "package-osx-dmg" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
-      when: manual
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
 

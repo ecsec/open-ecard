@@ -61,6 +61,10 @@
 											</dependencyset>
 										</dependencysets>
 									</modulepath>
+									<addmodules>
+										<!-- Add EC crypto, or it will fail to be included into the SSL stack -->
+										<addmodule>jdk.crypto.ec</addmodule>
+									</addmodules>
 									<!-- JVM arguments of the application -->
 									<javaoptions>
 										-XX:-UsePerfData -XX:-Inline -Xms16m -Xmx64m -XX:+UseG1GC -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1ReservePercent=5 -Djavax.xml.stream.isSupportingExternalEntities=false -Djavax.xml.stream.supportDTD=false --add-exports=org.openecard.richclient/com.github.markusbernhardt.proxy.jna.win=com.sun.jna

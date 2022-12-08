@@ -877,6 +877,12 @@
 				<artifactId>mockito-core</artifactId>
 				<version>3.5.7</version>
 			</dependency-->
+			<dependency>
+				<groupId>org.ogce</groupId>
+				<artifactId>xpp3</artifactId>
+				<version>1.1.6</version>
+				<scope>test</scope>
+			</dependency>
 
 			<!-- other third party libs -->
 			<dependency>

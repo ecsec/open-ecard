@@ -77,6 +77,8 @@ package-linux-deb:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DEB
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
 
 package-linux-rpm:
   stage: package
@@ -90,6 +92,8 @@ package-linux-rpm:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=RPM
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
 
 package-osx-pkg:
   stage: package
@@ -107,6 +111,8 @@ package-osx-pkg:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=PKG
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
 
 package-osx-dmg:
   stage: package
@@ -122,6 +128,8 @@ package-osx-dmg:
     - mvn install -DskipTests -Ddesktop-package -Dpackage.type=DMG
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
 
 notarize-osx-pkg:
   stage: package
@@ -140,6 +148,8 @@ notarize-osx-pkg:
   needs: [ "package-osx-pkg", "package-osx-dmg" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "master"
       when: manual
 
 package-win:
@@ -167,3 +177,5 @@ package-win:
         .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual

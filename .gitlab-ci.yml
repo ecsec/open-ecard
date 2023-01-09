@@ -22,7 +22,7 @@ compile:
   stage: compile
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "linux"
+    - "docker-exec"
   cache:
     key: "$CACHE_KEY"
     paths:
@@ -39,7 +39,7 @@ test:
   stage: test
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "linux"
+    - "docker-exec"
   cache:
     key: "$CACHE_KEY"
     paths:
@@ -70,7 +70,7 @@ package-linux-deb:
   stage: package
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "linux"
+    - "docker-exec"
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage
@@ -85,7 +85,7 @@ package-linux-rpm:
   stage: package
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "linux"
+    - "docker-exec"
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage
@@ -184,7 +184,7 @@ collect-installers:
   stage: post-package
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "linux"
+    - "docker-exec"
   artifacts:
     paths:
       - "*.deb"

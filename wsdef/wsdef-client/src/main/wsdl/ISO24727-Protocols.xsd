@@ -702,6 +702,9 @@ An example for which this is useful looks like this:
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
+					<element name="AcceptedEIDType" type="string"
+						maxOccurs="unbounded" minOccurs="0" />
+
 					<element name="RequiredAge" type="positiveInteger"
 						maxOccurs="1" minOccurs="0" />
 
@@ -732,6 +735,9 @@ An example for which this is useful looks like this:
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
+					<element name="UsedEIDType" type="string"
+						maxOccurs="1" minOccurs="0" />
+
 					<element name="AgeVerification" type="anyURI"
 						maxOccurs="1" minOccurs="0" />
 
@@ -783,6 +789,8 @@ An example for which this is useful looks like this:
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
+					<element name="AcceptedEIDType" type="string"
+						maxOccurs="unbounded" minOccurs="0" />
 					<element name="Certificate" type="hexBinary"
 						maxOccurs="unbounded" minOccurs="1" />
 					<element name="CertificateDescription"

@@ -81,6 +81,16 @@ public class OpenecardProperties {
 
     private static InputStream loadHomeProps() {
 	try {
+	    String fileName = "openecard_test.properties";
+	    InputStream testProps = FileUtils.resolveResourceAsStream(OpenecardProperties.class, fileName);
+	    if (testProps != null) {
+		return testProps;
+	    }
+	} catch (IOException ex) {
+	    LOG.info("Failed to load test properties from resources.", ex);
+	}
+
+	try {
 	    File homePath = FileUtils.getHomeConfigDir();
 	    File cfgFile = new File(homePath, "openecard.properties");
 	    InputStream homeProps = new FileInputStream(cfgFile);

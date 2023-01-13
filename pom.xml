@@ -85,7 +85,7 @@
 		<version.pmd>6.52.0</version.pmd>
 		<version.openjfx>17.0.2</version.openjfx>
 		<version.roboface>1.4.0</version.roboface>
-		<robovm.version>2.3.13</robovm.version>
+		<robovm.version>2.3.18</robovm.version>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>

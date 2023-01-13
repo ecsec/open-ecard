@@ -73,9 +73,9 @@
 		</findbugs.packages>
 		<strip.debug.symbols>false</strip.debug.symbols>
 
-		<bundled.java.version>[11,14)</bundled.java.version>
-		<target.java.version>11</target.java.version>
-		<min.jkd.version>11</min.jkd.version>
+		<bundled.java.version>[17,)</bundled.java.version>
+		<target.java.version>17</target.java.version>
+		<min.jkd.version>17</min.jkd.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--maven.compiler.release>11</maven.compiler.release-->
@@ -83,9 +83,9 @@
 		<version.bouncycastle>1.62</version.bouncycastle>
 		<powermock.version>2.0.9</powermock.version>
 		<version.pmd>6.52.0</version.pmd>
-		<version.openjfx>14.0.2.1</version.openjfx>
-		<version.roboface>1.1.1</version.roboface>
-		<robovm.version>2.3.10</robovm.version>
+		<version.openjfx>17.0.2</version.openjfx>
+		<version.roboface>1.4.0</version.roboface>
+		<robovm.version>2.3.13</robovm.version>
 
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>

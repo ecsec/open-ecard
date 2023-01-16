@@ -35,6 +35,24 @@ compile:
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == "master"
 
+compile-mobile-lib:
+  stage: compile
+  tags:
+    - "mac"
+    - "dev-cert"
+  cache:
+    key: "$CACHE_KEY"
+    paths:
+      - .m2/repository/
+    policy: pull-push
+  script:
+    - MAVEN_OPTS=$MAVEN_OPTS mvn clean compile -P build-mobile-libs
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == "master"
+
 test:
   stage: test
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
@@ -101,8 +119,6 @@ package-osx-pkg:
   tags:
     - "mac"
     - "dev-cert"
-  variables:
-    JAVA_HOME: /Users/ecsec-ci/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home/
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage
@@ -120,8 +136,6 @@ package-osx-dmg:
   tags:
     - "mac"
     - "dev-cert"
-  variables:
-    JAVA_HOME: /Users/ecsec-ci/Library/Java/JavaVirtualMachines/jdk-17.0.2.jdk/Contents/Home/
   artifacts:
     paths:
       - packager/richclient-packager/target/jpackage

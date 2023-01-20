@@ -78,6 +78,12 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>ios-lib</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.mobidevelop.robovm</groupId>

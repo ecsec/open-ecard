@@ -64,8 +64,12 @@ compile-mobile-lib:
     - "mac"
     - "dev-cert"
   <<: *docker-cache
+  artifacts:
+    paths:
+      - robovm/
   script:
     - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw clean install -P build-mobile-libs -DskipTests
+    - mv packager/ios-framework/target/robovm robovm/
   needs: []
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

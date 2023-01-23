@@ -65,7 +65,7 @@ compile-mobile-lib:
     - "dev-cert"
   <<: *docker-cache
   script:
-    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw clean compile -P build-mobile-libs
+    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw clean install -P build-mobile-libs -DskipTests
   needs: []
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
@@ -84,6 +84,7 @@ test:
         - "**/target/surefire-reports/TEST-*.xml"
   script:
     - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw verify -Dci.env
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_MERGE_REQUEST_IID
@@ -110,6 +111,7 @@ package-linux-deb:
       - packager/richclient-packager/target/jpackage
   script:
     - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=DEB
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
@@ -128,6 +130,7 @@ package-linux-rpm:
       - packager/richclient-packager/target/jpackage
   script:
     - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=RPM
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
@@ -148,6 +151,7 @@ package-osx-pkg:
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/ecsec.keychain-db
     - ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=PKG
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
@@ -166,6 +170,7 @@ package-osx-dmg:
       - packager/richclient-packager/target/jpackage
   script:
     - ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=DMG
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
@@ -219,6 +224,7 @@ package-win:
         /td SHA256
         /fd SHA256
         .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
+  needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"

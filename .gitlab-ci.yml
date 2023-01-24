@@ -65,11 +65,13 @@ compile-mobile-lib:
     - "dev-cert"
   <<: *docker-cache
   artifacts:
+    expose_as: 'OpenEcard-CocoaPod'
     paths:
       - robovm/
   script:
     - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw clean install -P build-mobile-libs -DskipTests
     - mv packager/ios-framework/target/robovm robovm/
+    - cp LICENSE.GPL LICENSE && mv LICENSE robovm/LICENSE && cp LICENSE.* robovm/
   needs: []
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
@@ -273,4 +275,30 @@ collect-installers:
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
     - if: $CI_MERGE_REQUEST_IID
+      when: manual
+
+publish-ios-pod-spec:
+  stage: post-package
+  tags:
+    - "mac"
+    - "dev-cert"
+  <<: *docker-cache
+  script:
+    - TAG=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
+    - echo "Pod::Spec.new do |s|" > open-ecard.podspec
+    - echo "s.name              = 'open-ecard'" >> open-ecard.podspec
+    - echo "s.version           = '${TAG}'" >> open-ecard.podspec
+    - echo "s.summary           = 'ecard framework'" >> open-ecard.podspec
+    - echo "s.description       = 'Open source framework implementing the eCard-API-Framework (BSI-TR-03112) through which arbitrary applications can utilize authentication and signatures with arbitrary chip cards'" >> open-ecard.podspec
+    - echo "s.homepage          = 'https://dev.openecard.org'" >> open-ecard.podspec
+    - echo "s.author            = { 'Name' => 'florian.otto@ecsec.de' }" >> open-ecard.podspec
+    - echo "s.license           = { :type => 'GPLv3', :file => 'LICENSE' }" >> open-ecard.podspec
+    - echo "s.source            = { :http => 'https://github.com/ecsec/open-ecard/releases/download/"${TAG}"/OpenEcard-CocoaPod.zip' }" >> open-ecard.podspec
+    - echo "s.ios.deployment_target = '13.0'" >> open-ecard.podspec
+    - echo "s.ios.vendored_frameworks = 'OpenEcard.framework'" >> open-ecard.podspec
+    - echo end >> open-ecard.podspec
+    - pod trunk push open-ecard.podspec'
+  needs: []
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
       when: manual

@@ -70,10 +70,10 @@ Mobile libs
 -----------
 
 Open eCard supports building of libraries for Android and iOS for usage in arbitrary mobile apps.
-For this purpose, Java JDK 11 is required.
+For this purpose, Java JDK 17 is required.
 Building the Open eCard with those mobile libraries can look like the following:
 
-    $ mvn clean install -P build-mobile-libs
+    $ ./mvnw clean install -pl packager/ios-framework -am -P build-mobile-libs
 
 ### Android
 After a successfull build the library for android can be found in `android-lib` sub project. 

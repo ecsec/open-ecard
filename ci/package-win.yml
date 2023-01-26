@@ -1,0 +1,39 @@
+package-win:
+  stage: package
+  tags:
+    - "win"
+  variables:
+    WIN_KEYSTORE: C:\gitlab-runner\assets\openecard_cs.p12
+  cache:
+    key: $OEC_WIN_CACHE
+    paths:
+      - .m2/wrapper/dists
+      - .m2/repository/
+      - .mvn/wrapper/maven-wrapper.jar
+    policy: pull-push
+  artifacts:
+    name: 'OeC-Installer-EXE'
+    paths:
+      - packager/richclient-packager/target/iscc
+  script:
+    - .\mvnw.cmd install -DskipTests -Ddesktop-package
+    - $EXE_FILE_PATH = $(Get-Childitem
+        -Path .\packager\richclient-packager\target\iscc\
+        -Include Open-eCard-App-*.exe
+        -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()                                          
+    - signtool.exe sign 
+        /debug 
+        /p ${WIN_KEYCHAIN_PW}
+        /f "${WIN_KEYSTORE}"
+        /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp
+        /td SHA256
+        /fd SHA256
+        .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
+  needs: [ "compile" ]
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: manual
+    - if: $CI_MERGE_REQUEST_IID
+      when: manual

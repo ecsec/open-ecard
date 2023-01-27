@@ -4,7 +4,7 @@ package-ios-framework:
     - "mac"
     - "dev-cert"
   cache:
-    key: $OEC_OSX_CACHE
+    key: "$OEC_OSX_CACHE"
     paths:
       - .m2/wrapper/dists
       - .m2/repository/
@@ -21,6 +21,7 @@ package-ios-framework:
     - mv packager/ios-framework/target/robovm/OpenEcard.xcframework OpenEcard.xcframework/
     - cp LICENSE.GPL LICENSE
   needs: []
+  allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"

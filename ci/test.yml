@@ -4,7 +4,7 @@ test:
   tags:
     - "docker-exec"
   cache:
-    key: $OEC_DOCKER_CACHE
+    key: "$OEC_DOCKER_CACHE"
     paths:
       - .m2/wrapper/dists
       - .m2/repository/

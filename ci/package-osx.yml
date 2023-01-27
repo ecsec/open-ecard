@@ -4,7 +4,7 @@ package-osx-pkg:
     - "mac"
     - "dev-cert"
   cache:
-    key: $OEC_OSX_CACHE
+    key: "$OEC_OSX_CACHE"
     paths:
       - .m2/wrapper/dists
       - .m2/repository/
@@ -33,7 +33,7 @@ package-osx-dmg:
     - "mac"
     - "dev-cert"
   cache:
-    key: $OEC_OSX_CACHE
+    key: "$OEC_OSX_CACHE"
     paths:
       - .m2/wrapper/dists
       - .m2/repository/

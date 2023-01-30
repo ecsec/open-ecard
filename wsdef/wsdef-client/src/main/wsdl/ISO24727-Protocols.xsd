@@ -723,6 +723,9 @@ An example for which this is useful looks like this:
 					<element name="DataSetToBeRead"
 						type="iso:DataSetNameType" maxOccurs="unbounded" minOccurs="0" />
 					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
+
+					<element name="AcceptedEIDType" type="string"
+							 maxOccurs="unbounded" minOccurs="0" />
 				</sequence>
 			</restriction>
 		</complexContent>
@@ -732,6 +735,9 @@ An example for which this is useful looks like this:
 		<complexContent>
 			<restriction base="iso:DIDAuthenticationDataType">
 				<sequence>
+					<element name="UsedEIDType" type="string"
+						maxOccurs="1" minOccurs="0" />
+
 					<element name="AgeVerification" type="anyURI"
 						maxOccurs="1" minOccurs="0" />
 
@@ -794,6 +800,8 @@ An example for which this is useful looks like this:
 					<element name="AuthenticatedAuxiliaryData"
 						type="hexBinary" maxOccurs="1" minOccurs="0" />
 					<element name="TransactionInfo" type="string" maxOccurs="1" minOccurs="0"></element>
+					<element name="AcceptedEIDType" type="string"
+							 maxOccurs="unbounded" minOccurs="0" />
 				</sequence>
 			</restriction>
 		</complexContent>

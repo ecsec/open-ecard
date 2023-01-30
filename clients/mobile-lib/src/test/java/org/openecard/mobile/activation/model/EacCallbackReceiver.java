@@ -1,5 +1,5 @@
-/** **************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/****************************************************************************
+ * Copyright (C) 2019-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,7 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
+
 package org.openecard.mobile.activation.model;
 
 import java.util.ArrayList;
@@ -26,9 +27,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -42,6 +42,7 @@ import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
+
 
 /**
  *
@@ -113,7 +114,7 @@ public class EacCallbackReceiver {
 	    promisedTransactionData.deliver((String) arguments[1]);
 	    promisedOperationConfirmAttributes.deliver((ConfirmAttributeSelectionOperation) arguments[2]);
 	    return null;
-	}).when(interaction).onServerData(any(), anyString(), any());
+	}).when(interaction).onServerData(any(), nullable(String.class), any());
     }
 
 

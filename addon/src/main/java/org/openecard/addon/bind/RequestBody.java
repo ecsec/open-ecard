@@ -22,6 +22,7 @@
 
 package org.openecard.addon.bind;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -70,13 +71,18 @@ public class RequestBody extends Body {
 	String[] entries = value.split("&");
 	for (String entry : entries) {
 	    String[] split = entry.split("=");
-	    if (split.length == 1) {
-		String key = URLDecoder.decode(split[0], utf8);
-		result.put(key, null);
-	    } else if (split.length == 2) {
-		String key = URLDecoder.decode(split[0], utf8);
-		String val = URLDecoder.decode(split[1], utf8);
-		result.put(key, val);
+	    try {
+		    if (split.length == 1) {
+			    String key = URLDecoder.decode(split[0], utf8.name());
+			    result.put(key, null);
+		    } else if (split.length == 2) {
+			    String key = URLDecoder.decode(split[0], utf8.name());
+			    String val = URLDecoder.decode(split[1], utf8.name());
+			    result.put(key, val);
+		    }
+	    } catch (UnsupportedEncodingException ex) {
+		    // UTF8 is supported everywhere
+		    throw new RuntimeException("UTF-8 is unsupported on this platform.", ex);
 	    }
 	}
 

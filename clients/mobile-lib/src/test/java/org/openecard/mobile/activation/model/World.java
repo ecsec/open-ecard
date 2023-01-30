@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2019-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,46 +19,18 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+
 package org.openecard.mobile.activation.model;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openecard.binding.tctoken.TCTokenContext;
-import org.openecard.binding.tctoken.ex.AuthServerException;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
-import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.util.Promise;
-import org.openecard.mobile.activation.ActivationController;
-import org.openecard.mobile.activation.ActivationResult;
-import org.openecard.mobile.activation.ActivationResultCode;
-import org.openecard.mobile.activation.ActivationSource;
-import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.EacInteraction;
-import org.openecard.mobile.activation.PinManagementControllerFactory;
-import org.openecard.mobile.activation.PinManagementInteraction;
-import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.*;
 import org.openecard.mobile.activation.common.ArrayBackedAutoCloseable;
 import org.openecard.mobile.activation.common.CommonActivationUtils;
-import static org.openecard.mobile.activation.model.Timeout.MIN_WAIT_TIMEOUT;
-import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
@@ -67,6 +39,25 @@ import org.openecard.scio.AbstractNFCCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.mockito.Mockito.*;
+import static org.openecard.mobile.activation.model.Timeout.MIN_WAIT_TIMEOUT;
+import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
+
 
 /**
  *
@@ -238,9 +229,9 @@ public class World implements AutoCloseable {
 
 	public void startSimpleEac() throws InvalidAddressException {
 	    LOG.debug("Start simple eac with test.governikus-eid.");
-	    String rawTcTokenUrl = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	    String localUrl = createLocalhostLinkForGovernikusTest();
 
-	    this.startSimpleEac(rawTcTokenUrl);
+	    this.startSimpleEacWithLocalUrl(localUrl);
 	}
 
 	public void startSimpleEac(TCTokenContext jmockitMockTcTokenContext) throws InvalidAddressException {
@@ -298,9 +289,15 @@ public class World implements AutoCloseable {
 	}
 
 	private void startSimpleEac(String rawTcTokenUrl, String scheme) {
+	    try {
+		String url = scheme + "://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, "UTF-8");
+		startSimpleEacWithLocalUrl(url);
+	    } catch (UnsupportedEncodingException ex) {
+		throw new RuntimeException("UTF-8 is not supported.");
+	    }
+	}
 
-	    String url = scheme + "://localhost/eID-Client?TC_TOKEN_URL_KEY=blabla&tcTokenURL=" + URLEncoder.encode(rawTcTokenUrl, Charset.defaultCharset());;
-
+	private void startSimpleEacWithLocalUrl(String localUrl) {
 	    supportedCards = new HashSet<>();
 	    promisedActivationResult = new Promise<>();
 	    promisedStarted = new Promise<>();
@@ -310,9 +307,42 @@ public class World implements AutoCloseable {
 	    this.activationInteraction = new ActivationCallbackReceiver(world, interaction);
 
 	    activationController = eacControllerFactory().create(
-		    url,
-		    PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
-		    eacInteraction.interaction);
+		localUrl,
+		PromiseDeliveringFactory.controllerCallback.deliverStartedCompletion(promisedStarted, promisedActivationResult),
+		eacInteraction.interaction);
+	}
+
+	private String createLocalhostLinkForGovernikusTest() {
+		try {
+			URL obj = new URL("https://test.governikus-eid.de/Autent-DemoApplication/samlstationary");
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("POST");
+			con.setInstanceFollowRedirects(false);
+
+			// For POST only - START
+			con.setDoOutput(true);
+			OutputStream os = con.getOutputStream();
+			String postParams = "changeAllNatural=ALLOWED&requestedAttributesEidForm.documentType=ALLOWED&requestedAttributesEidForm.issuingState=ALLOWED&requestedAttributesEidForm.dateOfExpiry=ALLOWED&requestedAttributesEidForm.givenNames=ALLOWED&requestedAttributesEidForm.familyNames=ALLOWED&requestedAttributesEidForm.artisticName=ALLOWED&requestedAttributesEidForm.academicTitle=ALLOWED&requestedAttributesEidForm.dateOfBirth=ALLOWED&requestedAttributesEidForm.placeOfBirth=ALLOWED&requestedAttributesEidForm.nationality=ALLOWED&requestedAttributesEidForm.birthName=ALLOWED&requestedAttributesEidForm.placeOfResidence=ALLOWED&requestedAttributesEidForm.communityID=ALLOWED&requestedAttributesEidForm.residencePermitI=ALLOWED&requestedAttributesEidForm.restrictedId=ALLOWED&ageVerificationForm.ageToVerify=0&ageVerificationForm.ageVerification=PROHIBITED&placeVerificationForm.placeToVerify=02760401100000&placeVerificationForm.placeVerification=PROHIBITED&eidTypesForm.cardCertified=ALLOWED&eidTypesForm.seCertified=ALLOWED&eidTypesForm.seEndorsed=ALLOWED&eidTypesForm.hwKeyStore=ALLOWED&transactionInfo=&levelOfAssurance=BUND_HOCH";
+			os.write(postParams.getBytes());
+			os.flush();
+			os.close();
+			// For POST only - END
+
+			int responseCode = con.getResponseCode();
+
+			if (responseCode > 300 && responseCode < 400) {
+				String locUrl = con.getHeaderField("Location");
+				if (locUrl != null) {
+					return locUrl;
+				} else {
+					throw new RuntimeException("No location received from server.");
+				}
+			} else {
+				throw new RuntimeException("Wrong Status code received from server.");
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(("Failed to fetch localhost link"));
+		}
 	}
 
 	public void expectActivationResult(ActivationResultCode code) {

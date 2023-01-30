@@ -1,0 +1,78 @@
+publish-to-github:
+  stage: publish
+  image: debian:stable-20230109-slim
+  tags:
+    - "docker-exec"
+  script:
+    - apt update && apt upgrade && apt install -y jq && apt install -y curl && apt install -y zip
+    # Create Release
+    - >-
+      RELEASE_ID=$(curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} -X POST -v \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        https://api.github.com/repos/ecsec/open-ecard/releases \
+        -d '{ "tag_name":"'"${CI_COMMIT_TAG}"'", "name":"'"${CI_COMMIT_TAG}"'", "draft":false, "prerelease":false, "generate_release_notes":false }' | jq '.id')
+    # Upload iOS Framework
+    - zip -r OpenEcardPod.zip LICENSE* OpenEcard.xcframework
+    - >-
+      curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} \
+        -X POST -v \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        -H "Content-Type: application/zip" \
+        --data-binary "@OpenEcardPod.zip" \
+        https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=OpenEcard-CocoaPod.zip
+    # Upload all installers
+    - INSTALLERS=(packager/richclient-packager/target/jpackage/* packager/richclient-packager/target/iscc/*)
+    - >-
+      for INSTALLER in "${INSTALLERS[@]}"; do
+        INSTALLER_FILENAME=$(echo "${INSTALLER}" | sed 's:.*/::')
+        curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} \
+          -X POST -v \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@${INSTALLER}" \
+          https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=${INSTALLER_FILENAME}
+      done
+  dependencies:
+    - "package-linux-deb"
+    - "package-linux-rpm"
+    - "package-osx-pkg"
+    - "package-osx-dmg"
+    - "package-win"
+    - "package-ios-framework"
+  needs:
+    - "package-linux-deb"
+    - "package-linux-rpm"
+    - "package-osx-pkg"
+    - "package-osx-dmg"
+    - "package-win"
+    - "package-ios-framework"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+
+publish-ios-pod-spec:
+  stage: publish
+  tags:
+    - "mac"
+    - "dev-cert"
+  script:
+    - TAG=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
+    - echo "Pod::Spec.new do |s|" > open-ecard.podspec
+    - echo "s.name              = 'open-ecard'" >> open-ecard.podspec
+    - echo "s.version           = '${TAG}'" >> open-ecard.podspec
+    - echo "s.summary           = 'ecard framework'" >> open-ecard.podspec
+    - echo "s.description       = 'Open source framework implementing the eCard-API-Framework (BSI-TR-03112) through which arbitrary applications can utilize authentication and signatures with arbitrary chip cards'" >> open-ecard.podspec
+    - echo "s.homepage          = 'https://dev.openecard.org'" >> open-ecard.podspec
+    - echo "s.author            = { 'Name' => 'florian.otto@ecsec.de' }" >> open-ecard.podspec
+    - echo "s.license           = { :type => 'GPLv3', :file => 'LICENSE' }" >> open-ecard.podspec
+    - echo "s.source            = { :http => 'https://github.com/ecsec/open-ecard/releases/download/"${TAG}"/OpenEcard-CocoaPod.zip' }" >> open-ecard.podspec
+    - echo "s.ios.deployment_target = '13.0'" >> open-ecard.podspec
+    - echo "s.ios.vendored_frameworks = 'OpenEcard.xcframework'" >> open-ecard.podspec
+    - echo end >> open-ecard.podspec
+    - pod trunk push open-ecard.podspec
+  needs: [ "publish-to-github" ]
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+      when: manual

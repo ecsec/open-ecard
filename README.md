@@ -80,6 +80,15 @@ After a successfull build the library for android can be found in `android-lib` 
 It also can be used as prebuild dependency via gradle dependency management. 
 See [open-ecard-android](https://github.com/ecsec/open-ecard-android) for further information.
 
+The android API artifacts are taken from the Android SDK.
+They are uploaded into the maven repository with the following commands.
+Remember to set the variables `API_VERSION` and `ANDROID_HOME` accordingly.
+
+```
+mvn deploy:deploy-file -DrepositoryId=ecsec-thirdparty  -Durl=https://mvn.ecsec.de/repository/ecard_thirdparty/ -DgroupId=com.google.android -DartifactId=android -Dversion=api-$API_VERSION -Dclassifier=sources -Dfile=$ANDROID_HOME/platforms/android-$API_VERSION/android-stubs-src.jar
+mvn deploy:deploy-file -DrepositoryId=ecsec-thirdparty  -Durl=https://mvn.ecsec.de/repository/ecard_thirdparty/ -DgroupId=com.google.android -DartifactId=android -Dversion=api-$API_VERSION -Dfile=$ANDROID_HOME/platforms/android-$API_VERSION/android.jar
+```
+
 ### iOS (>2.x)
 If building on MacOS a ready to use framework gets generated and can be found in 
 `./packager/ios-framework/target/robovm`.  

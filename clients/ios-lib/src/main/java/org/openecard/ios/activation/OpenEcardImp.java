@@ -36,8 +36,8 @@ import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.robovm.annotations.FrameworkObject;
 import org.openecard.scio.CachingTerminalFactoryBuilder;
 import org.openecard.scio.IOSNFCFactory;
-import org.openecard.ws.android.AndroidMarshaller;
 import org.openecard.scio.IOSConfig;
+import org.openecard.ws.jaxb.JAXBMarshaller;
 
 
 /**
@@ -110,7 +110,7 @@ public class OpenEcardImp implements OpenEcard {
 	};
 
 	CachingTerminalFactoryBuilder<IOSNFCFactory> builder = new CachingTerminalFactoryBuilder(() -> new IOSNFCFactory(currentConfig));
-	OpeneCardContextConfig config = new OpeneCardContextConfig(builder, AndroidMarshaller.class.getCanonicalName());
+	OpeneCardContextConfig config = new OpeneCardContextConfig(builder, JAXBMarshaller.class.getCanonicalName());
 	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new IOSNFCDialogMsgSetter(builder));
 	this.utils = activationUtils;
 	this.context = this.utils.context(capabilities);

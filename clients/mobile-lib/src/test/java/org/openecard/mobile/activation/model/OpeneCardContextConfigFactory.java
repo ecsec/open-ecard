@@ -24,9 +24,9 @@ package org.openecard.mobile.activation.model;
 import java.lang.reflect.InvocationTargetException;
 import org.openecard.common.ifd.scio.TerminalFactory;
 import org.openecard.mobile.system.OpeneCardContextConfig;
-import org.openecard.ws.android.AndroidMarshaller;
 import org.openecard.ws.common.GenericFactoryException;
 import org.openecard.ws.common.GenericInstanceProvider;
+import org.openecard.ws.jaxb.JAXBMarshaller;
 import org.openecard.ws.marshal.WSMarshaller;
 
 /**
@@ -86,6 +86,6 @@ public final class OpeneCardContextConfigFactory implements Builder<OpeneCardCon
 
 	return new OpeneCardContextConfigFactory(null, null)
 		.withTerminalFactory(DelegatingMobileNfcTerminalFactory.class)
-		.withWsdefMarshaller(AndroidMarshaller.class);
+		.withWsdefMarshaller(JAXBMarshaller.class);
     }
 }

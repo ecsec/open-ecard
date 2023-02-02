@@ -170,7 +170,7 @@
 
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>android-marshaller</artifactId>
+			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

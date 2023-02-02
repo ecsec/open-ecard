@@ -28,7 +28,7 @@ import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.scio.AndroidNFCFactory;
 import org.openecard.scio.CachingTerminalFactoryBuilder;
-import org.openecard.ws.android.AndroidMarshaller;
+import org.openecard.ws.jaxb.JAXBMarshaller;
 
 /**
  *
@@ -59,7 +59,7 @@ public class OpeneCard {
 
 	CachingTerminalFactoryBuilder<AndroidNFCFactory> factory = new CachingTerminalFactoryBuilder<>(() -> new AndroidNFCFactory());
 
-	OpeneCardContextConfig config = new OpeneCardContextConfig(factory, AndroidMarshaller.class.getCanonicalName());
+	OpeneCardContextConfig config = new OpeneCardContextConfig(factory, JAXBMarshaller.class.getCanonicalName());
 	CommonActivationUtils activationUtils = new CommonActivationUtils(config, new NFCDialogMsgSetter() {
 	    @Override
 	    public void setText(String msg) {

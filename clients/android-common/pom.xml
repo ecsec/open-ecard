@@ -42,7 +42,7 @@
 	    <!-- all OeC Android dependencies -->
 		<dependency>
 			<groupId>org.openecard.wsdef</groupId>
-			<artifactId>android-marshaller</artifactId>
+			<artifactId>jaxb-marshaller</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

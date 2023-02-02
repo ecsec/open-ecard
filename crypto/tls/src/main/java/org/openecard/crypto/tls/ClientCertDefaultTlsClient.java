@@ -252,23 +252,55 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
     @Override
     protected Vector getSupportedSignatureAlgorithms() {
 	TlsCrypto crypto = context.getCrypto();
-        short[] hashAlgorithms = new short[]{HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-	    HashAlgorithm.sha224};
-        short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
 
-        Vector result = new Vector();
-        for (int i = 0; i < signatureAlgorithms.length; ++i)
-        {
-            for (int j = 0; j < hashAlgorithms.length; ++j)
-            {
-                SignatureAndHashAlgorithm alg = new SignatureAndHashAlgorithm(hashAlgorithms[j], signatureAlgorithms[i]);
-                if (crypto.hasSignatureAndHashAlgorithm(alg))
-                {
-                    result.addElement(alg);
-                }
-            }
-        }
+        Vector result = ClientCertDefaultTlsClient.getDefaultSignatureAlgorithms(crypto, minClientVersion == ProtocolVersion.TLSv10);
         return result;
+    }
+
+    public static Vector getDefaultSignatureAlgorithms(TlsCrypto crypto, boolean withLegacy) {
+	Vector result = new Vector();
+
+	ArrayList<Short> hashAlgorithms = new ArrayList<>();
+	hashAlgorithms.add(HashAlgorithm.sha512);
+	hashAlgorithms.add(HashAlgorithm.sha384);
+	hashAlgorithms.add(HashAlgorithm.sha256);
+	hashAlgorithms.add(HashAlgorithm.sha224);
+	if (withLegacy) {
+	    hashAlgorithms.add(HashAlgorithm.sha1);
+	}
+
+	short[] signatureAlgorithms = new short[] {
+	    SignatureAlgorithm.rsa,
+	    SignatureAlgorithm.ecdsa
+	};
+
+	SignatureAndHashAlgorithm[] intrinsicSigAlgs = {
+	    //SignatureAndHashAlgorithm.ed25519,
+	    //SignatureAndHashAlgorithm.ed448,
+	    SignatureAndHashAlgorithm.rsa_pss_rsae_sha256,
+	    SignatureAndHashAlgorithm.rsa_pss_rsae_sha384,
+	    SignatureAndHashAlgorithm.rsa_pss_rsae_sha512,
+	    SignatureAndHashAlgorithm.rsa_pss_pss_sha256,
+	    SignatureAndHashAlgorithm.rsa_pss_pss_sha384,
+	    SignatureAndHashAlgorithm.rsa_pss_pss_sha512
+	};
+
+	for (SignatureAndHashAlgorithm sigAlg : intrinsicSigAlgs) {
+	    if (crypto.hasSignatureAndHashAlgorithm(sigAlg)) {
+		result.add(sigAlg);
+	    }
+	}
+
+	for (int i = 0; i < signatureAlgorithms.length; ++i) {
+	    for (int j = 0; j < hashAlgorithms.size(); ++j) {
+		SignatureAndHashAlgorithm alg = new SignatureAndHashAlgorithm(hashAlgorithms.get(j), signatureAlgorithms[i]);
+		if (crypto.hasSignatureAndHashAlgorithm(alg)) {
+		    result.addElement(alg);
+		}
+	    }
+	}
+
+	return result;
     }
 
     @Override

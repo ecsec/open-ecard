@@ -191,24 +191,10 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
     @Override
     protected Vector getSupportedSignatureAlgorithms() {
-	TlsCrypto crypto = context.getCrypto();
-        short[] hashAlgorithms = new short[]{ HashAlgorithm.sha512, HashAlgorithm.sha384, HashAlgorithm.sha256,
-	    HashAlgorithm.sha224 };
-        short[] signatureAlgorithms = new short[]{ SignatureAlgorithm.rsa, SignatureAlgorithm.ecdsa };
+	    TlsCrypto crypto = context.getCrypto();
 
-        Vector result = new Vector();
-        for (int i = 0; i < signatureAlgorithms.length; ++i)
-        {
-            for (int j = 0; j < hashAlgorithms.length; ++j)
-            {
-                SignatureAndHashAlgorithm alg = new SignatureAndHashAlgorithm(hashAlgorithms[j], signatureAlgorithms[i]);
-                if (crypto.hasSignatureAndHashAlgorithm(alg))
-                {
-                    result.addElement(alg);
-                }
-            }
-        }
-        return result;
+	    Vector result = ClientCertDefaultTlsClient.getDefaultSignatureAlgorithms(crypto, minClientVersion == ProtocolVersion.TLSv10);
+	    return result;
     }
 
     @Override

@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<iso:DestroyChannel xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
-  <iso:SlotHandle>000102030405</iso:SlotHandle>
-</iso:DestroyChannel>

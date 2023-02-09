@@ -10,6 +10,7 @@ stages:
   - analyze
   - package
   - post-package
+  - deploy
   - publish
 
 variables:
@@ -28,4 +29,5 @@ include:
 - '/.gitlab-ci.d/package-win.yml'
 - '/.gitlab-ci.d/package-ios-framework.yml'
 - '/.gitlab-ci.d/post-package.yml'
+- '/.gitlab-ci.d/deploy.yml'
 - '/.gitlab-ci.d/publish.yml'

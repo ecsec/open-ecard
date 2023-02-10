@@ -87,6 +87,9 @@
 		<version.roboface>1.4.0</version.roboface>
 		<robovm.version>2.3.19-SNAPSHOT</robovm.version>
 
+		<version.jaxb-api.mobile>3.0.1</version.jaxb-api.mobile>
+		<version.jaxb-impl.mobile>3.0.2-mobile</version.jaxb-impl.mobile>
+
 		<!-- These properties can be set from the commandline to override the selected certificate -->
 		<jarsigner.tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</jarsigner.tsa>
 	</properties>

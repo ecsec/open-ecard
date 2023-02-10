@@ -20,8 +20,10 @@
 				<exclude>ch.qos.logback:logback-*</exclude>
 
 				<!-- JAXB dependencies -->
-				<exclude>com.sun.xml.bind:jaxb-impl</exclude>
-				<exclude>com.sun.xml.bind:jaxb-core</exclude>
+				<exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
+				<exclude>org.glassfish.jaxb:jaxb-core</exclude>
+				<exclude>org.glassfish.jaxb:txw2</exclude>
+				<exclude>com.sun.istack:istack-commons-runtime</exclude>
 				<exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
 				<exclude>jakarta.xml.ws:jakarta.xml.ws-api</exclude>
 				<exclude>jakarta.xml.soap:jakarta.xml.soap-api</exclude>

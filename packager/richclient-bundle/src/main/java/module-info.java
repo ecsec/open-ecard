@@ -35,7 +35,7 @@ module org.openecard.richclient {
     uses ch.qos.logback.classic.spi.Configurator;
 
     /* JAXB module */
-    requires com.sun.xml.bind;
+    requires org.glassfish.jaxb.runtime;
 
     /* JavaFX modules */
     requires javafx.base;

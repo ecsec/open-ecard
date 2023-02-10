@@ -74,25 +74,13 @@
 			<groupId>org.openecard.clients</groupId>
 			<artifactId>android-common</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.xml.bind</groupId>
-					<artifactId>jaxb-impl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jakarta.xml.bind-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>jakarta.xml.ws</groupId>
-					<artifactId>jakarta.xml.ws-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
-		<!-- This Glassfish JAXB Impl will be downloaded from mvn.ecsec.de
-			 It contains a fix to a EXC_BAD_ACCESS which occurs on iOS apps.
-			 The sources are in https://git.ecsec.de/oec/jakarta-jaxb-ri -->
+		<!--
+			Redefine JAXB impl version to use custom build without AWT and some other fixes.
+			The implementation is published on mvn.ecsec.de with the sources
+			available at https://git.ecsec.de/oec/jakarta-jaxb-ri
+		-->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
@@ -108,6 +96,6 @@
 			<artifactId>jakarta.xml.ws-api</artifactId>
 			<version>3.0.1</version>
 		</dependency>
-
 	</dependencies>
+
 </project>

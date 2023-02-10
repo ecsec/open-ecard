@@ -115,6 +115,11 @@
 			<url>https://mvn.ecsec.de/repository/openecard-public</url>
 		</repository>
 		<repository>
+			<id>openecard-thirdparty</id>
+			<name>Openecard Third-Party Repo</name>
+			<url>https://mvn.ecsec.de/repository/ecard_thirdparty</url>
+		</repository>
+		<repository>
 			<id>javacard-pro</id>
 			<name>javacard.pro</name>
 			<url>https://javacard.pro/maven/</url>

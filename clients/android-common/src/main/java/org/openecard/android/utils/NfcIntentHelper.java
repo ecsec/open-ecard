@@ -64,7 +64,8 @@ public class NfcIntentHelper {
 	    LOG.debug("Enable NFC foreground dispatch...");
 	    Activity activity = this.capabilityHelper.getContext();
 	    Intent activityIntent = new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, 0);
+	    int flags = android.os.Build.VERSION.SDK_INT >= 31 ? android.app.PendingIntent.FLAG_MUTABLE : 0;
+	    PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, flags);
 	    // enable dispatch of messages with nfc tag
 	    this.capabilityHelper.getNfcAdapter().enableForegroundDispatch(activity, pendingIntent, null, null);
 	}

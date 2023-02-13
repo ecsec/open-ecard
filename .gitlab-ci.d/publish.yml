@@ -4,14 +4,15 @@ publish-to-github:
   tags:
     - "docker-exec"
   script:
-    - apt update && apt upgrade && apt install -y jq && apt install -y curl && apt install -y zip
+    - apt-get update && apt-get upgrade -y && apt-get install -y jq curl zip
     # Create Release
+    - TAG=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
     - >-
       RELEASE_ID=$(curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} -X POST -v \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         https://api.github.com/repos/ecsec/open-ecard/releases \
-        -d '{ "tag_name":"'"${CI_COMMIT_TAG}"'", "name":"'"${CI_COMMIT_TAG}"'", "draft":false, "prerelease":false, "generate_release_notes":false }' | jq '.id')
+        -d '{ "tag_name":"'"${CI_COMMIT_TAG}"'", "name":"'"${TAG}"'", "draft":false, "prerelease":false, "generate_release_notes":false }' | jq '.id')
     # Upload iOS Framework
     - zip -r OpenEcardPod.zip LICENSE* OpenEcard.xcframework
     - >-
@@ -67,7 +68,7 @@ publish-ios-pod-spec:
     - echo "s.homepage          = 'https://dev.openecard.org'" >> open-ecard.podspec
     - echo "s.author            = { 'Name' => 'florian.otto@ecsec.de' }" >> open-ecard.podspec
     - echo "s.license           = { :type => 'GPLv3', :file => 'LICENSE' }" >> open-ecard.podspec
-    - echo "s.source            = { :http => 'https://github.com/ecsec/open-ecard/releases/download/"${TAG}"/OpenEcard-CocoaPod.zip' }" >> open-ecard.podspec
+    - echo "s.source            = { :http => 'https://github.com/ecsec/open-ecard/releases/download/"${CI_COMMIT_TAG}"/OpenEcard-CocoaPod.zip' }" >> open-ecard.podspec
     - echo "s.ios.deployment_target = '13.0'" >> open-ecard.podspec
     - echo "s.ios.vendored_frameworks = 'OpenEcard.xcframework'" >> open-ecard.podspec
     - echo end >> open-ecard.podspec

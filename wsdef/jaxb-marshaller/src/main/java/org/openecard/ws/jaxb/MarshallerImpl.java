@@ -239,14 +239,14 @@ public class MarshallerImpl {
 
     private String calculateClassesHash() {
 	try {
-	    MessageDigest md = MessageDigest.getInstance("MD5");
+	    MessageDigest md = MessageDigest.getInstance("SHA-256");
 	    for (Class<?> c : userClasses) {
 		md.update(c.getName().getBytes());
 	    }
 	    byte[] digest = md.digest();
 	    return toHexString(digest);
 	} catch (NoSuchAlgorithmException ex) {
-	    throw new RuntimeException("MD5 hash algorithm is not supported on your platform.", ex);
+	    throw new RuntimeException("SHA-256 hash algorithm is not supported on your platform.", ex);
 	}
     }
 

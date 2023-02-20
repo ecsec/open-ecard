@@ -2,8 +2,6 @@ package-win:
   stage: package
   tags:
     - "win"
-  variables:
-    WIN_KEYSTORE: C:\gitlab-runner\assets\openecard_cs.p12
   cache:
     key: "$OEC_WIN_CACHE"
     paths:
@@ -23,7 +21,7 @@ package-win:
         -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()                                          
     - signtool.exe sign 
         /debug 
-        /p ${WIN_KEYCHAIN_PW}
+        /p ${WIN_KEYSTORE_PW}
         /f "${WIN_KEYSTORE}"
         /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp
         /td SHA256

@@ -101,6 +101,19 @@ pod 'open-ecard'
 See [open-ecard-ios](https://github.com/ecsec/open-ecard-ios) for further information.
 
 
+Changelog
+=========
+
+A release changelog can be created by listing all commits since the last release:
+
+```
+git log --oneline --no-merges ${LAST_RELEASE_TAG}..${NEW_RELEASE_TAG}
+```
+
+Usually, this list will be manually adjusted by removing unimportant commits.
+For example, commits that are related to the CI process.
+
+
 License
 =======
 

@@ -23,8 +23,7 @@
 package org.openecard.ifd.scio.wrapper;
 
 import iso.std.iso_iec._24727.tech.schema.BioSensorCapabilityType;
-import org.openecard.common.ifd.scio.SCIOATR;
-import org.openecard.common.ifd.scio.SCIOTerminal;
+import org.openecard.common.ifd.scio.*;
 import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType;
 import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
 import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
@@ -41,9 +40,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ifd.PACECapabilities;
-import org.openecard.common.ifd.scio.NoSuchTerminal;
-import org.openecard.common.ifd.scio.SCIOErrorCode;
-import org.openecard.common.ifd.scio.SCIOException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.reader.ExecutePACERequest;
 import org.openecard.ifd.scio.reader.ExecutePACEResponse;
@@ -146,6 +142,11 @@ public class TerminalInfo {
 	if (! slotCapRead) {
 	    SlotCapabilityType cap = new SlotCapabilityType();
 	    cap.setIndex(BigInteger.ZERO);
+
+	    String ifaceProto = getInterfaceProtocol();
+	    if (ifaceProto != null) {
+		cap.getProtocol().add(ifaceProto);
+	    }
 
 	    if (supportsPace()) {
 		List<PACECapabilities.PACECapability> capabilities = getPACECapabilities();
@@ -255,6 +256,18 @@ public class TerminalInfo {
 	return bioCap;
     }
 
+    private String getInterfaceProtocol() {
+	if (isConnected()) {
+	    SCIOCard card = channel.getChannel().getCard();
+	    boolean contactless = card.isContactless();
+	    if (contactless) {
+		return ECardConstants.IFD.Protocol.TYPE_A;
+	    } else {
+		return ECardConstants.IFD.Protocol.T0;
+	    }
+	}
+	return null;
+    }
 
     private Integer getPaceCtrlCode() throws SCIOException, InterruptedException {
 	if (isConnected()) {

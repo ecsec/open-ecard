@@ -94,6 +94,10 @@ public class ECardConstants {
 
 	public static class Protocol {
 
+	    public static boolean isProtocol(String proto) {
+		return proto.equals(T0) || proto.equals(T1) || proto.equals(T2) || proto.equals(TYPE_A) || proto.equals(TYPE_B);
+	    }
+
 	    public static final String T0 = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0";
 	    public static final String T1 = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1";
 	    public static final String T2 = "urn:iso:std:iso-iec:10536:tech:protocols:T-equals-2";

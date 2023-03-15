@@ -22,9 +22,9 @@
 
 package org.openecard.scio;
 
-import javax.smartcardio.ATR;
-import javax.smartcardio.Card;
-import javax.smartcardio.CardException;
+import javax.smartcardio.*;
+import org.openecard.common.apdu.common.CardCommandAPDU;
+import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.scio.SCIOATR;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOException;
@@ -43,6 +43,7 @@ public class PCSCCard implements SCIOCard {
 
     private final PCSCTerminal terminal;
     private final Card card;
+    private Boolean isContactless;
 
     PCSCCard(PCSCTerminal terminal, Card card) {
 	this.terminal = terminal;
@@ -64,6 +65,28 @@ public class PCSCCard implements SCIOCard {
     public SCIOProtocol getProtocol() {
 	String proto = card.getProtocol();
 	return SCIOProtocol.getType(proto);
+    }
+
+    @Override
+    public boolean isContactless() {
+	if (isContactless == null) {
+	    this.isContactless = hasContactlessUid();
+	}
+
+	return isContactless;
+    }
+
+    private boolean hasContactlessUid() {
+	try {
+	    CardCommandAPDU getUidCmd = new CardCommandAPDU((byte) 0xFF, (byte) 0xCA, (byte) 0x00, (byte) 0x00, (short) 0xFF);
+	    CommandAPDU convertCommand = new CommandAPDU(getUidCmd.toByteArray());
+	    ResponseAPDU response = card.getBasicChannel().transmit(convertCommand);
+	    CardResponseAPDU cr = new CardResponseAPDU(response.getBytes());
+	    return cr.isNormalProcessed();
+	} catch (Exception ex) {
+	    // don't care
+	    return false;
+	}
     }
 
     @Override

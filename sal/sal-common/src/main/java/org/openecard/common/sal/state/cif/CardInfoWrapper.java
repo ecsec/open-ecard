@@ -65,7 +65,7 @@ public class CardInfoWrapper {
      * @param cif the CardInfo that should be wrapped
      * @param interfaceProtocol Protocol with which the card is connected.
      */
-    public CardInfoWrapper(CardInfoType cif, @Nullable String interfaceProtocol) {
+    public CardInfoWrapper(CardInfoType cif, String interfaceProtocol) {
 	this.cif = cif;
 	this.interfaceProtocol = interfaceProtocol;
 

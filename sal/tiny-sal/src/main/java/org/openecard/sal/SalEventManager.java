@@ -10,21 +10,9 @@
 
 package org.openecard.sal;
 
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
+import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities;
-import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse;
-import iso.std.iso_iec._24727.tech.schema.GetStatus;
-import iso.std.iso_iec._24727.tech.schema.GetStatusResponse;
-import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType;
-import iso.std.iso_iec._24727.tech.schema.IFDStatusType;
-import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType;
-import iso.std.iso_iec._24727.tech.schema.ListIFDs;
-import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse;
-import iso.std.iso_iec._24727.tech.schema.SlotStatusType;
-import iso.std.iso_iec._24727.tech.schema.Wait;
-import iso.std.iso_iec._24727.tech.schema.WaitResponse;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -324,10 +312,11 @@ public class SalEventManager {
 			    CardInfoType cif = env.getRecognition().getCardInfo(type);
 			    if (cif != null) {
 				// add card to SAL state
-				// TODO: add interface protocol, but it looks like it was never used so probably ok to leave it null
 				try {
+				    // get protocol of the slot (fails if card is not connected)
+				    String slotProto = getSlotProto(slotCapabilities);
 				    // Register card before triggering events.
-				    salStates.addCard(ctx, ifdName, handle.getSlotIndex(), new CardInfoWrapper(cif, null));
+				    salStates.addCard(ctx, ifdName, handle.getSlotIndex(), new CardInfoWrapper(cif, slotProto));
 				} catch (DuplicateCardEntry ex) {
 				    LOG.error("Duplicate card entry detected, ignoring new card.");
 				}
@@ -396,6 +385,22 @@ public class SalEventManager {
 	    }
 
 	    return null;
+	}
+
+	private String getSlotProto(IFDCapabilitiesType ifdCap) {
+	    List<SlotCapabilityType> slotCaps = ifdCap.getSlotCapability();
+	    if (slotCaps.isEmpty()) {
+		throw new IllegalStateException("No slot capabilities found.");
+	    }
+	    SlotCapabilityType slotCap = slotCaps.get(0);
+	    List<String> protos = slotCap.getProtocol();
+	    for (String nextProto : protos) {
+		if (ECardConstants.IFD.Protocol.isProtocol(nextProto)) {
+		    return nextProto;
+		}
+	    }
+	    // no protocol contained in list
+	    throw new IllegalStateException("No protocol found in slot capabilities.");
 	}
 
 	private boolean hasKeypad(@Nullable IFDCapabilitiesType capabilities) {

@@ -40,6 +40,7 @@ import java.util.Map;
 
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.INVALID_TCTOKEN_URL;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.NO_TOKEN;
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
 
 
 /**
@@ -56,10 +57,10 @@ public class TCTokenRequest {
 
     private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
     private static final String CARD_TYPE_KEY = "cardType";
-    private static final String DEFAULT_NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
     private TCToken token;
-    private String cardType = DEFAULT_NPA_CARD_TYPE;
+    private String cardType = NPA_CARD_TYPE;
+
 
     private List<Pair<URL, TlsServerCertificate>> certificates;
     private TCTokenContext tokenCtx;
@@ -145,7 +146,7 @@ public class TCTokenRequest {
    public static boolean isPerformTR03112Checks(String cardType) {
        boolean activationChecks = true;
 	// disable checks when not using the nPA
-	if (cardType != null && !cardType.equals(DEFAULT_NPA_CARD_TYPE)) {
+	if (cardType != null && !NPA_CARD_TYPE.equals(cardType)) {
 	    activationChecks = false;
 	} else if (TR03112Utils.DEVELOPER_MODE) {
 	    activationChecks = false;

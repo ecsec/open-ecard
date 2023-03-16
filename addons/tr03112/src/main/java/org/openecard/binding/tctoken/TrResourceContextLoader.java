@@ -15,6 +15,8 @@ import org.openecard.common.util.Promise;
 import org.openecard.httpcore.ResourceContextLoader;
 import org.openecard.httpcore.cookies.CookieManager;
 
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
+
 
 /**
  * Resourceloader with specific changes for use in accordance to TR-03112.
@@ -36,7 +38,7 @@ public class TrResourceContextLoader extends ResourceContextLoader {
 	Promise<Object> cardTypeP = dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE);
 	Object cardType = cardTypeP.derefNonblocking();
 	// verify when the value is not set or when no nPA is requested
-	if (cardType != null && ! "http://bsi.bund.de/cif/npa.xml".equals(cardType)) {
+	if (cardType != null && ! NPA_CARD_TYPE.equals(cardType)) {
 	    return true;
 	} else {
 	    return false;

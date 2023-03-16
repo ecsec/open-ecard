@@ -25,6 +25,8 @@ package org.openecard.common.sal.state.cif;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import org.openecard.common.util.StringUtils;
 import org.testng.annotations.Test;
+
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
 import static org.testng.Assert.*;
 
 
@@ -46,7 +48,7 @@ public class CardInfoWrapperTest {
     public void test() throws Exception {
 	CardInfoType cardInfo = new CifLoader().getNpaCif();
 	CardInfoWrapper cardInfoWrapper = new CardInfoWrapper(cardInfo, null);
-	assertEquals(cardInfoWrapper.getCardType(), "http://bsi.bund.de/cif/npa.xml");
+	assertEquals(cardInfoWrapper.getCardType(), NPA_CARD_TYPE);
 	assertEquals(cardInfoWrapper.getImplicitlySelectedApplication(), rootApplication);
 	assertEquals(cardInfoWrapper.getCardApplications().size(), 3);
 	assertEquals(cardInfoWrapper.getDataSetNameList(rootApplication).getDataSetName().size(), 5);

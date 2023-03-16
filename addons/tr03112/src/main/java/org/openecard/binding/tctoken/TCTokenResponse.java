@@ -87,7 +87,7 @@ public class TCTokenResponse extends BindingResult {
     }
 
     /**
-     * Gtes the TCToken of the request.
+     * Gets the TCToken of the request.
      *
      * @return The TCToken.
      */

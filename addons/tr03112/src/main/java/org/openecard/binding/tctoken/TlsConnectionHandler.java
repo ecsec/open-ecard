@@ -46,6 +46,8 @@ import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
+
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
@@ -98,7 +100,7 @@ public class TlsConnectionHandler {
 	    }
 	    // eID servers usually have problems with sni, so disable it for them
 	    // TODO: check occasionally if this still holds
-	    boolean doSni = ! "http://bsi.bund.de/cif/npa.xml".equals(cardType);
+	    boolean doSni = ! NPA_CARD_TYPE.equals(cardType);
 
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());

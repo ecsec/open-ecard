@@ -48,6 +48,8 @@ public class ECardConstants {
     public static final int SLOT_HANDLE_DEFAULT_SIZE = 24;
 
     public static final String UNKNOWN_CARD = "http://bsi.bund.de/cif/unknown";
+    public static final String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+
     public static final String PAOS_NEXT = ECARD_PREFIX + "PAOS/GetNextCommand";
 
     public static final String ACTOR_NEXT = "http://schemas.xmlsoap.org/soap/actor/next";

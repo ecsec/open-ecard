@@ -70,7 +70,7 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
 
     protected ArrayList<ServerName> serverNames;
     protected ProtocolVersion clientVersion = ProtocolVersion.TLSv12;
-    protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv10;
+    protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv12;
 
     /**
      * Create a ClientCertPSKTlsClient for the given parameters.
@@ -80,15 +80,16 @@ public class ClientCertPSKTlsClient extends PSKTlsClient implements ClientCertTl
      * @param host Host or IP address. Value must not be null.
      * @param doSni Control whether the server should send the SNI Header in the Client Hello.
      */
-    public ClientCertPSKTlsClient(@Nonnull TlsCrypto tcf, @Nonnull TlsPSKIdentity pskId, @Nullable String host,
-	    boolean doSni) {
+    public ClientCertPSKTlsClient(@Nonnull TlsCrypto tcf, @Nonnull TlsPSKIdentity pskId, @Nullable String host, boolean doSni) {
 	super(tcf, pskId);
 	this.serverNames = new ArrayList<>();
 	if (doSni) {
 	    this.serverNames.add(makeServerName(host));
 	}
-	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
-	this.minClientVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
+	boolean legacyTls = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
+	if (legacyTls) {
+	    this.minClientVersion = ProtocolVersion.TLSv10;
+	}
 	this.host = host;
     }
 

@@ -40,8 +40,7 @@ import java.util.Map;
 
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.INVALID_TCTOKEN_URL;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.NO_TOKEN;
-import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
-import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK;
+import static org.openecard.common.ECardConstants.*;
 
 
 /**
@@ -57,10 +56,8 @@ public class TCTokenRequest {
     private static final Logger LOG = LoggerFactory.getLogger(TCTokenRequest.class);
 
     private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
-    private static final String CARD_TYPE_KEY = "cardType";
 
     private TCToken token;
-    private String cardType = NPA_CARD_TYPE;
 
 
     private List<Pair<URL, TlsServerCertificate>> certificates;
@@ -107,9 +104,6 @@ public class TCTokenRequest {
 		    case TC_TOKEN_URL_KEY:
 			LOG.info("Skipping given query parameter '{}' because it was already extracted", TC_TOKEN_URL_KEY);
 			break;
-		    case CARD_TYPE_KEY:
-			tcTokenRequest.cardType = v;
-			break;
 		    default:
 			LOG.info("Unknown query element: {}", k);
 			break;
@@ -124,37 +118,6 @@ public class TCTokenRequest {
 	return tcTokenRequest;
     }
 
-    private static BigInteger extractSlotIndex(String rawSlotIndex) {
-	if (rawSlotIndex == null || rawSlotIndex.isEmpty()) {
-	    return null;
-	}
-	return new BigInteger(rawSlotIndex);
-    }
-
-    public static byte[] extractContextHandle(String rawContextHandle) {
-	if (rawContextHandle == null || rawContextHandle.isEmpty()) {
-	    return null;
-	}
-	return StringUtils.toByteArray(rawContextHandle);
-    }
-
-    /**
-     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
-     *
-     * @param cardType The card type.
-     * @return {@code true} if checks should be performed, {@code false} otherwise.
-     */
-   public static boolean isPerformTR03112Checks(String cardType) {
-       boolean activationChecks = true;
-	// disable checks when not using the nPA
-	if (cardType != null && !NPA_CARD_TYPE.equals(cardType)) {
-	    activationChecks = false;
-	} else if (TR03112Utils.DEVELOPER_MODE) {
-	    activationChecks = false;
-	    LOG.warn("DEVELOPER_MODE: All TR-03124-1 security checks are disabled.");
-	}
-	return activationChecks;
-   }
 
     /**
      * Evaluate and extract the TC Token context from the given parameters.
@@ -208,15 +171,6 @@ public class TCTokenRequest {
 	return token;
     }
 
-    /**
-     * Returns the card type selected for this authentication process.
-     * Defaults to the nPA identifier to provide a fallback.
-     *
-     * @return Card type
-     */
-    public String getCardType() {
-	return cardType;
-    }
 
     /**
      * Gets the certificates of the servers that have been passed while the TCToken was retrieved.
@@ -238,7 +192,19 @@ public class TCTokenRequest {
      * @return {@code true} if checks should be performed, {@code false} otherwise.
      */
     public boolean  isPerformTR03112Checks() {
-	return isPerformTR03112Checks(this.cardType);
+	// nobody uses PAOS, so for now use this as an indicator, that we need to use the nPA
+	boolean isNpa = BINDING_PAOS.equals(tokenCtx.getToken().getBinding());
+	// disable checks when not using the nPA
+	boolean activationChecks;
+	if (! isNpa) {
+	    activationChecks = false;
+	} else if (TR03112Utils.DEVELOPER_MODE) {
+	    activationChecks = false;
+	    LOG.warn("DEVELOPER_MODE: All TR-03124-1 security checks are disabled.");
+	} else {
+	    activationChecks = false;
+	}
+	return activationChecks;
     }
 
     public boolean isSameChannel() {

@@ -47,6 +47,7 @@ public class TCTokenSAXHandler extends DefaultHandler {
     private static final String BINDING = "Binding";
     private static final String PATH_SECURITY_PARAMETERS = "PathSecurity-Parameters";
     private static final String PSK = "PSK";
+    private static final String ALLOWED_CARD_TYPE = "AllowedCardType";
 
     private boolean read;
     private StringBuilder sb;
@@ -128,6 +129,8 @@ public class TCTokenSAXHandler extends DefaultHandler {
 	    if (psp.getPSK() == null || psp.getPSK().length == 0) {
 		token.setPathSecurityParameters(null);
 	    }
+	} else if (qName.equalsIgnoreCase(ALLOWED_CARD_TYPE)) {
+	    token.getAllowedCardType().add(value);
 	}
     }
 

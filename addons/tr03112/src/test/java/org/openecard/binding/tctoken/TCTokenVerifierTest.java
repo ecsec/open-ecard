@@ -33,6 +33,8 @@ import org.openecard.httpcore.ResourceContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK;
+
 
 /**
  * @author Moritz Horsch
@@ -84,13 +86,13 @@ public class TCTokenVerifierTest {
 
     @Test(expectedExceptions = InvalidTCTokenElement.class, enabled = false)
     public void testVerifyPathSecurityProtocol() throws ActivationError {
-	token.setPathSecurityProtocol("urn:ietf:rfc:42791");
+	token.setPathSecurityProtocol(PATH_SEC_PROTO_TLS_PSK + "1");
 	verifier.verifyPathSecurity();
     }
 
     @Test(expectedExceptions = InvalidTCTokenElement.class, enabled = false)
     public void testVerifyPathSecurityParameters() throws ActivationError {
-	token.setPathSecurityProtocol("urn:ietf:rfc:4279");
+	token.setPathSecurityProtocol(PATH_SEC_PROTO_TLS_PSK);
 	token.setPathSecurityParameters(null);
 	verifier.verifyPathSecurity();
     }

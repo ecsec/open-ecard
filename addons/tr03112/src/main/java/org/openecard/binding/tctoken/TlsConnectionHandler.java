@@ -46,7 +46,7 @@ import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
+import static org.openecard.common.ECardConstants.*;
 
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
@@ -117,7 +117,7 @@ public class TlsConnectionHandler {
 
 	    String secProto = token.getPathSecurityProtocol();
 	    // use same channel as demanded in TR-03124 sec. 2.4.3
-	    if (isSameChannel()) {
+	    if (tokenRequest.isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 		if (tlsClient instanceof ClientCertDefaultTlsClient) {
 		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
@@ -148,7 +148,7 @@ public class TlsConnectionHandler {
 
 		TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
 		switch (secProto) {
-		    case "urn:ietf:rfc:4279":
+		    case PATH_SEC_PROTO_TLS_PSK:
 			{
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new BasicTlsPSKIdentity(sessionId, psk);
@@ -157,7 +157,7 @@ public class TlsConnectionHandler {
 			    tlsClient.setMinimumVersion(minVersion);
 			    break;
 			}
-		    case "urn:ietf:rfc:5246":
+		    case PATH_SEC_PROTO_MTLS:
 			{
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
@@ -185,22 +185,6 @@ public class TlsConnectionHandler {
 
 	} catch (MalformedURLException ex) {
 	    throw new ConnectionError(MALFORMED_URL, ex, "ServerAddress");
-	}
-    }
-
-    public boolean isSameChannel() {
-	TCTokenType token = tokenRequest.getTCToken();
-	String secProto = token.getPathSecurityProtocol();
-	// check security proto
-	if (secProto == null || "".equals(secProto)) {
-	    return true;
-	}
-	// check PSK value
-	if (secProto.equals("urn:ietf:rfc:4279")) {
-	    TCTokenType.PathSecurityParameters pathsecParams = token.getPathSecurityParameters();
-	    return pathsecParams == null || pathsecParams.getPSK() == null || pathsecParams.getPSK().length == 0;
-	} else {
-	    return false;
 	}
     }
 
@@ -237,7 +221,7 @@ public class TlsConnectionHandler {
     }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
-	if (! isSameChannel()) {
+	if (! tokenRequest.isSameChannel()) {
 	    // normal procedure, create a new channel
 	    return createNewTlsConnection(tlsVersion);
 	} else {

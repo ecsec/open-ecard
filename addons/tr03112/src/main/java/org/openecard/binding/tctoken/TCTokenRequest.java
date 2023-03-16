@@ -41,6 +41,7 @@ import java.util.Map;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.INVALID_TCTOKEN_URL;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.NO_TOKEN;
 import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
+import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK;
 
 
 /**
@@ -239,4 +240,21 @@ public class TCTokenRequest {
     public boolean  isPerformTR03112Checks() {
 	return isPerformTR03112Checks(this.cardType);
     }
+
+    public boolean isSameChannel() {
+	TCTokenType token = getTCToken();
+	String secProto = token.getPathSecurityProtocol();
+	// check security proto
+	if (secProto == null || "".equals(secProto)) {
+	    return true;
+	}
+	// check PSK value
+	if (secProto.equals(PATH_SEC_PROTO_TLS_PSK)) {
+	    TCTokenType.PathSecurityParameters pathsecParams = token.getPathSecurityParameters();
+	    return pathsecParams == null || pathsecParams.getPSK() == null || pathsecParams.getPSK().length == 0;
+	} else {
+	    return false;
+	}
+    }
+
 }

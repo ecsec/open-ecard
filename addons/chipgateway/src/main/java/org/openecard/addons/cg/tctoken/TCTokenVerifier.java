@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.lang.JoseException;
 import static org.openecard.addons.cg.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_MTLS;
 
 
 /**
@@ -64,7 +65,7 @@ public class TCTokenVerifier {
 	assertRequired("SessionIdentifier", token.getSessionIdentifier());
         assertRequired("PathSecurity-Protocol", token.getPathSecurityProtocol());
         checkEqualOR("PathSecurity-Protocol", token.getPathSecurityProtocol(),
-                "urn:ietf:rfc:5246",
+		PATH_SEC_PROTO_MTLS,
                 "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption");
         if (token.getPathSecurityProtocol().equals("http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption")) {
             assertRequired("PathSecurity-Parameters", token.getPathSecurityParameters());

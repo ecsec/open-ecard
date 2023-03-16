@@ -91,9 +91,6 @@ public class TlsConnectionHandler {
 
 	    String secProto = token.getPathSecurityProtocol();
 
-	    // determine TLS version to use
-	    ProtocolVersion version = ProtocolVersion.TLSv12;
-	    ProtocolVersion minVersion = ProtocolVersion.TLSv12;
 	    switch (secProto) {
 		case PATH_SEC_PROTO_MTLS:
 		case "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption":
@@ -111,8 +108,6 @@ public class TlsConnectionHandler {
 			// use a smartcard for client authentication if needed
 			TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
 			tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
-			tlsClient.setClientVersion(version);
-			tlsClient.setMinimumVersion(minVersion);
 			// add PKIX verifier
 			if (ChipGatewayProperties.isValidateServerCert()) {
 			    tlsAuth.addCertificateVerifier(new CGJavaSecVerifier());

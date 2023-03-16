@@ -131,18 +131,6 @@ public class TlsConnectionHandler {
 		    tokenRequest.getTokenContext().closeStream();
 		}
 
-		// determine TLS version to use
-		ProtocolVersion version = ProtocolVersion.TLSv12;
-		ProtocolVersion minVersion = ProtocolVersion.TLSv12;
-		switch (secProto) {
-		    case "urn:ietf:rfc:5246":
-			// no changes
-			break;
-		    case "urn:ietf:rfc:4279":
-			minVersion = ProtocolVersion.TLSv11;
-			break;
-		}
-
 		// Set up TLS connection
 		DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 
@@ -152,18 +140,14 @@ public class TlsConnectionHandler {
 			{
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new BasicTlsPSKIdentity(sessionId, psk);
-			    tlsClient = new ClientCertPSKTlsClient(crypto, pskId, serverHost, doSni);
-			    tlsClient.setClientVersion(version);
-			    tlsClient.setMinimumVersion(minVersion);
+			    tlsClient = new ClientCertPSKTlsClient(crypto, pskId, serverHost, true);
 			    break;
 			}
 		    case PATH_SEC_PROTO_MTLS:
 			{
 			    // use a smartcard for client authentication if needed
 			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
-			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, doSni);
-			    tlsClient.setClientVersion(version);
-			    tlsClient.setMinimumVersion(minVersion);
+			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			    // add PKIX verifier
 			    if (verifyCertificates) {
 				tlsAuth.addCertificateVerifier(new JavaSecVerifier());

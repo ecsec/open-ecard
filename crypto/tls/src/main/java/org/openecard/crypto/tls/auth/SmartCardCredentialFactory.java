@@ -30,6 +30,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -77,16 +78,32 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
     private static final Logger LOG = LoggerFactory.getLogger(SmartCardCredentialFactory.class);
 
     private final TokenCache tokenCache;
-    private final ConnectionHandleType handle;
     private final boolean filterAlwaysReadable;
+    private ConnectionHandleType handle;
+    private List<String> allowedCardTypes;
 
     private TlsContext context;
 
     public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nullable ConnectionHandleType handle,
 	    boolean filterAlwaysReadable) {
 	this.tokenCache = new TokenCache(dispatcher);
-	this.handle = handle;
 	this.filterAlwaysReadable = filterAlwaysReadable;
+	this.handle = handle;
+	this.allowedCardTypes = Collections.emptyList();
+    }
+
+    public void defineAllowedCardTypes(List<String> allowedCardTypes) {
+	ArrayList<String> types = new ArrayList<>();
+	types.addAll(allowedCardTypes);
+	this.allowedCardTypes = Collections.unmodifiableList(types);
+    }
+
+    protected boolean isAllowedCardType(String cardType) {
+	if (allowedCardTypes.isEmpty()) {
+	    return true;
+	} else {
+	    return allowedCardTypes.contains(cardType);
+	}
     }
 
     @Override

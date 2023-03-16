@@ -21,6 +21,7 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ForceProcessing" type="xs:boolean" default="true" minOccurs="0" />
+			<xs:element name="AllowedCardType" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 

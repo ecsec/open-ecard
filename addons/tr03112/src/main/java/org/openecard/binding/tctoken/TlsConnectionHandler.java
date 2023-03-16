@@ -219,6 +219,7 @@ public class TlsConnectionHandler {
 
     private CredentialFactory makeSmartCardCredential() {
 	SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
+	scFac.defineAllowedCardTypes(tokenRequest.getTCToken().getAllowedCardType());
 	return scFac;
     }
 

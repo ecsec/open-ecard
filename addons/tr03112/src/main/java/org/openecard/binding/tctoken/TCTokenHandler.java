@@ -416,7 +416,7 @@ public class TCTokenHandler {
 
     private static void prepareForTask(TCTokenRequest request, ConnectionHandleType connectionHandle) {
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	boolean performChecks = isPerformTR03112Checks(request);
+	boolean performChecks = request.isPerformTR03112Checks();
 	if (!performChecks) {
 	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
@@ -514,15 +514,6 @@ public class TCTokenHandler {
 	return new ArrayList<>(result);
     }
 
-    /**
-     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
-     *
-     * @param tcTokenRequest TC Token request.
-     * @return {@code true} if checks should be performed, {@code false} otherwise.
-     */
-    private static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
-	return tcTokenRequest.isPerformTR03112Checks();
-    }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
 	new Thread(() -> {

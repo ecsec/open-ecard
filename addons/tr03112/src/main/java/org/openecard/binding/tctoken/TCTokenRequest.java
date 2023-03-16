@@ -202,7 +202,7 @@ public class TCTokenRequest {
 	    activationChecks = false;
 	    LOG.warn("DEVELOPER_MODE: All TR-03124-1 security checks are disabled.");
 	} else {
-	    activationChecks = false;
+	    activationChecks = true;
 	}
 	return activationChecks;
     }

@@ -23,50 +23,23 @@
 package org.openecard.binding.tctoken;
 
 import generated.TCTokenType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import org.openecard.addon.Context;
-import org.openecard.addons.tr03124.gui.CardMonitorTask;
-import org.openecard.addons.tr03124.gui.CardSelectionAction;
-import org.openecard.addons.tr03124.gui.CardSelectionStep;
-import org.openecard.binding.tctoken.ex.AuthServerException;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
-import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
-import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.binding.tctoken.ex.*;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
-import org.openecard.common.AppVersion;
-import org.openecard.common.DynamicContext;
-import org.openecard.common.I18n;
-import org.openecard.common.event.EventType;
-import org.openecard.common.interfaces.CardRecognition;
-import org.openecard.common.sal.util.InsertCardDialog;
-import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.StringUtils;
 import org.openecard.common.util.TR03112Utils;
-import org.openecard.common.util.UrlBuilder;
-import org.openecard.gui.ResultStatus;
-import org.openecard.gui.UserConsent;
-import org.openecard.gui.UserConsentNavigator;
-import org.openecard.gui.definition.UserConsentDescription;
-import org.openecard.gui.executor.ExecutionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.INVALID_TCTOKEN_URL;
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.NO_TOKEN;
 
 
 /**
@@ -80,40 +53,39 @@ import org.slf4j.LoggerFactory;
 public class TCTokenRequest {
 
     private static final Logger LOG = LoggerFactory.getLogger(TCTokenRequest.class);
-    private static final I18n LANG = I18n.getTranslation("tr03112");
 
     private static final String TC_TOKEN_URL_KEY = "tcTokenURL";
     private static final String CARD_TYPE_KEY = "cardType";
-    private static final String SLOT_INDEX_KEY = "slotIndex";
-    private static final String CONTEXT_HANDLE_KEY = "contextHandle";
-    private static final String IFD_NAME_KEY = "ifdName";
     private static final String DEFAULT_NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
     private TCToken token;
-    private String ifdName;
-    private BigInteger slotIndex;
-    private byte[] contextHandle;
     private String cardType = DEFAULT_NPA_CARD_TYPE;
+
     private List<Pair<URL, TlsServerCertificate>> certificates;
-    private URL tcTokenURL;
     private TCTokenContext tokenCtx;
+
+    public static TCTokenRequest fetchTCToken(Map<String, String> parameters) throws InvalidRedirectUrlException, SecurityViolationException, UserCancellationException, InvalidTCTokenException, InvalidTCTokenElement, MissingActivationParameterException, AuthServerException, InvalidAddressException {
+	Map<String, String> copyParams = new HashMap<>(parameters);
+	Pair<TCTokenContext, URL> tokenInfo = extractTCTokenContext(copyParams);
+	TCTokenRequest req = convert(copyParams, tokenInfo);
+	return req;
+    }
 
     /**
      * Check and evaluate the request parameters and wrap the result in a {@code TCTokenRequest} class.
      *
      * @param parameters The request parameters.
-     * @param ctx Addon {@link Context} used for the communication with the core.
      * @param tokenInfo The token.
      * @return A TCTokenRequest wrapping the parameters.
      * @throws MissingActivationParameterException
      */
-    public static TCTokenRequest convert(Map<String, String> parameters, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
+    public static TCTokenRequest convert(Map<String, String> parameters, Pair<TCTokenContext, URL> tokenInfo)
 	    throws MissingActivationParameterException {
-	TCTokenRequest result = parseTCTokenRequestURI(parameters, ctx, tokenInfo);
+	TCTokenRequest result = parseTCTokenRequestURI(parameters, tokenInfo);
 	return result;
     }
 
-    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
+    private static TCTokenRequest parseTCTokenRequestURI(Map<String, String> queries, Pair<TCTokenContext, URL> tokenInfo)
 	    throws MissingActivationParameterException {
 	TCTokenRequest tcTokenRequest = new TCTokenRequest();
 
@@ -133,15 +105,6 @@ public class TCTokenRequest {
 		    case TC_TOKEN_URL_KEY:
 			LOG.info("Skipping given query parameter '{}' because it was already extracted", TC_TOKEN_URL_KEY);
 			break;
-		    case IFD_NAME_KEY:
-			tcTokenRequest.ifdName = v;
-			break;
-		    case CONTEXT_HANDLE_KEY:
-			tcTokenRequest.contextHandle = extractContextHandle(v);
-			break;
-		    case SLOT_INDEX_KEY:
-			tcTokenRequest.slotIndex = extractSlotIndex(v);
-			break;
 		    case CARD_TYPE_KEY:
 			tcTokenRequest.cardType = v;
 			break;
@@ -155,31 +118,15 @@ public class TCTokenRequest {
 	tcTokenRequest.tokenCtx = tokenInfo.p1;
 	tcTokenRequest.token = tokenInfo.p1.getToken();
 	tcTokenRequest.certificates = tokenInfo.p1.getCerts();
-	tcTokenRequest.tcTokenURL = tokenInfo.p2;
+
 	return tcTokenRequest;
     }
 
-    public static String extractIFDName(Map<String, String> queries) {
-	return queries.get(IFD_NAME_KEY);
-    }
-
-    public static String extractCardType(Map<String, String> queries) {
-	return queries.get(CARD_TYPE_KEY);
-    }
-
-    public static BigInteger extractSlotIndex(Map<String, String> queries) {
-	return extractSlotIndex(queries.get(SLOT_INDEX_KEY));
-    }
-
-    public static BigInteger extractSlotIndex(String rawSlotIndex) {
+    private static BigInteger extractSlotIndex(String rawSlotIndex) {
 	if (rawSlotIndex == null || rawSlotIndex.isEmpty()) {
 	    return null;
 	}
 	return new BigInteger(rawSlotIndex);
-    }
-
-    public static byte[] extractContextHandle(Map<String, String> queries) {
-	return extractContextHandle(queries.get(CONTEXT_HANDLE_KEY));
     }
 
     public static byte[] extractContextHandle(String rawContextHandle) {
@@ -187,16 +134,6 @@ public class TCTokenRequest {
 	    return null;
 	}
 	return StringUtils.toByteArray(rawContextHandle);
-    }
-
-    /**
-     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
-     *
-     * @param queries The query parameters of the TC token binding request.
-     * @return {@code true} if checks should be performed, {@code false} otherwise.
-     */
-    public static boolean isPerformTR03112Checks(Map<String, String> queries) {
-	return isPerformTR03112Checks(queries.get(CARD_TYPE_KEY));
     }
 
     /**
@@ -231,25 +168,17 @@ public class TCTokenRequest {
      * @throws InvalidTCTokenException
      * @throws InvalidTCTokenUrlException
      */
-    public static Pair<TCTokenContext, URL> extractTCTokenContext(Map<String, String> queries) throws AuthServerException,
+    private static Pair<TCTokenContext, URL> extractTCTokenContext(Map<String, String> queries) throws AuthServerException,
 	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
 	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
-	String activationTokenUrl = queries.get(TC_TOKEN_URL_KEY);
+	    String tcTokenUrl = queries.get(TC_TOKEN_URL_KEY);
 
-	Pair<TCTokenContext, URL> result = extractTCTokenContext(activationTokenUrl);
-	queries.remove(TC_TOKEN_URL_KEY);
-	return result;
+	    Pair<TCTokenContext, URL> result = extractTCTokenContextInt(tcTokenUrl);
+	    queries.remove(TC_TOKEN_URL_KEY);
+	    return result;
     }
 
-    public static Pair<TCTokenContext, URL> removeTCTokenContext(Map<String, String> queries) throws AuthServerException,
-	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
-	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
-	Pair<TCTokenContext, URL> result = extractTCTokenContext(queries);
-	queries.remove(TC_TOKEN_URL_KEY);
-	return result;
-    }
-
-    private static Pair<TCTokenContext, URL> extractTCTokenContext(String activationTokenUrl) throws AuthServerException,
+    private static Pair<TCTokenContext, URL> extractTCTokenContextInt(String activationTokenUrl) throws AuthServerException,
 	    InvalidRedirectUrlException, InvalidAddressException, InvalidTCTokenElement, SecurityViolationException, UserCancellationException,
 	    MissingActivationParameterException, InvalidTCTokenException, InvalidTCTokenUrlException {
 	if (activationTokenUrl == null) {
@@ -267,178 +196,6 @@ public class TCTokenRequest {
 	return new Pair(tokenCtx, tokenUrl);
     }
 
-    public static void correctTCTokenRequestURI(Map<String, String> queries, Context ctx) throws MissingActivationParameterException {
-	final String cardType = extractCardType(queries);
-	final boolean hasCardType = cardType != null;
-	try {
-	    if (queries.containsKey("cardTypes") || hasCardType) {
-		String[] types;
-		if (hasCardType) {
-		    types = new String[]{cardType};
-		} else {
-		    types = queries.get("cardTypes").split(",");
-		}
-
-		ConnectionHandleType handle = findCard(types, ctx);
-		setIfdName(queries, handle.getIFDName());
-		setContextHandle(queries, handle.getContextHandle());
-		setSlotIndex(queries, handle.getSlotIndex());
-		addTokenUrlParameter(queries, handle.getRecognitionInfo());
-	    } else {
-		String[] types = new String[]{DEFAULT_NPA_CARD_TYPE};
-		ConnectionHandleType handle = findCard(types, ctx);
-		setIfdName(queries, handle.getIFDName());
-		setContextHandle(queries, handle.getContextHandle());
-		setSlotIndex(queries, handle.getSlotIndex());
-	    }
-	} catch (UserCancellationException ex) {
-	    if (queries.containsKey("cardTypes")) {
-		addTokenUrlParameter(queries, queries.get("cardTypes").split(",")[0]);
-	    }
-	    LOG.warn("The user aborted the CardInsertion dialog.", ex);
-	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	    dynCtx.put(TR03112Keys.CARD_SELECTION_CANCELLATION, ex);
-	}
-
-	// cardType determined! set in dynamic context, so the information is available in ResourceContext
-	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	dynCtx.put(TR03112Keys.ACTIVATION_CARD_TYPE, hasCardType ? cardType : DEFAULT_NPA_CARD_TYPE);
-    }
-
-    /**
-     * Finds a card which matches one of the give types.
-     *
-     * @param types String array containing valid card types.
-     * @param disp Dispatcher used to query cards and terminals.
-     * @param gui User consent to display messages to the user.
-     * @return ConnectionHandleType object of the chosen card.
-     */
-    private static ConnectionHandleType findCard(@Nonnull  String[] types, @Nonnull Context ctx) throws
-	    MissingActivationParameterException, UserCancellationException {
-	CardRecognition rec = ctx.getRecognition();
-	Map<String, String> namesAndType = new HashMap<>();
-	for (String type : types) {
-	    namesAndType.put(rec.getTranslatedCardName(type), type);
-	}
-
-	InsertCardDialog insCardDiag =
-		new InsertCardDialog(ctx.getUserConsent(), namesAndType, ctx.getEventDispatcher(),
-			ctx.getSalStateView());
-	List<ConnectionHandleType> usableCards = insCardDiag.show();
-
-	if (usableCards == null) {
-	    // user aborted the card insertion dialog
-	    LOG.info("Waiting for cards has not returned a result, cancelling process.");
-	    throw new UserCancellationException(null, LANG.translationForKey(CARD_INSERTION_ABORT));
-	}
-
-	ConnectionHandleType handle;
-	if (usableCards.size() > 1) {
-	    UserConsentDescription ucd = new UserConsentDescription(LANG.translationForKey("card.selection.heading.uc",
-		    AppVersion.getName()));
-	    String stepTitle = LANG.translationForKey("card.selection.heading.step");
-	    CardSelectionStep step = new CardSelectionStep(stepTitle, usableCards, ctx.getRecognition());
-	    ArrayList<String> types2 = new ArrayList<>();
-	    types2.addAll(namesAndType.values());
-	    CardMonitorTask task = new CardMonitorTask(types2, step);
-	    ctx.getEventDispatcher().add(task, EventType.CARD_REMOVED, EventType.CARD_RECOGNIZED);
-	    step.setBackgroundTask(task);
-	    CardSelectionAction action = new CardSelectionAction(step, usableCards, types2, ctx);
-	    step.setAction(action);
-	    ucd.getSteps().add(step);
-
-	    UserConsent uc = ctx.getUserConsent();
-	    UserConsentNavigator ucNav = uc.obtainNavigator(ucd);
-	    ExecutionEngine exec = new ExecutionEngine(ucNav);
-	    ResultStatus resStatus = exec.process();
-	    if (resStatus != ResultStatus.OK) {
-		throw new MissingActivationParameterException(CARD_SELECTION_ABORT);
-	    }
-
-	    handle = action.getResult();
-	    ctx.getEventDispatcher().del(task);
-	} else {
-	    handle = usableCards.get(0);
-	}
-
-	return handle;
-    }
-
-    /**
-     * Sets the IFDName in the given map.
-     *
-     * @param queries Map which shall contain the new IFDName value.
-     * @param ifdName The new IFDName to set.
-     */
-    private static void setIfdName(@Nonnull Map<String, String> queries, @Nonnull String ifdName) {
-	if (! ifdName.isEmpty()) {
-	    queries.put(IFD_NAME_KEY, ifdName);
-	}
-    }
-
-    /**
-     * Sets the ContextHandle in the given Map.
-     *
-     * @param queries Map which shall contain the new ContextHandle value.
-     * @param contextHandle The new ContextHandle to set.
-     */
-    private static void setContextHandle(@Nonnull Map<String, String> queries, @Nonnull byte[] contextHandle) {
-	if (contextHandle.length > 0) {
-	    queries.put(CONTEXT_HANDLE_KEY, ByteUtils.toHexString(contextHandle));
-	}
-    }
-
-    /**
-     * Sets the SlotIndex in the given Map.
-     *
-     * @param queries Map which shall contain the new SlotIndex.
-     * @param index The new SlotIndex to set.
-     */
-    private static void setSlotIndex(@Nonnull Map<String, String> queries, @Nonnull BigInteger index) {
-	queries.put(SLOT_INDEX_KEY, index.toString());
-    }
-
-    /**
-     * Adds the card type given in the given RecognitionInfo object as type to the tcTokenURL contained in the given map.
-     *
-     * @param queries Map which contains the tcTokenURL and shall contain the new cardType.
-     * @param recInfo RecognitionInfo object containing the cardType or type parameter.
-     */
-    private static void addTokenUrlParameter(@Nonnull Map<String, String> queries, @Nonnull RecognitionInfo recInfo) {
-	if (queries.containsKey(TC_TOKEN_URL_KEY)) {
-	    String tcTokenURL = queries.get(TC_TOKEN_URL_KEY);
-	    try {
-		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
-		// url encoding is done by the builder
-		builder = builder.queryParam("type", recInfo.getCardType(), true);
-		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
-		queries.put(CARD_TYPE_KEY, recInfo.getCardType());
-	    } catch (URISyntaxException ex) {
-		// ignore if this happens the authentication will fail at all.
-	    }
-	}
-    }
-
-    /**
-     * Adds the card type given in the given RecognitionInfo object as type to the tcTokenURL contained in the given map.
-     *
-     * @param queries Map which contains the tcTokenURL and shall contain the new cardType.
-     * @param recInfo RecognitionInfo object containing the cardType or type parameter.
-     */
-    private static void addTokenUrlParameter(@Nonnull Map<String, String> queries, @Nonnull String selectedCardType) {
-	if (queries.containsKey(TC_TOKEN_URL_KEY)) {
-	    String tcTokenURL = queries.get(TC_TOKEN_URL_KEY);
-	    try {
-		UrlBuilder builder = UrlBuilder.fromUrl(tcTokenURL);
-		// url encoding is done by the builder
-		builder = builder.queryParam("type", selectedCardType, true);
-		queries.put(TC_TOKEN_URL_KEY, builder.build().toString());
-		queries.put(CARD_TYPE_KEY, selectedCardType);
-	    } catch (URISyntaxException ex) {
-		// ignore if this happens the authentication will fail at all.
-	    }
-	}
-    }
 
     /**
      * Returns the TCToken.
@@ -447,33 +204,6 @@ public class TCTokenRequest {
      */
     public TCToken getTCToken() {
 	return token;
-    }
-
-    /**
-     * Returns the IFD name.
-     *
-     * @return IFD name
-     */
-    public String getIFDName() {
-	return ifdName;
-    }
-
-    /**
-     * Returns the context handle.
-     *
-     * @return Context handle
-     */
-    public byte[] getContextHandle() {
-	return contextHandle;
-    }
-
-    /**
-     * Returns the slot index.
-     *
-     * @return Slot index
-     */
-    public BigInteger getSlotIndex() {
-	return slotIndex;
     }
 
     /**
@@ -494,15 +224,6 @@ public class TCTokenRequest {
      */
     public List<Pair<URL, TlsServerCertificate>> getCertificates() {
 	return certificates;
-    }
-
-    /**
-     * Gets the TC Token URL.
-     *
-     * @return TC Token URL
-     */
-    public URL getTCTokenURL() {
-	return tcTokenURL;
     }
 
     public TCTokenContext getTokenContext() {

@@ -64,6 +64,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.BINDING_HTTP;
+import static org.openecard.common.ECardConstants.BINDING_PAOS;
 
 /**
  * Transport binding agnostic TCToken handler. <br>
@@ -192,7 +194,7 @@ public class TCTokenHandler {
 	    final FutureTask<?> taskResult;
 	    final String taskName;
 	    switch (binding) {
-		case "urn:liberty:paos:2006-08": {
+		case BINDING_PAOS: {
 		    // send StartPAOS
 		    ConnectionHandleType connectionHandle = preparePaosHandle();
 		    prepareForTask(tokenReq, connectionHandle);
@@ -203,7 +205,7 @@ public class TCTokenHandler {
 
 		    break;
 		}
-		case "urn:ietf:rfc:2616": {
+		case BINDING_HTTP: {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
 
 		    // we know exactly which card we want

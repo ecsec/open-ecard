@@ -55,6 +55,9 @@ public class ECardConstants {
     public static final String PATH_SEC_PROTO_TLS_PSK = "urn:ietf:rfc:4279";
     public static final String PATH_SEC_PROTO_MTLS = "urn:ietf:rfc:5246";
 
+    public static final String BINDING_HTTP = "urn:ietf:rfc:2616";
+    public static final String BINDING_PAOS = "urn:liberty:paos:2006-08";
+
     public static final String ACTOR_NEXT = "http://schemas.xmlsoap.org/soap/actor/next";
     public static final String SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
     public static final String PAOS_VERSION_11 = "urn:liberty:paos:2003-08";

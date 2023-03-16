@@ -40,8 +40,7 @@ import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_MTLS;
-import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK;
+import static org.openecard.common.ECardConstants.*;
 
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
@@ -192,7 +191,7 @@ public class TCTokenVerifier {
     public void verifyBinding() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String value = token.getBinding();
 	assertRequired("Binding", value);
-	checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
+	checkEqualOR("Binding", value, BINDING_PAOS, BINDING_HTTP);
     }
 
     /**

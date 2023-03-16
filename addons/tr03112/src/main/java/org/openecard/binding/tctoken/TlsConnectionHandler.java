@@ -89,18 +89,6 @@ public class TlsConnectionHandler {
     public void setUpClient() throws ConnectionError {
 	try {
 	    TCTokenType token = tokenRequest.getTCToken();
-	    String cardType = null;
-	    if (handle != null) {
-		if (handle.getRecognitionInfo() != null) {
-		    cardType = handle.getRecognitionInfo().getCardType();
-		}
-		if (cardType == null) {
-		    cardType = tokenRequest.getCardType();
-		}
-	    }
-	    // eID servers usually have problems with sni, so disable it for them
-	    // TODO: check occasionally if this still holds
-	    boolean doSni = ! NPA_CARD_TYPE.equals(cardType);
 
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());

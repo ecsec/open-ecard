@@ -82,7 +82,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
     private TlsContext context;
 
-    public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
+    public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nullable ConnectionHandleType handle,
 	    boolean filterAlwaysReadable) {
 	this.tokenCache = new TokenCache(dispatcher);
 	this.handle = handle;

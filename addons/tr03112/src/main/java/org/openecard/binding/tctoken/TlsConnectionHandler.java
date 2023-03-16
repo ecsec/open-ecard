@@ -217,14 +217,9 @@ public class TlsConnectionHandler {
 	return handler;
     }
 
-    @Nullable
     private CredentialFactory makeSmartCardCredential() {
-	if (handle != null) {
-	    SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
-	    return scFac;
-	} else {
-	    return null;
-	}
+	SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
+	return scFac;
     }
 
 }

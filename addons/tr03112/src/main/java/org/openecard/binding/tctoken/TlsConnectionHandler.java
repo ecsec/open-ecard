@@ -74,15 +74,13 @@ public class TlsConnectionHandler {
     private ClientCertTlsClient tlsClient;
     private boolean verifyCertificates = true;
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle)
-	    throws ConnectionError {
+    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle) {
 	this.dispatcher = dispatcher;
 	this.tokenRequest = tokenRequest;
 	this.handle = handle;
     }
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest)
-	    throws ConnectionError {
+    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest) {
 	this(dispatcher, tokenRequest, null);
     }
 

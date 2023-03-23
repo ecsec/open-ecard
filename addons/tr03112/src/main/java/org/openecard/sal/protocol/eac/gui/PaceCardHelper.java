@@ -41,7 +41,7 @@ import org.openecard.addon.Context;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.PACECapabilities;
-import org.openecard.common.sal.util.CardConnectorUtil;
+import org.openecard.crypto.common.sal.CardConnectorUtil;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.SysUtils;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;

@@ -37,6 +37,8 @@ import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.Promise;
 import org.openecard.common.util.SysUtils;
+import org.openecard.crypto.common.sal.CancelOnCardRemovedFilter;
+import org.openecard.crypto.common.sal.CardRemovalFilter;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;

@@ -54,15 +54,13 @@ import org.openecard.bouncycastle.util.io.pem.PemWriter;
 import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.util.Promise;
 import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.KeyTypes;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
-import org.openecard.crypto.common.sal.did.DataSetInfo;
-import org.openecard.crypto.common.sal.did.DidInfo;
-import org.openecard.crypto.common.sal.did.DidInfos;
-import org.openecard.crypto.common.sal.did.NoSuchDid;
-import org.openecard.crypto.common.sal.did.TokenCache;
+import org.openecard.crypto.common.sal.TokenFinder;
+import org.openecard.crypto.common.sal.did.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,17 +77,24 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
     private final TokenCache tokenCache;
     private final boolean filterAlwaysReadable;
-    private ConnectionHandleType handle;
+    private ConnectionHandleType inputHandle;
+    private ConnectionHandleType usedHandle;
     private List<String> allowedCardTypes;
 
     private TlsContext context;
 
-    public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nullable ConnectionHandleType handle,
+    public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
 	    boolean filterAlwaysReadable) {
 	this.tokenCache = new TokenCache(dispatcher);
 	this.filterAlwaysReadable = filterAlwaysReadable;
-	this.handle = handle;
+	this.inputHandle = handle;
+	this.usedHandle = inputHandle;
 	this.allowedCardTypes = Collections.emptyList();
+    }
+
+    @Nullable
+    public ConnectionHandleType getUsedHandle() {
+	return usedHandle;
     }
 
     public void defineAllowedCardTypes(List<String> allowedCardTypes) {
@@ -113,6 +118,29 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
     @Override
     public List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr) {
+	if (inputHandle.getSlotHandle() != null) {
+	    // use the one prepared handle
+	    return getClientCredentials(cr, inputHandle);
+	} else {
+	    // find a card which can be used to answer the request
+	    TokenFinder f = null;
+	    try (TokenFinder.TokenFinderWatcher fw = f.startWatching()) {
+		Promise<ConnectionHandleType> card = fw.waitForNext();
+		ConnectionHandleType handle = card.deref();
+		usedHandle = handle;
+		return getClientCredentials(cr, handle);
+	    } catch (InterruptedException ex) {
+		LOG.warn("Interrupted while waiting for a card to be inserted, continuing without certificate authentication.");
+		return Collections.emptyList();
+	    } catch (WSHelper.WSException ex) {
+		LOG.warn("Error while accessing the smartcard, continuing without certificate authentication.");
+		return Collections.emptyList();
+	    }
+	}
+    }
+
+
+    protected List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr, ConnectionHandleType handle) {
 	ArrayList<TlsCredentialedSigner> credentials = new ArrayList<>();
 	TlsCryptoParameters tlsCrypto = new TlsCryptoParameters(context);
 

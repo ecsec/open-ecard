@@ -73,6 +73,7 @@ public class TlsConnectionHandler {
     private String sessionId;
     private ClientCertTlsClient tlsClient;
     private boolean verifyCertificates = true;
+    private SmartCardCredentialFactory credentialFactory;
 
     public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle) {
 	this.dispatcher = dispatcher;
@@ -108,7 +109,7 @@ public class TlsConnectionHandler {
 		if (tlsClient instanceof ClientCertDefaultTlsClient) {
 		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
 		}
-		// save the info that we have a same channel situtation
+		// save the info that we have a same channel situation
 		DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 		dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE);
 	    } else {
@@ -132,7 +133,8 @@ public class TlsConnectionHandler {
 		    case PATH_SEC_PROTO_MTLS:
 			{
 			    // use a smartcard for client authentication if needed
-			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
+			    credentialFactory = makeSmartCardCredential();
+			    tlsAuth.setCredentialFactory(credentialFactory);
 			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			    // add PKIX verifier
 			    if (verifyCertificates) {
@@ -217,10 +219,15 @@ public class TlsConnectionHandler {
 	return handler;
     }
 
-    private CredentialFactory makeSmartCardCredential() {
+    private SmartCardCredentialFactory makeSmartCardCredential() {
 	SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
 	scFac.defineAllowedCardTypes(tokenRequest.getTCToken().getAllowedCardType());
 	return scFac;
+    }
+
+    @Nullable
+    public SmartCardCredentialFactory getSmartcardCredentialFactory() {
+	return credentialFactory;
     }
 
 }

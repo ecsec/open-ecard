@@ -25,19 +25,14 @@ package org.openecard.crypto.tls.verify;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXParameters;
-import java.security.cert.TrustAnchor;
-import java.util.ArrayList;
-import java.util.Set;
+import java.security.cert.*;
+import java.util.*;
+
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
+import org.openecard.common.util.Pair;
 import org.openecard.crypto.tls.CertificateVerificationException;
 import org.openecard.crypto.tls.CertificateVerifier;
 
@@ -52,7 +47,7 @@ import org.openecard.crypto.tls.CertificateVerifier;
 public class JavaSecVerifier implements CertificateVerifier {
 
     protected final boolean checkRevocation;
-    protected final CertPathValidator certPathValidator;
+    protected final CertPathBuilder certPathValidator;
 
     /**
      * Create a JavaSecVerifier and load the internal certificate path validator.
@@ -66,9 +61,9 @@ public class JavaSecVerifier implements CertificateVerifier {
     public JavaSecVerifier(boolean checkRevocation) throws RuntimeException {
 	this.checkRevocation = checkRevocation;
 	try {
-	    certPathValidator = CertPathValidator.getInstance("PKIX");
+	    certPathValidator = CertPathBuilder.getInstance("PKIX");
 	} catch (NoSuchAlgorithmException ex) {
-	    throw new RuntimeException("Failed to load CertPathValidator");
+	    throw new RuntimeException("Failed to load CertPathBuilder");
 	}
     }
 
@@ -76,31 +71,72 @@ public class JavaSecVerifier implements CertificateVerifier {
 	return new TrustStoreLoader().getTrustAnchors();
     }
 
-
     @Override
     public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
+	validateCertificate(chain, hostname);
+    }
+
+    protected CertPathBuilderResult validateCertificate(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
-	    CertPath certPath = convertChain(chain);
+	    Set<TrustAnchor> trustStore = getTrustStore();
+	    Pair<X509Certificate, CertStore> path = buildChain(chain);
+
+	    CertPathBuilder cpb = certPathValidator;
+	    X509CertSelector targetSelector = new X509CertSelector();
+	    targetSelector.setCertificate(path.p1);
 
 	    // create the parameters for the validator
-	    PKIXParameters params = new PKIXParameters(getTrustStore());
+	    PKIXBuilderParameters cpp = new PKIXBuilderParameters(trustStore, targetSelector);
+	    cpp.addCertStore(path.p2);
 	    if (checkRevocation) {
-		params.setRevocationEnabled(true);
-		System.setProperty("com.sun.security.enableCRLDP", "true");
+		//				cpp.setRevocationEnabled(true);
+		//				System.setProperty("com.sun.security.enableCRLDP", "true");
+		cpp.setRevocationEnabled(false);
+		PKIXRevocationChecker revChecker = (PKIXRevocationChecker) cpb.getRevocationChecker();
+		Set<PKIXRevocationChecker.Option> revOpts = new HashSet<>();
+		//revOpts.add(PKIXRevocationChecker.Option.ONLY_END_ENTITY);
+		revChecker.setOptions(revOpts);
+		// TODO: add OCSP responses
+		//revChecker.setOcspResponses(responses);
+		cpp.setCertPathCheckers(null);
+		cpp.addCertPathChecker(revChecker);
 	    } else {
 		// disable CRL checking since we are not supplying any CRLs yet
-		params.setRevocationEnabled(false);
+		cpp.setRevocationEnabled(false);
 	    }
 
-	    // validate - exception marks failure
-	    certPathValidator.validate(certPath, params);
-	} catch (CertPathValidatorException ex) {
+	    // build path performs the validation - exception marks failure
+	    CertPathBuilderResult result = cpb.build(cpp);
+	    return result;
+
+	} catch (CertPathBuilderException ex) {
 	    throw new CertificateVerificationException(ex.getMessage());
 	} catch (GeneralSecurityException ex) {
 	    throw new CertificateVerificationException(ex.getMessage());
 	} catch (IOException ex) {
 	    throw new CertificateVerificationException("Error converting certificate chain to java.security format.");
 	}
+    }
+
+    private Pair<X509Certificate, CertStore> buildChain(TlsServerCertificate chain) throws CertificateException, IOException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+	ArrayList<X509Certificate> auxCerts = new ArrayList<>();
+	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+	for (TlsCertificate next : chain.getCertificate().getCertificateList()) {
+	    X509Certificate nextConverted = convertCertificateInt(cf, next);
+	    auxCerts.add(nextConverted);
+	}
+
+	X509Certificate eeCert = auxCerts.get(0);
+	CertStore auxCertStore = buildAuxCertStore(auxCerts);
+
+	return new Pair<>(eeCert, auxCertStore);
+    }
+
+    private CertStore buildAuxCertStore(Collection certs) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+	CollectionCertStoreParameters params = new CollectionCertStoreParameters(certs);
+	CertStore store = CertStore.getInstance("Collection", params);
+	return store;
     }
 
 
@@ -122,11 +158,11 @@ public class JavaSecVerifier implements CertificateVerifier {
 	return convertCertificateInt(cf, cert);
     }
 
-    public static Certificate convertCertificateInt(CertificateFactory cf, TlsCertificate cert)
-	    throws CertificateException, IOException {
+    public static X509Certificate convertCertificateInt(CertificateFactory cf, TlsCertificate cert)
+	throws CertificateException, IOException {
 	byte[] nextData = cert.getEncoded();
 	ByteArrayInputStream nextDataStream = new ByteArrayInputStream(nextData);
-	java.security.cert.Certificate nextConverted = cf.generateCertificate(nextDataStream);
+	X509Certificate nextConverted = (X509Certificate) cf.generateCertificate(nextDataStream);
 	return nextConverted;
     }
 

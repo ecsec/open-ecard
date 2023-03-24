@@ -22,23 +22,8 @@
 
 package org.openecard.sal.protocol.genericcryptography;
 
-import iso.std.iso_iec._24727.tech.schema.CardCallTemplateType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
+import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType.APICommand;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-import iso.std.iso_iec._24727.tech.schema.SignResponse;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
@@ -52,27 +37,31 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.GetResponse;
 import org.openecard.common.apdu.InternalAuthenticate;
 import org.openecard.common.apdu.ManageSecurityEnvironment;
-import org.openecard.common.apdu.common.APDUTemplateException;
-import org.openecard.common.apdu.common.BaseTemplateContext;
-import org.openecard.common.apdu.common.CardCommandAPDU;
-import org.openecard.common.apdu.common.CardCommandTemplate;
-import org.openecard.common.apdu.common.CardResponseAPDU;
-import org.openecard.common.apdu.common.TLVFunction;
+import org.openecard.common.apdu.common.*;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.apdu.utils.SALErrorUtils;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.common.sal.exception.IncorrectParameterException;
-import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOComputeDigitalSignature;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -121,13 +110,13 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(sign);
 	    String didName = SALUtils.getDIDName(sign);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    StateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(sign, didName, cardStateEntry, connectionHandle);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
 	    byte[] applicationID = connectionHandle.getCardApplication();
-	    Assert.securityConditionDID(cardStateEntry, applicationID, didName, CryptographicServiceActionName.SIGN);
+	    Assert.securityConditionDID(cardStateEntry.getCardEntry(), applicationID, didName, CryptographicServiceActionName.SIGN);
 
 	    byte[] message = sign.getMessage();
 	    byte[] keyReference = cryptoMarker.getCryptoKeyInfo().getKeyRef().getKeyRef();

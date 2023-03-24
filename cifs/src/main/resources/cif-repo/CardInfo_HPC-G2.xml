@@ -1328,7 +1328,7 @@
 							 signECDSA).
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
-						<iso:CryptoMarker Protocol="1.2.840.10045.4.3.2">
+						<iso:CryptoMarker Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDSA</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
@@ -1690,7 +1690,7 @@
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
 						<iso:CryptoMarker
-							Protocol="1.2.840.10045.4.3.2">
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDSA</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
@@ -1742,7 +1742,7 @@
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
 						<iso:CryptoMarker
-							Protocol="1.2.840.10045.4.3.2">
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDH</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
@@ -2633,7 +2633,7 @@
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
 						<iso:CryptoMarker
-							Protocol="1.2.840.10045.4.3.2">
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDSA</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
@@ -2994,7 +2994,7 @@
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
 						<iso:CryptoMarker
-							Protocol="1.2.840.10045.4.3.2">
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDSA</iso:Algorithm>
 								<iso:AlgorithmIdentifier>
@@ -3046,7 +3046,7 @@
 							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
 						-->
 						<iso:CryptoMarker
-							Protocol="1.2.840.10045.4.3.2">
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
 							<iso:AlgorithmInfo>
 								<iso:Algorithm>ECDH</iso:Algorithm>
 								<iso:AlgorithmIdentifier>

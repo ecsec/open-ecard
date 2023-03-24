@@ -34,10 +34,7 @@ import org.openecard.binding.tctoken.ex.*;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.*;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.DocumentSchemaValidator;
-import org.openecard.common.interfaces.DocumentValidatorException;
+import org.openecard.common.interfaces.*;
 import org.openecard.common.util.*;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
@@ -100,6 +97,7 @@ public class TCTokenHandler {
 
     private final String pin;
     private final String puk;
+    private final EventDispatcher evtDispatcher;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
     private final AddonManager manager;
@@ -112,6 +110,7 @@ public class TCTokenHandler {
      */
     public TCTokenHandler(Context ctx) {
 	this.dispatcher = ctx.getDispatcher();
+	this.evtDispatcher = ctx.getEventDispatcher();
 	this.gui = ctx.getUserConsent();
 	this.manager = ctx.getManager();
 	pin = LANG_PACE.translationForKey("pin");
@@ -212,7 +211,8 @@ public class TCTokenHandler {
 		    // TODO: see if we need to really do this, as the handle never leaves the OeC
 		    ConnectionHandleType connectionHandle = preparePaosHandle();
 		    prepareForTask(tokenReq, connectionHandle);
-		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenReq);
+		    // get first handle, currently we just support one and this is likely not to change soon
+		    HttpGetTask task = new HttpGetTask(dispatcher, evtDispatcher, connectionHandle, tokenReq);
 		    taskResult = new FutureTask<>(task);
 		    taskName = "TLS Auth";
 		    break;

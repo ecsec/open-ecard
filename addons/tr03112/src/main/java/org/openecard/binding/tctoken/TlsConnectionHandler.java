@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.tls.ProtocolVersion;
 import org.openecard.bouncycastle.tls.TlsClient;
@@ -40,10 +41,8 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.auth.CredentialFactory;
-import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.auth.*;
 import org.openecard.crypto.tls.verify.SameCertVerifier;
-import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 import static org.openecard.common.ECardConstants.*;
@@ -62,9 +61,7 @@ import org.openecard.crypto.tls.verify.JavaSecVerifier;
  */
 public class TlsConnectionHandler {
 
-    private final Dispatcher dispatcher;
     private final TCTokenRequest tokenRequest;
-    private final ConnectionHandleType handle;
 
     private URL serverAddress;
     private String hostname;
@@ -73,16 +70,15 @@ public class TlsConnectionHandler {
     private String sessionId;
     private ClientCertTlsClient tlsClient;
     private boolean verifyCertificates = true;
-    private SmartCardCredentialFactory credentialFactory;
+    private CredentialFactory credentialFactory;
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle) {
-	this.dispatcher = dispatcher;
+
+    public TlsConnectionHandler(TCTokenRequest tokenRequest) {
 	this.tokenRequest = tokenRequest;
-	this.handle = handle;
     }
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest) {
-	this(dispatcher, tokenRequest, null);
+    public void setSmartCardCredential(CredentialFactory credentialFactory) {
+	this.credentialFactory = credentialFactory;
     }
 
     public void setUpClient() throws ConnectionError {
@@ -132,8 +128,7 @@ public class TlsConnectionHandler {
 			}
 		    case PATH_SEC_PROTO_MTLS:
 			{
-			    // use a smartcard for client authentication if needed
-			    credentialFactory = makeSmartCardCredential();
+			    // use a smartcard for client authentication if one is set
 			    tlsAuth.setCredentialFactory(credentialFactory);
 			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			    // add PKIX verifier
@@ -217,17 +212,6 @@ public class TlsConnectionHandler {
 	handler.connect(tlsClient);
 
 	return handler;
-    }
-
-    private SmartCardCredentialFactory makeSmartCardCredential() {
-	SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
-	scFac.defineAllowedCardTypes(tokenRequest.getTCToken().getAllowedCardType());
-	return scFac;
-    }
-
-    @Nullable
-    public SmartCardCredentialFactory getSmartcardCredentialFactory() {
-	return credentialFactory;
     }
 
 }

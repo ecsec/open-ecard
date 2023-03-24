@@ -40,14 +40,18 @@ import org.apache.http.protocol.HttpRequestExecutor;
 import org.openecard.bouncycastle.tls.TlsClientProtocol;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.common.util.FileUtils;
-import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
+import org.openecard.crypto.tls.auth.BaseSmartCardCredentialFactory;
+import org.openecard.crypto.tls.auth.PreselectedSmartCardCredentialFactory;
+import org.openecard.crypto.tls.auth.SearchingSmartCardCredentialFactory;
 import org.openecard.httpcore.HttpRequestHelper;
 import org.openecard.httpcore.HttpUtils;
 import org.openecard.httpcore.StreamHttpClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
@@ -62,15 +66,20 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
     private static final Logger LOG = LoggerFactory.getLogger(HttpGetTask.class);
 
     private final Dispatcher dispatcher;
+	private final EventDispatcher evtDispatcher;
+	private final byte[] ctxHandle;
     private final ConnectionHandleType connectionHandle;
     private final TCTokenRequest tokenRequest;
 
-    private SmartCardCredentialFactory credentialFac;
+    private final BaseSmartCardCredentialFactory credentialFac;
 
-    public HttpGetTask(Dispatcher dispatcher, ConnectionHandleType connectionHandle, TCTokenRequest tokenRequest) {
+    public HttpGetTask(Dispatcher dispatcher, EventDispatcher evtDispatcher, @Nonnull ConnectionHandleType connectionHandle, TCTokenRequest tokenRequest) {
 	this.dispatcher = dispatcher;
+	this.evtDispatcher = evtDispatcher;
+	this.ctxHandle = connectionHandle.getContextHandle();
 	this.connectionHandle = connectionHandle;
 	this.tokenRequest = tokenRequest;
+	this.credentialFac = makeSmartcardCredentialFactory();
     }
 
     @Override
@@ -80,9 +89,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 	} finally {
 	    // if a handle has been selected in the process, then disconnect it
 	    ConnectionHandleType usedHandle = getUsedHandle();
-	    if (usedHandle != null) {
-		TCTokenHandler.disconnectHandle(dispatcher, usedHandle);
-	    }
+	    TCTokenHandler.disconnectHandle(dispatcher, usedHandle);
 	}
 
 	// produce a positive result
@@ -92,20 +99,38 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 
     @Nullable
     private ConnectionHandleType getUsedHandle() {
-	if (credentialFac != null && credentialFac.getUsedHandle() != null) {
+	if (credentialFac != null) {
 	    return credentialFac.getUsedHandle();
-	} else if (connectionHandle != null) {
+	} else {
 	    // special case for early error and when the connection has not been established yet
 	    return connectionHandle;
+	}
+    }
+
+    private BaseSmartCardCredentialFactory makeSmartcardCredentialFactory() {
+	if (connectionHandle.getSlotHandle() == null) {
+	    SearchingSmartCardCredentialFactory cf = new SearchingSmartCardCredentialFactory(
+		dispatcher,
+		true,
+		evtDispatcher,
+		ctxHandle,
+		tokenRequest.getTCToken().getAllowedCardType()
+	    );
+	    return cf;
 	} else {
-	    return null;
+	    PreselectedSmartCardCredentialFactory cf = new PreselectedSmartCardCredentialFactory(
+		dispatcher,
+		connectionHandle,
+		true
+	    );
+	    return cf;
 	}
     }
 
     private void getRequest() throws IOException, ConnectionError, URISyntaxException, HttpException {
-	TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
+	TlsConnectionHandler tlsHandler = new TlsConnectionHandler(tokenRequest);
+	tlsHandler.setSmartCardCredential(credentialFac);
 	tlsHandler.setUpClient();
-	credentialFac = tlsHandler.getSmartcardCredentialFactory();
 
 	// connect the tls endpoint and make a get request
 	TlsClientProtocol handler = tlsHandler.createTlsConnection();

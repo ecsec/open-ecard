@@ -22,6 +22,8 @@
 
 package org.openecard.addons.cg.impl;
 
+import org.openecard.common.util.HandlerBuilder;
+import org.openecard.common.util.HandlerUtils;
 import org.openecard.crypto.common.sal.did.TokenCache;
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
@@ -80,15 +82,17 @@ public class ListCertificates {
     private final char[] pin;
 
 
-    public ListCertificates(TokenCache tokenCache, byte[] slotHandle, List<CertificateFilterType> certFilter,
+    public ListCertificates(TokenCache tokenCache, String sessionId, byte[] slotHandle, List<CertificateFilterType> certFilter,
 	    @Nullable char[] pin) throws ParameterInvalid {
 	if (slotHandle == null || slotHandle.length == 0) {
 	    throw new ParameterInvalid("Slot handle is empty.");
 	}
 
 	this.tokenCache = tokenCache;
-	this.handle = new ConnectionHandleType();
-	this.handle.setSlotHandle(ByteUtils.clone(slotHandle));
+	this.handle = HandlerBuilder.create()
+	    .setSlotHandle(ByteUtils.clone(slotHandle))
+	    .setSessionId(sessionId)
+	    .buildConnectionHandle();
 	this.certFilter = certFilter;
 	this.pin = pin;
     }

@@ -50,7 +50,7 @@ import java.util.List;
 public class SearchingSmartCardCredentialFactory extends BaseSmartCardCredentialFactory {
 
     private final EventDispatcher evtDispatcher;
-    private final byte[] ctxHandle;
+    private final ConnectionHandleType sessionHandle;
 
     private ConnectionHandleType usedHandle;
     private List<String> allowedCardTypes;
@@ -60,11 +60,12 @@ public class SearchingSmartCardCredentialFactory extends BaseSmartCardCredential
 	@Nonnull Dispatcher dispatcher,
 	boolean filterAlwaysReadable,
 	@Nonnull EventDispatcher evtDispatcher,
-	byte[] ctxHandle, List<String> allowedCardTypes
+	@Nonnull ConnectionHandleType sessionHandle,
+	List<String> allowedCardTypes
     ) {
 	super(dispatcher, filterAlwaysReadable);
 	this.evtDispatcher = evtDispatcher;
-	this.ctxHandle = ctxHandle;
+	this.sessionHandle = sessionHandle;
 	this.allowedCardTypes = allowedCardTypes;
     }
 
@@ -84,7 +85,7 @@ public class SearchingSmartCardCredentialFactory extends BaseSmartCardCredential
     @Override
     public List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr) {
 	// find a card which can be used to answer the request
-	TokenFinder f = new TokenFinder(dispatcher, evtDispatcher, ctxHandle, allowedCardTypes);
+	TokenFinder f = new TokenFinder(dispatcher, evtDispatcher, sessionHandle, allowedCardTypes);
 	try (TokenFinder.TokenFinderWatcher fw = f.startWatching()) {
 	    Promise<ConnectionHandleType> card = fw.waitForNext();
 	    ConnectionHandleType handle = card.deref();

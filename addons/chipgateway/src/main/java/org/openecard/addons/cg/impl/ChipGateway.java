@@ -548,7 +548,7 @@ public class ChipGateway {
 
 	// add token info
 	try {
-	    ListTokens helper = new ListTokens(Collections.EMPTY_LIST, addonCtx);
+	    ListTokens helper = new ListTokens(Collections.EMPTY_LIST, addonCtx, sessionId);
 	    List<TokenInfoType> matchedTokens = helper.findTokens();
 	    cmd.getTokenInfo().addAll(matchedTokens);
 	} catch (UnsupportedAlgorithmException ex) {
@@ -594,7 +594,7 @@ public class ChipGateway {
 
 	Date startTime = new Date();
 
-	ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), addonCtx);
+	ListTokens helper = new ListTokens(tokensReq.getTokenInfo(), addonCtx, sessionId);
 	do {
 	    // build list of matching tokens
 	    List<TokenInfoType> matchedTokens = helper.findTokens();
@@ -638,7 +638,7 @@ public class ChipGateway {
 		try {
 		    pin = getPin(certReq.getPIN());
 		    byte[] slotHandle = certReq.getSlotHandle();
-		    ListCertificates helper = new ListCertificates(tokenCache, slotHandle, certReq.getCertificateFilter(), pin);
+		    ListCertificates helper = new ListCertificates(tokenCache, sessionId, slotHandle, certReq.getCertificateFilter(), pin);
 		    List<CertificateInfoType> certInfos = helper.getCertificates();
 
 		    certResp.getCertificateInfo().addAll(certInfos);

@@ -113,7 +113,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 		dispatcher,
 		true,
 		evtDispatcher,
-		ctxHandle,
+		connectionHandle,
 		tokenRequest.getTCToken().getAllowedCardType()
 	    );
 	    return cf;

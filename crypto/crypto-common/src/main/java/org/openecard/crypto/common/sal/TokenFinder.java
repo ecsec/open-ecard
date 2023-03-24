@@ -43,15 +43,15 @@ public class TokenFinder {
 
     private final Dispatcher dispatcher;
     private final EventDispatcher eventHandler;
-    private final byte[] contextHandle;
+    private final ConnectionHandleType sessionHandle;
     private final List<String> cardTypes;
 
     private boolean cardsWokenUp = false;
 
-    public TokenFinder(Dispatcher dispatcher, EventDispatcher eventHandler, byte[] contextHandle, List<String> cardTypes) {
+    public TokenFinder(Dispatcher dispatcher, EventDispatcher eventHandler, ConnectionHandleType sessionHandle, List<String> cardTypes) {
 	this.dispatcher = dispatcher;
 	this.eventHandler = eventHandler;
-	this.contextHandle = contextHandle;
+	this.sessionHandle = sessionHandle;
 	this.cardTypes = cardTypes;
     }
 
@@ -59,7 +59,7 @@ public class TokenFinder {
      * Sends a PrepareDevices call to the IFD identified by the context of this instance.
      */
     public void wakeCards() throws WSHelper.WSException {
-	TokenFinder.wakeCards(dispatcher, contextHandle);
+	TokenFinder.wakeCards(dispatcher, sessionHandle.getContextHandle());
 	cardsWokenUp = true;
     }
 
@@ -89,21 +89,20 @@ public class TokenFinder {
     public class TokenFinderWatcher implements AutoCloseable {
 
 	public Promise<ConnectionHandleType> waitForNext() {
-	    Promise<ConnectionHandleType> nextResult = new FuturePromise<>(new Callable<ConnectionHandleType>() {
-		    @Override
-		    public ConnectionHandleType call() throws Exception {
-			CardConnectorUtil ccu = new CardConnectorUtil(dispatcher, eventHandler, cardTypes, null, contextHandle, null);
-			CardApplicationPathType path = ccu.waitForCard();
+	    Promise<ConnectionHandleType> nextResult = new FuturePromise<>(() -> {
+		String session = sessionHandle.getChannelHandle().getSessionIdentifier();
+		byte[] contextHandle = sessionHandle.getContextHandle();
+		CardConnectorUtil ccu = new CardConnectorUtil(dispatcher, eventHandler, cardTypes, session, contextHandle, null);
+		CardApplicationPathType path = ccu.waitForCard();
 
-			// connect card
-			CardApplicationConnect cc = new CardApplicationConnect();
-			cc.setCardApplicationPath(path);
-			CardApplicationConnectResponse cr = (CardApplicationConnectResponse) dispatcher.safeDeliver(cc);
-			WSHelper.checkResult(cr);
+		// connect card
+		CardApplicationConnect cc = new CardApplicationConnect();
+		cc.setCardApplicationPath(path);
+		CardApplicationConnectResponse cr = (CardApplicationConnectResponse) dispatcher.safeDeliver(cc);
+		WSHelper.checkResult(cr);
 
-			return cr.getConnectionHandle();
-		    }
-		});
+		return cr.getConnectionHandle();
+	    });
 
 	    return nextResult;
 	}

@@ -77,7 +77,7 @@ public class CardConnectorUtil {
 
 	try {
 	    // check if there is a card already present
-	    for (String type : cardTypes) {
+	    if (! cardTypes.isEmpty()) {
 		CardApplicationPathType h = checkType();
 		if (h != null) {
 		    return h;

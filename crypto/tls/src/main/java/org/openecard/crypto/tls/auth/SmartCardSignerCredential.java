@@ -125,14 +125,14 @@ public class SmartCardSignerCredential implements TlsSigner {
 	}
     }
 
-    private boolean isRawSignature(SignatureAlgorithms alg) {
+    private static boolean isRawSignature(SignatureAlgorithms alg) {
 	return isRawRSA(alg) || isRawECDSA(alg);
     }
 
-    private boolean isRawRSA(SignatureAlgorithms alg) {
+    private static boolean isRawRSA(SignatureAlgorithms alg) {
 	return alg == SignatureAlgorithms.CKM_RSA_PKCS;
     }
-    private boolean isRawECDSA(SignatureAlgorithms alg) {
+    private static boolean isRawECDSA(SignatureAlgorithms alg) {
 	return alg == SignatureAlgorithms.CKM_ECDSA;
     }
 

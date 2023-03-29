@@ -27,6 +27,9 @@ import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -71,10 +74,10 @@ public class SmartCardSignerCredential implements TlsSigner {
 
     @Override
     public byte[] generateRawSignature(SignatureAndHashAlgorithm algorithm, byte[] hash) throws IOException {
-	return genSig(algorithm, hash, true);
+	return genSig(algorithm, hash);
     }
 
-    private byte[] genSig(SignatureAndHashAlgorithm algorithm, byte[] sigData, boolean isRaw)
+    private byte[] genSig(SignatureAndHashAlgorithm algorithm, byte[] sigData)
 	    throws IOException {
 	SignatureAlgorithms didAlg = getDidAlgorithm();
 	LOG.debug("Using DID with algorithm={}.", didAlg.getJcaAlg());
@@ -84,31 +87,30 @@ public class SmartCardSignerCredential implements TlsSigner {
 		    HashAlgorithm.getText(algorithm.getHash()));
 	    LOG.debug("Performing TLS 1.2 signature for algorithm={}.", reqAlgStr);
 
-	    if (isRaw && isRawRSA(didAlg)) {
-		// TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
-		ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
-		DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), sigData);
-		sigData = digestInfo.getEncoded(ASN1Encoding.DER);
-		LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
+	    if (isRawSignature(didAlg)) {
+		if (algorithm.getSignature() == SignatureAlgorithm.rsa) {
+		    // TLS >= 1.2 needs a PKCS#1 v1.5 signature and no raw RSA signature
+		    ASN1ObjectIdentifier hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash());
+		    DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), sigData);
+		    sigData = digestInfo.getEncoded(ASN1Encoding.DER);
+		    LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
+		} else if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
+		    throw new UnsupportedOperationException("Not supported yet.");
+		} else if (algorithm.getSignature() == SignatureAlgorithm.ecdsa) {
+		    throw new UnsupportedOperationException("Not supported yet.");
+		} else{
+		    throw new UnsupportedOperationException("Not supported yet.");
+		}
 	    }
 	} else {
 	    LOG.debug("Performing pre-TLS 1.2 signature.");
 	}
 
 	try {
-	    if (isRaw) {
-		LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
-	    } else {
-		LOG.debug("Hashed Signature of data blob.");
-		CryptoMarkerType cryptoMarker = did.getGenericCryptoMarker();
-		    if (didAlg.getHashAlg() != null && (cryptoMarker.getHashGenerationInfo() == null ||
-			    cryptoMarker.getHashGenerationInfo() == HashGenerationInfoType.NOT_ON_CARD)) {
-			sigData = did.hash(sigData);
-		    }
-	    }
-
 	    did.authenticateMissing();
+	    LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
 	    byte[] signature = did.sign(sigData);
+	    LOG.debug("Raw Signature={}.", ByteUtils.toHexString(signature));
 	    return signature;
 	} catch (WSHelper.WSException ex) {
 	    String msg = "Failed to create signature because of an unknown error.";
@@ -147,25 +149,40 @@ public class SmartCardSignerCredential implements TlsSigner {
 	}
     }
 
+    private boolean supportsExternalHashing() throws WSHelper.WSException {
+	CryptoMarkerType cryptoMarker = did.getGenericCryptoMarker();
+	return cryptoMarker.getHashGenerationInfo() == HashGenerationInfoType.NOT_ON_CARD;
+    }
+
     @Override
     public TlsStreamSigner getStreamSigner(final SignatureAndHashAlgorithm algorithm) throws IOException {
-	if (! isRawSignature(getDidAlgorithm())) {
-	    // create stream signer for use with real data, not the hash of it
-	    return new TlsStreamSigner() {
-		private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+	try {
+	    if (algorithm != null && supportsExternalHashing()) {
+		String digestName = HashAlgorithm.getName(algorithm.getHash());
+		MessageDigest md = MessageDigest.getInstance(digestName);
+		OutputStream os = new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+			    md.update((byte) b);
+			}
+		    };
+		// create stream signer for use with real data, not the hash of it
+		return new TlsStreamSigner() {
+		    @Override
+		    public OutputStream getOutputStream() throws IOException {
+			return os;
+		    }
 
-		@Override
-		public OutputStream getOutputStream() throws IOException {
-		    return buffer;
-		}
-
-		@Override
-		public byte[] getSignature() throws IOException {
-		    return genSig(algorithm, buffer.toByteArray(), false);
-		}
-	    };
-	} else {
-	    return null;
+		    @Override
+		    public byte[] getSignature() throws IOException {
+			return genSig(algorithm, md.digest());
+		    }
+		};
+	    } else {
+		return null;
+	    }
+	} catch (NoSuchAlgorithmException | WSHelper.WSException ex) {
+	    throw new IOException("Failed to create stream signer.", ex);
 	}
     }
 

@@ -1776,7 +1776,7 @@
 						</iso:Action>
 						<iso:SecurityCondition>
 							<iso:DIDAuthentication>
-								<iso:DIDName>PIN.QES</iso:DIDName>
+								<iso:DIDName>PIN.CH</iso:DIDName>
 								<iso:DIDState>true</iso:DIDState>
 							</iso:DIDAuthentication>
 						</iso:SecurityCondition>
@@ -1835,6 +1835,59 @@
 					</iso:AccessRule>
 				</iso:DIDACL>
 			</iso:DIDInfo>
+
+			<!-- PrK.HP.SIG.E256 (cf. [HPC-2#5.6.2.5]) -->
+			<iso:DIDInfo>
+				<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
+				<iso:DifferentialIdentity>
+					<iso:DIDName>PrK.HP.SIG.E256</iso:DIDName>
+					<iso:DIDProtocol>urn:oid:1.3.162.15480.3.0.25</iso:DIDProtocol>
+					<iso:DIDMarker>
+						<!-- According to [HPC-2#5.6.2.12] the key PrK.HP.SIG.E256 has KeyId='07' and may be used with
+							 signECDSA).
+							 {1.2.840.10045.4.3.2} (ECDSA with SHA256).
+						-->
+						<iso:CryptoMarker
+							Protocol="urn:oid:1.3.162.15480.3.0.25">
+							<iso:AlgorithmInfo>
+								<iso:Algorithm>ECDSA</iso:Algorithm>
+								<iso:AlgorithmIdentifier>
+									<iso:Algorithm>http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256</iso:Algorithm>
+								</iso:AlgorithmIdentifier>
+								<iso:SupportedOperations>Compute-signature</iso:SupportedOperations>
+								<!-- for CardAlgRef see [HPC-1#Tabelle 270] -->
+								<iso:CardAlgRef>00</iso:CardAlgRef>
+							</iso:AlgorithmInfo>
+							<iso:KeyInfo>
+								<iso:KeyRef>
+									<iso:KeyRef>07</iso:KeyRef>
+								</iso:KeyRef>
+								<iso:KeySize>256</iso:KeySize>
+							</iso:KeyInfo>
+							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
+							<iso:CertificateRef>
+								<iso:DataSetName>EF.C.HP.SIG.E256</iso:DataSetName>
+							</iso:CertificateRef>
+						</iso:CryptoMarker>
+					</iso:DIDMarker>
+					<iso:DIDScope>local</iso:DIDScope>
+				</iso:DifferentialIdentity>
+				<iso:DIDACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>CryptographicService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:CryptographicServiceAction>Sign</iso:CryptographicServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:DIDAuthentication>
+								<iso:DIDName>PIN.CH</iso:DIDName>
+								<iso:DIDState>true</iso:DIDState>
+							</iso:DIDAuthentication>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+				</iso:DIDACL>
+			</iso:DIDInfo>
+
 
 			<!-- EF.C.HP.AUT.R2048 (cf. [HPC-2#5.6.2.3]) -->
 			<iso:DataSetInfo>
@@ -1952,6 +2005,37 @@
 					<iso:efIdOrPath>C205</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
+
+			<!-- EF.C.HP.SIG.E256 (cf. [HPC-2#5.6.2.10]) -->
+			<iso:DataSetInfo>
+				<iso:RequirementLevel>PersonalizationOptional</iso:RequirementLevel>
+				<iso:DataSetName>EF.C.HP.SIG.E256</iso:DataSetName>
+				<iso:DataSetACL>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<iso:AccessRule>
+						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
+						<iso:Action>
+							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
+						</iso:Action>
+						<iso:SecurityCondition>
+							<iso:always>true</iso:always>
+						</iso:SecurityCondition>
+					</iso:AccessRule>
+					<!-- TBD: CL interface requires PACE -->
+				</iso:DataSetACL>
+				<iso:DataSetPath>
+					<iso:efIdOrPath>C007</iso:efIdOrPath>
+				</iso:DataSetPath>
+			</iso:DataSetInfo>
+
 		</iso:CardApplication>
 
 		<!-- DF CIA.QES is currently not specified here -->

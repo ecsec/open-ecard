@@ -26,10 +26,7 @@ import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import org.openecard.bouncycastle.asn1.x500.X500Name;
 import org.openecard.bouncycastle.tls.*;
-import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
-import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
-import org.openecard.bouncycastle.tls.crypto.TlsCryptoParameters;
-import org.openecard.bouncycastle.tls.crypto.TlsSigner;
+import org.openecard.bouncycastle.tls.crypto.*;
 import org.openecard.bouncycastle.util.io.pem.PemObject;
 import org.openecard.bouncycastle.util.io.pem.PemWriter;
 import org.openecard.common.SecurityConditionUnsatisfiable;
@@ -158,8 +155,8 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 				TlsSigner signer = new SmartCardSignerCredential(info);
 				cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg);
 				credentials.add(cred);
-				//break;
-				return credentials;
+				break;
+				//return credentials;
 			    }
 			} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
 			    LOG.error("Failed to read certificates from card. Skipping DID {}.", info.getDidName(), ex);
@@ -194,7 +191,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	    return true;
 	}
 
-	// check if any of the certificates has an issuer mathing the request
+	// check if any of the certificates has an issuer matching the request
 	for (Object issuerObj : cr.getCertificateAuthorities()) {
 	    try {
 		X500Name issuer = (X500Name) issuerObj;
@@ -304,6 +301,12 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
     @Nullable
     private KeyTypes convertSigType(short sigType) {
 	switch (sigType) {
+	case SignatureAlgorithm.rsa_pss_pss_sha256:
+	case SignatureAlgorithm.rsa_pss_pss_sha384:
+	case SignatureAlgorithm.rsa_pss_pss_sha512:
+	case SignatureAlgorithm.rsa_pss_rsae_sha256:
+	case SignatureAlgorithm.rsa_pss_rsae_sha384:
+	case SignatureAlgorithm.rsa_pss_rsae_sha512:
 	case SignatureAlgorithm.rsa: return KeyTypes.CKK_RSA;
 	case SignatureAlgorithm.ecdsa: return KeyTypes.CKK_EC;
 	default: return null;

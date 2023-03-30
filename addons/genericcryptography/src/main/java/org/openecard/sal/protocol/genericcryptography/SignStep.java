@@ -26,10 +26,11 @@ import iso.std.iso_iec._24727.tech.schema.*;
 import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType.APICommand;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
-import org.openecard.bouncycastle.asn1.ASN1EncodableVector;
-import org.openecard.bouncycastle.asn1.ASN1Encoding;
-import org.openecard.bouncycastle.asn1.ASN1Integer;
-import org.openecard.bouncycastle.asn1.DERSequence;
+import org.openecard.bouncycastle.asn1.*;
+import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.openecard.bouncycastle.asn1.x509.DigestInfo;
+import org.openecard.bouncycastle.tls.SignatureAlgorithm;
+import org.openecard.bouncycastle.tls.TlsUtils;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
@@ -48,6 +49,8 @@ import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.SignatureAlgorithms;
+import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOComputeDigitalSignature;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSOHash;
@@ -124,17 +127,20 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	    byte[] hashRef = cryptoMarker.getAlgorithmInfo().getHashAlgRef();
 	    HashGenerationInfoType hashInfo = cryptoMarker.getHashGenerationInfo();
 
+	    // add DigestInfo for RSA-SSA if hashing is not to be done on card
+	    byte[] hashValue = prepareMessage(message, hashInfo, cryptoMarker.getAlgorithmInfo());
+
 	    if (didStructure.getDIDScope() == DIDScopeType.LOCAL) {
 		keyReference[0] = (byte) (0x80 | keyReference[0]);
 	    }
 
 	    if (cryptoMarker.getSignatureGenerationInfo() != null) {
-		response = performSignature(cryptoMarker, keyReference, algorithmIdentifier, message, slotHandle,
+		response = performSignature(cryptoMarker, keyReference, algorithmIdentifier, hashValue, slotHandle,
 			hashRef, hashInfo);
 	    } else {
 		// assuming that legacySignatureInformation exists
 		BaseTemplateContext templateContext = new BaseTemplateContext();
-		templateContext.put(HASH_TO_SIGN, message);
+		templateContext.put(HASH_TO_SIGN, hashValue);
 		templateContext.put(KEY_REFERENCE, keyReference);
 		templateContext.put(ALGORITHM_IDENTIFIER, algorithmIdentifier);
 		templateContext.put(HASHALGORITHM_REFERENCE, hashRef);
@@ -150,7 +156,19 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
 	return response;
     }
 
-    /**
+	private byte[] prepareMessage(byte[] hash, HashGenerationInfoType hashInfo, AlgorithmInfoType algorithmInfo) throws UnsupportedAlgorithmException, IOException {
+		SignatureAlgorithms algorithm = SignatureAlgorithms.fromAlgId(algorithmInfo.getAlgorithmIdentifier().getAlgorithm());
+		if (algorithm.isRsaSsa()) {
+			// Cards don't build the DigestInfo struct, so we have to do it here
+			ASN1ObjectIdentifier hashAlgId = algorithm.getHashAlg().getOid();
+			DigestInfo digestInfo = new DigestInfo(new AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), hash);
+			return digestInfo.getEncoded(ASN1Encoding.DER);
+		} else{
+			return hash;
+		}
+	}
+
+	/**
      * This method performs the signature creation according to BSI TR-03112 part 7.
      *
      * @param cryptoMarker The {@link CryptoMarkerType} containing the SignatureCreationInfo for creating the signature.

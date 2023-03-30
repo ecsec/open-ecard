@@ -487,6 +487,10 @@ public enum SignatureAlgorithms {
 	}
     }
 
+    public boolean isRsaSsa() {
+	return getKeyType() == KeyTypes.CKK_RSA && getHashAlg() != null && !isRsaPss();
+    }
+
     @Nonnull
     public static SignatureAlgorithms fromMechanismId(long id) throws UnsupportedAlgorithmException {
 	SignatureAlgorithms result = mechanismLookup.get(id);

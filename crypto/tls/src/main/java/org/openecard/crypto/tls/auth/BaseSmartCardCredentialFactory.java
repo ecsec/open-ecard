@@ -179,7 +179,9 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	boolean needsPin = false;
 	List<DataSetInfo> dsis = info.getRelatedDataSets();
 	for (DataSetInfo dsi : dsis) {
-	    needsPin = needsPin && dsi.needsPin();
+	    if (! needsPin) {
+		needsPin = dsi.needsPin();
+	    }
 	}
 	return needsPin;
     }
@@ -499,6 +501,11 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 
 
     private boolean isSafeForNoneDid(SignatureAndHashAlgorithm reqAlg) {
+	// PSS is currently not supported by the stack
+    	if (SignatureAlgorithm.isRSAPSS(reqAlg.getSignature())) {
+	    return false;
+    	}
+
 	switch (reqAlg.getHash()) {
 	case HashAlgorithm.sha1:
 	case HashAlgorithm.sha224:

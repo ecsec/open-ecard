@@ -24,13 +24,6 @@ package org.openecard.crypto.tls.auth;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import javax.annotation.Nonnull;
 import org.openecard.bouncycastle.asn1.ASN1Encoding;
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.openecard.bouncycastle.asn1.DERNull;
@@ -52,6 +45,12 @@ import org.openecard.crypto.common.sal.did.DidInfo;
 import org.openecard.crypto.common.sal.did.NoSuchDid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 /**
@@ -83,8 +82,10 @@ public class SmartCardSignerCredential implements TlsSigner {
 	LOG.debug("Using DID with algorithm={}.", didAlg.getJcaAlg());
 
 	if (algorithm != null) {
-	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(algorithm.getSignature()),
-		    HashAlgorithm.getText(algorithm.getHash()));
+	    String reqAlgStr = String.format("%s-%s",
+		    SignatureAlgorithm.getText(algorithm.getSignature()),
+		    HashAlgorithm.getText(algorithm.getHash())
+	    );
 	    LOG.debug("Performing TLS 1.2 signature for algorithm={}.", reqAlgStr);
 
 	    if (isRawSignature(didAlg)) {
@@ -95,11 +96,16 @@ public class SmartCardSignerCredential implements TlsSigner {
 		    sigData = digestInfo.getEncoded(ASN1Encoding.DER);
 		    LOG.debug("Signing DigestInfo with algorithm={}.", hashAlgId);
 		} else if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
-		    throw new UnsupportedOperationException("Not supported yet.");
-		} else if (algorithm.getSignature() == SignatureAlgorithm.ecdsa) {
-		    throw new UnsupportedOperationException("Not supported yet.");
-		} else{
-		    throw new UnsupportedOperationException("Not supported yet.");
+		    // cah be implemented with more recent BC versions by using the createRawSigner function
+		    // when implementing this, also adjust the filter function BaseSmartCardCredentialFactory.isSafeForNoneDid
+
+		    // Digest digest = crypto.createDigest(cryptoHashAlgorithm);
+		    // PSSSigner signer = PSSSigner.createRawSigner(new RSABlindedEngine(), digest, digest, digest.getDigestSize(), PSSSigner.TRAILER_IMPLICIT);
+		    // signer.init(true, new ParametersWithRandom(privateKey, crypto.getSecureRandom()));
+		    // signer.update(hash, 0, hash.length);
+		    // return signer.generateSignature();
+
+		    throw new UnsupportedOperationException("RSA-PSS with raw signature DIDs is not supported with this version of BouncyCastle.");
 		}
 	    }
 	} else {
@@ -108,7 +114,7 @@ public class SmartCardSignerCredential implements TlsSigner {
 
 	try {
 	    did.authenticateMissing();
-	    LOG.debug("Raw Signature of data={}.", ByteUtils.toHexString(sigData));
+	    LOG.debug("Calculating raw Signature of data={}.", ByteUtils.toHexString(sigData));
 	    byte[] signature = did.sign(sigData);
 	    LOG.debug("Raw Signature={}.", ByteUtils.toHexString(signature));
 	    return signature;
@@ -156,6 +162,9 @@ public class SmartCardSignerCredential implements TlsSigner {
 
     @Override
     public TlsStreamSigner getStreamSigner(final SignatureAndHashAlgorithm algorithm) throws IOException {
+	// the right thing to do would be to use the streaming hash functionality of DidAuthenticate, but this is not
+	// implemented and also not needed if hashes are not created on the card
+
 	try {
 	    if (algorithm != null && supportsExternalHashing()) {
 		String digestName = HashAlgorithm.getName(algorithm.getHash());

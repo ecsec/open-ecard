@@ -460,6 +460,9 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 		case CKM_SHA256_RSA_PKCS:
 		case CKM_SHA384_RSA_PKCS:
 		case CKM_SHA512_RSA_PKCS:
+		case CKM_SHA256_RSA_PKCS_PSS:
+		case CKM_SHA384_RSA_PKCS_PSS:
+		case CKM_SHA512_RSA_PKCS_PSS:
 		    result.add(next);
 		}
 	    } catch (UnsupportedAlgorithmException ex) {
@@ -480,12 +483,25 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 		// allowed sig algs
 	    case SignatureAlgorithm.ecdsa:
 	    case SignatureAlgorithm.rsa:
+	    case SignatureAlgorithm.rsa_pss_pss_sha256:
+	    case SignatureAlgorithm.rsa_pss_pss_sha384:
+	    case SignatureAlgorithm.rsa_pss_pss_sha512:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
 		break;
 	    default:
 		it.remove();
 		continue;
 	    }
-	    switch (alg.getHash()) {
+
+	    short hashAlg;
+	    if (SignatureAlgorithm.isRSAPSS(alg.getSignature())) {
+		hashAlg = SignatureAlgorithm.getRSAPSSHashAlgorithm(alg.getSignature());
+	    } else {
+		hashAlg = alg.getHash();
+	    }
+	    switch (hashAlg) {
 		// allowed hash algs
 	    case HashAlgorithm.sha512:
 	    case HashAlgorithm.sha384:

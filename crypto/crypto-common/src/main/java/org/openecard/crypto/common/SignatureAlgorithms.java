@@ -478,7 +478,7 @@ public enum SignatureAlgorithms {
     public boolean isRsaPss() {
 	switch (this) {
 	case CKM_SHA1_RSA_PKCS_PSS:
-	case CKM_SHA256_RSA_PKCS:
+	case CKM_SHA256_RSA_PKCS_PSS:
 	case CKM_SHA384_RSA_PKCS_PSS:
 	case CKM_SHA512_RSA_PKCS_PSS:
 	    return true;

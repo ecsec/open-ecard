@@ -167,7 +167,14 @@ public class SmartCardSignerCredential implements TlsSigner {
 
 	try {
 	    if (algorithm != null && supportsExternalHashing()) {
-		String digestName = HashAlgorithm.getName(algorithm.getHash());
+		short hashAlg;
+		if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
+		    hashAlg = SignatureAlgorithm.getRSAPSSHashAlgorithm(algorithm.getSignature());
+		} else {
+		    hashAlg = algorithm.getHash();
+		}
+
+		String digestName = HashAlgorithm.getName(hashAlg);
 		MessageDigest md = MessageDigest.getInstance(digestName);
 		OutputStream os = new OutputStream() {
 			@Override

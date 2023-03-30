@@ -39,7 +39,6 @@ import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.security.auth.x500.X500Principal;
@@ -48,9 +47,7 @@ import java.io.StringWriter;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 public abstract class BaseSmartCardCredentialFactory implements CredentialFactory, ContextAware {
@@ -236,10 +233,10 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 
     private boolean matchesAlg(SignatureAndHashAlgorithm reqAlg, SignatureAlgorithms alg) {
 	try {
-	    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
+	    Set<SignatureAndHashAlgorithm> bcAlg = getCompatibleAlgorithms(alg);
 
 	    // RAW signature
-	    if (bcAlg == null) {
+	    if (bcAlg.isEmpty()) {
 		// filter out unmatching signature type
 		if (alg.getKeyType() != convertSigType(reqAlg.getSignature())) {
 		    return false;
@@ -258,7 +255,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 		}
 	    } else {
 		// match everything else
-		return reqAlg.equals(bcAlg);
+		return bcAlg.contains(reqAlg);
 	    }
 	} catch (IllegalArgumentException ex) {
 	    return false;
@@ -271,12 +268,37 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	return SignatureAlgorithms.CKM_RSA_PKCS == alg;
     }
 
-    @Nullable
-    private static SignatureAndHashAlgorithm convertSignatureAlgorithm(SignatureAlgorithms alg) {
+    private static Set<SignatureAndHashAlgorithm> getCompatibleAlgorithms(SignatureAlgorithms alg) {
 	HashAlgorithms hashAlg = alg.getHashAlg();
 	KeyTypes keyType = alg.getKeyType();
 
 	short hash;
+	short sig;
+
+	if (alg.isRsaPss() && alg.getHashAlg() != null) {
+	    SignatureAndHashAlgorithm pssAlg;
+	    SignatureAndHashAlgorithm rsaeAlg;
+	    switch (alg.getHashAlg()) {
+		case CKM_SHA256:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha256);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha256);
+		    break;
+		case CKM_SHA384:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha384);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha384);
+		    break;
+		case CKM_SHA512:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha512);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha512);
+		    break;
+		default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
+	    }
+	    return new HashSet<SignatureAndHashAlgorithm>(){{
+		    add(pssAlg);
+		    add(rsaeAlg);
+	    }};
+	}
+
 	if (hashAlg != null) {
 	    switch (hashAlg) {
 	    case CKM_SHA_1: hash = HashAlgorithm.sha1; break;
@@ -287,17 +309,16 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	    default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
 	    }
 	} else {
-	    return null;
+	    return Collections.emptySet();
 	}
 
-	short sig;
 	switch (keyType) {
 	case CKK_RSA: sig = SignatureAlgorithm.rsa; break;
 	case CKK_EC: sig = SignatureAlgorithm.ecdsa; break;
 	default: throw new IllegalArgumentException("Unsupported signature algorithm selected.");
 	}
 
-	return new SignatureAndHashAlgorithm(hash, sig);
+	return Collections.singleton(new SignatureAndHashAlgorithm(hash, sig));
     }
 
     @Nullable
@@ -483,12 +504,12 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 		// allowed sig algs
 	    case SignatureAlgorithm.ecdsa:
 	    case SignatureAlgorithm.rsa:
-	    case SignatureAlgorithm.rsa_pss_pss_sha256:
-	    case SignatureAlgorithm.rsa_pss_pss_sha384:
-	    case SignatureAlgorithm.rsa_pss_pss_sha512:
-	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
-	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
-	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha256:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha384:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha512:
+//	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
+//	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
+//	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
 		break;
 	    default:
 		it.remove();

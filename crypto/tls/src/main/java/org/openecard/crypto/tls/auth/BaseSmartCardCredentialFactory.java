@@ -507,9 +507,9 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 //	    case SignatureAlgorithm.rsa_pss_pss_sha256:
 //	    case SignatureAlgorithm.rsa_pss_pss_sha384:
 //	    case SignatureAlgorithm.rsa_pss_pss_sha512:
-//	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
-//	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
-//	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
 		break;
 	    default:
 		it.remove();

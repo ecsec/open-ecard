@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2018 ecsec GmbH.
+ * Copyright (C) 2013-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,30 +24,9 @@ package org.openecard.crypto.tls.auth;
 
 import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.security.auth.x500.X500Principal;
 import org.openecard.bouncycastle.asn1.x500.X500Name;
-import org.openecard.bouncycastle.tls.Certificate;
-import org.openecard.bouncycastle.tls.CertificateRequest;
-import org.openecard.bouncycastle.tls.DefaultTlsCredentialedSigner;
-import org.openecard.bouncycastle.tls.HashAlgorithm;
-import org.openecard.bouncycastle.tls.SignatureAlgorithm;
-import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm;
-import org.openecard.bouncycastle.tls.TlsContext;
-import org.openecard.bouncycastle.tls.TlsCredentialedSigner;
-import org.openecard.bouncycastle.tls.crypto.TlsCertificate;
-import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
-import org.openecard.bouncycastle.tls.crypto.TlsCryptoParameters;
-import org.openecard.bouncycastle.tls.crypto.TlsSigner;
+import org.openecard.bouncycastle.tls.*;
+import org.openecard.bouncycastle.tls.crypto.*;
 import org.openecard.bouncycastle.util.io.pem.PemObject;
 import org.openecard.bouncycastle.util.io.pem.PemWriter;
 import org.openecard.common.SecurityConditionUnsatisfiable;
@@ -57,35 +36,32 @@ import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.KeyTypes;
 import org.openecard.crypto.common.SignatureAlgorithms;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
-import org.openecard.crypto.common.sal.did.DataSetInfo;
-import org.openecard.crypto.common.sal.did.DidInfo;
-import org.openecard.crypto.common.sal.did.DidInfos;
-import org.openecard.crypto.common.sal.did.NoSuchDid;
-import org.openecard.crypto.common.sal.did.TokenCache;
+import org.openecard.crypto.common.sal.did.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 
-/**
- * Implementation of CredentialFactory operating on generic crypto SAL DIDs.
- *
- * @author Tobias Wich
- * @author Dirk Petrautzki
- */
-public class SmartCardCredentialFactory implements CredentialFactory, ContextAware {
+public abstract class BaseSmartCardCredentialFactory implements CredentialFactory, ContextAware {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartCardCredentialFactory.class);
+    protected final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    private final TokenCache tokenCache;
-    private final ConnectionHandleType handle;
-    private final boolean filterAlwaysReadable;
+    protected TlsContext context;
+    protected final Dispatcher dispatcher;
+    protected final TokenCache tokenCache;
+    protected final boolean filterAlwaysReadable;
 
-    private TlsContext context;
-
-    public SmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, @Nonnull ConnectionHandleType handle,
-	    boolean filterAlwaysReadable) {
+    protected BaseSmartCardCredentialFactory(@Nonnull Dispatcher dispatcher, boolean filterAlwaysReadable) {
+	this.dispatcher = dispatcher;
 	this.tokenCache = new TokenCache(dispatcher);
-	this.handle = handle;
 	this.filterAlwaysReadable = filterAlwaysReadable;
     }
 
@@ -94,8 +70,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	this.context = context;
     }
 
-    @Override
-    public List<TlsCredentialedSigner> getClientCredentials(CertificateRequest cr) {
+    public abstract ConnectionHandleType getUsedHandle();
+
+    protected List<TlsCredentialedSigner> getClientCredentialsForCard(CertificateRequest cr, ConnectionHandleType handle) {
 	ArrayList<TlsCredentialedSigner> credentials = new ArrayList<>();
 	TlsCryptoParameters tlsCrypto = new TlsCryptoParameters(context);
 
@@ -104,7 +81,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	removeUnsupportedAlgs(crSigAlgs);
 	for (SignatureAndHashAlgorithm reqAlg : crSigAlgs) {
 	    String reqAlgStr = String.format("%s-%s", SignatureAlgorithm.getText(reqAlg.getSignature()),
-		    HashAlgorithm.getText(reqAlg.getHash()));
+					     HashAlgorithm.getText(reqAlg.getHash()));
 	    LOG.debug("  {}", reqAlgStr);
 	}
 
@@ -175,8 +152,8 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 				TlsSigner signer = new SmartCardSignerCredential(info);
 				cred = new DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg);
 				credentials.add(cred);
-				//break;
-				return credentials;
+				break;
+				//return credentials;
 			    }
 			} catch (SecurityConditionUnsatisfiable | NoSuchDid | CertificateException | IOException ex) {
 			    LOG.error("Failed to read certificates from card. Skipping DID {}.", info.getDidName(), ex);
@@ -199,7 +176,9 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	boolean needsPin = false;
 	List<DataSetInfo> dsis = info.getRelatedDataSets();
 	for (DataSetInfo dsi : dsis) {
-	    needsPin = needsPin && dsi.needsPin();
+	    if (! needsPin) {
+		needsPin = dsi.needsPin();
+	    }
 	}
 	return needsPin;
     }
@@ -211,7 +190,7 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	    return true;
 	}
 
-	// check if any of the certificates has an issuer mathing the request
+	// check if any of the certificates has an issuer matching the request
 	for (Object issuerObj : cr.getCertificateAuthorities()) {
 	    try {
 		X500Name issuer = (X500Name) issuerObj;
@@ -254,10 +233,10 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
     private boolean matchesAlg(SignatureAndHashAlgorithm reqAlg, SignatureAlgorithms alg) {
 	try {
-	    SignatureAndHashAlgorithm bcAlg = convertSignatureAlgorithm(alg);
+	    Set<SignatureAndHashAlgorithm> bcAlg = getCompatibleAlgorithms(alg);
 
 	    // RAW signature
-	    if (bcAlg == null) {
+	    if (bcAlg.isEmpty()) {
 		// filter out unmatching signature type
 		if (alg.getKeyType() != convertSigType(reqAlg.getSignature())) {
 		    return false;
@@ -265,18 +244,18 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 
 		// Only allow a certain set of Hash algs. Some hashes are too large for the cards.
 		switch (reqAlg.getHash()) {
-		    case HashAlgorithm.sha1:
-		    case HashAlgorithm.sha224:
-		    case HashAlgorithm.sha256:
-		    case HashAlgorithm.sha384:
-		    case HashAlgorithm.sha512:
-			return true;
-		    default:
-			return false;
+		case HashAlgorithm.sha1:
+		case HashAlgorithm.sha224:
+		case HashAlgorithm.sha256:
+		case HashAlgorithm.sha384:
+		case HashAlgorithm.sha512:
+		    return true;
+		default:
+		    return false;
 		}
 	    } else {
 		// match everything else
-		return reqAlg.equals(bcAlg);
+		return bcAlg.contains(reqAlg);
 	    }
 	} catch (IllegalArgumentException ex) {
 	    return false;
@@ -289,46 +268,75 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	return SignatureAlgorithms.CKM_RSA_PKCS == alg;
     }
 
-    @Nullable
-    private static SignatureAndHashAlgorithm convertSignatureAlgorithm(SignatureAlgorithms alg) {
+    private static Set<SignatureAndHashAlgorithm> getCompatibleAlgorithms(SignatureAlgorithms alg) {
 	HashAlgorithms hashAlg = alg.getHashAlg();
 	KeyTypes keyType = alg.getKeyType();
 
 	short hash;
-	if (hashAlg != null) {
-	    switch (hashAlg) {
-		case CKM_SHA_1: hash = HashAlgorithm.sha1; break;
-		case CKM_SHA224: hash = HashAlgorithm.sha224; break;
-		case CKM_SHA256: hash = HashAlgorithm.sha256; break;
-		case CKM_SHA384: hash = HashAlgorithm.sha384; break;
-		case CKM_SHA512: hash = HashAlgorithm.sha512; break;
+	short sig;
+
+	if (alg.isRsaPss() && alg.getHashAlg() != null) {
+	    SignatureAndHashAlgorithm pssAlg;
+	    SignatureAndHashAlgorithm rsaeAlg;
+	    switch (alg.getHashAlg()) {
+		case CKM_SHA256:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha256);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha256);
+		    break;
+		case CKM_SHA384:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha384);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha384);
+		    break;
+		case CKM_SHA512:
+		    pssAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_pss_sha512);
+		    rsaeAlg = new SignatureAndHashAlgorithm(HashAlgorithm.Intrinsic, SignatureAlgorithm.rsa_pss_rsae_sha512);
+		    break;
 		default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
 	    }
+	    return new HashSet<SignatureAndHashAlgorithm>(){{
+		    add(pssAlg);
+		    add(rsaeAlg);
+	    }};
+	}
+
+	if (hashAlg != null) {
+	    switch (hashAlg) {
+	    case CKM_SHA_1: hash = HashAlgorithm.sha1; break;
+	    case CKM_SHA224: hash = HashAlgorithm.sha224; break;
+	    case CKM_SHA256: hash = HashAlgorithm.sha256; break;
+	    case CKM_SHA384: hash = HashAlgorithm.sha384; break;
+	    case CKM_SHA512: hash = HashAlgorithm.sha512; break;
+	    default: throw new IllegalArgumentException("Unsupported hash algorithm selected.");
+	    }
 	} else {
-	    return null;
+	    return Collections.emptySet();
 	}
 
-	short sig;
 	switch (keyType) {
-	    case CKK_RSA: sig = SignatureAlgorithm.rsa; break;
-	    case CKK_EC: sig = SignatureAlgorithm.ecdsa; break;
-	    default: throw new IllegalArgumentException("Unsupported signature algorithm selected.");
+	case CKK_RSA: sig = SignatureAlgorithm.rsa; break;
+	case CKK_EC: sig = SignatureAlgorithm.ecdsa; break;
+	default: throw new IllegalArgumentException("Unsupported signature algorithm selected.");
 	}
 
-	return new SignatureAndHashAlgorithm(hash, sig);
+	return Collections.singleton(new SignatureAndHashAlgorithm(hash, sig));
     }
 
     @Nullable
     private KeyTypes convertSigType(short sigType) {
 	switch (sigType) {
-	    case SignatureAlgorithm.rsa: return KeyTypes.CKK_RSA;
-	    case SignatureAlgorithm.ecdsa: return KeyTypes.CKK_EC;
-	    default: return null;
+	case SignatureAlgorithm.rsa_pss_pss_sha256:
+	case SignatureAlgorithm.rsa_pss_pss_sha384:
+	case SignatureAlgorithm.rsa_pss_pss_sha512:
+	case SignatureAlgorithm.rsa_pss_rsae_sha256:
+	case SignatureAlgorithm.rsa_pss_rsae_sha384:
+	case SignatureAlgorithm.rsa_pss_rsae_sha512:
+	case SignatureAlgorithm.rsa: return KeyTypes.CKK_RSA;
+	case SignatureAlgorithm.ecdsa: return KeyTypes.CKK_EC;
+	default: return null;
 	}
     }
 
-    private Certificate convertCert(TlsCrypto crypto, List<X509Certificate> chain) throws IOException,
-	    CertificateEncodingException {
+    private Certificate convertCert(TlsCrypto crypto, List<X509Certificate> chain) throws IOException, CertificateEncodingException {
 	TlsCertificate cert = crypto.createCertificate(chain.get(0).getEncoded());
 	return new Certificate(new TlsCertificate[]{ cert });
     }
@@ -463,17 +471,20 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algStr);
 
 		switch (alg) {
-		    case CKM_ECDSA:
-//		    case CKM_ECDSA_SHA1: // too weak
-		    case CKM_ECDSA_SHA256:
-		    case CKM_ECDSA_SHA384:
-		    case CKM_ECDSA_SHA512:
-		    case CKM_RSA_PKCS:
-//		    case CKM_SHA1_RSA_PKCS: // too weak
-		    case CKM_SHA256_RSA_PKCS:
-		    case CKM_SHA384_RSA_PKCS:
-		    case CKM_SHA512_RSA_PKCS:
-			result.add(next);
+		case CKM_ECDSA:
+		    //		    case CKM_ECDSA_SHA1: // too weak
+		case CKM_ECDSA_SHA256:
+		case CKM_ECDSA_SHA384:
+		case CKM_ECDSA_SHA512:
+		case CKM_RSA_PKCS:
+		    //		    case CKM_SHA1_RSA_PKCS: // too weak
+		case CKM_SHA256_RSA_PKCS:
+		case CKM_SHA384_RSA_PKCS:
+		case CKM_SHA512_RSA_PKCS:
+		case CKM_SHA256_RSA_PKCS_PSS:
+		case CKM_SHA384_RSA_PKCS_PSS:
+		case CKM_SHA512_RSA_PKCS_PSS:
+		    result.add(next);
 		}
 	    } catch (UnsupportedAlgorithmException ex) {
 		LOG.error("Unsupported algorithm used in CIF. Skipping DID {}.", next.getDidName(), ex);
@@ -491,38 +502,56 @@ public class SmartCardCredentialFactory implements CredentialFactory, ContextAwa
 	    SignatureAndHashAlgorithm alg = it.next();
 	    switch (alg.getSignature()) {
 		// allowed sig algs
-		case SignatureAlgorithm.ecdsa:
-		case SignatureAlgorithm.rsa:
-		    break;
-		default:
-		    it.remove();
-		    continue;
+	    case SignatureAlgorithm.ecdsa:
+	    case SignatureAlgorithm.rsa:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha256:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha384:
+//	    case SignatureAlgorithm.rsa_pss_pss_sha512:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha256:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha384:
+	    case SignatureAlgorithm.rsa_pss_rsae_sha512:
+		break;
+	    default:
+		it.remove();
+		continue;
 	    }
-	    switch (alg.getHash()) {
+
+	    short hashAlg;
+	    if (SignatureAlgorithm.isRSAPSS(alg.getSignature())) {
+		hashAlg = SignatureAlgorithm.getRSAPSSHashAlgorithm(alg.getSignature());
+	    } else {
+		hashAlg = alg.getHash();
+	    }
+	    switch (hashAlg) {
 		// allowed hash algs
-		case HashAlgorithm.sha512:
-		case HashAlgorithm.sha384:
-		case HashAlgorithm.sha256:
-//		case HashAlgorithm.sha1: // too weak
-		    break;
-		default:
-		    it.remove();
-		    continue;
+	    case HashAlgorithm.sha512:
+	    case HashAlgorithm.sha384:
+	    case HashAlgorithm.sha256:
+		//		case HashAlgorithm.sha1: // too weak
+		break;
+	    default:
+		it.remove();
+		continue;
 	    }
 	}
     }
 
 
     private boolean isSafeForNoneDid(SignatureAndHashAlgorithm reqAlg) {
+	// PSS is currently not supported by the stack
+    	if (SignatureAlgorithm.isRSAPSS(reqAlg.getSignature())) {
+	    return false;
+    	}
+
 	switch (reqAlg.getHash()) {
-	    case HashAlgorithm.sha1:
-	    case HashAlgorithm.sha224:
-	    case HashAlgorithm.sha256:
-	    case HashAlgorithm.sha384:
-	    case HashAlgorithm.sha512:
-		return true;
-	    default:
-		return false;
+	case HashAlgorithm.sha1:
+	case HashAlgorithm.sha224:
+	case HashAlgorithm.sha256:
+	case HashAlgorithm.sha384:
+	case HashAlgorithm.sha512:
+	    return true;
+	default:
+	    return false;
 	}
     }
 

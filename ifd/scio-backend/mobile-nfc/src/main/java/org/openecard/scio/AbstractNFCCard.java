@@ -85,6 +85,11 @@ public abstract class AbstractNFCCard implements SCIOCard {
     }
 
     @Override
+    public boolean isContactless() {
+	return true;
+    }
+
+    @Override
     public SCIOChannel openLogicalChannel() throws SCIOException {
 	throw new SCIOException("Logical channels are not supported.", SCIOErrorCode.SCARD_E_UNSUPPORTED_FEATURE);
     }

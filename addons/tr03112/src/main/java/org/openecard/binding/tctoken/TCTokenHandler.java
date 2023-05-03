@@ -21,32 +21,7 @@
  ************************************************************************** */
 package org.openecard.binding.tctoken;
 
-import iso.std.iso_iec._24727.tech.schema.ActionType;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.CreateSession;
-import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse;
-import iso.std.iso_iec._24727.tech.schema.DestroySession;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import javax.annotation.Nonnull;
-import javax.xml.transform.TransformerException;
+import iso.std.iso_iec._24727.tech.schema.*;
 import org.openecard.addon.AddonManager;
 import org.openecard.addon.AddonRegistry;
 import org.openecard.addon.Context;
@@ -55,41 +30,15 @@ import org.openecard.addon.bind.BindingResult;
 import org.openecard.addon.bind.BindingResultCode;
 import org.openecard.addon.manifest.AddonSpecification;
 import org.openecard.addon.manifest.ProtocolPluginSpecification;
-import org.openecard.binding.tctoken.ex.ActivationError;
-import org.openecard.binding.tctoken.ex.AuthServerException;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
-import org.openecard.binding.tctoken.ex.MissingActivationParameterException;
-import org.openecard.binding.tctoken.ex.NonGuiException;
-import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.binding.tctoken.ex.*;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
-import org.openecard.common.DynamicContext;
-import org.openecard.common.ECardConstants;
-import org.openecard.common.I18n;
-import org.openecard.common.OpenecardProperties;
-import org.openecard.common.WSHelper;
+import org.openecard.common.*;
 import org.openecard.common.WSHelper.WSException;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.interfaces.DispatcherException;
-import org.openecard.common.interfaces.DocumentSchemaValidator;
-import org.openecard.common.interfaces.DocumentValidatorException;
-import org.openecard.common.util.FuturePromise;
-import org.openecard.common.util.HandlerUtils;
-import org.openecard.common.util.JAXPSchemaValidator;
-import org.openecard.common.util.Pair;
-import org.openecard.common.util.Promise;
+import org.openecard.common.interfaces.*;
+import org.openecard.common.util.*;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.message.DialogType;
-import org.openecard.httpcore.HttpResourceException;
-import org.openecard.httpcore.InvalidProxyException;
-import org.openecard.httpcore.InvalidUrlException;
-import org.openecard.httpcore.ResourceContext;
-import org.openecard.httpcore.ValidationError;
+import org.openecard.httpcore.*;
 import org.openecard.transport.paos.PAOSConnectionException;
 import org.openecard.transport.paos.PAOSException;
 import org.openecard.ws.marshal.WSMarshaller;
@@ -100,6 +49,20 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+
+import javax.annotation.Nonnull;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.BINDING_HTTP;
+import static org.openecard.common.ECardConstants.BINDING_PAOS;
 
 /**
  * Transport binding agnostic TCToken handler. <br>
@@ -134,6 +97,7 @@ public class TCTokenHandler {
 
     private final String pin;
     private final String puk;
+    private final EventDispatcher evtDispatcher;
     private final Dispatcher dispatcher;
     private final UserConsent gui;
     private final AddonManager manager;
@@ -146,6 +110,7 @@ public class TCTokenHandler {
      */
     public TCTokenHandler(Context ctx) {
 	this.dispatcher = ctx.getDispatcher();
+	this.evtDispatcher = ctx.getEventDispatcher();
 	this.gui = ctx.getUserConsent();
 	this.manager = ctx.getManager();
 	pin = LANG_PACE.translationForKey("pin");
@@ -220,44 +185,34 @@ public class TCTokenHandler {
      * @throws DispatcherException If there was a problem dispatching a request from the server.
      * @throws PAOSException If there was a transport error.
      */
-    private TCTokenResponse processBinding(Map<String, String> params, Context ctx, Pair<TCTokenContext, URL> tokenInfo)
+    private TCTokenResponse processBinding(Context ctx, TCTokenRequest tokenReq)
 	    throws PAOSException, DispatcherException, MissingActivationParameterException {
-	final TCToken token = tokenInfo.p1.getToken();
+	final TCToken token = tokenReq.getTCToken();
 	try {
 	    String binding = token.getBinding();
 	    final FutureTask<?> taskResult;
 	    final String taskName;
 	    switch (binding) {
-		case "urn:liberty:paos:2006-08": {
+		case BINDING_PAOS: {
 		    // send StartPAOS
 		    ConnectionHandleType connectionHandle = preparePaosHandle();
-		    TCTokenRequest tokenRequest = TCTokenRequest.convert(params, ctx, tokenInfo);
-		    prepareForTask(tokenRequest, connectionHandle);
+		    prepareForTask(tokenReq, connectionHandle);
 		    List<String> supportedDIDs = getSupportedDIDs();
-		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenRequest, schemaValidator);
+		    PAOSTask task = new PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenReq, schemaValidator);
 		    taskResult = new FutureTask<>(task);
 		    taskName = "PAOS";
 
 		    break;
 		}
-		case "urn:ietf:rfc:2616": {
+		case BINDING_HTTP: {
 		    // no actual binding, just connect via tls and authenticate the user with that connection
-		    TCTokenRequest.correctTCTokenRequestURI(params, ctx);
-
-
-		    byte[] requestedContextHandle = TCTokenRequest.extractContextHandle(params);
-		    String ifdName = TCTokenRequest.extractIFDName(params);
-		    BigInteger requestedSlotIndex = TCTokenRequest.extractSlotIndex(params);
 
 		    // we know exactly which card we want
-		    ConnectionHandleType requestedHandle = new ConnectionHandleType();
-		    requestedHandle.setContextHandle(requestedContextHandle);
-		    requestedHandle.setIFDName(ifdName);
-		    requestedHandle.setSlotIndex(requestedSlotIndex);
-		    ConnectionHandleType connectionHandle = prepareTlsHandle(requestedHandle);
-		    TCTokenRequest tokenRequest = TCTokenRequest.convert(params, ctx, tokenInfo);
-		    prepareForTask(tokenRequest, connectionHandle);
-		    HttpGetTask task = new HttpGetTask(dispatcher, connectionHandle, tokenRequest);
+		    // TODO: see if we need to really do this, as the handle never leaves the OeC
+		    ConnectionHandleType connectionHandle = preparePaosHandle();
+		    prepareForTask(tokenReq, connectionHandle);
+		    // get first handle, currently we just support one and this is likely not to change soon
+		    HttpGetTask task = new HttpGetTask(dispatcher, evtDispatcher, connectionHandle, tokenReq);
 		    taskResult = new FutureTask<>(task);
 		    taskName = "TLS Auth";
 		    break;
@@ -297,11 +252,13 @@ public class TCTokenHandler {
 	dispatcher.safeDeliver(appDis);
     }
 
+    // TODO: check where this has been used and if it is still needed
     public static void destroySession(Dispatcher dispatcher, ConnectionHandleType connectionHandle) {
 	DestroySession destroySession = new DestroySession();
 	destroySession.setConnectionHandle(connectionHandle);
 	dispatcher.safeDeliver(destroySession);
     }
+
     /**
      * Activates the client according to the received TCToken.
      *
@@ -313,25 +270,23 @@ public class TCTokenHandler {
      */
     public BindingResult handleActivate(Map<String, String> params, Context ctx) throws InvalidRedirectUrlException,
 	    SecurityViolationException, NonGuiException, ActivationError {
-	Map<String, String> copyParams = new HashMap<>(params);
-	Pair<TCTokenContext, URL> tokenInfo = null;
+	TCTokenRequest tokenReq = null;
 	try {
-	    tokenInfo = TCTokenRequest.removeTCTokenContext(copyParams);
-
-	    return this.handleActivateInner(copyParams, ctx, tokenInfo);
+	    tokenReq = TCTokenRequest.fetchTCToken(params);
+	    return this.handleActivateInner(ctx, tokenReq);
 	} finally {
-	    if (tokenInfo != null && tokenInfo.p1 != null) {
+	    if (tokenReq != null) {
 		// close connection to tctoken server in case PAOS didn't already perform this action
-		tokenInfo.p1.closeStream();
+		tokenReq.getTokenContext().closeStream();
 	    }
 	}
 
     }
 
-    public TCTokenResponse handleActivateInner(Map<String, String> params, Context ctx, Pair<TCTokenContext, URL> tokenInfo) throws InvalidRedirectUrlException,
+    public TCTokenResponse handleActivateInner(Context ctx, TCTokenRequest tokenReq) throws InvalidRedirectUrlException,
 	    SecurityViolationException, NonGuiException, AuthServerException, InvalidAddressException, InvalidTCTokenElement, UserCancellationException, MissingActivationParameterException, InvalidTCTokenException {
 
-	TCToken token = tokenInfo.p1.getToken();
+	TCToken token = tokenReq.getTCToken();
 	if (LOG.isDebugEnabled()) {
 	    try {
 		WSMarshaller m = WSMarshallerFactory.createInstance();
@@ -360,9 +315,9 @@ public class TCTokenHandler {
 //	}
 	try {
 	    // process binding and follow redirect addresses afterwards
-	    response = processBinding(params, ctx, tokenInfo);
+	    response = processBinding(ctx, tokenReq);
 	    // fill in values, so it is usuable by the transport module
-	    response = determineRefreshURL(params, response);
+	    response = determineRefreshURL(tokenReq, response);
 	    response.finishResponse();
 	    return response;
 	} catch (DispatcherException w) {
@@ -432,7 +387,7 @@ public class TCTokenHandler {
 
 	    try {
 		// fill in values, so it is usuable by the transport module
-		response = determineRefreshURL(params, response);
+		response = determineRefreshURL(tokenReq, response);
 		response.finishResponse();
 	    } catch (InvalidRedirectUrlException ex) {
 		LOG.error(ex.getMessage(), ex);
@@ -461,7 +416,7 @@ public class TCTokenHandler {
 
     private static void prepareForTask(TCTokenRequest request, ConnectionHandleType connectionHandle) {
 	final DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-	boolean performChecks = isPerformTR03112Checks(request);
+	boolean performChecks = request.isPerformTR03112Checks();
 	if (!performChecks) {
 	    LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.");
 	}
@@ -504,7 +459,7 @@ public class TCTokenHandler {
      * @return Modified response with the final address the browser should be redirected to.
      * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
      */
-    private static TCTokenResponse determineRefreshURL(Map<String, String> params, TCTokenResponse response)
+    private static TCTokenResponse determineRefreshURL(TCTokenRequest request, TCTokenResponse response)
 	    throws InvalidRedirectUrlException, SecurityViolationException {
 	try {
 	    String endpointStr = response.getRefreshAddress();
@@ -512,7 +467,7 @@ public class TCTokenHandler {
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	    // disable certificate checks according to BSI TR03112-7 in some situations
-	    boolean redirectChecks = TCTokenRequest.isPerformTR03112Checks(params);
+	    boolean redirectChecks = request.isPerformTR03112Checks();
 	    RedirectCertificateValidator verifier = new RedirectCertificateValidator(redirectChecks);
 	    ResourceContext ctx = new TrResourceContextLoader().getStream(endpoint, verifier);
 	    ctx.closeStream();
@@ -559,15 +514,6 @@ public class TCTokenHandler {
 	return new ArrayList<>(result);
     }
 
-    /**
-     * Checks if checks according to BSI TR03112-7 3.4.2, 3.4.4 and 3.4.5 must be performed.
-     *
-     * @param tcTokenRequest TC Token request.
-     * @return {@code true} if checks should be performed, {@code false} otherwise.
-     */
-    private static boolean isPerformTR03112Checks(TCTokenRequest tcTokenRequest) {
-	return tcTokenRequest.isPerformTR03112Checks();
-    }
 
     private void showBackgroundMessage(final String msg, final String title, final DialogType dialogType) {
 	new Thread(() -> {

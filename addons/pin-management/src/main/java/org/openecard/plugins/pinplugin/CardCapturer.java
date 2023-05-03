@@ -30,7 +30,8 @@ import org.openecard.common.WSHelper;
 import org.openecard.common.WSHelper.WSException;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.interfaces.Dispatcher;
-import static org.openecard.plugins.pinplugin.AbstractPINAction.GERMAN_IDENTITY_CARD;
+
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY;
 import static org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction.PIN_STATUS;
 import org.slf4j.Logger;
@@ -127,7 +128,7 @@ public class CardCapturer {
 	}
 
 	// check if a german identity card is inserted, if not wait for it
-	ConnectionHandleType cHandle = pinAction.waitForCardType(GERMAN_IDENTITY_CARD);
+	ConnectionHandleType cHandle = pinAction.waitForCardType(NPA_CARD_TYPE);
 	if (cHandle == null) {
 	    LOG.debug("User cancelled card insertion.");
 	    return null;
@@ -168,7 +169,7 @@ public class CardCapturer {
 
 	    String cardType = conRes.getConnectionHandle().getRecognitionInfo().getCardType();
 	    ConnectionHandleType cHandleNew = conRes.getConnectionHandle();
-	    if (cardType.equals("http://bsi.bund.de/cif/npa.xml")) {
+	    if (cardType.equals(NPA_CARD_TYPE)) {
 		// ensure same terminal and get the new slothandle
 		if (cHandleNew.getIFDName().equals(handle.getIFDName())
 			&& ! Arrays.equals(cHandleNew.getSlotHandle(), handle.getSlotHandle())) {

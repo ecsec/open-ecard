@@ -41,10 +41,12 @@ import org.openecard.addon.Context;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.PACECapabilities;
-import org.openecard.common.sal.util.CardConnectorUtil;
+import org.openecard.crypto.common.sal.CardConnectorUtil;
 import org.openecard.common.util.HandlerUtils;
 import org.openecard.common.util.SysUtils;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
+
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
 
 
 /**
@@ -52,8 +54,6 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
  * @author Tobias Wich
  */
 public class PaceCardHelper {
-
-    private static final String NPA_TYPE = "http://bsi.bund.de/cif/npa.xml";
 
     private final Context ctx;
     private ConnectionHandleType conHandle;
@@ -89,7 +89,7 @@ public class PaceCardHelper {
     }
 
     private PACEMarkerType getPaceMarkerFromCif(String pinType) {
-	CardInfoType cif = ctx.getRecognition().getCardInfo(NPA_TYPE);
+	CardInfoType cif = ctx.getRecognition().getCardInfo(NPA_CARD_TYPE);
 	if (cif != null) {
 	    for (CardApplicationType app : cif.getApplicationCapabilities().getCardApplication()) {
 		for (DIDInfoType did : app.getDIDInfo()) {
@@ -176,7 +176,7 @@ public class PaceCardHelper {
 	    final String sessionIdentifier = conHandle.getChannelHandle().getSessionIdentifier();
 
 	    Set<String> npaType = new HashSet<>();
-	    npaType.add(NPA_TYPE);
+	    npaType.add(NPA_CARD_TYPE);
 	    // wait for eid card
 	    CardConnectorUtil connectorUtil = new CardConnectorUtil(ctx.getDispatcher(), ctx.getEventDispatcher(), npaType,
 		    sessionIdentifier, conHandle.getContextHandle(), conHandle.getIFDName());

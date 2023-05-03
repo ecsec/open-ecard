@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import javax.annotation.Nullable;
 import org.openecard.bouncycastle.tls.ProtocolVersion;
 import org.openecard.bouncycastle.tls.TlsClient;
@@ -40,12 +41,12 @@ import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 import org.openecard.crypto.tls.ClientCertPSKTlsClient;
 import org.openecard.crypto.tls.ClientCertTlsClient;
-import org.openecard.crypto.tls.auth.CredentialFactory;
-import org.openecard.crypto.tls.auth.DynamicAuthentication;
+import org.openecard.crypto.tls.auth.*;
 import org.openecard.crypto.tls.verify.SameCertVerifier;
-import org.openecard.crypto.tls.auth.SmartCardCredentialFactory;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.*;
+
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
@@ -60,9 +61,7 @@ import org.openecard.crypto.tls.verify.JavaSecVerifier;
  */
 public class TlsConnectionHandler {
 
-    private final Dispatcher dispatcher;
     private final TCTokenRequest tokenRequest;
-    private final ConnectionHandleType handle;
 
     private URL serverAddress;
     private String hostname;
@@ -71,34 +70,20 @@ public class TlsConnectionHandler {
     private String sessionId;
     private ClientCertTlsClient tlsClient;
     private boolean verifyCertificates = true;
+    private CredentialFactory credentialFactory;
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest, ConnectionHandleType handle)
-	    throws ConnectionError {
-	this.dispatcher = dispatcher;
+
+    public TlsConnectionHandler(TCTokenRequest tokenRequest) {
 	this.tokenRequest = tokenRequest;
-	this.handle = handle;
     }
 
-    public TlsConnectionHandler(Dispatcher dispatcher, TCTokenRequest tokenRequest)
-	    throws ConnectionError {
-	this(dispatcher, tokenRequest, null);
+    public void setSmartCardCredential(CredentialFactory credentialFactory) {
+	this.credentialFactory = credentialFactory;
     }
 
     public void setUpClient() throws ConnectionError {
 	try {
 	    TCTokenType token = tokenRequest.getTCToken();
-	    String cardType = null;
-	    if (handle != null) {
-		if (handle.getRecognitionInfo() != null) {
-		    cardType = handle.getRecognitionInfo().getCardType();
-		}
-		if (cardType == null) {
-		    cardType = tokenRequest.getCardType();
-		}
-	    }
-	    // eID servers usually have problems with sni, so disable it for them
-	    // TODO: check occasionally if this still holds
-	    boolean doSni = ! "http://bsi.bund.de/cif/npa.xml".equals(cardType);
 
 	    sessionId = token.getSessionIdentifier();
 	    serverAddress = new URL(token.getServerAddress());
@@ -115,12 +100,12 @@ public class TlsConnectionHandler {
 
 	    String secProto = token.getPathSecurityProtocol();
 	    // use same channel as demanded in TR-03124 sec. 2.4.3
-	    if (isSameChannel()) {
+	    if (tokenRequest.isSameChannel()) {
 		tlsClient = tokenRequest.getTokenContext().getTlsClient();
 		if (tlsClient instanceof ClientCertDefaultTlsClient) {
 		    ((ClientCertDefaultTlsClient) tlsClient).setEnforceSameSession(true);
 		}
-		// save the info that we have a same channel situtation
+		// save the info that we have a same channel situation
 		DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 		dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE);
 	    } else {
@@ -129,39 +114,23 @@ public class TlsConnectionHandler {
 		    tokenRequest.getTokenContext().closeStream();
 		}
 
-		// determine TLS version to use
-		ProtocolVersion version = ProtocolVersion.TLSv12;
-		ProtocolVersion minVersion = ProtocolVersion.TLSv12;
-		switch (secProto) {
-		    case "urn:ietf:rfc:5246":
-			// no changes
-			break;
-		    case "urn:ietf:rfc:4279":
-			minVersion = ProtocolVersion.TLSv11;
-			break;
-		}
-
 		// Set up TLS connection
 		DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 
 		TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
 		switch (secProto) {
-		    case "urn:ietf:rfc:4279":
+		    case PATH_SEC_PROTO_TLS_PSK:
 			{
 			    byte[] psk = token.getPathSecurityParameters().getPSK();
 			    TlsPSKIdentity pskId = new BasicTlsPSKIdentity(sessionId, psk);
-			    tlsClient = new ClientCertPSKTlsClient(crypto, pskId, serverHost, doSni);
-			    tlsClient.setClientVersion(version);
-			    tlsClient.setMinimumVersion(minVersion);
+			    tlsClient = new ClientCertPSKTlsClient(crypto, pskId, serverHost, true);
 			    break;
 			}
-		    case "urn:ietf:rfc:5246":
+		    case PATH_SEC_PROTO_MTLS:
 			{
-			    // use a smartcard for client authentication if needed
-			    tlsAuth.setCredentialFactory(makeSmartCardCredential());
-			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, doSni);
-			    tlsClient.setClientVersion(version);
-			    tlsClient.setMinimumVersion(minVersion);
+			    // use a smartcard for client authentication if one is set
+			    tlsAuth.setCredentialFactory(credentialFactory);
+			    tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			    // add PKIX verifier
 			    if (verifyCertificates) {
 				tlsAuth.addCertificateVerifier(new JavaSecVerifier());
@@ -183,22 +152,6 @@ public class TlsConnectionHandler {
 
 	} catch (MalformedURLException ex) {
 	    throw new ConnectionError(MALFORMED_URL, ex, "ServerAddress");
-	}
-    }
-
-    public boolean isSameChannel() {
-	TCTokenType token = tokenRequest.getTCToken();
-	String secProto = token.getPathSecurityProtocol();
-	// check security proto
-	if (secProto == null || "".equals(secProto)) {
-	    return true;
-	}
-	// check PSK value
-	if (secProto.equals("urn:ietf:rfc:4279")) {
-	    TCTokenType.PathSecurityParameters pathsecParams = token.getPathSecurityParameters();
-	    return pathsecParams == null || pathsecParams.getPSK() == null || pathsecParams.getPSK().length == 0;
-	} else {
-	    return false;
 	}
     }
 
@@ -235,7 +188,7 @@ public class TlsConnectionHandler {
     }
     public TlsClientProtocol createTlsConnection(ProtocolVersion tlsVersion)
 	    throws IOException, URISyntaxException {
-	if (! isSameChannel()) {
+	if (! tokenRequest.isSameChannel()) {
 	    // normal procedure, create a new channel
 	    return createNewTlsConnection(tlsVersion);
 	} else {
@@ -259,16 +212,6 @@ public class TlsConnectionHandler {
 	handler.connect(tlsClient);
 
 	return handler;
-    }
-
-    @Nullable
-    private CredentialFactory makeSmartCardCredential() {
-	if (handle != null) {
-	    SmartCardCredentialFactory scFac = new SmartCardCredentialFactory(dispatcher, handle, true);
-	    return scFac;
-	} else {
-	    return null;
-	}
     }
 
 }

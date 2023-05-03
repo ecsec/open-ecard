@@ -22,32 +22,19 @@
 
 package org.openecard.binding.tctoken;
 
-import org.openecard.httpcore.ValidationError;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenElement;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException;
-import org.openecard.binding.tctoken.ex.InvalidTCTokenException;
-import org.openecard.binding.tctoken.ex.TCTokenRetrievalException;
-import org.openecard.binding.tctoken.ex.SecurityViolationException;
-import org.openecard.binding.tctoken.ex.AuthServerException;
-import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
-import org.openecard.binding.tctoken.ex.InvalidAddressException;
-import org.openecard.binding.tctoken.ex.ResultMinor;
-import org.openecard.binding.tctoken.ex.UserCancellationException;
+import org.openecard.binding.tctoken.ex.*;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.util.Pair;
-import org.openecard.httpcore.HttpResourceException;
-import org.openecard.httpcore.InsecureUrlException;
-import org.openecard.httpcore.InvalidProxyException;
-import org.openecard.httpcore.InvalidRedirectChain;
-import org.openecard.httpcore.ResourceContext;
+import org.openecard.httpcore.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
+import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
 
 
 /**
@@ -85,12 +72,6 @@ public class TCTokenContext extends ResourceContext {
 	} catch (IOException | HttpResourceException | InvalidProxyException | ValidationError ex) {
 	    throw new TCTokenRetrievalException(RETRIEVAL_FAILED, ex);
 	}
-    }
-
-    public static TCTokenContext generateTCToken(String data) throws InvalidTCTokenException, AuthServerException,
-	    InvalidRedirectUrlException, InvalidTCTokenElement, InvalidTCTokenUrlException, SecurityViolationException,
-	    UserCancellationException {
-	return generateTCToken(data, new ResourceContext(null, null, Collections.EMPTY_LIST));
     }
 
     private static TCTokenContext generateTCToken(String data, ResourceContext base) throws InvalidTCTokenException,

@@ -48,7 +48,15 @@ public class ECardConstants {
     public static final int SLOT_HANDLE_DEFAULT_SIZE = 24;
 
     public static final String UNKNOWN_CARD = "http://bsi.bund.de/cif/unknown";
+    public static final String NPA_CARD_TYPE = "http://bsi.bund.de/cif/npa.xml";
+
     public static final String PAOS_NEXT = ECARD_PREFIX + "PAOS/GetNextCommand";
+
+    public static final String PATH_SEC_PROTO_TLS_PSK = "urn:ietf:rfc:4279";
+    public static final String PATH_SEC_PROTO_MTLS = "urn:ietf:rfc:5246";
+
+    public static final String BINDING_HTTP = "urn:ietf:rfc:2616";
+    public static final String BINDING_PAOS = "urn:liberty:paos:2006-08";
 
     public static final String ACTOR_NEXT = "http://schemas.xmlsoap.org/soap/actor/next";
     public static final String SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -93,6 +101,10 @@ public class ECardConstants {
     public static class IFD {
 
 	public static class Protocol {
+
+	    public static boolean isProtocol(String proto) {
+		return proto.equals(T0) || proto.equals(T1) || proto.equals(T2) || proto.equals(TYPE_A) || proto.equals(TYPE_B);
+	    }
 
 	    public static final String T0 = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0";
 	    public static final String T1 = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1";

@@ -75,7 +75,7 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 
     protected ArrayList<ServerName> serverNames;
     protected ProtocolVersion clientVersion = ProtocolVersion.TLSv12;
-    protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv10;
+    protected ProtocolVersion minClientVersion = ProtocolVersion.TLSv12;
 
     /**
      * Create a ClientCertDefaultTlsClient for the given parameters.
@@ -90,8 +90,10 @@ public class ClientCertDefaultTlsClient extends DefaultTlsClient implements Clie
 	if (doSni) {
 	    this.serverNames.add(makeServerName(host));
 	}
-	boolean tls1 = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
-	this.minClientVersion = tls1 ? ProtocolVersion.TLSv10 : ProtocolVersion.TLSv11;
+	boolean legacyTls = Boolean.valueOf(OpenecardProperties.getProperty("legacy.tls1"));
+	if (legacyTls) {
+	    this.minClientVersion = ProtocolVersion.TLSv10;
+	}
 	this.host = host;
     }
 

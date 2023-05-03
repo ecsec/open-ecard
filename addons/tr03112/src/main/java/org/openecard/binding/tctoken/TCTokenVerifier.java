@@ -40,6 +40,8 @@ import org.openecard.binding.tctoken.ex.ActivationError;
 import org.openecard.common.util.Pair;
 import org.openecard.common.util.TR03112Utils;
 import static org.openecard.binding.tctoken.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.*;
+
 import org.openecard.binding.tctoken.ex.ResultMinor;
 import org.openecard.binding.tctoken.ex.UserCancellationException;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
@@ -189,7 +191,7 @@ public class TCTokenVerifier {
     public void verifyBinding() throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String value = token.getBinding();
 	assertRequired("Binding", value);
-	checkEqualOR("Binding", value, "urn:liberty:paos:2006-08", "urn:ietf:rfc:2616");
+	checkEqualOR("Binding", value, BINDING_PAOS, BINDING_HTTP);
     }
 
     /**
@@ -213,15 +215,15 @@ public class TCTokenVerifier {
 	if ((checkEmpty(proto) && checkEmpty(psp))) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
-	} else if ((! checkEmpty(proto)) && "urn:ietf:rfc:4279".equals(proto) && checkEmpty(psp) && ! token.isInvalidPSK()) {
+	} else if ((! checkEmpty(proto)) && PATH_SEC_PROTO_TLS_PSK.equals(proto) && checkEmpty(psp) && ! token.isInvalidPSK()) {
 	    assertSameChannel("ServerAddress", token.getServerAddress());
 	    return;
 	}
 
 	assertRequired("PathSecurityProtocol", proto);
-	String[] protos = {"urn:ietf:rfc:5246", "urn:ietf:rfc:4279"};
+	String[] protos = {PATH_SEC_PROTO_MTLS, PATH_SEC_PROTO_TLS_PSK};
 	checkEqualOR("PathSecurityProtocol", proto, protos);
-	if ("urn:ietf:rfc:4279".equals(proto)) {
+	if (PATH_SEC_PROTO_TLS_PSK.equals(proto)) {
 	    if (token.isInvalidPSK()) {
 		String minor = ResultMinor.COMMUNICATION_ERROR;
 		String errorUrl = token.getComErrorAddressWithParams(minor);

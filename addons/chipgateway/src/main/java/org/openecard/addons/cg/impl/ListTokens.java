@@ -46,6 +46,8 @@ import org.openecard.common.SecurityConditionUnsatisfiable;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.util.ByteComparator;
+import org.openecard.common.util.ByteUtils;
+import org.openecard.common.util.HandlerBuilder;
 import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.DataSetInfo;
 import org.openecard.crypto.common.sal.did.DidInfo;
@@ -66,13 +68,15 @@ public class ListTokens {
 
     private final List<TokenInfoType> requestedTokens;
     private final Context ctx;
+    private final String sessionId;
     private final Dispatcher dispatcher;
 
     private final TreeSet<byte[]> connectedSlots;
 
-    public ListTokens(List<TokenInfoType> requestedTokens, Context ctx) throws UnsupportedAlgorithmException {
+    public ListTokens(List<TokenInfoType> requestedTokens, Context ctx, String sessionId) throws UnsupportedAlgorithmException {
 	this.requestedTokens = new ArrayList<>(requestedTokens);
 	this.ctx = ctx;
+	this.sessionId = sessionId;
 	this.dispatcher = ctx.getDispatcher();
 	this.connectedSlots = new TreeSet<>(new ByteComparator());
 
@@ -230,8 +234,10 @@ public class ListTokens {
     private boolean determineTokenFeatures(TokenInfoType next) {
 	try {
 	    // request the missing information
-	    ConnectionHandleType h = new ConnectionHandleType();
-	    h.setSlotHandle(next.getConnectionHandle().getSlotHandle());
+	    ConnectionHandleType h = HandlerBuilder.create()
+		    .setSlotHandle(next.getConnectionHandle().getSlotHandle())
+		    .setSessionId(sessionId)
+		    .buildConnectionHandle();
 
 	    DidInfos dids = new DidInfos(dispatcher, null, h);
 	    List<DidInfo> didInfos = dids.getDidInfos();

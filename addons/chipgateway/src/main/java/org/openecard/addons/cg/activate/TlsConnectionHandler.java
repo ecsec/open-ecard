@@ -41,6 +41,8 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication;
 import org.openecard.crypto.tls.verify.SameCertVerifier;
 import org.openecard.crypto.tls.proxy.ProxySettings;
 import static org.openecard.addons.cg.ex.ErrorTranslations.*;
+import static org.openecard.common.ECardConstants.PATH_SEC_PROTO_MTLS;
+
 import org.openecard.addons.cg.ex.InvalidTCTokenElement;
 import org.openecard.addons.cg.impl.ChipGatewayProperties;
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
@@ -89,11 +91,8 @@ public class TlsConnectionHandler {
 
 	    String secProto = token.getPathSecurityProtocol();
 
-	    // determine TLS version to use
-	    ProtocolVersion version = ProtocolVersion.TLSv12;
-	    ProtocolVersion minVersion = ProtocolVersion.TLSv12;
 	    switch (secProto) {
-		case "urn:ietf:rfc:5246":
+		case PATH_SEC_PROTO_MTLS:
 		case "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption":
 		    // no changes
 		    break;
@@ -103,14 +102,12 @@ public class TlsConnectionHandler {
 	    DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 
 	    switch (secProto) {
-		case "urn:ietf:rfc:5246":
+		case PATH_SEC_PROTO_MTLS:
 		case "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption":
 		    {
 			// use a smartcard for client authentication if needed
 			TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
 			tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
-			tlsClient.setClientVersion(version);
-			tlsClient.setMinimumVersion(minVersion);
 			// add PKIX verifier
 			if (ChipGatewayProperties.isValidateServerCert()) {
 			    tlsAuth.addCertificateVerifier(new CGJavaSecVerifier());

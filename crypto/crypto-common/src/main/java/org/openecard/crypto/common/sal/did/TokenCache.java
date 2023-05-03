@@ -48,14 +48,10 @@ public class TokenCache {
     }
 
     public DidInfos getInfo(@Nullable char[] pin, @Nonnull ConnectionHandleType handle) {
-	return getInfo(pin, handle.getSlotHandle());
-    }
-
-    public DidInfos getInfo(@Nullable char[] pin, @Nonnull byte[] slotHandle) {
-	DidInfos result = cachedInfos.get(slotHandle);
+	DidInfos result = cachedInfos.get(handle.getSlotHandle());
 
 	if (result == null) {
-	    result = new DidInfos(dispatcher, pin, slotHandle);
+	    result = new DidInfos(dispatcher, pin, handle);
 	} else if (pin != null) {
 	    result.setPin(pin);
 	}

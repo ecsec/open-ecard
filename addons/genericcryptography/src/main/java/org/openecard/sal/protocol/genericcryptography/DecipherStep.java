@@ -22,15 +22,7 @@
 
 package org.openecard.sal.protocol.genericcryptography;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.Decipher;
-import iso.std.iso_iec._24727.tech.schema.DecipherResponse;
-import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
-import java.util.Map;
+import iso.std.iso_iec._24727.tech.schema.*;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.common.ECardConstants;
@@ -41,14 +33,18 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.crypto.common.sal.did.CryptoMarkerType;
-import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.tlv.TLV;
 import org.openecard.common.util.ByteUtils;
+import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.openecard.sal.protocol.genericcryptography.apdu.PSODecipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
+import java.util.Map;
 
 
 /**
@@ -85,9 +81,9 @@ public class DecipherStep implements ProtocolStep<Decipher, DecipherResponse> {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    String didName = SALUtils.getDIDName(request);
 	    byte[] applicationID = connectionHandle.getCardApplication();
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    StateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
 
-	    Assert.securityConditionDID(cardStateEntry, applicationID, didName, CryptographicServiceActionName.DECIPHER);
+	    Assert.securityConditionDID(cardStateEntry.getCardEntry(), applicationID, didName, CryptographicServiceActionName.DECIPHER);
 
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());

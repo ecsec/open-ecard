@@ -45,6 +45,12 @@ public class TCToken extends TCTokenType {
 
     private static final Logger LOG = LoggerFactory.getLogger(TCToken.class);
 
+    private boolean forceProcessing;
+
+    public Boolean isForceProcessing() {
+		return forceProcessing;
+	}
+
     public static TCToken generateToken(Map<String, String> params) throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String serverAddress = params.get("ServerAddress");
 	String sessionId = params.get("SessionIdentifier");
@@ -74,7 +80,7 @@ public class TCToken extends TCTokenType {
 	} else {
 	    forceProcessingBool = Boolean.parseBoolean(forceProcessing);
 	}
-	token.setForceProcessing(forceProcessingBool);
+	token.forceProcessing = forceProcessingBool;
 
 	// validate TCToken
 	TCTokenVerifier verifier = new TCTokenVerifier(token);

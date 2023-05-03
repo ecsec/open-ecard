@@ -7,7 +7,7 @@
  * contained in a signed written agreement between you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.common.sal.util;
+package org.openecard.crypto.common.sal;
 
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;

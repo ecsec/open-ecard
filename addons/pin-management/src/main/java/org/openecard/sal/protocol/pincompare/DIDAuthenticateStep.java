@@ -22,38 +22,27 @@
 
 package org.openecard.sal.protocol.pincompare;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DifferentialIdentityServiceActionName;
-import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType;
-import iso.std.iso_iec._24727.tech.schema.InputUnitType;
-import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType;
-import iso.std.iso_iec._24727.tech.schema.PinInputType;
-import iso.std.iso_iec._24727.tech.schema.Transmit;
-import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
-import iso.std.iso_iec._24727.tech.schema.VerifyUser;
-import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse;
-import java.math.BigInteger;
-import java.util.Map;
+import iso.std.iso_iec._24727.tech.schema.*;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.bouncycastle.util.Arrays;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
+import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
+import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateOutputType;
+import org.openecard.common.anytype.pin.PINCompareMarkerType;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.Assert;
-import org.openecard.common.anytype.pin.PINCompareMarkerType;
-import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.ConnectedCardEntry;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.common.util.PINUtils;
-import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType;
-import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateOutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 
 /**
@@ -92,13 +81,14 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    String didName = SALUtils.getDIDName(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    StateEntry stateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    ConnectedCardEntry cardStateEntry = stateEntry.getCardEntry();
 	    PINCompareDIDAuthenticateInputType pinCompareInput = new PINCompareDIDAuthenticateInputType(request.getAuthenticationProtocolData());
 	    PINCompareDIDAuthenticateOutputType pinCompareOutput = pinCompareInput.getOutputType();
 
 	    byte[] cardApplication;
 	    if (request.getDIDScope() != null && request.getDIDScope().equals(DIDScopeType.GLOBAL)) {
-		cardApplication = cardStateEntry.getInfo().getApplicationIdByDidName(request.getDIDName(),
+		cardApplication = cardStateEntry.getCif().getApplicationIdByDidName(request.getDIDName(),
 			request.getDIDScope());
 	    } else {
 		cardApplication = connectionHandle.getCardApplication();

@@ -67,10 +67,6 @@ public class DidInfos {
     private Map<byte[], Map<String, DataSetInfo>> cachedDataSets;
 
     public DidInfos(@Nonnull Dispatcher dispatcher, @Nullable char[] pin, @Nonnull ConnectionHandleType handle) {
-	this(dispatcher, pin, handle.getSlotHandle());
-    }
-
-    public DidInfos(@Nonnull Dispatcher dispatcher, @Nullable char[] pin, @Nonnull byte[] slotHandle) {
 	this.dispatcher = dispatcher;
 	if (pin != null) {
 	    this.pin = pin.clone();
@@ -78,8 +74,7 @@ public class DidInfos {
 	    this.pin = null;
 	}
 
-	handle = new ConnectionHandleType();
-	handle.setSlotHandle(ByteUtils.clone(slotHandle));
+	this.handle = HandlerUtils.copyHandle(handle);
 	cachedDids = new TreeMap<>(new ByteComparator());
 	cachedDataSets = new TreeMap<>(new ByteComparator());
     }

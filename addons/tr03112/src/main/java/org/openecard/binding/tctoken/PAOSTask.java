@@ -74,7 +74,7 @@ public class PAOSTask implements Callable<StartPAOSResponse> {
 	    throws MalformedURLException, PAOSException, DispatcherException, InvocationTargetException,
 	    ConnectionError, PAOSConnectionException {
 	try {
-	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(dispatcher, tokenRequest, connectionHandle);
+	    TlsConnectionHandler tlsHandler = new TlsConnectionHandler(tokenRequest);
 	    tlsHandler.setUpClient();
 
 	    DocumentSchemaValidator v;

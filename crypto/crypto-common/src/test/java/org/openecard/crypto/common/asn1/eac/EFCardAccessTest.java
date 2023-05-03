@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static org.openecard.common.ECardConstants.NPA_CARD_TYPE;
 import static org.testng.Assert.*;
 
 
@@ -174,7 +176,7 @@ public class EFCardAccessTest {
 
 	assertEquals(cil.getProtocol(), "0.4.0.127.0.7.2.2.6");
 	assertEquals(cil.getProtocol(), EACObjectIdentifier.id_CI);
-	assertEquals(cil.getURL(), "http://bsi.bund.de/cif/npa.xml");
+	assertEquals(cil.getURL(), NPA_CARD_TYPE);
 	assertNull(cil.getEFCardInfo());
 
 	cil = efcaB.getCardInfoLocator();

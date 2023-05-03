@@ -21,62 +21,20 @@
  ************************************************************************** */
 package org.openecard.common.sal.util;
 
-import iso.std.iso_iec._24727.tech.schema.ACLList;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDelete;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationList;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceDescribe;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationServiceList;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationStartSession;
-import iso.std.iso_iec._24727.tech.schema.ChannelHandleType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDDelete;
-import iso.std.iso_iec._24727.tech.schema.DIDGet;
-import iso.std.iso_iec._24727.tech.schema.DIDList;
-import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.DIDUpdate;
-import iso.std.iso_iec._24727.tech.schema.DSICreate;
-import iso.std.iso_iec._24727.tech.schema.DSIDelete;
-import iso.std.iso_iec._24727.tech.schema.DSIList;
-import iso.std.iso_iec._24727.tech.schema.DSIRead;
-import iso.std.iso_iec._24727.tech.schema.DSIWrite;
-import iso.std.iso_iec._24727.tech.schema.DataSetDelete;
-import iso.std.iso_iec._24727.tech.schema.DataSetList;
-import iso.std.iso_iec._24727.tech.schema.DataSetSelect;
-import iso.std.iso_iec._24727.tech.schema.Decipher;
-import iso.std.iso_iec._24727.tech.schema.Encipher;
-import iso.std.iso_iec._24727.tech.schema.GetRandom;
-import iso.std.iso_iec._24727.tech.schema.Hash;
-import iso.std.iso_iec._24727.tech.schema.Sign;
-import iso.std.iso_iec._24727.tech.schema.VerifyCertificate;
-import iso.std.iso_iec._24727.tech.schema.VerifySignature;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import iso.std.iso_iec._24727.tech.schema.*;
 import org.openecard.common.ECardException;
 import org.openecard.common.sal.Assert;
 import org.openecard.common.sal.exception.IncorrectParameterException;
 import org.openecard.common.sal.exception.NamedEntityNotFoundException;
 import org.openecard.common.sal.exception.UnknownConnectionHandleException;
-import org.openecard.common.sal.exception.UnknownSlotHandleException;
-import org.openecard.common.sal.state.CardEntry;
-import org.openecard.common.sal.state.CardStateEntry;
-import org.openecard.common.sal.state.CardStateMap;
-import org.openecard.common.sal.state.ConnectedCardEntry;
-import org.openecard.common.sal.state.NoSuchSession;
-import org.openecard.common.sal.state.SalStateManager;
-import org.openecard.common.sal.state.StateEntry;
+import org.openecard.common.sal.state.*;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Convenience class for the SAL.
@@ -230,14 +188,15 @@ public class SALUtils {
 	return didStructure;
     }
 
-    public static DIDStructureType getDIDStructure(Object object, String didName, CardStateEntry entry, ConnectionHandleType connectionHandle)
+    public static DIDStructureType getDIDStructure(Object object, String didName, StateEntry stateEntry, ConnectionHandleType connectionHandle)
 	    throws NamedEntityNotFoundException, Exception {
+	ConnectedCardEntry entry = stateEntry.getCardEntry();
 	DIDScopeType didScope = (DIDScopeType) get(object, "getDIDScope");
 	DIDStructureType didStructure = null;
 
 	if (didScope != null && didScope.equals(DIDScopeType.GLOBAL)) {
 	    // search all applications
-	    for (CardApplicationWrapper app : entry.getInfo().getCardApplications().values()) {
+	    for (CardApplicationWrapper app : entry.getCif().getCardApplications().values()) {
 		didStructure = entry.getDIDStructure(didName, app.getApplicationIdentifier());
 		// stop when we have a match
 		if (didStructure != null) {
@@ -253,30 +212,9 @@ public class SALUtils {
 	return didStructure;
     }
 
-    public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle)
+    public static StateEntry getCardStateEntry(Map<String, Object> internalData, ConnectionHandleType connectionHandle)
 	    throws UnknownConnectionHandleException {
-	return getCardStateEntry(states, connectionHandle, true);
-    }
-
-    public static CardStateEntry getCardStateEntry(CardStateMap states, ConnectionHandleType connectionHandle, boolean filterAppId)
-	    throws UnknownConnectionHandleException {
-	CardStateEntry value = states.getEntry(connectionHandle, filterAppId);
-	if (value == null) {
-	    if (connectionHandle.getSlotHandle() != null) {
-		LOG.debug("No slot handle contained in card states.");
-		throw new UnknownSlotHandleException(connectionHandle);
-	    } else {
-		LOG.debug("No entry found in card states.");
-		throw new UnknownConnectionHandleException(connectionHandle);
-	    }
-	}
-
-	return value;
-    }
-
-    public static CardStateEntry getCardStateEntry(Map<String, Object> internalData, ConnectionHandleType connectionHandle)
-	    throws UnknownConnectionHandleException {
-	CardStateEntry value = (CardStateEntry) internalData.get("cardState");
+	StateEntry value = (StateEntry) internalData.get("cardState");
 	if (value == null) {
 	    throw new UnknownConnectionHandleException(connectionHandle);
 	}
@@ -285,9 +223,9 @@ public class SALUtils {
     }
 
     private static Object get(Object object, String method) throws Exception {
-	Method[] methodes = object.getClass().getDeclaredMethods();
+	Method[] methods = object.getClass().getDeclaredMethods();
 
-	for (Method m : methodes) {
+	for (Method m : methods) {
 	    if (m.getName().equals(method)) {
 		return m.invoke(object);
 	    }

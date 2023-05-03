@@ -23,12 +23,11 @@
 package org.openecard.binding.tctoken;
 
 import org.openecard.binding.tctoken.ex.ActivationError;
-import java.io.IOException;
-import java.net.URL;
 import org.openecard.binding.tctoken.ex.InvalidAddressException;
 import org.openecard.common.util.FileUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.net.URL;
 
 
 /**
@@ -37,13 +36,6 @@ import org.testng.annotations.Test;
  * @author Johannes Schmölz
  */
 public class TCTokenFactoryTest {
-
-    @Test
-    public void testGenerateTCToken_String() throws ActivationError, IOException {
-	String tcToken = FileUtils.toString(FileUtils.resolveResourceAsStream(TCTokenFactoryTest.class, "TCToken.xml"), "UTF-8");
-	TCTokenContext result = TCTokenContext.generateTCToken(tcToken);
-	Assert.assertNotNull(result.getToken(), "TCToken is null.");
-    }
 
     @Test(expectedExceptions = {InvalidAddressException.class})
     public void testGenerateTCToken_TCTokenType() throws ActivationError {

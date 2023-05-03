@@ -24,13 +24,7 @@ package org.openecard.addons.cg.activate;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
-import java.security.cert.PKIXRevocationChecker;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.HashSet;
 import java.util.Set;
 import javax.security.auth.x500.X500Principal;
@@ -49,8 +43,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CGJavaSecVerifier extends JavaSecVerifier {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CGJavaSecVerifier.class);
-
     public CGJavaSecVerifier() throws RuntimeException {
 	super(ChipGatewayProperties.isRevocationCheck());
     }
@@ -63,38 +55,17 @@ public class CGJavaSecVerifier extends JavaSecVerifier {
     @Override
     public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
-	    CertPath certPath = convertChain(chain);
-
-	    // create the parameters for the validator
-	    PKIXParameters params = new PKIXParameters(getTrustStore());
-	    params.setRevocationEnabled(false);
-
-	    if (checkRevocation) {
-		PKIXRevocationChecker revChecker = (PKIXRevocationChecker) certPathValidator.getRevocationChecker();
-		Set<PKIXRevocationChecker.Option> revOpts = new HashSet<>();
-		//revOpts.add(PKIXRevocationChecker.Option.ONLY_END_ENTITY);
-		revChecker.setOptions(revOpts);
-		// TODO: add OCSP responses
-		//revChecker.setOcspResponses(responses);
-		params.setCertPathCheckers(null);
-		params.addCertPathChecker(revChecker);
-	    }
-
-	    // validate - exception marks failure
-	    PKIXCertPathValidatorResult r = (PKIXCertPathValidatorResult) certPathValidator.validate(certPath, params);
+	    CertPathBuilderResult certPathBuilderResult = validateCertificate(chain, hostname);
 
 	    if (ChipGatewayProperties.isUseApiEndpointWhitelist()) {
-		X509Certificate cert = (X509Certificate) certPath.getCertificates().get(0);
+		X509Certificate cert = (X509Certificate) certPathBuilderResult.getCertPath().getCertificates().get(0);
 		X500Principal subj = cert.getSubjectX500Principal();
 		if (! AllowedApiEndpoints.instance().isInSubjects(subj)) {
 		    String msg = "The certificate used in the signature has an invalid subject: " + subj.getName();
 		    throw new CertificateVerificationException(msg);
 		}
 	    }
-	} catch (CertPathValidatorException ex) {
-	    throw new CertificateVerificationException(ex.getMessage());
-	} catch (GeneralSecurityException ex) {
-	    throw new CertificateVerificationException(ex.getMessage());
+
 	} catch (IOException ex) {
 	    if (ex instanceof CertificateVerificationException) {
 		throw (CertificateVerificationException) ex;

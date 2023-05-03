@@ -53,8 +53,7 @@ public class StatusResponseBodyFactory {
 	try {
 	    ResponseBody body = new ResponseBody();
 	    String value = m.doc2str(m.marshal(status));
-	    // TODO: is this mime type an error or is there a reason for that?
-	    body.setValue(value, "text/plain");
+	    body.setValue(value, "text/xml");
 	    result.setBody(body);
 	    result.setResultCode(BindingResultCode.OK);
 	} catch (WSMarshallerException | TransformerException ex) {

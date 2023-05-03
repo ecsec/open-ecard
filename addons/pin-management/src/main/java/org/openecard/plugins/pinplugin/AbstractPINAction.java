@@ -68,7 +68,6 @@ public abstract class AbstractPINAction implements AppExtensionAction {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPINAction.class);
 
     // constants
-    protected static final String GERMAN_IDENTITY_CARD = "http://bsi.bund.de/cif/npa.xml";
     private static final byte[] RECOGNIZE_PIN_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103");
     private static final byte[] RECOGNIZE_PUK_APDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830104");
     private static final byte[] RESPONSE_RC3 = new byte[] { (byte) 0x90, 0x00 };

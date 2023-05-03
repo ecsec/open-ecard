@@ -22,21 +22,14 @@
 
 package org.openecard.sal.protocol.genericcryptography;
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.Hash;
-import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType;
-import iso.std.iso_iec._24727.tech.schema.HashResponse;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
+import iso.std.iso_iec._24727.tech.schema.*;
 import org.openecard.addon.sal.FunctionType;
 import org.openecard.addon.sal.ProtocolStep;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.sal.state.CardStateEntry;
+import org.openecard.common.sal.state.StateEntry;
 import org.openecard.common.sal.util.SALUtils;
 import org.openecard.crypto.common.HashAlgorithms;
 import org.openecard.crypto.common.SignatureAlgorithms;
@@ -44,6 +37,10 @@ import org.openecard.crypto.common.UnsupportedAlgorithmException;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 
 /**
@@ -79,7 +76,7 @@ public class HashStep implements ProtocolStep<Hash, HashResponse> {
 	try {
 	    ConnectionHandleType connectionHandle = SALUtils.getConnectionHandle(request);
 	    String didName = SALUtils.getDIDName(request);
-	    CardStateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
+	    StateEntry cardStateEntry = SALUtils.getCardStateEntry(internalData, connectionHandle);
 	    DIDStructureType didStructure = SALUtils.getDIDStructure(request, didName, cardStateEntry, connectionHandle);
 	    CryptoMarkerType cryptoMarker = new CryptoMarkerType(didStructure.getDIDMarker());
 

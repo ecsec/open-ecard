@@ -61,6 +61,13 @@ public interface SCIOCard {
     SCIOProtocol getProtocol();
 
     /**
+     * Returns whether the card is connected with a contactless protocol, or not.
+     *
+     * @return {@code true} if the card is connected with a contactless protocol, {@code false} otherwise.
+     */
+    boolean isContactless();
+
+    /**
      * Gets the card channel for the basic logical channel.
      * The basic channel has the number 0.
      *

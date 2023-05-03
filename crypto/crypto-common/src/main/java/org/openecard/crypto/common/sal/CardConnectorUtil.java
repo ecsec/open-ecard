@@ -8,7 +8,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.sal.util;
+package org.openecard.crypto.common.sal;
 
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
@@ -17,10 +17,9 @@ import iso.std.iso_iec._24727.tech.schema.CardApplicationPath;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
+
 import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.event.EventObject;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class CardConnectorUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(CardConnectorUtil.class);
-    private final Set<String> cardTypes;
+    private final Collection<String> cardTypes;
     private final String session;
     private final byte[] ctxHandle;
     private final String ifdName;
@@ -52,7 +51,7 @@ public class CardConnectorUtil {
     private final Dispatcher dispatcher;
     private final EventDispatcher eventHandler;
 
-    public CardConnectorUtil(Dispatcher dispatcher, EventDispatcher eventHandler, Set<String> cardTypes, String session, byte[] ctxHandle, String ifdName) {
+    public CardConnectorUtil(Dispatcher dispatcher, EventDispatcher eventHandler, Collection<String> cardTypes, String session, byte[] ctxHandle, String ifdName) {
 	this.cardTypes = cardTypes;
 	this.session = session;
 	this.ctxHandle = ctxHandle;
@@ -78,7 +77,7 @@ public class CardConnectorUtil {
 
 	try {
 	    // check if there is a card already present
-	    for (String type : cardTypes) {
+	    if (! cardTypes.isEmpty()) {
 		CardApplicationPathType h = checkType();
 		if (h != null) {
 		    return h;

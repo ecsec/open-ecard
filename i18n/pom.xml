@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>src-parent</artifactId>
-		<version>2.1.7-SNAPSHOT</version>
+		<version>2.1.7</version>
 		<relativePath>../src-parent/</relativePath>
 	</parent>
 
@@ -13,4 +13,8 @@
 	<artifactId>i18n</artifactId>
 	<packaging>jar</packaging>
 	<name>Open eCard I18n</name>
+
+  <scm>
+    <tag>v2.1.7</tag>
+  </scm>
 </project>

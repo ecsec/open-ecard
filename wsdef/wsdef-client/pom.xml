@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>wsdef</artifactId>
-		<version>2.1.7</version>
+		<version>2.1.8-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.wsdef</groupId>
@@ -131,8 +131,4 @@
 			<artifactId>jakarta.xml.ws-api</artifactId>
 		</dependency>
 	</dependencies>
-
-  <scm>
-    <tag>v2.1.7</tag>
-  </scm>
 </project>

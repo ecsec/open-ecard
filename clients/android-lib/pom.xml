@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>clients</artifactId>
-		<version>2.1.7</version>
+		<version>2.1.8-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.clients</groupId>
@@ -95,8 +95,4 @@
 			<version>${version.jaxb-api.mobile}</version>
 		</dependency>
 	</dependencies>
-
-  <scm>
-    <tag>v2.1.7</tag>
-  </scm>
 </project>

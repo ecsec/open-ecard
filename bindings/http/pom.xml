@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>bindings</artifactId>
-		<version>2.1.7</version>
+		<version>2.1.8-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.openecard.bindings</groupId>
@@ -84,8 +84,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <scm>
-    <tag>v2.1.7</tag>
-  </scm>
 </project>

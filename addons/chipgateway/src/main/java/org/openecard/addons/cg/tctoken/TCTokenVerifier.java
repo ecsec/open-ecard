@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -68,10 +68,9 @@ public class TCTokenVerifier {
 		PATH_SEC_PROTO_MTLS,
                 "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption");
         if (token.getPathSecurityProtocol().equals("http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption")) {
-            assertRequired("PathSecurity-Parameters", token.getPathSecurityParameters());
-	    assertRequired("JWK", token.getPathSecurityParameters().getJWK());
+	    assertRequired("JWK", token.getJWK());
 	    try {
-		JsonWebKey key = JsonWebKey.Factory.newJwk(token.getPathSecurityParameters().getJWK());
+		JsonWebKey key = JsonWebKey.Factory.newJwk(token.getJWK());
 	    } catch (JoseException ex) {
 		throw new InvalidTCTokenElement("Failed to parse JWK.", ex);
 	    }

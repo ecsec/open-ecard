@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2018 ecsec GmbH.
+ * Copyright (C) 2016-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -192,7 +192,7 @@ public class ChipGateway {
 
 	    JsonWebKey webKey = null;
 	    if ("http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption".equals(token.getPathSecurityProtocol())) {
-		String jwkStr = token.getPathSecurityParameters().getJWK();
+		String jwkStr = token.getJWK();
 		try {
 		    webKey = JsonWebKey.Factory.newJwk(jwkStr);
 		} catch (JoseException ex) {

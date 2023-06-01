@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2016 ecsec GmbH.
+ * Copyright (C) 2014-2023 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -46,10 +46,15 @@ public class TCToken extends TCTokenType {
     private static final Logger LOG = LoggerFactory.getLogger(TCToken.class);
 
     private boolean forceProcessing;
+    private String jwk;
 
     public Boolean isForceProcessing() {
 		return forceProcessing;
 	}
+
+    public String getJWK() {
+	return jwk;
+    }
 
     public static TCToken generateToken(Map<String, String> params) throws InvalidRedirectUrlException, InvalidTCTokenElement {
 	String serverAddress = params.get("ServerAddress");
@@ -67,10 +72,8 @@ public class TCToken extends TCTokenType {
 	token.setBinding(binding);
 	token.setPathSecurityProtocol(pathSecProto);
 	if (pathSecParams != null) {
-	    TCTokenType.PathSecurityParameters pathSecParamsObj = new TCTokenType.PathSecurityParameters();
 	    if ("http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption".equals(pathSecProto)) {
-		pathSecParamsObj.setJWK(pathSecParams);
-		token.setPathSecurityParameters(pathSecParamsObj);
+		token.jwk = pathSecParams;
 	    }
 	}
 	Boolean forceProcessingBool;

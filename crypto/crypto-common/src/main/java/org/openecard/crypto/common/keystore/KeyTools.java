@@ -32,7 +32,11 @@ import java.security.cert.CertificateFactory;
 import java.security.interfaces.DSAKey;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
@@ -116,16 +120,30 @@ public class KeyTools {
 
     public static int getReferenceKeySize(AsymmetricKeyParameter key) {
 	int reference = -1;
-	if (key instanceof RSAKeyParameters) {
-	    reference = 2048;
-	} else if (key instanceof DSAKeyParameters) {
-	    reference = 2048;
-	} else if (key instanceof DHKeyParameters) {
-	    reference = 2048;
-	} else if (key instanceof ElGamalKeyParameters) {
-	    reference = 2048;
-	} else if (key instanceof ECKeyParameters) {
-	    reference = 224;
+	if (Calendar.getInstance().get(Calendar.YEAR) < 2024) {
+		if (key instanceof RSAKeyParameters) {
+			reference = 2048;
+		} else if (key instanceof DSAKeyParameters) {
+			reference = 2048;
+		} else if (key instanceof DHKeyParameters) {
+			reference = 2048;
+		} else if (key instanceof ElGamalKeyParameters) {
+			reference = 2048;
+		} else if (key instanceof ECKeyParameters) {
+			reference = 224;
+		}
+	} else {
+		if (key instanceof RSAKeyParameters) {
+			reference = 3072;
+		} else if (key instanceof DSAKeyParameters) {
+			reference = 3072;
+		} else if (key instanceof DHKeyParameters) {
+			reference = 3072;
+		} else if (key instanceof ElGamalKeyParameters) {
+			reference = 3072;
+		} else if (key instanceof ECKeyParameters) {
+			reference = 256;
+		}
 	}
 	return reference;
     }

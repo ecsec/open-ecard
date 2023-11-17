@@ -54,7 +54,7 @@ package-osx-dmg:
     - if: $CI_MERGE_REQUEST_IID
       when: manual
 
-notarize-osx-pkg:
+notarize-osx-pkgs:
   stage: package
   tags:
     - "mac"
@@ -64,7 +64,11 @@ notarize-osx-pkg:
     - "package-osx-dmg"
   script:
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
+    - DMG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.dmg')
     - PKG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.pkg')
+    - xcrun notarytool submit ${DMG_FILE_PATH}
+        --keychain-profile "oec-installers"
+        --wait
     - xcrun notarytool submit ${PKG_FILE_PATH}
         --keychain-profile "oec-installers"
         --wait

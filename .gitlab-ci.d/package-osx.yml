@@ -62,6 +62,10 @@ notarize-osx-pkgs:
   dependencies:
     - "package-osx-pkg"
     - "package-osx-dmg"
+  artifacts:
+    name: 'OeC-Installer'
+    paths:
+      - packager/richclient-packager/target/jpackage
   script:
     - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
     - DMG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.dmg')
@@ -72,6 +76,8 @@ notarize-osx-pkgs:
     - xcrun notarytool submit ${PKG_FILE_PATH}
         --keychain-profile "oec-installers"
         --wait
+    - xcrun stapler staple ${PKG_FILE_PATH}
+    - xcrun stapler staple ${DMG_FILE_PATH}
   needs: [ "package-osx-pkg", "package-osx-dmg" ]
   allow_failure: true
   rules:

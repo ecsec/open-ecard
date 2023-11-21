@@ -11,7 +11,7 @@ In a high-level perspective the architecture of the eCard-API-Framework consists
 
 Against the background of the [eIDAS](https://www.eid.as/)-Regulation, the General Data Protection Regulation ([GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj)), the [GAIA-X](https://data-infrastructure.eu/) initiative and the ongoing trend towards increased mobility, the Identity-Layer has been subject to an ongoing revision to form **MOBILE-X**, which integrates the [ChipGateway](https://www.oasis-open.org/committees/download.php/60049/ChipGateway-Specification-OASIS.pdf) protocol as well as aspects of Identity Management [ISO/IEC 24760](https://www.iso.org/standard/77582.html) and Privacy Management [ISO/IEC 29101](https://www.iso.org/standard/75293.html) in order to enable electronic signatures and "Self Sovereign Identity".
 
-The artifacts of the project consist of modularized, and to some extent extensible, libraries as well as client implementations such as a Desktop application (richclient) an smartphone apps for Android and iOS.
+The artifacts of the project consist of modularized, and to some extent extensible, libraries for Desktop applications and smartphone apps for Android and iOS as well as client implementations like a Desktop application (richclient) for various operating systems.
 
 
 Build Instructions
@@ -37,9 +37,9 @@ as follows:
     $ cd open-ecard-$version
     $ mvn clean install
 
-Finally, you can run the Open eCard App from command line:
+Finally, you can run the Open eCard App richclient from command line:
 
-    $ ./packager/richclient-packager/target/open-ecard/bin/open-ecard
+    $ ./mvnw exec:java -pl clients/richclient -Dexec.mainClass=org.openecard.richclient.RichClient
 
 Packaging
 -----------

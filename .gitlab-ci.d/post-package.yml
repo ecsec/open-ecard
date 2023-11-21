@@ -22,15 +22,13 @@ collect-installers:
   dependencies:
     - "package-linux-deb"
     - "package-linux-rpm"
-    - "package-osx-pkg"
-    - "package-osx-dmg"
     - "package-win"
+    - "notarize-osx-pkgs"
   needs:
     - "package-linux-deb"
     - "package-linux-rpm"
-    - "package-osx-pkg"
-    - "package-osx-dmg"
     - "package-win"
+    - "notarize-osx-pkgs"
   allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

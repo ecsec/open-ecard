@@ -122,15 +122,18 @@ public final class AndroidNFCCard extends AbstractNFCCard {
             final boolean isTagPresent = !tagPending && isodep != null && isodep.isConnected();
             return isTagPresent;
         } catch (SecurityException e){
-            //this seems to be thrown on some specific implementations allthough not specified
             return false;
         }
     }
 
     @Override
     public boolean tagWasPresent() {
-	final boolean tagWasPresent = !tagPending && (isodep == null || !isodep.isConnected());
-	return tagWasPresent;
+        try{
+	    final boolean tagWasPresent = !tagPending && (isodep == null || !isodep.isConnected());
+	    return tagWasPresent;
+        } catch (SecurityException e){
+            return true;
+        }
     }
 
     @Override
@@ -166,9 +169,13 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
 	    if (this.isodep != null) {
 		LOG.debug("Closing the tag");
-		boolean wasClosed = this.isodep.isConnected();
-		this.isodep.close();
-		return wasClosed;
+                try {
+		    boolean wasClosed = this.isodep.isConnected();
+                    this.isodep.close();
+                    return wasClosed;
+                } catch (SecurityException e) {
+                    return false;
+                }
 	    } else {
 		return false;
 	    }

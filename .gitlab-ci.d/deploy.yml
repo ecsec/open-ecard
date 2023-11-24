@@ -11,7 +11,7 @@ deploy-mvn-artifacts:
       - .mvn/wrapper/maven-wrapper.jar
     policy: pull-push
   script:
-    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw deploy -DskipTests -s $MVN_SETTINGS
+    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw deploy -DskipTests -P build-mobile-libs -s $MVN_SETTINGS
   allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

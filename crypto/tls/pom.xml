@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.openecard</groupId>
 		<artifactId>crypto</artifactId>
-		<version>2.1.10-SNAPSHOT</version>
+		<version>2.1.10</version>
 	</parent>
 
 	<groupId>org.openecard.crypto</groupId>
@@ -36,4 +36,8 @@
 			<artifactId>delight-nashorn-sandbox</artifactId>
 		</dependency>
 	</dependencies>
+
+  <scm>
+    <tag>v2.1.10</tag>
+  </scm>
 </project>

@@ -76,8 +76,8 @@ Building the Open eCard with those mobile libraries can look like the following:
     $ ./mvnw clean install -pl packager/ios-framework -am -P build-mobile-libs
 
 ### Android
-After a successfull build the library for android can be found in `android-lib` sub project. 
-It also can be used as prebuild dependency via gradle dependency management. 
+After a successfull build the library for android can be found in `android-lib` sub project.
+It also can be used as prebuild dependency via gradle dependency management.
 See [open-ecard-android](https://github.com/ecsec/open-ecard-android) for further information.
 
 The android API artifacts are taken from the Android SDK.
@@ -90,8 +90,8 @@ mvn deploy:deploy-file -DrepositoryId=ecsec-thirdparty  -Durl=https://mvn.ecsec.
 ```
 
 ### iOS (>2.x)
-If building on MacOS a ready to use framework gets generated and can be found in 
-`./packager/ios-framework/target/robovm`.  
+If building on MacOS a ready to use framework gets generated and can be found in
+`./packager/ios-framework/target/robovm`. 
 The framework can also be found as asset of the release.
 
 It also can be installed as a cocoapod dependency.
@@ -134,3 +134,18 @@ contribution agreement (https://dev.openecard.org/documents/35). The agreement
 basically states, that the contributed work can, additionally to the GPLv3, be
 made available to others in an individual agreement as defined in the previous
 section. For further details refer to the agreement.
+
+Release (CD)
+============
+The creation of precompiled artifacts is done via a CD pipeline on servers of
+ecsec GmbH.
+To perform a new release, the version information in the pom files has to be
+updated and an appropriate tag in the form: vX.YY.ZZZ has to be pushed to the
+repository clone on ecsecs gitlab instance.
+To update the version one can use:
+
+```
+mvn versions:set -DnewVersion=X.YY.ZZZ
+```
+
+After the release, consider updating the version again to a new SNAPSHOT version.

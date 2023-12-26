@@ -33,8 +33,8 @@ public interface PinManagementControllerFactory {
 
     ActivationController create(ControllerCallback activation, PinManagementInteraction interaction);
 
-    /**
-     * TOD: Re-enable the following method when the binding problems are solved:
+    // TODO: Re-enable the following method when the binding problems are solved:
+    /*
      * ActivationController create(Set<String> supportedCard, ControllerCallback activation, PinManagementInteraction interaction);
      */
 

@@ -44,7 +44,7 @@ public interface WSMarshaller {
     /**
      * Add the given class to the marshaller and unmarshaller, so that it can emit and consume instances of the type.
      * The given class must be a JAXB element type, meaning it must contain a class level annotation of type {@link
-     * javax.xml.bind.annotation.XmlElement}.
+     * jakarta.xml.bind.annotation.XmlElement}.
      * <p>
      * An implementation may ignore this function if it supports all types needed inside this implementation. The JAXB
      * implementation has no problem, so on the desktop this is no problem.

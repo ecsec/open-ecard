@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *   rpm: [&lt;update1&gt;, &lt;update2&gt;, ...]
  * }</pre>
  * <p>The content of the update elements is defined in {@link VersionUpdate}.<br>
- * The update-list location is taken from the built in property: <tt>update-list.location</tt></p>
+ * The update-list location is taken from the built in property: <code>update-list.location</code></p>
  *
  * @author Tobias Wich
  * @author Sebastian Schuberth

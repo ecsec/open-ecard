@@ -22,7 +22,7 @@
 
 /**
  * Stream based extension to the Apache http-core library and a TLS based HTTP client.
- * <p>Instead of being socket based, the {@link org.openecard.apache.http.HttpClientConnection} implementation in this
+ * <p>Instead of being socket based, the {@link org.apache.http.HttpClientConnection} implementation in this
  * package can operate directly on Java's standard {@link java.io.InputStream} and {@link java.io.OutputStream}
  * class.</p>
  *

@@ -131,7 +131,7 @@ public class DynamicAuthentication implements TlsAuthentication, ContextAware {
     /**
      * Sets the factory which is used to find and create a credential reference for the authentication.
      *
-     * @see #getClientCredentials(org.openecard.bouncycastle.crypto.tls.CertificateRequest)
+     * @see #getClientCredentials(CertificateRequest)
      * @param credentialFactory Factory that provides client credentials when they are requested from the server.
      */
     public void setCredentialFactory(@Nullable CredentialFactory credentialFactory) {

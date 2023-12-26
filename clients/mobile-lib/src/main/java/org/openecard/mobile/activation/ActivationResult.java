@@ -21,7 +21,6 @@
  ************************************************************************** */
 package org.openecard.mobile.activation;
 
-import org.openecard.common.ECardConstants;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
@@ -40,7 +39,7 @@ public interface ActivationResult {
     /**
      * If present, represents the minor error code of the error leading to the termination of the process.
      *
-     * @see ECardConstants.Minor;
+     * @see org.openecard.common.ECardConstants.Minor ECardConstants
      * @return The minor result code or {@code null} if not present.
      */
     String getProcessResultMinor();

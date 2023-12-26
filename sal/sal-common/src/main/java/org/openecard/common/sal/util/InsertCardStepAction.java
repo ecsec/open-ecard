@@ -63,7 +63,7 @@ public class InsertCardStepAction extends StepAction implements EventCallback {
      *
      * @param stepName The name of the step this action is run in.
      * @param cardTypes Collection of valid card types.
-     * @param salStateView The manager of card states
+     * @param knownCards The cards already known to the system.
      * @param promise The promise used to communicate the recognized card handle.
      */
     public InsertCardStepAction(

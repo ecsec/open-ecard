@@ -69,9 +69,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Context object containing references to all internal objects of the Open eCard Stack. This object can be obtained by
- * either {@link OpeneCardServiceClient} or {@link OpeneCardServiceClientHandler}. Instances of this class must not be
- * used after the the Open eCard stack has been stopped.
+ * Context object containing references to all internal objects of the Open eCard Stack.
+ * Instances of this class must not be used after the the Open eCard stack has been stopped.
  *
  * @author Mike Prechtl
  * @author Tobias Wich

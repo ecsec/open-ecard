@@ -33,8 +33,8 @@ public interface EacControllerFactory {
 
     ActivationController create(String url, ControllerCallback activation, EacInteraction interaction);
 
-    /**
-     * TOD: Re-enable the following method when the binding problems are solved:
+    // TODO: Re-enable the following method when the binding problems are solved:
+    /*
      * ActivationController create(String url, Set<String> supportedCard, ControllerCallback activation, EacInteraction interaction);
      */
     

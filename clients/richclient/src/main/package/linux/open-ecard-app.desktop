@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=${package.identifier}
+Comment=Open eCard App
+Exec=/opt/${package.identifier}/bin/${package.identifier}
+Icon=/opt/${package.identifier}/lib/${package.identifier}.png
+Terminal=false
+Type=Application
+Categories=Network;

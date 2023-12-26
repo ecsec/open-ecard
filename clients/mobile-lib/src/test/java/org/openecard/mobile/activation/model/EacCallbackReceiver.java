@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.Assert;
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import org.mockito.invocation.InvocationOnMock;
@@ -42,6 +40,7 @@ import static org.openecard.mobile.activation.model.Timeout.WAIT_TIMEOUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
+import org.testng.Assert;
 
 
 /**

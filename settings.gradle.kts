@@ -1,5 +1,12 @@
 pluginManagement {
-    repositories {
+	resolutionStrategy {
+		eachPlugin {
+			if (requested.id.id == "robovm") {
+				useModule("com.mobidevelop.robovm:robovm-gradle-plugin:${requested.version}")
+			}
+		}
+	}
+	repositories {
 		gradlePluginPortal()
         mavenCentral()
     }
@@ -37,6 +44,8 @@ include("addons:status")
 include("addons:tr03112")
 include("clients:richclient")
 include("clients:mobile-lib")
+include("clients:ios-common")
+include("clients:ios-lib")
 
 
 dependencyResolutionManagement {
@@ -97,8 +106,11 @@ dependencyResolutionManagement {
 
 			library("android", "com.google.android", "android").version("api-33")
 
-			library("robovm-rt", "com.mobidevelop.robovm", "robovm-rt").version("2.3.19-SNAPSHOT")
-			library("robovm-cocoa", "com.mobidevelop.robovm", "robovm-cocoatouch").version("2.3.19-SNAPSHOT")
+//			version("robovm", "2.3.19-SNAPSHOT")
+			version("robovm", "2.3.20")
+			library("robovm-gradle", "com.mobidevelop.robovm", "robovm-gradle-plugin").versionRef("robovm")
+			library("robovm-rt", "com.mobidevelop.robovm", "robovm-rt").versionRef("robovm")
+			library("robovm-cocoa", "com.mobidevelop.robovm", "robovm-cocoatouch").versionRef("robovm")
 			library("roboface-annots", "org.openecard.tools", "roboface-annotation").version("1.4.0")
 			library("roboface-marshal", "org.openecard.tools", "roboface-marshaller").version("1.4.0")
 			library("roboface-processor", "org.openecard.tools", "roboface-processor").version("1.4.0")

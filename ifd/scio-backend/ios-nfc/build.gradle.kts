@@ -5,8 +5,8 @@ plugins {
 }
 
 dependencies {
-	api(libs.robovm.rt)
-	api(libs.robovm.cocoa)
+	implementation(libs.robovm.rt)
+	implementation(libs.robovm.cocoa)
 //	api(libs.jaxb.api)
 //	api(libs.jaxb.ws.api)
 //	api(libs.slf4j.api)

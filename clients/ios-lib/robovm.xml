@@ -1,0 +1,102 @@
+<config>
+	<!-- The framework targets iOS. -->
+	<os>ios</os>
+
+	<!-- Build a fat binary containing 32-bit and 64-bit machine code for both
+	devices and the simulator. -->
+	<arch>arm64</arch>
+	<arch>arm64-simulator</arch>
+	<arch>thumbv7</arch>
+	<arch>x86_64</arch>
+
+	<mainClass>org.openecard.ios.activation.OpenEcardImp</mainClass>
+
+	<!-- We're building a framework. -->
+	<target>xcframework</target>
+
+	<!-- The framework name is defined in robovm.properties. -->
+	<imageName>${framework.name}</imageName>
+
+	<!-- The Info.plist.xml file will be copied into the framework. -->
+	<infoPList>Info.plist.xml</infoPList>
+
+	<resources>
+		<!-- Copies the header files in headers/ to a directory named Headers in
+		the root of the .framework folder structure. -->
+		<resource>
+			<directory>./target/classes/roboheaders</directory>
+			<targetPath>../../Headers</targetPath>
+		</resource>
+		<!-- Copies the modules files in modules/ to a directory named Moduless in
+		the root of the .framework folder structure. Required to enable swift support -->
+		<resource>
+			<directory>modules</directory>
+			<targetPath>../../Modules</targetPath>
+		</resource>
+	</resources>
+	<!-- <treeShaker>none</treeShaker> -->
+	<treeShaker>aggressive</treeShaker>
+
+	<!-- Force link all classes in the SDK packages. -->
+
+
+
+	<!-- leaving out all forced link results in 13MB less size -->
+
+	<forceLinkClasses>
+
+		<!-- 2MB -->
+		<pattern>org.openecard.addons.activate.ActivateAction</pattern>
+		<pattern>org.openecard.sal.protocol.eac.EACProtocol</pattern>
+		<pattern>org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction</pattern>
+		<pattern>org.openecard.sal.protocol.pincompare.PINCompareProtocol</pattern>
+		<pattern>org.openecard.addons.status.StatusAction</pattern>
+		<pattern>org.openecard.common.interfaces.*</pattern>
+
+		<!-- JAXB classes which will be probably used by reflection -->
+		<pattern>org.openecard.addon.manifest.*</pattern>
+		<pattern>iso.std.iso_iec._24727.tech.schema.**</pattern>
+		<pattern>org.w3._2000._09.xmldsig_.**</pattern>
+		<pattern>de.bund.bsi.ecard.api._1.**</pattern>
+		<pattern>oasis.names.tc.**</pattern>
+		<pattern>org.etsi.uri.**</pattern>
+		<pattern>org.w3.**</pattern>
+
+		<!-- 1MB -->
+		<pattern>org.openecard.ws.*</pattern>
+
+		<!-- 2MB -->
+		<pattern>org.openecard.bouncycastle.jcajce.*</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.interfaces.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.io.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.*</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.dh.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.ec.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.rsa.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.util.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.asymmetric.x509.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.config.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.digest.SHA*</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.symmetric.AES*</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.symmetric.util.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.provider.util.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.spec.**</pattern>
+		<pattern>org.openecard.bouncycastle.jcajce.util.**</pattern>
+
+		<!-- 0MB -->
+		<pattern>java.util.logging.*</pattern>
+
+		<pattern>org.glassfish.jaxb.**</pattern>
+
+		<!-- 1 MB-->
+		<pattern>org.apache.xml.serializer.**</pattern>
+		<pattern>org.apache.harmony.xml.**</pattern>
+		<pattern>org.apache.xpath.jaxp.*</pattern>
+
+		<!-- 1MB -->
+		<pattern>org.apache.xerces.**</pattern>
+
+		<!-- 2MB -->
+		<pattern>com.android.okhttp.HttpsHandler</pattern>
+	</forceLinkClasses>
+</config>

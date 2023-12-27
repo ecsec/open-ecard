@@ -4,76 +4,26 @@ plugins {
 	id("openecard.lib-conventions")
 }
 
-
 sourceSets {
 	create("ios") {
 		java {
 			srcDir("src/main/java")
 		}
 		compileClasspath += main.get().compileClasspath
-//		runtimeClasspath += main.get().runtimeClasspath
+		runtimeClasspath += main.get().runtimeClasspath
 		annotationProcessorPath += main.get().annotationProcessorPath
 	}
 }
 
-val ios by configurations.creating {
-	isCanBeConsumed = true
-	isCanBeResolved = false
-	// If you want this configuration to share the same dependencies, otherwise omit this line
-	extendsFrom(
-		configurations["api"],
-//		configurations["implementation"],
-//		configurations["compileOnly"],
-//		configurations["runtimeOnly"],
-	)
-}
-
-tasks.named("compileIosJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
-		it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
+configurations {
+	create("ios") {
+//		extendsFrom(configurations.api.get())
 	}
 }
 
-val iosJar = tasks.create("iosJar", Jar::class) {
-	group = "build"
-	dependsOn("iosClasses")
-	tasks.named("build") {
-		dependsOn("iosJar")
-	}
-	from(sourceSets.getByName("ios").output)
-	archiveClassifier.set("iOS")
+val iosImplementation by configurations.named("iosImplementation") {
+	extendsFrom(configurations.implementation.get())
 }
-
-artifacts {
-	add("ios", iosJar)
-}
-
-
-
-
-//sourceSets {
-//	create("ios") {
-//		java {
-//			srcDir("src/main/java")
-//		}
-//		compileClasspath += main.get().compileClasspath
-//		runtimeClasspath += main.get().runtimeClasspath
-//		annotationProcessorPath += main.get().annotationProcessorPath
-//	}
-//}
-//
-//configurations {
-//	create("ios") {
-////		extendsFrom(configurations.api.get())
-//	}
-//}
-//
-//val iosImplementation by configurations.named("iosImplementation") {
-//	extendsFrom(configurations.implementation.get())
-//}
 //val iosCompileOnly by configurations.named("iosCompileOnly") {
 //	extendsFrom(configurations.compileOnly.get())
 //}
@@ -89,6 +39,30 @@ artifacts {
 //	}
 //}
 
+tasks.named("compileIosJava", JavaCompile::class) {
+	this.group = "build"
+	this.options.compilerArgs.let {
+		it.add("-processor")
+		it.add("org.openecard.robovm.processor.RobofaceProcessor")
+		it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
+		it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
+	}
+}
+
+tasks.create("iosJar", Jar::class) {
+	dependsOn("iosClasses")
+	tasks.named("build") {
+		dependsOn("iosJar")
+	}
+	from(sourceSets.getByName("ios").output)
+	archiveClassifier.set("iOS")
+}
+
+artifacts {
+	add("ios", tasks.named("iosJar")) {
+
+	}
+}
 
 
 dependencies {
@@ -102,6 +76,7 @@ dependencies {
 //	api(libs.slf4j.api)
 	api(project(":management"))
 	api(project(":sal:tiny-sal"))
+	api(project(":addon"))
 	api(project(":addons:tr03112"))
 	api(project(":addons:pin-management"))
 	api(project(":addons:status"))

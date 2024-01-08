@@ -1,11 +1,11 @@
-description = "android-nfc"
+description = "android-lib"
 
 plugins {
 	id("openecard.android-conventions")
 }
 
 android {
-	namespace = "org.openecard.ifd.nfc"
+	namespace = "org.openecard.clients.android.lib"
 }
 
 dependencies {
@@ -15,7 +15,7 @@ dependencies {
 //	api(libs.slf4j.api)
 //	api(project(":common"))
 //	api(project(":ifd:ifd-common"))
-	api(project(":ifd:scio-backend:mobile-nfc"))
+	api(project(":clients:android-common"))
 //	implementation(project(":wsdef:wsdef-client"))
 //	implementation(project(":i18n"))
 //	api(libs.bc.prov)

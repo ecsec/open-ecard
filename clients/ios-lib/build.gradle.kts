@@ -1,7 +1,7 @@
 description = "ios-lib"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.iosbundle-conventions")
 	id("robovm").version(libs.versions.robovm)
 }
 

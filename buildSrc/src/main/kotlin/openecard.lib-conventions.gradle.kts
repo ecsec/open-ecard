@@ -1,5 +1,6 @@
 plugins {
 	`java-library`
+	id("openecard.publish-conventions")
 }
 
 val javaToolchain: String by project

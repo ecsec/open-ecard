@@ -41,6 +41,7 @@ import org.openecard.common.sal.CombinedCIFProvider;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
+import org.openecard.mobile.ex.*;
 import org.openecard.mobile.ui.EacNavigatorFactory;
 import org.openecard.mobile.ui.InsertCardNavigatorFactory;
 import org.openecard.mobile.ui.CompositeUserConsent;
@@ -53,10 +54,7 @@ import org.openecard.mobile.activation.ActivationInteraction;
 import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.NfcCapabilityResult;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.mobile.ex.NfcDisabled;
-import org.openecard.mobile.ex.NfcUnavailable;
-import org.openecard.mobile.ex.UnableToInitialize;
+
 import static org.openecard.mobile.system.ServiceMessages.*;
 import org.openecard.mobile.ui.MessageDialogStub;
 import org.openecard.mobile.ui.UserConsentNavigatorFactory;
@@ -122,11 +120,11 @@ public class OpeneCardContext {
     ///
     /// Initialization & Shutdown
     ///
-    public void initialize() throws UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
+    public void initialize() throws AllreadyInitialized, UnableToInitialize, NfcUnavailable, NfcDisabled, ApduExtLengthNotSupported {
 	String errorMsg = SERVICE_RESPONSE_FAILED;
 
 	if (initialized) {
-	    throw new UnableToInitialize(SERVICE_ALREADY_INITIALIZED);
+	    throw new AllreadyInitialized(SERVICE_ALREADY_INITIALIZED);
 	}
 
 
@@ -181,7 +179,8 @@ public class OpeneCardContext {
 		LOG.info("CardRecognition initialized.");
 	    } catch (Exception ex) {
 		errorMsg = CARD_REC_INIT_FAILED;
-		throw ex;
+		LOG.error("CardRecognition initialisation failed.");
+		throw new UnableToInitialize("Properties could not be loaded", ex);
 	    }
 
 	    // set up ifd

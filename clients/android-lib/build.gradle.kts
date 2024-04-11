@@ -28,3 +28,8 @@ dependencies {
 
 	testImplementation(libs.bundles.test.basics)
 }
+
+configurations.api {
+    exclude(group= "com.google.code.findbugs", module= "jsr305")
+    exclude(group= "com.google.code.findbugs", module= "annotations")
+}

@@ -9,6 +9,7 @@ dependencies {
 //	api(libs.jaxb.ws.api)
 //	api(libs.slf4j.api)
 	api(project(":sal:sal-common"))
+	api(project(":cifs"))
 //	api(project(":wsdef:wsdef-client"))
 //	implementation(project(":i18n"))
 //	api(libs.bc.prov)

@@ -92,8 +92,8 @@ artifacts {
 
 
 dependencies {
-	implementation(libs.robovm.rt)
-	implementation(libs.robovm.cocoa)
+	compileOnly(libs.robovm.rt)
+	compileOnly(libs.robovm.cocoa)
 	compileOnly(libs.roboface.annots)
 	implementation(libs.roboface.marshal)
 

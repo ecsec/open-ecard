@@ -12,6 +12,21 @@ dependencies {
 //	implementation(libs.android)
 //	api(libs.jaxb.api)
 //	api(libs.jaxb.ws.api)
+api( "jakarta.xml.bind:jakarta.xml.bind-api"){
+    version {
+	strictly("3.0.1")
+    }
+}
+api( "jakarta.xml.ws:jakarta.xml.ws-api"){
+    version {
+	strictly("3.0.1")
+    }
+}
+api( "org.glassfish.jaxb:jaxb-runtime") {
+    version {
+	strictly("3.0.2-mobile")
+    }
+}
 //	api(libs.slf4j.api)
 //	api(project(":common"))
 //	api(project(":ifd:ifd-common"))

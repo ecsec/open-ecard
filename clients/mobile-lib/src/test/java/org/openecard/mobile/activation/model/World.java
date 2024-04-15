@@ -546,11 +546,7 @@ public class World implements AutoCloseable {
 	public ContextWorld startSuccessfully() {
 	    LOG.debug("Start successfully.");
 	    Promise<ActivationSource> resultStart = new Promise<>();
-	    try {
-		contextManager().initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(resultStart, null));
-	    } catch (UnableToInitialize | NfcUnavailable | NfcDisabled | ApduExtLengthNotSupported ex) {
-		throw new RuntimeException(ex);
-	    }
+	    contextManager().initializeContext(PromiseDeliveringFactory.createStartServiceDelivery(resultStart, null));
 
 	    Assert.assertNotNull(waitFor(resultStart));
 	    return this;

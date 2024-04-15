@@ -27,10 +27,7 @@ import org.openecard.mobile.activation.NFCCapabilities;
 import org.openecard.mobile.activation.ServiceErrorCode;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.StartServiceHandler;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.mobile.ex.NfcDisabled;
-import org.openecard.mobile.ex.NfcUnavailable;
-import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.mobile.ex.*;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 import org.openecard.mobile.system.ServiceMessages;
@@ -93,7 +90,7 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 	    OpeneCardContext newContext = new OpeneCardContext(nfc, config, msgSetter);
 	    try {
 		newContext.initialize();
-	    } catch (UnableToInitialize ex) {
+	    } catch (AllreadyInitialized ex) {
 		error = new CommonServiceErrorResponse(ServiceErrorCode.ALREADY_STARTED, ServiceMessages.SERVICE_ALREADY_INITIALIZED);
 	    } catch (NfcUnavailable ex) {
 		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NOT_AVAILABLE, ServiceMessages.NFC_NOT_AVAILABLE_FAIL);
@@ -101,6 +98,9 @@ public class CommonContextManager implements ContextManager, OpeneCardContextPro
 		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NOT_ENABLED, ServiceMessages.NFC_NOT_ENABLED_FAIL);
 	    } catch (ApduExtLengthNotSupported ex) {
 		error = new CommonServiceErrorResponse(ServiceErrorCode.NFC_NO_EXTENDED_LENGTH, ServiceMessages.NFC_NO_EXTENDED_LENGTH_SUPPORT);
+	    } catch (UnableToInitialize ex) {
+		    LOG.error("An unexpected error occurred while initializing the Open eCard service context.", ex);
+		    error = new CommonServiceErrorResponse(ServiceErrorCode.INTERNAL_ERROR, ServiceMessages.UNEXCPECTED_ERROR);
 	    } catch (Exception ex) {
 		LOG.error("An unexpected error occurred while initializing the Open eCard service context.", ex);
 		error = new CommonServiceErrorResponse(ServiceErrorCode.INTERNAL_ERROR, ServiceMessages.UNEXCPECTED_ERROR);

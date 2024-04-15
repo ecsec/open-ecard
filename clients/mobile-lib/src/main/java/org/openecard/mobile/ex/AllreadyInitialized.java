@@ -20,21 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.mobile.activation;
+package org.openecard.mobile.ex;
 
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.mobile.ex.NfcDisabled;
-import org.openecard.mobile.ex.NfcUnavailable;
-import org.openecard.mobile.ex.UnableToInitialize;
-import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
+ * Is thrown if the service context can not be initialized.
  *
- * @author Neil Crossley
+ * @author Mike Prechtl
  */
-@FrameworkInterface
-public interface ContextManager {
-    void initializeContext(StartServiceHandler handler);
+public class AllreadyInitialized extends Exception {
 
-    void terminateContext(StopServiceHandler handler);
+    public AllreadyInitialized(String message) {
+	super(message);
+    }
+
+    public AllreadyInitialized(String message, Throwable cause) {
+	super(message, cause);
+    }
+
 }

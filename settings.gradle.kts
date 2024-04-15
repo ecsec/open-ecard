@@ -13,6 +13,7 @@ pluginManagement {
     }
 }
 
+
 rootProject.name = "openecard-app"
 
 include("wsdef:wsdef-common")
@@ -71,8 +72,8 @@ dependencyResolutionManagement {
 
 		create("libs") {
 			// logging
-			library("slf4j-api", "org.slf4j", "slf4j-api").version("2.0.5")
-			library("slf4j-jdk14", "org.slf4j", "slf4j-jdk14").version("2.0.5")
+			library("slf4j-api", "org.slf4j", "slf4j-api").version("2.0.6")
+			library("slf4j-jdk14", "org.slf4j", "slf4j-jdk14").version("2.0.6")
 			library("logback-classic", "ch.qos.logback", "logback-classic").version("1.4.5")
 
 			// utilities
@@ -99,12 +100,12 @@ dependencyResolutionManagement {
 			library("bc-pkix", "org.openecard:bcpkix-jdk15on:1.62")
 			library("bc-tls", "org.openecard:bctls-jdk15on:1.62")
 
-			library("httpcore", "org.apache.httpcomponents", "httpcore").version("4.4.15")
+			library("httpcore", "org.apache.httpcomponents", "httpcore").version("4.4.16")
 			// https://github.com/akuhtz/proxy-vole
 			library("proxyvole", "org.bidib.com.github.markusbernhardt", "proxy-vole").version("1.1.2")
 //			library("nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
 
-			library("pdfbox", "org.apache.pdfbox", "pdfbox").version("2.0.27")
+			library("pdfbox", "org.apache.pdfbox", "pdfbox").version("2.0.28")
 
 			library("scio", "com.github.martinpaljak", "apdu4j-jnasmartcardio").version("0.2.7+220204")
 
@@ -119,7 +120,7 @@ dependencyResolutionManagement {
 			library("roboface-marshal", "org.openecard.tools", "roboface-marshaller").version("1.4.0")
 			library("roboface-processor", "org.openecard.tools", "roboface-processor").version("1.4.0")
 
-			library("jose4j", "org.bitbucket.b_c", "jose4j").version("0.9.1")
+			library("jose4j", "org.bitbucket.b_c", "jose4j").version("0.9.3")
 
 			library("jna-jpms", "net.java.dev.jna", "jna-jpms").version("5.12.1")
 			library("jna-jpms-platform", "net.java.dev.jna", "jna-platform-jpms").version("5.12.1")

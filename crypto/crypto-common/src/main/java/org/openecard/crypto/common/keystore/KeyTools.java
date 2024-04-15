@@ -120,7 +120,7 @@ public class KeyTools {
 
     public static int getReferenceKeySize(AsymmetricKeyParameter key) {
 	int reference = -1;
-	if (Calendar.getInstance().get(Calendar.YEAR) < 2024) {
+	if (Calendar.getInstance().get(Calendar.YEAR) < 2025) {
 		if (key instanceof RSAKeyParameters) {
 			reference = 2048;
 		} else if (key instanceof DSAKeyParameters) {

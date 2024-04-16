@@ -58,6 +58,9 @@ nb-configuration.xml
 **/build/
 !src/**/build/
 
+# Ignore local properties
+/local.properties
+
 # Ignore Gradle GUI config
 gradle-app.setting
 

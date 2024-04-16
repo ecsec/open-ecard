@@ -8,6 +8,3 @@ indent_style = tab
 insert_final_newline = true
 max_line_length = 120
 tab_width = 4
-
-[*.java]
-tab_width = 8

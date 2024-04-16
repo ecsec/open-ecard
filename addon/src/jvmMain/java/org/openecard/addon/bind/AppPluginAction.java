@@ -33,6 +33,12 @@ import org.openecard.addon.LifecycleTrait;
  */
 public interface AppPluginAction extends LifecycleTrait {
 
-    BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments);
+    BindingResult execute(
+		RequestBody body,
+		Map<String, String> parameters,
+		Headers headers,
+		List<Attachment> attachments,
+		Map<String, Object> extraParams
+	);
 
 }

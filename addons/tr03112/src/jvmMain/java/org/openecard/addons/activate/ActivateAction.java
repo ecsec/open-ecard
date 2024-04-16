@@ -118,7 +118,7 @@ public class ActivateAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments, Map<String, Object> extraParams) {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {
@@ -431,7 +431,7 @@ public class ActivateAction implements AppPluginAction {
      * @return A {@link BindingResult} object containing the current status of the App as XML structure.
      */
     private BindingResult processStatus(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments) {
-	BindingResult response = statusAction.execute(body, params, headers, attachments);
+	BindingResult response = statusAction.execute(body, params, headers, attachments, null);
 	return response;
     }
 

@@ -50,19 +50,19 @@ public class AppPluginActionProxy  extends AbstractFactory<AppPluginAction> impl
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments) {
-	//TODO use annotations to find the right function
-	return c.execute(body, parameters, headers, attachments);
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments, Map<String, Object> extraParams) {
+		//TODO use annotations to find the right function
+		return c.execute(body, parameters, headers, attachments, extraParams);
     }
 
     @Override
     public void init(Context ctx) throws ActionInitializationException {
-	c = loadInstance(ctx, AppPluginAction.class);
+		c = loadInstance(ctx, AppPluginAction.class);
     }
 
     @Override
     public void destroy(boolean force) {
-	c.destroy(force);
+		c.destroy(force);
     }
 
 }

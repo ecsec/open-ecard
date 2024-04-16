@@ -126,7 +126,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    // and add some special values to the header section
 	    headers.setHeader(METHOD_HDR, httpRequest.getRequestLine().getMethod());
 
-	    BindingResult bindingResult = action.execute(body, queries, headers, null);
+	    BindingResult bindingResult = action.execute(body, queries, headers, null, null);
 
 	    HttpResponse response = createHTTPResponseFromBindingResult(bindingResult);
 	    response.setParams(httpRequest.getParams());

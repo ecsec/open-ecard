@@ -48,7 +48,12 @@ public class ActivationControllerService {
 	this.contextProvider = contextProvider;
     }
 
-    public void start(final URL requestURI, final ControllerCallback controllerCallback, InteractionPreperationFactory hooks) {
+    public void start(
+		final URL requestURI,
+		final ControllerCallback controllerCallback,
+		InteractionPreperationFactory hooks,
+		Map<String, Object> extraParams
+	) {
 	LOG.debug("Starting new activation process.");
 	if (requestURI == null) {
 	    throw new IllegalArgumentException("Request url cannot be null.");
@@ -60,7 +65,7 @@ public class ActivationControllerService {
 	Thread executingThread = new Thread(() -> {
 	    CommonActivationResult result;
 	    try {
-		result = this.activate(requestURI, controllerCallback, hooks);
+		result = this.activate(requestURI, controllerCallback, hooks, extraParams);
 	    } catch (Exception e) {
 		LOG.debug("Activation was interrupted.", e);
 		result = createInterruptResult();
@@ -161,7 +166,7 @@ public class ActivationControllerService {
      * @param requestURI
      * @return
      */
-    private CommonActivationResult activate(URL requestURI, ControllerCallback givenCallback, InteractionPreperationFactory hooks) {
+    private CommonActivationResult activate(URL requestURI, ControllerCallback givenCallback, InteractionPreperationFactory hooks, Map<String, Object> extraParams) {
 	synchronized (this.processLock) {
 	    if (this.currentCallback != givenCallback && this.cancelledCallback != givenCallback) {
 		return new CommonActivationResult(INTERRUPTED, "The activation process is already running");
@@ -223,7 +228,7 @@ public class ActivationControllerService {
 			throw new InterruptedException();
 		    }
 		    LOG.debug("Found handler for resource {}. Executing", resourceName);
-		    BindingResult result = action.execute(null, queries, null, null);
+		    BindingResult result = action.execute(null, queries, null, null, extraParams);
 		    LOG.debug("Handler completed for resource {}.", resourceName);
 		    return createActivationResult(result);
 		} catch (Exception ex) {

@@ -106,7 +106,7 @@ tasks.jpackage {
 	)
 
 
-	appName = "Open eCard App"
+	appName = "Open-eCard-App"
 	VersionNumber.parse(project.version.toString()).let {
 		appVersion = "${it.major}.${it.minor}.${it.micro}"
 	}
@@ -130,7 +130,6 @@ tasks.jpackage {
 	mac {
 		resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
 
-		appName = "Open-eCard-App"
 		icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
 		macPackageName = "Open-eCard-App"
 		macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
@@ -144,7 +143,6 @@ tasks.jpackage {
 		type = ImageType.MSI
 		resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
 
-		appName = "Open-eCard-App"
 		icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
 
 		winDirChooser = true

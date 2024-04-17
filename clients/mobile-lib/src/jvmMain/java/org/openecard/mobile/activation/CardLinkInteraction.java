@@ -26,4 +26,5 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 
 @FrameworkInterface
 public interface CardLinkInteraction extends ActivationInteraction {
+	void onCanRequest(ConfirmPasswordOperation enterCan);
 }

@@ -21,6 +21,7 @@ variables:
   OEC_WIN_CACHE: "oec-win-cache"
 
 include:
+- '/.gitlab-ci.d/cache.yml'
 - '/.gitlab-ci.d/compile.yml'
 - '/.gitlab-ci.d/test.yml'
 - '/.gitlab-ci.d/sast.yml'

@@ -1,0 +1,11 @@
+.cache-gradle-base:
+  paths:
+    - .gradle/caches/
+    - .gradle/wrapper/
+    - .gradle/daemon/
+    - .gradle/native/
+    - .gradle/jdks/
+
+.cache-gradle-builds:
+  paths:
+    - "**/build"

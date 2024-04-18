@@ -89,6 +89,9 @@ dependencyResolutionManagement {
 			bundle("test-basics", listOf("testng", "powermock-testng", "powermock-mockito"))
 			library("awaitility", "org.awaitility", "awaitility").version("4.2.0")
 
+			//adds job for generating reports about dependency versions
+			plugin("versions", "com.github.ben-manes.versions").version("0.51.0")
+
 			// jaxb
 			library("jaxb-api", "jakarta.xml.bind", "jakarta.xml.bind-api").version("4.0.0")
 			library("jaxb-ws-api", "jakarta.xml.ws", "jakarta.xml.ws-api").version("4.0.0")

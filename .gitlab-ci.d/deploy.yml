@@ -11,7 +11,8 @@ deploy-mvn-artifacts:
       paths: [ .cache-gradle-builds, paths ]
       policy: pull
   script:
-    - ./gradlew publish
+    - VERSION=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
+    - ./gradlew publish -Pversion=${VERSION}
   allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

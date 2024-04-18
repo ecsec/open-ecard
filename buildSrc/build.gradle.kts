@@ -25,9 +25,12 @@ plugins {
 
 
 val androidPluginVersion: String by props
+val androidSdkResolverVersion: String by props
+
 //val kotlinPluginVersion = "1.9.20"
 dependencies {
 //	implementation("org.jetbrains.kotlin.jvm", "org.jetbrains.kotlin.jvm.gradle.plugin", kotlinPluginVersion)
 //	implementation("org.jetbrains.kotlin.plugin.allopen", "org.jetbrains.kotlin.plugin.allopen.gradle.plugin", kotlinPluginVersion )
 	implementation("com.android.library:com.android.library.gradle.plugin:${androidPluginVersion}")
+	implementation("com.quittle:setup-android-sdk:${androidSdkResolverVersion}")
 }

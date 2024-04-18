@@ -24,7 +24,27 @@ dependencies {
 	implementation(libs.robovm.cocoa)
 	compileOnly(libs.roboface.annots)
 	implementation(libs.roboface.marshal)
-
+	constraints {
+		val reason = "Newer versions will break our build because of modularization since v4."
+		api("jakarta.xml.bind:jakarta.xml.bind-api") {
+			version {
+				strictly("3.0.1")
+			}
+			because(reason)
+		}
+		api("jakarta.xml.ws:jakarta.xml.ws-api") {
+			version {
+				strictly("3.0.1")
+			}
+			because(reason)
+		}
+		api("org.glassfish.jaxb:jaxb-runtime") {
+			version {
+				strictly("3.0.2-mobile")
+			}
+			because(reason)
+		}
+	}
 	api(project(":clients:ios-common"))
 //	api(project(":management"))
 //	api(project(":sal:tiny-sal"))

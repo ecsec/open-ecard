@@ -1,6 +1,6 @@
 plugins {
     id("com.android.library")
-    `maven-publish`
+	id("openecard.publish-conventions")
 }
 
 tasks.withType<JavaCompile> {
@@ -25,23 +25,13 @@ android {
 	}
     }
 }
+
 publishing {
-    publications {
-	register<MavenPublication>("release") {
-	    afterEvaluate {
-		from(components["release"])
-	    }
-	}
-    }
-	repositories {
-		maven {
-			credentials {
-				username = System.getenv("MVN_ECSEC_USERNAME") ?: project.findProperty("mvnUsernameEcsec") as String?
-				password = System.getenv("MVN_ECSEC_PASSWORD") ?: project.findProperty("mvnPasswordEcsec") as String?
+	publications {
+		register<MavenPublication>("release") {
+			afterEvaluate {
+				from(components["release"])
 			}
-			val releasesRepoUrl = uri("https://mvn.ecsec.de/repository/openecard-release")
-			val snapshotsRepoUrl = uri("https://mvn.ecsec.de/repository/openecard-snapshot")
-			url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
 		}
 	}
 }

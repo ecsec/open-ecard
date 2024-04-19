@@ -1,5 +1,6 @@
 plugins {
 	`java-library`
+	id("openecard.publish-conventions")
 }
 
 val javaToolchain: String by project
@@ -15,4 +16,12 @@ java {
 
 tasks.withType<JavaCompile> {
 	options.encoding = "UTF-8"
+}
+
+publishing {
+	publications {
+		create<MavenPublication>("mavenJava") {
+			from(components["java"])
+		}
+	}
 }

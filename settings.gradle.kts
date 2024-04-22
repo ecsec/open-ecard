@@ -118,7 +118,7 @@ dependencyResolutionManagement {
 			library("android", "com.google.android", "android").version("api-33")
 
 //			version("robovm", "2.3.19-SNAPSHOT")
-			version("robovm", "2.3.20")
+			version("robovm", "2.3.21")
 			library("robovm-gradle", "com.mobidevelop.robovm", "robovm-gradle-plugin").versionRef("robovm")
 			library("robovm-rt", "com.mobidevelop.robovm", "robovm-rt").versionRef("robovm")
 			library("robovm-cocoa", "com.mobidevelop.robovm", "robovm-cocoatouch").versionRef("robovm")

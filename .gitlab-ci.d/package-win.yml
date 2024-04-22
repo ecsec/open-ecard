@@ -3,20 +3,20 @@ package-win:
   tags:
     - "win"
   cache:
-    key: "$OEC_WIN_CACHE"
-    paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
-    policy: pull-push
+  - key: "$OEC_JAVA_CACHE_KEY"
+    paths: !reference [ .cache-gradle-base, paths ]
+    policy: pull
+  - key: "$OEC_JAVA_TMP_CACHE_KEY"
+    paths: [ .cache-gradle-builds, paths ]
+    policy: pull
   artifacts:
     name: 'OeC-Installer-EXE'
     paths:
-      - packager/richclient-packager/target/iscc
+      - clients/richclient/build/dist/
   script:
-    - .\mvnw.cmd install -DskipTests -Ddesktop-package
+    - ./gradlew packageMac
     - $EXE_FILE_PATH = $(Get-Childitem
-        -Path .\packager\richclient-packager\target\iscc\
+        -Path .\clients\richclient\build\dist
         -Include Open-eCard-App-*.exe
         -File -Recurse -ErrorAction SilentlyContinue | Format-Wide Name  | Out-String).Trim()                                          
     - signtool.exe sign 
@@ -26,7 +26,7 @@ package-win:
         /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp
         /td SHA256
         /fd SHA256
-        .\packager\richclient-packager\target\iscc\$EXE_FILE_PATH
+        .\clients\richclient\build\dist\$EXE_FILE_PATH
   needs: [ "compile" ]
   allow_failure: true
   rules:

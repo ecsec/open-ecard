@@ -233,6 +233,8 @@ fun JPackageTask.windowsConfigs(){
 	winDirChooser = true
 	winMenuGroup = "misc"
 	winUpgradeUuid = "B11CB66-71B5-42C1-8076-15F1FEDCC22A"
+	winShortcut = true
+	winShortcutPrompt = true
 }
 fun JPackageTask.macConfigs(){
 

@@ -225,7 +225,6 @@ fun JPackageTask.linuxConfigs() {
 //	linuxPackageDeps = false
 }
 fun JPackageTask.windowsConfigs(){
-	type = ImageType.MSI
 	resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
 
 	icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()

@@ -1,5 +1,8 @@
+import com.android.build.gradle.internal.tasks.factory.registerTask
+import com.sun.jna.Platform
 import org.gradle.util.internal.VersionNumber
 import org.panteleyev.jpackage.ImageType
+import org.panteleyev.jpackage.JPackageTask
 import java.time.LocalDate
 
 
@@ -86,18 +89,113 @@ task("copyJar", Copy::class) {
 //<package.identifier>open-ecard-app</package.identifier>
 //<package.deps>pcscd</package.deps>
 //<package.type>PLATFORM</package.type>
-tasks.jpackage {
+
+tasks.register("packageDeb", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a DEB package for installation."
+
+	assert(Platform.isLinux())
 	dependsOn("build", "copyDependencies", "copyJar")
 
-//	runtimeImage = System.getProperty("java.home")
-//	module = "org.openecard.richclient/org.openecard.richclient.RichClient"
-//	modulePaths = listOf(layout.buildDirectory.dir("jmods").get().toString())
+	applyDefaults()
+	linuxConfigs()
 
-    input  = layout.buildDirectory.dir("jars").get().toString()
+	type = ImageType.DEB
+}
+tasks.register("packageRpm", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a RPM package for installation."
+
+	assert(Platform.isLinux())
+	dependsOn("build", "copyDependencies", "copyJar")
+
+	applyDefaults()
+	linuxConfigs()
+
+	type = ImageType.RPM
+}
+tasks.register("packageDmg", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a DMG package for installation."
+
+	assert(Platform.isMac())
+	dependsOn("build", "copyDependencies", "copyJar")
+
+	applyDefaults()
+	macConfigs()
+
+	type = ImageType.DMG
+}
+tasks.register("packagePkg", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a PKG package for installation."
+
+	assert(Platform.isMac())
+	dependsOn("build", "copyDependencies", "copyJar")
+
+	applyDefaults()
+	macConfigs()
+
+	type = ImageType.PKG
+}
+tasks.register("packageMsi", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a MSI package for installation."
+
+	assert(Platform.isWindows())
+	dependsOn("build", "copyDependencies", "copyJar")
+
+	applyDefaults()
+	windowsConfigs()
+
+	type = ImageType.MSI
+}
+tasks.register("packageExe", JPackageTask::class){
+	group = "Distribution"
+	description = "Creates a EXE for installation."
+
+	assert(Platform.isWindows())
+	dependsOn("build", "copyDependencies", "copyJar")
+
+	applyDefaults()
+	windowsConfigs()
+
+	type = ImageType.EXE
+}
+
+tasks.register("packageLinux"){
+	group = "Distribution"
+	description = "Creates DEB and RPM packages for linux systems."
+
+	dependsOn(
+		"packageDeb",
+		"packageRpm",
+	)
+}
+tasks.register("packageWindows"){
+	group = "Distribution"
+	description = "Creates EXE and MSI packages for Windows systems."
+
+	dependsOn(
+		"packageExe",
+		"packageMsi",
+	)
+}
+tasks.register("packageMac"){
+	group = "Distribution"
+	description = "Creates DMG and PKG packages for Mac systems."
+
+	dependsOn(
+		"packagePKG",
+		"packageDMG",
+	)
+}
+fun JPackageTask.applyDefaults(){
+	input  = layout.buildDirectory.dir("jars").get().toString()
 	mainJar = tasks.jar.get().archiveFileName.get()
 	mainClass = application.mainClass.get()
 
-    destination = layout.buildDirectory.dir("dist").get().toString()
+	destination = layout.buildDirectory.dir("dist").get().toString()
 	javaOptions = listOf(
 		"-XX:-UsePerfData", "-XX:-Inline",
 		"-Xms16m", "-Xmx64m",
@@ -115,40 +213,37 @@ tasks.jpackage {
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	licenseFile = projectDir.resolve("../../LICENSE.GPL").path
 	aboutUrl = "https://openecard.org/"
+}
+fun JPackageTask.linuxConfigs() {
+//	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
+	icon = layout.projectDirectory.dir("src/main/package/linux/Open-eCard-App.png").toString()
+	linuxDebMaintainer = "tobias.wich@ecsec.de"
+	linuxPackageName = "open-ecard-app"
+	linuxAppCategory = "utils"
+//	linuxRpmLicenseType = "GPLv3+"
+	linuxMenuGroup = "Network"
+//	linuxPackageDeps = false
+}
+fun JPackageTask.windowsConfigs(){
+	type = ImageType.MSI
+	resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
 
-	linux {
-//		resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
-		icon = layout.projectDirectory.dir("src/main/package/linux/Open-eCard-App.png").toString()
-		linuxDebMaintainer = "tobias.wich@ecsec.de"
-		linuxPackageName = "open-ecard-app"
-		linuxAppCategory = "utils"
-//		linuxRpmLicenseType = "GPLv3+"
-		linuxMenuGroup = "Network"
-//		linuxPackageDeps = false
-	}
+	icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
 
-	mac {
-		resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
+	winDirChooser = true
+	winMenuGroup = "misc"
+	winUpgradeUuid = "B11CB66-71B5-42C1-8076-15F1FEDCC22A"
+}
+fun JPackageTask.macConfigs(){
 
-		icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
-		macPackageName = "Open-eCard-App"
-		macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
+	resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
 
-		macSign = true
-		macSigningKeyUserName = "ecsec GmbH (72RMQ6K75Z)"
-		macSigningKeychain = "/Users/ecsec-ci/Library/Keychains/ecsec.keychain-db"
-	}
+	icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
+	macPackageName = "Open-eCard-App"
+	macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
 
-	windows {
-		type = ImageType.MSI
-		resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
-
-		icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
-
-		winDirChooser = true
-		winMenuGroup = "misc"
-		winUpgradeUuid = "B11CB66-71B5-42C1-8076-15F1FEDCC22A"
-	}
-
+	macSign = true
+	macSigningKeyUserName = "ecsec GmbH (72RMQ6K75Z)"
+	macSigningKeychain = "/Users/ecsec-ci/Library/Keychains/ecsec.keychain-db"
 
 }

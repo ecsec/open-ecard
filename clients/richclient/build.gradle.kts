@@ -186,8 +186,8 @@ tasks.register("packageMac"){
 	description = "Creates DMG and PKG packages for Mac systems."
 
 	dependsOn(
-		"packagePKG",
-		"packageDMG",
+		"packagePkg",
+		"packageDmg",
 	)
 }
 fun JPackageTask.applyDefaults(){

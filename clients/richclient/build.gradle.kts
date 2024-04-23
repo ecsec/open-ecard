@@ -1,5 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.registerTask
 import com.sun.jna.Platform
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.util.internal.VersionNumber
 import org.panteleyev.jpackage.ImageType
 import org.panteleyev.jpackage.JPackageTask
@@ -145,22 +146,61 @@ tasks.register("packageMsi", JPackageTask::class){
 	assert(Platform.isWindows())
 	dependsOn("build", "copyDependencies", "copyJar")
 
+	temp = "/build/jpfiles"
+
 	applyDefaults()
 	windowsConfigs()
 
 	type = ImageType.MSI
 }
-tasks.register("packageExe", JPackageTask::class){
+
+val issWorkDir = layout.buildDirectory.dir("iscc")
+tasks.register("prepareIsccFile", Copy::class){
+
+	val version = VersionNumber.parse(project.version.toString()).let {
+		"${it.major}.${it.minor}.${it.micro}"
+	}
+
+
+
+	val appName = "Open-eCard-App"
+	val vendor = "ecsec GmbH"
+	val licenseFile = projectDir.resolve("../../LICENSE.GPL").path
+	val aboutUrl = "https://openecard.org/"
+	val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
+	val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
+
+	from("src/main/package/win")
+
+	include("Open-eCard-App.iss")
+	filter {line ->
+		line.replace("\$appName", appName)
+		.replace("\$appVersion" , version)
+		.replace("\$vendor" , vendor)
+		.replace("\$url" , aboutUrl)
+		.replace("\$identifier" , appName)
+		.replace("\$licensePath" , licenseFile)
+		.replace("\$outPath" , "$projectDir\\build\\dist")
+		.replace("\$iconFile" , iconPath)
+		.replace("\$bmpPath" , bmpPath)
+		.replace("\$msiPath" , "$projectDir\\build\\jpfiles\\images\\win-msi.image\\Open-eCard-App")
+	}
+
+	into(issWorkDir)
+	outputs.upToDateWhen { false }
+}
+
+tasks.register("packageExeIscc", Exec::class){
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
 	assert(Platform.isWindows())
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("build", "copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
 
-	applyDefaults()
-	windowsConfigs()
+	workingDir(issWorkDir)
+	executable("iscc")
+	args("Open-eCard-App.iss")
 
-	type = ImageType.EXE
 }
 
 tasks.register("packageLinux"){

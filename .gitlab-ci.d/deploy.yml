@@ -16,5 +16,26 @@ deploy-mvn-artifacts:
   allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
-    - if: $CI_MERGE_REQUEST_IID
-      when: manual
+
+deploy-mvn-artifacts-mr:
+    stage: deploy
+    image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+    tags:
+        - "docker-exec"
+    cache:
+        - key: "$OEC_JAVA_CACHE_KEY"
+          paths: !reference [ .cache-gradle-base, paths ]
+          policy: pull
+        - key: "$OEC_JAVA_TMP_CACHE_KEY"
+          paths: [ .cache-gradle-builds, paths ]
+          policy: pull
+    script:
+        - ORIGINAL_VERSION=$(grep -oP 'version=\K.*' gradle.properties)
+        - VERSION_WITHOUT_SNAPSHOT=$(printf '%s' "${ORIGINAL_VERSION}" | sed -e 's/-SNAPSHOT//')
+        - BRANCH_NAME=$(printf '%s' "${CI_COMMIT_REF_NAME}" | sed -e 's/[^[:alnum:]]/-/g')
+        - VERSION=${VERSION_WITHOUT_SNAPSHOT}-${BRANCH_NAME}-SNAPSHOT
+        - ./gradlew publish -Pversion=${VERSION}
+    allow_failure: true
+    rules:
+        - if: $CI_MERGE_REQUEST_IID
+          when: manual

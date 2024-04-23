@@ -11,7 +11,7 @@ publishing {
 			}
 			val releasesRepoUrl = uri("https://mvn.ecsec.de/repository/openecard-release")
 			val snapshotsRepoUrl = uri("https://mvn.ecsec.de/repository/openecard-snapshot")
-			url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+			url = if (version.toString().contains("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
 		}
 	}
 }

@@ -17,8 +17,8 @@ package-ios-framework:
       - LICENSE.*
       - LICENSE
   script:
-    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw clean install -P build-mobile-libs -DskipTests
-    - mv packager/ios-framework/target/robovm/OpenEcard.xcframework OpenEcard.xcframework/
+    - ./gradlew robovmInstall
+    - mv clients/ios-lib/build/robovm/OpenEcard.xcframework OpenEcard.xcframework/
     - cp LICENSE.GPL LICENSE
   needs: []
   allow_failure: true

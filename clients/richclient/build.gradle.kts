@@ -160,9 +160,6 @@ tasks.register("prepareIsccFile", Copy::class){
 	val version = VersionNumber.parse(project.version.toString()).let {
 		"${it.major}.${it.minor}.${it.micro}"
 	}
-
-
-
 	val appName = "Open-eCard-App"
 	val vendor = "ecsec GmbH"
 	val licenseFile = projectDir.resolve("../../LICENSE.GPL").path
@@ -217,7 +214,7 @@ tasks.register("packageWindows"){
 	description = "Creates EXE and MSI packages for Windows systems."
 
 	dependsOn(
-		"packageExe",
+		"packageExeIscc",
 		"packageMsi",
 	)
 }

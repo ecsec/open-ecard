@@ -1,44 +1,32 @@
 #define appName "$appName"
-#define appVersion "$appVersion"
-#define publisher "$vendor"
-#define appURL "$url"
-#define appSupportURL "$url"
-#define appExeName "$appName.exe"
-#define appIdentifier "$identifier"
-#define dirName "$appName"
-#define licensePath = "$licensePath"
-#define outPath = "$outPath"
-#define iconFile = "$iconFile"
-#define wizzardSmallImage = "$bmpPath"
-#define msiPath = "$msiPath"
 
 [Setup]
 AppId={{CB11CB66-71B5-42C1-8076-15F1FEDCC22A}}
-AppName={#appName}
-AppVersion={#appVersion}
-AppPublisher={#publisher}
-AppPublisherURL={#appURL}
-AppSupportURL={#appSupportURL}
-DefaultDirName={autopf}\{#dirName}
+AppName=$appName
+AppVersion=$appVersion
+AppPublisher=$vendor
+AppPublisherURL=$appURL
+AppSupportURL=$appURL
+DefaultDirName={autopf}\$appName
 DisableStartupPrompt=Yes
 DisableDirPage=No
 DisableProgramGroupPage=Yes
 DisableReadyPage=No
 DisableFinishedPage=No
 DisableWelcomePage=No
-DefaultGroupName={#appName}{#appVersion}
-LicenseFile={#licensePath}
+DefaultGroupName=$appName$appVersion
+LicenseFile=$licensePath
 PrivilegesRequired=admin
-OutputDir={#outPath}
-OutputBaseFilename={#appIdentifier}-{#appVersion}
-SetupIconFile={#iconFile}
+OutputDir=$outPath
+OutputBaseFilename=$identifier-$appVersion
+SetupIconFile=$iconFile
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-WizardSmallImageFile={#wizzardSmallImage}
+WizardSmallImageFile=$bmpPath
 
 UninstallDisplayIcon={app}\Open-eCard-App.ico
-UninstallDisplayName={#appName}
+UninstallDisplayName=$appName
 WizardImageStretch=No
 
 ArchitecturesAllowed=x64
@@ -55,23 +43,23 @@ Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#msiPath}\{#appExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#msiPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "$msiPath\$appName.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "$msiPath\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\{#appName}"; Filename: "{app}\{#appExeName}"
-Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\$appName"; Filename: "{app}\$appName.exe"
+Name: "{autodesktop}\$appName"; Filename: "{app}\$appName.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#appExeName}"; Description: "{cm:LaunchProgram,{#StringChange(appName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\$appName.exe"; Description: "{cm:LaunchProgram,{#StringChange(appName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
-Filename: "{cmd}"; Parameters: "/C ""taskkill /im {#appExeName} /f /t"
-Filename: "{app}\{#appExeName} "; Parameters: "-uninstall -svcName Open-eCard-App -stopOnUninstall"; Check: returnFalse()
+Filename: "{cmd}"; Parameters: "/C ""taskkill /im $appName.exe /f /t"
+Filename: "{app}\$appName.exe "; Parameters: "-uninstall -svcName $appName -stopOnUninstall"; Check: returnFalse()
 
 [Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Open-eCard-App"; ValueData: """{app}\{#appExeName}"""; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Open-eCard-App"; ValueData: """{app}\$appName.exe"""; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\services\SCardSvr"; ValueType: dword; ValueName: "Start"; ValueData: "2"; Flags: uninsdeletekeyifempty
 
 [Code]

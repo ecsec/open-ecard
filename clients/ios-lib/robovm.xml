@@ -24,7 +24,7 @@
 		<!-- Copies the header files in headers/ to a directory named Headers in
 		the root of the .framework folder structure. -->
 		<resource>
-			<directory>./target/classes/roboheaders</directory>
+			<directory>./build/classes/java/main/roboheaders</directory>
 			<targetPath>../../Headers</targetPath>
 		</resource>
 		<!-- Copies the modules files in modules/ to a directory named Moduless in

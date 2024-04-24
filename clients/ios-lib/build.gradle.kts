@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 description = "ios-lib"
 
 plugins {
@@ -18,8 +20,27 @@ robovm {
 	isEnableBitcode = true
 }
 
+val iosHeaders : Configuration by configurations.creating {
+	isCanBeResolved = true
+}
+
+tasks.register("copyHeaders", Copy::class){
+	val sharedFiles = iosHeaders
+	inputs.files(sharedFiles)
+
+	from(sharedFiles)
+	into(layout.buildDirectory.dir("classes/java/main/roboheaders/"))
+}
+
+tasks.named("robovmInstall").dependsOn("copyHeaders")
+tasks.named("javadoc").dependsOn("copyHeaders")
+tasks.named("jar").dependsOn("copyHeaders")
 
 dependencies {
+
+	iosHeaders(project(path=":clients:mobile-lib", configuration=iosHeaders.name))
+	iosHeaders(project(path=":clients:ios-common", configuration=iosHeaders.name))
+
 	implementation(libs.robovm.rt)
 	implementation(libs.robovm.cocoa)
 	compileOnly(libs.roboface.annots)

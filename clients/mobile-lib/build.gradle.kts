@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 description = "mobile-lib"
 
 plugins {
@@ -28,7 +30,11 @@ val ios by configurations.creating {
 	)
 }
 
-tasks.named("compileIosJava", JavaCompile::class) {
+val iosHeaders by configurations.creating {
+	isCanBeResolved = true
+}
+
+val compileIosJava = tasks.named("compileIosJava", JavaCompile::class) {
 	this.options.compilerArgs.let {
 		it.add("-processor")
 		it.add("org.openecard.robovm.processor.RobofaceProcessor")
@@ -36,6 +42,13 @@ tasks.named("compileIosJava", JavaCompile::class) {
 		it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
 	}
 }
+val shareHeader = tasks.register("shareHeader "){
+	dependsOn("compileIosJava")
+	outputs.file(
+		layout.buildDirectory.file("classes/java/ios/roboheaders/open-ecard-mobile-lib.h")
+	)
+}
+
 
 val iosJar = tasks.create("iosJar", Jar::class) {
 	group = "build"
@@ -48,7 +61,8 @@ val iosJar = tasks.create("iosJar", Jar::class) {
 }
 
 artifacts {
-	add("ios", iosJar)
+	add(ios.name, iosJar)
+	add(iosHeaders.name, shareHeader)
 }
 
 

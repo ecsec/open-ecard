@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 description = "ios-common"
 
 plugins {
@@ -13,6 +15,21 @@ tasks.named("compileJava", JavaCompile::class) {
 	}
 }
 
+val shareHeader = tasks.register("shareHeader"){
+	dependsOn("compileJava")
+	outputs.file(
+		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard-ios-common.h")
+	)
+}
+tasks.named("jar").dependsOn("shareHeader")
+
+val iosHeaders by configurations.creating {
+	isCanBeResolved = true
+}
+
+artifacts {
+	add(iosHeaders.name, shareHeader)
+}
 
 dependencies {
 	implementation(libs.robovm.rt)

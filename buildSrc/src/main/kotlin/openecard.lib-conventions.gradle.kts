@@ -14,6 +14,10 @@ java {
 }
 
 
+tasks.named<Test>("test") {
+	useTestNG()
+}
+
 tasks.withType<JavaCompile> {
 	options.encoding = "UTF-8"
 }

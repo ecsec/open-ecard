@@ -48,6 +48,8 @@ dependencies {
 //	api(project(":ifd:ifd-protocols:pace"))
 	api(project(":ifd:scio-backend:ios-nfc"))
 
+	implementation(libs.xerces.imp)
+
 	annotationProcessor(libs.roboface.processor)
 
 	testImplementation(libs.bundles.test.basics)

@@ -126,6 +126,8 @@ dependencyResolutionManagement {
 			library("roboface-marshal", "org.openecard.tools", "roboface-marshaller").version("1.4.0")
 			library("roboface-processor", "org.openecard.tools", "roboface-processor").version("1.4.0")
 
+			library("xerces-imp", "xerces", "xercesImpl").version("2.12.0")
+
 			library("jose4j", "org.bitbucket.b_c", "jose4j").version("0.9.3")
 
 			library("jna-jpms", "net.java.dev.jna", "jna-jpms").version("5.12.1")

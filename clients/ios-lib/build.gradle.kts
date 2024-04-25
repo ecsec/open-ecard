@@ -25,6 +25,7 @@ val iosHeaders : Configuration by configurations.creating {
 }
 
 tasks.register("copyHeaders", Copy::class){
+	dependsOn("compileJava")
 	val sharedFiles = iosHeaders
 	inputs.files(sharedFiles)
 

@@ -13,10 +13,10 @@ tasks.named("compileJava", JavaCompile::class) {
 		it.add("-Aroboface.headername=open-ecard-ios-common.h")
 		it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
 	}
+	dependsOn("shareHeader")
 }
 
 val shareHeader = tasks.register("shareHeader"){
-	dependsOn("compileJava")
 	outputs.file(
 		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard-ios-common.h")
 	)

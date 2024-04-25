@@ -14,8 +14,7 @@ stages:
   - publish
 
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
-  MAVEN_USER_HOME: "$CI_PROJECT_DIR/.m2"
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
   OEC_DOCKER_CACHE: "oec-cache"
   OEC_OSX_CACHE: "oec-macos-cache"
   OEC_WIN_CACHE: "oec-win-cache"

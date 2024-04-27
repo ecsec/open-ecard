@@ -53,6 +53,7 @@ include("clients:ios-common")
 include("clients:ios-lib")
 include("clients:android-common")
 include("clients:android-lib")
+include("clients:ios-frmwrk")
 
 
 dependencyResolutionManagement {

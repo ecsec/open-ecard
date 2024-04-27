@@ -1,10 +1,11 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 description = "ios-lib"
 
 plugins {
 	id("openecard.iosbundle-conventions")
-	id("robovm").version(libs.versions.robovm)
+	id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 tasks.named("compileJava", JavaCompile::class) {
@@ -16,31 +17,28 @@ tasks.named("compileJava", JavaCompile::class) {
 	}
 }
 
-robovm {
-	isEnableBitcode = true
+tasks.named("shadowJar", ShadowJar::class) {
+	relocate("org.apache.http", "oec.apache.http")
 }
 
-val iosHeaders : Configuration by configurations.creating {
+val shareHeader = tasks.register("shareHeader"){
+	outputs.file(
+		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard.h")
+	)
+}
+
+val iosHeaders: Configuration by configurations.creating {
 	isCanBeResolved = true
 }
 
-tasks.register("copyHeaders", Copy::class){
-	dependsOn("compileJava")
-	val sharedFiles = iosHeaders
-	inputs.files(sharedFiles)
-
-	from(sharedFiles)
-	into(layout.buildDirectory.dir("classes/java/main/roboheaders/"))
+artifacts {
+	add(iosHeaders.name, shareHeader)
 }
 
-tasks.named("robovmInstall").dependsOn("copyHeaders")
-tasks.named("javadoc").dependsOn("copyHeaders")
-tasks.named("jar").dependsOn("copyHeaders")
+tasks.named("jar").dependsOn("shareHeader")
+tasks.named("javadoc").dependsOn("shareHeader")
 
 dependencies {
-
-	iosHeaders(project(path=":clients:mobile-lib", configuration=iosHeaders.name))
-	iosHeaders(project(path=":clients:ios-common", configuration=iosHeaders.name))
 
 	implementation(libs.robovm.rt)
 	implementation(libs.robovm.cocoa)
@@ -77,6 +75,7 @@ dependencies {
 //	api(project(":addons:genericcryptography"))
 //	api(project(":ifd:ifd-protocols:pace"))
 	api(project(":wsdef:jaxb-marshaller"))
+	api(libs.httpcore)
 
 	annotationProcessor(libs.roboface.processor)
 

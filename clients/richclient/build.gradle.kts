@@ -174,14 +174,17 @@ tasks.register("packageMsi", JPackageTask::class){
 	group = "Distribution"
 	description = "Creates a MSI package for installation."
 
+	// we need the following for the iscc task which reuses the exe-file from this task
+	// to keep it we put it in /build/jpfiles
+	// jp will however fail if this dir exists beforehand, so we make sure to delete it...
 	doFirst {
 		delete(project.layout.buildDirectory.dir("jpfiles"))
 	}
+	temp = "/build/jpfiles"
 
 	assert(Platform.isWindows())
 	dependsOn("build", "copyDependencies", "copyJar")
 
-	temp = "/build/jpfiles"
 
 	applyDefaults()
 	windowsConfigs()

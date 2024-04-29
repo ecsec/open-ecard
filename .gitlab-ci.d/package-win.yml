@@ -2,16 +2,6 @@ package-win:
   stage: package
   tags:
     - "win"
-  cache:
-  - key: "OEC_WIN_CACHE"
-    paths:
-        - .gradle/caches/
-        - .gradle/wrapper/
-        - .gradle/daemon/
-        - .gradle/native/
-        - .gradle/jdks/
-        - "**/build"
-    policy: pull-push
   artifacts:
     name: 'OeC-Installer-EXE'
     paths:

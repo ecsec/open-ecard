@@ -18,7 +18,7 @@ package-ios-framework:
       - LICENSE
   script:
     - ./gradlew robovmInstall
-    - mv clients/ios-lib/build/robovm/OpenEcard.xcframework OpenEcard.xcframework/
+    - mv clients/ios-frmwrk/build/robovm/OpenEcard.xcframework OpenEcard.xcframework/
     - cp LICENSE.GPL LICENSE
   needs: []
   allow_failure: true

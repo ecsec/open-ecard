@@ -36,3 +36,9 @@ tasks.register("copyHeaders", Copy::class){
 }
 
 tasks.named("robovmInstall").dependsOn("copyHeaders")
+tasks.create("buildIosFramework"){
+	group = "Distribution"
+	description = "Alias for robovmInstall creating xcFramework for iOS"
+	dependsOn("robovmInstall")
+
+}

@@ -209,7 +209,7 @@ tasks.register("prepareIsccFile", Copy::class){
 	into(issWorkDir)
 	outputs.upToDateWhen { false }
 }
-tasks.register("packageExeIscc", Exec::class){
+tasks.register("packageExe", Exec::class){
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
@@ -236,7 +236,7 @@ tasks.register("packageWindows"){
 	description = "Creates EXE and MSI packages for Windows systems."
 
 	dependsOn(
-		"packageExeIscc",
+		"packageExe",
 		"packageMsi",
 	)
 }

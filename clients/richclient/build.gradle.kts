@@ -174,6 +174,10 @@ tasks.register("packageMsi", JPackageTask::class){
 	group = "Distribution"
 	description = "Creates a MSI package for installation."
 
+	doFirst {
+		delete(project.layout.buildDirectory.dir("jpfiles"))
+	}
+
 	assert(Platform.isWindows())
 	dependsOn("build", "copyDependencies", "copyJar")
 
@@ -220,9 +224,6 @@ tasks.register("packageExe", Exec::class){
 	executable("iscc")
 	args("Open-eCard-App.iss")
 
-	doLast {
-		delete(project.layout.buildDirectory.dir("jpfiles"))
-	}
 
 }
 

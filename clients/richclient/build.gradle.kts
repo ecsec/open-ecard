@@ -220,6 +220,10 @@ tasks.register("packageExe", Exec::class){
 	executable("iscc")
 	args("Open-eCard-App.iss")
 
+	doLast {
+		delete(project.layout.buildDirectory.dir("jpfiles"))
+	}
+
 }
 
 tasks.register("packageLinux"){

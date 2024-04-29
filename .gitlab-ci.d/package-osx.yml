@@ -4,12 +4,15 @@ package-osx:
     - "mac"
     - "dev-cert"
   cache:
-  - key: "$OEC_JAVA_CACHE_KEY"
-    paths: !reference [ .cache-gradle-base, paths ]
-    policy: pull
-  - key: "$OEC_JAVA_TMP_CACHE_KEY"
-    paths: [ .cache-gradle-builds, paths ]
-    policy: pull
+  - key: "OEC_OSX_CACHE"
+    paths:
+        - .gradle/caches/
+        - .gradle/wrapper/
+        - .gradle/daemon/
+        - .gradle/native/
+        - .gradle/jdks/
+        - "**/build"
+    policy: pull-push
   artifacts:
     name: 'OeC-Installer-PKG'
     paths:

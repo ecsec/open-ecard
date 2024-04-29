@@ -4,11 +4,14 @@ package-ios-framework:
     - "mac"
     - "dev-cert"
   cache:
-    key: "$OEC_OSX_CACHE"
+  - key: "OEC_OSX_CACHE"
     paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
+        - .gradle/caches/
+        - .gradle/wrapper/
+        - .gradle/daemon/
+        - .gradle/native/
+        - .gradle/jdks/
+        - "**/build"
     policy: pull-push
   artifacts:
     name: 'OpenEcard-CocoaPod'

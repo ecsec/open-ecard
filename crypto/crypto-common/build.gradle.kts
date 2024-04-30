@@ -17,4 +17,5 @@ dependencies {
 //	api(libs.httpcore)
 
 	testImplementation(libs.bundles.test.basics)
+	testImplementation(project(":wsdef:jaxb-marshaller"))
 }

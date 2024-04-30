@@ -28,6 +28,7 @@ import org.openecard.bouncycastle.tls.TlsAuthentication;
 import org.openecard.bouncycastle.tls.TlsCredentials;
 import org.openecard.bouncycastle.tls.TlsServerCertificate;
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
+import org.openecard.bouncycastle.util.Strings;
 import org.openecard.crypto.common.ReusableSecureRandom;
 import org.openecard.crypto.tls.CertificateVerifier;
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
@@ -40,29 +41,31 @@ import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
  */
 public class DefaultTlsClientImpl extends ClientCertDefaultTlsClient {
 
-    public DefaultTlsClientImpl(String hostName) {
-	super(new BcTlsCrypto(ReusableSecureRandom.getInstance()), hostName, true);
-    }
+	public DefaultTlsClientImpl(String hostName) {
+		super(new BcTlsCrypto(ReusableSecureRandom.getInstance()), hostName, true);
+	}
 
-    @Override
-    public TlsAuthentication getAuthentication() throws IOException {
-	return new TlsAuthentication() {
-	    @Override
-	    public void notifyServerCertificate(TlsServerCertificate crtfct) throws IOException {
-		JavaSecVerifier v = new JavaSecVerifier();
+	@Override
+	public TlsAuthentication getAuthentication() throws IOException {
+		return new TlsAuthentication() {
+			@Override
+			public void notifyServerCertificate(TlsServerCertificate crtfct) throws IOException {
+				JavaSecVerifier v = new JavaSecVerifier();
 
-		CertificateVerifier cv = new CertificateVerifierBuilder()
-			.and(new HostnameVerifier())
-			.and(v)
-			.and(new KeyLengthVerifier())
-			.build();
-		cv.isValid(crtfct, serverNames.get(0).toString());
-	    }
-	    @Override
-	    public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
-	    }
-	};
-    }
+				CertificateVerifier cv = new CertificateVerifierBuilder()
+					.and(new HostnameVerifier())
+					.and(v)
+					.and(new KeyLengthVerifier())
+					.build();
+				var hostname = Strings.fromUTF8ByteArray(serverNames.get(0).getNameData());
+				cv.isValid(crtfct, hostname);
+			}
+
+			@Override
+			public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {
+				throw new UnsupportedOperationException("Not supported yet.");
+			}
+		};
+	}
 
 }

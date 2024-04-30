@@ -7,7 +7,7 @@ package-win:
     paths:
       - clients/richclient/build/dist/
   script:
-    - ./gradlew packageWin
+    - .\gradlew.bat packageWin
     - $EXE_FILE_PATH = $(Get-Childitem
         -Path .\clients\richclient\build\dist
         -Include Open-eCard-App-*.exe

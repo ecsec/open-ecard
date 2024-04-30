@@ -13,10 +13,10 @@ collect-installers:
       - "*.exe"
   script:
     - >-
-      cp  clients/richclient/build/dist/jpackage/*.pkg \
-          clients/richclient/build/dist/jpackage/*.dmg \
-          clients/richclient/build/dist/jpackage/*.deb \
-          clients/richclient/build/dist/jpackage/*.rpm \
+      cp  clients/richclient/build/dist/*.pkg \
+          clients/richclient/build/dist/*.dmg \
+          clients/richclient/build/dist/*.deb \
+          clients/richclient/build/dist/*.rpm \
           clients/richclient/build/dist/iscc/*.exe \
           .
   dependencies:

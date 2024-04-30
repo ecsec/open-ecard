@@ -37,6 +37,7 @@ artifacts {
 
 tasks.named("jar").dependsOn("shareHeader")
 tasks.named("javadoc").dependsOn("shareHeader")
+tasks.named("shadowJar").dependsOn("shareHeader")
 
 dependencies {
 

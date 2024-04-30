@@ -22,40 +22,18 @@
 
 package org.openecard.addons.cardlink;
 
-import org.openecard.addon.ActionInitializationException;
-import org.openecard.addon.Context;
-import org.openecard.addon.bind.*;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.mobile.activation.Websocket;
 
-import java.util.List;
-import java.util.Map;
+public class CardLinkProcess {
+	private final Websocket ws;
 
-import static org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_KEY;
-
-public class ActivateAction implements AppPluginAction {
-
-	private Context aCtx;
-
-	@Override
-	public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments, Map<String, Object> extraParams) {
-		Websocket ws = (Websocket) extraParams.get(WS_KEY);
-		if (ws == null) {
-			return new BindingResult(BindingResultCode.WRONG_PARAMETER)
-				.setResultMessage("Missing websocket in dynamic context.");
-		}
-
-		// TODO: implement
-		var proc = new CardLinkProcess(ws);
-		return proc.start();
+	public CardLinkProcess(Websocket ws) {
+		this.ws = ws;
 	}
 
-	@Override
-	public void init(Context aCtx) throws ActionInitializationException {
-		this.aCtx = aCtx;
-	}
+	public BindingResult start() {
 
-	@Override
-	public void destroy(boolean force) {
-		this.aCtx = null;
+		return null;
 	}
 }

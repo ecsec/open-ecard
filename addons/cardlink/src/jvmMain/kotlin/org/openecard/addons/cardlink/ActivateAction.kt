@@ -32,10 +32,10 @@ class ActivateAction : AppPluginAction {
     private var aCtx: Context? = null
 
     override fun execute(
-		body: RequestBody,
-		parameters: MutableMap<String, String>,
-		headers: Headers,
-		attachments: MutableList<Attachment>,
+		body: RequestBody?,
+		parameters: MutableMap<String, String>?,
+		headers: Headers?,
+		attachments: MutableList<Attachment>?,
 		extraParams: MutableMap<String, Any>
     ): BindingResult {
         val ws: Websocket = extraParams[WS_KEY] as Websocket?

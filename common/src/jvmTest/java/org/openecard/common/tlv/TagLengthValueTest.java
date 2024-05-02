@@ -173,4 +173,23 @@ public class TagLengthValueTest {
 	assertEquals(new byte[] {(byte)0x7C, 0x04, (byte)0x81, 0x02, 0x01, 0x02}, result);
     }
 
+	@Test
+	public void testCreateTLVChilds() throws TLVException {
+		TLV outer = new TLV();
+		outer.setTagNumWithClass(0x7C);
+		TLV inner1 = new TLV();
+		inner1.setTagNumWithClass(0x81);
+		inner1.setValue(new byte[]{0x01, 0x02});
+		TLV inner2 = new TLV();
+		inner2.setTagNumWithClass(0x81);
+		inner2.setValue(new byte[]{0x03, 0x04});
+
+		outer.setChild(inner1);
+		inner1.addToEnd(inner2);
+
+		byte[] result = outer.toBER();
+
+		assertEquals(new byte[] {(byte)0x7C, 0x08, (byte)0x81, 0x02, 0x01, 0x02, (byte)0x81, 0x02, 0x03, 0x04}, result);
+	}
+
 }

@@ -15,6 +15,7 @@ dependencies {
 	iosHeaders(project(path=":clients:ios-common", configuration=iosHeaders.name))
 	iosHeaders(project(path=":clients:ios-lib", configuration=iosHeaders.name))
 
+	api(libs.slf4j.jdk14)
 	api(project(path=":clients:ios-lib", configuration="shadow"))
 	implementation(libs.robovm.rt)
 	implementation(libs.robovm.cocoa)

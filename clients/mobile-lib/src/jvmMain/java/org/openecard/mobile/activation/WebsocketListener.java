@@ -23,10 +23,12 @@
 package org.openecard.mobile.activation;
 
 import javax.annotation.Nullable;
+import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
  * Interface for listening to websocket events.
  */
+@FrameworkInterface
 public interface WebsocketListener {
 	/**
 	 * Called when the websocket connection is established.

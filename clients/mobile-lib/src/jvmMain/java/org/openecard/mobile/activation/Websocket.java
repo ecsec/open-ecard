@@ -101,6 +101,6 @@ public interface Websocket {
 	 * @param data the data to send.
 	 * @throws WebsocketException if the data could not be sent.
 	 */
-	void send(byte[] data) throws WebsocketException;
+	//void send(byte[] data) throws WebsocketException;
 
 }

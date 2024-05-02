@@ -49,14 +49,14 @@ public interface WebsocketListener {
 	 * @param webSocket the websocket that had the error.
 	 * @param error the error that occurred.
 	 */
-	void onError(Websocket webSocket, Throwable error);
+	void onError(Websocket webSocket, String error);
 
 	/**
 	 * Called when a binary message is received.
 	 * @param webSocket the websocket that received the message.
 	 * @param data the binary data that was received.
 	 */
-	void onBinary(Websocket webSocket, byte[] data);
+	//void onBinary(Websocket webSocket, byte[] data);
 
 	/**
 	 * Called when a text message is received.

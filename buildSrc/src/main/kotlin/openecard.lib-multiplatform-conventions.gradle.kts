@@ -12,10 +12,13 @@ kotlin {
 
 	applyDefaultHierarchyTemplate()
 
-	jvm {  }
+	jvm {
+		withJava()
+	}
 }
 
 val testHeapSize: String by project
 tasks.withType<Test> {
 	maxHeapSize = testHeapSize
+	useTestNG()
 }

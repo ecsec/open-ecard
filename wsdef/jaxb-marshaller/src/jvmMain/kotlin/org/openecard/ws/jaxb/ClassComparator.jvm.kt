@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,25 +18,20 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.jaxb
 
-package org.openecard.ws.jaxb;
-
-import java.util.Comparator;
-
+import java.util.Comparator
 
 /**
  * Comparator implementation using the full name of the classes to compare the difference.
  *
  * @author Tobias Wich
  */
-public class ClassComparator implements Comparator<Class<?>> {
-
-    @Override
-    public int compare(Class<?> c1, Class<?> c2) {
-	String n1 = c1.getName();
-	String n2 = c2.getName();
-	return n1.compareTo(n2);
+class ClassComparator : Comparator<Class<*>> {
+    override fun compare(c1: Class<*>, c2: Class<*>): Int {
+        val n1: String = c1.getName()
+        val n2: String = c2.getName()
+        return n1.compareTo(n2)
     }
-
 }

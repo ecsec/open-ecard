@@ -19,6 +19,10 @@ plugins {
 
 
 dependencies {
+	implementation(libs.plugins.kotlinJvm)
+	implementation(libs.plugins.kotlinAllOpen)
+	implementation(libs.plugins.kotlinMultiplatform)
+
 	implementation(libs.plugins.androidLibrary)
 }
 

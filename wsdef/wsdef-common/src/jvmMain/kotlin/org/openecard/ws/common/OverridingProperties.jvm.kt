@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2018 ecsec GmbH.
+ * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,20 +18,14 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.common
 
-package org.openecard.ws.common;
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.*
+import java.util.*
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Properties;
-import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+private val LOG = KotlinLogging.logger {}
 
 /**
  * Basic Properties class which overrides default values from System properties on its creation.
@@ -40,11 +34,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Wich
  */
-public class OverridingProperties {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OverridingProperties.class);
-
-    private final Properties properties;
+open class OverridingProperties {
+    private val properties: Properties
 
     /**
      * Loads properties from named resource.
@@ -53,9 +44,7 @@ public class OverridingProperties {
      * @param fName Name of the properties file.
      * @throws IOException If loading of the resource failed.
      */
-    public OverridingProperties(String fName) throws IOException {
-	this(getfileStream(OverridingProperties.class, fName));
-    }
+    constructor(fName: String) : this(getfileStream(OverridingProperties::class.java, fName))
 
     /**
      * Loads properties from named resource.
@@ -65,9 +54,7 @@ public class OverridingProperties {
      * @param fName Name of the properties file.
      * @throws IOException If loading of the resource failed.
      */
-    public OverridingProperties(Class clazz, String fName) throws IOException {
-	this(getfileStream(clazz, fName));
-    }
+    constructor(clazz: Class<*>, fName: String) : this(getfileStream(clazz, fName))
 
     /**
      * Load properties from InputStream.
@@ -75,9 +62,7 @@ public class OverridingProperties {
      * @param stream Stream with Java properties format.
      * @throws IOException If loading of the resource failed.
      */
-    public OverridingProperties(InputStream stream) throws IOException {
-	this(stream, null);
-    }
+    constructor(stream: InputStream) : this(stream, null)
 
     /**
      * Load properties from property instance.
@@ -85,8 +70,8 @@ public class OverridingProperties {
      * @param props Properties instance.
      * @throws IOException If the merge of the properties with the system defaults failed.
      */
-    public OverridingProperties(Properties props) throws IOException {
-	properties = mergeWithOverrides(props);
+    constructor(props: Properties) {
+        properties = mergeWithOverrides(props)
     }
 
     /**
@@ -99,80 +84,48 @@ public class OverridingProperties {
      * @param homeConf Stream to properties overriding the base properties. May be null.
      * @throws IOException If loading of the base resource failed.
      */
-    public OverridingProperties(InputStream bundledConf, InputStream homeConf) throws IOException {
-	Properties baseProps = new Properties();
-	baseProps.load(bundledConf);
-	bundledConf.close();
+	@kotlin.jvm.Throws(IOException::class)
+    constructor(bundledConf: InputStream, homeConf: InputStream?) {
+        var baseProps = Properties()
+        baseProps.load(bundledConf)
+        bundledConf.close()
 
-	try {
-	    if (homeConf != null) {
-		Properties homeProps = new Properties(baseProps);
-		homeProps.load(homeConf);
-		homeConf.close();
-		baseProps = homeProps;
-	    }
-	} catch (IOException ex) {
-	    LOG.error("Failed to load given properties stream.", ex);
-	}
+        try {
+            if (homeConf != null) {
+                val homeProps = Properties(baseProps)
+                homeProps.load(homeConf)
+                homeConf.close()
+                baseProps = homeProps
+            }
+        } catch (ex: IOException) {
+            LOG.error(ex) { "Failed to load given properties stream." }
+        }
 
-	properties = mergeWithOverrides(baseProps);
-    }
-
-
-    @Nullable
-    private static InputStream getfileStream(Class clazz, String fName) {
-	InputStream in = clazz.getResourceAsStream("/" + fName);
-	if (in == null) {
-	    in = clazz.getResourceAsStream(fName);
-	}
-	return in;
-    }
-
-    private static Properties mergeWithOverrides(Properties reference) throws IOException {
-	Properties result = new Properties(reference);
-	result.load(propsToStream(getOverrides(reference)));
-	return result;
-    }
-
-    private static Reader propsToStream(Properties properties) throws IOException {
-	StringWriter w = new StringWriter();
-	properties.store(w, null);
-	String propsStr = w.toString();
-	return new StringReader(propsStr);
-    }
-
-    private static Properties getOverrides(Properties reference) {
-	Properties overrides = new Properties();
-	for (String nextKey : reference.stringPropertyNames()) {
-	    if (System.getProperties().containsKey(nextKey)) {
-		overrides.setProperty(nextKey, System.getProperties().getProperty(nextKey));
-	    }
-	}
-	return overrides;
+        properties = mergeWithOverrides(baseProps)
     }
 
 
     /**
      * Gets the value for the given property key.
      *
-     * @see Properties#getProperty(java.lang.String)
+     * @see Properties.getProperty
      * @param key Key of the property.
      * @return The value, or null if none is found.
      */
-    public final String getProperty(String key) {
-	return properties.getProperty(key);
+    fun getProperty(key: String): String? {
+        return properties.getProperty(key)
     }
 
     /**
      * Sets the value for a property key.
      *
-     * @see Properties#setProperty(java.lang.String, java.lang.String)
+     * @see Properties.setProperty
      * @param key The key to be placed into the property list.
      * @param value The value corresponding to key.
      * @return The previous value in the properties structure, or null if none was set.
      */
-    public final Object setProperty(String key, String value) {
-	return properties.setProperty(key, value);
+    fun setProperty(key: String, value: String): Any {
+        return properties.setProperty(key, value)
     }
 
     /**
@@ -181,8 +134,40 @@ public class OverridingProperties {
      *
      * @return Copy of the properties.
      */
-    public final Properties properties() {
-	return new Properties(properties);
+    fun properties(): Properties {
+        return Properties(properties)
     }
+}
 
+
+@Throws(IOException::class)
+private fun getfileStream(clazz: Class<*>, fName: String): InputStream {
+	return clazz.getResourceAsStream("/$fName")
+		?: clazz.getResourceAsStream(fName)
+		?: throw IOException("Resource $fName not found.")
+}
+
+@Throws(IOException::class)
+private fun mergeWithOverrides(reference: Properties): Properties {
+	val result = Properties(reference)
+	result.load(propsToStream(getOverrides(reference)))
+	return result
+}
+
+@Throws(IOException::class)
+private fun propsToStream(properties: Properties): Reader {
+	val w = StringWriter()
+	properties.store(w, null)
+	val propsStr = w.toString()
+	return StringReader(propsStr)
+}
+
+private fun getOverrides(reference: Properties): Properties {
+	val overrides = Properties()
+	for (nextKey in reference.stringPropertyNames()) {
+		if (System.getProperties().containsKey(nextKey)) {
+			overrides.setProperty(nextKey, System.getProperties().getProperty(nextKey))
+		}
+	}
+	return overrides
 }

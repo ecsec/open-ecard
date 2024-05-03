@@ -18,21 +18,13 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.soap
 
-package org.openecard.ws.soap;
-
-import org.w3c.dom.Element;
-
+import org.w3c.dom.Element
 
 /**
  *
  * @author Tobias Wich
  */
-public class SOAPEnvelope extends SOAPElement {
-
-    public SOAPEnvelope(Element element) {
-	super(element);
-    }
-
-}
+class SOAPEnvelope(element: Element) : SOAPElement(element)

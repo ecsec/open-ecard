@@ -18,29 +18,22 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.ws.common;
+ */
+package org.openecard.ws.common
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class GenericFactoryException extends Exception {
+class GenericFactoryException : Exception {
+    constructor(message: String) : super(message)
 
-    private static final long serialVersionUID = 1L;
+    constructor(cause: Throwable) : super(cause)
 
-    public GenericFactoryException(String message) {
-	super(message);
+    constructor(message: String, cause: Throwable) : super(message, cause)
+
+    companion object {
+        private const val serialVersionUID = 1L
     }
-
-    public GenericFactoryException(Throwable cause) {
-	super(cause);
-    }
-
-    public GenericFactoryException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
 }

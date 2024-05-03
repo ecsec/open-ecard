@@ -18,13 +18,26 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.marshal
 
-package org.openecard.ws.marshal;
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.openecard.ws.common.OverridingProperties
+import java.io.IOException
+import java.util.*
 
-import java.io.IOException;
-import java.util.Properties;
-import org.openecard.ws.common.OverridingProperties;
+private val LOG = KotlinLogging.logger {}
+
+private var properties: Internal? =
+	try {
+		Internal()
+	} catch (ex: IOException) {
+		// in that case a null pointer occurs when properties is accessed
+		LOG.error(ex) { "Failed to load wsdef.properties file correctly." }
+		null
+	}
+
+private class Internal : OverridingProperties("wsdef.properties")
 
 
 /**
@@ -33,37 +46,20 @@ import org.openecard.ws.common.OverridingProperties;
  *
  * @author Tobias Wich
  */
-public abstract class WsdefProperties {
+object WsdefProperties {
 
-    private static class Internal extends OverridingProperties {
-	public Internal() throws IOException {
-	    super("wsdef.properties");
-	}
+	@JvmStatic
+    fun getProperty(key: String): String? {
+        return properties!!.getProperty(key)
     }
 
-    static {
-	try {
-	    properties = new Internal();
-	} catch (IOException ex) {
-	    // in that case a null pointer occurs when properties is accessed
-	    String msg = "Failed to load wsdef.properties file correctly.";
-	    org.slf4j.LoggerFactory.getLogger(WsdefProperties.class).error(msg, ex);
-	}
+    @JvmStatic
+    fun setProperty(key: String, value: String?): Any {
+        return properties!!.setProperty(key, value!!)
     }
 
-    private static Internal properties;
-
-
-    public static String getProperty(String key) {
-	return properties.getProperty(key);
-    }
-
-    public static Object setProperty(String key, String value) {
-	return properties.setProperty(key, value);
-    }
-
-    public static Properties properties() {
-	return properties.properties();
+    fun properties(): Properties {
+        return properties!!.properties()
     }
 
 }

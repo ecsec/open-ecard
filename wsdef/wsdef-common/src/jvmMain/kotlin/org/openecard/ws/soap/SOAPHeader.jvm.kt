@@ -18,27 +18,19 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.soap
 
-package org.openecard.ws.soap;
-
-import javax.xml.namespace.QName;
-import org.w3c.dom.Element;
-
+import org.w3c.dom.Element
+import javax.xml.namespace.QName
 
 /**
  *
  * @author Tobias Wich
  */
-public class SOAPHeader extends SOAPElement {
-
-    protected SOAPHeader(Element element) {
-	super(element);
+class SOAPHeader internal constructor(element: Element) : SOAPElement(element) {
+    @Throws(SOAPException::class)
+    fun addHeaderElement(elementName: QName): Element {
+        return addChildElement(elementName)
     }
-
-
-    public Element addHeaderElement(QName elementName) throws SOAPException {
-	return addChildElement(elementName);
-    }
-
 }

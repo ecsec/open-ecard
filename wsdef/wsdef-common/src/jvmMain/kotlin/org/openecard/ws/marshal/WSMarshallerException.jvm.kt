@@ -18,29 +18,22 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.ws.marshal;
+ */
+package org.openecard.ws.marshal
 
 
 /**
  *
  * @author Tobias Wich
  */
-public class WSMarshallerException extends Exception {
+open class WSMarshallerException : Exception {
+    constructor(message: String) : super(message)
 
-    private static final long serialVersionUID = 1L;
+    constructor(cause: Throwable) : super(cause)
 
-    public WSMarshallerException(String message) {
-	super(message);
+    constructor(message: String, cause: Throwable) : super(message, cause)
+
+    companion object {
+        private const val serialVersionUID = 1L
     }
-
-    public WSMarshallerException(Throwable cause) {
-	super(cause);
-    }
-
-    public WSMarshallerException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
 }

@@ -18,29 +18,23 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.soap
 
-package org.openecard.ws.marshal;
-
+import org.openecard.ws.marshal.WSMarshallerException
 
 /**
  *
  * @author Tobias Wich
  */
-public class MarshallingTypeException extends WSMarshallerException {
+class SOAPException : WSMarshallerException {
+    constructor(message: String) : super(message)
 
-    private static final long serialVersionUID = 1L;
+    constructor(cause: Throwable) : super(cause)
 
-    public MarshallingTypeException(String message) {
-	super(message);
+    constructor(message: String, cause: Throwable) : super(message, cause)
+
+    companion object {
+        private const val serialVersionUID = 1L
     }
-
-    public MarshallingTypeException(Throwable cause) {
-	super(cause);
-    }
-
-    public MarshallingTypeException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
 }

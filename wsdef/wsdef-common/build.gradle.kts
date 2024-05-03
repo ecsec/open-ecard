@@ -1,11 +1,26 @@
 description = "wsdef-common"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-dependencies {
-	implementation(libs.slf4j.api)
-	api(libs.annotations)
-	api(libs.jaxb.api)
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				api(libs.annotations)
+				api(libs.jaxb.api)
+			}
+		}
+	}
 }

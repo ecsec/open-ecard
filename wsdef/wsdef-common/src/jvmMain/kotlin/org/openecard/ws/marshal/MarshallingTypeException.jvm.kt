@@ -18,11 +18,22 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.marshal
+
 
 /**
- * JAXB and JAX-WS abstractions to be able to run on platforms without the javax packages, e.g. Android.
- * These classes provide the necessary abstractions and a few helpers to simplify life when dealing with JAXB and
- * JAX-WS.
+ *
+ * @author Tobias Wich
  */
-package org.openecard.ws.marshal;
+class MarshallingTypeException : WSMarshallerException {
+    constructor(message: String) : super(message)
+
+    constructor(cause: Throwable) : super(cause)
+
+    constructor(message: String, cause: Throwable) : super(message, cause)
+
+    companion object {
+        private const val serialVersionUID = 1L
+    }
+}

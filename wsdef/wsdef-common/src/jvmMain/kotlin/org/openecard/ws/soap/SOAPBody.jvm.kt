@@ -18,10 +18,21 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.ws.soap
+
+import org.w3c.dom.Document
+import org.w3c.dom.Element
 
 /**
- * SAAJ abstractions to be able to run on platforms without the javax packages, e.g. Android.
- * These classes provide interfaces for SAAJ. They are more or less the same.
+ *
+ * @author Tobias Wich
  */
-package org.openecard.ws.soap;
+class SOAPBody internal constructor(element: Element) : SOAPElement(element) {
+    @Throws(SOAPException::class)
+    fun addDocument(document: Document) {
+        val doc = element.ownerDocument
+        val newNode = doc.adoptNode(document.documentElement)
+        element.appendChild(newNode)
+    }
+}

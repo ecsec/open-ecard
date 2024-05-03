@@ -168,7 +168,7 @@ public class PAOS {
 
     private Element getHeaderElement(SOAPMessage msg, QName elem, boolean create) throws SOAPException {
 	Element result = null;
-	SOAPHeader h = msg.getSOAPHeader();
+	SOAPHeader h = msg.getSoapHeader();
 	// try to find a header
 	for (Element e : h.getChildElements()) {
 	    if (e.getLocalName().equals(elem.getLocalPart()) && e.getNamespaceURI().equals(elem.getNamespaceURI())) {
@@ -224,7 +224,7 @@ public class PAOS {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	    Element body = msg.getSOAPBody().getChildElements().get(0);
+	    Element body = msg.getSoapBody().getChildElements().get(0);
 	    updateMessageID(msg);
 
 	    if (LOG.isDebugEnabled()) {
@@ -292,7 +292,7 @@ public class PAOS {
 	}
 
 	SOAPMessage msg = m.add2soap(contentDoc);
-	SOAPHeader header = msg.getSOAPHeader();
+	SOAPHeader header = msg.getSoapHeader();
 
 	// fill header with paos stuff
 	Element paos = header.addHeaderElement(PAOS_PAOS);
@@ -597,7 +597,7 @@ public class PAOS {
 	try {
 	    Document doc = m.str2doc(content);
 	    SOAPMessage msg = m.doc2soap(doc);
-	    Element body = msg.getSOAPBody().getChildElements().get(0);
+	    Element body = msg.getSoapBody().getChildElements().get(0);
 	    Object obj = m.unmarshal(body);
 
 	    if (obj instanceof DIDAuthenticate) {

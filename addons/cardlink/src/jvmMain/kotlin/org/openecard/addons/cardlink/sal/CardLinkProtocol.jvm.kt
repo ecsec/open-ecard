@@ -19,15 +19,17 @@
  * you and ecsec GmbH.
  *
  */
-package org.openecard.addons.cardlink
 
-import org.openecard.addon.bind.BindingResult
-import org.openecard.mobile.activation.Websocket
+package org.openecard.addons.cardlink.sal
 
-class CardLinkProcess(ws: Websocket) {
-    private val ws: Websocket = ws
+import org.openecard.addon.Context
+import org.openecard.addon.sal.SALProtocolBaseImpl
 
-    fun start(): BindingResult {
-        TODO()
-    }
+class CardLinkProtocol : SALProtocolBaseImpl() {
+	override fun init(aCtx: Context) {
+		addOrderStep(CardLinkStep(aCtx))
+	}
+
+	override fun destroy(force: Boolean) {
+	}
 }

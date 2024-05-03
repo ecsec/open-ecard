@@ -35,18 +35,18 @@
 	<ApplicationActions/>
 	<IFDActions/>
 	<SALActions>
-		<!--ProtocolPluginSpecification>
-			<URI>urn:oid:1.3.162.15480.3.0.14.2</URI>
-			<ClassName>org.openecard.sal.protocol.eac.EACProtocol</ClassName>
-			<LocalizedName xml:lang="DE">EAC2 Protokollimplementierung</LocalizedName>
-			<LocalizedName xml:lang="EN">EAC2 Protocol Implementation</LocalizedName>
+		<ProtocolPluginSpecification>
+			<URI>https://gematik.de/protocols/cardlink</URI>
+			<ClassName>org.openecard.addons.cardlink.sal.CardLinkProtocol</ClassName>
+			<LocalizedName xml:lang="DE">CardLink Protokollimplementierung</LocalizedName>
+			<LocalizedName xml:lang="EN">CardLink Protocol Implementation</LocalizedName>
 			<LocalizedDescription xml:lang="DE">
-				Implementierung des EAC2 Protokoll gemäß BSI-TR-03112 Teil 7.
+				Implementierung des CardLink Protokoll gemäß Gematik.
 			</LocalizedDescription>
 			<LocalizedDescription xml:lang="EN">
-				Implementation of the EAC2 protocol according to BSI-TR-03112 part 7.
+				Implementation of the CardLink protocol according to Gematik.
 			</LocalizedDescription>
 			<ConfigDescription/>
-		</ProtocolPluginSpecification-->
+		</ProtocolPluginSpecification>
 	</SALActions>
 </AddonSpecification>

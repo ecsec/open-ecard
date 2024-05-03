@@ -43,7 +43,7 @@ class ActivateAction : AppPluginAction {
                 .setResultMessage("Missing websocket in dynamic context.")
 
         // call CardLink process
-        val proc: CardLinkProcess = CardLinkProcess(ws)
+        val proc: CardLinkProcess = CardLinkProcess(aCtx!!, ws)
         return proc.start()
     }
 

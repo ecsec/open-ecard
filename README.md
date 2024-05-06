@@ -27,7 +27,7 @@ The simplified build instructions are as follows:
 
     $ git clone git://github.com/ecsec/open-ecard.git
     $ cd open-ecard
-    $ mvn clean install
+    $ ./gradlew build
 
 
 In case you received a preassembled source bundle, the build instructions are
@@ -35,7 +35,7 @@ as follows:
 
     $ tar xaf open-ecard-${version}.tar.xz
     $ cd open-ecard-$version
-    $ mvn clean install
+    $ ./gradlew build
 
 Finally, you can run the Open eCard App richclient from command line:
 

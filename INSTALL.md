@@ -6,17 +6,7 @@ In order to build the Open eCard project, some additional tools are needed.
 Required dependencies are:
 * Java JDK 17 or higher - Oracle JDK and OpenJDK are working correctly (jlink is required for building modular runtime images)
 
-* Maven in at least version 3.8.6
-
-  https://maven.apache.org/download.html
-
-* Git 1.7.11 or higher (older versions are probably also ok)
-
-  http://git-scm.com/downloads
-
 Optional dependencies are:
-* Java JDK 11 to build mobile libraries
-
 * Android SDK
   The Android SDK dependent modules are built when the environment variable
   ANDROID_HOME is set and points to the installation directory of the Android
@@ -38,15 +28,13 @@ Build Sources
 
 A standard build is performed by the command:
 
-    $ mvn clean install
+    $ ./gradlew build
 
-In order to create Javadoc and source artifacts, perform the following command:
+By default, only a modular runtime image is created. However, a native application package can be created by using one of the following system specific commands:
 
-    $ mvn clean javadoc:javadoc javadoc:jar source:jar install
-
-By default, only a modular runtime image is created. However, a native application package can be created by using the property `desktop-package`:
-
-    $ mvn clean install -Ddesktop-package
+    $ ./gradlew packageLinux
+	$ ./gradlew packageWin
+	$ ./gradlew packageMac
 
 Usually, the predefined package formats are used: dmg for Mac OS, deb for Linux and EXE & MSI for Windows. An additional property `package.type` can replace the predefined format of the native application package (only for Mac and Linux). The possible formats are:
 

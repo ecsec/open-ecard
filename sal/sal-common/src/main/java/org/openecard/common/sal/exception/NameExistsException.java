@@ -34,8 +34,8 @@ public class NameExistsException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public NameExistsException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.NAME_EXISTS, message);
+    public NameExistsException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.NAME_EXISTS, msg), null);
     }
 
 }

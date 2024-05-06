@@ -34,8 +34,8 @@ public final class IncorrectParameterException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public IncorrectParameterException(String message) {
-	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, message);
+    public IncorrectParameterException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.App.INCORRECT_PARM, msg), null);
     }
 
 }

@@ -12,7 +12,6 @@ package org.openecard.common.sal.state;
 
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
-import static org.openecard.common.ECardException.makeException;
 
 /**
  *
@@ -22,8 +21,8 @@ public class NoSuchSession extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public NoSuchSession(String message) {
-	makeException(this, ECardConstants.Minor.SAL.NO_SESSION, message);
+    public NoSuchSession(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.NO_SESSION, msg), null);
     }
 
 }

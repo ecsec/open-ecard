@@ -24,7 +24,6 @@ package org.openecard.common.sal.exception;
 
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
-import static org.openecard.common.ECardException.makeException;
 
 
 /**
@@ -36,6 +35,6 @@ public class PrerequisitesNotSatisfiedException extends ECardException{
     private static final long serialVersionUID = 1L;
 
     public PrerequisitesNotSatisfiedException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, message);
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED, message), null);
     }
 }

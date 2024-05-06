@@ -35,23 +35,25 @@ public class IFDException extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public IFDException(String msg) {
-	makeException(this, msg);
+
+		super(makeOasisResultTraitImpl(msg), null);
     }
 
     public IFDException(String minor, String msg) {
-	makeException(this, minor, msg);
+
+		super(makeOasisResultTraitImpl(minor, msg), null);
     }
 
     public IFDException(Result r) {
-	makeException(this, r);
+		super(makeOasisResultTraitImpl(r), null);
     }
 
     public IFDException(Throwable cause) {
-	makeException(this, cause);
+		super(makeOasisResultTraitImpl(), cause);
     }
 
     public IFDException(String msg, Throwable cause) {
-	makeException(this, cause, msg);
+		super(makeOasisResultTraitImpl(msg), cause);
     }
 
 }

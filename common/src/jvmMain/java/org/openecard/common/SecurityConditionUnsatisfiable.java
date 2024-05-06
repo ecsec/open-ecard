@@ -33,11 +33,11 @@ public class SecurityConditionUnsatisfiable extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public SecurityConditionUnsatisfiable(String msg) {
-	makeException(this, ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg);
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), null);
     }
 
     public SecurityConditionUnsatisfiable(String msg, Throwable cause) {
-	makeException(this, cause, ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg);
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), cause);
     }
 
 }

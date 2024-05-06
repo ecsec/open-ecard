@@ -37,11 +37,11 @@ public class UnknownConnectionHandleException extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public UnknownConnectionHandleException(ConnectionHandleType handle) {
-	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, HandlePrinter.printHandle(handle));
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.App.INCORRECT_PARM, HandlePrinter.printHandle(handle)), null);
     }
 
     protected UnknownConnectionHandleException(String minor, ConnectionHandleType handle) {
-	makeException(this, minor, HandlePrinter.printHandle(handle));
+		super(makeOasisResultTraitImpl(minor, HandlePrinter.printHandle(handle)), null);
     }
 
 }

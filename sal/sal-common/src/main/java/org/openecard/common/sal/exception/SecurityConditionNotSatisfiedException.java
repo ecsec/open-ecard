@@ -38,8 +38,8 @@ public final class SecurityConditionNotSatisfiedException extends ECardException
 	this("");
     }
 
-    public SecurityConditionNotSatisfiedException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, message);
+    public SecurityConditionNotSatisfiedException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), null);
     }
 
 }

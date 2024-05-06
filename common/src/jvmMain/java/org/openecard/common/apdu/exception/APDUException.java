@@ -46,7 +46,7 @@ public final class APDUException extends ECardException {
      * @param msg Message
      */
     public APDUException(String msg) {
-	makeException(this, msg);
+		super(makeOasisResultTraitImpl(msg), null);
     }
 
     /**
@@ -56,7 +56,7 @@ public final class APDUException extends ECardException {
      * @param msg Message
      */
     public APDUException(String minor, String msg) {
-	makeException(this, minor, msg);
+		super(makeOasisResultTraitImpl(minor, msg), null);
     }
 
     /**
@@ -65,7 +65,7 @@ public final class APDUException extends ECardException {
      * @param r Result
      */
     public APDUException(Result r) {
-	makeException(this, r);
+		super(makeOasisResultTraitImpl(r), null);
     }
 
     /**
@@ -74,7 +74,7 @@ public final class APDUException extends ECardException {
      * @param cause Cause
      */
     public APDUException(Throwable cause) {
-	makeException(this, cause);
+		super(makeOasisResultTraitImpl(), cause);
     }
     
     /**
@@ -83,7 +83,7 @@ public final class APDUException extends ECardException {
      * @param ex WSException
      */
     public APDUException(WSHelper.WSException ex) {
-	makeException(this, ex, ex.getResultMajor(), ex.getResultMinor(), ex.getResultMessage());
+		super(makeOasisResultTraitImpl(ex.getResult()), ex);
     }
 
     /**

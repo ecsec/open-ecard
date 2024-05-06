@@ -24,7 +24,6 @@ package org.openecard.common.sal.exception;
 
 import org.openecard.common.ECardConstants;
 import org.openecard.common.ECardException;
-import static org.openecard.common.ECardException.makeException;
 
 
 /**
@@ -36,11 +35,11 @@ public class InternalAppError extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public InternalAppError(String msg) {
-	makeException(this, ECardConstants.Minor.App.INT_ERROR, msg);
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.App.INT_ERROR, msg), null);
     }
 
     public InternalAppError(String msg, Throwable cause) {
-	makeException(this, cause, ECardConstants.Minor.App.INT_ERROR, msg);
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.App.INT_ERROR, msg), cause);
     }
 
 }

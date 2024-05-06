@@ -34,8 +34,8 @@ public final class NamedEntityNotFoundException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public NamedEntityNotFoundException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, message);
+    public NamedEntityNotFoundException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.NAMED_ENTITY_NOT_FOUND, msg), null);
     }
 
 }

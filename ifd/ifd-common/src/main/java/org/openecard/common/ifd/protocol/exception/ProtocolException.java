@@ -35,20 +35,21 @@ public class ProtocolException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public ProtocolException(String msg) {
-	makeException(this, msg);
+    public ProtocolException(String msg)
+	{
+		super(makeOasisResultTraitImpl(msg), null);
     }
 
     public ProtocolException(String minor, String msg) {
-	makeException(this, minor, msg);
+		super(makeOasisResultTraitImpl(minor, msg), null);
     }
 
     public ProtocolException(Result r) {
-	makeException(this, r);
+		super(makeOasisResultTraitImpl(r), null);
     }
 
     public ProtocolException(Throwable cause) {
-	makeException(this, cause);
+		super(makeOasisResultTraitImpl(), cause);
     }
 
 }

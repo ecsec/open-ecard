@@ -34,12 +34,12 @@ public final class UnknownProtocolException extends ECardException {
 
     private static final long serialVersionUID = 1L;
 
-    public UnknownProtocolException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.PROTOCOL_NOT_RECOGNIZED, message);
+    public UnknownProtocolException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.PROTOCOL_NOT_RECOGNIZED, msg), null);
     }
 
     public UnknownProtocolException(String protocol, String objectString) {
-	this("No protocol step available for " + protocol + " in protocol " + objectString + ".");
+		this("No protocol step available for " + protocol + " in protocol " + objectString + ".");
     }
 
 }

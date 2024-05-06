@@ -36,23 +36,23 @@ import org.openecard.common.ECardException;
     private static final long serialVersionUID = 1L;
 
     public UtilException(String msg) {
-	makeException(this, msg);
+		super(makeOasisResultTraitImpl(msg), null);
     }
 
     public UtilException(String msg, Throwable cause) {
-	makeException(this, cause, msg);
+		super(makeOasisResultTraitImpl(msg), cause);
     }
 
     public UtilException(String minor, String msg) {
-	makeException(this, minor, msg);
+		super(makeOasisResultTraitImpl(minor, msg), null);
     }
 
     public UtilException(Result r) {
-	makeException(this, r);
+		super(makeOasisResultTraitImpl(r), null);
     }
 
     public UtilException(Throwable cause) {
-	makeException(this, cause);
+		super(makeOasisResultTraitImpl(), cause);
     }
 
 }

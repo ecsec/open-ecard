@@ -35,19 +35,19 @@ public class RecognitionException extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public RecognitionException(String msg) {
-	makeException(this, msg);
+		super(makeOasisResultTraitImpl(msg), null);
     }
 
     public RecognitionException(String minor, String msg) {
-	makeException(this, minor, msg);
+		super(makeOasisResultTraitImpl(minor, msg), null);
     }
 
     public RecognitionException(Result r) {
-	makeException(this, r);
+		super(makeOasisResultTraitImpl(r), null);
     }
 
     public RecognitionException(Throwable cause) {
-	makeException(this, cause);
+		super(makeOasisResultTraitImpl(), cause);
     }
 
 }

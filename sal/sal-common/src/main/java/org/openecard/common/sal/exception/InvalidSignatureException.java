@@ -35,7 +35,7 @@ public class InvalidSignatureException extends ECardException {
     private static final long serialVersionUID = 1L;
 
     public InvalidSignatureException() {
-	makeException(this, ECardConstants.Minor.App.INCORRECT_PARM, "The signature is invalid.");
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.App.INCORRECT_PARM, "The signature is invalid."), null);
     }
 
 }

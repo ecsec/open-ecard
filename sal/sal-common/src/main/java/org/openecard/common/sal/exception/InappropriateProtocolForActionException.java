@@ -34,16 +34,16 @@ public final class InappropriateProtocolForActionException extends ECardExceptio
 
     private static final long serialVersionUID = 1L;
 
-    public InappropriateProtocolForActionException() {
-	makeException(this, ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function is not supported for this protocol.");
-    }
+	public InappropriateProtocolForActionException() {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, "The function is not supported for this protocol."), null);
+	}
 
-    public InappropriateProtocolForActionException(String message) {
-	makeException(this, ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, message);
-    }
+	public InappropriateProtocolForActionException(String msg) {
+		super(makeOasisResultTraitImpl(ECardConstants.Minor.SAL.INAPPROPRIATE_PROTOCOL_FOR_ACTION, msg), null);
+	}
 
-    public InappropriateProtocolForActionException(String function, String objectString) {
-	this("The function '" + function + "' is not supported for the protocol '" + objectString + "'.");
-    }
+	public InappropriateProtocolForActionException(String function, String objectString) {
+		this("The function '" + function + "' is not supported for the protocol '" + objectString + "'.");
+	}
 
 }

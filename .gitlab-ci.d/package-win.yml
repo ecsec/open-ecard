@@ -6,8 +6,6 @@ package-win:
     name: 'OeC-Installer-EXE'
     paths:
       - clients/richclient/build/dist/
-  variables:
-    GRADLE_USER_HOME: C:\gitlab-runner\.gradle
   script:
     - .\gradlew.bat packageWin --no-build-cache
     - $EXE_FILE_PATH = $(Get-Childitem

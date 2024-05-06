@@ -18,9 +18,8 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.common.util;
+ */
+package org.openecard.common.util
 
 
 /**
@@ -29,20 +28,15 @@ package org.openecard.common.util;
  *
  * @author Tobias Wich
  */
-public class Pair <P1, P2> {
-
-    public final P1 p1;
-    public final P2 p2;
-
-    /**
-     * Creates a Pair instance for the given parameters.
-     *
-     * @param p1 First value which is later accessible as {@code p1}.
-     * @param p2 Second value which is later accessible as {@code p2}.
-     */
-    public Pair(P1 p1, P2 p2) {
-	this.p1 = p1;
-	this.p2 = p2;
-    }
-
-}
+class Pair<P1, P2>
+/**
+ * Creates a Pair instance for the given parameters.
+ *
+ * @param p1 First value which is later accessible as `p1`.
+ * @param p2 Second value which is later accessible as `p2`.
+ */
+constructor(
+	@JvmField
+	val p1: P1, @JvmField
+	val p2: P2
+)

@@ -14,7 +14,6 @@ stages:
   - publish
 
 variables:
-  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
   OEC_JAVA_CACHE_KEY: "oec-java-cache"
   OEC_JAVA_TMP_CACHE_KEY: "oec-java-tmp-cache"
   OEC_OSX_CACHE: "oec-macos-cache"

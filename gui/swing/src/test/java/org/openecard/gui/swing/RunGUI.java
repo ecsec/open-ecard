@@ -389,7 +389,7 @@ public class RunGUI {
      * Uncomment the
      * <code>@Ignore</code> line to run a demo gui so you can debug it.
      */
-    @Test
+    @Test(enabled = false)
     public void runUC() {
 	try {
 	    SwingDialogWrapper dialog = new SwingDialogWrapper();

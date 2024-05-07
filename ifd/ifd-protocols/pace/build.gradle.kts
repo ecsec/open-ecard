@@ -1,27 +1,33 @@
 description = "pace"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-dependencies {
-//	api(libs.jaxb.api)
-//	api(libs.jaxb.ws.api)
-//	api(libs.slf4j.api)
-//	api(project(":common"))
-	api(project(":crypto:crypto-common"))
-	api(project(":ifd:ifd-common"))
-//	implementation(project(":wsdef:wsdef-client"))
-//	implementation(project(":i18n"))
-//	api(libs.bc.prov)
-//	api(libs.bc.tls)
-//	api(libs.httpcore)
-//	api(libs.proxyvole)
-//	api(project(":gui:graphics"))
-//	api(libs.pdfbox)
-//	api(libs.scio)
-
-	testImplementation(libs.bundles.test.basics)
-	testImplementation(project(":gui:swing"))
-	testImplementation(project(":ifd:ifd-core"))
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				api(project(":crypto:crypto-common"))
+				api(project(":ifd:ifd-common"))
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics)
+				implementation(project(":gui:swing"))
+				implementation(project(":ifd:ifd-core"))
+			}
+		}
+	}
 }

@@ -1,23 +1,34 @@
 description = "tiny-sal"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-dependencies {
-//	api(libs.jaxb.api)
-//	api(libs.jaxb.ws.api)
-//	api(libs.slf4j.api)
-	api(project(":sal:sal-common"))
-	api(project(":cifs"))
-//	api(project(":wsdef:wsdef-client"))
-//	implementation(project(":i18n"))
-//	api(libs.bc.prov)
-//	api(libs.bc.tls)
-//	api(libs.httpcore)
-
-	testImplementation(libs.bundles.test.basics)
-	testImplementation(project(":wsdef:jaxb-marshaller"))
-	testImplementation(project(":gui:swing"))
-	testImplementation(project(":ifd:ifd-core"))
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				api(project(":sal:sal-common"))
+				api(project(":cifs"))
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics)
+				implementation(project(":wsdef:jaxb-marshaller"))
+				implementation(project(":gui:swing"))
+				implementation(project(":ifd:ifd-core"))
+			}
+		}
+	}
 }

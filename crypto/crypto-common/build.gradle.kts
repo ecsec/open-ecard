@@ -1,21 +1,33 @@
 description = "crypto-common"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-dependencies {
-//	api(libs.jaxb.api)
-//	api(libs.jaxb.ws.api)
-//	api(libs.slf4j.api)
-	api(project(":common"))
-//	api(project(":wsdef:wsdef-common"))
-//	implementation(project(":wsdef:wsdef-client"))
-//	implementation(project(":i18n"))
-	api(libs.bc.prov)
-	api(libs.bc.tls)
-//	api(libs.httpcore)
-
-	testImplementation(libs.bundles.test.basics)
-	testImplementation(project(":wsdef:jaxb-marshaller"))
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				api(project(":common"))
+				api(libs.bc.prov)
+				api(libs.bc.tls)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics)
+				implementation(project(":wsdef:jaxb-marshaller"))
+			}
+		}
+	}
 }

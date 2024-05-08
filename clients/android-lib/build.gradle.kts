@@ -1,17 +1,34 @@
 description = "android-lib"
 
 plugins {
-	id("openecard.android-conventions")
+	id("openecard.android-multiplatform-conventions")
 }
 
 android {
 	namespace = "org.openecard.clients.android.lib"
 }
 
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val androidMain by getting {
+			dependencies {
+				api(project(":clients:android-common"))
+			}
+		}
+	}
+}
+
 dependencies {
-//	implementation(libs.android)
-//	api(libs.jaxb.api)
-//	api(libs.jaxb.ws.api)
 	constraints {
 		val reason = "Newer versions will break our build because of modularization since v4."
 		api("jakarta.xml.bind:jakarta.xml.bind-api") {
@@ -33,22 +50,6 @@ dependencies {
 			because(reason)
 		}
 	}
-
-//	api(libs.slf4j.api)
-//	api(project(":common"))
-//	api(project(":ifd:ifd-common"))
-	api(project(":clients:android-common"))
-//	implementation(project(":wsdef:wsdef-client"))
-//	implementation(project(":i18n"))
-//	api(libs.bc.prov)
-//	api(libs.bc.tls)
-//	api(libs.httpcore)
-//	api(libs.proxyvole)
-//	api(project(":gui:graphics"))
-//	api(libs.pdfbox)
-//	api(libs.scio)
-
-	testImplementation(libs.bundles.test.basics)
 }
 
 configurations.api {

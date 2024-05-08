@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2019-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,24 +18,26 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-package org.openecard.android.activation;
+ */
 
-import android.content.Intent;
-import android.nfc.Tag;
-import java.io.IOException;
-import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.ex.ApduExtLengthNotSupported;
-import org.openecard.mobile.ex.NFCTagNotSupported;
+package org.openecard.android.activation
+
+import android.content.Intent
+import android.nfc.Tag
+import org.openecard.mobile.activation.ContextManager
+import org.openecard.mobile.ex.ApduExtLengthNotSupported
+import org.openecard.mobile.ex.NFCTagNotSupported
+import java.io.IOException
+
 
 /**
  *
  * @author Neil Crossley
  */
-public interface AndroidContextManager extends ContextManager {
+interface AndroidContextManager : ContextManager {
+	@Throws(ApduExtLengthNotSupported::class, NFCTagNotSupported::class, IOException::class)
+	fun onNewIntent(intent: Intent?)
 
-	public void onNewIntent(Intent intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException;
-
-	public void onNewIntent(Tag intent) throws ApduExtLengthNotSupported, NFCTagNotSupported, IOException;
-
+	@Throws(ApduExtLengthNotSupported::class, NFCTagNotSupported::class, IOException::class)
+	fun onNewIntent(intent: Tag?)
 }

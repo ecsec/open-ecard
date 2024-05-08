@@ -27,18 +27,22 @@ import org.openecard.gui.definition.Step
 import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
+import org.openecard.mobile.activation.Websocket
 
 private val title = "Phone Verification"
 
-class PhoneStep : Step(title) {
+class PhoneStep(val ws: Websocket) : Step(title) {
 	init {
-
+		setAction(PhoneStepAction(this))
 	}
 }
 
 class PhoneStepAction(val phoneStep: PhoneStep) : StepAction(phoneStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>?, result: StepResult?): StepActionResult {
+//		val phoneNumber = requestPhoneNumber()
+//		sendPhoneNumber(phoneNumber)
+//		sendOtp()
 		TODO("Not yet implemented")
 	}
 

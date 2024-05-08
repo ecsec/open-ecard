@@ -23,12 +23,16 @@
 package org.openecard.addons.cardlink.sal.gui
 
 import org.openecard.gui.definition.UserConsentDescription
+import org.openecard.mobile.activation.Websocket
 
 private val title = "CardLink User Consent"
 const val CONSENT_TYPE = "CardLink"
 
-class CardLinkUserConsent : UserConsentDescription(title, CONSENT_TYPE) {
+class CardLinkUserConsent(ws: Websocket) : UserConsentDescription(title, CONSENT_TYPE) {
 	init {
-		
+		steps.apply {
+			add(PhoneStep(ws))
+			add(ProcessCardStep(ws))
+		}
 	}
 }

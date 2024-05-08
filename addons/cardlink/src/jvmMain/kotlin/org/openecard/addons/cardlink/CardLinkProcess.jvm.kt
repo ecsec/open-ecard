@@ -18,16 +18,16 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.addons.cardlink
 
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
-import iso.std.iso_iec._24727.tech.schema.CreateSession
-import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse
+import iso.std.iso_iec._24727.tech.schema.*
 import org.openecard.addon.Context
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
+import org.openecard.addons.cardlink.sal.CARDLINK_PROTOCOL_ID
+import org.openecard.addons.cardlink.sal.setProcessWebsocket
 import org.openecard.common.WSHelper
 import org.openecard.mobile.activation.Websocket
 
@@ -37,25 +37,18 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 
     fun start(): BindingResult {
 		val conHandle = openSession()
-		performDidAuth(conHandle)
-
-		val phoneNumber = requestPhoneNumber()
-		sendPhoneNumber(phoneNumber)
-		sendOtp()
-
-		val requiredCardTypes = setOf("http://ws.gematik.de/egk/1.0.0")
-		val cardHandle = waitForCard(requiredCardTypes)
-		authCard(cardHandle)
-		val cardData = readPatientData(cardHandle)
-		sendPatientData(cardData)
+		setProcessWebsocket(ws)
+		val cardHandle = performDidAuth(conHandle)
 		handleRemoteApdus(cardHandle)
+		destroySession(cardHandle)
 
 		// no error means success
         return BindingResult(BindingResultCode.OK)
     }
 
+	@Throws(WSHelper.WSException::class)
 	private fun openSession(): ConnectionHandleType {
-		// Perform a CreateSession to initialize the SAL.
+		// Perform a CreateSession to initialize the SAL
 		val createSession = CreateSession()
 		val createSessionResp = dispatcher.safeDeliver(createSession) as CreateSessionResponse
 
@@ -68,36 +61,33 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		return connectionHandle
 	}
 
-	private fun performDidAuth(conHandle: ConnectionHandleType) {
-		TODO("Not yet implemented")
+	@Throws(WSHelper.WSException::class)
+	private fun destroySession(conHandle: ConnectionHandleType) {
+		// Perform a CloseSession to close the SAL
+		val closeSession = DestroySession().apply {
+			connectionHandle = conHandle
+		}
+		val closeSessionResp = dispatcher.safeDeliver(closeSession) as DestroySessionResponse
+
+		// Check CloseSessionResponse
+		WSHelper.checkResult(closeSessionResp)
 	}
 
-	private fun waitForCard(requiredCardTypes: Set<String>): Any {
-		TODO("Not yet implemented")
-	}
+	@Throws(WSHelper.WSException::class)
+	private fun performDidAuth(conHandle: ConnectionHandleType): ConnectionHandleType {
+		// Perform a DIDAuthenticate to authenticate the user
+		val didAuth = DIDAuthenticate().apply {
+			connectionHandle = conHandle
+			authenticationProtocolData = DIDAuthenticationDataType().apply {
+				protocol = CARDLINK_PROTOCOL_ID
+			}
+		}
+		val didAuthResp = dispatcher.safeDeliver(didAuth) as DIDAuthenticateResponse
 
-	private fun authCard(cardHandle: Any) {
-		TODO("Not yet implemented")
-	}
+		// Check DIDAuthenticateResponse
+		WSHelper.checkResult(didAuthResp)
 
-	private fun readPatientData(cardHandle: Any): Any {
-		TODO("Not yet implemented")
-	}
-
-	private fun requestPhoneNumber(): String {
-		TODO("Not yet implemented")
-	}
-
-	private fun sendPhoneNumber(phoneNumber: String) {
-		TODO("Not yet implemented")
-	}
-
-	private fun sendOtp() {
-		// ask user a few times until code is accepted by the server
-		TODO("Not yet implemented")
-	}
-
-	private fun sendPatientData(cardData: Any) {
+		//return didAuthResp.authenticationProtocolData
 		TODO("Not yet implemented")
 	}
 

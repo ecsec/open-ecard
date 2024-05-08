@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.addons.cardlink.sal
 
@@ -27,13 +27,31 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
+import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
+import org.openecard.common.ThreadTerminateException
+import org.openecard.gui.ResultStatus
+import org.openecard.gui.UserConsentNavigator
+import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.sal.protocol.eac.PACEStep
 
 class CardLinkStep(aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
+	val gui = aCtx.userConsent
+
 	override fun getFunctionType(): FunctionType {
 		return FunctionType.DIDAuthenticate
 	}
 
 	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
+		val ws = getProcessWebsocket()
+		val uc = CardLinkUserConsent(ws)
+
+		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
+		val exec = ExecutionEngine(navigator)
+		try {
+			val guiResult = exec.process()
+		} catch (ex: ThreadTerminateException) {
+		}
+
 		TODO("Not yet implemented")
 	}
 }

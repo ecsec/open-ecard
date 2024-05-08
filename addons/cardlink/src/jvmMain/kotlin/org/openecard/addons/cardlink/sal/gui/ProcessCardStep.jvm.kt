@@ -20,28 +20,33 @@
  *
  ***************************************************************************/
 
-package org.openecard.addons.cardlink.sal
+package org.openecard.addons.cardlink.sal.gui
 
-import org.openecard.addon.Context
-import org.openecard.addon.sal.SALProtocolBaseImpl
+import org.openecard.gui.StepResult
+import org.openecard.gui.definition.Step
+import org.openecard.gui.executor.ExecutionResults
+import org.openecard.gui.executor.StepAction
+import org.openecard.gui.executor.StepActionResult
 import org.openecard.mobile.activation.Websocket
 
-const val CARDLINK_PROTOCOL_ID = "https://gematik.de/protocols/cardlink"
+private val title = "Process Card"
 
-
-fun setProcessWebsocket(ws: Websocket) {
-	TODO()
+class ProcessCardStep(val ws: Websocket) : Step(title) {
+	init {
+		setAction(ProcessCardStepAction(this))
+	}
 }
 
-fun getProcessWebsocket(): Websocket {
-	TODO()
-}
+class ProcessCardStepAction(val processCardStep: ProcessCardStep) : StepAction(processCardStep) {
 
-class CardLinkProtocol : SALProtocolBaseImpl() {
-	override fun init(aCtx: Context) {
-		addOrderStep(CardLinkStep(aCtx))
+	override fun perform(oldResults: MutableMap<String, ExecutionResults>?, result: StepResult?): StepActionResult {
+//		val requiredCardTypes = setOf("http://ws.gematik.de/egk/1.0.0")
+//		val cardHandle = waitForCard(requiredCardTypes)
+//		authCard(cardHandle)
+//		val cardData = readPatientData(cardHandle)
+//		sendPatientData(cardData)
+
+		TODO("Not yet implemented")
 	}
 
-	override fun destroy(force: Boolean) {
-	}
 }

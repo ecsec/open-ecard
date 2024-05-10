@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <AddonSpecification>
-	<ID>Cardlink</ID>
+	<ID>CardLink</ID>
 	<Version>1.0.0</Version>
 	<License/>
-	<LocalizedName xml:lang="DE">Cardlink Protokoll</LocalizedName>
-	<LocalizedName xml:lang="EN">Cardlink Protocol</LocalizedName>
+	<LocalizedName xml:lang="DE">CardLink Protokoll</LocalizedName>
+	<LocalizedName xml:lang="EN">CardLink Protocol</LocalizedName>
 	<LocalizedDescription xml:lang="DE">
-		Cardlink Protokoll nach Gematik Spezifikation.
+		CardLink Protokoll nach Gematik Spezifikation.
 	</LocalizedDescription>
 	<LocalizedDescription xml:lang="EN">
-		Cardlink protocol according to Gematik specification.
+		CardLink protocol according to Gematik specification.
 	</LocalizedDescription>
-	<About xml:lang="DE">Cardlink Funktionalität.</About>
-	<About xml:lang="EN">Cardlink functionality.</About>
+	<About xml:lang="DE">CardLink Funktionalität.</About>
+	<About xml:lang="EN">CardLink functionality.</About>
 	<Logo/>
 	<ConfigDescription/>
 	<BindingActions>
@@ -21,11 +21,11 @@
 			<LocalizedName xml:lang="DE">Aktivierungsendpunkt</LocalizedName>
 			<LocalizedName xml:lang="EN">Activation Endpoint</LocalizedName>
 			<LocalizedDescription xml:lang="DE">
-				Endpunkt für die Aktivierung der Open eCard App zur Durchführung einer Cardlink Authentifizierung
+				Endpunkt für die Aktivierung der Open eCard App zur Durchführung einer CardLink Authentifizierung
 				mit der eGK.
 			</LocalizedDescription>
 			<LocalizedDescription xml:lang="EN">
-				Endpoint for the activation of the Open eCard App to start a Cardlink authentication with the
+				Endpoint for the activation of the Open eCard App to start a CardLink authentication with the
 				German eHealth Card.
 			</LocalizedDescription>
 			<ResourceName>cardlink</ResourceName>

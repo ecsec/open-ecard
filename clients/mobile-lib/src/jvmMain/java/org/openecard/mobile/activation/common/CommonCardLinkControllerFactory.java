@@ -25,7 +25,6 @@ package org.openecard.mobile.activation.common;
 import org.openecard.common.DynamicContext;
 import org.openecard.mobile.activation.*;
 import org.openecard.mobile.system.OpeneCardContext;
-import org.openecard.mobile.ui.EacNavigatorFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,7 +36,7 @@ import java.util.Set;
 /**
  * @author Tobias Wich
  */
-public class CommonCardlinkControllerFactory implements CardlinkControllerFactory {
+public class CommonCardLinkControllerFactory implements CardLinkControllerFactory {
 
 	public static final String WS_KEY = "websocket";
 
@@ -47,13 +46,13 @@ public class CommonCardlinkControllerFactory implements CardlinkControllerFactor
 	private final ActivationControllerService activationControllerService;
 	private final NFCDialogMsgSetter msgSetter;
 
-	public CommonCardlinkControllerFactory(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
+	public CommonCardLinkControllerFactory(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
 		this.activationControllerService = activationControllerService;
 		this.msgSetter = msgSetter;
 	}
 
 	@Override
-	public ActivationController create(Websocket websocket, ControllerCallback activation, CardlinkInteraction interaction) {
+	public ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction) {
 		if (websocket == null) {
 			throw new IllegalArgumentException("The given websocket object cannot be null");
 		}
@@ -88,17 +87,12 @@ public class CommonCardlinkControllerFactory implements CardlinkControllerFactor
 		return controller;
 	}
 
-	private void prepareDynamicContext(Object websocket) {
-		DynamicContext dctx = DynamicContext.getInstance("ws_context");
-		dctx.put("websocket", websocket);
-	}
-
 	@Override
 	public void destroy(ActivationController controller) {
 	}
 
-	static CommonCardlinkControllerFactory create(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
-		return new CommonCardlinkControllerFactory(
+	static CommonCardLinkControllerFactory create(ActivationControllerService activationControllerService, NFCDialogMsgSetter msgSetter) {
+		return new CommonCardLinkControllerFactory(
 			activationControllerService, msgSetter);
 	}
 

@@ -30,7 +30,7 @@ import org.openecard.mobile.activation.Websocket;
 import java.util.List;
 import java.util.Map;
 
-import static org.openecard.mobile.activation.common.CommonCardlinkControllerFactory.WS_KEY;
+import static org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_KEY;
 
 public class ActivateAction implements AppPluginAction {
 

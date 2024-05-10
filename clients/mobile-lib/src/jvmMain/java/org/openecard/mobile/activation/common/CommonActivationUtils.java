@@ -38,7 +38,7 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
     private final OpeneCardContextConfig config;
     private final ActivationControllerService activationControllerService;
     private EacControllerFactory eacControllerFactory;
-	private CardlinkControllerFactory cardlinkControllerFactory;
+	private CardLinkControllerFactory cardlinkControllerFactory;
     private PinManagementControllerFactory pinManagementControllerFactory;
     private final NFCDialogMsgSetter msgSetter;
 
@@ -58,9 +58,9 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
     }
 
 	@Override
-	public CardlinkControllerFactory cardlinkFactory() {
+	public CardLinkControllerFactory cardLinkFactory() {
 		if (cardlinkControllerFactory == null) {
-			cardlinkControllerFactory = CommonCardlinkControllerFactory.create(activationControllerService, msgSetter);
+			cardlinkControllerFactory = CommonCardLinkControllerFactory.create(activationControllerService, msgSetter);
 		}
 		return cardlinkControllerFactory;
 	}

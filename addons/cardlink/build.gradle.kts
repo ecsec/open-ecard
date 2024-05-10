@@ -1,4 +1,4 @@
-description = "cardlink"
+description = "CardLink plugin"
 
 plugins {
 	id("openecard.lib-conventions")

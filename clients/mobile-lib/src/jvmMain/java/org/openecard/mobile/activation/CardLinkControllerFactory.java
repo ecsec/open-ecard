@@ -25,5 +25,7 @@ package org.openecard.mobile.activation;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 @FrameworkInterface
-public interface CardlinkInteraction extends ActivationInteraction {
+public interface CardLinkControllerFactory {
+	ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction);
+	void destroy(ActivationController controller);
 }

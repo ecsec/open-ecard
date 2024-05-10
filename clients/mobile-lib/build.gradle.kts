@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-
 description = "mobile-lib"
 
 plugins {
@@ -25,6 +23,9 @@ kotlin {
 				compileOnly(libs.roboface.annots)
 				implementation(libs.roboface.marshal)
 
+				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
+				compileOnly(libs.roboface.processor)
+
 				api(project(":management"))
 				api(project(":sal:tiny-sal"))
 				api(project(":addons:tr03112"))
@@ -42,18 +43,33 @@ kotlin {
 			}
 		}
 	}
-}
 
-sourceSets {
-	create("ios") {
-		java {
-			srcDir("src/jvmMain/java")
+	jvm() {
+		compilations {
+			val main by getting
+			val roboMain by compilations.creating {
+
+				compileJavaTaskProvider?.configure {
+
+					options.annotationProcessorPath = main.compileDependencyFiles
+					options.compilerArgs.let {
+						it.add("-processor")
+						it.add("org.openecard.robovm.processor.RobofaceProcessor")
+						it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
+						it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
+					}
+				}
+
+				defaultSourceSet {
+					dependencies {
+						implementation(main.compileDependencyFiles + main.output.classesDirs)
+					}
+				}
+			}
 		}
-		compileClasspath += main.get().compileClasspath
-//		runtimeClasspath += main.get().runtimeClasspath
-		annotationProcessorPath += main.get().annotationProcessorPath
 	}
 }
+
 
 val ios by configurations.creating {
 	isCanBeConsumed = true
@@ -64,29 +80,22 @@ val iosHeaders by configurations.creating {
 	isCanBeResolved = true
 }
 
-val compileIosJava = tasks.named("compileIosJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
-		it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
-	}
-}
+
 val shareHeader = tasks.register("shareHeader ") {
-	dependsOn("compileIosJava")
+	dependsOn("compileRoboMainJava")
 	outputs.file(
-		layout.buildDirectory.file("classes/java/ios/roboheaders/open-ecard-mobile-lib.h")
+		layout.buildDirectory.file("classes/java/roboMain/roboheaders/open-ecard-mobile-lib.h")
 	)
 }
 
 
 val iosJar = tasks.create("iosJar", Jar::class) {
 	group = "build"
-	dependsOn("iosClasses")
 	tasks.named("build") {
 		dependsOn("iosJar")
 	}
-	from(sourceSets.getByName("ios").output)
+//	dependsOn("jvmRoboMainClasses")
+	from(sourceSets.getByName("roboMain").output)
 	archiveClassifier.set("iOS")
 }
 
@@ -95,9 +104,6 @@ artifacts {
 	add(iosHeaders.name, shareHeader)
 }
 
-dependencies {
-	annotationProcessor(libs.roboface.processor)
-}
 
 // extra coverage dependencies so gradle is not upset
 tasks.koverGenerateArtifact {

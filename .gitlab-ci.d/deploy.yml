@@ -1,6 +1,6 @@
 deploy-mvn-artifacts:
   stage: deploy
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  image: docker.io/mobiledevops/android-sdk-image:34.0.1
   tags:
     - "podman"
   cache:
@@ -19,7 +19,7 @@ deploy-mvn-artifacts:
 
 deploy-mvn-artifacts-mr:
     stage: deploy
-    image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+    image: docker.io/mobiledevops/android-sdk-image:34.0.1
     tags:
         - "podman"
     cache:

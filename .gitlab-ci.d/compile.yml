@@ -1,6 +1,6 @@
 compile:
   stage: compile
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  image: docker.io/mobiledevops/android-sdk-image:34.0.1
   tags:
     - "podman"
   cache:

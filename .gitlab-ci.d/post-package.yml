@@ -2,7 +2,7 @@ collect-installers:
   stage: post-package
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "docker-exec"
+    - "podman"
   artifacts:
     name: 'OeC-Installers'
     paths:

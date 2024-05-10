@@ -2,7 +2,7 @@ deploy-mvn-artifacts:
   stage: deploy
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "docker-exec"
+    - "podman"
   cache:
     - key: "$OEC_JAVA_CACHE_KEY"
       paths: !reference [ .cache-gradle-base, paths ]
@@ -21,7 +21,7 @@ deploy-mvn-artifacts-mr:
     stage: deploy
     image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
     tags:
-        - "docker-exec"
+        - "podman"
     cache:
         - key: "$OEC_JAVA_CACHE_KEY"
           paths: !reference [ .cache-gradle-base, paths ]

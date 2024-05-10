@@ -2,7 +2,7 @@ publish-to-github:
   stage: publish
   image: debian:stable-20230109-slim
   tags:
-    - "docker-exec"
+    - "podman"
   script:
     - apt-get update && apt-get upgrade -y && apt-get install -y jq curl zip
     # Create Release

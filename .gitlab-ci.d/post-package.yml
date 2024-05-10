@@ -1,6 +1,6 @@
 collect-installers:
   stage: post-package
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  image: docker.io/alpine:latest
   tags:
     - "podman"
   artifacts:

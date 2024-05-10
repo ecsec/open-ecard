@@ -24,9 +24,12 @@ package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 
+/**
+ *
+ * @author Tobias Wich
+ */
 @FrameworkInterface
-public interface CardLinkInteraction extends ActivationInteraction {
-	void onCanRequest(ConfirmPasswordOperation enterCan);
-	void onPhoneNumberRequest(ConfirmTextOperation enterPhoneNumber);
-	void onSmsCodeRequest(ConfirmPasswordOperation smsCode);
+public interface ConfirmTextOperation {
+
+    void confirmText(String text);
 }

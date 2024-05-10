@@ -23,6 +23,7 @@ dependencies {
 	implementation(libs.plugins.kotlinKapt)
 	implementation(libs.plugins.kotlinAllOpen)
 	implementation(libs.plugins.kotlinMultiplatform)
+	implementation(libs.plugins.kotlinKover)
 
 	implementation(libs.plugins.androidLibrary)
 }

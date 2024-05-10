@@ -1,6 +1,7 @@
 plugins {
 	kotlin("multiplatform")
 	id("openecard.publish-conventions")
+	id("openecard.coverage-conventions")
 }
 
 val javaToolchain: String by project

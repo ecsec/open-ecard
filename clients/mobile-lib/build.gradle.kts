@@ -72,7 +72,7 @@ val compileIosJava = tasks.named("compileIosJava", JavaCompile::class) {
 		it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
 	}
 }
-val shareHeader = tasks.register("shareHeader "){
+val shareHeader = tasks.register("shareHeader ") {
 	dependsOn("compileIosJava")
 	outputs.file(
 		layout.buildDirectory.file("classes/java/ios/roboheaders/open-ecard-mobile-lib.h")
@@ -97,4 +97,9 @@ artifacts {
 
 dependencies {
 	annotationProcessor(libs.roboface.processor)
+}
+
+// extra coverage dependencies so gradle is not upset
+tasks.koverGenerateArtifact {
+	dependsOn(shareHeader)
 }

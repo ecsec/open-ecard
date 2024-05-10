@@ -13,10 +13,10 @@ test:
   artifacts:
     reports:
       junit:
-        - "**/build/jacoco-report/jacoco.xml"
-        - "**/build/test-results/test/TEST-*.xml"
+        - "**/build/reports/kover/report.xml"
+        - "**/build/test-results/*/TEST-*.xml"
   script:
-    - ./gradlew check
+    - ./gradlew check koverVerify koverXmlReport
   needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

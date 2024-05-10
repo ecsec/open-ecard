@@ -24,3 +24,8 @@ kotlin {
 		}
 	}
 }
+
+// kover gets confused because no sources are in this project
+kover {
+	disable()
+}

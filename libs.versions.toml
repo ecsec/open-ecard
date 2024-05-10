@@ -113,6 +113,8 @@ kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kot
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 
+kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }
+
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 

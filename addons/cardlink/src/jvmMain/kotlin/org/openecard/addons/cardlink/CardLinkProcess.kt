@@ -18,22 +18,16 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.addons.cardlink
 
-package org.openecard.addons.cardlink;
+import org.openecard.addon.bind.BindingResult
+import org.openecard.mobile.activation.Websocket
 
-import org.openecard.addon.bind.BindingResult;
-import org.openecard.mobile.activation.Websocket;
+class CardLinkProcess(ws: Websocket) {
+    private val ws: Websocket = ws
 
-public class CardLinkProcess {
-	private final Websocket ws;
-
-	public CardLinkProcess(Websocket ws) {
-		this.ws = ws;
-	}
-
-	public BindingResult start() {
-
-		return null;
-	}
+    fun start(): BindingResult {
+        TODO()
+    }
 }

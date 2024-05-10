@@ -77,6 +77,7 @@ dependencies {
 //	api(project(":ifd:ifd-protocols:pace"))
 	api(project(":wsdef:jaxb-marshaller"))
 	api(libs.httpcore)
+	api(project(":addons:cardlink"))
 
 	annotationProcessor(libs.roboface.processor)
 

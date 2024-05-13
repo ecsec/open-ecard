@@ -72,6 +72,7 @@ class NfcIntentHelper(innerHelper: NfcCapabilityHelper<Activity>) {
 	companion object {
 		var LOG: Logger = LoggerFactory.getLogger(NfcIntentHelper::class.java)
 
+		@JvmStatic
 		fun create(activity: Activity): NfcIntentHelper {
 			requireNotNull(activity) { "activity cannot be null" }
 

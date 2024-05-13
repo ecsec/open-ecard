@@ -55,6 +55,7 @@ class OpeneCard internal constructor(
 			SysUtils.setIsAndroid()
 		}
 
+		@JvmStatic
 		fun createInstance(): OpeneCard {
 			val androidNfcFactory : GenericInstanceProvider<AndroidNFCFactory?> = object : GenericInstanceProvider<AndroidNFCFactory?> {
 				override val instance = AndroidNFCFactory()

@@ -341,7 +341,7 @@ public class World implements AutoCloseable {
 				throw new RuntimeException("Wrong Status code received from server.");
 			}
 		} catch (Exception ex) {
-			throw new RuntimeException(("Failed to fetch localhost link"));
+			throw new RuntimeException("Failed to fetch localhost link", ex);
 		}
 	}
 

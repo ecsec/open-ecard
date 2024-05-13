@@ -19,6 +19,13 @@ dependencies {
 	api(project(path=":clients:ios-lib", configuration="shadow"))
 	implementation(libs.robovm.rt)
 	implementation(libs.robovm.cocoa)
+	api(project(":management"))
+	api(project(":sal:tiny-sal"))
+	api(project(":addons:tr03112"))
+	api(project(":addons:pin-management"))
+	api(project(":addons:status"))
+	api(project(":addons:genericcryptography"))
+	api(project(":ifd:ifd-protocols:pace"))
 }
 
 tasks.named("jar").dependsOn("copyHeaders")

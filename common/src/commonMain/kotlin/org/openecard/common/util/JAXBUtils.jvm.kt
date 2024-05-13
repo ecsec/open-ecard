@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2016-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,28 +20,25 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
+package org.openecard.common.util
 
-import javax.annotation.Nonnull;
-import org.openecard.ws.marshal.MarshallingTypeException;
-import org.openecard.ws.marshal.WSMarshaller;
-import org.openecard.ws.marshal.WSMarshallerException;
-import org.openecard.ws.marshal.WSMarshallerFactory;
-import org.w3c.dom.Document;
-
+import org.openecard.ws.marshal.MarshallingTypeException
+import org.openecard.ws.marshal.WSMarshallerException
+import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
+import javax.annotation.Nonnull
 
 /**
  *
  * @author Tobias Wich
  */
-public class JAXBUtils {
-
-    @Nonnull
-    public static <T> T deepCopy(@Nonnull T in) throws MarshallingTypeException, WSMarshallerException {
-	WSMarshaller m = WSMarshallerFactory.createInstance();
-	Document d = m.marshal(in);
-	Object out = m.unmarshal(d);
-	return ((Class<T>) in.getClass()).cast(out);
+object JAXBUtils {
+    @JvmStatic
+	@Nonnull
+    @Throws(MarshallingTypeException::class, WSMarshallerException::class)
+    fun <T : Any> deepCopy(@Nonnull input: T): T {
+        val m = createInstance()
+        val d = m.marshal(input)
+        val out = m.unmarshal(d)
+        return input.javaClass.cast(out)
     }
-
 }

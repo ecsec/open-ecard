@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,20 +20,14 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.swing.common;
+package org.openecard.gui.swing.common
 
-import java.io.IOException;
-import org.openecard.ws.common.OverridingProperties;
-
+import org.openecard.ws.common.OverridingProperties
 
 /**
+ * Class loading properties with values for the Swing GUI module.
+ * Take a look at the resource file uidefaults.properties for a complete list of the available keys.
  *
  * @author Tobias Wich
  */
-public class GUIProperties extends OverridingProperties {
-
-    public GUIProperties() throws IOException {
-	super("uidefaults.properties");
-    }
-
-}
+class GUIProperties : OverridingProperties("uidefaults.properties")

@@ -54,8 +54,8 @@ object WsdefProperties {
     }
 
     @JvmStatic
-    fun setProperty(key: String, value: String?): Any {
-        return properties.setProperty(key, value!!)
+    fun setProperty(key: String, value: String): Any? {
+        return properties.setProperty(key, value)
     }
 
 	@JvmStatic

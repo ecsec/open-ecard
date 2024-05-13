@@ -56,7 +56,7 @@ object RecognitionProperties {
 	}
 
 	@JvmStatic
-	fun setProperty(key: String, value: String): Any {
+	fun setProperty(key: String, value: String): Any? {
 		return properties.setProperty(key, value)
 	}
 

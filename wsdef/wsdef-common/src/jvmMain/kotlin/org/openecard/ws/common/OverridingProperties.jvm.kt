@@ -124,7 +124,7 @@ open class OverridingProperties {
      * @param value The value corresponding to key.
      * @return The previous value in the properties structure, or null if none was set.
      */
-    fun setProperty(key: String, value: String): Any {
+    fun setProperty(key: String, value: String): Any? {
         return properties.setProperty(key, value)
     }
 

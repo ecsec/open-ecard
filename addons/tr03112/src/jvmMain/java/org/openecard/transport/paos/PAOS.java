@@ -65,6 +65,7 @@ import org.openecard.binding.tctoken.TlsConnectionHandler;
 import org.openecard.httpcore.HttpRequestHelper;
 import org.openecard.httpcore.HttpUtils;
 import org.openecard.httpcore.StreamHttpClientConnection;
+import org.openecard.sal.protocol.eac.transport.paos.MessageIdGenerator;
 import org.openecard.ws.marshal.MarshallingTypeException;
 import org.openecard.ws.marshal.WSMarshaller;
 import org.openecard.ws.marshal.WSMarshallerException;

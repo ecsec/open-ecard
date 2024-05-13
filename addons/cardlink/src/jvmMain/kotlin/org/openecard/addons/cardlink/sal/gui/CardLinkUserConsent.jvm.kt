@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.addons.cardlink.sal.gui
 
@@ -32,7 +32,8 @@ class CardLinkUserConsent(ws: Websocket) : UserConsentDescription(title, CONSENT
 	init {
 		steps.apply {
 			add(PhoneStep(ws))
-			add(ProcessCardStep(ws))
+			add(TanStep(ws))
+			add(EnterCanStep(ws))
 		}
 	}
 }

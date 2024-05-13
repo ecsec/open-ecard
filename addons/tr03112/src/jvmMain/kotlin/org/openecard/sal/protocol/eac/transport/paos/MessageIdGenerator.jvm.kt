@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,10 +20,9 @@
  *
  ***************************************************************************/
 
-package org.openecard.transport.paos;
+package org.openecard.sal.protocol.eac.transport.paos
 
-import org.openecard.common.util.ValueGenerators;
-
+import org.openecard.common.util.ValueGenerators.generateUUID
 
 /**
  * The MessageIdGenerator keeps track of the message IDs of the PAOS messages.
@@ -31,46 +30,42 @@ import org.openecard.common.util.ValueGenerators;
  *
  * @author Tobias Wich
  */
-final class MessageIdGenerator {
-
-    private String otherMsg;
-    private String myMsg;
-
+class MessageIdGenerator {
     /**
      * Gets the last remote message ID of this instance.
      *
      * @return The last remote message ID.
      */
-    public String getRemoteID() {
-	return otherMsg;
-    }
+    var remoteID: String? = null
+        private set
+    private var myMsg: String? = null
 
     /**
      * Sets the remote message ID of this instance.
      * This function does nothing if the last ID does not match the given ID.
      *
      * @param newID The new remote message ID.
-     * @return {@code true} if the last ID matches, {@code false} otherwise.
+     * @return `true` if the last ID matches, `false` otherwise.
      */
-    public boolean setRemoteID(String newID) {
-	if (myMsg != null && newID.equals(myMsg)) {
-	    // messages don't fit together
-	    return false;
-	}
-	otherMsg = newID;
-	return true;
+    fun setRemoteID(newID: String): Boolean {
+        if (myMsg != null && newID == myMsg) {
+            // messages don't fit together
+            return false
+        }
+        remoteID = newID
+        return true
     }
 
     /**
      * Create a new message ID for the local message that should be sent.
-     * This function also saves the new ID in order to match it in the next {@link #setRemoteID(java.lang.String)}
+     * This function also saves the new ID in order to match it in the next [.setRemoteID]
      * invocation.
      *
      * @return The new ID for the message that should be sent.
      */
-    public String createNewID() {
-	myMsg = ValueGenerators.generateUUID();
-	return myMsg;
+    fun createNewID(): String {
+		val newId = generateUUID()
+        myMsg = newId
+        return newId
     }
-
 }

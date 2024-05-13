@@ -24,22 +24,32 @@ package org.openecard.addons.cardlink.sal.gui
 
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Step
+import org.openecard.gui.definition.TextField
 import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.mobile.activation.Websocket
 
-private val title = "Process Card"
+private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN"
+private const val title = "Enter CAN"
 
-class ProcessCardStep(val ws: Websocket) : Step(title) {
+private const val CAN_ID = "CARDLINK_FIELD_CAN"
+
+class EnterCanStep(val ws: Websocket) : Step(title) {
 	init {
-		setAction(ProcessCardStepAction(this))
+		setAction(EnterCanStepAction(this))
+
+		inputInfoUnits.add(TextField(CAN_ID).also {
+			it.minLength = 6
+			it.maxLength = 6
+		})
 	}
 }
 
-class ProcessCardStepAction(val processCardStep: ProcessCardStep) : StepAction(processCardStep) {
+class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanStep) {
 
-	override fun perform(oldResults: MutableMap<String, ExecutionResults>?, result: StepResult?): StepActionResult {
+	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
+		val can = (oldResults[stepID]!!.getResult(CAN_ID) as TextField).value.concatToString()
 //		val requiredCardTypes = setOf("http://ws.gematik.de/egk/1.0.0")
 //		val cardHandle = waitForCard(requiredCardTypes)
 //		authCard(cardHandle)

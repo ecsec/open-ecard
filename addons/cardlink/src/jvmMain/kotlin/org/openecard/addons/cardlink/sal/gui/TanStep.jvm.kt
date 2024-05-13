@@ -31,31 +31,32 @@ import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.Websocket
 
-private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE"
-private const val title = "Phone Number Entry"
+private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN"
+private const val title = "TAN Verification"
 
-private const val PHONE_ID = "CARDLINK_FIELD_PHONE"
+private const val TAN_ID = "CARDLINK_FIELD_TAN"
 
-class PhoneStep(val ws: Websocket) : Step(STEP_ID, title) {
+class TanStep(val ws: Websocket) : Step(STEP_ID, title) {
 	init {
-		setAction(PhoneStepAction(this))
+		setAction(TanStepAction(this))
 
-		inputInfoUnits.add(TextField(PHONE_ID).also {
+		inputInfoUnits.add(TextField(TAN_ID).also {
 			it.minLength = 6
+			// TODO: add descriptive data
 		})
 	}
 }
 
-class PhoneStepAction(phoneStep: PhoneStep) : StepAction(phoneStep) {
+class TanStepAction(tanStep: TanStep) : StepAction(tanStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
-		val phoneNumber = (oldResults[stepID]!!.getResult(PHONE_ID) as TextField).value.concatToString()
-		val sendPhoneStatus = sendPhoneNumber(phoneNumber)
+		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
+		val sendTanStatus = sendTan(tan)
 
-		return StepActionResult(sendPhoneStatus)
+		return StepActionResult(sendTanStatus)
 	}
 
-	private fun sendPhoneNumber(phoneNumber: String): StepActionResultStatus {
+	private fun sendTan(tan: String): StepActionResultStatus {
 		TODO("Not yet implemented")
 		return StepActionResultStatus.NEXT
 	}

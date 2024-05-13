@@ -42,10 +42,7 @@ import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.definition.ViewController;
 import org.openecard.mobile.ex.*;
-import org.openecard.mobile.ui.EacNavigatorFactory;
-import org.openecard.mobile.ui.InsertCardNavigatorFactory;
-import org.openecard.mobile.ui.CompositeUserConsent;
-import org.openecard.mobile.ui.PINManagementNavigatorFactory;
+import org.openecard.mobile.ui.*;
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.ifd.scio.wrapper.IFDTerminalFactory;
@@ -56,8 +53,7 @@ import org.openecard.mobile.activation.NfcCapabilityResult;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 
 import static org.openecard.mobile.system.ServiceMessages.*;
-import org.openecard.mobile.ui.MessageDialogStub;
-import org.openecard.mobile.ui.UserConsentNavigatorFactory;
+
 import org.openecard.mobile.utils.ClasspathRegistry;
 import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.recognition.RepoCifProvider;
@@ -262,6 +258,9 @@ public class OpeneCardContext {
 	// the key type must match the generic. This can't be enforced so watch it here.
 	EacNavigatorFactory eacNavFac = EacNavigatorFactory.create(msgSetter, dispatcher);
 	realFactories.put(eacNavFac.getProtocolType(), eacNavFac);
+
+	CardLinkNavigatorFactory cardLinkNavFac = CardLinkNavigatorFactory.create(msgSetter, dispatcher);
+	realFactories.put(cardLinkNavFac.getProtocolType(), cardLinkNavFac);
 
 	PINManagementNavigatorFactory pinMngFac = new PINManagementNavigatorFactory(
 		dispatcher, eventDispatcher);

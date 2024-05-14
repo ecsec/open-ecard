@@ -29,7 +29,6 @@ import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.util.HandlerUtils
 import org.openecard.common.util.SysUtils
 import org.openecard.crypto.common.sal.CardConnectorUtil
-import java.lang.Boolean
 import kotlin.String
 import kotlin.Throws
 
@@ -71,7 +70,7 @@ open class InsertCardHelper(
 			// connect eid card
 			val conReq = CardApplicationConnect()
 			conReq.cardApplicationPath = path
-			conReq.isExclusiveUse = Boolean.TRUE
+			conReq.isExclusiveUse = true
 			val conRes = ctx.dispatcher.safeDeliver(conReq) as CardApplicationConnectResponse
 			checkResult(conRes)
 			this.conHandle = conRes.connectionHandle

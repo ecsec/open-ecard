@@ -31,6 +31,8 @@ kotlin {
 				//	api(libs.bc.tls)
 				//	api(libs.httpcore)
 
+				implementation(libs.kotlin.serialization.json)
+
 				//	testImplementation(libs.bundles.test.basics)
 				//	testImplementation(project(":gui:swing"))
 				//	testImplementation(project(":ifd:ifd-core"))

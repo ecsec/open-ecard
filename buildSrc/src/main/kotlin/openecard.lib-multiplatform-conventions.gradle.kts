@@ -1,5 +1,6 @@
 plugins {
 	kotlin("multiplatform")
+	kotlin("plugin.serialization")
 	id("openecard.publish-conventions")
 	id("openecard.coverage-conventions")
 }

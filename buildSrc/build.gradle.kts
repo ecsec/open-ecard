@@ -24,6 +24,7 @@ dependencies {
 	implementation(libs.plugins.kotlinAllOpen)
 	implementation(libs.plugins.kotlinMultiplatform)
 	implementation(libs.plugins.kotlinKover)
+	implementation(libs.plugins.kotlinSerialization)
 
 	implementation(libs.plugins.androidLibrary)
 	implementation(libs.robovm.gradlePlugin)

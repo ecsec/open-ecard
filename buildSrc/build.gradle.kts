@@ -26,6 +26,7 @@ dependencies {
 	implementation(libs.plugins.kotlinKover)
 
 	implementation(libs.plugins.androidLibrary)
+	implementation(libs.robovm.gradlePlugin)
 }
 
 fun DependencyHandlerScope.implementation(pluginProv: Provider<PluginDependency>) {

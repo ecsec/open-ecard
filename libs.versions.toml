@@ -77,7 +77,7 @@ scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", vers
 
 android = { group = "com.google.android", name = "android", version = "api-33" }
 
-robovm-gradle = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
+robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
 robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
 roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version = "1.4.0" }

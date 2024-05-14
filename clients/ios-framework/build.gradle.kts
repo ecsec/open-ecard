@@ -4,7 +4,7 @@ description = "Create a shadowed build of httpcore for usage in openecard and mi
 
 plugins {
 	id("openecard.iosbundle-conventions")
-	id("robovm").version(libs.versions.robovm)
+	id("robovm")
 }
 val iosHeaders: Configuration by configurations.creating {
 	isCanBeResolved = true

@@ -1,11 +1,4 @@
 pluginManagement {
-	resolutionStrategy {
-		eachPlugin {
-			if (requested.id.id == "robovm") {
-				useModule("com.mobidevelop.robovm:robovm-gradle-plugin:${requested.version}")
-			}
-		}
-	}
 	repositories {
 		gradlePluginPortal()
 		google()

@@ -18,6 +18,7 @@ package-osx:
     paths:
       - clients/richclient/build/dist
   script:
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
     - ./gradlew packageMac
   needs: [ "compile" ]
   allow_failure: true
@@ -40,7 +41,7 @@ notarize-osx:
     paths:
       - clients/richclient/build/dist
   script:
-    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
     - DMG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.dmg')
     - PKG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.pkg')
     - xcrun notarytool submit ${DMG_FILE_PATH}

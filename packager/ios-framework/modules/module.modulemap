@@ -1,5 +1,0 @@
-framework module OpenEcard{
-  umbrella header "open-ecard.h"
-  export *
-  module * { export * }
-}

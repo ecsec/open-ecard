@@ -20,20 +20,13 @@
  *
  ***************************************************************************/
 
-package org.openecard.addons.cardlink.sal.gui
+package org.openecard.addons.cardlink.ws
 
-import org.openecard.gui.definition.UserConsentDescription
-import org.openecard.mobile.activation.Websocket
+import kotlinx.serialization.Serializable
 
-private const val title = "CardLink User Consent"
-const val CONSENT_TYPE = "CardLink"
 
-class CardLinkUserConsent(ws: Websocket) : UserConsentDescription(title, CONSENT_TYPE) {
-	init {
-		steps.apply {
-			add(PhoneStep(ws))
-			add(TanStep(ws))
-			add(EnterCanStep(ws))
-		}
-	}
-}
+@Serializable
+data class SendPhoneNumber(val phoneNumber: String)
+
+@Serializable
+data class SendTan(val tan: String)

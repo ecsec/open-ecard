@@ -17,7 +17,7 @@ collect-installers:
           clients/richclient/build/dist/*.dmg \
           clients/richclient/build/dist/*.deb \
           clients/richclient/build/dist/*.rpm \
-          clients/richclient/build/dist/iscc/*.exe \
+          clients/richclient/build/dist/*.exe \
           .
   dependencies:
     - "package-linux"

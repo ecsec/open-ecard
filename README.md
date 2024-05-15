@@ -70,9 +70,9 @@ Native packages for the Open eCard can be built by the following commands, given
 
 Or to build all types for a platform:
 
-    $ ./gradlew :clients:richclient:packageWin (windows exe and msi)
-    $ ./gradlew :clients:richclient:packageLinux (linux deb and rpm)
-    $ ./gradlew :clients:richclient:packageMac (osx dmg and pkg)
+    $ ./gradlew :clients:richclient:packageWin
+    $ ./gradlew :clients:richclient:packageLinux
+    $ ./gradlew :clients:richclient:packageMac
 
 
 You have to make sure the required packaging tools are installed.

@@ -32,7 +32,7 @@ deploy-mvn-artifacts-mr:
     - ORIGINAL_VERSION=$(grep -oP 'version=\K.*' gradle.properties)
     - VERSION_WITHOUT_SNAPSHOT=$(printf '%s' "${ORIGINAL_VERSION}" | sed -e 's/-SNAPSHOT//')
     - BRANCH_NAME=$(printf '%s' "${CI_COMMIT_REF_NAME}" | sed -e 's/^master$//' | sed -e 's/[^[:alnum:]]/-/g')
-    - VERSION=${VERSION_WITHOUT_SNAPSHOT}-${BRANCH_NAME:+-$BRANCH_NAME}-SNAPSHOT
+    - VERSION=${VERSION_WITHOUT_SNAPSHOT}${BRANCH_NAME:+-$BRANCH_NAME}-SNAPSHOT
     - ./gradlew publish -Pversion=${VERSION}
   allow_failure: true
   rules:

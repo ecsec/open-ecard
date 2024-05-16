@@ -1,0 +1,125 @@
+[versions]
+agp = "8.2.+"
+kotlin = "1.9.+"
+kx-co = "1.8.+"
+
+ktor = "2.3.+"
+
+androidx-activityCompose = "1.8.+"
+androidx-appcompat = "1.6.+"
+androidx-constraintlayout = "2.1.+"
+androidx-core-ktx = "1.12.+"
+androidx-espresso-core = "3.5.+"
+androidx-material = "1.11.+"
+androidx-test-junit = "1.1.+"
+
+robovm = "2.3.21"
+jfx = "17.0.2"
+
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlin-test-testng = { module = "org.jetbrains.kotlin:kotlin-test-testng", version.ref = "kotlin" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "6.0.+" }
+kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
+kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
+
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+
+# logging
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.13" }
+slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.13" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.4.14" }
+
+# utilities
+annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
+
+# testing
+testng = { group = "org.testng", name = "testng", version = "7.7.0" }
+powermock-testng = { group = "org.powermock", name = "powermock-module-testng", version = "2.0.9" }
+powermock-mockito = { group = "org.powermock", name = "powermock-api-mockito2", version = "2.0.9" }
+awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
+
+# jaxb
+jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.0" }
+jaxb-ws-api = { group = "jakarta.xml.ws", name = "jakarta.xml.ws-api", version = "4.0.0" }
+jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "4.0.2" }
+jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.14.0" }
+
+#			bc-prov", "org.bouncycastle:bcprov-jdk15on:1.62")
+#			bc-pkix", "org.bouncycastle:bcpkix-jdk15on:1.62")
+#			bc-tls", "org.bouncycastle:bctls-jdk15on:1.62")
+bc-prov = { group = "org.openecard", name = "bcprov-jdk15on", version = "1.62" }
+bc-pkix = { group = "org.openecard", name = "bcpkix-jdk15on", version = "1.62" }
+bc-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62" }
+
+httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "4.4.16" }
+# https://github.com/akuhtz/proxy-vole
+proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.2" }
+#			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
+
+pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
+
+scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "0.2.7+220204" }
+
+android = { group = "com.google.android", name = "android", version = "api-33" }
+
+robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
+robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
+robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
+roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version = "1.4.0" }
+roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version = "1.4.0" }
+roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version = "1.4.0" }
+
+xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.0" }
+
+jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.3" }
+
+jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version = "5.12.1" }
+jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version = "5.12.1" }
+
+jfx-base = { group = "org.openjfx", name = "javafx-base", version.ref = "jfx" }
+jfx-controls = { group = "org.openjfx", name = "javafx-controls", version.ref = "jfx" }
+jfx-swing = { group = "org.openjfx", name = "javafx-swing", version.ref = "jfx" }
+
+
+[bundles]
+test-basics-kotlin = ["kotlin-test"]
+test-powermock = ["powermock-testng", "powermock-mockito"]
+test-basics = ["testng", "powermock-testng", "powermock-mockito"]
+
+
+[plugins]
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidSdkLoader = { id = "com.quittle.setup-android-sdk", version = "3.1.0" }
+
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+
+kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }
+
+# adds job for generating reports about dependency versions
+versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
+
+cxf = { id = "io.mateo.cxf-codegen", version = "2.2.0" }
+
+jfx = { id =  "org.openjfx.javafxplugin", version = "0.1.0" }
+
+jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.6.0" }

@@ -1,23 +1,25 @@
-package-osx-pkg:
+package-osx:
   stage: package
   tags:
     - "mac"
     - "dev-cert"
   cache:
-    key: "$OEC_OSX_CACHE"
+  - key: "OEC_OSX_CACHE"
     paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
+        - .gradle/caches/
+        - .gradle/wrapper/
+        - .gradle/daemon/
+        - .gradle/native/
+        - .gradle/jdks/
+        - "**/build"
     policy: pull-push
   artifacts:
     name: 'OeC-Installer-PKG'
     paths:
-      - packager/richclient-packager/target/jpackage
+      - clients/richclient/build/dist
   script:
-    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
-    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/ecsec.keychain-db
-    - ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=PKG
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
+    - ./gradlew packageMac
   needs: [ "compile" ]
   allow_failure: true
   rules:
@@ -27,49 +29,21 @@ package-osx-pkg:
     - if: $CI_MERGE_REQUEST_IID
       when: manual
 
-package-osx-dmg:
-  stage: package
-  tags:
-    - "mac"
-    - "dev-cert"
-  cache:
-    key: "$OEC_OSX_CACHE"
-    paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
-    policy: pull-push
-  artifacts:
-    name: 'OeC-Installer-DMG'
-    paths:
-      - packager/richclient-packager/target/jpackage
-  script:
-    - ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=DMG
-  needs: [ "compile" ]
-  allow_failure: true
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
-    - if: $CI_COMMIT_BRANCH == "master"
-      when: manual
-    - if: $CI_MERGE_REQUEST_IID
-      when: manual
-
-notarize-osx-pkgs:
+notarize-osx:
   stage: package
   tags:
     - "mac"
     - "dev-cert"
   dependencies:
-    - "package-osx-pkg"
-    - "package-osx-dmg"
+    - "package-osx"
   artifacts:
     name: 'OeC-Installer'
     paths:
-      - packager/richclient-packager/target/jpackage
+      - clients/richclient/build/dist
   script:
-    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} /Users/ecsec-ci/Library/Keychains/login.keychain-db
-    - DMG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.dmg')
-    - PKG_FILE_PATH=$(find packager/richclient-packager/target/jpackage/ -name 'Open-eCard-App-*.pkg')
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
+    - DMG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.dmg')
+    - PKG_FILE_PATH=$(find clients/richclient/build/dist -name 'Open-eCard-App-*.pkg')
     - xcrun notarytool submit ${DMG_FILE_PATH}
         --keychain-profile "oec-installers"
         --wait
@@ -78,7 +52,7 @@ notarize-osx-pkgs:
         --wait
     - xcrun stapler staple ${PKG_FILE_PATH}
     - xcrun stapler staple ${DMG_FILE_PATH}
-  needs: [ "package-osx-pkg", "package-osx-dmg" ]
+  needs: [ "package-osx" ]
   allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/

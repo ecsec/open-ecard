@@ -17,82 +17,90 @@ The artifacts of the project consist of modularized, and to some extent extensib
 Build Instructions
 ==================
 
-Detailed build instructions can be found in the INSTALL.md file bundled with
-this source package.
+Note that command line examples are shown in unix style.
+On windows all examples should work analogously with the appropriate style.
+Instead of `./gradlew` use `.\gradlew.bat` on windows machines.
 
 Quick Start
 -----------
+
+For a general overview of available gradle tasks use: 
+
+	$ ./gradlew tasks 
 
 The simplified build instructions are as follows:
 
     $ git clone git://github.com/ecsec/open-ecard.git
     $ cd open-ecard
-    $ mvn clean install
+    $ ./gradlew build
 
 
-In case you received a preassembled source bundle, the build instructions are
+In case you received a pre-assembled source bundle, the build instructions are
 as follows:
 
     $ tar xaf open-ecard-${version}.tar.xz
     $ cd open-ecard-$version
-    $ mvn clean install
+    $ ./gradlew build
 
 Finally, you can run the Open eCard App richclient from command line:
 
-    $ ./mvnw exec:java -pl clients/richclient -Dexec.mainClass=org.openecard.richclient.RichClient
+    $ ./gradlew :clients:richclient:run
 
 Packaging
 -----------
 
-Native packages which are based on a modular runtime image can be built with the new [jpackage](https://openjdk.java.net/jeps/343) tool which is part in newer JDK versions (14+). Native packages for the Open eCard can be built by downloading such a JDK version, referencing it as toolchain and by specifying the following property:
+Native packages which are based on a modular runtime image can be built with [jpackage](https://docs.oracle.com/en/java/javase/21/jpackage/).
+The following types are available:
 
-    $ mvn clean install -Ddesktop-package
+- DMG
+- PKG
+- DEB
+- RPM
+- MSI
+- EXE
 
-By default, the packager will take the predefined package types, such as dmg for Mac OS and deb for Linux-based systems. The package type can be overridden for Mac and Linux packages by using the following user property:
+Native packages for the Open eCard can be built by the following commands, given the required build tools are available.
 
-    $ mvn clean install -Ddesktop-package -Dpackage.type=<type>
+    $ ./gradlew :clients:richclient:pacakgeDmg
+    $ ./gradlew :clients:richclient:pacakgePkg
+    $ ./gradlew :clients:richclient:pacakgeDeb
+    $ ./gradlew :clients:richclient:pacakgeRpm
+    $ ./gradlew :clients:richclient:pacakgeMsi
+    $ ./gradlew :clients:richclient:pacakgeExe
 
-Thereby, the following types are available:
+Or to build all types for a platform:
 
- - DMG
- - PKG
- - DEB
- - RPM
+    $ ./gradlew :clients:richclient:packageWin
+    $ ./gradlew :clients:richclient:packageLinux
+    $ ./gradlew :clients:richclient:packageMac
 
-You have to make sure the required packaging tools are installed. In case of Windows, msi and exe packages are built. For this purpose, two additional tools are required:
+
+You have to make sure the required packaging tools are installed.
+In case of Windows, msi and exe packages are built. For this purpose, two additional tools are required:
 
  - [WiX toolset](https://wixtoolset.org/) - to create msi installers
  - [Inno Setup](http://www.jrsoftware.org/isinfo.php) - to create exe installers (Path environment variable must be set)
 
-More information about the required JDK versions and the setup of the toolchain, can be found in the INSTALL.md file.
 
 Mobile libs
 -----------
 
 Open eCard supports building of libraries for Android and iOS for usage in arbitrary mobile apps.
-For this purpose, Java JDK 17 is required.
-Building the Open eCard with those mobile libraries can look like the following:
-
-    $ ./mvnw clean install -pl packager/ios-framework -am -P build-mobile-libs
 
 ### Android
-After a successfull build the library for android can be found in `android-lib` sub project.
-It also can be used as prebuild dependency via gradle dependency management.
-See [open-ecard-android](https://github.com/ecsec/open-ecard-android) for further information.
+The android artifacts are created during a normal build (e.i. gradle `build` task).
+However, the android SDK must be present and configured correctly (e.i. `ANDROID_HOME` must be set).
 
-The android API artifacts are taken from the Android SDK.
-They are uploaded into the maven repository with the following commands.
-Remember to set the variables `API_VERSION` and `ANDROID_HOME` accordingly.
-
-```
-mvn deploy:deploy-file -DrepositoryId=ecsec-thirdparty  -Durl=https://mvn.ecsec.de/repository/ecard_thirdparty/ -DgroupId=com.google.android -DartifactId=android -Dversion=api-$API_VERSION -Dclassifier=sources -Dfile=$ANDROID_HOME/platforms/android-$API_VERSION/android-stubs-src.jar
-mvn deploy:deploy-file -DrepositoryId=ecsec-thirdparty  -Durl=https://mvn.ecsec.de/repository/ecard_thirdparty/ -DgroupId=com.google.android -DartifactId=android -Dversion=api-$API_VERSION -Dfile=$ANDROID_HOME/platforms/android-$API_VERSION/android.jar
-```
+See [open-ecard-android](https://github.com/ecsec/open-ecard-android) for further information on using the artifact.
 
 ### iOS (>2.x)
-If building on MacOS a ready to use framework gets generated and can be found in
-`./packager/ios-framework/target/robovm`. 
-The framework can also be found as asset of the release.
+Build the ios artifacts by running the following command (Apple developer machine is required):
+
+	`./gradlew :clients:ios-framework:build`
+
+If building on MacOS a ready to use framework gets generated and can be found in the ios-framework build folder.
+
+	`./clients/ios-framework/build/robovm` 
 
 It also can be installed as a cocoapod dependency.
 ```
@@ -117,35 +125,23 @@ For example, commits that are related to the CI process.
 License
 =======
 
-The Open eCard App uses a Dual Licensing model. The software is always
-distributed under the GNU General Public License v3 (GPLv3). Additionally the
-software can be licensed in an individual agreement between the licenser and
-the licensee.
+The Open eCard App uses a Dual Licensing model.
+The software is always distributed under the GNU General Public License v3 (GPLv3).
+Additionally, the software can be licensed in an individual agreement between the licenser and the licensee.
 
 
 Contributing
 ============
 
-New developers can find information on how to participate under
-https://dev.openecard.org/projects/open-ecard/wiki/Developer_Guide.
+New developers can find information on how to participate under https://dev.openecard.org/projects/open-ecard/wiki/Developer_Guide.
 
-Contributions can only be accepted when the contributor has signed the
-contribution agreement (https://dev.openecard.org/documents/35). The agreement
-basically states, that the contributed work can, additionally to the GPLv3, be
-made available to others in an individual agreement as defined in the previous
-section. For further details refer to the agreement.
+Contributions can only be accepted when the contributor has signed the contribution agreement (https://dev.openecard.org/documents/35).
+The agreement basically states, that the contributed work can, additionally to the GPLv3, be made available to others in an individual agreement as defined in the previous section.
+For further details refer to the agreement.
+
 
 Release (CD)
 ============
-The creation of precompiled artifacts is done via a CD pipeline on servers of
-ecsec GmbH.
-To perform a new release, the version information in the pom files has to be
-updated and an appropriate tag in the form: vX.YY.ZZZ has to be pushed to the
-repository clone on ecsecs gitlab instance.
-To update the version one can use:
-
-```
-mvn versions:set -DnewVersion=X.YY.ZZZ
-```
-
-After the release, consider updating the version again to a new SNAPSHOT version.
+A release is created by publishing a new version tag.
+The creation of precompiled artifacts is done via a CD pipeline on servers of ecsec GmbH.
+After a successful build, the artifacts are uploaded to form a github release.

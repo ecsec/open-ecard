@@ -14,13 +14,13 @@ stages:
   - publish
 
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
-  MAVEN_USER_HOME: "$CI_PROJECT_DIR/.m2"
-  OEC_DOCKER_CACHE: "oec-cache"
+  OEC_JAVA_CACHE_KEY: "oec-java-cache"
+  OEC_JAVA_TMP_CACHE_KEY: "oec-java-tmp-cache"
   OEC_OSX_CACHE: "oec-macos-cache"
   OEC_WIN_CACHE: "oec-win-cache"
 
 include:
+- '/.gitlab-ci.d/cache.yml'
 - '/.gitlab-ci.d/compile.yml'
 - '/.gitlab-ci.d/test.yml'
 - '/.gitlab-ci.d/sast.yml'

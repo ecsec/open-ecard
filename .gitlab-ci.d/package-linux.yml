@@ -1,48 +1,21 @@
-package-linux-deb:
+package-linux:
   stage: package
   image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
   tags:
-    - "docker-exec"
+    - "podman"
   cache:
-    key: "$OEC_DOCKER_CACHE"
-    paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
-    policy: pull-push
+  - key: "$OEC_JAVA_CACHE_KEY"
+    paths: !reference [ .cache-gradle-base, paths ]
+    policy: pull
+  - key: "$OEC_JAVA_TMP_CACHE_KEY"
+    paths: [ .cache-gradle-builds, paths ]
+    policy: pull
   artifacts:
-    name: 'OeC-Installer-DEB'
+    name: 'OeC-Installer-Linux'
     paths:
-      - packager/richclient-packager/target/jpackage
+      - clients/richclient/build/dist
   script:
-    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=DEB
-  needs: [ "compile" ]
-  allow_failure: true
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
-    - if: $CI_COMMIT_BRANCH == "master"
-      when: manual
-    - if: $CI_MERGE_REQUEST_IID
-      when: manual
-
-package-linux-rpm:
-  stage: package
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
-  tags:
-    - "docker-exec"
-  cache:
-    key: "$OEC_DOCKER_CACHE"
-    paths:
-      - .m2/wrapper/dists
-      - .m2/repository/
-      - .mvn/wrapper/maven-wrapper.jar
-    policy: pull-push
-  artifacts:
-    name: 'OeC-Installer-RPM'
-    paths:
-      - packager/richclient-packager/target/jpackage
-  script:
-    - MAVEN_USER_HOME=$MAVEN_USER_HOME MAVEN_OPTS=$MAVEN_OPTS ./mvnw install -DskipTests -Ddesktop-package -Dpackage.type=RPM
+    - ./gradlew packageLinux
   needs: [ "compile" ]
   allow_failure: true
   rules:

@@ -2,7 +2,7 @@ publish-to-github:
   stage: publish
   image: debian:stable-20230109-slim
   tags:
-    - "docker-exec"
+    - "podman"
   script:
     - apt-get update && apt-get upgrade -y && apt-get install -y jq curl zip
     # Create Release
@@ -37,17 +37,13 @@ publish-to-github:
           https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=${INSTALLER_FILENAME}
       done
   dependencies:
-    - "package-linux-deb"
-    - "package-linux-rpm"
-    - "package-osx-pkg"
-    - "package-osx-dmg"
+    - "package-linux"
+    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   needs:
-    - "package-linux-deb"
-    - "package-linux-rpm"
-    - "package-osx-pkg"
-    - "package-osx-dmg"
+    - "package-linux"
+    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   rules:

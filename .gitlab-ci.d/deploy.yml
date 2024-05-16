@@ -37,5 +37,4 @@ deploy-mvn-artifacts-mr:
   allow_failure: true
   rules:
     - if: $CI_MERGE_REQUEST_IID
-      when: manual
     - if: $CI_COMMIT_BRANCH == "master"

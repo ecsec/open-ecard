@@ -27,6 +27,7 @@ kotlin {
 				api(project(":ifd:ifd-common"))
 				api(project(":sal:sal-common"))
 				api(project(":clients:mobile-lib"))
+				implementation(project(":addons:tr03112"))
 				//	implementation(project(":i18n"))
 				//	api(libs.bc.prov)
 				//	api(libs.bc.tls)

@@ -35,7 +35,6 @@ import org.openecard.mobile.activation.*;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
-import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.openecard.sal.protocol.eac.gui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

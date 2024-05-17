@@ -45,10 +45,10 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
+import org.openecard.ifd.protocol.pace.common.PasswordID;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
-import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,13 +137,13 @@ public class CHATStepAction extends StepAction {
 		nativePace = ph.isNativePinEntry();
 
 		// get the PACEMarker
-		paceMarker = ph.getPaceMarker(passwordType.getString(), ECardConstants.NPA_CARD_TYPE);
+		paceMarker = ph.getPaceMarker(passwordType.name(), ECardConstants.NPA_CARD_TYPE);
 	    } else {
 		// mobile device, pick only available reader and proceed
 		status.update(PacePinStatus.UNKNOWN);
 		cardHandle = ph.getMobileReader();
 		nativePace = false;
-		paceMarker = ph.getPaceMarker(passwordType.getString(), ECardConstants.NPA_CARD_TYPE);
+		paceMarker = ph.getPaceMarker(passwordType.name(), ECardConstants.NPA_CARD_TYPE);
 	    }
 
 	    // save values in dynctx

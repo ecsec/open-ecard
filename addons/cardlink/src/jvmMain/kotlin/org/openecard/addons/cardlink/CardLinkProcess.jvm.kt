@@ -28,7 +28,10 @@ import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
 import org.openecard.addons.cardlink.sal.CARDLINK_PROTOCOL_ID
 import org.openecard.addons.cardlink.sal.setProcessWebsocket
+import org.openecard.binding.tctoken.TR03112Keys
+import org.openecard.common.DynamicContext
 import org.openecard.common.WSHelper
+import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.Websocket
 
 class CardLinkProcess constructor(private val ctx: Context, private val ws: Websocket) {
@@ -36,7 +39,9 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 	private val dispatcher = ctx.dispatcher
 
     fun start(): BindingResult {
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
+		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 		setProcessWebsocket(ws)
 		val cardHandle = performDidAuth(conHandle)
 		handleRemoteApdus(cardHandle)

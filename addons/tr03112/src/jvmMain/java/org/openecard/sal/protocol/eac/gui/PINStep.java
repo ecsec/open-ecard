@@ -28,13 +28,13 @@ import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.I18n;
 import org.openecard.gui.definition.InputInfoUnit;
+import org.openecard.ifd.protocol.pace.common.PasswordID;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.definition.Step;
 import org.openecard.gui.definition.Text;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
-import org.openecard.sal.protocol.eac.anytype.PasswordID;
 
 
 /**
@@ -74,7 +74,7 @@ public final class PINStep extends Step {
 
     public PINStep(EACData eacData, boolean capturePin, PACEMarkerType paceMarker) {
 	super(STEP_ID, "Dummy-Title");
-	this.pinType = LANG_PACE.translationForKey(PasswordID.parse(eacData.pinID).getString());
+	this.pinType = LANG_PACE.translationForKey(PasswordID.parse(eacData.pinID).name());
 	this.paceMarker = paceMarker;
 	this.hasAttemptsCounter = eacData.pinID != PasswordID.CAN.getByte();
 	this.capturePin = capturePin;
@@ -116,7 +116,7 @@ public final class PINStep extends Step {
 
     public static Step createDummy(byte pinId) {
 	Step s = new Step(STEP_ID);
-	String pinType = LANG_PACE.translationForKey(PasswordID.parse(pinId).getString());
+	String pinType = LANG_PACE.translationForKey(PasswordID.parse(pinId).name());
 	s.setTitle(LANG_PACE.translationForKey(TITLE, pinType));
 	s.setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	return s;

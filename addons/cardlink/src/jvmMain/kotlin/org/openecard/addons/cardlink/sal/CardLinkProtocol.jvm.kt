@@ -45,3 +45,8 @@ class CardLinkProtocol : SALProtocolBaseImpl() {
 	override fun destroy(force: Boolean) {
 	}
 }
+
+object CardLinkKeys {
+	private const val prefix = "CardLink::"
+	const val CON_HANDLE = "${prefix}CON_HANDLE"
+}

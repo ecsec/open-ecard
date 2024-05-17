@@ -34,7 +34,7 @@ import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.sal.protocol.eac.PACEStep
 
-class CardLinkStep(aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
+class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	val gui = aCtx.userConsent
 
 	override fun getFunctionType(): FunctionType {
@@ -43,7 +43,7 @@ class CardLinkStep(aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticat
 
 	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
 		val ws = getProcessWebsocket()
-		val uc = CardLinkUserConsent(ws)
+		val uc = CardLinkUserConsent(ws, aCtx, req.connectionHandle)
 
 		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
 		val exec = ExecutionEngine(navigator)

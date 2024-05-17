@@ -22,6 +22,7 @@ kotlin {
 				api(project(":crypto:tls"))
 				api(project(":ifd:ifd-common"))
 				api(project(":sal:sal-common"))
+				implementation(project(":ifd:ifd-protocols:pace"))
 			}
 		}
 		val jvmTest by getting {

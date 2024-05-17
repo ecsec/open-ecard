@@ -111,28 +111,12 @@ class WSModelSerializationTest {
 	}
 
 	@Test(dataProvider = "egkPayloads")
-	fun testEgkMessageSerialization(egkPayload: EgkPayload, serialName: String) {
-		val egkMessage = EgkMessage(
-			type = serialName,
-			egkPayload
-		)
-		val jsonString = cardLinkJsonFormatter.encodeToString(egkMessage)
-		// Try to get an instance of EGKPayload from the Base64-encoded payload
-		egkMessage.getEgkPayload()
-
-		logger.info { jsonString }
-	}
-
-	@Test(dataProvider = "egkPayloads")
 	fun testEgkEnvelopeSerialization(egkPayload: EgkPayload, serialName: String) {
-		val egkMessage = EgkMessage(
-			type = serialName,
-			egkPayload
-		)
 		val egkEnvelope = EgkEnvelope(
 			cardSessionId = "foobar",
 			correlationId = UUID.randomUUID().toString(),
-			message = egkMessage
+			payload = egkPayload,
+			payloadType = serialName
 		)
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		logger.info { jsonString }

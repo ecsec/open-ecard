@@ -46,16 +46,24 @@ const val CONFIRM_TAN_RESPONSE = "confirmTanResponse"
 class EgkEnvelope(
 	var cardSessionId: String,
 	var correlationId: String?,
-	var message: EgkMessage
+	var payload: EgkPayload,
+	var payloadType: String,
 )
 
 object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 	override val descriptor: SerialDescriptor = EgkEnvelope.serializer().descriptor
 
 	override fun serialize(encoder: Encoder, value: EgkEnvelope) {
-		val egkEnvelope = Json.encodeToJsonElement(value.message)
+		val payloadJsonStr = cardLinkJsonFormatter.encodeToString(value.payload)
+		val base64EncodedPayload = Base64.getEncoder().encodeToString(payloadJsonStr.encodeToByteArray())
+
+		val jsonPayload = buildJsonObject {
+			put("type", value.payloadType)
+			put("payload", base64EncodedPayload)
+		}
+
 		val jsonArray = buildJsonArray {
-			add(egkEnvelope)
+			add(jsonPayload)
 			add(value.cardSessionId)
 			value.correlationId?.let { add(it) }
 		}
@@ -65,54 +73,32 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 	override fun deserialize(decoder: Decoder): EgkEnvelope {
 		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
-		val egkEnvelope = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
+		val egkMessage = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
 			?: throw IllegalArgumentException("Web-Socket message does not contain an Egk message.")
 		val cardSessionId = websocketMessage.jsonArray.getOrNull(1)?.jsonPrimitive?.content
 			?: throw IllegalArgumentException("Web-Socket message does not contain a card session ID.")
 		val correlationId = websocketMessage.jsonArray.getOrNull(2)?.jsonPrimitive?.content
 
+		val messageType = egkMessage["type"]?.jsonPrimitive?.content
+			?: throw IllegalArgumentException("Web-Socket EGK message does not contain a type.")
+		val messagePayload = egkMessage["payload"]?.jsonPrimitive?.content
+			?: throw IllegalArgumentException("Web-Socket EGK message does not contain a payload.")
+
+		val jsonPayload = String(Base64.getDecoder().decode(messagePayload))
+		val jsonElement = Json.parseToJsonElement(jsonPayload)
+		val typedJsonElement = JsonObject(jsonElement.jsonObject.toMutableMap().apply {
+			put(Json.configuration.classDiscriminator, JsonPrimitive(messageType))
+		})
+
 		return EgkEnvelope(
 			cardSessionId,
 			correlationId,
-			cardLinkJsonFormatter.decodeFromJsonElement<EgkMessage>(egkEnvelope)
+			cardLinkJsonFormatter.decodeFromJsonElement<EgkPayload>(typedJsonElement),
+			messageType,
 		)
 	}
 }
 
-
-@Serializable
-class EgkMessage {
-
-	private var type: String
-	/* Ready Message does not contain a payload */
-	private var payload: String?
-
-	constructor(type: String) {
-		this.type = type
-		this.payload = null
-	}
-
-	constructor(type: String, payload: EgkPayload) {
-		val jsonPayload = cardLinkJsonFormatter.encodeToString(payload)
-		val base64EncodedPayload = Base64.getEncoder().encodeToString(jsonPayload.encodeToByteArray())
-
-		this.type = type
-		this.payload = base64EncodedPayload
-	}
-
-	fun getEgkPayload() : EgkPayload {
-		if (payload != null) {
-			val jsonPayload = String(Base64.getDecoder().decode(payload))
-			val jsonElement = Json.parseToJsonElement(jsonPayload)
-			val typedJsonElement = JsonObject(jsonElement.jsonObject.toMutableMap().apply {
-				put(Json.configuration.classDiscriminator, JsonPrimitive(type))
-			})
-			return cardLinkJsonFormatter.decodeFromJsonElement<EgkPayload>(typedJsonElement)
-		} else {
-			throw IllegalArgumentException("Envelope Message does not have a payload.")
-		}
-	}
-}
 
 val module = SerializersModule {
 	polymorphic(EgkPayload::class) {

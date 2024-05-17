@@ -16,6 +16,7 @@ test:
         - "**/build/reports/kover/report.xml"
         - "**/build/test-results/*/TEST-*.xml"
   script:
+    - !reference [.versioning, script]
     - ./gradlew check koverVerify koverXmlReport
   needs: [ "compile" ]
   rules:

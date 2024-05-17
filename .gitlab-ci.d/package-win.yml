@@ -7,6 +7,12 @@ package-win:
     paths:
       - clients/richclient/build/dist/
   script:
+    - |
+      if (Get-Variable 'CI_COMMIT_TAG' -ErrorAction Ignore) {
+        echo "Do versioning for release build..."
+        set ORG_GRADLE_PROJECT_version $CI_COMMIT_TAG.substring(1)
+      }
+    # TODO: Do versioning for SNAPSHOT builds
     - .\gradlew.bat packageWin --no-build-cache --no-daemon
     - $EXE_FILE_PATH = $(Get-Childitem
         -Path .\clients\richclient\build\dist

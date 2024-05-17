@@ -20,6 +20,7 @@ package-ios-framework:
       - LICENSE.*
       - LICENSE
   script:
+    - !reference [.versioning, script]
     - ./gradlew buildIosFramework
     - mv clients/ios-framework/build/robovm/OpenEcard.xcframework OpenEcard.xcframework/
     - cp LICENSE.GPL LICENSE

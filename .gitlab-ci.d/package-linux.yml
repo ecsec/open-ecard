@@ -15,6 +15,7 @@ package-linux:
     paths:
       - clients/richclient/build/dist
   script:
+    - !reference [.versioning, script]
     - ./gradlew packageLinux
   needs: [ "compile" ]
   allow_failure: true

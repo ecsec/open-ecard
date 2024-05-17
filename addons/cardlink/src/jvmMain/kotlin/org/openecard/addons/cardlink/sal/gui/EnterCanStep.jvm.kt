@@ -28,6 +28,8 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
+import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.sal.CardLinkKeys.CORRECT_CAN
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -113,6 +115,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 					return StepActionResult(StepActionResultStatus.REPEAT)
 				} else {
 					checkResult(establishChannelResponse)
+					dynCtx.put(CardLinkKeys.CORRECT_CAN, canValue)
 				}
 			}
 
@@ -141,7 +144,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 
 
 			// repeat the step
-			LOG.error { "An unknown error occured while trying to verify the PIN." }
+			LOG.error { "An unknown error occurred while trying to verify the PIN." }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
 				ErrorStep(

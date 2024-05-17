@@ -12,7 +12,7 @@ package-osx:
         - .gradle/native/
         - .gradle/jdks/
         - "**/build"
-    policy: pull-push
+    policy: pull
   artifacts:
     name: 'OeC-Installer-PKG'
     paths:

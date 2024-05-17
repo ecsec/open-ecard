@@ -28,7 +28,8 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.*
-import java.util.*
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 
 const val REGISTER_EGK = "registerEGK"
@@ -53,9 +54,10 @@ class EgkEnvelope(
 object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 	override val descriptor: SerialDescriptor = EgkEnvelope.serializer().descriptor
 
+	@OptIn(ExperimentalEncodingApi::class)
 	override fun serialize(encoder: Encoder, value: EgkEnvelope) {
 		val payloadJsonStr = cardLinkJsonFormatter.encodeToString(value.payload)
-		val base64EncodedPayload = Base64.getEncoder().encodeToString(payloadJsonStr.encodeToByteArray())
+		val base64EncodedPayload = Base64.encode(payloadJsonStr.encodeToByteArray())
 
 		val jsonPayload = buildJsonObject {
 			put("type", value.payloadType)
@@ -70,6 +72,7 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 		encoder.encodeSerializableValue(JsonElement.serializer(), jsonArray)
 	}
 
+	@OptIn(ExperimentalEncodingApi::class)
 	override fun deserialize(decoder: Decoder): EgkEnvelope {
 		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
@@ -84,7 +87,7 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 		val messagePayload = egkMessage["payload"]?.jsonPrimitive?.content
 			?: throw IllegalArgumentException("Web-Socket EGK message does not contain a payload.")
 
-		val jsonPayload = String(Base64.getDecoder().decode(messagePayload))
+		val jsonPayload = String(Base64.decode(messagePayload))
 		val jsonElement = Json.parseToJsonElement(jsonPayload)
 		val typedJsonElement = JsonObject(jsonElement.jsonObject.toMutableMap().apply {
 			put(Json.configuration.classDiscriminator, JsonPrimitive(messageType))

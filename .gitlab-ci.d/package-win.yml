@@ -11,6 +11,12 @@ package-win:
       if (Get-Variable 'CI_COMMIT_TAG' -ErrorAction Ignore) {
         echo "Do versioning for release build..."
         set ORG_GRADLE_PROJECT_version $CI_COMMIT_TAG.substring(1)
+      } else {
+        $content = Get-Content .\gradle.properties -raw
+        $hashTable = ConvertFrom-StringData -StringData $content
+        $SNAPSHOT_VERSION = $hashTable.version
+        $VERSION_WITHOUT_SNAPSHOT = $SNAPSHOT_VERSION.replace('-SNAPSHOT', '')
+        set ORG_GRADLE_PROJECT_version $VERSION_WITHOUT_SNAPSHOT-$CI_COMMIT_REF_SLUG-SNAPSHOT
       }
     # TODO: Do versioning for SNAPSHOT builds
     - .\gradlew.bat packageWin --no-build-cache --no-daemon -Pversion="$ORG_GRADLE_PROJECT_version"

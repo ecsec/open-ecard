@@ -68,6 +68,7 @@ publish-ios-pod-spec:
     - echo "s.ios.deployment_target = '13.0'" >> open-ecard.podspec
     - echo "s.ios.vendored_frameworks = 'OpenEcard.xcframework'" >> open-ecard.podspec
     - echo end >> open-ecard.podspec
+    - pod spec lint open-ecard.podspec --verbose
     - pod trunk push open-ecard.podspec
   needs: [ "publish-to-github" ]
   rules:

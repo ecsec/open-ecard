@@ -1,6 +1,6 @@
 package-linux:
   stage: package
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:2.0
   tags:
     - "podman"
   cache:

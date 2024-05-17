@@ -13,7 +13,7 @@ package-win:
         set ORG_GRADLE_PROJECT_version $CI_COMMIT_TAG.substring(1)
       }
     # TODO: Do versioning for SNAPSHOT builds
-    - .\gradlew.bat packageWin --no-build-cache --no-daemon
+    - .\gradlew.bat packageWin --no-build-cache --no-daemon -Pversion="$ORG_GRADLE_PROJECT_version"
     - $EXE_FILE_PATH = $(Get-Childitem
         -Path .\clients\richclient\build\dist
         -Include Open-eCard-App-*.exe

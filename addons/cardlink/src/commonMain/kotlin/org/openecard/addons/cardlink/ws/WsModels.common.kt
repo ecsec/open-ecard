@@ -57,7 +57,7 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 	@OptIn(ExperimentalEncodingApi::class)
 	override fun serialize(encoder: Encoder, value: EgkEnvelope) {
 		val payloadJsonStr = cardLinkJsonFormatter.encodeToString(value.payload)
-		val base64EncodedPayload = Base64.encode(payloadJsonStr.encodeToByteArray())
+		val base64EncodedPayload = Base64.encode(payloadJsonStr.encodeToByteArray()).trimEnd('=')
 
 		val jsonPayload = buildJsonObject {
 			put("type", value.payloadType)

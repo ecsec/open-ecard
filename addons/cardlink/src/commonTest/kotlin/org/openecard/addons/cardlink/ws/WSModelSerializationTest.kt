@@ -25,6 +25,7 @@ package org.openecard.addons.cardlink.ws
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
+import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.util.*
@@ -120,5 +121,9 @@ class WSModelSerializationTest {
 		)
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		logger.info { jsonString }
+
+		// we will deserialize the string back to the class
+		val egkEnvelopeDecoded = cardLinkJsonFormatter.decodeFromString<EgkEnvelope>(jsonString)
+		Assert.assertEquals(egkEnvelopeDecoded.payload.javaClass.name, egkPayload.javaClass.name)
 	}
 }

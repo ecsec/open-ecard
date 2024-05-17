@@ -23,7 +23,7 @@
 package org.openecard.addons.cardlink.ws
 
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
@@ -52,7 +52,13 @@ class EgkEnvelope(
 )
 
 object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
-	override val descriptor: SerialDescriptor = EgkEnvelope.serializer().descriptor
+	// Not really used, but must be implemented
+	override val descriptor : SerialDescriptor = buildClassSerialDescriptor("EgkEnvelope") {
+		element<String>("cardSessionId")
+		element<String>("correlationId")
+		element<EgkPayload>("payload")
+		element<String>("payloadType")
+	}
 
 	@OptIn(ExperimentalEncodingApi::class)
 	override fun serialize(encoder: Encoder, value: EgkEnvelope) {

@@ -14,6 +14,8 @@ kotlin {
 		val commonTest by getting {
 			dependencies {
 				implementation(libs.bundles.test.basics.kotlin)
+				implementation(libs.slf4j.api)
+				implementation(libs.slf4j.jdk14)
 			}
 		}
 		val jvmMain by getting {

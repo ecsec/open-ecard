@@ -66,9 +66,9 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
 		val egkEnvelope = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
-			?: throw RuntimeException("Web-Socket message does not contain an Egk message.")
+			?: throw IllegalArgumentException("Web-Socket message does not contain an Egk message.")
 		val cardSessionId = websocketMessage.jsonArray.getOrNull(1)?.jsonPrimitive?.content
-			?: throw RuntimeException("Web-Socket message does not contain a card session ID.")
+			?: throw IllegalArgumentException("Web-Socket message does not contain a card session ID.")
 		val correlationId = websocketMessage.jsonArray.getOrNull(2)?.jsonPrimitive?.content
 
 		return EgkEnvelope(
@@ -109,7 +109,7 @@ class EgkMessage {
 			})
 			return cardLinkJsonFormatter.decodeFromJsonElement<EgkPayload>(typedJsonElement)
 		} else {
-			throw RuntimeException("Envelope Message does not have a payload.")
+			throw IllegalArgumentException("Envelope Message does not have a payload.")
 		}
 	}
 }

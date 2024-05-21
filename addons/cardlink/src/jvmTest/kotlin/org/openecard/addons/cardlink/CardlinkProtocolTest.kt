@@ -33,6 +33,7 @@ import org.openecard.common.WSHelper
 import org.openecard.common.event.EventDispatcherImpl
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.interfaces.Dispatcher
+import org.openecard.common.interfaces.EventDispatcher
 import org.openecard.common.sal.CombinedCIFProvider
 import org.openecard.common.util.ByteUtils
 import org.openecard.gui.UserConsent
@@ -53,7 +54,6 @@ import org.openecard.ws.common.GenericInstanceProvider
 import org.openecard.ws.jaxb.JAXBMarshaller
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import java.util.*
 
 
 private val logger = KotlinLogging.logger {}
@@ -97,15 +97,14 @@ class CardlinkProtocolTest {
 		val contextManager = activationUtils.context(nfcCapabilities)
 		contextManager.initializeContext(startServiceHandler)
 
-		//val uc: UserConsent = Mockito.mock(UserConsent::class.java)
+		val eventDispatcher = EventDispatcherImpl()
+		eventDispatcher.start()
+
 		val vc: ViewController = Mockito.mock(ViewController::class.java)
 		val d: Dispatcher = MessageDispatcher(env)
 		val tinyManagement = TinyManagement(env)
-		val uc : UserConsent = createUserConsent(d, msgSetter)
+		val uc : UserConsent = createUserConsent(d, msgSetter, eventDispatcher)
 		val mainSAL = TinySAL(env)
-
-		val eventDispatcher = EventDispatcherImpl()
-		eventDispatcher.start()
 
 		val ifd = IFD()
 		ifd.setEnvironment(env)
@@ -145,13 +144,13 @@ class CardlinkProtocolTest {
 		WSHelper.checkResult(mainSAL.initialize(Initialize()))
 	}
 
-	private fun createUserConsent(dispatcher: Dispatcher, msgSetter: NFCDialogMsgSetter): CompositeUserConsent {
-		val realFactories = HashMap<String, UserConsentNavigatorFactory<out ActivationInteraction?>>()
-
+	private fun createUserConsent(dispatcher: Dispatcher, msgSetter: NFCDialogMsgSetter, eventDispatcher: EventDispatcher): CompositeUserConsent {
+		val eacNavFac = EacNavigatorFactory.create(msgSetter, dispatcher)
+		val insertFac = InsertCardNavigatorFactory(msgSetter)
+		val pinMngFac = PINManagementNavigatorFactory(dispatcher, eventDispatcher)
 		val cardLinkNavFac = CardLinkNavigatorFactory.create(msgSetter, dispatcher)
-		realFactories[cardLinkNavFac.protocolType] = cardLinkNavFac
 
-		val allFactories = listOf(cardLinkNavFac)
+		val allFactories = listOf(eacNavFac, insertFac, pinMngFac, cardLinkNavFac)
 
 		return CompositeUserConsent(
 			allFactories,

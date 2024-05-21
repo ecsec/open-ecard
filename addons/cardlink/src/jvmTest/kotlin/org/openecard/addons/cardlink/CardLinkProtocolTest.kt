@@ -63,7 +63,7 @@ private val logger = KotlinLogging.logger {}
 /**
  * @author Mike Prechtl
  */
-class CardlinkProtocolTest {
+class CardLinkProtocolTest {
 
 	private lateinit var env: ClientEnv
 

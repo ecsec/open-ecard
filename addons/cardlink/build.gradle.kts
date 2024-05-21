@@ -41,7 +41,15 @@ kotlin {
 				//	testImplementation(project(":management"))
 				//	testImplementation(project(":sal:tiny-sal"))
 			}
-
+		}
+		val jvmTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics)
+				implementation(libs.logback.classic)
+				implementation(project(":ifd:scio-backend:pcsc"))
+				implementation(project(":wsdef:wsdef-common"))
+				implementation(project(":wsdef:jaxb-marshaller"))
+			}
 		}
 	}
 }

@@ -22,6 +22,7 @@
 
 package org.openecard.addons.cardlink
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.EstablishContext
 import iso.std.iso_iec._24727.tech.schema.Initialize
 import iso.std.iso_iec._24727.tech.schema.ListIFDs
@@ -30,22 +31,32 @@ import org.openecard.addon.AddonManager
 import org.openecard.common.ClientEnv
 import org.openecard.common.WSHelper
 import org.openecard.common.event.EventDispatcherImpl
+import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.sal.CombinedCIFProvider
+import org.openecard.common.util.ByteUtils
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.ViewController
 import org.openecard.ifd.scio.IFD
 import org.openecard.management.TinyManagement
-import org.openecard.mobile.activation.ActivationInteraction
+import org.openecard.mobile.activation.*
+import org.openecard.mobile.activation.common.CommonActivationUtils
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter
+import org.openecard.mobile.system.OpeneCardContextConfig
 import org.openecard.mobile.ui.*
 import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.recognition.RepoCifProvider
 import org.openecard.sal.TinySAL
+import org.openecard.scio.PCSCFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
+import org.openecard.ws.common.GenericInstanceProvider
+import org.openecard.ws.jaxb.JAXBMarshaller
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.*
 
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @author Mike Prechtl
@@ -54,13 +65,40 @@ class CardlinkProtocolTest {
 
 	private lateinit var env: ClientEnv
 
-	@Test
-	fun testCardlinkProtocol() {
+	private lateinit var activationUtils: CommonActivationUtils
+
+	@BeforeClass
+	fun setup() {
 		env = ClientEnv()
+
+		val pcscFactory : GenericInstanceProvider<TerminalFactory?> = object : GenericInstanceProvider<TerminalFactory?> {
+			override val instance = PCSCFactory()
+		}
+
+		val msgSetter = object : NFCDialogMsgSetter {
+			override fun setText(msg: String) { }
+			override fun isSupported(): Boolean { return false }
+		}
+
+		val nfcCapabilities = object : NFCCapabilities {
+			override fun isAvailable(): Boolean { return true }
+			override fun isEnabled(): Boolean { return true }
+			override fun checkExtendedLength(): NfcCapabilityResult { return NfcCapabilityResult.SUPPORTED }
+		}
+
+		val startServiceHandler = object : StartServiceHandler {
+			override fun onSuccess(source: ActivationSource?) { logger.info { "[ServiceHandler] onSuccess" } }
+			override fun onFailure(response: ServiceErrorResponse?) { logger.info { "[ServiceHandler] onFailure: ${response?.errorMessage}" } }
+		}
+
+		val config = OpeneCardContextConfig(pcscFactory, JAXBMarshaller::class.java.getCanonicalName())
+		activationUtils = CommonActivationUtils(config, msgSetter)
+
+		val contextManager = activationUtils.context(nfcCapabilities)
+		contextManager.initializeContext(startServiceHandler)
 
 		//val uc: UserConsent = Mockito.mock(UserConsent::class.java)
 		val vc: ViewController = Mockito.mock(ViewController::class.java)
-		val msgSetter: NFCDialogMsgSetter = Mockito.mock(NFCDialogMsgSetter::class.java)
 		val d: Dispatcher = MessageDispatcher(env)
 		val tinyManagement = TinyManagement(env)
 		val uc : UserConsent = createUserConsent(d, msgSetter)
@@ -82,11 +120,14 @@ class CardlinkProtocolTest {
 
 		val establishContext = EstablishContext()
 		val ecr = ifd.establishContext(establishContext)
+		logger.info { "Established context." }
+
 		val cr = CardRecognitionImpl(env)
 		env.recognition = cr
 
 		WSHelper.checkResult(ecr)
 		val contextHandle = ecr.contextHandle
+		logger.info { "ContextHandle: ${ByteUtils.toHexString(contextHandle)}" }
 		mainSAL.setIfdCtx(contextHandle)
 
 		val listIFDs = ListIFDs()
@@ -116,5 +157,29 @@ class CardlinkProtocolTest {
 			allFactories,
 			MessageDialogStub()
 		)
+	}
+
+	@Test
+	fun testCardLinkProtocol() {
+		val webSocketMock = Mockito.mock(Websocket::class.java)
+		val callbackController = Mockito.mock(ControllerCallback::class.java)
+
+		val cardlinkInteraction = object : CardLinkInteraction {
+			override fun requestCardInsertion() { logger.info { "requestCardInsertion" } }
+			override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler?) { logger.info { "requestCardInsertion" } }
+			override fun onCardInteractionComplete() { logger.info { "onCardInteractionComplete" } }
+			override fun onCardRecognized() { logger.info { "onCardRecognized" } }
+			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
+			override fun onCanRequest(enterCan: ConfirmPasswordOperation?) { logger.info { "onCanRequest" } }
+			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation?) { logger.info { "onPhoneNumberRequest" } }
+			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation?) { logger.info { "onSmsCodeRequest" } }
+		}
+
+		val cardLinkFactory = activationUtils.cardLinkFactory()
+		cardLinkFactory.create(webSocketMock, callbackController, cardlinkInteraction)
+
+		// Probably we have to wait here until process is finished?
+
+		Mockito.verify(callbackController, Mockito.times(1)).onStarted()
 	}
 }

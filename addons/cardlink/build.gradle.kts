@@ -46,6 +46,7 @@ kotlin {
 			dependencies {
 				implementation(libs.bundles.test.basics)
 				implementation(libs.logback.classic)
+				implementation(libs.kotlin.logging)
 				implementation(project(":ifd:scio-backend:pcsc"))
 				implementation(project(":wsdef:wsdef-common"))
 				implementation(project(":wsdef:jaxb-marshaller"))

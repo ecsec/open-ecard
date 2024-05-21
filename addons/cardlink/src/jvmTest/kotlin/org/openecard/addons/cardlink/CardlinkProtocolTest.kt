@@ -36,6 +36,7 @@ import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.interfaces.EventDispatcher
 import org.openecard.common.sal.CombinedCIFProvider
 import org.openecard.common.util.ByteUtils
+import org.openecard.common.util.Promise
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.ViewController
 import org.openecard.ifd.scio.IFD
@@ -52,6 +53,7 @@ import org.openecard.scio.PCSCFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
 import org.openecard.ws.common.GenericInstanceProvider
 import org.openecard.ws.jaxb.JAXBMarshaller
+import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
@@ -66,6 +68,8 @@ class CardlinkProtocolTest {
 	private lateinit var env: ClientEnv
 
 	private lateinit var activationUtils: CommonActivationUtils
+
+	private val promise: Promise<ActivationResult?> = Promise<ActivationResult?>()
 
 	@BeforeClass
 	fun setup() {
@@ -161,7 +165,17 @@ class CardlinkProtocolTest {
 	@Test
 	fun testCardLinkProtocol() {
 		val webSocketMock = Mockito.mock(Websocket::class.java)
-		val callbackController = Mockito.mock(ControllerCallback::class.java)
+
+		val callbackController = object : ControllerCallback {
+			override fun onStarted() {
+				logger.info { "Authentication started." }
+			}
+
+			override fun onAuthenticationCompletion(result: ActivationResult?) {
+				logger.info { "Authentication completed." }
+				promise.deliver(result)
+			}
+		}
 
 		val cardlinkInteraction = object : CardLinkInteraction {
 			override fun requestCardInsertion() { logger.info { "requestCardInsertion" } }
@@ -177,7 +191,9 @@ class CardlinkProtocolTest {
 		val cardLinkFactory = activationUtils.cardLinkFactory()
 		cardLinkFactory.create(webSocketMock, callbackController, cardlinkInteraction)
 
-		// Probably we have to wait here until process is finished?
+		val activationResult = promise.deref()
+		Assert.assertNotNull(activationResult)
+		Assert.assertEquals(activationResult?.resultCode, ActivationResultCode.OK)
 
 		Mockito.verify(callbackController, Mockito.times(1)).onStarted()
 	}

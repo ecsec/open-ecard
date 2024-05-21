@@ -18,7 +18,6 @@ package-win:
         $VERSION_WITHOUT_SNAPSHOT = $SNAPSHOT_VERSION.replace('-SNAPSHOT', '')
         set ORG_GRADLE_PROJECT_version $VERSION_WITHOUT_SNAPSHOT-$CI_COMMIT_REF_SLUG-SNAPSHOT
       }
-    # TODO: Do versioning for SNAPSHOT builds
     - .\gradlew.bat packageWin --no-build-cache --no-daemon -Pversion="$ORG_GRADLE_PROJECT_version"
     - $EXE_FILE_PATH = $(Get-Childitem
         -Path .\clients\richclient\build\dist
@@ -33,10 +32,10 @@ package-win:
         /fd SHA256
         .\clients\richclient\build\dist\$EXE_FILE_PATH
   needs: [ "compile" ]
-  allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
     - if: $CI_MERGE_REQUEST_IID
       when: manual
+      allow_failure: true

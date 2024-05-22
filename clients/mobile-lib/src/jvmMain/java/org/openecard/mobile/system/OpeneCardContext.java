@@ -271,6 +271,7 @@ public class OpeneCardContext {
 
 	List<UserConsentNavigatorFactory<?>> allFactories = Arrays.asList(
 		eacNavFac,
+		cardLinkNavFac,
 		pinMngFac,
 		insertFac);
 

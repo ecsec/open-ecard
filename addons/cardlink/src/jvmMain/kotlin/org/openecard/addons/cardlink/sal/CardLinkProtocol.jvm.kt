@@ -24,17 +24,18 @@ package org.openecard.addons.cardlink.sal
 
 import org.openecard.addon.Context
 import org.openecard.addon.sal.SALProtocolBaseImpl
+import org.openecard.common.DynamicContext
 import org.openecard.mobile.activation.Websocket
 
 const val CARDLINK_PROTOCOL_ID = "https://gematik.de/protocols/cardlink"
 
 
-fun setProcessWebsocket(ws: Websocket) {
-	TODO()
+fun setProcessWebsocket(dynCtx: DynamicContext, ws: Websocket) {
+	dynCtx.put(CardLinkKeys.WEBSOCKET, ws)
 }
 
-fun getProcessWebsocket(): Websocket {
-	TODO()
+fun getProcessWebsocket(dynCtx: DynamicContext): Websocket {
+	return dynCtx.getPromise(CardLinkKeys.WEBSOCKET).deref() as Websocket
 }
 
 class CardLinkProtocol : SALProtocolBaseImpl() {
@@ -51,4 +52,5 @@ object CardLinkKeys {
 	const val CORRECT_CAN = "${prefix}CORRECT_CAN"
 	const val WS_SESSION_ID = "${prefix}WS_SESSION_ID"
 	const val LAST_SENT_MESSAGE_ID = "${prefix}LAST_SENT_MESSAGE_ID"
+	const val WEBSOCKET = "${prefix}WEBSOCKET"
 }

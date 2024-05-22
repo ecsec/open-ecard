@@ -42,7 +42,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
-		setProcessWebsocket(ws)
+		setProcessWebsocket(dynCtx, ws)
 		val cardHandle = performDidAuth(conHandle)
 		handleRemoteApdus(cardHandle)
 		destroySession(cardHandle)

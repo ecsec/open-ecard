@@ -30,7 +30,6 @@ import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
 import org.openecard.addons.cardlink.ws.RegisterEgk
-import org.openecard.addons.cardlink.ws.RegisterEgkData
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ThreadTerminateException
@@ -47,7 +46,8 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 	}
 
 	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
-		val ws = getProcessWebsocket()
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val ws = getProcessWebsocket(dynCtx)
 		val uc = CardLinkUserConsent(ws, aCtx, req.connectionHandle)
 
 		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
@@ -59,7 +59,6 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 			TODO("Fail with error message")
 		}
 
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 		val conHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
 

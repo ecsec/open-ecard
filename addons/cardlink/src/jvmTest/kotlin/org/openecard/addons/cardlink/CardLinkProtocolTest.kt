@@ -95,13 +95,13 @@ class CardLinkProtocolTest {
 
 		val cardlinkInteraction = object : CardLinkInteraction {
 			override fun requestCardInsertion() { logger.info { "requestCardInsertion" } }
-			override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler?) { logger.info { "requestCardInsertion" } }
+			override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler) { logger.info { "requestCardInsertion" } }
 			override fun onCardInteractionComplete() { logger.info { "onCardInteractionComplete" } }
 			override fun onCardRecognized() { logger.info { "onCardRecognized" } }
 			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
-			override fun onCanRequest(enterCan: ConfirmPasswordOperation?) { logger.info { "onCanRequest" } }
-			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation?) { logger.info { "onPhoneNumberRequest" } }
-			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation?) { logger.info { "onSmsCodeRequest" } }
+			override fun onCanRequest(enterCan: ConfirmPasswordOperation) { logger.info { "onCanRequest" } }
+			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) { logger.info { "onPhoneNumberRequest" } }
+			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) { logger.info { "onSmsCodeRequest" } }
 		}
 
 		val cardLinkFactory = activationUtils.cardLinkFactory()

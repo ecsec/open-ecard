@@ -25,6 +25,8 @@ package org.openecard.mobile.activation.common;
 import org.openecard.common.DynamicContext;
 import org.openecard.mobile.activation.*;
 import org.openecard.mobile.system.OpeneCardContext;
+import org.openecard.mobile.ui.CardLinkNavigatorFactory;
+import org.openecard.mobile.ui.EacNavigatorFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -76,6 +78,7 @@ public class CommonCardLinkControllerFactory implements CardLinkControllerFactor
 			public AutoCloseable create(OpeneCardContext context) {
 				return new ArrayBackedAutoCloseable(new AutoCloseable[]{
 					CommonCardEventHandler.hookUp(created, supportedCards, context.getEventDispatcher(), interaction, msgSetter),
+					InteractionRegistrationHandler.hookUp(CardLinkNavigatorFactory.PROTOCOL_TYPE, context, interaction)
 				});
 			}
 		};

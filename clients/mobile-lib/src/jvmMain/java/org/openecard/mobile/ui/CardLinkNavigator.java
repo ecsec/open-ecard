@@ -26,20 +26,14 @@ import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.util.Pair;
 import org.openecard.common.util.Promise;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
 import org.openecard.gui.definition.*;
 import org.openecard.mobile.activation.*;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
-import org.openecard.sal.protocol.eac.EACData;
-import org.openecard.sal.protocol.eac.EACProtocol;
-import org.openecard.sal.protocol.eac.gui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -134,104 +128,58 @@ public final class CardLinkNavigator extends MobileNavigator {
 
 	private StepResult nextInt(Step curStep) {
 		// handle step display
+		// TODO: Use Step IDs from Cardlink Addon, maybe move them to Mobile Lib?
 		if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE".equals(curStep.getID())) {
 			idx++;
-			// TODO: handle Phone Step
-			//return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-			throw new UnsupportedOperationException("Not supported yet.");
-//		} else if (CHATStep.STEP_ID.equals(curStep.getID())) {
-//			idx++;
-//			Step cvcStep = steps.get(0);
-//			Step chatStep = steps.get(1);
-//
-//			return displayAndExecuteBackground(chatStep, () -> {
-//				String tInfo = getTransactionInfo();
-//
-//				final Promise<List<OutputInfoUnit>> waitForAttributes = new Promise<>();
-//
-//				Pair<ServerData, ConfirmAttributeSelectionOperation> selection = createSelection(cvcStep, chatStep, waitForAttributes);
-//
-//				try {
-//					interaction.onServerData(selection.p1, tInfo, selection.p2);
-//					List<OutputInfoUnit> outInfo = waitForAttributes.deref();
-//					return new MobileResult(chatStep, ResultStatus.OK, outInfo);
-//				} catch (InterruptedException ex) {
-//					return new MobileResult(cvcStep, ResultStatus.INTERRUPTED, Collections.emptyList());
-//				}
-//			});
-//		} else if (PINStep.STEP_ID.equals(curStep.getID())) {
-//			idx++;
-//			Step pinStep = curStep;
-//
-//			return displayAndExecuteBackground(pinStep, () -> {
-//				final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-//
-//				EACData eacData = (EACData) context.get(EACProtocol.EAC_DATA);
-//				boolean isCanStep = eacData.pinID == PasswordID.CAN.getByte();
-//
-//				final Promise<List<OutputInfoUnit>> waitForPin = new Promise<>();
-//				PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
-//				if (ps == null) {
-//					LOG.error("Missing PinState object.");
-//					interaction.onCardInteractionComplete();
-//					return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
-//				} else if (!isCanStep && ps.isRequestCan()) {
-//					this.pauseExecution(context);
-//					interaction.onPinCanRequest(new ConfirmPinCanOperationEACImpl(this, interaction, msgSetter, pinStep, waitForPin));
-//				} else {
-//					ConfirmPasswordOperation op = new ConfirmPasswordOperationEACImpl(this, interaction, msgSetter, pinStep, waitForPin);
-//					if (isCanStep) {
-//						LOG.debug("Notifying need to enter pin and can");
-//						this.pauseExecution(context);
-//						interaction.onCanRequest(op);
-//					} else {
-//						LOG.debug("Notifying need to enter pin");
-//						if (ps.isUnknown()) {
-//							this.pauseExecution(context);
-//							interaction.onPinRequest(op);
-//						} else {
-//							final int attempts = ps.getAttempts();
-//							this.pauseExecution(context);
-//							interaction.onPinRequest(attempts, op);
-//						}
-//					}
-//				}
-//
-//				List<OutputInfoUnit> outInfo = waitForPin.deref();
-//				return new MobileResult(pinStep, ResultStatus.OK, outInfo);
-//			});
-//
-//		} else if (ProcessingStep.STEP_ID.equals(curStep.getID())) {
-//			idx++;
-//
-//			return displayAndExecuteBackground(curStep, () -> {
-//				LOG.debug("Delivering final PIN status in ProcessingStep.");
-//				interaction.onCardAuthenticationSuccessful();
-//				return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-//			});
-//		} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
-//			idx++;
-//
-//			return displayAndExecuteBackground(curStep, () -> {
-//				final DynamicContext context = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-//				PinState ps = (PinState) context.get(EACProtocol.PIN_STATUS);
-//
-//				if (ps == null) {
-//					LOG.error("Missing PinState object.");
-//					return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
-//				} else {
-//					if (ps.isBlocked()) {
-//						this.pauseExecution(context);
-//						interaction.onCardBlocked();
-//					} else if (ps.isDeactivated()) {
-//						this.pauseExecution(context);
-//						interaction.onCardDeactivated();
-//					}
-//				}
-//
-//				// cancel is returned by the step action
-//				return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-//			});
+
+			Step phoneStep = curStep;
+
+			return displayAndExecuteBackground(phoneStep, () -> {
+				final Promise<List<OutputInfoUnit>> waitForPhoneNumber = new Promise<>();
+				final ConfirmTextOperation confirmTextOperation = new ConfirmCardLinkPhoneNumberImpl(waitForPhoneNumber, phoneStep, this);
+
+				try {
+					interaction.onPhoneNumberRequest(confirmTextOperation);
+					List<OutputInfoUnit> phoneNumber = waitForPhoneNumber.deref();
+					return new MobileResult(phoneStep, ResultStatus.OK, phoneNumber);
+				} catch (InterruptedException ex) {
+					return new MobileResult(phoneStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN".equals(curStep.getID())) {
+			idx++;
+
+			Step tanStep = curStep;
+
+			return displayAndExecuteBackground(tanStep, () -> {
+				final Promise<List<OutputInfoUnit>> waitForTan = new Promise<>();
+				final ConfirmPasswordOperation confirmTan = new ConfirmCardLinkTanImpl(waitForTan, tanStep, this);
+
+				try {
+					interaction.onSmsCodeRequest(confirmTan);
+					List<OutputInfoUnit> tan = waitForTan.deref();
+					return new MobileResult(tanStep, ResultStatus.OK, tan);
+				} catch (InterruptedException ex) {
+					return new MobileResult(tanStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
+			idx++;
+
+			Step canStep = curStep;
+
+			return displayAndExecuteBackground(canStep, () -> {
+				final Promise<List<OutputInfoUnit>> waitForCan = new Promise<>();
+				final ConfirmPasswordOperation confirmCan = new ConfirmCardLinkCanImpl(waitForCan, canStep, interaction,msgSetter,this);
+
+				try {
+					interaction.onCanRequest(confirmCan);
+					List<OutputInfoUnit> tan = waitForCan.deref();
+					return new MobileResult(canStep, ResultStatus.OK, tan);
+				} catch (InterruptedException ex) {
+					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
 		} else {
 			idx++;
 			return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
@@ -290,121 +238,27 @@ public final class CardLinkNavigator extends MobileNavigator {
 		}
 	}
 
-
-	public void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
-		for (InputInfoUnit infoInUnit : inInfo) {
-			for (OutputInfoUnit infoOutUnit : outInfo) {
-				if (infoInUnit.getID().equals(infoOutUnit.getID())) {
-					infoInUnit.copyContentFrom(infoOutUnit);
-				}
-			}
-		}
-	}
-
-	private String getTransactionInfo() {
-		DynamicContext ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-		EACData eacData = (EACData) ctx.get(EACProtocol.EAC_DATA);
-		String tInfo = null;
-		if (eacData != null) {
-			tInfo = eacData.transactionInfo;
-		}
-		return tInfo;
-	}
-
-	public List<OutputInfoUnit> getPinResult(Step step, String pinValue, String canValue) {
-		PINStep pinStep = (PINStep) step;
-
+	public List<OutputInfoUnit> writeBackValues(Step step, String value) {
 		ArrayList<OutputInfoUnit> result = new ArrayList<>();
-		for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
-			if (pinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_PIN_FIELD")) {
-				PasswordField pw = new PasswordField(nextIn.getID());
-				pw.copyContentFrom(nextIn);
-				pw.setValue(pinValue.toCharArray());
-				result.add(pw);
-			} else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
-				PasswordField pw = new PasswordField(nextIn.getID());
-				pw.copyContentFrom(nextIn);
-				pw.setValue(canValue.toCharArray());
-				result.add(pw);
+		for (InputInfoUnit nextIn : step.getInputInfoUnits()) {
+			// TODO: Use Step IDs from Cardlink Addon, maybe move them to Mobile Lib?
+			if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_PHONE")) {
+				TextField tf = new TextField(nextIn.getID());
+				tf.copyContentFrom(nextIn);
+				tf.setValue(value.toCharArray());
+				result.add(tf);
+			} else if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_TAN")) {
+				TextField tf = new TextField(nextIn.getID());
+				tf.copyContentFrom(nextIn);
+				tf.setValue(value.toCharArray());
+				result.add(tf);
+			} else if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_CAN")) {
+				TextField tf = new TextField(nextIn.getID());
+				tf.copyContentFrom(nextIn);
+				tf.setValue(value.toCharArray());
+				result.add(tf);
 			}
 		}
-
 		return result;
-	}
-
-	private static Pair<ServerData, ConfirmAttributeSelectionOperation> createSelection(Step cvcStep, Step chatStep, final Promise<List<OutputInfoUnit>> waitForAttributes) {
-		String subject = null;
-		String subjectUrl = null;
-		TermsOfUsage termsOfUsage = null;
-		String validity = null;
-		String issuer = null;
-		String issuerUrl = null;
-
-		for (InputInfoUnit next : cvcStep.getInputInfoUnits()) {
-			if ("SubjectName".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				subject = tt.getText();
-			} else if ("SubjectURL".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				subjectUrl = tt.getText();
-			} else if ("TermsOfUsage".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				Document d = tt.getDocument();
-				termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), ByteBuffer.wrap(d.getValue()));
-			} else if ("Validity".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				validity = tt.getText();
-			} else if ("IssuerName".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				issuer = tt.getText();
-			} else if ("IssuerURL".equals(next.getID()) && next instanceof ToggleText) {
-				ToggleText tt = (ToggleText) next;
-				issuerUrl = tt.getText();
-			}
-		}
-
-		Checkbox readBox = null;
-		Checkbox writeBox = null;
-
-		for (InputInfoUnit next : chatStep.getInputInfoUnits()) {
-			if (CHATStep.READ_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
-				readBox = (Checkbox) next;
-			} else if (CHATStep.WRITE_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
-				writeBox = (Checkbox) next;
-			}
-		}
-		List<SelectableItem> readAccessAttributes = asSelectableItems(readBox);
-		List<SelectableItem> writeAccessAttribute = asSelectableItems(writeBox);
-
-		ServerDataImpl sd = new ServerDataImpl(subject, issuer, subjectUrl, issuerUrl, validity, termsOfUsage, readAccessAttributes, writeAccessAttribute);
-		ConfirmAttributeSelectionOperation selectionConfirmation = new ConfirmAttributeSelectionOperationImpl(
-			waitForAttributes,
-			readBox,
-			writeBox);
-		Pair<ServerData, ConfirmAttributeSelectionOperation> selection = new Pair<>(sd, selectionConfirmation);
-		return selection;
-	}
-
-	private static List<SelectableItem> asSelectableItems(Checkbox readBox) {
-		List<SelectableItem> accessAttributes = new ArrayList<>();
-		if (readBox != null) {
-			for (org.openecard.gui.definition.BoxItem nb : readBox.getBoxItems()) {
-				SelectableItem bi = new BoxItemImpl(nb.getName(), nb.isChecked(), nb.isDisabled(), nb.getText());
-				accessAttributes.add(bi);
-			}
-		}
-		return accessAttributes;
-	}
-
-	private void pauseExecution() {
-		this.dispatcher.safeDeliver(new PowerDownDevices());
-		interaction.onCardInteractionComplete();
-	}
-
-	private void pauseExecution(DynamicContext context) {
-		if (context != null) {
-			context.put(TR03112Keys.CONNECTION_HANDLE, context.get(TR03112Keys.SESSION_CON_HANDLE));
-		}
-		this.pauseExecution();
 	}
 }

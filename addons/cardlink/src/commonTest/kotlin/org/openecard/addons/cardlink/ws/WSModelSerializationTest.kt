@@ -45,26 +45,26 @@ class WSModelSerializationTest {
 			arrayOf(
 			 	RegisterEgk(
 					cardSessionId = "foo",
-					atr = "atr",
-					gdo = "gdo",
-					cvcCA = "cvcCA",
-					cvcAuth = "cvcAuth",
-					cardVersion = "cardVersion",
-					x509AuthECC = "x509"
+					atr = "atr".encodeToByteArray(),
+					gdo = "gdo".encodeToByteArray(),
+					cvcCA = "cvcCA".encodeToByteArray(),
+					cvcAuth = "cvcAuth".encodeToByteArray(),
+					cardVersion = "cardVersion".encodeToByteArray(),
+					x509AuthECC = "x509".encodeToByteArray()
 				),
 				RegisterEgk.serializer().descriptor.serialName
 			),
 			arrayOf(
 				SendApdu(
 					cardSessionId = "foo",
-					apdu = "apdu"
+					apdu = "apdu".encodeToByteArray()
 				),
 				SendApdu.serializer().descriptor.serialName
 			),
 			arrayOf(
 				SendApduResponse(
 					cardSessionId = "foo",
-					response = "resp"
+					response = "resp".encodeToByteArray()
 				),
 				SendApduResponse.serializer().descriptor.serialName
 			),

@@ -109,6 +109,22 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 }
 
 
+typealias ByteArrayAsBase64 = @Serializable(ByteArrayAsBase64Serializer::class) ByteArray
+
+@OptIn(ExperimentalEncodingApi::class)
+object ByteArrayAsBase64Serializer : KSerializer<ByteArray> {
+	override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ByteArrayAsBase64Serializer", PrimitiveKind.STRING)
+
+	override fun serialize(encoder: Encoder, value: ByteArray) {
+		val base64Encoded = Base64.encode(value).trimEnd('=')
+		encoder.encodeString(base64Encoded)
+	}
+
+	override fun deserialize(decoder: Decoder): ByteArray {
+		return Base64.decode(decoder.decodeString())
+	}
+}
+
 val module = SerializersModule {
 	polymorphic(EgkPayload::class) {
 		subclass(RegisterEgk::class)
@@ -129,27 +145,27 @@ interface EgkPayload
 @SerialName(REGISTER_EGK)
 data class RegisterEgk(
 	val cardSessionId: String,
-	val gdo: String,
-	val cardVersion: String,
-	val x509AuthRSA: String? = null,
-	val x509AuthECC: String,
-	val cvcAuth: String,
-	val cvcCA: String,
-	val atr: String,
+	val gdo: ByteArrayAsBase64,
+	val cardVersion: ByteArrayAsBase64,
+	val x509AuthRSA: ByteArrayAsBase64? = null,
+	val x509AuthECC: ByteArrayAsBase64,
+	val cvcAuth: ByteArrayAsBase64,
+	val cvcCA: ByteArrayAsBase64,
+	val atr: ByteArrayAsBase64,
 ) : EgkPayload
 
 @Serializable
 @SerialName(SEND_APDU)
 data class SendApdu(
 	val cardSessionId: String,
-	val apdu: String,
+	val apdu: ByteArrayAsBase64,
 ) : EgkPayload
 
 @Serializable
 @SerialName(SEND_APDU_RESPONSE)
 data class SendApduResponse(
 	val cardSessionId: String,
-	val response: String,
+	val response: ByteArrayAsBase64,
 ) : EgkPayload
 
 @Serializable

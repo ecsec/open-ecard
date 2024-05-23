@@ -22,6 +22,11 @@
 
 package org.openecard.addons.cardlink.sal.gui
 
+import kotlinx.serialization.encodeToString
+import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.ws.*
+import org.openecard.binding.tctoken.TR03112Keys
+import org.openecard.common.DynamicContext
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.TextField
@@ -30,6 +35,7 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.Websocket
+import java.util.*
 
 private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN"
 private const val title = "TAN Verification"
@@ -47,7 +53,7 @@ class TanStep(val ws: Websocket) : Step(STEP_ID, title) {
 	}
 }
 
-class TanStepAction(tanStep: TanStep) : StepAction(tanStep) {
+class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
 		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
@@ -57,7 +63,24 @@ class TanStepAction(tanStep: TanStep) : StepAction(tanStep) {
 	}
 
 	private fun sendTan(tan: String): StepActionResultStatus {
-		TODO("Not yet implemented")
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
+
+		val sendTan = SendTan(tan)
+		val egkEnvelope = EgkEnvelope(
+			cardSessionId,
+			null,
+			sendTan,
+			CONFIRM_TAN
+		)
+		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
+
+		val ws = tanStep.ws
+		ws.connect()
+		ws.send(egkEnvelopeMsg)
+
+		TODO("Not implemented: wait for cardlink service answer if TAN is correct")
+
 		return StepActionResultStatus.NEXT
 	}
 

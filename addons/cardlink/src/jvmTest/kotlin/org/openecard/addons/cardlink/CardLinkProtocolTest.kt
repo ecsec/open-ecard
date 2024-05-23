@@ -99,12 +99,18 @@ class CardLinkProtocolTest {
 			override fun onCardInteractionComplete() { logger.info { "onCardInteractionComplete" } }
 			override fun onCardRecognized() { logger.info { "onCardRecognized" } }
 			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
-			override fun onCanRequest(enterCan: ConfirmPasswordOperation) { logger.info { "onCanRequest" } }
+			override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
+				logger.info { "onCanRequest" }
+				enterCan.confirmPassword("123456")
+			}
 			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {
 				logger.info { "onPhoneNumberRequest" }
 				enterPhoneNumber.confirmText("+491517264234")
 			}
-			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) { logger.info { "onSmsCodeRequest" } }
+			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) {
+				logger.info { "onSmsCodeRequest" }
+				smsCode.confirmPassword("123456")
+			}
 		}
 
 		val cardLinkFactory = activationUtils.cardLinkFactory()

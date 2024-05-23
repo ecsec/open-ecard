@@ -39,6 +39,7 @@ const val READY = "ready"
 const val SEND_APDU_RESPONSE = "sendAPDUResponse"
 /* Newly defined types */
 const val REQUEST_SMS_TAN = "requestSmsTan"
+const val REQUEST_SMS_TAN_RESPONSE = "requestSmsTanResponse"
 const val CONFIRM_TAN = "confirmTan"
 const val CONFIRM_TAN_RESPONSE = "confirmTanResponse"
 
@@ -134,6 +135,7 @@ val module = SerializersModule {
 		subclass(SendPhoneNumber::class)
 		subclass(SendTan::class)
 		subclass(ConfirmTan::class)
+		subclass(ConfirmPhoneNumber::class)
 	}
 }
 
@@ -181,6 +183,13 @@ data class TasklistError(
 @Serializable
 @SerialName(REQUEST_SMS_TAN)
 data class SendPhoneNumber(val phoneNumber: String) : EgkPayload
+
+@Serializable
+@SerialName(REQUEST_SMS_TAN_RESPONSE)
+data class ConfirmPhoneNumber(
+	var minor: MinorResultCode?,
+	var errorMessage: String?,
+) : EgkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN)

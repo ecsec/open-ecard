@@ -101,6 +101,13 @@ class WSModelSerializationTest {
 					errorMessage = "Tan expired."
 				),
 				ConfirmTan.serializer().descriptor.serialName
+			),
+			arrayOf(
+				ConfirmPhoneNumber(
+					minor = null,
+					errorMessage = null
+				),
+				ConfirmPhoneNumber.serializer().descriptor.serialName
 			)
 		)
 	}

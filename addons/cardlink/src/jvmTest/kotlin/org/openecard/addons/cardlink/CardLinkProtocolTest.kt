@@ -23,7 +23,10 @@
 package org.openecard.addons.cardlink
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
+import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
+import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.Promise
 import org.openecard.mobile.activation.*
@@ -36,6 +39,7 @@ import org.openecard.ws.jaxb.JAXBMarshaller
 import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
+import java.util.*
 
 
 private val logger = KotlinLogging.logger {}
@@ -46,6 +50,9 @@ private val logger = KotlinLogging.logger {}
 class CardLinkProtocolTest {
 
 	private lateinit var activationUtils: CommonActivationUtils
+	private lateinit var webSocketMock: Websocket
+	private lateinit var callbackController: ControllerCallback
+	private lateinit var cardLinkInteraction: CardLinkInteraction
 
 	private val activationResult: Promise<ActivationResult?> = Promise<ActivationResult?>()
 	private val isContextInitialized: Promise<Boolean> = Promise<Boolean>()
@@ -87,11 +94,35 @@ class CardLinkProtocolTest {
 		isContextInitialized.deref()
 	}
 
-	@Test
-	fun testCardLinkProtocol() {
-		val webSocketMock = Mockito.mock(Websocket::class.java)
+	@BeforeClass
+	fun setupWebsocketMock() {
+		this.webSocketMock = Mockito.mock(Websocket::class.java)
+		val correlationIdTan = UUID.randomUUID().toString()
+		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
-		val callbackController = object : ControllerCallback {
+		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
+			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
+		}
+
+		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
+			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from CardLink-Service..." }
+			argumentCaptor.value.onOpen(webSocketMock)
+			argumentCaptor.value.onText(webSocketMock, """
+				[
+					{
+						"type":"requestSmsTanResponse",
+						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
+					},
+					"123456",
+					"correlationIdTan"
+				]
+			""")
+		}
+	}
+
+	@BeforeClass
+	fun setupCallbackController() {
+		this.callbackController = object : ControllerCallback {
 			override fun onStarted() {
 				logger.info { "Authentication started." }
 			}
@@ -101,8 +132,11 @@ class CardLinkProtocolTest {
 				activationResult.deliver(result)
 			}
 		}
+	}
 
-		val cardlinkInteraction = object : CardLinkInteraction {
+	@BeforeClass
+	fun setupCardLinkInteraction() {
+		this.cardLinkInteraction = object : CardLinkInteraction {
 			override fun requestCardInsertion() { logger.info { "requestCardInsertion" } }
 			override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler) { logger.info { "requestCardInsertion" } }
 			override fun onCardInteractionComplete() { logger.info { "onCardInteractionComplete" } }
@@ -121,9 +155,12 @@ class CardLinkProtocolTest {
 				smsCode.confirmPassword("123456")
 			}
 		}
+	}
 
+	@Test
+	fun testCardLinkProtocol() {
 		val cardLinkFactory = activationUtils.cardLinkFactory()
-		cardLinkFactory.create(webSocketMock, callbackController, cardlinkInteraction)
+		cardLinkFactory.create(webSocketMock, callbackController, cardLinkInteraction)
 
 		val result = activationResult.deref()
 		Assert.assertNotNull(result)

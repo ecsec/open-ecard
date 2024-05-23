@@ -47,7 +47,8 @@ class CardLinkProtocolTest {
 
 	private lateinit var activationUtils: CommonActivationUtils
 
-	private val promise: Promise<ActivationResult?> = Promise<ActivationResult?>()
+	private val activationResult: Promise<ActivationResult?> = Promise<ActivationResult?>()
+	private val isContextInitialized: Promise<Boolean> = Promise<Boolean>()
 
 	@BeforeClass
 	fun setup() {
@@ -67,8 +68,14 @@ class CardLinkProtocolTest {
 		}
 
 		val startServiceHandler = object : StartServiceHandler {
-			override fun onSuccess(source: ActivationSource?) { logger.info { "[ServiceHandler] onSuccess" } }
-			override fun onFailure(response: ServiceErrorResponse?) { logger.info { "[ServiceHandler] onFailure: ${response?.errorMessage}" } }
+			override fun onSuccess(source: ActivationSource?) {
+				logger.info { "[ServiceHandler] onSuccess" }
+				isContextInitialized.deliver(true)
+			}
+			override fun onFailure(response: ServiceErrorResponse?) {
+				logger.info { "[ServiceHandler] onFailure: ${response?.errorMessage}" }
+				isContextInitialized.deliver(false)
+			}
 		}
 
 		val config = OpeneCardContextConfig(pcscFactory, JAXBMarshaller::class.java.getCanonicalName())
@@ -76,6 +83,8 @@ class CardLinkProtocolTest {
 
 		val contextManager = activationUtils.context(nfcCapabilities)
 		contextManager.initializeContext(startServiceHandler)
+
+		isContextInitialized.deref()
 	}
 
 	@Test
@@ -89,7 +98,7 @@ class CardLinkProtocolTest {
 
 			override fun onAuthenticationCompletion(result: ActivationResult?) {
 				logger.info { "Authentication completed." }
-				promise.deliver(result)
+				activationResult.deliver(result)
 			}
 		}
 
@@ -116,9 +125,9 @@ class CardLinkProtocolTest {
 		val cardLinkFactory = activationUtils.cardLinkFactory()
 		cardLinkFactory.create(webSocketMock, callbackController, cardlinkInteraction)
 
-		val activationResult = promise.deref()
-		Assert.assertNotNull(activationResult)
-		Assert.assertEquals(activationResult?.resultCode, ActivationResultCode.OK)
+		val result = activationResult.deref()
+		Assert.assertNotNull(result)
+		Assert.assertEquals(result?.resultCode, ActivationResultCode.OK)
 
 		Mockito.verify(callbackController, Mockito.times(1)).onStarted()
 	}

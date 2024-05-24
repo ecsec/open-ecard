@@ -107,7 +107,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		TODO("Not yet implemented")
 	}
 
-	private fun handleRemoteApdus(cardHandle: Any, dynCtx: DynamicContext) {
+	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, dynCtx: DynamicContext) {
 		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
 
 		// TODO: currently, wait for APDUs until websocket channel is closed
@@ -145,8 +145,17 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		}
 	}
 
-	private fun sendApduToCard(cardHandle: Any, apdu: ByteArray) : ByteArray {
-		TODO("Send APDU to card, return SendAPDUResponse to CardLink Service")
+	private fun sendApduToCard(cardHandle: ConnectionHandleType, apdu: ByteArray) : ByteArray {
+		val inputAPDU = InputAPDUInfoType()
+		inputAPDU.inputAPDU = apdu
+
+		val t = Transmit()
+		t.slotHandle = cardHandle.slotHandle
+		t.inputAPDUInfo.add(inputAPDU)
+
+		val response = dispatcher.safeDeliver(t) as TransmitResponse
+		WSHelper.checkResult(response)
+		return response.outputAPDU[0]
 	}
 
 	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : EgkEnvelope? {

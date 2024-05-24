@@ -34,6 +34,7 @@ kotlin {
 				//	api(libs.httpcore)
 
 				implementation(libs.kotlin.serialization.json)
+				implementation(libs.kotlin.coroutines.core)
 
 				//	testImplementation(libs.bundles.test.basics)
 				//	testImplementation(project(":gui:swing"))

@@ -25,6 +25,7 @@ package org.openecard.addons.cardlink
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
+import org.openecard.addons.cardlink.ws.CONFIRM_TAN
 import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
 import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
 import org.openecard.common.ifd.scio.TerminalFactory
@@ -114,8 +115,22 @@ class CardLinkProtocolTest {
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
 					"123456",
-					"correlationIdTan"
+					"$correlationIdTan"
 				]
+			""")
+		}
+
+		Mockito.`when`(webSocketMock.send(Mockito.contains(CONFIRM_TAN))).then {
+			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from CardLink-Service..." }
+			argumentCaptor.value.onOpen(webSocketMock)
+			argumentCaptor.value.onText(webSocketMock, """
+				[
+					{
+						"type":"confirmTanResponse",
+						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
+					},
+					"123456",
+					"$correlationIdTan"]
 			""")
 		}
 	}

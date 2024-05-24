@@ -22,12 +22,12 @@
 
 package org.openecard.addons.cardlink.sal.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.addons.cardlink.ws.EgkEnvelope
-import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
-import org.openecard.addons.cardlink.ws.SendPhoneNumber
-import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
+import org.openecard.addons.cardlink.sal.getWebsocketListener
+import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.gui.StepResult
@@ -38,7 +38,10 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.Websocket
-import java.util.*
+import org.openecard.sal.protocol.eac.gui.ErrorStep
+
+
+private val logger = KotlinLogging.logger {}
 
 private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE"
 private const val title = "Phone Number Entry"
@@ -61,10 +64,10 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		val phoneNumber = (oldResults[stepID]!!.getResult(PHONE_ID) as TextField).value.concatToString()
 		val sendPhoneStatus = sendPhoneNumber(phoneNumber)
 
-		return StepActionResult(sendPhoneStatus)
+		return sendPhoneStatus
 	}
 
-	private fun sendPhoneNumber(phoneNumber: String): StepActionResultStatus {
+	private fun sendPhoneNumber(phoneNumber: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
@@ -76,14 +79,65 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 			REQUEST_SMS_TAN
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
-
 		val ws = phoneStep.ws
-		ws.connect()
 		ws.send(egkEnvelopeMsg)
 
-		TODO("Not implemented: wait for cardlink service answer, if phone number is ok")
+		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+		val phoneNumberResponse : EgkEnvelope? = waitForPhoneNumberResponse(wsListener)
 
-		return StepActionResultStatus.NEXT
+		if (phoneNumberResponse == null) {
+			val errorMsg = "Didn't receive $REQUEST_SMS_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
+
+		val egkPayload = phoneNumberResponse.payload
+		if (egkPayload is ConfirmPhoneNumber) {
+			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
+
+			// TODO: probably some more checks required?
+			return if (egkPayload.minor == null && egkPayload.errorMessage == null) {
+				StepActionResult(StepActionResultStatus.NEXT)
+			} else {
+				StepActionResult(
+					StepActionResultStatus.REPEAT,
+					ErrorStep(
+						"CardLink Error",
+						egkPayload.errorMessage,
+					)
+				)
+			}
+		} else {
+			val errorMsg = "EGK Payload is not from type ConfirmPhoneNumber."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
 	}
 
+	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): EgkEnvelope? {
+		var phoneNumberResponse : EgkEnvelope?
+		runBlocking {
+			phoneNumberResponse = wsListener.pollMessage(REQUEST_SMS_TAN_RESPONSE)
+
+			var pollTryCounter = 5
+			while (phoneNumberResponse == null && pollTryCounter != 0) {
+				delay(500)
+				phoneNumberResponse = wsListener.pollMessage(REQUEST_SMS_TAN_RESPONSE)
+				pollTryCounter--
+			}
+		}
+		return phoneNumberResponse
+	}
 }

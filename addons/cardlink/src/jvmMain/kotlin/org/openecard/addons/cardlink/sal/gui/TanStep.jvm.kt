@@ -22,8 +22,12 @@
 
 package org.openecard.addons.cardlink.sal.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.sal.getWebsocketListener
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
@@ -35,7 +39,10 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.Websocket
-import java.util.*
+import org.openecard.sal.protocol.eac.gui.ErrorStep
+
+
+private val logger = KotlinLogging.logger {}
 
 private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN"
 private const val title = "TAN Verification"
@@ -59,29 +66,91 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
 		val sendTanStatus = sendTan(tan)
 
-		return StepActionResult(sendTanStatus)
+		return sendTanStatus
 	}
 
-	private fun sendTan(tan: String): StepActionResultStatus {
+	private fun sendTan(tan: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val correlationId = dynCtx.get(CardLinkKeys.CORRELATION_ID_TAN_PROCESS) as String
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendTan = SendTan(tan)
 		val egkEnvelope = EgkEnvelope(
 			cardSessionId,
-			null,
+			correlationId,
 			sendTan,
 			CONFIRM_TAN
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
-
 		val ws = tanStep.ws
-		ws.connect()
 		ws.send(egkEnvelopeMsg)
 
-		TODO("Not implemented: wait for cardlink service answer if TAN is correct")
+		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+		val tanConfirmResponse : EgkEnvelope? = waitForTanConfirmResponse(wsListener)
 
-		return StepActionResultStatus.NEXT
+		if (tanConfirmResponse == null) {
+			val errorMsg = "Didn't receive $CONFIRM_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
+
+		if (tanConfirmResponse.correlationId != correlationId) {
+			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
+
+		val egkPayload = tanConfirmResponse.payload
+		if (egkPayload is ConfirmTan) {
+			// TODO: probably some more checks required?
+			return if (egkPayload.minor == null && egkPayload.errorMessage == null) {
+				StepActionResult(StepActionResultStatus.NEXT)
+			} else {
+				StepActionResult(
+					StepActionResultStatus.REPEAT,
+					ErrorStep(
+						"CardLink Error",
+						egkPayload.errorMessage,
+					)
+				)
+			}
+		} else {
+			val errorMsg = "EGK Payload is not from type ConfirmTan."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
 	}
 
+	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): EgkEnvelope? {
+		var tanConfirmResponse : EgkEnvelope?
+		runBlocking {
+			tanConfirmResponse = wsListener.pollMessage(CONFIRM_TAN_RESPONSE)
+
+			var pollTryCounter = 5
+			while (tanConfirmResponse == null && pollTryCounter != 0) {
+				delay(500)
+				tanConfirmResponse = wsListener.pollMessage(CONFIRM_TAN_RESPONSE)
+				pollTryCounter--
+			}
+		}
+		return tanConfirmResponse
+	}
 }

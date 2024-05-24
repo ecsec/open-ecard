@@ -32,9 +32,11 @@ import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
 import org.openecard.addons.cardlink.ws.RegisterEgk
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
+import org.openecard.common.ECardConstants
 import org.openecard.common.ThreadTerminateException
 import org.openecard.common.WSHelper
 import org.openecard.crypto.common.sal.did.DidInfos
+import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
 
@@ -54,7 +56,18 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val exec = ExecutionEngine(navigator)
 		try {
 			val guiResult = exec.process()
-			TODO("evaluate result and fail if needed")
+			when (guiResult) {
+				ResultStatus.OK -> {
+					//continue
+				}
+				else -> {
+					// fail
+					return DIDAuthenticateResponse().apply {
+						// TODO: obtain proper error from gui
+						result = WSHelper.makeResultUnknownError("CardLink failed")
+					}
+				}
+			}
 		} catch (ex: ThreadTerminateException) {
 			TODO("Fail with error message")
 		}
@@ -79,11 +92,19 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val cvcEgkAuthEc = infos.getDataSetInfo("EF.C.eGK.AUT_CVC.E256").read()
 		val cvcEgkCaEc = infos.getDataSetInfo("EF.C.CA.CS.E256").read()
 		val atrDs = infos.getDataSetInfo("EF.ATR").read()
-		val cvcEsignAuthEc = infos.getDataSetInfo("EF.C.CH.AUT.E256").read()
-		val cvcEsignAuthRsa = infos.getDataSetInfo("EF.C.CH.AUT.R2048").read()
+		val x509EsignAuthEc = infos.getDataSetInfo("EF.C.CH.AUT.E256").read()
+		val x509EsignAuthRsa = infos.getDataSetInfo("EF.C.CH.AUT.R2048").read()
 
-		//val regEgk = RegisterEgk(cardSessionId, egkData)
-		TODO("Not yet implemented")
+		return RegisterEgk(
+			cardSessionId = cardSessionId,
+			gdo = gdoDs,
+			cardVersion = versionDs,
+			cvcAuth = cvcEgkAuthEc,
+			cvcCA = cvcEgkCaEc,
+			atr = atrDs,
+			x509AuthECC = x509EsignAuthEc,
+			x509AuthRSA = x509EsignAuthRsa
+		)
 	}
 
 	private fun sendEgkData(regEgk: RegisterEgk) {

@@ -585,7 +585,7 @@ public class CardRecognitionImpl implements CardRecognition {
 			    continue;
 			}
 			// check internals for match
-			if (checkBody(r.getBody(), result)) {
+			if (checkDataObject(r.getBody(), result)) {
 			    if (r.getConclusion().getRecognizedCardType() != null) {
 				// type recognised
 				return r.getConclusion().getRecognizedCardType();
@@ -602,67 +602,44 @@ public class CardRecognitionImpl implements CardRecognition {
 	return null;
     }
 
-    private boolean checkBody(DataMaskType body, byte[] result) {
-	// tag in body has a special meaning
-	if (body.getTag() != null && body.getDataObject() != null) {
-	    byte[] tag = body.getTag();
-	    if (ByteUtils.isPrefix(tag, result)) {
-		result = ByteUtils.copy(result, tag.length, result.length - tag.length);
-		return checkDataObject(body.getDataObject(), result);
-	    } else {
-		return false;
-	    }
-	} else if (body.getDataObject() != null) {
-	    return checkDataObject(body.getDataObject(), result);
-	} else {
-	    return checkMatchingData(body.getMatchingData(), result);
-	}
-    }
+	private boolean checkDataObject(DataMaskType matcher, byte[] result) {
+		if (matcher.getTag() != null) {
+			try {
+				TLV tlv = TLV.fromBER(result);
+				var tagNum = ByteUtils.toLong(matcher.getTag());
+				var nextTlvs = tlv.findNextTags(tagNum);
+				for (var next : nextTlvs) {
+					if (matcher.getDataObject() != null) {
+						var outcome = checkDataObject(matcher.getDataObject(), next.getValue());
+						if (outcome) {
+							return true;
+						}
+					} else if (matcher.getMatchingData() != null) {
+						var outcome = checkMatchingData(matcher.getMatchingData(), next.getValue());
+						if (outcome) {
+							return true;
+						}
+					} else {
+						LOG.error("No data object or matching data found in DataMaskType.");
+						return false;
+					}
+				}
+			} catch (TLVException ex) {
+				// no TLV, hence no tag to match
+				return false;
+			}
+		}
 
-
-    private boolean checkDataObject(DataMaskType matcher, byte[] result) {
-	// check if we have a tag and data object
-	if (matcher.getTag() != null && matcher.getDataObject() != null) {
-	    try {
-		TLV tlv = TLV.fromBER(result);
-		return checkDataObject(matcher, tlv);
-	    } catch (TLVException ex) {
-	    }
-	    // no TLV structure or fallthrough after tag not found
-	    return false;
-	}
-
-	// we have a matcher
-	return checkMatchingData(matcher.getMatchingData(), result);
-    }
-
-    private boolean checkDataObject(DataMaskType matcher, TLV result) {
-	byte[] tag = matcher.getTag();
-	DataMaskType nextMatcher = matcher.getDataObject();
-
-	// this function only works with tag and dataobject
-	if (tag == null || nextMatcher == null) {
-	    return false;
+		if (matcher.getDataObject() != null) {
+			return checkDataObject(matcher.getDataObject(), result);
+		} else if (matcher.getMatchingData() != null) {
+			return checkMatchingData(matcher.getMatchingData(), result);
+		} else {
+			LOG.error("No data object or matching data found in DataMaskType.");
+			return false;
+		}
 	}
 
-	long tagNum = ByteUtils.toLong(tag);
-
-	List<TLV> chunks = result.findNextTags(tagNum);
-	for (TLV next : chunks) {
-	    boolean outcome;
-	    if (nextMatcher.getMatchingData() != null) {
-		outcome = checkMatchingData(nextMatcher.getMatchingData(), next.getValue());
-	    } else {
-		outcome = checkDataObject(nextMatcher, next.getChild());
-	    }
-	    // evaluate outcome
-	    if (outcome == true) {
-		return true;
-	    }
-	}
-	// no match
-	return false;
-    }
 
     private boolean checkMatchingData(MatchingDataType matcher, byte[] result) {
 	// get values

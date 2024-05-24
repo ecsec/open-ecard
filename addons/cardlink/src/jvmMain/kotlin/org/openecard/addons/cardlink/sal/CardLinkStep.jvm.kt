@@ -25,11 +25,12 @@ package org.openecard.addons.cardlink.sal
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
+import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
-import org.openecard.addons.cardlink.ws.RegisterEgk
+import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -39,6 +40,7 @@ import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.mobile.activation.Websocket
 
 class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	val gui = aCtx.userConsent
@@ -76,7 +78,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val conHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
 
 		val egkData = readEgkData(conHandle, cardSessionId)
-		sendEgkData(egkData)
+		sendEgkData(egkData, cardSessionId, ws)
 
 		waitForCardLinkFinish()
 
@@ -107,9 +109,15 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		)
 	}
 
-	private fun sendEgkData(regEgk: RegisterEgk) {
-
-		TODO("Not yet implemented")
+	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: Websocket) {
+		val egkEnvelope = EgkEnvelope(
+			cardSessionId,
+			null,
+			regEgk,
+			REGISTER_EGK
+		)
+		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
+		ws.send(egkEnvelopeMsg)
 	}
 
 	private fun waitForCardLinkFinish() {

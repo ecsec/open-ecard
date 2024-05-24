@@ -26,6 +26,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.openecard.addons.cardlink.ws.CONFIRM_TAN
+import org.openecard.addons.cardlink.ws.REGISTER_EGK
 import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
 import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
 import org.openecard.common.ifd.scio.TerminalFactory
@@ -99,6 +100,7 @@ class CardLinkProtocolTest {
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
+		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
@@ -106,7 +108,7 @@ class CardLinkProtocolTest {
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
-			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from CardLink-Service..." }
+			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from App..." }
 			argumentCaptor.value.onOpen(webSocketMock)
 			argumentCaptor.value.onText(webSocketMock, """
 				[
@@ -114,23 +116,37 @@ class CardLinkProtocolTest {
 						"type":"requestSmsTanResponse",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"123456",
+					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(CONFIRM_TAN))).then {
-			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from CardLink-Service..." }
-			argumentCaptor.value.onOpen(webSocketMock)
+			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from App..." }
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
 						"type":"confirmTanResponse",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"123456",
-					"$correlationIdTan"]
+					"$cardSessionId",
+					"$correlationIdTan"
+				]
+			""")
+		}
+
+		Mockito.`when`(webSocketMock.send(Mockito.contains(REGISTER_EGK))).then {
+			logger.info { "[WS-MOCK] Received $REGISTER_EGK message from App..." }
+			argumentCaptor.value.onText(webSocketMock, """
+				[
+					{
+						"type":"sendAPDU",
+						"payload":"aoY"
+					},
+					"$cardSessionId",
+					"$correlationIdTan"
+				]
 			""")
 		}
 	}

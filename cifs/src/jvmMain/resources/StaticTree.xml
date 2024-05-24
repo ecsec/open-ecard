@@ -111,6 +111,7 @@
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
 		</iso:CardCall>
+
 		<iso:CardCall>
 			<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 			<iso:ResponseAPDU>
@@ -167,17 +168,36 @@
 											<iso:RecognizedCardType>http://cif.chipkarte.at/e-card/g4</iso:RecognizedCardType>
 										</iso:Conclusion>
 									</iso:ResponseAPDU>
+								</iso:CardCall>
+							</iso:Conclusion>
+						</iso:ResponseAPDU>
+					</iso:CardCall>
+				</iso:Conclusion>
+			</iso:ResponseAPDU>
+		</iso:CardCall>
+
+		<iso:CardCall>
+			<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
+			<iso:ResponseAPDU>
+				<iso:Trailer>9000</iso:Trailer>
+				<iso:Conclusion>
+					<iso:CardCall>
+						<iso:CommandAPDU>00A4020C022F11</iso:CommandAPDU>
+						<iso:ResponseAPDU>
+							<iso:Trailer>9000</iso:Trailer>
+							<iso:Conclusion>
+								<iso:CardCall>
+									<iso:CommandAPDU>00B00000FF</iso:CommandAPDU>
 									<iso:ResponseAPDU>
+										<!-- EF Logging Version -->
 										<iso:Body>
+											<iso:Tag>EF</iso:Tag>
 											<iso:DataObject>
-												<iso:Tag>61</iso:Tag>
-												<iso:DataObject>
-													<iso:MatchingData>
-														<iso:Offset>00</iso:Offset>
-														<iso:Length>11</iso:Length>
-														<iso:MatchingValue>4F0FE828BD080FA000000167455349474E</iso:MatchingValue>
-													</iso:MatchingData>
-												</iso:DataObject>
+												<iso:Tag>C7</iso:Tag>
+												<iso:MatchingData>
+													<iso:Length>03</iso:Length>
+													<iso:MatchingValue>010000</iso:MatchingValue>
+												</iso:MatchingData>
 											</iso:DataObject>
 										</iso:Body>
 										<iso:Trailer>6282</iso:Trailer>
@@ -192,6 +212,7 @@
 				</iso:Conclusion>
 			</iso:ResponseAPDU>
 		</iso:CardCall>
+
 		<iso:CardCall>
 			<iso:CommandAPDU>00A4000C023F00</iso:CommandAPDU>
 			<iso:ResponseAPDU>

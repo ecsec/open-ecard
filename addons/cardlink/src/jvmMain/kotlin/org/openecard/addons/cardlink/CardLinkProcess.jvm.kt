@@ -22,18 +22,25 @@
 
 package org.openecard.addons.cardlink
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
-import org.openecard.addons.cardlink.sal.CARDLINK_PROTOCOL_ID
-import org.openecard.addons.cardlink.sal.prepareWebsocketListener
-import org.openecard.addons.cardlink.sal.setProcessWebsocket
+import org.openecard.addons.cardlink.sal.*
+import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.WSHelper
 import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.Websocket
+import java.util.*
+
+
+private val logger = KotlinLogging.logger {}
 
 class CardLinkProcess constructor(private val ctx: Context, private val ws: Websocket) {
 
@@ -47,7 +54,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		ws.connect()
 		prepareWebsocketListener(dynCtx)
 		val cardHandle = performDidAuth(conHandle)
-		handleRemoteApdus(cardHandle)
+		handleRemoteApdus(cardHandle, dynCtx)
 		destroySession(cardHandle)
 
 		// no error means success
@@ -100,8 +107,61 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		TODO("Not yet implemented")
 	}
 
-	private fun handleRemoteApdus(cardHandle: Any) {
-		TODO("Not yet implemented")
+	private fun handleRemoteApdus(cardHandle: Any, dynCtx: DynamicContext) {
+		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+
+		// TODO: currently, wait for APDUs until websocket channel is closed
+		while (wsListener.isOpen()) {
+			val sendApduMessage: EgkEnvelope? = waitForSendApduMessage(wsListener)
+
+			if (sendApduMessage == null) {
+				val errorMsg = "Didn't receive any SendAPDU messages from CardLink-Service."
+				logger.warn { errorMsg }
+				continue
+			}
+
+			if (sendApduMessage.payload !is SendApdu) {
+				val errorMsg = "Received malformed eGK payload. Payload is not from type: SendApdu."
+				logger.error { errorMsg }
+			} else {
+				val apdu = (sendApduMessage.payload as SendApdu).apdu
+				val correlationId = sendApduMessage.correlationId
+				val cardSessionId = sendApduMessage.cardSessionId
+
+				val apduResponse = sendApduToCard(cardHandle, apdu)
+
+				val egkEnvelope = EgkEnvelope(
+					cardSessionId,
+					correlationId,
+					SendApduResponse(
+						cardSessionId,
+						apduResponse
+					),
+					SEND_APDU_RESPONSE
+				)
+				val egkEnvelopeJson = cardLinkJsonFormatter.encodeToString(egkEnvelope)
+				ws.send(egkEnvelopeJson)
+			}
+		}
+	}
+
+	private fun sendApduToCard(cardHandle: Any, apdu: ByteArray) : ByteArray {
+		TODO("Send APDU to card, return SendAPDUResponse to CardLink Service")
+	}
+
+	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : EgkEnvelope? {
+		var sendApduMessage: EgkEnvelope?
+		runBlocking {
+			sendApduMessage = wsListener.pollMessage(SEND_APDU)
+
+			var pollTryCounter = 5
+			while (sendApduMessage == null && pollTryCounter != 0) {
+				delay(500)
+				sendApduMessage = wsListener.pollMessage(SEND_APDU)
+				pollTryCounter--
+			}
+		}
+		return sendApduMessage
 	}
 
 }

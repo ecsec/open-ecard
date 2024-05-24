@@ -40,12 +40,16 @@ class WebsocketListenerImpl: WebsocketListener {
 
 	private lateinit var messageChannel : Channel<EgkEnvelope>
 
+	private var isOpen : Boolean = false
+
 	override fun onOpen(webSocket: Websocket?) {
 		messageChannel = Channel()
+		isOpen = true
 	}
 
 	override fun onClose(webSocket: Websocket?, statusCode: Int, reason: String?) {
 		messageChannel.close()
+		isOpen = false
 	}
 
 	override fun onError(webSocket: Websocket?, error: String?) {
@@ -63,6 +67,10 @@ class WebsocketListenerImpl: WebsocketListener {
 				logger.debug { "Received empty data in CardLink Websocket." }
 			}
 		}
+	}
+
+	fun isOpen() : Boolean {
+		return isOpen
 	}
 
 	suspend fun pollMessage(payloadType: String) : EgkEnvelope? {

@@ -79,7 +79,7 @@ public class PACEProtocol implements Protocol {
 	    } else {
 		pin = paceInput.getPIN().getBytes(PACEConstants.PIN_CHARSET);
 	    }
-	    if (pin == null || pin.length == 0) {
+	    if (pin.length == 0) {
 		response.setResult(WSHelper.makeResultError(
 			ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
 			"No PIN was entered."));

@@ -114,7 +114,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
 
 		// TODO: currently, wait for APDUs until websocket channel is closed
-		while (wsListener.isOpen()) {
+		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {
 			val sendApduMessage: EgkEnvelope? = waitForSendApduMessage(wsListener)
 
 			if (sendApduMessage == null) {
@@ -159,6 +159,14 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		val response = dispatcher.safeDeliver(t) as TransmitResponse
 		WSHelper.checkResult(response)
 		return response.outputAPDU[0]
+	}
+
+	private fun isAPDUExchangeOngoing(wsListener: WebsocketListenerImpl) : Boolean {
+		var isAPDUExchangeOngoing: Boolean
+		runBlocking {
+			isAPDUExchangeOngoing = wsListener.isAPDUExchangeOngoing()
+		}
+		return isAPDUExchangeOngoing
 	}
 
 	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : EgkEnvelope? {

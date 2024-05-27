@@ -73,6 +73,10 @@ class WebsocketListenerImpl: WebsocketListener {
 		return isOpen
 	}
 
+	suspend fun isAPDUExchangeOngoing() : Boolean {
+		return pollMessage(FINISH_APDU_EXCHANGE) != null
+	}
+
 	suspend fun pollMessage(payloadType: String) : EgkEnvelope? {
 		for (message in messageChannel) {
 			if (message.payloadType == payloadType) {

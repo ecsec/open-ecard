@@ -25,10 +25,7 @@ package org.openecard.addons.cardlink
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
-import org.openecard.addons.cardlink.ws.CONFIRM_TAN
-import org.openecard.addons.cardlink.ws.REGISTER_EGK
-import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
-import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
+import org.openecard.addons.cardlink.ws.*
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.Promise
 import org.openecard.mobile.activation.*
@@ -117,7 +114,7 @@ class CardLinkProtocolTest {
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
-						"type":"requestSmsTanResponse",
+						"type":"$REQUEST_SMS_TAN_RESPONSE",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
 					"${cardSessionId.value}",
@@ -131,7 +128,7 @@ class CardLinkProtocolTest {
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
-						"type":"confirmTanResponse",
+						"type":"$CONFIRM_TAN_RESPONSE",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
 					"${cardSessionId.value}",
@@ -145,8 +142,19 @@ class CardLinkProtocolTest {
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
-						"type":"sendAPDU",
+						"type":"$SEND_APDU",
 						"payload":"aoY"
+					},
+					"${cardSessionId.value}"",
+					"$correlationIdTan"
+				]
+			""")
+			// TODO: send other APDUs or finish the APDU exchange
+			argumentCaptor.value.onText(webSocketMock, """
+				[
+					{
+						"type":"$FINISH_APDU_EXCHANGE",
+						"payload":null
 					},
 					"${cardSessionId.value}"",
 					"$correlationIdTan"

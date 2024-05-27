@@ -42,6 +42,8 @@ const val REQUEST_SMS_TAN = "requestSmsTan"
 const val REQUEST_SMS_TAN_RESPONSE = "requestSmsTanResponse"
 const val CONFIRM_TAN = "confirmTan"
 const val CONFIRM_TAN_RESPONSE = "confirmTanResponse"
+// TODO: Define payload for finishAPDU message
+const val FINISH_APDU_EXCHANGE = "finishAPDUExchange"
 
 
 @Serializable(with = EgkEnvelopeSerializer::class)

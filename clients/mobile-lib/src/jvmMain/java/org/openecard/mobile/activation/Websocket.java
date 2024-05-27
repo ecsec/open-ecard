@@ -57,9 +57,10 @@ public interface Websocket {
 	/**
 	 * Connect to the server.
 	 * This method can also be used to reestablish a lost connection.
+	 * @param cardSessionId used as websocket session identifier
 	 * @throws WebsocketException if the connection could not be established.
 	 */
-	void connect() throws WebsocketException;
+	void connect(String cardSessionId) throws WebsocketException;
 
 	/**
 	 * Get open state of the connection.

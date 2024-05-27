@@ -49,9 +49,12 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
     fun start(): BindingResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
+		// TODO: For now we generate the cardSessionID here, should be moved to the CardLink-Service
+		val cardSessionId = UUID.randomUUID().toString()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
+		dynCtx.put(CardLinkKeys.WS_SESSION_ID, cardSessionId)
 		setProcessWebsocket(dynCtx, ws)
-		ws.connect()
+		ws.connect(cardSessionId)
 		prepareWebsocketListener(dynCtx)
 		val cardHandle = performDidAuth(conHandle)
 		handleRemoteApdus(cardHandle, dynCtx)

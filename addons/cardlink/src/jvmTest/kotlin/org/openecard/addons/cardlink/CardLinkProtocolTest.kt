@@ -100,8 +100,12 @@ class CardLinkProtocolTest {
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
-		val cardSessionId = UUID.randomUUID().toString()
+		val cardSessionId = ArgumentCaptor.forClass(String::class.java)
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
+
+		Mockito.`when`(webSocketMock.connect(cardSessionId.capture())).then {
+			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: '${cardSessionId.value}'." }
+		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
 			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
@@ -116,7 +120,7 @@ class CardLinkProtocolTest {
 						"type":"requestSmsTanResponse",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"$cardSessionId",
+					"${cardSessionId.value}",
 					"$correlationIdTan"
 				]
 			""")
@@ -130,7 +134,7 @@ class CardLinkProtocolTest {
 						"type":"confirmTanResponse",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"$cardSessionId",
+					"${cardSessionId.value}",
 					"$correlationIdTan"
 				]
 			""")
@@ -144,7 +148,7 @@ class CardLinkProtocolTest {
 						"type":"sendAPDU",
 						"payload":"aoY"
 					},
-					"$cardSessionId",
+					"${cardSessionId.value}"",
 					"$correlationIdTan"
 				]
 			""")

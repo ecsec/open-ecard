@@ -55,9 +55,11 @@ class PACEConstants {
     public static final short CMD_FAILED = (short) 0x6300;
     public static final short INCORRECT_PARA = (short) 0x6300;
 
-    public static final List<String> SUPPORTED_PACE_PROTOCOLS = Arrays.asList(
-	    PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128
-    );
+	public static final List<String> SUPPORTED_PACE_PROTOCOLS = Arrays.asList(
+		PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+		PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192,
+		PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256
+	);
     public static final List<Integer> SUPPORTED_PACE_DOMAIN_PARAMS = Arrays.asList(
 	    10, // NIST P-224 (secp224r1)
 	    11, // BrainpoolP224r1

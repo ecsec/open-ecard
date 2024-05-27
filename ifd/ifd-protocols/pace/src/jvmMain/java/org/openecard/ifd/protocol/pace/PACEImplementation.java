@@ -99,7 +99,7 @@ public class PACEImplementation {
 
 	domainParameter = new PACEDomainParameter(this.psip);
 	cryptoSuite = new PACECryptoSuite(this.psip.getPACEInfo(), domainParameter);
-	kdf = new KDF();
+	kdf = new KDF(this.psip.getPACEInfo().getKdfLength());
     }
 
     /**

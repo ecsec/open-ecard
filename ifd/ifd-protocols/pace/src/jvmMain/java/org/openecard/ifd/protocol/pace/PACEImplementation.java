@@ -61,7 +61,6 @@ public class PACEImplementation {
     private final Dispatcher dispatcher;
     private final KDF kdf;
     private final byte[] slotHandle;
-    private CardResponseAPDU response;
     // Crypto
     private final PACESecurityInfoPair psip;
     private final PACECryptoSuite cryptoSuite;
@@ -128,7 +127,7 @@ public class PACEImplementation {
 	CardCommandAPDU mseSetAT = new MSESetATPACE(oID, passwordID, psip.getPACEInfo().getParameterID(), chat);
 
 	try {
-	    response = mseSetAT.transmit(dispatcher, slotHandle);
+	    mseSetAT.transmit(dispatcher, slotHandle);
 	    // Continue with step 2
 	    generalAuthenticateEncryptedNonce();
 	} catch (APDUException e) {
@@ -194,7 +193,7 @@ public class PACEImplementation {
 	byte[] keyPI = kdf.derivePI(password);
 
 	try {
-	    response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
+	    var response = gaEncryptedNonce.transmit(dispatcher, slotHandle);
 	    s = cryptoSuite.decryptNonce(keyPI, response.getData());
 	    // Continue with Step 3
 	    generalAuthenticateMapNonce();
@@ -225,6 +224,7 @@ public class PACEImplementation {
 	CardCommandAPDU gaMapNonce = new GeneralAuthenticate((byte) 0x81, pkMapPCD);
 	gaMapNonce.setChaining();
 
+	CardResponseAPDU response;
 	try {
 	    response = gaMapNonce.transmit(dispatcher, slotHandle);
 	} catch (APDUException e) {
@@ -267,7 +267,7 @@ public class PACEImplementation {
 	gaKeyAgreement.setChaining();
 
 	try {
-	    response = gaKeyAgreement.transmit(dispatcher, slotHandle);
+	    var response = gaKeyAgreement.transmit(dispatcher, slotHandle);
 	    keyPICC = new PACEKey(domainParameter);
 	    byte[] keyPKPICC = keyPICC.decodePublicKey(response.getData());
 
@@ -308,7 +308,7 @@ public class PACEImplementation {
 	tokenPICC.generateToken(keyMAC, keyPCD.getEncodedPublicKey());
 
 	try {
-	    response = gaMutualAuth.transmit(dispatcher, slotHandle);
+	    var response = gaMutualAuth.transmit(dispatcher, slotHandle);
 
 	    if (tokenPICC.verifyToken(response.getData(), specifiedCHAT)) {
 		currentCAR = tokenPICC.getCurrentCAR();

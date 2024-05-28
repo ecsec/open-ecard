@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,8 +19,6 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-@file:OptIn(ExperimentalUnsignedTypes::class)
 
 package org.openecard.ifd.protocol.pace
 
@@ -47,20 +45,6 @@ import javax.crypto.spec.SecretKeySpec
 // ISO/IEC 7816-4 padding tag
 private const val PAD = 0x80.toByte()
 
-/**
- * Increment the Send Sequence Counter (SSC).
- *
- * @param ssc the Send Sequence Counter (SSC)
- */
-private fun incrementSSC(ssc: UByteArray) {
-	for (i in ssc.indices.reversed()) {
-		ssc[i]++
-		if (ssc[i] != 0.toUByte()) {
-			break
-		}
-	}
-}
-
 fun BigInteger.toSSCBytes(): ByteArray {
 	val ssc = this.toByteArray()
 	if (ssc.size < 16) {
@@ -72,7 +56,7 @@ fun BigInteger.toSSCBytes(): ByteArray {
 }
 
 enum class ReadState {
- 	INIT,
+	INIT,
 	DATA,
 	TRAILER,
 	MAC,
@@ -88,18 +72,21 @@ enum class ReadState {
 					else -> throw IOException("Malformed Secure Messaging APDU")
 				}
 			}
+
 			DATA -> {
 				when (tag) {
 					0x99L -> TRAILER
 					else -> throw IOException("Malformed Secure Messaging APDU")
 				}
 			}
+
 			TRAILER -> {
 				when (tag) {
 					0x8EL -> MAC
 					else -> throw IOException("Malformed Secure Messaging APDU")
 				}
 			}
+
 			MAC -> {
 				throw IOException("Malformed Secure Messaging APDU")
 			}
@@ -114,47 +101,47 @@ enum class ReadState {
  */
 class SecureMessaging(
 	// Keys for encryption and message authentication.
-    private val keyMAC: ByteArray,
+	private val keyMAC: ByteArray,
 	private val keyENC: ByteArray,
 ) {
-    // Send Sequence Counter. See BSI-TR-03110 section F.3.
-    private var secureMessagingSSC = BigInteger.ZERO
+	// Send Sequence Counter. See BSI-TR-03110 section F.3.
+	private var secureMessagingSSC = BigInteger.ZERO
 
-    /**
-     * Encrypt the APDU.
-     *
-     * @param apdu APDU
-     * @return Encrypted APDU
-     * @throws Exception
-     */
-    @Throws(Exception::class)
-    fun encrypt(apdu: ByteArray): ByteArray {
-        secureMessagingSSC++
-        val commandAPDU = encrypt(apdu, secureMessagingSSC)
-        secureMessagingSSC++
+	/**
+	 * Encrypt the APDU.
+	 *
+	 * @param apdu APDU
+	 * @return Encrypted APDU
+	 * @throws Exception
+	 */
+	@Throws(Exception::class)
+	fun encrypt(apdu: ByteArray): ByteArray {
+		secureMessagingSSC++
+		val commandAPDU = encrypt(apdu, secureMessagingSSC)
+		secureMessagingSSC++
 
-        return commandAPDU
-    }
+		return commandAPDU
+	}
 
-    /**
-     * Encrypt the APDU.
-     *
-     * @param apdu APDU
-     * @param secureMessagingSSC Secure Messaging Send Sequence Counter
-     * @return Encrypted APDU
-     * @throws Exception
-     */
-    @Throws(Exception::class)
-    private fun encrypt(apdu: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
-        val baos = ByteArrayOutputStream()
-        val cAPDU = CardCommandAPDU(apdu)
+	/**
+	 * Encrypt the APDU.
+	 *
+	 * @param apdu APDU
+	 * @param secureMessagingSSC Secure Messaging Send Sequence Counter
+	 * @return Encrypted APDU
+	 * @throws Exception
+	 */
+	@Throws(Exception::class)
+	private fun encrypt(apdu: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
+		val baos = ByteArrayOutputStream()
+		val cAPDU = CardCommandAPDU(apdu)
 
-        require(!cAPDU.isSecureMessaging) { "Malformed APDU." }
+		require(!cAPDU.isSecureMessaging) { "Malformed APDU." }
 
-        var data = cAPDU.data
-        val header = cAPDU.header
-        val lc = cAPDU.lc
-        val le = cAPDU.le
+		var data = cAPDU.data
+		val header = cAPDU.header
+		val lc = cAPDU.lc
+		val le = cAPDU.le
 		val leEncoded = cAPDU.encodeLeField()
 
 		// Indicate Secure Messaging
@@ -164,33 +151,33 @@ class SecureMessaging(
 			it.byte
 		}
 
-        if (data.isNotEmpty()) {
-            // Encrypt data
-            val c = getCipher(secureMessagingSSC, Cipher.ENCRYPT_MODE)
+		if (data.isNotEmpty()) {
+			// Encrypt data
+			val c = getCipher(secureMessagingSSC, Cipher.ENCRYPT_MODE)
 			val paddedData = pad(data, 16)
 			val dataEncrypted = c.doFinal(paddedData)
 
-            // Add padding indicator 0x01
-            val paddedEncryptedData = ByteUtils.concatenate(0x01.toByte(), dataEncrypted)
+			// Add padding indicator 0x01
+			val paddedEncryptedData = ByteUtils.concatenate(0x01.toByte(), dataEncrypted)
 
-            val dataObject = TLV()
-            dataObject.setTagNumWithClass(0x87.toByte())
-            dataObject.value = paddedEncryptedData
-            baos.write(dataObject.toBER())
-        }
+			val dataObject = TLV()
+			dataObject.setTagNumWithClass(0x87.toByte())
+			dataObject.value = paddedEncryptedData
+			baos.write(dataObject.toBER())
+		}
 
-        // Write protected LE
-        if (leEncoded.isNotEmpty()) {
-            val leObject = TLV()
-            leObject.setTagNumWithClass(0x97.toByte())
+		// Write protected LE
+		if (leEncoded.isNotEmpty()) {
+			val leObject = TLV()
+			leObject.setTagNumWithClass(0x97.toByte())
 			leObject.value = leEncoded
-            baos.write(leObject.toBER())
-        }
+			baos.write(leObject.toBER())
+		}
 
 		//
 		// Calculate MAC
 		//
-        val cmac = getCMAC(secureMessagingSSC)
+		val cmac = getCMAC(secureMessagingSSC)
 		var mac = ByteArray(cmac.macSize)
 
 		synchronized(cmac) {
@@ -204,61 +191,61 @@ class SecureMessaging(
 
 			cmac.doFinal(mac, 0)
 		}
-        mac = ByteUtils.copy(mac, 0, 8)
+		mac = ByteUtils.copy(mac, 0, 8)
 
-        //
-        // Build APDU
-        val macStructure = TLV()
-        macStructure.setTagNumWithClass(0x8E.toByte())
-        macStructure.value = mac
-        val secureData = ByteUtils.concatenate(baos.toByteArray(), macStructure.toBER())
+		//
+		// Build APDU
+		val macStructure = TLV()
+		macStructure.setTagNumWithClass(0x8E.toByte())
+		macStructure.value = mac
+		val secureData = ByteUtils.concatenate(baos.toByteArray(), macStructure.toBER())
 
-        val secureCommand = CardCommandAPDU(header[0], header[1], header[2], header[3], secureData)
-        // set LE explicitly to 0x00 or in case of extended length 0x00 0x00
-        if ((lc > 0xFF) || (le > 0x100)) {
-            secureCommand.le = 65536
-        } else {
-            secureCommand.le = 256
-        }
+		val secureCommand = CardCommandAPDU(header[0], header[1], header[2], header[3], secureData)
+		// set LE explicitly to 0x00 or in case of extended length 0x00 0x00
+		if ((lc > 0xFF) || (le > 0x100)) {
+			secureCommand.le = 65536
+		} else {
+			secureCommand.le = 256
+		}
 
-        return secureCommand.toByteArray()
-    }
+		return secureCommand.toByteArray()
+	}
 
-    /**
-     * Decrypt the APDU.
-     *
-     * @param response the response
-     * @return the byte[]
-     * @throws Exception the exception
-     */
-    @Throws(Exception::class)
-    fun decrypt(response: ByteArray): ByteArray {
-        require(response.size >= 12) { "Malformed Secure Messaging APDU." }
-        return decrypt(response, secureMessagingSSC)
-    }
+	/**
+	 * Decrypt the APDU.
+	 *
+	 * @param response the response
+	 * @return the byte[]
+	 * @throws Exception the exception
+	 */
+	@Throws(Exception::class)
+	fun decrypt(response: ByteArray): ByteArray {
+		require(response.size >= 12) { "Malformed Secure Messaging APDU." }
+		return decrypt(response, secureMessagingSSC)
+	}
 
-    /**
-     * Decrypt the APDU.
-     *
-     * @param response the response
-     * @param secureMessagingSSC the secure messaging ssc
-     * @return the byte[]
-     * @throws Exception the exception
-     */
-    @Throws(Exception::class)
-    private fun decrypt(response: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
-        // Status bytes of the response APDU. MUST be 2 bytes.
-        val statusBytes = ByteArray(2)
+	/**
+	 * Decrypt the APDU.
+	 *
+	 * @param response the response
+	 * @param secureMessagingSSC the secure messaging ssc
+	 * @return the byte[]
+	 * @throws Exception the exception
+	 */
+	@Throws(Exception::class)
+	private fun decrypt(response: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
+		// Status bytes of the response APDU. MUST be 2 bytes.
+		val statusBytes = ByteArray(2)
 		// plain data 0x81
-        var plainDataObject: ByteArray? = null
+		var plainDataObject: ByteArray? = null
 		// Padding-content indicator followed by cryptogram 0x87.
 		var withPadding = false
 		var encDataObject: ByteArray? = null
-        // Cryptographic checksum 0x8E. MUST be 8 bytes.
-        val macObject = ByteArray(8)
+		// Cryptographic checksum 0x8E. MUST be 8 bytes.
+		val macObject = ByteArray(8)
 
 		val responseNoTrailer = response.sliceArray(0 until response.size - 2)
-        val tlv = TLV.fromBER(responseNoTrailer)
+		val tlv = TLV.fromBER(responseNoTrailer)
 
 		//
 		// Read APDU structure
@@ -279,12 +266,15 @@ class SecureMessaging(
 				ReadState.DATA -> {
 					if (nextTlv.tag.tagNumWithClass == 0x81L) {
 						plainDataObject = nextTlv.value
-					}
-					else if (nextTlv.tag.tagNumWithClass == 0x87L) {
+					} else if (nextTlv.tag.tagNumWithClass == 0x87L) {
 						when (nextTlv.value.first()) {
 							0x00.toByte(), 0x01.toByte() -> withPadding = true
 							0x02.toByte() -> withPadding = false
-							else -> throw UnsupportedOperationException("Unsupported padding indicator byte 0x${nextTlv.value.first().toString(16)}")
+							else -> throw UnsupportedOperationException(
+								"Unsupported padding indicator byte 0x${
+									nextTlv.value.first().toString(16)
+								}"
+							)
 						}
 						encDataObject = nextTlv.value.sliceArray(1 until nextTlv.value.size)
 					}
@@ -305,138 +295,138 @@ class SecureMessaging(
 		// after reading everything, the state must be MAC
 		require(state == ReadState.MAC) { "Malformed Secure Messaging APDU" }
 
-        // Calculate MAC for verification
-        val cmac = getCMAC(secureMessagingSSC)
-        var mac = ByteArray(cmac.macSize)
+		// Calculate MAC for verification
+		val cmac = getCMAC(secureMessagingSSC)
+		var mac = ByteArray(cmac.macSize)
 
-        synchronized(cmac) {
-            val macData = ByteArrayOutputStream()
+		synchronized(cmac) {
+			val macData = ByteArrayOutputStream()
 
 			tlv.asList().dropLast(1).forEach { macData.write(it.toBER()) }
 
-            val paddedData = pad(macData.toByteArray(), 16)
-            cmac.update(paddedData, 0, paddedData.size)
+			val paddedData = pad(macData.toByteArray(), 16)
+			cmac.update(paddedData, 0, paddedData.size)
 
-            cmac.doFinal(mac, 0)
-            mac = ByteUtils.copy(mac, 0, 8)
-        }
+			cmac.doFinal(mac, 0)
+			mac = ByteUtils.copy(mac, 0, 8)
+		}
 
-        // Verify MAC
-        if (!ByteUtils.compare(mac, macObject)) {
-            throw GeneralSecurityException("Secure Messaging MAC verification failed")
-        }
+		// Verify MAC
+		if (!ByteUtils.compare(mac, macObject)) {
+			throw GeneralSecurityException("Secure Messaging MAC verification failed")
+		}
 
 		val baos = ByteArrayOutputStream(response.size - 10)
-        // Decrypt data
-        if (encDataObject != null) {
-            val c = getCipher(secureMessagingSSC, Cipher.DECRYPT_MODE)
-            val dataDecrypted = c.doFinal(encDataObject)
+		// Decrypt data
+		if (encDataObject != null) {
+			val c = getCipher(secureMessagingSSC, Cipher.DECRYPT_MODE)
+			val dataDecrypted = c.doFinal(encDataObject)
 			if (withPadding) {
 				baos.write(unpad(dataDecrypted))
 			} else {
 				baos.write(dataDecrypted)
 			}
-        } else if (plainDataObject != null) {
+		} else if (plainDataObject != null) {
 			baos.write(plainDataObject)
 		}
 
-        // Add status code
-        baos.write(statusBytes)
+		// Add status code
+		baos.write(statusBytes)
 
-        return baos.toByteArray()
-    }
+		return baos.toByteArray()
+	}
 
 
-    //
-    // Cipher functions
-    //
+	//
+	// Cipher functions
+	//
 
-    /**
-     * Gets the cipher for de/encryption.
-     *
-     * @param smssc the Secure Messaging Send Sequence Counter
-     * @param mode the mode indicating de/encryption
-     * @return the cipher
-     * @throws Exception the exception
-     */
-    @Throws(Exception::class)
-    private fun getCipher(smssc: BigInteger, mode: Int): Cipher {
-        val c = Cipher.getInstance("AES/CBC/NoPadding")
-        val key: Key = SecretKeySpec(keyENC, "AES")
-        val iv = getCipherIV(smssc.toSSCBytes())
-        val algoPara: AlgorithmParameterSpec = IvParameterSpec(iv)
+	/**
+	 * Gets the cipher for de/encryption.
+	 *
+	 * @param smssc the Secure Messaging Send Sequence Counter
+	 * @param mode the mode indicating de/encryption
+	 * @return the cipher
+	 * @throws Exception the exception
+	 */
+	@Throws(Exception::class)
+	private fun getCipher(smssc: BigInteger, mode: Int): Cipher {
+		val c = Cipher.getInstance("AES/CBC/NoPadding")
+		val key: Key = SecretKeySpec(keyENC, "AES")
+		val iv = getCipherIV(smssc.toSSCBytes())
+		val algoPara: AlgorithmParameterSpec = IvParameterSpec(iv)
 
-        c.init(mode, key, algoPara)
+		c.init(mode, key, algoPara)
 
-        return c
-    }
+		return c
+	}
 
-    /**
-     * Gets the Initialization Vector (IV) for the cipher.
-     *
-     * @param smssc Secure Messaging Send Sequence Counter
-     * @return Initialization Vector
-     * @throws Exception
-     */
-    @Throws(Exception::class)
-    private fun getCipherIV(smssc: ByteArray): ByteArray {
-        val c = Cipher.getInstance("AES/ECB/NoPadding")
-        val key: Key = SecretKeySpec(keyENC, "AES")
+	/**
+	 * Gets the Initialization Vector (IV) for the cipher.
+	 *
+	 * @param smssc Secure Messaging Send Sequence Counter
+	 * @return Initialization Vector
+	 * @throws Exception
+	 */
+	@Throws(Exception::class)
+	private fun getCipherIV(smssc: ByteArray): ByteArray {
+		val c = Cipher.getInstance("AES/ECB/NoPadding")
+		val key: Key = SecretKeySpec(keyENC, "AES")
 
-        c.init(Cipher.ENCRYPT_MODE, key)
+		c.init(Cipher.ENCRYPT_MODE, key)
 
-        return c.doFinal(smssc)
-    }
+		return c.doFinal(smssc)
+	}
 
-    /**
-     * Gets the CMAC.
-     *
-     * @param smssc Secure Messaging Send Sequence Counter
-     * @return CMAC
-     */
-    private fun getCMAC(smssc: BigInteger): CMac {
-        val cmac = CMac(AESEngine())
-        cmac.init(KeyParameter(keyMAC))
+	/**
+	 * Gets the CMAC.
+	 *
+	 * @param smssc Secure Messaging Send Sequence Counter
+	 * @return CMAC
+	 */
+	private fun getCMAC(smssc: BigInteger): CMac {
+		val cmac = CMac(AESEngine())
+		cmac.init(KeyParameter(keyMAC))
 		val smsscBytes = smssc.toSSCBytes()
-        cmac.update(smsscBytes, 0, smsscBytes.size)
+		cmac.update(smsscBytes, 0, smsscBytes.size)
 
-        return cmac
-    }
+		return cmac
+	}
 
 
-    //
+	//
 	// ISO/IEC 7816-4 padding functions
 	//
 
-    /**
-     * Padding the data.
-     *
-     * @param data Unpadded data
-     * @param blockSize Block size
-     * @return Padded data
-     */
-    private fun pad(data: ByteArray, blockSize: Int): ByteArray {
-        val result = ByteArray(data.size + (blockSize - data.size % blockSize))
-        System.arraycopy(data, 0, result, 0, data.size)
-        result[data.size] = PAD
+	/**
+	 * Padding the data.
+	 *
+	 * @param data Unpadded data
+	 * @param blockSize Block size
+	 * @return Padded data
+	 */
+	private fun pad(data: ByteArray, blockSize: Int): ByteArray {
+		val result = ByteArray(data.size + (blockSize - data.size % blockSize))
+		System.arraycopy(data, 0, result, 0, data.size)
+		result[data.size] = PAD
 
-        return result
-    }
+		return result
+	}
 
-    /**
-     * Unpadding the data.
-     *
-     * @param data Padded data
-     * @return Unpadded data
-     */
-    private fun unpad(data: ByteArray): ByteArray {
-        for (i in data.indices.reversed()) {
-            if (data[i] == PAD) {
-                return ByteUtils.copy(data, 0, i)
-            }
-        }
+	/**
+	 * Unpadding the data.
+	 *
+	 * @param data Padded data
+	 * @return Unpadded data
+	 */
+	private fun unpad(data: ByteArray): ByteArray {
+		for (i in data.indices.reversed()) {
+			if (data[i] == PAD) {
+				return ByteUtils.copy(data, 0, i)
+			}
+		}
 
-        return data
-    }
+		return data
+	}
 
 }

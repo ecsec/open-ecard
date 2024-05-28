@@ -1,0 +1,14 @@
+.versioning:
+  script:
+    - |
+      if [ -z "${CI_COMMIT_TAG}" ]; then
+        echo "Do versioning for SNAPSHOT build..."
+        ORIGINAL_VERSION=$(grep "^version" gradle.properties | cut -d'=' -f2)
+        VERSION_WITHOUT_SNAPSHOT=$(printf '%s' "${ORIGINAL_VERSION}" | sed -e 's/-SNAPSHOT//')
+        BRANCH_NAME=$(printf '%s' "${CI_COMMIT_REF_NAME}" | sed -e 's/^master$//' | sed -e 's/[^[:alnum:]]/-/g')
+        export ORG_GRADLE_PROJECT_version=${VERSION_WITHOUT_SNAPSHOT}${BRANCH_NAME:+-$BRANCH_NAME}-SNAPSHOT
+      else
+        echo "Do versioning for release build..."
+        export ORG_GRADLE_PROJECT_version=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
+      fi
+      echo "Using version ${ORG_GRADLE_PROJECT_version} for build"

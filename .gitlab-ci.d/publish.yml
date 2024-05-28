@@ -24,7 +24,7 @@ publish-to-github:
         --data-binary "@OpenEcardPod.zip" \
         https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=OpenEcard-CocoaPod.zip
     # Upload all installers
-    - INSTALLERS=(packager/richclient-packager/target/jpackage/* packager/richclient-packager/target/iscc/*)
+    - INSTALLERS=(clients/richclient/build/dist/*)
     - >-
       for INSTALLER in "${INSTALLERS[@]}"; do
         INSTALLER_FILENAME=$(echo "${INSTALLER}" | sed 's:.*/::')
@@ -68,6 +68,7 @@ publish-ios-pod-spec:
     - echo "s.ios.deployment_target = '13.0'" >> open-ecard.podspec
     - echo "s.ios.vendored_frameworks = 'OpenEcard.xcframework'" >> open-ecard.podspec
     - echo end >> open-ecard.podspec
+    - pod spec lint open-ecard.podspec --verbose
     - pod trunk push open-ecard.podspec
   needs: [ "publish-to-github" ]
   rules:

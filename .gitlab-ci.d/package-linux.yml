@@ -1,6 +1,6 @@
 package-linux:
   stage: package
-  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:latest
+  image: public.docker.ecsec.de/ecsec/tools/oec-linux-installer:2.0
   tags:
     - "podman"
   cache:
@@ -15,12 +15,13 @@ package-linux:
     paths:
       - clients/richclient/build/dist
   script:
+    - !reference [.versioning, script]
     - ./gradlew packageLinux
   needs: [ "compile" ]
-  allow_failure: true
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"
       when: manual
     - if: $CI_MERGE_REQUEST_IID
       when: manual
+      allow_failure: true

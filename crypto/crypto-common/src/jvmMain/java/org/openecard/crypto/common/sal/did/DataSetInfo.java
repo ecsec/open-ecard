@@ -156,6 +156,7 @@ public class DataSetInfo {
 
     public byte[] read() throws WSHelper.WSException {
 	if (cachedData == null) {
+		connectApplication();
 	    select();
 
 	    DSIRead req = new DSIRead();

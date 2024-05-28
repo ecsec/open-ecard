@@ -25,6 +25,7 @@ package org.openecard.addons.cardlink.sal
 import org.openecard.addon.Context
 import org.openecard.addon.sal.SALProtocolBaseImpl
 import org.openecard.addons.cardlink.ws.WebsocketListenerImpl
+import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.common.DynamicContext
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
@@ -32,23 +33,12 @@ import org.openecard.mobile.activation.WebsocketListener
 const val CARDLINK_PROTOCOL_ID = "https://gematik.de/protocols/cardlink"
 
 
-fun setProcessWebsocket(dynCtx: DynamicContext, ws: Websocket) {
+fun setWsPair(dynCtx: DynamicContext, ws: WsPair) {
 	dynCtx.put(CardLinkKeys.WEBSOCKET, ws)
 }
 
-fun getProcessWebsocket(dynCtx: DynamicContext): Websocket {
-	return dynCtx.getPromise(CardLinkKeys.WEBSOCKET).deref() as Websocket
-}
-
-fun prepareWebsocketListener(dynCtx: DynamicContext) {
-	val ws = getProcessWebsocket(dynCtx)
-	val webSocketListener = WebsocketListenerImpl()
-	ws.setListener(webSocketListener)
-	dynCtx.put(CardLinkKeys.WEBSOCKET_LISTENER, webSocketListener)
-}
-
-fun getWebsocketListener(dynCtx: DynamicContext): WebsocketListener {
-	return dynCtx.getPromise(CardLinkKeys.WEBSOCKET_LISTENER).deref() as WebsocketListener
+fun getWsPair(dynCtx: DynamicContext): WsPair {
+	return dynCtx.getPromise(CardLinkKeys.WEBSOCKET).deref() as WsPair
 }
 
 class CardLinkProtocol : SALProtocolBaseImpl() {
@@ -66,6 +56,5 @@ object CardLinkKeys {
 	const val WS_SESSION_ID = "${prefix}WS_SESSION_ID"
 	const val LAST_SENT_MESSAGE_ID = "${prefix}LAST_SENT_MESSAGE_ID"
 	const val WEBSOCKET = "${prefix}WEBSOCKET"
-	const val WEBSOCKET_LISTENER = "${prefix}WEBSOCKET_LISTENER"
 	const val CORRELATION_ID_TAN_PROCESS = "${prefix}CORRELATION_ID_TAN"
 }

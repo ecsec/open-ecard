@@ -31,10 +31,7 @@ import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
-import org.openecard.addons.cardlink.ws.EgkEnvelope
-import org.openecard.addons.cardlink.ws.REGISTER_EGK
-import org.openecard.addons.cardlink.ws.RegisterEgk
-import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
+import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -44,7 +41,6 @@ import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
-import org.openecard.mobile.activation.Websocket
 
 private val logger = KotlinLogging.logger {}
 
@@ -57,7 +53,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 
 	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-		val ws = getProcessWebsocket(dynCtx)
+		val ws = getWsPair(dynCtx)
 		val uc = CardLinkUserConsent(ws, aCtx, req.connectionHandle)
 
 		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
@@ -118,7 +114,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		)
 	}
 
-	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: Websocket) {
+	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: WsPair) {
 		val egkEnvelope = EgkEnvelope(
 			cardSessionId,
 			null,
@@ -126,7 +122,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 			REGISTER_EGK
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
-		ws.send(egkEnvelopeMsg)
+		ws.socket.send(egkEnvelopeMsg)
 	}
 
 	private fun waitForCardLinkFinish() {

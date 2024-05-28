@@ -53,11 +53,13 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		val cardSessionId = UUID.randomUUID().toString()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 		dynCtx.put(CardLinkKeys.WS_SESSION_ID, cardSessionId)
-		setProcessWebsocket(dynCtx, ws)
+
 		ws.connect(cardSessionId)
-		prepareWebsocketListener(dynCtx)
+		val wsPair = WsPair.addListener(ws)
+		setWsPair(dynCtx, wsPair)
+
 		val cardHandle = performDidAuth(conHandle, dynCtx)
-		handleRemoteApdus(cardHandle, dynCtx)
+		handleRemoteApdus(cardHandle, wsPair)
 		destroySession(cardHandle)
 
 		// no error means success
@@ -111,8 +113,8 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		return cardHandle
 	}
 
-	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, dynCtx: DynamicContext) {
-		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, wsPair: WsPair) {
+		val wsListener = wsPair.listener
 
 		// TODO: currently, wait for APDUs until websocket channel is closed
 		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {

@@ -27,7 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.addons.cardlink.sal.getWebsocketListener
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
@@ -38,7 +37,6 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
-import org.openecard.mobile.activation.Websocket
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 
 
@@ -49,7 +47,7 @@ private const val title = "TAN Verification"
 
 private const val TAN_ID = "CARDLINK_FIELD_TAN"
 
-class TanStep(val ws: Websocket) : Step(STEP_ID, title) {
+class TanStep(val ws: WsPair) : Step(STEP_ID, title) {
 	init {
 		setAction(TanStepAction(this))
 
@@ -83,9 +81,9 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = tanStep.ws
-		ws.send(egkEnvelopeMsg)
+		ws.socket.send(egkEnvelopeMsg)
 
-		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+		val wsListener = ws.listener
 		val tanConfirmResponse : EgkEnvelope? = waitForTanConfirmResponse(wsListener)
 
 		if (tanConfirmResponse == null) {

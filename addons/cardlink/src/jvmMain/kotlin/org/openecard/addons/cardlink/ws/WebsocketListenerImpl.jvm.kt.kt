@@ -38,7 +38,7 @@ private val logger = KotlinLogging.logger {}
  */
 class WebsocketListenerImpl: WebsocketListener {
 
-	private lateinit var messageChannel : Channel<EgkEnvelope>
+	private lateinit var messageChannel: Channel<EgkEnvelope>
 
 	private var isOpen : Boolean = false
 

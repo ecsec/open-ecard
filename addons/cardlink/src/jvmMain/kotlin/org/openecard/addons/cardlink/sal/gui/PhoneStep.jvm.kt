@@ -26,7 +26,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.addons.cardlink.sal.getWebsocketListener
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
@@ -37,7 +36,6 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
-import org.openecard.mobile.activation.Websocket
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 
 
@@ -48,7 +46,7 @@ private const val title = "Phone Number Entry"
 
 private const val PHONE_ID = "CARDLINK_FIELD_PHONE"
 
-class PhoneStep(val ws: Websocket) : Step(STEP_ID, title) {
+class PhoneStep(val ws: WsPair) : Step(STEP_ID, title) {
 	init {
 		setAction(PhoneStepAction(this))
 
@@ -80,9 +78,9 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = phoneStep.ws
-		ws.send(egkEnvelopeMsg)
+		ws.socket.send(egkEnvelopeMsg)
 
-		val wsListener = getWebsocketListener(dynCtx) as WebsocketListenerImpl
+		val wsListener = ws.listener
 		val phoneNumberResponse : EgkEnvelope? = waitForPhoneNumberResponse(wsListener)
 
 		if (phoneNumberResponse == null) {

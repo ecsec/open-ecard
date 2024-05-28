@@ -29,6 +29,7 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -68,7 +69,7 @@ private const val ERROR_TITLE = "action.error.title"
 private const val ERROR_UNKNOWN = "action.error.unknown"
 
 
-class EnterCanStep(val ws: Websocket, val addonCtx: Context, val sessHandle: ConnectionHandleType) :
+class EnterCanStep(val ws: WsPair, val addonCtx: Context, val sessHandle: ConnectionHandleType) :
 	Step(STEP_ID, title) {
 	init {
 		setAction(EnterCanStepAction(this))

@@ -540,56 +540,76 @@ public class CardCommandAPDU extends CardAPDU {
      *
      * @return Encoded APDU
      */
-    public final byte[] toByteArray() {
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	public final byte[] toByteArray() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-	try {
-	    // Write APDU header
-	    baos.write(header);
-	    // Write APDU LC field.
-	    if (lc > 255 || (le > 256 && lc > 0)) {
-		// Encoded extended LC field in three bytes.
-		baos.write(x00);
-		baos.write((byte) (lc >> 8));
-		baos.write((byte) lc);
-	    } else if (lc > 0) {
-		// Write short LC field
-		baos.write((byte) lc);
-	    }
-	    // Write APDU data field
-	    baos.write(data);
-	    // Write APDU LE field.
-	    if (le > 256) {
-		// Write extended LE field.
-		if (lc == 0 || lc == -1) {
-		    // Encoded extended LE field in three bytes.
-		    baos.write(x00);
+		try {
+			// Write APDU header
+			baos.write(header);
+			// Write APDU LC field.
+			encodeLcField(baos);
+			// Write APDU data field
+			baos.write(data);
+			// Write APDU LE field.
+			encodeLeField(baos);
+		} catch (IOException ex) {
+			LOG.error("Failed to create APDU in memory.", ex);
 		}
-		// Encoded extended LE field in two bytes if extended LC field is present.
-		// If more bytes are requested than possible, assume the maximum.
-		if (le >= 65536) {
-		    baos.write(x00);
-		    baos.write(x00);
-		} else {
-		    baos.write((byte) (le >> 8));
-		    baos.write((byte) le);
-		}
-	    } else if (le > 0) {
-		if (lc > 255) {
-		    // Write extended LE field in two bytes because extended LC field is present.
-		    baos.write((byte) (le >> 8));
-		    baos.write((byte) le);
-		} else {
-		    // Write short LE field
-		    baos.write((byte) le);
-		}
-	    }
-	} catch (IOException ex) {
-	    LOG.error("Failed to create APDU in memory.", ex);
+
+		return baos.toByteArray();
 	}
 
-	return baos.toByteArray();
-    }
+	private void encodeLcField(ByteArrayOutputStream baos) {
+		if (lc > 255 || (le > 256 && lc > 0)) {
+			// Encoded extended LC field in three bytes.
+			baos.write(x00);
+			baos.write((byte) (lc >> 8));
+			baos.write((byte) lc);
+		} else if (lc > 0) {
+			// Write short LC field
+			baos.write((byte) lc);
+		}
+	}
+
+	public byte[] encodeLcField() {
+		var baos = new ByteArrayOutputStream();
+		encodeLcField(baos);
+		return baos.toByteArray();
+	}
+
+	private void encodeLeField(ByteArrayOutputStream baos) {
+		if (le > 256) {
+			// Write extended LE field.
+			if (lc == 0 || lc == -1) {
+				// Encoded extended LE field in three bytes.
+				baos.write(x00);
+			}
+			// Encoded extended LE field in two bytes if extended LC field is present.
+			// If more bytes are requested than possible, assume the maximum.
+			if (le >= 65536) {
+				baos.write(x00);
+				baos.write(x00);
+			} else {
+				baos.write((byte) (le >> 8));
+				baos.write((byte) le);
+			}
+		} else if (le > 0) {
+			if (lc > 255) {
+				// Write extended LE field in two bytes because extended LC field is present.
+				baos.write((byte) (le >> 8));
+				baos.write((byte) le);
+			} else {
+				// Write short LE field
+				baos.write((byte) le);
+			}
+		}
+	}
+
+	public byte[] encodeLeField() {
+		var baos = new ByteArrayOutputStream();
+		encodeLeField(baos);
+		return baos.toByteArray();
+	}
 
     /**
      * Returns the bytes of the APDU as a hex encoded string.

@@ -22,6 +22,7 @@
 
 package org.openecard.addons.cardlink.sal
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
@@ -30,7 +31,10 @@ import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
-import org.openecard.addons.cardlink.ws.*
+import org.openecard.addons.cardlink.ws.EgkEnvelope
+import org.openecard.addons.cardlink.ws.REGISTER_EGK
+import org.openecard.addons.cardlink.ws.RegisterEgk
+import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -41,6 +45,8 @@ import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.mobile.activation.Websocket
+
+private val logger = KotlinLogging.logger {}
 
 class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	val gui = aCtx.userConsent
@@ -66,12 +72,15 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 					// fail
 					return DIDAuthenticateResponse().apply {
 						// TODO: obtain proper error from gui
-						result = WSHelper.makeResultUnknownError("CardLink failed")
+						result = WSHelper.makeResultUnknownError("CardLink GUI process failed.")
 					}
 				}
 			}
 		} catch (ex: ThreadTerminateException) {
-			TODO("Fail with error message")
+			// fail
+			return DIDAuthenticateResponse().apply {
+				result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "CardLink failed GUI process has been interrupted.")
+			}
 		}
 
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String

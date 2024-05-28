@@ -53,7 +53,8 @@ class WebsocketListenerImpl: WebsocketListener {
 	}
 
 	override fun onError(webSocket: Websocket?, error: String?) {
-		TODO("Not yet implemented")
+		// TODO: Implement onError handler
+		logger.error("onError handler not implemented yet")
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)

@@ -56,7 +56,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		setProcessWebsocket(dynCtx, ws)
 		ws.connect(cardSessionId)
 		prepareWebsocketListener(dynCtx)
-		val cardHandle = performDidAuth(conHandle)
+		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, dynCtx)
 		destroySession(cardHandle)
 
@@ -93,7 +93,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 	}
 
 	@Throws(WSHelper.WSException::class)
-	private fun performDidAuth(conHandle: ConnectionHandleType): ConnectionHandleType {
+	private fun performDidAuth(conHandle: ConnectionHandleType, dynCtx: DynamicContext): ConnectionHandleType {
 		// Perform a DIDAuthenticate to authenticate the user
 		val didAuth = DIDAuthenticate().apply {
 			connectionHandle = conHandle
@@ -106,8 +106,9 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		// Check DIDAuthenticateResponse
 		WSHelper.checkResult(didAuthResp)
 
-		//return didAuthResp.authenticationProtocolData
-		TODO("Not yet implemented")
+		val cardHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType?
+		require(cardHandle != null) { "CardLink Protocol ended without a handle to the connected card." }
+		return cardHandle
 	}
 
 	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, dynCtx: DynamicContext) {

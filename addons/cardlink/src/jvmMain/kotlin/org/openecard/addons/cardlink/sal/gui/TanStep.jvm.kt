@@ -55,7 +55,7 @@ class TanStep(val ws: Websocket) : Step(STEP_ID, title) {
 
 		inputInfoUnits.add(TextField(TAN_ID).also {
 			it.minLength = 6
-			// TODO: add descriptive data
+			it.description = "Please enter the TAN you received via SMS."
 		})
 	}
 }

@@ -29,7 +29,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.addons.cardlink.sal.CardLinkKeys.CORRECT_CAN
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants

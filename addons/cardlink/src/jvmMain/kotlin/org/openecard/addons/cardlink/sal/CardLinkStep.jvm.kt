@@ -115,7 +115,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 	}
 
 	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: WsPair) {
-		val egkEnvelope = EgkEnvelope(
+		val egkEnvelope = CardEnvelope(
 			cardSessionId,
 			null,
 			regEgk,

@@ -69,12 +69,12 @@ class WSModelSerializationTest {
 				SendApduResponse.serializer().descriptor.serialName
 			),
 			arrayOf(
-				TasklistError(
+				TasklistErrorPayload(
 					cardSessionId = "foo",
 					status = 400,
 					errormessage = "error-message"
 				),
-				TasklistError.serializer().descriptor.serialName
+				TasklistErrorPayload.serializer().descriptor.serialName
 			),
 			arrayOf(
 				SendPhoneNumber(
@@ -113,14 +113,14 @@ class WSModelSerializationTest {
 	}
 
 	@Test(dataProvider = "egkPayloads")
-	fun testEgkPayloadSerialization(egkPayload: EgkPayload, serialName: String) {
+	fun testEgkPayloadSerialization(egkPayload: CardLinkPayload, serialName: String) {
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkPayload)
 		logger.info { jsonString }
 	}
 
 	@Test(dataProvider = "egkPayloads")
-	fun testEgkEnvelopeSerialization(egkPayload: EgkPayload, serialName: String) {
-		val egkEnvelope = EgkEnvelope(
+	fun testEgkEnvelopeSerialization(egkPayload: CardLinkPayload, serialName: String) {
+		val egkEnvelope = CardEnvelope(
 			cardSessionId = "foobar",
 			correlationId = UUID.randomUUID().toString(),
 			payload = egkPayload,
@@ -130,7 +130,7 @@ class WSModelSerializationTest {
 		logger.info { jsonString }
 
 		// we will deserialize the string back to the class
-		val egkEnvelopeDecoded = cardLinkJsonFormatter.decodeFromString<EgkEnvelope>(jsonString)
+		val egkEnvelopeDecoded = cardLinkJsonFormatter.decodeFromString<CardEnvelope>(jsonString)
 		Assert.assertEquals(egkEnvelopeDecoded.payload.javaClass.name, egkPayload.javaClass.name)
 	}
 }

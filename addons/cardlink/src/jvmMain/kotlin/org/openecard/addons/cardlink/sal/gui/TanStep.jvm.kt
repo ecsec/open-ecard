@@ -73,7 +73,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendTan = SendTan(tan)
-		val egkEnvelope = EgkEnvelope(
+		val egkEnvelope = CardEnvelope(
 			cardSessionId,
 			correlationId,
 			sendTan,
@@ -84,7 +84,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val tanConfirmResponse : EgkEnvelope? = waitForTanConfirmResponse(wsListener)
+		val tanConfirmResponse : CardEnvelope? = waitForTanConfirmResponse(wsListener)
 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Didn't receive $CONFIRM_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
@@ -137,8 +137,8 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		}
 	}
 
-	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): EgkEnvelope? {
-		var tanConfirmResponse : EgkEnvelope?
+	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): CardEnvelope? {
+		var tanConfirmResponse : CardEnvelope?
 		runBlocking {
 			tanConfirmResponse = wsListener.pollMessage(CONFIRM_TAN_RESPONSE)
 

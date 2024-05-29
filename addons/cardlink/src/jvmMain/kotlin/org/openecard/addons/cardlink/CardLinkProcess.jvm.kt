@@ -118,7 +118,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 
 		// TODO: currently, wait for APDUs until websocket channel is closed
 		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {
-			val sendApduMessage: EgkEnvelope? = waitForSendApduMessage(wsListener)
+			val sendApduMessage: CardEnvelope? = waitForSendApduMessage(wsListener)
 
 			if (sendApduMessage == null) {
 				val errorMsg = "Didn't receive any SendAPDU messages from CardLink-Service."
@@ -136,7 +136,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
-				val egkEnvelope = EgkEnvelope(
+				val egkEnvelope = CardEnvelope(
 					cardSessionId,
 					correlationId,
 					SendApduResponse(
@@ -172,8 +172,8 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		return isAPDUExchangeOngoing
 	}
 
-	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : EgkEnvelope? {
-		var sendApduMessage: EgkEnvelope?
+	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : CardEnvelope? {
+		var sendApduMessage: CardEnvelope?
 		runBlocking {
 			sendApduMessage = wsListener.pollMessage(SEND_APDU)
 

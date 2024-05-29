@@ -32,39 +32,67 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 
-const val REGISTER_EGK = "registerEGK"
-const val TASK_LIST_ERROR = "receiveTasklistError"
-const val SEND_APDU = "sendAPDU"
 const val READY = "ready"
+const val REGISTER_EGK = "registerEGK"
+const val SEND_APDU = "sendAPDU"
 const val SEND_APDU_RESPONSE = "sendAPDUResponse"
-/* Newly defined types */
+
+const val TASK_LIST_ERROR = "receiveTasklistError"
+
+// Newly defined types
 const val REQUEST_SMS_TAN = "requestSmsTan"
 const val REQUEST_SMS_TAN_RESPONSE = "requestSmsTanResponse"
 const val CONFIRM_TAN = "confirmTan"
 const val CONFIRM_TAN_RESPONSE = "confirmTanResponse"
-// TODO: Define payload for finishAPDU message
-const val FINISH_APDU_EXCHANGE = "finishAPDUExchange"
 
+// additional types for the base specification
+const val SESSION_INFO = "sessionInformation"
+const val REGISTER_EGK_FINISH = "registerEgkFinish"
+
+
+interface GematikMessage
+
+open class TaskListErrorMessage(
+	val payload: TasklistErrorPayload,
+) : GematikMessage {
+	val type = "receiveTasklistError"
+}
 
 @Serializable(with = EgkEnvelopeSerializer::class)
-class EgkEnvelope(
-	var cardSessionId: String,
-	var correlationId: String?,
-	var payload: EgkPayload,
+open class GematikEnvelope(
+	var payload: CardLinkPayload?,
 	var payloadType: String,
-)
+) : GematikMessage
 
-object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
+class ZeroEnvelope(
+	payload: CardLinkPayload?,
+	payloadType: String,
+) : GematikEnvelope(payload, payloadType)
+
+open class PairEnvelope(
+	payload: CardLinkPayload?,
+	payloadType: String,
+	val correlationId: String,
+) : GematikEnvelope(payload, payloadType)
+
+class CardEnvelope(
+	payload: CardLinkPayload?,
+	payloadType: String,
+	correlationId: String,
+	var cardSessionId: String,
+) : PairEnvelope(payload, payloadType, correlationId)
+
+object EgkEnvelopeSerializer : KSerializer<GematikEnvelope> {
 	// Not really used, but must be implemented
 	override val descriptor : SerialDescriptor = buildClassSerialDescriptor("EgkEnvelope") {
 		element<String>("cardSessionId")
 		element<String>("correlationId")
-		element<EgkPayload>("payload")
+		element<CardLinkPayload>("payload")
 		element<String>("payloadType")
 	}
 
 	@OptIn(ExperimentalEncodingApi::class)
-	override fun serialize(encoder: Encoder, value: EgkEnvelope) {
+	override fun serialize(encoder: Encoder, value: CardEnvelope) {
 		val payloadJsonStr = cardLinkJsonFormatter.encodeToString(value.payload)
 		val base64EncodedPayload = Base64.encode(payloadJsonStr.encodeToByteArray()).trimEnd('=')
 
@@ -82,7 +110,7 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 	}
 
 	@OptIn(ExperimentalEncodingApi::class)
-	override fun deserialize(decoder: Decoder): EgkEnvelope {
+	override fun deserialize(decoder: Decoder): CardEnvelope {
 		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
 		val egkMessage = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
@@ -102,10 +130,10 @@ object EgkEnvelopeSerializer : KSerializer<EgkEnvelope> {
 			put(Json.configuration.classDiscriminator, JsonPrimitive(messageType))
 		})
 
-		return EgkEnvelope(
+		return CardEnvelope(
 			cardSessionId,
 			correlationId,
-			cardLinkJsonFormatter.decodeFromJsonElement<EgkPayload>(typedJsonElement),
+			cardLinkJsonFormatter.decodeFromJsonElement<CardLinkPayload>(typedJsonElement),
 			messageType,
 		)
 	}
@@ -129,11 +157,10 @@ object ByteArrayAsBase64Serializer : KSerializer<ByteArray> {
 }
 
 val module = SerializersModule {
-	polymorphic(EgkPayload::class) {
+	polymorphic(CardLinkPayload::class) {
 		subclass(RegisterEgk::class)
 		subclass(SendApdu::class)
 		subclass(SendApduResponse::class)
-		subclass(TasklistError::class)
 		subclass(SendPhoneNumber::class)
 		subclass(SendTan::class)
 		subclass(ConfirmTan::class)
@@ -143,7 +170,15 @@ val module = SerializersModule {
 
 val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE }
 
-interface EgkPayload
+interface CardLinkPayload
+
+
+@Serializable
+@SerialName(SESSION_INFO)
+data class SessionInformation(
+	val webSocketId: String,
+	val phoneRegistered: Boolean,
+)
 
 @Serializable
 @SerialName(REGISTER_EGK)
@@ -156,53 +191,53 @@ data class RegisterEgk(
 	val cvcAuth: ByteArrayAsBase64,
 	val cvcCA: ByteArrayAsBase64,
 	val atr: ByteArrayAsBase64,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 @SerialName(SEND_APDU)
 data class SendApdu(
 	val cardSessionId: String,
 	val apdu: ByteArrayAsBase64,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 @SerialName(SEND_APDU_RESPONSE)
 data class SendApduResponse(
 	val cardSessionId: String,
 	val response: ByteArrayAsBase64,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 @SerialName(TASK_LIST_ERROR)
-data class TasklistError(
+data class TasklistErrorPayload(
 	val cardSessionId: String,
 	val status: Int,
 	val tistatus: String? = null,
 	val rootcause: String? = null,
 	val errormessage: String? = null,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 @SerialName(REQUEST_SMS_TAN)
-data class SendPhoneNumber(val phoneNumber: String) : EgkPayload
+data class SendPhoneNumber(val phoneNumber: String) : CardLinkPayload
 
 @Serializable
 @SerialName(REQUEST_SMS_TAN_RESPONSE)
 data class ConfirmPhoneNumber(
 	var minor: MinorResultCode?,
 	var errorMessage: String?,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN)
-data class SendTan(val tan: String) : EgkPayload
+data class SendTan(val tan: String) : CardLinkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN_RESPONSE)
 data class ConfirmTan(
 	var minor: MinorResultCode?,
 	var errorMessage: String?,
-) : EgkPayload
+) : CardLinkPayload
 
 @Serializable
 enum class MinorResultCode {
@@ -212,3 +247,9 @@ enum class MinorResultCode {
 	TAN_RETRY_LIMIT_EXCEEDED,
 	UNKNOWN_ERROR,
 }
+
+@Serializable
+@SerialName(REGISTER_EGK_FINISH)
+data class RegisterEgkFinish(
+	val removeCard: Boolean,
+)

@@ -70,7 +70,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)
-		val egkEnvelope = EgkEnvelope(
+		val egkEnvelope = CardEnvelope(
 			cardSessionId,
 			null,
 			sendPhoneNumber,
@@ -81,7 +81,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val phoneNumberResponse : EgkEnvelope? = waitForPhoneNumberResponse(wsListener)
+		val phoneNumberResponse : CardEnvelope? = waitForPhoneNumberResponse(wsListener)
 
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Didn't receive $REQUEST_SMS_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
@@ -124,8 +124,8 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		}
 	}
 
-	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): EgkEnvelope? {
-		var phoneNumberResponse : EgkEnvelope?
+	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): CardEnvelope? {
+		var phoneNumberResponse : CardEnvelope?
 		runBlocking {
 			phoneNumberResponse = wsListener.pollMessage(REQUEST_SMS_TAN_RESPONSE)
 

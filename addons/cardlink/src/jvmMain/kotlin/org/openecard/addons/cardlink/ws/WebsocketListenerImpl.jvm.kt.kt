@@ -29,6 +29,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
+import java.time.Instant
+import kotlin.time.Duration
 
 
 private val logger = KotlinLogging.logger {}
@@ -38,7 +40,7 @@ private val logger = KotlinLogging.logger {}
  */
 class WebsocketListenerImpl: WebsocketListener {
 
-	private lateinit var messageChannel: Channel<EgkEnvelope>
+	private lateinit var messageChannel: Channel<CardEnvelope>
 
 	private var isOpen : Boolean = false
 
@@ -62,7 +64,7 @@ class WebsocketListenerImpl: WebsocketListener {
 		GlobalScope.launch {
 			if (data != null) {
 				logger.debug { "Received message: $data" }
-				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<EgkEnvelope>(data)
+				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<CardEnvelope>(data)
 				messageChannel.send(egkEnvelope)
 			} else {
 				logger.debug { "Received empty data in CardLink Websocket." }
@@ -75,15 +77,27 @@ class WebsocketListenerImpl: WebsocketListener {
 	}
 
 	suspend fun isAPDUExchangeOngoing() : Boolean {
-		return pollMessage(FINISH_APDU_EXCHANGE) != null
+		return pollMessage(REGISTER_EGK_FINISH) != null
 	}
 
-	suspend fun pollMessage(payloadType: String) : EgkEnvelope? {
+	suspend fun pollMessage(payloadType: String) : CardEnvelope? {
 		for (message in messageChannel) {
 			if (message.payloadType == payloadType) {
 				return message
 			}
 		}
 		return null
+	}
+
+	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : CardEnvelope? {
+		// TODO: use onReceive to trigger loop to find message
+		val start = Instant.now()
+		while (start.plus(timeout))
+		for (message in messageChannel) {
+			if (message.payloadType == payloadType) {
+				return message
+			}
+		}
+
 	}
 }

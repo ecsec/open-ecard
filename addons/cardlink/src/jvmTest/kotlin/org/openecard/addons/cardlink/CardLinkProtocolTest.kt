@@ -153,7 +153,7 @@ class CardLinkProtocolTest {
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
-						"type":"$FINISH_APDU_EXCHANGE",
+						"type":"$REGISTER_EGK_FINISH",
 						"payload":null
 					},
 					"${cardSessionId.value}"",

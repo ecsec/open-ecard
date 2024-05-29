@@ -47,6 +47,9 @@ public interface Websocket {
 	@Nonnull
 	String getUrl();
 
+	@Nonnull
+	void setUrl(@Nonnull String url);
+
 	/**
 	 * Gets the selected subprotocol once the connection is established.
 	 * @return the selected subprotocol or null if no subprotocol was selected.
@@ -57,10 +60,9 @@ public interface Websocket {
 	/**
 	 * Connect to the server.
 	 * This method can also be used to reestablish a lost connection.
-	 * @param cardSessionId used as websocket session identifier
 	 * @throws WebsocketException if the connection could not be established.
 	 */
-	void connect(String cardSessionId) throws WebsocketException;
+	void connect() throws WebsocketException;
 
 	/**
 	 * Get open state of the connection.

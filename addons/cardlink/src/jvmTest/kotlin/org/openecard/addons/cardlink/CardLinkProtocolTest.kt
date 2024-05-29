@@ -100,8 +100,8 @@ class CardLinkProtocolTest {
 		val cardSessionId = ArgumentCaptor.forClass(String::class.java)
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
-		Mockito.`when`(webSocketMock.connect(cardSessionId.capture())).then {
-			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: '${cardSessionId.value}'." }
+		Mockito.`when`(webSocketMock.connect()).then {
+			logger.info { "[WS-MOCK] Websocket connect was called." }
 		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {

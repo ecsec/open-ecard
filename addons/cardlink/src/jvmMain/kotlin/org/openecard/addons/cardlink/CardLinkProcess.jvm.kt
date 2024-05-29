@@ -54,7 +54,7 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 		dynCtx.put(CardLinkKeys.WS_SESSION_ID, cardSessionId)
 
-		ws.connect(cardSessionId)
+		ws.connect()
 		val wsPair = WsPair.addListener(ws)
 		setWsPair(dynCtx, wsPair)
 

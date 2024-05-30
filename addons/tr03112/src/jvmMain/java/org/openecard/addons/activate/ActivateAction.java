@@ -118,7 +118,7 @@ public class ActivateAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments, Map<String, Object> extraParams) {
+    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> attachments, Map<String, ? extends Object> extraParams) {
 	DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
 	try {

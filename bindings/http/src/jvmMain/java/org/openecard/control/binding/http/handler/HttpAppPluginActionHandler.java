@@ -191,9 +191,9 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	if (responseBody != null && responseBody.hasValue()) {
 	    LOG.debug("BindingResult contains a body.");
 	    // determine content type
-	    ContentType ct = ContentType.create(responseBody.getMimeType(), responseBody.getEncoding());
+	    ContentType ct = ContentType.create(responseBody.mimeType, responseBody.encoding);
 
-	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.getValue(), ct);
+	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.value, ct);
 	    response.setEntity(entity);
 	} else {
 	    LOG.debug("BindingResult contains no body.");

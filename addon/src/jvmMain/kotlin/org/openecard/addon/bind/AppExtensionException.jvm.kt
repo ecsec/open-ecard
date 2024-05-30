@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 HS Coburg.
+ * Copyright (C) 2018-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,27 +20,19 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon;
+package org.openecard.addon.bind
 
+import org.openecard.common.WSHelper
+import org.openecard.common.WSHelper.makeResultError
+import org.openecard.common.WSHelper.makeResultUnknownError
 
 /**
- * 
- * @author Dirk Petrautzki
+ * Exception indicating an error in the processing of an AppExtension.
+ *
+ * @author Tobias Wich
  */
-public class ActionInitializationException extends AddonException {
+class AppExtensionException : WSHelper.WSException {
+    constructor(minor: String, msg: String) : super(makeResultError(minor, msg))
 
-    private static final long serialVersionUID = -2587833834285178408L;
-
-    public ActionInitializationException(String message, Throwable e) {
-	super(message, e);
-    }
-
-    public ActionInitializationException(String message) {
-	super(message);
-    }
-
-    public ActionInitializationException(Throwable e) {
-	super(e);
-    }
-
+    constructor(msg: String) : super(makeResultUnknownError(msg))
 }

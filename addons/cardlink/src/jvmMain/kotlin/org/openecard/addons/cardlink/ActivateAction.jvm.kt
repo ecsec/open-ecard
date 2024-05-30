@@ -31,19 +31,22 @@ import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS
 class ActivateAction : AppPluginAction {
     private var aCtx: Context? = null
 
+	private val ctxChecked: Context
+		get() = aCtx ?: throw IllegalStateException("CardLink action is not initialized.")
+
     override fun execute(
 		body: RequestBody?,
-		parameters: MutableMap<String, String>?,
+		parameters: Map<String, String>?,
 		headers: Headers?,
-		attachments: MutableList<Attachment>?,
-		extraParams: MutableMap<String, Any>
-    ): BindingResult {
-        val ws: Websocket = extraParams[WS_KEY] as Websocket?
+		attachments: List<Attachment>?,
+		extraParams: Map<String, Any>?
+	): BindingResult {
+        val ws: Websocket = extraParams?.get(WS_KEY) as Websocket?
             ?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
                 .setResultMessage("Missing websocket in dynamic context.")
 
         // call CardLink process
-        val proc: CardLinkProcess = CardLinkProcess(aCtx!!, ws)
+        val proc: CardLinkProcess = CardLinkProcess(ctxChecked, ws)
         return proc.start()
     }
 

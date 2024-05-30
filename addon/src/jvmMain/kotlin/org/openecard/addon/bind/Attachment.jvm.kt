@@ -20,27 +20,18 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon;
+package org.openecard.addon.bind
 
+import java.io.InputStream
 
 /**
  *
  * @author Tobias Wich
  */
-public class AddonException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    public AddonException(String message) {
-	super(message);
-    }
-
-    public AddonException(Throwable cause) {
-	super(cause);
-    }
-
-    public AddonException(String message, Throwable cause) {
-	super(message, cause);
-    }
-
+class Attachment {
+    val mIMEType: String? = null
+    val encoding: String? = null
+    val value: InputStream? = null
+    private val _name: String? = null
+    private val _filename: String? = null
 }

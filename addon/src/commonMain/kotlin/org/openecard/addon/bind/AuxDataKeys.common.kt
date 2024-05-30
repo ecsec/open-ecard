@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2016 ecsec GmbH.
+ * Copyright (C) 2013-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,20 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
-
-import java.util.List;
-import java.util.Map;
-import org.openecard.addon.LifecycleTrait;
+package org.openecard.addon.bind
 
 
 /**
+ * Constants for use in the auxiliary data map.
+ * Auxiliary data are open, but some of the sued keys share a common meaning. The constants here help to establish a
+ * language common to both bindings and add-ons.
  *
  * @author Tobias Wich
  */
-public interface AppPluginAction extends LifecycleTrait {
+object AuxDataKeys {
+    private const val PREFIX = "org.openecard.addon.bind.aux_data."
 
-    BindingResult execute(
-		RequestBody body,
-		Map<String, String> parameters,
-		Headers headers,
-		List<Attachment> attachments,
-		Map<String, Object> extraParams
-	);
-
+    const val REDIRECT_LOCATION: String = "${PREFIX}redirect_location"
+    const val RESPONSE_HEADERS: String = "${PREFIX}response_headers"
+    const val MINOR_PROCESS_RESULT: String = "${PREFIX}minor_result"
 }

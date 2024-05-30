@@ -74,7 +74,7 @@ public class ActivateCGAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> att, Map<String, Object> extraParams) {
+    public BindingResult execute(RequestBody body, Map<String, String> params, Headers headers, List<Attachment> att, Map<String, ? extends Object> extraParams) {
 	BindingResult response;
 	boolean aquired = false;
 

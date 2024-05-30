@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013 ecsec GmbH.
+ * Copyright (C) 2013-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,32 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
+package org.openecard.addon.bind
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.openecard.addon.AbstractFactory
+import org.openecard.addon.ActionInitializationException
+import org.openecard.addon.Context
 
 /**
  *
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-@Documented
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface BodyType {
+class AppExtensionActionProxy(implClass: String, classLoader: ClassLoader) :
+    AbstractFactory<AppExtensionAction>(implClass, classLoader), AppExtensionAction {
+    private var c: AppExtensionAction? = null
 
+    @Throws(AppExtensionException::class)
+    override fun execute() {
+        c?.execute() ?: throw IllegalStateException("AppExtensionAction not initialized")
+    }
+
+    @Throws(ActionInitializationException::class)
+    override fun init(ctx: Context) {
+        c = loadInstance(ctx, AppExtensionAction::class.java)
+    }
+
+    override fun destroy(force: Boolean) {
+        c?.destroy(force)
+    }
 }

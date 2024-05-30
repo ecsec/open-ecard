@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2015 ecsec GmbH.
+ * Copyright (C) 2013-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
+package org.openecard.addon.bind
 
 
 /**
@@ -29,8 +29,7 @@ package org.openecard.addon.bind;
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-public enum BindingResultCode {
-
+enum class BindingResultCode {
     /**
      * Indicates that an depending host is not available.
      */
@@ -85,6 +84,6 @@ public enum BindingResultCode {
      * Indicates a thread interruption, either explicitly by the user or implicitly by a shutdown of a
      * subsystem or the whole system.
      */
-    INTERRUPTED;
-
+    INTERRUPTED,
+	;
 }

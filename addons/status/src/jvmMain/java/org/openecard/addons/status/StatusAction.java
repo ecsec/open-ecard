@@ -58,7 +58,7 @@ public class StatusAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments, Map<String, Object> extraParams) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments, Map<String, ? extends Object> extraParams) {
 	BindingResult response;
 	try {
 	    StatusRequest statusRequest = StatusRequest.convert(parameters);

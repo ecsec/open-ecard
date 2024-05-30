@@ -18,27 +18,17 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.addon.bind;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+ */
+package org.openecard.addon
 
 
 /**
  *
  * @author Tobias Wich
- * @author Dirk Petrautzki
  */
-@Documented
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface ResourceNameType {
+interface LifecycleTrait {
+    @Throws(ActionInitializationException::class)
+    fun init(aCtx: Context)
 
+    fun destroy(force: Boolean)
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2013-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,26 +20,15 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon;
+package org.openecard.addon.bind
+
+import org.openecard.addon.LifecycleTrait
 
 /**
- * Exception type for all exceptions related to the AddonProperties.
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-public class AddonPropertiesException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    public AddonPropertiesException(String message) {
-	super(message);
-    }
-
-    public AddonPropertiesException(Throwable cause) {
-	super(cause);
-    }
-
-    public AddonPropertiesException(String message, Throwable cause) {
-	super(message, cause);
-    }
+interface AppExtensionAction : LifecycleTrait {
+    @Throws(AppExtensionException::class)
+    fun execute()
 }

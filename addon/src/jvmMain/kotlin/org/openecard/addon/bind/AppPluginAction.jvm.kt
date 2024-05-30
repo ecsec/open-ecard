@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2019 ecsec GmbH.
+ * Copyright (C) 2013-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,20 @@
  *
  ***************************************************************************/
 
-package org.openecard.addon.bind;
+package org.openecard.addon.bind
 
-import java.nio.charset.Charset;
-
+import org.openecard.addon.LifecycleTrait
 
 /**
- * Response specific Body for use in Plug-Ins and Bindings.
  *
- * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-public class ResponseBody extends Body {
-
-    public ResponseBody() {
-	super();
-    }
-
-    public ResponseBody(String value, Charset encoding, String mimeType) {
-	super(value, encoding, mimeType);
-    }
-
+interface AppPluginAction : LifecycleTrait {
+    fun execute(
+        body: RequestBody?,
+        parameters: Map<String, String>?,
+        headers: Headers?,
+        attachments: List<Attachment>?,
+        extraParams: Map<String, Any>?,
+    ): BindingResult
 }

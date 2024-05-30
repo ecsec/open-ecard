@@ -26,10 +26,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
-import java.time.Instant
+import java.util.Date
 import kotlin.time.Duration
 
 
@@ -56,7 +57,7 @@ class WebsocketListenerImpl: WebsocketListener {
 
 	override fun onError(webSocket: Websocket?, error: String?) {
 		// TODO: Implement onError handler
-		logger.error("onError handler not implemented yet")
+		logger.error { "onError handler not implemented yet" }
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)
@@ -77,27 +78,22 @@ class WebsocketListenerImpl: WebsocketListener {
 	}
 
 	suspend fun isAPDUExchangeOngoing() : Boolean {
-		return pollMessage(REGISTER_EGK_FINISH) != null
-	}
-
-	suspend fun pollMessage(payloadType: String) : CardEnvelope? {
-		for (message in messageChannel) {
-			if (message.payloadType == payloadType) {
-				return message
-			}
-		}
-		return null
+		return retrieveMessage(REGISTER_EGK_FINISH, Duration.ZERO) != null
 	}
 
 	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : CardEnvelope? {
 		// TODO: use onReceive to trigger loop to find message
-		val start = Instant.now()
-		while (start.plus(timeout))
-		for (message in messageChannel) {
-			if (message.payloadType == payloadType) {
-				return message
+		val start = Date()
+		do {
+			for (message in messageChannel) {
+				if (message.payloadType == payloadType) {
+					return message
+				}
 			}
-		}
+			delay(500)
+		} while (start.time + timeout.inWholeMilliseconds > Date().time)
 
+		// timeout
+		return null
 	}
 }

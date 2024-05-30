@@ -42,11 +42,14 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-class CardLinkProcess constructor(private val ctx: Context, private val ws: Websocket) {
+class CardLinkProcess(
+	private val ctx: Context,
+	private val ws: Websocket,
+) {
 
 	private val dispatcher = ctx.dispatcher
 
-    fun start(): BindingResult {
+	fun start(): BindingResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
 		// TODO: For now we generate the cardSessionID here, should be moved to the CardLink-Service
@@ -137,13 +140,13 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
 				val egkEnvelope = CardEnvelope(
-					cardSessionId,
-					correlationId,
 					SendApduResponse(
 						cardSessionId,
 						apduResponse
 					),
-					SEND_APDU_RESPONSE
+					SEND_APDU_RESPONSE,
+					correlationId,
+					cardSessionId,
 				)
 				val egkEnvelopeJson = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 				ws.send(egkEnvelopeJson)
@@ -173,18 +176,9 @@ class CardLinkProcess constructor(private val ctx: Context, private val ws: Webs
 	}
 
 	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : CardEnvelope? {
-		var sendApduMessage: CardEnvelope?
-		runBlocking {
-			sendApduMessage = wsListener.pollMessage(SEND_APDU)
-
-			var pollTryCounter = 5
-			while (sendApduMessage == null && pollTryCounter != 0) {
-				delay(500)
-				sendApduMessage = wsListener.pollMessage(SEND_APDU)
-				pollTryCounter--
-			}
+		return runBlocking {
+			wsListener.retrieveMessage(SEND_APDU)
 		}
-		return sendApduMessage
 	}
 
 }

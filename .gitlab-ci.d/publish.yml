@@ -72,5 +72,6 @@ publish-ios-pod-spec:
     - pod trunk push open-ecard.podspec
   needs: [ "publish-to-github" ]
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)$/
       when: manual
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/

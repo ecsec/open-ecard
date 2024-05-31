@@ -116,7 +116,7 @@ class CardLinkProtocolTest {
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
-			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from App..." }
+			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from App:\n${it.arguments[0]}" }
 			argumentCaptor.value.onOpen(webSocketMock)
 			argumentCaptor.value.onText(webSocketMock, """
 				[
@@ -131,7 +131,7 @@ class CardLinkProtocolTest {
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(CONFIRM_TAN))).then {
-			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from App..." }
+			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from App:\n${it.arguments[0]}" }
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
@@ -145,7 +145,7 @@ class CardLinkProtocolTest {
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REGISTER_EGK))).then {
-			logger.info { "[WS-MOCK] Received $REGISTER_EGK message from App..." }
+			logger.info { "[WS-MOCK] Received $REGISTER_EGK message from App:\n${it.arguments[0]}" }
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{
@@ -161,7 +161,7 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$REGISTER_EGK_FINISH",
-						"payload":null
+						"payload":"eyAicmVtb3ZlQ2FyZCI6IHRydWUgfQ"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"

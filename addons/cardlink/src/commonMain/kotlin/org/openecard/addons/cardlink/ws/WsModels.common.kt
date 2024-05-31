@@ -217,6 +217,7 @@ val module = SerializersModule {
 		subclass(SendTan::class)
 		subclass(ConfirmTan::class)
 		subclass(ConfirmPhoneNumber::class)
+		subclass(RegisterEgkFinish::class)
 	}
 }
 
@@ -304,4 +305,4 @@ enum class MinorResultCode {
 @SerialName(REGISTER_EGK_FINISH)
 data class RegisterEgkFinish(
 	val removeCard: Boolean,
-)
+) : CardLinkPayload

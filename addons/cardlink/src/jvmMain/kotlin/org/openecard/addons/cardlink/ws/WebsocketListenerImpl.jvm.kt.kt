@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger {}
  */
 class WebsocketListenerImpl: WebsocketListener {
 
-	private lateinit var messageChannel: Channel<CardEnvelope>
+	private lateinit var messageChannel: Channel<GematikMessage>
 
 	private var isOpen : Boolean = false
 
@@ -65,7 +65,7 @@ class WebsocketListenerImpl: WebsocketListener {
 		GlobalScope.launch {
 			if (data != null) {
 				logger.debug { "Received message: $data" }
-				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<CardEnvelope>(data)
+				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikMessage>(data)
 				messageChannel.send(egkEnvelope)
 			} else {
 				logger.debug { "Received empty data in CardLink Websocket." }
@@ -81,7 +81,7 @@ class WebsocketListenerImpl: WebsocketListener {
 		return retrieveMessage(REGISTER_EGK_FINISH, Duration.ZERO) != null
 	}
 
-	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : CardEnvelope? {
+	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : GematikMessage? {
 		// TODO: use onReceive to trigger loop to find message
 		val start = Date()
 		do {

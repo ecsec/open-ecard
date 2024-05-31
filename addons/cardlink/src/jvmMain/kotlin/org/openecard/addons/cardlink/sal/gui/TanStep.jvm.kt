@@ -73,21 +73,33 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendTan = SendTan(tan)
-		val egkEnvelope = CardEnvelope(
-			cardSessionId,
-			correlationId,
+		val egkEnvelope : GematikMessage = CardEnvelope(
 			sendTan,
-			CONFIRM_TAN
+			CONFIRM_TAN,
+			correlationId,
+			cardSessionId,
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = tanStep.ws
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val tanConfirmResponse : CardEnvelope? = waitForTanConfirmResponse(wsListener)
+		val tanConfirmResponse : GematikMessage? = waitForTanConfirmResponse(wsListener)
 
 		if (tanConfirmResponse == null) {
-			val errorMsg = "Didn't receive $CONFIRM_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
+			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
+			logger.error { errorMsg }
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
+
+		if (tanConfirmResponse !is CardEnvelope) {
+			val errorMsg = "Tan confirm message is not from type CardEnvelope."
 			logger.error { errorMsg }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
@@ -137,18 +149,9 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		}
 	}
 
-	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): CardEnvelope? {
-		var tanConfirmResponse : CardEnvelope?
-		runBlocking {
-			tanConfirmResponse = wsListener.pollMessage(CONFIRM_TAN_RESPONSE)
-
-			var pollTryCounter = 5
-			while (tanConfirmResponse == null && pollTryCounter != 0) {
-				delay(500)
-				tanConfirmResponse = wsListener.pollMessage(CONFIRM_TAN_RESPONSE)
-				pollTryCounter--
-			}
+	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): GematikMessage? {
+		return runBlocking {
+			wsListener.retrieveMessage(CONFIRM_TAN_RESPONSE)
 		}
-		return tanConfirmResponse
 	}
 }

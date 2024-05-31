@@ -37,6 +37,7 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.sal.protocol.eac.gui.ErrorStep
+import java.util.*
 
 
 private val logger = KotlinLogging.logger {}
@@ -67,24 +68,25 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 
 	private fun sendPhoneNumber(phoneNumber: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val correlationId = UUID.randomUUID().toString()
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)
-		val egkEnvelope = CardEnvelope(
-			cardSessionId,
-			null,
+		val egkEnvelope : GematikMessage = CardEnvelope(
 			sendPhoneNumber,
-			REQUEST_SMS_TAN
+			REQUEST_SMS_TAN,
+			correlationId,
+			cardSessionId,
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = phoneStep.ws
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val phoneNumberResponse : CardEnvelope? = waitForPhoneNumberResponse(wsListener)
+		val phoneNumberResponse : GematikMessage? = waitForPhoneNumberResponse(wsListener)
 
 		if (phoneNumberResponse == null) {
-			val errorMsg = "Didn't receive $REQUEST_SMS_TAN_RESPONSE from CardLink-Service after waiting for 2,5 seconds."
+			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
@@ -96,7 +98,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		}
 
 		val egkPayload = phoneNumberResponse.payload
-		if (egkPayload is ConfirmPhoneNumber) {
+		if (phoneNumberResponse is CardEnvelope && egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
 			// TODO: probably some more checks required?
@@ -124,18 +126,9 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		}
 	}
 
-	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): CardEnvelope? {
-		var phoneNumberResponse : CardEnvelope?
-		runBlocking {
-			phoneNumberResponse = wsListener.pollMessage(REQUEST_SMS_TAN_RESPONSE)
-
-			var pollTryCounter = 5
-			while (phoneNumberResponse == null && pollTryCounter != 0) {
-				delay(500)
-				phoneNumberResponse = wsListener.pollMessage(REQUEST_SMS_TAN_RESPONSE)
-				pollTryCounter--
-			}
+	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): GematikMessage? {
+		return runBlocking {
+			wsListener.retrieveMessage(REQUEST_SMS_TAN_RESPONSE)
 		}
-		return phoneNumberResponse
 	}
 }

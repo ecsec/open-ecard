@@ -119,13 +119,18 @@ class CardLinkProcess(
 	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, wsPair: WsPair) {
 		val wsListener = wsPair.listener
 
-		// TODO: currently, wait for APDUs until websocket channel is closed
 		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {
-			val sendApduMessage: CardEnvelope? = waitForSendApduMessage(wsListener)
+			val sendApduMessage: GematikMessage? = waitForSendApduMessage(wsListener)
 
 			if (sendApduMessage == null) {
 				val errorMsg = "Didn't receive any SendAPDU messages from CardLink-Service."
 				logger.warn { errorMsg }
+				continue
+			}
+
+			if (sendApduMessage !is CardEnvelope) {
+				val errorMsg = "APDU message is not from type CardEnvelope."
+				logger.error { errorMsg }
 				continue
 			}
 
@@ -139,7 +144,7 @@ class CardLinkProcess(
 
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
-				val egkEnvelope = CardEnvelope(
+				val egkEnvelope: GematikMessage = CardEnvelope(
 					SendApduResponse(
 						cardSessionId,
 						apduResponse
@@ -168,14 +173,12 @@ class CardLinkProcess(
 	}
 
 	private fun isAPDUExchangeOngoing(wsListener: WebsocketListenerImpl) : Boolean {
-		var isAPDUExchangeOngoing: Boolean
-		runBlocking {
-			isAPDUExchangeOngoing = wsListener.isAPDUExchangeOngoing()
+		return runBlocking {
+			wsListener.isAPDUExchangeOngoing()
 		}
-		return isAPDUExchangeOngoing
 	}
 
-	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : CardEnvelope? {
+	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : GematikMessage? {
 		return runBlocking {
 			wsListener.retrieveMessage(SEND_APDU)
 		}

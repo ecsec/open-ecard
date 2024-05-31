@@ -41,6 +41,7 @@ import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -115,11 +116,12 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 	}
 
 	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: WsPair) {
-		val egkEnvelope = CardEnvelope(
-			cardSessionId,
-			null,
+		val correlationId = UUID.randomUUID().toString()
+		val egkEnvelope : GematikMessage = CardEnvelope(
 			regEgk,
-			REGISTER_EGK
+			REGISTER_EGK,
+			correlationId,
+			cardSessionId,
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		ws.socket.send(egkEnvelopeMsg)

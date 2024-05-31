@@ -97,7 +97,8 @@ class CardLinkProtocolTest {
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
-		val cardSessionId = ArgumentCaptor.forClass(String::class.java)
+		// TODO: use same cardSessionID which is generated in CardLinkProcess
+		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
 		Mockito.`when`(webSocketMock.connect()).then {
@@ -117,7 +118,7 @@ class CardLinkProtocolTest {
 						"type":"$REQUEST_SMS_TAN_RESPONSE",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"${cardSessionId.value}",
+					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")
@@ -131,7 +132,7 @@ class CardLinkProtocolTest {
 						"type":"$CONFIRM_TAN_RESPONSE",
 						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
 					},
-					"${cardSessionId.value}",
+					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")
@@ -145,7 +146,7 @@ class CardLinkProtocolTest {
 						"type":"$SEND_APDU",
 						"payload":"aoY"
 					},
-					"${cardSessionId.value}"",
+					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")
@@ -156,7 +157,7 @@ class CardLinkProtocolTest {
 						"type":"$REGISTER_EGK_FINISH",
 						"payload":null
 					},
-					"${cardSessionId.value}"",
+					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")

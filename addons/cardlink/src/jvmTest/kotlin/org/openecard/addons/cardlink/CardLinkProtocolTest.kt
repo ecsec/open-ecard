@@ -25,7 +25,10 @@ package org.openecard.addons.cardlink
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
+import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
+import org.openecard.binding.tctoken.TR03112Keys
+import org.openecard.common.DynamicContext
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.Promise
 import org.openecard.mobile.activation.*
@@ -97,12 +100,15 @@ class CardLinkProtocolTest {
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
-		// TODO: use same cardSessionID which is generated in CardLinkProcess
-		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
+
+		lateinit var cardSessionId : String
 
 		Mockito.`when`(webSocketMock.connect()).then {
 			logger.info { "[WS-MOCK] Websocket connect was called." }
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
+			logger.info { "[WS-MOCK] Using $cardSessionId as cardSessionID." }
 		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {

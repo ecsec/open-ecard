@@ -40,10 +40,10 @@ const val SEND_APDU_RESPONSE = "sendAPDUResponse"
 const val TASK_LIST_ERROR = "receiveTasklistError"
 
 // Newly defined types
-const val REQUEST_SMS_TAN = "requestSmsTan"
-const val REQUEST_SMS_TAN_RESPONSE = "requestSmsTanResponse"
-const val CONFIRM_TAN = "confirmTan"
-const val CONFIRM_TAN_RESPONSE = "confirmTanResponse"
+const val REQUEST_SMS_TAN = "requestSMSCode"
+const val REQUEST_SMS_TAN_RESPONSE = "requestSMSCodeResponse"
+const val CONFIRM_TAN = "confirmSMSCode"
+const val CONFIRM_TAN_RESPONSE = "confirmSMSCodeResponse"
 
 // additional types for the base specification
 const val SESSION_INFO = "sessionInformation"
@@ -51,41 +51,26 @@ const val REGISTER_EGK_FINISH = "registerEgkFinish"
 
 
 @Serializable(with = GematikMessageSerializer::class)
-abstract class GematikMessage {
-	abstract val payload: CardLinkPayload?
-	abstract val payloadType: String
+class GematikEnvelope {
+	val payload: CardLinkPayload
+	val correlationId: String?
+	val cardSessionId: String?
 }
 
 @Serializable
 @SerialName("TaskListErrorEnvelope")
 class TaskListErrorEnvelope(
 	override val payload: TasklistErrorPayload,
-	override val payloadType: String = TASK_LIST_ERROR,
-) : GematikMessage()
-
-@Serializable
-@SerialName("ZeroEnvelope")
-class ZeroEnvelope(
-	override val payload: CardLinkPayload?,
-	override val payloadType: String,
-) : GematikMessage()
-
-@Serializable
-@SerialName("PairEnvelope")
-class PairEnvelope(
-	override val payload: CardLinkPayload?,
-	override val payloadType: String,
-	val correlationId: String,
-) : GematikMessage()
+	override val correlationId: String? = null,
+) : GematikMessage
 
 @Serializable
 @SerialName("CardEnvelope")
 class CardEnvelope(
 	override val payload: CardLinkPayload?,
 	override val payloadType: String,
-	val correlationId: String,
-	val cardSessionId: String,
-) : GematikMessage()
+	override val correlationId: String,
+) : GematikMessage
 
 object GematikMessageSerializer : KSerializer<GematikMessage> {
 	// Not really used, but must be implemented
@@ -100,8 +85,6 @@ object GematikMessageSerializer : KSerializer<GematikMessage> {
 		val jsonElement = when (value) {
 			is TaskListErrorEnvelope -> serializeTasklistError(value)
 			is CardEnvelope -> serializeGematikMessage(value.payload, value.payloadType, value.cardSessionId, value.correlationId)
-			is PairEnvelope -> serializeGematikMessage(value.payload, value.payloadType, null, value.correlationId)
-			is ZeroEnvelope -> serializeGematikMessage(value.payload, value.payloadType, null, null)
 			else -> throw IllegalArgumentException("Unsupported Gematik message.")
 		}
 		encoder.encodeSerializableValue(JsonElement.serializer(), jsonElement)
@@ -223,7 +206,7 @@ val module = SerializersModule {
 
 val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE }
 
-interface CardLinkPayload
+sealed interface CardLinkPayload
 
 
 @Serializable

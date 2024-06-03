@@ -52,22 +52,27 @@ class CardLinkProcess(
 	fun start(): BindingResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
-		// TODO: For now we generate the cardSessionID here, should be moved to the CardLink-Service
-		val cardSessionId = UUID.randomUUID().toString()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
-		dynCtx.put(CardLinkKeys.WS_SESSION_ID, cardSessionId)
 
 		ws.connect()
 		val wsPair = WsPair.addListener(ws)
 		setWsPair(dynCtx, wsPair)
+
+		waitForSessionInformation(dynCtx)
 
 		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, wsPair)
 		waitForCardLinkFinish(dynCtx)
 		destroySession(cardHandle)
 
+		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
+		val webSocketId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String?
+
 		// no error means success
-        return BindingResult(BindingResultCode.OK)
+		val bindingResult = BindingResult(BindingResultCode.OK)
+		bindingResult.addParameter(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
+		webSocketId?.let { bindingResult.addParameter(CardLinkKeys.WS_SESSION_ID, it) }
+		return bindingResult
     }
 
 	@Throws(WSHelper.WSException::class)
@@ -180,6 +185,25 @@ class CardLinkProcess(
 	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : GematikEnvelope? {
 		return runBlocking {
 			wsListener.retrieveMessage(SEND_APDU)
+		}
+	}
+
+	private fun waitForSessionInformation(dynCtx: DynamicContext) {
+		val wsListener = getWsPair(dynCtx).listener
+		runBlocking {
+			val sessionInformation = wsListener.retrieveMessage(SESSION_INFO)
+			val payload = sessionInformation?.payload
+
+			if (payload != null && payload is SessionInformation) {
+				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, sessionInformation.cardSessionId)
+				dynCtx.put(CardLinkKeys.WS_SESSION_ID, payload.webSocketId)
+				logger.debug { "Using ${sessionInformation.cardSessionId} as cardSessionId and ${payload.webSocketId} as webSocketId." }
+			} else {
+				// we generate our own cardSessionId
+				val cardSessionId = UUID.randomUUID().toString()
+				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
+				logger.debug { "Received no or a malformed SessionInformation message. Using $cardSessionId as cardSessionId." }
+			}
 		}
 	}
 

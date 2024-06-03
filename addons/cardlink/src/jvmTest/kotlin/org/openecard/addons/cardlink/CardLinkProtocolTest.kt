@@ -100,24 +100,29 @@ class CardLinkProtocolTest {
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
+		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
-		lateinit var cardSessionId : String
-
 		Mockito.`when`(webSocketMock.connect()).then {
-			logger.info { "[WS-MOCK] Websocket connect was called." }
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-			cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
-			logger.info { "[WS-MOCK] Using $cardSessionId as cardSessionID." }
+			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: $cardSessionId." }
 		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
 			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
+			argumentCaptor.value.onOpen(webSocketMock)
+			argumentCaptor.value.onText(webSocketMock, """
+				[
+					{
+						"type":"$SESSION_INFO",
+						"payload":"eyAid2ViU29ja2V0SWQiOiAiMTIzNDU2IiwgInBob25lUmVnaXN0ZXJlZCI6IGZhbHNlIH0"
+					},
+					"$cardSessionId"
+				]
+			""")
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
 			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from App:\n${it.arguments[0]}" }
-			argumentCaptor.value.onOpen(webSocketMock)
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{

@@ -81,7 +81,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 			}
 		}
 
-		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
+		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 		val conHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
 
 		val egkData = readEgkData(conHandle, cardSessionId)

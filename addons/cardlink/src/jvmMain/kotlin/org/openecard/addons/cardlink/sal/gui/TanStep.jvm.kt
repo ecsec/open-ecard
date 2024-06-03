@@ -70,7 +70,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 	private fun sendTan(tan: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val correlationId = dynCtx.get(CardLinkKeys.CORRELATION_ID_TAN_PROCESS) as String
-		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
+		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
 		val sendTan = SendTan(tan)
 		val egkEnvelope = GematikEnvelope(

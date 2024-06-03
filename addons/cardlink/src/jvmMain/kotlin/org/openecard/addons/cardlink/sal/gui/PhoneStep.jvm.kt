@@ -69,7 +69,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 	private fun sendPhoneNumber(phoneNumber: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val correlationId = UUID.randomUUID().toString()
-		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
+		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)
 		val egkEnvelope = GematikEnvelope(

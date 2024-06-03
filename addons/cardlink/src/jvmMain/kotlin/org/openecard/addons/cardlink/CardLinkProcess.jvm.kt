@@ -67,7 +67,6 @@ class CardLinkProcess(
 		destroySession(cardHandle)
 
 		// no error means success
-		ws.close(200, null)
         return BindingResult(BindingResultCode.OK)
     }
 

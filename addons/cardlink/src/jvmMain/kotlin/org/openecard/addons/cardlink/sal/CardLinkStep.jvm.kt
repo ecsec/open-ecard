@@ -117,9 +117,8 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 
 	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: WsPair) {
 		val correlationId = UUID.randomUUID().toString()
-		val egkEnvelope : GematikMessage = CardEnvelope(
+		val egkEnvelope = GematikEnvelope(
 			regEgk,
-			REGISTER_EGK,
 			correlationId,
 			cardSessionId,
 		)

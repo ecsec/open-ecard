@@ -120,7 +120,7 @@ class CardLinkProcess(
 		val wsListener = wsPair.listener
 
 		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {
-			val sendApduMessage: GematikMessage? = waitForSendApduMessage(wsListener)
+			val sendApduMessage: GematikEnvelope? = waitForSendApduMessage(wsListener)
 
 			if (sendApduMessage == null) {
 				val errorMsg = "Didn't receive any SendAPDU messages from CardLink-Service."
@@ -128,9 +128,9 @@ class CardLinkProcess(
 				continue
 			}
 
-			if (sendApduMessage !is CardEnvelope) {
-				val errorMsg = "APDU message is not from type CardEnvelope."
-				logger.error { errorMsg }
+			if (sendApduMessage.cardSessionId == null || sendApduMessage.correlationId == null) {
+				val errorMsg = "Received malformed SendAPDU message which does not contain a cardSessionId or correlationId."
+				logger.warn { errorMsg }
 				continue
 			}
 
@@ -138,18 +138,17 @@ class CardLinkProcess(
 				val errorMsg = "Received malformed eGK payload. Payload is not from type: SendApdu."
 				logger.error { errorMsg }
 			} else {
-				val apdu = (sendApduMessage.payload as SendApdu).apdu
+				val apdu = sendApduMessage.payload.apdu
 				val correlationId = sendApduMessage.correlationId
 				val cardSessionId = sendApduMessage.cardSessionId
 
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
-				val egkEnvelope: GematikMessage = CardEnvelope(
+				val egkEnvelope = GematikEnvelope(
 					SendApduResponse(
 						cardSessionId,
 						apduResponse
 					),
-					SEND_APDU_RESPONSE,
 					correlationId,
 					cardSessionId,
 				)
@@ -178,7 +177,7 @@ class CardLinkProcess(
 		}
 	}
 
-	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : GematikMessage? {
+	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : GematikEnvelope? {
 		return runBlocking {
 			wsListener.retrieveMessage(SEND_APDU)
 		}

@@ -72,9 +72,8 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)
-		val egkEnvelope : GematikMessage = CardEnvelope(
+		val egkEnvelope = GematikEnvelope(
 			sendPhoneNumber,
-			REQUEST_SMS_TAN,
 			correlationId,
 			cardSessionId,
 		)
@@ -83,7 +82,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val phoneNumberResponse : GematikMessage? = waitForPhoneNumberResponse(wsListener)
+		val phoneNumberResponse : GematikEnvelope? = waitForPhoneNumberResponse(wsListener)
 
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
@@ -98,7 +97,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		}
 
 		val egkPayload = phoneNumberResponse.payload
-		if (phoneNumberResponse is CardEnvelope && egkPayload is ConfirmPhoneNumber) {
+		if (egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
 			// TODO: probably some more checks required?
@@ -126,7 +125,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		}
 	}
 
-	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): GematikMessage? {
+	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): GematikEnvelope? {
 		return runBlocking {
 			wsListener.retrieveMessage(REQUEST_SMS_TAN_RESPONSE)
 		}

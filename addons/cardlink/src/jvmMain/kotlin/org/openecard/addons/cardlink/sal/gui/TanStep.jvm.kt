@@ -73,9 +73,8 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		val cardSessionId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String
 
 		val sendTan = SendTan(tan)
-		val egkEnvelope : GematikMessage = CardEnvelope(
+		val egkEnvelope = GematikEnvelope(
 			sendTan,
-			CONFIRM_TAN,
 			correlationId,
 			cardSessionId,
 		)
@@ -84,22 +83,10 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val tanConfirmResponse : GematikMessage? = waitForTanConfirmResponse(wsListener)
+		val tanConfirmResponse : GematikEnvelope? = waitForTanConfirmResponse(wsListener)
 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
-			logger.error { errorMsg }
-			return StepActionResult(
-				StepActionResultStatus.REPEAT,
-				ErrorStep(
-					"CardLink Error",
-					errorMsg,
-				)
-			)
-		}
-
-		if (tanConfirmResponse !is CardEnvelope) {
-			val errorMsg = "Tan confirm message is not from type CardEnvelope."
 			logger.error { errorMsg }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
@@ -149,7 +136,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		}
 	}
 
-	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): GematikMessage? {
+	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): GematikEnvelope? {
 		return runBlocking {
 			wsListener.retrieveMessage(CONFIRM_TAN_RESPONSE)
 		}

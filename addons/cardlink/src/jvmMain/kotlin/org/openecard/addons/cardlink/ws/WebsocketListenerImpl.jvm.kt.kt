@@ -28,6 +28,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerialName
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
 import java.util.Date
@@ -41,7 +42,7 @@ private val logger = KotlinLogging.logger {}
  */
 class WebsocketListenerImpl: WebsocketListener {
 
-	private lateinit var messageChannel: Channel<GematikMessage>
+	private lateinit var messageChannel: Channel<GematikEnvelope>
 
 	private var isOpen : Boolean = false
 
@@ -65,7 +66,7 @@ class WebsocketListenerImpl: WebsocketListener {
 		GlobalScope.launch {
 			if (data != null) {
 				logger.debug { "Received message: $data" }
-				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikMessage>(data)
+				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(data)
 				messageChannel.send(egkEnvelope)
 			} else {
 				logger.debug { "Received empty data in CardLink Websocket." }
@@ -81,13 +82,16 @@ class WebsocketListenerImpl: WebsocketListener {
 		return retrieveMessage(REGISTER_EGK_FINISH, Duration.ZERO) != null
 	}
 
-	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : GematikMessage? {
+	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : GematikEnvelope? {
 		// TODO: use onReceive to trigger loop to find message
 		val start = Date()
 		do {
 			for (message in messageChannel) {
-				if (message.payloadType == payloadType) {
-					return message
+				if (message.payload != null) {
+					val serialName = message.payload::class.java.getAnnotation(SerialName::class.java)?.value
+					if (serialName == payloadType) {
+						return message
+					}
 				}
 			}
 			delay(500)

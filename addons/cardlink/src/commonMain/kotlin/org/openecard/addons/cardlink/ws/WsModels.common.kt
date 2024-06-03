@@ -51,28 +51,13 @@ const val REGISTER_EGK_FINISH = "registerEgkFinish"
 
 
 @Serializable(with = GematikMessageSerializer::class)
-class GematikEnvelope {
-	val payload: CardLinkPayload
-	val correlationId: String?
-	val cardSessionId: String?
-}
+data class GematikEnvelope(
+	val payload: CardLinkPayload?,
+	val correlationId: String?,
+	val cardSessionId: String?,
+)
 
-@Serializable
-@SerialName("TaskListErrorEnvelope")
-class TaskListErrorEnvelope(
-	override val payload: TasklistErrorPayload,
-	override val correlationId: String? = null,
-) : GematikMessage
-
-@Serializable
-@SerialName("CardEnvelope")
-class CardEnvelope(
-	override val payload: CardLinkPayload?,
-	override val payloadType: String,
-	override val correlationId: String,
-) : GematikMessage
-
-object GematikMessageSerializer : KSerializer<GematikMessage> {
+object GematikMessageSerializer : KSerializer<GematikEnvelope> {
 	// Not really used, but must be implemented
 	override val descriptor : SerialDescriptor = buildClassSerialDescriptor("GematikMessage") {
 		element<String>("cardSessionId")
@@ -81,81 +66,44 @@ object GematikMessageSerializer : KSerializer<GematikMessage> {
 		element<String>("payloadType")
 	}
 
-	override fun serialize(encoder: Encoder, value: GematikMessage) {
-		val jsonElement = when (value) {
-			is TaskListErrorEnvelope -> serializeTasklistError(value)
-			is CardEnvelope -> serializeGematikMessage(value.payload, value.payloadType, value.cardSessionId, value.correlationId)
-			else -> throw IllegalArgumentException("Unsupported Gematik message.")
-		}
-		encoder.encodeSerializableValue(JsonElement.serializer(), jsonElement)
-	}
-
 	@OptIn(ExperimentalEncodingApi::class)
-	private fun serializeGematikMessage(payload: CardLinkPayload?, payloadType: String, cardSessionId: String?, correlationId: String?) : JsonElement {
-		val base64EncodedPayload: String? = payload?.let {
-			val payloadJsonStr = cardLinkJsonFormatter.encodeToString(payload)
+	override fun serialize(encoder: Encoder, value: GematikEnvelope) {
+		val payloadType = value.payload?.let {
+			it::class.java.getAnnotation(SerialName::class.java)?.value
+		}
+		val base64EncodedPayload: String = value.payload.let {
+			val payloadJsonStr = cardLinkJsonFormatter.encodeToString(it)
 			Base64.encode(payloadJsonStr.encodeToByteArray()).trimEnd('=')
 		}
 		val jsonPayload = buildJsonObject {
 			put("type", payloadType)
 			put("payload", base64EncodedPayload)
 		}
-		return buildJsonArray {
+		val jsonElement = buildJsonArray {
 			add(jsonPayload)
-			cardSessionId?.let { add(it) }
-			correlationId?.let { add(it) }
+			value.cardSessionId?.let { add(it) }
+			value.correlationId?.let { add(it) }
 		}
+		encoder.encodeSerializableValue(JsonElement.serializer(), jsonElement)
 	}
 
-	@OptIn(ExperimentalEncodingApi::class)
-	private fun serializeTasklistError(taskListErrorEnvelope: TaskListErrorEnvelope) : JsonElement {
-		val payloadJsonStr = cardLinkJsonFormatter.encodeToString(taskListErrorEnvelope.payload)
-		val base64EncodedPayload = Base64.encode(payloadJsonStr.encodeToByteArray()).trimEnd('=')
-		return buildJsonObject {
-			put("type", TASK_LIST_ERROR)
-			put("payload", base64EncodedPayload)
-		}
-	}
+	override fun deserialize(decoder: Decoder): GematikEnvelope {
+		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
-	override fun deserialize(decoder: Decoder): GematikMessage {
-		when (val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())) {
-			is JsonObject -> {
-				val payloadType = websocketMessage.jsonObject["type"]?.jsonPrimitive?.content
-					?: throw IllegalArgumentException("Payload type of TaskListErrorMessage is missing.")
-				val payload = websocketMessage.jsonObject["payload"]?.jsonPrimitive?.content
-					?: throw IllegalArgumentException("Payload of TaskListErrorMessage is missing.")
-				val typedJsonElement = toTypedJsonElement(payload, payloadType)
+		val gematikMessage = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
+			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload.")
+		val cardSessionId = websocketMessage.jsonArray.getOrNull(1)?.jsonPrimitive?.content
+		val correlationId = websocketMessage.jsonArray.getOrNull(2)?.jsonPrimitive?.content
 
-				return TaskListErrorEnvelope(
-					cardLinkJsonFormatter.decodeFromJsonElement<TasklistErrorPayload>(typedJsonElement),
-				)
-			}
-			is JsonArray -> {
-				val gematikMessage = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
-					?: throw IllegalArgumentException("Web-Socket Gematik message does not contain an Egk message.")
-				val cardSessionId = websocketMessage.jsonArray.getOrNull(1)?.jsonPrimitive?.content
-				val correlationId = websocketMessage.jsonArray.getOrNull(2)?.jsonPrimitive?.content
+		val payloadType = gematikMessage["type"]?.jsonPrimitive?.content
+			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a type.")
+		val payload = gematikMessage["payload"]?.jsonPrimitive?.content
+			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload value.")
 
-				val payloadType = gematikMessage["type"]?.jsonPrimitive?.content
-					?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a type.")
-				val payload = gematikMessage["payload"]?.jsonPrimitive?.content
-					?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload.")
+		val typedJsonElement = toTypedJsonElement(payload, payloadType)
+		val cardLinkPayload = cardLinkJsonFormatter.decodeFromJsonElement<CardLinkPayload>(typedJsonElement)
 
-				val typedJsonElement = toTypedJsonElement(payload, payloadType)
-				val cardLinkPayload = cardLinkJsonFormatter.decodeFromJsonElement<CardLinkPayload>(typedJsonElement)
-
-				return if (cardSessionId != null && correlationId != null) {
-					CardEnvelope(cardLinkPayload, payloadType, cardSessionId, correlationId)
-				} else if (correlationId != null) {
-					PairEnvelope(cardLinkPayload, payloadType, correlationId)
-				} else {
-					ZeroEnvelope(cardLinkPayload, payloadType)
-				}
-			}
-			else -> {
-				throw IllegalStateException("Received malformed Web-Socket message.")
-			}
-		}
+		return GematikEnvelope(cardLinkPayload, correlationId, cardSessionId)
 	}
 
 	@OptIn(ExperimentalEncodingApi::class)
@@ -186,12 +134,6 @@ object ByteArrayAsBase64Serializer : KSerializer<ByteArray> {
 }
 
 val module = SerializersModule {
-	polymorphic(GematikMessage::class) {
-		subclass(TaskListErrorEnvelope::class)
-		subclass(ZeroEnvelope::class)
-		subclass(PairEnvelope::class)
-		subclass(CardEnvelope::class)
-	}
 	polymorphic(CardLinkPayload::class) {
 		subclass(RegisterEgk::class)
 		subclass(SendApdu::class)
@@ -214,7 +156,7 @@ sealed interface CardLinkPayload
 data class SessionInformation(
 	val webSocketId: String,
 	val phoneRegistered: Boolean,
-)
+) : CardLinkPayload
 
 @Serializable
 @SerialName(REGISTER_EGK)

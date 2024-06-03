@@ -112,17 +112,16 @@ class WSModelSerializationTest {
 
 	@Test(dataProvider = "egkPayloads")
 	fun testEgkEnvelopeSerialization(egkPayload: CardLinkPayload, serialName: String) {
-		val egkEnvelope : GematikMessage = CardEnvelope(
+		val egkEnvelope = GematikEnvelope(
 			cardSessionId = "foobar",
 			correlationId = UUID.randomUUID().toString(),
 			payload = egkPayload,
-			payloadType = serialName
 		)
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		logger.info { jsonString }
 
 		// we will deserialize the string back to the class
-		val egkEnvelopeDecoded = cardLinkJsonFormatter.decodeFromString<GematikMessage>(jsonString)
+		val egkEnvelopeDecoded = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(jsonString)
 		Assert.assertEquals(egkEnvelopeDecoded.payload?.javaClass?.name, egkPayload.javaClass.name)
 	}
 }

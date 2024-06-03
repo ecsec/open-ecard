@@ -150,13 +150,16 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$SEND_APDU",
-						"payload":"aoY"
+						"payload":"eyAiY2FyZFNlc3Npb25JZCI6ICI2MjU5MDQ4ZS1lMjFmLTRlODYtOGZjNS00NTNmMGEwYTVjNjQiLCAiYXBkdSI6ICJhcGR1IiB9IA"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"
 				]
 			""")
-			// TODO: send other APDUs or finish the APDU exchange
+		}
+
+		Mockito.`when`(webSocketMock.send(Mockito.contains(SEND_APDU_RESPONSE))).then {
+			logger.info { "[WS-MOCK] Received $SEND_APDU_RESPONSE message from App:\n${it.arguments[0]}" }
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{

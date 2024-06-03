@@ -26,6 +26,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
@@ -86,7 +87,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val egkData = readEgkData(conHandle, cardSessionId)
 		sendEgkData(egkData, cardSessionId, ws)
 
-		waitForCardLinkFinish()
+		waitForCardLinkFinish(dynCtx)
 
 		return DIDAuthenticateResponse().apply {
 			result = WSHelper.makeResultOK()
@@ -126,8 +127,11 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		ws.socket.send(egkEnvelopeMsg)
 	}
 
-	private fun waitForCardLinkFinish() {
-		TODO("Not yet implemented")
+	private fun waitForCardLinkFinish(dynCtx: DynamicContext) {
+		val wsListener = getWsPair(dynCtx).listener
+		runBlocking {
+			// As soon as we received the registerEgkFinish message, the CardLink process is finished
+			wsListener.retrieveMessage(REGISTER_EGK_FINISH)
+		}
 	}
-
 }

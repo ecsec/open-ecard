@@ -87,8 +87,6 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val egkData = readEgkData(conHandle, cardSessionId)
 		sendEgkData(egkData, cardSessionId, ws)
 
-		waitForCardLinkFinish(dynCtx)
-
 		return DIDAuthenticateResponse().apply {
 			result = WSHelper.makeResultOK()
 		}
@@ -125,13 +123,5 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		ws.socket.send(egkEnvelopeMsg)
-	}
-
-	private fun waitForCardLinkFinish(dynCtx: DynamicContext) {
-		val wsListener = getWsPair(dynCtx).listener
-		runBlocking {
-			// As soon as we received the registerEgkFinish message, the CardLink process is finished
-			wsListener.retrieveMessage(REGISTER_EGK_FINISH)
-		}
 	}
 }

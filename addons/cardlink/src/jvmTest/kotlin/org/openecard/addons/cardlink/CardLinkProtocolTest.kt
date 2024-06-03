@@ -150,7 +150,7 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$SEND_APDU",
-						"payload":"eyAiY2FyZFNlc3Npb25JZCI6ICI2MjU5MDQ4ZS1lMjFmLTRlODYtOGZjNS00NTNmMGEwYTVjNjQiLCAiYXBkdSI6ICJhcGR1IiB9IA"
+						"payload":"eyAiY2FyZFNlc3Npb25JZCI6ICI2MjU5MDQ4ZS1lMjFmLTRlODYtOGZjNS00NTNmMGEwYTVjNjQiLCAiYXBkdSI6ICJBS1FBREFJL0FBIiB9IA"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"

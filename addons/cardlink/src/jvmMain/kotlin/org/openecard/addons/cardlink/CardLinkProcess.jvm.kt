@@ -63,6 +63,7 @@ class CardLinkProcess(
 
 		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, wsPair)
+		waitForCardLinkFinish(dynCtx)
 		destroySession(cardHandle)
 
 		// no error means success
@@ -183,4 +184,11 @@ class CardLinkProcess(
 		}
 	}
 
+	private fun waitForCardLinkFinish(dynCtx: DynamicContext) {
+		val wsListener = getWsPair(dynCtx).listener
+		runBlocking {
+			// As soon as we received the registerEgkFinish message, the CardLink process is finished
+			wsListener.retrieveMessage(REGISTER_EGK_FINISH)
+		}
+	}
 }

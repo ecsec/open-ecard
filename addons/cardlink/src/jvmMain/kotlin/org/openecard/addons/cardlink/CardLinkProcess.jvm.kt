@@ -24,7 +24,6 @@ package org.openecard.addons.cardlink
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
@@ -34,9 +33,12 @@ import org.openecard.addons.cardlink.sal.*
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
+import org.openecard.common.ECardConstants
 import org.openecard.common.WSHelper
+import org.openecard.common.toException
 import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.Websocket
+import org.openecard.mobile.activation.WebsocketListener
 import java.util.*
 
 
@@ -45,6 +47,7 @@ private val logger = KotlinLogging.logger {}
 class CardLinkProcess(
 	private val ctx: Context,
 	private val ws: Websocket,
+	private val successorListener: WebsocketListener,
 ) {
 
 	private val dispatcher = ctx.dispatcher
@@ -55,14 +58,14 @@ class CardLinkProcess(
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 
 		ws.connect()
-		val wsPair = WsPair.addListener(ws)
+		val wsPair = WsPair.withNewListener(ws, successorListener)
 		setWsPair(dynCtx, wsPair)
 
-		waitForSessionInformation(dynCtx)
+		waitForSessionInformation(dynCtx, wsPair)
 
 		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, wsPair)
-		waitForCardLinkFinish(dynCtx)
+		waitForCardLinkFinish(wsPair)
 		destroySession(cardHandle)
 
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
@@ -188,8 +191,8 @@ class CardLinkProcess(
 		}
 	}
 
-	private fun waitForSessionInformation(dynCtx: DynamicContext) {
-		val wsListener = getWsPair(dynCtx).listener
+	private fun waitForSessionInformation(dynCtx: DynamicContext, wsPair: WsPair) {
+		val wsListener = wsPair.listener
 		runBlocking {
 			val sessionInformation = wsListener.retrieveMessage(SESSION_INFO)
 			val payload = sessionInformation?.payload
@@ -209,11 +212,16 @@ class CardLinkProcess(
 		}
 	}
 
-	private fun waitForCardLinkFinish(dynCtx: DynamicContext) {
-		val wsListener = getWsPair(dynCtx).listener
-		runBlocking {
+	private fun waitForCardLinkFinish(wsPair: WsPair): GematikEnvelope {
+		val wsListener = wsPair.listener
+		return runBlocking {
 			// As soon as we received the registerEgkFinish message, the CardLink process is finished
-			wsListener.retrieveMessage(REGISTER_EGK_FINISH)
+			val finishMsg = wsListener.retrieveMessage(REGISTER_EGK_FINISH)
+
+			// replace listener with the provided successor, so the application can continue
+			wsPair.switchToSuccessorListener()
+
+			finishMsg ?: throw WSHelper.makeResultError(ECardConstants.Minor.Disp.TIMEOUT, "Timeout happened during waiting for $REGISTER_EGK_FINISH message from CardLink-Service.").toException()
 		}
 	}
 }

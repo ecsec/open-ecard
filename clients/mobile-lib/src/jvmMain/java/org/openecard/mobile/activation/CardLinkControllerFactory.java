@@ -26,6 +26,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 
 @FrameworkInterface
 public interface CardLinkControllerFactory {
-	ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction);
+	ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction, WebsocketListener listenerSuccessor);
 	void destroy(ActivationController controller);
 }

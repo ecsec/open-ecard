@@ -24,11 +24,8 @@ package org.openecard.addons.cardlink.sal
 
 import org.openecard.addon.Context
 import org.openecard.addon.sal.SALProtocolBaseImpl
-import org.openecard.addons.cardlink.ws.WebsocketListenerImpl
 import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.common.DynamicContext
-import org.openecard.mobile.activation.Websocket
-import org.openecard.mobile.activation.WebsocketListener
 
 const val CARDLINK_PROTOCOL_ID = "https://gematik.de/protocols/cardlink"
 

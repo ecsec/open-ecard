@@ -26,7 +26,9 @@ import org.openecard.addon.ActionInitializationException
 import org.openecard.addon.Context
 import org.openecard.addon.bind.*
 import org.openecard.mobile.activation.Websocket
+import org.openecard.mobile.activation.WebsocketListener
 import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_KEY
+import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_LISTENER_SUCCESSOR_KEY
 
 class ActivateAction : AppPluginAction {
     private var aCtx: Context? = null
@@ -41,12 +43,15 @@ class ActivateAction : AppPluginAction {
 		attachments: List<Attachment>?,
 		extraParams: Map<String, Any>?
 	): BindingResult {
-        val ws: Websocket = extraParams?.get(WS_KEY) as Websocket?
+        val ws = extraParams?.get(WS_KEY) as Websocket?
             ?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
-                .setResultMessage("Missing websocket in dynamic context.")
+                .setResultMessage("Missing websocket in CardLink activate request.")
+		val successorListener = extraParams?.get(WS_LISTENER_SUCCESSOR_KEY) as WebsocketListener?
+			?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
+				.setResultMessage("Missing websocket successor listener in CardLink activate request.")
 
         // call CardLink process
-        val proc: CardLinkProcess = CardLinkProcess(ctxChecked, ws)
+        val proc: CardLinkProcess = CardLinkProcess(ctxChecked, ws, successorListener)
         return proc.start()
     }
 

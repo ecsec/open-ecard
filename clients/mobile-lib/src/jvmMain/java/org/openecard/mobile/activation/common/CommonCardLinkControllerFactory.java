@@ -41,6 +41,7 @@ import java.util.Set;
 public class CommonCardLinkControllerFactory implements CardLinkControllerFactory {
 
 	public static final String WS_KEY = "websocket";
+	public static final String WS_LISTENER_SUCCESSOR_KEY = "websocket_listener_successor";
 
 
 	private static final String PROTOCOL_TYPE = "cardlink";
@@ -54,7 +55,7 @@ public class CommonCardLinkControllerFactory implements CardLinkControllerFactor
 	}
 
 	@Override
-	public ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction) {
+	public ActivationController create(Websocket websocket, ControllerCallback activation, CardLinkInteraction interaction, WebsocketListener listenerSuccessor) {
 		if (websocket == null) {
 			throw new IllegalArgumentException("The given websocket object cannot be null");
 		}
@@ -68,6 +69,7 @@ public class CommonCardLinkControllerFactory implements CardLinkControllerFactor
 
 		Map<String, Object> extraParams = new HashMap<>();
 		extraParams.put(WS_KEY, websocket);
+		extraParams.put(WS_LISTENER_SUCCESSOR_KEY, listenerSuccessor);
 
 		Set<String> supportedCards = new HashSet<>();
 

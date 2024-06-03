@@ -56,7 +56,8 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val ws = getWsPair(dynCtx)
-		val uc = CardLinkUserConsent(ws, aCtx, req.connectionHandle)
+		val isPhoneRegistered = dynCtx.get(CardLinkKeys.PHONE_NUMBER_REGISTERED) as Boolean? ?: false
+		val uc = CardLinkUserConsent(ws, aCtx, isPhoneRegistered, req.connectionHandle)
 
 		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
 		val exec = ExecutionEngine(navigator)

@@ -197,11 +197,13 @@ class CardLinkProcess(
 			if (payload != null && payload is SessionInformation) {
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, sessionInformation.cardSessionId)
 				dynCtx.put(CardLinkKeys.WS_SESSION_ID, payload.webSocketId)
+				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, payload.phoneRegistered)
 				logger.debug { "Using ${sessionInformation.cardSessionId} as cardSessionId and ${payload.webSocketId} as webSocketId." }
 			} else {
 				// we generate our own cardSessionId
 				val cardSessionId = UUID.randomUUID().toString()
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
+				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, false)
 				logger.debug { "Received no or a malformed SessionInformation message. Using $cardSessionId as cardSessionId." }
 			}
 		}

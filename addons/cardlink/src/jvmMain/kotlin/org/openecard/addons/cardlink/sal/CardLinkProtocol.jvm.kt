@@ -55,6 +55,7 @@ object CardLinkKeys {
 	const val CORRECT_CAN = "${prefix}CORRECT_CAN"
 	const val WS_SESSION_ID = "${prefix}WS_SESSION_ID"
 	const val CARD_SESSION_ID = "${prefix}CARD_SESSION_ID"
+	const val PHONE_NUMBER_REGISTERED = "${prefix}PHONE_NUMBER_REGISTERED"
 	const val LAST_SENT_MESSAGE_ID = "${prefix}LAST_SENT_MESSAGE_ID"
 	const val WEBSOCKET = "${prefix}WEBSOCKET"
 	const val CORRELATION_ID_TAN_PROCESS = "${prefix}CORRELATION_ID_TAN"

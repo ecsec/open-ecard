@@ -31,11 +31,13 @@ import org.openecard.mobile.activation.Websocket
 private const val title = "CardLink User Consent"
 const val CONSENT_TYPE = "CardLink"
 
-class CardLinkUserConsent(ws: WsPair, addonCtx: Context, sessionHandle: ConnectionHandleType) : UserConsentDescription(title, CONSENT_TYPE) {
+class CardLinkUserConsent(ws: WsPair, addonCtx: Context, isPhoneRegistered: Boolean, sessionHandle: ConnectionHandleType) : UserConsentDescription(title, CONSENT_TYPE) {
 	init {
 		steps.apply {
-			add(PhoneStep(ws))
-			add(TanStep(ws))
+			if (!isPhoneRegistered) {
+				add(PhoneStep(ws))
+				add(TanStep(ws))
+			}
 			add(EnterCanStep(ws, addonCtx, sessionHandle))
 		}
 	}

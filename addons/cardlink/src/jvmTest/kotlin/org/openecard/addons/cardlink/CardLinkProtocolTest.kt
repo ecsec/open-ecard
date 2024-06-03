@@ -110,6 +110,7 @@ class CardLinkProtocolTest {
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
 			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
 			argumentCaptor.value.onOpen(webSocketMock)
+			/* Use payload eyAid2ViU29ja2V0SWQiOiAiMTIzNDU2IiwgInBob25lUmVnaXN0ZXJlZCI6IHRydWUgfQ for registered phone */
 			argumentCaptor.value.onText(webSocketMock, """
 				[
 					{

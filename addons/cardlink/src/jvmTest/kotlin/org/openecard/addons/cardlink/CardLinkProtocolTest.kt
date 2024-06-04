@@ -181,15 +181,15 @@ class CardLinkProtocolTest {
 
 	@BeforeClass
 	fun setupCallbackController() {
-		this.callbackController = object : ControllerCallback {
-			override fun onStarted() {
-				logger.info { "Authentication started." }
-			}
+		this.callbackController = Mockito.mock(ControllerCallback::class.java)
 
-			override fun onAuthenticationCompletion(result: ActivationResult?) {
-				logger.info { "Authentication completed." }
-				activationResult.deliver(result)
-			}
+		Mockito.`when`(callbackController.onStarted()).then {
+			logger.info { "Authentication started." }
+		}
+
+		Mockito.`when`(callbackController.onAuthenticationCompletion(Mockito.any())).then {
+			logger.info { "Authentication completed." }
+			activationResult.deliver(it.arguments[0] as ActivationResult?)
 		}
 	}
 
@@ -218,13 +218,14 @@ class CardLinkProtocolTest {
 
 	@Test
 	fun testCardLinkProtocol() {
+		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
 		val cardLinkFactory = activationUtils.cardLinkFactory()
-		cardLinkFactory.create(webSocketMock, callbackController, cardLinkInteraction)
+		cardLinkFactory.create(webSocketMock, callbackController, cardLinkInteraction, webSocketListenerSuccessor)
 
 		val result = activationResult.deref()
 		Assert.assertNotNull(result)
 		Assert.assertEquals(result?.resultCode, ActivationResultCode.OK)
 
-		Mockito.verify(callbackController, Mockito.times(1)).onStarted()
+		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
 	}
 }

@@ -82,7 +82,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val phoneNumberResponse : GematikEnvelope? = waitForPhoneNumberResponse(wsListener)
+		val phoneNumberResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
 
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
@@ -122,12 +122,6 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 					errorMsg,
 				)
 			)
-		}
-	}
-
-	private fun waitForPhoneNumberResponse(wsListener: WebsocketListenerImpl): GematikEnvelope? {
-		return runBlocking {
-			wsListener.retrieveMessage(REQUEST_SMS_TAN_RESPONSE)
 		}
 	}
 }

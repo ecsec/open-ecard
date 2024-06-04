@@ -23,15 +23,10 @@
 package org.openecard.addons.cardlink.ws
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.serialization.SerialName
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
-import java.util.Date
 import kotlin.time.Duration
 
 
@@ -78,26 +73,20 @@ class WebsocketListenerImpl: WebsocketListener {
 		return isOpen
 	}
 
-	suspend fun isAPDUExchangeOngoing() : Boolean {
-		return retrieveMessage(REGISTER_EGK_FINISH, Duration.ZERO) != null
+	fun nextMessageBlocking() : GematikEnvelope? {
+		return runBlocking {
+			nextMessage()
+		}
 	}
 
-	suspend fun retrieveMessage(payloadType: String, timeout: Duration = Duration.parse("30s")) : GematikEnvelope? {
-		// TODO: use onReceive to trigger loop to find message
-		val start = Date()
-		do {
-			for (message in messageChannel) {
-				if (message.payload != null) {
-					val serialName = message.payload::class.java.getAnnotation(SerialName::class.java)?.value
-					if (serialName == payloadType) {
-						return message
-					}
-				}
+	suspend fun nextMessage(timeout: Duration = Duration.parse("30s")) : GematikEnvelope? {
+		try {
+			return withTimeoutOrNull(timeout) {
+				return@withTimeoutOrNull messageChannel.receive()
 			}
-			delay(500)
-		} while (start.time + timeout.inWholeMilliseconds > Date().time)
-
-		// timeout
-		return null
+		} catch (_: TimeoutCancellationException) {
+			logger.debug { "Timeout happened during waiting for CardLink message." }
+			return null
+		}
 	}
 }

@@ -23,7 +23,6 @@
 package org.openecard.addons.cardlink.sal.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
@@ -83,7 +82,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val tanConfirmResponse : GematikEnvelope? = waitForTanConfirmResponse(wsListener)
+		val tanConfirmResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
@@ -133,12 +132,6 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 					errorMsg,
 				)
 			)
-		}
-	}
-
-	private fun waitForTanConfirmResponse(wsListener: WebsocketListenerImpl): GematikEnvelope? {
-		return runBlocking {
-			wsListener.retrieveMessage(CONFIRM_TAN_RESPONSE)
 		}
 	}
 }

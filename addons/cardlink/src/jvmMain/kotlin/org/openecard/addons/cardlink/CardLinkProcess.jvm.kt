@@ -65,7 +65,6 @@ class CardLinkProcess(
 
 		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, wsPair)
-		waitForCardLinkFinish(wsPair)
 		destroySession(cardHandle)
 
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
@@ -127,28 +126,35 @@ class CardLinkProcess(
 	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, wsPair: WsPair) {
 		val wsListener = wsPair.listener
 
-		while (wsListener.isOpen() && isAPDUExchangeOngoing(wsListener)) {
-			val sendApduMessage: GematikEnvelope? = waitForSendApduMessage(wsListener)
+		while (wsListener.isOpen()) {
+			val gematikMessage: GematikEnvelope? = wsListener.nextMessageBlocking()
 
-			if (sendApduMessage == null) {
-				val errorMsg = "Didn't receive any SendAPDU messages from CardLink-Service."
+			if (gematikMessage == null) {
+				val errorMsg = "Timeout happened during APDU exchange with CardLink-Service."
 				logger.warn { errorMsg }
-				continue
+				throw WSHelper.makeResultError(ECardConstants.Minor.Disp.TIMEOUT, errorMsg).toException()
 			}
 
-			if (sendApduMessage.cardSessionId == null || sendApduMessage.correlationId == null) {
+			if (gematikMessage.payload is RegisterEgkFinish) {
+				logger.debug { "Received '${REGISTER_EGK_FINISH}' message from CardLink service." }
+				// replace listener with the provided successor, so the application can continue
+				wsPair.switchToSuccessorListener()
+				return
+			}
+
+			if (gematikMessage.cardSessionId == null || gematikMessage.correlationId == null) {
 				val errorMsg = "Received malformed SendAPDU message which does not contain a cardSessionId or correlationId."
 				logger.warn { errorMsg }
 				continue
 			}
 
-			if (sendApduMessage.payload !is SendApdu) {
+			if (gematikMessage.payload !is SendApdu) {
 				val errorMsg = "Received malformed eGK payload. Payload is not from type: SendApdu."
 				logger.error { errorMsg }
 			} else {
-				val apdu = sendApduMessage.payload.apdu
-				val correlationId = sendApduMessage.correlationId
-				val cardSessionId = sendApduMessage.cardSessionId
+				val apdu = gematikMessage.payload.apdu
+				val correlationId = gematikMessage.correlationId
+				val cardSessionId = gematikMessage.cardSessionId
 
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
@@ -179,23 +185,16 @@ class CardLinkProcess(
 		return response.outputAPDU[0]
 	}
 
-	private fun isAPDUExchangeOngoing(wsListener: WebsocketListenerImpl) : Boolean {
-		return runBlocking {
-			wsListener.isAPDUExchangeOngoing()
-		}
-	}
-
-	private fun waitForSendApduMessage(wsListener: WebsocketListenerImpl) : GematikEnvelope? {
-		return runBlocking {
-			wsListener.retrieveMessage(SEND_APDU)
-		}
-	}
-
 	private fun waitForSessionInformation(dynCtx: DynamicContext, wsPair: WsPair) {
 		val wsListener = wsPair.listener
 		runBlocking {
-			val sessionInformation = wsListener.retrieveMessage(SESSION_INFO)
+			val sessionInformation = wsListener.nextMessage()
 			val payload = sessionInformation?.payload
+
+			if (sessionInformation == null) {
+				val errorMsg = "Timeout happened during waiting for '${SESSION_INFO}' message from CardLink-Service."
+				logger.warn { errorMsg }
+			}
 
 			if (payload != null && payload is SessionInformation) {
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, sessionInformation.cardSessionId)
@@ -209,19 +208,6 @@ class CardLinkProcess(
 				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, false)
 				logger.debug { "Received no or a malformed SessionInformation message. Using $cardSessionId as cardSessionId." }
 			}
-		}
-	}
-
-	private fun waitForCardLinkFinish(wsPair: WsPair): GematikEnvelope {
-		val wsListener = wsPair.listener
-		return runBlocking {
-			// As soon as we received the registerEgkFinish message, the CardLink process is finished
-			val finishMsg = wsListener.retrieveMessage(REGISTER_EGK_FINISH)
-
-			// replace listener with the provided successor, so the application can continue
-			wsPair.switchToSuccessorListener()
-
-			finishMsg ?: throw WSHelper.makeResultError(ECardConstants.Minor.Disp.TIMEOUT, "Timeout happened during waiting for $REGISTER_EGK_FINISH message from CardLink-Service.").toException()
 		}
 	}
 }

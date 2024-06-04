@@ -157,8 +157,8 @@ class CardLinkProtocolTest {
 			val mseApdu = "002241A406840109800100".hexToByteArray()
 			val mseMessage = GematikEnvelope(
 				SendApdu(cardSessionId, mseApdu),
-				cardSessionId,
 				correlationIdMseApdu,
+				cardSessionId,
 			)
 
 			argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(mseMessage))
@@ -175,8 +175,8 @@ class CardLinkProtocolTest {
 				val internalAuthApdu = "0088000020${randomBytes}00".hexToByteArray()
 				val internalAuthMessage = GematikEnvelope(
 					SendApdu(cardSessionId, internalAuthApdu),
-					cardSessionId,
 					UUID.randomUUID().toString(),
+					cardSessionId,
 				)
 				argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(internalAuthMessage))
 			} else {

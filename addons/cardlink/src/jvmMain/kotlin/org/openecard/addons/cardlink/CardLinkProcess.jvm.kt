@@ -57,9 +57,9 @@ class CardLinkProcess(
 		val conHandle = openSession()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 
-		ws.connect()
 		val wsPair = WsPair.withNewListener(ws, successorListener)
 		setWsPair(dynCtx, wsPair)
+		ws.connect()
 
 		waitForSessionInformation(dynCtx, wsPair)
 

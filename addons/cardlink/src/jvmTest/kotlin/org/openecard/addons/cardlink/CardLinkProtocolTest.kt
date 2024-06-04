@@ -106,10 +106,6 @@ class CardLinkProtocolTest {
 
 		Mockito.`when`(webSocketMock.connect()).then {
 			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: $cardSessionId." }
-		}
-
-		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
-			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
 			argumentCaptor.value.onOpen(webSocketMock)
 			/* Use payload eyAid2ViU29ja2V0SWQiOiAiMTIzNDU2IiwgInBob25lUmVnaXN0ZXJlZCI6IHRydWUgfQ for registered phone */
 			argumentCaptor.value.onText(webSocketMock, """
@@ -121,6 +117,10 @@ class CardLinkProtocolTest {
 					"$cardSessionId"
 				]
 			""")
+		}
+
+		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
+			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {

@@ -23,12 +23,10 @@
 package org.openecard.addons.cardlink
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.serialization.encodeToString
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
-import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
-import org.openecard.binding.tctoken.TR03112Keys
-import org.openecard.common.DynamicContext
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.Promise
 import org.openecard.mobile.activation.*
@@ -42,6 +40,7 @@ import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.*
+import kotlin.random.Random
 
 
 private val logger = KotlinLogging.logger {}
@@ -96,10 +95,12 @@ class CardLinkProtocolTest {
 		isContextInitialized.deref()
 	}
 
+	@OptIn(ExperimentalStdlibApi::class)
 	@BeforeClass
 	fun setupWebsocketMock() {
 		this.webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
+		val correlationIdMseApdu = UUID.randomUUID().toString()
 		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
@@ -152,30 +153,45 @@ class CardLinkProtocolTest {
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REGISTER_EGK))).then {
 			logger.info { "[WS-MOCK] Received $REGISTER_EGK message from App:\n${it.arguments[0]}" }
-			argumentCaptor.value.onText(webSocketMock, """
-				[
-					{
-						"type":"$SEND_APDU",
-						"payload":"eyAiY2FyZFNlc3Npb25JZCI6ICI2MjU5MDQ4ZS1lMjFmLTRlODYtOGZjNS00NTNmMGEwYTVjNjQiLCAiYXBkdSI6ICJBS1FBREFJL0FBIiB9IA"
-					},
-					"$cardSessionId",
-					"$correlationIdTan"
-				]
-			""")
+
+			val mseApdu = "002241A406840109800100".hexToByteArray()
+			val mseMessage = GematikEnvelope(
+				SendApdu(cardSessionId, mseApdu),
+				cardSessionId,
+				correlationIdMseApdu,
+			)
+
+			argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(mseMessage))
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(SEND_APDU_RESPONSE))).then {
-			logger.info { "[WS-MOCK] Received $SEND_APDU_RESPONSE message from App:\n${it.arguments[0]}" }
-			argumentCaptor.value.onText(webSocketMock, """
-				[
-					{
-						"type":"$REGISTER_EGK_FINISH",
-						"payload":"eyAicmVtb3ZlQ2FyZCI6IHRydWUgfQ"
-					},
-					"$cardSessionId",
-					"$correlationIdTan"
-				]
-			""")
+			val sendApduResponse = it.arguments[0] as String
+
+			logger.info { "[WS-MOCK] Received $SEND_APDU_RESPONSE message from App:\n${sendApduResponse}" }
+
+			if (sendApduResponse.contains(correlationIdMseApdu)) {
+				logger.info { "[WS-MOCK] Received sendAPDUResponse for MSE message in CardLink-Mock." }
+				val randomBytes = Random.nextBytes(32).toHexString()
+				val internalAuthApdu = "0088000020${randomBytes}00".hexToByteArray()
+				val internalAuthMessage = GematikEnvelope(
+					SendApdu(cardSessionId, internalAuthApdu),
+					cardSessionId,
+					UUID.randomUUID().toString(),
+				)
+				argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(internalAuthMessage))
+			} else {
+				logger.info { "[WS-MOCK] Received sendAPDUResponse for Internal Authenticate in CardLink-Mock." }
+				argumentCaptor.value.onText(webSocketMock, """
+					[
+						{
+							"type":"$REGISTER_EGK_FINISH",
+							"payload":"eyAicmVtb3ZlQ2FyZCI6IHRydWUgfQ"
+						},
+						"$cardSessionId",
+						"$correlationIdTan"
+					]
+				""")
+			}
 		}
 	}
 

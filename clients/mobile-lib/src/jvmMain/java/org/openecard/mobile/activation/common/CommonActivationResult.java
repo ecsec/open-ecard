@@ -12,6 +12,10 @@ package org.openecard.mobile.activation.common;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Neil Crossley
@@ -22,6 +26,7 @@ public class CommonActivationResult implements ActivationResult {
     private final ActivationResultCode resultCode;
     private final String errorMessage;
     private String processMinor;
+	private Map<String, String> resultParameters;
 
     public CommonActivationResult(ActivationResultCode resultCode) {
 	this(null, resultCode, null);
@@ -39,6 +44,7 @@ public class CommonActivationResult implements ActivationResult {
 	this.redirectUrl = redirectUrl;
 	this.resultCode = resultCode;
 	this.errorMessage = errorMessage;
+	this.resultParameters = new HashMap();
     }
 
     public void setProcessMinor(String processMinor) {
@@ -65,7 +71,18 @@ public class CommonActivationResult implements ActivationResult {
 	return processMinor;
     }
 
-    @Override
+	public void addParams(Map<String, String> params) {
+		if (params != null) {
+			resultParameters.putAll(params);
+		}
+	}
+
+	@Override
+	public Map<String, String> getResultParameters() {
+		return Collections.unmodifiableMap(resultParameters);
+	}
+
+	@Override
     public String toString() {
 	StringBuilder builder = new StringBuilder();
 	builder.append("[ActivationResult resultCode:");

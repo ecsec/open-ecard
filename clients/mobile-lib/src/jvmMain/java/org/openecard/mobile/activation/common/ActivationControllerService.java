@@ -298,6 +298,7 @@ public class ActivationControllerService {
 	}
 
 	activationResult.setProcessMinor(auxResultData.get(AuxDataKeys.MINOR_PROCESS_RESULT));
+	activationResult.addParams(result.getParameters());
 
 	return activationResult;
     }

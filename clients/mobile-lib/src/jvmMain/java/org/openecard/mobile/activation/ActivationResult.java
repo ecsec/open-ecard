@@ -24,6 +24,7 @@ package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -46,5 +47,6 @@ public interface ActivationResult {
      */
     String getProcessResultMinor();
 
-	Map<String, String> getResultParameters();
+	Set<String> getResultParameterKeys();
+	String getResultParameter(String key);
 }

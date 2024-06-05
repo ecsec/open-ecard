@@ -12,9 +12,7 @@ package org.openecard.mobile.activation.common;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -77,9 +75,12 @@ public class CommonActivationResult implements ActivationResult {
 		}
 	}
 
-	@Override
-	public Map<String, String> getResultParameters() {
-		return Collections.unmodifiableMap(resultParameters);
+	public Set<String> getResultParameterKeys() {
+		return resultParameters.keySet();
+	}
+
+	public String getResultParameter(String key) {
+		return resultParameters.get(key);
 	}
 
 	@Override

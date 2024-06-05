@@ -94,6 +94,12 @@ open class InsertCardHelper(
 		return newHandle
 	}
 
+	fun useMobileReader(): ConnectionHandleType {
+		val newHandle = getMobileReader()
+		conHandle = newHandle
+		return HandlerUtils.copyHandle(conHandle)
+	}
+
 	fun disconnectIfMobile() {
 		if (SysUtils.isMobileDevice()) {
 			val disc = CardApplicationDisconnect()

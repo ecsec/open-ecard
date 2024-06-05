@@ -94,13 +94,12 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 				dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType? ?: enterCanStep.sessHandle
 			val ph = InsertCardHelper(enterCanStep.addonCtx, conHandle)
 
-			var cardHandle: ConnectionHandleType
-			if (!SysUtils.isMobileDevice()) {
-				cardHandle = ph.connectCardIfNeeded(requiredCardTypes)
-			} else {
+			if (SysUtils.isMobileDevice()) {
 				// mobile device, pick only available reader and proceed
-				cardHandle = ph.getMobileReader()
+				ph.useMobileReader()
 			}
+			// connect card as we need to use it right away
+			val cardHandle = ph.connectCardIfNeeded(requiredCardTypes)
 
 			// safe for later process
 			dynCtx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle)

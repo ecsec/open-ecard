@@ -73,6 +73,21 @@ class WebsocketListenerImpl: WebsocketListener {
 		return isOpen
 	}
 
+	fun waitForOpenChannel(timeout: Duration = Duration.parse("10s")) {
+		runBlocking {
+			try {
+				withTimeout(timeout) {
+					while (!isOpen()) {
+						logger.debug { "Waiting for the CardLink WebSocket channel to open..." }
+						delay(500)
+					}
+				}
+			} catch (_: TimeoutCancellationException) {
+				logger.debug { "A timeout occurred while waiting for the CardLink WebSocket channel to open." }
+			}
+		}
+	}
+
 	fun nextMessageBlocking() : GematikEnvelope? {
 		return runBlocking {
 			nextMessage()

@@ -6,10 +6,10 @@ kx-serde = "1.6.+"
 
 ktor = "2.3.+"
 
-androidx-activityCompose = "1.8.+"
+androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
-androidx-core-ktx = "1.12.+"
+androidx-core-ktx = "1.13.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
 androidx-test-junit = "1.1.+"
@@ -53,16 +53,16 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 
 # testing
-testng = { group = "org.testng", name = "testng", version = "7.7.0" }
+testng = { group = "org.testng", name = "testng", version = "7.9.+" }
 powermock-testng = { group = "org.powermock", name = "powermock-module-testng", version = "2.0.9" }
 powermock-mockito = { group = "org.powermock", name = "powermock-api-mockito2", version = "2.0.9" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
 
 # jaxb
-jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.0" }
+jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.2" }
 jaxb-ws-api = { group = "jakarta.xml.ws", name = "jakarta.xml.ws-api", version = "4.0.0" }
-jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "4.0.2" }
-jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.14.0" }
+jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "4.0.5" }
+jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
 #			bc-prov", "org.bouncycastle:bcprov-jdk15on:1.62")
 #			bc-pkix", "org.bouncycastle:bcpkix-jdk15on:1.62")
@@ -91,7 +91,7 @@ roboface-processor = { group = "org.openecard.tools", name = "roboface-processor
 
 xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.0" }
 
-jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.3" }
+jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version = "5.12.1" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version = "5.12.1" }

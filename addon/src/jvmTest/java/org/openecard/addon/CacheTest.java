@@ -47,9 +47,11 @@ public class CacheTest {
      */
     Cache cache = new Cache();
 
+	String dummyClassName = "dummyClass";
+
     @Test
     public void addSALProtocol() {
-	SALProtocolProxy proxy = new SALProtocolProxy(null, null);
+	SALProtocolProxy proxy = new SALProtocolProxy(dummyClassName, getClass().getClassLoader());
 	int initialHash = proxy.hashCode();
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
@@ -63,7 +65,7 @@ public class CacheTest {
 
     @Test
     public void addIFDProtocol() {
-	IFDProtocolProxy proxy = new IFDProtocolProxy(null, null);
+	IFDProtocolProxy proxy = new IFDProtocolProxy(dummyClassName, getClass().getClassLoader());
 	int initialHash = proxy.hashCode();
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
@@ -77,7 +79,7 @@ public class CacheTest {
 
     @Test
     public void addAppExtAction() {
-	AppExtensionActionProxy proxy = new AppExtensionActionProxy(null, null);
+	AppExtensionActionProxy proxy = new AppExtensionActionProxy(dummyClassName, getClass().getClassLoader());
 	int initialHash = proxy.hashCode();
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
@@ -91,7 +93,7 @@ public class CacheTest {
 
     @Test
     public void addAppPluginAction() {
-	AppPluginActionProxy proxy = new AppPluginActionProxy(null, null);
+	AppPluginActionProxy proxy = new AppPluginActionProxy(dummyClassName, getClass().getClassLoader());
 	int initialHash = proxy.hashCode();
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
@@ -105,25 +107,25 @@ public class CacheTest {
 
     @Test
     public void addWithFilledCache() {
-	SALProtocolProxy proxy4 = new SALProtocolProxy(null, null);
+	SALProtocolProxy proxy4 = new SALProtocolProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec4 = new AddonSpecification();
 	String id4 = "test4";
 	spec4.setId(id4);
 	spec4.setVersion("1.0.0");
 	cache.addSALProtocol(spec4, id4, proxy4);
-	IFDProtocolProxy proxy3 = new IFDProtocolProxy(null, null);
+	IFDProtocolProxy proxy3 = new IFDProtocolProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec2 = new AddonSpecification();
 	String id1 = "test1";
 	spec2.setId(id1);
 	spec2.setVersion("1.0.0");
 	cache.addIFDProtocol(spec2, id1, proxy3);
-	AppPluginActionProxy proxy = new AppPluginActionProxy(null, null);
+	AppPluginActionProxy proxy = new AppPluginActionProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec1 = new AddonSpecification();
 	String id0 = "test2";
 	spec1.setId(id0);
 	spec1.setVersion("1.0.0");
 	cache.addAppPluginAction(spec1, id0, proxy);
-	AppExtensionActionProxy proxy2 = new AppExtensionActionProxy(null, null);
+	AppExtensionActionProxy proxy2 = new AppExtensionActionProxy(dummyClassName, getClass().getClassLoader());
 	int initialHash = proxy2.hashCode();
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
@@ -137,7 +139,7 @@ public class CacheTest {
 
     @Test
     public void removeSingle() {
-	AppPluginActionProxy proxy = new AppPluginActionProxy(null, null);
+	AppPluginActionProxy proxy = new AppPluginActionProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
 	spec.setId(id);
@@ -151,25 +153,25 @@ public class CacheTest {
 
     @Test
     public void removeMulti() {
-	SALProtocolProxy proxy4 = new SALProtocolProxy(null, null);
+	SALProtocolProxy proxy4 = new SALProtocolProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec4 = new AddonSpecification();
 	String id4 = "test4";
 	spec4.setId(id4);
 	spec4.setVersion("1.0.0");
 	cache.addSALProtocol(spec4, id4, proxy4);
-	IFDProtocolProxy proxy3 = new IFDProtocolProxy(null, null);
+	IFDProtocolProxy proxy3 = new IFDProtocolProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec2 = new AddonSpecification();
 	String id1 = "test1";
 	spec2.setId(id1);
 	spec2.setVersion("1.0.0");
 	cache.addIFDProtocol(spec2, id1, proxy3);
-	AppPluginActionProxy proxy = new AppPluginActionProxy(null, null);
+	AppPluginActionProxy proxy = new AppPluginActionProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec1 = new AddonSpecification();
 	String id0 = "test2";
 	spec1.setId(id0);
 	spec1.setVersion("1.0.0");
 	cache.addAppPluginAction(spec1, id0, proxy);
-	AppExtensionActionProxy proxy2 = new AppExtensionActionProxy(null, null);
+	AppExtensionActionProxy proxy2 = new AppExtensionActionProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
 	spec.setId(id);
@@ -187,7 +189,7 @@ public class CacheTest {
 
     @Test
     public void wrongGetOperation() {
-	AppPluginActionProxy proxy = new AppPluginActionProxy(null, null);
+	AppPluginActionProxy proxy = new AppPluginActionProxy(dummyClassName, getClass().getClassLoader());
 	AddonSpecification spec = new AddonSpecification();
 	String id = "test";
 	spec.setId(id);

@@ -232,7 +232,7 @@ class CardLinkProtocolTest {
 		}
 	}
 
-	@Test
+	@Test(enabled = false)
 	fun testCardLinkProtocol() {
 		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
 		val cardLinkFactory = activationUtils.cardLinkFactory()

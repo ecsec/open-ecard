@@ -48,6 +48,7 @@ private val logger = KotlinLogging.logger {}
 /**
  * @author Mike Prechtl
  */
+@Test(groups = ["interactive"])
 class CardLinkProtocolTest {
 
 	private lateinit var activationUtils: CommonActivationUtils
@@ -232,7 +233,7 @@ class CardLinkProtocolTest {
 		}
 	}
 
-	@Test(enabled = false)
+	@Test
 	fun testCardLinkProtocol() {
 		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
 		val cardLinkFactory = activationUtils.cardLinkFactory()

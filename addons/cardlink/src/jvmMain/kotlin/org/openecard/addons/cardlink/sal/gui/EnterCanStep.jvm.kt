@@ -112,6 +112,10 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 					// repeat the step
 					LOG.info { "Wrong CAN entered, trying again." }
 					return StepActionResult(StepActionResultStatus.REPEAT)
+				} else if (establishChannelResponse.result.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
+					// card removed
+					LOG.info { "Card was removed." }
+					return StepActionResult(StepActionResultStatus.REPEAT)
 				} else {
 					checkResult(establishChannelResponse)
 				}
@@ -142,7 +146,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 
 
 			// repeat the step
-			LOG.error { "An unknown error occurred while trying to verify the PIN." }
+			LOG.error(ex) { "An unknown error occurred while trying to verify the PIN." }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
 				ErrorStep(

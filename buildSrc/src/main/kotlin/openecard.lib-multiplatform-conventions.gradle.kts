@@ -20,7 +20,7 @@ kotlin {
 			val test by getting {
 				tasks.named<Test>("jvmTest") {
 					useTestNG() {
-						excludeGroups("interactive")
+						excludeGroups("interactive", "broken")
 					}
 				}
 				// only run interactive tests

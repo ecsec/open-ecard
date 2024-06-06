@@ -30,6 +30,8 @@ import org.openecard.common.apdu.common.CardResponseAPDU
 import org.openecard.common.ifd.PACECapabilities
 import org.openecard.common.ifd.PacePinStatus
 import org.openecard.common.sal.util.InsertCardHelper
+import org.openecard.common.util.ByteUtils
+import org.openecard.common.util.StringUtils
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
 
 /**
@@ -122,28 +124,7 @@ class PaceCardHelper(ctx: Context, conHandle: ConnectionHandleType) : InsertCard
     val pinStatus: PacePinStatus
         get() {
             val input = InputAPDUInfoType()
-            input.inputAPDU = byteArrayOf(
-                0x00.toByte(),
-                0x22.toByte(),
-                0xC1.toByte(),
-                0xA4.toByte(),
-                0x0F.toByte(),
-                0x80.toByte(),
-                0x0A.toByte(),
-                0x04.toByte(),
-                0x00.toByte(),
-                0x7F.toByte(),
-                0x00.toByte(),
-                0x07.toByte(),
-                0x02.toByte(),
-                0x02.toByte(),
-                0x04.toByte(),
-                0x02.toByte(),
-                0x02.toByte(),
-                0x83.toByte(),
-                0x01.toByte(),
-                0x03.toByte()
-            )
+            input.inputAPDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103")
             input.acceptableStatusCode.addAll(PacePinStatus.getCodes())
 
             val transmit = Transmit()

@@ -38,7 +38,7 @@ public interface Websocket {
 	 * This method replaces an existing listener, if one is already set.
 	 * @param listener the listener to set.
 	 */
-	void setListener(WebsocketListener listener);
+	void setListener(@Nonnull WebsocketListener listener);
 	/**
 	 * Remove the listener for the websocket events, if one is set.
 	 */
@@ -97,7 +97,7 @@ public interface Websocket {
 	 * @param data the data to send.
 	 * @throws WebsocketException if the data could not be sent.
 	 */
-	void send(String data) throws WebsocketException;
+	void send(@Nonnull String data) throws WebsocketException;
 
 	/**
 	 * Send a binary frame.

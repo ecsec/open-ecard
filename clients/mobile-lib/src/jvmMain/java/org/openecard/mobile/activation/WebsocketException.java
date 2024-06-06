@@ -22,16 +22,18 @@
 
 package org.openecard.mobile.activation;
 
+import javax.annotation.Nonnull;
+
 /**
  * Exception for errors that occur during the websocket communication.
  */
 public class WebsocketException extends Exception {
 
-	public WebsocketException(String message) {
+	public WebsocketException(@Nonnull String message) {
 		super(message);
 	}
 
-	public WebsocketException(String message, Throwable cause) {
+	public WebsocketException(@Nonnull String message, @Nonnull Throwable cause) {
 		super(message, cause);
 	}
 

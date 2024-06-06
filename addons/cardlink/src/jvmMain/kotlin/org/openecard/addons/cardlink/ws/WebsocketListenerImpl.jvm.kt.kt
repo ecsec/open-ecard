@@ -41,31 +41,27 @@ class WebsocketListenerImpl: WebsocketListener {
 
 	private var isOpen : Boolean = false
 
-	override fun onOpen(webSocket: Websocket?) {
+	override fun onOpen(webSocket: Websocket) {
 		messageChannel = Channel()
 		isOpen = true
 	}
 
-	override fun onClose(webSocket: Websocket?, statusCode: Int, reason: String?) {
+	override fun onClose(webSocket: Websocket, statusCode: Int, reason: String?) {
 		messageChannel.close()
 		isOpen = false
 	}
 
-	override fun onError(webSocket: Websocket?, error: String?) {
+	override fun onError(webSocket: Websocket, error: String) {
 		// TODO: Implement onError handler
 		logger.error { "onError handler not implemented yet" }
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun onText(webSocket: Websocket?, data: String?) {
+	override fun onText(webSocket: Websocket, data: String) {
 		GlobalScope.launch {
-			if (data != null) {
-				logger.debug { "Received message: $data" }
-				val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(data)
-				messageChannel.send(egkEnvelope)
-			} else {
-				logger.debug { "Received empty data in CardLink Websocket." }
-			}
+			logger.debug { "Received message: $data" }
+			val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(data)
+			messageChannel.send(egkEnvelope)
 		}
 	}
 

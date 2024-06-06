@@ -22,6 +22,7 @@
 
 package org.openecard.mobile.activation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
@@ -34,7 +35,7 @@ public interface WebsocketListener {
 	 * Called when the websocket connection is established.
 	 * @param webSocket the websocket that was opened.
 	 */
-	void onOpen(Websocket webSocket);
+	void onOpen(@Nonnull Websocket webSocket);
 
 	/**
 	 * Called when the websocket connection is closed.
@@ -42,14 +43,14 @@ public interface WebsocketListener {
 	 * @param statusCode the status code of the close.
 	 * @param reason the reason for the close, if any.
 	 */
-	void onClose(Websocket webSocket, int statusCode, @Nullable  String reason);
+	void onClose(@Nonnull Websocket webSocket, int statusCode, @Nullable  String reason);
 
 	/**
 	 * Called when an error occurs on the websocket connection.
 	 * @param webSocket the websocket that had the error.
 	 * @param error the error that occurred.
 	 */
-	void onError(Websocket webSocket, String error);
+	void onError(@Nonnull Websocket webSocket, @Nonnull String error);
 
 	/**
 	 * Called when a binary message is received.
@@ -63,5 +64,5 @@ public interface WebsocketListener {
 	 * @param webSocket the websocket that received the message.
 	 * @param data the text data that was received.
 	 */
-	void onText(Websocket webSocket, String data);
+	void onText(@Nonnull Websocket webSocket, @Nonnull String data);
 }

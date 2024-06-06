@@ -234,7 +234,8 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 
     @Override
     public byte[] transceive(byte[] apdu) throws IOException {
-	this.cardMonitor.notifyStartTranceiving();
+		NFCCardMonitoring cm = cardMonitor;
+	cm.notifyStartTranceiving();
 	try {
 	    IsoDep currentTag;
 	    synchronized (connectLock) {
@@ -259,7 +260,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 	    }
 	}
 	finally {
-	    this.cardMonitor.notifyStopTranceiving();
+		cm.notifyStopTranceiving();
 	}
     }
 

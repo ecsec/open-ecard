@@ -49,7 +49,6 @@ class CardLinkProtocol : SALProtocolBaseImpl() {
 
 object CardLinkKeys {
 	private const val prefix = "CardLink::"
-	const val CORRECT_CAN = "${prefix}CORRECT_CAN"
 	const val WS_SESSION_ID = "${prefix}WS_SESSION_ID"
 	const val CARD_SESSION_ID = "${prefix}CARD_SESSION_ID"
 	const val PHONE_NUMBER_REGISTERED = "${prefix}PHONE_NUMBER_REGISTERED"

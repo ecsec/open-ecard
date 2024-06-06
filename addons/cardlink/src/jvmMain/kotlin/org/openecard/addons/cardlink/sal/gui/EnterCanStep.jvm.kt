@@ -114,7 +114,6 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 					return StepActionResult(StepActionResultStatus.REPEAT)
 				} else {
 					checkResult(establishChannelResponse)
-					dynCtx.put(CardLinkKeys.CORRECT_CAN, canValue)
 				}
 			}
 

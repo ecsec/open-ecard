@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,25 +20,23 @@
  *
  ***************************************************************************/
 
-package org.openecard.ifd.protocol.pace.crypto;
+package org.openecard.ifd.protocol.pace.crypto
 
-import java.security.GeneralSecurityException;
-import org.openecard.common.util.StringUtils;
-import org.testng.annotations.Test;
-
+import org.openecard.common.util.StringUtils
+import org.testng.annotations.Test
+import java.security.GeneralSecurityException
 
 /**
  *
  * @author Tobias Wich
  */
-public class AuthenticationTokenTest {
-
-    @Test(enabled = false)
-    public void runTest() throws GeneralSecurityException {
-	String dataStr = "7C1C86087997B6007844F957871044454356434165494443543030303031";
-	byte[] data = StringUtils.toByteArray(dataStr);
-	AuthenticationToken token = new AuthenticationToken(null);
-	token.verifyToken(data, true);
+class AuthenticationTokenTest {
+    @Test(groups = ["broken"])
+    fun runTest() {
+        val dataStr = "7C1C86087997B6007844F957871044454356434165494443543030303031"
+        val data = StringUtils.toByteArray(dataStr)
+		// need to set token value (7997b6007844f957) in target class
+        val token = AuthenticationToken(null)
+        token.verifyToken(data, true)
     }
-
 }

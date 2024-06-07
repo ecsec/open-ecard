@@ -23,8 +23,8 @@
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.List;
 
 /**
  *
@@ -47,6 +47,6 @@ public interface ActivationResult {
      */
     String getProcessResultMinor();
 
-	Set<String> getResultParameterKeys();
+	List<String> getResultParameterKeys();
 	String getResultParameter(String key);
 }

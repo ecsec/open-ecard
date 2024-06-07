@@ -75,8 +75,8 @@ public class CommonActivationResult implements ActivationResult {
 		}
 	}
 
-	public Set<String> getResultParameterKeys() {
-		return resultParameters.keySet();
+	public List<String> getResultParameterKeys() {
+		return List.copyOf(resultParameters.keySet());
 	}
 
 	public String getResultParameter(String key) {

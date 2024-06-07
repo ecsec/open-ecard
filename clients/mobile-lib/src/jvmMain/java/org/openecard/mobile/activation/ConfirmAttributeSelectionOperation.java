@@ -33,6 +33,6 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface ConfirmAttributeSelectionOperation {
 
-    public void enterAttributeSelection(List<SelectableItem> readItems, List<SelectableItem> writeItems);
+    void enterAttributeSelection(List<SelectableItem> readItems, List<SelectableItem> writeItems);
 
 }

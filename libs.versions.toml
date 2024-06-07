@@ -89,7 +89,7 @@ roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation",
 roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version = "1.4.0" }
 roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version = "1.4.0" }
 
-xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.0" }
+xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.2" }
 
 jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 

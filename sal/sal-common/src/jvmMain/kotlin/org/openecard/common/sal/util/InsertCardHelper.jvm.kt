@@ -36,8 +36,13 @@ open class InsertCardHelper(
 	protected val ctx: Context,
 	protected var conHandle: ConnectionHandleType
 ) {
-	fun isConnected(): kotlin.Boolean {
-		return conHandle.slotHandle != null
+	fun isConnected(): Boolean {
+		val hasSlotHandle = conHandle.slotHandle != null
+		return if (hasSlotHandle) {
+			ctx.salStateView.hasConnectedCard(conHandle)
+		} else {
+			false
+		}
 	}
 
 	@Throws(WSHelper.WSException::class, InterruptedException::class)

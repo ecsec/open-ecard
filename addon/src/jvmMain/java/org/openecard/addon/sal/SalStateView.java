@@ -19,6 +19,7 @@ import java.util.List;
 public interface SalStateView {
 
     List<ConnectionHandleType> listCardHandles();
+	boolean hasConnectedCard(ConnectionHandleType handle);
 
     boolean isDisconnected(byte[] contextHandle, String givenIfdName, byte[] givenSlotIndex);
 

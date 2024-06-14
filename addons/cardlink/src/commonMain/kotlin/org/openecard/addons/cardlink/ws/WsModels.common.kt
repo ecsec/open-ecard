@@ -48,6 +48,7 @@ const val CONFIRM_TAN_RESPONSE = "confirmSMSCodeResponse"
 // additional types for the base specification
 const val SESSION_INFO = "sessionInformation"
 const val REGISTER_EGK_FINISH = "registerEgkFinish"
+const val ICCSN_REASSIGNMENT = "ICCSNReassignment"
 
 
 @Serializable(with = GematikMessageSerializer::class)
@@ -144,6 +145,7 @@ val module = SerializersModule {
 		subclass(ConfirmPhoneNumber::class)
 		subclass(RegisterEgkFinish::class)
 		subclass(SessionInformation::class)
+		subclass(TasklistErrorPayload::class)
 	}
 }
 
@@ -219,11 +221,16 @@ data class ConfirmTan(
 ) : CardLinkPayload
 
 @Serializable
+@SerialName(ICCSN_REASSIGNMENT)
+class ICCSNReassignment : CardLinkPayload
+
+@Serializable
 enum class MinorResultCode {
 	NUMBER_FROM_WRONG_COUNTRY,
 	TAN_EXPIRED,
 	TAN_INCORRECT,
 	TAN_RETRY_LIMIT_EXCEEDED,
+	INVALID_REQUEST,
 	UNKNOWN_ERROR,
 }
 

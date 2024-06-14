@@ -144,6 +144,12 @@ class CardLinkProcess(
 				return
 			}
 
+			if (gematikMessage.payload is ICCSNReassignment) {
+				logger.debug { "Received '${ICCSN_REASSIGNMENT}' message from CardLink service." }
+				// TODO: do interaction call here to inform User about received ICCSN reassignment message
+				continue
+			}
+
 			if (gematikMessage.cardSessionId == null || gematikMessage.correlationId == null) {
 				val errorMsg = "Received malformed SendAPDU message which does not contain a cardSessionId or correlationId."
 				logger.warn { errorMsg }

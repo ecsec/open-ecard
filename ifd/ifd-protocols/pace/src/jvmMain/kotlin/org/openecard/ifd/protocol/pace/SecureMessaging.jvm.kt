@@ -220,8 +220,17 @@ class SecureMessaging(
 	 */
 	@Throws(Exception::class)
 	fun decrypt(response: ByteArray): ByteArray {
-		require(response.size >= 12) { "Malformed Secure Messaging APDU." }
-		return decrypt(response, secureMessagingSSC)
+		require(response.size >= 2) { "Secure Messaging Response APDU does not have a trailer." }
+		val trailer = response.sliceArray(response.size - 2 until response.size)
+
+		return when (ByteUtils.toHexString(trailer)) {
+			"6987" -> throw GeneralSecurityException("Secure Messaging of ICC reports missing SM DOs (6987).")
+			"6988" -> throw GeneralSecurityException("Secure Messaging of ICC reports invalid SM DOs (6988).")
+			else -> {
+				val responseNoTrailer = response.sliceArray(0 until response.size - 2)
+				decrypt(responseNoTrailer, secureMessagingSSC)
+			}
+		}
 	}
 
 	/**
@@ -233,7 +242,7 @@ class SecureMessaging(
 	 * @throws Exception the exception
 	 */
 	@Throws(Exception::class)
-	private fun decrypt(response: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
+	private fun decrypt(responseNoTrailer: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
 		// Status bytes of the response APDU. MUST be 2 bytes.
 		val statusBytes = ByteArray(2)
 		// plain data 0x81
@@ -244,7 +253,6 @@ class SecureMessaging(
 		// Cryptographic checksum 0x8E. MUST be 8 bytes.
 		val macObject = ByteArray(8)
 
-		val responseNoTrailer = response.sliceArray(0 until response.size - 2)
 		val tlv = TLV.fromBER(responseNoTrailer)
 
 		//
@@ -293,7 +301,7 @@ class SecureMessaging(
 		}
 
 		// after reading everything, the state must be MAC
-		require(state == ReadState.MAC) { "Malformed Secure Messaging APDU" }
+		require(state == ReadState.MAC) { "Malformed Secure Messaging APDU (parser state=$state)" }
 
 		// Calculate MAC for verification
 		val cmac = getCMAC(secureMessagingSSC)
@@ -316,7 +324,7 @@ class SecureMessaging(
 			throw GeneralSecurityException("Secure Messaging MAC verification failed")
 		}
 
-		val baos = ByteArrayOutputStream(response.size - 10)
+		val baos = ByteArrayOutputStream(responseNoTrailer.size)
 		// Decrypt data
 		if (encDataObject != null) {
 			val c = getCipher(secureMessagingSSC, Cipher.DECRYPT_MODE)

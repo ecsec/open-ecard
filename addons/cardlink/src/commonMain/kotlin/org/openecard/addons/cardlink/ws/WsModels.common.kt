@@ -146,6 +146,7 @@ val module = SerializersModule {
 		subclass(RegisterEgkFinish::class)
 		subclass(SessionInformation::class)
 		subclass(TasklistErrorPayload::class)
+		subclass(ICCSNReassignment::class)
 	}
 }
 

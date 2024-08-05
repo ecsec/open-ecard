@@ -154,6 +154,16 @@ public class DataSetInfo {
 	}
     }
 
+	public byte[] readOptional() {
+		try {
+			return read();
+		} catch (WSHelper.WSException ex) {
+			var msg = String.format("Error reading data set (%s).", datasetNameTarget.getDataSetName());
+			LOG.debug("msg", ex);
+			return null;
+		}
+	}
+
     public byte[] read() throws WSHelper.WSException {
 	if (cachedData == null) {
 		connectApplication();

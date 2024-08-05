@@ -101,7 +101,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val cvcEgkCaEc = infos.getDataSetInfo("EF.C.CA.CS.E256").read()
 		val atrDs = infos.getDataSetInfo("EF.ATR").read()
 		val x509EsignAuthEc = infos.getDataSetInfo("EF.C.CH.AUT.E256").read()
-		val x509EsignAuthRsa = infos.getDataSetInfo("EF.C.CH.AUT.R2048").read()
+		val x509EsignAuthRsa: ByteArray? = infos.getDataSetInfo("EF.C.CH.AUT.R2048").readOptional()
 
 		return RegisterEgk(
 			cardSessionId = cardSessionId,

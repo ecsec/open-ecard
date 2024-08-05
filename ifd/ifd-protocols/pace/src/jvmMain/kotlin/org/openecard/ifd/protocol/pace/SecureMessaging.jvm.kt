@@ -417,7 +417,9 @@ class SecureMessaging(
 	private fun pad(data: ByteArray, blockSize: Int): ByteArray {
 		val result = ByteArray(data.size + (blockSize - data.size % blockSize))
 		System.arraycopy(data, 0, result, 0, data.size)
-		result[data.size] = PAD
+		if (data.size != blockSize) {
+			result[data.size] = PAD
+		}
 
 		return result
 	}

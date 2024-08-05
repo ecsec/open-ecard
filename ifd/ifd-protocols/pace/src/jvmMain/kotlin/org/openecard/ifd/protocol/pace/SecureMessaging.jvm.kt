@@ -215,8 +215,8 @@ class SecureMessaging(
 	}
 
 	private fun cutLePrefix(leEncoded: ByteArray): ByteArray {
-		// le in SM DO has no prefix, so cut it if we have an extended le field
-		return if (leEncoded.isEmpty() || leEncoded.size == 1) {
+		// le in SM DO has no prefix, so cut it if we have an extended le field with 3 bytes
+		return if (leEncoded.size < 3) {
 			leEncoded
 		} else if (leEncoded.size == 3) {
 			leEncoded.sliceArray(1 until leEncoded.size)

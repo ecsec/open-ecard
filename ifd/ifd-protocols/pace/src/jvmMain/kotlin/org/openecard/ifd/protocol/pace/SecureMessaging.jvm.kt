@@ -202,10 +202,11 @@ class SecureMessaging(
 
 		val secureCommand = CardCommandAPDU(header[0], header[1], header[2], header[3], secureData)
 		// set LE explicitly to 0x00 or in case of extended length 0x00 0x00
-		if ((lc > 0xFF) || (le > 0x100)) {
-			secureCommand.le = 65536
-		} else {
+		// always use extended length if there is an le field, as returned data can be longer due to encryption
+		if (secureCommand.lc <= 0xFF && leEncoded.isEmpty()) {
 			secureCommand.le = 256
+		} else {
+			secureCommand.le = 65536
 		}
 
 		return secureCommand.toByteArray()

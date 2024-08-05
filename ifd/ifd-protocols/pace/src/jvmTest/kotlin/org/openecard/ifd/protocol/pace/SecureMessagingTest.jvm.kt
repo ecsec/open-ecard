@@ -140,7 +140,7 @@ class SecureMessagingTest {
         //
         plainAPDU = StringUtils.toByteArray("0084000008")
         encryptedAPDU = sm.encrypt(plainAPDU)
-        expectedEncryptedAPDU = StringUtils.toByteArray("0C8400000D9701088E081DC3357110820CAD00")
+        expectedEncryptedAPDU = StringUtils.toByteArray("0C84000000000D9701088E081DC3357110820CAD0000")
         Assert.assertEquals(encryptedAPDU, expectedEncryptedAPDU)
 
         //
@@ -148,7 +148,7 @@ class SecureMessagingTest {
         //
         plainAPDU = StringUtils.toByteArray("00840000001111")
         encryptedAPDU = sm.encrypt(plainAPDU)
-        expectedEncryptedAPDU = StringUtils.toByteArray("0C84000000000F97030011118E0886F60FBCE3B0AAAC0000")
+        expectedEncryptedAPDU = StringUtils.toByteArray("0C84000000000E970211118E08EEF70779FD0263D60000")
         Assert.assertEquals(encryptedAPDU, expectedEncryptedAPDU)
 
         //
@@ -176,7 +176,7 @@ class SecureMessagingTest {
         plainAPDU = StringUtils.toByteArray("00 22 81 B6 0F 83 0D 44 45 43 56 43 41 41 54 30 30 30 30 31 08", true)
         encryptedAPDU = sm.encrypt(plainAPDU)
         expectedEncryptedAPDU =
-            StringUtils.toByteArray("0C2281B620871101B86BC36EBADED003068B831CC70D8E0E9701088E08972AE4B01DB3299300")
+            StringUtils.toByteArray("0C2281B6000020871101B86BC36EBADED003068B831CC70D8E0E9701088E08972AE4B01DB329930000")
         Assert.assertEquals(encryptedAPDU, expectedEncryptedAPDU)
 
         //

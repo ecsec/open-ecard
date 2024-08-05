@@ -145,7 +145,7 @@ class SecureMessaging(
 		val header = cAPDU.header
 		val lc = cAPDU.lc
 		val le = cAPDU.le
-		val leEncoded = cAPDU.encodeLeField()
+		val leEncoded = cutLePrefix(cAPDU.encodeLeField())
 
 		// Indicate Secure Messaging
 		// note: must be done before mac calculation
@@ -212,6 +212,17 @@ class SecureMessaging(
 		}
 
 		return secureCommand.toByteArray()
+	}
+
+	private fun cutLePrefix(leEncoded: ByteArray): ByteArray {
+		// le in SM DO has no prefix, so cut it if we have an extended le field
+		return if (leEncoded.isEmpty() || leEncoded.size == 1) {
+			leEncoded
+		} else if (leEncoded.size == 3) {
+			leEncoded.sliceArray(1 until leEncoded.size)
+		} else {
+			throw IllegalArgumentException("Invalid LE field: ${ByteUtils.toHexString(leEncoded)}")
+		}
 	}
 
 	/**

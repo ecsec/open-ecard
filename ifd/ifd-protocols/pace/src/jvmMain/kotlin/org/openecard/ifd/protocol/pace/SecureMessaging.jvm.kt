@@ -362,8 +362,8 @@ class SecureMessaging(
 	private fun getCipher(smssc: BigInteger, mode: Int): Cipher {
 		val c = Cipher.getInstance("AES/CBC/NoPadding")
 		val key: Key = SecretKeySpec(keyENC, "AES")
-		val iv = getCipherIV(smssc.toSSCBytes())
-		val algoPara: AlgorithmParameterSpec = IvParameterSpec(iv)
+		val iv = getCipherIV(smssc)
+		val algoPara = IvParameterSpec(iv)
 
 		c.init(mode, key, algoPara)
 
@@ -378,13 +378,13 @@ class SecureMessaging(
 	 * @throws Exception
 	 */
 	@Throws(Exception::class)
-	private fun getCipherIV(smssc: ByteArray): ByteArray {
+	private fun getCipherIV(smssc: BigInteger): ByteArray {
 		val c = Cipher.getInstance("AES/ECB/NoPadding")
 		val key: Key = SecretKeySpec(keyENC, "AES")
 
 		c.init(Cipher.ENCRYPT_MODE, key)
 
-		return c.doFinal(smssc)
+		return c.doFinal(smssc.toSSCBytes())
 	}
 
 	/**

@@ -428,11 +428,10 @@ class SecureMessaging(
 	 * @return Padded data
 	 */
 	private fun pad(data: ByteArray, blockSize: Int): ByteArray {
+		// as padding is mandatory, the result will contain an extra empty block in case the data is already a multiple of the block size
 		val result = ByteArray(data.size + (blockSize - data.size % blockSize))
 		System.arraycopy(data, 0, result, 0, data.size)
-		if (data.size != blockSize) {
-			result[data.size] = PAD
-		}
+		result[data.size] = PAD
 
 		return result
 	}

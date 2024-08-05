@@ -49,9 +49,12 @@ fun BigInteger.toSSCBytes(): ByteArray {
 	val ssc = this.toByteArray()
 	if (ssc.size < 16) {
 		val result = ByteArray(16)
-		return ssc.copyInto(result, result.size - ssc.size)
-	} else {
+		ssc.copyInto(result, result.size - ssc.size)
+		return result
+	} else if (ssc.size == 16) {
 		return ssc
+	} else {
+		throw IllegalArgumentException("Send Sequence Counter overflow.")
 	}
 }
 
@@ -196,7 +199,8 @@ class SecureMessaging(
 		val macStructure = TLV()
 		macStructure.setTagNumWithClass(0x8E.toByte())
 		macStructure.value = mac
-		val secureData = ByteUtils.concatenate(baos.toByteArray(), macStructure.toBER())
+		baos.write(macStructure.toBER())
+		val secureData = baos.toByteArray()
 
 		val secureCommand = CardCommandAPDU(header[0], header[1], header[2], header[3], secureData)
 		// set LE explicitly to 0x00 or in case of extended length 0x00 0x00

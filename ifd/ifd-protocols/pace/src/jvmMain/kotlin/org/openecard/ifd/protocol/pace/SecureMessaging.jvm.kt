@@ -180,17 +180,15 @@ class SecureMessaging(
 		val cmac = getCMAC(secureMessagingSSC)
 		var mac = ByteArray(cmac.macSize)
 
-		synchronized(cmac) {
-			val paddedHeader = pad(header, 16)
-			cmac.update(paddedHeader, 0, paddedHeader.size)
+		val paddedHeader = pad(header, 16)
+		cmac.update(paddedHeader, 0, paddedHeader.size)
 
-			if (baos.size() > 0) {
-				val paddedData = pad(baos.toByteArray(), 16)
-				cmac.update(paddedData, 0, paddedData.size)
-			}
-
-			cmac.doFinal(mac, 0)
+		if (baos.size() > 0) {
+			val paddedData = pad(baos.toByteArray(), 16)
+			cmac.update(paddedData, 0, paddedData.size)
 		}
+
+		cmac.doFinal(mac, 0)
 		mac = ByteUtils.copy(mac, 0, 8)
 
 		//

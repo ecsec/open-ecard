@@ -111,6 +111,12 @@ public class CardCommandAPDUTest {
 	assertEquals(apdu.getLE(), 511);
 	assertEquals(apdu.getData(), new byte[0]);
 
+	apdu.setBody(new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00});
+	assertEquals(apdu.getLC(), -1);
+	assertEquals(apdu.getLE(), 65536);
+	assertEquals(apdu.encodeLeField(), new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00});
+	assertEquals(apdu.getData(), new byte[0]);
+
 	// Case 3. : |CLA|INS|P1|P2|LC|DATA|
 	apdu.setBody(fillBytesWithLength(240));
 	assertEquals(apdu.getLC(), 240);

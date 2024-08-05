@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.openecard.common.WSHelper;
@@ -386,7 +387,7 @@ public class CardCommandAPDU extends CardAPDU {
 		    // Case 2.1, 3.1, 4.1, 4.3
 		    if (bais.available() < 3) {
 			// Case 2.1 |CLA|INS|P1|P2|EXTLE|
-			le = ((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF);
+			le = parseExtLeNumber(bais);
 		    } else {
 			// Case 3.1, 4.1, 4.3
 			lc = ((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF);
@@ -399,11 +400,11 @@ public class CardCommandAPDU extends CardAPDU {
 			    le = (bais.read() & 0xFF);
 			} else if (bais.available() == 2) {
 			    // Case 4.3 |CLA|INS|P1|P2|EXTLC|DATA|EXTLE|
-			    le = ((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF);
+			    le = parseExtLeNumber(bais);
 			} else if (bais.available() == 3) {
 			    if (bais.read() == 0) {
 				// Case 4.3 |CLA|INS|P1|P2|EXTLC|DATA|EXTLE|
-				le = ((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF);
+				le = parseExtLeNumber(bais);
 			    } else {
 				throw new IllegalArgumentException("Malformed APDU.");
 			    }
@@ -423,7 +424,7 @@ public class CardCommandAPDU extends CardAPDU {
 		    } else if (bais.available() == 3) {
 			// Case 4.2 |CLA|INS|P1|P2|LC|DATA|EXTLE|
 			bais.read(); // throw away first byte
-			setLE((short) (((bais.read() & 0xFF) << 8) | (bais.read() & 0xFF)));
+			le = parseExtLeNumber(bais);
 		    } else if (bais.available() == 2 || bais.available() > 3) {
 			throw new IllegalArgumentException("Malformed APDU.");
 		    }
@@ -575,6 +576,17 @@ public class CardCommandAPDU extends CardAPDU {
 		var baos = new ByteArrayOutputStream();
 		encodeLcField(baos);
 		return baos.toByteArray();
+	}
+
+	private int parseExtLeNumber(InputStream in) throws IOException {
+		int high = in.read();
+		int low = in.read();
+		int num = ((high & 0xFF) << 8) | (low & 0xFF);
+		if (num == 0) {
+			return 65536;
+		} else {
+			return num;
+		}
 	}
 
 	private void encodeLeField(ByteArrayOutputStream baos) {

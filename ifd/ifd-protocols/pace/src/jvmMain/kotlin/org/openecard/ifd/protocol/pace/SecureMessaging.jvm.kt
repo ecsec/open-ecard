@@ -25,9 +25,7 @@ package org.openecard.ifd.protocol.pace
 import org.openecard.bouncycastle.crypto.engines.AESEngine
 import org.openecard.bouncycastle.crypto.macs.CMac
 import org.openecard.bouncycastle.crypto.params.KeyParameter
-import org.openecard.common.apdu.common.CardCommandAPDU
-import org.openecard.common.apdu.common.ClassByte
-import org.openecard.common.apdu.common.SecureMessagingIndication
+import org.openecard.common.apdu.common.*
 import org.openecard.common.tlv.TLV
 import org.openecard.common.util.ByteUtils
 import java.io.ByteArrayInputStream
@@ -150,8 +148,16 @@ class SecureMessaging(
 		// Indicate Secure Messaging
 		// note: must be done before mac calculation
 		header[0] = ClassByte.parse(header[0]).let {
-			it.sm = SecureMessagingIndication.SM_W_HEADER
-			it.byte
+			when (it) {
+				is InterIndustryClassByte -> {
+					it.sm = SecureMessagingIndication.SM_W_HEADER
+					it.byte
+				}
+				is ProprietaryClassByte -> {
+					// synthesize a new class byte with SM indication
+					InterIndustryClassByte(0, SecureMessagingIndication.SM_W_HEADER, false).byte
+				}
+			}
 		}
 
 		if (data.isNotEmpty()) {

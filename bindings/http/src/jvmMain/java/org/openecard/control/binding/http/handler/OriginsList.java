@@ -59,7 +59,7 @@ public class OriginsList {
     }
 
     private static synchronized void load() {
-	TreeSet wl = new TreeSet<>();
+	TreeSet<URI> wl = new TreeSet<>();
 
 	try {
 	    // read bundled whitelist

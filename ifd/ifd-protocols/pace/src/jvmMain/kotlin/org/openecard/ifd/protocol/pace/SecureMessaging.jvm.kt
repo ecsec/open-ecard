@@ -26,15 +26,12 @@ import org.openecard.bouncycastle.crypto.engines.AESEngine
 import org.openecard.bouncycastle.crypto.macs.CMac
 import org.openecard.bouncycastle.crypto.params.KeyParameter
 import org.openecard.common.apdu.common.*
+import org.openecard.common.ifd.*
 import org.openecard.common.tlv.TLV
 import org.openecard.common.util.ByteUtils
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.math.BigInteger
-import java.security.GeneralSecurityException
 import java.security.Key
-import java.security.spec.AlgorithmParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -70,26 +67,26 @@ enum class ReadState {
 					0x81L -> DATA
 					0x87L -> DATA
 					0x99L -> TRAILER
-					else -> throw IOException("Malformed Secure Messaging APDU")
+					else -> throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 				}
 			}
 
 			DATA -> {
 				when (tag) {
 					0x99L -> TRAILER
-					else -> throw IOException("Malformed Secure Messaging APDU")
+					else -> throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 				}
 			}
 
 			TRAILER -> {
 				when (tag) {
 					0x8EL -> MAC
-					else -> throw IOException("Malformed Secure Messaging APDU")
+					else -> throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 				}
 			}
 
 			MAC -> {
-				throw IOException("Malformed Secure Messaging APDU")
+				throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 			}
 		}
 	}
@@ -113,13 +110,13 @@ class SecureMessaging(
 	 *
 	 * @param apdu APDU
 	 * @return Encrypted APDU
-	 * @throws Exception
 	 */
-	@Throws(Exception::class)
+	@Throws(InvalidInputApduInSecureMessaging::class, SecureMessagingCryptoException::class)
 	fun encrypt(apdu: ByteArray): ByteArray {
-		secureMessagingSSC++
-		val commandAPDU = encrypt(apdu, secureMessagingSSC)
-		secureMessagingSSC++
+		val encSSC = secureMessagingSSC.plus(BigInteger.ONE)
+		val commandAPDU = encrypt(apdu, encSSC)
+		// update if the command is successful
+		secureMessagingSSC = encSSC.plus(BigInteger.ONE)
 
 		return commandAPDU
 	}
@@ -130,19 +127,16 @@ class SecureMessaging(
 	 * @param apdu APDU
 	 * @param secureMessagingSSC Secure Messaging Send Sequence Counter
 	 * @return Encrypted APDU
-	 * @throws Exception
 	 */
-	@Throws(Exception::class)
+	@OptIn(ExperimentalStdlibApi::class)
 	private fun encrypt(apdu: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
 		val baos = ByteArrayOutputStream()
 		val cAPDU = CardCommandAPDU(apdu)
 
-		require(!cAPDU.isSecureMessaging) { "Malformed APDU." }
+		if (cAPDU.isSecureMessaging) { throw InvalidInputApduInSecureMessaging("Input APDU already contains a SM CLA byte.", "6882".hexToByteArray()) }
 
 		var data = cAPDU.data
 		val header = cAPDU.header
-		val lc = cAPDU.lc
-		val le = cAPDU.le
 		val leEncoded = cutLePrefix(cAPDU.encodeLeField())
 
 		// Indicate Secure Messaging
@@ -154,8 +148,8 @@ class SecureMessaging(
 					it.byte
 				}
 				is ProprietaryClassByte -> {
-					// synthesize a new class byte with SM indication
-					InterIndustryClassByte(0, SecureMessagingIndication.SM_W_HEADER, false).byte
+					// proprietary APDUs are not allowed in ISO conforming secure messaging
+					throw InvalidInputApduInSecureMessaging("Proprietary APDU is not allowed in ISO conforming secure messaging.", "6E00".hexToByteArray())
 				}
 			}
 		}
@@ -220,6 +214,7 @@ class SecureMessaging(
 		return secureCommand.toByteArray()
 	}
 
+	@OptIn(ExperimentalStdlibApi::class)
 	private fun cutLePrefix(leEncoded: ByteArray): ByteArray {
 		// le in SM DO has no prefix, so cut it if we have an extended le field with 3 bytes
 		return if (leEncoded.size < 3) {
@@ -227,7 +222,7 @@ class SecureMessaging(
 		} else if (leEncoded.size == 3) {
 			leEncoded.sliceArray(1 until leEncoded.size)
 		} else {
-			throw IllegalArgumentException("Invalid LE field: ${ByteUtils.toHexString(leEncoded)}")
+			throw InvalidInputApduInSecureMessaging("Invalid LE field: ${ByteUtils.toHexString(leEncoded)}", "6700".hexToByteArray())
 		}
 	}
 
@@ -236,16 +231,15 @@ class SecureMessaging(
 	 *
 	 * @param response the response
 	 * @return the byte[]
-	 * @throws Exception the exception
 	 */
-	@Throws(Exception::class)
+	@Throws(SecureMessagingParseException::class, SecureMessagingCryptoException::class, SecureMessagingRejectedByIcc::class, UnsupportedSecureMessagingFeature::class)
 	fun decrypt(response: ByteArray): ByteArray {
-		require(response.size >= 2) { "Secure Messaging Response APDU does not have a trailer." }
+		parseRequire(response.size >= 2) { "Secure Messaging Response APDU does not have a trailer." }
 		val trailer = response.sliceArray(response.size - 2 until response.size)
 
 		return when (ByteUtils.toHexString(trailer)) {
-			"6987" -> throw GeneralSecurityException("Secure Messaging of ICC reports missing SM DOs (6987).")
-			"6988" -> throw GeneralSecurityException("Secure Messaging of ICC reports invalid SM DOs (6988).")
+			"6987" -> throw SecureMessagingRejectedByIcc("Secure Messaging of ICC reports missing SM DOs (6987).")
+			"6988" -> throw SecureMessagingRejectedByIcc("Secure Messaging of ICC reports invalid SM DOs (6988).")
 			else -> {
 				val responseNoTrailer = response.sliceArray(0 until response.size - 2)
 				decrypt(responseNoTrailer, secureMessagingSSC)
@@ -253,15 +247,7 @@ class SecureMessaging(
 		}
 	}
 
-	/**
-	 * Decrypt the APDU.
-	 *
-	 * @param response the response
-	 * @param secureMessagingSSC the secure messaging ssc
-	 * @return the byte[]
-	 * @throws Exception the exception
-	 */
-	@Throws(Exception::class)
+
 	private fun decrypt(responseNoTrailer: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
 		// Status bytes of the response APDU. MUST be 2 bytes.
 		val statusBytes = ByteArray(2)
@@ -288,7 +274,7 @@ class SecureMessaging(
 			state = state.selectNext(nextTlv.tag.tagNumWithClass)
 			when (state) {
 				ReadState.INIT -> {
-					throw IOException("Malformed Secure Messaging APDU")
+					throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 				}
 
 				ReadState.DATA -> {
@@ -298,7 +284,7 @@ class SecureMessaging(
 						when (nextTlv.value.first()) {
 							0x00.toByte(), 0x01.toByte() -> withPadding = true
 							0x02.toByte() -> withPadding = false
-							else -> throw UnsupportedOperationException(
+							else -> throw UnsupportedSecureMessagingFeature(
 								"Unsupported padding indicator byte 0x${
 									nextTlv.value.first().toString(16)
 								}"
@@ -309,19 +295,19 @@ class SecureMessaging(
 				}
 
 				ReadState.TRAILER -> {
-					require(nextTlv.value.size == 2) { "Malformed Secure Messaging APDU" }
+					parseRequire(nextTlv.value.size == 2) { "Malformed Secure Messaging APDU" }
 					nextTlv.value.copyInto(statusBytes)
 				}
 
 				ReadState.MAC -> {
-					require(nextTlv.value.size == 8) { "Malformed Secure Messaging APDU" }
+					parseRequire(nextTlv.value.size == 8) { "Malformed Secure Messaging APDU" }
 					nextTlv.value.copyInto(macObject)
 				}
 			}
 		}
 
 		// after reading everything, the state must be MAC
-		require(state == ReadState.MAC) { "Malformed Secure Messaging APDU (parser state=$state)" }
+		parseRequire(state == ReadState.MAC) { "Malformed Secure Messaging APDU (parser state=$state)" }
 
 		// Calculate MAC for verification
 		val cmac = getCMAC(secureMessagingSSC)
@@ -341,7 +327,7 @@ class SecureMessaging(
 
 		// Verify MAC
 		if (!ByteUtils.compare(mac, macObject)) {
-			throw GeneralSecurityException("Secure Messaging MAC verification failed")
+			throw SecureMessagingCryptoException("Secure Messaging MAC verification failed")
 		}
 
 		val baos = ByteArrayOutputStream(responseNoTrailer.size)
@@ -379,14 +365,18 @@ class SecureMessaging(
 	 */
 	@Throws(Exception::class)
 	private fun getCipher(smssc: BigInteger, mode: Int): Cipher {
-		val c = Cipher.getInstance("AES/CBC/NoPadding")
-		val key: Key = SecretKeySpec(keyENC, "AES")
-		val iv = getCipherIV(smssc)
-		val algoPara = IvParameterSpec(iv)
+		try {
+			val c = Cipher.getInstance("AES/CBC/NoPadding")
+			val key: Key = SecretKeySpec(keyENC, "AES")
+			val iv = getCipherIV(smssc)
+			val algoPara = IvParameterSpec(iv)
 
-		c.init(mode, key, algoPara)
+			c.init(mode, key, algoPara)
 
-		return c
+			return c
+		} catch (ex: Exception) {
+			throw SecureMessagingCryptoException(ex.message ?: "Failed to get and initialize cipher.", ex)
+		}
 	}
 
 	/**
@@ -398,12 +388,16 @@ class SecureMessaging(
 	 */
 	@Throws(Exception::class)
 	private fun getCipherIV(smssc: BigInteger): ByteArray {
-		val c = Cipher.getInstance("AES/ECB/NoPadding")
-		val key: Key = SecretKeySpec(keyENC, "AES")
+		try {
+			val c = Cipher.getInstance("AES/ECB/NoPadding")
+			val key: Key = SecretKeySpec(keyENC, "AES")
 
-		c.init(Cipher.ENCRYPT_MODE, key)
+			c.init(Cipher.ENCRYPT_MODE, key)
 
-		return c.doFinal(smssc.toSSCBytes())
+			return c.doFinal(smssc.toSSCBytes())
+		} catch (ex: Exception) {
+			throw SecureMessagingCryptoException(ex.message ?: "Failed to get IV.", ex)
+		}
 	}
 
 	/**
@@ -413,12 +407,16 @@ class SecureMessaging(
 	 * @return CMAC
 	 */
 	private fun getCMAC(smssc: BigInteger): CMac {
-		val cmac = CMac(AESEngine())
-		cmac.init(KeyParameter(keyMAC))
-		val smsscBytes = smssc.toSSCBytes()
-		cmac.update(smsscBytes, 0, smsscBytes.size)
+		try {
+			val cmac = CMac(AESEngine())
+			cmac.init(KeyParameter(keyMAC))
+			val smsscBytes = smssc.toSSCBytes()
+			cmac.update(smsscBytes, 0, smsscBytes.size)
 
-		return cmac
+			return cmac
+		} catch (ex: Exception) {
+			throw SecureMessagingCryptoException(ex.message ?: "Failed to calculate CMAC.", ex)
+		}
 	}
 
 
@@ -456,6 +454,12 @@ class SecureMessaging(
 		}
 
 		return data
+	}
+
+	private fun parseRequire(cond: Boolean, lazyMessage: () -> String) {
+		if (!cond) {
+			throw SecureMessagingParseException(lazyMessage())
+		}
 	}
 
 }

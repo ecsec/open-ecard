@@ -20,21 +20,19 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.ifd;
+package org.openecard.common.ifd
 
-import iso.std.iso_iec._24727.tech.schema.EstablishChannel;
-import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
-import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.gui.UserConsent;
-
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
+import org.openecard.common.interfaces.Dispatcher
+import org.openecard.gui.UserConsent
 
 /**
  *
  * @author Tobias Wich
  */
 // TODO: replace with addon IFD protocols
-public interface Protocol {
-
+interface Protocol {
     /**
      * Perform protocol and thereby set up a secure messaging channel.
      *
@@ -43,24 +41,35 @@ public interface Protocol {
      * @param gui UserConsent GUI which can be used to get secrets (e.g. PIN) from the user
      * @return Protocol response data
      */
-    EstablishChannelResponse establish(EstablishChannel req, Dispatcher dispatcher, UserConsent gui);
+    fun establish(req: EstablishChannel, dispatcher: Dispatcher, gui: UserConsent): EstablishChannelResponse
 
     /**
-     * Filter function to perform secure messaging after the protocol has been established.<br>
+     * Filter function to perform secure messaging after the protocol has been established.<br></br>
      * Apply secure messaging encryption to APDU.
      *
      * @param commandAPDU Command APDU which should be encrypted
      * @return Command APDU which is encrypted
      */
-    byte[] applySM(byte[] commandAPDU);
+    @Throws(
+        InvalidInputApduInSecureMessaging::class,
+        SecureMessagingCryptoException::class,
+        MissingSecureMessagingChannel::class
+    )
+    fun applySM(commandAPDU: ByteArray): ByteArray
 
     /**
-     * Filter function to perform secure messaging after the protocol has been established.<br>
+     * Filter function to perform secure messaging after the protocol has been established.<br></br>
      * Remove secure messaging encryption from APDU.
      *
      * @param responseAPDU Response APDU which should be decrypted
      * @return Response APDU which is encrypted
      */
-    byte[] removeSM(byte[] responseAPDU);
-
+    @Throws(
+        SecureMessagingParseException::class,
+        SecureMessagingCryptoException::class,
+        SecureMessagingRejectedByIcc::class,
+        UnsupportedSecureMessagingFeature::class,
+        MissingSecureMessagingChannel::class
+    )
+    fun removeSM(responseAPDU: ByteArray): ByteArray
 }

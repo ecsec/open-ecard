@@ -30,7 +30,7 @@ import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
-import org.openecard.common.ifd.Protocol;
+import org.openecard.common.ifd.*;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
 import org.openecard.common.interfaces.Dispatcher;
@@ -134,33 +134,33 @@ public class PACEProtocol implements Protocol {
     }
 
     @Override
-    public byte[] applySM(byte[] commandAPDU) {
-	try {
-	    if (sm != null) {
-		return sm.encrypt(commandAPDU);
-	    } else {
-		throw new RuntimeException("No established Secure Messaging channel available");
-	    }
-	} catch (Exception ex) {
-	    sm = null;
-	    logger.error(ex.getMessage(), ex);
-	    throw new RuntimeException(ex);
+	public byte[] applySM(byte[] commandAPDU) throws SecureMessagingCryptoException, InvalidInputApduInSecureMessaging, MissingSecureMessagingChannel {
+		if (sm != null) {
+			try {
+				return sm.encrypt(commandAPDU);
+			} catch (UnrecoverableSecureMessagingException ex) {
+				logger.error("Secure messaging crypto is corrupt, terminating SM.", ex);
+				sm = null;
+				throw ex;
+			}
+		} else {
+			throw new MissingSecureMessagingChannel("No established Secure Messaging channel available", null);
+		}
 	}
-    }
 
     @Override
-    public byte[] removeSM(byte[] responseAPDU) {
-	try {
-	    if (sm != null) {
-		return sm.decrypt(responseAPDU);
-	    } else {
-		throw new RuntimeException("No established Secure Messaging channel available");
-	    }
-	} catch (Exception ex) {
-	    sm = null;
-	    logger.error(ex.getMessage(), ex);
-	    throw new RuntimeException(ex);
-	}
+    public byte[] removeSM(byte[] responseAPDU) throws SecureMessagingParseException, SecureMessagingCryptoException, SecureMessagingRejectedByIcc, UnsupportedSecureMessagingFeature, MissingSecureMessagingChannel {
+		if (sm != null) {
+			try {
+				return sm.decrypt(responseAPDU);
+			} catch (UnrecoverableSecureMessagingException ex) {
+				logger.error(ex.getMessage(), ex);
+				sm = null;
+				throw ex;
+			}
+		} else {
+			throw new MissingSecureMessagingChannel("No established Secure Messaging channel available", null);
+		}
     }
 
 }

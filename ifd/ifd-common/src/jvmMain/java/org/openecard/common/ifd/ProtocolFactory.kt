@@ -20,27 +20,25 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.ifd;
+package org.openecard.common.ifd
 
 
 /**
  *
  * @author Tobias Wich
  */
-public interface ProtocolFactory {
-
+interface ProtocolFactory {
     /**
      * Get URI of the protocol the instances created by this factory support.
      *
      * @return URI of the supported protocol
      */
-    String getProtocol();
+    val protocol: String
 
     /**
      * Create instance of the protocol.
      *
      * @return instance of the protocol which can be used for one connection
      */
-    Protocol createInstance();
-
+    fun createInstance(): Protocol
 }

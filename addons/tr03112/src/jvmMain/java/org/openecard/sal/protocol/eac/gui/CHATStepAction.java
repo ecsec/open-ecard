@@ -24,10 +24,8 @@ package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
@@ -129,7 +127,11 @@ public class CHATStepAction extends StepAction {
 
 	    PaceCardHelper ph = new PaceCardHelper(addonCtx, sessHandle);
 	    if (! SysUtils.isMobileDevice()) {
-		cardHandle = ph.connectCardIfNeeded(Set.of(ECardConstants.NPA_CARD_TYPE));
+		cardHandle = ph.connectCardIfNeeded(
+			new HashSet<>() {{
+				add(ECardConstants.NPA_CARD_TYPE);
+			}}
+		);
 		if (passwordType == PasswordID.PIN) {
 		    PacePinStatus pinState = ph.getPinStatus();
 		    status.update(pinState);

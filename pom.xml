@@ -5,7 +5,7 @@
 	<groupId>org.openecard</groupId>
 	<artifactId>app</artifactId>
 	<packaging>pom</packaging>
-	<version>2.1.12-SNAPSHOT</version>
+	<version>2.1.12</version>
 	<name>Open eCard Client</name>
 
 	<url>http://www.openecard.org/</url>

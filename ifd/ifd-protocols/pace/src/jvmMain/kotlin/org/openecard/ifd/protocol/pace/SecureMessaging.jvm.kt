@@ -148,8 +148,11 @@ class SecureMessaging(
 					it.byte
 				}
 				is ProprietaryClassByte -> {
-					// proprietary APDUs are not allowed in ISO conforming secure messaging
-					throw InvalidInputApduInSecureMessaging("Proprietary APDU is not allowed in ISO conforming secure messaging.", "6E00".hexToByteArray())
+					// pretend the proprietary CLA has iso structure
+					it.toInterIndustry().let {
+						it.sm = SecureMessagingIndication.SM_W_HEADER
+						it.byte
+					}
 				}
 			}
 		}

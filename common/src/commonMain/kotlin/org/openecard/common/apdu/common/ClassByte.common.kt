@@ -16,7 +16,7 @@ sealed interface ClassByte {
 				)
 			} else if ((data.toInt() and 0b1100_0000) == 0b0100_0000) {
 				InterIndustryClassByte(
-					data.toInt() and 0b0000_1111,
+					(data.toInt() and 0b0000_1111) + 4,
 					if ((data.toInt() and 0b0010_0000) > 0) SecureMessagingIndication.SM_WO_HEADER else SecureMessagingIndication.NO_SM,
 					(data.toInt() and 0b0001_0000) != 0,
 				)
@@ -46,7 +46,7 @@ class InterIndustryClassByte (
 	override val byte: Byte
 		get() {
 			return if (channelNumber > 3) {
-				val ch = (channelNumber and 0b0000_1111)
+				val ch = (channelNumber - 4) and 0b0000_1111
 				val smVal = when (sm) {
 					SecureMessagingIndication.NO_SM -> 0
 					SecureMessagingIndication.SM_WO_HEADER -> 0b0010_0000

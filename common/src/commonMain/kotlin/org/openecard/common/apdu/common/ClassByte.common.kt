@@ -42,9 +42,11 @@ class InterIndustryClassByte (
 	var channelNumber: Int,
 	var sm: SecureMessagingIndication,
 	var commandChaining: Boolean,
+	var proprietary: Boolean = false,
 ) : ClassByte {
 	override val byte: Byte
 		get() {
+			val propBit = if (proprietary) 0x80 else 0x00
 			return if (channelNumber > 3) {
 				val ch = (channelNumber - 4) and 0b0000_1111
 				val smVal = when (sm) {
@@ -53,12 +55,12 @@ class InterIndustryClassByte (
 					else -> throw IllegalArgumentException("SM indicator not supported with this amount of channels.")
 				}
 				val chain = if (commandChaining) 0b0001_0000 else 0
-				(0b0100_0000 or ch or smVal or chain).toByte()
+				(propBit or 0b0100_0000 or ch or smVal or chain).toByte()
 			} else {
 				val ch = (channelNumber and 0b0000_0011)
 				val smVal = sm.value shl 2
 				val chain = if (commandChaining) 0b0001_0000 else 0
-				(ch or smVal or chain).toByte()
+				(propBit or ch or smVal or chain).toByte()
 			}
 		}
 }
@@ -68,6 +70,12 @@ class ProprietaryClassByte (
 ) : ClassByte {
 	override val byte: Byte
 		get() = (0x80 or proprietaryData.toInt()).toByte()
+
+	fun toInterIndustry(): InterIndustryClassByte {
+		val isoCla = ClassByte.parseInterIndustry(proprietaryData)
+		isoCla.proprietary = true
+		return isoCla
+	}
 }
 
 enum class SecureMessagingIndication(val value: Int) {

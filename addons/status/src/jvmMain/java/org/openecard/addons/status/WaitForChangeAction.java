@@ -60,7 +60,7 @@ public class WaitForChangeAction implements AppPluginAction {
     }
 
     @Override
-    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments) {
+    public BindingResult execute(RequestBody body, Map<String, String> parameters, Headers headers, List<Attachment> attachments, Map<String, ? extends Object> extraParams) {
 	BindingResult response;
 	try {
 	    WaitForChangeRequest statusRequest = WaitForChangeRequest.convert(parameters);

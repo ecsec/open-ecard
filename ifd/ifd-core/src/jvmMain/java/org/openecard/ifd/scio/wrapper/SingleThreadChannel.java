@@ -33,6 +33,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardCommandStatus;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.ifd.Protocol;
+import org.openecard.common.ifd.RecoverableSecureMessagingException;
 import org.openecard.common.ifd.scio.SCIOCard;
 import org.openecard.common.ifd.scio.SCIOChannel;
 import org.openecard.common.ifd.scio.SCIOErrorCode;
@@ -241,43 +242,49 @@ public class SingleThreadChannel implements IfdChannel {
 
     @Nonnull
     @Override
-    public byte[] transmit(@Nonnull byte[] input, @Nonnull List<byte[]> responses) throws TransmitException,
-	    SCIOException, IllegalStateException, InterruptedException {
-	byte[] inputAPDU = input;
-	if (isSM()) {
-	    LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, false));
-	    inputAPDU = smProtocol.applySM(inputAPDU);
-	}
-	LOG.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, false));
-	CardResponseAPDU rapdu = transmit(inputAPDU);
-	byte[] result = rapdu.toByteArray();
-	LOG.debug("Receive APDU: {}", ByteUtils.toHexString(result, false));
-	if (isSM()) {
-	    result = smProtocol.removeSM(result);
-	    LOG.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, false));
-	}
-	// get status word
-	byte[] sw = new byte[2];
-	sw[0] = result[result.length - 2];
-	sw[1] = result[result.length - 1];
+	public byte[] transmit(@Nonnull byte[] input, @Nonnull List<byte[]> responses) throws TransmitException,
+		SCIOException, IllegalStateException, InterruptedException {
+		byte[] inputAPDU = input;
+		byte result[];
 
-	// return without validation when no expected results given
-	if (responses.isEmpty()) {
-	    return result;
-	}
-	// verify result
-	for (byte[] expected : responses) {
-	    // one byte codes are used like mask values
-	    // AcceptableStatusCode-elements containing only one byte match all status codes starting with this byte
-	    if (ByteUtils.isPrefix(expected, sw)) {
-		return result;
-	    }
-	}
+		try {
+			if (isSM()) {
+				LOG.debug("Apply secure messaging to APDU: {}", ByteUtils.toHexString(inputAPDU, false));
+				inputAPDU = smProtocol.applySM(inputAPDU);
+			}
+			LOG.debug("Send APDU: {}", ByteUtils.toHexString(inputAPDU, false));
+			CardResponseAPDU rapdu = transmit(inputAPDU);
+			result = rapdu.toByteArray();
+			LOG.debug("Receive APDU: {}", ByteUtils.toHexString(result, false));
+			if (isSM()) {
+				result = smProtocol.removeSM(result);
+				LOG.debug("Remove secure messaging from APDU: {}", ByteUtils.toHexString(result, false));
+			}
+		} catch (RecoverableSecureMessagingException ex) {
+			result = ex.getErrorResponse();
+		}
+		// get status word
+		byte[] sw = new byte[2];
+		sw[0] = result[result.length - 2];
+		sw[1] = result[result.length - 1];
 
-	// not an expected result
-	String msg = "The returned status code is not in the list of expected status codes. The returned code is:\n";
-	TransmitException tex = new TransmitException(result, msg + CardCommandStatus.getMessage(sw));
-	throw tex;
+		// return without validation when no expected results given
+		if (responses.isEmpty()) {
+			return result;
+		}
+		// verify result
+		for (byte[] expected : responses) {
+			// one byte codes are used like mask values
+			// AcceptableStatusCode-elements containing only one byte match all status codes starting with this byte
+			if (ByteUtils.isPrefix(expected, sw)) {
+				return result;
+			}
+		}
+
+		// not an expected result
+		String msg = "The returned status code is not in the list of expected status codes. The returned code is:\n";
+		TransmitException tex = new TransmitException(result, msg + CardCommandStatus.getMessage(sw));
+		throw tex;
     }
 
     @Nonnull

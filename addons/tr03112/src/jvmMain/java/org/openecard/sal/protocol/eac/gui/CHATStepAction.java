@@ -24,9 +24,9 @@ package org.openecard.sal.protocol.eac.gui;
 
 import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.DynamicContext;
@@ -43,10 +43,10 @@ import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.gui.executor.StepActionResult;
 import org.openecard.gui.executor.StepActionResultStatus;
+import org.openecard.ifd.protocol.pace.common.PasswordID;
 import org.openecard.sal.protocol.eac.EACData;
 import org.openecard.sal.protocol.eac.EACProtocol;
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType;
-import org.openecard.sal.protocol.eac.anytype.PasswordID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +127,11 @@ public class CHATStepAction extends StepAction {
 
 	    PaceCardHelper ph = new PaceCardHelper(addonCtx, sessHandle);
 	    if (! SysUtils.isMobileDevice()) {
-		cardHandle = ph.connectCardIfNeeded();
+		cardHandle = ph.connectCardIfNeeded(
+			new HashSet<>() {{
+				add(ECardConstants.NPA_CARD_TYPE);
+			}}
+		);
 		if (passwordType == PasswordID.PIN) {
 		    PacePinStatus pinState = ph.getPinStatus();
 		    status.update(pinState);
@@ -135,13 +139,13 @@ public class CHATStepAction extends StepAction {
 		nativePace = ph.isNativePinEntry();
 
 		// get the PACEMarker
-		paceMarker = ph.getPaceMarker(passwordType.getString());
+		paceMarker = ph.getPaceMarker(passwordType.name(), ECardConstants.NPA_CARD_TYPE);
 	    } else {
 		// mobile device, pick only available reader and proceed
 		status.update(PacePinStatus.UNKNOWN);
 		cardHandle = ph.getMobileReader();
 		nativePace = false;
-		paceMarker = ph.getPaceMarker(passwordType.getString());
+		paceMarker = ph.getPaceMarker(passwordType.name(), ECardConstants.NPA_CARD_TYPE);
 	    }
 
 	    // save values in dynctx

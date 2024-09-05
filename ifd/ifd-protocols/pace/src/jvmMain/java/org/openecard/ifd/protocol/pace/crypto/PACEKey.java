@@ -26,13 +26,11 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.openecard.bouncycastle.crypto.params.ECDomainParameters;
-import org.openecard.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
-import org.openecard.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
+
+import org.openecard.bouncycastle.asn1.x9.ECNamedCurveTable;
+import org.openecard.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.openecard.bouncycastle.crypto.params.*;
+import org.openecard.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec;
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.openecard.bouncycastle.math.ec.ECPoint;
@@ -128,13 +126,24 @@ public final class PACEKey {
 	    pk = new ElGamalPublicKeyParameters(egp.getG().multiply(d), egp);
 
 	} else if (pdp.isECDH()) {
-	    ECParameterSpec p = (ECParameterSpec) pdp.getParameter();
-	    int numBits = p.getN().bitLength();
-	    BigInteger d = new BigInteger(numBits, rand);
-	    ECDomainParameters ecp = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH());
+		var gen = new ECKeyPairGenerator();
 
-	    sk = new ECPrivateKeyParameters(d, ecp);
-	    pk = new ECPublicKeyParameters(ecp.getG().multiply(d), ecp);
+		ECDomainParameters domainParams;
+		var p = (ECParameterSpec) pdp.getParameter();
+		if (p instanceof ECNamedCurveParameterSpec) {
+			var pn = (ECNamedCurveParameterSpec) p;
+			var curveOid = ECNamedCurveTable.getOID(pn.getName());
+			domainParams = new ECNamedDomainParameters(curveOid, p.getCurve(), p.getG(), p.getN(), p.getH(), p.getSeed());
+		} else {
+			domainParams = new ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH(), p.getSeed());
+		}
+
+		var genParams = new ECKeyGenerationParameters(domainParams, rand);
+		gen.init(genParams);
+		var keyPair = gen.generateKeyPair();
+
+	    sk = keyPair.getPrivate();
+	    pk = keyPair.getPublic();
 	} else {
 	    throw new IllegalArgumentException();
 	}

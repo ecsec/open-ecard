@@ -10,6 +10,8 @@
 package org.openecard.mobile.activation.common;
 
 import java.net.URL;
+import java.util.Map;
+
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ControllerCallback;
 
@@ -24,17 +26,26 @@ class CommonActivationController implements ActivationController {
     private final ActivationControllerService activationControllerService;
     private final ControllerCallback activation;
     private final InteractionPreperationFactory hooks;
+	private final Map<String, Object> extraParams;
 
-    public CommonActivationController(URL requestURI, String protocolType, ActivationControllerService activationControllerService, ControllerCallback activation, InteractionPreperationFactory hooks) {
-	this.requestURI = requestURI;
-	this.protocolType = protocolType;
-	this.activationControllerService = activationControllerService;
-	this.activation = activation;
-	this.hooks = hooks;
-    }
+	public CommonActivationController(
+		URL requestURI,
+		String protocolType,
+		ActivationControllerService activationControllerService,
+		ControllerCallback activation,
+		InteractionPreperationFactory hooks,
+		Map<String, Object> extraParams
+	) {
+		this.requestURI = requestURI;
+		this.protocolType = protocolType;
+		this.activationControllerService = activationControllerService;
+		this.activation = activation;
+		this.hooks = hooks;
+		this.extraParams = extraParams;
+	}
 
     public void start() {
-	this.activationControllerService.start(this.requestURI, this.activation, this.hooks);
+		this.activationControllerService.start(this.requestURI, this.activation, this.hooks, this.extraParams);
     }
 
     @Override

@@ -125,7 +125,9 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		mockControllerCallback,
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 
 	ActivationResult result = outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	Assert.assertNotNull(result);
@@ -140,7 +142,9 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		mockControllerCallback,
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 
 	outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
     }
@@ -156,7 +160,9 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		mockControllerCallback,
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.cancelAuthentication(mockControllerCallback);
 
 	Assert.assertThrows(() -> outcome.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -173,7 +179,9 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		mockControllerCallback,
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	Thread.sleep(SLEEP_WAIT / 2);
 	sut.cancelAuthentication(mockControllerCallback);
 
@@ -191,7 +199,9 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		mockControllerCallback,
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	Thread.sleep(MICRO_WAIT);
 	sut.cancelAuthentication(mockControllerCallback);
 	Thread.sleep(MICRO_WAIT);
@@ -221,16 +231,24 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess1),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess2),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess3),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess4),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 
 	startSuccess1.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 	Assert.assertThrows(() -> startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -253,16 +271,24 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess1),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess2),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess3),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverStarted(startSuccess4),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 
 	Assert.assertThrows(() -> startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	Assert.assertThrows(() -> startSuccess3.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
@@ -283,16 +309,24 @@ public class ActivationControllerServiceTests {
 
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess1),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess2),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess3),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 	sut.start(ActivationUrlFactory.fromResource("eID-Client").create(),
 		PromiseDeliveringFactory.controllerCallback.deliverCompletion(startSuccess4),
-		anyInteractionPreperationFactory());
+		anyInteractionPreperationFactory(),
+		null
+	);
 
 	Assert.assertThrows(() -> startSuccess1.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS));
 	startSuccess2.deref(WAIT_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -370,7 +404,7 @@ public class ActivationControllerServiceTests {
     }
 
     private ActivationControllerServiceTests withActivation(BindingResult result, int sleepDelay) {
-	when(this.mockPluginAction.execute(any(), any(), any(), any())).thenAnswer(new Answer<BindingResult>() {
+	when(this.mockPluginAction.execute(any(), any(), any(), any(), any())).thenAnswer(new Answer<BindingResult>() {
 	    @Override
 	    public BindingResult answer(InvocationOnMock arg0) throws Throwable {
 		Thread.sleep(sleepDelay);

@@ -68,30 +68,30 @@ class MessageFactory private constructor(private val protocol: String, private v
                 try {
                     tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
                 } catch (ex: ParserConfigurationException) {
-                    LOG.warn { "Failed to enable secure processing for DOM Builder." }
+                    //LOG.warn { "Failed to enable secure processing for DOM Builder." }
                 }
                 // XXE countermeasures
                 tmpW3Factory.isExpandEntityReferences = false
                 try {
                     tmpW3Factory.isXIncludeAware = false
                 } catch (ex: UnsupportedOperationException) {
-                    LOG.warn { "Failed to disable XInclude support." }
+                    //LOG.warn { "Failed to disable XInclude support." }
                 }
                 try {
                     tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
                 } catch (ex: IllegalArgumentException) {
-                    LOG.warn { "Failed to disallow external DTD access." }
+                    //LOG.warn { "Failed to disallow external DTD access." }
                 }
                 try {
                     tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
                 } catch (ex: ParserConfigurationException) {
-                    LOG.warn { "Failed to disallow DTDs entirely." }
+                    //LOG.warn { "Failed to disallow DTDs entirely." }
                 }
                 try {
                     tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false)
                     tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false)
                 } catch (ex: ParserConfigurationException) {
-                    LOG.warn { "Failed to disable XEE mitigations." }
+                    //LOG.warn { "Failed to disable XEE mitigations." }
                 }
 
                 val tmpW3Builder = tmpW3Factory.newDocumentBuilder()

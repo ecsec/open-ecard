@@ -32,5 +32,7 @@ public interface ActivationSource {
 
     EacControllerFactory eacFactory();
 
+	CardLinkControllerFactory cardLinkFactory();
+
     PinManagementControllerFactory pinManagementFactory();
 }

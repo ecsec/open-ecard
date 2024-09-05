@@ -126,7 +126,7 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	    // and add some special values to the header section
 	    headers.setHeader(METHOD_HDR, httpRequest.getRequestLine().getMethod());
 
-	    BindingResult bindingResult = action.execute(body, queries, headers, null);
+	    BindingResult bindingResult = action.execute(body, queries, headers, null, null);
 
 	    HttpResponse response = createHTTPResponseFromBindingResult(bindingResult);
 	    response.setParams(httpRequest.getParams());
@@ -191,9 +191,9 @@ public class HttpAppPluginActionHandler extends HttpControlHandler {
 	if (responseBody != null && responseBody.hasValue()) {
 	    LOG.debug("BindingResult contains a body.");
 	    // determine content type
-	    ContentType ct = ContentType.create(responseBody.getMimeType(), responseBody.getEncoding());
+	    ContentType ct = ContentType.create(responseBody.mimeType, responseBody.encoding);
 
-	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.getValue(), ct);
+	    ByteArrayEntity entity = new ByteArrayEntity(responseBody.value, ct);
 	    response.setEntity(entity);
 	} else {
 	    LOG.debug("BindingResult contains no body.");

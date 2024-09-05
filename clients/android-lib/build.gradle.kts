@@ -23,6 +23,8 @@ kotlin {
 		val androidMain by getting {
 			dependencies {
 				api(project(":clients:android-common"))
+				api(project(":addons:cardlink"))
+				implementation(libs.xerces.imp)
 			}
 		}
 	}

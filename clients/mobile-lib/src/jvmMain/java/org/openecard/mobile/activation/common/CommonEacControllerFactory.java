@@ -80,7 +80,7 @@ public class CommonEacControllerFactory implements EacControllerFactory {
 	    }
 	};
 
-	CommonActivationController controller = new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks);
+	CommonActivationController controller = new CommonActivationController(activationUrl, PROTOCOL_TYPE, activationControllerService, activation, hooks, null);
 
 	controller.start();
 

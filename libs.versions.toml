@@ -2,13 +2,14 @@
 agp = "8.2.+"
 kotlin = "1.9.+"
 kx-co = "1.8.+"
+kx-serde = "1.6.+"
 
 ktor = "2.3.+"
 
-androidx-activityCompose = "1.8.+"
+androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
-androidx-core-ktx = "1.12.+"
+androidx-core-ktx = "1.13.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
 androidx-test-junit = "1.1.+"
@@ -21,9 +22,13 @@ jfx = "17.0.2"
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlin-test-testng = { module = "org.jetbrains.kotlin:kotlin-test-testng", version.ref = "kotlin" }
+
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "6.0.+" }
+
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
+
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
@@ -48,16 +53,16 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 
 # testing
-testng = { group = "org.testng", name = "testng", version = "7.7.0" }
+testng = { group = "org.testng", name = "testng", version = "7.9.+" }
 powermock-testng = { group = "org.powermock", name = "powermock-module-testng", version = "2.0.9" }
 powermock-mockito = { group = "org.powermock", name = "powermock-api-mockito2", version = "2.0.9" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
 
 # jaxb
-jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.0" }
+jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.2" }
 jaxb-ws-api = { group = "jakarta.xml.ws", name = "jakarta.xml.ws-api", version = "4.0.0" }
-jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "4.0.2" }
-jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.14.0" }
+jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "4.0.5" }
+jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
 #			bc-prov", "org.bouncycastle:bcprov-jdk15on:1.62")
 #			bc-pkix", "org.bouncycastle:bcpkix-jdk15on:1.62")
@@ -84,9 +89,9 @@ roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation",
 roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version = "1.4.0" }
 roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version = "1.4.0" }
 
-xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.0" }
+xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.2" }
 
-jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.3" }
+jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version = "5.12.1" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version = "5.12.1" }
@@ -112,6 +117,7 @@ kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }
 

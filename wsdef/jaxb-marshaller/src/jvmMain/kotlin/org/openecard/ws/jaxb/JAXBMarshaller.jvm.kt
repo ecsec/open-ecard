@@ -95,19 +95,19 @@ class JAXBMarshaller : WSMarshaller {
             try {
                 tmpW3Factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
             } catch (ex: ParserConfigurationException) {
-                LOG.warn { "Failed to enable secure processing for DOM Builder." }
+                //LOG.warn { "Failed to enable secure processing for DOM Builder." }
             }
             // XXE countermeasures
 			tmpW3Factory.isExpandEntityReferences = false
             try {
 				tmpW3Factory.isXIncludeAware = false
             } catch (ex: UnsupportedOperationException) {
-                LOG.warn { "Failed to disable XInclude support." }
+                //LOG.warn { "Failed to disable XInclude support." }
             }
             try {
                 tmpW3Factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
             } catch (ex: IllegalArgumentException) {
-                LOG.warn { "Failed to disallow external DTD access." }
+                //LOG.warn { "Failed to disallow external DTD access." }
             }
             try {
                 tmpW3Factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
@@ -118,7 +118,7 @@ class JAXBMarshaller : WSMarshaller {
                 tmpW3Factory.setFeature("http://xml.org/sax/features/external-general-entities", false)
                 tmpW3Factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false)
             } catch (ex: ParserConfigurationException) {
-                LOG.warn { "Failed to disable XEE mitigations." }
+                //LOG.warn { "Failed to disable XEE mitigations." }
             }
 
             tmpW3Builder = tmpW3Factory.newDocumentBuilder()
@@ -127,18 +127,18 @@ class JAXBMarshaller : WSMarshaller {
             try {
                 tfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
             } catch (ex: TransformerConfigurationException) {
-                LOG.warn { "Failed to enable secure processing for XML Transformer." }
+                //LOG.warn { "Failed to enable secure processing for XML Transformer." }
             }
             // XXE countermeasures
             try {
                 tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
             } catch (ex: IllegalArgumentException) {
-                LOG.warn { "Failed to disallow external DTD access." }
+                //LOG.warn { "Failed to disallow external DTD access." }
             }
             try {
                 tfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "")
             } catch (ex: IllegalArgumentException) {
-                LOG.warn { "Failed to disallow external stylesheet access." }
+                //LOG.warn { "Failed to disallow external stylesheet access." }
             }
             try {
                 tfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
@@ -153,7 +153,7 @@ class JAXBMarshaller : WSMarshaller {
                 tmpSerializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
                 tmpSerializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
             } catch (ex: IllegalArgumentException) {
-                LOG.warn { "Failed to configure output formatting." }
+                //LOG.warn { "Failed to configure output formatting." }
             }
 
             // instantiate soap stuff

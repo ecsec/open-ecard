@@ -46,15 +46,9 @@ public final class KDF {
      *
      * @throws GeneralSecurityException
      */
-    public KDF() throws GeneralSecurityException {
-	try {
-	    md = MessageDigest.getInstance("SHA1");
-	    keyLength = 16;
-	} catch (NoSuchAlgorithmException ex) {
-	    logger.error(ex.getMessage(), ex);
-	    throw new GeneralSecurityException(ex);
+    public KDF(int keyLength) throws GeneralSecurityException {
+		this(getDigest(keyLength), keyLength);
 	}
-    }
 
     /**
      * Key Derivation Function.
@@ -62,10 +56,23 @@ public final class KDF {
      * @param md MessageDigest
      * @param keyLength Key length
      */
-    public KDF(MessageDigest md, int keyLength) {
-	this.md = md;
-	this.keyLength = keyLength;
-    }
+	public KDF(MessageDigest md, int keyLength) {
+		this.md = md;
+		this.keyLength = keyLength;
+	}
+
+	private static MessageDigest getDigest(int keyLength) throws GeneralSecurityException {
+		try {
+			if (keyLength == 16) {
+				return MessageDigest.getInstance("SHA1");
+			} else {
+				return MessageDigest.getInstance("SHA256");
+			}
+		} catch (NoSuchAlgorithmException ex) {
+			logger.error(ex.getMessage(), ex);
+			throw new GeneralSecurityException(ex);
+		}
+	}
 
     /**
      * Derive key for encryption.

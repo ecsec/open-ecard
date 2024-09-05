@@ -1,5 +1,5 @@
 /** **************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2019-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,9 +19,12 @@
  * you and ecsec GmbH.
  *
  ************************************************************************** */
+
 package org.openecard.mobile.activation;
 
 import org.openecard.robovm.annotations.FrameworkInterface;
+
+import java.util.List;
 
 /**
  *
@@ -44,4 +47,6 @@ public interface ActivationResult {
      */
     String getProcessResultMinor();
 
+	List<String> getResultParameterKeys();
+	String getResultParameter(String key);
 }

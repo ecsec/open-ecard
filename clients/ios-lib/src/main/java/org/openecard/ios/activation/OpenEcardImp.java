@@ -69,6 +69,7 @@ public class OpenEcardImp implements OpenEcard {
 
     public OpenEcardImp() {
 	this.developerOptions = new DeveloperOptionsImpl();
+	Thread.currentThread().setContextClassLoader(ClassLoader.getSystemClassLoader());
 	IOSNFCCapabilities capabilities = new IOSNFCCapabilities();
 	IOSConfig currentConfig = new IOSConfig() {
 	    @Override

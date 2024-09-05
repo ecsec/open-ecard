@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AddonSpecification>
+	<ID>CardLink</ID>
+	<Version>1.0.0</Version>
+	<License/>
+	<LocalizedName xml:lang="DE">CardLink Protokoll</LocalizedName>
+	<LocalizedName xml:lang="EN">CardLink Protocol</LocalizedName>
+	<LocalizedDescription xml:lang="DE">
+		CardLink Protokoll nach Gematik Spezifikation.
+	</LocalizedDescription>
+	<LocalizedDescription xml:lang="EN">
+		CardLink protocol according to Gematik specification.
+	</LocalizedDescription>
+	<About xml:lang="DE">CardLink Funktionalität.</About>
+	<About xml:lang="EN">CardLink functionality.</About>
+	<Logo/>
+	<ConfigDescription/>
+	<BindingActions>
+		<AppPluginSpecification>
+			<ClassName>org.openecard.addons.cardlink.ActivateAction</ClassName>
+			<LocalizedName xml:lang="DE">Aktivierungsendpunkt</LocalizedName>
+			<LocalizedName xml:lang="EN">Activation Endpoint</LocalizedName>
+			<LocalizedDescription xml:lang="DE">
+				Endpunkt für die Aktivierung der Open eCard App zur Durchführung einer CardLink Authentifizierung
+				mit der eGK.
+			</LocalizedDescription>
+			<LocalizedDescription xml:lang="EN">
+				Endpoint for the activation of the Open eCard App to start a CardLink authentication with the
+				German eHealth Card.
+			</LocalizedDescription>
+			<ResourceName>cardlink</ResourceName>
+			<ConfigDescription/>
+		</AppPluginSpecification>
+	</BindingActions>
+	<ApplicationActions/>
+	<IFDActions/>
+	<SALActions>
+		<ProtocolPluginSpecification>
+			<URI>https://gematik.de/protocols/cardlink</URI>
+			<ClassName>org.openecard.addons.cardlink.sal.CardLinkProtocol</ClassName>
+			<LocalizedName xml:lang="DE">CardLink Protokollimplementierung</LocalizedName>
+			<LocalizedName xml:lang="EN">CardLink Protocol Implementation</LocalizedName>
+			<LocalizedDescription xml:lang="DE">
+				Implementierung des CardLink Protokoll gemäß Gematik.
+			</LocalizedDescription>
+			<LocalizedDescription xml:lang="EN">
+				Implementation of the CardLink protocol according to Gematik.
+			</LocalizedDescription>
+			<ConfigDescription/>
+		</ProtocolPluginSpecification>
+	</SALActions>
+</AddonSpecification>

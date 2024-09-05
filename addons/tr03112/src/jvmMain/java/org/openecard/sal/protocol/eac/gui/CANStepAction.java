@@ -24,7 +24,9 @@ package org.openecard.sal.protocol.eac.gui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import java.util.HashSet;
 import java.util.Map;
+
 import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
@@ -69,7 +71,9 @@ public class CANStepAction extends AbstractPasswordStepAction {
 	try {
 	    ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	    PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
-	    conHandle = ph.connectCardIfNeeded();
+	    conHandle = ph.connectCardIfNeeded(new HashSet<>(){{
+			add(ECardConstants.NPA_CARD_TYPE);
+		}});
 	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
 	    EstablishChannelResponse establishChannelResponse = performPACEWithPIN(oldResults, conHandle);

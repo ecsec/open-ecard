@@ -1,5 +1,5 @@
-/** **************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+/****************************************************************************
+ * Copyright (C) 2019-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,16 +18,12 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ************************************************************************** */
+ ***************************************************************************/
 package org.openecard.mobile.activation.common;
 
 import java.net.MalformedURLException;
-import org.openecard.mobile.activation.ActivationSource;
-import org.openecard.mobile.activation.ActivationUtils;
-import org.openecard.mobile.activation.ContextManager;
-import org.openecard.mobile.activation.EacControllerFactory;
-import org.openecard.mobile.activation.NFCCapabilities;
-import org.openecard.mobile.activation.PinManagementControllerFactory;
+
+import org.openecard.mobile.activation.*;
 import org.openecard.mobile.system.OpeneCardContext;
 import org.openecard.mobile.system.OpeneCardContextConfig;
 
@@ -42,6 +38,7 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
     private final OpeneCardContextConfig config;
     private final ActivationControllerService activationControllerService;
     private EacControllerFactory eacControllerFactory;
+	private CardLinkControllerFactory cardlinkControllerFactory;
     private PinManagementControllerFactory pinManagementControllerFactory;
     private final NFCDialogMsgSetter msgSetter;
 
@@ -59,6 +56,14 @@ public class CommonActivationUtils implements ActivationUtils, OpeneCardContextP
 	}
 	return eacControllerFactory;
     }
+
+	@Override
+	public CardLinkControllerFactory cardLinkFactory() {
+		if (cardlinkControllerFactory == null) {
+			cardlinkControllerFactory = CommonCardLinkControllerFactory.create(activationControllerService, msgSetter);
+		}
+		return cardlinkControllerFactory;
+	}
 
     @Override
     public PinManagementControllerFactory pinManagementFactory() {

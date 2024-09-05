@@ -70,6 +70,7 @@ public class ClasspathRegistry implements AddonRegistry {
 		marshaller.addXmlTypeClass(AddonSpecification.class);
 
 		loadManifest(addons, marshaller, "TR-03112", "TCToken-Manifest.xml");
+			loadManifest(addons, marshaller, "CardLink", "CardLink-Manifest.xml");
 		loadManifest(addons, marshaller, "ChipGateway", "ChipGateway-Manifest.xml");
 		loadManifest(addons, marshaller, "PIN-Management", "PIN-Plugin-Manifest.xml");
 		loadManifest(addons, marshaller, "GenericCrypto", "GenericCrypto-Plugin-Manifest.xml");

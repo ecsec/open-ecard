@@ -56,7 +56,7 @@ public class PINStep {
      */
     public PINStep(GUIContentMap content) {
 	this.content = content;
-	this.passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).getString();
+	this.passwordType = PasswordID.parse((Byte) (content.get(GUIContentMap.ELEMENT.PIN_ID))).name();
 	this.step = new Step(STEP_ID, lang.translationForKey(TITLE, passwordType));
 	initialize();
     }

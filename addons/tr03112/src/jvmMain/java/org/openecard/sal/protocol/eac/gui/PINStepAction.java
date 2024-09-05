@@ -24,7 +24,9 @@ package org.openecard.sal.protocol.eac.gui;
 import org.openecard.common.ifd.PacePinStatus;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse;
+import java.util.HashSet;
 import java.util.Map;
+
 import org.openecard.addon.Context;
 import org.openecard.binding.tctoken.TR03112Keys;
 import org.openecard.common.ECardConstants;
@@ -82,7 +84,9 @@ public class PINStepAction extends AbstractPasswordStepAction {
 	ConnectionHandleType conHandle = (ConnectionHandleType) this.ctx.get(TR03112Keys.CONNECTION_HANDLE);
 	try {
 	    PaceCardHelper ph = new PaceCardHelper(addonCtx, conHandle);
-	    conHandle = ph.connectCardIfNeeded();
+	    conHandle = ph.connectCardIfNeeded(new HashSet<>() {{
+			add(ECardConstants.NPA_CARD_TYPE);
+		}});
 	    this.ctx.put(TR03112Keys.CONNECTION_HANDLE, conHandle);
 
 	    PacePinStatus currentState;

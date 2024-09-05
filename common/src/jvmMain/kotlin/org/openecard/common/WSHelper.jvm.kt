@@ -210,3 +210,7 @@ object WSHelper {
         }
     }
 }
+
+fun Result.toException(): WSHelper.WSException {
+	return WSHelper.createException(this)
+}

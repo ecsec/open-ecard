@@ -165,4 +165,30 @@ public final class PACEInfo extends SecurityInfo {
 	return false;
     }
 
+	public int getKdfLength() {
+		switch (protocol) {
+			case PACEObjectIdentifier.id_PACE_DH_GM_3DES_CBC_CBC:
+			case PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_128:
+			case PACEObjectIdentifier.id_PACE_DH_IM_3DES_CBC_CBC:
+			case PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_128:
+			case PACEObjectIdentifier.id_PACE_ECDH_GM_3DES_CBC_CBC:
+			case PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128:
+			case PACEObjectIdentifier.id_PACE_ECDH_IM_3DES_CBC_CBC:
+			case PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_128:
+				return 16;
+			case PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_192:
+			case PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_192:
+			case PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192:
+			case PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_192:
+				return 24;
+			case PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_256:
+			case PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_256:
+			case PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256:
+			case PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_256:
+				return 32;
+			default:
+				throw new IllegalArgumentException("Unknown PACE protocol: " + protocol);
+		}
+	}
+
 }

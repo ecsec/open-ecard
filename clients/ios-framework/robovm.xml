@@ -47,6 +47,8 @@
 
 		<!-- 2MB -->
 		<pattern>org.openecard.addons.activate.ActivateAction</pattern>
+		<pattern>org.openecard.addons.cardlink.ActivateAction</pattern>
+		<pattern>org.openecard.addons.cardlink.sal.CardLinkProtocol</pattern>
 		<pattern>org.openecard.sal.protocol.eac.EACProtocol</pattern>
 		<pattern>org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction</pattern>
 		<pattern>org.openecard.sal.protocol.pincompare.PINCompareProtocol</pattern>

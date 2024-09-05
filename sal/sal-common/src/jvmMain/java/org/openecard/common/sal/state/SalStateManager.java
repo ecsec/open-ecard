@@ -215,5 +215,18 @@ public class SalStateManager implements SalStateView {
 	return results;
     }
 
+	@Override
+	public boolean hasConnectedCard(ConnectionHandleType handle) {
+		if (handle.getSlotHandle() != null) {
+			try {
+				var entry = getSessionBySlotHandle(handle.getSlotHandle());
+				return entry.getCardEntry() != null;
+			} catch (NoSuchSession ex) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 
 }

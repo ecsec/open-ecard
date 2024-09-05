@@ -27,7 +27,7 @@ package-win:
         /debug 
         /p ${WIN_KEYSTORE_PW}
         /f "${WIN_KEYSTORE}"
-        /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp
+        /tr https://rfc3161.ai.moda
         /td SHA256
         /fd SHA256
         .\clients\richclient\build\dist\$EXE_FILE_PATH

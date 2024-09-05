@@ -55,4 +55,5 @@ object CardLinkKeys {
 	const val LAST_SENT_MESSAGE_ID = "${prefix}LAST_SENT_MESSAGE_ID"
 	const val WEBSOCKET = "${prefix}WEBSOCKET"
 	const val CORRELATION_ID_TAN_PROCESS = "${prefix}CORRELATION_ID_TAN"
+	const val ICCSN = "${prefix}ICCSN"
 }

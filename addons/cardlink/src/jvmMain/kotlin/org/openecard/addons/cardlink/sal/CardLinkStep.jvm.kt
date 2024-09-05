@@ -34,10 +34,8 @@ import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
-import org.openecard.common.DynamicContext
-import org.openecard.common.ECardConstants
-import org.openecard.common.ThreadTerminateException
-import org.openecard.common.WSHelper
+import org.openecard.common.*
+import org.openecard.common.tlv.TLV
 import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
@@ -85,7 +83,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 		val conHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
 
-		val egkData = readEgkData(conHandle, cardSessionId)
+		val egkData = readEgkData(conHandle, cardSessionId, dynCtx)
 		sendEgkData(egkData, cardSessionId, ws)
 
 		return DIDAuthenticateResponse().apply {
@@ -93,15 +91,18 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		}
 	}
 
-	private fun readEgkData(conHandle: ConnectionHandleType, cardSessionId: String): RegisterEgk {
+	private fun readEgkData(conHandle: ConnectionHandleType, cardSessionId: String, dynCtx: DynamicContext): RegisterEgk {
 		val infos = DidInfos(aCtx.dispatcher, null, conHandle)
 		val gdoDs = infos.getDataSetInfo("EF.GDO").read()
+
 		val versionDs = infos.getDataSetInfo("EF.Version2").read()
 		val cvcEgkAuthEc = infos.getDataSetInfo("EF.C.eGK.AUT_CVC.E256").read()
 		val cvcEgkCaEc = infos.getDataSetInfo("EF.C.CA.CS.E256").read()
 		val atrDs = infos.getDataSetInfo("EF.ATR").read()
 		val x509EsignAuthEc = infos.getDataSetInfo("EF.C.CH.AUT.E256").read()
 		val x509EsignAuthRsa: ByteArray? = infos.getDataSetInfo("EF.C.CH.AUT.R2048").readOptional()
+
+		dynCtx.put(CardLinkKeys.ICCSN, readIccsnFrom(gdoDs))
 
 		return RegisterEgk(
 			cardSessionId = cardSessionId,
@@ -124,5 +125,17 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		ws.socket.send(egkEnvelopeMsg)
+	}
+
+	@OptIn(ExperimentalStdlibApi::class)
+	private fun readIccsnFrom(gdoDs: ByteArray?): String? {
+		val tlvEfGdo = TLV.fromBER(gdoDs)
+		return if (tlvEfGdo.tagNumWithClass == 0x5A.toLong() && tlvEfGdo.valueLength == 0x0A) {
+			tlvEfGdo.value.toHexString()
+		} else {
+			throw WSHelper
+				.makeResultError(ECardConstants.Minor.SAL.INSUFFICIENT_RES, "ICCSN could not be read")
+				.toException()
+		}
 	}
 }

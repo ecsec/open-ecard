@@ -27,7 +27,7 @@ package-win:
         /debug 
         /p ${WIN_KEYSTORE_PW}
         /f "${WIN_KEYSTORE}"
-        /tr https://rfc3161.ai.moda
+        /tr http://timestamp.globalsign.com/scripts/timstamp.dll
         /td SHA256
         /fd SHA256
         .\clients\richclient\build\dist\$EXE_FILE_PATH

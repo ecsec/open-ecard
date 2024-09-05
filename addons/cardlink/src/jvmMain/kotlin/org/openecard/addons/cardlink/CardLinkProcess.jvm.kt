@@ -100,6 +100,9 @@ class CardLinkProcess(
 		val closeSession = DestroySession().apply {
 			connectionHandle = conHandle
 		}
+		val pdd = PowerDownDevices()
+		pdd.contextHandle = closeSession.connectionHandle.contextHandle
+		dispatcher.safeDeliver(pdd)
 		val closeSessionResp = dispatcher.safeDeliver(closeSession) as DestroySessionResponse
 
 		// Check CloseSessionResponse

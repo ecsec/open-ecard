@@ -22,13 +22,16 @@
 
 package org.openecard.mobile.ui;
 
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
-import org.openecard.binding.tctoken.TR03112Keys;
-import org.openecard.common.DynamicContext;
-import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.event.EventObject;
+import org.openecard.common.event.EventType;
+import org.openecard.common.interfaces.*;
 import org.openecard.common.util.Promise;
+import org.openecard.common.util.SysUtils;
 import org.openecard.gui.ResultStatus;
 import org.openecard.gui.StepResult;
+import org.openecard.gui.StepWithConnection;
 import org.openecard.gui.definition.*;
 import org.openecard.mobile.activation.*;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
@@ -36,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +57,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 
 	private final List<Step> steps;
 	private final CardLinkInteraction interaction;
+	private final EventDispatcher eventDispatcher;
 
 	private Future<?> runningAction;
 	private volatile Thread cardLinkNextThread;
@@ -64,11 +69,12 @@ public final class CardLinkNavigator extends MobileNavigator {
 	private final Dispatcher dispatcher;
 
 	public CardLinkNavigator(UserConsentDescription uc, CardLinkInteraction interaction, NFCDialogMsgSetter msgSetter,
-							 Dispatcher dispatcher) {
+							 Dispatcher dispatcher, EventDispatcher eventDispatcher ) {
 		this.steps = new ArrayList<>(uc.getSteps());
 		this.interaction = interaction;
 		this.msgSetter = msgSetter;
 		this.dispatcher = dispatcher;
+		this.eventDispatcher = eventDispatcher;
 	}
 
 	@Override
@@ -166,15 +172,20 @@ public final class CardLinkNavigator extends MobileNavigator {
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
 			idx++;
 
-			Step canStep = curStep;
+			StepWithConnection canStep = (StepWithConnection) curStep;
 
 			return displayAndExecuteBackground(canStep, () -> {
+				List<EventCallback> hooks = pauseExecution(canStep.getConnectionHandle());
+
 				final Promise<List<OutputInfoUnit>> waitForCan = new Promise<>();
 				final ConfirmPasswordOperation confirmCan = new ConfirmCardLinkCanImpl(waitForCan, canStep, interaction,msgSetter,this);
 
 				try {
 					interaction.onCanRequest(confirmCan);
 					List<OutputInfoUnit> tan = waitForCan.deref();
+					for (EventCallback hook: hooks){
+						this.eventDispatcher.del(hook);
+					}
 					return new MobileResult(canStep, ResultStatus.OK, tan);
 				} catch (InterruptedException ex) {
 					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
@@ -184,6 +195,32 @@ public final class CardLinkNavigator extends MobileNavigator {
 			idx++;
 			return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		}
+	}
+
+	private List<EventCallback> pauseExecution(ConnectionHandleType connectionHandle)  throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked {
+		if (SysUtils.isAndroid()) {
+			EventCallback callback = new EventCallback() {
+				@Override
+				public void signalEvent(EventType eventType, EventObject eventData) {
+
+					if (eventType == EventType.CARD_REMOVED) {
+						powerDownDevices(connectionHandle);
+					}
+				}
+			};
+			this.eventDispatcher.add(callback, EventType.CARD_REMOVED);
+			List<EventCallback> results = new LinkedList<>();
+			results.add(callback);
+			return results;
+		} else {
+			powerDownDevices(connectionHandle);
+			return Collections.EMPTY_LIST;
+		}
+	}
+	private void powerDownDevices(ConnectionHandleType connectionHandle) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked {
+		PowerDownDevices pdd = new PowerDownDevices();
+		pdd.setContextHandle(connectionHandle.getContextHandle());
+		this.dispatcher.safeDeliver(pdd);
 	}
 
 	@Override

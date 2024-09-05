@@ -41,6 +41,7 @@ import org.openecard.common.anytype.AuthDataResponse
 import org.openecard.common.sal.util.InsertCardHelper
 import org.openecard.common.util.SysUtils
 import org.openecard.gui.StepResult
+import org.openecard.gui.StepWithConnection
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.TextField
 import org.openecard.gui.executor.ExecutionResults
@@ -70,7 +71,7 @@ private const val ERROR_UNKNOWN = "action.error.unknown"
 
 
 class EnterCanStep(val ws: WsPair, val addonCtx: Context, val sessHandle: ConnectionHandleType) :
-	Step(STEP_ID, title) {
+	StepWithConnection(STEP_ID, title, sessHandle) {
 	init {
 		setAction(EnterCanStepAction(this))
 

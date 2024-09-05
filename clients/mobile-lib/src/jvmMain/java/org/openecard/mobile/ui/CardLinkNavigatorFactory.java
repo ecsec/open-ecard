@@ -23,6 +23,7 @@
 package org.openecard.mobile.ui;
 
 import org.openecard.common.interfaces.Dispatcher;
+import org.openecard.common.interfaces.EventDispatcher;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.mobile.activation.CardLinkInteraction;
@@ -39,6 +40,7 @@ public class CardLinkNavigatorFactory implements UserConsentNavigatorFactory<Car
 	private CardLinkInteraction interaction;
 	private NFCDialogMsgSetter msgSetter;
 	private Dispatcher dispatcher;
+	private EventDispatcher eventDispatcher;
 
 	public static final String PROTOCOL_TYPE = "CardLink";
 
@@ -48,6 +50,9 @@ public class CardLinkNavigatorFactory implements UserConsentNavigatorFactory<Car
 
 	private void setDispatcher(Dispatcher dispatcher) {
 		this.dispatcher = dispatcher;
+	}
+	private void setEventDispatcher(EventDispatcher eventDispatcher) {
+		this.eventDispatcher = eventDispatcher;
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public class CardLinkNavigatorFactory implements UserConsentNavigatorFactory<Car
 			throw new IllegalArgumentException("This factory explicitly does not support the given user consent description.");
 		}
 
-		return new CardLinkNavigator(uc, interaction, msgSetter, dispatcher);
+		return new CardLinkNavigator(uc, interaction, msgSetter, dispatcher, eventDispatcher);
 	}
 
 	@Override
@@ -74,10 +79,11 @@ public class CardLinkNavigatorFactory implements UserConsentNavigatorFactory<Car
 		this.interaction = interaction;
 	}
 
-	public static CardLinkNavigatorFactory create(NFCDialogMsgSetter msgSetter, Dispatcher dispatcher) {
+	public static CardLinkNavigatorFactory create(NFCDialogMsgSetter msgSetter, Dispatcher dispatcher, EventDispatcher eventDispatcher) {
 		CardLinkNavigatorFactory factory = new CardLinkNavigatorFactory();
 		factory.setDialogMsgSetter(msgSetter);
 		factory.setDispatcher(dispatcher);
+		factory.setEventDispatcher(eventDispatcher);
 		return factory;
 	}
 

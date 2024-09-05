@@ -71,10 +71,12 @@ class CardLinkProcess(
 
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 		val webSocketId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String?
+		val iccsn = dynCtx.get(CardLinkKeys.ICCSN) as String?
 
 		// no error means success
 		val bindingResult = BindingResult(BindingResultCode.OK)
 		bindingResult.addParameter(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
+		bindingResult.addParameter(CardLinkKeys.ICCSN, iccsn)
 		webSocketId?.let { bindingResult.addParameter(CardLinkKeys.WS_SESSION_ID, it) }
 		return bindingResult
     }

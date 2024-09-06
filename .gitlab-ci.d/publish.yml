@@ -38,12 +38,10 @@ publish-to-github:
       done
   dependencies:
     - "package-linux"
-    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   needs:
     - "package-linux"
-    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   rules:

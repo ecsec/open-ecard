@@ -59,7 +59,6 @@ val setAppAboutUrl = "https://openecard.org/"
 val setAppVersion = VersionNumber.parse(project.version.toString()).let {
 	"${it.major}.${it.minor}.${it.micro}${ if (!it.qualifier.isNullOrEmpty()) "-${it.qualifier}" else ""}"
 }
-}
 
 task("copyDependencies", Copy::class) {
 	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))

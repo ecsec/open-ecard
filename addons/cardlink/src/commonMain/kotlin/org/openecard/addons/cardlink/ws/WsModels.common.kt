@@ -151,7 +151,7 @@ val module = SerializersModule {
 	}
 }
 
-val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE }
+val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE; ignoreUnknownKeys = true }
 
 sealed interface CardLinkPayload
 

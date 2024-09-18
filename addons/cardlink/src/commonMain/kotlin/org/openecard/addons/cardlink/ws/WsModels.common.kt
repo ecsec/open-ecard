@@ -150,7 +150,7 @@ val module = SerializersModule {
 	}
 }
 
-val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE }
+val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE; ignoreUnknownKeys = true }
 
 sealed interface CardLinkPayload
 
@@ -228,6 +228,7 @@ class ICCSNReassignment : CardLinkPayload
 @Serializable
 enum class MinorResultCode {
 	NUMBER_FROM_WRONG_COUNTRY,
+	NUMBER_BLOCKED,
 	TAN_EXPIRED,
 	TAN_INCORRECT,
 	TAN_RETRY_LIMIT_EXCEEDED,

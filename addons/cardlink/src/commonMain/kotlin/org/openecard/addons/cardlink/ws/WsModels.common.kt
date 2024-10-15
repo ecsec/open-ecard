@@ -223,7 +223,9 @@ data class ConfirmTan(
 
 @Serializable
 @SerialName(ICCSN_REASSIGNMENT)
-class ICCSNReassignment : CardLinkPayload
+data class ICCSNReassignment(
+	val lastAssignment: String
+) : CardLinkPayload
 
 @Serializable
 enum class ResultCode {

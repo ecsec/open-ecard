@@ -101,7 +101,7 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
 			// TODO: probably some more checks required?
-			return if (egkPayload.minor == null && egkPayload.errorMessage == null) {
+			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
 				StepActionResult(

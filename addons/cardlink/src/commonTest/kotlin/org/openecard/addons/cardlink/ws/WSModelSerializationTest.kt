@@ -82,21 +82,21 @@ class WSModelSerializationTest {
 			),
 			arrayOf(
 				ConfirmTan(
-					null,
-					null
+					resultCode = ResultCode.SUCCESS,
+					errorMessage = null
 				),
 				ConfirmTan.serializer().descriptor.serialName
 			),
 			arrayOf(
 				ConfirmTan(
-					minor = MinorResultCode.TAN_EXPIRED,
+					resultCode = ResultCode.TAN_EXPIRED,
 					errorMessage = "Tan expired."
 				),
 				ConfirmTan.serializer().descriptor.serialName
 			),
 			arrayOf(
 				ConfirmPhoneNumber(
-					minor = null,
+					resultCode = ResultCode.SUCCESS,
 					errorMessage = null
 				),
 				ConfirmPhoneNumber.serializer().descriptor.serialName

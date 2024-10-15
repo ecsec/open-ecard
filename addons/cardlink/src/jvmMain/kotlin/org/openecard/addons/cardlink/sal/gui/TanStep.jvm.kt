@@ -111,7 +111,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		val egkPayload = tanConfirmResponse.payload
 		if (egkPayload is ConfirmTan) {
 			// TODO: probably some more checks required?
-			return if (egkPayload.minor == null && egkPayload.errorMessage == null) {
+			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
 				StepActionResult(

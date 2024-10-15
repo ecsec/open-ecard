@@ -206,7 +206,7 @@ data class SendPhoneNumber(val phoneNumber: String) : CardLinkPayload
 @Serializable
 @SerialName(REQUEST_SMS_TAN_RESPONSE)
 data class ConfirmPhoneNumber(
-	var minor: MinorResultCode?,
+	var resultCode: ResultCode,
 	var errorMessage: String?,
 ) : CardLinkPayload
 
@@ -217,7 +217,7 @@ data class SendTan(val tan: String) : CardLinkPayload
 @Serializable
 @SerialName(CONFIRM_TAN_RESPONSE)
 data class ConfirmTan(
-	var minor: MinorResultCode?,
+	var resultCode: ResultCode,
 	var errorMessage: String?,
 ) : CardLinkPayload
 
@@ -226,8 +226,10 @@ data class ConfirmTan(
 class ICCSNReassignment : CardLinkPayload
 
 @Serializable
-enum class MinorResultCode {
+enum class ResultCode {
+	SUCCESS,
 	NUMBER_FROM_WRONG_COUNTRY,
+	NUMBER_BLOCKED,
 	TAN_EXPIRED,
 	TAN_INCORRECT,
 	TAN_RETRY_LIMIT_EXCEEDED,

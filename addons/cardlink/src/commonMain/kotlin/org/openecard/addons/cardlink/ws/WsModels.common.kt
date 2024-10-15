@@ -212,7 +212,7 @@ data class ConfirmPhoneNumber(
 
 @Serializable
 @SerialName(CONFIRM_TAN)
-data class SendTan(val tan: String) : CardLinkPayload
+data class SendTan(val smsCode: String) : CardLinkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN_RESPONSE)

@@ -76,7 +76,7 @@ class WSModelSerializationTest {
 			),
 			arrayOf(
 				SendTan(
-					tan = "123456"
+					smsCode = "123456"
 				),
 				SendTan.serializer().descriptor.serialName
 			),

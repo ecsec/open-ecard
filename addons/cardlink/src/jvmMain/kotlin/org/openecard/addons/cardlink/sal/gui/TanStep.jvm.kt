@@ -147,6 +147,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		}
 
 		if (egkPayload is ConfirmTan) {
+			// TODO: probably some more checks required?
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {

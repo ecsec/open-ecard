@@ -155,6 +155,18 @@ class CardLinkProcess(
 				continue
 			}
 
+			if (gematikMessage.payload is TasklistErrorPayload) {
+				val errorMsg = gematikMessage.payload.errormessage ?: "Received an unknown error from CardLink service."
+				val displayError = "$errorMsg (Status ${gematikMessage.payload.status})"
+				logger.warn { "Received '${TASK_LIST_ERROR}': $displayError" }
+
+				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				dynCtx.put(CardLinkKeys.ERROR_CODE, gematikMessage.payload.status.toString())
+				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
+
+				throw WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, displayError).toException()
+			}
+
 			if (gematikMessage.cardSessionId == null || gematikMessage.correlationId == null) {
 				val errorMsg = "Received malformed SendAPDU message which does not contain a cardSessionId or correlationId."
 				logger.warn { errorMsg }

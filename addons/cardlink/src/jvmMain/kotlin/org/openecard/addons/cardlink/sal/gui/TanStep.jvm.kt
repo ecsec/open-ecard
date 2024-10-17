@@ -110,8 +110,21 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
+
 			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
+			return StepActionResult(
+				StepActionResultStatus.CANCEL,
+				ErrorStep(
+					"CardLink Error",
+					errorMsg,
+				)
+			)
+		}
+
+		if (tanConfirmResponse.correlationId != correlationId) {
+			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
+			logger.error { errorMsg }
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
 				ErrorStep(
@@ -147,7 +160,6 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		}
 
 		if (egkPayload is ConfirmTan) {
-			// TODO: probably some more checks required?
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {

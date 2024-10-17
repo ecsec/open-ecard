@@ -134,7 +134,6 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		if (egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
-			// TODO: probably some more checks required?
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {

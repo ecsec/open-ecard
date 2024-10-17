@@ -226,6 +226,7 @@ class CardLinkProtocolTest {
 				logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
 				enterCan.confirmPassword("123123")
 			}
+
 			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {
 				logger.info { "onPhoneNumberRequest" }
 				enterPhoneNumber.confirmText("+491517264234")
@@ -242,6 +243,7 @@ class CardLinkProtocolTest {
 				logger.info { "onPhoneNumberRetry: $errorMessage (Status Code: $resultCode)" }
 				enterPhoneNumber.confirmText("+491517264234")
 			}
+
 			override fun onSmsCodeRetry(
 				smsCode: ConfirmPasswordOperation,
 				resultCode: CardLinkErrorCodes.CardLinkCodes?,
@@ -250,6 +252,7 @@ class CardLinkProtocolTest {
 				logger.info { "onSmsCodeRetry: $errorMessage (Status Code: $resultCode)" }
 				smsCode.confirmPassword("123456")
 			}
+
 		}
 	}
 

@@ -42,12 +42,22 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE"
-private const val title = "Phone Number Entry"
+private const val PHONE_ENTER_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE"
+private const val PHONE_ENTER_TITLE = "Phone Number Entry"
+
+private const val PHONE_RETRY_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE_RETRY"
+private const val PHONE_RETRY_TITLE = "Phone Number Retry Entry"
 
 private const val PHONE_ID = "CARDLINK_FIELD_PHONE"
 
-class PhoneStep(val ws: WsPair) : Step(STEP_ID, title) {
+
+abstract class PhoneStepAbstract(
+	open val ws: WsPair,
+	stepId: String,
+	title: String
+) : Step(stepId, title)
+
+class PhoneStep(override val ws: WsPair) : PhoneStepAbstract(ws, PHONE_ENTER_STEP_ID, PHONE_ENTER_TITLE) {
 	init {
 		setAction(PhoneStepAction(this))
 
@@ -57,7 +67,17 @@ class PhoneStep(val ws: WsPair) : Step(STEP_ID, title) {
 	}
 }
 
-class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) {
+class PhoneRetryStep(override val ws: WsPair) : PhoneStepAbstract(ws, PHONE_RETRY_STEP_ID, PHONE_RETRY_TITLE) {
+	init {
+		setAction(PhoneStepAction(this))
+
+		inputInfoUnits.add(TextField(PHONE_ID).also {
+			it.minLength = 6
+		})
+	}
+}
+
+class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(phoneStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
 		val phoneNumber = (oldResults[stepID]!!.getResult(PHONE_ID) as TextField).value.concatToString()
@@ -87,8 +107,10 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ResultCode.UNKNOWN_ERROR.name)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
-				StepActionResultStatus.REPEAT,
+				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
@@ -100,23 +122,31 @@ class PhoneStepAction(private val phoneStep: PhoneStep) : StepAction(phoneStep) 
 		if (egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
-			// TODO: probably some more checks required?
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
-				StepActionResult(
-					StepActionResultStatus.REPEAT,
-					ErrorStep(
-						"CardLink Error",
-						egkPayload.errorMessage,
-					)
-				)
+				logger.error { "Received error in Phone step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
+
+				dynCtx.put(CardLinkKeys.ERROR_CODE, egkPayload.resultCode.name)
+				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
+
+				val resultStatus = when (egkPayload.resultCode) {
+					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> StepActionResultStatus.REPEAT
+					else -> StepActionResultStatus.CANCEL
+				}
+
+				val retryStep = when (egkPayload.resultCode) {
+					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> PhoneRetryStep(phoneStep.ws)
+					else -> null
+				}
+
+				StepActionResult(resultStatus, retryStep)
 			}
 		} else {
 			val errorMsg = "EGK Payload is not from type ConfirmPhoneNumber."
 			logger.error { errorMsg }
 			return StepActionResult(
-				StepActionResultStatus.REPEAT,
+				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,

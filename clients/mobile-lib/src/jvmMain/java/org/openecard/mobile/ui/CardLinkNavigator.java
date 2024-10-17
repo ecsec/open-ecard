@@ -24,6 +24,8 @@ package org.openecard.mobile.ui;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.PowerDownDevices;
+import org.openecard.binding.tctoken.TR03112Keys;
+import org.openecard.common.DynamicContext;
 import org.openecard.common.event.EventObject;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.*;
@@ -35,6 +37,7 @@ import org.openecard.gui.StepWithConnection;
 import org.openecard.gui.definition.*;
 import org.openecard.mobile.activation.*;
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter;
+import org.openecard.sal.protocol.eac.gui.ErrorStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
@@ -137,36 +140,66 @@ public final class CardLinkNavigator extends MobileNavigator {
 		// TODO: Use Step IDs from Cardlink Addon, maybe move them to Mobile Lib?
 		if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE".equals(curStep.getID())) {
 			idx++;
-
-			Step phoneStep = curStep;
-
-			return displayAndExecuteBackground(phoneStep, () -> {
+			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForPhoneNumber = new Promise<>();
-				final ConfirmTextOperation confirmTextOperation = new ConfirmCardLinkPhoneNumberImpl(waitForPhoneNumber, phoneStep, this);
+				final ConfirmTextOperation confirmTextOperation = new ConfirmCardLinkPhoneNumberImpl(waitForPhoneNumber, curStep, this);
 
 				try {
 					interaction.onPhoneNumberRequest(confirmTextOperation);
 					List<OutputInfoUnit> phoneNumber = waitForPhoneNumber.deref();
-					return new MobileResult(phoneStep, ResultStatus.OK, phoneNumber);
+					return new MobileResult(curStep, ResultStatus.OK, phoneNumber);
 				} catch (InterruptedException ex) {
-					return new MobileResult(phoneStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE_RETRY".equals(curStep.getID())) {
+			idx++;
+			return displayAndExecuteBackground(curStep, () -> {
+				final Promise<List<OutputInfoUnit>> waitForPhoneNumber = new Promise<>();
+				final ConfirmTextOperation confirmTextOperation = new ConfirmCardLinkPhoneNumberImpl(waitForPhoneNumber, curStep, this);
+
+				try {
+					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
+
+					interaction.onPhoneNumberRetry(confirmTextOperation, resultCode, errorMessage);
+					List<OutputInfoUnit> phoneNumber = waitForPhoneNumber.deref();
+					return new MobileResult(curStep, ResultStatus.OK, phoneNumber);
+				} catch (InterruptedException ex) {
+					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN".equals(curStep.getID())) {
 			idx++;
-
-			Step tanStep = curStep;
-
-			return displayAndExecuteBackground(tanStep, () -> {
+			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForTan = new Promise<>();
-				final ConfirmPasswordOperation confirmTan = new ConfirmCardLinkTanImpl(waitForTan, tanStep, this);
+				final ConfirmPasswordOperation confirmTan = new ConfirmCardLinkTanImpl(waitForTan, curStep, this);
 
 				try {
 					interaction.onSmsCodeRequest(confirmTan);
 					List<OutputInfoUnit> tan = waitForTan.deref();
-					return new MobileResult(tanStep, ResultStatus.OK, tan);
+					return new MobileResult(curStep, ResultStatus.OK, tan);
 				} catch (InterruptedException ex) {
-					return new MobileResult(tanStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN_RETRY".equals(curStep.getID())) {
+			idx++;
+			return displayAndExecuteBackground(curStep, () -> {
+				final Promise<List<OutputInfoUnit>> waitForTan = new Promise<>();
+				final ConfirmPasswordOperation confirmTan = new ConfirmCardLinkTanImpl(waitForTan, curStep, this);
+
+				try {
+					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
+
+					interaction.onSmsCodeRetry(confirmTan, resultCode, errorMessage);
+					List<OutputInfoUnit> tan = waitForTan.deref();
+					return new MobileResult(curStep, ResultStatus.OK, tan);
+				} catch (InterruptedException ex) {
+					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
@@ -191,6 +224,34 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN_RETRY".equals(curStep.getID())) {
+			idx++;
+
+			StepWithConnection canStep = (StepWithConnection) curStep;
+
+			return displayAndExecuteBackground(canStep, () -> {
+				List<EventCallback> hooks = pauseExecution(canStep.getConnectionHandle());
+
+				final Promise<List<OutputInfoUnit>> waitForCan = new Promise<>();
+				final ConfirmPasswordOperation confirmCan = new ConfirmCardLinkCanImpl(waitForCan, canStep, interaction,msgSetter,this);
+
+				try {
+					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
+					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
+
+					interaction.onCanRetry(confirmCan, resultCode, errorMessage);
+					List<OutputInfoUnit> tan = waitForCan.deref();
+					for (EventCallback hook: hooks){
+						this.eventDispatcher.del(hook);
+					}
+					return new MobileResult(canStep, ResultStatus.OK, tan);
+				} catch (InterruptedException ex) {
+					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
+				}
+			});
+		} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
+			return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else {
 			idx++;
 			return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());

@@ -23,7 +23,6 @@
 package org.openecard.addons.cardlink.sal.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
@@ -41,12 +40,22 @@ import org.openecard.sal.protocol.eac.gui.ErrorStep
 
 private val logger = KotlinLogging.logger {}
 
-private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN"
-private const val title = "TAN Verification"
+private const val TAN_ENTER_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN"
+private const val TAN_ENTER_TITLE = "TAN Verification"
+
+private const val TAN_RETRY_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_TAN_RETRY"
+private const val TAN_RETRY_TITLE = "TAN Retry Verification"
 
 private const val TAN_ID = "CARDLINK_FIELD_TAN"
 
-class TanStep(val ws: WsPair) : Step(STEP_ID, title) {
+
+abstract class TanStepAbstract(
+	open val ws: WsPair,
+	stepId: String,
+	title: String
+) : Step(stepId, title)
+
+class TanStep(override val ws: WsPair) : TanStepAbstract(ws, TAN_ENTER_STEP_ID, TAN_ENTER_TITLE) {
 	init {
 		setAction(TanStepAction(this))
 
@@ -57,7 +66,18 @@ class TanStep(val ws: WsPair) : Step(STEP_ID, title) {
 	}
 }
 
-class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
+class TanRetryStep(override val ws: WsPair) : TanStepAbstract(ws, TAN_RETRY_STEP_ID, TAN_RETRY_TITLE) {
+	init {
+		setAction(TanStepAction(this))
+
+		inputInfoUnits.add(TextField(TAN_ID).also {
+			it.minLength = 6
+			it.description = "Please enter the TAN you received via SMS."
+		})
+	}
+}
+
+class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
 		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
@@ -87,8 +107,10 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ResultCode.UNKNOWN_ERROR.name)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
-				StepActionResultStatus.REPEAT,
+				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
@@ -100,7 +122,7 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
 			logger.error { errorMsg }
 			return StepActionResult(
-				StepActionResultStatus.REPEAT,
+				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
@@ -110,23 +132,33 @@ class TanStepAction(private val tanStep: TanStep) : StepAction(tanStep) {
 
 		val egkPayload = tanConfirmResponse.payload
 		if (egkPayload is ConfirmTan) {
-			// TODO: probably some more checks required?
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
-				StepActionResult(
-					StepActionResultStatus.REPEAT,
-					ErrorStep(
-						"CardLink Error",
-						egkPayload.errorMessage,
-					)
-				)
+				logger.error { "Received error in Tan step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
+
+				dynCtx.put(CardLinkKeys.ERROR_CODE, egkPayload.resultCode.name)
+				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
+
+				val resultStatus = when (egkPayload.resultCode) {
+					ResultCode.TAN_INCORRECT -> StepActionResultStatus.REPEAT
+					ResultCode.TAN_EXPIRED -> StepActionResultStatus.BACK
+					else -> StepActionResultStatus.CANCEL
+				}
+
+				val retryStep = when (egkPayload.resultCode) {
+					ResultCode.TAN_INCORRECT -> TanRetryStep(tanStep.ws)
+					ResultCode.TAN_EXPIRED -> PhoneStep(tanStep.ws)
+					else -> null
+				}
+
+				StepActionResult(resultStatus, retryStep)
 			}
 		} else {
 			val errorMsg = "EGK Payload is not from type ConfirmTan."
 			logger.error { errorMsg }
 			return StepActionResult(
-				StepActionResultStatus.REPEAT,
+				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,

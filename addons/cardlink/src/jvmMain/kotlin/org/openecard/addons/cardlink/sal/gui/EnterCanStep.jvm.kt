@@ -29,6 +29,8 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.ws.ErrorCodes
+import org.openecard.addons.cardlink.ws.ResultCode
 import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
@@ -57,8 +59,11 @@ import org.openecard.sal.protocol.eac.gui.PinOrCanEmptyException
 
 private val LOG = KotlinLogging.logger {}
 
-private const val STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN"
-private const val title = "Enter CAN"
+private const val CAN_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN"
+private const val CAN_TITLE = "Enter CAN"
+
+private const val CAN_RETRY_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN_RETRY"
+private const val CAN_RETRY_TITLE = "Enter CAN (Retry)"
 
 private const val CAN_ID = "CARDLINK_FIELD_CAN"
 
@@ -70,8 +75,16 @@ private const val ERROR_TITLE = "action.error.title"
 private const val ERROR_UNKNOWN = "action.error.unknown"
 
 
-class EnterCanStep(val ws: WsPair, val addonCtx: Context, val sessHandle: ConnectionHandleType) :
-	StepWithConnection(STEP_ID, title, sessHandle) {
+abstract class EnterCanStepAbstract(
+	open val ws: WsPair,
+	open val addonCtx: Context,
+	open val sessHandle: ConnectionHandleType,
+	stepId: String,
+	title: String
+) : StepWithConnection(stepId, title, sessHandle)
+
+class EnterCanStep(override val ws: WsPair, override val addonCtx: Context, override val sessHandle: ConnectionHandleType)
+		: EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_STEP_ID, CAN_TITLE) {
 	init {
 		setAction(EnterCanStepAction(this))
 
@@ -82,12 +95,24 @@ class EnterCanStep(val ws: WsPair, val addonCtx: Context, val sessHandle: Connec
 	}
 }
 
-class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanStep) {
+class EnterCanRetryStep(override val ws: WsPair, override val addonCtx: Context, override val sessHandle: ConnectionHandleType)
+	: EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_RETRY_STEP_ID, CAN_RETRY_TITLE) {
+	init {
+		setAction(EnterCanStepAction(this))
+
+		inputInfoUnits.add(TextField(CAN_ID).also {
+			it.minLength = 6
+			it.maxLength = 6
+		})
+	}
+}
+
+class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(enterCanStep) {
 
 	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
-		try {
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
+		try {
 			val canValue = (oldResults[stepID]!!.getResult(CAN_ID) as TextField).value.concatToString()
 			val requiredCardTypes = setOf("http://ws.gematik.de/egk/1.0.0")
 
@@ -105,18 +130,33 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 			// safe for later process
 			dynCtx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle)
 
-
 			val establishChannelResponse = performPACEWithCAN(canValue, cardHandle)
 
 			if (establishChannelResponse.result.resultMajor == ECardConstants.Major.ERROR) {
 				if (establishChannelResponse.result.resultMinor == ECardConstants.Minor.IFD.AUTHENTICATION_FAILED) {
+					val errorMessage = "Wrong CAN entered, trying again."
 					// repeat the step
-					LOG.info { "Wrong CAN entered, trying again." }
-					return StepActionResult(StepActionResultStatus.REPEAT)
+					LOG.info { errorMessage }
+
+					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_INCORRECT.name)
+					dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
+
+					return StepActionResult(
+						StepActionResultStatus.REPEAT,
+						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+					)
 				} else if (establishChannelResponse.result.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
-					// card removed
-					LOG.info { "Card was removed." }
-					return StepActionResult(StepActionResultStatus.REPEAT)
+					val errorMessage = "Card was removed."
+					// repeat the step
+					LOG.info { errorMessage }
+
+					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CARD_REMOVED.name)
+					dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
+
+					return StepActionResult(
+						StepActionResultStatus.REPEAT,
+						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+					)
 				} else {
 					checkResult(establishChannelResponse)
 				}
@@ -129,7 +169,6 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 				LOG.error(ex) { "User canceled the authentication manually." }
 				return StepActionResult(StepActionResultStatus.CANCEL)
 			}
-
 
 			// for people which think they have to remove the card in the process
 			if (ex.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
@@ -145,7 +184,6 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 				)
 			}
 
-
 			// repeat the step
 			LOG.error(ex) { "An unknown error occurred while trying to verify the PIN." }
 			return StepActionResult(
@@ -155,13 +193,28 @@ class EnterCanStepAction(val enterCanStep: EnterCanStep) : StepAction(enterCanSt
 					langPin.translationForKey(ERROR_UNKNOWN), ex
 				)
 			)
-
 		} catch (ex: InterruptedException) {
-			LOG.warn(ex) { "CAN step action interrupted." }
-			return StepActionResult(StepActionResultStatus.CANCEL)
+			val errorMessage = "CAN step action interrupted."
+			LOG.info { errorMessage }
+
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_STEP_INTERRUPTED.name)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
+
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+			)
 		} catch (ex: PinOrCanEmptyException) {
-			LOG.warn(ex) { "CAN was empty" }
-			return StepActionResult(StepActionResultStatus.REPEAT)
+			val errorMessage = "CAN was empty."
+			LOG.info { errorMessage }
+
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_EMPTY.name)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
+
+			return StepActionResult(
+				StepActionResultStatus.REPEAT,
+				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+			)
 		}
 	}
 

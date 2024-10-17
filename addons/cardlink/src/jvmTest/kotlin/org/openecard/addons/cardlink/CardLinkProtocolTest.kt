@@ -130,7 +130,7 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$REQUEST_SMS_TAN_RESPONSE",
-						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
+						"payload":"eyJyZXN1bHRDb2RlIjoiU1VDQ0VTUyIsImVycm9yTWVzc2FnZSI6bnVsbH0"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"
@@ -144,7 +144,7 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$CONFIRM_TAN_RESPONSE",
-						"payload":"eyJtaW5vciI6bnVsbCwiZXJyb3JNZXNzYWdlIjpudWxsfQ"
+						"payload":"eyJyZXN1bHRDb2RlIjoiU1VDQ0VTUyIsImVycm9yTWVzc2FnZSI6bnVsbH0"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"
@@ -220,7 +220,11 @@ class CardLinkProtocolTest {
 			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
 			override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
 				logger.info { "onCanRequest" }
-				enterCan.confirmPassword("123456")
+				enterCan.confirmPassword("123123")
+			}
+			override fun onCanRetry(enterCan: ConfirmPasswordOperation, resultCode: String?, errorMessage: String?) {
+				logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
+				enterCan.confirmPassword("123123")
 			}
 			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {
 				logger.info { "onPhoneNumberRequest" }
@@ -228,6 +232,22 @@ class CardLinkProtocolTest {
 			}
 			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) {
 				logger.info { "onSmsCodeRequest" }
+				smsCode.confirmPassword("123456")
+			}
+			override fun onPhoneNumberRetry(
+				enterPhoneNumber: ConfirmTextOperation,
+				resultCode: String?,
+				errorMessage: String?,
+			) {
+				logger.info { "onPhoneNumberRetry: $errorMessage (Status Code: $resultCode)" }
+				enterPhoneNumber.confirmText("+491517264234")
+			}
+			override fun onSmsCodeRetry(
+				smsCode: ConfirmPasswordOperation,
+				resultCode: String?,
+				errorMessage: String?,
+			) {
+				logger.info { "onSmsCodeRetry: $errorMessage (Status Code: $resultCode)" }
 				smsCode.confirmPassword("123456")
 			}
 		}

@@ -68,8 +68,9 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 				else -> {
 					// fail
 					return DIDAuthenticateResponse().apply {
-						// TODO: obtain proper error from gui
-						result = WSHelper.makeResultUnknownError("CardLink GUI process failed.")
+						val resultCode = dynCtx.get(CardLinkKeys.ERROR_CODE) as String? ?: ResultCode.UNKNOWN_ERROR.name
+						val errorMessage = dynCtx.get(CardLinkKeys.ERROR_MESSAGE) as String? ?: "Unknown Error happened during CardLink process."
+						result = WSHelper.makeResultError(resultCode, errorMessage)
 					}
 				}
 			}

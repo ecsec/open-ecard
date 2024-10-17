@@ -56,4 +56,6 @@ object CardLinkKeys {
 	const val WEBSOCKET = "${prefix}WEBSOCKET"
 	const val CORRELATION_ID_TAN_PROCESS = "${prefix}CORRELATION_ID_TAN"
 	const val ICCSN = "${prefix}ICCSN"
+	const val ERROR_CODE = "${prefix}ERROR_CODE"
+	const val ERROR_MESSAGE = "${prefix}ERROR_MESSAGE"
 }

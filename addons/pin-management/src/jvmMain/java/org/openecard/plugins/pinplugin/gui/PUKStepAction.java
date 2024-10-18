@@ -109,6 +109,7 @@ public class PUKStepAction extends StepAction {
 	}
 
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PUK);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 	// perform PACE by sending an EstablishChannel
 	EstablishChannel establishChannel = new EstablishChannel();
 	establishChannel.setSlotHandle(slotHandle);

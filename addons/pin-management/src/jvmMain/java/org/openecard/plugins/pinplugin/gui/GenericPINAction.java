@@ -184,6 +184,7 @@ public class GenericPINAction extends StepAction {
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PIN);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
@@ -213,6 +214,7 @@ public class GenericPINAction extends StepAction {
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_CAN);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
@@ -244,6 +246,7 @@ public class GenericPINAction extends StepAction {
 	}
 
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PUK);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	EstablishChannel eChannel = createEstablishChannelStructure(paceInputMap);
 	return (EstablishChannelResponse) dispatcher.safeDeliver(eChannel);

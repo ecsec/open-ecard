@@ -136,6 +136,7 @@ public class PINStepAction extends StepAction {
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_PIN);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	// perform PACE by EstablishChannel
 	EstablishChannel establishChannel = new EstablishChannel();

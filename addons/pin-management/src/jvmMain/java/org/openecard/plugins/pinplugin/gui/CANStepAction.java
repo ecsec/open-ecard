@@ -124,6 +124,7 @@ public class CANStepAction extends StepAction {
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_CAN);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel establishChannel = new EstablishChannel();

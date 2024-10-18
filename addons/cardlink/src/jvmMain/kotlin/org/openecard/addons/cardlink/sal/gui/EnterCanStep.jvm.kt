@@ -284,6 +284,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 		paceInputMap.addElement(PACEInputType.PIN, canValue)
 		paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.CAN.byteAsString)
+		paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "true")
 
 		// perform PACE by EstablishChannelCommand
 		val eChannel = createEstablishChannelStructure(conHandle, paceInputMap)

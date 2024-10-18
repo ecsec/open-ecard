@@ -90,6 +90,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 
 	// perform PACE
 	paceInputMap.addElement(PACEInputType.PIN_ID, PasswordID.parse(eacData.pinID).getByteAsString());
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 	paceInputMap.addElement(PACEInputType.CHAT, eacData.selectedCHAT.toString());
 	String certDesc = ByteUtils.toHexString(eacData.rawCertificateDescription);
 	paceInputMap.addElement(PACEInputType.CERTIFICATE_DESCRIPTION, certDesc);
@@ -127,6 +128,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	    }
 	}
 	paceInputMap.addElement(PACEInputType.PIN_ID, PIN_ID_CAN);
+	paceInputMap.addAttribute(AuthDataResponse.OEC_NS, PACEInputType.USE_SHORT_EF, "false");
 
 	// perform PACE by EstablishChannelCommand
 	EstablishChannel eChannel = createEstablishChannelStructure(conHandle, paceInputMap);

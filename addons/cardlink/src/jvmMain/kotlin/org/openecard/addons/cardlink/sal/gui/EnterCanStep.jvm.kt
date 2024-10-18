@@ -29,7 +29,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
@@ -39,6 +38,7 @@ import org.openecard.common.WSHelper.WSException
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.anytype.AuthDataResponse
+import org.openecard.common.ifd.anytype.PACEInputType
 import org.openecard.common.sal.util.InsertCardHelper
 import org.openecard.common.util.SysUtils
 import org.openecard.gui.StepResult
@@ -49,7 +49,7 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.ifd.protocol.pace.common.PasswordID
-import org.openecard.sal.protocol.eac.anytype.PACEInputType
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.CanLengthInvalidException
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 import org.openecard.sal.protocol.eac.gui.PinOrCanEmptyException

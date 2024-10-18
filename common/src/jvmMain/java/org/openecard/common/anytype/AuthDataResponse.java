@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,11 +31,12 @@ import org.w3c.dom.Element;
 /**
  *
  * @author Tobias Wich
- * @param <T> Specialiued type of the DIDAuthenticationData.
+ * @param <T> Specialized type of the DIDAuthenticationData.
  */
 public class AuthDataResponse <T extends DIDAuthenticationDataType> {
 
-    private static final String ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema";
+    public static final String ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema";
+	public static final String OEC_NS = "https://openecard.org/app";
 
     private final T responseObj;
 
@@ -70,5 +71,17 @@ public class AuthDataResponse <T extends DIDAuthenticationDataType> {
     public Element addElement(String localName, String data) {
 	return addElement(new QName(ISO_NS, localName), data);
     }
+
+	public void addAttribute(QName qname, String data) {
+		responseObj.getOtherAttributes().put(qname, data);
+	}
+
+	public void addAttribute(String ns, String localName, String data) {
+		addAttribute(new QName(ns, localName), data);
+	}
+
+	public void addAttribute(String localName, String data) {
+		addAttribute(new QName(null, localName), data);
+	}
 
 }

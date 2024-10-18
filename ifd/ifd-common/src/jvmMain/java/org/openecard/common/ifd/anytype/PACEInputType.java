@@ -25,6 +25,7 @@ package org.openecard.common.ifd.anytype;
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.common.anytype.AuthDataMap;
+import org.openecard.common.anytype.AuthDataResponse;
 
 
 /**
@@ -39,12 +40,14 @@ public class PACEInputType {
     public static final String CHAT = "CHAT";
     public static final String PIN = "PIN";
     public static final String CERTIFICATE_DESCRIPTION = "CertificateDescription";
+	public static final String USE_SHORT_EF = "UseShortEF";
     //
     private final AuthDataMap authMap;
     private final String pin;
     private final byte pinID;
     private final byte[] chat;
     private final byte[] certDesc;
+	private final boolean useShortEf;
 
     /**
      * Creates a new PACEInputType.
@@ -60,6 +63,7 @@ public class PACEInputType {
 	chat = authMap.getContentAsBytes(CHAT);
 	pin = authMap.getContentAsString(PIN);
 	certDesc = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION);
+	useShortEf = Boolean.parseBoolean(authMap.getAttribute(AuthDataResponse.OEC_NS, USE_SHORT_EF));
     }
 
     /**
@@ -97,6 +101,10 @@ public class PACEInputType {
     public byte[] getCertificateDescription() {
 	return certDesc;
     }
+
+	public boolean isUseShortEf() {
+		return useShortEf;
+	}
 
     /**
      * Returns a PACEOutputType based on the PACEInputType.

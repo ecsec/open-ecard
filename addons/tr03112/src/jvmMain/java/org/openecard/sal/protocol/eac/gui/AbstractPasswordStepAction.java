@@ -23,13 +23,13 @@ import org.openecard.common.ECardConstants;
 import org.openecard.common.WSHelper;
 import org.openecard.common.anytype.AuthDataMap;
 import org.openecard.common.anytype.AuthDataResponse;
+import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.gui.definition.PasswordField;
 import org.openecard.gui.executor.ExecutionResults;
 import org.openecard.gui.executor.StepAction;
 import org.openecard.ifd.protocol.pace.common.PasswordID;
 import org.openecard.sal.protocol.eac.EACData;
-import org.openecard.sal.protocol.eac.anytype.PACEInputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

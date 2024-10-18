@@ -1035,7 +1035,6 @@ public class TinySAL implements SAL {
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
 
 		if (CardUtils.isShortEFIdentifier(fileID)) {
-			cardStateEntry.unsetSelectedEF();
 			cardStateEntry.setSelectedEF(dataSetName, null);
 		} else {
 			byte[] slotHandle = connectionHandle.getSlotHandle();
@@ -1424,7 +1423,15 @@ public class TinySAL implements SAL {
 			throw new IncorrectParameterException(msg);
 		}
 
-		byte[] fileContent = CardUtils.readFile(fcp, env.getDispatcher(), slotHandle);
+		byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
+		Byte shortEf;
+		if (CardUtils.isShortEFIdentifier(fileID)) {
+			shortEf = fileID[0];
+		} else {
+			shortEf = null;
+		}
+
+		byte[] fileContent = CardUtils.readFile(fcp, shortEf, env.getDispatcher(), slotHandle);
 		response.setDSIContent(fileContent);
 
 	    } else {

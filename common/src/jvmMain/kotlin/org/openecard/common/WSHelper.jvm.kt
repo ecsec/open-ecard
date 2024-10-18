@@ -176,15 +176,11 @@ object WSHelper {
     }
 
     @JvmStatic
-	fun <C : Class<T>, T : ResponseBaseType> makeResponse(c: C, r: Result): T? {
-        try {
-            val t = c.getConstructor().newInstance()
-            t.profile = ECardConstants.Profile.ECARD_1_1
-            t.result = r
-            return t
-        } catch (ignore: Exception) {
-            return null
-        }
+	fun <C : Class<T>, T : ResponseBaseType> makeResponse(c: C, r: Result): T {
+		val t = c.getConstructor().newInstance()
+		t.profile = ECardConstants.Profile.ECARD_1_1
+		t.result = r
+		return t
     }
 
 

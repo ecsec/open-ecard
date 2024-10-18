@@ -30,6 +30,7 @@ import org.openecard.common.ECardException;
 import org.openecard.common.WSHelper;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.utils.CardUtils;
+import org.openecard.common.apdu.utils.FileControlParameters;
 import org.openecard.common.ifd.*;
 import org.openecard.common.ifd.anytype.PACEInputType;
 import org.openecard.common.ifd.anytype.PACEOutputType;
@@ -89,7 +90,7 @@ public class PACEProtocol implements Protocol {
 	    // Read EF.CardAccess from card
 	    byte[] slotHandle = req.getSlotHandle();
 	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle,
-		    ShortUtils.toByteArray(PACEConstants.EF_CARDACCESS_FID), null, CardUtils.FCP_RESPONSE_DATA);
+		    ShortUtils.toByteArray(PACEConstants.EF_CARDACCESS_FID), null, FileControlParameters.FCP);
 	    FCP efCardAccessFCP = new FCP(TLV.fromBER(resp.getData()));
 	    byte[] efcadata = CardUtils.readFile(efCardAccessFCP, dispatcher, slotHandle);
 

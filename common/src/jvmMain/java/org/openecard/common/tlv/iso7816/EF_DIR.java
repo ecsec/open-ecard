@@ -40,7 +40,7 @@ import org.openecard.common.tlv.Tag;
  */
 public class EF_DIR {
 
-    public static final short EF_DIR_FID = (short) 0x2F00;
+    private static final byte[] EF_DIR_FID = new byte[]{0x2F, 0x00};
 
     private final TLV tlv;
 

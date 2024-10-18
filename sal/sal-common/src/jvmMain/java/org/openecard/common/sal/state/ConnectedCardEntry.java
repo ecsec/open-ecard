@@ -33,6 +33,7 @@ public class ConnectedCardEntry extends CardEntry {
     protected byte[] cardApplication;
     private final Set<DIDInfoType> authenticatedDIDs = new HashSet<>();
     private FCP lastSelectedEfFCP;
+	private DataSetInfoType currentFile;
 
     public ConnectedCardEntry(byte[] slotHandle, byte[] cardApplication, CardEntry base) {
 	super(base.ctxHandle, base.ifdName, base.slotIdx, base.cif);
@@ -46,12 +47,18 @@ public class ConnectedCardEntry extends CardEntry {
 	connectionHandle.setSlotHandle(slotHandle);
     }
 
-    public void setFCPOfSelectedEF(FCP fcp) {
+    public void setSelectedEF(String dataSetName, FCP fcp) {
+	currentFile = this.cif.getDataSet(dataSetName, cardApplication);
 	lastSelectedEfFCP = fcp;
     }
-    public void unsetFCPOfSelectedEF() {
+    public void unsetSelectedEF() {
 	lastSelectedEfFCP = null;
+	currentFile = null;
     }
+
+	public DataSetInfoType getCurrentFileInfo() {
+		return this.currentFile;
+	}
 
     public FCP getFCPOfSelectedEF() {
 	return lastSelectedEfFCP;
@@ -110,6 +117,7 @@ public class ConnectedCardEntry extends CardEntry {
 
     public void setCurrentCardApplication(byte[] applicationID) {
 	this.cardApplication = ByteUtils.clone(applicationID);
+	unsetSelectedEF();
     }
     
     public CardApplicationWrapper getCurrentCardApplication() {

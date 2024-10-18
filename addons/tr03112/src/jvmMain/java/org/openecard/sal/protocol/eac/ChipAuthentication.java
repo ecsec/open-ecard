@@ -28,6 +28,7 @@ import org.openecard.common.apdu.common.CardCommandAPDU;
 import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.apdu.utils.CardUtils;
+import org.openecard.common.apdu.utils.FileControlParameters;
 import org.openecard.common.interfaces.Dispatcher;
 import org.openecard.common.sal.protocol.exception.ProtocolException;
 import org.openecard.common.tlv.TLV;
@@ -116,7 +117,7 @@ public class ChipAuthentication {
 	try {
 	    byte[] file = ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID);
 	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null,
-		    CardUtils.FCP_RESPONSE_DATA);
+			FileControlParameters.FCP);
 	    FCP efCardSecurityFCP = new FCP(TLV.fromBER(resp.getData()));
 	    byte[] efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle);
 	    return efCardSecurity;

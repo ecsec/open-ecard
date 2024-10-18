@@ -181,6 +181,7 @@ import org.openecard.common.apdu.common.CardResponseAPDU;
 import org.openecard.common.apdu.common.TrailerConstants;
 import org.openecard.common.apdu.exception.APDUException;
 import org.openecard.common.apdu.utils.CardUtils;
+import org.openecard.common.apdu.utils.FileControlParameters;
 import org.openecard.common.interfaces.Environment;
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked;
 import org.openecard.common.interfaces.Publish;
@@ -208,7 +209,6 @@ import org.openecard.common.tlv.iso7816.DataElements;
 import org.openecard.common.tlv.iso7816.FCP;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.crypto.common.sal.did.CryptoMarkerType;
-import org.openecard.gui.UserConsent;
 import org.openecard.ws.SAL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -466,7 +466,7 @@ public class TinySAL implements SAL {
 	    ConnectedCardEntry connectedCardEntry = stateEntry.setConnectedCard(slotHandle, applicationID, baseCardStateEntry);
 
 	    // reset the ef FCP
-	    connectedCardEntry.unsetFCPOfSelectedEF();
+	    connectedCardEntry.unsetSelectedEF();
 	    salStates.addCard(connectedCardEntry);
 
 	    response.setConnectionHandle(stateEntry.copyHandle());
@@ -508,7 +508,7 @@ public class TinySAL implements SAL {
 
 		cardStateEntry.setCurrentCardApplication(reqApplicationID);
 		// reset the ef FCP
-		cardStateEntry.unsetFCPOfSelectedEF();
+		cardStateEntry.unsetSelectedEF();
 	    }
 
 	    response.setConnectionHandle(stateEntry.copyHandle());
@@ -1033,23 +1033,29 @@ public class TinySAL implements SAL {
 		    NamedDataServiceActionName.DATA_SET_SELECT);
 
 	    byte[] fileID = dataSetInfo.getDataSetPath().getEfIdOrPath();
-	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
-		    null, CardUtils.FCP_RESPONSE_DATA);
 
-	    FCP fcp = null;
-	    if (result != null && result.getData().length > 0) {
-		try {
-		    fcp = new FCP(result.getData());
-		} catch (TLVException ex) {
-		    LOG.warn("Invalid FCP received.");
+		if (CardUtils.isShortEFIdentifier(fileID)) {
+			cardStateEntry.unsetSelectedEF();
+			cardStateEntry.setSelectedEF(dataSetName, null);
+		} else {
+			byte[] slotHandle = connectionHandle.getSlotHandle();
+			CardResponseAPDU result = CardUtils.selectFileWithOptions(env.getDispatcher(), slotHandle, fileID,
+				null, FileControlParameters.FCP);
+
+			FCP fcp = null;
+			if (result != null && result.getData().length > 0) {
+				try {
+					fcp = new FCP(result.getData());
+				} catch (TLVException ex) {
+					LOG.warn("Invalid FCP received.");
+				}
+			}
+			if (fcp == null) {
+				LOG.info("Using fake FCP.");
+				fcp = new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2, fileID.length)));
+			}
+			cardStateEntry.setSelectedEF(dataSetName, fcp);
 		}
-	    }
-	    if (fcp == null) {
-		LOG.info("Using fake FCP.");
-		fcp = new FCP(createFakeFCP(Arrays.copyOfRange(fileID, fileID.length - 2, fileID.length)));
-	    }
-	    cardStateEntry.setFCPOfSelectedEF(fcp);
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());
 	} catch (Exception e) {
@@ -1404,43 +1410,26 @@ public class TinySAL implements SAL {
 	    Assert.assertIncorrectParameter(dsiName, "The parameter DSIName is empty.");
 	    Assert.securityConditionDataSet(cardStateEntry, applicationID, dsiName, NamedDataServiceActionName.DSI_READ);
 
-	    if (cardStateEntry.getFCPOfSelectedEF() == null) {
+		var dataSetInfo = cardStateEntry.getCurrentFileInfo();
+	    if (dataSetInfo == null) {
 		throw new PrerequisitesNotSatisfiedException("No DataSet to read selected.");
 	    }
+		var fcp = cardStateEntry.getFCPOfSelectedEF();
+		DSIType dsi = CardInfoWrapper.resolveDSI(dataSetInfo, dsiName);
 
-	    CardInfoWrapper cardInfoWrapper = cardStateEntry.getCif();
-	    DataSetInfoType dataSetInfo = cardInfoWrapper.getDataSetByDsiName(dsiName);
-
-	    if (dataSetInfo == null) {
-		// there is no data set which contains the given dsi name so the name should be an data set name
-		dataSetInfo = cardInfoWrapper.getDataSetByName(dsiName);
-
-		if (dataSetInfo != null) {
-		    if (!cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().isEmpty()) {
-
-			byte[] path = dataSetInfo.getDataSetPath().getEfIdOrPath();
-			byte[] fid = Arrays.copyOfRange(path, path.length - 2, path.length);
-			if (!Arrays.equals(fid, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
-			    String msg = "Wrong DataSet for reading the DSI " + dsiName + " is selected.";
-			    throw new PrerequisitesNotSatisfiedException(msg);
-			}
-		    }
-
-		    byte[] fileContent = CardUtils.readFile(cardStateEntry.getFCPOfSelectedEF(), env.getDispatcher(),
-			    slotHandle);
-		    response.setDSIContent(fileContent);
-		} else {
-		    String msg = "The given DSIName does not related to any know DSI or DataSet.";
-		    throw new IncorrectParameterException(msg);
+	    if (dsi == null) {
+		// there is no dsi with the requested name in the data set, so the name should be the data set itself
+		if (!dataSetInfo.getDataSetName().equals(dsiName)) {
+			String msg = "The given DSIName does not related to any know DSI or DataSet.";
+			throw new IncorrectParameterException(msg);
 		}
-	    } else {
-		// There exists a data set with the given dsi name
-		// check whether the correct file is selected
-		byte[] dataSetPath = dataSetInfo.getDataSetPath().getEfIdOrPath();
-		byte[] dataSetFID = new byte[] {dataSetPath[dataSetPath.length - 2], dataSetPath[dataSetPath.length - 1]};
 
-		if (Arrays.equals(dataSetFID, cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0))) {
-		    DSIType dsi = cardInfoWrapper.getDSIbyName(dsiName);
+		byte[] fileContent = CardUtils.readFile(fcp, env.getDispatcher(), slotHandle);
+		response.setDSIContent(fileContent);
+
+	    } else {
+		    // There exists a data set with the given dsi name
+
 		    PathType dsiPath = dsi.getDSIPath();
 
 		    if (dsiPath.getTagRef() != null) {
@@ -1492,25 +1481,22 @@ public class TinySAL implements SAL {
 			allowedResponse.add(new byte[]{(byte) 0x90, (byte) 0x00});
 			allowedResponse.add(new byte[]{(byte) 0x62, (byte) 0x82});
 
-			if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
+			if (fcp != null && fcp.getDataElements().isLinear()) {
 			    // in this case we use the index as record number and the length as length of record
 			    ReadRecord readRecord = new ReadRecord(index[0]);
 			    // NOTE: For record based files TR-0312-4 states to ignore the length field in case of records
-			    CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle,
-				    allowedResponse);
+			    CardResponseAPDU cardResponse = readRecord.transmit(env.getDispatcher(), slotHandle, allowedResponse);
 			    response.setDSIContent(cardResponse.getData());
 			} else {
 			    // in this case we use index as offset and length as the expected length
 			    ReadBinary readBinary = new ReadBinary(ByteUtils.toShort(index), ByteUtils.toShort(length));
-			    CardResponseAPDU cardResponse = readBinary.transmit(env.getDispatcher(), slotHandle,
-				    allowedResponse);
+			    CardResponseAPDU cardResponse = readBinary.transmit(env.getDispatcher(), slotHandle, allowedResponse);
 			    response.setDSIContent(cardResponse.getData());
 			}
 		    } else {
 			String msg = "The currently selected data set does not contain the DSI with the name " + dsiName;
 			throw new PrerequisitesNotSatisfiedException(msg);
 		    }
-		}
 	    }
 	} catch (ECardException e) {
 	    response.setResult(e.getResult());

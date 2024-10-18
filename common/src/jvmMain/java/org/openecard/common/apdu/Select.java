@@ -38,6 +38,7 @@ public class Select extends CardCommandAPDU {
      * SELECT command instruction byte
      */
     private static final byte SELECT_INS = (byte) 0xA4;
+	private static final byte NO_FILE_METADATA = (byte) 0x0C;
     private static final byte FCI = (byte) 0x00;
     private static final byte FCP = (byte) 0x04;
     private static final byte FMD = (byte) 0x08;
@@ -51,6 +52,14 @@ public class Select extends CardCommandAPDU {
     public Select(byte p1, byte p2) {
 	super(x00, SELECT_INS, p1, p2);
     }
+
+	/**
+	 * Set to return no file metadata (FCI, FCP, FMD).
+	 */
+	public void setNoMetadata() {
+		setP2(NO_FILE_METADATA);
+		setLE(0);
+	}
 
     /**
      * Set to return FCI (File Control Information) template.
@@ -69,7 +78,7 @@ public class Select extends CardCommandAPDU {
     }
 
     /**
-     * Set to return FCP (File Management Data) template.
+     * Set to return FMD (File Management Data) template.
      */
     public void setFMD() {
 	setP2(FMD);
@@ -88,7 +97,7 @@ public class Select extends CardCommandAPDU {
 	 * Creates a new Select APDU to select the Master File.
 	 */
 	public MasterFile() {
-	    super((byte) 0x00, (byte) 0x0C);
+	    super((byte) 0x00, NO_FILE_METADATA);
 	    setData(MF_FID);
 	}
     }
@@ -103,7 +112,7 @@ public class Select extends CardCommandAPDU {
 	 * @param fid File Identifier
 	 */
 	public File(byte[] fid) {
-	    super((byte) 0x00, (byte) 0x0C);
+	    super((byte) 0x00, NO_FILE_METADATA);
 	    setData(fid);
 	}
     }
@@ -119,7 +128,7 @@ public class Select extends CardCommandAPDU {
 	 * @param fid File Identifier
 	 */
 	public ChildDirectory(byte[] fid) {
-	    super((byte) 0x01, (byte) 0x0C);
+	    super((byte) 0x01, NO_FILE_METADATA);
 	    setData(fid);
 	}
     }
@@ -135,7 +144,7 @@ public class Select extends CardCommandAPDU {
 	 * @param fid File Identifier
 	 */
 	public ChildFile(byte[] fid) {
-	    super((byte) 0x02, (byte) 0x0C);
+	    super((byte) 0x02, NO_FILE_METADATA);
 	    setData(fid);
 	}
 
@@ -158,7 +167,7 @@ public class Select extends CardCommandAPDU {
 	 * Creates a new Select APDU to select the parent directory.
 	 */
 	public Parent() {
-	    super((byte) 0x03, (byte) 0x0C);
+	    super((byte) 0x03, NO_FILE_METADATA);
 	}
     }
 
@@ -173,7 +182,7 @@ public class Select extends CardCommandAPDU {
 	 * @param aid Application Identifier
 	 */
 	public Application(byte[] aid) {
-	    super((byte) 0x04, (byte) 0x0C);
+	    super((byte) 0x04, NO_FILE_METADATA);
 	    setData(aid);
 	}
     }
@@ -189,7 +198,7 @@ public class Select extends CardCommandAPDU {
 	 * @param aid Application Identifier
 	 */
 	public AbsolutePath(byte[] aid) {
-	    super((byte) 0x08, (byte) 0x0C);
+	    super((byte) 0x08, NO_FILE_METADATA);
 	    setData(aid);
 	}
     }
@@ -205,7 +214,7 @@ public class Select extends CardCommandAPDU {
 	 * @param aid Application Identifier
 	 */
 	public RelativePath(byte[] aid) {
-	    super((byte) 0x09, (byte) 0x0C);
+	    super((byte) 0x09, NO_FILE_METADATA);
 	    setData(aid);
 	}
     }

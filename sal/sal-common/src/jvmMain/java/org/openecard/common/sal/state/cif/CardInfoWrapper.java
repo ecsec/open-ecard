@@ -326,6 +326,15 @@ public class CardInfoWrapper {
 	return null;
     }
 
+	public static DSIType resolveDSI(DataSetInfoType dataSetInfo, String dsiName) {
+		for (DSIType dsi : dataSetInfo.getDSI()) {
+			if (dsi.getDSIName().equals(dsiName)) {
+				return dsi;
+			}
+		}
+		return null;
+	}
+
     /**
      * The method searches a specific data set by the DSI name.
      *

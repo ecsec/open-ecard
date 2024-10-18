@@ -72,11 +72,13 @@ class CardLinkProcess(
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 		val webSocketId = dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String?
 		val iccsn = dynCtx.get(CardLinkKeys.ICCSN) as String?
+		val iccsnReassignment = dynCtx.get(CardLinkKeys.ICCSN_REASSIGNMENT_TIMESTAMP) as String?
 
 		// no error means success
 		val bindingResult = BindingResult(BindingResultCode.OK)
 		bindingResult.addParameter(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
 		bindingResult.addParameter(CardLinkKeys.ICCSN, iccsn)
+		iccsnReassignment?.let { bindingResult.addParameter(CardLinkKeys.ICCSN_REASSIGNMENT_TIMESTAMP, it) }
 		webSocketId?.let { bindingResult.addParameter(CardLinkKeys.WS_SESSION_ID, it) }
 		return bindingResult
     }
@@ -131,6 +133,7 @@ class CardLinkProcess(
 	}
 
 	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, wsPair: WsPair) {
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val wsListener = wsPair.listener
 
 		while (wsListener.isOpen()) {
@@ -151,7 +154,7 @@ class CardLinkProcess(
 
 			if (gematikMessage.payload is ICCSNReassignment) {
 				logger.debug { "Received '${ICCSN_REASSIGNMENT}' message from CardLink service." }
-				// TODO: do interaction call here to inform User about received ICCSN reassignment message
+				dynCtx.put(CardLinkKeys.ICCSN_REASSIGNMENT_TIMESTAMP, gematikMessage.payload.lastAssignment)
 				continue
 			}
 
@@ -161,7 +164,6 @@ class CardLinkProcess(
 				val displayError = "$errorMsg (Result Code: $errorResultCode)"
 				logger.warn { "Received '${TASK_LIST_ERROR}': $displayError" }
 
-				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 				dynCtx.put(CardLinkKeys.ERROR_CODE, errorResultCode)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 

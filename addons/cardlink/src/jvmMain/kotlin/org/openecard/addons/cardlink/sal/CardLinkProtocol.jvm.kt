@@ -58,4 +58,5 @@ object CardLinkKeys {
 	const val ICCSN = "${prefix}ICCSN"
 	const val ERROR_CODE = "${prefix}ERROR_CODE"
 	const val ERROR_MESSAGE = "${prefix}ERROR_MESSAGE"
+	const val ICCSN_REASSIGNMENT_TIMESTAMP = "${prefix}ICCSN_REASSIGNMENT_TIMESTAMP"
 }

@@ -54,7 +54,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      *
      * @param offset Offset
      */
@@ -63,7 +63,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      *
      * @param offset Offset
      * @param length Expected length
@@ -73,7 +73,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      * Bit 8 of P1 is set to 1, bits 7 and 6 of P1 are set to 00 (RFU),
      * bits 5 to 1 of P1 encode a short EF identifier and P2 (eight bits)
      * encodes an offset from zero to 255.
@@ -88,7 +88,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      * Bit 8 of P1 is set to 0, and P1-P2 (fifteen bits) encodes an
      * offset from zero to 32 767.
      *
@@ -103,7 +103,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      * Bit 8 of P1 is set to 0, and P1-P2 (fifteen bits) encodes an
      * offset from zero to 32 767.
      *
@@ -118,7 +118,7 @@ public class ReadBinary extends CardCommandAPDU {
     }
 
     /**
-     * Creates an new READ BINARY APDU.
+     * Creates a new READ BINARY APDU.
      * P1-P2 set to '0000' identifies the current EF.
      * The offset data object with tag '54' is encoded in the command data field.
      *
@@ -132,7 +132,7 @@ public class ReadBinary extends CardCommandAPDU {
 	byte[] content = ShortUtils.toByteArray(offset);
 	content = ByteUtils.concatenate((byte) 0x54, content);
 
-	setP1P2(ShortUtils.toByteArray(fileID));
+	setP1P2(ShortUtils.toByteArray(fileID, true));
 	setData(content);
 	setLE(length);
     }

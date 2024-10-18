@@ -25,6 +25,8 @@ package org.openecard.common.apdu;
 import iso.std.iso_iec._24727.tech.schema.Transmit;
 import java.util.ArrayList;
 import org.openecard.common.apdu.common.CardCommandAPDU;
+import org.openecard.common.tlv.TLV;
+import org.openecard.common.tlv.TLVException;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.common.util.ShortUtils;
 
@@ -95,21 +97,6 @@ public class ReadBinary extends CardCommandAPDU {
      * @param offset Offset
      * @param length Expected length
      */
-    public ReadBinary(short offset, byte length) {
-	setINS(READ_BINARY_INS_1);
-	setP1((byte) (((byte) (offset >> 8)) & 0x7F));
-	setP2((byte) (offset & xFF));
-	setLE(length);
-    }
-
-    /**
-     * Creates a new READ BINARY APDU.
-     * Bit 8 of P1 is set to 0, and P1-P2 (fifteen bits) encodes an
-     * offset from zero to 32 767.
-     *
-     * @param offset Offset
-     * @param length Expected length
-     */
     public ReadBinary(short offset, short length) {
 	setINS(READ_BINARY_INS_1);
 	setP1((byte) (((byte) (offset >> 8)) & 0x7F));
@@ -129,12 +116,22 @@ public class ReadBinary extends CardCommandAPDU {
     public ReadBinary(short fileID, short offset, short length) {
 	super(x00, READ_BINARY_INS_2, x00, x00);
 
-	byte[] content = ShortUtils.toByteArray(offset);
-	content = ByteUtils.concatenate((byte) 0x54, content);
+	try {
+		// offset DO according to ISO/IEC 7816-4, Sec. 7.2.2
+		var discretionaryData = new TLV();
+		discretionaryData.setTagNumWithClass((byte) 0x53);
+		var offsetDo = new TLV();
+		offsetDo.setTagNumWithClass((byte) 0x54);
+		offsetDo.setValue(ShortUtils.toByteArray(offset));
+		discretionaryData.setChild(offsetDo);
+		var content = discretionaryData.toBER();
 
-	setP1P2(ShortUtils.toByteArray(fileID, true));
-	setData(content);
-	setLE(length);
+		setP1P2(ShortUtils.toByteArray(fileID, true));
+		setData(content);
+		setLE(length);
+	} catch (TLVException ex) {
+		throw new RuntimeException("Error encoding offset DO.", ex);
+	}
     }
 
     /**

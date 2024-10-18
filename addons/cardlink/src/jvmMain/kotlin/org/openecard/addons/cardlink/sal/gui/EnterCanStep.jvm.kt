@@ -138,7 +138,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 					// repeat the step
 					LOG.info { errorMessage }
 
-					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_INCORRECT.name)
+					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.ClientCodes.CAN_INCORRECT.name)
 					dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
 
 					return StepActionResult(
@@ -150,7 +150,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 					// repeat the step
 					LOG.info { errorMessage }
 
-					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CARD_REMOVED.name)
+					dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.ClientCodes.CARD_REMOVED.name)
 					dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
 
 					return StepActionResult(
@@ -172,9 +172,12 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 			// for people which think they have to remove the card in the process
 			if (ex.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
-				LOG.error(ex) {
-					"The SlotHandle was invalid so probably the user removed the card or an reset occurred."
-				}
+				val errorMessage = "The SlotHandle was invalid so probably the user removed the card or an reset occurred."
+				LOG.error(ex) { errorMessage }
+
+				dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.ClientCodes.INVALID_SLOT_HANDLE.name)
+				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
+
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
 					ErrorStep(
@@ -197,7 +200,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 			val errorMessage = "CAN step action interrupted."
 			LOG.info { errorMessage }
 
-			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_STEP_INTERRUPTED.name)
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.ClientCodes.CAN_STEP_INTERRUPTED.name)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
 
 			return StepActionResult(
@@ -208,7 +211,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 			val errorMessage = "CAN was empty."
 			LOG.info { errorMessage }
 
-			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.CAN_EMPTY.name)
+			dynCtx.put(CardLinkKeys.ERROR_CODE, ErrorCodes.ClientCodes.CAN_EMPTY.name)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMessage)
 
 			return StepActionResult(

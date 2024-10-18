@@ -246,7 +246,7 @@ public class CardUtils {
     public static byte[] readFile(FCP fcp, Byte shortEf, Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	// Read 255 bytes per APDU
-	byte length = (byte) 0xFF;
+	short length = 0xFF;
 	short numToRead = -1; // -1 indicates I don't know
 	if (fcp != null) {
 	    Long fcpNumBytes = fcp.getNumBytes();
@@ -273,7 +273,11 @@ public class CardUtils {
 		if (! isRecord) {
 		    CardCommandAPDU readBinary;
 			if (shortEf != null) {
-				readBinary = new ReadBinary(shortEf, numRead, length);
+				if (numRead > 0xFF) {
+					readBinary = new ReadBinary(shortEf, numRead, length);
+				} else {
+					readBinary = new ReadBinary(shortEf, (byte) numRead, length);
+				}
 			} else {
 				readBinary = new ReadBinary(numRead, length);
 			}

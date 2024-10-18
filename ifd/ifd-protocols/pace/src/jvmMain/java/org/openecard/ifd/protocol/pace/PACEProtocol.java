@@ -93,10 +93,8 @@ public class PACEProtocol implements Protocol {
 		if (paceInput.isUseShortEf()) {
 			efcadata = CardUtils.readFile(null, PACEConstants.EF_CARDACCESS_FID_SHORT, dispatcher, slotHandle);
 		} else {
-			CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle,
-				ShortUtils.toByteArray(PACEConstants.EF_CARDACCESS_FID), null, FileControlParameters.FCP);
-			FCP efCardAccessFCP = new FCP(TLV.fromBER(resp.getData()));
-			efcadata = CardUtils.readFile(efCardAccessFCP, dispatcher, slotHandle);
+			CardUtils.selectFileWithOptions(dispatcher, slotHandle, PACEConstants.EF_CARDACCESS_FID, null, FileControlParameters.NONE);
+			efcadata = CardUtils.readFile(null, dispatcher, slotHandle);
 		}
 
 	    // Parse SecurityInfos and get PACESecurityInfos

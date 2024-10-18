@@ -35,7 +35,7 @@ import org.openecard.crypto.common.asn1.eac.oid.PACEObjectIdentifier;
 class PACEConstants {
 
     // EF.CardAccess file identifier
-    public static final short EF_CARDACCESS_FID = (short) 0x011C;
+    public static final byte[] EF_CARDACCESS_FID = new byte[]{0x01, 0x1C};
 	public static final byte EF_CARDACCESS_FID_SHORT = (byte) 0x1C;
     // PACE password types
     public static final byte PASSWORD_MRZ = (byte) 0x01;

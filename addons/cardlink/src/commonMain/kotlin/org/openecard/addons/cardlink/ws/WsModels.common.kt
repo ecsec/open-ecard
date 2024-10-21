@@ -249,7 +249,7 @@ data class RegisterEgkFinish(
 
 fun ResultCode.toCardLinkErrorCode(): CardLinkErrorCodes.CardLinkCodes? {
 	return when(this) {
-		ResultCode.NUMBER_FROM_WRONG_COUNTRY -> CardLinkErrorCodes.CardLinkCodes.NUMBER_FROM_WRONG_COUNTRY
+		ResultCode.NUMBER_FROM_WRONG_COUNTRY -> CardLinkErrorCodes.CardLinkCodes.NOT_ADMISSIBLE_TEL_PREFIX
 		ResultCode.NUMBER_BLOCKED -> CardLinkErrorCodes.CardLinkCodes.NUMBER_BLOCKED
 		ResultCode.TAN_EXPIRED -> CardLinkErrorCodes.CardLinkCodes.TAN_EXPIRED
 		ResultCode.TAN_INCORRECT -> CardLinkErrorCodes.CardLinkCodes.TAN_INCORRECT

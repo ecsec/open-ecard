@@ -61,18 +61,16 @@ class CardLinkErrorCodes {
 		NOT_ADMISSIBLE_TEL_PREFIX(1018),
 		// Unknown error, probably an internal server error happened or used on an unknown result code
 		UNKNOWN_ERROR(1019),
-		// Not a german phone number
-		NUMBER_FROM_WRONG_COUNTRY(1020),
 		// Phone number is blocked
-		NUMBER_BLOCKED(1021),
+		NUMBER_BLOCKED(1020),
 		// Tan has expired
-		TAN_EXPIRED(1022),
+		TAN_EXPIRED(1021),
 		// Tan is incorrect
-		TAN_INCORRECT(1023),
+		TAN_INCORRECT(1022),
 		// Tan retry limit exceeded
-		TAN_RETRY_LIMIT_EXCEEDED(1024),
+		TAN_RETRY_LIMIT_EXCEEDED(1023),
 		// If the client does not receive an APDU message from the CardLink service
-		SERVER_TIMEOUT(1025);
+		SERVER_TIMEOUT(1024);
 
 		companion object {
 			private var codesByStatus: Map<Int, CardLinkCodes> = entries.associateBy { it.statusCode }

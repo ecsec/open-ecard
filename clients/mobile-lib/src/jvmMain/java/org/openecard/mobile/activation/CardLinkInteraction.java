@@ -27,9 +27,9 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface CardLinkInteraction extends ActivationInteraction {
 	void onCanRequest(ConfirmPasswordOperation enterCan);
-	void onCanRetry(ConfirmPasswordOperation enterCan, CardLinkErrorCodes.ClientCodes resultCode, String errorMessage);
+	void onCanRetry(ConfirmPasswordOperation enterCan, ErrorCodes.CardLinkErrorCodes.ClientCodes resultCode, String errorMessage);
 	void onPhoneNumberRequest(ConfirmTextOperation enterPhoneNumber);
-	void onPhoneNumberRetry(ConfirmTextOperation enterPhoneNumber, CardLinkErrorCodes.CardLinkCodes resultCode, String errorMessage);
+	void onPhoneNumberRetry(ConfirmTextOperation enterPhoneNumber, ErrorCodes.CardLinkErrorCodes.CardLinkCodes resultCode, String errorMessage);
 	void onSmsCodeRequest(ConfirmPasswordOperation smsCode);
-	void onSmsCodeRetry(ConfirmPasswordOperation smsCode, CardLinkErrorCodes.CardLinkCodes resultCode, String errorMessage);
+	void onSmsCodeRetry(ConfirmPasswordOperation smsCode, ErrorCodes.CardLinkErrorCodes.CardLinkCodes resultCode, String errorMessage);
 }

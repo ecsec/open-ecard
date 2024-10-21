@@ -146,12 +146,14 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 				val resultStatus = when (egkPayload.resultCode) {
 					ResultCode.TAN_INCORRECT -> StepActionResultStatus.REPEAT
 					ResultCode.TAN_EXPIRED -> StepActionResultStatus.BACK
+					ResultCode.TAN_RETRY_LIMIT_EXCEEDED -> StepActionResultStatus.BACK
 					else -> StepActionResultStatus.CANCEL
 				}
 
 				val retryStep = when (egkPayload.resultCode) {
 					ResultCode.TAN_INCORRECT -> TanRetryStep(tanStep.ws)
 					ResultCode.TAN_EXPIRED -> PhoneStep(tanStep.ws)
+					ResultCode.TAN_RETRY_LIMIT_EXCEEDED -> PhoneStep(tanStep.ws)
 					else -> null
 				}
 

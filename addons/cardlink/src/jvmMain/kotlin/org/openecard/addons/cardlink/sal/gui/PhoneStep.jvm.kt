@@ -23,7 +23,6 @@
 package org.openecard.addons.cardlink.sal.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
@@ -36,6 +35,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 import java.util.*
 
@@ -107,7 +107,7 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
-			dynCtx.put(CardLinkKeys.ERROR_CODE, ResultCode.UNKNOWN_ERROR.name)
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
@@ -127,7 +127,7 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 			} else {
 				logger.error { "Received error in Phone step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
 
-				dynCtx.put(CardLinkKeys.ERROR_CODE, egkPayload.resultCode.name)
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, egkPayload.resultCode.toCardLinkErrorCode())
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
 				val resultStatus = when (egkPayload.resultCode) {
@@ -145,6 +145,8 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		} else {
 			val errorMsg = "EGK Payload is not from type ConfirmPhoneNumber."
 			logger.error { errorMsg }
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
 				ErrorStep(

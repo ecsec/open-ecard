@@ -28,6 +28,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.*
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -244,3 +245,17 @@ enum class ResultCode {
 data class RegisterEgkFinish(
 	val removeCard: Boolean,
 ) : CardLinkPayload
+
+
+fun ResultCode.toCardLinkErrorCode(): CardLinkErrorCodes.CardLinkCodes? {
+	return when(this) {
+		ResultCode.NUMBER_FROM_WRONG_COUNTRY -> CardLinkErrorCodes.CardLinkCodes.NUMBER_FROM_WRONG_COUNTRY
+		ResultCode.NUMBER_BLOCKED -> CardLinkErrorCodes.CardLinkCodes.NUMBER_BLOCKED
+		ResultCode.TAN_EXPIRED -> CardLinkErrorCodes.CardLinkCodes.TAN_EXPIRED
+		ResultCode.TAN_INCORRECT -> CardLinkErrorCodes.CardLinkCodes.TAN_INCORRECT
+		ResultCode.TAN_RETRY_LIMIT_EXCEEDED -> CardLinkErrorCodes.CardLinkCodes.TAN_RETRY_LIMIT_EXCEEDED
+		ResultCode.INVALID_REQUEST -> CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE
+		ResultCode.UNKNOWN_ERROR -> CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+		else -> null
+	}
+}

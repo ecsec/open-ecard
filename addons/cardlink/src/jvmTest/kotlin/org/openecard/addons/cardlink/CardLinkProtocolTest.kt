@@ -220,9 +220,9 @@ class CardLinkProtocolTest {
 			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
 			override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
 				logger.info { "onCanRequest" }
-				enterCan.confirmPassword("123123")
+				enterCan.confirmPassword("1231234")
 			}
-			override fun onCanRetry(enterCan: ConfirmPasswordOperation, resultCode: String?, errorMessage: String?) {
+			override fun onCanRetry(enterCan: ConfirmPasswordOperation, resultCode: CardLinkErrorCodes.ClientCodes?, errorMessage: String?) {
 				logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
 				enterCan.confirmPassword("123123")
 			}
@@ -236,7 +236,7 @@ class CardLinkProtocolTest {
 			}
 			override fun onPhoneNumberRetry(
 				enterPhoneNumber: ConfirmTextOperation,
-				resultCode: String?,
+				resultCode: CardLinkErrorCodes.CardLinkCodes?,
 				errorMessage: String?,
 			) {
 				logger.info { "onPhoneNumberRetry: $errorMessage (Status Code: $resultCode)" }
@@ -244,7 +244,7 @@ class CardLinkProtocolTest {
 			}
 			override fun onSmsCodeRetry(
 				smsCode: ConfirmPasswordOperation,
-				resultCode: String?,
+				resultCode: CardLinkErrorCodes.CardLinkCodes?,
 				errorMessage: String?,
 			) {
 				logger.info { "onSmsCodeRetry: $errorMessage (Status Code: $resultCode)" }

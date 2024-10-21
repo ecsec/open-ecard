@@ -35,6 +35,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 
 
@@ -107,7 +108,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
 			logger.error { errorMsg }
-			dynCtx.put(CardLinkKeys.ERROR_CODE, ResultCode.UNKNOWN_ERROR.name)
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
@@ -121,6 +122,8 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		if (tanConfirmResponse.correlationId != correlationId) {
 			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
 			logger.error { errorMsg }
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
 				ErrorStep(
@@ -137,7 +140,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 			} else {
 				logger.error { "Received error in Tan step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
 
-				dynCtx.put(CardLinkKeys.ERROR_CODE, egkPayload.resultCode.name)
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, egkPayload.resultCode.toCardLinkErrorCode())
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
 				val resultStatus = when (egkPayload.resultCode) {
@@ -157,6 +160,8 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		} else {
 			val errorMsg = "EGK Payload is not from type ConfirmTan."
 			logger.error { errorMsg }
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 			return StepActionResult(
 				StepActionResultStatus.CANCEL,
 				ErrorStep(

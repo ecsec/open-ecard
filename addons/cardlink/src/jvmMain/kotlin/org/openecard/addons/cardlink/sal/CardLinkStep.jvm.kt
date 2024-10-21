@@ -26,7 +26,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
@@ -40,6 +39,7 @@ import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
@@ -68,7 +68,10 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 				else -> {
 					// fail
 					return DIDAuthenticateResponse().apply {
-						val resultCode = dynCtx.get(CardLinkKeys.ERROR_CODE) as String? ?: ResultCode.UNKNOWN_ERROR.name
+						val clientCode = dynCtx.get(CardLinkKeys.CLIENT_ERROR_CODE) as CardLinkErrorCodes.ClientCodes?
+						val cardLinkCode = dynCtx.get(CardLinkKeys.SERVICE_ERROR_CODE) as CardLinkErrorCodes.CardLinkCodes?
+
+						val resultCode = cardLinkCode?.name ?: clientCode?.name ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR.name
 						val errorMessage = dynCtx.get(CardLinkKeys.ERROR_MESSAGE) as String? ?: "Unknown Error happened during CardLink process."
 						result = WSHelper.makeResultError(resultCode, errorMessage)
 					}

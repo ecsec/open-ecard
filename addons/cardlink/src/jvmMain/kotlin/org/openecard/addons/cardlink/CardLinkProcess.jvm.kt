@@ -33,13 +33,14 @@ import org.openecard.addons.cardlink.sal.*
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
-import org.openecard.common.ECardConstants
 import org.openecard.common.WSHelper
 import org.openecard.common.toException
 import org.openecard.common.util.HandlerUtils
+import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
 import java.util.*
+import kotlin.time.Duration
 
 
 private val logger = KotlinLogging.logger {}
@@ -142,7 +143,7 @@ class CardLinkProcess(
 			if (gematikMessage == null) {
 				val errorMsg = "Timeout happened during APDU exchange with CardLink-Service."
 				logger.warn { errorMsg }
-				throw WSHelper.makeResultError(ECardConstants.Minor.Disp.TIMEOUT, errorMsg).toException()
+				throw WSHelper.makeResultError(CardLinkErrorCodes.CardLinkCodes.SERVER_TIMEOUT.name, errorMsg).toException()
 			}
 
 			if (gematikMessage.payload is RegisterEgkFinish) {
@@ -160,20 +161,24 @@ class CardLinkProcess(
 
 			if (gematikMessage.payload is TasklistErrorPayload) {
 				val errorMsg = gematikMessage.payload.errormessage ?: "Received an unknown error from CardLink service."
-				val errorResultCode = ErrorCodes.CardLinkCodes.byStatus(gematikMessage.payload.status)?.name ?: ErrorCodes.CardLinkCodes.UNKNOWN_ERROR.name
-				val displayError = "$errorMsg (Result Code: $errorResultCode)"
-				logger.warn { "Received '${TASK_LIST_ERROR}': $displayError" }
+				val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(gematikMessage.payload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
 
-				dynCtx.put(CardLinkKeys.ERROR_CODE, errorResultCode)
+				logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
+
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, errorResultCode)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 
-				throw WSHelper.makeResultError(ECardConstants.Minor.Disp.COMM_ERROR, displayError).toException()
+				throw WSHelper.makeResultError(errorResultCode.name, errorMsg).toException()
 			}
 
 			if (gematikMessage.cardSessionId == null || gematikMessage.correlationId == null) {
 				val errorMsg = "Received malformed SendAPDU message which does not contain a cardSessionId or correlationId."
 				logger.warn { errorMsg }
-				continue
+
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE)
+				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
+
+				throw WSHelper.makeResultError(CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE.name, errorMsg).toException()
 			}
 
 			if (gematikMessage.payload !is SendApdu) {
@@ -216,7 +221,7 @@ class CardLinkProcess(
 	private fun waitForSessionInformation(dynCtx: DynamicContext, wsPair: WsPair) {
 		val wsListener = wsPair.listener
 		runBlocking {
-			val sessionInformation = wsListener.nextMessage()
+			val sessionInformation = wsListener.nextMessage(Duration.parse("5s"))
 			val payload = sessionInformation?.payload
 
 			if (sessionInformation == null) {

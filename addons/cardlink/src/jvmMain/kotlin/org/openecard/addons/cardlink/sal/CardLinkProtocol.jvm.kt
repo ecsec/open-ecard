@@ -56,7 +56,8 @@ object CardLinkKeys {
 	const val WEBSOCKET = "${prefix}WEBSOCKET"
 	const val CORRELATION_ID_TAN_PROCESS = "${prefix}CORRELATION_ID_TAN"
 	const val ICCSN = "${prefix}ICCSN"
-	const val ERROR_CODE = "${prefix}ERROR_CODE"
+	const val CLIENT_ERROR_CODE = "${prefix}CLIENT_ERROR_CODE"
+	const val SERVICE_ERROR_CODE = "${prefix}SERVICE_ERROR_CODE"
 	const val ERROR_MESSAGE = "${prefix}ERROR_MESSAGE"
 	const val ICCSN_REASSIGNMENT_TIMESTAMP = "${prefix}ICCSN_REASSIGNMENT_TIMESTAMP"
 }

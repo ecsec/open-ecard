@@ -160,7 +160,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 
 				try {
 					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var resultCode = (CardLinkErrorCodes.CardLinkCodes) dynCtx.get("CardLink::SERVICE_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
 					interaction.onPhoneNumberRetry(confirmTextOperation, resultCode, errorMessage);
@@ -192,7 +192,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 
 				try {
 					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var resultCode = (CardLinkErrorCodes.CardLinkCodes) dynCtx.get("CardLink::SERVICE_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
 					interaction.onSmsCodeRetry(confirmTan, resultCode, errorMessage);
@@ -237,7 +237,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 
 				try {
 					var dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
-					var resultCode = (String) dynCtx.get("CardLink::ERROR_CODE");
+					var resultCode = (CardLinkErrorCodes.ClientCodes) dynCtx.get("CardLink::CLIENT_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
 					interaction.onCanRetry(confirmCan, resultCode, errorMessage);

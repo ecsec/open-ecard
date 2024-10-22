@@ -31,7 +31,7 @@ dependencies {
 tasks.named("jar").dependsOn("copyHeaders")
 
 robovm {
-	isEnableBitcode = true
+	isEnableBitcode = false
 }
 
 tasks.register("copyHeaders", Copy::class){

@@ -28,6 +28,8 @@ import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
+import org.openecard.common.WSHelper
+import org.openecard.common.toException
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.TextField
@@ -119,8 +121,19 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 			)
 		}
 
+		val egkPayload = tanConfirmResponse.payload
+
+		if (egkPayload is TasklistErrorPayload) {
+			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
+			val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+			logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, errorResultCode)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
+			throw WSHelper.makeResultError(errorResultCode.name, errorMsg).toException()
+		}
+
 		if (tanConfirmResponse.correlationId != correlationId) {
-			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
+			val errorMsg = "Received TAN-Confirm response where Correlation-ID does not match."
 			logger.error { errorMsg }
 			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
@@ -133,7 +146,6 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 			)
 		}
 
-		val egkPayload = tanConfirmResponse.payload
 		if (egkPayload is ConfirmTan) {
 			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
 				StepActionResult(StepActionResultStatus.NEXT)

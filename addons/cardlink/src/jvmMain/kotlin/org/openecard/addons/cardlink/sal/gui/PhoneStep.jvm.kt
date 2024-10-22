@@ -28,6 +28,8 @@ import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.*
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
+import org.openecard.common.WSHelper
+import org.openecard.common.toException
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.TextField
@@ -119,6 +121,16 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		}
 
 		val egkPayload = phoneNumberResponse.payload
+
+		if (egkPayload is TasklistErrorPayload) {
+			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
+			val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+			logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
+			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, errorResultCode)
+			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
+			throw WSHelper.makeResultError(errorResultCode.name, errorMsg).toException()
+		}
+
 		if (egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 

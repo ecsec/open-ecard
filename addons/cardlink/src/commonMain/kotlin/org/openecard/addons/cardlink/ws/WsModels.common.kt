@@ -76,7 +76,8 @@ object GematikMessageSerializer : KSerializer<GematikEnvelope> {
 		}
 		val base64EncodedPayload: String = value.payload.let {
 			val payloadJsonStr = cardLinkJsonFormatter.encodeToString(it)
-			Base64.encode(payloadJsonStr.encodeToByteArray()).trimEnd('=')
+			Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+				.encode(payloadJsonStr.encodeToByteArray())
 		}
 		val jsonPayload = buildJsonObject {
 			put("type", payloadType)
@@ -111,7 +112,9 @@ object GematikMessageSerializer : KSerializer<GematikEnvelope> {
 
 	@OptIn(ExperimentalEncodingApi::class)
 	fun toTypedJsonElement(base64EncodedPayload: String, payloadType: String) : JsonObject {
-		val jsonPayload = String(Base64.decode(base64EncodedPayload))
+		val jsonPayload = Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+			.decode(base64EncodedPayload)
+			.toString(Charsets.UTF_8)
 		val jsonElement = Json.parseToJsonElement(jsonPayload)
 		return JsonObject(jsonElement.jsonObject.toMutableMap().apply {
 			put(Json.configuration.classDiscriminator, JsonPrimitive(payloadType))
@@ -127,12 +130,14 @@ object ByteArrayAsBase64Serializer : KSerializer<ByteArray> {
 	override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ByteArrayAsBase64Serializer", PrimitiveKind.STRING)
 
 	override fun serialize(encoder: Encoder, value: ByteArray) {
-		val base64Encoded = Base64.encode(value).trimEnd('=')
-		encoder.encodeString(base64Encoded)
+		encoder.encodeString(
+			Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(value)
+		)
 	}
 
 	override fun deserialize(decoder: Decoder): ByteArray {
-		return Base64.decode(decoder.decodeString())
+		return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+			.decode(decoder.decodeString())
 	}
 }
 

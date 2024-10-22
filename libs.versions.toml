@@ -1,8 +1,8 @@
 [versions]
 agp = "8.2.+"
-kotlin = "1.9.+"
-kx-co = "1.8.+"
-kx-serde = "1.6.+"
+kotlin = "2.0.21"
+kx-co = "1.9.+"
+kx-serde = "1.7.+"
 
 ktor = "2.3.+"
 

@@ -116,8 +116,8 @@ public class IfdEventRunner implements Runnable {
     @Override
     public void run() {
 	// fire events for current state
-	fireEvents(initialState);
 	try {
+		fireEvents(initialState);
 	    int failCount = 0;
 	    while (! stopped) {
 		try {
@@ -134,6 +134,8 @@ public class IfdEventRunner implements Runnable {
 	    }
 	} catch (InterruptedException ex) {
 	    LOG.info("Event thread interrupted.", ex);
+	} catch (NullPointerException ex) {
+		LOG.warn("Event thread interrupted.", ex);
 	}
 	LOG.info("Stopping IFD event thread.");
     }

@@ -47,7 +47,9 @@ class ReschedulableTimer extends Timer {
 	timerTask = new TimerTask() {
 	    @Override
 	    public void run() {
-		task.run();
+			if(task != null) {
+				task.run();
+			}
 	    };
 	};
 
@@ -64,7 +66,9 @@ class ReschedulableTimer extends Timer {
 	timerTask = new TimerTask() {
 	    @Override
 	    public void run() {
-		task.run();
+			if(task != null) {
+				task.run();
+			}
 	    };
 	};
 

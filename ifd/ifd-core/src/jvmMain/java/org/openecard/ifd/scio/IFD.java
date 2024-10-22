@@ -80,13 +80,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import org.openecard.common.ECardConstants;
@@ -604,6 +598,12 @@ public class IFD implements org.openecard.ws.IFD {
 	    } else {
 		// run wait in a future so it can be easily interrupted
 		syncWaitThread = future;
+		if(threadPool == null) {
+			String msg = "Thread pool is null. Cannot execute future.";
+			LOG.error(msg);
+			Result r = WSHelper.makeResultUnknownError(msg);
+			return WSHelper.makeResponse(WaitResponse.class, r);
+		}
 		threadPool.execute(future);
 
 		// get results from the future

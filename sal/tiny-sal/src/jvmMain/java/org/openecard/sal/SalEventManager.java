@@ -165,12 +165,12 @@ public class SalEventManager {
 	@Nonnull
 	private List<IFDStatusType> wait(@Nonnull List<IFDStatusType> lastKnown) throws WSHelper.WSException {
 	    LOG.info("Waiting for IFD changes");
+		try {
 	    Wait wait = new Wait();
 	    wait.setContextHandle(ctxHandle);
 	    wait.getIFDStatus().addAll(lastKnown);
 	    WaitResponse resp = env.getIFD().wait(wait);
 
-	    try {
 		WSHelper.checkResult(resp);
 		List<IFDStatusType> result = resp.getIFDEvent();
 		return result;
@@ -198,8 +198,8 @@ public class SalEventManager {
 	@Override
 	public void run() {
 	    // fire events for current state
-	    handleEvents(initialState);
 	    try {
+			handleEvents(initialState);
 		int failCount = 0;
 		while (!stopped) {
 		    try {
@@ -216,7 +216,9 @@ public class SalEventManager {
 		}
 	    } catch (InterruptedException ex) {
 		LOG.info("Event thread interrupted.", ex);
-	    }
+	    }catch (NullPointerException ex) {
+			LOG.info("Event thread interrupted.", ex);
+		}
 	    LOG.info("Stopping IFD event thread.");
 	}
 

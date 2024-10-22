@@ -8,25 +8,19 @@ collect-installers:
     paths:
       - "*.deb"
       - "*.rpm"
-      - "*.dmg"
-      - "*.pkg"
       - "*.exe"
   script:
     - >-
-      cp  clients/richclient/build/dist/*.pkg \
-          clients/richclient/build/dist/*.dmg \
-          clients/richclient/build/dist/*.deb \
+      cp  clients/richclient/build/dist/*.deb \
           clients/richclient/build/dist/*.rpm \
           clients/richclient/build/dist/*.exe \
           .
   dependencies:
     - "package-linux"
     - "package-win"
-    - "notarize-osx"
   needs:
     - "package-linux"
     - "package-win"
-    - "notarize-osx"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_COMMIT_BRANCH == "master"

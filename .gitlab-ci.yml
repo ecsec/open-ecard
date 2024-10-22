@@ -26,7 +26,6 @@ include:
 - '/.gitlab-ci.d/test.yml'
 - '/.gitlab-ci.d/sast.yml'
 - '/.gitlab-ci.d/package-linux.yml'
-- '/.gitlab-ci.d/package-osx.yml'
 - '/.gitlab-ci.d/package-win.yml'
 - '/.gitlab-ci.d/package-ios-framework.yml'
 - '/.gitlab-ci.d/post-package.yml'

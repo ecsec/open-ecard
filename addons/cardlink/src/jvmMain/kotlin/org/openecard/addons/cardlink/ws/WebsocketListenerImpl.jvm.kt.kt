@@ -47,6 +47,7 @@ class WebsocketListenerImpl: WebsocketListener {
 	}
 
 	override fun onClose(webSocket: Websocket, statusCode: Int, reason: String?) {
+		logger.warn { "websocket received close with $statusCode - $reason" }
 		messageChannel.close()
 		isOpen = false
 	}
@@ -59,7 +60,7 @@ class WebsocketListenerImpl: WebsocketListener {
 	@OptIn(DelicateCoroutinesApi::class)
 	override fun onText(webSocket: Websocket, data: String) {
 		GlobalScope.launch {
-			logger.debug { "Received message: $data" }
+			logger.debug { "websocket received message: $data" }
 			val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(data)
 			messageChannel.send(egkEnvelope)
 		}

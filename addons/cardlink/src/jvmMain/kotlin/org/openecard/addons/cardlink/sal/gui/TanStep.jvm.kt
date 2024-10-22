@@ -94,7 +94,8 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		val correlationId = dynCtx.get(CardLinkKeys.CORRELATION_ID_TAN_PROCESS) as String
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
-		val sendTan = SendTan(tan)
+		//second tan is for older services
+		val sendTan = SendTan(tan,tan)
 		val egkEnvelope = GematikEnvelope(
 			sendTan,
 			correlationId,
@@ -136,6 +137,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		}
 
 		val egkPayload = tanConfirmResponse.payload
+		logger.debug { "egkPayload in tanstep: $egkPayload" }
 
 		if (egkPayload is TasklistErrorPayload) {
 			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
@@ -161,22 +163,28 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		}
 
 		if (egkPayload is ConfirmTan) {
-			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
+			return if (
+				(egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) ||
+				(egkPayload.resultCode == null && egkPayload.minor == null && egkPayload.errorMessage == null)
+			) {
+				logger.debug { "Continue with next" }
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
 				logger.error { "Received error in Tan step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
 
-				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, egkPayload.resultCode.toCardLinkErrorCode())
+				val resCode = egkPayload.resultCode ?: egkPayload.minor
+
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR )
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
-				val resultStatus = when (egkPayload.resultCode) {
+				val resultStatus = when (resCode) {
 					ResultCode.TAN_INCORRECT -> StepActionResultStatus.REPEAT
 					ResultCode.TAN_EXPIRED -> StepActionResultStatus.BACK
 					ResultCode.TAN_RETRY_LIMIT_EXCEEDED -> StepActionResultStatus.BACK
 					else -> StepActionResultStatus.CANCEL
 				}
 
-				val retryStep = when (egkPayload.resultCode) {
+				val retryStep = when (resCode) {
 					ResultCode.TAN_INCORRECT -> TanRetryStep(tanStep.ws)
 					ResultCode.TAN_EXPIRED -> PhoneStep(tanStep.ws)
 					ResultCode.TAN_RETRY_LIMIT_EXCEEDED -> PhoneStep(tanStep.ws)

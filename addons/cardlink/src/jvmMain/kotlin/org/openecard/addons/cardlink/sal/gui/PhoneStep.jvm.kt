@@ -121,6 +121,7 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		}
 
 		val egkPayload = phoneNumberResponse.payload
+		logger.debug { "egkPayload in phonestep: $egkPayload" }
 
 		if (egkPayload is TasklistErrorPayload) {
 			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
@@ -134,20 +135,27 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		if (egkPayload is ConfirmPhoneNumber) {
 			dynCtx.put(CardLinkKeys.CORRELATION_ID_TAN_PROCESS, phoneNumberResponse.correlationId)
 
-			return if (egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) {
+			return if (
+				(egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) ||
+				//support old server variants not sending success code
+				(egkPayload.resultCode == null && egkPayload.minor == null && egkPayload.errorMessage == null)
+			) {
+				logger.debug { "Continue with next" }
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
 				logger.error { "Received error in Phone step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
 
-				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, egkPayload.resultCode.toCardLinkErrorCode())
+				val resCode = egkPayload.resultCode ?: egkPayload.minor
+
+				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
-				val resultStatus = when (egkPayload.resultCode) {
+				val resultStatus = when (resCode) {
 					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> StepActionResultStatus.REPEAT
 					else -> StepActionResultStatus.CANCEL
 				}
 
-				val retryStep = when (egkPayload.resultCode) {
+				val retryStep = when (resCode) {
 					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> PhoneRetryStep(phoneStep.ws)
 					else -> null
 				}

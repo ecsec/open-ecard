@@ -208,18 +208,23 @@ data class SendPhoneNumber(val phoneNumber: String) : CardLinkPayload
 @Serializable
 @SerialName(REQUEST_SMS_TAN_RESPONSE)
 data class ConfirmPhoneNumber(
-	var resultCode: ResultCode,
+	var resultCode: ResultCode? = null,
+	var minor: ResultCode? = null,
 	var errorMessage: String?,
 ) : CardLinkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN)
-data class SendTan(val smsCode: String) : CardLinkPayload
+data class SendTan(
+	val smsCode: String,
+	val tan: String,
+) : CardLinkPayload
 
 @Serializable
 @SerialName(CONFIRM_TAN_RESPONSE)
 data class ConfirmTan(
-	var resultCode: ResultCode,
+	var resultCode: ResultCode? = null,
+	var minor: ResultCode? = null,
 	var errorMessage: String?,
 ) : CardLinkPayload
 

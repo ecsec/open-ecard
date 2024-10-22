@@ -122,20 +122,6 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 			)
 		}
 
-		if (tanConfirmResponse.correlationId != correlationId) {
-			val errorMsg = "Correlation-ID does not match with Correlation-ID from CardLink-Service."
-			logger.error { errorMsg }
-			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
-			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
-			return StepActionResult(
-				StepActionResultStatus.CANCEL,
-				ErrorStep(
-					"CardLink Error",
-					errorMsg,
-				)
-			)
-		}
-
 		val egkPayload = tanConfirmResponse.payload
 		logger.debug { "egkPayload in tanstep: $egkPayload" }
 

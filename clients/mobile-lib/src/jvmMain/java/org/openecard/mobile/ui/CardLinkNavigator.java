@@ -163,7 +163,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					var resultCode = (CardLinkErrorCodes.CardLinkCodes) dynCtx.get("CardLink::SERVICE_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
-					interaction.onPhoneNumberRetry(confirmTextOperation, resultCode, errorMessage);
+					interaction.onPhoneNumberRetry(confirmTextOperation, resultCode.name(), errorMessage);
 					List<OutputInfoUnit> phoneNumber = waitForPhoneNumber.deref();
 					return new MobileResult(curStep, ResultStatus.OK, phoneNumber);
 				} catch (InterruptedException ex) {
@@ -195,7 +195,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					var resultCode = (CardLinkErrorCodes.CardLinkCodes) dynCtx.get("CardLink::SERVICE_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
-					interaction.onSmsCodeRetry(confirmTan, resultCode, errorMessage);
+					interaction.onSmsCodeRetry(confirmTan, resultCode.name(), errorMessage);
 					List<OutputInfoUnit> tan = waitForTan.deref();
 					return new MobileResult(curStep, ResultStatus.OK, tan);
 				} catch (InterruptedException ex) {
@@ -240,7 +240,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					var resultCode = (CardLinkErrorCodes.ClientCodes) dynCtx.get("CardLink::CLIENT_ERROR_CODE");
 					var errorMessage = (String) dynCtx.get("CardLink::ERROR_MESSAGE");
 
-					interaction.onCanRetry(confirmCan, resultCode, errorMessage);
+					interaction.onCanRetry(confirmCan, resultCode.name(), errorMessage);
 					List<OutputInfoUnit> tan = waitForCan.deref();
 					for (EventCallback hook: hooks){
 						this.eventDispatcher.del(hook);

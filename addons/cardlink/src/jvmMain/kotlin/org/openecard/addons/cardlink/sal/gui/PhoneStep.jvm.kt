@@ -152,11 +152,13 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 
 				val resultStatus = when (resCode) {
 					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> StepActionResultStatus.REPEAT
+					ResultCode.INVALID_REQUEST -> StepActionResultStatus.REPEAT
 					else -> StepActionResultStatus.CANCEL
 				}
 
 				val retryStep = when (resCode) {
 					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> PhoneRetryStep(phoneStep.ws)
+					ResultCode.INVALID_REQUEST -> PhoneRetryStep(phoneStep.ws)
 					else -> null
 				}
 

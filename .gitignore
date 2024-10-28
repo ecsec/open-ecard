@@ -34,6 +34,7 @@ bin/
 *.ipr
 *.iml
 *.iws
+.kotlin/
 
 # NetBeans
 nb-configuration.xml

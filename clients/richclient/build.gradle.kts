@@ -22,6 +22,7 @@ application {
 }
 
 dependencies {
+	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
 	implementation(project(":crypto:tls"))
 
@@ -48,8 +49,6 @@ dependencies {
 	implementation(libs.jose4j)
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)
-
-	implementation(libs.annotations)
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

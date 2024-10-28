@@ -31,6 +31,10 @@ dependencies {
 
 	implementation(libs.plugins.androidLibrary)
 	implementation(libs.robovm.gradlePlugin)
+
+	implementation(libs.jose4j)
+	implementation(libs.semver)
+	implementation(libs.jgit)
 }
 
 fun DependencyHandlerScope.implementation(pluginProv: Provider<PluginDependency>) {

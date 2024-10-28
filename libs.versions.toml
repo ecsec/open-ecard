@@ -29,6 +29,8 @@ jna = "5.16.0"
 semver = "2.0.0"
 jwtkt = "1.0.1"
 
+jgit = "7.1.0.202411261347-r"
+
 wiremock = "3.9.2"
 
 
@@ -40,6 +42,7 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
 
+kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-serde" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
@@ -125,6 +128,7 @@ jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", ve
 
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 
 [bundles]
 test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-classic"]

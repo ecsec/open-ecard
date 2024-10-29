@@ -23,6 +23,7 @@
 package org.openecard.richclient.updater
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.runBlocking
 import org.jose4j.json.internal.json_simple.JSONArray
 import org.jose4j.json.internal.json_simple.JSONObject
 import org.jose4j.json.internal.json_simple.parser.JSONParser
@@ -31,6 +32,9 @@ import org.openecard.common.OpenecardProperties
 import org.openecard.common.util.InvalidUpdateDefinition
 import org.openecard.common.util.SysUtils
 import org.openecard.crypto.tls.proxy.ProxySettings
+import org.openecard.releases.ArtifactType
+import org.openecard.releases.ReleaseInfo
+import org.openecard.releases.loadReleaseInfo
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
@@ -46,105 +50,44 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  * @author Sebastian Schuberth
  */
-class VersionUpdateLoader internal constructor(private val updateUrl: URL, private val pkgType: String) {
-    @Throws(IllegalArgumentException::class)
-    fun loadVersionUpdateList(): VersionUpdateList {
-        try {
-            // load proxy if one is available
-            ProxySettings.default // make sure it is initialized
-            val proxies = ProxySelector.getDefault().select(updateUrl.toURI())
-            var p = Proxy.NO_PROXY
-            for (next in proxies) {
-                if (next.type() != Proxy.Type.DIRECT) {
-					LOG.debug { "Found a proxy for the update connection." }
-                    p = next
-                    break
-                }
-            }
-
-			LOG.info { "Trying to load version list." }
-            val con = updateUrl.openConnection(p)
-            con.connect()
-            val `in` = con.getInputStream()
-            val r: Reader = InputStreamReader(`in`, StandardCharsets.UTF_8)
-
-            val rootObj = JSONParser().parse(r) as JSONObject
-
-            // get package specific download page
-            val downloadPageString = rootObj[pkgType + "_download_page"] as String
-
-            // access package specific list
-            val updatesRaw = rootObj[pkgType] as JSONArray
-
-            val updates = ArrayList<VersionUpdate>()
-
-            for (ur in updatesRaw) {
-                try {
-                    val next: VersionUpdate = VersionUpdate.Companion.fromJson(ur as JSONObject)
-                    updates.add(next)
-                } catch (ex: InvalidUpdateDefinition) {
-					LOG.warn(ex) { "Invalid version info contained in update list." }
-                    throw IllegalArgumentException("Invalid version info contained in update list.", ex)
-                }
-            }
-
-            // make sure the versions are in the correct order
-			updates.sort()
-
-            val list = VersionUpdateList(updates, URL(downloadPageString))
-			LOG.info { "Successfully retrieved version update list." }
-            return list
-        } catch (ex: IOException) {
-			LOG.error(ex) { "Failed to retrieve update list from server." }
-            throw IllegalArgumentException("Failed to retrieve update list from server.", ex)
-        } catch (ex: NullPointerException) {
-			LOG.warn { "Package type ${pkgType} not supported in update list." }
-            throw IllegalArgumentException("Package type $pkgType not supported in update list.", ex)
-        } catch (ex: URISyntaxException) {
-            val msg = "Failed to convert Update URL to a URI."
-			LOG.error(ex) { msg }
-            throw IllegalArgumentException(msg, ex)
-        } catch (ex: ParseException) {
-            val msg = "Failed to deserialize JSON data."
-			LOG.error(ex) { msg }
-            throw IllegalArgumentException(msg, ex)
-        }
+class VersionUpdateLoader internal constructor(private val updateUrl: String, private val pkgType: ArtifactType?) {
+    fun loadVersionUpdateList(): Result<Pair<ReleaseInfo, ArtifactType>?> = runBlocking {
+		// TODO: add local caching of the release info jwt, for offline display of the update
+		pkgType?.let {
+			loadReleaseInfo(updateUrl)
+				.map { it.releaseInfo }
+				.map { it to pkgType }
+		} ?: Result.success(null)
     }
 
     companion object {
-        @Throws(IllegalArgumentException::class)
         fun createWithDefaults(): VersionUpdateLoader {
-            try {
-                return VersionUpdateLoader(getUpdateUrl(), getPkgType())
-            } catch (ex: MalformedURLException) {
-                val msg = "Update URL value is not a valid URL."
-				LOG.error(ex) { msg }
-                throw IllegalArgumentException(msg, ex)
-            }
+			return VersionUpdateLoader(getUpdateUrl(), getPkgType())
         }
 
         @Throws(MalformedURLException::class)
-        fun getUpdateUrl(): URL {
-            val url = OpenecardProperties.getProperty("update-list.location")
-            return URL(url)
+        private fun getUpdateUrl(): String {
+            val url = OpenecardProperties.getProperty("release-info.location")
+            return url
         }
 
-        fun getPkgType(): String {
-            if (SysUtils.isWin() && SysUtils.is64bit()) {
-                return "win64"
+        private fun getPkgType(): ArtifactType? {
+            return if (SysUtils.isWin() && SysUtils.is64bit()) {
+                ArtifactType.EXE
             } else if (SysUtils.isWin()) {
-                return "win32"
+				// win 32 is not supported anymore
+                null
             } else if (SysUtils.isDebianOrDerivate()) {
-                return "deb"
+                ArtifactType.DEB
             } else if (SysUtils.isRedhatOrDerivate()) {
-                return "rpm"
+                ArtifactType.RPM
             } else if (SysUtils.isSuSEOrDerivate()) {
-                return "rpm"
+                ArtifactType.RPM
             } else if (SysUtils.isMacOSX()) {
-                return "osx"
-            }
-
-            return "UNKNOWN"
+                ArtifactType.DMG
+            } else {
+				null
+			}
         }
     }
 }

@@ -54,14 +54,32 @@ fun ReleaseInfo.checkVersion(version: Version): Result<UpdateAdvice> = runCatchi
 		}
 
 		// we have a noncritical update
-		else {
+		else if (version.major == this.latestVersion.version.major && version.minor == this.latestVersion.version.minor) {
 			UpdateAdvice.UPDATE
+		}
+
+		// we are not maintained anymore
+		else {
+			UpdateAdvice.UNMAINTAINED
 		}
 	}
 }
 
+fun ReleaseInfo.getMaintainedVersionData(version: Version): VersionData? {
+	val maintVersion = this.maintenanceVersions.find {
+		it.version.major == version.major && it.version.minor == version.minor
+	}
+	return maintVersion
+}
+
+fun ReleaseInfo.getUpdateData(version: Version): VersionData {
+	return this.getMaintainedVersionData(version)
+		?: this.latestVersion
+}
+
 enum class UpdateAdvice {
 	NO_UPDATE,
+	UNMAINTAINED,
 	MAINTAINED_NO_UPDATE,
 	MAINTAINED_UPDATE,
 	UPDATE,

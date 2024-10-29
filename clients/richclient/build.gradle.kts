@@ -46,6 +46,8 @@ dependencies {
 	implementation(project(":cifs"))
 	implementation(project(":wsdef:jaxb-marshaller"))
 
+	implementation(project(":releases"))
+
 	implementation(libs.jose4j)
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)

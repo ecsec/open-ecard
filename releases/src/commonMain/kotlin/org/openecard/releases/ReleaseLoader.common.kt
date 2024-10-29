@@ -28,13 +28,19 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.json.*
 
-suspend fun loadReleaseInfo(releaseInfoUrl: String): Result<ReleaseInfo> = runCatching {
+data class ReleaseInfoResult(
+	val jwt: String,
+	val releaseInfo: ReleaseInfo,
+)
+
+suspend fun loadReleaseInfo(releaseInfoUrl: String): Result<ReleaseInfoResult> = runCatching {
 	val client = createHttpClient()
 	val jws: String = client.get(releaseInfoUrl) {
 		header("Accept", "application/jwt")
 	}.body()
 	val json = verifyReleaseInfoJwt(jws).getOrThrow()
-	Json.decodeFromJsonElement(json)
+	val releaseInfo: ReleaseInfo = Json.decodeFromJsonElement(json)
+	ReleaseInfoResult(jws, releaseInfo)
 }
 
 suspend fun verifyReleaseInfoJwt(jwtStr: String): Result<JsonObject> = runCatching {

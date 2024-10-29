@@ -22,9 +22,13 @@
 
 package org.openecard.richclient.updater
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.z4kn4fein.semver.Version
+import io.github.z4kn4fein.semver.toVersion
 import org.openecard.common.AppVersion.version
-import org.openecard.common.SemanticVersion
-import java.net.URL
+import org.openecard.releases.*
+
+private val LOG = KotlinLogging.logger {}
 
 /**
  * Update checker for the Open eCard App.
@@ -37,131 +41,37 @@ import java.net.URL
  * }</pre>
  *
  * The content of the update elements is defined in [VersionUpdate].<br></br>
- * The update-list location is taken from the built in property: `update-list.location`
+ * The update-list location is taken from the built in property: `release-info.location`
  *
  * @author Tobias Wich
  * @author Sebastian Schuberth
  */
 class VersionUpdateChecker internal constructor(
-    private val installedVersion: SemanticVersion,
-    list: VersionUpdateList
+	val installedVersion: Version,
+	private val list: Pair<ReleaseInfo, ArtifactType>
 ) {
-    private val updates: List<VersionUpdate> = list.versionUpdates
-    val downloadPage: URL = list.downloadPage
 
-    fun needsUpdate(): Boolean {
-        val major = majorUpgrade
-        val minor = minorUpgrade
-        val sec = securityUpgrade
+	val updateAdvice = list.first.checkVersion(installedVersion).getOrDefault(UpdateAdvice.NO_UPDATE)
 
-        // don't check for maintained version as this would trigger an update without any versions to update to
-        return major != null || minor != null || sec != null /*|| ! isCurrentMaintained()*/
-    }
+	fun getUpdateInfo(): Pair<VersionData, UpdateAdvice>? {
+		return when (updateAdvice) {
+			UpdateAdvice.NO_UPDATE, UpdateAdvice.MAINTAINED_NO_UPDATE -> null
+			else -> list.first.getUpdateData(installedVersion) to updateAdvice
+		}
+	}
 
-    val isCurrentMaintained: Boolean
-        get() {
-            val cur = currentVersion
-            if (cur != null) {
-                return cur.status == VersionUpdate.Status.MAINTAINED
-            }
-            // version not in list means not maintained
-            return false
-        }
+	fun getArtifactUpdateUrl(): String? {
+		return getUpdateInfo()?.let { (data, _) ->
+			data.artifacts.find { it.type == list.second }
+				?.url
+		}
+	}
 
-    val majorUpgrade: VersionUpdate?
-        get() {
-            val copy = ArrayList(updates)
-
-            val i = copy.iterator()
-            while (i.hasNext()) {
-                val next = i.next()
-                if (installedVersion.major >= next.version.major) {
-                    i.remove()
-                }
-            }
-
-            // just compare last version as it will be the most current one
-            if (!copy.isEmpty()) {
-                val last = copy[copy.size - 1]
-                if (last.version.isNewer(installedVersion)) {
-                    return last
-                }
-            }
-
-            // no newer version available
-            return null
-        }
-
-    val minorUpgrade: VersionUpdate?
-        get() {
-            val copy = ArrayList(updates)
-
-            // remove all versions having a different major and smaller minor version
-            val i = copy.iterator()
-            while (i.hasNext()) {
-                val next = i.next()
-                if (installedVersion.major != next.version.major) {
-                    i.remove()
-                } else if (installedVersion.minor >= next.version.minor) {
-                    i.remove()
-                }
-            }
-
-            // just compare last version as it will be the most current one
-            if (copy.isNotEmpty()) {
-                val last = copy[copy.size - 1]
-                if (last.version.isNewer(installedVersion)) {
-                    return last
-                }
-            }
-
-            // no newer version available
-            return null
-        }
-
-    val securityUpgrade: VersionUpdate?
-        get() {
-            val copy = ArrayList(updates)
-
-            // remove all versions having a different major and minor version
-            val i = copy.iterator()
-            while (i.hasNext()) {
-                val next = i.next()
-                if (installedVersion.major != next.version.major) {
-                    i.remove()
-                } else if (installedVersion.minor != next.version.minor) {
-                    i.remove()
-                }
-            }
-
-            // just compare last version as it will be the most current one
-            if (!copy.isEmpty()) {
-                val last = copy[copy.size - 1]
-                if (last.version.isNewer(installedVersion)) {
-                    return last
-                }
-            }
-
-            // no newer version available
-            return null
-        }
-
-    val currentVersion: VersionUpdate?
-        get() {
-            for (next in updates) {
-                if (installedVersion.isSame(next.version)) {
-                    return next
-                }
-            }
-
-            return null
-        }
-
-    companion object {
-        fun loadCurrentVersionList(): VersionUpdateChecker {
-            val loader: VersionUpdateLoader = VersionUpdateLoader.Companion.createWithDefaults()
-            val list = loader.loadVersionUpdateList()
-            return VersionUpdateChecker(version, list)
-        }
-    }
+	companion object {
+		fun loadCurrentVersionList(): VersionUpdateChecker? {
+			val loader: VersionUpdateLoader = VersionUpdateLoader.createWithDefaults()
+			val list = loader.loadVersionUpdateList().getOrThrow()
+			return list?.let { VersionUpdateChecker(version.versionString.toVersion(), list) }
+		}
+	}
 }

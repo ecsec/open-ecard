@@ -82,7 +82,7 @@ class ReleaseLoaderTest {
 		)
 
 		val baseUrl = wm.baseUrl()
-		val releaseInfo = loadReleaseInfo("$baseUrl/release.jwt").getOrThrow()
+		val releaseInfo = loadReleaseInfo("$baseUrl/release.jwt").getOrThrow().releaseInfo
 		assertEquals("2.2.4", releaseInfo.latestVersion.version.toString())
 	}
 }

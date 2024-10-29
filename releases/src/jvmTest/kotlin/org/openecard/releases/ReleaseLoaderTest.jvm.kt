@@ -24,10 +24,11 @@ package org.openecard.releases
 
 import com.appstractive.jwt.jwt
 import com.appstractive.jwt.sign
-import com.appstractive.jwt.signatures.ec256
+import com.appstractive.jwt.signatures.es256
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -67,17 +68,17 @@ class ReleaseLoaderTest {
 			claims {
 				issuer = "https://openecard.org"
 				audience = "https://openecard.org/app"
-				notBefore()
+				issuedAt = Clock.System.now()
 				claim("release-info", releaseInfoJson)
 			}
 		}.sign {
-			ec256 { pem(javaClass.getResourceAsStream("/release-test-signer.pem")?.readAllBytes()!!) }
-		}
+			es256 { pem(javaClass.getResourceAsStream("/release-test-signer.pem")?.readAllBytes()!!) }
+		}.toString()
 		wm.stubFor(
 			get(urlEqualTo("/release.jwt"))
 				.withHeader("Accept", containing("application/jwt"))
 				.willReturn(
-					okForContentType("application/jwt", jwt.toString())
+					okForContentType("application/jwt", jwt)
 				)
 		)
 

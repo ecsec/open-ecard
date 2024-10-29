@@ -23,7 +23,7 @@
 package org.openecard.releases
 
 import com.appstractive.jwt.*
-import com.appstractive.jwt.signatures.ec256
+import com.appstractive.jwt.signatures.es256
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.json.*
@@ -47,12 +47,12 @@ suspend fun verifyReleaseInfoJwt(jwtStr: String): Result<JsonObject> = runCatchi
 	val verificationKey = MR.files.release_verifier_pem.readText()
 	val jwt = JWT.from(jwtStr)
 	val valid = jwt.verify {
-		ec256 {
+		es256 {
 			pem(verificationKey)
 		}
 		issuer("https://openecard.org")
 		audience("https://openecard.org/app")
-		notBefore()
+		//notBefore()
 	}
 
 	if (!valid) {

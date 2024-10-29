@@ -52,12 +52,12 @@ class VersionCheckTest {
 
 	@Test
 	fun `test update major`() {
-		assertEquals(UpdateAdvice.UPDATE, releaseInfo.checkVersion("1.5.10").getOrThrow())
+		assertEquals(UpdateAdvice.UNMAINTAINED, releaseInfo.checkVersion("1.5.10").getOrThrow())
 	}
 
 	@Test
 	fun `test update minor`() {
-		assertEquals(UpdateAdvice.UPDATE, releaseInfo.checkVersion("2.0.0").getOrThrow())
+		assertEquals(UpdateAdvice.UNMAINTAINED, releaseInfo.checkVersion("2.0.0").getOrThrow())
 	}
 
 	@Test

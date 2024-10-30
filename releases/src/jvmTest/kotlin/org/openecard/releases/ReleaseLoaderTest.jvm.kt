@@ -27,6 +27,7 @@ import com.appstractive.jwt.sign
 import com.appstractive.jwt.signatures.es256
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.Options
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
@@ -36,7 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ReleaseLoaderTest {
-	val wm = WireMockServer()
+	val wm = WireMockServer(Options.DYNAMIC_PORT)
 
 	@BeforeTest
 	fun startWiremock() {

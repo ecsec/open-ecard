@@ -38,6 +38,19 @@ public enum ServiceErrorCode {
      */
     NFC_NOT_AVAILABLE,
 
+	/**
+	 * indicates that no connection to a service could be established
+	 */
+	NO_CONNECTION,
+	/**
+	 * indicates that a connection to a service was lost
+	 */
+	LOST_CONNECTION,
+
+	/**
+	 * indicates that no authorized connection could be established
+	 */
+	NOT_AUTHORIZED,
     /**
      * indicates that nfc is not enabled, please move to the device settings.
      */

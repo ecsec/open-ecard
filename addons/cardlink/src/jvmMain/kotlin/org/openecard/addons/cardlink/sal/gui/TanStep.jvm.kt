@@ -106,7 +106,12 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val tanConfirmResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
+		var tanConfirmResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
+
+		if(tanConfirmResponse?.payload is SessionInformation){
+			logger.debug { "Ignore ${SESSION_INFO} during TAN-Step." }
+			tanConfirmResponse = wsListener.nextMessageBlocking()
+		}
 
 		if (tanConfirmResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $CONFIRM_TAN_RESPONSE from CardLink-Service."
@@ -135,7 +140,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		}
 
 		if (tanConfirmResponse.correlationId != correlationId) {
-			val errorMsg = "Received TAN-Confirm response where Correlation-ID does not match."
+			val errorMsg = "Received $egkPayload where Correlation-ID does not match."
 			logger.error { errorMsg }
 			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)

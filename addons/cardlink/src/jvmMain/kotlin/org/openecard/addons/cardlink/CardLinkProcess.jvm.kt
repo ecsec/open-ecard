@@ -146,6 +146,11 @@ class CardLinkProcess(
 				throw WSHelper.makeResultError(CardLinkErrorCodes.CardLinkCodes.SERVER_TIMEOUT.name, errorMsg).toException()
 			}
 
+			if(gematikMessage.payload is SessionInformation){
+				logger.debug { "Received '${SESSION_INFO} during ongoing process. Ignoring since most probably caused by reconnection." }
+				continue
+			}
+
 			if (gematikMessage.payload is RegisterEgkFinish) {
 				logger.debug { "Received '${REGISTER_EGK_FINISH}' message from CardLink service." }
 				// replace listener with the provided successor, so the application can continue

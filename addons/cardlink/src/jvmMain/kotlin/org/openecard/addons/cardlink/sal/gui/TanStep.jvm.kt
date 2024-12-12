@@ -30,6 +30,7 @@ import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.WSHelper
 import org.openecard.common.toException
+import org.openecard.common.util.UrlBuilder
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.TextField
@@ -39,6 +40,7 @@ import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
+import java.net.URI
 
 
 private val logger = KotlinLogging.logger {}
@@ -103,6 +105,13 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = tanStep.ws
+		if(!ws.socket.isOpen){
+			var builder = UrlBuilder.fromUrl(ws.socket.url)
+			builder = builder.queryParam("token", dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String)
+			ws.socket.url = builder.build().toString()
+			logger.debug { "Socket closed during tan step - trying to reconnect to: ${ws.socket.url}" }
+			ws.socket.connect()
+		}
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener

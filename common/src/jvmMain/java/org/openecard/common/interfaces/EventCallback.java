@@ -36,7 +36,7 @@ import org.openecard.common.event.EventType;
 public interface EventCallback {
 
     /**
-     * Callback funtion for IFD events.
+     * Callback function for IFD events.
      * This function gets called for each registered event in the {@link EventDispatcher}.
      *
      * @param eventType Type of the event.

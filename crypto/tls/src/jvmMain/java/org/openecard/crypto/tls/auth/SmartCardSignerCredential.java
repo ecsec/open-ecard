@@ -148,7 +148,7 @@ public class SmartCardSignerCredential implements TlsSigner {
     public SignatureAlgorithms getDidAlgorithm() {
 	try {
 	    AlgorithmInfoType algInfo = did.getGenericCryptoMarker().getAlgorithmInfo();
-	    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
+	    SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
 	    return alg;
 	} catch (UnsupportedAlgorithmException | WSHelper.WSException ex) {
 	    throw new RuntimeException("Error evaluating algorithm", ex);

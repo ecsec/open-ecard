@@ -54,7 +54,7 @@ public class AllowedSignatureAlgorithms {
     }
 
     public static String algIdtoJcaName(String algId) throws UnsupportedAlgorithmException {
-	SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algId);
+	SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algId);
 	if (! ALLOWED_ALGS.contains(alg)) {
 	    String msg = "The requested algorithm is not allowed in the ChipGateway protocol.";
 	    throw new UnsupportedAlgorithmException(msg);
@@ -64,7 +64,7 @@ public class AllowedSignatureAlgorithms {
 
     public static boolean isKnownJcaAlgorithm(String jcaAlg) {
 	try {
-	    SignatureAlgorithms alg = SignatureAlgorithms.fromJcaName(jcaAlg);
+	    SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromJcaName(jcaAlg);
 	    return ALLOWED_ALGS.contains(alg);
 	} catch (UnsupportedAlgorithmException ex) {
 	    return false;

@@ -76,7 +76,7 @@ public class AuthenticationHelper {
 	byte[] aad = aadObj.getData();
 
 	// Calculate comp(key)
-	EFCardAccess efca = new EFCardAccess(securityInfos);
+	EFCardAccess efca = EFCardAccess.getInstance(securityInfos);
 	CASecurityInfos cas = efca.getCASecurityInfos();
 	CADomainParameter cdp = new CADomainParameter(cas);
 	CAKey caKey = new CAKey(cdp);

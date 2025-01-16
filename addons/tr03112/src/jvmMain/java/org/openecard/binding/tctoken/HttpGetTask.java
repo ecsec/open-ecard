@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -114,7 +115,7 @@ public class HttpGetTask implements Callable<StartPAOSResponse> {
 		true,
 		evtDispatcher,
 		connectionHandle,
-		tokenRequest.getTCToken().getAllowedCardType()
+		new HashSet(tokenRequest.getTCToken().getAllowedCardType())
 	    );
 	    return cf;
 	} else {

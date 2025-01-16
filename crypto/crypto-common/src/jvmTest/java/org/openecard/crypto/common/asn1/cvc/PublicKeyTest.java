@@ -62,19 +62,19 @@ public class PublicKeyTest {
     @Test
     public void testKeyCVCA() throws Exception {
 	PublicKey pk = chain.getCVCACertificates().get(0).getPublicKey();
-	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.objectIdentifier, TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     @Test
     public void testKeyDV() throws Exception {
 	PublicKey pk = chain.getDVCertificates().get(0).getPublicKey();
-	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.objectIdentifier, TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     @Test
     public void testKeyTerminal() throws Exception {
 	PublicKey pk = chain.getTerminalCertificate().getPublicKey();
-	assertEquals(pk.getObjectIdentifier(), TAObjectIdentifier.id_TA_ECDSA_SHA_512);
+	assertEquals(pk.objectIdentifier, TAObjectIdentifier.id_TA_ECDSA_SHA_512);
     }
 
     private byte[] loadTestFile(String file) throws Exception {

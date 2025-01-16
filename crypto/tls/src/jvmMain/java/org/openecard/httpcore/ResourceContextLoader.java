@@ -141,7 +141,7 @@ public class ResourceContextLoader {
 	    }
 	    // FIXME: validate certificate chain as soon as a usable solution exists for the trust problem
 	    // tlsAuth.setCertificateVerifier(new JavaSecVerifier());
-	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.instance);
 	    ClientCertTlsClient tlsClient = new ClientCertDefaultTlsClient(crypto, hostname, true);
 	    tlsClient.setAuthentication(tlsAuth);
 

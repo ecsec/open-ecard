@@ -126,7 +126,7 @@ public final class HttpConnectProxy extends Proxy {
 
 	// evaluate scheme
 	if ("HTTPS".equals(proxyScheme)) {
-	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+	    TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.instance);
 	    ClientCertDefaultTlsClient tlsClient = new ClientCertDefaultTlsClient(crypto, proxyHost, true);
 	    DynamicAuthentication tlsAuth = new DynamicAuthentication(proxyHost);
 	    if (proxyValidate) {

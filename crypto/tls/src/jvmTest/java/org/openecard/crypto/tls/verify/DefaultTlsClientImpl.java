@@ -42,7 +42,7 @@ import org.openecard.crypto.tls.ClientCertDefaultTlsClient;
 public class DefaultTlsClientImpl extends ClientCertDefaultTlsClient {
 
 	public DefaultTlsClientImpl(String hostName) {
-		super(new BcTlsCrypto(ReusableSecureRandom.getInstance()), hostName, true);
+		super(new BcTlsCrypto(ReusableSecureRandom.instance), hostName, true);
 	}
 
 	@Override

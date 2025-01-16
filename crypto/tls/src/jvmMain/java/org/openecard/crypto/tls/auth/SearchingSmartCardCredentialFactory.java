@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -53,7 +54,7 @@ public class SearchingSmartCardCredentialFactory extends BaseSmartCardCredential
     private final ConnectionHandleType sessionHandle;
 
     private ConnectionHandleType usedHandle;
-    private List<String> allowedCardTypes;
+    private Set<String> allowedCardTypes;
 
 
     public SearchingSmartCardCredentialFactory(
@@ -61,7 +62,7 @@ public class SearchingSmartCardCredentialFactory extends BaseSmartCardCredential
 	boolean filterAlwaysReadable,
 	@Nonnull EventDispatcher evtDispatcher,
 	@Nonnull ConnectionHandleType sessionHandle,
-	List<String> allowedCardTypes
+	Set<String> allowedCardTypes
     ) {
 	super(dispatcher, filterAlwaysReadable);
 	this.evtDispatcher = evtDispatcher;

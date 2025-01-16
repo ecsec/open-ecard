@@ -99,7 +99,7 @@ public class PACEProtocol implements Protocol {
 
 	    // Parse SecurityInfos and get PACESecurityInfos
 	    SecurityInfos sis = SecurityInfos.getInstance(efcadata);
-	    EFCardAccess efca = new EFCardAccess(sis);
+	    EFCardAccess efca = EFCardAccess.getInstance(sis);
 	    PACESecurityInfos psi = efca.getPACESecurityInfos();
 
 	    // Start PACE

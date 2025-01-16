@@ -85,7 +85,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	    LOG.debug("  {}", reqAlgStr);
 	}
 
-	try {
+//	try {
 	    DidInfos didInfos = tokenCache.getInfo(null, handle);
 	    List<DidInfo> infos = didInfos.getCryptoDidInfos();
 
@@ -140,7 +140,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 
 			try {
 			    AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
-			    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
+			    SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
 
 			    TlsCredentialedSigner cred;
 			    List<X509Certificate> chain = info.getRelatedCertificateChain();
@@ -165,9 +165,9 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 		    }
 		}
 	    }
-	} catch (NoSuchDid | WSHelper.WSException ex) {
-	    LOG.error("Failed to access DIDs of smartcard. Proceeding without client authentication.", ex);
-	}
+//	} catch (NoSuchDid | WSHelper.WSException ex) {
+//	    LOG.error("Failed to access DIDs of smartcard. Proceeding without client authentication.", ex);
+//	}
 
 	return credentials;
     }
@@ -264,7 +264,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 
     private boolean isRawRSA(DidInfo info) throws WSHelper.WSException, UnsupportedAlgorithmException {
 	AlgorithmInfoType algInfo = info.getGenericCryptoMarker().getAlgorithmInfo();
-	SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
+	SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algInfo.getAlgorithmIdentifier().getAlgorithm());
 	return SignatureAlgorithms.CKM_RSA_PKCS == alg;
     }
 
@@ -468,7 +468,7 @@ public abstract class BaseSmartCardCredentialFactory implements CredentialFactor
 	    try {
 		AlgorithmInfoType algInfo = next.getGenericCryptoMarker().getAlgorithmInfo();
 		String algStr = algInfo.getAlgorithmIdentifier().getAlgorithm();
-		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algStr);
+		SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algStr);
 
 		switch (alg) {
 		case CKM_ECDSA:

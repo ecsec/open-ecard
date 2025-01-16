@@ -84,9 +84,9 @@ public class EFCardAccessTest {
 	PACEInfo pi = pip.getPACEInfo();
 	PACEDomainParameter pdp = pip.createPACEDomainParameter();
 
-	assertEquals(pi.getProtocol(), "0.4.0.127.0.7.2.2.4.2.2");
-	assertEquals(pi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
-	assertEquals(pi.getVersion(), 2);
+	assertEquals(pi.protocol, "0.4.0.127.0.7.2.2.4.2.2");
+	assertEquals(pi.protocol, PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
+	assertEquals(pi.version, 2);
 	assertEquals(pi.getParameterID(), 13);
 
 	psi = efcaB.getPACESecurityInfos();
@@ -94,9 +94,9 @@ public class EFCardAccessTest {
 	PACEDomainParameterInfo pdpi = psi.getPACEDomainParameterInfos().get(0);
 //	pdp = new PACEDomainParameter(psi);
 
-	assertEquals(pi.getProtocol(), "0.4.0.127.0.7.2.2.4.2.2");
-	assertEquals(pi.getProtocol(), PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
-	assertEquals(pi.getVersion(), 1);
+	assertEquals(pi.protocol, "0.4.0.127.0.7.2.2.4.2.2");
+	assertEquals(pi.protocol, PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128);
+	assertEquals(pi.version, 1);
 	assertEquals(pi.getParameterID(), -1);
 
 	assertEquals(pdpi.getProtocol(), "0.4.0.127.0.7.2.2.4.2");
@@ -111,15 +111,15 @@ public class EFCardAccessTest {
 	CADomainParameter cdp = new CADomainParameter(csi);
 
 	CAInfo ci = csi.getCAInfos().get(0);
-	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
-	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
-	assertEquals(ci.getVersion(), 2);
+	assertEquals(ci.protocol, "0.4.0.127.0.7.2.2.3.2.2");
+	assertEquals(ci.protocol, CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
+	assertEquals(ci.version, 2);
 	assertEquals(ci.getKeyID(), 65);
 
 	ci = csi.getCAInfos().get(1);
-	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
-	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
-	assertEquals(ci.getVersion(), 2);
+	assertEquals(ci.protocol, "0.4.0.127.0.7.2.2.3.2.2");
+	assertEquals(ci.protocol, CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
+	assertEquals(ci.version, 2);
 	assertEquals(ci.getKeyID(), 69);
 
 	CADomainParameterInfo cdpi = csi.getCADomainParameterInfos().get(0);
@@ -143,9 +143,9 @@ public class EFCardAccessTest {
 	cdpi = csi.getCADomainParameterInfos().get(0);
 //	cdp = new CADomainParameter(csi);
 
-	assertEquals(ci.getProtocol(), "0.4.0.127.0.7.2.2.3.2.2");
-	assertEquals(ci.getProtocol(), CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
-	assertEquals(ci.getVersion(), 2);
+	assertEquals(ci.protocol, "0.4.0.127.0.7.2.2.3.2.2");
+	assertEquals(ci.protocol, CAObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128);
+	assertEquals(ci.version, 2);
 	assertEquals(ci.getKeyID(), 0);
 
 	assertEquals(cdpi.getProtocol(), "0.4.0.127.0.7.2.2.3.2");
@@ -158,16 +158,16 @@ public class EFCardAccessTest {
 	TASecurityInfos tsi = efcaA.getTASecurityInfos();
 	TAInfo ti = tsi.getTAInfos().get(0);
 
-	assertEquals(ti.getProtocol(), "0.4.0.127.0.7.2.2.2");
-	assertEquals(ti.getProtocol(), EACObjectIdentifier.id_TA);
-	assertEquals(ti.getVersion(), 2);
+	assertEquals(ti.protocol, "0.4.0.127.0.7.2.2.2");
+	assertEquals(ti.protocol, EACObjectIdentifier.id_TA);
+	assertEquals(ti.version, 2);
 
 	tsi = efcaB.getTASecurityInfos();
 	ti = tsi.getTAInfos().get(0);
 
-	assertEquals(ti.getProtocol(), "0.4.0.127.0.7.2.2.2");
-	assertEquals(ti.getProtocol(), EACObjectIdentifier.id_TA);
-	assertEquals(ti.getVersion(), 2);
+	assertEquals(ti.protocol, "0.4.0.127.0.7.2.2.2");
+	assertEquals(ti.protocol, EACObjectIdentifier.id_TA);
+	assertEquals(ti.version, 2);
     }
 
     @Test

@@ -84,7 +84,7 @@ public class HashStep implements ProtocolStep<Hash, HashResponse> {
 	    if (hashInfo != null) {
 		if (hashInfo == HashGenerationInfoType.NOT_ON_CARD) {
 		    String algId = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
-		    SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algId);
+		    SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algId);
 		    HashAlgorithms hashAlg = alg.getHashAlg();
 		    if (hashAlg == null) {
 			String msg = String.format("Algorithm %s does not specify a Hash algorithm.", algId);

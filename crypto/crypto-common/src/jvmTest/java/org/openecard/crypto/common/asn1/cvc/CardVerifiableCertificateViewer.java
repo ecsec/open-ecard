@@ -80,7 +80,7 @@ public class CardVerifiableCertificateViewer {
 	    System.out.println("Certificate Profile Identifier: " + ByteUtils.toHexString(c.getCPI(), true));
 	    System.out.println("Certification Authority Reference: " + new String(c.getCAR().toByteArray()));
 	    System.out.println("Certificate Holder Reference: " + new String(c.getCHR().toByteArray()));
-	    System.out.println("Role: " + c.getCHAT().getRole().name());
+	    System.out.println("Role: " + c.getCHAT().role.name());
 	    System.out.println("CHAT: " + c.getCHAT().toString());
 	    System.out.println("EffectiveDate: " + dateFormat.format(c.getEffectiveDate().getTime()));
 	    System.out.println("ExpirationDate: " + dateFormat.format(c.getExpirationDate().getTime()));

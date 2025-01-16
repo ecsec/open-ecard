@@ -25,8 +25,6 @@ public @interface ECardApiMethod {
 
     /**
      * Name of the wsdl:operation matching this method.
-     *
-     * @specdefault Name of the Java method.
      */
     String operationName() default "";
 

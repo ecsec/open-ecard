@@ -19,36 +19,33 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.scio
 
-package org.openecard.scio;
-
-import javax.annotation.Nonnull;
-import javax.smartcardio.CardException;
-import jnasmartcardio.Smartcardio.JnaPCSCException;
-import org.openecard.common.ifd.scio.SCIOErrorCode;
-
+import jnasmartcardio.Smartcardio.JnaPCSCException
+import org.openecard.common.ifd.scio.SCIOErrorCode
+import org.openecard.common.ifd.scio.SCIOErrorCode.Companion.getErrorCode
+import javax.annotation.Nonnull
+import javax.smartcardio.CardException
 
 /**
  * Helper class to retrieve the actual PCSC error code from the Java SmartcardIO exception.
  *
  * @author Tobias Wich
  */
-public class PCSCExceptionExtractor {
-
-    public static SCIOErrorCode getCode(@Nonnull CardException mainException) {
-	return getCode((JnaPCSCException) mainException);
+object PCSCExceptionExtractor {
+    fun getCode(mainException: CardException): SCIOErrorCode {
+        return PCSCExceptionExtractor.getCode(mainException as JnaPCSCException)
     }
 
     /**
      * Gets the actual error code from the given JnaPCSCException.
-     * In case no error code can be found, {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} is returned.
+     * In case no error code can be found, [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] is returned.
      *
      * @param mainException The exception coming from the Java SmartcardIO.
-     * @return The code extracted from the exception, or {@link SCIOErrorCode#SCARD_F_UNKNOWN_ERROR} if no code could be
-     *   extracted.
+     * @return The code extracted from the exception, or [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] if no code could be
+     * extracted.
      */
-    public static SCIOErrorCode getCode(@Nonnull JnaPCSCException mainException) {
-	return SCIOErrorCode.getErrorCode(mainException.code);
+    fun getCode(mainException: JnaPCSCException): SCIOErrorCode {
+        return getErrorCode(mainException.code)
     }
-
 }

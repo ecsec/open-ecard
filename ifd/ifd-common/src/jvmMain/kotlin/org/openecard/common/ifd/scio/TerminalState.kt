@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2015 TU Darmstadt.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,35 +19,33 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.ifd.scio;
-
-import javax.annotation.Nonnull;
-
+package org.openecard.common.ifd.scio
 
 /**
- * Exception indicating problems in the ISO/IEC 7816 stack.
+ * Class representing the state of a terminal.
+ * In contrast to [SCIOTerminal], this class does not alter its state according to the the underlying hardware.
+ * It is therefore a snapshot of the state of a terminal at a given point in time.
  *
- * @author Moritz Horsch
  * @author Tobias Wich
  */
-public class SCIOException extends Exception {
+class TerminalState {
+    val name: String?
+    val isCardPresent: Boolean
 
-    private final SCIOErrorCode code;
-
-    public SCIOException(String message, SCIOErrorCode code) {
-	super(message);
-	this.code = code;
+    constructor(name: String?, cardPresent: Boolean) {
+        this.name = name
+        this.isCardPresent = cardPresent
     }
 
-    public SCIOException(String message, SCIOErrorCode code, Throwable cause) {
-	super(message, cause);
-	this.code = code;
+    constructor(term: SCIOTerminal) {
+        this.name = term.name
+        this.isCardPresent = term.isCardPresent
     }
 
-    @Nonnull
-    public SCIOErrorCode getCode() {
-	return code;
+    companion object {
+        @Throws(SCIOException::class)
+        fun convert(terminals: List<SCIOTerminal>): List<TerminalState> {
+			return terminals.map { TerminalState(it) }
+        }
     }
-
 }

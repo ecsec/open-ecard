@@ -19,20 +19,22 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.ifd.protocol.exception
 
-package org.openecard.common.ifd;
-
+import oasis.names.tc.dss._1_0.core.schema.Result
+import org.openecard.common.ECardException
 
 /**
+ * Exception class for IFD protocols.
  *
- * @author Johannes Schmoelz
+ * @author Moritz Horsch
  */
-public enum MessageType {
+class ProtocolException : ECardException {
+    constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
 
-    AUTHENTICATION_REQUEST,
-    SUCCESS,
-    AUTHENTICATION_FAILED,
-    REQUEST_CONFIRMATION,
-    CANCEL
+    constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
 
+    constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
+
+    constructor(cause: Throwable) : super(makeOasisResultTraitImpl(), cause)
 }

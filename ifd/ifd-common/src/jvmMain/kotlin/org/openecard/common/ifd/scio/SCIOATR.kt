@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2014-2015 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,37 +19,24 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.ifd.protocol.exception;
-
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.common.ECardException;
-
+package org.openecard.common.ifd.scio
 
 /**
- * Exception class for IFD protocols.
+ * Represent an ISO/IEC 7618 Answer To Reset (ATR) or Answer To Select (ATS).
+ * The instances of this class are immutable, thus they always return copies to mutable values such as arrays.
  *
- * @author Moritz Horsch
+ * @author Wael Alkhatib
  */
-public class ProtocolException extends ECardException {
+class SCIOATR(atr: ByteArray) {
+    private val atr: ByteArray = atr.clone()
 
-    private static final long serialVersionUID = 1L;
-
-    public ProtocolException(String msg)
-	{
-		super(makeOasisResultTraitImpl(msg), null);
-    }
-
-    public ProtocolException(String minor, String msg) {
-		super(makeOasisResultTraitImpl(minor, msg), null);
-    }
-
-    public ProtocolException(Result r) {
-		super(makeOasisResultTraitImpl(r), null);
-    }
-
-    public ProtocolException(Throwable cause) {
-		super(makeOasisResultTraitImpl(), cause);
-    }
-
+    val bytes: ByteArray
+        /**
+         * Gets the raw bytes of this ATR.
+         * The returned array is a copy of the ATR wrapped in the instance of this class. It is therefore safe to modify the
+         * returned array.
+         *
+         * @return A copy of the ATR represented by the instance of this class.
+         */
+        get() = atr.clone() // TODO: add functionality to extract values such as capabilities of the card
 }

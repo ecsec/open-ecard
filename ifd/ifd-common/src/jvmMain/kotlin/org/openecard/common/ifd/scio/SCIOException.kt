@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014-2015 TU Darmstadt.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,8 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.ifd.scio
+
 
 /**
- * Low level interface for smart cards resembling the interface of the Java SmardcardIO.
+ * Exception indicating problems in the ISO/IEC 7816 stack.
+ *
+ * @author Moritz Horsch
+ * @author Tobias Wich
  */
-package org.openecard.common.ifd.scio;
+class SCIOException(message: String, val code: SCIOErrorCode, cause: Throwable? = null) : Exception(message, cause) {
+	constructor(message: String, code: SCIOErrorCode) : this(message, code, null)
+}

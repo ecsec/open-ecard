@@ -19,38 +19,35 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.ifd.scio;
-
-import java.util.List;
-import javax.annotation.Nonnull;
+package org.openecard.common.ifd.scio
 
 
 /**
  * Interface for smart-card terminal manager.
- * This class is obtained from the system through a factory implementing the {@link TerminalFactory} interface.
+ * This class is obtained from the system through a factory implementing the [TerminalFactory] interface.
  *
  * @author Wael Alkhatib
  * @author Tobias Wich
  */
-public interface SCIOTerminals {
-
+interface SCIOTerminals {
     /**
-     * State attribute for matching terminals in the {@link #list(SCIOTerminals.State)} function.
+     * State attribute for matching terminals in the [.list] function.
      */
-    public static enum State {
-	/**
-	 * State matching all terminals regardless of their state.
-	 */
-	ALL,
-	/**
-	 * Card is present in the terminal.
-	 */
-	CARD_PRESENT,
-	/**
-	 * Card is not present in the terminal.
-	 */
-	CARD_ABSENT,
+    enum class State {
+        /**
+         * State matching all terminals regardless of their state.
+         */
+        ALL,
+
+        /**
+         * Card is present in the terminal.
+         */
+        CARD_PRESENT,
+
+        /**
+         * Card is not present in the terminal.
+         */
+        CARD_ABSENT,
     }
 
     /**
@@ -58,34 +55,36 @@ public interface SCIOTerminals {
      * card can only be used for a very short time and no permament connection is desireable.
      * There one would start a session and once that is present the IFD can connect to the card.
      * @return Returns true if the operation caused a change in the terminal. Otherwise, false for no-op.
-     * @throws org.openecard.common.ifd.scio.SCIOException
+     * @throws SCIOException
      */
-    boolean prepareDevices() throws SCIOException;
+    @Throws(SCIOException::class)
+    fun prepareDevices(): Boolean
 
     /**
      * Power down any previously prepared devices.
      * This is the companion operation to PrepareDevices.
      * @return Returns true if the operation caused a change in the terminal. Otherwise, false for no-op.
      */
-    boolean powerDownDevices();
+    fun powerDownDevices(): Boolean
 
     /**
      * Gets a list of all terminals satisfying the given state.
-     * <p>If state is {@link State#ALL}, this method returns all terminals encapsulated by this object. If state is
-     * {@link State#CARD_PRESENT} or {@link State#CARD_ABSENT}, it returns all terminals where a card is currently
-     * present or absent, respectively.</p>
+     *
+     * If state is [State.ALL], this method returns all terminals encapsulated by this object. If state is
+     * [State.CARD_PRESENT] or [State.CARD_ABSENT], it returns all terminals where a card is currently
+     * present or absent, respectively.
      *
      * @param state State the terminals in the result must satisfy.
      * @return An unmodifiable list of terminals satisfying the given state. The returned list may be empty.
      * @throws SCIOException Thrown if the operation failed.
      * @throws NullPointerException Thrown if no state instance has been given.
      */
-    @Nonnull
-    List<SCIOTerminal> list(@Nonnull State state) throws SCIOException;
+    @Throws(SCIOException::class)
+    fun list(state: State): List<SCIOTerminal>
 
     /**
      * Gets a list of all terminals.
-     * This method is a simplification of the {@link #list(SCIOTerminals.State)} function. In general it should be
+     * This method is a simplification of the [.list] function. In general it should be
      * implemented as follows:
      * <pre>
      * return list(State.ALL);</pre>
@@ -93,8 +92,8 @@ public interface SCIOTerminals {
      * @return An unmodifiable list of all terminals. The returned list may be empty.
      * @throws SCIOException Thrown if the operation failed.
      */
-    @Nonnull
-    List<SCIOTerminal> list() throws SCIOException;
+    @Throws(SCIOException::class)
+    fun list(): List<SCIOTerminal>
 
     /**
      * Gets the terminal with the specified name.
@@ -102,18 +101,10 @@ public interface SCIOTerminals {
      * @param name Name of the terminal to return.
      * @return The terminal instance.
      * @throws NoSuchTerminal Thrown if no terminal with the given name exists.
-     * @throws NullPointerException Thrown if the given terminal name is null.
      */
-    SCIOTerminal getTerminal(@Nonnull String name) throws NoSuchTerminal;
+    @Throws(NoSuchTerminal::class)
+    fun getTerminal(name: String): SCIOTerminal
 
-    /**
-     * Gets a TerminalWatcher instance so state changes can be observed.
-     * The watcher instance represents maintains its own state, so that it is possible to create several watchers in
-     * parallel.
-     *
-     * @return A new instance of TerminalWatcher.
-     * @throws SCIOException Thrown if the operation failed.
-     */
-    TerminalWatcher getWatcher() throws SCIOException;
-
+	@get:Throws(SCIOException::class)
+    val watcher: TerminalWatcher
 }

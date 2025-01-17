@@ -19,8 +19,7 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.ifd.scio;
+package org.openecard.common.ifd.scio
 
 
 /**
@@ -28,14 +27,6 @@ package org.openecard.common.ifd.scio;
  *
  * @author Tobias Wich
  */
-public class NoSuchTerminal extends Exception {
-
-    public NoSuchTerminal(String message) {
-	super(message);
-    }
-
-    public NoSuchTerminal(String message, Throwable cause) {
-	super(message, cause);
-    }
-
+class NoSuchTerminal(message: String, cause: Throwable? = null) : Exception(message, cause) {
+	constructor(message: String) : this(message, null)
 }

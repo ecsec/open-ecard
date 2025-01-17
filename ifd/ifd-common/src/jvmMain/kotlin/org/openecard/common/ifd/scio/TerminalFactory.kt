@@ -19,37 +19,34 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.ifd.scio;
+package org.openecard.common.ifd.scio
 
 
 /**
  * TerminalFactory interface similar to javax.smartcardio.TerminalFactory, but without
- * the static factory elements which are not present in systems like Android.<br>
+ * the static factory elements which are not present in systems like Android.<br></br>
  * The ecsec IFD contains a generic loader class which takes a class name from a config file
- * and executes a method with the following signature:<br>
- * <code>public static TerminalFactory getInstance();</code>
+ * and executes a method with the following signature:<br></br>
+ * `public static TerminalFactory getInstance();`
  *
  * @author Tobias Wich
  */
-public interface TerminalFactory {
-
+interface TerminalFactory {
     /**
      * Returns the type of this TerminalFactory. Examples would be PC/SC or AndroidNFC.
      *
      * @return the type of this TerminalFactory
      */
-    String getType();
+    val type: String
 
     /**
      * Returns a new SCIOTerminals object encapsulating the terminals
      * supported by this factory.
-     * See the class comment of the {@linkplain SCIOTerminals} class
+     * See the class comment of the [SCIOTerminals] class
      * regarding how the returned objects can be shared and reused.
      *
      * @return a new SCIOTerminals object encapsulating the terminals
      * supported by this factory.
      */
-    SCIOTerminals terminals();
-
+    fun terminals(): SCIOTerminals
 }

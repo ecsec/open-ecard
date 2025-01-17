@@ -18,34 +18,27 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-package org.openecard.scio;
+ */
+package org.openecard.scio
 
-import org.openecard.common.ifd.scio.TerminalFactory;
-import org.openecard.ws.common.GenericFactoryException;
-import org.openecard.ws.common.GenericInstanceProvider;
+import org.openecard.common.ifd.scio.TerminalFactory
+import org.openecard.ws.common.GenericFactoryException
+import org.openecard.ws.common.GenericInstanceProvider
 
 /**
  *
  * @author Neil Crossley
  */
-public class CachingTerminalFactoryBuilder<T extends TerminalFactory> implements GenericInstanceProvider<TerminalFactory> {
+class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
+    GenericInstanceProvider<TerminalFactory> {
+    var previousInstance: T? = null
+        private set
 
-    private final GenericInstanceProvider<T> delegate;
-
-    private T previousInstance = null;
-
-    public CachingTerminalFactoryBuilder(GenericInstanceProvider<T> delegate) {
-	this.delegate = delegate;
-    }
-
-    @Override
-    public T getInstance() throws GenericFactoryException {
-	previousInstance = this.delegate.getInstance();
-	return previousInstance;
-    }
-
-    public T getPreviousInstance() {
-	return this.previousInstance;
-    }
+    @get:Throws(GenericFactoryException::class)
+	override val instance: T
+        get() {
+			val next = delegate.instance
+            previousInstance = next
+            return next
+        }
 }

@@ -78,7 +78,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
     }
 
     private void startCardMonitor() {
-	NFCCardMonitoring createdMonitor = new NFCCardMonitoring(nfcCardTerminal, this);
+	NFCCardMonitoring createdMonitor = new NFCCardMonitoring(terminal, this);
 	Thread executionThread = new Thread(createdMonitor);
 	executionThread.start();
 	this.monitor = executionThread;
@@ -255,7 +255,7 @@ public final class AndroidNFCCard extends AbstractNFCCard {
 		return currentTag.transceive(apdu);
 	    } catch (TagLostException ex) {
 		LOG.debug("NFC Tag is not present.", ex);
-		this.nfcCardTerminal.removeTag();
+		this.terminal.removeTag();
 		throw new IllegalStateException("Transmit of apdu command failed, because the tag was lost.");
 	    }
 	}

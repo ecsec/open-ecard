@@ -48,6 +48,7 @@ include("clients:ios-lib")
 include("clients:android-common")
 include("clients:android-lib")
 include("clients:ios-framework")
+include("clients:desktop-lib")
 
 
 dependencyResolutionManagement {

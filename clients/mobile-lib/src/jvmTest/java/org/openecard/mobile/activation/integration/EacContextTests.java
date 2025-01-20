@@ -36,7 +36,7 @@ public class EacContextTests extends BaseIntegrationSetup {
     @Test
     void canBeginEacActivation() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
+	try (World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
 
@@ -49,7 +49,7 @@ public class EacContextTests extends BaseIntegrationSetup {
     @Test
     void canBeginEacActivationWithEidScheme() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
+	try (World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
 
@@ -61,7 +61,7 @@ public class EacContextTests extends BaseIntegrationSetup {
     @Test
     void whenEacActivationCancelsThenEacActivationIsInterrupted() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
+	try (World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
 
@@ -76,7 +76,7 @@ public class EacContextTests extends BaseIntegrationSetup {
     @Test
     void expectServerData() throws Exception {
 	WorldBuilder worldBuilder = WorldBuilder.create();
-	try ( World world = worldBuilder.build()) {
+	try (World world = worldBuilder.build()) {
 
 	    world.contextWorld.startSuccessfully();
 

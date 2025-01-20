@@ -43,6 +43,16 @@ public class KeyLengthVerifier implements CertificateVerifier {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeyLengthVerifier.class);
 
+	private final boolean withChain;
+
+	public KeyLengthVerifier(boolean withChain) {
+		this.withChain = withChain;
+	}
+
+	public KeyLengthVerifier() {
+		this(false);
+	}
+
     @Override
     public void isValid(TlsServerCertificate chain, String hostname) throws CertificateVerificationException {
 	try {
@@ -60,6 +70,10 @@ public class KeyLengthVerifier implements CertificateVerifier {
 		    KeyTools.assertKeyLength(x509);
 
 		    firstCert = false;
+		}
+		// stop if we are only checking the first certificate
+		if (! withChain) {
+			break;
 		}
 	    }
 	} catch (IOException ex) {

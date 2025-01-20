@@ -19,41 +19,30 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.transport.httpcore
 
-package org.openecard.transport.httpcore;
-
-import java.io.IOException;
-import org.openecard.bouncycastle.tls.CertificateRequest;
-import org.openecard.bouncycastle.tls.DefaultTlsClient;
-import org.openecard.bouncycastle.tls.TlsAuthentication;
-import org.openecard.bouncycastle.tls.TlsCredentials;
-import org.openecard.bouncycastle.tls.TlsServerCertificate;
-import org.openecard.bouncycastle.tls.crypto.TlsCrypto;
-
+import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.crypto.TlsCrypto
+import java.io.IOException
 
 /**
  * Implementation of BouncyCastle's abstract DefaultTlsClient.
  *
  * @author Tobias Wich
  */
-public class DefaultTlsClientImpl extends DefaultTlsClient {
+open class DefaultTlsClientImpl(crypto: TlsCrypto) : DefaultTlsClient(crypto) {
+    @Throws(IOException::class)
+    override fun getAuthentication(): TlsAuthentication {
+        return object : TlsAuthentication {
+            @Throws(IOException::class)
+            override fun notifyServerCertificate(serverCertificate: TlsServerCertificate) {
+                // ignore
+            }
 
-    public DefaultTlsClientImpl(TlsCrypto crypto) {
-	super(crypto);
+            @Throws(IOException::class)
+            override fun getClientCredentials(cr: CertificateRequest): TlsCredentials {
+                throw UnsupportedOperationException("Not supported yet.")
+            }
+        }
     }
-
-    @Override
-    public TlsAuthentication getAuthentication() throws IOException {
-	return new TlsAuthentication() {
-	    @Override
-	    public void notifyServerCertificate(TlsServerCertificate serverCertificate) throws IOException {
-		// ignore
-	    }
-	    @Override
-	    public TlsCredentials getClientCredentials(CertificateRequest cr) throws IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
-	    }
-	};
-    }
-
 }

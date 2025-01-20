@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.httpcore
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import org.apache.http.HttpException
 
 /**
+ * Exception indicating an errornous result.
+ * Results with codes greater than 400 are errors. In some circumstances it is more convenient to raise an error to
+ * signal the invalid result. This class helps to do so.
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
-}
+class InvalidResultStatus(val code: Int = 0, val reason: String? = null, message: String, cause: Throwable? = null) : HttpException(message, cause)

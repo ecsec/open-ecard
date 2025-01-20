@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,14 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.crypto.tls.proxy
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import java.net.SocketException
 
 /**
+ * Exception indicating a failed attempt to open a HTTP proxy tunnel.
+ * The exception contains the result code and the textual description of the error.
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
-}
+class HttpConnectProxyException(msg: String, val code: Int, val description: String?) : SocketException(msg)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2012-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,25 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.crypto.tls
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import org.openecard.bouncycastle.tls.TlsServerCertificate
 
 /**
+ * Interface for certificate verification.
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
+interface CertificateVerifier {
+    /**
+     * Verify the given certificate chain.
+     * An invalid certificate is indicated by a CertificateVerificationException.<br></br>
+     * The verification must at least check the certificate chain and the hosts name.
+     *
+     * @param chain Certificate chain to be verified.
+     * @param hostOrIP Name of the host or its IP address used in the validation.
+     * @throws CertificateVerificationException Thrown in case the verification failed.
+     */
+    @Throws(CertificateVerificationException::class)
+    fun isValid(chain: TlsServerCertificate, hostOrIP: String)
 }

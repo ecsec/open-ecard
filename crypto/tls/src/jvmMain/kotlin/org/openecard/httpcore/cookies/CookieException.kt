@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,12 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.httpcore.cookies
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
 
 /**
+ * Exception implementation which shall be used for the CookieManager and the Cookie class.
  *
- * @author Neil Crossley
+ * @author Hans-Martin Haase
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
-}
+class CookieException(message: String, cause: Throwable? = null) : Exception(message, cause)

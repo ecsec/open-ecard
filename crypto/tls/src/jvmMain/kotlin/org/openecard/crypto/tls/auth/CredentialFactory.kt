@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2013-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,23 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.crypto.tls.auth
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import org.openecard.bouncycastle.tls.CertificateRequest
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner
 
 /**
+ * Interface of a factory for TlsCredentials
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
+interface CredentialFactory {
+    /**
+     * Gets all credentials matching the given certificate request.
+     * Given a set of credentials the factory manages, filter out all that do NOT match the given certificate request.
+     *
+     * @param cr Certificate request for which a credential is searched.
+     * @return Possibly empty list of all credentials which could answer the given request.
+     */
+    fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner>
 }

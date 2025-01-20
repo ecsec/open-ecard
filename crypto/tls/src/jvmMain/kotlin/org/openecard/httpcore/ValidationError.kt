@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,21 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.httpcore
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import org.openecard.common.I18n
+import org.openecard.common.I18nException
+import org.openecard.common.I18nKey
 
 /**
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
+class ValidationError : I18nException {
+	@JvmOverloads
+    constructor(message: String?, cause: Throwable? = null) : super(message, cause)
 
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
+    constructor(lang: I18n, key: I18nKey, vararg params: Any) : super(lang, key, *params)
+
+    constructor(lang: I18n, key: I18nKey, cause: Throwable, vararg params: Any) : super(lang, key, cause, *params)
 }

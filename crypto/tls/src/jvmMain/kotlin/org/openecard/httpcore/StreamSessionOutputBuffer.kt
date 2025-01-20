@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,26 +19,26 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.scio
+package org.openecard.httpcore
 
-import org.openecard.common.ifd.scio.TerminalFactory
-import org.openecard.ws.common.GenericFactoryException
-import org.openecard.ws.common.GenericInstanceProvider
+import org.apache.http.impl.io.HttpTransportMetricsImpl
+import org.apache.http.impl.io.SessionOutputBufferImpl
+import java.io.OutputStream
 
 /**
+ * Stream based output buffer for use in Apache httpcore.
  *
- * @author Neil Crossley
+ * @author Tobias Wich
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
-
-    @get:Throws(GenericFactoryException::class)
-	override val instance: T
-        get() {
-			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
+class StreamSessionOutputBuffer(out: OutputStream?, bufsize: Int) :
+    SessionOutputBufferImpl(HttpTransportMetricsImpl(), bufsize) {
+    /**
+     * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
+     *
+     * @param out The destination output stream.
+     * @param bufsize The size of the internal buffer.
+     */
+    init {
+        bind(out)
+    }
 }

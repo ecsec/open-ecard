@@ -30,14 +30,14 @@ public class AndroidNFCCardTerminal extends NFCCardTerminal<AndroidNFCCard> {
 
     @Override
     public boolean isCardPresent() {
-	synchronized(cardLock) {
+	synchronized(getCardLock()) {
 	    AndroidNFCCard currentCard = this.getNFCCard();
 	    return currentCard != null && currentCard.isTagPresent();
 	}
     }
 
     void setNFCTag(IsoDep tag, int timeout) throws IOException {
-	synchronized(this.cardLock) {
+	synchronized(getCardLock()) {
 	    AndroidNFCCard card = getNFCCard();
 	    if (card == null) {
 		throw new IOException("The NFC stack was not initialized and cannot prematurely accept the NFC tag.");

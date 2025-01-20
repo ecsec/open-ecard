@@ -45,10 +45,10 @@ import org.openecard.scio.CachingTerminalFactoryBuilder
  */
 class DelegatingAndroidContextManager(
 	private val contextManager: ContextManager,
-	builder: CachingTerminalFactoryBuilder<AndroidNFCFactory?>,
+	builder: CachingTerminalFactoryBuilder<AndroidNFCFactory>,
 ) : AndroidContextManager {
 
-	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory?> = builder
+	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory> = builder
 
 	@Throws(ApduExtLengthNotSupported::class, NFCTagNotSupported::class, IOException::class)
 	override fun onNewIntent(intent: Intent?) {
@@ -60,11 +60,11 @@ class DelegatingAndroidContextManager(
 
 	@Throws(ApduExtLengthNotSupported::class, NFCTagNotSupported::class, IOException::class)
 	override fun onNewIntent(intent: Tag?) {
-		val nfcFactory: AndroidNFCFactory? = builder.getPreviousInstance()
+		val nfcFactory: AndroidNFCFactory? = builder.previousInstance
 		if (nfcFactory != null && intent != null) {
 			val isoDep: IsoDep = IsoDep.get(intent)
 			if (isoDep != null) {
-				if (isoDep.isExtendedLengthApduSupported()) {
+				if (isoDep.isExtendedLengthApduSupported) {
 					// set nfc tag with timeout of five seconds
 					nfcFactory.setNFCTag(isoDep, 5000)
 				} else {

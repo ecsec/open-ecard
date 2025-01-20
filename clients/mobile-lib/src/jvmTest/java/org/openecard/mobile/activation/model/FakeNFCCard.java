@@ -42,7 +42,7 @@ public class FakeNFCCard extends AbstractNFCCard {
 
     @Override
     public boolean isTagPresent() {
-	return delegate.isTagPresent;
+	return delegate.isTagPresent();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class FakeNFCCard extends AbstractNFCCard {
 
     @Override
     public SCIOATR getATR() {
-	return delegate.aTR;
+	return delegate.getATR();
     }
 
     @Override

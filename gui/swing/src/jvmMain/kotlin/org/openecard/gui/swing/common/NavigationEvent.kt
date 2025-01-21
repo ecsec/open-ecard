@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,24 +19,32 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.gui.swing.common
 
-package org.openecard.gui.executor;
-
-import java.util.concurrent.Callable;
-import org.openecard.gui.UserConsentNavigator;
-
+import java.awt.event.ActionEvent
 
 /**
- * Background task for execution in steps.
- * A background task can get executed in parallel to the display of a step. In case the background task is finished
- * before the user closes the step with any of the buttons, the user consent must translate the result of the task
- * ({@link StepActionResult}) to a result of the step ({@link org.openecard.gui.StepResult}) and return it to the caller
- * of the navigators function (e.g. {@link UserConsentNavigator#next()}). In case the step is closed by the user, then
- * the background task is aborted and the usual procedure is followed.
  *
  * @author Tobias Wich
  */
-@FunctionalInterface
-public interface BackgroundTask extends Callable<StepActionResult> {
+enum class NavigationEvent {
+    NEXT,
+    BACK,
+    CANCEL;
 
+    companion object {
+        fun fromEvent(e: ActionEvent): NavigationEvent? {
+            val command = e.getActionCommand()
+            if (command == GUIConstants.BUTTON_BACK) {
+                return BACK
+            } else if (command == GUIConstants.BUTTON_NEXT) {
+                return NEXT
+            } else if (command == GUIConstants.BUTTON_FINISH) {
+                return NEXT
+            } else if (command == GUIConstants.BUTTON_CANCEL) {
+                return CANCEL
+            }
+            return null
+        }
+    }
 }

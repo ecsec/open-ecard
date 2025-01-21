@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,24 +19,28 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.gui.swing.file
 
-package org.openecard.gui.executor;
-
-import java.util.concurrent.Callable;
-import org.openecard.gui.UserConsentNavigator;
-
+import org.openecard.gui.file.FileFilter
+import java.io.File
 
 /**
- * Background task for execution in steps.
- * A background task can get executed in parallel to the display of a step. In case the background task is finished
- * before the user closes the step with any of the buttons, the user consent must translate the result of the task
- * ({@link StepActionResult}) to a result of the step ({@link org.openecard.gui.StepResult}) and return it to the caller
- * of the navigators function (e.g. {@link UserConsentNavigator#next()}). In case the step is closed by the user, then
- * the background task is aborted and the usual procedure is followed.
+ * Wrapper class for a Open eCard FileFilter.
+ * It wraps the Open eCard FileFilter in Swing FileFilter, so that it can be used in a JFileChooser.
  *
  * @author Tobias Wich
  */
-@FunctionalInterface
-public interface BackgroundTask extends Callable<StepActionResult> {
+class SwingFileFilterWrapper
+/**
+ * Create a FileFilter wrapper instance for the given FileFilter.
+ *
+ * @param wrappedFilter The FileFilter that needs to be wrapped.
+ */(private val wrappedFilter: FileFilter) : javax.swing.filechooser.FileFilter() {
+    override fun accept(f: File): Boolean {
+        return wrappedFilter.accept(f)
+    }
 
+    override fun getDescription(): String {
+        return wrappedFilter.getDescription()
+    }
 }

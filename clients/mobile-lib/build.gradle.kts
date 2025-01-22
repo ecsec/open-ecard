@@ -82,7 +82,7 @@ val iosHeaders by configurations.creating {
 }
 
 
-val shareHeader = tasks.register("shareHeader ") {
+val shareHeader = tasks.register("shareHeader") {
 	dependsOn("compileRoboMainJava")
 	outputs.file(
 		layout.buildDirectory.file("classes/java/roboMain/roboheaders/open-ecard-mobile-lib.h")
@@ -90,14 +90,14 @@ val shareHeader = tasks.register("shareHeader ") {
 }
 
 
-val iosJar = tasks.create("iosJar", Jar::class) {
+val iosJar = tasks.register("iosJar", Jar::class) {
 	group = "build"
-	tasks.named("build") {
-		dependsOn("iosJar")
-	}
 //	dependsOn("jvmRoboMainClasses")
 	from(sourceSets.getByName("roboMain").output)
 	archiveClassifier.set("iOS")
+}
+tasks.named("build") {
+	dependsOn("iosJar")
 }
 
 artifacts {

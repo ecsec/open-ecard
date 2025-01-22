@@ -45,6 +45,9 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
+const val wrongCan = "1231234"
+const val correctCan = "123123"
+
 /**
  * @author Mike Prechtl
  */
@@ -104,6 +107,10 @@ class CardLinkProtocolTest {
 		val correlationIdMseApdu = UUID.randomUUID().toString()
 		val cardSessionId = UUID.randomUUID().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
+
+		Mockito.`when`(webSocketMock.getUrl()).then {
+			"ws://localhost:8080/"
+		}
 
 		Mockito.`when`(webSocketMock.connect()).then {
 			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: $cardSessionId." }
@@ -220,11 +227,11 @@ class CardLinkProtocolTest {
 			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
 			override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
 				logger.info { "onCanRequest" }
-				enterCan.confirmPassword("1231234")
+				enterCan.confirmPassword(wrongCan)
 			}
 			override fun onCanRetry(enterCan: ConfirmPasswordOperation, resultCode: String?, errorMessage: String?) {
 				logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
-				enterCan.confirmPassword("123123")
+				enterCan.confirmPassword(correctCan)
 			}
 
 			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {

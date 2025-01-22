@@ -47,15 +47,15 @@ ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref
 # logging
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.13" }
 slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.13" }
-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.4.14" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
 
 # utilities
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 
 # testing
-testng = { group = "org.testng", name = "testng", version = "7.9.+" }
-mockito = { group = "org.mockito", name = "mockito-core", version = "5.15.2" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
+testng = { group = "org.testng", name = "testng", version = "7.10.+" }
+mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.+" }
 powermock-testng = { group = "org.powermock", name = "powermock-module-testng", version = "2.0.9" }
 powermock-mockito = { group = "org.powermock", name = "powermock-api-mockito2", version = "2.0.9" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
@@ -105,6 +105,7 @@ jfx-swing = { group = "org.openjfx", name = "javafx-swing", version.ref = "jfx" 
 
 [bundles]
 test-basics-kotlin = ["kotlin-test", "kotlin-test-testng"]
+test-mockito = ["mockito", "mockito-kotlin"]
 test-powermock = ["powermock-testng", "powermock-mockito"]
 test-basics = ["testng", "powermock-testng", "powermock-mockito"]
 

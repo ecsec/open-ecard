@@ -35,7 +35,6 @@ kotlin {
 		val jvmTest by getting {
 			dependencies {
 				implementation(project(":wsdef:jaxb-marshaller"))
-				implementation(libs.bundles.test.powermock)
 			}
 		}
 	}

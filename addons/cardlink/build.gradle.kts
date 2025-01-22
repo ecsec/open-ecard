@@ -14,7 +14,6 @@ kotlin {
 		val commonTest by getting {
 			dependencies {
 				implementation(libs.bundles.test.basics.kotlin)
-				implementation(libs.logback.classic)
 			}
 		}
 		val jvmMain by getting {
@@ -32,7 +31,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.mockito)
 				implementation(project(":ifd:scio-backend:pcsc"))
 				implementation(project(":wsdef:wsdef-common"))
 				implementation(project(":wsdef:jaxb-marshaller"))

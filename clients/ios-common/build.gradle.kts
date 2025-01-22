@@ -51,6 +51,4 @@ dependencies {
 	implementation(libs.xerces.imp)
 
 	annotationProcessor(libs.roboface.processor)
-
-	testImplementation(libs.bundles.test.basics)
 }

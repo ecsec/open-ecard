@@ -39,8 +39,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.mockito)
-				implementation(libs.logback.classic)
 				implementation(project(":ifd:scio-backend:mobile-nfc"))
 				implementation(project(":wsdef:jaxb-marshaller"))
 			}

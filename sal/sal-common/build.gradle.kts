@@ -27,7 +27,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.basics)
 				implementation(project(":wsdef:jaxb-marshaller"))
 				implementation(project(":cifs"))
 			}

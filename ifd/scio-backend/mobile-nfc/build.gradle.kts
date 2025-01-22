@@ -24,8 +24,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-//				implementation(libs.kotlin.test.testng)
-				implementation(libs.mockito)
 				implementation(libs.awaitility)
 			}
 		}

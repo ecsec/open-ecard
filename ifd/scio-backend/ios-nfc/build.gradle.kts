@@ -23,5 +23,4 @@ dependencies {
 //	api(libs.pdfbox)
 //	api(libs.scio)
 
-	testImplementation(libs.bundles.test.basics)
 }

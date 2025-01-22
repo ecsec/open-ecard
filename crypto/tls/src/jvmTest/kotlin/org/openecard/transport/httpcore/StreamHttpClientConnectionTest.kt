@@ -81,7 +81,7 @@ class StreamHttpClientConnectionTest {
         Assert.assertTrue(socket.isConnected)
         val tlsClient: DefaultTlsClient = object : DefaultTlsClientImpl(BcTlsCrypto(rand)) {
             override fun getSNIServerNames(): Vector<*> {
-                return Vector(listOf(ServerName(0.toShort(), hostName)))
+                return Vector(listOf(ServerName(0.toShort(), hostName.toByteArray())))
             }
         }
         val handler = TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())

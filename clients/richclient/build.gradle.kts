@@ -51,12 +51,12 @@ dependencies {
 
 	implementation(libs.annotations)
 
-	testImplementation(libs.bundles.test.basics)
+	testImplementation(libs.bundles.test.basics.kotlin)
 }
 
 val setAppName = "Open-eCard-App"
 val setAppVendor = "ecsec GmbH"
-val setAppLicenseFile = projectDir.resolve("../../LICENSE.GPL").path
+val setAppLicenseFile: String = projectDir.resolve("../../LICENSE.GPL").path
 val setAppAboutUrl = "https://openecard.org/"
 val setAppVersion = VersionNumber.parse(project.version.toString()).let {
 	"${it.major}.${it.minor}.${it.micro}"

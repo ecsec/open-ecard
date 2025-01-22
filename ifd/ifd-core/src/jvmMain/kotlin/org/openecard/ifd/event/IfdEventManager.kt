@@ -31,8 +31,6 @@ import org.openecard.common.event.IfdEventObject
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.HandlerBuilder
 import org.openecard.common.util.ValueGenerators.genBase64Session
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.lang.Boolean
 import java.math.BigInteger
 import java.util.concurrent.ExecutorService
@@ -40,11 +38,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
-import javax.annotation.Nonnull
 import kotlin.ByteArray
 import kotlin.RuntimeException
 import kotlin.String
-import kotlin.Throws
+
 
 private val LOG = KotlinLogging.logger {  }
 

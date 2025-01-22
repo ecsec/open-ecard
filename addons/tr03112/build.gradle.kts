@@ -23,6 +23,8 @@ kotlin {
 				api(project(":ifd:ifd-common"))
 				api(project(":sal:sal-common"))
 				implementation(project(":ifd:ifd-protocols:pace"))
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

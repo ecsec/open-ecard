@@ -47,13 +47,12 @@ import java.io.StringWriter
 import java.security.cert.CertificateEncodingException
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
-import javax.annotation.Nonnull
 import javax.security.auth.x500.X500Principal
 
 private val LOG = KotlinLogging.logger { }
 
 abstract class BaseSmartCardCredentialFactory protected constructor(
-	@param:Nonnull protected val dispatcher: Dispatcher,
+	protected val dispatcher: Dispatcher,
 	protected val filterAlwaysReadable: Boolean
 ) : CredentialFactory, ContextAware {
 

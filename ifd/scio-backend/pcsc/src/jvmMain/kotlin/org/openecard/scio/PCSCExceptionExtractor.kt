@@ -24,7 +24,6 @@ package org.openecard.scio
 import jnasmartcardio.Smartcardio.JnaPCSCException
 import org.openecard.common.ifd.scio.SCIOErrorCode
 import org.openecard.common.ifd.scio.SCIOErrorCode.Companion.getErrorCode
-import javax.annotation.Nonnull
 import javax.smartcardio.CardException
 
 /**

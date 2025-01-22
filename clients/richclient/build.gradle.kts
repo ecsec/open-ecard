@@ -49,6 +49,8 @@ dependencies {
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)
 
+	implementation(libs.annotations)
+
 	testImplementation(libs.bundles.test.basics)
 }
 

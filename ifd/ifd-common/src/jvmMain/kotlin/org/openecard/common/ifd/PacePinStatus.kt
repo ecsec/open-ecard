@@ -22,8 +22,7 @@
 package org.openecard.common.ifd
 
 import org.openecard.common.util.StringUtils
-import java.util.*
-import javax.annotation.Nonnull
+
 
 /**
  * Eac PIN Status calls.

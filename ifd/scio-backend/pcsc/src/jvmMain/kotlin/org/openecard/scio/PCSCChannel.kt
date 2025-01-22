@@ -26,14 +26,10 @@ import org.openecard.common.apdu.common.CardCommandAPDU
 import org.openecard.common.apdu.common.CardResponseAPDU
 import org.openecard.common.ifd.scio.SCIOChannel
 import org.openecard.common.ifd.scio.SCIOException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
-import javax.annotation.Nonnull
 import javax.smartcardio.CardChannel
 import javax.smartcardio.CardException
 import javax.smartcardio.CommandAPDU
-import kotlin.Throws
 
 private val LOG = KotlinLogging.logger {  }
 

@@ -32,8 +32,6 @@ import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.HandlerBuilder
 import java.math.BigInteger
-import javax.annotation.Nonnull
-import kotlin.collections.MutableList
 
 private val LOG = KotlinLogging.logger {  }
 

@@ -32,7 +32,6 @@ import org.openecard.common.ifd.scio.TerminalWatcher
 import org.openecard.ifd.scio.wrapper.ChannelManager
 import java.math.BigInteger
 import java.util.concurrent.Callable
-import javax.annotation.Nonnull
 import kotlin.collections.MutableList
 import kotlin.collections.indices
 
@@ -154,7 +153,6 @@ class EventWatcher(
 	 * @param expectedStatus Status known to the caller of the function.
 	 * @return The difference between the internal state of this object and the given reference status.
 	 */
-	@Nonnull
 	fun compare(expectedStatus: MutableList<IFDStatusType>): MutableList<IFDStatusType> {
 		val remaining = currentState!!.toMutableList()
 
@@ -189,7 +187,6 @@ class EventWatcher(
 	}
 
 
-	@Nonnull
 	private fun convert(terminals: List<TerminalState>): MutableList<IFDStatusType> {
 		val result = mutableListOf<IFDStatusType>()
 		for (next in terminals) {
@@ -198,7 +195,6 @@ class EventWatcher(
 		return result
 	}
 
-	@Nonnull
 	private fun convert(next: TerminalState): IFDStatusType {
 		val result = IFDStatusType()
 		result.setIFDName(next.name)

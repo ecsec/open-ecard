@@ -28,6 +28,8 @@ kotlin {
 				//	api(libs.bc.tls)
 				//	api(libs.httpcore)
 				api(project(":addon"))
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

@@ -28,7 +28,6 @@ import org.openecard.gui.definition.TextField
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.util.*
-import javax.annotation.Nonnull
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JPasswordField
@@ -100,7 +99,6 @@ class AbstractInput private constructor(
         this.panel.add(this.label)
     }
 
-    @get:Nonnull
     private val fieldValue: CharArray
         get() {
             val doc = textField.document

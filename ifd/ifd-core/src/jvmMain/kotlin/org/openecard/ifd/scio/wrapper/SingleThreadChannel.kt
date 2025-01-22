@@ -30,11 +30,9 @@ import org.openecard.common.ifd.RecoverableSecureMessagingException
 import org.openecard.common.ifd.scio.*
 import org.openecard.common.util.ByteUtils
 import org.openecard.ifd.scio.TransmitException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
-import javax.annotation.Nonnull
+
 
 private val LOG = KotlinLogging.logger { }
 
@@ -146,7 +144,6 @@ class SingleThreadChannel : IfdChannel {
 	 * @throws IllegalArgumentException Thrown if the APDU encodes a `MANAGE CHANNEL` command.
 	 * @throws NullPointerException Thrown in case the argument is `null`.
 	 */
-	@Nonnull
 	@Throws(SCIOException::class, IllegalStateException::class, InterruptedException::class)
 	private fun transmit(command: ByteArray): CardResponseAPDU {
 		// send command

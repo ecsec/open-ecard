@@ -20,6 +20,8 @@ kotlin {
 			dependencies {
 				api(project(":sal:sal-common"))
 				api(project(":cifs"))
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

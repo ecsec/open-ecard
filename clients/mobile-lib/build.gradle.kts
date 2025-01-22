@@ -107,6 +107,8 @@ artifacts {
 
 
 // extra coverage dependencies so gradle is not upset
-tasks.koverGenerateArtifact {
-	dependsOn(shareHeader)
+kover {
+	currentProject {
+		this.sources.includedSourceSets.add("shareHeader")
+	}
 }

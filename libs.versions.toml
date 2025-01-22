@@ -79,8 +79,6 @@ pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "0.2.7+220204" }
 
-android = { group = "com.google.android", name = "android", version = "api-33" }
-
 robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
 robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
@@ -94,10 +92,6 @@ jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version = "5.12.1" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version = "5.12.1" }
-
-jfx-base = { group = "org.openjfx", name = "javafx-base", version.ref = "jfx" }
-jfx-controls = { group = "org.openjfx", name = "javafx-controls", version.ref = "jfx" }
-jfx-swing = { group = "org.openjfx", name = "javafx-swing", version.ref = "jfx" }
 
 
 [bundles]

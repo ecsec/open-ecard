@@ -23,7 +23,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlin-test-testng = { module = "org.jetbrains.kotlin:kotlin-test-testng", version.ref = "kotlin" }
 
-kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "6.0.+" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-logging" }
 
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
@@ -45,8 +45,8 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 
 # logging
-slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.13" }
-slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.13" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.16" }
+slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.16" }
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
 
 # utilities

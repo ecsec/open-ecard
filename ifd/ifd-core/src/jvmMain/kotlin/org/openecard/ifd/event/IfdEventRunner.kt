@@ -58,7 +58,7 @@ class IfdEventRunner(
 		LOG.debug { "Requesting terminal names." }
         val listReq = ListIFDs()
         listReq.setContextHandle(ctxHandle)
-        val ifds = env.getIFD().listIFDs(listReq)
+        val ifds = env.ifd!!.listIFDs(listReq)
         checkResult(ifds)
 
 		LOG.debug { "Requesting status for all terminals found." }
@@ -67,7 +67,7 @@ class IfdEventRunner(
             val status = GetStatus()
             status.setContextHandle(ctxHandle)
             status.setIFDName(ifd)
-            val statusResponse = env.getIFD().getStatus(status)
+            val statusResponse = env.ifd!!.getStatus(status)
 
             try {
                 checkResult<GetStatusResponse>(statusResponse)
@@ -183,7 +183,7 @@ class IfdEventRunner(
                 // create event
                 val h = makeConnectionHandle(ifdName, null, slotCapabilities)
 				LOG.debug { "Found a terminal added event (${ifdName})." }
-                env.getEventDispatcher().notify(EventType.TERMINAL_ADDED, IfdEventObject(h))
+                env.eventDispatcher!!.notify(EventType.TERMINAL_ADDED, IfdEventObject(h))
             }
 
 
@@ -210,7 +210,7 @@ class IfdEventRunner(
 					LOG.debug { "Found a card insert event (${ifdName})." }
 					LOG.info { "Card with ATR=${ByteUtils.toHexString(slot.getATRorATS())} inserted." }
                     val handle = makeUnknownCardHandle(ifdName, newSlot, slotCapabilities)
-                    env.getEventDispatcher().notify(EventType.CARD_INSERTED, IfdEventObject(handle))
+                    env.eventDispatcher!!.notify(EventType.CARD_INSERTED, IfdEventObject(handle))
                 } else if (!terminalAdded && !cardPresent && cardWasPresent) {
                     // this makes only sense when the terminal was already there
                     // CARD REMOVED
@@ -226,7 +226,7 @@ class IfdEventRunner(
                     }
 					LOG.debug { "Found a card removed event ($ifdName)." }
                     val h = makeConnectionHandle(ifdName, idx, slotCapabilities)
-                    env.getEventDispatcher().notify(EventType.CARD_REMOVED, IfdEventObject(h))
+                    env.eventDispatcher!!.notify(EventType.CARD_REMOVED, IfdEventObject(h))
                 }
             }
 
@@ -243,7 +243,7 @@ class IfdEventRunner(
                 }
                 val h = makeConnectionHandle(ifdName, null, slotCapabilities)
 				LOG.debug { "Found a terminal removed event ($ifdName)." }
-                env.getEventDispatcher().notify(EventType.TERMINAL_REMOVED, IfdEventObject(h))
+                env.eventDispatcher!!.notify(EventType.TERMINAL_REMOVED, IfdEventObject(h))
             }
         }
     }
@@ -253,7 +253,7 @@ class IfdEventRunner(
             val req = GetIFDCapabilities()
             req.setContextHandle(ctxHandle)
             req.setIFDName(ifdName)
-            val res = env.getDispatcher().safeDeliver(req) as GetIFDCapabilitiesResponse
+            val res = env.dispatcher!!.safeDeliver(req) as GetIFDCapabilitiesResponse
             checkResult<GetIFDCapabilitiesResponse>(res)
             return res.getIFDCapabilities()
         } catch (ex: WSHelper.WSException) {

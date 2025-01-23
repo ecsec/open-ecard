@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015-2018 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,35 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import javax.annotation.Nonnull;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.openecard.common.event.EventObject
+import org.openecard.common.event.EventType
 
 /**
- * Interface for schema based document validations.
  *
  * @author Tobias Wich
  */
-public interface DocumentSchemaValidator {
-
-    /**
-     * Validates the given document against the schema definition of the instance.
-     *
-     * @param doc The document to verify.
-     * @throws DocumentValidatorException Indicates a failed document validation.
-     */
-    void validate(@Nonnull Document doc) throws DocumentValidatorException;
-
-    /**
-     * Validates the given document element against the schema definition of the instance.
-     *
-     * @param doc The element to verify.
-     * @throws DocumentValidatorException Indicates a failed document validation.
-     */
-    void validate(@Nonnull Element doc) throws DocumentValidatorException;
-
+interface EventFilter {
+    fun matches(t: EventType, o: EventObject): Boolean
 }

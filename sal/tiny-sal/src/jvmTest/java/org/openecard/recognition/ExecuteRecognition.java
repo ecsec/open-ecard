@@ -45,7 +45,7 @@ public class ExecuteRecognition {
     public void testExecute() throws Exception {
 	Environment env = new ClientEnv();
 	IFD ifd = new org.openecard.ifd.scio.IFD();
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 	byte[] ctx;
 	// establish context
 	EstablishContext eCtx = new EstablishContext();

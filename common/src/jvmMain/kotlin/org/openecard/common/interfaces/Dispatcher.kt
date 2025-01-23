@@ -19,12 +19,9 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
+import java.lang.reflect.InvocationTargetException
 
 /**
  * Interface for a webservice method dispatcher.
@@ -34,8 +31,7 @@ import java.util.List;
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-public interface Dispatcher {
-
+interface Dispatcher {
     /**
      * Invokes the service which is responsible for messages of the type of the given request object.
      *
@@ -44,30 +40,32 @@ public interface Dispatcher {
      * @throws DispatcherException In case an error happens in the reflections part of the dispatcher.
      * @throws InvocationTargetException In case the dispatched method throws en exception.
      */
-    Object deliver(Object request) throws DispatcherException, InvocationTargetException;
+    @Throws(DispatcherException::class, InvocationTargetException::class)
+    fun deliver(request: Any): Any
 
     /**
      * Invokes the service which is responsible for messages of the type of the given request object.
-     * This is a version of the {@link #deliver(Object)} method which throws unchecked instead of checked exceptions.
+     * This is a version of the [.deliver] method which throws unchecked instead of checked exceptions.
      *
      * @param request Object to dispatch to related service.
      * @return The result of the method invocation.
      * @throws DispatcherExceptionUnchecked In case an error happens in the reflections part of the dispatcher.
      * @throws InvocationTargetExceptionUnchecked In case the dispatched method throws en exception.
      */
-    Object safeDeliver(Object request) throws DispatcherExceptionUnchecked, InvocationTargetExceptionUnchecked;
+    @Throws(DispatcherExceptionUnchecked::class, InvocationTargetExceptionUnchecked::class)
+    fun safeDeliver(request: Any): Any
 
     /**
      * Get a list of String with the available services.
      * The format of the name depends on the name space of the service so the service name has either the prefix
-     * {@code urn:iso:std:iso-iec:24727:tech:schema} or {@code http://www.bsi.bund.de/ecard/api/1.0}. A valid example
-     * is for instance <br>
-     * {@code http://www.bsi.bund.de/ecard/api/1.0#InitializeFramework} or <br>
-     * {@code urn:iso:std:iso-iec:24727:tech:schema:DIDAuthenticate}.
+     * `urn:iso:std:iso-iec:24727:tech:schema` or `http://www.bsi.bund.de/ecard/api/1.0`. A valid example
+     * is for instance <br></br>
+     * `http://www.bsi.bund.de/ecard/api/1.0#InitializeFramework` or <br></br>
+     * `urn:iso:std:iso-iec:24727:tech:schema:DIDAuthenticate`.
      *
      * @return A list of Strings representing the available services of the dispatcher.
      */
-    List<String> getServiceList();
+    val serviceList: List<String>
 
     /**
      * Get a Dispatcher which provides a implementation specific range of services.
@@ -78,6 +76,5 @@ public interface Dispatcher {
      *
      * @return A Dispatcher which provides implementation specific range of services.
      */
-    Dispatcher getFilter();
-
+    val filter: Dispatcher
 }

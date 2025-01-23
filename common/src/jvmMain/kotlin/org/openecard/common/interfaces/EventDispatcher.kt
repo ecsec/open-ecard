@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,11 +19,27 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
+
+import org.openecard.common.event.EventObject
+import org.openecard.common.event.EventType
 
 /**
- * Java reflection based implementation of the Dispatcher interface.
- * The interface definitions are loaded once when the dispatcher is created.
  *
- * @see org.openecard.common.interfaces.Dispatcher
+ * @author René Lottes
  */
-package org.openecard.transport.dispatcher;
+interface EventDispatcher {
+    fun start()
+
+    fun terminate()
+
+    fun add(cb: EventCallback): EventCallback
+
+    fun add(cb: EventCallback, vararg eventTypes: EventType): EventCallback
+
+    fun add(cb: EventCallback, filter: EventFilter): EventCallback
+
+    fun del(cb: EventCallback): EventCallback
+
+    fun notify(t: EventType, o: EventObject)
+}

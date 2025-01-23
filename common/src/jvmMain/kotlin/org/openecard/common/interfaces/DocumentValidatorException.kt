@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016-2017 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,38 +19,15 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.interfaces;
-
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.util.List;
+package org.openecard.common.interfaces
 
 
 /**
+ * Exception indicating problems in the validation of an object.
  *
  * @author Tobias Wich
  */
-public interface CardRecognition {
-
-    List<CardInfoType> getCardInfos();
-
-    // TODO: get rid of these functions, they should be in the SAL propably
-    CardInfoType getCardInfo(String type);
-    CardInfoType getCardInfoFromRepo(String type);
-
-    String getTranslatedCardName(String cardType);
-
-    InputStream getCardImage(String objectid);
-
-    InputStream getUnknownCardImage();
-
-    InputStream getNoCardImage();
-
-    InputStream getNoTerminalImage();
-
-    RecognitionInfo recognizeCard(byte[] ctx, String ifdName, BigInteger slot) throws RecognitionException;
-
+class DocumentValidatorException : Exception {
+	@JvmOverloads
+    constructor(message: String, cause: Throwable? = null) : super(message, cause)
 }

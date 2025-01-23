@@ -27,13 +27,11 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.EstablishContext;
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
 import java.io.InputStream;
-import org.openecard.addon.AddonManager;
+
 import org.openecard.common.ClientEnv;
 import org.openecard.common.event.EventDispatcherImpl;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.interfaces.EventDispatcher;
-import org.openecard.gui.swing.SwingDialogWrapper;
-import org.openecard.gui.swing.SwingUserConsent;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.management.TinyManagement;
 import org.openecard.recognition.CardRecognitionImpl;
@@ -70,7 +68,7 @@ public final class TestClient {
 
 	// Set up the IFD
 	IFD ifd = new IFD();
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 
 	// Set up Management
 	TinyManagement management = new TinyManagement(env);
@@ -89,7 +87,7 @@ public final class TestClient {
 	final CardRecognitionImpl recognition = new CardRecognitionImpl(env);
 	env.setRecognition(recognition);
 
-	env.setCIFProvider(new CIFProvider() {
+	env.setCifProvider(new CIFProvider() {
 	    @Override
 	    public CardInfoType getCardInfo(ConnectionHandleType type, String cardType) {
 		return recognition.getCardInfo(cardType);

@@ -29,10 +29,6 @@ import iso.std.iso_iec._24727.tech.schema.ACLModify;
 import iso.std.iso_iec._24727.tech.schema.ACLModifyResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationCreate;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationCreateResponse;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDelete;
-import iso.std.iso_iec._24727.tech.schema.CardApplicationDeleteResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnectResponse;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationEndSession;
@@ -118,23 +114,17 @@ import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Iterator;
-import java.util.Arrays;
-import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openecard.bouncycastle.util.encoders.Hex;
 import org.openecard.common.ClientEnv;
 import org.openecard.common.ECardConstants;
-import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.Dispatcher;
-import org.openecard.common.event.IfdEventObject;
 import org.openecard.common.interfaces.CIFProvider;
 import org.openecard.common.util.ByteUtils;
 import org.openecard.ifd.scio.IFD;
 import org.openecard.recognition.CardRecognitionImpl;
 import org.openecard.transport.dispatcher.MessageDispatcher;
 import org.testng.Assert;
-import org.testng.SkipException;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
@@ -162,9 +152,9 @@ public class TinySALTest {
 	env.setDispatcher(dispatcher);
 	IFD ifd = new IFD();
 	ifd.setEnvironment(env);
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 
-	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
+	EstablishContextResponse ecr = env.getIfd().establishContext(new EstablishContext());
 	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
 	contextHandle = ecr.getContextHandle();
@@ -191,7 +181,7 @@ public class TinySALTest {
                 return null;
             }
 	};
-	env.setCIFProvider(cp);
+	env.setCifProvider(cp);
 	// TODO: fix test
 //	SALStateCallback salCallback = new SALStateCallback(env, states);
 //

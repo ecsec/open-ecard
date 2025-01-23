@@ -19,15 +19,12 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import iso.std.iso_iec._24727.tech.schema.CardInfoType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.io.InputStream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import iso.std.iso_iec._24727.tech.schema.CardInfoType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import java.io.InputStream
+import javax.annotation.Nonnull
 
 /**
  * Interface providing a method to get a CardInfo file for a specific card.
@@ -36,46 +33,42 @@ import javax.annotation.Nullable;
  *
  * @author Tobias Wich
  */
-public interface CIFProvider {
-
+interface CIFProvider {
     /**
      * Gets the CardInfo file for a given cardType enriched with information of the card the handle points to.
      *
-     * @param handle Handle referencing a card. May be {@code null} in case only the static CIF will be returned.
+     * @param handle Handle referencing a card. May be `null` in case only the static CIF will be returned.
      * @param cardType Type of the card to look up. Without this identifier, the static CIF template can not be found.
-     * @return The CIF or {@code null} in case there is no CIF or the CIF could not be created correctly.
+     * @return The CIF or `null` in case there is no CIF or the CIF could not be created correctly.
      * @throws RuntimeException Thrown in case there is an error due to invalid code or invalid hardware.
      */
-    @Nullable
-    CardInfoType getCardInfo(@Nullable ConnectionHandleType handle, @Nonnull String cardType)
-	    throws RuntimeException;
+    @Throws(RuntimeException::class)
+    fun getCardInfo(handle: ConnectionHandleType?, cardType: String): CardInfoType?
 
     /**
      * Gets the CardInfo file for a given cardType enriched with information of the card.
-     * 
+     *
      * @param cardType Type of the card.
-     * @return The CIF or {@code null} in case there is no CIF or the CIF could not be created correctly.
+     * @return The CIF or `null` in case there is no CIF or the CIF could not be created correctly.
      */
-    @Nullable
-    CardInfoType getCardInfo(@Nonnull String cardType) throws RuntimeException;
+    @Throws(RuntimeException::class)
+    fun getCardInfo(cardType: String): CardInfoType?
 
     /**
      * Gets the CardImage for a given cardType. Returns null if the card type is not known to the CIF-Provider.
-     * 
+     *
      * @param cardType Type of the card.
-     * @return The Card Image as InputStream or {@code null} in case there is no Card Image.
+     * @return The Card Image as InputStream or `null` in case there is no Card Image.
      */
-    @Nullable
-    InputStream getCardImage(@Nonnull String cardType);
+    fun getCardImage(cardType: String): InputStream?
 
     /**
      * Evaluates whether recognition is necessary for cards with the given ATR.
-     * If there are conflicting views between the specialized SALs, then a result of {@code false} wins, as it means one
+     * If there are conflicting views between the specialized SALs, then a result of `false` wins, as it means one
      * particular SAL knows that this ATR is handled by it, so no recognition is needed.
      *
      * @param atr ATR of the card in question.
-     * @return {@code true} if recognition must be performed, {@code false} otherwise.
+     * @return `true` if recognition must be performed, `false` otherwise.
      */
-    boolean needsRecognition(@Nullable byte[] atr);
-
+    fun needsRecognition(atr: ByteArray): Boolean
 }

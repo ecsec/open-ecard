@@ -55,7 +55,6 @@ import org.openecard.gui.swing.SwingDialogWrapper
 import org.openecard.gui.swing.SwingUserConsent
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.httpcore.HttpRequestHelper
-import org.openecard.httpcore.HttpUtils
 import org.openecard.httpcore.KHttpUtils
 import org.openecard.httpcore.StreamHttpClientConnection
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory
@@ -241,7 +240,7 @@ class RichClient {
 
             // Initialize the EventManager
             eventDispatcher!!.add(
-                tray!!.status(),
+                tray!!.status()!!,
                 EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
                 EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED
             )

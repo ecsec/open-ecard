@@ -279,7 +279,7 @@ class PINTest {
     fun executePACE_PIN() {
         val ifd = IFD()
         val env: ClientEnv = ClientEnv()
-        env.setGUI(SwingUserConsent(SwingDialogWrapper()))
+        env.gui = SwingUserConsent(SwingDialogWrapper())
         ifd.setEnvironment(env)
         val eCtx: EstablishContext = EstablishContext()
         val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()

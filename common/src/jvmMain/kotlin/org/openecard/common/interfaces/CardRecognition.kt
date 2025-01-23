@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2016-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,23 +19,35 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
+import iso.std.iso_iec._24727.tech.schema.CardInfoType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import java.io.InputStream
+import java.math.BigInteger
 
 /**
- * Exception indicating problems in the validation of an object.
  *
  * @author Tobias Wich
  */
-public class DocumentValidatorException extends Exception {
+interface CardRecognition {
 
-    public DocumentValidatorException(String message) {
-	super(message);
-    }
+    val cardInfos: List<CardInfoType>
 
-    public DocumentValidatorException(String message, Throwable cause) {
-	super(message, cause);
-    }
+    // TODO: get rid of these functions, they should be in the SAL propably
+    fun getCardInfo(type: String): CardInfoType?
+    fun getCardInfoFromRepo(type: String): CardInfoType?
 
+    fun getTranslatedCardName(cardType: String): String
+
+    fun getCardImage(objectid: String): InputStream?
+
+    val unknownCardImage: InputStream
+
+    val noCardImage: InputStream
+
+    val noTerminalImage: InputStream
+
+    @Throws(RecognitionException::class)
+    fun recognizeCard(ctx: ByteArray, ifdName: String, slot: BigInteger): ConnectionHandleType.RecognitionInfo?
 }

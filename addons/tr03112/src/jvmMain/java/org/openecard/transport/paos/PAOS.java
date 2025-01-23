@@ -516,7 +516,7 @@ public class PAOS {
 	} catch (InvocationTargetException ex) {
 	    throw new PAOSDispatcherException(DISPATCHER_ERROR, ex);
 	} catch (TransformerException ex) {
-	    throw new DispatcherException(ex);
+	    throw new DispatcherException(ex.getMessage(), ex);
 	} catch (WSException ex) {
 	    PAOSException newEx = new PAOSException(ex);
 	    if (firstOecMinorError != null) {

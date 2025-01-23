@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,29 +19,14 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.interfaces;
-
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
-
+package org.openecard.common.interfaces
 
 /**
- * Interface for event callback handlers.
- * This interface must be implemented by a callback registering itself in the event system.
+ * This annotation is used to mark SOAP actions which shall not be filtered out by the getFilter method of the Dispatcher.
+ * If the MessageDispatcher is invoked with the isFiler = true constructor than just services are stored which have the
+ * Publish method.
  *
- * @see EventDispatcher
- * @author Johannes Schmoelz
+ * @author Hans-Martin Haase
  */
-public interface EventCallback {
-
-    /**
-     * Callback function for IFD events.
-     * This function gets called for each registered event in the {@link EventDispatcher}.
-     *
-     * @param eventType Type of the event.
-     * @param eventData Data describing the event further.
-     */
-    void signalEvent(EventType eventType, EventObject eventData);
-
-}
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Publish 

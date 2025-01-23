@@ -19,16 +19,10 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import java.lang.annotation.Inherited
+import kotlin.reflect.KClass
 
 /**
  * This annotation is used in the environment to mark the return value of getters as dispatchable type.
@@ -38,18 +32,16 @@ import java.lang.annotation.Target;
  *
  * @author Tobias Wich
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
 @Inherited
-public @interface Dispatchable {
-
+annotation class Dispatchable(
     /**
      * Gets the class of the webservice interface associated with this getter.
      * The class instance must be webservice interface and all of its methods must be webservice methods.
      *
      * @return Class object representing the actual webservice interface, the Object class if none is set.
      */
-    Class interfaceClass();
-
-}
+    val interfaceClass: KClass<*>
+)

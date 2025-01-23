@@ -100,7 +100,7 @@ class IfdEventManager(
         val wait = Wait()
         wait.setContextHandle(ctx)
         wait.getIFDStatus().addAll(lastKnown)
-        val resp = env.getIFD().wait(wait)
+        val resp = env.ifd!!.wait(wait)
 
         try {
             checkResult(resp)
@@ -150,14 +150,14 @@ class IfdEventManager(
             .setSlotHandle(cHandleIn.getSlotHandle())
             .setProtectedAuthPath(protectedAuthPath)
             .buildConnectionHandle()
-        env.getEventDispatcher().notify(EventType.CARD_RESET, IfdEventObject(cInNew, ifaceProtocol, true))
+        env.eventDispatcher!!.notify(EventType.CARD_RESET, IfdEventObject(cInNew, ifaceProtocol, true))
     }
 
     private fun getCapabilities(ctxHandle: ByteArray?, ifdName: String?): IFDCapabilitiesType? {
         val req = GetIFDCapabilities()
         req.setContextHandle(ctxHandle)
         req.setIFDName(ifdName)
-        val res = env.getDispatcher().safeDeliver(req) as GetIFDCapabilitiesResponse
+        val res = env.dispatcher!!.safeDeliver(req) as GetIFDCapabilitiesResponse
         return res.getIFDCapabilities()
     }
 

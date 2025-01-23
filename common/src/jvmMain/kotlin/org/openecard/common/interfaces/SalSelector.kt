@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,31 +19,23 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.ifd.event
+package org.openecard.common.interfaces
 
-import iso.std.iso_iec._24727.tech.schema.EstablishContext
-import org.openecard.common.ClientEnv
-import org.openecard.ifd.scio.IFD
-import org.openecard.ifd.scio.IFDException
-import org.testng.annotations.Test
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import org.openecard.ws.SAL
 
 /**
+ * Interface describing the methods of a class capable of selecting a particular SAL instance.
  *
  * @author Tobias Wich
  */
-class ManagerTest {
-    @Test(enabled = false)
-    @Throws(InterruptedException::class, IFDException::class)
-    fun runManager() {
-        val ifd = IFD()
-        val ctx = EstablishContext()
-        val ctxR = ifd.establishContext(ctx)
-        val env = ClientEnv()
-		env.ifd = ifd
-        val evt = IfdEventManager(env, ctxR.getContextHandle())
-        evt.initialize()
-        Thread.sleep(1000)
-        //evt.terminate();
-        Thread.sleep(1000000)
-    }
+interface SalSelector {
+    fun getSalForCardType(cardType: String): SAL
+
+    fun getSalForProtocol(protocolUri: String): List<SAL>
+
+    fun getSalForHandle(handle: ConnectionHandleType): SAL
+
+    fun getSalForPath(path: CardApplicationPathType): SAL
 }

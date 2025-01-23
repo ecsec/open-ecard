@@ -67,35 +67,35 @@ public class ClientEnv implements Environment {
 
 
     @Override
-    public void setGUI(UserConsent gui) {
+    public void setGui(UserConsent gui) {
 	this.gui = gui;
     }
 
     @Override
-    public UserConsent getGUI() {
+    public UserConsent getGui() {
 	return this.gui;
     }
 
     @Override
-    public void setIFD(IFD ifd) {
+    public void setIfd(IFD ifd) {
 	this.ifd = ifd;
     }
 
     @Override
     @Dispatchable(interfaceClass = IFD.class)
-    public IFD getIFD() {
+    public IFD getIfd() {
 	return ifd;
     }
 
     @Override
-    public synchronized void addIFDCtx(byte[] ctx) {
+    public synchronized void addIfdCtx(byte[] ctx) {
 	if (ctx != null && ctx.length > 0) {
 	    ifdCtx.add(Arrays.copyOf(ctx, ctx.length));
 	}
     }
 
     @Override
-    public synchronized void removeIFDCtx(byte[] ctx) {
+    public synchronized void removeIfdCtx(byte[] ctx) {
 	Iterator<byte[]> it = ifdCtx.iterator();
 	while (it.hasNext()) {
 	    byte[] next = it.next();
@@ -107,7 +107,7 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public synchronized List<byte[]> getIFDCtx() {
+    public synchronized List<byte[]> getIfdCtx() {
 	ArrayList<byte[]> result = new ArrayList<>(ifdCtx.size());
 	for (byte[] next : ifdCtx) {
 	    result.add(Arrays.copyOf(next, next.length));
@@ -126,13 +126,13 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public void setSAL(SAL sal) {
+    public void setSal(SAL sal) {
 	this.sal = sal;
     }
 
     @Override
     @Dispatchable(interfaceClass = SAL.class)
-    public SAL getSAL() {
+    public SAL getSal() {
 	return sal;
     }
 
@@ -178,12 +178,12 @@ public class ClientEnv implements Environment {
     }
 
     @Override
-    public void setCIFProvider(CIFProvider provider) {
+    public void setCifProvider(CIFProvider provider) {
 	this.cifProvider = provider;
     }
 
     @Override
-    public CIFProvider getCIFProvider() {
+    public CIFProvider getCifProvider() {
 	return cifProvider;
     }
 

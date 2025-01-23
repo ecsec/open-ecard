@@ -132,7 +132,7 @@ class IFD : IFD {
 				val currentTermFactory = this.termFactory
 				cm = ChannelManager(currentTermFactory)
 				ctxHandle = ChannelManager.Companion.createCtxHandle()
-				env!!.addIFDCtx(ctxHandle)
+				env!!.addIfdCtx(ctxHandle!!)
 				numClients = AtomicInteger(1)
 				// TODO: add custom ThreadFactory to control the thread name
 				threadPool = Executors.newCachedThreadPool(object : ThreadFactory {
@@ -174,7 +174,7 @@ class IFD : IFD {
 		val response: ReleaseContextResponse
 		if (ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			if (numClients!!.decrementAndGet() == 0) { // last client detaches
-				env!!.removeIFDCtx(ctxHandle)
+				env!!.removeIfdCtx(ctxHandle!!)
 				ctxHandle = null
 				numClients = null
 				// terminate thread pool
@@ -223,7 +223,7 @@ class IFD : IFD {
 				.setContextHandle(parameters.getContextHandle())
 				.buildConnectionHandle()
 
-			env!!.getEventDispatcher().notify(EventType.PREPARE_DEVICES, IfdEventObject(handle))
+			env!!.eventDispatcher!!.notify(EventType.PREPARE_DEVICES, IfdEventObject(handle))
 		}
 
 		return WSHelper.makeResponse(
@@ -240,7 +240,7 @@ class IFD : IFD {
 				.setContextHandle(parameters.getContextHandle())
 				.buildConnectionHandle()
 
-			env!!.getEventDispatcher().notify(EventType.POWER_DOWN_DEVICES, IfdEventObject(handle))
+			env!!.eventDispatcher!!.notify(EventType.POWER_DOWN_DEVICES, IfdEventObject(handle))
 		}
 
 		return WSHelper.makeResponse(
@@ -1266,7 +1266,7 @@ class IFD : IFD {
 			}
 
 			val channel = cm!!.getSlaveChannel(parameters.getSlotHandle())
-			val aTerm = AbstractTerminal(this, cm!!, channel, env!!.getGUI(), ctxHandle, parameters.getDisplayIndex())
+			val aTerm = AbstractTerminal(this, cm!!, channel, env!!.gui, ctxHandle, parameters.getDisplayIndex())
 			try {
 				response = aTerm.verifyUser(parameters)
 				return response
@@ -1388,7 +1388,7 @@ class IFD : IFD {
 			// check out available software protocols
 			this.protocolFactories.get(protocol)?.let { factory ->
 				val protoImpl = factory.createInstance()
-				val response = protoImpl.establish(parameters, env!!.getDispatcher(), env!!.getGUI())
+				val response = protoImpl.establish(parameters, env!!.dispatcher!!, env!!.gui!!)
 				// register protocol instance for secure messaging when protocol was processed successful
 				if (response.getResult().getResultMajor() == ECardConstants.Major.OK) {
 					channel.addSecureMessaging(protoImpl)

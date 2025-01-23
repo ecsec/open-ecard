@@ -137,7 +137,7 @@ public class SalEventManager {
 	    LOG.debug("Requesting terminal names.");
 	    ListIFDs listReq = new ListIFDs();
 	    listReq.setContextHandle(ctxHandle);
-	    ListIFDsResponse ifds = env.getIFD().listIFDs(listReq);
+	    ListIFDsResponse ifds = env.getIfd().listIFDs(listReq);
 	    WSHelper.checkResult(ifds);
 
 	    LOG.debug("Requesting status for all terminals found.");
@@ -146,7 +146,7 @@ public class SalEventManager {
 		GetStatus status = new GetStatus();
 		status.setContextHandle(ctxHandle);
 		status.setIFDName(ifd);
-		GetStatusResponse statusResponse = env.getIFD().getStatus(status);
+		GetStatusResponse statusResponse = env.getIfd().getStatus(status);
 
 		try {
 		    WSHelper.checkResult(statusResponse);
@@ -169,7 +169,7 @@ public class SalEventManager {
 	    Wait wait = new Wait();
 	    wait.setContextHandle(ctxHandle);
 	    wait.getIFDStatus().addAll(lastKnown);
-	    WaitResponse resp = env.getIFD().wait(wait);
+	    WaitResponse resp = env.getIfd().wait(wait);
 
 		WSHelper.checkResult(resp);
 		List<IFDStatusType> result = resp.getIFDEvent();

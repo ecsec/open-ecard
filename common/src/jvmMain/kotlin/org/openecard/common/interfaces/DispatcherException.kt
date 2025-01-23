@@ -19,13 +19,11 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import org.openecard.common.I18n;
-import org.openecard.common.I18nException;
-import org.openecard.common.I18nKey;
-
+import org.openecard.common.I18n
+import org.openecard.common.I18nException
+import org.openecard.common.I18nKey
 
 /**
  * Exception class indicating reflection or runtime errors in the dispatcher.
@@ -33,27 +31,7 @@ import org.openecard.common.I18nKey;
  *
  * @author Tobias Wich
  */
-public class DispatcherException extends I18nException {
-
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates an instance and initializes the exception with a message.
-     *
-     * @param message The message describing the error.
-     */
-    public DispatcherException(String message) {
-	super(message);
-    }
-
-    /**
-     * Creates an instance and initializes the exception with a cause.
-     *
-     * @param cause The exception causing the error.
-     */
-    public DispatcherException(Throwable cause) {
-	super(cause);
-    }
+open class DispatcherException : I18nException {
 
     /**
      * Creates an instance and initializes the exception with a message and a cause.
@@ -61,9 +39,8 @@ public class DispatcherException extends I18nException {
      * @param message The message describing the error.
      * @param cause The exception causing the error.
      */
-    public DispatcherException(String message, Throwable cause) {
-	super(message, cause);
-    }
+	@JvmOverloads
+    constructor(message: String?, cause: Throwable? = null) : super(message, cause)
 
     /**
      * Creates a DispatcherException.
@@ -72,9 +49,7 @@ public class DispatcherException extends I18nException {
      * @param key Key which is fed into the translation database.
      * @param params Optional parameters for the translation.
      */
-    protected DispatcherException(I18n lang, I18nKey key, Object... params) {
-	super(lang, key, params);
-    }
+    protected constructor(lang: I18n, key: I18nKey, vararg params: Any) : super(lang, key, *params)
 
     /**
      * Creates a DispatcherException.
@@ -84,8 +59,11 @@ public class DispatcherException extends I18nException {
      * @param params Optional parameters for the translation.
      * @param cause Exception causing the problem.
      */
-    protected DispatcherException(I18n lang, I18nKey key, Throwable cause, Object... params) {
-	super(lang, key, cause, params);
-    }
+    protected constructor(lang: I18n, key: I18nKey, cause: Throwable, vararg params: Any) : super(
+        lang,
+        key,
+        cause,
+        *params
+    )
 
 }

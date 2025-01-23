@@ -19,19 +19,13 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.interfaces;
-
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
+package org.openecard.common.interfaces
 
 
 /**
  *
- * @author Tobias Wich
+ * @author Johannes Schmölz
  */
-public interface EventFilter {
-
-    boolean matches(EventType t, EventObject o);
-
+interface AsyncTransportCallback {
+    fun receive(message: Any): Any
 }

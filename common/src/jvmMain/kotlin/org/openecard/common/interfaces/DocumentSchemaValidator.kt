@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2019 ecsec GmbH.
+ * Copyright (C) 2015-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,28 +19,33 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import java.util.List;
-import org.openecard.ws.SAL;
-
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import javax.annotation.Nonnull
 
 /**
- * Interface describing the methods of a class capable of selecting a particular SAL instance.
+ * Interface for schema based document validations.
  *
  * @author Tobias Wich
  */
-public interface SalSelector {
+interface DocumentSchemaValidator {
+    /**
+     * Validates the given document against the schema definition of the instance.
+     *
+     * @param doc The document to verify.
+     * @throws DocumentValidatorException Indicates a failed document validation.
+     */
+    @Throws(DocumentValidatorException::class)
+    fun validate(doc: Document)
 
-    SAL getSalForCardType(String cardType);
-
-    List<SAL> getSalForProtocol(String protocolUri);
-
-    SAL getSalForHandle(ConnectionHandleType handle);
-
-    SAL getSalForPath(CardApplicationPathType path);
-
+    /**
+     * Validates the given document element against the schema definition of the instance.
+     *
+     * @param doc The element to verify.
+     * @throws DocumentValidatorException Indicates a failed document validation.
+     */
+    @Throws(DocumentValidatorException::class)
+    fun validate(doc: Element)
 }

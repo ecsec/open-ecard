@@ -171,24 +171,25 @@ class CardRecognitionImpl @JvmOverloads constructor(
     }
 
 
-    override fun getCardInfos(): List<CardInfoType> {
-        // TODO: add caching
-        val req = iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD()
-        req.setAction(ECardConstants.CIF.GET_OTHER)
-        val res = cifRepo.getCardInfoOrACD(req)
-        // checkout response if it contains our cardinfo
-        val cifs = res.getCardInfoOrCapabilityInfo()
-        val result = ArrayList<CardInfoType>()
-        for (next in cifs) {
-            if (next is CardInfoType) {
-                result.add(next)
-            }
-        }
-        return result
-    }
+    override val cardInfos: List<CardInfoType>
+		get() {
+			// TODO: add caching
+			val req = iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACD()
+			req.setAction(ECardConstants.CIF.GET_OTHER)
+			val res = cifRepo.getCardInfoOrACD(req)
+			// checkout response if it contains our cardinfo
+			val cifs = res.getCardInfoOrCapabilityInfo()
+			val result = ArrayList<CardInfoType>()
+			for (next in cifs) {
+				if (next is CardInfoType) {
+					result.add(next)
+				}
+			}
+			return result
+		}
 
     override fun getCardInfo(type: String): CardInfoType? {
-        var cif = env.getCIFProvider().getCardInfo(type)
+        var cif = env.cifProvider?.getCardInfo(type)
         if (cif == null) {
             cif = getCardInfoFromRepo(type)
         }
@@ -256,7 +257,7 @@ class CardRecognitionImpl @JvmOverloads constructor(
     override fun getCardImage(objectid: String): InputStream? {
         val fname = cardImagesMap.getProperty(objectid)
         // Get the card image as inputstream from the responsible Middleware SAL
-        var fs = env.getCIFProvider().getCardImage(objectid)
+        var fs = env.cifProvider?.getCardImage(objectid)
         // If null is returned, load the Image from the local cif repo
         if (fs == null && fname != null) {
             fs = loadCardImage(fname)
@@ -271,25 +272,28 @@ class CardRecognitionImpl @JvmOverloads constructor(
      * @return Stream containing the requested image.
      * @see .getCardImage
      */
-    override fun getUnknownCardImage(): InputStream? {
-        return loadCardImage("unknown_card.png")
-    }
+    override val unknownCardImage: InputStream
+		get() {
+			return loadCardImage("unknown_card.png")!!
+		}
 
     /**
      * @return Stream containing the requested image.
      * @see .getCardImage
      */
-    override fun getNoCardImage(): InputStream? {
-        return loadCardImage("no_card.jpg")
-    }
+    override val noCardImage: InputStream
+		get() {
+			return loadCardImage("no_card.jpg")!!
+		}
 
     /**
      * @return Stream containing the requested image.
      * @see .getCardImage
      */
-    override fun getNoTerminalImage(): InputStream? {
-        return loadCardImage("no_terminal.png")
-    }
+    override val noTerminalImage: InputStream
+			get () {
+			return loadCardImage("no_terminal.png")!!
+		}
 
     /**
      * Recognizes the card in the defined reader.
@@ -377,7 +381,7 @@ class CardRecognitionImpl @JvmOverloads constructor(
         c.setIFDName(ifdName)
         c.setSlot(slot)
 
-        val r = env.getDispatcher().safeDeliver(c) as ConnectResponse
+        val r = env.dispatcher!!.safeDeliver(c) as ConnectResponse
         checkResult(r.getResult())
 
         waitForExclusiveCardAccess(r.getSlotHandle(), ifdName)
@@ -400,7 +404,7 @@ class CardRecognitionImpl @JvmOverloads constructor(
             // try to get exclusive card access for the recognition run
             val trans = BeginTransaction()
             trans.setSlotHandle(slotHandle)
-            val resp = env.getDispatcher().safeDeliver(trans) as BeginTransactionResponse
+            val resp = env.dispatcher!!.safeDeliver(trans) as BeginTransactionResponse
             resultMajor = resp.getResult().getResultMajor()
 
             if (resultMajor != ECardConstants.Major.OK) {
@@ -413,8 +417,8 @@ class CardRecognitionImpl @JvmOverloads constructor(
                     val waitInSeconds = fibonacci(i)
                     i++
 					LOG.debug { "Could not get exclusive card access. Trying again in $waitInSeconds seconds." }
-                    if (i == 6 && env.getGUI() != null) {
-                        val dialog = env.getGUI().obtainMessageDialog()
+                    if (i == 6 && env.gui != null) {
+                        val dialog = env.gui!!.obtainMessageDialog()
                         val message: String? = LANG.translationForKey("message", name, ifdName)
                         val title: String? = LANG.translationForKey("error", ifdName)
                         dialog.showMessageDialog(message, title, DialogType.WARNING_MESSAGE)
@@ -432,12 +436,12 @@ class CardRecognitionImpl @JvmOverloads constructor(
         // end exclusive card access
         val end = EndTransaction()
         end.setSlotHandle(slotHandle)
-        val endTransactionResponse = env.getDispatcher().safeDeliver(end) as EndTransactionResponse
+        val endTransactionResponse = env.dispatcher!!.safeDeliver(end) as EndTransactionResponse
         checkResult(endTransactionResponse.getResult())
 
         val d = Disconnect()
         d.setSlotHandle(slotHandle)
-        val r = env.getDispatcher().safeDeliver(d) as DisconnectResponse
+        val r = env.dispatcher!!.safeDeliver(d) as DisconnectResponse
         checkResult(r.getResult())
     }
 
@@ -456,7 +460,7 @@ class CardRecognitionImpl @JvmOverloads constructor(
         }
         t.getInputAPDUInfo().add(apdu)
 
-        val r = env.getDispatcher().safeDeliver(t) as TransmitResponse
+        val r = env.dispatcher!!.safeDeliver(t) as TransmitResponse
 		return if (checkTransmitResult(r)) {
 			r.getOutputAPDU()[0]
 		} else {

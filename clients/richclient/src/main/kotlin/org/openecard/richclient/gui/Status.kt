@@ -248,8 +248,8 @@ class Status(
         }
 
         if (!cardIcons.containsKey(cardType)) {
-            var `is` = env.recognition.getCardImage(cardType)
-				?: env.recognition.unknownCardImage
+            var `is` = env.recognition!!.getCardImage(cardType)
+				?: env.recognition!!.unknownCardImage
             val icon = GuiUtils.getScaledCardImageIcon(`is`)
             cardIcons[cardType] = icon
         }
@@ -277,7 +277,7 @@ class Status(
         } else {
             // read CardTypeName from CardInfo file
             var cardTypeName = cardType
-            val cif = env.cifProvider.getCardInfo(cardType)
+            val cif = env.cifProvider!!.getCardInfo(cardType)
 
             if (cif != null) {
                 val type = cif.cardType
@@ -332,7 +332,7 @@ class Status(
     }
 
     @Synchronized
-    override fun signalEvent(eventType: EventType?, eventData: EventObject) {
+    override fun signalEvent(eventType: EventType, eventData: EventObject) {
 		LOG.debug { "Event: $eventType" }
 
         val ch = eventData.handle

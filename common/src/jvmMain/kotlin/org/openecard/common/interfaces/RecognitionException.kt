@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,21 +19,22 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
+import oasis.names.tc.dss._1_0.core.schema.Result
+import org.openecard.common.ECardException
 
 /**
- * This annotation is used to mark SOAP actions which shall not be filtered out by the getFilter method of the Dispatcher.
- * If the MessageDispatcher is invoked with the isFiler = true constructor than just services are stored which have the
- * Publish method. 
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Publish {
+class RecognitionException : ECardException {
+    constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
+
+    constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
+
+    constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
+
+    constructor(cause: Throwable) : super(makeOasisResultTraitImpl(), cause)
 
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2016 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,31 +19,26 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import org.openecard.common.event.EventObject;
-import org.openecard.common.event.EventType;
-
+import org.openecard.common.event.EventObject
+import org.openecard.common.event.EventType
 
 /**
+ * Interface for event callback handlers.
+ * This interface must be implemented by a callback registering itself in the event system.
  *
- * @author René Lottes
+ * @see EventDispatcher
+ *
+ * @author Johannes Schmoelz
  */
-public interface EventDispatcher {
-
-    void start();
-
-    void terminate();
-    
-    EventCallback add(EventCallback cb);
-    
-    EventCallback add(EventCallback cb, EventType ... eventTypes);
-    
-    EventCallback add(EventCallback cb, EventFilter filter);
-    
-    EventCallback del(EventCallback cb);
-    
-    void notify(EventType t, EventObject o);
-    
+interface EventCallback {
+    /**
+     * Callback function for IFD events.
+     * This function gets called for each registered event in the [EventDispatcher].
+     *
+     * @param eventType Type of the event.
+     * @param eventData Data describing the event further.
+     */
+    fun signalEvent(eventType: EventType, eventData: EventObject)
 }

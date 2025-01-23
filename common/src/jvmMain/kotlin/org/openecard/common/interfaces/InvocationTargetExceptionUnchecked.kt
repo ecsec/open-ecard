@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,16 +19,11 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.common.interfaces;
-
+package org.openecard.common.interfaces
 
 /**
+ * Same as [InvocationTargetException] but in as an unchecked version.
  *
- * @author Johannes Schmölz
+ * @author Tobias Wich
  */
-public interface AsyncTransportCallback {
-
-    Object receive(Object message);
-
-}
+class InvocationTargetExceptionUnchecked @JvmOverloads constructor(msg: String?, cause: Throwable? = null) : RuntimeException(msg, cause)

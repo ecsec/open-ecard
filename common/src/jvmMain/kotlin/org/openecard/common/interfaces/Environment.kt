@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2012-2020 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,35 +19,42 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import org.openecard.common.ECardException;
-
+import org.openecard.gui.UserConsent
+import org.openecard.ws.IFD
+import org.openecard.ws.Management
+import org.openecard.ws.SAL
 
 /**
  *
- * @author Tobias Wich
+ * @author Johannes Schmoelz
  */
-public class RecognitionException extends ECardException {
+interface Environment {
 
-    private static final long serialVersionUID = 1L;
+    var gui: UserConsent?
 
-    public RecognitionException(String msg) {
-		super(makeOasisResultTraitImpl(msg), null);
-    }
+    var ifd: IFD?
 
-    public RecognitionException(String minor, String msg) {
-		super(makeOasisResultTraitImpl(minor, msg), null);
-    }
+    fun addIfdCtx(ctx: ByteArray)
+    fun removeIfdCtx(ctx: ByteArray)
 
-    public RecognitionException(Result r) {
-		super(makeOasisResultTraitImpl(r), null);
-    }
+    val ifdCtx: List<ByteArray>
 
-    public RecognitionException(Throwable cause) {
-		super(makeOasisResultTraitImpl(), cause);
-    }
+    var sal: SAL?
 
+    var eventDispatcher: EventDispatcher?
+
+    var dispatcher: Dispatcher?
+
+    var recognition: CardRecognition?
+
+    var cifProvider: CIFProvider?
+
+    var salSelector: SalSelector?
+
+    fun setGenericComponent(id: String, component: Any)
+    fun getGenericComponent(id: String): Any?
+
+    var management: Management?
 }

@@ -409,7 +409,7 @@ public class AddonManager {
 	Context aCtx = new Context(this, env, addonSpec, viewController, salStateView);
 	aCtx.setCardRecognition(env.getRecognition());
 	aCtx.setEventHandle(eventHandler);
-	aCtx.setUserConsent(env.getGUI());
+	aCtx.setUserConsent(env.getGui());
 
 	return aCtx;
     }

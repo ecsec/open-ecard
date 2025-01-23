@@ -19,20 +19,24 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.common.interfaces
 
-package org.openecard.common.interfaces;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
- * Same as {@link InvocationTargetException} but in as an unchecked version.
+ * Exception class indicating reflection or runtime errors in the dispatcher.
+ * This exception indicates a failure to read webservice interface definitions and invocations with unknown types.
+ * This exception is unchecked to make it easier to call interfaces such as the SAL which are definitely present.
  *
  * @author Tobias Wich
  */
-public class InvocationTargetExceptionUnchecked extends RuntimeException {
-
-    public InvocationTargetExceptionUnchecked(String msg, Throwable cause) {
-	super(msg, cause);
-    }
+class DispatcherExceptionUnchecked : RuntimeException {
+    /**
+     * Creates an instance and initializes the exception with a message and a cause.
+     *
+     * @param message The message describing the error.
+     * @param cause The exception causing the error.
+     */
+	@JvmOverloads
+    constructor(message: String?, cause: Throwable? = null) : super(message, cause)
 
 }

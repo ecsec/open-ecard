@@ -2063,35 +2063,6 @@
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
-			<!-- EF.C.CA_eGK.CS (cf. [eGK-2#6.2.2]) -->
-			<iso:DataSetInfo>
-				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-				<iso:DataSetName>EF.C.CA_eGK.CS</iso:DataSetName>
-				<iso:DataSetACL>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-				</iso:DataSetACL>
-				<iso:DataSetPath>
-					<iso:efIdOrPath>2F04</iso:efIdOrPath>
-				</iso:DataSetPath>
-			</iso:DataSetInfo>
-
 			<!-- EF.C.CA.CS.E256 (cf. 5.3.3 MF / EF.C.CA.CS.E256) -->
 			<iso:DataSetInfo>
 				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
@@ -2119,35 +2090,6 @@
 				<iso:DataSetPath>
 					<!--iso:efIdOrPath>2F07</iso:efIdOrPath-->
 					<iso:efIdOrPath>07</iso:efIdOrPath>
-				</iso:DataSetPath>
-			</iso:DataSetInfo>
-
-			<!-- EF.C.eGK.AUT_CVC (cf. [eGK-2#6.2.3]) -->
-			<iso:DataSetInfo>
-				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-				<iso:DataSetName>EF.C.eGK.AUT_CVC</iso:DataSetName>
-				<iso:DataSetACL>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-				</iso:DataSetACL>
-				<iso:DataSetPath>
-					<iso:efIdOrPath>2F03</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -2306,7 +2248,8 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>2F10</iso:efIdOrPath>
+					<!--<iso:efIdOrPath>2F10</iso:efIdOrPath>-->
+					<iso:efIdOrPath>10</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -2986,66 +2929,6 @@
 			<!-- =============== -->
 			<!-- HCA: Data Sets  -->
 			<!-- =============== -->
-
-			<!-- EF.DM (cf. [eGK-2#6.3.1]) -->
-			<iso:DataSetInfo>
-				<iso:RequirementLevel>PersonalizationMandatory</iso:RequirementLevel>
-				<iso:DataSetName>EF.DM</iso:DataSetName>
-				<iso:DataSetACL>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:or>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>SK.CMS</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>SK.VSDCMS</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>PrK.eGK.AUT_rsaSessionkey4SM</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-							</iso:or>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:DIDAuthentication>
-								<iso:DIDName>PIN.home</iso:DIDName>
-								<iso:DIDState>true</iso:DIDState>
-							</iso:DIDAuthentication>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-				</iso:DataSetACL>
-				<iso:DataSetPath>
-					<iso:efIdOrPath>D004</iso:efIdOrPath>
-				</iso:DataSetPath>
-			</iso:DataSetInfo>
 
 
 			<!-- EF.Einwilligung (cf. [eGK-2#6.3.2]) -->
@@ -4103,7 +3986,8 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>D001</iso:efIdOrPath>
+					<!--<iso:efIdOrPath>D001</iso:efIdOrPath>-->
+					<iso:efIdOrPath>01</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -7363,7 +7247,7 @@
 							</iso:KeyInfo>
 							<iso:SignatureGenerationInfo>MSE_KEY_DS INT_AUTH</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.AUTN</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.AUTN.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -7573,7 +7457,7 @@
 							</iso:KeyInfo>
 							<iso:SignatureGenerationInfo>MSE_KEY_DS PSO_CDS</iso:SignatureGenerationInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.AUTN</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.AUTN.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -7796,7 +7680,7 @@
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.ENC</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.ENC.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -7986,7 +7870,7 @@
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.ENC</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.ENC.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -8192,7 +8076,7 @@
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.ENCV</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.ENCV.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -8384,7 +8268,7 @@
 								<iso:KeySize>2048</iso:KeySize>
 							</iso:KeyInfo>
 							<iso:CertificateRef>
-								<iso:DataSetName>EF.C.CH.ENCV</iso:DataSetName>
+								<iso:DataSetName>EF.C.CH.ENCV.R2048</iso:DataSetName>
 							</iso:CertificateRef>
 						</iso:CryptoMarker>
 					</iso:DIDMarker>
@@ -8612,8 +8496,8 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>C500</iso:efIdOrPath>
-					<!--iso:efIdOrPath>01</iso:efIdOrPath-->
+					<!--<iso:efIdOrPath>C500</iso:efIdOrPath>-->
+					<iso:efIdOrPath>01</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
@@ -8672,14 +8556,14 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>C504</iso:efIdOrPath>
-					<!--iso:efIdOrPath>04</iso:efIdOrPath-->
+					<!--<iso:efIdOrPath>C504</iso:efIdOrPath>-->
+					<iso:efIdOrPath>04</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
-			<!-- EF.C.CH.AUTN (cf. [eGK-2#6.4.2]) -->
+			<!-- EF.C.CH.AUTN.R2048 (cf. [eGK-2#6.4.2]) -->
 			<iso:DataSetInfo>
-				<iso:DataSetName>EF.C.CH.AUTN</iso:DataSetName>
+				<iso:DataSetName>EF.C.CH.AUTN.R2048</iso:DataSetName>
 				<iso:DataSetACL>
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
@@ -8928,13 +8812,14 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>C509</iso:efIdOrPath>
+					<!--<iso:efIdOrPath>C509</iso:efIdOrPath>-->
+					<iso:efIdOrPath>09</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
-			<!-- EF.C.CH.ENC (cf. [eGK-2#6.4.3]) -->
+			<!-- EF.C.CH.ENC.R2048 (cf. [eGK-2#6.4.3]) -->
 			<iso:DataSetInfo>
-				<iso:DataSetName>EF.C.CH.ENC</iso:DataSetName>
+				<iso:DataSetName>EF.C.CH.ENC.R2048</iso:DataSetName>
 				<iso:DataSetACL>
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
@@ -8978,14 +8863,15 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>C200</iso:efIdOrPath>
+					<!--<iso:efIdOrPath>C200</iso:efIdOrPath>-->
+					<iso:efIdOrPath>02</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
 
-			<!-- EF.C.CH.ENCV (cf. [eGK-2#6.4.4]) -->
+			<!-- EF.C.CH.ENCV.R2048 (cf. [eGK-2#6.4.4]) -->
 			<iso:DataSetInfo>
-				<iso:DataSetName>EF.C.CH.ENCV</iso:DataSetName>
+				<iso:DataSetName>EF.C.CH.ENCV.R2048</iso:DataSetName>
 				<iso:DataSetACL>
 					<iso:AccessRule>
 						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
@@ -9152,77 +9038,11 @@
 					</iso:AccessRule>
 				</iso:DataSetACL>
 				<iso:DataSetPath>
-					<iso:efIdOrPath>C50A</iso:efIdOrPath>
+					<!--<iso:efIdOrPath>C50A</iso:efIdOrPath>-->
+					<iso:efIdOrPath>0A</iso:efIdOrPath>
 				</iso:DataSetPath>
 			</iso:DataSetInfo>
 
-			<!-- EF.DM (cf. [eGK-2#6.4.5]) -->
-			<iso:DataSetInfo>
-				<iso:DataSetName>EF.DM</iso:DataSetName>
-				<iso:DataSetACL>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DataSetSelect</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:always>true</iso:always>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIWrite</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:DIDAuthentication>
-								<iso:DIDName>PIN.home</iso:DIDName>
-								<iso:DIDState>true</iso:DIDState>
-							</iso:DIDAuthentication>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-					<iso:AccessRule>
-						<iso:CardApplicationServiceName>NamedDataService</iso:CardApplicationServiceName>
-						<iso:Action>
-							<iso:NamedDataServiceAction>DSIRead</iso:NamedDataServiceAction>
-						</iso:Action>
-						<iso:SecurityCondition>
-							<iso:or>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>SK.CMS</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>SK.VSDCMS</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-								<iso:SecurityCondition>
-									<iso:DIDAuthentication>
-										<iso:DIDName>PrK.eGK.AUT_rsaSessionkey4SM</iso:DIDName>
-										<iso:DIDState>true</iso:DIDState>
-									</iso:DIDAuthentication>
-								</iso:SecurityCondition>
-							</iso:or>
-						</iso:SecurityCondition>
-					</iso:AccessRule>
-				</iso:DataSetACL>
-				<iso:DataSetPath>
-					<iso:efIdOrPath>D004</iso:efIdOrPath>
-				</iso:DataSetPath>
-			</iso:DataSetInfo>
 		</iso:CardApplication>
 
 		<!-- =============== -->

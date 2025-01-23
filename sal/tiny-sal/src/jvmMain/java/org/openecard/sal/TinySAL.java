@@ -1431,7 +1431,7 @@ public class TinySAL implements SAL {
 			shortEf = null;
 		}
 
-		byte[] fileContent = CardUtils.readFile(fcp, shortEf, env.getDispatcher(), slotHandle);
+		byte[] fileContent = CardUtils.readFile(fcp, shortEf, env.getDispatcher(), slotHandle, true);
 		response.setDSIContent(fileContent);
 
 	    } else {

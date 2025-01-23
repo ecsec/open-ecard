@@ -106,14 +106,14 @@ class DataSetInfo internal constructor(private val didInfos: DidInfos, applicati
                 // not satisfiable means pin does not suffice
                 return false
             } catch (ex: NoSuchDid) {
-                val msg = "DID referenced in CIF could not be resolved."
+				val msg = "DID referenced in CIF could not be resolved."
 				LOG.error(ex) { msg }
-                throw createException(
-                    makeResultError(
-                        ECardConstants.Minor.App.INT_ERROR,
-                        msg
-                    )
-                )
+				throw createException(
+					makeResultError(
+						ECardConstants.Minor.App.INT_ERROR,
+						msg
+					)
+				)
             }
         }
 
@@ -135,9 +135,9 @@ class DataSetInfo internal constructor(private val didInfos: DidInfos, applicati
             // no PIN DID in missing list
             return false
         } catch (ex: NoSuchDid) {
-            val msg = "DID referenced in CIF could not be resolved."
+			val msg = "DID referenced in CIF could not be resolved."
 			LOG.error(ex) { msg }
-            throw createException(makeResultError(ECardConstants.Minor.App.INT_ERROR, msg))
+			throw createException(makeResultError(ECardConstants.Minor.App.INT_ERROR, msg))
         }
     }
 

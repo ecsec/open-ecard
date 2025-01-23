@@ -515,7 +515,7 @@ public class CardCommandAPDU extends CardAPDU {
      * @return Iterator containing the APDUs.
      */
     public final Iterable getChainingIterator() {
-	// TODO: Implemente the chaining iterator and add generic type to Iterable. I suppose it is this class.
+	// TODO: Implement the chaining iterator and add generic type to Iterable. I suppose it is this class.
 	throw new IllegalAccessError("Not implemented yet");
     }
 

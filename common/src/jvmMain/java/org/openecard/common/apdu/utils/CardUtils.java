@@ -229,8 +229,8 @@ public class CardUtils {
 	return result;
     }
 
-	public static byte[] readFile(FCP fcp, Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
-		return readFile(fcp, null, dispatcher, slotHandle);
+	public static byte[] readFile(FCP fcp, Dispatcher dispatcher, byte[] slotHandle, boolean readWithExtendedLength) throws APDUException {
+		return readFile(fcp, null, dispatcher, slotHandle, readWithExtendedLength);
 	}
 
     /**
@@ -243,10 +243,10 @@ public class CardUtils {
      * @return File content
      * @throws APDUException
      */
-    public static byte[] readFile(FCP fcp, Byte shortEf, Dispatcher dispatcher, byte[] slotHandle) throws APDUException {
+    public static byte[] readFile(FCP fcp, Byte shortEf, Dispatcher dispatcher, byte[] slotHandle, boolean readWithExtendedLength) throws APDUException {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	// Read 255 bytes per APDU
-	short length = 0xFF;
+	// Read as much bytes per APDU as possible
+	short length = (short) (readWithExtendedLength ? 0xFFFF : 0xFF);
 	short numToRead = -1; // -1 indicates I don't know
 	if (fcp != null) {
 	    Long fcpNumBytes = fcp.getNumBytes();
@@ -349,7 +349,7 @@ public class CardUtils {
 				LOG.warn("Couldn't get File Control Parameters from Select response.", e);
 			}
 		}
-		return readFile(fcp, dispatcher, slotHandle);
+		return readFile(fcp, dispatcher, slotHandle, false);
     }
 
     private static boolean isRecordEF(FCP fcp) {

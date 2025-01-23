@@ -116,10 +116,9 @@ public class ChipAuthentication {
     public byte[] readEFCardSecurity() throws ProtocolException {
 	try {
 	    byte[] file = ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID);
-	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null,
-			FileControlParameters.FCP);
+	    CardResponseAPDU resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null, FileControlParameters.FCP);
 	    FCP efCardSecurityFCP = new FCP(TLV.fromBER(resp.getData()));
-	    byte[] efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle);
+	    byte[] efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle, false);
 	    return efCardSecurity;
 	} catch (APDUException ex) {
 	    throw new ProtocolException(ex.getResult());

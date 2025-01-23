@@ -59,8 +59,8 @@ class CardLinkProtocolTest {
 	private lateinit var callbackController: ControllerCallback
 	private lateinit var cardLinkInteraction: CardLinkInteraction
 
-	private val activationResult: Promise<ActivationResult?> = Promise<ActivationResult?>()
-	private val isContextInitialized: Promise<Boolean> = Promise<Boolean>()
+	private val activationResult: Promise<ActivationResult> = Promise()
+	private val isContextInitialized: Promise<Boolean> = Promise()
 
 	@BeforeClass
 	fun setup() {

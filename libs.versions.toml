@@ -21,8 +21,6 @@ jfx = "22.0.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-kotlin-test-testng = { module = "org.jetbrains.kotlin:kotlin-test-testng", version.ref = "kotlin" }
 
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-logging" }
 
@@ -96,7 +94,7 @@ jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", ve
 
 
 [bundles]
-test-basics-kotlin = ["kotlin-test", "kotlin-test-testng", "mockito", "mockito-kotlin", "logback-classic"]
+test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-classic"]
 
 
 [plugins]

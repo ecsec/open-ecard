@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
 	kotlin("multiplatform")
 }
@@ -11,8 +9,4 @@ kotlin {
 	}
 
 	applyDefaultHierarchyTemplate()
-
-	compilerOptions {
-		this.languageVersion = KotlinVersion.KOTLIN_2_0
-	}
 }

@@ -1,17 +1,10 @@
 plugins {
-	kotlin("multiplatform")
+	id("openecard.kmp-conventions")
 	id("openecard.android-conventions")
 	id("openecard.coverage-conventions")
 }
 
-val javaToolchain: String by project
 kotlin {
-	jvmToolchain {
-		languageVersion = JavaLanguageVersion.of(javaToolchain)
-	}
-
-	applyDefaultHierarchyTemplate()
-
 	androidTarget {  }
 
 	jvm {  }

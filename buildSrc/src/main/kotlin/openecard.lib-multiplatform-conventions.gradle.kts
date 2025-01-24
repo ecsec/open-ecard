@@ -1,19 +1,11 @@
 plugins {
-	kotlin("multiplatform")
-	kotlin("plugin.serialization")
+	id("openecard.kmp-conventions")
 	id("openecard.publish-conventions")
 	id("openecard.coverage-conventions")
+	kotlin("plugin.serialization")
 }
 
-val javaToolchain: String by project
 kotlin {
-	jvmToolchain {
-		languageVersion = JavaLanguageVersion.of(javaToolchain)
-	}
-	//java.targetCompatibility = JavaVersion.valueOf("11")
-
-	applyDefaultHierarchyTemplate()
-
 	jvm {
 		withJava()
 		compilations {

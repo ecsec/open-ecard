@@ -26,7 +26,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.basics)
 			}
 		}
 	}

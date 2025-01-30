@@ -157,7 +157,7 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
     }
 
 	private byte[] prepareMessage(byte[] hash, HashGenerationInfoType hashInfo, AlgorithmInfoType algorithmInfo) throws UnsupportedAlgorithmException, IOException {
-		SignatureAlgorithms algorithm = SignatureAlgorithms.fromAlgId(algorithmInfo.getAlgorithmIdentifier().getAlgorithm());
+		SignatureAlgorithms algorithm = SignatureAlgorithms.Companion.fromAlgId(algorithmInfo.getAlgorithmIdentifier().getAlgorithm());
 		if (algorithm.isRsaSsa()) {
 			// Cards don't build the DigestInfo struct, so we have to do it here
 			ASN1ObjectIdentifier hashAlgId = algorithm.getHashAlg().getOid();
@@ -281,7 +281,6 @@ public class SignStep implements ProtocolStep<Sign, SignResponse> {
      *
      * @param cryptoMarker A {@link CryptoMarkerType} object containing the information about the creation of a signature
      *   in a legacy way.
-     * @param slotHandle A slotHandle identifying the current card.
      * @param templateCTX A Map containing the context data for the evaluation of the template variables. This object
      *   contains per default the message to sign and the {@link TLVFunction}.
      * @return A {@link SignResponse} object containing the signature of the <b>message</b>.

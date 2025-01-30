@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.android.activation
 
@@ -32,9 +32,7 @@ import org.openecard.mobile.activation.NfcCapabilityResult
  *
  * @author Neil Crossley
  */
-class AndroidNfcCapabilities internal constructor(capabilityHelper: NfcCapabilityHelper<Context?>) : NFCCapabilities {
-
-	private val capabilityHelper: NfcCapabilityHelper<Context?> = capabilityHelper
+class AndroidNfcCapabilities internal constructor(private val capabilityHelper: NfcCapabilityHelper<Context>) : NFCCapabilities {
 
 	override fun isAvailable(): Boolean {
 		return capabilityHelper.isNFCAvailable
@@ -49,7 +47,7 @@ class AndroidNfcCapabilities internal constructor(capabilityHelper: NfcCapabilit
 	}
 
 	companion object {
-		fun create(context: Context?): AndroidNfcCapabilities {
+		fun create(context: Context): AndroidNfcCapabilities {
 			return AndroidNfcCapabilities(NfcCapabilityHelper.create(context))
 		}
 	}

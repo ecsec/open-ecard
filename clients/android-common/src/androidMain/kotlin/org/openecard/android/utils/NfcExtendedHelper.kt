@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.android.utils
 
@@ -50,7 +50,7 @@ object NfcExtendedHelper {
 	 */
 	fun checkExtendedLength(context: Context?): NfcCapabilityResult {
 		if (canUseHiddenApi()) {
-			val nfcAdapter: NfcAdapter = NfcAdapter.getDefaultAdapter(context)
+			val nfcAdapter = NfcAdapter.getDefaultAdapter(context)
 			if (nfcAdapter != null) {
 				val tagObj = getTagObject(nfcAdapter)
 				if (tagObj != null) {

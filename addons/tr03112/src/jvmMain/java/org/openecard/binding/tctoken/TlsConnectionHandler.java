@@ -117,7 +117,7 @@ public class TlsConnectionHandler {
 		// Set up TLS connection
 		DynamicAuthentication tlsAuth = new DynamicAuthentication(serverHost);
 
-		TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+		TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.instance);
 		switch (secProto) {
 		    case PATH_SEC_PROTO_TLS_PSK:
 			{

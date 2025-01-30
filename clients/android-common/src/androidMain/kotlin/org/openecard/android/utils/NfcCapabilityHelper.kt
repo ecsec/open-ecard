@@ -18,16 +18,19 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.android.utils
 
 import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.mobile.activation.NfcCapabilityResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+private val LOG = KotlinLogging.logger {  }
 
 
 /**
@@ -64,19 +67,17 @@ class NfcCapabilityHelper<T : Context?> internal constructor(activity: T?, nfcAd
 		 *
 		 * @return true if nfc is enabled, otherwise false
 		 */
-		get() = nfcAdapter != null && nfcAdapter.isEnabled()
+		get() = nfcAdapter != null && nfcAdapter.isEnabled
 
 	fun checkExtendedLength(): NfcCapabilityResult {
 		return NfcExtendedHelper.checkExtendedLength(context)
 	}
 
 	companion object {
-		var LOG: Logger = LoggerFactory.getLogger(NfcCapabilityHelper::class.java)
-
-		fun <T : Context?> create(activity: T): NfcCapabilityHelper<T> {
+		fun <T : Context> create(activity: T): NfcCapabilityHelper<T> {
 			requireNotNull(activity) { "activity cannot be null" }
 			val nfcManager: NfcManager = activity.getSystemService(Context.NFC_SERVICE) as NfcManager
-			val adapter: NfcAdapter = nfcManager.getDefaultAdapter()
+			val adapter: NfcAdapter = nfcManager.defaultAdapter
 
 			return NfcCapabilityHelper(activity, adapter)
 		}

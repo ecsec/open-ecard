@@ -1,26 +1,31 @@
 description = "mobile-nfc"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-dependencies {
-//	implementation(libs.android)
-//	api(libs.jaxb.api)
-//	api(libs.jaxb.ws.api)
-//	api(libs.slf4j.api)
-//	api(project(":common"))
-	api(project(":ifd:ifd-common"))
-//	implementation(project(":wsdef:wsdef-client"))
-//	implementation(project(":i18n"))
-//	api(libs.bc.prov)
-//	api(libs.bc.tls)
-//	api(libs.httpcore)
-//	api(libs.proxyvole)
-//	api(project(":gui:graphics"))
-//	api(libs.pdfbox)
-//	api(libs.scio)
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+				api(project(":ifd:ifd-common"))
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
 
-	testImplementation(libs.bundles.test.basics)
-	testImplementation(libs.awaitility)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+				implementation(libs.awaitility)
+			}
+		}
+	}
 }

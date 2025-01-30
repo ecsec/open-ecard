@@ -23,6 +23,8 @@ kotlin {
 				api(libs.bc.pkix)
 				api(libs.jackson.jaxb)
 				api(libs.jose4j)
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

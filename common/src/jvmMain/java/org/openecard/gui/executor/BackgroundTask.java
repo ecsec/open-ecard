@@ -36,6 +36,7 @@ import org.openecard.gui.UserConsentNavigator;
  *
  * @author Tobias Wich
  */
+@FunctionalInterface
 public interface BackgroundTask extends Callable<StepActionResult> {
 
 }

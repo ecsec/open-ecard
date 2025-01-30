@@ -38,8 +38,6 @@ import org.openecard.ifd.scio.IFD
 import org.openecard.transport.dispatcher.MessageDispatcher
 import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.testng.annotations.Test
 import org.xml.sax.SAXException
 import java.math.BigInteger

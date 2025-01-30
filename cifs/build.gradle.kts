@@ -21,8 +21,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.powermock)
-				implementation(libs.slf4j.api)
 			}
 		}
 	}

@@ -123,7 +123,7 @@ public class ReadBinary extends CardCommandAPDU {
 		var offsetDo = new TLV();
 		offsetDo.setTagNumWithClass((byte) 0x54);
 		offsetDo.setValue(ShortUtils.toByteArray(offset));
-		discretionaryData.setChild(offsetDo);
+		discretionaryData.setValue(offsetDo.toBER());
 		var content = discretionaryData.toBER();
 
 		setP1P2(ShortUtils.toByteArray(fileID, true));

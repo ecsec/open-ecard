@@ -60,14 +60,14 @@ public class TestTransactions {
 	// set up ifd and establish context
 	Environment env = new ClientEnv();
 	final IFD ifd = new org.openecard.ifd.scio.IFD();
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 	EstablishContext eCtx = new EstablishContext();
 	EstablishContextResponse eCtxR = ifd.establishContext(eCtx);
 	final byte[] ctx = eCtxR.getContextHandle();
 
 	// Set up GUI and card recognition
 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-	env.setGUI(gui);
+	env.setGui(gui);
 	final CardRecognitionImpl recog = new CardRecognitionImpl(env);
 
 	// get the first reader

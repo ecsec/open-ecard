@@ -25,12 +25,13 @@ kotlin {
 				api(libs.bc.prov)
 				api(libs.bc.tls)
 				api(libs.httpcore)
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {
 			dependencies {
 				implementation(project(":wsdef:jaxb-marshaller"))
-				implementation(libs.bundles.test.powermock)
 			}
 		}
 	}

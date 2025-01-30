@@ -23,7 +23,7 @@
 package org.openecard.addon.bind
 
 import java.io.StringWriter
-import javax.annotation.Nonnull
+
 
 /**
  * Result of a Plug-In invocation.
@@ -42,8 +42,6 @@ open class BindingResult(var resultCode: BindingResultCode = BindingResultCode.O
 
     val attachments: List<Attachment> = mutableListOf()
 
-
-	@Nonnull
     fun getParameters(): Map<String, String?> {
         return this.parameters
     }

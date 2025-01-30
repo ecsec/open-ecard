@@ -18,7 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
+ ***************************************************************************/
 
 package org.openecard.android.activation
 
@@ -39,12 +39,10 @@ import org.openecard.ws.common.GenericInstanceProvider
  */
 class OpeneCard internal constructor(
 	private val utils: CommonActivationUtils,
-	builder: CachingTerminalFactoryBuilder<AndroidNFCFactory?>,
+	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory>,
 ) {
 
-	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory?> = builder
-
-	fun context(context: Context?): AndroidContextManager {
+	fun context(context: Context): AndroidContextManager {
 		val capabilities: AndroidNfcCapabilities = AndroidNfcCapabilities.Companion.create(context)
 		return DelegatingAndroidContextManager(utils.context(capabilities), this.builder)
 	}
@@ -57,10 +55,10 @@ class OpeneCard internal constructor(
 
 		@JvmStatic
 		fun createInstance(): OpeneCard {
-			val androidNfcFactory : GenericInstanceProvider<AndroidNFCFactory?> = object : GenericInstanceProvider<AndroidNFCFactory?> {
+			val androidNfcFactory : GenericInstanceProvider<AndroidNFCFactory> = object : GenericInstanceProvider<AndroidNFCFactory> {
 				override val instance = AndroidNFCFactory()
 			}
-			val factory: CachingTerminalFactoryBuilder<AndroidNFCFactory?> = CachingTerminalFactoryBuilder<AndroidNFCFactory?>(androidNfcFactory)
+			val factory: CachingTerminalFactoryBuilder<AndroidNFCFactory> = CachingTerminalFactoryBuilder<AndroidNFCFactory>(androidNfcFactory)
 
 			val config = OpeneCardContextConfig(factory, JAXBMarshaller::class.java.getCanonicalName())
 			val activationUtils = CommonActivationUtils(config, object : NFCDialogMsgSetter {

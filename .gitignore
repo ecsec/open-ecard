@@ -34,6 +34,7 @@ bin/
 *.ipr
 *.iml
 *.iws
+.kotlin/
 
 # NetBeans
 nb-configuration.xml
@@ -82,3 +83,7 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+
+# env
+.envrc
+.env

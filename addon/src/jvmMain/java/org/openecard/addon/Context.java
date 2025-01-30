@@ -119,7 +119,7 @@ public class Context {
     }
 
     public List<byte[]> getIfdCtx() {
-	return env.getIFDCtx();
+	return env.getIfdCtx();
     }
 
     /**

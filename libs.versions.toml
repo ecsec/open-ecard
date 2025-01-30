@@ -1,11 +1,12 @@
 [versions]
-agp = "8.2.+"
 kotlin = "2.0.21"
 kx-co = "1.9.+"
 kx-serde = "1.7.+"
+kt-logging = "7.0.+"
 
 ktor = "2.3.+"
 
+agp = "8.6+"
 androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
@@ -15,15 +16,13 @@ androidx-material = "1.11.+"
 androidx-test-junit = "1.1.+"
 
 robovm = "2.3.21"
-jfx = "17.0.2"
+jfx = "22.0.2"
 
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-kotlin-test-testng = { module = "org.jetbrains.kotlin:kotlin-test-testng", version.ref = "kotlin" }
 
-kotlin-logging = { module = "io.github.oshai:kotlin-logging", version = "6.0.+" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-logging" }
 
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
@@ -45,17 +44,16 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 
 # logging
-slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.13" }
-slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.13" }
-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.4.14" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.16" }
+slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.16" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
 
 # utilities
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 
 # testing
-testng = { group = "org.testng", name = "testng", version = "7.9.+" }
-powermock-testng = { group = "org.powermock", name = "powermock-module-testng", version = "2.0.9" }
-powermock-mockito = { group = "org.powermock", name = "powermock-api-mockito2", version = "2.0.9" }
+mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.+" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
 
 # jaxb
@@ -80,8 +78,6 @@ pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "0.2.7+220204" }
 
-android = { group = "com.google.android", name = "android", version = "api-33" }
-
 robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
 robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
@@ -96,15 +92,9 @@ jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version = "5.12.1" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version = "5.12.1" }
 
-jfx-base = { group = "org.openjfx", name = "javafx-base", version.ref = "jfx" }
-jfx-controls = { group = "org.openjfx", name = "javafx-controls", version.ref = "jfx" }
-jfx-swing = { group = "org.openjfx", name = "javafx-swing", version.ref = "jfx" }
-
 
 [bundles]
-test-basics-kotlin = ["kotlin-test"]
-test-powermock = ["powermock-testng", "powermock-mockito"]
-test-basics = ["testng", "powermock-testng", "powermock-mockito"]
+test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-classic"]
 
 
 [plugins]
@@ -119,7 +109,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
-kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }
+kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
 
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }

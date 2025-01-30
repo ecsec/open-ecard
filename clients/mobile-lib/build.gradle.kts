@@ -33,11 +33,12 @@ kotlin {
 				api(project(":addons:status"))
 				api(project(":addons:genericcryptography"))
 				api(project(":ifd:ifd-protocols:pace"))
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.basics)
 				implementation(project(":ifd:scio-backend:mobile-nfc"))
 				implementation(project(":wsdef:jaxb-marshaller"))
 			}
@@ -81,7 +82,7 @@ val iosHeaders by configurations.creating {
 }
 
 
-val shareHeader = tasks.register("shareHeader ") {
+val shareHeader = tasks.register("shareHeader") {
 	dependsOn("compileRoboMainJava")
 	outputs.file(
 		layout.buildDirectory.file("classes/java/roboMain/roboheaders/open-ecard-mobile-lib.h")
@@ -89,14 +90,14 @@ val shareHeader = tasks.register("shareHeader ") {
 }
 
 
-val iosJar = tasks.create("iosJar", Jar::class) {
+val iosJar = tasks.register("iosJar", Jar::class) {
 	group = "build"
-	tasks.named("build") {
-		dependsOn("iosJar")
-	}
 //	dependsOn("jvmRoboMainClasses")
 	from(sourceSets.getByName("roboMain").output)
 	archiveClassifier.set("iOS")
+}
+tasks.named("build") {
+	dependsOn("iosJar")
 }
 
 artifacts {
@@ -106,6 +107,8 @@ artifacts {
 
 
 // extra coverage dependencies so gradle is not upset
-tasks.koverGenerateArtifact {
-	dependsOn(shareHeader)
+kover {
+	currentProject {
+		this.sources.includedSourceSets.add("shareHeader")
+	}
 }

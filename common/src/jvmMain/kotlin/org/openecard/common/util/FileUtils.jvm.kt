@@ -361,7 +361,7 @@ object FileUtils {
 
     @JvmStatic
 	@JvmOverloads
-    fun readLinesFromConfig(inStream: InputStream?, charset: String? = "UTF-8"): List<String> {
+    fun readLinesFromConfig(inStream: InputStream, charset: String = "UTF-8"): List<String> {
         val result = mutableListOf<String>()
 
         val s = Scanner(inStream, charset)

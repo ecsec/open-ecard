@@ -24,7 +24,6 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				implementation(libs.bundles.test.basics)
 				implementation(project(":gui:swing"))
 				implementation(project(":ifd:ifd-core"))
 			}

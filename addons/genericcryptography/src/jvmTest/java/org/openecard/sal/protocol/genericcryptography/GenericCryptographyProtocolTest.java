@@ -142,10 +142,10 @@ public class GenericCryptographyProtocolTest {
 	env.setDispatcher(d);
 	ifd = new IFD();
 	ifd.setEnvironment(env);
-	env.setGUI(new SwingUserConsent(new SwingDialogWrapper()));
-	env.setIFD(ifd);
+	env.setGui(new SwingUserConsent(new SwingDialogWrapper()));
+	env.setIfd(ifd);
 
-	EstablishContextResponse ecr = env.getIFD().establishContext(new EstablishContext());
+	EstablishContextResponse ecr = env.getIfd().establishContext(new EstablishContext());
 	final CardRecognitionImpl cr = new CardRecognitionImpl(env);
 	ListIFDs listIFDs = new ListIFDs();
 	CIFProvider cp = new CIFProvider() {
@@ -166,7 +166,7 @@ public class GenericCryptographyProtocolTest {
                 return cr.getCardImage(cardType);
             }
 	};
-	env.setCIFProvider(cp);
+	env.setCifProvider(cp);
 
 	listIFDs.setContextHandle(ecr.getContextHandle());
 	ListIFDsResponse listIFDsResponse = ifd.listIFDs(listIFDs);

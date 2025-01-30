@@ -165,7 +165,7 @@ public class OpeneCardContext {
 
 
 	    gui = createUserConsent(dispatcher, eventDispatcher);
-	    env.setGUI(gui);
+	    env.setGui(gui);
 
 	    // set up card recognition
 	    try {
@@ -183,18 +183,18 @@ public class OpeneCardContext {
 	    ifd.addProtocol(ECardConstants.Protocol.PACE, new PACEProtocolFactory());
 	    ifd.setEnvironment(env);
 	    ifd.setTerminalFactoryBuilder(new IFDTerminalFactory(this.config.getTerminalFactoryBuilder()));
-	    env.setIFD(ifd);
+	    env.setIfd(ifd);
 	    LOG.info("IFD initialized.");
 
 
 	    CombinedCIFProvider cifProv = new CombinedCIFProvider();
-	    env.setCIFProvider(cifProv);
+	    env.setCifProvider(cifProv);
 	    cifProv.addCifProvider(new RepoCifProvider(recognition));
 
 	    // set up SAL
 	    TinySAL mainSAL = new TinySAL(env);
 	    sal = mainSAL;
-	    env.setSAL(sal);
+	    env.setSal(sal);
 	    LOG.info("SAL prepared.");
 
 	    ViewController viewController = new ViewController() {

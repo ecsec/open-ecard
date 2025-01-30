@@ -106,7 +106,7 @@ public class TlsConnectionHandler {
 		case "http://ws.openecard.org/pathsecurity/tlsv12-with-pin-encryption":
 		    {
 			// use a smartcard for client authentication if needed
-			TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.getInstance());
+			TlsCrypto crypto = new BcTlsCrypto(ReusableSecureRandom.instance);
 			tlsClient = new ClientCertDefaultTlsClient(crypto, serverHost, true);
 			// add PKIX verifier
 			if (ChipGatewayProperties.isValidateServerCert()) {

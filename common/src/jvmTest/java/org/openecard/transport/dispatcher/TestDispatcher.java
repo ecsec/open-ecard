@@ -50,7 +50,7 @@ public class TestDispatcher {
 	Environment env = new TestEnv1();
 	MessageDispatcher disp = new MessageDispatcher(env);
 
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 
 	Object req = new EstablishContext();
 	Object res = disp.deliver(req);
@@ -70,7 +70,7 @@ public class TestDispatcher {
 	Environment env = new TestEnv2();
 	MessageDispatcher disp = new MessageDispatcher(env);
 
-	env.setIFD(ifd);
+	env.setIfd(ifd);
 
 	Object req = new EstablishContext();
 	Object res = disp.deliver(req);

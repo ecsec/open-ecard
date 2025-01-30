@@ -28,6 +28,8 @@ kotlin {
 				//	api(libs.bc.tls)
 				//	api(libs.httpcore)
 				api(project(":addon"))
+
+				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {
@@ -49,6 +51,7 @@ tasks.named("jvmProcessResources", ProcessResources::class).configure {
 		val files = destinationDir.resolve("www").walk()
 			.filter { it.isFile }
 			.map { it.relativeTo(destinationDir).path }
+			.map { "/$it" }
 			.joinToString(":")
 		destinationDir.resolve("www-files").writeText(files)
 	}

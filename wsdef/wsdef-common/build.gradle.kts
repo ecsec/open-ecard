@@ -18,7 +18,7 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				api(libs.annotations)
+				implementation(libs.annotations)
 				api(libs.jaxb.api)
 			}
 		}

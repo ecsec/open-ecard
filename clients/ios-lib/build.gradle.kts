@@ -81,6 +81,5 @@ dependencies {
 
 	annotationProcessor(libs.roboface.processor)
 
-	testImplementation(libs.bundles.test.basics)
 //	testImplementation(project(":ifd:scio-backend:mobile-nfc"))
 }

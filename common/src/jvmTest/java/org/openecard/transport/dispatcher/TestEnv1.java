@@ -51,23 +51,23 @@ public class TestEnv1 implements Environment {
     private IFD ifd;
 
     @Override
-    public void setIFD(IFD ifd) {
+    public void setIfd(IFD ifd) {
 	this.ifd = ifd;
     }
 
     @Override
     @Dispatchable(interfaceClass = IFD.class)
-    public IFD getIFD() {
+    public IFD getIfd() {
 	return ifd;
     }
 
     @Override
-    public void setSAL(SAL sal) {
+    public void setSal(SAL sal) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public SAL getSAL() {
+    public SAL getSal() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -154,12 +154,12 @@ public class TestEnv1 implements Environment {
     }
 
     @Override
-    public void setCIFProvider(CIFProvider provider) {
+    public void setCifProvider(CIFProvider provider) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public CIFProvider getCIFProvider() {
+    public CIFProvider getCifProvider() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -174,27 +174,27 @@ public class TestEnv1 implements Environment {
     }
 
     @Override
-    public void addIFDCtx(byte[] ctx) {
+    public void addIfdCtx(byte[] ctx) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void removeIFDCtx(byte[] ctx) {
+    public void removeIfdCtx(byte[] ctx) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public List<byte[]> getIFDCtx() {
+    public List<byte[]> getIfdCtx() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void setGUI(UserConsent gui) {
+    public void setGui(UserConsent gui) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public UserConsent getGUI() {
+    public UserConsent getGui() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 

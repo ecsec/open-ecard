@@ -30,7 +30,6 @@ import org.openecard.common.util.HandlerUtils
 import org.openecard.common.util.SysUtils
 import org.openecard.crypto.common.sal.CardConnectorUtil
 import kotlin.String
-import kotlin.Throws
 
 open class InsertCardHelper(
 	protected val ctx: Context,

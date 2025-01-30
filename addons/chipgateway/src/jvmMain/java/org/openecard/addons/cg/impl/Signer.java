@@ -102,7 +102,7 @@ public class Signer {
 	    CryptoMarkerType cryptoMarker = didInfo.getGenericCryptoMarker();
 	    String algUri = cryptoMarker.getAlgorithmInfo().getAlgorithmIdentifier().getAlgorithm();
 	    try {
-		SignatureAlgorithms alg = SignatureAlgorithms.fromAlgId(algUri);
+		SignatureAlgorithms alg = SignatureAlgorithms.Companion.fromAlgId(algUri);
 
 		// calculate hash if needed
 		byte[] digest = data;

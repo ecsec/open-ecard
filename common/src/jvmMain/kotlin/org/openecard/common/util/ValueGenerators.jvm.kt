@@ -110,7 +110,7 @@ object ValueGenerators {
      */
 	@Throws(IllegalArgumentException::class)
 	@JvmStatic
-	fun generateRandom(nibbleLength: Int): ByteArray? {
+	fun generateRandom(nibbleLength: Int): ByteArray {
         var nibbleLength = nibbleLength
         if (nibbleLength < 1) {
             throw IllegalArgumentException("nibbleLength must be greater than 0")

@@ -1,18 +1,19 @@
 plugins {
-	`application`
+	application
+	kotlin("jvm")
 }
 
 val javaToolchain: String by project
-//java.sourceCompatibility = JavaVersion.VERSION_1_8
-java {
-	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(javaToolchain))
+kotlin {
+	jvmToolchain {
+		languageVersion = JavaLanguageVersion.of(javaToolchain)
 	}
-//	withSourcesJar()
-//	withJavadocJar()
 }
 
-
-tasks.withType<JavaCompile> {
-	options.encoding = "UTF-8"
+val testHeapSize: String by project
+tasks {
+	test {
+		maxHeapSize = testHeapSize
+		useTestNG()
+	}
 }

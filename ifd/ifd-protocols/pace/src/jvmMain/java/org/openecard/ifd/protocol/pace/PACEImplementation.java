@@ -254,8 +254,6 @@ public class PACEImplementation {
 
     /**
      * Step 4: Key agreement
-     *
-     * @param mapPK_PICC
      */
     private void generalAuthenticateKeyAgreement() throws Exception {
 	keyPCD = new PACEKey(domainParameter);

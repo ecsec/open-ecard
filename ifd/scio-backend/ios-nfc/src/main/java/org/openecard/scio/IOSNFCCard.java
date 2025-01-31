@@ -113,7 +113,9 @@ public final class IOSNFCCard extends AbstractNFCCard {
 
 	LOG.debug("Initializing new NFCTagReaderSession");
 	NFCTagReaderSessionDelegateAdapterImpl delegate = new NFCTagReaderSessionDelegateAdapterImpl();
-	NFCTagReaderSession session = new NFCTagReaderSession(NFCPollingOption.ISO14443, delegate, dspqueue);
+	NFCPollingOption pollingOption = NFCPollingOption.ISO14443;
+	pollingOption.set(NFCPollingOption.PACE);
+	NFCTagReaderSession session = new NFCTagReaderSession(pollingOption, delegate, dspqueue);
 	session.setAlertMessage(cfg.getDefaultProvideCardMessage());
 
 	NFCSessionContext resultSessionContext = new NFCSessionContext(delegate, session);

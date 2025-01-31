@@ -22,11 +22,8 @@
 
 package org.openecard.mobile.system;
 
-import iso.std.iso_iec._24727.tech.schema.EstablishContext;
-import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse;
-import iso.std.iso_iec._24727.tech.schema.Initialize;
-import iso.std.iso_iec._24727.tech.schema.ReleaseContext;
-import iso.std.iso_iec._24727.tech.schema.Terminate;
+import iso.std.iso_iec._24727.tech.schema.*;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

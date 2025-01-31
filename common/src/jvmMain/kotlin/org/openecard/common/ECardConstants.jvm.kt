@@ -127,6 +127,14 @@ object ECardConstants {
 			fun isProtocol(proto: String): Boolean {
                 return proto == T0 || proto == T1 || proto == T2 || proto == TYPE_A || proto == TYPE_B
             }
+			@JvmStatic
+			fun isWired(proto: String): Boolean {
+				return proto == T0 || proto == T1
+			}
+			@JvmStatic
+			fun isWireless(proto: String): Boolean {
+				return !isWired(proto)
+			}
 
             const val T0: String = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-0"
             const val T1: String = "urn:iso:std:iso-iec:7816:-3:tech:protocols:T-equals-1"

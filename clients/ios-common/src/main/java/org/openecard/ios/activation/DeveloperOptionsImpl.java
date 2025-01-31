@@ -24,6 +24,7 @@ package org.openecard.ios.activation;
 import org.openecard.common.util.TR03112Utils;
 import org.openecard.ios.logging.JulConfigHelper;
 import org.openecard.ios.logging.LogLevel;
+import org.openecard.ios.logging.LogMessageHandler;
 
 
 /**
@@ -37,6 +38,11 @@ public class DeveloperOptionsImpl implements DeveloperOptions {
 	JulConfigHelper.setLogLevel("", LogLevel.DEBUG);
     }
 
+    @Override
+    public void registerLogHandler(LogMessageHandler handler) {
+    	JulConfigHelper.registerLogHandler(handler);
+    }
+    
     @Override
     public void enableTR03112DeveloperMOde() {
 	TR03112Utils.DEVELOPER_MODE = true;

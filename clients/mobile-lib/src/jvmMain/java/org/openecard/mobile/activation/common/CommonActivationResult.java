@@ -76,7 +76,13 @@ public class CommonActivationResult implements ActivationResult {
 	}
 
 	public List<String> getResultParameterKeys() {
-		return List.copyOf(resultParameters.keySet());
+		//this makes problems with robovm - so doing it the old way
+		//return List.copyOf(resultParameters.keySet());
+		ArrayList<String> res = new ArrayList<>();
+		for(String s : resultParameters.keySet()){
+			res.add(s);
+		}
+		return res;
 	}
 
 	public String getResultParameter(String key) {

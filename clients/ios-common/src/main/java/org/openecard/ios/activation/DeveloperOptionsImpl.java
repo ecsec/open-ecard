@@ -39,6 +39,16 @@ public class DeveloperOptionsImpl implements DeveloperOptions {
     }
 
     @Override
+    public void setLogLevel(LogLevel level) {
+        JulConfigHelper.setLogLevel("", level);
+    }
+
+    @Override
+    public void setLogLevelFor(String logger, LogLevel level) {
+        JulConfigHelper.setLogLevel(logger, level);
+    }
+
+    @Override
     public void registerLogHandler(LogMessageHandler handler) {
     	JulConfigHelper.registerLogHandler(handler);
     }

@@ -24,12 +24,9 @@ package org.openecard.scio
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.apdu.common.CardCommandAPDU
 import org.openecard.common.apdu.common.CardResponseAPDU
-import org.openecard.common.ifd.scio.SCIOCard
 import org.openecard.common.ifd.scio.SCIOChannel
 import org.openecard.common.ifd.scio.SCIOErrorCode
 import org.openecard.common.ifd.scio.SCIOException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.nio.ByteBuffer
 

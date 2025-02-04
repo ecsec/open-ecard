@@ -25,6 +25,7 @@ package org.openecard.addons.cardlink.sal.gui
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.ws.WsPair
+import org.openecard.common.util.SysUtils
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.mobile.activation.Websocket
 
@@ -38,7 +39,14 @@ class CardLinkUserConsent(ws: WsPair, addonCtx: Context, isPhoneRegistered: Bool
 				add(PhoneStep(ws))
 				add(TanStep(ws))
 			}
-			add(EnterCanStep(ws, addonCtx, sessionHandle))
+			//on mobile we definitely have NFC so we will need a CAN
+			if(SysUtils.isMobileDevice()) {
+				add(EnterCanStep(ws, addonCtx, sessionHandle))
+			//desktop might have a contact based reader allowing to connect without can
+			//if direct connect fails, EnterCanStep will be added by DirectConnectStep
+			} else {
+				add(DirectConnectStep(ws, addonCtx, sessionHandle))
+			}
 		}
 	}
 }

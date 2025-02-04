@@ -76,7 +76,7 @@ proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole
 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
-scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "0.2.7+220204" }
+scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "24.09.26" }
 
 robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }

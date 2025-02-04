@@ -208,6 +208,10 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_DIRECT_CONNECT".equals(curStep.getID())) {
+			//we don't need interactions here so just inc idx and set status to OK
+			idx++;
+			return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
 			idx++;
 

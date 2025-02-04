@@ -204,7 +204,7 @@ class SingleThreadChannel : IfdChannel {
 	@Throws(TransmitException::class, SCIOException::class, IllegalStateException::class, InterruptedException::class)
 	override fun transmit(input: ByteArray, responses: List<ByteArray>): ByteArray {
 		var inputAPDU = input
-		var result: ByteArray?
+		var result: ByteArray
 
 		try {
 			if (isSM) {

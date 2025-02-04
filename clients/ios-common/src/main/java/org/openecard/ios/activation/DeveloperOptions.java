@@ -21,6 +21,7 @@
  ************************************************************************** */
 package org.openecard.ios.activation;
 
+import org.openecard.ios.logging.LogLevel;
 import org.openecard.ios.logging.LogMessageHandler;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
@@ -32,6 +33,8 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 public interface DeveloperOptions {
 
     void setDebugLogLevel();
+    void setLogLevel(LogLevel level);
+    void setLogLevelFor(String logger, LogLevel level);
     void registerLogHandler(LogMessageHandler handler);
 
     void enableTR03112DeveloperMOde();

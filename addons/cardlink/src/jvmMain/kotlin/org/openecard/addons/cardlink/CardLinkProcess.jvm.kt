@@ -77,6 +77,7 @@ class CardLinkProcess(
 
 		// no error means success
 		val bindingResult = BindingResult(BindingResultCode.OK)
+		bindingResult.addParameter(CardLinkKeys.PERSONAL_DATA, dynCtx.get(CardLinkKeys.PERSONAL_DATA) as String)
 		bindingResult.addParameter(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
 		bindingResult.addParameter(CardLinkKeys.ICCSN, iccsn)
 		iccsnReassignment?.let { bindingResult.addParameter(CardLinkKeys.ICCSN_REASSIGNMENT_TIMESTAMP, it) }

@@ -188,7 +188,6 @@ public class OpenEcardImp implements OpenEcard {
     private static void resetLogLevelsInt() {
 	JulConfigHelper.resetLogging();
 	JulConfigHelper.setLogLevel("", LogLevel.ERROR);
-	JulConfigHelper.setLogLevel("org.openecard", LogLevel.INFO);
     }
 
 }

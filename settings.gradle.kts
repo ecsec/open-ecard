@@ -63,7 +63,7 @@ dependencyResolutionManagement {
 		}
 
 		maven {
-			url = uri("https://javacard.pro/maven/")
+			url = uri("https://mvn.javacard.pro/maven/")
 		}
 	}
 

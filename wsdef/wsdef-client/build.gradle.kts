@@ -21,6 +21,11 @@ sourceSets.main.configure {
 	}
 }
 
+
+cxfCodegen {
+	cxfVersion = libs.versions.cxf
+}
+
 tasks.register("ecard", Wsdl2Java::class) {
 	var outDir: DirectoryProperty? = null
 	toolOptions {

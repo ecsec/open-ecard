@@ -1,4 +1,9 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+@file:OptIn(ExperimentalPathApi::class)
+
+import org.jetbrains.kotlin.incremental.createDirectory
+import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 description = "ios-common"
 
@@ -6,30 +11,8 @@ plugins {
 	id("openecard.lib-conventions")
 }
 
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard-ios-common.h")
-		it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
-	}
-	dependsOn("shareHeader")
-}
+val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
-val shareHeader = tasks.register("shareHeader"){
-	outputs.file(
-		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard-ios-common.h")
-	)
-}
-tasks.named("jar").dependsOn("shareHeader")
-
-val iosHeaders by configurations.creating {
-	isCanBeResolved = true
-}
-
-artifacts {
-	add(iosHeaders.name, shareHeader)
-}
 
 dependencies {
 	implementation(libs.robovm.rt)
@@ -51,4 +34,44 @@ dependencies {
 	implementation(libs.xerces.imp)
 
 	annotationProcessor(libs.roboface.processor)
+}
+
+
+tasks.named("compileJava", JavaCompile::class) {
+	this.options.compilerArgs.let {
+		it.add("-processor")
+		it.add("org.openecard.robovm.processor.RobofaceProcessor")
+		it.add("-Aroboface.headername=open-ecard-ios-common.h")
+		it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
+	}
+
+	outputs.dir(roboHeaderTargetDirStr)
+
+	doLast {
+		val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+		val targetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+		targetDir.asFile.toPath().deleteRecursively()
+		targetDir.asFile.parentFile.createDirectory()
+		Files.move(genHeaders.asFile.toPath(), targetDir.asFile.toPath())
+	}
+}
+
+val iosHeaders by configurations.creating {
+	isCanBeResolved = true
+}
+
+val shareHeader = tasks.register("shareHeader") {
+	dependsOn("classes")
+
+	outputs.file(
+		layout.buildDirectory.dir(roboHeaderTargetDirStr)
+	)
+}
+
+tasks.named("build") {
+	dependsOn("shareHeader")
+}
+
+artifacts {
+	add(iosHeaders.name, shareHeader)
 }

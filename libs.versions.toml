@@ -17,6 +17,7 @@ androidx-test-junit = "1.1.+"
 
 robovm = "2.3.21"
 jfx = "22.0.2"
+cxf = "4.1.0"
 
 
 [libraries]
@@ -114,7 +115,7 @@ kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
 
-cxf = { id = "io.mateo.cxf-codegen", version = "2.2.0" }
+cxf = { id = "io.mateo.cxf-codegen", version = "2.4.1" }
 
 jfx = { id =  "org.openjfx.javafxplugin", version = "0.1.0" }
 

@@ -1,11 +1,10 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-
 description = "Create a shadowed build of httpcore for usage in openecard and mitigate problems with robovm."
 
 plugins {
 	id("openecard.iosbundle-conventions")
 	id("robovm")
 }
+
 val iosHeaders: Configuration by configurations.creating {
 	isCanBeResolved = true
 }
@@ -28,7 +27,7 @@ dependencies {
 	api(project(":ifd:ifd-protocols:pace"))
 }
 
-tasks.named("jar").dependsOn("copyHeaders")
+tasks.named("jar") { dependsOn("copyHeaders") }
 
 robovm {
 	isEnableBitcode = false
@@ -43,7 +42,7 @@ tasks.register("copyHeaders", Copy::class){
 	into(layout.buildDirectory.dir("classes/java/main/roboheaders/"))
 }
 
-tasks.named("robovmInstall").dependsOn("copyHeaders")
+tasks.named("robovmInstall") { dependsOn("copyHeaders") }
 tasks.create("buildIosFramework"){
 	group = "Distribution"
 	description = "Alias for robovmInstall creating xcFramework for iOS"

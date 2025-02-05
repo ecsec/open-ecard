@@ -1,5 +1,10 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+@file:OptIn(ExperimentalPathApi::class)
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.incremental.createDirectory
+import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 description = "ios-lib"
 
@@ -8,36 +13,8 @@ plugins {
 	id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard.h")
-		it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
-	}
-}
+val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
-tasks.named("shadowJar", ShadowJar::class) {
-	relocate("org.apache.http", "oec.apache.http")
-}
-
-val shareHeader = tasks.register("shareHeader"){
-	outputs.file(
-		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard.h")
-	)
-}
-
-val iosHeaders: Configuration by configurations.creating {
-	isCanBeResolved = true
-}
-
-artifacts {
-	add(iosHeaders.name, shareHeader)
-}
-
-tasks.named("jar").dependsOn("shareHeader")
-tasks.named("javadoc").dependsOn("shareHeader")
-tasks.named("shadowJar").dependsOn("shareHeader")
 
 dependencies {
 
@@ -82,4 +59,49 @@ dependencies {
 	annotationProcessor(libs.roboface.processor)
 
 //	testImplementation(project(":ifd:scio-backend:mobile-nfc"))
+}
+
+
+tasks.named("compileJava", JavaCompile::class) {
+	this.options.compilerArgs.let {
+		it.add("-processor")
+		it.add("org.openecard.robovm.processor.RobofaceProcessor")
+		it.add("-Aroboface.headername=open-ecard.h")
+		it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
+	}
+
+	outputs.dir(roboHeaderTargetDirStr)
+
+	doLast {
+		val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+		val targetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+		targetDir.asFile.toPath().deleteRecursively()
+		targetDir.asFile.parentFile.createDirectory()
+		Files.move(genHeaders.asFile.toPath(), targetDir.asFile.toPath())
+	}
+}
+
+val iosHeaders by configurations.creating {
+	isCanBeResolved = true
+}
+
+val shareHeader = tasks.register("shareHeader") {
+	dependsOn("classes")
+
+	outputs.file(
+		layout.buildDirectory.dir(roboHeaderTargetDirStr)
+	)
+}
+
+tasks.named("build") {
+	dependsOn("shareHeader")
+}
+
+artifacts {
+	add(iosHeaders.name, shareHeader)
+}
+
+
+tasks.named("shadowJar", ShadowJar::class) {
+	relocate("org.apache.http", "oec.apache.http")
 }

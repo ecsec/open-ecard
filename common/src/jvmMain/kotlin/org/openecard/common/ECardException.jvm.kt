@@ -24,8 +24,6 @@ package org.openecard.common
 
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType
 import oasis.names.tc.dss._1_0.core.schema.Result
-import java.io.PrintStream
-import java.io.PrintWriter
 
 
 interface OasisResultTrait {

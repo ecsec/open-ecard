@@ -9,7 +9,6 @@ plugins {
 
 dependencies {
 	api(libs.jaxb.api)
-	api(libs.jaxb.ws.api)
 }
 
 // the generated java files produce errors in modern javadoc versions

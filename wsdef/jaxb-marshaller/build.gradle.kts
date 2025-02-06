@@ -18,7 +18,6 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				api(libs.jaxb.api)
 				implementation(libs.jaxb.impl)
 				implementation(project(":wsdef:wsdef-common"))
 			}

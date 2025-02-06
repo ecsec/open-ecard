@@ -16,6 +16,7 @@ androidx-material = "1.11.+"
 androidx-test-junit = "1.1.+"
 
 robovm = "2.3.21"
+roboface = "1.4.0"
 jfx = "22.0.2"
 cxf = "4.1.0"
 jna = "5.16.0"
@@ -82,9 +83,9 @@ scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", vers
 robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
 robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
-roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version = "1.4.0" }
-roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version = "1.4.0" }
-roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version = "1.4.0" }
+roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version.ref = "roboface" }
+roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version.ref = "roboface" }
+roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version.ref = "roboface" }
 
 xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.2" }
 

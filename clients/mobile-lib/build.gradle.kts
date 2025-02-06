@@ -69,14 +69,14 @@ kotlin {
 						it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
 					}
 
-					outputs.dir(roboHeaderTargetDirStr)
+					val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+					outputs.dir(roboHeaderTargetDir)
 
 					doLast {
 						val genHeaders = layout.buildDirectory.dir("classes/java/roboMain/roboheaders").get()
-						val targetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-						targetDir.asFile.toPath().deleteRecursively()
-						targetDir.asFile.parentFile.createDirectory()
-						Files.move(genHeaders.asFile.toPath(), targetDir.asFile.toPath())
+						roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+						roboHeaderTargetDir.asFile.parentFile.createDirectory()
+						Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
 					}
 				}
 

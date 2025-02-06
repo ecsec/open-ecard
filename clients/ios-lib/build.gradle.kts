@@ -70,7 +70,8 @@ tasks.named("compileJava", JavaCompile::class) {
 		it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
 	}
 
-	outputs.dir(roboHeaderTargetDirStr)
+	val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+	outputs.dir(roboHeaderTargetDir)
 
 	doLast {
 		val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()

@@ -41,14 +41,9 @@ import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.nio.ByteBuffer
-import java.nio.charset.Charset
 import java.util.*
 import java.util.zip.GZIPInputStream
-import javax.management.Query.and
-import kotlin.experimental.and
 
 private val logger = KotlinLogging.logger {}
 
@@ -95,7 +90,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 		val conHandle = dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
 
-		readPersonalInformation(conHandle, cardSessionId, dynCtx)
+		readPersonalInformation(conHandle, dynCtx)
 
 		val egkData = readEgkData(conHandle, cardSessionId, dynCtx)
 		sendEgkData(egkData, cardSessionId, ws)
@@ -105,27 +100,17 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		}
 	}
 
-	@OptIn(ExperimentalStdlibApi::class)
-	private fun readPersonalInformation(conHandle: ConnectionHandleType, cardSessionId: String, dynCtx: DynamicContext) {
+	@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
+	private fun readPersonalInformation(conHandle: ConnectionHandleType,  dynCtx: DynamicContext) {
 		val infos = DidInfos(aCtx.dispatcher, null, conHandle)
-		val efPd_dataset = infos.getDataSetInfo("EF.PD").read()
+		val efPd = infos.getDataSetInfo("EF.PD").read()
 
-		val lengthPD = ByteBuffer.wrap(efPd_dataset, 0, 2).asShortBuffer().get()
-		val rawPersonalData = ByteBuffer.wrap(efPd_dataset, 2, lengthPD.toInt())
+		val lengthPD = ByteBuffer.wrap(efPd, 0, 2).asShortBuffer().get().toInt()
+		val pd = efPd.sliceArray(IntRange(2,2+lengthPD-1))
 
-		val bos = ByteArrayOutputStream()
-
-		GZIPInputStream(object : InputStream() {
-			override fun read(): Int {
-				return if(rawPersonalData.hasRemaining()){
-					return rawPersonalData.get().toUByte().toInt()
-				} else {
-					-1
-				}
-			}
-		}).transferTo(bos)
-
-		dynCtx.put(CardLinkKeys.PERSONAL_DATA, bos.toByteArray().toHexString())
+		val gzipIs= GZIPInputStream(ByteArrayInputStream(pd))
+		val uncompressedBar = gzipIs.readBytes()
+		dynCtx.put(CardLinkKeys.PERSONAL_DATA, uncompressedBar.toHexString())
 	}
 
 	private fun readEgkData(conHandle: ConnectionHandleType, cardSessionId: String, dynCtx: DynamicContext): RegisterEgk {

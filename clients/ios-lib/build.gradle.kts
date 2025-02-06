@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalPathApi::class)
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.incremental.createDirectory
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
@@ -9,57 +8,76 @@ import kotlin.io.path.deleteRecursively
 description = "ios-lib"
 
 plugins {
-	id("openecard.iosbundle-conventions")
-	id("com.github.johnrengelman.shadow") version "8.1.1"
+	id("openecard.lib-multiplatform-conventions")
 }
 
 val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
 
-dependencies {
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				compileOnly(libs.robovm.rt)
+				compileOnly(libs.robovm.cocoa)
+				compileOnly(libs.roboface.annots)
+				implementation(libs.roboface.marshal)
 
-	implementation(libs.robovm.rt)
-	implementation(libs.robovm.cocoa)
-	compileOnly(libs.roboface.annots)
-	implementation(libs.roboface.marshal)
-	api(project(":clients:ios-common"))
-//	api(project(":management"))
-//	api(project(":sal:tiny-sal"))
-//	api(project(":addon"))
-//	api(project(":addons:tr03112"))
-//	api(project(":addons:pin-management"))
-//	api(project(":addons:status"))
-//	api(project(":addons:genericcryptography"))
-//	api(project(":ifd:ifd-protocols:pace"))
-	api(project(":wsdef:jaxb-marshaller"))
-	api(libs.httpcore)
-	api(project(":addons:cardlink"))
+				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
+				compileOnly(libs.roboface.processor)
 
-	annotationProcessor(libs.roboface.processor)
+				api(project(":clients:ios-common"))
+				api(project(":wsdef:jaxb-marshaller"))
+				api(libs.httpcore)
+				api(project(":addons:cardlink"))
 
-//	testImplementation(project(":ifd:scio-backend:mobile-nfc"))
-}
+				implementation(libs.xerces.imp)
 
-
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard.h")
-		it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
+				implementation(libs.annotations)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+			}
+		}
 	}
 
-	val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-	outputs.dir(roboHeaderTargetDir)
+	jvm() {
+		val main by compilations.getting {
+			compileJavaTaskProvider?.configure {
 
-	doLast {
-		val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
-		val targetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-		targetDir.asFile.toPath().deleteRecursively()
-		targetDir.asFile.parentFile.createDirectory()
-		Files.move(genHeaders.asFile.toPath(), targetDir.asFile.toPath())
+				options.annotationProcessorPath = compileDependencyFiles
+				options.compilerArgs.let {
+					it.add("-processor")
+					it.add("org.openecard.robovm.processor.RobofaceProcessor")
+					it.add("-Aroboface.headername=open-ecard.h")
+					it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
+				}
+
+				val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+				outputs.dir(roboHeaderTargetDir)
+
+				doLast {
+					val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+					roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+					roboHeaderTargetDir.asFile.parentFile.createDirectory()
+					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+				}
+			}
+		}
 	}
 }
+
 
 val iosHeaders by configurations.creating {
 	isCanBeResolved = true
@@ -79,9 +97,4 @@ tasks.named("build") {
 
 artifacts {
 	add(iosHeaders.name, shareHeader)
-}
-
-
-tasks.named("shadowJar", ShadowJar::class) {
-	relocate("org.apache.http", "oec.apache.http")
 }

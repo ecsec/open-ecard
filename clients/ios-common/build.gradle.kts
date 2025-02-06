@@ -8,53 +8,74 @@ import kotlin.io.path.deleteRecursively
 description = "ios-common"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
 val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
 
-dependencies {
-	implementation(libs.robovm.rt)
-	implementation(libs.robovm.cocoa)
-	compileOnly(libs.roboface.annots)
-	implementation(libs.roboface.marshal)
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				compileOnly(libs.robovm.rt)
+				compileOnly(libs.robovm.cocoa)
+				compileOnly(libs.roboface.annots)
+				implementation(libs.roboface.marshal)
 
-	api(project(":clients:mobile-lib", "ios"))
-//	api(project(":management"))
-//	api(project(":sal:tiny-sal"))
-//	api(project(":addon"))
-//	api(project(":addons:tr03112"))
-//	api(project(":addons:pin-management"))
-//	api(project(":addons:status"))
-//	api(project(":addons:genericcryptography"))
-//	api(project(":ifd:ifd-protocols:pace"))
-	api(project(":ifd:scio-backend:ios-nfc"))
+				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
+				compileOnly(libs.roboface.processor)
 
-	implementation(libs.xerces.imp)
+				api(project(":clients:mobile-lib", "ios"))
+				api(project(":ifd:scio-backend:ios-nfc"))
 
-	annotationProcessor(libs.roboface.processor)
-}
+				implementation(libs.xerces.imp)
 
-
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard-ios-common.h")
-		it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
+				implementation(libs.annotations)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+			}
+		}
 	}
 
-	val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-	outputs.dir(roboHeaderTargetDir)
+	jvm() {
+		val main by compilations.getting {
+			compileJavaTaskProvider?.configure {
 
-	doLast {
-		val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
-		roboHeaderTargetDir.asFile.toPath().deleteRecursively()
-		roboHeaderTargetDir.asFile.parentFile.createDirectory()
-		Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+				options.annotationProcessorPath = compileDependencyFiles
+				options.compilerArgs.let {
+					it.add("-processor")
+					it.add("org.openecard.robovm.processor.RobofaceProcessor")
+					it.add("-Aroboface.headername=open-ecard-ios-common.h")
+					it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
+				}
+
+				val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+				outputs.dir(roboHeaderTargetDir)
+
+				doLast {
+					val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+					roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+					roboHeaderTargetDir.asFile.parentFile.createDirectory()
+					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+				}
+			}
+		}
 	}
 }
+
 
 val iosHeaders by configurations.creating {
 	isCanBeResolved = true

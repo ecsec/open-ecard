@@ -112,6 +112,7 @@ kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = 
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
+shadow = { id = "com.gradleup.shadow", version = "8.3.6" }
 
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }

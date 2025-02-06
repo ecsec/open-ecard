@@ -15,7 +15,7 @@ androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
 androidx-test-junit = "1.1.+"
 
-robovm = "2.3.21"
+robovm = "2.3.22"
 roboface = "1.4.0"
 jfx = "22.0.2"
 cxf = "4.1.0"

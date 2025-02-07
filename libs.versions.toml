@@ -61,8 +61,11 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
 
 # jaxb
-jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "4.0.2" }
-jaxb-impl = { group = "com.sun.xml.bind", name = "jaxb-impl", version = "4.0.5" }
+# stick to version 3 of jaxb, so the module system doesn't fuck up android and ios
+# the problem is that org.glassfish.jaxb.runtime.v2.MUtils accesses Module from java reflections, which is not supported
+jaxb-api = { group = "jakarta.xml.bind", name = "jakarta.xml.bind-api", version = "3.0.1" }
+jaxb-impl = { group = "com.sun.xml.bind", name = "jaxb-impl", version = "3.0.2" }
+
 jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
 #			bc-prov", "org.bouncycastle:bcprov-jdk15on:1.62")

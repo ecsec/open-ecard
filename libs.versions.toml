@@ -5,6 +5,7 @@ kx-serde = "1.7.+"
 kt-logging = "7.0.+"
 
 ktor = "2.3.+"
+kover = "0.9.1"
 
 agp = "8.6+"
 androidx-activityCompose = "1.9.+"
@@ -111,7 +112,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
-kotlinKover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
+kotlinKover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 shadow = { id = "com.gradleup.shadow", version = "8.3.6" }
 
 # adds job for generating reports about dependency versions

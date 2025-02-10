@@ -1,54 +1,98 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+@file:OptIn(ExperimentalPathApi::class)
+
+import org.jetbrains.kotlin.incremental.createDirectory
+import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 description = "ios-common"
 
 plugins {
-	id("openecard.lib-conventions")
+	id("openecard.lib-multiplatform-conventions")
 }
 
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard-ios-common.h")
-		it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
+val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
+
+
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				compileOnly(libs.robovm.rt)
+				compileOnly(libs.robovm.cocoa)
+				compileOnly(libs.roboface.annots)
+				implementation(libs.roboface.marshal)
+
+				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
+				compileOnly(libs.roboface.processor)
+
+				api(project(":clients:mobile-lib", "ios"))
+				api(project(":ifd:scio-backend:ios-nfc"))
+
+				implementation(libs.xerces.imp)
+
+				implementation(libs.annotations)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+			}
+		}
 	}
-	dependsOn("shareHeader")
+
+	jvm() {
+		val main by compilations.getting {
+			compileJavaTaskProvider?.configure {
+
+				options.annotationProcessorPath = compileDependencyFiles
+				options.compilerArgs.let {
+					it.add("-processor")
+					it.add("org.openecard.robovm.processor.RobofaceProcessor")
+					it.add("-Aroboface.headername=open-ecard-ios-common.h")
+					it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
+				}
+
+				val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+				outputs.dir(roboHeaderTargetDir)
+
+				doLast {
+					val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+					roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+					roboHeaderTargetDir.asFile.parentFile.createDirectory()
+					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+				}
+			}
+		}
+	}
 }
 
-val shareHeader = tasks.register("shareHeader"){
-	outputs.file(
-		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard-ios-common.h")
-	)
-}
-tasks.named("jar").dependsOn("shareHeader")
 
 val iosHeaders by configurations.creating {
 	isCanBeResolved = true
 }
 
-artifacts {
-	add(iosHeaders.name, shareHeader)
+val shareHeader = tasks.register("shareHeader") {
+	dependsOn("classes")
+
+	outputs.file(
+		layout.buildDirectory.dir(roboHeaderTargetDirStr)
+	)
 }
 
-dependencies {
-	implementation(libs.robovm.rt)
-	implementation(libs.robovm.cocoa)
-	compileOnly(libs.roboface.annots)
-	implementation(libs.roboface.marshal)
+tasks.named("build") {
+	dependsOn("shareHeader")
+}
 
-	api(project(":clients:mobile-lib", "ios"))
-//	api(project(":management"))
-//	api(project(":sal:tiny-sal"))
-//	api(project(":addon"))
-//	api(project(":addons:tr03112"))
-//	api(project(":addons:pin-management"))
-//	api(project(":addons:status"))
-//	api(project(":addons:genericcryptography"))
-//	api(project(":ifd:ifd-protocols:pace"))
-	api(project(":ifd:scio-backend:ios-nfc"))
-
-	implementation(libs.xerces.imp)
-
-	annotationProcessor(libs.roboface.processor)
+artifacts {
+	add(iosHeaders.name, shareHeader)
 }

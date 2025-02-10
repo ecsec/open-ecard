@@ -1,85 +1,100 @@
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+@file:OptIn(ExperimentalPathApi::class)
+
+import org.jetbrains.kotlin.incremental.createDirectory
+import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 description = "ios-lib"
 
 plugins {
-	id("openecard.iosbundle-conventions")
-	id("com.github.johnrengelman.shadow") version "8.1.1"
+	id("openecard.lib-multiplatform-conventions")
 }
 
-tasks.named("compileJava", JavaCompile::class) {
-	this.options.compilerArgs.let {
-		it.add("-processor")
-		it.add("org.openecard.robovm.processor.RobofaceProcessor")
-		it.add("-Aroboface.headername=open-ecard.h")
-		it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
+val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
+
+
+kotlin {
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(libs.kotlin.logging)
+			}
+		}
+		val commonTest by getting {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
+			}
+		}
+		val jvmMain by getting {
+			dependencies {
+				compileOnly(libs.robovm.rt)
+				compileOnly(libs.robovm.cocoa)
+				compileOnly(libs.roboface.annots)
+				implementation(libs.roboface.marshal)
+
+				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
+				compileOnly(libs.roboface.processor)
+
+				api(project(":clients:ios-common"))
+				api(project(":wsdef:jaxb-marshaller"))
+				api(libs.httpcore)
+				api(project(":addons:cardlink"))
+
+				implementation(libs.xerces.imp)
+
+				implementation(libs.annotations)
+			}
+		}
+		val jvmTest by getting {
+			dependencies {
+			}
+		}
+	}
+
+	jvm() {
+		val main by compilations.getting {
+			compileJavaTaskProvider?.configure {
+
+				options.annotationProcessorPath = compileDependencyFiles
+				options.compilerArgs.let {
+					it.add("-processor")
+					it.add("org.openecard.robovm.processor.RobofaceProcessor")
+					it.add("-Aroboface.headername=open-ecard.h")
+					it.add("-Aroboface.include.headers=open-ecard-ios-common.h")
+				}
+
+				val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+				outputs.dir(roboHeaderTargetDir)
+
+				doLast {
+					val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
+					roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+					roboHeaderTargetDir.asFile.parentFile.createDirectory()
+					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+				}
+			}
+		}
 	}
 }
 
-tasks.named("shadowJar", ShadowJar::class) {
-	relocate("org.apache.http", "oec.apache.http")
+
+val iosHeaders by configurations.creating {
+	isCanBeResolved = true
 }
 
-val shareHeader = tasks.register("shareHeader"){
+val shareHeader = tasks.register("shareHeader") {
+	dependsOn("classes")
+
 	outputs.file(
-		layout.buildDirectory.file("classes/java/main/roboheaders/open-ecard.h")
+		layout.buildDirectory.dir(roboHeaderTargetDirStr)
 	)
 }
 
-val iosHeaders: Configuration by configurations.creating {
-	isCanBeResolved = true
+tasks.named("build") {
+	dependsOn("shareHeader")
 }
 
 artifacts {
 	add(iosHeaders.name, shareHeader)
-}
-
-tasks.named("jar").dependsOn("shareHeader")
-tasks.named("javadoc").dependsOn("shareHeader")
-tasks.named("shadowJar").dependsOn("shareHeader")
-
-dependencies {
-
-	implementation(libs.robovm.rt)
-	implementation(libs.robovm.cocoa)
-	compileOnly(libs.roboface.annots)
-	implementation(libs.roboface.marshal)
-	constraints {
-		val reason = "Newer versions will break our build because of modularization since v4."
-		api("jakarta.xml.bind:jakarta.xml.bind-api") {
-			version {
-				strictly("3.0.1")
-			}
-			because(reason)
-		}
-		api("jakarta.xml.ws:jakarta.xml.ws-api") {
-			version {
-				strictly("3.0.1")
-			}
-			because(reason)
-		}
-		api("org.glassfish.jaxb:jaxb-runtime") {
-			version {
-				strictly("3.0.2-mobile")
-			}
-			because(reason)
-		}
-	}
-	api(project(":clients:ios-common"))
-//	api(project(":management"))
-//	api(project(":sal:tiny-sal"))
-//	api(project(":addon"))
-//	api(project(":addons:tr03112"))
-//	api(project(":addons:pin-management"))
-//	api(project(":addons:status"))
-//	api(project(":addons:genericcryptography"))
-//	api(project(":ifd:ifd-protocols:pace"))
-	api(project(":wsdef:jaxb-marshaller"))
-	api(libs.httpcore)
-	api(project(":addons:cardlink"))
-
-	annotationProcessor(libs.roboface.processor)
-
-//	testImplementation(project(":ifd:scio-backend:mobile-nfc"))
 }

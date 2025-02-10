@@ -1,8 +1,17 @@
+@file:OptIn(ExperimentalPathApi::class)
+
+import org.jetbrains.kotlin.incremental.createDirectory
+import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
+
 description = "mobile-lib"
 
 plugins {
 	id("openecard.lib-multiplatform-conventions")
 }
+
+val roboHeaderTargetDirStr = "generated/sources/headers/roboface/roboMain"
 
 kotlin {
 	sourceSets {
@@ -59,6 +68,16 @@ kotlin {
 						it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
 						it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
 					}
+
+					val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
+					outputs.dir(roboHeaderTargetDir)
+
+					doLast {
+						val genHeaders = layout.buildDirectory.dir("classes/java/roboMain/roboheaders").get()
+						roboHeaderTargetDir.asFile.toPath().deleteRecursively()
+						roboHeaderTargetDir.asFile.parentFile.createDirectory()
+						Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
+					}
 				}
 
 				defaultSourceSet {
@@ -83,32 +102,26 @@ val iosHeaders by configurations.creating {
 
 
 val shareHeader = tasks.register("shareHeader") {
-	dependsOn("compileRoboMainJava")
+	dependsOn("roboMainClasses")
+
 	outputs.file(
-		layout.buildDirectory.file("classes/java/roboMain/roboheaders/open-ecard-mobile-lib.h")
+		layout.buildDirectory.dir(roboHeaderTargetDirStr)
 	)
 }
 
 
 val iosJar = tasks.register("iosJar", Jar::class) {
 	group = "build"
-//	dependsOn("jvmRoboMainClasses")
+	dependsOn("roboMainClasses")
 	from(sourceSets.getByName("roboMain").output)
 	archiveClassifier.set("iOS")
 }
 tasks.named("build") {
 	dependsOn("iosJar")
+	dependsOn("shareHeader")
 }
 
 artifacts {
 	add(ios.name, iosJar)
 	add(iosHeaders.name, shareHeader)
-}
-
-
-// extra coverage dependencies so gradle is not upset
-kover {
-	currentProject {
-		this.sources.includedSourceSets.add("shareHeader")
-	}
 }

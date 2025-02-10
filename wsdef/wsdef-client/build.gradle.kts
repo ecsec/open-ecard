@@ -9,7 +9,6 @@ plugins {
 
 dependencies {
 	api(libs.jaxb.api)
-	api(libs.jaxb.ws.api)
 }
 
 // the generated java files produce errors in modern javadoc versions
@@ -19,6 +18,11 @@ sourceSets.main.configure {
 	resources {
 		srcDir("src/main/wsdl")
 	}
+}
+
+
+cxfCodegen {
+	cxfVersion = libs.versions.cxf
 }
 
 tasks.register("ecard", Wsdl2Java::class) {

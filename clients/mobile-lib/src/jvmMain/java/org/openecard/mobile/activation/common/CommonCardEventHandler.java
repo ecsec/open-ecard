@@ -45,6 +45,7 @@ public class CommonCardEventHandler {
 	}
 
 	public void onCardInserted() {
+		interaction.onCardInserted();
 	}
 
 	public void onCardRemoved() {

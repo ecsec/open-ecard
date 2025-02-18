@@ -34,7 +34,7 @@ public class CommonCardEventHandler {
 
 	private final ActivationInteraction interaction;
 	private final Object recognizedLock = new Object();
-	private volatile boolean cardRecognized;
+	private volatile boolean cardPresent;
 	private final NFCDialogMsgSetter msgSetter;
 	private final boolean isAndroid;
 
@@ -49,12 +49,12 @@ public class CommonCardEventHandler {
 	}
 
 	public void onCardRemoved() {
-		boolean wasRecognized;
+		boolean wasPresent;
 		synchronized (recognizedLock) {
-			wasRecognized = this.cardRecognized;
-			this.cardRecognized = false;
+			wasPresent = this.cardPresent;
+			this.cardPresent = false;
 		}
-		if (wasRecognized) {
+		if (wasPresent) {
 			this.interaction.onCardRemoved();
 		} else {
 			if (isAndroid) {
@@ -71,13 +71,24 @@ public class CommonCardEventHandler {
 		}
 	}
 
-	public void onCardRecognized() {
-		boolean wasRecognized;
+	public void onCardInsufficient() {
+		boolean wasPresent;
 		synchronized (recognizedLock) {
-			wasRecognized = this.cardRecognized;
-			cardRecognized = true;
+			wasPresent = this.cardPresent;
+			cardPresent = true;
 		}
-		if (!wasRecognized) {
+		if (!wasPresent) {
+			interaction.onCardInsufficient();
+		}
+	}
+
+	public void onCardRecognized() {
+		boolean wasPresent;
+		synchronized (recognizedLock) {
+			wasPresent = this.cardPresent;
+			cardPresent = true;
+		}
+		if (!wasPresent) {
 			interaction.onCardRecognized();
 		}
 	}
@@ -109,6 +120,9 @@ public class CommonCardEventHandler {
 			@Override
 			public void signalEvent(EventType eventType, EventObject eventData) {
 				switch (eventType) {
+					case CARD_RECOGNIZED_UNKNOWN:
+						handler.onCardInsufficient();
+						break;
 					case CARD_RECOGNIZED:
 						final ConnectionHandleType handle = eventData.getHandle();
 						if (handle == null) {
@@ -121,8 +135,9 @@ public class CommonCardEventHandler {
 						final String type = recognitionInfo.getCardType();
 
 						if (supportedCards == null || supportedCards.isEmpty() || supportedCards.contains(type)) {
-
 							handler.onCardRecognized();
+						} else {
+							handler.onCardInsufficient();
 						}
 
 						break;
@@ -133,7 +148,7 @@ public class CommonCardEventHandler {
 			}
 		};
 		eventDispatcher.add(cardInsertionHandler, EventType.CARD_REMOVED, EventType.CARD_INSERTED);
-		eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED);
+		eventDispatcher.add(cardDetectHandler, EventType.CARD_RECOGNIZED_UNKNOWN, EventType.CARD_RECOGNIZED);
 
 		return new AutoCloseable() {
 			@Override

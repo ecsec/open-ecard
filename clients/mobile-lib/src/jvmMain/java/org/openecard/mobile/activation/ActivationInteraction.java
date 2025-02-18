@@ -38,6 +38,8 @@ public interface ActivationInteraction {
 
 	void onCardInserted();
 
+	void onCardInsufficient();
+
 	void onCardRecognized();
 
 	void onCardRemoved();

@@ -72,6 +72,7 @@ public class CommonCardLinkControllerFactory implements CardLinkControllerFactor
 		extraParams.put(WS_LISTENER_SUCCESSOR_KEY, listenerSuccessor);
 
 		Set<String> supportedCards = new HashSet<>();
+		supportedCards.add("http://ws.gematik.de/egk/1.0.0");
 
 		CommonCardEventHandler created = new CommonCardEventHandler(interaction, false, msgSetter);
 

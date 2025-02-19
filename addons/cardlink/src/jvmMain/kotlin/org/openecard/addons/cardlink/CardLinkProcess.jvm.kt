@@ -54,11 +54,21 @@ class CardLinkProcess(
 	private val dispatcher = ctx.dispatcher
 
 	fun start(): BindingResult {
+		//ensure that switch to successor is called in any case
+		val wsPair = WsPair.withNewListener(ws, successorListener)
+		try {
+			return internalProcessing(wsPair)
+		} finally {
+			// replace listener with the provided successor, so the application can continue
+			wsPair.switchToSuccessorListener()
+		}
+	}
+
+	private fun internalProcessing(wsPair: WsPair): BindingResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val conHandle = openSession()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 
-		val wsPair = WsPair.withNewListener(ws, successorListener)
 		val wsListener = wsPair.listener
 		setWsPair(dynCtx, wsPair)
 		ws.connect()
@@ -68,6 +78,7 @@ class CardLinkProcess(
 
 		val cardHandle = performDidAuth(conHandle, dynCtx)
 		handleRemoteApdus(cardHandle, wsPair)
+
 		destroySession(cardHandle)
 
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
@@ -83,7 +94,7 @@ class CardLinkProcess(
 		iccsnReassignment?.let { bindingResult.addParameter(CardLinkKeys.ICCSN_REASSIGNMENT_TIMESTAMP, it) }
 		webSocketId?.let { bindingResult.addParameter(CardLinkKeys.WS_SESSION_ID, it) }
 		return bindingResult
-    }
+	}
 
 	@Throws(WSHelper.WSException::class)
 	private fun openSession(): ConnectionHandleType {
@@ -154,8 +165,6 @@ class CardLinkProcess(
 
 			if (gematikMessage.payload is RegisterEgkFinish) {
 				logger.debug { "Received '${REGISTER_EGK_FINISH}' message from CardLink service." }
-				// replace listener with the provided successor, so the application can continue
-				wsPair.switchToSuccessorListener()
 				return
 			}
 

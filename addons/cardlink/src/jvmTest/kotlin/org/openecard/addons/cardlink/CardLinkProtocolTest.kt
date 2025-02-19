@@ -40,13 +40,20 @@ import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
-
 
 private val logger = KotlinLogging.logger {}
 
 const val wrongCan = "1231234"
 const val correctCan = "123123"
+
+@OptIn(ExperimentalEncodingApi::class)
+fun String.toB64() : String {
+	return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(this.toByteArray())
+}
 
 /**
  * @author Mike Prechtl
@@ -55,15 +62,10 @@ const val correctCan = "123123"
 class CardLinkProtocolTest {
 
 	private lateinit var activationUtils: CommonActivationUtils
-	private lateinit var webSocketMock: Websocket
 	private lateinit var callbackController: ControllerCallback
 	private lateinit var cardLinkInteraction: CardLinkInteraction
 
-	private val activationResult: Promise<ActivationResult> = Promise()
-	private val isContextInitialized: Promise<Boolean> = Promise()
-
-	@BeforeClass
-	fun setup() {
+	private fun setupContext(isContextInitialized: Promise<Boolean>) {
 		val pcscFactory : GenericInstanceProvider<TerminalFactory?> = object : GenericInstanceProvider<TerminalFactory?> {
 			override val instance = PCSCFactory()
 		}
@@ -100,9 +102,8 @@ class CardLinkProtocolTest {
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	@BeforeClass
-	fun setupWebsocketMock() {
-		this.webSocketMock = Mockito.mock(Websocket::class.java)
+	private fun setupWebsocketMock(answerWithError: Boolean = false, websocketListenerHash: Promise<Int>): Websocket {
+		val webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
 		val correlationIdMseApdu = UUID.randomUUID().toString()
 		val cardSessionId = UUID.randomUUID().toString()
@@ -128,7 +129,13 @@ class CardLinkProtocolTest {
 		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
-			logger.info { "[WS-MOCK] Websocket-Listener was provided." }
+			when (val l = argumentCaptor.value) {
+				is WebsocketListenerImpl -> logger.info { "[WS-MOCK] OpeneCard-Internal Websocket-Listener was provided." }
+				else -> {
+					logger.info { "[WS-MOCK] An alternative Websocket-Listener was provided." }
+					websocketListenerHash.deliver(l.hashCode())
+				}
+			}
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
@@ -151,7 +158,13 @@ class CardLinkProtocolTest {
 				[
 					{
 						"type":"$CONFIRM_TAN_RESPONSE",
-						"payload":"eyJyZXN1bHRDb2RlIjoiU1VDQ0VTUyIsImVycm9yTWVzc2FnZSI6bnVsbH0"
+						"payload":"${
+							if(answerWithError) {
+								"""{"resultCode":"UNKNOWN_ERROR","errorMessage":""}""".toB64()
+							} else {
+								"""{"resultCode":"SUCCESS","errorMessage":null}""".toB64()
+							}
+						}"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"
@@ -201,10 +214,10 @@ class CardLinkProtocolTest {
 				""")
 			}
 		}
+		return webSocketMock
 	}
 
-	@BeforeClass
-	fun setupCallbackController() {
+	private fun setupCallbackController(activationResult: Promise<ActivationResult>) {
 		this.callbackController = Mockito.mock(ControllerCallback::class.java)
 
 		Mockito.`when`(callbackController.onStarted()).then {
@@ -267,14 +280,46 @@ class CardLinkProtocolTest {
 
 	@Test
 	fun testCardLinkProtocol() {
+		val activationResult: Promise<ActivationResult> = Promise()
+		val isContextInitialized: Promise<Boolean> = Promise()
+		val websocketListenerHash: Promise<Int> = Promise()
+
+		setupContext(isContextInitialized)
+		setupCallbackController(activationResult)
+		val wsListener = setupWebsocketMock(false, websocketListenerHash)
+
 		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
 		val cardLinkFactory = activationUtils.cardLinkFactory()
-		cardLinkFactory.create(webSocketMock, callbackController, cardLinkInteraction, webSocketListenerSuccessor)
+		cardLinkFactory.create(wsListener, callbackController, cardLinkInteraction, webSocketListenerSuccessor)
 
 		val result = activationResult.deref()
 		Assert.assertNotNull(result)
 		Assert.assertEquals(result?.resultCode, ActivationResultCode.OK)
 
 		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
+		Assert.assertEquals(websocketListenerHash.deref(), webSocketListenerSuccessor.hashCode())
 	}
+
+	@Test
+	fun ensureWebsocketListenerSuccessorIsAlwaysSet() {
+		val activationResult: Promise<ActivationResult> = Promise()
+		val isContextInitialized: Promise<Boolean> = Promise()
+		val websocketListenerHash: Promise<Int> = Promise()
+
+		setupContext(isContextInitialized)
+		setupCallbackController(activationResult)
+		val wsListener = setupWebsocketMock(true, websocketListenerHash)
+
+		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
+		val cardLinkFactory = activationUtils.cardLinkFactory()
+		cardLinkFactory.create(wsListener , callbackController, cardLinkInteraction, webSocketListenerSuccessor)
+
+		val result = activationResult.deref()
+		Assert.assertNotNull(result)
+		Assert.assertNotEquals(result?.resultCode, ActivationResultCode.OK)
+
+		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
+		Assert.assertEquals(websocketListenerHash.deref(2, TimeUnit.SECONDS), webSocketListenerSuccessor.hashCode())
+	}
+
 }

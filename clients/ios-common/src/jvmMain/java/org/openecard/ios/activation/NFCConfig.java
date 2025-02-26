@@ -30,18 +30,20 @@ import org.openecard.robovm.annotations.FrameworkInterface;
 @FrameworkInterface
 public interface NFCConfig {
 
-    public String getProvideCardMessage();
+    String getProvideCardMessage();
 
-    public String getDefaultNFCCardRecognizedMessage();
+	String getDefaultCardInsertedMessage();
 
-    public String getDefaultNFCErrorMessage();
+    String getDefaultNFCCardRecognizedMessage();
 
-    public String getAquireNFCTagTimeoutMessage();
+    String getDefaultNFCErrorMessage();
 
-    public String getNFCCompletionMessage();
+    String getAquireNFCTagTimeoutMessage();
 
-    public String getTagLostErrorMessage();
+    String getNFCCompletionMessage();
 
-    public String getDefaultCardConnectedMessage();
+    String getTagLostErrorMessage();
+
+    String getDefaultCardConnectedMessage();
 
 }

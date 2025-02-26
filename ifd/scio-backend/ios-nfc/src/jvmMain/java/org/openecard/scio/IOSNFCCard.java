@@ -386,7 +386,7 @@ public final class IOSNFCCard extends AbstractNFCCard {
 		public void didDetectTags(NFCTagReaderSession session, @org.robovm.rt.bro.annotation.Marshaler(NSArray.AsListMarshaler.class) List<NFCTag> tags) {
 
 			for (NFCTag t : tags) {
-				setDialogMsg(cfg.getDefaultCardRecognizedMessage());
+				setDialogMsg(cfg.getDefaultCardInsertedMessage());
 				session.connectToTag(t, (NSError err) -> {
 					if (err != null) {
 						notifyError(err);

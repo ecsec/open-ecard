@@ -209,8 +209,8 @@ public final class CardLinkNavigator extends MobileNavigator {
 				}
 			});
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_DIRECT_CONNECT".equals(curStep.getID())) {
-			//we don't need interactions here so just inc idx and set status to OK
 			idx++;
+			interaction.requestCardInsertion();
 			return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
 			idx++;

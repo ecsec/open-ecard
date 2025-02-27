@@ -8,6 +8,8 @@ public interface IOSConfig {
 
     String getDefaultProvideCardMessage();
 
+	String getDefaultCardInsertedMessage();
+
     String getDefaultCardRecognizedMessage();
 
     String getTagLostErrorMessage();

@@ -25,16 +25,23 @@ package org.openecard.mobile.activation;
 import org.openecard.robovm.annotations.FrameworkInterface;
 
 /**
- *
  * @author Neil Crossley
  */
 @FrameworkInterface
 public interface ActivationInteraction {
 
-    void requestCardInsertion();
-    void requestCardInsertion(NFCOverlayMessageHandler msgHandler);
-    void onCardInteractionComplete();
-    void onCardRecognized();
-    void onCardRemoved();
+	void requestCardInsertion();
+
+	void requestCardInsertion(NFCOverlayMessageHandler msgHandler);
+
+	void onCardInteractionComplete();
+
+	void onCardInserted();
+
+	void onCardInsufficient();
+
+	void onCardRecognized();
+
+	void onCardRemoved();
 
 }

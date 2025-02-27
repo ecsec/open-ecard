@@ -35,6 +35,7 @@ public enum EventType {
     CARD_REMOVED("http://openecard.org/event/card_removed"),
     CARD_RESET("http://openecard.org/event/card_reset"),
     CARD_RECOGNIZED("http://openecard.org/event/card_recognized"),
+	CARD_RECOGNIZED_UNKNOWN("http://openecard.org/event/card_recognized_unknown"),
     TERMINAL_ADDED("http://openecard.org/event/terminal_added"),
     TERMINAL_REMOVED("http://openecard.org/event/terminal_removed"),
     PREPARE_DEVICES("http://openecard.org/event/prepare_devices"),

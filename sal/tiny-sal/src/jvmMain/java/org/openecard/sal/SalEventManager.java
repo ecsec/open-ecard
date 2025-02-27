@@ -330,7 +330,7 @@ public class SalEventManager {
 
 			} else {
 			    LOG.debug("No card regonition for terminal {}.", ifdName);
-			    handleCardRemoved(oldSlot, oldTerm, ifdName, slotCapabilities);
+				env.getEventDispatcher().notify(EventType.CARD_RECOGNIZED_UNKNOWN, new IfdEventObject(handle));
 			}
 
 		    } else if (!terminalAdded && !cardPresent && cardWasPresent) {

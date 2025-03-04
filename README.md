@@ -61,12 +61,12 @@ The following types are available:
 
 Native packages for the Open eCard can be built by the following commands, given the required build tools are available.
 
-    $ ./gradlew :clients:richclient:pacakgeDmg
-    $ ./gradlew :clients:richclient:pacakgePkg
-    $ ./gradlew :clients:richclient:pacakgeDeb
-    $ ./gradlew :clients:richclient:pacakgeRpm
-    $ ./gradlew :clients:richclient:pacakgeMsi
-    $ ./gradlew :clients:richclient:pacakgeExe
+    $ ./gradlew :clients:richclient:packageDmg
+    $ ./gradlew :clients:richclient:packagePkg
+    $ ./gradlew :clients:richclient:packageDeb
+    $ ./gradlew :clients:richclient:packageRpm
+    $ ./gradlew :clients:richclient:packageMsi
+    $ ./gradlew :clients:richclient:packageExe
 
 Or to build all types for a platform:
 

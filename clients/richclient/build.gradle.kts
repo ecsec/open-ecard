@@ -121,7 +121,7 @@ fun JPackageTask.macConfigs(){
 
 	macSign = true
 	macSigningKeyUserName = "ecsec GmbH (72RMQ6K75Z)"
-	macSigningKeychain = "/Users/ecsec-ci/Library/Keychains/ecsec.keychain-db"
+	macSigningKeychain = System.getenv("MAC_SIGNING_KEYCHAIN") ?: "/Users/florianotto/Library/Keychains/ecsec.keychain-db"
 
 }
 

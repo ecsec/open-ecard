@@ -297,7 +297,7 @@ class CardLinkProtocolTest {
 		Assert.assertEquals(result?.resultCode, ActivationResultCode.OK)
 
 		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
-		Assert.assertEquals(websocketListenerHash.deref(), webSocketListenerSuccessor.hashCode())
+		Assert.assertEquals(websocketListenerHash.deref(2, TimeUnit.SECONDS)!!, webSocketListenerSuccessor.hashCode())
 	}
 
 	@Test
@@ -319,7 +319,7 @@ class CardLinkProtocolTest {
 		Assert.assertNotEquals(result?.resultCode, ActivationResultCode.OK)
 
 		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
-		Assert.assertEquals(websocketListenerHash.deref(2, TimeUnit.SECONDS), webSocketListenerSuccessor.hashCode())
+		Assert.assertEquals(websocketListenerHash.deref(2, TimeUnit.SECONDS)!!, webSocketListenerSuccessor.hashCode())
 	}
 
 }

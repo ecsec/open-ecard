@@ -62,6 +62,7 @@ val setAppAboutUrl = "https://openecard.org/"
 val setAppVersion = VersionNumber.parse(project.version.toString()).let {
 	"${it.major}.${it.minor}.${it.micro}"
 }
+val macSigningId = "ecsec GmbH (72RMQ6K75Z)"
 
 task("copyDependencies", Copy::class) {
 	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))
@@ -120,7 +121,7 @@ fun JPackageTask.macConfigs(){
 	macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
 
 	macSign = true
-	macSigningKeyUserName = "ecsec GmbH (72RMQ6K75Z)"
+	macSigningKeyUserName = macSigningId
 	macSigningKeychain = System.getenv("MAC_SIGNING_KEYCHAIN") ?: "/Users/florianotto/Library/Keychains/ecsec.keychain-db"
 
 }
@@ -149,12 +150,46 @@ tasks.register("packageRpm", JPackageTask::class){
 
 	type = ImageType.RPM
 }
+tasks.register("prepareMacBundle") {
+    dependsOn("build", "copyDependencies", "copyJar")
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+
+    doLast {
+        // The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
+        // If we need to sign in future additional libraries, this can also be done here
+        val jnaFiles = fileTree("build/jars") { include("jna-*.jar") }
+        for (jnaFile in jnaFiles) {
+            exec { commandLine("jar", "xf", jnaFile.path, "com/sun/jna/darwin-x86-64/libjnidispatch.jnilib", "com/sun/jna/darwin-aarch64/libjnidispatch.jnilib") }
+
+            val jnaLibFiles = fileTree("com/sun/jna/") { include("darwin-*/libjnidispatch.jnilib") }
+            for (jnaLibFile in jnaLibFiles) {
+                val relativeFilePath = jnaLibFile.relativeTo(project.projectDir).path
+                exec { commandLine(
+                    "codesign",
+                    "-vvv",
+                    "--display",
+                    "--strict",
+                    "--force",
+                    "--deep",
+                    "--options=runtime",
+                    "--timestamp",
+                    "-s",
+                    "Developer ID Application: $macSigningId",
+                    relativeFilePath
+                ) }
+                exec { commandLine("jar", "uf", jnaFile.path, relativeFilePath) }
+                jnaLibFile.delete()
+            }
+        }
+    }
+}
 tasks.register("packageDmg", JPackageTask::class){
 	group = "Distribution"
 	description = "Creates a DMG package for installation."
 
 	assert(Platform.isMac())
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("prepareMacBundle")
 
 	applyDefaults()
 	macConfigs()
@@ -166,7 +201,7 @@ tasks.register("packagePkg", JPackageTask::class){
 	description = "Creates a PKG package for installation."
 
 	assert(Platform.isMac())
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("prepareMacBundle")
 
 	applyDefaults()
 	macConfigs()

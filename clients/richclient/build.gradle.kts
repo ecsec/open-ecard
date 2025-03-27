@@ -63,7 +63,6 @@ val setAppVersion = VersionNumber.parse(project.version.toString()).let {
 	"${it.major}.${it.minor}.${it.micro}"
 }
 val macSigningId = System.getenv("MAC_SIGNING_ID")
-	?: throw IllegalStateException("Please provide a signing id (Apple TeamID) via the env variable 'MAC_SIGNING_ID'.")
 
 task("copyDependencies", Copy::class) {
 	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))
@@ -123,6 +122,7 @@ fun JPackageTask.macConfigs(){
 
 	macSign = true
 	macSigningKeyUserName = macSigningId
+		?: throw IllegalStateException("Please provide a signing id (Apple TeamID) via the env variable 'MAC_SIGNING_ID'.")
 	macSigningKeychain = System.getenv("MAC_SIGNING_KEYCHAIN")
 		?: throw IllegalStateException("Please provide a signing keychain via the env variable 'MAC_SIGNING_KEYCHAIN'.")
 

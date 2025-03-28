@@ -23,6 +23,7 @@
 package org.openecard.richclient.gui.update
 
 import javafx.scene.control.Hyperlink
+import org.openecard.releases.UpdateAdvice
 
 /**
  *

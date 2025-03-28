@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2024 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,15 +20,8 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.updater
+package org.openecard.releases
 
-import java.net.URL
+import io.ktor.client.*
 
-/**
- *
- * @author Sebastian Schuberth
- */
-class VersionUpdateList(
-    val versionUpdates: List<VersionUpdate>,
-    val downloadPage: URL,
-)
+expect fun createHttpClient(): HttpClient

@@ -25,9 +25,16 @@ dependencies {
 	implementation(libs.plugins.kotlinMultiplatform)
 	implementation(libs.plugins.kotlinKover)
 	implementation(libs.plugins.kotlinSerialization)
+	implementation(libs.plugins.compose.compiler)
+	implementation(libs.plugins.jetbrainsCompose)
+	implementation(libs.plugins.moko)
 
 	implementation(libs.plugins.androidLibrary)
 	implementation(libs.robovm.gradlePlugin)
+
+	implementation(libs.jose4j)
+	implementation(libs.semver)
+	implementation(libs.jgit)
 }
 
 fun DependencyHandlerScope.implementation(pluginProv: Provider<PluginDependency>) {

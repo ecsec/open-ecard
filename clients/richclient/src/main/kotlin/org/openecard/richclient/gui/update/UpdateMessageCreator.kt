@@ -24,7 +24,7 @@ package org.openecard.richclient.gui.update
 
 import org.openecard.common.AppVersion.name
 import org.openecard.common.I18n
-import org.openecard.richclient.updater.VersionUpdate
+import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
 
 /**
@@ -34,57 +34,23 @@ import org.openecard.richclient.updater.VersionUpdateChecker
 class UpdateMessageCreator {
     private val lang: I18n = I18n.getTranslation("update")
 
-    fun getMessage(updateChecker: VersionUpdateChecker): String {
-        val currentVersion: VersionUpdate? = updateChecker.currentVersion
-
-        val majUpdate: VersionUpdate? = updateChecker.majorUpgrade
-        val updateVersions: ArrayList<String> = ArrayList()
-
-        if (majUpdate != null) {
-            val maj: String = majUpdate.version.toString() + " (major update)"
-            updateVersions.add(maj)
-        }
-        val minUpdate: VersionUpdate? = updateChecker.minorUpgrade
-
-        if (minUpdate != null) {
-            val min: String = minUpdate.version.toString() + " (minor update)"
-            updateVersions.add(min)
-        }
-        val secUpdate: VersionUpdate? = updateChecker.securityUpgrade
-
-        if (secUpdate != null) {
-            val sec: String = secUpdate.version.toString() + " (security update)"
-            updateVersions.add(sec)
-        }
-
-        val numberOfVersions: Int = updateVersions.size
-
-        var msg: String = ""
-        if (numberOfVersions == 1) {
-            msg = lang.translationForKey("new_version_msg", name, updateVersions.get(0))
-        } else if (numberOfVersions > 1) {
-            val sb: StringBuilder = StringBuilder()
-
-            for (i in 0 until numberOfVersions) {
-                sb.append(updateVersions[i])
-                if (i < numberOfVersions - 1) {
-                    sb.append(", ")
-                }
-            }
-
-            msg = lang.translationForKey("new_versions_msg", name, sb.toString())
-        }
-
-        if (!updateChecker.isCurrentMaintained) {
-			if (currentVersion != null) {
-				msg = lang.translationForKey(
-					"version_not_maintained",
-					currentVersion.version.toString(),
-					updateVersions[0]
-				)
+    fun getMessage(updateChecker: VersionUpdateChecker): String? {
+		updateChecker.getUpdateInfo()?.let {
+			val (data, advice) = it
+			val updateStr = when (advice) {
+				UpdateAdvice.UNMAINTAINED -> return lang.translationForKey("version_not_maintained", updateChecker.installedVersion, data.version.toString() + " (major update)")
+				UpdateAdvice.MAINTAINED_UPDATE -> data.version.toString() + " (minor update)"
+				UpdateAdvice.UPDATE -> data.version.toString() + " (minor update)"
+				UpdateAdvice.SECURITY_UPDATE -> data.version.toString() + " (security update)"
+				else -> null
 			}
-        }
 
-        return msg
+			if (updateStr != null) {
+				val msg = lang.translationForKey("new_version_msg", name, updateStr)
+				return msg
+			}
+		}
+
+		return null
     }
 }

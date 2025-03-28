@@ -39,11 +39,11 @@ import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import javafx.util.Callback
 import org.openecard.common.AppVersion.name
-import org.openecard.common.AppVersion.versionString
 import org.openecard.common.I18n
+import org.openecard.common.OpenecardProperties
 import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.gui.swing.common.SwingUtils
-import org.openecard.richclient.updater.VersionUpdate
+import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.net.URI
 import java.util.function.Consumer
@@ -123,109 +123,64 @@ class UpdateWindow(private val updateChecker: VersionUpdateChecker, private val 
             })
 
             // make table immutable and add the three columns
-            table.setEditable(false)
-            table.getColumns().add(versionCol)
-            table.getColumns().add(updateTypeCol)
-            table.getColumns().add(downloadLinkCol)
+			table.isEditable = false
+            table.columns.add(versionCol)
+            table.columns.add(updateTypeCol)
+            table.columns.add(downloadLinkCol)
 
-            val updates: MutableList<VersionUpdate> = mutableListOf()
+            val updates = updateChecker.getUpdateInfo()
             val updateList: ObservableList<VersionUpdateTableItem> = FXCollections.observableArrayList()
 
-            // if there is a major update, add table entry with version, type = "major" and download link
-            val majUpdate: VersionUpdate? = updateChecker.majorUpgrade
+			updates?.let { (data, advice) ->
+				val version = data.version.toString()
+				val type = when (advice) {
+					UpdateAdvice.MAINTAINED_UPDATE -> lang.translationForKey("minor")
+					UpdateAdvice.UPDATE -> lang.translationForKey("minor")
+					UpdateAdvice.SECURITY_UPDATE -> lang.translationForKey("security")
+					else -> lang.translationForKey("major")
+				}
+				val link = updateChecker.getArtifactUpdateUrl()
+				if (link != null) {
+					val hyperlink = generateHyperLink(link)
+					updateList.add(VersionUpdateTableItem(version, type, hyperlink))
+				}
+			}
 
-            if (majUpdate != null) {
-                val version: String = majUpdate.version.toString()
-                val type: String = "major"
-                val link: String = majUpdate.downloadLink.toString()
-                val hyperlink: Hyperlink = generateHyperLink(link)
-
-                updateList.add(VersionUpdateTableItem(version, type, hyperlink))
-
-                updates.add(majUpdate)
-            }
-
-            // if there is a minor update, add table entry with version, type = "minor" and download link
-            val minUpdate: VersionUpdate? = updateChecker.minorUpgrade
-
-            if (minUpdate != null) {
-                val version: String = minUpdate.version.toString()
-                val type: String = "minor"
-                val link: String = minUpdate.downloadLink.toString()
-                val hyperlink: Hyperlink = generateHyperLink(link)
-
-                updateList.add(VersionUpdateTableItem(version, type, hyperlink))
-
-                updates.add(minUpdate)
-            }
-
-            // if there is a security update, add table entry with version, type = "security" and download link
-            val secUpdate: VersionUpdate? = updateChecker.securityUpgrade
-
-            if (secUpdate != null) {
-                val version: String = secUpdate.version.toString()
-                val type: String = "security"
-                val link: String = secUpdate.downloadLink.toString()
-                val hyperlink: Hyperlink = generateHyperLink(link)
-                updateList.add(VersionUpdateTableItem(version, type, hyperlink))
-
-                updates.add(secUpdate)
-            }
-
-            table.getColumns()
-                .forEach(Consumer { column: TableColumn<VersionUpdateTableItem?, *> -> column.setSortable(false) })
+            table.columns.forEach(Consumer { column: TableColumn<VersionUpdateTableItem?, *> -> column.setSortable(false) })
 
             // add all (between 1 and 3) table rows and set width to the calculated width, which is needed to 
             // display all items without wrapping / scrolling bars
             table.setItems(updateList)
             table.makeTableFitContent()
-            width = table.getPrefWidth()
+            width = table.prefWidth
 
             // get current app version as String
-            val currentVersion: String
-            val current: VersionUpdate? = updateChecker.currentVersion
-
-            if (current != null) {
-                currentVersion = current.version.versionString
-            } else {
-                currentVersion = versionString
-            }
+            val currentVersion: String = updateChecker.installedVersion.toString()
 
             // determine message on top ("not maintained anymore" or "new version(s) available")
-            val label: Label
-            val numberOfVersions: Int = updates.size
-
-            if (!updateChecker.isCurrentMaintained) {
-                label = Label(lang.translationForKey("version_not_maintained", currentVersion))
-            } else if (numberOfVersions == 1) {
-                label = Label(
-                    lang.translationForKey(
-                        "new_version_msg",
-                        name,
-                        currentVersion
-                    )
-                )
-            } else if (numberOfVersions > 1) {
-                label = Label(
-                    lang.translationForKey(
-                        "new_versions_msg",
-                        name,
-                        currentVersion
-                    )
-                )
-            } else {
-				label = Label("No updates available.")
+			val label = if (updates != null) {
+				if (updates.second == UpdateAdvice.UNMAINTAINED) {
+					Label(lang.translationForKey("version_not_maintained", currentVersion))
+				} else {
+					Label(
+						lang.translationForKey(
+							"new_version_msg",
+							name,
+							currentVersion
+						)
+					)
+				}
+			} else {
+				Label("No updates available.")
 			}
 
             label.wrapTextProperty().set(true)
 
             // add section for the manual download link
             val vbox = VBox()
-            val labelPage =
-                Label(lang.translationForKey("manual_download"))
+            val labelPage = Label(lang.translationForKey("manual_download"))
             vbox.children.add(labelPage)
-            val downloadPage: Hyperlink =
-                generateHyperLink(updateChecker.downloadPage.toString())
+            val downloadPage: Hyperlink = generateHyperLink(OpenecardProperties.getProperty("release-page.location"))
             vbox.children.add(downloadPage)
 
             // add message, update table and manual download section to list and return it

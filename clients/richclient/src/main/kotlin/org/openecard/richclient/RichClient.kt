@@ -271,7 +271,7 @@ class RichClient {
         } catch (ex: Exception) {
 			LOG.error(ex) { "${ex.message}"}
 
-            if (message == null || message.isEmpty()) {
+            if (message.isNullOrEmpty()) {
                 // Add exception message if no custom message is set
                 message = ex.message
             }
@@ -294,14 +294,16 @@ class RichClient {
                 return
             }
 
-            val updateChecker: VersionUpdateChecker = VersionUpdateChecker.Companion.loadCurrentVersionList()
+            val updateChecker = VersionUpdateChecker.loadCurrentVersionList()
 
-            if (updateChecker.needsUpdate()) {
-				LOG.info { "Available update found." }
-                tray.status()!!.showUpdateIcon(updateChecker)
-            } else {
-				LOG.info { "No update found, trying again later." }
-            }
+			updateChecker?.let {
+				if (updateChecker.getUpdateInfo() != null) {
+					LOG.info { "Available update found." }
+					tray.status()?.showUpdateIcon(updateChecker)
+				} else {
+					LOG.info { "No update found, trying again later." }
+				}
+			}
 
             // repeat every 24 hours
             Timer().schedule(UpdateTask(tray), (24 * 60 * 60 * 1000).toLong())

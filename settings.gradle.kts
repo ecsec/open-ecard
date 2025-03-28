@@ -12,6 +12,7 @@ plugins {
 
 rootProject.name = "openecard-app"
 
+include("releases")
 include("wsdef:wsdef-common")
 include("wsdef:wsdef-client")
 include("wsdef:jaxb-marshaller")

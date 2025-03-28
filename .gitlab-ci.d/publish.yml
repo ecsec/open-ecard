@@ -1,10 +1,9 @@
 publish-to-github:
   stage: publish
-  image: debian:stable-20230109-slim
+  image: public.docker.ecsec.de/ecsec/tools/podman-java21:1.3
   tags:
     - "podman"
   script:
-    - apt-get update && apt-get upgrade -y && apt-get install -y jq curl zip
     # Create Release
     - TAG=$(echo "${CI_COMMIT_TAG}" | cut -c 2-)
     - >-
@@ -36,12 +35,29 @@ publish-to-github:
           --data-binary "@${INSTALLER}" \
           https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=${INSTALLER_FILENAME}
       done
+    - mkdir build/
+    - cd clients/richclient/build/dist/
+    - sha256sum * > ../../../../build/artifacts.sha256sum
+    - cd -
+    - cat build/artifacts.sha256sum
+    - ./gradlew buildReleaseInfo -Pversion=$TAG
+    - cat build/release-info.jwt
+    - >-
+      curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} \
+        -X POST -v \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        -H "Content-Type: application/octet-stream" \
+        --data-binary "@build/release-info.jwt" \
+        https://uploads.github.com/repos/ecsec/open-ecard/releases/${RELEASE_ID}/assets?name=release-info.jwt
   dependencies:
     - "package-linux"
+    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   needs:
     - "package-linux"
+    - "package-osx"
     - "package-win"
     - "package-ios-framework"
   rules:

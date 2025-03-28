@@ -3,9 +3,13 @@ kotlin = "2.0.21"
 kx-co = "1.9.+"
 kx-serde = "1.7.+"
 kt-logging = "7.0.+"
+kx-datetime = "0.6.1"
+compose = "1.7.0"
 
 ktor = "2.3.+"
 kover = "0.9.1"
+
+moko = "0.24.3"
 
 agp = "8.6+"
 androidx-activityCompose = "1.9.+"
@@ -22,6 +26,13 @@ jfx = "22.0.2"
 cxf = "4.1.0"
 jna = "5.16.0"
 
+semver = "2.0.0"
+jwtkt = "1.1.0"
+
+jgit = "7.1.0.202411261347-r"
+
+wiremock = "3.9.2"
+
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -31,7 +42,10 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
 
+kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-serde" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
+
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
@@ -41,11 +55,19 @@ androidx-material = { group = "com.google.android.material", name = "material", 
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 
+moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
+moko-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko" }
+moko-resourcesTest = { module = "dev.icerock.moko:resources-test", version.ref = "moko" }
+
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-websocket = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-nego = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serde-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serde-xml = { module = "io.ktor:ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 
 # logging
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.16" }
@@ -59,6 +81,7 @@ annotations = { group = "com.google.code.findbugs", name = "annotations", versio
 mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.+" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
+wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 
 # jaxb
 # stick to version 3 of jaxb, so the module system doesn't fuck up android and ios
@@ -96,10 +119,16 @@ roboface-processor = { group = "org.openecard.tools", name = "roboface-processor
 xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.2" }
 
 jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
+jwtkt-core = { module = "com.appstractive:jwt-kt", version.ref = "jwtkt" }
+jwtkt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwtkt" }
+jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
 
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version.ref = "jna" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version.ref = "jna" }
 
+semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
+
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 
 [bundles]
 test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-classic"]
@@ -119,6 +148,12 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 
 kotlinKover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 shadow = { id = "com.gradleup.shadow", version = "8.3.6" }
+
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }
+
 
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }

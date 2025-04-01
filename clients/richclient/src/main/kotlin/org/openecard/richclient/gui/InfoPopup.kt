@@ -30,7 +30,7 @@ import java.awt.event.WindowEvent
 import javax.swing.JDialog
 
 /**
- * This class creats a InfoPopup showing different information about connected terminals and available cards.
+ * This class creates a InfoPopup showing different information about connected terminals and available cards.
  * It also contains the different controls of the application, e.g. the exit button.
  *
  * @author Johannes Schmölz
@@ -60,8 +60,10 @@ class InfoPopup @JvmOverloads constructor(c: Container, private val point: Point
     override fun updateContent(c: Container) {
         contentPane = c
         pack()
-        repaint()
-        location = calculatePosition(c, point!!)
+		repaint()
+		point?.let {
+			location = calculatePosition(c, point)
+		}
     }
 
     private fun calculatePosition(c: Container, p: Point): Point {
@@ -95,13 +97,13 @@ class InfoPopup @JvmOverloads constructor(c: Container, private val point: Point
         contentPane = c
         pack()
 
-        if (point != null) {
+		point?.let {
             location = calculatePosition(c, point)
         }
 
         addWindowFocusListener(object : WindowAdapter() {
             override fun windowLostFocus(e: WindowEvent) {
-                dispose()
+                //dispose()
             }
         })
 

@@ -22,17 +22,25 @@
 
 package org.openecard.richclient.gui
 
+import dorkbox.systemTray.MenuItem
+import dorkbox.systemTray.Separator
+import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
 import org.openecard.common.I18n
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
+import org.openecard.gui.about.AboutDialog
 import org.openecard.gui.graphics.*
 import org.openecard.richclient.RichClient
+import org.openecard.richclient.gui.manage.ManagementDialog
 import java.awt.*
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.awt.event.WindowListener
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
@@ -40,9 +48,13 @@ import java.util.concurrent.TimeoutException
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.swing.JSeparator
 import kotlin.system.exitProcess
 
 private val LOG = KotlinLogging.logger {  }
+
+private const val ICON_LOADER: String = "loader"
+private const val ICON_LOGO: String = "logo"
 
 /**
  * This class creates a tray icon on systems that do have a system tray.
@@ -53,40 +65,39 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 class AppTray
-/**
- * Constructor of AppTray class.
- *
- * @param client RichClient
- */(private val client: RichClient) {
+	/**
+	 * Constructor of AppTray class.
+	 *
+	 * @param client RichClient
+	 */
+	(private val client: RichClient) {
 
     private val lang: I18n = I18n.getTranslation("richclient")
 
     private var tray: SystemTray? = null
-    private var trayIcon: TrayIcon? = null
-    private var status: Status? = null
-    private var frame: InfoFrame? = null
-    private val isLinux: Boolean? = null
-    private val isKde: Boolean by lazy {
-		// KDE_FULL_SESSION contains true when KDE is running
-		// The spec says (http://techbase.kde.org/KDE_System_Administration/Environment_Variables#KDE_FULL_SESSION)
-		// If you plan on using this variable to detect a running KDE session, check if the value is not empty
-		// instead of seeing if it equals true. The value might be changed in the future to include KDE version.
-		val kdeSession: String? = System.getenv("KDE_FULL_SESSION")
-		kdeSession != null && !kdeSession.isEmpty()
-	}
-    private var trayAvailable: Boolean = false
+    var status: Status? = null
+		private set
+	private var frame: InfoFrame? = null
+	private var infoPopupActive = false
 
     /**
      * Starts the setup process.
      * A loading icon is displayed.
      */
     fun beginSetup() {
-        if (isTraySupported) {
-            setupTrayIcon()
-        } else {
-            setupFrame()
-        }
-    }
+		tray = SystemTray.get(lang.translationForKey("tray.title", name))?.let { tray ->
+			tray.setImage(tray.getTrayIconImage(ICON_LOADER))
+			tray.status = lang.translationForKey("tray.message.loading", name)
+			tray.setTooltip(lang.translationForKey("tray.title", name))
+
+			tray
+		}
+
+		// no tray, set up frame
+		if (tray == null) {
+			frame = setupFrame(true)
+		}
+	}
 
     /**
      * Finishes the setup process.
@@ -96,197 +107,167 @@ class AppTray
      * @param manager
      */
     fun endSetup(env: Environment, manager: AddonManager) {
-        status = Status(this, env, manager)
+		val statusObj = Status(this, env, manager, tray == null)
+		status = statusObj
 
-        if (trayAvailable) {
-            trayIcon!!.image = getTrayIconImage(ICON_LOGO)
-            trayIcon!!.toolTip = lang.translationForKey("tray.title", name)
-        } else {
-            frame!!.isVisible = false
-            status!!.setInfoPanel(frame)
+		tray?.let { tray ->
+			tray.setImage(tray.getTrayIconImage(ICON_LOGO))
+			tray.status = null
+			tray.menu.add(MenuItem("Card Status", object : ActionListener {
+				override fun actionPerformed(e: ActionEvent) {
+					if (!infoPopupActive) {
+						val frame = setupFrame(false)
+						frame.setStatusPane(statusObj)
+						frame.addWindowListener(object : WindowAdapter() {
+							override fun windowClosed(e: WindowEvent) {
+								infoPopupActive = false
+							}
+						})
+						infoPopupActive = true
+					}
+				}
+			}))
+			tray.menu.add(Separator())
+			tray.menu.add(MenuItem(lang.translationForKey("tray.about"), object : ActionListener {
+				override fun actionPerformed(e: ActionEvent) {
+					AboutDialog.showDialog()
+				}
+			}))
+			tray.menu.add(MenuItem(lang.translationForKey("tray.config"), object : ActionListener {
+				override fun actionPerformed(e: ActionEvent) {
+					ManagementDialog.Companion.showDialog(manager)
+				}
+			}))
+			tray.menu.add(Separator())
+			tray.menu.add(MenuItem(lang.translationForKey("tray.exit"), object : ActionListener {
+				override fun actionPerformed(e: ActionEvent) {
+					shutdown()
+				}
+			}))
 
-            frame!!.isResizable = false
-            frame!!.setLocationRelativeTo(null)
-            frame!!.state = Frame.ICONIFIED
-            frame!!.isVisible = true
-            frame!!.pack()
         }
-    }
 
-    /**
-     * Returns the current status.
-     *
-     * @return current status
-     */
-    fun status(): Status? {
-        return status
+		frame?.setStatusPane(statusObj)
     }
 
     /**
      * Removes the tray icon from the tray and terminates the application.
      */
     fun shutdown() {
-        if (trayAvailable) {
-            if (!SysUtils.isMacOSX()) {
-                val desc: String = lang.translationForKey("tray.message.shutdown", name)
-                trayIcon!!.displayMessage(name, desc, TrayIcon.MessageType.INFO)
-            }
-            client.teardown()
-            tray!!.remove(trayIcon)
-        } else {
-            client.teardown()
-        }
+		tray?.shutdown()
+		tray = null
+		client.teardown()
 		exitProcess(0)
     }
 
 
-    private fun setupTrayIcon() {
-        trayAvailable = true
+	private fun setupFrame(standalone: Boolean): InfoFrame {
+		return InfoFrame(lang.translationForKey("tray.title", name)).also { frame ->
+			frame.iconImage = GraphicsUtil.createImage(OecLogo::class.java, 256, 256)
 
-        tray = SystemTray.getSystemTray()
+			if (standalone) {
+				frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
-        trayIcon = TrayIcon(
-            getTrayIconImage(ICON_LOADER),
-            lang.translationForKey("tray.message.loading", name), null
-        )
-        trayIcon!!.isImageAutoSize = true
-        trayIcon!!.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                if (status != null) {
-                    status!!.showInfo(Point(e.x, e.y))
-                }
-            }
-        })
+				val logo = ImageIcon(GraphicsUtil.createImage(OecLogo::class.java, 256, 256))
+				val label = JLabel(logo)
+				val c: Container = frame.contentPane
+				c.preferredSize = Dimension(logo.iconWidth, logo.iconHeight)
+				c.background = Color.white
+				c.add(label)
 
-        try {
-            tray?.add(trayIcon)
-        } catch (ex: AWTException) {
-			LOG.error(ex) { "TrayIcon could not be added to the system tray." }
-
-            // tray and trayIcon are not needed anymore
-            tray = null
-            trayIcon = null
-            setupFrame()
-        }
-    }
-
-
-    private fun getTrayIconImage(name: String): Image {
-        val dim: Dimension = tray!!.trayIconSize
-
-        if (SysUtils.isUnix()) {
-            return getImageLinux(name, dim)
-        } else if (SysUtils.isMacOSX()) {
-            return getImageMacOSX(name, dim)
-        } else {
-            return getImageDefault(name, dim)
-        }
-    }
-
-    private fun getImageLinux(name: String, dim: Dimension): Image {
-		return if (name == ICON_LOADER) {
-			GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
-		} else {
-			GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
-		}
-    }
-
-    private fun getImageMacOSX(name: String, dim: Dimension): Image {
-		val c = if (isMacMenuBarDarkMode) {
-			OecLogoWhite::class.java
-		} else {
-			OecLogoBlack::class.java
-		}
-        return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1)
-    }
-
-    private fun getImageDefault(name: String, dim: Dimension): Image {
-		return if (name == ICON_LOADER) {
-			GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
-		} else {
-			GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
-		}
-    }
-
-    private val isMacMenuBarDarkMode: Boolean
-        get() {
-            // code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
-            val f: FutureTask<Int> =
-                FutureTask({
-                    // check for exit status only. Once there are more modes than "dark" and "default", we might need to
-                    // analyze string contents..
-                    val proc: Process = Runtime.getRuntime()
-                        .exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
-                    proc.waitFor()
-                    proc.exitValue()
-                })
-            try {
-                val t: Thread = Thread({
-                    f.run()
-                })
-                t.isDaemon = true
-                t.start()
-                val result: Int = f.get(100, TimeUnit.MILLISECONDS)
-                return result == 0
-            } catch (ex: InterruptedException) {
-                // TimeoutException thrown if process didn't terminate
-				LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
-                f.cancel(true) // make sure the thread is dead
-                return false
-            } catch (ex: TimeoutException) {
-				LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
-                f.cancel(true)
-                return false
-            } catch (ex: ExecutionException) {
-				LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
-                f.cancel(true)
-                return false
-            }
-        }
-
-    private val isGnome: Boolean by lazy {
-		"GNOME" == System.getenv("XDM_CURRENT_DESKTOP")
-			|| "GNOME" == System.getenv("XDG_CURRENT_DESKTOP")
-	}
-
-    private val isPlasma: Boolean by lazy {
-		if (isKde) {
-			"5" == System.getenv("KDE_SESSION_VERSION")
-		} else {
-			false
+				frame.pack()
+				frame.isResizable = false
+				frame.setLocationRelativeTo(null)
+				frame.isVisible = true
+			} else {
+				frame.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
+				frame.isVisible = false
+			}
 		}
 	}
 
-    private val isTraySupported: Boolean
-        get() {
-            return SystemTray.isSupported()
-                    && !isPlasma
-                    && !isGnome
-                    && !SysUtils.isMacOSX()
-        }
+}
 
-    private fun setupFrame() {
-        trayAvailable = false
 
-        frame = InfoFrame(lang.translationForKey("tray.title", name))
-        frame!!.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        frame!!.iconImage = GraphicsUtil.createImage(OecLogo::class.java, 256, 256)
+private fun InfoFrame.setStatusPane(statusObj: Status) {
+	this.isVisible = false
+	statusObj.setInfoPanel(this)
 
-        val logo: ImageIcon = ImageIcon(GraphicsUtil.createImage(OecLogo::class.java, 256, 256))
-        val label: JLabel = JLabel(logo)
-        val c: Container = frame!!.contentPane
-        c.preferredSize = Dimension(logo.iconWidth, logo.iconHeight)
-        c.background = Color.white
-        c.add(label)
+	this.isResizable = false
+	this.setLocationRelativeTo(null)
+	this.state = Frame.ICONIFIED
+	this.isVisible = true
+	this.pack()
+}
 
-        frame!!.pack()
-        frame!!.isResizable = false
-        frame!!.setLocationRelativeTo(null)
-        frame!!.isVisible = true
-    }
+private fun SystemTray.getTrayIconImage(name: String): Image {
+	val dim: Dimension = trayImageSize.let { Dimension(it, it) }
 
-    companion object {
-        private const val ICON_LOADER: String = "loader"
-        private const val ICON_LOGO: String = "logo"
-    }
+	return if (SysUtils.isUnix()) {
+		getImageLinux(name, dim)
+	} else if (SysUtils.isMacOSX()) {
+		getImageMacOSX(name, dim)
+	} else {
+		getImageDefault(name, dim)
+	}
+}
+
+private fun getImageLinux(name: String, dim: Dimension): Image {
+	return if (name == ICON_LOADER) {
+		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
+	} else {
+		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
+	}
+}
+
+private fun getImageMacOSX(name: String, dim: Dimension): Image {
+	val c = if (isMacMenuBarDarkMode()) {
+		OecLogoWhite::class.java
+	} else {
+		OecLogoBlack::class.java
+	}
+	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1)
+}
+
+private fun getImageDefault(name: String, dim: Dimension): Image {
+	return if (name == ICON_LOADER) {
+		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
+	} else {
+		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
+	}
+}
+
+private fun isMacMenuBarDarkMode(): Boolean {
+	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
+	val f: FutureTask<Int> =
+		FutureTask {
+			// check for exit status only. Once there are more modes than "dark" and "default", we might need to
+			// analyze string contents.
+			val proc: Process = Runtime.getRuntime()
+				.exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
+			proc.waitFor()
+			proc.exitValue()
+		}
+	try {
+		val t = Thread {
+			f.run()
+		}
+		t.isDaemon = true
+		t.start()
+		val result: Int = f.get(100, TimeUnit.MILLISECONDS)
+		return result == 0
+	} catch (ex: InterruptedException) {
+		// TimeoutException thrown if process didn't terminate
+		LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
+		f.cancel(true) // make sure the thread is dead
+		return false
+	} catch (ex: TimeoutException) {
+		LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
+		f.cancel(true)
+		return false
+	} catch (ex: ExecutionException) {
+		LOG.warn(ex) { "Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode." }
+		f.cancel(true)
+		return false
+	}
 }

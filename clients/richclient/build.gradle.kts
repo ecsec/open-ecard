@@ -51,6 +51,7 @@ dependencies {
 	implementation(libs.jose4j)
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)
+	implementation(libs.systray)
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

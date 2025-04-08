@@ -23,6 +23,7 @@ androidx-test-junit = "1.1.+"
 robovm = "2.3.21"
 roboface = "1.4.0"
 jfx = "22.0.2"
+systray = "4.5"
 cxf = "4.1.0"
 jna = "5.16.0"
 
@@ -125,6 +126,8 @@ jwtkt-jwks = { module = "com.appstractive:jwt-jwks-kt", version.ref = "jwtkt" }
 
 jna-jpms = { group = "net.java.dev.jna", name = "jna-jpms", version.ref = "jna" }
 jna-jpms-platform = { group = "net.java.dev.jna", name = "jna-platform-jpms", version.ref = "jna" }
+
+systray = { group = "com.dorkbox", name = "SystemTray", version.ref = "systray" }
 
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 

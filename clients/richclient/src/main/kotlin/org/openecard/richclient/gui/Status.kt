@@ -62,7 +62,8 @@ private val LOG = KotlinLogging.logger {  }
 class Status(
 	private val appTray: AppTray,
 	private val env: Environment,
-	private val manager: AddonManager
+	private val manager: AddonManager,
+	private val withControls: Boolean,
 ) :
     EventCallback {
 
@@ -103,7 +104,7 @@ class Status(
 
     fun setInfoPanel(frame: StatusContainer?) {
         popup = frame
-        popup!!.contentPane = contentPane
+        popup?.contentPane = contentPane
     }
 
 
@@ -180,9 +181,11 @@ class Status(
         btnPanel.add(btnAbout)
         btnPanel.add(btnExit)
 
-        contentPane!!.add(gradPanel, BorderLayout.NORTH)
-        contentPane!!.add(infoView, BorderLayout.CENTER)
-        contentPane!!.add(btnPanel, BorderLayout.SOUTH)
+        contentPane!!.add(gradPanel!!, BorderLayout.NORTH)
+        contentPane!!.add(infoView!!, BorderLayout.CENTER)
+		if (withControls) {
+			contentPane!!.add(btnPanel, BorderLayout.SOUTH)
+		}
     }
 
     @Synchronized
@@ -342,7 +345,7 @@ class Status(
         }
 
         val ifdName = ch.ifdName
-        val ctx = ch.contextHandle
+		val ctx = ch.contextHandle
 		LOG.debug { "ConnectionHandle: ifd=${ifdName}, slot=${ByteUtils.toHexString(ch.slotHandle)}, ctx=${ByteUtils.toHexString(ctx)}" }
         val info = ch.recognitionInfo
         if (info != null) {
@@ -351,7 +354,7 @@ class Status(
 			LOG.debug { "RecognitionInfo: null" }
         }
 
-        if (null != eventType && isResponsibleContext(ifdName, ctx)) {
+        if (isResponsibleContext(ifdName, ctx)) {
             when (eventType) {
                 EventType.TERMINAL_ADDED -> addInfo(ifdName, info)
                 EventType.TERMINAL_REMOVED -> {
@@ -411,7 +414,7 @@ class Status(
             }
         })
 
-        gradPanel!!.add(updateLabel, BorderLayout.EAST)
+        gradPanel!!.add(updateLabel!!, BorderLayout.EAST)
 
         if (popup != null) {
             popup!!.updateContent(contentPane!!)

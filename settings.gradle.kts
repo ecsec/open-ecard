@@ -67,6 +67,11 @@ dependencyResolutionManagement {
 		maven {
 			url = uri("https://mvn.javacard.pro/maven/")
 		}
+
+		// repo with systray startup fix
+		maven {
+			url = uri("https://maven.martmists.com/snapshots")
+		}
 	}
 
 	versionCatalogs {

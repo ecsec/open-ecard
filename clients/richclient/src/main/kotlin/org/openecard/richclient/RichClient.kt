@@ -219,7 +219,7 @@ class RichClient {
 
                 if (dispatcherMode) {
                     val waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", 5000L)!!
-                    val timeout = getRegInt(hk, regPath, "DP_Timeout", 3600000L)!!
+					val timeout = getRegInt(hk, regPath, "DP_Timeout", 3600000L)!!
                     // try to register with dispatcher service
 					LOG.debug { "Trying to register HTTP binding port with dispatcher service." }
                     val realPort = httpBinding!!.port
@@ -240,7 +240,7 @@ class RichClient {
 
             // Initialize the EventManager
             eventDispatcher!!.add(
-                tray!!.status()!!,
+                tray!!.status!!,
                 EventType.TERMINAL_ADDED, EventType.TERMINAL_REMOVED,
                 EventType.CARD_INSERTED, EventType.CARD_RECOGNIZED, EventType.CARD_REMOVED
             )
@@ -299,7 +299,7 @@ class RichClient {
 			updateChecker?.let {
 				if (updateChecker.getUpdateInfo() != null) {
 					LOG.info { "Available update found." }
-					tray.status()?.showUpdateIcon(updateChecker)
+					tray.status?.showUpdateIcon(updateChecker)
 				} else {
 					LOG.info { "No update found, trying again later." }
 				}

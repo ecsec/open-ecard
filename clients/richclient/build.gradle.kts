@@ -91,6 +91,11 @@ fun JPackageTask.applyDefaults(){
 	aboutUrl = setAppAboutUrl
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	appDescription = "Client side implementation of the eCard-API-Framework (BSI TR-03112)"
+
+    System.getenv("RUNTIME_JDK_PATH")?.let {
+        jLinkOptions.add("--modulePath")
+        jLinkOptions.add(it)
+    }
 }
 fun JPackageTask.linuxConfigs() {
 //	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()

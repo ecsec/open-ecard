@@ -81,6 +81,8 @@ In case of Windows, msi and exe packages are built. For this purpose, two additi
  - [WiX toolset](https://wixtoolset.org/) - to create msi installers
  - [Inno Setup](http://www.jrsoftware.org/isinfo.php) - to create exe installers (Path environment variable must be set)
 
+By setting the environment variable `RUNTIME_JDK_PATH`, the Open eCard App can be built for various architectures.
+This variable contains the path to the `jmods` folder of the Java runtime environment, for example `/lib/jvm/java-17-openjdk-amd64/jmods/`.
 
 Mobile libs
 -----------

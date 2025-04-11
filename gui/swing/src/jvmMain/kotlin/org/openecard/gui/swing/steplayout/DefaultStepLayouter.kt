@@ -49,7 +49,7 @@ class DefaultStepLayouter(infoUnits: List<InputInfoUnit>, stepName: String) : St
 		val pageStart = JPanel(BorderLayout())
 		val title = JLabel("<html><h3>$stepName</h3></html>")
 		// add a space of 20 on top and 3 below to match with the logo separator
-		title.setBorder(EmptyBorder(20, 0, 3, 0))
+		title.setBorder(EmptyBorder(20, 0, 6, 0))
 		pageStart.add(title, BorderLayout.PAGE_START)
 		val sep = JSeparator(SwingConstants.HORIZONTAL)
 		pageStart.add(sep, BorderLayout.CENTER)

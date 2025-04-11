@@ -100,7 +100,7 @@ class SwingUserConsent
 
         // Config layout
         val layout = GroupLayout(rootPanel)
-        rootPanel.setLayout(layout)
+		rootPanel.setLayout(layout)
 
 		layout.autoCreateGaps = false
 		layout.autoCreateContainerGaps = true

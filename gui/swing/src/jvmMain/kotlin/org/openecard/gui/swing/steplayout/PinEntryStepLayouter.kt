@@ -53,7 +53,7 @@ class PinEntryStepLayouter(infoUnits: MutableList<InputInfoUnit>, stepName: Stri
 		title.setIcon(logo)
 		title.setIconTextGap(20)
 		// add a space of 3 below to match with the logo separator
-		title.setBorder(EmptyBorder(0, 0, 3, 0))
+		title.setBorder(EmptyBorder(0, 0, 6, 0))
 		pageStart.add(title, BorderLayout.PAGE_START)
 		val sep = JSeparator(SwingConstants.HORIZONTAL)
 		pageStart.add(sep, BorderLayout.CENTER)

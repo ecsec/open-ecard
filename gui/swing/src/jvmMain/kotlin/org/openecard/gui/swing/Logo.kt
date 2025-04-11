@@ -44,7 +44,7 @@ class Logo : JPanel() {
         val lbl = JLabel(logo)
 
         // set a horizontal box layout (logo on the left, separator on the right)
-        setLayout(BoxLayout(this, BoxLayout.X_AXIS))
+        setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
         add(lbl)
 
         // add the panel containing the separator
@@ -52,8 +52,8 @@ class Logo : JPanel() {
         // set a vertical box layout (dummy on the top, separator on the bottom)
         separatorPanel.setLayout(BoxLayout(separatorPanel, BoxLayout.Y_AXIS))
         val separator = JSeparator(SwingConstants.HORIZONTAL)
-        val dummyPanel = JPanel()
-		dummyPanel.preferredSize = Dimension(10, 60)
+		val dummyPanel = JPanel()
+		dummyPanel.preferredSize = Dimension(10, 6)
         separatorPanel.add(dummyPanel)
         separatorPanel.add(separator)
         add(separatorPanel)

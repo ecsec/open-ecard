@@ -33,6 +33,8 @@ import iso.std.iso_iec._24727.tech.schema.EstablishContext
 import iso.std.iso_iec._24727.tech.schema.Initialize
 import iso.std.iso_iec._24727.tech.schema.ReleaseContext
 import iso.std.iso_iec._24727.tech.schema.Terminate
+import javafx.application.Application
+import javafx.stage.Stage
 import org.apache.http.HttpException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -85,7 +87,7 @@ import kotlin.system.exitProcess
  * @author René Lottes
  * @author Tobias Wich
  */
-class RichClient {
+class RichClient : Application() {
     // Tray icon
     private var tray: AppTray? = null
 
@@ -113,7 +115,7 @@ class RichClient {
     // ContextHandle determines a specific IFD layer context
     private var contextHandle: ByteArray? = null
 
-    fun setup() {
+    override fun start(stage: Stage) {
         GUIDefaults.initialize()
 
         val title = LANG.translationForKey("client.startup.failed.headline", name)
@@ -459,8 +461,7 @@ class RichClient {
 				"Running on ${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}."
 			}
 
-            val client = RichClient()
-            client.setup()
+            launch(RichClient::class.java)
         }
 
         private fun regKeyExists(hk: WinReg.HKEY, key: String, value: String): Boolean {

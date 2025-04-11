@@ -121,7 +121,8 @@ object GUIDefaults {
 	@JvmStatic
 	fun initialize() {
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+			// disabled as this causes hangs with gtk native calls inside swing and systray
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
 			val toolkit = Toolkit.getDefaultToolkit()
 			val guiProps = GUIProperties()

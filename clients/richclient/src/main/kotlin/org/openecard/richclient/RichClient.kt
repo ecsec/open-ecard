@@ -73,6 +73,7 @@ import org.openecard.ws.SAL
 import java.io.IOException
 import java.net.BindException
 import java.net.Socket
+import java.net.URI
 import java.net.URL
 import java.nio.charset.UnsupportedCharsetException
 import java.util.*
@@ -220,12 +221,12 @@ class RichClient : Application() {
                 httpBinding!!.start()
 
                 if (dispatcherMode) {
-                    val waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", 5000L)!!
+					val waitTime = getRegInt(hk, regPath, "Retry_Wait_Time", 5000L)!!
 					val timeout = getRegInt(hk, regPath, "DP_Timeout", 3600000L)!!
                     // try to register with dispatcher service
 					LOG.debug { "Trying to register HTTP binding port with dispatcher service." }
                     val realPort = httpBinding!!.port
-                    val regUrl = URL("http://127.0.0.1:24727/dp/register")
+                    val regUrl = URI("http://127.0.0.1:24727/dp/register").toURL()
                     val ft: FutureTask<*> = FutureTask(DispatcherRegistrator(regUrl, realPort, waitTime, timeout), 1)
                     val registerThread = Thread(ft, "Register-Dispatcher-Service")
                     registerThread.isDaemon = true
@@ -379,7 +380,7 @@ class RichClient : Application() {
                     // prepare request
                     HttpRequestHelper.setDefaultHeader(req, regUrl)
                     val reqContentType = ContentType.create("application/x-www-form-urlencoded", "UTF-8")
-                    val bodyStr = String.format("Port=%d", bindingPort)
+                    val bodyStr = "Port=$bindingPort"
                     val bodyEnt = StringEntity(bodyStr, reqContentType)
                     req.entity = bodyEnt
                     req.setHeader(bodyEnt.contentType)

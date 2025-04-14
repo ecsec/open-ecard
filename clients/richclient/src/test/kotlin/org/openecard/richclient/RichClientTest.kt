@@ -23,10 +23,8 @@
 package org.openecard.richclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import javafx.application.Application
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.URI
 import java.net.URL
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -51,13 +49,14 @@ class RichClientTest {
 	 */
 	@BeforeTest
 	fun setUp() {
-		tcTokenURL = URI(
-			"http", "127.0.0.1:24727",
+		tcTokenURL = URL(
+			"http", "127.0.0.1", 24727,
 			"/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml"
-		).toURL()
-		statusURL = URI("http", "127.0.0.1:24727", "/getStatus").toURL()
-		waitForChangeURL = URI("http", "127.0.0.1:24727", "/waitForChange").toURL()
-		Application.launch(RichClient::class.java)
+		)
+		statusURL = URL("http", "127.0.0.1", 24727, "/getStatus")
+		waitForChangeURL = URL("http", "127.0.0.1", 24727, "/waitForChange")
+		val client = RichClient()
+		client.setup()
 		// Wait some seconds until the client comes up
 		Thread.sleep(2500)
 	}

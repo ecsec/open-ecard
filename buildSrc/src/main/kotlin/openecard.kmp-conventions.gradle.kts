@@ -14,6 +14,7 @@ kotlin {
 
 // configure ktlint
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+	ignoreFailures = project.findProperty("ktlint.ignoreFailures")?.toString().toBoolean()
 	version =
 		versionCatalogs
 			.find("libs")

@@ -20,6 +20,9 @@ variables:
   OEC_WIN_CACHE: "oec-win-cache"
 
 include:
+- project: 'ec/admin/gitlab-ci-templates'
+  ref: main
+  file: '/templates/.gitlab-ci-quality.yml'
 - '/.gitlab-ci.d/version.yml'
 - '/.gitlab-ci.d/cache.yml'
 - '/.gitlab-ci.d/compile.yml'

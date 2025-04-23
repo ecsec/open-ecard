@@ -17,10 +17,24 @@ test:
         - "**/build/test-results/*/TEST-*.xml"
   script:
     - !reference [.versioning, script]
-    - ./gradlew check koverVerify koverXmlReport
+    - ./gradlew check koverVerify koverXmlReport -Pktlint.ignoreFailures=true
   needs: [ "compile" ]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc.\d+)?$/
     - if: $CI_MERGE_REQUEST_IID
       allow_failure: true
     - if: $CI_COMMIT_BRANCH == "master"
+
+
+kotlin-quality:
+  extends: .kotlinlint
+  image: docker.io/mobiledevops/android-sdk-image:34.0.1
+  cache:
+    - key: "$OEC_JAVA_CACHE_KEY"
+      paths: !reference [ .cache-gradle-base, paths ]
+      policy: pull-push
+    - key: "$OEC_JAVA_TMP_CACHE_KEY"
+      paths: [ .cache-gradle-builds, paths ]
+      policy: pull-push
+  needs:
+    - compile

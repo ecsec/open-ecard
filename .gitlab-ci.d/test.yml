@@ -1,6 +1,6 @@
 test:
   stage: test
-  image: docker.io/mobiledevops/android-sdk-image:34.0.1
+  image: docker.io/cimg/android:2025.04
   tags:
     - "podman"
   cache:
@@ -28,15 +28,13 @@ test:
 
 kotlin-quality:
   extends: .kotlinlint
-  image: docker.io/mobiledevops/android-sdk-image:34.0.1
+  image: docker.io/cimg/android:2025.04
   cache:
     - key: "$OEC_JAVA_CACHE_KEY"
       paths: !reference [ .cache-gradle-base, paths ]
-      policy: pull-push
+      policy: pull
     - key: "$OEC_JAVA_TMP_CACHE_KEY"
       paths: [ .cache-gradle-builds, paths ]
-      policy: pull-push
+      policy: pull
   needs:
     - compile
-  before_script:
-    - apt update && apt -y install jq

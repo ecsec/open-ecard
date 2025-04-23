@@ -1,5 +1,8 @@
 [versions]
 kotlin = "2.0.21"
+ktlint = "1.5.0"
+ktlint-githubreporter = "2.0.1"
+ktlint-plugin = "12.2.+"
 kx-co = "1.9.+"
 kx-serde = "1.7.+"
 kt-logging = "7.0.+"
@@ -36,6 +39,7 @@ wiremock = "3.9.2"
 
 
 [libraries]
+ktlint-githubreporter = { module = "io.github.tobi2k:ktlint-gitlab-reporter", version.ref = "ktlint-githubreporter" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-logging" }
@@ -142,6 +146,7 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version = "3.1.0" }
 
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }

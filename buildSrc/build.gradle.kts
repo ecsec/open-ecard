@@ -19,6 +19,7 @@ plugins {
 
 
 dependencies {
+	implementation(libs.plugins.ktlint)
 	implementation(libs.plugins.kotlinJvm)
 	implementation(libs.plugins.kotlinKapt)
 	implementation(libs.plugins.kotlinAllOpen)

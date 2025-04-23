@@ -1,6 +1,6 @@
 deploy-mvn-artifacts:
   stage: deploy
-  image: docker.io/mobiledevops/android-sdk-image:34.0.1
+  image: docker.io/cimg/android:2025.04
   tags:
     - "podman"
   cache:

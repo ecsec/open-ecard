@@ -22,8 +22,6 @@
 package org.openecard.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 private val LOG = KotlinLogging.logger { }
 
@@ -34,7 +32,10 @@ private val LOG = KotlinLogging.logger { }
  *
  * @author Mike Prechtl
  */
-class NFCCardMonitoring(private val terminal: NFCCardTerminal<*>, private val card: AbstractNFCCard) : Runnable {
+class NFCCardMonitoring(
+	private val terminal: NFCCardTerminal<*>,
+	private val card: AbstractNFCCard,
+) : Runnable {
 	private val lock = Object()
 
 	@Volatile

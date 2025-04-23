@@ -29,23 +29,21 @@ package org.openecard.common.ifd.scio
  * @author Tobias Wich
  */
 class TerminalState {
-    val name: String?
-    val isCardPresent: Boolean
+	val name: String?
+	val isCardPresent: Boolean
 
-    constructor(name: String?, cardPresent: Boolean) {
-        this.name = name
-        this.isCardPresent = cardPresent
-    }
+	constructor(name: String?, cardPresent: Boolean) {
+		this.name = name
+		this.isCardPresent = cardPresent
+	}
 
-    constructor(term: SCIOTerminal) {
-        this.name = term.name
-        this.isCardPresent = term.isCardPresent
-    }
+	constructor(term: SCIOTerminal) {
+		this.name = term.name
+		this.isCardPresent = term.isCardPresent
+	}
 
-    companion object {
-        @Throws(SCIOException::class)
-        fun convert(terminals: List<SCIOTerminal>): List<TerminalState> {
-			return terminals.map { TerminalState(it) }
-        }
-    }
+	companion object {
+		@Throws(SCIOException::class)
+		fun convert(terminals: List<SCIOTerminal>): List<TerminalState> = terminals.map { TerminalState(it) }
+	}
 }

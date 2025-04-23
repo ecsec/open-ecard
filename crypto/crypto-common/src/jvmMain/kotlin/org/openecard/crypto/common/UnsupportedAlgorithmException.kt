@@ -25,6 +25,9 @@ package org.openecard.crypto.common
  *
  * @author Tobias Wich
  */
-class UnsupportedAlgorithmException(msg: String, cause: Throwable? = null) : Exception(msg, cause) {
+class UnsupportedAlgorithmException(
+	msg: String,
+	cause: Throwable? = null,
+) : Exception(msg, cause) {
 	constructor(msg: String) : this(msg, null)
 }

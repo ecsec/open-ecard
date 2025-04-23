@@ -32,30 +32,31 @@ import org.openecard.common.AppVersion.version
  * @author Tobias Wich
  */
 interface ClientCertTlsClient : TlsClient {
-    /**
-     * Sets the TlsAuthentication implementation that should be used when the server requests authentication.
-     *
-     * @param tlsAuth TlsAuthentication implementation.
-     */
-    fun setAuthentication(tlsAuth: TlsAuthentication?)
+	/**
+	 * Sets the TlsAuthentication implementation that should be used when the server requests authentication.
+	 *
+	 * @param tlsAuth TlsAuthentication implementation.
+	 */
+	fun setAuthentication(tlsAuth: TlsAuthentication?)
 
-    /**
-     * Get the desired TLS protocol version.
-     *
-     * @return Returns the TLS protocol version.
-     */
-    /**
-     * Sets the desired TLS protocol version.
-     *
-     * @param version TLS protocol version.
-     */
-    var clientVersion: ProtocolVersion
+	/**
+	 * Get the desired TLS protocol version.
+	 *
+	 * @return Returns the TLS protocol version.
+	 */
 
-    /**
-     * Sets the minimum accepted TLS protocol version.
-     * In case the server tries to use a lower version, an error will occur in the TLS stack.
-     *
-     * @param minClientVersion Minimum accepted TLS protocol version.
-     */
-    fun setMinimumVersion(minClientVersion: ProtocolVersion)
+	/**
+	 * Sets the desired TLS protocol version.
+	 *
+	 * @param version TLS protocol version.
+	 */
+	var clientVersion: ProtocolVersion
+
+	/**
+	 * Sets the minimum accepted TLS protocol version.
+	 * In case the server tries to use a lower version, an error will occur in the TLS stack.
+	 *
+	 * @param minClientVersion Minimum accepted TLS protocol version.
+	 */
+	fun setMinimumVersion(minClientVersion: ProtocolVersion)
 }

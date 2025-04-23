@@ -22,23 +22,22 @@
 
 package org.openecard.common.ifd
 
-
 /**
  *
  * @author Tobias Wich
  */
 interface ProtocolFactory {
-    /**
-     * Get URI of the protocol the instances created by this factory support.
-     *
-     * @return URI of the supported protocol
-     */
-    val protocol: String
+	/**
+	 * Get URI of the protocol the instances created by this factory support.
+	 *
+	 * @return URI of the supported protocol
+	 */
+	val protocol: String
 
-    /**
-     * Create instance of the protocol.
-     *
-     * @return instance of the protocol which can be used for one connection
-     */
-    fun createInstance(): Protocol
+	/**
+	 * Create instance of the protocol.
+	 *
+	 * @return instance of the protocol which can be used for one connection
+	 */
+	fun createInstance(): Protocol
 }

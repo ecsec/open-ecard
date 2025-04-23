@@ -23,7 +23,6 @@ package org.openecard.common.interfaces
 
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import javax.annotation.Nonnull
 
 /**
  * Interface for schema based document validations.
@@ -31,21 +30,21 @@ import javax.annotation.Nonnull
  * @author Tobias Wich
  */
 interface DocumentSchemaValidator {
-    /**
-     * Validates the given document against the schema definition of the instance.
-     *
-     * @param doc The document to verify.
-     * @throws DocumentValidatorException Indicates a failed document validation.
-     */
-    @Throws(DocumentValidatorException::class)
-    fun validate(doc: Document)
+	/**
+	 * Validates the given document against the schema definition of the instance.
+	 *
+	 * @param doc The document to verify.
+	 * @throws DocumentValidatorException Indicates a failed document validation.
+	 */
+	@Throws(DocumentValidatorException::class)
+	fun validate(doc: Document)
 
-    /**
-     * Validates the given document element against the schema definition of the instance.
-     *
-     * @param doc The element to verify.
-     * @throws DocumentValidatorException Indicates a failed document validation.
-     */
-    @Throws(DocumentValidatorException::class)
-    fun validate(doc: Element)
+	/**
+	 * Validates the given document element against the schema definition of the instance.
+	 *
+	 * @param doc The element to verify.
+	 * @throws DocumentValidatorException Indicates a failed document validation.
+	 */
+	@Throws(DocumentValidatorException::class)
+	fun validate(doc: Element)
 }

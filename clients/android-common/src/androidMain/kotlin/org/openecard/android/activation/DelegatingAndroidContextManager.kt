@@ -26,18 +26,14 @@ import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
-import java.io.IOException
 import org.openecard.mobile.activation.ContextManager
 import org.openecard.mobile.activation.StartServiceHandler
 import org.openecard.mobile.activation.StopServiceHandler
 import org.openecard.mobile.ex.ApduExtLengthNotSupported
 import org.openecard.mobile.ex.NFCTagNotSupported
-import org.openecard.mobile.ex.NfcDisabled
-import org.openecard.mobile.ex.NfcUnavailable
-import org.openecard.mobile.ex.UnableToInitialize
 import org.openecard.scio.AndroidNFCFactory
 import org.openecard.scio.CachingTerminalFactoryBuilder
-
+import java.io.IOException
 
 /**
  *
@@ -47,7 +43,6 @@ class DelegatingAndroidContextManager(
 	private val contextManager: ContextManager,
 	builder: CachingTerminalFactoryBuilder<AndroidNFCFactory>,
 ) : AndroidContextManager {
-
 	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory> = builder
 
 	@Throws(ApduExtLengthNotSupported::class, NFCTagNotSupported::class, IOException::class)

@@ -34,20 +34,23 @@ import java.util.*
  * @author Tobias Wich
  */
 class ExpirationVerifier : CertificateVerifier {
-    @Throws(CertificateVerificationException::class)
-    override fun isValid(chain: TlsServerCertificate, hostOrIP: String) {
-        try {
-            val now = Date()
-            for (next in chain.certificate.getCertificateList()) {
-                val c = Certificate.getInstance(next.encoded)
-                val expDate = c.endDate.date
-                if (now.after(expDate)) {
-                    val msg = String.format("The certificate '%s' expired at %s.", c.subject, expDate)
-                    throw CertificateVerificationException(msg)
-                }
-            }
-        } catch (ex: IOException) {
-            throw CertificateVerificationException("Invalid certificate received from server.", ex)
-        }
-    }
+	@Throws(CertificateVerificationException::class)
+	override fun isValid(
+		chain: TlsServerCertificate,
+		hostOrIP: String,
+	) {
+		try {
+			val now = Date()
+			for (next in chain.certificate.getCertificateList()) {
+				val c = Certificate.getInstance(next.encoded)
+				val expDate = c.endDate.date
+				if (now.after(expDate)) {
+					val msg = String.format("The certificate '%s' expired at %s.", c.subject, expDate)
+					throw CertificateVerificationException(msg)
+				}
+			}
+		} catch (ex: IOException) {
+			throw CertificateVerificationException("Invalid certificate received from server.", ex)
+		}
+	}
 }

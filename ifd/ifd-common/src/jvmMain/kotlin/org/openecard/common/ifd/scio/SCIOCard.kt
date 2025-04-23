@@ -28,77 +28,79 @@ package org.openecard.common.ifd.scio
  * @author Tobias Wich
  */
 interface SCIOCard {
+	val terminal: SCIOTerminal
 
-    val terminal: SCIOTerminal
+	val aTR: SCIOATR
 
-    val aTR: SCIOATR
+	val protocol: SCIOProtocol
 
-    val protocol: SCIOProtocol
+	/**
+	 * Returns whether the card is connected with a contactless protocol, or not.
+	 *
+	 * @return `true` if the card is connected with a contactless protocol, `false` otherwise.
+	 */
+	val isContactless: Boolean
 
-    /**
-     * Returns whether the card is connected with a contactless protocol, or not.
-     *
-     * @return `true` if the card is connected with a contactless protocol, `false` otherwise.
-     */
-    val isContactless: Boolean
+	@get:Throws(IllegalStateException::class)
+	val basicChannel: SCIOChannel
 
-    @get:Throws(IllegalStateException::class)
-    val basicChannel: SCIOChannel
+	/**
+	 * Opens and returns a logical channel to the card.
+	 * The channel is opened by issuing a MANAGE CHANNEL command. The card must support logical channels, or this
+	 * method fails.
+	 *
+	 * @return The new logical channel.
+	 * @throws SCIOException Thrown in case the channel could not be opened.
+	 * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
+	 */
+	@Throws(SCIOException::class, IllegalStateException::class)
+	fun openLogicalChannel(): SCIOChannel
 
-    /**
-     * Opens and returns a logical channel to the card.
-     * The channel is opened by issuing a MANAGE CHANNEL command. The card must support logical channels, or this
-     * method fails.
-     *
-     * @return The new logical channel.
-     * @throws SCIOException Thrown in case the channel could not be opened.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
-     */
-    @Throws(SCIOException::class, IllegalStateException::class)
-    fun openLogicalChannel(): SCIOChannel
+	/**
+	 * Starts a transaction on the card.
+	 * Usually the transaction is bound to the current thread, but an implementation may decide to choose another
+	 * exclusion mechanism.
+	 *
+	 * @throws SCIOException Thrown if exclusive access is already set or it could not be set due to some other problem.
+	 * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
+	 */
+	@Throws(SCIOException::class, IllegalStateException::class)
+	fun beginExclusive()
 
-    /**
-     * Starts a transaction on the card.
-     * Usually the transaction is bound to the current thread, but an implementation may decide to choose another
-     * exclusion mechanism.
-     *
-     * @throws SCIOException Thrown if exclusive access is already set or it could not be set due to some other problem.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
-     */
-    @Throws(SCIOException::class, IllegalStateException::class)
-    fun beginExclusive()
+	/**
+	 * Ends the exclusive access to the card.
+	 * Exclusive access must have been established previously with the [.beginExclusive] method.
+	 *
+	 * @throws SCIOException Thrown in case the operation failed due to some unkown reason.
+	 * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect],
+	 * or no [.beginExclusive] call has been issued before.
+	 */
+	@Throws(SCIOException::class, IllegalStateException::class)
+	fun endExclusive()
 
-    /**
-     * Ends the exclusive access to the card.
-     * Exclusive access must have been established previously with the [.beginExclusive] method.
-     *
-     * @throws SCIOException Thrown in case the operation failed due to some unkown reason.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect],
-     * or no [.beginExclusive] call has been issued before.
-     */
-    @Throws(SCIOException::class, IllegalStateException::class)
-    fun endExclusive()
+	/**
+	 * Sends a control command to the terminal.
+	 *
+	 * @param controlCode The control code of the command.
+	 * @param command The command data. The data may be empty.
+	 * @return The response of the command. Note that this is not necessarily an APDU.
+	 * @throws SCIOException Thrown if the operation failed.
+	 * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
+	 */
+	@Throws(SCIOException::class, IllegalStateException::class, NullPointerException::class)
+	fun transmitControlCommand(
+		controlCode: Int,
+		command: ByteArray,
+	): ByteArray
 
-    /**
-     * Sends a control command to the terminal.
-     *
-     * @param controlCode The control code of the command.
-     * @param command The command data. The data may be empty.
-     * @return The response of the command. Note that this is not necessarily an APDU.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalStateException Thrown in case the card is already disconnected (see [.disconnect].
-     */
-    @Throws(SCIOException::class, IllegalStateException::class, NullPointerException::class)
-    fun transmitControlCommand(controlCode: Int, command: ByteArray): ByteArray
-
-    /**
-     * Disconnects the connection to the card.
-     * After the execution of this method, all invocations on methods of [SCIOCard] and [SCIOChannel]
-     * instances which need the connection to this card will yield errors.
-     *
-     * @param reset If `true` the card will be reset during the disconnect.
-     * @throws SCIOException Thrown if the operation failed.
-     */
-    @Throws(SCIOException::class)
-    fun disconnect(reset: Boolean)
+	/**
+	 * Disconnects the connection to the card.
+	 * After the execution of this method, all invocations on methods of [SCIOCard] and [SCIOChannel]
+	 * instances which need the connection to this card will yield errors.
+	 *
+	 * @param reset If `true` the card will be reset during the disconnect.
+	 * @throws SCIOException Thrown if the operation failed.
+	 */
+	@Throws(SCIOException::class)
+	fun disconnect(reset: Boolean)
 }

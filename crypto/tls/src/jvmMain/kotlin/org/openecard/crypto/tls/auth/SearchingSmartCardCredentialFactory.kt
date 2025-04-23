@@ -30,7 +30,7 @@ import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.interfaces.EventDispatcher
 import org.openecard.crypto.common.sal.TokenFinder
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Implementation of CredentialFactory operating on generic crypto SAL DIDs.
@@ -39,41 +39,38 @@ private val LOG = KotlinLogging.logger {  }
  * @author Dirk Petrautzki
  */
 open class SearchingSmartCardCredentialFactory(
-    dispatcher: Dispatcher,
-    filterAlwaysReadable: Boolean,
-    private val evtDispatcher: EventDispatcher,
-    private val sessionHandle: ConnectionHandleType,
-    private val allowedCardTypes: Set<String>
+	dispatcher: Dispatcher,
+	filterAlwaysReadable: Boolean,
+	private val evtDispatcher: EventDispatcher,
+	private val sessionHandle: ConnectionHandleType,
+	private val allowedCardTypes: Set<String>,
 ) : BaseSmartCardCredentialFactory(dispatcher, filterAlwaysReadable) {
-
-    override var usedHandle: ConnectionHandleType? = null
+	override var usedHandle: ConnectionHandleType? = null
 		protected set
 
-
-    protected fun isAllowedCardType(cardType: String?): Boolean {
-		return if (allowedCardTypes.isEmpty()) {
+	protected fun isAllowedCardType(cardType: String?): Boolean =
+		if (allowedCardTypes.isEmpty()) {
 			true
 		} else {
 			allowedCardTypes.contains(cardType)
 		}
-    }
 
-    override fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner> {
-        // find a card which can be used to answer the request
-        val f = TokenFinder(dispatcher, evtDispatcher, sessionHandle, allowedCardTypes)
-        try {
-            f.startWatching().use { fw ->
-                val card = fw.waitForNext()
-                val handle = card.deref()!!
-                usedHandle = handle
-                return getClientCredentialsForCard(cr, handle)
-            }
-        } catch (ex: InterruptedException) {
+	override fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner> {
+		// find a card which can be used to answer the request
+		val f = TokenFinder(dispatcher, evtDispatcher, sessionHandle, allowedCardTypes)
+		try {
+			f.startWatching().use { fw ->
+				val card = fw.waitForNext()
+				val handle = card.deref()!!
+				usedHandle = handle
+				return getClientCredentialsForCard(cr, handle)
+			}
+		} catch (ex: InterruptedException) {
 			LOG.warn { "Interrupted while waiting for a card to be inserted, continuing without certificate authentication." }
-            return listOf()
-        } catch (ex: WSHelper.WSException) {
+			return listOf()
+		} catch (ex: WSHelper.WSException) {
 			LOG.warn { "Error while accessing the smartcard, continuing without certificate authentication." }
-            return listOf()
-        }
-    }
+			return listOf()
+		}
+	}
 }

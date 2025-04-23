@@ -30,68 +30,70 @@ import org.openecard.crypto.common.asn1.eac.oid.CAObjectIdentifier
  *
  * @author Moritz Horsch
  */
-class CADomainParameterInfo(seq: ASN1Sequence) {
-    /**
-     * Returns the object identifier of the protocol.
-     *
-     * @return Protocol
-     */
-    val protocol: String
+class CADomainParameterInfo(
+	seq: ASN1Sequence,
+) {
+	/**
+	 * Returns the object identifier of the protocol.
+	 *
+	 * @return Protocol
+	 */
+	val protocol: String
 
-    /**
-     * Returns the ChipAuthentication domain parameter.
-     *
-     * @return domain parameter
-     */
-    val domainParameter: AlgorithmIdentifier
+	/**
+	 * Returns the ChipAuthentication domain parameter.
+	 *
+	 * @return domain parameter
+	 */
+	val domainParameter: AlgorithmIdentifier
 
-    /**
-     * Returns the key identifier.
-     *
-     * @return KeyID
-     */
-    val keyID: Int
+	/**
+	 * Returns the key identifier.
+	 *
+	 * @return KeyID
+	 */
+	val keyID: Int
 
-
-    /**
-     * Creates a new ChipAuthenticationDomainParameterInfo object. See TR-03110
-     * Section A.1.1.2.
-     *
-     * @param seq ANS1 encoded data
-     */
-    init {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1))
+	/**
+	 * Creates a new ChipAuthenticationDomainParameterInfo object. See TR-03110
+	 * Section A.1.1.2.
+	 *
+	 * @param seq ANS1 encoded data
+	 */
+	init {
+		if (seq.size() == 2) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1))
 			keyID = 0
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1))
-            keyID = (ASN1Integer.getInstance(seq.getObjectAt(2)) as ASN1Integer).value.toInt()
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for CADomainParameterInfo")
-        }
-    }
+		} else if (seq.size() == 3) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			domainParameter = AlgorithmIdentifier.getInstance(seq.getObjectAt(1))
+			keyID = (ASN1Integer.getInstance(seq.getObjectAt(2)) as ASN1Integer).value.toInt()
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for CADomainParameterInfo")
+		}
+	}
 
-    companion object {
-        private val protocols: Array<String> = arrayOf(
-            CAObjectIdentifier.id_CA_DH,
-            CAObjectIdentifier.id_CA_ECDH
-        )
+	companion object {
+		private val protocols: Array<String> =
+			arrayOf(
+				CAObjectIdentifier.id_CA_DH,
+				CAObjectIdentifier.id_CA_ECDH,
+			)
 
-        /**
-         * Checks if the id is a CA object identifier.
-         *
-         * @param oid Object identifier
-         * @return true if o is a CA object identifier, otherwise false
-         */
-        fun isObjectIdentifier(oid: String): Boolean {
-            for (i in protocols.indices) {
-                if (protocols[i] == oid) {
-                    return true
-                }
-            }
-            return false
-        }
-    }
+		/**
+		 * Checks if the id is a CA object identifier.
+		 *
+		 * @param oid Object identifier
+		 * @return true if o is a CA object identifier, otherwise false
+		 */
+		fun isObjectIdentifier(oid: String): Boolean {
+			for (i in protocols.indices) {
+				if (protocols[i] == oid) {
+					return true
+				}
+			}
+			return false
+		}
+	}
 }

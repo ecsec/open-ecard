@@ -30,68 +30,72 @@ import java.security.spec.AlgorithmParameterSpec
  * @author Tobias Wich
  */
 class PACEDomainParameter {
-    private var domainParameter: AlgorithmParameterSpec
-    private val pip: PACESecurityInfoPair
-    private val pi: PACEInfo
+	private var domainParameter: AlgorithmParameterSpec
+	private val pip: PACESecurityInfoPair
+	private val pi: PACEInfo
 
-    /**
-     * Create new PACEDomainParameter. Loads parameter as defined in the PACEInfo.
-     *
-     * @param pip PACESecurityInfoPair
-     */
-    constructor(pip: PACESecurityInfoPair) {
-        this.pip = pip
-        this.pi = pip.pACEInfo
+	/**
+	 * Create new PACEDomainParameter. Loads parameter as defined in the PACEInfo.
+	 *
+	 * @param pip PACESecurityInfoPair
+	 */
+	constructor(pip: PACESecurityInfoPair) {
+		this.pip = pip
+		this.pi = pip.pACEInfo
 
-        this.domainParameter = loadParameters(pip, pi)
-    }
+		this.domainParameter = loadParameters(pip, pi)
+	}
 
-    /**
-     * Create new PACEDomainParameter.
-     *
-     * @param pip PACESecurityInfoPair
-     * @param domainParameter AlgorithmParameterSpec
-     */
-    constructor(pip: PACESecurityInfoPair, domainParameter: AlgorithmParameterSpec) {
-        this.pip = pip
-        this.pi = pip.pACEInfo
-        this.domainParameter = domainParameter
-    }
+	/**
+	 * Create new PACEDomainParameter.
+	 *
+	 * @param pip PACESecurityInfoPair
+	 * @param domainParameter AlgorithmParameterSpec
+	 */
+	constructor(pip: PACESecurityInfoPair, domainParameter: AlgorithmParameterSpec) {
+		this.pip = pip
+		this.pi = pip.pACEInfo
+		this.domainParameter = domainParameter
+	}
 
-    var parameter: AlgorithmParameterSpec
-        /**
-         * Returns the domain parameter.
-         *
-         * @return Domain parameter
-         */
-        get() = domainParameter
-        /**
-         * Sets the domain parameter.
-         *
-         * @param domainParameter Domain parameter
-         */
-        set(domainParameter) {
-            this.domainParameter = domainParameter
-        }
+	var parameter: AlgorithmParameterSpec
+		/**
+		 * Returns the domain parameter.
+		 *
+		 * @return Domain parameter
+		 */
+		get() = domainParameter
 
-    val isDH: Boolean
-        /**
-         * Checks if the protocol identifier indicates Diffie-Hellman.
-         *
-         * @return True if Diffie-Hellman is used, otherwise false
-         */
-        get() = pi.isDH
+		/**
+		 * Sets the domain parameter.
+		 *
+		 * @param domainParameter Domain parameter
+		 */
+		set(domainParameter) {
+			this.domainParameter = domainParameter
+		}
 
-    val isECDH: Boolean
-        /**
-         * Checks if the protocol identifier indicates elliptic curve Diffie-Hellman.
-         *
-         * @return True if elliptic curve Diffie-Hellman is used, otherwise false
-         */
-        get() = pi.isECDH
+	val isDH: Boolean
+		/**
+		 * Checks if the protocol identifier indicates Diffie-Hellman.
+		 *
+		 * @return True if Diffie-Hellman is used, otherwise false
+		 */
+		get() = pi.isDH
+
+	val isECDH: Boolean
+		/**
+		 * Checks if the protocol identifier indicates elliptic curve Diffie-Hellman.
+		 *
+		 * @return True if elliptic curve Diffie-Hellman is used, otherwise false
+		 */
+		get() = pi.isECDH
 
 	companion object {
-		private fun loadParameters(pip: PACESecurityInfoPair, pi: PACEInfo): AlgorithmParameterSpec {
+		private fun loadParameters(
+			pip: PACESecurityInfoPair,
+			pi: PACEInfo,
+		): AlgorithmParameterSpec {
 			// see if this is a standardized parameter or not
 			return if (pip.isStandardizedParameter) {
 				val index = pi.parameterID
@@ -101,7 +105,6 @@ class PACEDomainParameter {
 				val pdp = requireNotNull(pip.pACEDomainParameterInfo) { "Cannot load domain parameter" }
 				ExplicitDomainParameters(pdp.domainParameter).parameter
 			}
-
 		}
 	}
 }

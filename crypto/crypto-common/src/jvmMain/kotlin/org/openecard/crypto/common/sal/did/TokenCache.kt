@@ -31,28 +31,33 @@ import java.util.*
  *
  * @author Tobias Wich
  */
-class TokenCache(private val dispatcher: Dispatcher) {
-    private val cachedInfos: MutableMap<ByteArray, DidInfos> = TreeMap<ByteArray, DidInfos>(ByteComparator())
+class TokenCache(
+	private val dispatcher: Dispatcher,
+) {
+	private val cachedInfos: MutableMap<ByteArray, DidInfos> = TreeMap<ByteArray, DidInfos>(ByteComparator())
 
-	fun getInfo(pin: CharArray?, handle: ConnectionHandleType): DidInfos {
-        var result = cachedInfos[handle.getSlotHandle()]
+	fun getInfo(
+		pin: CharArray?,
+		handle: ConnectionHandleType,
+	): DidInfos {
+		var result = cachedInfos[handle.getSlotHandle()]
 
-        if (result == null) {
-            result = DidInfos(dispatcher, pin, handle)
-        } else if (pin != null) {
-            result.setPin(pin)
-        }
+		if (result == null) {
+			result = DidInfos(dispatcher, pin, handle)
+		} else if (pin != null) {
+			result.setPin(pin)
+		}
 
-        return result
-    }
+		return result
+	}
 
-    fun clearPins() {
-        val it = cachedInfos.entries.iterator()
-        while (it.hasNext()) {
-            val next = it.next()
-            val slotHandle = next.key
-            val dids = next.value
-            dids.clearPin(slotHandle)
-        }
-    }
+	fun clearPins() {
+		val it = cachedInfos.entries.iterator()
+		while (it.hasNext()) {
+			val next = it.next()
+			val slotHandle = next.key
+			val dids = next.value
+			dids.clearPin(slotHandle)
+		}
+	}
 }

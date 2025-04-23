@@ -20,8 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.common.util;
-
+package org.openecard.common.util
 
 /**
  * Collection of utility functions for exception processing.
@@ -29,25 +28,26 @@ package org.openecard.common.util;
  * @author Tobias Wich
  */
 object ExceptionUtils {
-    /**
-     * Checks the given exception's cause path for the given types.
-     * The types are checked in reverse order, meaning the last given type is the expected type of first cause. When the
-     * cause path is as expected, the returned object is cast to the expected type.
+	/**
+	 * Checks the given exception's cause path for the given types.
+	 * The types are checked in reverse order, meaning the last given type is the expected type of first cause. When the
+	 * cause path is as expected, the returned object is cast to the expected type.
 	 *
-     * The function works when the given types are not [Throwable] classes, however in that case it will never
-     * return an object.
-     *
-     * @param <T> Return type of the expected Throwable object.
-     * @param <C> Typed class of the expected Throwable object.
-     * @param ex The root exception whose cause path should be checked.
-     * @param returnClass Typed class of the expected Throwable object.
-     * @param cs Classes of the Throwables in between the path.
-     * @return The expected Throwable object, or null if the path is not correctly typed or does not exist.
-     */
+	 * The function works when the given types are not [Throwable] classes, however in that case it will never
+	 * return an object.
+	 *
+	 * @param <T> Return type of the expected Throwable object.
+	 * @param <C> Typed class of the expected Throwable object.
+	 * @param ex The root exception whose cause path should be checked.
+	 * @param returnClass Typed class of the expected Throwable object.
+	 * @param cs Classes of the Throwables in between the path.
+	 * @return The expected Throwable object, or null if the path is not correctly typed or does not exist.
+	 */
 	@JvmStatic
 	fun <T : Throwable, C : Class<T>> matchPath(
-		ex: Throwable, returnClass: C,
-		vararg cs: Class<*>
+		ex: Throwable,
+		returnClass: C,
+		vararg cs: Class<*>,
 	): T? {
 		// TODO: optimize reverse processing
 		var curEx = ex

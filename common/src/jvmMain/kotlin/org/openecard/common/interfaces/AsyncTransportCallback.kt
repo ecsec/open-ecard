@@ -21,11 +21,10 @@
  ***************************************************************************/
 package org.openecard.common.interfaces
 
-
 /**
  *
  * @author Johannes Schmölz
  */
 interface AsyncTransportCallback {
-    fun receive(message: Any): Any
+	fun receive(message: Any): Any
 }

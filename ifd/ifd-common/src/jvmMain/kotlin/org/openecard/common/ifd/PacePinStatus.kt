@@ -23,81 +23,81 @@ package org.openecard.common.ifd
 
 import org.openecard.common.util.StringUtils
 
-
 /**
  * Eac PIN Status calls.
  * See BSI TR-03130-3, B.14.2
  *
  * @author Tobias Wich
  */
-enum class PacePinStatus(vararg codes: ByteArray) {
-    UNKNOWN,
+enum class PacePinStatus(
+	vararg codes: ByteArray,
+) {
+	UNKNOWN,
 
-    /**
-     * PIN activated, 3 tries left.
-     */
-    RC3(
+	/**
+	 * PIN activated, 3 tries left.
+	 */
+	RC3(
 		StringUtils.toByteArray("9000"),
 		StringUtils.toByteArray("63C3"),
 	),
 
-    /**
-     * PIN activated, 2 tries left.
-     */
-    RC2(
+	/**
+	 * PIN activated, 2 tries left.
+	 */
+	RC2(
 		StringUtils.toByteArray("63C2"),
 	),
 
-    /**
-     * PIN suspended, 1 try left, CAN needs to be entered.
-     */
-    RC1(
+	/**
+	 * PIN suspended, 1 try left, CAN needs to be entered.
+	 */
+	RC1(
 		StringUtils.toByteArray("63C1"),
 		StringUtils.toByteArray("6985"),
 	),
 
-    /**
-     * PIN blocked, 0 tries left.
-     */
-    BLOCKED(
-        StringUtils.toByteArray("63C0"),  // blocked, deactivated or suspended, we hope the best and pretend it is blocked, so the user has a chance to fix it
-        StringUtils.toByteArray("6982"),
-        StringUtils.toByteArray("6983"),
-    ),
+	/**
+	 * PIN blocked, 0 tries left.
+	 */
+	BLOCKED(
+		StringUtils.toByteArray("63C0"), // blocked, deactivated or suspended, we hope the best and pretend it is blocked, so the user has a chance to fix it
+		StringUtils.toByteArray("6982"),
+		StringUtils.toByteArray("6983"),
+	),
 
-    /**
-     * PIN/Card not activated.
-     */
-    DEACTIVATED(
+	/**
+	 * PIN/Card not activated.
+	 */
+	DEACTIVATED(
 		StringUtils.toByteArray("6984"),
-	);
+	),
+	;
 
-    private val codes: List<ByteArray> = codes.toList()
+	private val codes: List<ByteArray> = codes.toList()
 
 	companion object {
-        fun getCodes(): List<ByteArray> {
-			return entries.flatMap { it.codes }
-        }
+		fun getCodes(): List<ByteArray> = entries.flatMap { it.codes }
 
-        /**
-         * Gets the PIN status for the given response code.
-         *
-         * @param code PIN status code as returned by the PIN status APDU.
-         * @return The PIN status matching the given code.
-         * @throws IllegalArgumentException Thrown in case the given code is not a specified status code.
-         */
-        @JvmStatic
-        @Throws(IllegalArgumentException::class)
-        fun fromCode(code: ByteArray): PacePinStatus {
-            for (ps in entries) {
-                for (refCode in ps.codes) {
-                    if (refCode.contentEquals(code)) {
-                        return ps
-                    }
-                }
-            }
-            // no status found
-            return PacePinStatus.UNKNOWN
-        }
-    }
+		/**
+		 * Gets the PIN status for the given response code.
+		 *
+		 * @param code PIN status code as returned by the PIN status APDU.
+		 * @return The PIN status matching the given code.
+		 * @throws IllegalArgumentException Thrown in case the given code is not a specified status code.
+		 */
+		@JvmStatic
+		@Throws(IllegalArgumentException::class)
+		fun fromCode(code: ByteArray): PacePinStatus {
+			for (ps in entries) {
+				for (refCode in ps.codes) {
+					if (refCode.contentEquals(code)) {
+						return ps
+					}
+				}
+			}
+			// no status found
+			return PacePinStatus.UNKNOWN
+		}
+	}
 }

@@ -37,8 +37,9 @@ import java.util.*
  *
  * @author Tobias Wich
  */
-class AuthenticatedAuxiliaryData(tlv: TLV) :
-	TLVList(tlv, Tag(TagClass.APPLICATION, false, EACTags.AUTHENTIFICATION_DATA.toLong())) {
+class AuthenticatedAuxiliaryData(
+	tlv: TLV,
+) : TLVList(tlv, Tag(TagClass.APPLICATION, false, EACTags.AUTHENTIFICATION_DATA.toLong())) {
 	private val templates: HashMap<ASN1ObjectIdentifier, DiscretionaryDataTemplate> = HashMap()
 	private var empty = false
 
@@ -67,7 +68,6 @@ class AuthenticatedAuxiliaryData(tlv: TLV) :
 
 	val data: ByteArray?
 		get() = if (empty) null else this.tlv.toBER()
-
 
 	val ageVerificationData: Calendar?
 		get() {
@@ -112,7 +112,6 @@ class AuthenticatedAuxiliaryData(tlv: TLV) :
 		c.set(year, month, day)
 		return c
 	}
-
 }
 
 @Throws(TLVException::class)

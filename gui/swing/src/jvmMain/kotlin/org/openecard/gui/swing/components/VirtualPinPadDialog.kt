@@ -42,113 +42,110 @@ import javax.swing.text.JTextComponent
  * @author Tobias Wich
  */
 class VirtualPinPadDialog(
-    pinButton: VirtualPinPadButton,
-    private val inputField: JTextComponent,
-    private val passDef: PasswordField
+	pinButton: VirtualPinPadButton,
+	private val inputField: JTextComponent,
+	private val passDef: PasswordField,
 ) : JDialog(
-    getOwningWindow(inputField), "PIN-Pad", ModalityType.DOCUMENT_MODAL
-) {
+		getOwningWindow(inputField),
+		"PIN-Pad",
+		ModalityType.DOCUMENT_MODAL,
+	) {
+	private var numCharsEntered = 0
 
-    private var numCharsEntered = 0
-
-    /**
-     * Creates a new instance of the dialog.
-     *
-     * @param pinButton
-     * @param inputField The component capturing the PIN.
-     * @param passDef The definition of the password field.
-     */
-    init {
+	/**
+	 * Creates a new instance of the dialog.
+	 *
+	 * @param pinButton
+	 * @param inputField The component capturing the PIN.
+	 * @param passDef The definition of the password field.
+	 */
+	init {
 		this.inputField.text = ""
 
-        setSize(200, 200)
-        setResizable(false)
+		setSize(200, 200)
+		setResizable(false)
 		layout = BorderLayout(3, 3)
 
-        val dialogLocation = pinButton.locationOnScreen
-        dialogLocation.translate(0, pinButton.getHeight())
+		val dialogLocation = pinButton.locationOnScreen
+		dialogLocation.translate(0, pinButton.getHeight())
 		location = dialogLocation
 
-        val buttons = JPanel(GridLayout(4, 3, 4, 4))
-        add(buttons, BorderLayout.CENTER)
-        for (i in 1..9) {
-            buttons.add(createButton(i))
-        }
-        // last row
-        buttons.add(createRemoveSingleElementButton())
-        buttons.add(createButton(0))
-        buttons.add(createCloseButton())
-    }
+		val buttons = JPanel(GridLayout(4, 3, 4, 4))
+		add(buttons, BorderLayout.CENTER)
+		for (i in 1..9) {
+			buttons.add(createButton(i))
+		}
+		// last row
+		buttons.add(createRemoveSingleElementButton())
+		buttons.add(createButton(0))
+		buttons.add(createCloseButton())
+	}
 
-    private fun createButton(num: Int): JButton {
-        val button = JButton(num.toString())
-        button.addActionListener(NumberProcessingListener())
-        return button
-    }
+	private fun createButton(num: Int): JButton {
+		val button = JButton(num.toString())
+		button.addActionListener(NumberProcessingListener())
+		return button
+	}
 
-    private fun createRemoveSingleElementButton(): JButton {
-        val button = JButton()
-        //setButtonFont(button);
-        button.addActionListener(RemoveSingleElementListener())
-        val ico: Icon = ImageIcon(resolveResourceAsURL(VirtualPinPadDialog::class.java, "arrow.png"))
-        button.setIcon(ico)
-        val marginInset = button.margin
-        button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))
-        return button
-    }
+	private fun createRemoveSingleElementButton(): JButton {
+		val button = JButton()
+		// setButtonFont(button);
+		button.addActionListener(RemoveSingleElementListener())
+		val ico: Icon = ImageIcon(resolveResourceAsURL(VirtualPinPadDialog::class.java, "arrow.png"))
+		button.setIcon(ico)
+		val marginInset = button.margin
+		button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))
+		return button
+	}
 
-    private fun createCloseButton(): JButton {
-        val button = JButton("OK")
-        //setButtonFont(button);
-        button.addActionListener(CloseInputListener())
-        val marginInset = button.margin
-        button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))
-        return button
-    }
+	private fun createCloseButton(): JButton {
+		val button = JButton("OK")
+		// setButtonFont(button);
+		button.addActionListener(CloseInputListener())
+		val marginInset = button.margin
+		button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))
+		return button
+	}
 
-    private fun setButtonFont(button: JButton) {
-        var f = button.getFont()
-        f = f.deriveFont(f.size2D + 10)
-        button.setFont(f)
-    }
+	private fun setButtonFont(button: JButton) {
+		var f = button.getFont()
+		f = f.deriveFont(f.size2D + 10)
+		button.setFont(f)
+	}
 
-
-    /**
-     * Listener handling button presses of the PIN number buttons.
-     */
-    private inner class NumberProcessingListener : ActionListener {
-        override fun actionPerformed(e: ActionEvent) {
-            val b = e.getSource() as JButton
-            var data = inputField.getText()
-            data += b.text
+	/**
+	 * Listener handling button presses of the PIN number buttons.
+	 */
+	private inner class NumberProcessingListener : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			val b = e.getSource() as JButton
+			var data = inputField.getText()
+			data += b.text
 			inputField.text = data
 
-            numCharsEntered++
-            if (passDef.maxLength > 0 && numCharsEntered >= passDef.maxLength) {
+			numCharsEntered++
+			if (passDef.maxLength > 0 && numCharsEntered >= passDef.maxLength) {
 				isVisible = false
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private inner class RemoveSingleElementListener : ActionListener {
-        override fun actionPerformed(e: ActionEvent) {
-            var data = inputField.getText()
-            if (!data.isEmpty()) {
-                data = data.substring(0, data.length - 1)
+	private inner class RemoveSingleElementListener : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			var data = inputField.getText()
+			if (!data.isEmpty()) {
+				data = data.substring(0, data.length - 1)
 				inputField.text = data
-                numCharsEntered--
-            }
-        }
-    }
+				numCharsEntered--
+			}
+		}
+	}
 
-    private inner class CloseInputListener : ActionListener {
-        override fun actionPerformed(e: ActionEvent) {
-            dispatchEvent(WindowEvent(this@VirtualPinPadDialog, WindowEvent.WINDOW_CLOSING))
-        }
-    }
-
+	private inner class CloseInputListener : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			dispatchEvent(WindowEvent(this@VirtualPinPadDialog, WindowEvent.WINDOW_CLOSING))
+		}
+	}
 }
 
-private fun getOwningWindow(inputField: JTextComponent): Window? {
-	return SwingUtilities.getWindowAncestor(inputField)
-}
+private fun getOwningWindow(inputField: JTextComponent): Window? = SwingUtilities.getWindowAncestor(inputField)

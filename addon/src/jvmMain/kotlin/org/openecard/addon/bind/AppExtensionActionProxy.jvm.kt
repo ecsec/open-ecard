@@ -31,21 +31,24 @@ import org.openecard.addon.Context
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-class AppExtensionActionProxy(implClass: String, classLoader: ClassLoader) :
-    AbstractFactory<AppExtensionAction>(implClass, classLoader), AppExtensionAction {
-    private var c: AppExtensionAction? = null
+class AppExtensionActionProxy(
+	implClass: String,
+	classLoader: ClassLoader,
+) : AbstractFactory<AppExtensionAction>(implClass, classLoader),
+	AppExtensionAction {
+	private var c: AppExtensionAction? = null
 
-    @Throws(AppExtensionException::class)
-    override fun execute() {
-        c?.execute() ?: throw IllegalStateException("AppExtensionAction not initialized")
-    }
+	@Throws(AppExtensionException::class)
+	override fun execute() {
+		c?.execute() ?: throw IllegalStateException("AppExtensionAction not initialized")
+	}
 
-    @Throws(ActionInitializationException::class)
-    override fun init(ctx: Context) {
-        c = loadInstance(ctx, AppExtensionAction::class.java)
-    }
+	@Throws(ActionInitializationException::class)
+	override fun init(ctx: Context) {
+		c = loadInstance(ctx, AppExtensionAction::class.java)
+	}
 
-    override fun destroy(force: Boolean) {
-        c?.destroy(force)
-    }
+	override fun destroy(force: Boolean) {
+		c?.destroy(force)
+	}
 }

@@ -27,25 +27,26 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence
 import org.openecard.bouncycastle.asn1.x9.X9ECParameters
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
+
 /**
  * See BSI-TR-03110, version 2.10, part 3, section A.2.1.2.
  *
  * @author Moritz Horsch
  */
-class ExplicitDomainParameters(ai: AlgorithmIdentifier) : DomainParameters(loadParameters(ai)) {
+class ExplicitDomainParameters(
+	ai: AlgorithmIdentifier,
+) : DomainParameters(loadParameters(ai)) {
+	companion object {
+		/**
+		 * dhpublicnumber OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x942(10046) number-type(2) 1}
+		 */
+		const val dhpublicnumber: String = "1.2.840.10046.2.1"
 
-
-    companion object {
-        /**
-         * dhpublicnumber OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x942(10046) number-type(2) 1}
-         */
-        const val dhpublicnumber: String = "1.2.840.10046.2.1"
-
-        /**
-         * ecPublicKey OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x962(10045) keyType(2) 1}
-         */
-        const val ecPublicKey: String = "1.2.840.10045.2.1"
+		/**
+		 * ecPublicKey OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x962(10045) keyType(2) 1}
+		 */
+		const val ecPublicKey: String = "1.2.840.10045.2.1"
 
 		/**
 		 * Creates new ExplicitDomainParameters.
@@ -88,8 +89,7 @@ class ExplicitDomainParameters(ai: AlgorithmIdentifier) : DomainParameters(loadP
 			}
 		}
 
-		private fun loadDHParameter(seq: ASN1Sequence): ECParameterSpec {
+		private fun loadDHParameter(seq: ASN1Sequence): ECParameterSpec =
 			throw UnsupportedOperationException("Not implemented yet")
-		}
-    }
+	}
 }

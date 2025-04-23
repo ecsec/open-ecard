@@ -29,9 +29,8 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-
 @Serializable
-class ReleaseInfo (
+class ReleaseInfo(
 	val version: SemverVersion,
 	val latestVersion: VersionData,
 	val maintenanceVersions: List<VersionData>,
@@ -40,7 +39,7 @@ class ReleaseInfo (
 )
 
 @Serializable
-class VersionData (
+class VersionData(
 	val version: SemverVersion,
 	val artifacts: List<Artifact>,
 )
@@ -63,19 +62,21 @@ enum class ArtifactType {
 	OTHER,
 }
 
-object ArtifactTypeSerializer: KSerializer<ArtifactType> {
+object ArtifactTypeSerializer : KSerializer<ArtifactType> {
 	override val descriptor = PrimitiveSerialDescriptor("ArtifactType", PrimitiveKind.STRING)
 
-	override fun deserialize(decoder: Decoder): ArtifactType {
-		return try {
+	override fun deserialize(decoder: Decoder): ArtifactType =
+		try {
 			ArtifactType.valueOf(decoder.decodeString())
 		} catch (e: IllegalArgumentException) {
 			// make sure the code doesn't break if a new type is added
 			ArtifactType.OTHER
 		}
-	}
 
-	override fun serialize(encoder: Encoder, value: ArtifactType) {
+	override fun serialize(
+		encoder: Encoder,
+		value: ArtifactType,
+	) {
 		encoder.encodeString(value.name)
 	}
 }

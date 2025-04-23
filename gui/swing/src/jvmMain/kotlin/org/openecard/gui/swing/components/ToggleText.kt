@@ -54,13 +54,15 @@ private val LOG = KotlinLogging.logger { }
  * @author Moritz Horsch
  * @author Hans-Martin Haase
  */
-class ToggleText(buttonText: String, content: Document, collapsed: Boolean, private val externalPdf: Boolean = false) :
-	StepComponent {
-
+class ToggleText(
+	buttonText: String,
+	content: Document,
+	collapsed: Boolean,
+	private val externalPdf: Boolean = false,
+) : StepComponent {
 	private val rootPanel: JPanel = JPanel()
 	private val button: JButton = JButton("$buttonText  ")
 	private var text: Component
-
 
 	/**
 	 * Creates a new ToggleText.
@@ -70,7 +72,7 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 	constructor(toggleText: ToggleText) : this(
 		toggleText.title,
 		toggleText.document,
-		toggleText.isCollapsed
+		toggleText.isCollapsed,
 	)
 
 	/**
@@ -82,11 +84,14 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 	 */
 	@JvmOverloads
 	constructor(buttonText: String, contentText: String, collapsed: Boolean = false) : this(
-		buttonText, Document(
-			"text/plain", contentText.toByteArray(
-				Charset.forName("UTF-8")
-			)
-		), collapsed
+		buttonText,
+		Document(
+			"text/plain",
+			contentText.toByteArray(
+				Charset.forName("UTF-8"),
+			),
+		),
+		collapsed,
 	)
 
 	/**
@@ -122,20 +127,24 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 			}
 
 			else -> {
-				LOG.warn { "Unsupported usage of content of type $mimeType in ${org.openecard.gui.swing.components.ToggleText::class.java}" }
+				LOG.warn {
+					"Unsupported usage of content of type $mimeType in ${org.openecard.gui.swing.components.ToggleText::class.java}"
+				}
 				createJTextArea(LANG.translationForKey("unsupported.mimetype", mimeType))
 			}
 		}
 	}
 
 	private fun initComponents() {
-		button.addActionListener(ActionListener { e: ActionEvent? ->
-			text.isVisible = !text.isVisible
-			button.setIcon(if (text.isVisible) OPENED_INDICATOR else CLOSED_INDOCATOR)
-			rootPanel.revalidate()
-			rootPanel.doLayout()
-			rootPanel.repaint()
-		})
+		button.addActionListener(
+			ActionListener { e: ActionEvent? ->
+				text.isVisible = !text.isVisible
+				button.setIcon(if (text.isVisible) OPENED_INDICATOR else CLOSED_INDOCATOR)
+				rootPanel.revalidate()
+				rootPanel.doLayout()
+				rootPanel.repaint()
+			},
+		)
 	}
 
 	/**
@@ -201,12 +210,9 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 
 	override val isValueType: Boolean = false
 
-	override fun validate(): Boolean {
-		return true
-	}
+	override fun validate(): Boolean = true
 
 	override val value: OutputInfoUnit? = null
-
 
 	/**
 	 * Creates a JTextArea containing the given content.
@@ -254,7 +260,6 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 			LOG.error(ex) { "Failed to parse HTML document." }
 		}
 
-
 		val htmlText = JTextPane()
 		htmlText.setMargin(Insets(0, 13, 0, 0))
 		htmlText.isEditable = false
@@ -271,16 +276,18 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 		val contentPane = JPanel()
 		// TODO translate
 		val pdfButton = JButton(LANG.translationForKey("open.pdf.in.external.viewer"))
-		pdfButton.addActionListener(ActionListener { e ->
-			if (e.getSource() === pdfButton) {
-				try {
-					val desktop = Desktop.getDesktop()
-					desktop.open(File(pdfFile))
-				} catch (ex: IOException) {
-					LOG.error(ex) { "Failed to open pdf file." }
+		pdfButton.addActionListener(
+			ActionListener { e ->
+				if (e.getSource() === pdfButton) {
+					try {
+						val desktop = Desktop.getDesktop()
+						desktop.open(File(pdfFile))
+					} catch (ex: IOException) {
+						LOG.error(ex) { "Failed to open pdf file." }
+					}
 				}
-			}
-		})
+			},
+		)
 		contentPane.add(pdfButton)
 		return contentPane
 	}
@@ -288,22 +295,23 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 	private fun createPdfComponent(pdfData: ByteArray): JComponent {
 		try {
 			val doc = PDDocument.load(pdfData)
-			val pdfComp: PdfComponent = object : PdfComponent(doc) {
-				// override so sizing the pdf component works properly in the gridlayout
-				override fun getPreferredSize(): Dimension? {
-					if (!isPreferredSizeSet && isValidPage) {
-						val compWidth = getWidth()
-						val pdfRect = getPageDim(getCurPage())
-						if (compWidth > 0) {
-							val scale = compWidth / pdfRect.width
-							val prefHeight = ceil((pdfRect.height * scale).toDouble()).toInt()
-							return Dimension(compWidth, prefHeight)
+			val pdfComp: PdfComponent =
+				object : PdfComponent(doc) {
+					// override so sizing the pdf component works properly in the gridlayout
+					override fun getPreferredSize(): Dimension? {
+						if (!isPreferredSizeSet && isValidPage) {
+							val compWidth = getWidth()
+							val pdfRect = getPageDim(getCurPage())
+							if (compWidth > 0) {
+								val scale = compWidth / pdfRect.width
+								val prefHeight = ceil((pdfRect.height * scale).toDouble()).toInt()
+								return Dimension(compWidth, prefHeight)
+							}
 						}
-					}
 
-					return super.getPreferredSize()
+						return super.getPreferredSize()
+					}
 				}
-			}
 			pdfComp.setCurrentPage(0)
 			return pdfComp
 		} catch (ex: IOException) {
@@ -311,8 +319,6 @@ class ToggleText(buttonText: String, content: Document, collapsed: Boolean, priv
 			return JLabel("Failed to load PDF.")
 		}
 	}
-
-
 }
 
 private val LANG: I18n = I18n.getTranslation("swing")
@@ -323,7 +329,6 @@ private val TOGGLETEXT_BACKGROUND = "$TOGGLETEXT.background"
 private val TOGGLETEXT_INDICATOR_FOREGROUND = TOGGLETEXT + "Indicator.foreground"
 private val OPENED_INDICATOR: Icon = GUIDefaults.getImage("ToggleText.selectedIcon")!!
 private val CLOSED_INDOCATOR: Icon = GUIDefaults.getImage("ToggleText.icon")!!
-
 
 /**
  * Creates a tmp PDF file containing the given content.

@@ -30,46 +30,43 @@ import org.openecard.crypto.common.asn1.eac.oid.EACObjectIdentifier
  * @author Moritz Horsch
  */
 class TASecurityInfos {
-    var tAInfos: MutableList<TAInfo> = mutableListOf()
-    private var taiIndex = 0
+	var tAInfos: MutableList<TAInfo> = mutableListOf()
+	private var taiIndex = 0
 
+	val tAInfo: TAInfo?
+		/**
+		 * Returns the selected TAInfo.
+		 *
+		 * @return TAInfo
+		 */
+		get() = tAInfos[taiIndex]
 
-    val tAInfo: TAInfo?
-        /**
-         * Returns the selected TAInfo.
-         *
-         * @return TAInfo
-         */
-        get() = tAInfos[taiIndex]
+	/**
+	 * Adds a TAInfo.
+	 *
+	 * @param taInfo TAInfo
+	 */
+	fun addTAInfo(taInfo: TAInfo) {
+		this.tAInfos.add(taInfo)
+	}
 
-    /**
-     * Adds a TAInfo.
-     *
-     * @param taInfo TAInfo
-     */
-    fun addTAInfo(taInfo: TAInfo) {
-        this.tAInfos.add(taInfo)
-    }
+	/**
+	 * Selects a TAInfo.
+	 *
+	 * @param index Index
+	 */
+	fun selectTAInfo(index: Int) {
+		require(!(index < 0 || index > tAInfos.size - 1)) { "Index out of range." }
+		this.taiIndex = index
+	}
 
-    /**
-     * Selects a TAInfo.
-     *
-     * @param index Index
-     */
-    fun selectTAInfo(index: Int) {
-        require(!(index < 0 || index > tAInfos.size - 1)) { "Index out of range." }
-        this.taiIndex = index
-    }
-
-    companion object {
-        /**
-         * Compares the object identifier.
-         *
-         * @param oid Object identifier
-         * @return true if o is a TA object identifier, else false.
-         */
-        fun isObjectIdentifier(oid: String): Boolean {
-			return oid == EACObjectIdentifier.id_TA
-		}
-    }
+	companion object {
+		/**
+		 * Compares the object identifier.
+		 *
+		 * @param oid Object identifier
+		 * @return true if o is a TA object identifier, else false.
+		 */
+		fun isObjectIdentifier(oid: String): Boolean = oid == EACObjectIdentifier.id_TA
+	}
 }

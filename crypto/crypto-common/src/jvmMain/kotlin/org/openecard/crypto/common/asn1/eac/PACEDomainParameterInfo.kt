@@ -31,69 +31,72 @@ import org.openecard.crypto.common.asn1.eac.oid.PACEObjectIdentifier
  *
  * @author Moritz Horsch
  */
-class PACEDomainParameterInfo(seq: ASN1Sequence) {
-    /**
-     * Returns the object identifier of the protocol.
-     *
-     * @return Protocol
-     */
-    val protocol: String
+class PACEDomainParameterInfo(
+	seq: ASN1Sequence,
+) {
+	/**
+	 * Returns the object identifier of the protocol.
+	 *
+	 * @return Protocol
+	 */
+	val protocol: String
 
-    /**
-     * Returns the PACE domain parameter.
-     *
-     * @return domain parameter
-     */
-    val domainParameter: AlgorithmIdentifier
+	/**
+	 * Returns the PACE domain parameter.
+	 *
+	 * @return domain parameter
+	 */
+	val domainParameter: AlgorithmIdentifier
 
-    /**
-     * Returns the parameter identifier.
-     *
-     * @return parameter identifier
-     */
-    val parameterID: Int
+	/**
+	 * Returns the parameter identifier.
+	 *
+	 * @return parameter identifier
+	 */
+	val parameterID: Int
 
-    /**
-     * Creates a new PACEDomainParameterInfo object.
-     *
-     * @param seq ANS1 encoded data
-     */
-    init {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            domainParameter = AlgorithmIdentifier.Companion.getInstance(seq.getObjectAt(1))
+	/**
+	 * Creates a new PACEDomainParameterInfo object.
+	 *
+	 * @param seq ANS1 encoded data
+	 */
+	init {
+		if (seq.size() == 2) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			domainParameter = AlgorithmIdentifier.Companion.getInstance(seq.getObjectAt(1))
 			parameterID = 0
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            domainParameter = AlgorithmIdentifier.Companion.getInstance(seq.getObjectAt(1))
-            parameterID = ASN1Integer.getInstance(seq.getObjectAt(2)).value.toInt()
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for PACEDomainParameterInfo")
-        }
-    }
+		} else if (seq.size() == 3) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			domainParameter = AlgorithmIdentifier.Companion.getInstance(seq.getObjectAt(1))
+			parameterID = ASN1Integer.getInstance(seq.getObjectAt(2)).value.toInt()
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for PACEDomainParameterInfo")
+		}
+	}
 
-    companion object {
-        private val protocols: Array<String?> = arrayOf(
-            PACEObjectIdentifier.id_PACE_DH_GM,
-            PACEObjectIdentifier.id_PACE_DH_IM,
-            PACEObjectIdentifier.id_PACE_ECDH_GM,
-            PACEObjectIdentifier.id_PACE_ECDH_IM
-        )
+	companion object {
+		private val protocols: Array<String?> =
+			arrayOf(
+				PACEObjectIdentifier.id_PACE_DH_GM,
+				PACEObjectIdentifier.id_PACE_DH_IM,
+				PACEObjectIdentifier.id_PACE_ECDH_GM,
+				PACEObjectIdentifier.id_PACE_ECDH_IM,
+			)
 
-        /**
-         * Compares the object identifier.
-         *
-         * @param oid Object identifier
-         * @return true if oid is a PACE object identifier, otherwise false
-         */
-        fun isPACEObjectIdentifer(oid: String): Boolean {
-            for (p in protocols) {
-                if (p == oid) {
-                    return true
-                }
-            }
+		/**
+		 * Compares the object identifier.
+		 *
+		 * @param oid Object identifier
+		 * @return true if oid is a PACE object identifier, otherwise false
+		 */
+		fun isPACEObjectIdentifer(oid: String): Boolean {
+			for (p in protocols) {
+				if (p == oid) {
+					return true
+				}
+			}
 
-            return false
-        }
-    }
+			return false
+		}
+	}
 }

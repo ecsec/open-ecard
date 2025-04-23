@@ -33,41 +33,41 @@ import org.testng.annotations.Test
  * @author Moritz Horsch
  */
 class ObjectIdentifierUtilsTest {
-    @Test
-    fun testToByteArray() {
-        val oid = EACObjectIdentifier.id_PACE
-        val expResult = byteArrayOf(0x06, 0x08, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
-        val result = toByteArray(oid)
-        Assert.assertEquals(expResult, result)
-    }
+	@Test
+	fun testToByteArray() {
+		val oid = EACObjectIdentifier.id_PACE
+		val expResult = byteArrayOf(0x06, 0x08, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
+		val result = toByteArray(oid)
+		Assert.assertEquals(expResult, result)
+	}
 
-    @Test
-    fun testToString() {
-        val oid = byteArrayOf(0x06, 0x08, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
-        val expResult = "0.4.0.127.0.7.2.2.4"
-        val result = toString(oid)
-        Assert.assertEquals(expResult, result)
-    }
+	@Test
+	fun testToString() {
+		val oid = byteArrayOf(0x06, 0x08, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
+		val expResult = "0.4.0.127.0.7.2.2.4"
+		val result = toString(oid)
+		Assert.assertEquals(expResult, result)
+	}
 
-    @Test
-    fun testToString2() {
-        val oid = byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
-        val expResult = "0.4.0.127.0.7.2.2.4"
-        val result = toString(oid)
-        Assert.assertEquals(expResult, result)
-    }
+	@Test
+	fun testToString2() {
+		val oid = byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
+		val expResult = "0.4.0.127.0.7.2.2.4"
+		val result = toString(oid)
+		Assert.assertEquals(expResult, result)
+	}
 
-    @Test
-    fun testGetValue() {
-        val oid = EACObjectIdentifier.id_PACE
-        val expResult = byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
-        val result = getValue(oid)
-        Assert.assertEquals(expResult, result)
-    }
+	@Test
+	fun testGetValue() {
+		val oid = EACObjectIdentifier.id_PACE
+		val expResult = byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
+		val result = getValue(oid)
+		Assert.assertEquals(expResult, result)
+	}
 
-    @Test
-    fun testLargeOidValues() {
-        val oid = "1.2.3.128"
-        Assert.assertEquals(toString(getValue(oid)), oid)
-    }
+	@Test
+	fun testLargeOidValues() {
+		val oid = "1.2.3.128"
+		Assert.assertEquals(toString(getValue(oid)), oid)
+	}
 }

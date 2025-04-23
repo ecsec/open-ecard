@@ -30,12 +30,12 @@ import org.openecard.bouncycastle.tls.TlsCredentialedSigner
  * @author Tobias Wich
  */
 interface CredentialFactory {
-    /**
-     * Gets all credentials matching the given certificate request.
-     * Given a set of credentials the factory manages, filter out all that do NOT match the given certificate request.
-     *
-     * @param cr Certificate request for which a credential is searched.
-     * @return Possibly empty list of all credentials which could answer the given request.
-     */
-    fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner>
+	/**
+	 * Gets all credentials matching the given certificate request.
+	 * Given a set of credentials the factory manages, filter out all that do NOT match the given certificate request.
+	 *
+	 * @param cr Certificate request for which a credential is searched.
+	 * @return Possibly empty list of all credentials which could answer the given request.
+	 */
+	fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner>
 }

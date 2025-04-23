@@ -30,7 +30,6 @@ import java.net.SocketAddress
 import java.net.SocketException
 import java.nio.channels.SocketChannel
 
-
 /**
  * Wrapper class to simulate socket for TLS in- and output streams.
  * BouncyCastle is only able to emit InputStream and OutputStream classes which represent the tunneled channel. If it is
@@ -40,227 +39,191 @@ import java.nio.channels.SocketChannel
  * @author Tobias Wich
  */
 class SocketWrapper(
-    private val parent: Socket,
-    private val `in`: InputStream,
-    private val out: OutputStream
+	private val parent: Socket,
+	private val `in`: InputStream,
+	private val out: OutputStream,
 ) : Socket() {
-    /**
-     * Creates an instance of a SocketWrapper binding the given streams to the socket.
-     * The socket must be opened and the streams must belong to the socket. The latter requirement is not checked.
-     *
-     * @param parent Connected socket which should be wrapped.
-     * @param `in` Input stream belonging to the socket.
-     * @param out Output stream belonging to the socket.
-     * @throws IOException Thrown in case the socket is not connected.
-     */
-    init {
-        // assert that the socket is really open. An unconnected socket can not have open streams
-        if (!parent.isConnected) {
-            throw IOException("Socket is not connected.")
-        }
-    }
+	/**
+	 * Creates an instance of a SocketWrapper binding the given streams to the socket.
+	 * The socket must be opened and the streams must belong to the socket. The latter requirement is not checked.
+	 *
+	 * @param parent Connected socket which should be wrapped.
+	 * @param `in` Input stream belonging to the socket.
+	 * @param out Output stream belonging to the socket.
+	 * @throws IOException Thrown in case the socket is not connected.
+	 */
+	init {
+		// assert that the socket is really open. An unconnected socket can not have open streams
+		if (!parent.isConnected) {
+			throw IOException("Socket is not connected.")
+		}
+	}
 
+	@Throws(IOException::class)
+	override fun getInputStream(): InputStream {
+		// call original to check if the socket is closed already
+		parent.getInputStream()
+		return `in`
+	}
 
-    @Throws(IOException::class)
-    override fun getInputStream(): InputStream {
-        // call original to check if the socket is closed already
-        parent.getInputStream()
-        return `in`
-    }
+	@Throws(IOException::class)
+	override fun getOutputStream(): OutputStream {
+		// call original to check if the socket is closed already
+		parent.getInputStream()
+		return out
+	}
 
-    @Throws(IOException::class)
-    override fun getOutputStream(): OutputStream {
-        // call original to check if the socket is closed already
-        parent.getInputStream()
-        return out
-    }
+	@Throws(IOException::class)
+	override fun bind(bindpoint: SocketAddress?) {
+		parent.bind(bindpoint)
+	}
 
+	@Synchronized
+	@Throws(IOException::class)
+	override fun close() {
+		parent.close()
+	}
 
-    @Throws(IOException::class)
-    override fun bind(bindpoint: SocketAddress?) {
-        parent.bind(bindpoint)
-    }
+	@Throws(IOException::class)
+	override fun connect(endpoint: SocketAddress) {
+		parent.connect(endpoint)
+	}
 
-    @Synchronized
-    @Throws(IOException::class)
-    override fun close() {
-        parent.close()
-    }
+	@Throws(IOException::class)
+	override fun connect(
+		endpoint: SocketAddress,
+		timeout: Int,
+	) {
+		parent.connect(endpoint, timeout)
+	}
 
-    @Throws(IOException::class)
-    override fun connect(endpoint: SocketAddress) {
-        parent.connect(endpoint)
-    }
+	override fun getChannel(): SocketChannel? = parent.channel
 
-    @Throws(IOException::class)
-    override fun connect(endpoint: SocketAddress, timeout: Int) {
-        parent.connect(endpoint, timeout)
-    }
+	override fun getInetAddress(): InetAddress? = parent.getInetAddress()
 
-    override fun getChannel(): SocketChannel? {
-        return parent.channel
-    }
+	@Throws(SocketException::class)
+	override fun getKeepAlive(): Boolean = parent.getKeepAlive()
 
-    override fun getInetAddress(): InetAddress? {
-        return parent.getInetAddress()
-    }
+	override fun getLocalAddress(): InetAddress = parent.getLocalAddress()
 
-    @Throws(SocketException::class)
-    override fun getKeepAlive(): Boolean {
-        return parent.getKeepAlive()
-    }
+	override fun getLocalPort(): Int = parent.getLocalPort()
 
-    override fun getLocalAddress(): InetAddress {
-        return parent.getLocalAddress()
-    }
+	override fun getLocalSocketAddress(): SocketAddress? = parent.getLocalSocketAddress()
 
-    override fun getLocalPort(): Int {
-        return parent.getLocalPort()
-    }
+	@Throws(SocketException::class)
+	override fun getOOBInline(): Boolean = parent.getOOBInline()
 
-    override fun getLocalSocketAddress(): SocketAddress? {
-        return parent.getLocalSocketAddress()
-    }
+	override fun getPort(): Int = parent.getPort()
 
-    @Throws(SocketException::class)
-    override fun getOOBInline(): Boolean {
-        return parent.getOOBInline()
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun getReceiveBufferSize(): Int = parent.getReceiveBufferSize()
 
-    override fun getPort(): Int {
-        return parent.getPort()
-    }
+	override fun getRemoteSocketAddress(): SocketAddress? = parent.getRemoteSocketAddress()
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun getReceiveBufferSize(): Int {
-        return parent.getReceiveBufferSize()
-    }
+	@Throws(SocketException::class)
+	override fun getReuseAddress(): Boolean = parent.getReuseAddress()
 
-    override fun getRemoteSocketAddress(): SocketAddress? {
-        return parent.getRemoteSocketAddress()
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun getSendBufferSize(): Int = parent.getSendBufferSize()
 
-    @Throws(SocketException::class)
-    override fun getReuseAddress(): Boolean {
-        return parent.getReuseAddress()
-    }
+	@Throws(SocketException::class)
+	override fun getSoLinger(): Int = parent.getSoLinger()
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun getSendBufferSize(): Int {
-        return parent.getSendBufferSize()
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun getSoTimeout(): Int = parent.getSoTimeout()
 
-    @Throws(SocketException::class)
-    override fun getSoLinger(): Int {
-        return parent.getSoLinger()
-    }
+	@Throws(SocketException::class)
+	override fun getTcpNoDelay(): Boolean = parent.getTcpNoDelay()
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun getSoTimeout(): Int {
-        return parent.getSoTimeout()
-    }
+	@Throws(SocketException::class)
+	override fun getTrafficClass(): Int = parent.trafficClass
 
-    @Throws(SocketException::class)
-    override fun getTcpNoDelay(): Boolean {
-        return parent.getTcpNoDelay()
-    }
+	override fun isBound(): Boolean = parent.isBound
 
-    @Throws(SocketException::class)
-    override fun getTrafficClass(): Int {
-        return parent.trafficClass
-    }
+	override fun isClosed(): Boolean = parent.isClosed
 
-    override fun isBound(): Boolean {
-        return parent.isBound
-    }
+	override fun isConnected(): Boolean = parent.isConnected
 
-    override fun isClosed(): Boolean {
-        return parent.isClosed
-    }
+	override fun isInputShutdown(): Boolean = parent.isInputShutdown
 
-    override fun isConnected(): Boolean {
-        return parent.isConnected
-    }
+	override fun isOutputShutdown(): Boolean = parent.isOutputShutdown
 
-    override fun isInputShutdown(): Boolean {
-        return parent.isInputShutdown
-    }
+	@Throws(IOException::class)
+	override fun sendUrgentData(data: Int) {
+		parent.sendUrgentData(data)
+	}
 
-    override fun isOutputShutdown(): Boolean {
-        return parent.isOutputShutdown
-    }
+	@Throws(SocketException::class)
+	override fun setKeepAlive(on: Boolean) {
+		parent.setKeepAlive(on)
+	}
 
-    @Throws(IOException::class)
-    override fun sendUrgentData(data: Int) {
-        parent.sendUrgentData(data)
-    }
+	@Throws(SocketException::class)
+	override fun setOOBInline(on: Boolean) {
+		parent.setOOBInline(on)
+	}
 
-    @Throws(SocketException::class)
-    override fun setKeepAlive(on: Boolean) {
-        parent.setKeepAlive(on)
-    }
+	override fun setPerformancePreferences(
+		connectionTime: Int,
+		latency: Int,
+		bandwidth: Int,
+	) {
+		parent.setPerformancePreferences(connectionTime, latency, bandwidth)
+	}
 
-    @Throws(SocketException::class)
-    override fun setOOBInline(on: Boolean) {
-        parent.setOOBInline(on)
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun setReceiveBufferSize(size: Int) {
+		parent.setReceiveBufferSize(size)
+	}
 
-    override fun setPerformancePreferences(connectionTime: Int, latency: Int, bandwidth: Int) {
-        parent.setPerformancePreferences(connectionTime, latency, bandwidth)
-    }
+	@Throws(SocketException::class)
+	override fun setReuseAddress(on: Boolean) {
+		parent.setReuseAddress(on)
+	}
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun setReceiveBufferSize(size: Int) {
-        parent.setReceiveBufferSize(size)
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun setSendBufferSize(size: Int) {
+		parent.setSendBufferSize(size)
+	}
 
-    @Throws(SocketException::class)
-    override fun setReuseAddress(on: Boolean) {
-        parent.setReuseAddress(on)
-    }
+	@Throws(SocketException::class)
+	override fun setSoLinger(
+		on: Boolean,
+		linger: Int,
+	) {
+		parent.setSoLinger(on, linger)
+	}
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun setSendBufferSize(size: Int) {
-        parent.setSendBufferSize(size)
-    }
+	@Synchronized
+	@Throws(SocketException::class)
+	override fun setSoTimeout(timeout: Int) {
+		parent.setSoTimeout(timeout)
+	}
 
-    @Throws(SocketException::class)
-    override fun setSoLinger(on: Boolean, linger: Int) {
-        parent.setSoLinger(on, linger)
-    }
+	@Throws(SocketException::class)
+	override fun setTcpNoDelay(on: Boolean) {
+		parent.setTcpNoDelay(on)
+	}
 
-    @Synchronized
-    @Throws(SocketException::class)
-    override fun setSoTimeout(timeout: Int) {
-        parent.setSoTimeout(timeout)
-    }
+	@Throws(SocketException::class)
+	override fun setTrafficClass(tc: Int) {
+		parent.setTrafficClass(tc)
+	}
 
-    @Throws(SocketException::class)
-    override fun setTcpNoDelay(on: Boolean) {
-        parent.setTcpNoDelay(on)
-    }
+	@Throws(IOException::class)
+	override fun shutdownInput() {
+		parent.shutdownInput()
+	}
 
-    @Throws(SocketException::class)
-    override fun setTrafficClass(tc: Int) {
-        parent.setTrafficClass(tc)
-    }
+	@Throws(IOException::class)
+	override fun shutdownOutput() {
+		parent.shutdownOutput()
+	}
 
-    @Throws(IOException::class)
-    override fun shutdownInput() {
-        parent.shutdownInput()
-    }
-
-    @Throws(IOException::class)
-    override fun shutdownOutput() {
-        parent.shutdownOutput()
-    }
-
-    override fun toString(): String {
-        return parent.toString()
-    }
+	override fun toString(): String = parent.toString()
 }

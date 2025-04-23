@@ -44,7 +44,6 @@ private val LOG = KotlinLogging.logger { }
  * @author Tobias Wich
  */
 open class TrustStoreLoader {
-
 	protected open val storeFileName: String = "oec_cacerts.zip"
 
 	protected fun load() {
@@ -94,7 +93,7 @@ open class TrustStoreLoader {
 				TRUST_STORES.put(storeFileName, ks)
 				TRUST_ANCHORS.put(
 					storeFileName,
-					anchors.toSet()
+					anchors.toSet(),
 				)
 			}
 		} catch (ex: IOException) {
@@ -116,9 +115,7 @@ open class TrustStoreLoader {
 		}
 	}
 
-	protected open fun useInternalStore(): Boolean {
-		return false
-	}
+	protected open fun useInternalStore(): Boolean = false
 
 	protected fun loadInternalStore(): KeyStore? {
 		if (useInternalStore()) {
@@ -134,10 +131,11 @@ open class TrustStoreLoader {
 				val cf = CertificateFactory.getInstance("X.509")
 
 				// get stream to zip file containing the certificates
-				val `is` = resolveResourceAsStream(
-					TrustStoreLoader::class.java,
-					storeFileName
-				)
+				val `is` =
+					resolveResourceAsStream(
+						TrustStoreLoader::class.java,
+						storeFileName,
+					)
 				val zis = if (`is` != null) ZipInputStream(`is`) else null
 				if (zis != null) {
 					var entry: ZipEntry?

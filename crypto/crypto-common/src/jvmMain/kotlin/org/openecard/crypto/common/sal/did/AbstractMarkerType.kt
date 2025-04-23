@@ -27,11 +27,13 @@ import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType
  *
  * @author Tobias Wich
  */
-abstract class AbstractMarkerType protected constructor(protected val marker: DIDAbstractMarkerType) {
+abstract class AbstractMarkerType protected constructor(
+	protected val marker: DIDAbstractMarkerType,
+) {
 	/**
 	 * Get the value of the property Protocol.
 	 *
 	 * @return A string containing the protocol uri of this marker type.
 	 */
-    val protocol: String = marker.getProtocol()
+	val protocol: String = marker.getProtocol()
 }

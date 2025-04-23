@@ -31,23 +31,27 @@ import java.math.BigInteger
  * @author Tobias Wich
  */
 interface CardRecognition {
+	val cardInfos: List<CardInfoType>
 
-    val cardInfos: List<CardInfoType>
+	// TODO: get rid of these functions, they should be in the SAL propably
+	fun getCardInfo(type: String): CardInfoType?
 
-    // TODO: get rid of these functions, they should be in the SAL propably
-    fun getCardInfo(type: String): CardInfoType?
-    fun getCardInfoFromRepo(type: String): CardInfoType?
+	fun getCardInfoFromRepo(type: String): CardInfoType?
 
-    fun getTranslatedCardName(cardType: String): String
+	fun getTranslatedCardName(cardType: String): String
 
-    fun getCardImage(objectid: String): InputStream?
+	fun getCardImage(objectid: String): InputStream?
 
-    val unknownCardImage: InputStream
+	val unknownCardImage: InputStream
 
-    val noCardImage: InputStream
+	val noCardImage: InputStream
 
-    val noTerminalImage: InputStream
+	val noTerminalImage: InputStream
 
-    @Throws(RecognitionException::class)
-    fun recognizeCard(ctx: ByteArray, ifdName: String, slot: BigInteger): ConnectionHandleType.RecognitionInfo?
+	@Throws(RecognitionException::class)
+	fun recognizeCard(
+		ctx: ByteArray,
+		ifdName: String,
+		slot: BigInteger,
+	): ConnectionHandleType.RecognitionInfo?
 }

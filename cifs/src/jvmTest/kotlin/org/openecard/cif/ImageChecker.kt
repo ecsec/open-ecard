@@ -42,43 +42,41 @@ private val logger = KotlinLogging.logger { }
 // see also https://dev.openecard.org/issues/369
 @Test(groups = ["it"])
 class ImageChecker {
+	private lateinit var imageUrls: MutableList<URL>
 
-    private lateinit var imageUrls: MutableList<URL>
+	@BeforeClass
+	@Throws(IOException::class)
+	fun loadImageUrls() {
+		// load properties file
+		val `in` = ImageChecker::class.java.getResourceAsStream("/card-images/card-images.properties")
+		val p = Properties()
+		p.load(`in`)
 
-    @BeforeClass
-    @Throws(IOException::class)
-    fun loadImageUrls() {
-        // load properties file
-        val `in` = ImageChecker::class.java.getResourceAsStream("/card-images/card-images.properties")
-        val p = Properties()
-        p.load(`in`)
+		// convert each entry into a URL
+		imageUrls = ArrayList<URL>()
+		for (next in p.entries) {
+			val file = next.value as String?
+			val url = ImageChecker::class.java.getResource("/card-images/$file")
+			imageUrls.add(url!!)
+		}
+	}
 
-        // convert each entry into a URL
-        imageUrls = ArrayList<URL>()
-        for (next in p.entries) {
-            val file = next.value as String?
-            val url = ImageChecker::class.java.getResource("/card-images/$file")
-            imageUrls.add(url!!)
-        }
-    }
+	@Test
+	@Throws(IOException::class)
+	fun testPresence() {
+		for (url in imageUrls) {
+			url.openStream()
+			Assert.assertNotNull(url)
+		}
+	}
 
-    @Test
-    @Throws(IOException::class)
-    fun testPresence() {
-        for (url in imageUrls) {
-            url.openStream()
-            Assert.assertNotNull(url)
-        }
-    }
-
-    @Test(dependsOnMethods = ["testPresence"])
-    @Throws(IOException::class)
-    fun testLoadImages() {
-        for (url in imageUrls) {
-			logger.info { "Trying to load image '${url}'." }
-            val bi = ImageIO.read(url)
-            val icon = ImageIcon(bi)
-        }
-    }
-
+	@Test(dependsOnMethods = ["testPresence"])
+	@Throws(IOException::class)
+	fun testLoadImages() {
+		for (url in imageUrls) {
+			logger.info { "Trying to load image '$url'." }
+			val bi = ImageIO.read(url)
+			val icon = ImageIcon(bi)
+		}
+	}
 }

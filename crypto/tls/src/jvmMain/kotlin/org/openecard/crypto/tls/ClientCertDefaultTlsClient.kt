@@ -42,9 +42,12 @@ private val LOG = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
-open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, doSni: Boolean) : DefaultTlsClient(tcf),
+open class ClientCertDefaultTlsClient(
+	tcf: TlsCrypto,
+	private val host: String,
+	doSni: Boolean,
+) : DefaultTlsClient(tcf),
 	ClientCertTlsClient {
-
 	private var tlsAuth: TlsAuthentication? = null
 	private var enforceSameSession = false
 	private var firstSession: TlsSession? = null
@@ -72,7 +75,6 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		}
 	}
 
-
 	fun setServerName(serverName: String) {
 		serverNames.clear()
 		serverNames.add(makeServerName(serverName))
@@ -85,9 +87,7 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		}
 	}
 
-	override fun getSNIServerNames(): Vector<*>? {
-		return if (serverNames.isEmpty()) null else Vector(serverNames)
-	}
+	override fun getSNIServerNames(): Vector<*>? = if (serverNames.isEmpty()) null else Vector(serverNames)
 
 	private fun makeServerName(name: String): ServerName {
 		var name = name
@@ -99,9 +99,7 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		this.minClientVersion = minClientVersion
 	}
 
-	fun getMinimumVersion(): ProtocolVersion {
-		return this.minClientVersion
-	}
+	fun getMinimumVersion(): ProtocolVersion = this.minClientVersion
 
 	override fun getSupportedVersions(): Array<ProtocolVersion> {
 		val desiredVersion = clientVersion
@@ -114,11 +112,9 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		}
 	}
 
-
 	fun setEnforceSameSession(enforceSameSession: Boolean) {
 		this.enforceSameSession = enforceSameSession
 	}
-
 
 	@Synchronized
 	@Throws(IOException::class)
@@ -137,7 +133,6 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		this.tlsAuth = tlsAuth
 	}
 
-
 	override fun init(context: TlsClientContext?) {
 		// save first session so resumption only works with the exact same session
 		if (enforceSameSession && firstSession == null && lastSession != null) {
@@ -147,18 +142,18 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		super.init(context)
 	}
 
-
 	override fun getCipherSuites(): IntArray {
-		val ciphers = mutableListOf(
-			// recommended ciphers from TR-02102-2 sec. 3.3.1
-			CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-			CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-			CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 // acceptable in case DHE is not available
-			// there seems to be a problem with DH and besides that I don't like them anyways
+		val ciphers =
+			mutableListOf(
+				// recommended ciphers from TR-02102-2 sec. 3.3.1
+				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+				CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, // acceptable in case DHE is not available
+				// there seems to be a problem with DH and besides that I don't like them anyways
 			/*
 	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
 	CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
@@ -172,9 +167,8 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 	CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
 	CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
 	CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256
-	*/
-
-		)
+			 */
+			)
 
 		// when doing TLS 1.0, we need the old SHA1 cipher suites
 		if (minClientVersion.isEqualOrEarlierVersionOf(ProtocolVersion.TLSv11)) {
@@ -184,7 +178,7 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
 					CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
 					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA // acceptable in case DHE is not available
+					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, // acceptable in case DHE is not available
 					// there seems to be a problem with DH and besides that I don't like them anyways
 					/*
 			CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
@@ -193,8 +187,8 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 			CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
 			CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
 			CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
-			*/
-				)
+					 */
+				),
 			)
 		}
 
@@ -234,7 +228,12 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		return groups
 	}
 
-	override fun notifyAlertRaised(alertLevel: Short, alertDescription: Short, message: String?, cause: Throwable?) {
+	override fun notifyAlertRaised(
+		alertLevel: Short,
+		alertDescription: Short,
+		message: String?,
+		cause: Throwable?,
+	) {
 		val error = TlsError(alertLevel, alertDescription, message, cause)
 		if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
 			LOG.info { "TLS warning sent." }
@@ -251,7 +250,10 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		super.notifyAlertRaised(alertLevel, alertDescription, message, cause)
 	}
 
-	override fun notifyAlertReceived(alertLevel: Short, alertDescription: Short) {
+	override fun notifyAlertReceived(
+		alertLevel: Short,
+		alertDescription: Short,
+	) {
 		val error = TlsError(alertLevel, alertDescription)
 		if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
 			LOG.info { "TLS warning received." }
@@ -264,14 +266,12 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 		super.notifyAlertReceived(alertLevel, alertDescription)
 	}
 
-
-	override fun getSessionToResume(): TlsSession? {
-		return if (firstSession != null) {
+	override fun getSessionToResume(): TlsSession? =
+		if (firstSession != null) {
 			firstSession
 		} else {
 			super.getSessionToResume()
 		}
-	}
 
 	override fun notifySessionID(sessionID: ByteArray?) {
 		if (enforceSameSession) {
@@ -310,7 +310,10 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 	}
 
 	companion object {
-		fun getDefaultSignatureAlgorithms(crypto: TlsCrypto, withLegacy: Boolean): Vector<*> {
+		fun getDefaultSignatureAlgorithms(
+			crypto: TlsCrypto,
+			withLegacy: Boolean,
+		): Vector<*> {
 			val result: Vector<SignatureAndHashAlgorithm> = Vector()
 
 			val hashAlgorithms = mutableListOf<Short>()
@@ -322,21 +325,23 @@ open class ClientCertDefaultTlsClient(tcf: TlsCrypto, private val host: String, 
 				hashAlgorithms.add(HashAlgorithm.sha1)
 			}
 
-			val signatureAlgorithms = shortArrayOf(
-				SignatureAlgorithm.rsa,
-				SignatureAlgorithm.ecdsa
-			)
+			val signatureAlgorithms =
+				shortArrayOf(
+					SignatureAlgorithm.rsa,
+					SignatureAlgorithm.ecdsa,
+				)
 
-			val intrinsicSigAlgs = arrayOf(
-				//SignatureAndHashAlgorithm.ed25519,
-				//SignatureAndHashAlgorithm.ed448,
-				SignatureAndHashAlgorithm.rsa_pss_rsae_sha256,
-				SignatureAndHashAlgorithm.rsa_pss_rsae_sha384,
-				SignatureAndHashAlgorithm.rsa_pss_rsae_sha512,
-				SignatureAndHashAlgorithm.rsa_pss_pss_sha256,
-				SignatureAndHashAlgorithm.rsa_pss_pss_sha384,
-				SignatureAndHashAlgorithm.rsa_pss_pss_sha512
-			)
+			val intrinsicSigAlgs =
+				arrayOf(
+					// SignatureAndHashAlgorithm.ed25519,
+					// SignatureAndHashAlgorithm.ed448,
+					SignatureAndHashAlgorithm.rsa_pss_rsae_sha256,
+					SignatureAndHashAlgorithm.rsa_pss_rsae_sha384,
+					SignatureAndHashAlgorithm.rsa_pss_rsae_sha512,
+					SignatureAndHashAlgorithm.rsa_pss_pss_sha256,
+					SignatureAndHashAlgorithm.rsa_pss_pss_sha384,
+					SignatureAndHashAlgorithm.rsa_pss_pss_sha512,
+				)
 
 			for (sigAlg in intrinsicSigAlgs) {
 				if (crypto.hasSignatureAndHashAlgorithm(sigAlg)) {

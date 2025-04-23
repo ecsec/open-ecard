@@ -30,7 +30,7 @@ import org.openecard.common.ifd.scio.SCIOException
 import java.io.IOException
 import java.nio.ByteBuffer
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * NFC implementation of smartcardio's cardChannel interface.
@@ -38,45 +38,47 @@ private val LOG = KotlinLogging.logger {  }
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class NFCCardChannel(override val card: AbstractNFCCard) : SCIOChannel {
-    @Throws(SCIOException::class)
-    override fun close() {
+class NFCCardChannel(
+	override val card: AbstractNFCCard,
+) : SCIOChannel {
+	@Throws(SCIOException::class)
+	override fun close() {
 		LOG.debug { "Channels for NFC cards do not close on demand." }
-    }
+	}
 
-    override val channelNumber: Int
-        get() = 0
+	override val channelNumber: Int
+		get() = 0
 
-    @Throws(SCIOException::class, IllegalStateException::class)
-    override fun transmit(apdu: CardCommandAPDU): CardResponseAPDU {
-        return transmit(apdu.toByteArray())
-    }
+	@Throws(SCIOException::class, IllegalStateException::class)
+	override fun transmit(apdu: CardCommandAPDU): CardResponseAPDU = transmit(apdu.toByteArray())
 
-    @Throws(SCIOException::class, IllegalStateException::class)
-    override fun transmit(apdu: ByteArray): CardResponseAPDU {
-        synchronized(card) {
-            try {
-                return CardResponseAPDU(card.transceive(apdu))
-            } catch (ex: IOException) {
-                check(card.isTagPresent) { "Transmit of apdu command failed, because the card has been removed." }
+	@Throws(SCIOException::class, IllegalStateException::class)
+	override fun transmit(apdu: ByteArray): CardResponseAPDU {
+		synchronized(card) {
+			try {
+				return CardResponseAPDU(card.transceive(apdu))
+			} catch (ex: IOException) {
+				check(card.isTagPresent) { "Transmit of apdu command failed, because the card has been removed." }
 
-                // TODO: check if the error code can be chosen more specifically
-                throw SCIOException("Transmit failed.", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex)
-            }
-        }
-    }
+				// TODO: check if the error code can be chosen more specifically
+				throw SCIOException("Transmit failed.", SCIOErrorCode.SCARD_F_UNKNOWN_ERROR, ex)
+			}
+		}
+	}
 
-    @Throws(SCIOException::class, IllegalStateException::class)
-    override fun transmit(command: ByteBuffer, response: ByteBuffer): Int {
-        val cra = transmit(command.array())
-        val data = cra.toByteArray()
-        response.put(data)
+	@Throws(SCIOException::class, IllegalStateException::class)
+	override fun transmit(
+		command: ByteBuffer,
+		response: ByteBuffer,
+	): Int {
+		val cra = transmit(command.array())
+		val data = cra.toByteArray()
+		response.put(data)
 
-        return data.size
-    }
+		return data.size
+	}
 
-    override val isBasicChannel: Boolean = true
+	override val isBasicChannel: Boolean = true
 
-    override val isLogicalChannel: Boolean = false
-
+	override val isLogicalChannel: Boolean = false
 }

@@ -28,7 +28,6 @@ import org.slf4j.Logger
 import java.io.PrintWriter
 import java.io.StringWriter
 
-
 /**
  * Utility functions for Apache HTTP core.
  *
@@ -43,7 +42,10 @@ object HttpUtils {
 	 * @param req Request to dump.
 	 */
 	@JvmStatic
-	fun dumpHttpRequest(logger: Logger, req: HttpRequest) {
+	fun dumpHttpRequest(
+		logger: Logger,
+		req: HttpRequest,
+	) {
 		dumpHttpRequest(logger, null, req)
 	}
 
@@ -57,7 +59,11 @@ object HttpUtils {
 	 * @param req Request to dump.
 	 */
 	@JvmStatic
-	fun dumpHttpRequest(logger: Logger, msg: String?, req: HttpRequest) {
+	fun dumpHttpRequest(
+		logger: Logger,
+		msg: String?,
+		req: HttpRequest,
+	) {
 		if (logger.isDebugEnabled) {
 			val w = StringWriter()
 			val pw = PrintWriter(w)
@@ -91,7 +97,7 @@ object HttpUtils {
 	fun dumpHttpResponse(
 		logger: Logger,
 		res: HttpResponse,
-		entityData: String?
+		entityData: String?,
 	) {
 		if (logger.isDebugEnabled) {
 			val w = StringWriter()
@@ -126,16 +132,18 @@ object HttpUtils {
 	fun dumpHttpResponse(
 		logger: Logger,
 		res: HttpResponse,
-		entityData: ByteArray?
+		entityData: ByteArray?,
 	) {
 		dumpHttpResponse(logger, res, if (entityData != null) String(entityData) else null)
 	}
 
 	@JvmStatic
-	fun dumpHttpResponse(logger: Logger, res: HttpResponse) {
+	fun dumpHttpResponse(
+		logger: Logger,
+		res: HttpResponse,
+	) {
 		dumpHttpResponse(logger, res, null as String?)
 	}
-
 }
 
 /**
@@ -144,7 +152,6 @@ object HttpUtils {
  * @author Tobias Wich
  */
 object KHttpUtils {
-
 	/**
 	 * Dump the given HTTP request and log it with the given logger instance.
 	 *
@@ -152,7 +159,10 @@ object KHttpUtils {
 	 * @param logger Logger to dump HTTP request to.
 	 * @param req Request to dump.
 	 */
-	fun dumpHttpRequest(logger: KLogger, req: HttpRequest) {
+	fun dumpHttpRequest(
+		logger: KLogger,
+		req: HttpRequest,
+	) {
 		dumpHttpRequest(logger, null, req)
 	}
 
@@ -165,7 +175,11 @@ object KHttpUtils {
 	 * @param msg Message qualifying the context of the request.
 	 * @param req Request to dump.
 	 */
-	fun dumpHttpRequest(logger: KLogger, msg: String?, req: HttpRequest) {
+	fun dumpHttpRequest(
+		logger: KLogger,
+		msg: String?,
+		req: HttpRequest,
+	) {
 		if (logger.isDebugEnabled()) {
 			val w = StringWriter()
 			val pw = PrintWriter(w)
@@ -198,7 +212,7 @@ object KHttpUtils {
 	fun dumpHttpResponse(
 		logger: KLogger,
 		res: HttpResponse,
-		entityData: String?
+		entityData: String?,
 	) {
 		if (logger.isDebugEnabled()) {
 			val w = StringWriter()
@@ -232,12 +246,15 @@ object KHttpUtils {
 	fun dumpHttpResponse(
 		logger: KLogger,
 		res: HttpResponse,
-		entityData: ByteArray?
+		entityData: ByteArray?,
 	) {
 		dumpHttpResponse(logger, res, if (entityData != null) String(entityData) else null)
 	}
 
-	fun dumpHttpResponse(logger: KLogger, res: HttpResponse) {
+	fun dumpHttpResponse(
+		logger: KLogger,
+		res: HttpResponse,
+	) {
 		dumpHttpResponse(logger, res, null as String?)
 	}
 }

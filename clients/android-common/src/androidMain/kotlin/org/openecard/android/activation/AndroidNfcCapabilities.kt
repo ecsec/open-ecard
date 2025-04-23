@@ -27,28 +27,20 @@ import org.openecard.android.utils.NfcCapabilityHelper
 import org.openecard.mobile.activation.NFCCapabilities
 import org.openecard.mobile.activation.NfcCapabilityResult
 
-
 /**
  *
  * @author Neil Crossley
  */
-class AndroidNfcCapabilities internal constructor(private val capabilityHelper: NfcCapabilityHelper<Context>) : NFCCapabilities {
+class AndroidNfcCapabilities internal constructor(
+	private val capabilityHelper: NfcCapabilityHelper<Context>,
+) : NFCCapabilities {
+	override fun isAvailable(): Boolean = capabilityHelper.isNFCAvailable
 
-	override fun isAvailable(): Boolean {
-		return capabilityHelper.isNFCAvailable
-	}
+	override fun isEnabled(): Boolean = capabilityHelper.isNFCEnabled
 
-	override fun isEnabled(): Boolean {
-		return capabilityHelper.isNFCEnabled
-	}
-
-	override fun checkExtendedLength(): NfcCapabilityResult {
-		return capabilityHelper.checkExtendedLength()
-	}
+	override fun checkExtendedLength(): NfcCapabilityResult = capabilityHelper.checkExtendedLength()
 
 	companion object {
-		fun create(context: Context): AndroidNfcCapabilities {
-			return AndroidNfcCapabilities(NfcCapabilityHelper.create(context))
-		}
+		fun create(context: Context): AndroidNfcCapabilities = AndroidNfcCapabilities(NfcCapabilityHelper.create(context))
 	}
 }

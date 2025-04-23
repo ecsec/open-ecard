@@ -32,18 +32,18 @@ import org.testng.annotations.Test
  * @author Tobias Wich
  */
 class ManagerTest {
-    @Test(enabled = false)
-    @Throws(InterruptedException::class, IFDException::class)
-    fun runManager() {
-        val ifd = IFD()
-        val ctx = EstablishContext()
-        val ctxR = ifd.establishContext(ctx)
-        val env = ClientEnv()
+	@Test(enabled = false)
+	@Throws(InterruptedException::class, IFDException::class)
+	fun runManager() {
+		val ifd = IFD()
+		val ctx = EstablishContext()
+		val ctxR = ifd.establishContext(ctx)
+		val env = ClientEnv()
 		env.ifd = ifd
-        val evt = IfdEventManager(env, ctxR.getContextHandle())
-        evt.initialize()
-        Thread.sleep(1000)
-        //evt.terminate();
-        Thread.sleep(1000000)
-    }
+		val evt = IfdEventManager(env, ctxR.getContextHandle())
+		evt.initialize()
+		Thread.sleep(1000)
+		// evt.terminate();
+		Thread.sleep(1000000)
+	}
 }

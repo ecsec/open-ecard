@@ -22,7 +22,6 @@
 package org.openecard.crypto.common.keystore
 
 import org.openecard.bouncycastle.crypto.CryptoException
-import org.openecard.bouncycastle.crypto.Signer
 import org.openecard.bouncycastle.crypto.digests.NullDigest
 import org.openecard.bouncycastle.crypto.encodings.PKCS1Encoding
 import org.openecard.bouncycastle.crypto.engines.RSABlindedEngine
@@ -54,87 +53,95 @@ class KeyStoreSigner
  * @param password
  * @param alias
  */
-	(private val keyStore: KeyStore, private val password: CharArray?, private val alias: String) {
-    //    private Certificate bcCert;
+(
+	private val keyStore: KeyStore,
+	private val password: CharArray?,
+	private val alias: String,
+) {
+	//    private Certificate bcCert;
 
-    @get:Throws(KeyStoreException::class, CertificateException::class)
-    private val jCACertificateChain: Array<Certificate>
-        /**
-         * Gets the certificate for this keystore entry.
-         * This function returns the certificate in encoded form.
-         *
-         * @return Certificate of this KeyStore entry in encoded form.
-         * @throws KeyStoreException Thrown in case the keystore has not been initialized (loaded).
-         * @throws CertificateException Thrown in case the certificate could not be found.
-         */
-        get() {
+	@get:Throws(KeyStoreException::class, CertificateException::class)
+	private val jCACertificateChain: Array<Certificate>
+		/**
+		 * Gets the certificate for this keystore entry.
+		 * This function returns the certificate in encoded form.
+		 *
+		 * @return Certificate of this KeyStore entry in encoded form.
+		 * @throws KeyStoreException Thrown in case the keystore has not been initialized (loaded).
+		 * @throws CertificateException Thrown in case the certificate could not be found.
+		 */
+		get() {
 			val cert = keyStore.getCertificateChain(alias)
-            if (cert == null) {
-                throw CertificateException("Unknown alias.")
-            }
-            return cert
-        }
+			if (cert == null) {
+				throw CertificateException("Unknown alias.")
+			}
+			return cert
+		}
 
-    //    /**
-    //     * Gets the certificate for this KeyStore entry converted to a BouncyCastle TLS certificate.
-    //     *
-    //     * @return The certificate chain in BouncyCastle format.
-    //     * @throws CertificateException Thrown in case the certificate could not be found or converted.
-    //     * @throws IllegalStateException Thrown in case the keystore is not initialized.
-    //     */
-    //    @Nonnull
-    //    public synchronized Certificate getCertificateChain() throws CertificateException {
-    //	if (bcCert == null) {
-    //	    try {
-    //		java.security.cert.Certificate[] jcaCerts = getJCACertificateChain();
-    //		bcCert = KeyTools.convertCertificates(jcaCerts);
-    //	    } catch (KeyStoreException ex) {
-    //		throw new IllegalStateException("Uninitialized keystore supplied.");
-    //	    }
-    //	}
-    //	return bcCert;
-    //    }
+	//    /**
+	//     * Gets the certificate for this KeyStore entry converted to a BouncyCastle TLS certificate.
+	//     *
+	//     * @return The certificate chain in BouncyCastle format.
+	//     * @throws CertificateException Thrown in case the certificate could not be found or converted.
+	//     * @throws IllegalStateException Thrown in case the keystore is not initialized.
+	//     */
+	//    @Nonnull
+	//    public synchronized Certificate getCertificateChain() throws CertificateException {
+	// 	if (bcCert == null) {
+	// 	    try {
+	// 		java.security.cert.Certificate[] jcaCerts = getJCACertificateChain();
+	// 		bcCert = KeyTools.convertCertificates(jcaCerts);
+	// 	    } catch (KeyStoreException ex) {
+	// 		throw new IllegalStateException("Uninitialized keystore supplied.");
+	// 	    }
+	// 	}
+	// 	return bcCert;
+	//    }
 
-    /**
-     * Signs the given hash with the entry represented by this instance.
-     *
-     * @param sigHashAlg Signature and hash algorithm. If `null`, then use PKCS1 v1.5.
-     * @param hash The hash that should be signed.
-     * @return Signature of the given hash.
-     * @throws SignatureException In case the signature could not be created.
-     * @throws CredentialPermissionDenied In case the signature could not be performed by the token due to missing
-     * permissions.
-     */
-    @Throws(SignatureException::class, CredentialPermissionDenied::class)
-    fun sign(sigHashAlg: SignatureAndHashAlgorithm?, hash: ByteArray): ByteArray {
-        try {
-            val key = keyStore.getKey(alias, password)
-            if (key !is RSAPrivateKey) {
-                throw SignatureException("No private key available for the sign operation.")
-            } else {
-                val pKey = key as PrivateKey
-                val bcKey = PrivateKeyFactory.createKey(pKey.encoded)
-                val signer = if (sigHashAlg == null) {
-                    GenericSigner(PKCS1Encoding(RSABlindedEngine()), NullDigest())
-                } else {
-                    val hashOid = TlsUtils.getOIDForHashAlgorithm(sigHashAlg.getHash())
-                    RSADigestSigner(NullDigest(), hashOid)
-                }
-                signer.init(true, ParametersWithRandom(bcKey, ReusableSecureRandom.instance))
-                signer.update(hash, 0, hash.size)
-                val signature = signer.generateSignature()
-                return signature
-            }
-        } catch (ex: KeyStoreException) {
-            throw IllegalStateException("Keystore is not initialized.", ex)
-        } catch ( /*| InvalidKeyException*/ex: UnrecoverableKeyException) {
-            throw CredentialPermissionDenied("No usable key could be retrieved from the keystore.", ex)
-        } catch (ex: NoSuchAlgorithmException) {
-            throw SignatureException("Requested algorithm is not available.", ex)
-        } catch (ex: IOException) {
-            throw SignatureException("Failed to convert private key to BC class.", ex)
-        } catch (ex: CryptoException) {
-            throw SignatureException("Failed to compute signature.", ex)
-        }
-    }
+	/**
+	 * Signs the given hash with the entry represented by this instance.
+	 *
+	 * @param sigHashAlg Signature and hash algorithm. If `null`, then use PKCS1 v1.5.
+	 * @param hash The hash that should be signed.
+	 * @return Signature of the given hash.
+	 * @throws SignatureException In case the signature could not be created.
+	 * @throws CredentialPermissionDenied In case the signature could not be performed by the token due to missing
+	 * permissions.
+	 */
+	@Throws(SignatureException::class, CredentialPermissionDenied::class)
+	fun sign(
+		sigHashAlg: SignatureAndHashAlgorithm?,
+		hash: ByteArray,
+	): ByteArray {
+		try {
+			val key = keyStore.getKey(alias, password)
+			if (key !is RSAPrivateKey) {
+				throw SignatureException("No private key available for the sign operation.")
+			} else {
+				val pKey = key as PrivateKey
+				val bcKey = PrivateKeyFactory.createKey(pKey.encoded)
+				val signer =
+					if (sigHashAlg == null) {
+						GenericSigner(PKCS1Encoding(RSABlindedEngine()), NullDigest())
+					} else {
+						val hashOid = TlsUtils.getOIDForHashAlgorithm(sigHashAlg.getHash())
+						RSADigestSigner(NullDigest(), hashOid)
+					}
+				signer.init(true, ParametersWithRandom(bcKey, ReusableSecureRandom.instance))
+				signer.update(hash, 0, hash.size)
+				val signature = signer.generateSignature()
+				return signature
+			}
+		} catch (ex: KeyStoreException) {
+			throw IllegalStateException("Keystore is not initialized.", ex)
+		} catch ( /*| InvalidKeyException*/ex: UnrecoverableKeyException) {
+			throw CredentialPermissionDenied("No usable key could be retrieved from the keystore.", ex)
+		} catch (ex: NoSuchAlgorithmException) {
+			throw SignatureException("Requested algorithm is not available.", ex)
+		} catch (ex: IOException) {
+			throw SignatureException("Failed to convert private key to BC class.", ex)
+		} catch (ex: CryptoException) {
+			throw SignatureException("Failed to compute signature.", ex)
+		}
+	}
 }

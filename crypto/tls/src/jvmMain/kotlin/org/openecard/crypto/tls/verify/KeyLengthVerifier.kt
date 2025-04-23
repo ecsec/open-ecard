@@ -34,37 +34,43 @@ import java.io.IOException
  *
  * @author Tobias Wich
  */
-class KeyLengthVerifier @JvmOverloads constructor(private val withChain: Boolean = false) : CertificateVerifier {
-    @Throws(CertificateVerificationException::class)
-    override fun isValid(chain: TlsServerCertificate, hostname: String) {
-        try {
-            var firstCert = true
+class KeyLengthVerifier
+	@JvmOverloads
+	constructor(
+		private val withChain: Boolean = false,
+	) : CertificateVerifier {
+		@Throws(CertificateVerificationException::class)
+		override fun isValid(
+			chain: TlsServerCertificate,
+			hostname: String,
+		) {
+			try {
+				var firstCert = true
 
-            // check each certificate
-            for (next in chain.certificate.getCertificateList()) {
-                val x509 = Certificate.getInstance(next.encoded)
-                val selfSigned = x509.issuer == x509.subject
+				// check each certificate
+				for (next in chain.certificate.getCertificateList()) {
+					val x509 = Certificate.getInstance(next.encoded)
+					val selfSigned = x509.issuer == x509.subject
 
-                // skip key comparison step if this is a root certificate, but still check self signed server certs
-                val isRootCert = selfSigned && !firstCert
-                if (!isRootCert) {
-                    // determine if key has the minimum size
-                    KeyTools.assertKeyLength(x509)
+					// skip key comparison step if this is a root certificate, but still check self signed server certs
+					val isRootCert = selfSigned && !firstCert
+					if (!isRootCert) {
+						// determine if key has the minimum size
+						KeyTools.assertKeyLength(x509)
 
-                    firstCert = false
-                }
-                // stop if we are only checking the first certificate
-                if (!withChain) {
-                    break
-                }
-            }
-        } catch (ex: IOException) {
-            val msg = "Failed to extract public key from certificate."
-            throw CertificateVerificationException(msg, ex)
-        } catch (ex: KeyLengthException) {
-            val msg = "The key in the certificate does not satisfy the length requirements."
-            throw CertificateVerificationException(msg, ex)
-        }
-    }
-
-}
+						firstCert = false
+					}
+					// stop if we are only checking the first certificate
+					if (!withChain) {
+						break
+					}
+				}
+			} catch (ex: IOException) {
+				val msg = "Failed to extract public key from certificate."
+				throw CertificateVerificationException(msg, ex)
+			} catch (ex: KeyLengthException) {
+				val msg = "The key in the certificate does not satisfy the length requirements."
+				throw CertificateVerificationException(msg, ex)
+			}
+		}
+	}

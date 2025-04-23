@@ -9,10 +9,11 @@
  */
 package org.openecard.httpcore
 
-
 /**
  * Exception indicating an abortion after too many redirects.
  *
  * @author Tobias Wich
  */
-class RedirectionDepthException(msg: String) : HttpResourceException(msg)
+class RedirectionDepthException(
+	msg: String,
+) : HttpResourceException(msg)

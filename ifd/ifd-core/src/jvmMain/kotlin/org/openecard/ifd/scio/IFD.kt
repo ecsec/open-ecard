@@ -68,7 +68,7 @@ private val LOG = KotlinLogging.logger { }
 class IFD : IFD {
 	private var ctxHandle: ByteArray? = null
 
-	//private SCWrapper scwrapper;
+	// private SCWrapper scwrapper;
 	private var cm: ChannelManager? = null
 
 	private var env: Environment? = null
@@ -94,11 +94,12 @@ class IFD : IFD {
 	private val termFactory: TerminalFactory
 		get() {
 			val factoryBuilder = this.terminalFactoryBuilder!!
-			val currentTermFactory = try {
-				factoryBuilder.instance
-			} catch (ex: GenericFactoryException) {
-				throw IFDException(ex)
-			}
+			val currentTermFactory =
+				try {
+					factoryBuilder.instance
+				} catch (ex: GenericFactoryException) {
+					throw IFDException(ex)
+				}
 			return currentTermFactory
 		}
 
@@ -114,14 +115,14 @@ class IFD : IFD {
 		return hasContext
 	}
 
-
 	fun setEnvironment(env: Environment) {
 		this.env = env
 	}
 
-	fun addProtocol(proto: String, factory: ProtocolFactory): Boolean {
-		return protocolFactories.add(proto, factory)
-	}
+	fun addProtocol(
+		proto: String,
+		factory: ProtocolFactory,
+	): Boolean = protocolFactories.add(proto, factory)
 
 	@Synchronized
 	override fun establishContext(parameters: EstablishContext?): EstablishContextResponse {
@@ -135,16 +136,20 @@ class IFD : IFD {
 				env!!.addIfdCtx(ctxHandle!!)
 				numClients = AtomicInteger(1)
 				// TODO: add custom ThreadFactory to control the thread name
-				threadPool = Executors.newCachedThreadPool(object : ThreadFactory {
-					private val num = AtomicInteger(0)
-					private val group = ThreadGroup("IFD Wait")
-					override fun newThread(r: Runnable): Thread {
-						val name = "SCIO Watcher ${num.getAndIncrement()}"
-						val t = Thread(group, r, name)
-						t.setDaemon(false)
-						return t
-					}
-				})
+				threadPool =
+					Executors.newCachedThreadPool(
+						object : ThreadFactory {
+							private val num = AtomicInteger(0)
+							private val group = ThreadGroup("IFD Wait")
+
+							override fun newThread(r: Runnable): Thread {
+								val name = "SCIO Watcher ${num.getAndIncrement()}"
+								val t = Thread(group, r, name)
+								t.setDaemon(false)
+								return t
+							}
+						},
+					)
 				asyncWaitThreads = ConcurrentSkipListMap()
 				evManager = IfdEventManager(env!!, ctxHandle!!)
 				evManager!!.initialize()
@@ -154,17 +159,19 @@ class IFD : IFD {
 			}
 
 			// prepare response
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.EstablishContextResponse::class.java,
-				org.openecard.common.WSHelper.makeResultOK()
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.EstablishContextResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultOK(),
+				)
 			response.setContextHandle(ctxHandle)
 			return response
 		} catch (ex: IFDException) {
 			LOG.warn(ex) { ex.message }
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.EstablishContextResponse::class.java,
-				ex.result
+				ex.result,
 			)
 		}
 	}
@@ -185,18 +192,21 @@ class IFD : IFD {
 			}
 			evManager!!.terminate()
 
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse::class.java,
-				org.openecard.common.WSHelper.makeResultOK()
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultOK(),
+				)
 			return response
 		} else {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse::class.java,
+					r,
+				)
 			return response
 		}
 	}
@@ -206,29 +216,33 @@ class IFD : IFD {
 		try {
 			wasPrepared = cm!!.prepareDevices()
 		} catch (ex: SCIOException) {
-			val minorError = when (ex.code) {
-				SCIOErrorCode.SCARD_W_CANCELLED_BY_USER -> ECardConstants.Minor.IFD.CANCELLATION_BY_USER
-				SCIOErrorCode.SCARD_E_TIMEOUT -> ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT
-				else -> ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR
-			}
+			val minorError =
+				when (ex.code) {
+					SCIOErrorCode.SCARD_W_CANCELLED_BY_USER -> ECardConstants.Minor.IFD.CANCELLATION_BY_USER
+					SCIOErrorCode.SCARD_E_TIMEOUT -> ECardConstants.Minor.IFD.Terminal.WAIT_FOR_DEVICE_TIMEOUT
+					else -> ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR
+				}
 			val r = makeResultError(minorError, ex.message)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse::class.java,
-				r
+				r,
 			)
 		}
 
 		if (wasPrepared) {
-			val handle = HandlerBuilder.create()
-				.setContextHandle(parameters.getContextHandle())
-				.buildConnectionHandle()
+			val handle =
+				HandlerBuilder
+					.create()
+					.setContextHandle(parameters.getContextHandle())
+					.buildConnectionHandle()
 
 			env!!.eventDispatcher!!.notify(EventType.PREPARE_DEVICES, IfdEventObject(handle))
 		}
 
 		return WSHelper.makeResponse(
 			iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse::class.java,
-			org.openecard.common.WSHelper.makeResultOK()
+			org.openecard.common.WSHelper
+				.makeResultOK(),
 		)
 	}
 
@@ -236,16 +250,19 @@ class IFD : IFD {
 		val wasPoweredDown = cm!!.powerDownDevices()
 
 		if (wasPoweredDown) {
-			val handle = HandlerBuilder.create()
-				.setContextHandle(parameters.getContextHandle())
-				.buildConnectionHandle()
+			val handle =
+				HandlerBuilder
+					.create()
+					.setContextHandle(parameters.getContextHandle())
+					.buildConnectionHandle()
 
 			env!!.eventDispatcher!!.notify(EventType.POWER_DOWN_DEVICES, IfdEventObject(handle))
 		}
 
 		return WSHelper.makeResponse(
 			iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse::class.java,
-			org.openecard.common.WSHelper.makeResultOK()
+			org.openecard.common.WSHelper
+				.makeResultOK(),
 		)
 	}
 
@@ -254,10 +271,11 @@ class IFD : IFD {
 		if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
+					r,
+				)
 			return response
 		} else {
 			try {
@@ -266,24 +284,26 @@ class IFD : IFD {
 				for (next in terminals) {
 					ifds.add(next.name)
 				}
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 				response.getIFDName().addAll(ifds)
 				return response
 			} catch (ex: SCIOException) {
 				LOG.warn(ex) { "${ex.message}" }
 				val r = makeResultUnknownIFDError(ex.message)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.ListIFDsResponse::class.java,
+						r,
+					)
 				return response
 			}
 		}
 	}
-
 
 	override fun getIFDCapabilities(parameters: GetIFDCapabilities): GetIFDCapabilitiesResponse {
 		var response: GetIFDCapabilitiesResponse
@@ -292,23 +312,25 @@ class IFD : IFD {
 		if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					r,
+				)
 			return response
 		}
 
 		try {
 			val ifdName = parameters.getIFDName()
-			val info = try {
-				val channel = cm!!.openMasterChannel(ifdName)
-				TerminalInfo(cm!!, channel)
-			} catch (ex: NoSuchTerminal) {
-				// continue without a channel
-				val term = cm!!.terminals.getTerminal(ifdName)
-				TerminalInfo(cm!!, term)
-			}
+			val info =
+				try {
+					val channel = cm!!.openMasterChannel(ifdName)
+					TerminalInfo(cm!!, channel)
+				} catch (ex: NoSuchTerminal) {
+					// continue without a channel
+					val term = cm!!.terminals.getTerminal(ifdName)
+					TerminalInfo(cm!!, term)
+				}
 
 			val cap = IFDCapabilitiesType()
 
@@ -351,29 +373,33 @@ class IFD : IFD {
 			cap.isAcousticSignalUnit = info.isAcousticSignal
 
 			// prepare response
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				org.openecard.common.WSHelper.makeResultOK()
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultOK(),
+				)
 			response.setIFDCapabilities(cap)
 			return response
 		} catch (ex: NullPointerException) {
 			val msg = String.format("Requested terminal not found.")
 			LOG.warn(ex) { msg }
 			val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					r,
+				)
 			return response
 		} catch (ex: NoSuchTerminal) {
 			val msg = String.format("Requested terminal not found.")
 			LOG.warn(ex) { msg }
 			val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					r,
+				)
 			return response
 		} catch (ex: SCIOException) {
 			val msg = String.format("Failed to request status from terminal.")
@@ -385,23 +411,24 @@ class IFD : IFD {
 				LOG.debug(ex) { msg }
 			}
 			val r = makeResultUnknownIFDError(msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					r,
+				)
 			return response
 		} catch (ex: InterruptedException) {
 			val msg = String.format("Cancellation by user.")
 			LOG.warn(ex) { msg }
 			val r = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse::class.java,
+					r,
+				)
 			return response
 		}
 	}
-
 
 	override fun getStatus(parameters: GetStatus): GetStatusResponse {
 		var response: GetStatusResponse
@@ -410,10 +437,11 @@ class IFD : IFD {
 		if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
+					r,
+				)
 			return response
 		}
 
@@ -430,10 +458,11 @@ class IFD : IFD {
 					LOG.warn(ex) { msg }
 					val minor = ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD
 					val r = makeResult(ECardConstants.Major.ERROR, minor, msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
+							r,
+						)
 					return response
 				}
 			} else {
@@ -442,37 +471,45 @@ class IFD : IFD {
 		} catch (ex: SCIOException) {
 			val msg = "Failed to get list with the terminals."
 			LOG.warn(ex) { msg }
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
-				org.openecard.common.WSHelper.makeResultUnknownIFDError(msg)
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultUnknownIFDError(msg),
+				)
 			return response
 		}
 
 		// request status for each ifd
 		val status = ArrayList<IFDStatusType>(ifds.size)
 		for (ifd in ifds) {
-			var info = try {
-				val channel = cm!!.openMasterChannel(ifd.name)
-				TerminalInfo(cm!!, channel)
-			} catch (ex: NoSuchTerminal) {
-				// continue without a channel
-				TerminalInfo(cm!!, ifd)
-			} catch (ex: SCIOException) {
-				TerminalInfo(cm!!, ifd)
-			}
+			var info =
+				try {
+					val channel = cm!!.openMasterChannel(ifd.name)
+					TerminalInfo(cm!!, channel)
+				} catch (ex: NoSuchTerminal) {
+					// continue without a channel
+					TerminalInfo(cm!!, ifd)
+				} catch (ex: SCIOException) {
+					TerminalInfo(cm!!, ifd)
+				}
 			try {
 				val s = info.status
 				status.add(s)
 			} catch (ex: SCIOException) {
-				if (ex.code != SCIOErrorCode.SCARD_W_UNPOWERED_CARD && ex.code != SCIOErrorCode.SCARD_W_UNRESPONSIVE_CARD && ex.code != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD && ex.code != SCIOErrorCode.SCARD_E_PROTO_MISMATCH) {
+				if (ex.code != SCIOErrorCode.SCARD_W_UNPOWERED_CARD &&
+					ex.code != SCIOErrorCode.SCARD_W_UNRESPONSIVE_CARD &&
+					ex.code != SCIOErrorCode.SCARD_W_UNSUPPORTED_CARD &&
+					ex.code != SCIOErrorCode.SCARD_E_PROTO_MISMATCH
+				) {
 					val msg = String.format("Failed to determine status of terminal '%s'.", ifd.name)
 					LOG.warn(ex) { msg }
 					val r = makeResultUnknownIFDError(msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
+							r,
+						)
 					return response
 				} else {
 					// fall through if there is a card which can not be connected
@@ -482,14 +519,15 @@ class IFD : IFD {
 		}
 
 		// everything worked out well
-		response = WSHelper.makeResponse(
-			iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
-			org.openecard.common.WSHelper.makeResultOK()
-		)
+		response =
+			WSHelper.makeResponse(
+				iso.std.iso_iec._24727.tech.schema.GetStatusResponse::class.java,
+				org.openecard.common.WSHelper
+					.makeResultOK(),
+			)
 		response.getIFDStatus().addAll(status)
 		return response
 	}
-
 
 	override fun wait(parameters: Wait): WaitResponse {
 		var response: WaitResponse
@@ -498,10 +536,11 @@ class IFD : IFD {
 		if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+					r,
+				)
 			return response
 		}
 
@@ -513,10 +552,11 @@ class IFD : IFD {
 		if (timeout.signum() == -1 || timeout.signum() == 0) {
 			val msg = "Invalid timeout value given, must be strictly positive."
 			val r = makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+					r,
+				)
 			return response
 		}
 		var timeoutL: Long
@@ -559,10 +599,11 @@ class IFD : IFD {
 					if (s.getIFDName() == null) {
 						val msg = "IFD in a request IFDStatus not known."
 						val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-						response = WSHelper.makeResponse(
-							iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-							r
-						)
+						response =
+							WSHelper.makeResponse(
+								iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+								r,
+							)
 						return response
 					}
 					// check that at least one slot entry is present
@@ -585,10 +626,12 @@ class IFD : IFD {
 				threadPool!!.execute(future) // finally run this darn thingy
 
 				// prepare result with session id in it
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 				response.setSessionIdentifier(sessionId)
 				return response
 			} else {
@@ -600,7 +643,7 @@ class IFD : IFD {
 					val r = makeResultUnknownError(msg)
 					return WSHelper.makeResponse(
 						iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-						r
+						r,
 					)
 				}
 				threadPool!!.execute(future)
@@ -609,10 +652,12 @@ class IFD : IFD {
 				val events = future.get()
 
 				// prepare response
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 				response.getIFDEvent().addAll(events)
 				return response
 			}
@@ -623,12 +668,14 @@ class IFD : IFD {
 			if (ex.code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 				r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)
 			}
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+					r,
+				)
 			return response
-		} catch (ex: ExecutionException) { // this is the exception from within the future
+		} catch (ex: ExecutionException) {
+			// this is the exception from within the future
 			val cause = ex.cause
 			if (cause is SCIOException) {
 				val msg = "Unknown SCIO error occurred during wait call."
@@ -637,33 +684,35 @@ class IFD : IFD {
 				if ((ex.cause as SCIOException).code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
 					r.setResultMinor(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE)
 				}
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+						r,
+					)
 			} else {
 				val msg = "Unknown error during wait call."
 				LOG.error(cause) { msg }
 				val r = makeResultUnknownError(msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+						r,
+					)
 			}
 			return response
 		} catch (ex: InterruptedException) {
 			val msg = "Wait interrupted by another thread."
 			LOG.warn(ex) { msg }
 			val r = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.WaitResponse::class.java,
+					r,
+				)
 			Thread.currentThread().interrupt()
 			return response
 		}
 	}
-
 
 	override fun cancel(parameters: Cancel): CancelResponse {
 		val response: CancelResponse
@@ -672,10 +721,11 @@ class IFD : IFD {
 		if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 			val msg = "Invalid context handle specified."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+					r,
+				)
 			return response
 		}
 
@@ -686,17 +736,20 @@ class IFD : IFD {
 			val f = this.asyncWaitThreads!!.get(session)
 			if (f != null) {
 				f.cancel(true)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 			} else {
 				val msg = "No matching Wait call exists for the given session."
 				val r = makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+						r,
+					)
 			}
 		} else if (ifdName != null) {
 			// TODO: kill only if request is specific to the named terminal
@@ -705,31 +758,35 @@ class IFD : IFD {
 				if (syncWaitThread != null) {
 					syncWaitThread!!.cancel(true)
 					syncWaitThread = null // not really needed but seems cleaner
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-						org.openecard.common.WSHelper.makeResultOK()
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+							org.openecard.common.WSHelper
+								.makeResultOK(),
+						)
 				} else {
 					val msg = "No synchronous Wait to cancel."
 					val r = makeResultError(ECardConstants.Minor.IFD.IO.CANCEL_NOT_POSSIBLE, msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+							r,
+						)
 				}
 			}
 		} else {
 			// nothing to cancel
 			val msg = "Invalid parameters given."
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
-				org.openecard.common.WSHelper.makeResultUnknownError(msg)
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.CancelResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultUnknownError(msg),
+				)
 		}
 
 		return response
 	}
-
 
 	/**
 	 * Note: the first byte of the command data is the control code.
@@ -740,10 +797,11 @@ class IFD : IFD {
 		if (!hasContext()) {
 			val msg = "Context not initialized."
 			val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			return response
 		}
 
@@ -752,10 +810,11 @@ class IFD : IFD {
 		if (handle == null || command == null) {
 			val msg = "Missing parameter."
 			val r = makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			return response
 		}
 		val ctrlCode = command[0]
@@ -771,60 +830,65 @@ class IFD : IFD {
 
 				// evaluate result
 				val result = evaluateControlIFDRAPDU(resultCommand)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-					result
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+						result,
+					)
 				response.setResponse(resultCommand)
 				return response
 			} else {
 				val msg = "The terminal is not capable of performing the requested action."
 				val r = makeResultUnknownIFDError(msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+						r,
+					)
 				return response
 			}
 		} catch (ex: NoSuchChannel) {
 			val msg = "The card or the terminal is not available anymore."
 			val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			LOG.warn(ex) { msg }
 			return response
 		} catch (ex: IllegalStateException) {
 			val msg = "The card or the terminal is not available anymore."
 			val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			LOG.warn(ex) { msg }
 			return response
 		} catch (ex: SCIOException) {
 			val msg = "Unknown error while sending transmit control command."
 			val r = makeResultUnknownIFDError(msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			LOG.warn(ex) { msg }
 			return response
 		} catch (ex: InterruptedException) {
 			val msg = String.format("Cancellation by user.")
 			LOG.warn(ex) { msg }
 			val r = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
-				r
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.ControlIFDResponse::class.java,
+					r,
+				)
 			return response
 		}
 	}
-
 
 	override fun connect(parameters: Connect): ConnectResponse {
 		try {
@@ -833,10 +897,11 @@ class IFD : IFD {
 			if (!ByteUtils.compare(ctxHandle, parameters.getContextHandle())) {
 				val msg = "Invalid context handle specified."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_CONTEXT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+						r,
+					)
 				return response
 			} else {
 				try {
@@ -857,55 +922,62 @@ class IFD : IFD {
 						if (resp.getResult().getResultMajor() == ECardConstants.Major.ERROR) {
 							// destroy channel, when not successful here
 							ch.shutdown()
-							response = WSHelper.makeResponse(
-								iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-								resp.getResult()
-							)
+							response =
+								WSHelper.makeResponse(
+									iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+									resp.getResult(),
+								)
 							return response
 						}
 					}
 
 					// connection established, return result
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-						org.openecard.common.WSHelper.makeResultOK()
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+							org.openecard.common.WSHelper
+								.makeResultOK(),
+						)
 					response.setSlotHandle(slotHandle)
 					return response
 				} catch (ex: NoSuchTerminal) {
 					val msg = "The requested terminal does not exist."
 					val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+							r,
+						)
 					LOG.warn(ex) { msg }
 					return response
 				} catch (ex: NullPointerException) {
 					val msg = "The requested terminal does not exist."
 					val r = makeResultError(ECardConstants.Minor.IFD.Terminal.UNKNOWN_IFD, msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+							r,
+						)
 					LOG.warn(ex) { msg }
 					return response
 				} catch (ex: IllegalStateException) {
 					val msg = "No card available in the requested terminal."
 					val r = makeResultError(ECardConstants.Minor.IFD.Terminal.NO_CARD, msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+							r,
+						)
 					LOG.warn(ex) { msg }
 					return response
 				} catch (ex: SCIOException) {
 					val msg = "Unknown error in the underlying SCIO implementation."
 					val r = makeResultUnknownIFDError(msg)
-					response = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-						r
-					)
+					response =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
+							r,
+						)
 					LOG.warn(ex) { msg }
 					return response
 				}
@@ -915,11 +987,11 @@ class IFD : IFD {
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.ConnectResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(ex)
+				org.openecard.common.WSHelper
+					.makeResult(ex),
 			)
 		}
 	}
-
 
 	@Synchronized
 	override fun disconnect(parameters: Disconnect): DisconnectResponse {
@@ -928,10 +1000,11 @@ class IFD : IFD {
 			if (!hasContext()) {
 				val msg = "Context not initialized."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
+						r,
+					)
 				return response
 			}
 
@@ -948,17 +1021,21 @@ class IFD : IFD {
 					val master = cm!!.getMasterChannel(ifdName)
 
 					var builder = HandlerBuilder.create()
-					val cHandleIn = builder.setCardType(ECardConstants.UNKNOWN_CARD)
-						.setCardIdentifier(card.aTR.bytes)
-						.setContextHandle(ctxHandle)
-						.setIfdName(ifdName)
-						.setSlotIdx(BigInteger.ZERO)
-						.buildConnectionHandle()
+					val cHandleIn =
+						builder
+							.setCardType(ECardConstants.UNKNOWN_CARD)
+							.setCardIdentifier(card.aTR.bytes)
+							.setContextHandle(ctxHandle)
+							.setIfdName(ifdName)
+							.setSlotIdx(BigInteger.ZERO)
+							.buildConnectionHandle()
 					builder = HandlerBuilder.create()
-					val cHandleRm = builder.setContextHandle(ctxHandle)
-						.setIfdName(ifdName)
-						.setSlotIdx(BigInteger.ZERO)
-						.buildConnectionHandle()
+					val cHandleRm =
+						builder
+							.setContextHandle(ctxHandle)
+							.setIfdName(ifdName)
+							.setSlotIdx(BigInteger.ZERO)
+							.buildConnectionHandle()
 
 					try {
 						master.reconnect()
@@ -979,27 +1056,31 @@ class IFD : IFD {
 
 				// TODO: take care of other actions (probably over ControlIFD)
 				// the default is to not disconnect the card, because all existing connections would be broken
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 				return response
 			} catch (ex: NoSuchChannel) {
 				val msg = "No card available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: SCIOException) {
 				val msg = "Unknown error in the underlying SCIO implementation."
 				val r = makeResultUnknownIFDError(msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			}
@@ -1008,11 +1089,11 @@ class IFD : IFD {
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.DisconnectResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(ex)
+				org.openecard.common.WSHelper
+					.makeResult(ex),
 			)
 		}
 	}
-
 
 	override fun beginTransaction(beginTransaction: BeginTransaction): BeginTransactionResponse {
 		try {
@@ -1020,10 +1101,11 @@ class IFD : IFD {
 			if (!hasContext()) {
 				val msg = "Context not initialized."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
+						r,
+					)
 				return response
 			}
 
@@ -1034,19 +1116,21 @@ class IFD : IFD {
 			} catch (ex: NoSuchChannel) {
 				val msg = "No card available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: IllegalStateException) {
 				val msg = "No card available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: SCIOException) {
@@ -1066,24 +1150,28 @@ class IFD : IFD {
 					}
 				}
 				val r = makeResultError(minor, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
+						r,
+					)
 				return response
 			}
 
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-				org.openecard.common.WSHelper.makeResultOK()
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultOK(),
+				)
 			return response
 		} catch (ex: Exception) {
 			LOG.warn(ex) { "${ex.message}" }
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(ex)
+				org.openecard.common.WSHelper
+					.makeResult(ex),
 			)
 		}
 	}
@@ -1094,10 +1182,11 @@ class IFD : IFD {
 			if (!hasContext()) {
 				val msg = "Context not initialized."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
+						r,
+					)
 				return response
 			}
 
@@ -1108,47 +1197,52 @@ class IFD : IFD {
 			} catch (ex: NoSuchChannel) {
 				val msg = "No card with transaction available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: IllegalStateException) {
 				val msg = "No card with transaction available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: SCIOException) {
 				val msg = "Unknown error in the underlying SCIO implementation."
 				val r = makeResultUnknownIFDError(msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			}
 
-			response = WSHelper.makeResponse(
-				iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-				org.openecard.common.WSHelper.makeResultOK()
-			)
+			response =
+				WSHelper.makeResponse(
+					iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
+					org.openecard.common.WSHelper
+						.makeResultOK(),
+				)
 			return response
 		} catch (ex: Exception) {
 			LOG.warn(ex) { "${ex.message}" }
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.EndTransactionResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(ex)
+				org.openecard.common.WSHelper
+					.makeResult(ex),
 			)
 		}
 	}
-
 
 	@Publish
 	override fun transmit(parameters: Transmit): TransmitResponse {
@@ -1157,10 +1251,11 @@ class IFD : IFD {
 			if (!hasContext()) {
 				val msg = "Context not initialized."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
+						r,
+					)
 				return response
 			}
 
@@ -1175,20 +1270,23 @@ class IFD : IFD {
 						if (code.size == 0 || code.size > 2) {
 							val msg = "Invalid accepted status code given."
 							val r = makeResultError(ECardConstants.Minor.App.PARM_ERROR, msg)
-							response = WSHelper.makeResponse(
-								iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-								r
-							)
+							response =
+								WSHelper.makeResponse(
+									iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
+									r,
+								)
 							return response
 						}
 					}
 				}
 
 				// transmit APDUs and stop if an error occurs or a not expected status is hit
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-					org.openecard.common.WSHelper.makeResultOK()
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
+						org.openecard.common.WSHelper
+							.makeResultOK(),
+					)
 				var result: Result?
 				val rapdus = response.getOutputAPDU()
 				try {
@@ -1224,19 +1322,21 @@ class IFD : IFD {
 			} catch (ex: NoSuchChannel) {
 				val msg = "No card with transaction available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			} catch (ex: IllegalStateException) {
 				val msg = "No card with transaction available in the requested terminal."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
+						r,
+					)
 				LOG.warn(ex) { msg }
 				return response
 			}
@@ -1245,11 +1345,11 @@ class IFD : IFD {
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.TransmitResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(ex)
+				org.openecard.common.WSHelper
+					.makeResult(ex),
 			)
 		}
 	}
-
 
 	override fun verifyUser(parameters: VerifyUser): VerifyUserResponse {
 		// TODO: convert to IFD Protocol
@@ -1258,10 +1358,11 @@ class IFD : IFD {
 			if (!hasContext()) {
 				val msg = "Context not initialized."
 				val r = makeResultError(ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE, msg)
-				response = WSHelper.makeResponse(
-					VerifyUserResponse::class.java,
-					r
-				)
+				response =
+					WSHelper.makeResponse(
+						VerifyUserResponse::class.java,
+						r,
+					)
 				return response
 			}
 
@@ -1271,10 +1372,11 @@ class IFD : IFD {
 				response = aTerm.verifyUser(parameters)
 				return response
 			} catch (ex: IFDException) {
-				response = WSHelper.makeResponse(
-					VerifyUserResponse::class.java,
-					ex.result
-				)
+				response =
+					WSHelper.makeResponse(
+						VerifyUserResponse::class.java,
+						ex.result,
+					)
 				return response
 			}
 		} catch (ex: Exception) {
@@ -1282,33 +1384,34 @@ class IFD : IFD {
 			throwThreadKillException(ex)
 			return WSHelper.makeResponse(
 				VerifyUserResponse::class.java,
-				makeResult(ex)
+				makeResult(ex),
 			)
 		}
 	}
 
-
 	override fun modifyVerificationData(parameters: ModifyVerificationData?): ModifyVerificationDataResponse {
 		val response: ModifyVerificationDataResponse
 		val msg = "Command not supported."
-		response = WSHelper.makeResponse(
-			iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse::class.java,
-			org.openecard.common.WSHelper.makeResultUnknownError(msg)
-		)
+		response =
+			WSHelper.makeResponse(
+				iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse::class.java,
+				org.openecard.common.WSHelper
+					.makeResultUnknownError(msg),
+			)
 		return response
 	}
-
 
 	override fun output(parameters: Output?): OutputResponse {
 		val response: OutputResponse
 		val msg = "Command not supported."
-		response = WSHelper.makeResponse(
-			iso.std.iso_iec._24727.tech.schema.OutputResponse::class.java,
-			org.openecard.common.WSHelper.makeResultUnknownError(msg)
-		)
+		response =
+			WSHelper.makeResponse(
+				iso.std.iso_iec._24727.tech.schema.OutputResponse::class.java,
+				org.openecard.common.WSHelper
+					.makeResultUnknownError(msg),
+			)
 		return response
 	}
-
 
 	override fun establishChannel(parameters: EstablishChannel): EstablishChannelResponse {
 		val slotHandle = parameters.getSlotHandle()
@@ -1355,7 +1458,7 @@ class IFD : IFD {
 					if (execPaceRes.isError) {
 						return WSHelper.makeResponse(
 							iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse::class.java,
-							execPaceRes.getResult()
+							execPaceRes.getResult(),
 						)
 					}
 					val estPaceRes = EstablishPACEResponse(execPaceRes.data)
@@ -1375,15 +1478,16 @@ class IFD : IFD {
 						authDataResponse.setIDPICC(estPaceRes.iDICC)
 					}
 					// create response type and return
-					val response: EstablishChannelResponse = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse::class.java,
-						org.openecard.common.WSHelper.makeResultOK()
-					)
+					val response: EstablishChannelResponse =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse::class.java,
+							org.openecard.common.WSHelper
+								.makeResultOK(),
+						)
 					response.setAuthenticationProtocolData(authDataResponse.authDataType)
 					return response
 				}
 			} // end native pace support
-
 
 			// check out available software protocols
 			this.protocolFactories.get(protocol)?.let { factory ->
@@ -1400,12 +1504,13 @@ class IFD : IFD {
 			val r = makeResultUnknownError("No such protocol available in this IFD.")
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse::class.java,
-				r
+				r,
 			)
 		} catch (t: Throwable) {
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(t)
+				org.openecard.common.WSHelper
+					.makeResult(t),
 			)
 		}
 	}
@@ -1432,10 +1537,11 @@ class IFD : IFD {
 				// evaluate response
 				val execPaceRes = ExecutePACEResponse(resData)
 				if (execPaceRes.isError) {
-					destroyChannelResponse = WSHelper.makeResponse(
-						iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse::class.java,
-						execPaceRes.getResult()
-					)
+					destroyChannelResponse =
+						WSHelper.makeResponse(
+							iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse::class.java,
+							execPaceRes.getResult(),
+						)
 				}
 			}
 
@@ -1451,7 +1557,8 @@ class IFD : IFD {
 		} catch (t: Throwable) {
 			return WSHelper.makeResponse(
 				iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse::class.java,
-				org.openecard.common.WSHelper.makeResult(t)
+				org.openecard.common.WSHelper
+					.makeResult(t),
 			)
 		}
 	}
@@ -1466,11 +1573,12 @@ class IFD : IFD {
 	}
 
 	private fun throwThreadKillException(ex: Exception) {
-		val cause = if (ex is InvocationTargetExceptionUnchecked) {
-			ex.cause
-		} else {
-			ex
-		}
+		val cause =
+			if (ex is InvocationTargetExceptionUnchecked) {
+				ex.cause
+			} else {
+				ex
+			}
 
 		if (cause is ThreadTerminateException) {
 			throw cause as RuntimeException
@@ -1481,7 +1589,5 @@ class IFD : IFD {
 		}
 	}
 
-
 	// TODO: make all commands cancellable
-
 }

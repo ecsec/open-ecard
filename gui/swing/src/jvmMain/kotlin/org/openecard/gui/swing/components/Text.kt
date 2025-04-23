@@ -36,20 +36,25 @@ import javax.swing.text.html.HTMLEditorKit
  *
  * @author Tobias Wich
  */
-class Text(text: Text) : StepComponent {
+class Text(
+	text: Text,
+) : StepComponent {
 	private val textArea: JTextPane
 
 	init {
 		val textValue = text.document
 
-		val textString = when (textValue.mimeType) {
-			"text/plain" -> "<html><body>" + textValue.value.decodeToString() + "</body></html>"
+		val textString =
+			when (textValue.mimeType) {
+				"text/plain" -> "<html><body>" + textValue.value.decodeToString() + "</body></html>"
 
-			"text/html" ->        // pray that the code is HTML 3.2 compliant
-				textValue.value.decodeToString()
+				"text/html" -> // pray that the code is HTML 3.2 compliant
+					textValue.value.decodeToString()
 
-			else -> throw IllegalArgumentException("Content with the MimeType " + textValue.mimeType + " is not supported by the Swing Text implementation.")
-		}
+				else -> throw IllegalArgumentException(
+					"Content with the MimeType " + textValue.mimeType + " is not supported by the Swing Text implementation.",
+				)
+			}
 
 		textArea = JTextPane()
 		textArea.setEditorKitForContentType("text/html", HTMLEditorKit())
@@ -70,9 +75,7 @@ class Text(text: Text) : StepComponent {
 			return textArea
 		}
 
-	override fun validate(): Boolean {
-		return true
-	}
+	override fun validate(): Boolean = true
 
 	override val isValueType: Boolean = false
 

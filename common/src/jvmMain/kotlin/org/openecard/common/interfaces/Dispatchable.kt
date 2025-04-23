@@ -37,11 +37,11 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
 @Inherited
 annotation class Dispatchable(
-    /**
-     * Gets the class of the webservice interface associated with this getter.
-     * The class instance must be webservice interface and all of its methods must be webservice methods.
-     *
-     * @return Class object representing the actual webservice interface, the Object class if none is set.
-     */
-    val interfaceClass: KClass<*>
+	/**
+	 * Gets the class of the webservice interface associated with this getter.
+	 * The class instance must be webservice interface and all of its methods must be webservice methods.
+	 *
+	 * @return Class object representing the actual webservice interface, the Object class if none is set.
+	 */
+	val interfaceClass: KClass<*>,
 )

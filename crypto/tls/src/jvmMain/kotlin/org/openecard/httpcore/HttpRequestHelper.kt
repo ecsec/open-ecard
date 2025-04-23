@@ -32,37 +32,43 @@ import java.net.URL
  * @author Tobias Wich
  */
 object HttpRequestHelper {
-    /**
-     * Modify the given request and add a common set of headers.
-     *
-     * @param request Request which should be modified.
-     * @param host Name of the host to set in the Host header.
-     * @return Modified request instance for command chaining.
-     */
+	/**
+	 * Modify the given request and add a common set of headers.
+	 *
+	 * @param request Request which should be modified.
+	 * @param host Name of the host to set in the Host header.
+	 * @return Modified request instance for command chaining.
+	 */
 	@JvmStatic
-    fun setDefaultHeader(request: HttpRequest, host: String?): HttpRequest {
-        request.setHeader("Connection", "keep-alive")
-        request.setHeader("User-Agent", "$name/$version")
-        if (!host.isNullOrEmpty()) {
-            request.setHeader("Host", host)
-        }
-        return request
-    }
+	fun setDefaultHeader(
+		request: HttpRequest,
+		host: String?,
+	): HttpRequest {
+		request.setHeader("Connection", "keep-alive")
+		request.setHeader("User-Agent", "$name/$version")
+		if (!host.isNullOrEmpty()) {
+			request.setHeader("Host", host)
+		}
+		return request
+	}
 
-    /**
-     * Modify the given request and add a common set of headers.
-     *
-     * @param request Request which should be modified.
-     * @param endpoint URL of the endpoint for the Host header.
-     * @return Modified request instance for command chaining.
-     */
+	/**
+	 * Modify the given request and add a common set of headers.
+	 *
+	 * @param request Request which should be modified.
+	 * @param endpoint URL of the endpoint for the Host header.
+	 * @return Modified request instance for command chaining.
+	 */
 	@JvmStatic
-	fun setDefaultHeader(request: HttpRequest, endpoint: URL?): HttpRequest {
-        var host: String? = null
-        if (endpoint != null) {
-            host = endpoint.host
-            host += if (endpoint.port == -1) "" else (":" + endpoint.port)
-        }
-        return setDefaultHeader(request, host)
-    }
+	fun setDefaultHeader(
+		request: HttpRequest,
+		endpoint: URL?,
+	): HttpRequest {
+		var host: String? = null
+		if (endpoint != null) {
+			host = endpoint.host
+			host += if (endpoint.port == -1) "" else (":" + endpoint.port)
+		}
+		return setDefaultHeader(request, host)
+	}
 }

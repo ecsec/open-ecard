@@ -29,6 +29,6 @@ import org.openecard.addon.LifecycleTrait
  * @author Tobias Wich
  */
 interface AppExtensionAction : LifecycleTrait {
-    @Throws(AppExtensionException::class)
-    fun execute()
+	@Throws(AppExtensionException::class)
+	fun execute()
 }

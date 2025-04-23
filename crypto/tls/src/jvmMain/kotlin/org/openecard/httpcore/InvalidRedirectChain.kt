@@ -9,10 +9,12 @@
  */
 package org.openecard.httpcore
 
-
 /**
  * Exception indicating a constraint violation or an error while following redirects.
  *
  * @author Tobias Wich
  */
-class InvalidRedirectChain(msg: String, cause: Throwable? = null) : InvalidUrlException(msg, cause)
+class InvalidRedirectChain(
+	msg: String,
+	cause: Throwable? = null,
+) : InvalidUrlException(msg, cause)

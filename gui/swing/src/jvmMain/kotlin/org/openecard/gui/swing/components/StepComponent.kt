@@ -33,34 +33,34 @@ import java.awt.Component
  * @author Tobias Wich
  */
 interface StepComponent {
-    /**
-     * Get GUI component (AWT) so it can be drawn on a container.
-     * Every StepComponent must have exactly one GUI component containing all elements.
-     * @return Drawable component.
-     */
-    val component: Component
+	/**
+	 * Get GUI component (AWT) so it can be drawn on a container.
+	 * Every StepComponent must have exactly one GUI component containing all elements.
+	 * @return Drawable component.
+	 */
+	val component: Component
 
-    /**
-     * Determine if this component has content which can be validated.
-     * @return True when StepComponent.validate() can be called, false otherwise.
-     */
-    val isValueType: Boolean
+	/**
+	 * Determine if this component has content which can be validated.
+	 * @return True when StepComponent.validate() can be called, false otherwise.
+	 */
+	val isValueType: Boolean
 
-    /**
-     * Validate the contents of this component. A meaningful result is only
-     * expected if StepComponent.isValueType() returns true.<br></br>
-     * For example in case of a TextInput, this function checks if the text is
-     * within the bounds of minLength and maxLength.
-     * @return True if component is valid, false if not. Undefined behaviour
-     * when component does not contain validatable content.
-     */
-    fun validate(): Boolean
+	/**
+	 * Validate the contents of this component. A meaningful result is only
+	 * expected if StepComponent.isValueType() returns true.<br></br>
+	 * For example in case of a TextInput, this function checks if the text is
+	 * within the bounds of minLength and maxLength.
+	 * @return True if component is valid, false if not. Undefined behaviour
+	 * when component does not contain validatable content.
+	 */
+	fun validate(): Boolean
 
-    /**
-     * The UserConsentResponse contains the result for all steps. Every step can get
-     * these results from its components with this function.
-     * @return Value for use in UserConsentResponse when StepComponent.isValueType()
-     * returns true, undefined (also null possible) otherwise.
-     */
-    val value: OutputInfoUnit?
+	/**
+	 * The UserConsentResponse contains the result for all steps. Every step can get
+	 * these results from its components with this function.
+	 * @return Value for use in UserConsentResponse when StepComponent.isValueType()
+	 * returns true, undefined (also null possible) otherwise.
+	 */
+	val value: OutputInfoUnit?
 }

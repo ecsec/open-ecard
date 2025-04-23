@@ -47,14 +47,17 @@ import java.util.zip.GZIPInputStream
 
 private val logger = KotlinLogging.logger {}
 
-class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
+class CardLinkStep(
+	val aCtx: Context,
+) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	val gui = aCtx.userConsent
 
-	override fun getFunctionType(): FunctionType {
-		return FunctionType.DIDAuthenticate
-	}
+	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
 
-	override fun perform(req: DIDAuthenticate, internalData: MutableMap<String, Any>): DIDAuthenticateResponse {
+	override fun perform(
+		req: DIDAuthenticate,
+		internalData: MutableMap<String, Any>,
+	): DIDAuthenticateResponse {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val ws = getWsPair(dynCtx)
 		val isPhoneRegistered = dynCtx.get(CardLinkKeys.PHONE_NUMBER_REGISTERED) as Boolean? ?: false
@@ -66,7 +69,7 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 			val guiResult = exec.process()
 			when (guiResult) {
 				ResultStatus.OK -> {
-					//continue
+					// continue
 				}
 				else -> {
 					// fail
@@ -75,7 +78,8 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 						val cardLinkCode = dynCtx.get(CardLinkKeys.SERVICE_ERROR_CODE) as CardLinkErrorCodes.CardLinkCodes?
 
 						val resultCode = cardLinkCode?.name ?: clientCode?.name ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR.name
-						val errorMessage = dynCtx.get(CardLinkKeys.ERROR_MESSAGE) as String? ?: "Unknown Error happened during CardLink process."
+						val errorMessage =
+							dynCtx.get(CardLinkKeys.ERROR_MESSAGE) as String? ?: "Unknown Error happened during CardLink process."
 						result = WSHelper.makeResultError(resultCode, errorMessage)
 					}
 				}
@@ -83,7 +87,11 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 		} catch (ex: ThreadTerminateException) {
 			// fail
 			return DIDAuthenticateResponse().apply {
-				result = WSHelper.makeResultError(ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "CardLink failed GUI process has been interrupted.")
+				result =
+					WSHelper.makeResultError(
+						ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
+						"CardLink failed GUI process has been interrupted.",
+					)
 			}
 		}
 
@@ -101,19 +109,31 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 	}
 
 	@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
-	private fun readPersonalInformation(conHandle: ConnectionHandleType,  dynCtx: DynamicContext) {
+	private fun readPersonalInformation(
+		conHandle: ConnectionHandleType,
+		dynCtx: DynamicContext,
+	) {
 		val infos = DidInfos(aCtx.dispatcher, null, conHandle)
 		val efPd = infos.getDataSetInfo("EF.PD").read()
 
-		val lengthPD = ByteBuffer.wrap(efPd, 0, 2).asShortBuffer().get().toInt()
-		val pd = efPd.sliceArray(IntRange(2,2+lengthPD-1))
+		val lengthPD =
+			ByteBuffer
+				.wrap(efPd, 0, 2)
+				.asShortBuffer()
+				.get()
+				.toInt()
+		val pd = efPd.sliceArray(IntRange(2, 2 + lengthPD - 1))
 
-		val gzipIs= GZIPInputStream(ByteArrayInputStream(pd))
+		val gzipIs = GZIPInputStream(ByteArrayInputStream(pd))
 		val uncompressedBar = gzipIs.readBytes()
 		dynCtx.put(CardLinkKeys.PERSONAL_DATA, uncompressedBar.toHexString())
 	}
 
-	private fun readEgkData(conHandle: ConnectionHandleType, cardSessionId: String, dynCtx: DynamicContext): RegisterEgk {
+	private fun readEgkData(
+		conHandle: ConnectionHandleType,
+		cardSessionId: String,
+		dynCtx: DynamicContext,
+	): RegisterEgk {
 		val infos = DidInfos(aCtx.dispatcher, null, conHandle)
 		val gdoDs = infos.getDataSetInfo("EF.GDO").read()
 
@@ -134,17 +154,22 @@ class CardLinkStep(val aCtx: Context) : ProtocolStep<DIDAuthenticate, DIDAuthent
 			cvcCA = cvcEgkCaEc,
 			atr = atrDs,
 			x509AuthECC = x509EsignAuthEc,
-			x509AuthRSA = x509EsignAuthRsa
+			x509AuthRSA = x509EsignAuthRsa,
 		)
 	}
 
-	private fun sendEgkData(regEgk: RegisterEgk, cardSessionId: String, ws: WsPair) {
+	private fun sendEgkData(
+		regEgk: RegisterEgk,
+		cardSessionId: String,
+		ws: WsPair,
+	) {
 		val correlationId = UUID.randomUUID().toString()
-		val egkEnvelope = GematikEnvelope(
-			regEgk,
-			correlationId,
-			cardSessionId,
-		)
+		val egkEnvelope =
+			GematikEnvelope(
+				regEgk,
+				correlationId,
+				cardSessionId,
+			)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		ws.socket.send(egkEnvelopeMsg)
 	}

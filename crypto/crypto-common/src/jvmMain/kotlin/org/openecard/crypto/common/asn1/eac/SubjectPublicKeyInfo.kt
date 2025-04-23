@@ -29,50 +29,52 @@ import org.openecard.bouncycastle.asn1.DERBitString
  *
  * @author Moritz Horsch
  */
-class SubjectPublicKeyInfo(seq: ASN1Sequence) {
-    /**
-     * Gets the algorithm.
-     *
-     * @return the algorithm
-     */
-    val algorithm: String
+class SubjectPublicKeyInfo(
+	seq: ASN1Sequence,
+) {
+	/**
+	 * Gets the algorithm.
+	 *
+	 * @return the algorithm
+	 */
+	val algorithm: String
 
-    /**
-     * Gets the subject public key.
-     *
-     * @return the subject public key
-     */
-    val subjectPublicKey: ByteArray
+	/**
+	 * Gets the subject public key.
+	 *
+	 * @return the subject public key
+	 */
+	val subjectPublicKey: ByteArray
 
-    /**
-     * Instantiates a new SubjectPublicKeyInfo.
-     *
-     * @param seq the ASN1 encoded sequence
-     */
-    init {
-        if (seq.size() == 2) {
-            algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            subjectPublicKey = DERBitString.getInstance(seq.getObjectAt(1)).bytes
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for SubjectPublicKeyInfo")
-        }
-    }
+	/**
+	 * Instantiates a new SubjectPublicKeyInfo.
+	 *
+	 * @param seq the ASN1 encoded sequence
+	 */
+	init {
+		if (seq.size() == 2) {
+			algorithm = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			subjectPublicKey = DERBitString.getInstance(seq.getObjectAt(1)).bytes
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for SubjectPublicKeyInfo")
+		}
+	}
 
-    companion object {
-        /**
-         * Gets the single instance of SubjectPublicKeyInfo.
-         *
-         * @param obj
-         * @return single instance of SubjectPublicKeyInfo
-         */
-        fun getInstance(obj: Any): SubjectPublicKeyInfo {
-            if (obj is SubjectPublicKeyInfo) {
-                return obj
-            } else if (obj is ASN1Sequence) {
-                return SubjectPublicKeyInfo(obj)
-            }
+	companion object {
+		/**
+		 * Gets the single instance of SubjectPublicKeyInfo.
+		 *
+		 * @param obj
+		 * @return single instance of SubjectPublicKeyInfo
+		 */
+		fun getInstance(obj: Any): SubjectPublicKeyInfo {
+			if (obj is SubjectPublicKeyInfo) {
+				return obj
+			} else if (obj is ASN1Sequence) {
+				return SubjectPublicKeyInfo(obj)
+			}
 
-            throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
-        }
-    }
+			throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
+		}
+	}
 }

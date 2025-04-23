@@ -28,7 +28,7 @@ import org.openecard.common.util.LinuxLibraryFinder
 import java.security.NoSuchAlgorithmException
 import javax.smartcardio.TerminalFactory
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Proxy and abstracted Factory for SCIO PC/SC driver.
@@ -37,38 +37,34 @@ private val LOG = KotlinLogging.logger {  }
  * @author Benedikt Biallowons
  */
 class PCSCFactory : org.openecard.common.ifd.scio.TerminalFactory {
-    private val osName: String = System.getProperty("os.name")
+	private val osName: String = System.getProperty("os.name")
 	val rawFactory: TerminalFactory
 
-    /**
-     * Default constructor with fixes for the faulty SmartcardIO library.
-     *
-     * @throws java.io.FileNotFoundException if pcsclite for Linux can't be found.
-     * @throws NoSuchAlgorithmException if no PC/SC provider can be found.
-     */
-    init {
+	/**
+	 * Default constructor with fixes for the faulty SmartcardIO library.
+	 *
+	 * @throws java.io.FileNotFoundException if pcsclite for Linux can't be found.
+	 * @throws NoSuchAlgorithmException if no PC/SC provider can be found.
+	 */
+	init {
 		if (osName.startsWith("Linux")) {
-            val libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1")
-            System.setProperty("sun.security.smartcardio.library", libFile.absolutePath)
-        }
+			val libFile = LinuxLibraryFinder.getLibraryPath("pcsclite", "1")
+			System.setProperty("sun.security.smartcardio.library", libFile.absolutePath)
+		}
 
-        try {
+		try {
 			LOG.info { "Trying to initialize PCSC subsystem." }
-            this.rawFactory = TerminalFactory.getInstance(ALGORITHM, null, Smartcardio())
+			this.rawFactory = TerminalFactory.getInstance(ALGORITHM, null, Smartcardio())
 			LOG.info { "Successfully initialized PCSC subsystem." }
-        } catch (ex: NoSuchAlgorithmException) {
+		} catch (ex: NoSuchAlgorithmException) {
 			error { "Failed to initialize smartcard system." }
-            throw ex
-        }
-    }
+			throw ex
+		}
+	}
 
-    override val type: String = rawFactory.type
+	override val type: String = rawFactory.type
 
-    override fun terminals(): SCIOTerminals {
-        return PCSCTerminals(this)
-    }
-
+	override fun terminals(): SCIOTerminals = PCSCTerminals(this)
 }
 
 private const val ALGORITHM = "PC/SC"
-

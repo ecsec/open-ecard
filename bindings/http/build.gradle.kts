@@ -18,15 +18,15 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				//	api(libs.jaxb.api)
-				//	api(libs.jaxb.ws.api)
-				//	api(libs.slf4j.api)
-				//	api(project(":wsdef:wsdef-common"))
-				//	api(project(":wsdef:wsdef-client"))
-				//	implementation(project(":i18n"))
-				//	api(libs.bc.prov)
-				//	api(libs.bc.tls)
-				//	api(libs.httpcore)
+				// 	api(libs.jaxb.api)
+				// 	api(libs.jaxb.ws.api)
+				// 	api(libs.slf4j.api)
+				// 	api(project(":wsdef:wsdef-common"))
+				// 	api(project(":wsdef:wsdef-client"))
+				// 	implementation(project(":i18n"))
+				// 	api(libs.bc.prov)
+				// 	api(libs.bc.tls)
+				// 	api(libs.httpcore)
 				api(project(":addon"))
 
 				implementation(libs.annotations)
@@ -34,7 +34,7 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
-				//implementation(libs.bundles.test.powermock)
+				// implementation(libs.bundles.test.powermock)
 				implementation(project(":gui:swing"))
 				implementation(project(":ifd:ifd-core"))
 				implementation(project(":management"))
@@ -44,15 +44,17 @@ kotlin {
 	}
 }
 
-
 tasks.named("jvmProcessResources", ProcessResources::class).configure {
 	doLast {
 		// build file listing of www files in resources dir, separated with :
-		val files = destinationDir.resolve("www").walk()
-			.filter { it.isFile }
-			.map { it.relativeTo(destinationDir).path }
-			.map { "/$it" }
-			.joinToString(":")
+		val files =
+			destinationDir
+				.resolve("www")
+				.walk()
+				.filter { it.isFile }
+				.map { it.relativeTo(destinationDir).path }
+				.map { "/$it" }
+				.joinToString(":")
 		destinationDir.resolve("www-files").writeText(files)
 	}
 }

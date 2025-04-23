@@ -21,9 +21,11 @@
  ***************************************************************************/
 package org.openecard.crypto.common.sal.did
 
-
 /**
  *
  * @author Tobias Wich
  */
-class NoSuchDid(msg: String, cause: Throwable? = null) : Exception(msg, cause)
+class NoSuchDid(
+	msg: String,
+	cause: Throwable? = null,
+) : Exception(msg, cause)

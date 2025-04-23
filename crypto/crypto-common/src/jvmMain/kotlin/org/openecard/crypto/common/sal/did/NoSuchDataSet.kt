@@ -21,9 +21,11 @@
  ***************************************************************************/
 package org.openecard.crypto.common.sal.did
 
-
 /**
  *
  * @author Tobias Wich
  */
-class NoSuchDataSet(msg: String, cause: Throwable? = null) : Exception(msg, cause)
+class NoSuchDataSet(
+	msg: String,
+	cause: Throwable? = null,
+) : Exception(msg, cause)

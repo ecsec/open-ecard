@@ -31,37 +31,38 @@ import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS
 import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_LISTENER_SUCCESSOR_KEY
 
 class ActivateAction : AppPluginAction {
-    private var aCtx: Context? = null
+	private var aCtx: Context? = null
 
 	private val ctxChecked: Context
 		get() = aCtx ?: throw IllegalStateException("CardLink action is not initialized.")
 
-    override fun execute(
+	override fun execute(
 		body: RequestBody?,
 		parameters: Map<String, String>?,
 		headers: Headers?,
 		attachments: List<Attachment>?,
-		extraParams: Map<String, Any>?
+		extraParams: Map<String, Any>?,
 	): BindingResult {
-        val ws = extraParams?.get(WS_KEY) as Websocket?
-            ?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
-                .setResultMessage("Missing websocket in CardLink activate request.")
-		val successorListener = extraParams?.get(WS_LISTENER_SUCCESSOR_KEY) as WebsocketListener?
-			?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
-				.setResultMessage("Missing websocket successor listener in CardLink activate request.")
+		val ws =
+			extraParams?.get(WS_KEY) as Websocket?
+				?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
+					.setResultMessage("Missing websocket in CardLink activate request.")
+		val successorListener =
+			extraParams?.get(WS_LISTENER_SUCCESSOR_KEY) as WebsocketListener?
+				?: return BindingResult(BindingResultCode.WRONG_PARAMETER)
+					.setResultMessage("Missing websocket successor listener in CardLink activate request.")
 
-        // call CardLink process
-        val proc: CardLinkProcess = CardLinkProcess(ctxChecked, ws, successorListener)
-        return proc.start()
-    }
+		// call CardLink process
+		val proc: CardLinkProcess = CardLinkProcess(ctxChecked, ws, successorListener)
+		return proc.start()
+	}
 
-    @kotlin.Throws(ActionInitializationException::class)
+	@kotlin.Throws(ActionInitializationException::class)
 	override fun init(aCtx: Context) {
-        this.aCtx = aCtx
-    }
+		this.aCtx = aCtx
+	}
 
-    override fun destroy(force: Boolean) {
-        this.aCtx = null
-    }
-
+	override fun destroy(force: Boolean) {
+		this.aCtx = null
+	}
 }

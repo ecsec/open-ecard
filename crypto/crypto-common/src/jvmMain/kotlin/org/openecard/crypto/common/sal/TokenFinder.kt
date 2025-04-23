@@ -36,72 +36,78 @@ import java.util.concurrent.Callable
  * @author Tobias Wich
  */
 class TokenFinder(
-    private val dispatcher: Dispatcher,
-    private val eventHandler: EventDispatcher,
-    private val sessionHandle: ConnectionHandleType,
-    private val cardTypes: Set<String>
+	private val dispatcher: Dispatcher,
+	private val eventHandler: EventDispatcher,
+	private val sessionHandle: ConnectionHandleType,
+	private val cardTypes: Set<String>,
 ) {
-    private var cardsWokenUp = false
+	private var cardsWokenUp = false
 
-    /**
-     * Sends a PrepareDevices call to the IFD identified by the context of this instance.
-     */
-    @Throws(WSHelper.WSException::class)
-    fun wakeCards() {
-        wakeCards(dispatcher, sessionHandle.getContextHandle())
-        cardsWokenUp = true
-    }
+	/**
+	 * Sends a PrepareDevices call to the IFD identified by the context of this instance.
+	 */
+	@Throws(WSHelper.WSException::class)
+	fun wakeCards() {
+		wakeCards(dispatcher, sessionHandle.getContextHandle())
+		cardsWokenUp = true
+	}
 
-    @Throws(WSHelper.WSException::class)
-    fun startWatching(): TokenFinderWatcher {
-        if (!cardsWokenUp) {
-            wakeCards()
-        }
+	@Throws(WSHelper.WSException::class)
+	fun startWatching(): TokenFinderWatcher {
+		if (!cardsWokenUp) {
+			wakeCards()
+		}
 
-        return TokenFinderWatcher()
-    }
+		return TokenFinderWatcher()
+	}
 
-    inner class TokenFinderWatcher : AutoCloseable {
-        fun waitForNext(): Promise<ConnectionHandleType> {
-            val nextResult: Promise<ConnectionHandleType> = FuturePromise(Callable {
-                val session = sessionHandle.getChannelHandle().getSessionIdentifier()
-                val contextHandle = sessionHandle.getContextHandle()
-                val ccu = CardConnectorUtil(dispatcher, eventHandler, cardTypes, session, contextHandle, null)
-                val path = ccu.waitForCard()
+	inner class TokenFinderWatcher : AutoCloseable {
+		fun waitForNext(): Promise<ConnectionHandleType> {
+			val nextResult: Promise<ConnectionHandleType> =
+				FuturePromise(
+					Callable {
+						val session = sessionHandle.getChannelHandle().getSessionIdentifier()
+						val contextHandle = sessionHandle.getContextHandle()
+						val ccu = CardConnectorUtil(dispatcher, eventHandler, cardTypes, session, contextHandle, null)
+						val path = ccu.waitForCard()
 
-                // connect card
-                val cc = CardApplicationConnect()
-                cc.setCardApplicationPath(path)
-                val cr = dispatcher.safeDeliver(cc) as CardApplicationConnectResponse
-                checkResult<CardApplicationConnectResponse>(cr)
-                cr.getConnectionHandle()
-            })
+						// connect card
+						val cc = CardApplicationConnect()
+						cc.setCardApplicationPath(path)
+						val cr = dispatcher.safeDeliver(cc) as CardApplicationConnectResponse
+						checkResult<CardApplicationConnectResponse>(cr)
+						cr.getConnectionHandle()
+					},
+				)
 
-            return nextResult
-        }
+			return nextResult
+		}
 
-        fun releaseHandle(handle: ConnectionHandleType) {
-        }
+		fun releaseHandle(handle: ConnectionHandleType) {
+		}
 
-        override fun close() {
-        }
-    }
+		override fun close() {
+		}
+	}
 
-    companion object {
-        /**
-         * Sends a PrepareDevices call to the IFD identified by the given context.
-         *
-         * @param dispatcher
-         * @param contextHandle
-         * @throws WSHelper.WSException
-         */
-        @Throws(WSHelper.WSException::class)
-        fun wakeCards(dispatcher: Dispatcher, contextHandle: ByteArray) {
-            // signal cards to be activated
-            val pdReq = PrepareDevices()
-            pdReq.setContextHandle(contextHandle)
-            val response = dispatcher.safeDeliver(pdReq) as PrepareDevicesResponse
-            checkResult<PrepareDevicesResponse>(response)
-        }
-    }
+	companion object {
+		/**
+		 * Sends a PrepareDevices call to the IFD identified by the given context.
+		 *
+		 * @param dispatcher
+		 * @param contextHandle
+		 * @throws WSHelper.WSException
+		 */
+		@Throws(WSHelper.WSException::class)
+		fun wakeCards(
+			dispatcher: Dispatcher,
+			contextHandle: ByteArray,
+		) {
+			// signal cards to be activated
+			val pdReq = PrepareDevices()
+			pdReq.setContextHandle(contextHandle)
+			val response = dispatcher.safeDeliver(pdReq) as PrepareDevicesResponse
+			checkResult<PrepareDevicesResponse>(response)
+		}
+	}
 }

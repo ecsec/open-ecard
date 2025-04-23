@@ -29,15 +29,18 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate
  * @author Tobias Wich
  */
 interface CertificateVerifier {
-    /**
-     * Verify the given certificate chain.
-     * An invalid certificate is indicated by a CertificateVerificationException.<br></br>
-     * The verification must at least check the certificate chain and the hosts name.
-     *
-     * @param chain Certificate chain to be verified.
-     * @param hostOrIP Name of the host or its IP address used in the validation.
-     * @throws CertificateVerificationException Thrown in case the verification failed.
-     */
-    @Throws(CertificateVerificationException::class)
-    fun isValid(chain: TlsServerCertificate, hostOrIP: String)
+	/**
+	 * Verify the given certificate chain.
+	 * An invalid certificate is indicated by a CertificateVerificationException.<br></br>
+	 * The verification must at least check the certificate chain and the hosts name.
+	 *
+	 * @param chain Certificate chain to be verified.
+	 * @param hostOrIP Name of the host or its IP address used in the validation.
+	 * @throws CertificateVerificationException Thrown in case the verification failed.
+	 */
+	@Throws(CertificateVerificationException::class)
+	fun isValid(
+		chain: TlsServerCertificate,
+		hostOrIP: String,
+	)
 }

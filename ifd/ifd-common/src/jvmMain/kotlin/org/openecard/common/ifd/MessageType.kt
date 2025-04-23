@@ -21,15 +21,14 @@
  ***************************************************************************/
 package org.openecard.common.ifd
 
-
 /**
  *
  * @author Johannes Schmoelz
  */
 enum class MessageType {
-    AUTHENTICATION_REQUEST,
-    SUCCESS,
-    AUTHENTICATION_FAILED,
-    REQUEST_CONFIRMATION,
-    CANCEL
+	AUTHENTICATION_REQUEST,
+	SUCCESS,
+	AUTHENTICATION_FAILED,
+	REQUEST_CONFIRMATION,
+	CANCEL,
 }

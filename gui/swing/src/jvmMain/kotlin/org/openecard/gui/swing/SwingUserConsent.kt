@@ -51,117 +51,129 @@ class SwingUserConsent
  * Instantiate SwingUserConsent.
  *
  * @param baseDialogWrapper
- */(private val baseDialogWrapper: SwingDialogWrapper) : UserConsent {
-    override fun obtainNavigator(parameters: UserConsentDescription): UserConsentNavigator {
-        val dialogWrapper = baseDialogWrapper.derive()
-        dialogWrapper.setTitle(parameters.title)
+ */
+(
+	private val baseDialogWrapper: SwingDialogWrapper,
+) : UserConsent {
+	override fun obtainNavigator(parameters: UserConsentDescription): UserConsentNavigator {
+		val dialogWrapper = baseDialogWrapper.derive()
+		dialogWrapper.setTitle(parameters.title)
 
-        val rootPanel = dialogWrapper.getContentPane
-        rootPanel.removeAll()
+		val rootPanel = dialogWrapper.getContentPane
+		rootPanel.removeAll()
 
-        val isPinEntryDialog = parameters.dialogType == "pin_entry_dialog"
-        val isPinChangeDialog = parameters.dialogType == "pin_change_dialog"
-        val isUpdateDialog = parameters.dialogType == "update_dialog"
+		val isPinEntryDialog = parameters.dialogType == "pin_entry_dialog"
+		val isPinChangeDialog = parameters.dialogType == "pin_change_dialog"
+		val isUpdateDialog = parameters.dialogType == "update_dialog"
 
-        // set different size when special dialog type is requested
-        if (isPinEntryDialog) {
-            dialogWrapper.setSize(350, 284)
-        } else if (isPinChangeDialog) {
-            dialogWrapper.setSize(570, 430)
-        } else if (isUpdateDialog) {
-            dialogWrapper.setSize(480, 330)
-        }
+		// set different size when special dialog type is requested
+		if (isPinEntryDialog) {
+			dialogWrapper.setSize(350, 284)
+		} else if (isPinChangeDialog) {
+			dialogWrapper.setSize(570, 430)
+		} else if (isUpdateDialog) {
+			dialogWrapper.setSize(480, 330)
+		}
 
-        val dialogType = parameters.dialogType
-        val steps = parameters.getSteps()
+		val dialogType = parameters.dialogType
+		val steps = parameters.getSteps()
 
-        // Set up panels
-        val stepPanel = JPanel(BorderLayout())
-        val sideBar = JPanel()
+		// Set up panels
+		val stepPanel = JPanel(BorderLayout())
+		val sideBar = JPanel()
 
-        val stepBar = StepBar(steps)
-        val navBar = NavigationBar(steps.size)
+		val stepBar = StepBar(steps)
+		val navBar = NavigationBar(steps.size)
 
-        val l = Logo()
-        initializeSidePanel(sideBar, l, stepBar)
+		val l = Logo()
+		initializeSidePanel(sideBar, l, stepBar)
 
-        val navigator = SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar)
-        navBar.registerEvents(navigator)
-        navBar.setDefaultButton(dialogWrapper.rootPane)
+		val navigator = SwingNavigator(dialogWrapper, dialogType, steps, stepPanel, navBar, stepBar)
+		navBar.registerEvents(navigator)
+		navBar.setDefaultButton(dialogWrapper.rootPane)
 
-        dialogWrapper.dialog.addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(event: WindowEvent?) {
-                // The user has closed the window by pressing the x of the window manager handle this event as
-                // cancelation. This is necessary to unlock the app in case of a running authentication.
-                val e = ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_CANCEL)
-                navigator.actionPerformed(e)
-            }
-        })
+		dialogWrapper.dialog.addWindowListener(
+			object : WindowAdapter() {
+				override fun windowClosing(event: WindowEvent?) {
+					// The user has closed the window by pressing the x of the window manager handle this event as
+					// cancelation. This is necessary to unlock the app in case of a running authentication.
+					val e = ActionEvent(navBar, ActionEvent.ACTION_PERFORMED, GUIConstants.BUTTON_CANCEL)
+					navigator.actionPerformed(e)
+				}
+			},
+		)
 
-        // Config layout
-        val layout = GroupLayout(rootPanel)
+		// Config layout
+		val layout = GroupLayout(rootPanel)
 		rootPanel.setLayout(layout)
 
 		layout.autoCreateGaps = false
 		layout.autoCreateContainerGaps = true
 
-        if (isPinEntryDialog || isPinChangeDialog || isUpdateDialog) {
-            layout.setHorizontalGroup(
-                layout.createSequentialGroup()
-                    .addGroup(
-                        layout.createParallelGroup()
-                            .addComponent(stepPanel)
-                            .addComponent(navBar)
-                    )
-            )
-            layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                    .addGroup(
-                        layout.createSequentialGroup()
-                            .addComponent(stepPanel)
-                            .addComponent(navBar)
-                    )
-            )
-        } else {
-            layout.setHorizontalGroup(
-                layout.createSequentialGroup()
-                    .addComponent(sideBar, 200, 200, 200)
-                    .addGroup(
-                        layout.createParallelGroup()
-                            .addComponent(stepPanel)
-                            .addComponent(navBar)
-                    )
-            )
-            layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                    .addComponent(sideBar)
-                    .addGroup(
-                        layout.createSequentialGroup()
-                            .addComponent(stepPanel)
-                            .addComponent(navBar)
-                    )
-            )
-        }
+		if (isPinEntryDialog || isPinChangeDialog || isUpdateDialog) {
+			layout.setHorizontalGroup(
+				layout
+					.createSequentialGroup()
+					.addGroup(
+						layout
+							.createParallelGroup()
+							.addComponent(stepPanel)
+							.addComponent(navBar),
+					),
+			)
+			layout.setVerticalGroup(
+				layout
+					.createParallelGroup(GroupLayout.Alignment.CENTER)
+					.addGroup(
+						layout
+							.createSequentialGroup()
+							.addComponent(stepPanel)
+							.addComponent(navBar),
+					),
+			)
+		} else {
+			layout.setHorizontalGroup(
+				layout
+					.createSequentialGroup()
+					.addComponent(sideBar, 200, 200, 200)
+					.addGroup(
+						layout
+							.createParallelGroup()
+							.addComponent(stepPanel)
+							.addComponent(navBar),
+					),
+			)
+			layout.setVerticalGroup(
+				layout
+					.createParallelGroup(GroupLayout.Alignment.CENTER)
+					.addComponent(sideBar)
+					.addGroup(
+						layout
+							.createSequentialGroup()
+							.addComponent(stepPanel)
+							.addComponent(navBar),
+					),
+			)
+		}
 
-        rootPanel.validate()
-        rootPanel.repaint()
+		rootPanel.validate()
+		rootPanel.repaint()
 
-        return navigator
-    }
+		return navigator
+	}
 
-    override fun obtainFileDialog(): FileDialog {
-        return SwingFileDialog()
-    }
+	override fun obtainFileDialog(): FileDialog = SwingFileDialog()
 
-    override fun obtainMessageDialog(): MessageDialog {
-        return SwingMessageDialog()
-    }
+	override fun obtainMessageDialog(): MessageDialog = SwingMessageDialog()
 
-    private fun initializeSidePanel(panel: JPanel, vararg components: JComponent) {
-        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
-        for (c in components) {
-            c.setAlignmentX(Component.LEFT_ALIGNMENT)
-            panel.add(c)
-        }
-    }
+	private fun initializeSidePanel(
+		panel: JPanel,
+		vararg components: JComponent,
+	) {
+		panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
+		for (c in components) {
+			c.setAlignmentX(Component.LEFT_ALIGNMENT)
+			panel.add(c)
+		}
+	}
 }

@@ -29,17 +29,26 @@ import org.openecard.common.event.EventType
  * @author René Lottes
  */
 interface EventDispatcher {
-    fun start()
+	fun start()
 
-    fun terminate()
+	fun terminate()
 
-    fun add(cb: EventCallback): EventCallback
+	fun add(cb: EventCallback): EventCallback
 
-    fun add(cb: EventCallback, vararg eventTypes: EventType): EventCallback
+	fun add(
+		cb: EventCallback,
+		vararg eventTypes: EventType,
+	): EventCallback
 
-    fun add(cb: EventCallback, filter: EventFilter): EventCallback
+	fun add(
+		cb: EventCallback,
+		filter: EventFilter,
+	): EventCallback
 
-    fun del(cb: EventCallback): EventCallback
+	fun del(cb: EventCallback): EventCallback
 
-    fun notify(t: EventType, o: EventObject)
+	fun notify(
+		t: EventType,
+		o: EventObject,
+	)
 }

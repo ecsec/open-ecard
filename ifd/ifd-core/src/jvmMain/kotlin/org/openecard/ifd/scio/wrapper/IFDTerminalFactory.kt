@@ -33,33 +33,31 @@ import org.openecard.ws.common.GenericInstanceProvider
  *
  * @author Tobias Wich
  */
-class IFDTerminalFactory(private val factory: GenericInstanceProvider<TerminalFactory>) :
-	GenericInstanceProvider<TerminalFactory> {
-
+class IFDTerminalFactory(
+	private val factory: GenericInstanceProvider<TerminalFactory>,
+) : GenericInstanceProvider<TerminalFactory> {
 	@get:Throws(GenericFactoryException::class)
 	override val instance: TerminalFactory
 		get() = this.factory.instance
 
 	companion object {
-
 		private val factoryInst: IFDTerminalFactory by lazy {
-			val factory = try {
-				GenericFactory(
-					TerminalFactory::class.java,
-					properties(),
-					FACTORY_KEY
-				)
-			} catch (ex: GenericFactoryException) {
-				throw IFDException(ex)
-			}
+			val factory =
+				try {
+					GenericFactory(
+						TerminalFactory::class.java,
+						properties(),
+						FACTORY_KEY,
+					)
+				} catch (ex: GenericFactoryException) {
+					throw IFDException(ex)
+				}
 			IFDTerminalFactory(factory)
 		}
 
 		@Synchronized
 		@Throws(IFDException::class)
-		fun configBackedInstance(): IFDTerminalFactory {
-			return factoryInst
-		}
+		fun configBackedInstance(): IFDTerminalFactory = factoryInst
 	}
 }
 

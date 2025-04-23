@@ -33,73 +33,74 @@ import javax.xml.parsers.DocumentBuilder
  * @author Tobias Wich
  */
 class SOAPMessage {
-    val document: Document
-    private val namespace: String
+	val document: Document
+	private val namespace: String
 
-    val soapEnvelope: SOAPEnvelope
-    val soapHeader: SOAPHeader
-    val soapBody: SOAPBody
+	val soapEnvelope: SOAPEnvelope
+	val soapHeader: SOAPHeader
+	val soapBody: SOAPBody
 
-    internal constructor(docBuilder: DocumentBuilder, namespace: String) {
-        document = docBuilder.newDocument()
-        this.namespace = namespace
+	internal constructor(docBuilder: DocumentBuilder, namespace: String) {
+		document = docBuilder.newDocument()
+		this.namespace = namespace
 
-        // add envelope and that stuff
-        val envElem = document.createElementNS(namespace, "Envelope")
-        soapEnvelope = SOAPEnvelope(envElem)
-        document.appendChild(envElem)
-        val headElem = soapEnvelope.addChildElement(QName(namespace, "Header"))
-        soapHeader = SOAPHeader(headElem)
-        val bodyElem = soapEnvelope.addChildElement(QName(namespace, "Body"))
-        soapBody = SOAPBody(bodyElem)
-    }
+		// add envelope and that stuff
+		val envElem = document.createElementNS(namespace, "Envelope")
+		soapEnvelope = SOAPEnvelope(envElem)
+		document.appendChild(envElem)
+		val headElem = soapEnvelope.addChildElement(QName(namespace, "Header"))
+		soapHeader = SOAPHeader(headElem)
+		val bodyElem = soapEnvelope.addChildElement(QName(namespace, "Body"))
+		soapBody = SOAPBody(bodyElem)
+	}
 
-    internal constructor(doc: Document) {
-        this.document = doc
-        val envElem = doc.firstChild as Element?
-            ?: throw SOAPException("No Envelope element in SOAP message.")
-        soapEnvelope = SOAPEnvelope(envElem)
+	internal constructor(doc: Document) {
+		this.document = doc
+		val envElem =
+			doc.firstChild as Element?
+				?: throw SOAPException("No Envelope element in SOAP message.")
+		soapEnvelope = SOAPEnvelope(envElem)
 
-        namespace = MessageFactory.verifyNamespace(envElem.namespaceURI)
+		namespace = MessageFactory.verifyNamespace(envElem.namespaceURI)
 
-        // extract envelope and stuff from doc
-        var headElem: Element? = null
-        var bodyElem: Element? = null
+		// extract envelope and stuff from doc
+		var headElem: Element? = null
+		var bodyElem: Element? = null
 
-        // extract info
-        val nodes = envElem.childNodes
-        for (i in 0 until nodes.length) {
-            val n = nodes.item(i)
-            if (n.nodeType == Node.ELEMENT_NODE) {
-                val e = n as Element
-                if (e.namespaceURI == namespace) {
-                    // head is next
-                    if (headElem == null && bodyElem == null && "Header" == e.localName) {
-                        headElem = e
-                    } else if (bodyElem == null && "Body" == e.localName) {
-                        bodyElem = e
-                    } else {
-                        throw SOAPException("Undefined element (" + e.localName + ") in SOAP message.")
-                    }
-                } else {
-                    throw SOAPException("Undefined namespace (" + e.namespaceURI + ") in SOAP message.")
-                }
-            } else if (n.nodeType == Node.TEXT_NODE || n.nodeType == Node.CDATA_SECTION_NODE) {
-                //throw new SOAPException("Undefined node type in SOAP message.");
-                println("Undefined node type in SOAP message: " + n.nodeType + n.nodeName + n.nodeValue + n.textContent)
-            }
-        }
+		// extract info
+		val nodes = envElem.childNodes
+		for (i in 0 until nodes.length) {
+			val n = nodes.item(i)
+			if (n.nodeType == Node.ELEMENT_NODE) {
+				val e = n as Element
+				if (e.namespaceURI == namespace) {
+					// head is next
+					if (headElem == null && bodyElem == null && "Header" == e.localName) {
+						headElem = e
+					} else if (bodyElem == null && "Body" == e.localName) {
+						bodyElem = e
+					} else {
+						throw SOAPException("Undefined element (" + e.localName + ") in SOAP message.")
+					}
+				} else {
+					throw SOAPException("Undefined namespace (" + e.namespaceURI + ") in SOAP message.")
+				}
+			} else if (n.nodeType == Node.TEXT_NODE || n.nodeType == Node.CDATA_SECTION_NODE) {
+				// throw new SOAPException("Undefined node type in SOAP message.");
+				println("Undefined node type in SOAP message: " + n.nodeType + n.nodeName + n.nodeValue + n.textContent)
+			}
+		}
 
-        // check if all info is present, else create it
-        if (bodyElem == null) {
-            throw SOAPException("No Body element present in SOAP message.")
-        }
-        if (headElem == null) {
-            headElem = doc.createElementNS(namespace, "Header")
-            headElem = envElem.insertBefore(headElem, bodyElem) as Element
-        }
+		// check if all info is present, else create it
+		if (bodyElem == null) {
+			throw SOAPException("No Body element present in SOAP message.")
+		}
+		if (headElem == null) {
+			headElem = doc.createElementNS(namespace, "Header")
+			headElem = envElem.insertBefore(headElem, bodyElem) as Element
+		}
 
-        soapHeader = SOAPHeader(headElem)
-        soapBody = SOAPBody(bodyElem)
-    }
+		soapHeader = SOAPHeader(headElem)
+		soapBody = SOAPBody(bodyElem)
+	}
 }

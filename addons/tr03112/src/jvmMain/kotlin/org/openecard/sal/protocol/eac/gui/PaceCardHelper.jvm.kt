@@ -30,7 +30,6 @@ import org.openecard.common.apdu.common.CardResponseAPDU
 import org.openecard.common.ifd.PACECapabilities
 import org.openecard.common.ifd.PacePinStatus
 import org.openecard.common.sal.util.InsertCardHelper
-import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.StringUtils
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
 
@@ -38,105 +37,112 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
  *
  * @author Tobias Wich
  */
-class PaceCardHelper(ctx: Context, conHandle: ConnectionHandleType) : InsertCardHelper(
-    ctx, conHandle
-) {
-    @Throws(WSHelper.WSException::class)
-    fun getPaceMarker(pinType: String, cardType: String): PACEMarkerType {
-        return if (isConnected()) {
-            getPaceMarkerFromSal(pinType)
-        } else {
-            getPaceMarkerFromCif(pinType, cardType)
-        }
-    }
+class PaceCardHelper(
+	ctx: Context,
+	conHandle: ConnectionHandleType,
+) : InsertCardHelper(
+		ctx,
+		conHandle,
+	) {
+	@Throws(WSHelper.WSException::class)
+	fun getPaceMarker(
+		pinType: String,
+		cardType: String,
+	): PACEMarkerType =
+		if (isConnected()) {
+			getPaceMarkerFromSal(pinType)
+		} else {
+			getPaceMarkerFromCif(pinType, cardType)
+		}
 
-    @Throws(WSHelper.WSException::class)
-    private fun getPaceMarkerFromSal(pinType: String): PACEMarkerType {
-        val dg = DIDGet()
-        dg.connectionHandle = conHandle
-        dg.didName = pinType
-        val dgr = ctx.dispatcher.safeDeliver(dg) as DIDGetResponse
-        checkResult(dgr)
+	@Throws(WSHelper.WSException::class)
+	private fun getPaceMarkerFromSal(pinType: String): PACEMarkerType {
+		val dg = DIDGet()
+		dg.connectionHandle = conHandle
+		dg.didName = pinType
+		val dgr = ctx.dispatcher.safeDeliver(dg) as DIDGetResponse
+		checkResult(dgr)
 
-        val didStructure = dgr.didStructure
-        val didMarker = didStructure.didMarker as iso.std.iso_iec._24727.tech.schema.PACEMarkerType
-        return PACEMarkerType(didMarker)
-    }
+		val didStructure = dgr.didStructure
+		val didMarker = didStructure.didMarker as iso.std.iso_iec._24727.tech.schema.PACEMarkerType
+		return PACEMarkerType(didMarker)
+	}
 
-    private fun getPaceMarkerFromCif(pinType: String, cardType: String): PACEMarkerType {
-        val cif = ctx.recognition.getCardInfo(cardType)
-        if (cif != null) {
-            for (app in cif.applicationCapabilities.cardApplication) {
-                for (did in app.didInfo) {
-                    if (pinType == did.differentialIdentity.didName) {
-                        // convert marker
-                        val marker = did.differentialIdentity.didMarker.paceMarker
-                        val wrappedMarker = PACEMarkerType(marker)
-                        return wrappedMarker
-                    }
-                }
-            }
-        }
+	private fun getPaceMarkerFromCif(
+		pinType: String,
+		cardType: String,
+	): PACEMarkerType {
+		val cif = ctx.recognition.getCardInfo(cardType)
+		if (cif != null) {
+			for (app in cif.applicationCapabilities.cardApplication) {
+				for (did in app.didInfo) {
+					if (pinType == did.differentialIdentity.didName) {
+						// convert marker
+						val marker = did.differentialIdentity.didMarker.paceMarker
+						val wrappedMarker = PACEMarkerType(marker)
+						return wrappedMarker
+					}
+				}
+			}
+		}
 
-        // nothing found, this means the code is just wrong
-        val msg = String.format("The requested DID=%s is not available in the nPA CIF.", pinType)
-        throw IllegalArgumentException(msg)
-    }
+		// nothing found, this means the code is just wrong
+		val msg = String.format("The requested DID=%s is not available in the nPA CIF.", pinType)
+		throw IllegalArgumentException(msg)
+	}
 
+	@get:Throws(WSHelper.WSException::class)
+	val isNativePinEntry: Boolean
+		/**
+		 * Check if the selected card reader supports PACE.
+		 * In that case, the reader is a standard or comfort reader.
+		 *
+		 * @return true when card reader supports genericPACE, false otherwise.
+		 * @throws WSHelper.WSException
+		 */
+		get() {
+			// Request terminal capabilities
+			val capabilitiesRequest = GetIFDCapabilities()
+			capabilitiesRequest.contextHandle = conHandle.contextHandle
+			capabilitiesRequest.ifdName = conHandle.ifdName
+			val capabilitiesResponse = ctx.dispatcher.safeDeliver(capabilitiesRequest) as GetIFDCapabilitiesResponse
+			checkResult(capabilitiesResponse)
 
-    @get:Throws(WSHelper.WSException::class)
-    val isNativePinEntry: Boolean
-        /**
-         * Check if the selected card reader supports PACE.
-         * In that case, the reader is a standard or comfort reader.
-         *
-         * @return true when card reader supports genericPACE, false otherwise.
-         * @throws WSHelper.WSException
-         */
-        get() {
-            // Request terminal capabilities
-            val capabilitiesRequest = GetIFDCapabilities()
-            capabilitiesRequest.contextHandle = conHandle.contextHandle
-            capabilitiesRequest.ifdName = conHandle.ifdName
-            val capabilitiesResponse = ctx.dispatcher.safeDeliver(capabilitiesRequest) as GetIFDCapabilitiesResponse
-            checkResult(capabilitiesResponse)
+			if (capabilitiesResponse.ifdCapabilities != null) {
+				val capabilities = capabilitiesResponse.ifdCapabilities.slotCapability
+				// Check all capabilities for generic PACE
+				val genericPACE = PACECapabilities.PACECapability.GenericPACE.protocol
+				for (capability in capabilities) {
+					if (capability.index == conHandle.slotIndex) {
+						for (protocol in capability.protocol) {
+							if (protocol == genericPACE) {
+								return true
+							}
+						}
+					}
+				}
+			}
 
-            if (capabilitiesResponse.ifdCapabilities != null) {
-                val capabilities = capabilitiesResponse.ifdCapabilities.slotCapability
-                // Check all capabilities for generic PACE
-                val genericPACE = PACECapabilities.PACECapability.GenericPACE.protocol
-                for (capability in capabilities) {
-                    if (capability.index == conHandle.slotIndex) {
-                        for (protocol in capability.protocol) {
-                            if (protocol == genericPACE) {
-                                return true
-                            }
-                        }
-                    }
-                }
-            }
+			// No PACE capability found
+			return false
+		}
 
-            // No PACE capability found
-            return false
-        }
+	@get:Throws(WSHelper.WSException::class)
+	val pinStatus: PacePinStatus
+		get() {
+			val input = InputAPDUInfoType()
+			input.inputAPDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103")
+			input.acceptableStatusCode.addAll(PacePinStatus.getCodes())
 
-    @get:Throws(WSHelper.WSException::class)
-    val pinStatus: PacePinStatus
-        get() {
-            val input = InputAPDUInfoType()
-            input.inputAPDU = StringUtils.toByteArray("0022C1A40F800A04007F00070202040202830103")
-            input.acceptableStatusCode.addAll(PacePinStatus.getCodes())
+			val transmit = Transmit()
+			transmit.slotHandle = conHandle.slotHandle
+			transmit.inputAPDUInfo.add(input)
 
-            val transmit = Transmit()
-            transmit.slotHandle = conHandle.slotHandle
-            transmit.inputAPDUInfo.add(input)
-
-            val pinCheckResponse = ctx.dispatcher.safeDeliver(transmit) as TransmitResponse
-            checkResult(pinCheckResponse)
-            val output = pinCheckResponse.outputAPDU[0]
-            val outputApdu = CardResponseAPDU(output)
-            val status = outputApdu.statusBytes
-            return PacePinStatus.fromCode(status)
-        }
-
+			val pinCheckResponse = ctx.dispatcher.safeDeliver(transmit) as TransmitResponse
+			checkResult(pinCheckResponse)
+			val output = pinCheckResponse.outputAPDU[0]
+			val outputApdu = CardResponseAPDU(output)
+			val status = outputApdu.statusBytes
+			return PacePinStatus.fromCode(status)
+		}
 }

@@ -31,36 +31,41 @@ private val logger = KotlinLogging.logger {}
  * @param <C>
  * @author Dirk Petrautzki
  */
-open class AbstractFactory<C : LifecycleTrait>(private val implClass: String, private val classLoader: ClassLoader) {
-    @Throws(ActionInitializationException::class)
-    protected fun loadInstance(ctx: Context, clazz: Class<C>): C {
-        try {
-            val classToLoad = classLoader.loadClass(implClass)
-            val typedClass = classToLoad.asSubclass(clazz)
-            val ctor = typedClass.getConstructor()
-            ctor.isAccessible = true
-            val c = typedClass.cast(ctor.newInstance())
-            c.init(ctx)
-            return c
-        } catch (e: InstantiationException) {
-            logger.error(e) { "Given class could not be instantiated." }
-            throw ActionInitializationException(e)
-        } catch (e: InvocationTargetException) {
-            logger.error(e) { "Exception in nullary constructor of given class." }
-            throw ActionInitializationException(e)
-        } catch (e: IllegalAccessException) {
-            logger.error(e) { "The class or its nullary constructor is not accessible." }
-            throw ActionInitializationException(e)
-        } catch (e: ClassNotFoundException) {
-            logger.error(e) { "Given class could not be found." }
-            throw ActionInitializationException(e)
-        } catch (e: ClassCastException) {
-            logger.error(e) { "Given class does not extend FactoryBaseType." }
-            throw ActionInitializationException(e)
-        } catch (e: NoSuchMethodException) {
-            logger.error(e) { "Default constructor does not exist in action implementation." }
-            throw ActionInitializationException(e)
-        }
-    }
-
+open class AbstractFactory<C : LifecycleTrait>(
+	private val implClass: String,
+	private val classLoader: ClassLoader,
+) {
+	@Throws(ActionInitializationException::class)
+	protected fun loadInstance(
+		ctx: Context,
+		clazz: Class<C>,
+	): C {
+		try {
+			val classToLoad = classLoader.loadClass(implClass)
+			val typedClass = classToLoad.asSubclass(clazz)
+			val ctor = typedClass.getConstructor()
+			ctor.isAccessible = true
+			val c = typedClass.cast(ctor.newInstance())
+			c.init(ctx)
+			return c
+		} catch (e: InstantiationException) {
+			logger.error(e) { "Given class could not be instantiated." }
+			throw ActionInitializationException(e)
+		} catch (e: InvocationTargetException) {
+			logger.error(e) { "Exception in nullary constructor of given class." }
+			throw ActionInitializationException(e)
+		} catch (e: IllegalAccessException) {
+			logger.error(e) { "The class or its nullary constructor is not accessible." }
+			throw ActionInitializationException(e)
+		} catch (e: ClassNotFoundException) {
+			logger.error(e) { "Given class could not be found." }
+			throw ActionInitializationException(e)
+		} catch (e: ClassCastException) {
+			logger.error(e) { "Given class does not extend FactoryBaseType." }
+			throw ActionInitializationException(e)
+		} catch (e: NoSuchMethodException) {
+			logger.error(e) { "Default constructor does not exist in action implementation." }
+			throw ActionInitializationException(e)
+		}
+	}
 }

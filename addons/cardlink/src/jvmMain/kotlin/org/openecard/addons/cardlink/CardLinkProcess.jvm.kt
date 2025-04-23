@@ -42,7 +42,6 @@ import org.openecard.mobile.activation.WebsocketListener
 import java.util.*
 import kotlin.time.Duration
 
-
 private val logger = KotlinLogging.logger {}
 
 class CardLinkProcess(
@@ -50,11 +49,10 @@ class CardLinkProcess(
 	private val ws: Websocket,
 	private val successorListener: WebsocketListener,
 ) {
-
 	private val dispatcher = ctx.dispatcher
 
 	fun start(): BindingResult {
-		//ensure that switch to successor is called in any case
+		// ensure that switch to successor is called in any case
 		val wsPair = WsPair.withNewListener(ws, successorListener)
 		try {
 			return internalProcessing(wsPair)
@@ -114,9 +112,10 @@ class CardLinkProcess(
 	@Throws(WSHelper.WSException::class)
 	private fun destroySession(conHandle: ConnectionHandleType) {
 		// Perform a CloseSession to close the SAL
-		val closeSession = DestroySession().apply {
-			connectionHandle = conHandle
-		}
+		val closeSession =
+			DestroySession().apply {
+				connectionHandle = conHandle
+			}
 		val pdd = PowerDownDevices()
 		pdd.contextHandle = closeSession.connectionHandle.contextHandle
 		dispatcher.safeDeliver(pdd)
@@ -127,14 +126,19 @@ class CardLinkProcess(
 	}
 
 	@Throws(WSHelper.WSException::class)
-	private fun performDidAuth(conHandle: ConnectionHandleType, dynCtx: DynamicContext): ConnectionHandleType {
+	private fun performDidAuth(
+		conHandle: ConnectionHandleType,
+		dynCtx: DynamicContext,
+	): ConnectionHandleType {
 		// Perform a DIDAuthenticate to authenticate the user
-		val didAuth = DIDAuthenticate().apply {
-			connectionHandle = conHandle
-			authenticationProtocolData = DIDAuthenticationDataType().apply {
-				protocol = CARDLINK_PROTOCOL_ID
+		val didAuth =
+			DIDAuthenticate().apply {
+				connectionHandle = conHandle
+				authenticationProtocolData =
+					DIDAuthenticationDataType().apply {
+						protocol = CARDLINK_PROTOCOL_ID
+					}
 			}
-		}
 		val didAuthResp = dispatcher.safeDeliver(didAuth) as DIDAuthenticateResponse
 
 		// Check DIDAuthenticateResponse
@@ -145,7 +149,10 @@ class CardLinkProcess(
 		return cardHandle
 	}
 
-	private fun handleRemoteApdus(cardHandle: ConnectionHandleType, wsPair: WsPair) {
+	private fun handleRemoteApdus(
+		cardHandle: ConnectionHandleType,
+		wsPair: WsPair,
+	) {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val wsListener = wsPair.listener
 
@@ -158,8 +165,10 @@ class CardLinkProcess(
 				throw WSHelper.makeResultError(CardLinkErrorCodes.CardLinkCodes.SERVER_TIMEOUT.name, errorMsg).toException()
 			}
 
-			if(gematikMessage.payload is SessionInformation){
-				logger.debug { "Received '${SESSION_INFO} during ongoing process. Ignoring since most probably caused by reconnection." }
+			if (gematikMessage.payload is SessionInformation) {
+				logger.debug {
+					"Received '${SESSION_INFO} during ongoing process. Ignoring since most probably caused by reconnection."
+				}
 				continue
 			}
 
@@ -176,7 +185,9 @@ class CardLinkProcess(
 
 			if (gematikMessage.payload is TasklistErrorPayload) {
 				val errorMsg = gematikMessage.payload.errormessage ?: "Received an unknown error from CardLink service."
-				val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(gematikMessage.payload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+				val errorResultCode =
+					CardLinkErrorCodes.CardLinkCodes.byStatus(gematikMessage.payload.status)
+						?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
 
 				logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
 
@@ -193,7 +204,11 @@ class CardLinkProcess(
 				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
 
-				throw WSHelper.makeResultError(CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE.name, errorMsg).toException()
+				throw WSHelper
+					.makeResultError(
+						CardLinkErrorCodes.CardLinkCodes.INVALID_WEBSOCKET_MESSAGE.name,
+						errorMsg,
+					).toException()
 			}
 
 			if (gematikMessage.payload !is SendApdu) {
@@ -206,21 +221,25 @@ class CardLinkProcess(
 
 				val apduResponse = sendApduToCard(cardHandle, apdu)
 
-				val egkEnvelope = GematikEnvelope(
-					SendApduResponse(
+				val egkEnvelope =
+					GematikEnvelope(
+						SendApduResponse(
+							cardSessionId,
+							apduResponse,
+						),
+						correlationId,
 						cardSessionId,
-						apduResponse
-					),
-					correlationId,
-					cardSessionId,
-				)
+					)
 				val egkEnvelopeJson = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 				ws.send(egkEnvelopeJson)
 			}
 		}
 	}
 
-	private fun sendApduToCard(cardHandle: ConnectionHandleType, apdu: ByteArray) : ByteArray {
+	private fun sendApduToCard(
+		cardHandle: ConnectionHandleType,
+		apdu: ByteArray,
+	): ByteArray {
 		val inputAPDU = InputAPDUInfoType()
 		inputAPDU.inputAPDU = apdu
 
@@ -233,7 +252,10 @@ class CardLinkProcess(
 		return response.outputAPDU[0]
 	}
 
-	private fun waitForSessionInformation(dynCtx: DynamicContext, wsPair: WsPair) {
+	private fun waitForSessionInformation(
+		dynCtx: DynamicContext,
+		wsPair: WsPair,
+	) {
 		val wsListener = wsPair.listener
 		runBlocking {
 			val sessionInformation = wsListener.nextMessage(Duration.parse("5s"))
@@ -248,7 +270,9 @@ class CardLinkProcess(
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, sessionInformation.cardSessionId)
 				dynCtx.put(CardLinkKeys.WS_SESSION_ID, payload.webSocketId)
 				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, payload.phoneRegistered)
-				logger.debug { "Using ${sessionInformation.cardSessionId} as cardSessionId and ${payload.webSocketId} as webSocketId." }
+				logger.debug {
+					"Using ${sessionInformation.cardSessionId} as cardSessionId and ${payload.webSocketId} as webSocketId."
+				}
 			} else {
 				// we generate our own cardSessionId
 				val cardSessionId = UUID.randomUUID().toString()

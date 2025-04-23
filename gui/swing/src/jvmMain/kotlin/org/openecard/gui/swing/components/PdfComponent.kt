@@ -28,8 +28,9 @@ private val LOG = KotlinLogging.logger { }
  *
  * @author Tobias Wich
  */
-open class PdfComponent(private val pdfDoc: PDDocument) : JComponent() {
-
+open class PdfComponent(
+	private val pdfDoc: PDDocument,
+) : JComponent() {
 	private val renderer: PDFRenderer
 	private var curPage: Int
 
@@ -85,7 +86,6 @@ open class PdfComponent(private val pdfDoc: PDDocument) : JComponent() {
 	protected val isValidPage: Boolean
 		get() = curPage >= 0 && curPage < this.numPages
 
-
 	override fun getPreferredSize(): Dimension? {
 		if (!isPreferredSizeSet && this.isValidPage) {
 			val bounds = getPageDim(pdfDoc.getPage(curPage))
@@ -95,13 +95,10 @@ open class PdfComponent(private val pdfDoc: PDDocument) : JComponent() {
 		}
 	}
 
-	protected fun getCurPage(): PDPage {
-		return pdfDoc.getPage(curPage)
-	}
+	protected fun getCurPage(): PDPage = pdfDoc.getPage(curPage)
 
 	protected fun getPageDim(page: PDPage): PDRectangle {
 		val bounds = page.cropBox
 		return bounds
 	}
-
 }

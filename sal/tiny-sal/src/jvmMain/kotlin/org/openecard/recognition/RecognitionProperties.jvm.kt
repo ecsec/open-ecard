@@ -24,8 +24,6 @@ package org.openecard.recognition
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.ws.common.OverridingProperties
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
 
@@ -40,6 +38,7 @@ private val LOG = KotlinLogging.logger {}
  */
 object RecognitionProperties {
 	private val properties = loadProperties()
+
 	private fun loadProperties(): OverridingProperties {
 		try {
 			return OverridingProperties("cardrecognition.properties")
@@ -51,31 +50,26 @@ object RecognitionProperties {
 	}
 
 	@JvmStatic
-	fun getProperty(key: String): String? {
-		return properties.getProperty(key)
-	}
+	fun getProperty(key: String): String? = properties.getProperty(key)
 
 	@JvmStatic
-	fun setProperty(key: String, value: String): Any? {
-		return properties.setProperty(key, value)
-	}
+	fun setProperty(
+		key: String,
+		value: String,
+	): Any? = properties.setProperty(key, value)
 
 	@JvmStatic
-	fun properties(): Properties {
-		return properties.properties()
-	}
+	fun properties(): Properties = properties.properties()
 
-
-    @JvmStatic
+	@JvmStatic
 	val action: String?
-        get() = getProperty("org.openecard.recognition.action")
+		get() = getProperty("org.openecard.recognition.action")
 
 	@JvmStatic
-    val serviceName: String?
-        get() = getProperty("org.openecard.recognition.serviceName")
+	val serviceName: String?
+		get() = getProperty("org.openecard.recognition.serviceName")
 
 	@JvmStatic
-    val serviceAddr: String?
-        get() = getProperty("org.openecard.recognition.serviceAddr")
-
+	val serviceAddr: String?
+		get() = getProperty("org.openecard.recognition.serviceAddr")
 }

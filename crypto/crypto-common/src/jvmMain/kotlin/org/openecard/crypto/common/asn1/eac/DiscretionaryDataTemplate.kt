@@ -33,30 +33,31 @@ import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils
  *
  * @author Tobias Wich
  */
-class DiscretionaryDataTemplate(tlv: TLV) :
-    TLVList(tlv, Tag(TagClass.APPLICATION, false, EACTags.DISCRETIONARY_DATA_OBJECTS.toLong())) {
-    val objectIdentifier: ASN1ObjectIdentifier
-    private val data: ByteArray
+class DiscretionaryDataTemplate(
+	tlv: TLV,
+) : TLVList(tlv, Tag(TagClass.APPLICATION, false, EACTags.DISCRETIONARY_DATA_OBJECTS.toLong())) {
+	val objectIdentifier: ASN1ObjectIdentifier
+	private val data: ByteArray
 
-    init {
-        val p = Parser(tlv.getChild())
-        if (p.match(Tag.OID_TAG)) {
-            try {
-                val oidStr = ObjectIdentifierUtils.toString(p.next(0).value)
+	init {
+		val p = Parser(tlv.getChild())
+		if (p.match(Tag.OID_TAG)) {
+			try {
+				val oidStr = ObjectIdentifierUtils.toString(p.next(0).value)
 				objectIdentifier = ASN1ObjectIdentifier(oidStr)
-            } catch (ex: IllegalArgumentException) {
-                throw TLVException(ex)
-            }
-        } else {
-            throw TLVException("Object Identifier is missing in DiscretionaryDataTemplate.")
-        }
-        if (p.match(Tag(TagClass.APPLICATION, true, EACTags.DISCRETIONARY_DATA.toLong()))) {
-            data = p.next(0).value
-        } else {
-            throw TLVException("Discretionary Data is missing in DiscretionaryDataTemplate.")
-        }
-    }
+			} catch (ex: IllegalArgumentException) {
+				throw TLVException(ex)
+			}
+		} else {
+			throw TLVException("Object Identifier is missing in DiscretionaryDataTemplate.")
+		}
+		if (p.match(Tag(TagClass.APPLICATION, true, EACTags.DISCRETIONARY_DATA.toLong()))) {
+			data = p.next(0).value
+		} else {
+			throw TLVException("Discretionary Data is missing in DiscretionaryDataTemplate.")
+		}
+	}
 
-    val discretionaryData: ByteArray
-        get() = ByteUtils.clone(data)
+	val discretionaryData: ByteArray
+		get() = ByteUtils.clone(data)
 }

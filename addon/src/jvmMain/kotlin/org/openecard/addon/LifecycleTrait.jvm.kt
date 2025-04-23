@@ -21,14 +21,13 @@
  ***************************************************************************/
 package org.openecard.addon
 
-
 /**
  *
  * @author Tobias Wich
  */
 interface LifecycleTrait {
-    @Throws(ActionInitializationException::class)
-    fun init(aCtx: Context)
+	@Throws(ActionInitializationException::class)
+	fun init(aCtx: Context)
 
-    fun destroy(force: Boolean)
+	fun destroy(force: Boolean)
 }

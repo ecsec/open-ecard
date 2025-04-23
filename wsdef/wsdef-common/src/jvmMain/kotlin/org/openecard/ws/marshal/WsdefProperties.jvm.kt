@@ -28,7 +28,6 @@ import java.util.*
 
 private val LOG = KotlinLogging.logger {}
 
-
 /**
  * Class loading properties with values for the webservice module.
  * Take a look at the resource file wsdef.properties for a complete list of the available keys.
@@ -36,8 +35,8 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  */
 object WsdefProperties {
-
 	private val properties = loadProperties()
+
 	private fun loadProperties(): OverridingProperties {
 		try {
 			return OverridingProperties("wsdef.properties")
@@ -49,18 +48,14 @@ object WsdefProperties {
 	}
 
 	@JvmStatic
-    fun getProperty(key: String): String? {
-        return properties.getProperty(key)
-    }
-
-    @JvmStatic
-    fun setProperty(key: String, value: String): Any? {
-        return properties.setProperty(key, value)
-    }
+	fun getProperty(key: String): String? = properties.getProperty(key)
 
 	@JvmStatic
-    fun properties(): Properties {
-        return properties.properties()
-    }
+	fun setProperty(
+		key: String,
+		value: String,
+	): Any? = properties.setProperty(key, value)
 
+	@JvmStatic
+	fun properties(): Properties = properties.properties()
 }

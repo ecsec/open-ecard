@@ -39,8 +39,10 @@ import javax.swing.border.EmptyBorder
  * @author Tobias Wich
  * @author Florian Feldmann
  */
-class PinEntryStepLayouter(infoUnits: MutableList<InputInfoUnit>, stepName: String) : StepLayouter() {
-
+class PinEntryStepLayouter(
+	infoUnits: MutableList<InputInfoUnit>,
+	stepName: String,
+) : StepLayouter() {
 	override val components: MutableList<StepComponent> = mutableListOf()
 	override val panel: JPanel = JPanel(BorderLayout())
 
@@ -67,17 +69,28 @@ class PinEntryStepLayouter(infoUnits: MutableList<InputInfoUnit>, stepName: Stri
 
 		// Create content
 		for (next in infoUnits) {
-			val nextComponent: StepComponent = when (next.type()) {
-				InfoUnitElementType.CHECK_BOX -> org.openecard.gui.swing.components.Checkbox(next as Checkbox)
-				InfoUnitElementType.HYPERLINK -> org.openecard.gui.swing.components.Hyperlink(next as Hyperlink)
-				InfoUnitElementType.IMAGE_BOX -> org.openecard.gui.swing.components.ImageBox(next as ImageBox)
-				InfoUnitElementType.PASSWORD_FIELD -> AbstractInput(next as PasswordField)
-				InfoUnitElementType.RADIO_BOX -> Radiobutton(next as Radiobox)
-				InfoUnitElementType.SIGNAUTRE_FIELD -> throw UnsupportedOperationException("Not implemented yet.")
-				InfoUnitElementType.TEXT -> org.openecard.gui.swing.components.Text(next as Text)
-				InfoUnitElementType.TEXT_FIELD -> AbstractInput(next as TextField)
-				InfoUnitElementType.TOGGLE_TEXT -> org.openecard.gui.swing.components.ToggleText(next as ToggleText)
-			}
+			val nextComponent: StepComponent =
+				when (next.type()) {
+					InfoUnitElementType.CHECK_BOX ->
+						org.openecard.gui.swing.components
+							.Checkbox(next as Checkbox)
+					InfoUnitElementType.HYPERLINK ->
+						org.openecard.gui.swing.components
+							.Hyperlink(next as Hyperlink)
+					InfoUnitElementType.IMAGE_BOX ->
+						org.openecard.gui.swing.components
+							.ImageBox(next as ImageBox)
+					InfoUnitElementType.PASSWORD_FIELD -> AbstractInput(next as PasswordField)
+					InfoUnitElementType.RADIO_BOX -> Radiobutton(next as Radiobox)
+					InfoUnitElementType.SIGNAUTRE_FIELD -> throw UnsupportedOperationException("Not implemented yet.")
+					InfoUnitElementType.TEXT ->
+						org.openecard.gui.swing.components
+							.Text(next as Text)
+					InfoUnitElementType.TEXT_FIELD -> AbstractInput(next as TextField)
+					InfoUnitElementType.TOGGLE_TEXT ->
+						org.openecard.gui.swing.components
+							.ToggleText(next as ToggleText)
+				}
 
 			components.add(nextComponent)
 			contentPanel.add(nextComponent.component)
@@ -90,5 +103,4 @@ class PinEntryStepLayouter(infoUnits: MutableList<InputInfoUnit>, stepName: Stri
 
 		panel.add(scrollPane, BorderLayout.CENTER)
 	}
-
 }

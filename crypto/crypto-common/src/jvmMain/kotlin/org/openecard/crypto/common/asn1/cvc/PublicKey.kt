@@ -32,58 +32,54 @@ import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils
  * @author Moritz Horsch
  */
 abstract class PublicKey {
-    /**
-     * Compares the public key.
-     *
-     * @param pk PublicKey
-     * @return True if they are equal, otherwise false
-     */
-    open fun compare(pk: PublicKey): Boolean {
-        return ByteUtils.compare(this.tLVEncoded.toBER(), pk.tLVEncoded.toBER())
-    }
+	/**
+	 * Compares the public key.
+	 *
+	 * @param pk PublicKey
+	 * @return True if they are equal, otherwise false
+	 */
+	open fun compare(pk: PublicKey): Boolean = ByteUtils.compare(this.tLVEncoded.toBER(), pk.tLVEncoded.toBER())
 
-    /**
-     * Returns the object identifier.
-     *
-     * @return Object identifier
-     */
-    abstract val objectIdentifier: String
+	/**
+	 * Returns the object identifier.
+	 *
+	 * @return Object identifier
+	 */
+	abstract val objectIdentifier: String
 
-    /**
-     * Returns the TLV encoded key.
-     *
-     * @return TLV encoded key
-     */
-    abstract val tLVEncoded: TLV
+	/**
+	 * Returns the TLV encoded key.
+	 *
+	 * @return TLV encoded key
+	 */
+	abstract val tLVEncoded: TLV
 
-    companion object {
-        /**
-         * Tag for object identifiers.
-         */
-        const val OID_TAG: Int = 0x06
+	companion object {
+		/**
+		 * Tag for object identifiers.
+		 */
+		const val OID_TAG: Int = 0x06
 
-        /**
-         * Creates a new public key.
-         *
-         * @param key Key
-         * @return Public key
-         * @throws Exception
-         */
-        @Throws(Exception::class)
-        fun getInstance(key: ByteArray?): PublicKey {
-            return getInstance(TLV.fromBER(key))
-        }
+		/**
+		 * Creates a new public key.
+		 *
+		 * @param key Key
+		 * @return Public key
+		 * @throws Exception
+		 */
+		@Throws(Exception::class)
+		fun getInstance(key: ByteArray?): PublicKey = getInstance(TLV.fromBER(key))
 
-        /**
-         * Creates a new public key.
-         *
-         * @param key Key
-         * @return Public key
-         * @throws Exception
-         */
-        @Throws(Exception::class)
-        fun getInstance(key: TLV): PublicKey {
-			return try {
+		/**
+		 * Creates a new public key.
+		 *
+		 * @param key Key
+		 * @return Public key
+		 * @throws Exception
+		 */
+		@Throws(Exception::class)
+		fun getInstance(key: TLV): PublicKey =
+			try {
 				val oid = ObjectIdentifierUtils.toString(key.findChildTags(OID_TAG.toLong())[0].value)
 
 				if (oid.startsWith(TAObjectIdentifier.id_TA_ECDSA)) {
@@ -96,6 +92,5 @@ abstract class PublicKey {
 			} catch (e: Exception) {
 				throw IllegalArgumentException("Malformed public key: " + e.message)
 			}
-        }
-    }
+	}
 }

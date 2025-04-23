@@ -31,53 +31,55 @@ import org.openecard.common.anytype.AuthDataResponse
  *
  * @author Tobias Wich
  */
-class PACEInputType(baseType: DIDAuthenticationDataType) {
-    //
-    private val authMap: AuthDataMap = AuthDataMap(baseType)
+class PACEInputType(
+	baseType: DIDAuthenticationDataType,
+) {
+	//
+	private val authMap: AuthDataMap = AuthDataMap(baseType)
 
 	/**
-     * Returns the PIN.
-     *
-     * @return PIN
-     */
-    val pIN: String? = authMap.getContentAsString(PIN)
+	 * Returns the PIN.
+	 *
+	 * @return PIN
+	 */
+	val pIN: String? = authMap.getContentAsString(PIN)
 
 	/**
-     * Returns the PIN ID.
-     *
-     * @return PIN ID
-     */
-    val pINID: Byte = authMap.getContentAsBytes(PIN_ID)[0]
+	 * Returns the PIN ID.
+	 *
+	 * @return PIN ID
+	 */
+	val pINID: Byte = authMap.getContentAsBytes(PIN_ID)[0]
 
 	/**
-     * Returns the CHAT.
-     *
-     * @return CHAT
-     */
+	 * Returns the CHAT.
+	 *
+	 * @return CHAT
+	 */
 	// optional elements
 	val cHAT: ByteArray? = authMap.getContentAsBytes(CHAT)
 
 	/**
-     * Returns the certificate description.
-     *
-     * @return Certificate description
-     */
-    val certificateDescription: ByteArray? = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION)
+	 * Returns the certificate description.
+	 *
+	 * @return Certificate description
+	 */
+	val certificateDescription: ByteArray? = authMap.getContentAsBytes(CERTIFICATE_DESCRIPTION)
 	val isUseShortEf: Boolean = authMap.getAttribute(AuthDataResponse.OEC_NS, USE_SHORT_EF).toBoolean()
 
 	val outputType: PACEOutputType
-        /**
-         * Returns a PACEOutputType based on the PACEInputType.
-         *
-         * @return PACEOutputType
-         */
-        get() = PACEOutputType(authMap)
+		/**
+		 * Returns a PACEOutputType based on the PACEInputType.
+		 *
+		 * @return PACEOutputType
+		 */
+		get() = PACEOutputType(authMap)
 
-    companion object {
-        const val PIN_ID: String = "PinID"
-        const val CHAT: String = "CHAT"
-        const val PIN: String = "PIN"
-        const val CERTIFICATE_DESCRIPTION: String = "CertificateDescription"
-        const val USE_SHORT_EF: String = "UseShortEF"
-    }
+	companion object {
+		const val PIN_ID: String = "PinID"
+		const val CHAT: String = "CHAT"
+		const val PIN: String = "PIN"
+		const val CERTIFICATE_DESCRIPTION: String = "CertificateDescription"
+		const val USE_SHORT_EF: String = "UseShortEF"
+	}
 }

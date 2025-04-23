@@ -31,33 +31,33 @@ import java.security.GeneralSecurityException
  * @author Moritz Horsch
  */
 class CHATVerifierTest {
-    @Test
-    fun testVerfiy() {
-        val chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7")
+	@Test
+	fun testVerfiy() {
+		val chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7")
 
-        val c1 = CHAT(chatBytes)
-        c1.setReadAccess(CHAT.DataGroup.DG01, !false)
-        c1.setReadAccess(CHAT.DataGroup.DG02, !false)
+		val c1 = CHAT(chatBytes)
+		c1.setReadAccess(CHAT.DataGroup.DG01, !false)
+		c1.setReadAccess(CHAT.DataGroup.DG02, !false)
 
-        val c2 = CHAT(chatBytes)
-        c2.setReadAccess(CHAT.DataGroup.DG01, false)
-        c2.setReadAccess(CHAT.DataGroup.DG02, false)
+		val c2 = CHAT(chatBytes)
+		c2.setReadAccess(CHAT.DataGroup.DG01, false)
+		c2.setReadAccess(CHAT.DataGroup.DG02, false)
 
-        verfiy(c1, c2)
-    }
+		verfiy(c1, c2)
+	}
 
-    @Test(expectedExceptions = [GeneralSecurityException::class])
-    fun testVerfiy2() {
-        val chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7")
+	@Test(expectedExceptions = [GeneralSecurityException::class])
+	fun testVerfiy2() {
+		val chatBytes = StringUtils.toByteArray("7f4c12060904007f0007030102025305300301ffb7")
 
-        val c1 = CHAT(chatBytes)
-        c1.setReadAccess(CHAT.DataGroup.DG01, !false)
-        c1.setReadAccess(CHAT.DataGroup.DG02, !false)
+		val c1 = CHAT(chatBytes)
+		c1.setReadAccess(CHAT.DataGroup.DG01, !false)
+		c1.setReadAccess(CHAT.DataGroup.DG02, !false)
 
-        val c2 = CHAT(chatBytes)
-        c2.setReadAccess(CHAT.DataGroup.DG01, false)
-        c2.setReadAccess(CHAT.DataGroup.DG02, false)
+		val c2 = CHAT(chatBytes)
+		c2.setReadAccess(CHAT.DataGroup.DG01, false)
+		c2.setReadAccess(CHAT.DataGroup.DG02, false)
 
-        verfiy(c2, c1)
-    }
+		verfiy(c2, c1)
+	}
 }

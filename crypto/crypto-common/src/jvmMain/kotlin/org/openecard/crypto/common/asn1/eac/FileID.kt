@@ -28,7 +28,9 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence
  *
  * @author Moritz Horsch
  */
-class FileID(seq: ASN1Sequence) {
+class FileID(
+	seq: ASN1Sequence,
+) {
 	/**
 	 * Gets the file identifier (FID).
 	 *
@@ -42,7 +44,6 @@ class FileID(seq: ASN1Sequence) {
 	 * @return the SFID
 	 */
 	val sFID: ByteArray?
-
 
 	/**
 	 * Instantiates a new file id.

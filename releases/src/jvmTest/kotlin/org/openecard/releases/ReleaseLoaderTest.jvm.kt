@@ -50,41 +50,44 @@ class ReleaseLoaderTest {
 	}
 
 	@Test
-	fun testLoadReleaseInfo() = runBlocking {
-		val releaseInfoJson = Json.parseToJsonElement(
-			"""
-				{
-					"version": "2.2.4",
-					"latestVersion": {"version": "2.2.4", "artifacts":  []},
-					"maintenanceVersions": [{"version": "2.1.4", "artifacts": []}],
-					"artifacts": [],
-					"versionStatus": {
-						"maintained": ["~2.1.0"],
-						"security": [">=2.1.0 <=2.1.2"]
+	fun testLoadReleaseInfo() =
+		runBlocking {
+			val releaseInfoJson =
+				Json.parseToJsonElement(
+					"""
+					{
+						"version": "2.2.4",
+						"latestVersion": {"version": "2.2.4", "artifacts":  []},
+						"maintenanceVersions": [{"version": "2.1.4", "artifacts": []}],
+						"artifacts": [],
+						"versionStatus": {
+							"maintained": ["~2.1.0"],
+							"security": [">=2.1.0 <=2.1.2"]
+						}
 					}
-				}
-			""".trimIndent()
-		)
-		val jwt = jwt {
-			claims {
-				issuer = "https://openecard.org"
-				audience = "https://openecard.org/app"
-				issuedAt = Clock.System.now()
-				claim("release-info", releaseInfoJson)
-			}
-		}.sign {
-			es256 { pem(javaClass.getResourceAsStream("/release-test-signer.pem")?.readAllBytes()!!) }
-		}.toString()
-		wm.stubFor(
-			get(urlEqualTo("/release.jwt"))
-				.withHeader("Accept", containing("application/jwt"))
-				.willReturn(
-					okForContentType("application/jwt", jwt)
+					""".trimIndent(),
 				)
-		)
+			val jwt =
+				jwt {
+					claims {
+						issuer = "https://openecard.org"
+						audience = "https://openecard.org/app"
+						issuedAt = Clock.System.now()
+						claim("release-info", releaseInfoJson)
+					}
+				}.sign {
+					es256 { pem(javaClass.getResourceAsStream("/release-test-signer.pem")?.readAllBytes()!!) }
+				}.toString()
+			wm.stubFor(
+				get(urlEqualTo("/release.jwt"))
+					.withHeader("Accept", containing("application/jwt"))
+					.willReturn(
+						okForContentType("application/jwt", jwt),
+					),
+			)
 
-		val baseUrl = wm.baseUrl()
-		val releaseInfo = loadReleaseInfo("$baseUrl/release.jwt").getOrThrow().releaseInfo
-		assertEquals("2.2.4", releaseInfo.latestVersion.version.toString())
-	}
+			val baseUrl = wm.baseUrl()
+			val releaseInfo = loadReleaseInfo("$baseUrl/release.jwt").getOrThrow().releaseInfo
+			assertEquals("2.2.4", releaseInfo.latestVersion.version.toString())
+		}
 }

@@ -28,11 +28,13 @@ import org.w3c.dom.Element
  *
  * @author Tobias Wich
  */
-class SOAPBody internal constructor(element: Element) : SOAPElement(element) {
-    @Throws(SOAPException::class)
-    fun addDocument(document: Document) {
-        val doc = element.ownerDocument
-        val newNode = doc.adoptNode(document.documentElement)
-        element.appendChild(newNode)
-    }
+class SOAPBody internal constructor(
+	element: Element,
+) : SOAPElement(element) {
+	@Throws(SOAPException::class)
+	fun addDocument(document: Document) {
+		val doc = element.ownerDocument
+		val newNode = doc.adoptNode(document.documentElement)
+		element.appendChild(newNode)
+	}
 }

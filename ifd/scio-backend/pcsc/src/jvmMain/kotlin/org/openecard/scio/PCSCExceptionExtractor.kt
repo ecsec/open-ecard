@@ -32,19 +32,16 @@ import javax.smartcardio.CardException
  * @author Tobias Wich
  */
 object PCSCExceptionExtractor {
-    fun getCode(mainException: CardException): SCIOErrorCode {
-        return PCSCExceptionExtractor.getCode(mainException as JnaPCSCException)
-    }
+	fun getCode(mainException: CardException): SCIOErrorCode =
+		PCSCExceptionExtractor.getCode(mainException as JnaPCSCException)
 
-    /**
-     * Gets the actual error code from the given JnaPCSCException.
-     * In case no error code can be found, [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] is returned.
-     *
-     * @param mainException The exception coming from the Java SmartcardIO.
-     * @return The code extracted from the exception, or [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] if no code could be
-     * extracted.
-     */
-    fun getCode(mainException: JnaPCSCException): SCIOErrorCode {
-        return getErrorCode(mainException.code)
-    }
+	/**
+	 * Gets the actual error code from the given JnaPCSCException.
+	 * In case no error code can be found, [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] is returned.
+	 *
+	 * @param mainException The exception coming from the Java SmartcardIO.
+	 * @return The code extracted from the exception, or [SCIOErrorCode.SCARD_F_UNKNOWN_ERROR] if no code could be
+	 * extracted.
+	 */
+	fun getCode(mainException: JnaPCSCException): SCIOErrorCode = getErrorCode(mainException.code)
 }

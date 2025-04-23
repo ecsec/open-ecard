@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.common.ifd.scio
 
-
 /**
  * TerminalFactory interface similar to javax.smartcardio.TerminalFactory, but without
  * the static factory elements which are not present in systems like Android.<br></br>
@@ -32,21 +31,21 @@ package org.openecard.common.ifd.scio
  * @author Tobias Wich
  */
 interface TerminalFactory {
-    /**
-     * Returns the type of this TerminalFactory. Examples would be PC/SC or AndroidNFC.
-     *
-     * @return the type of this TerminalFactory
-     */
-    val type: String
+	/**
+	 * Returns the type of this TerminalFactory. Examples would be PC/SC or AndroidNFC.
+	 *
+	 * @return the type of this TerminalFactory
+	 */
+	val type: String
 
-    /**
-     * Returns a new SCIOTerminals object encapsulating the terminals
-     * supported by this factory.
-     * See the class comment of the [SCIOTerminals] class
-     * regarding how the returned objects can be shared and reused.
-     *
-     * @return a new SCIOTerminals object encapsulating the terminals
-     * supported by this factory.
-     */
-    fun terminals(): SCIOTerminals
+	/**
+	 * Returns a new SCIOTerminals object encapsulating the terminals
+	 * supported by this factory.
+	 * See the class comment of the [SCIOTerminals] class
+	 * regarding how the returned objects can be shared and reused.
+	 *
+	 * @return a new SCIOTerminals object encapsulating the terminals
+	 * supported by this factory.
+	 */
+	fun terminals(): SCIOTerminals
 }

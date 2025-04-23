@@ -29,9 +29,8 @@ import org.openecard.mobile.activation.common.NFCDialogMsgSetter
 import org.openecard.mobile.system.OpeneCardContextConfig
 import org.openecard.scio.AndroidNFCFactory
 import org.openecard.scio.CachingTerminalFactoryBuilder
-import org.openecard.ws.jaxb.JAXBMarshaller
 import org.openecard.ws.common.GenericInstanceProvider
-
+import org.openecard.ws.jaxb.JAXBMarshaller
 
 /**
  *
@@ -41,7 +40,6 @@ class OpeneCard internal constructor(
 	private val utils: CommonActivationUtils,
 	private val builder: CachingTerminalFactoryBuilder<AndroidNFCFactory>,
 ) {
-
 	fun context(context: Context): AndroidContextManager {
 		val capabilities: AndroidNfcCapabilities = AndroidNfcCapabilities.Companion.create(context)
 		return DelegatingAndroidContextManager(utils.context(capabilities), this.builder)
@@ -55,19 +53,23 @@ class OpeneCard internal constructor(
 
 		@JvmStatic
 		fun createInstance(): OpeneCard {
-			val androidNfcFactory : GenericInstanceProvider<AndroidNFCFactory> = object : GenericInstanceProvider<AndroidNFCFactory> {
-				override val instance = AndroidNFCFactory()
-			}
-			val factory: CachingTerminalFactoryBuilder<AndroidNFCFactory> = CachingTerminalFactoryBuilder<AndroidNFCFactory>(androidNfcFactory)
+			val androidNfcFactory: GenericInstanceProvider<AndroidNFCFactory> =
+				object : GenericInstanceProvider<AndroidNFCFactory> {
+					override val instance = AndroidNFCFactory()
+				}
+			val factory: CachingTerminalFactoryBuilder<AndroidNFCFactory> =
+				CachingTerminalFactoryBuilder<AndroidNFCFactory>(androidNfcFactory)
 
 			val config = OpeneCardContextConfig(factory, JAXBMarshaller::class.java.getCanonicalName())
-			val activationUtils = CommonActivationUtils(config, object : NFCDialogMsgSetter {
-				override fun setText(msg: String) { }
+			val activationUtils =
+				CommonActivationUtils(
+					config,
+					object : NFCDialogMsgSetter {
+						override fun setText(msg: String) { }
 
-				override fun isSupported(): Boolean {
-					return false
-				}
-			})
+						override fun isSupported(): Boolean = false
+					},
+				)
 			return OpeneCard(activationUtils, factory)
 		}
 	}

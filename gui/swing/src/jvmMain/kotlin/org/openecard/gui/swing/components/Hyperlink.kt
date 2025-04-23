@@ -42,59 +42,57 @@ import javax.swing.JLabel
  *
  * @author Tobias Wich
  */
-class Hyperlink(link: Hyperlink) : StepComponent {
-
-    private val href: URL = link.href
+class Hyperlink(
+	link: Hyperlink,
+) : StepComponent {
+	private val href: URL = link.href
 	private val text: String = link.text ?: href.toString()
 	private val underlineText: String = "<html><u>$text</u></html>"
 	private val label: JLabel = JLabel(text)
 
 	init {
 		label.isDoubleBuffered = true
-        label.setForeground(Color.blue)
-        label.setToolTipText(href.toString())
-        label.addMouseListener(BrowserLauncher())
-    }
+		label.setForeground(Color.blue)
+		label.setToolTipText(href.toString())
+		label.addMouseListener(BrowserLauncher())
+	}
 
-    override val component: Component
+	override val component: Component
 		get() {
 			return label
 		}
 
-    override fun validate(): Boolean {
-        return true
-    }
+	override fun validate(): Boolean = true
 
-    override val isValueType: Boolean = false
+	override val isValueType: Boolean = false
 
-    override val value: OutputInfoUnit? = null
+	override val value: OutputInfoUnit? = null
 
+	/**
+	 * Open browser on click and hover link when mouse is located over the link.
+	 */
+	private inner class BrowserLauncher : MouseListener {
+		override fun mouseClicked(e: MouseEvent?) {
+			try {
+				val uri = URI(href.toString())
+				SwingUtils.openUrl(uri, false)
+			} catch (ex: URISyntaxException) {
+				// silently fail, its just no use against developer stupidity
+			}
+		}
 
-    /**
-     * Open browser on click and hover link when mouse is located over the link.
-     */
-    private inner class BrowserLauncher : MouseListener {
-        override fun mouseClicked(e: MouseEvent?) {
-            try {
-                val uri = URI(href.toString())
-                SwingUtils.openUrl(uri, false)
-            } catch (ex: URISyntaxException) {
-                // silently fail, its just no use against developer stupidity
-            }
-        }
+		override fun mousePressed(e: MouseEvent?) {
+		}
 
-        override fun mousePressed(e: MouseEvent?) {
-        }
+		override fun mouseReleased(e: MouseEvent?) {
+		}
 
-        override fun mouseReleased(e: MouseEvent?) {
-        }
+		override fun mouseEntered(e: MouseEvent?) {
+			label.setText(underlineText)
+		}
 
-        override fun mouseEntered(e: MouseEvent?) {
-            label.setText(underlineText)
-        }
-
-        override fun mouseExited(e: MouseEvent?) {
-            label.setText(text)
-        }
-    }
+		override fun mouseExited(e: MouseEvent?) {
+			label.setText(text)
+		}
+	}
 }

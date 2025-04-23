@@ -23,8 +23,6 @@ package org.openecard.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.ifd.scio.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 private val LOG = KotlinLogging.logger { }
 
@@ -51,9 +49,7 @@ abstract class NFCCardTerminal<T : AbstractNFCCard> : SCIOTerminal {
 	@Throws(SCIOException::class)
 	abstract fun prepareDevices(): Boolean
 
-	fun powerDownDevices(): Boolean {
-		return this.setNFCCard(null)
-	}
+	fun powerDownDevices(): Boolean = this.setNFCCard(null)
 
 	fun setDialogMsg(dialogMsg: String) {
 		val currentCard = this.nFCCard
@@ -197,7 +193,6 @@ abstract class NFCCardTerminal<T : AbstractNFCCard> : SCIOTerminal {
 		LOG.debug { "${"Notifying card is present: {}"} $nowPresent" }
 		return nowPresent
 	}
-
 }
 
 const val STD_TERMINAL_NAME: String = "Integrated NFC"

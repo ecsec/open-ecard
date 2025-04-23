@@ -37,7 +37,6 @@ kotlin {
 	}
 }
 
-
 tasks.named("jvmProcessResources", ProcessResources::class).configure {
 	filesMatching("**/VERSION") {
 		expand("version" to project.version.toString())

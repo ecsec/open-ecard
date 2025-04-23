@@ -26,4 +26,9 @@ package org.openecard.common.interfaces
  *
  * @author Tobias Wich
  */
-class InvocationTargetExceptionUnchecked @JvmOverloads constructor(msg: String?, cause: Throwable? = null) : RuntimeException(msg, cause)
+class InvocationTargetExceptionUnchecked
+	@JvmOverloads
+	constructor(
+		msg: String?,
+		cause: Throwable? = null,
+	) : RuntimeException(msg, cause)

@@ -30,28 +30,23 @@ import java.util.*
  * @author Tobias Wich
  */
 class ProtocolFactories {
+	private val factories: MutableMap<String, ProtocolFactory> = mutableMapOf()
 
-    private val factories: MutableMap<String, ProtocolFactory> = mutableMapOf()
+	fun contains(proto: String): Boolean = factories.containsKey(proto)
 
+	fun protocols(): List<String> = factories.keys.toList()
 
-    fun contains(proto: String): Boolean {
-        return factories.containsKey(proto)
-    }
+	fun get(proto: String): ProtocolFactory? = factories[proto]
 
-    fun protocols(): List<String> {
-        return factories.keys.toList()
-    }
-
-    fun get(proto: String): ProtocolFactory? {
-        return factories[proto]
-    }
-
-    fun add(proto: String, impl: ProtocolFactory): Boolean {
-        var result = false
-        if (!contains(proto)) {
-            result = true
-            factories.put(proto, impl)
-        }
-        return result
-    }
+	fun add(
+		proto: String,
+		impl: ProtocolFactory,
+	): Boolean {
+		var result = false
+		if (!contains(proto)) {
+			result = true
+			factories.put(proto, impl)
+		}
+		return result
+	}
 }

@@ -33,18 +33,17 @@ import org.openecard.common.interfaces.Dispatcher
  * @author Dirk Petrautzki
  */
 class PreselectedSmartCardCredentialFactory(
-    dispatcher: Dispatcher,
-    private val inputHandle: ConnectionHandleType,
-    filterAlwaysReadable: Boolean
+	dispatcher: Dispatcher,
+	private val inputHandle: ConnectionHandleType,
+	filterAlwaysReadable: Boolean,
 ) : BaseSmartCardCredentialFactory(dispatcher, filterAlwaysReadable) {
-
-    override val usedHandle: ConnectionHandleType?
+	override val usedHandle: ConnectionHandleType?
 		get() {
 			return inputHandle
 		}
 
-    override fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner> {
-        // use the one prepared handle
-        return getClientCredentialsForCard(cr, inputHandle)
-    }
+	override fun getClientCredentials(cr: CertificateRequest): List<TlsCredentialedSigner> {
+		// use the one prepared handle
+		return getClientCredentialsForCard(cr, inputHandle)
+	}
 }

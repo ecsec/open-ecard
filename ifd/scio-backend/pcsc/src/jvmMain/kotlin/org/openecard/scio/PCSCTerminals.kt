@@ -41,29 +41,32 @@ private val LOG = KotlinLogging.logger { }
  * @author Wael Alkhatib
  * @author Tobias Wich
  */
-class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactory) : SCIOTerminals {
+class PCSCTerminals internal constructor(
+	private val terminalFactory: PCSCFactory,
+) : SCIOTerminals {
 	private var terminals: CardTerminals
 
 	init {
-		terminals = object : CardTerminals() {
-			@Throws(CardException::class)
-			override fun list(arg0: State?): MutableList<CardTerminal> {
-				if (loadTerminals()) {
-					return terminals.list(arg0)
-				} else {
-					throw JnaPCSCException(getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.")
+		terminals =
+			object : CardTerminals() {
+				@Throws(CardException::class)
+				override fun list(arg0: State?): MutableList<CardTerminal> {
+					if (loadTerminals()) {
+						return terminals.list(arg0)
+					} else {
+						throw JnaPCSCException(getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.")
+					}
 				}
-			}
 
-			@Throws(CardException::class)
-			override fun waitForChange(arg0: Long): Boolean {
-				if (loadTerminals()) {
-					return terminals.waitForChange(arg0)
-				} else {
-					throw JnaPCSCException(getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.")
+				@Throws(CardException::class)
+				override fun waitForChange(arg0: Long): Boolean {
+					if (loadTerminals()) {
+						return terminals.waitForChange(arg0)
+					} else {
+						throw JnaPCSCException(getLong(SCIOErrorCode.SCARD_E_NO_SERVICE), "Error loading PCSC subsystem.")
+					}
 				}
 			}
-		}
 	}
 
 	private fun loadTerminals(): Boolean {
@@ -87,17 +90,16 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 	}
 
 	@Throws(SCIOException::class)
-	override fun list(): List<SCIOTerminal> {
-		return list(SCIOTerminals.State.ALL)
-	}
+	override fun list(): List<SCIOTerminal> = list(SCIOTerminals.State.ALL)
 
 	@Throws(SCIOException::class)
-	override fun list(state: SCIOTerminals.State): List<SCIOTerminal> {
-		return list(state, true)
-	}
+	override fun list(state: SCIOTerminals.State): List<SCIOTerminal> = list(state, true)
 
 	@Throws(SCIOException::class)
-	fun list(state: SCIOTerminals.State, firstTry: Boolean): List<SCIOTerminal> {
+	fun list(
+		state: SCIOTerminals.State,
+		firstTry: Boolean,
+	): List<SCIOTerminal> {
 		LOG.trace { "Entering list()." }
 		try {
 			val scState = convertState(state)
@@ -127,13 +129,12 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 		}
 	}
 
-	private fun convertState(state: SCIOTerminals.State): CardTerminals.State {
-		return when (state) {
+	private fun convertState(state: SCIOTerminals.State): CardTerminals.State =
+		when (state) {
 			SCIOTerminals.State.ALL -> CardTerminals.State.ALL
 			SCIOTerminals.State.CARD_PRESENT -> CardTerminals.State.CARD_PRESENT
 			SCIOTerminals.State.CARD_ABSENT -> CardTerminals.State.CARD_ABSENT
 		}
-	}
 
 	private fun convertTerminal(scTerminal: CardTerminal): SCIOTerminal {
 		// TODO: check if we should only return the same instances (caching) here
@@ -162,11 +163,12 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 	override val watcher: TerminalWatcher
 		get() = PCSCWatcher(this)
 
-
 	/**
 	 * Terminal Watcher part
 	 */
-	private class PCSCWatcher(private val parent: PCSCTerminals) : TerminalWatcher {
+	private class PCSCWatcher(
+		private val parent: PCSCTerminals,
+	) : TerminalWatcher {
 		private val own: PCSCTerminals = PCSCTerminals(parent.terminalFactory)
 
 		private var pendingEvents: Queue<TerminalWatcher.StateChangeEvent>? = null
@@ -198,7 +200,7 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 				for (next in javaTerminals) {
 					val name = next.name
 					val cardInserted = next.isCardPresent
-					LOG.debug { "Terminal='${name}' cardPresent=${cardInserted}" }
+					LOG.debug { "Terminal='$name' cardPresent=$cardInserted" }
 					terminalList!!.add(name)
 					if (cardInserted) {
 						cardPresent!!.add(name)
@@ -216,7 +218,10 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 				if (code == SCIOErrorCode.SCARD_E_NO_READERS_AVAILABLE) {
 					LOG.debug { "No reader available exception." }
 					return listOf()
-				} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE || code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED || code == SCIOErrorCode.SCARD_E_INVALID_HANDLE) {
+				} else if (code == SCIOErrorCode.SCARD_E_NO_SERVICE ||
+					code == SCIOErrorCode.SCARD_E_SERVICE_STOPPED ||
+					code == SCIOErrorCode.SCARD_E_INVALID_HANDLE
+				) {
 					LOG.debug { "No service available exception, reloading PCSC and returning empty list." }
 					parent.loadTerminals()
 					own.loadTerminals()
@@ -232,14 +237,12 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 		}
 
 		@Throws(SCIOException::class)
-		override fun waitForChange(): TerminalWatcher.StateChangeEvent {
-			return waitForChange(0)
-		}
+		override fun waitForChange(): TerminalWatcher.StateChangeEvent = waitForChange(0)
 
 		@Throws(SCIOException::class)
 		override fun waitForChange(timeout: Long): TerminalWatcher.StateChangeEvent {
 			var timeout = timeout
-			LOG.trace { "Entering waitForChange() with timeout${timeout}." }
+			LOG.trace { "Entering waitForChange() with timeout$timeout." }
 			checkNotNull(pendingEvents) { "Calling wait on uninitialized watcher instance." }
 
 			// set timeout to maximum when value says wait indefinitely
@@ -325,7 +328,7 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 				val finishTime = System.nanoTime()
 				val delta = finishTime - startTime
 				timeout = timeout - (delta / 1000000)
-				LOG.trace { "Start wait loop again with reduced timeout value (${timeout} ms)." }
+				LOG.trace { "Start wait loop again with reduced timeout value ($timeout ms)." }
 			}
 
 			LOG.trace { "Leaving waitForChange() with no event." }
@@ -457,12 +460,14 @@ class PCSCTerminals internal constructor(private val terminalFactory: PCSCFactor
 			}
 		}
 	}
-
 }
 
 private const val WAIT_DELTA: Long = 1500
 
-private fun <T> subtract(a: Set<T>, b: Set<T>): Set<T> {
+private fun <T> subtract(
+	a: Set<T>,
+	b: Set<T>,
+): Set<T> {
 	val result = HashSet<T>(a)
 	result.removeAll(b)
 	return result
@@ -470,7 +475,7 @@ private fun <T> subtract(a: Set<T>, b: Set<T>): Set<T> {
 
 private fun createEvents(
 	type: TerminalWatcher.EventType,
-	list: Set<String>
+	list: Set<String>,
 ): Collection<TerminalWatcher.StateChangeEvent> {
 	val result = ArrayList<TerminalWatcher.StateChangeEvent>(list.size)
 	for (next in list) {

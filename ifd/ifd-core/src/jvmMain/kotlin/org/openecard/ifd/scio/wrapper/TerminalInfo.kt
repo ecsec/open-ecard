@@ -35,7 +35,6 @@ import org.openecard.ifd.scio.reader.ExecutePACEResponse
 import org.openecard.ifd.scio.reader.PCSCFeatures
 import java.math.BigInteger
 
-
 private val LOG = KotlinLogging.logger { }
 
 /**
@@ -64,7 +63,6 @@ class TerminalInfo {
 		}
 	}
 
-
 	// capabilities entries
 	private var acoustic: Boolean? = null
 	private var optic: Boolean? = null
@@ -92,7 +90,7 @@ class TerminalInfo {
 						}"
 						throw SCIOException(
 							msg,
-							SCIOErrorCode.SCARD_F_UNKNOWN_ERROR
+							SCIOErrorCode.SCARD_F_UNKNOWN_ERROR,
 						)
 					}
 					val cap = PACECapabilities(paceResponse.data)
@@ -101,7 +99,6 @@ class TerminalInfo {
 			}
 			return result
 		}
-
 
 	constructor(cm: ChannelManager, term: SCIOTerminal) {
 		this.cm = cm
@@ -115,7 +112,6 @@ class TerminalInfo {
 		this.externalChannel = true
 		this.channel = channel
 	}
-
 
 	val name: String
 		get() = term.name
@@ -131,7 +127,6 @@ class TerminalInfo {
 
 	val isConnected: Boolean
 		get() = channel != null
-
 
 	@get:Throws(SCIOException::class)
 	val status: IFDStatusType
@@ -161,7 +156,7 @@ class TerminalInfo {
 					throw SCIOException(
 						msg,
 						SCIOErrorCode.SCARD_E_UNKNOWN_READER,
-						ex
+						ex,
 					)
 				}
 			}
@@ -190,7 +185,6 @@ class TerminalInfo {
 
 		cap
 	}
-
 
 	@get:Throws(SCIOException::class)
 	val isAcousticSignal: Boolean
@@ -272,7 +266,6 @@ class TerminalInfo {
 			return keyCap
 		}
 
-
 	val biosensorCapability: BioSensorCapabilityType?
 		get() {
 			if (!bioCapRead) {
@@ -311,10 +304,7 @@ class TerminalInfo {
 		}
 
 	@Throws(SCIOException::class, InterruptedException::class)
-	fun supportsPace(): Boolean {
-		return this.paceCtrlCode != null
-	}
-
+	fun supportsPace(): Boolean = this.paceCtrlCode != null
 
 	@get:Throws(SCIOException::class, InterruptedException::class)
 	private val pinCompareCtrlCode: Int?
@@ -327,9 +317,7 @@ class TerminalInfo {
 		}
 
 	@Throws(SCIOException::class, InterruptedException::class)
-	fun supportsPinCompare(): Boolean {
-		return this.pinCompareCtrlCode != null
-	}
+	fun supportsPinCompare(): Boolean = this.pinCompareCtrlCode != null
 
 	companion object {
 		fun buildPACEProtocolList(paceCapabilities: List<PACECapabilities.PACECapability>): List<String> {

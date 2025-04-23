@@ -22,7 +22,6 @@
 
 package org.openecard.ifd.protocol.pace.common
 
-
 /**
  * Implements the different password identifier.
  * See BSI-TR-03110, version 2.10, part 3, section B.11.1.
@@ -30,57 +29,56 @@ package org.openecard.ifd.protocol.pace.common
  * @author Moritz Horsch
  */
 enum class PasswordID(
-    /**
-     * Returns the byte representation of the password ID.
-     *
-     * @return Byte representation
-     */
-    val byte: Byte
+	/**
+	 * Returns the byte representation of the password ID.
+	 *
+	 * @return Byte representation
+	 */
+	val byte: Byte,
 ) {
-    MRZ(0x01.toByte()),
-    CAN(0x02.toByte()),
-    PIN(0x03.toByte()),
-    PUK(0x04.toByte());
+	MRZ(0x01.toByte()),
+	CAN(0x02.toByte()),
+	PIN(0x03.toByte()),
+	PUK(0x04.toByte()),
+	;
 
-    val byteAsString: String
-        /**
-         * Returns the byte representation of the password ID as a string.
-         *
-         * @return Byte representation as a string
-         */
-        get() = byte.toString()
+	val byteAsString: String
+		/**
+		 * Returns the byte representation of the password ID as a string.
+		 *
+		 * @return Byte representation as a string
+		 */
+		get() = byte.toString()
 
-    companion object {
-        /**
-         * Parses a string to the password ID.
-         *
-         * @param type Type
-         * @return PasswordID
-         */
+	companion object {
+		/**
+		 * Parses a string to the password ID.
+		 *
+		 * @param type Type
+		 * @return PasswordID
+		 */
 		@JvmStatic
-        fun parse(type: String): PasswordID? {
-            return if (type.matches("[1-4]".toRegex())) {
-                parse(type.toInt())
-            } else {
-                valueOf(type)
-            }
-        }
+		fun parse(type: String): PasswordID? =
+			if (type.matches("[1-4]".toRegex())) {
+				parse(type.toInt())
+			} else {
+				valueOf(type)
+			}
 
-        /**
-         * Parses a byte to the password ID.
-         *
-         * @param type Type
-         * @return PasswordID
-         */
+		/**
+		 * Parses a byte to the password ID.
+		 *
+		 * @param type Type
+		 * @return PasswordID
+		 */
 		@JvmStatic
-		fun parse(type: Number): PasswordID? {
-            return when (type.toInt()) {
-                0x01 -> MRZ
-                0x02 -> CAN
-                0x03 -> PIN
-                0x04 -> PUK
-                else -> null
-            }
-        }
-    }
+		fun parse(type: Number): PasswordID? =
+			when (type.toInt()) {
+				0x01 -> MRZ
+				0x02 -> CAN
+				0x03 -> PIN
+				0x04 -> PUK
+				else -> null
+			}
+	}
 }

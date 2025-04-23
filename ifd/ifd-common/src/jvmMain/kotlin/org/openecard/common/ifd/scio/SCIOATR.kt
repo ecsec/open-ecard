@@ -27,16 +27,18 @@ package org.openecard.common.ifd.scio
  *
  * @author Wael Alkhatib
  */
-class SCIOATR(atr: ByteArray) {
-    private val atr: ByteArray = atr.clone()
+class SCIOATR(
+	atr: ByteArray,
+) {
+	private val atr: ByteArray = atr.clone()
 
-    val bytes: ByteArray
-        /**
-         * Gets the raw bytes of this ATR.
-         * The returned array is a copy of the ATR wrapped in the instance of this class. It is therefore safe to modify the
-         * returned array.
-         *
-         * @return A copy of the ATR represented by the instance of this class.
-         */
-        get() = atr.clone() // TODO: add functionality to extract values such as capabilities of the card
+	val bytes: ByteArray
+		/**
+		 * Gets the raw bytes of this ATR.
+		 * The returned array is a copy of the ATR wrapped in the instance of this class. It is therefore safe to modify the
+		 * returned array.
+		 *
+		 * @return A copy of the ATR represented by the instance of this class.
+		 */
+		get() = atr.clone() // TODO: add functionality to extract values such as capabilities of the card
 }

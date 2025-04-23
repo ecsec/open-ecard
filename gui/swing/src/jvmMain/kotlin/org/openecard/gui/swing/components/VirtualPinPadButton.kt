@@ -36,9 +36,12 @@ import javax.swing.text.JTextComponent
  *
  * @author Tobias Wich
  */
-class VirtualPinPadButton(private val inputField: JTextComponent, private val passDef: PasswordField) : JLabel(
-	pinPadIcon
-) {
+class VirtualPinPadButton(
+	private val inputField: JTextComponent,
+	private val passDef: PasswordField,
+) : JLabel(
+		pinPadIcon,
+	) {
 	/**
 	 * Creates an instance of the button.
 	 *
@@ -88,15 +91,15 @@ class VirtualPinPadButton(private val inputField: JTextComponent, private val pa
 		override fun mouseExited(e: MouseEvent) {
 		}
 	}
-
 }
 
 private val pinPadIcon: ImageIcon
 	get() {
-		val imgUrl = resolveResourceAsURL(
-			VirtualPinPadButton::class.java,
-			"virtual-pinpad-button.png"
-		)
+		val imgUrl =
+			resolveResourceAsURL(
+				VirtualPinPadButton::class.java,
+				"virtual-pinpad-button.png",
+			)
 		val img = ImageIcon(imgUrl)
 		return img
 	}

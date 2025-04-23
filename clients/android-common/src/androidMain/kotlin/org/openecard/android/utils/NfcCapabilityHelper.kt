@@ -27,18 +27,17 @@ import android.nfc.NfcAdapter
 import android.nfc.NfcManager
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.mobile.activation.NfcCapabilityResult
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-private val LOG = KotlinLogging.logger {  }
-
+private val LOG = KotlinLogging.logger { }
 
 /**
  *
  * @author Neil Crossley
  */
-class NfcCapabilityHelper<T : Context?> internal constructor(activity: T?, nfcAdapter: NfcAdapter?) {
-
+class NfcCapabilityHelper<T : Context?> internal constructor(
+	activity: T?,
+	nfcAdapter: NfcAdapter?,
+) {
 	val context: T
 	private val nfcAdapter: NfcAdapter?
 
@@ -48,16 +47,14 @@ class NfcCapabilityHelper<T : Context?> internal constructor(activity: T?, nfcAd
 		this.nfcAdapter = nfcAdapter
 	}
 
-	fun getNfcAdapter(): NfcAdapter? {
-		return nfcAdapter
-	}
+	fun getNfcAdapter(): NfcAdapter? = nfcAdapter
 
 	val isNFCAvailable: Boolean
 		/*
-	 * Check if NFC is available on the corresponding device.
-	 *
-	 * @return true if nfc is available, otherwise false
-	 */
+		 * Check if NFC is available on the corresponding device.
+		 *
+		 * @return true if nfc is available, otherwise false
+		 */
 		get() = nfcAdapter != null
 
 	val isNFCEnabled: Boolean
@@ -69,9 +66,7 @@ class NfcCapabilityHelper<T : Context?> internal constructor(activity: T?, nfcAd
 		 */
 		get() = nfcAdapter != null && nfcAdapter.isEnabled
 
-	fun checkExtendedLength(): NfcCapabilityResult {
-		return NfcExtendedHelper.checkExtendedLength(context)
-	}
+	fun checkExtendedLength(): NfcCapabilityResult = NfcExtendedHelper.checkExtendedLength(context)
 
 	companion object {
 		fun <T : Context> create(activity: T): NfcCapabilityHelper<T> {

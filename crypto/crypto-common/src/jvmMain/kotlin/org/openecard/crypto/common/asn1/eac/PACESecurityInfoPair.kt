@@ -32,19 +32,21 @@ class PACESecurityInfoPair
  *
  * @param pACEInfo PACEInfo object.
  * @param pACEDomainParameterInfo Domain Parameters. `null` for standard parameters.
- */(val pACEInfo: PACEInfo, val pACEDomainParameterInfo: PACEDomainParameterInfo?) {
-    val isStandardizedParameter: Boolean
-        get() {
-            val id: Int = pACEInfo.parameterID
-            return id >= 0 && id <= 31
-        }
+ */
+(
+	val pACEInfo: PACEInfo,
+	val pACEDomainParameterInfo: PACEDomainParameterInfo?,
+) {
+	val isStandardizedParameter: Boolean
+		get() {
+			val id: Int = pACEInfo.parameterID
+			return id >= 0 && id <= 31
+		}
 
-    /**
-     * Creates a PACEDomainParameter object based on this pair.
-     *
-     * @return The new PACEDomainParameter object.
-     */
-    fun createPACEDomainParameter(): PACEDomainParameter {
-        return PACEDomainParameter(this)
-    }
+	/**
+	 * Creates a PACEDomainParameter object based on this pair.
+	 *
+	 * @return The new PACEDomainParameter object.
+	 */
+	fun createPACEDomainParameter(): PACEDomainParameter = PACEDomainParameter(this)
 }

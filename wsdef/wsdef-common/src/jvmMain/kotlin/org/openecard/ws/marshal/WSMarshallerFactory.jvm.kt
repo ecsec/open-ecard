@@ -35,38 +35,37 @@ import org.openecard.ws.marshal.WsdefProperties.properties
  * @author Tobias Wich
  */
 class WSMarshallerFactory private constructor() {
-    private val factory: GenericFactory<WSMarshaller>
+	private val factory: GenericFactory<WSMarshaller>
 
-    init {
-        try {
-            val key = "org.openecard.ws.marshaller.impl"
-            factory = GenericFactory(WSMarshaller::class.java, properties(), key)
-        } catch (ex: GenericFactoryException) {
-            throw WSMarshallerException(ex)
-        }
-    }
+	init {
+		try {
+			val key = "org.openecard.ws.marshaller.impl"
+			factory = GenericFactory(WSMarshaller::class.java, properties(), key)
+		} catch (ex: GenericFactoryException) {
+			throw WSMarshallerException(ex)
+		}
+	}
 
+	companion object {
+		private var inst: WSMarshallerFactory? = null
 
-    companion object {
-        private var inst: WSMarshallerFactory? = null
-
-        /**
-         * Gets a new instance of the selected WSMarshaller implementation.
-         *
-         * @return WSMarshaller implementation instance.
-         * @throws WSMarshallerException In case the WSMarshaller instance could not be created.
-         */
-        @JvmStatic
+		/**
+		 * Gets a new instance of the selected WSMarshaller implementation.
+		 *
+		 * @return WSMarshaller implementation instance.
+		 * @throws WSMarshallerException In case the WSMarshaller instance could not be created.
+		 */
+		@JvmStatic
 		@Synchronized
-        @Throws(WSMarshallerException::class)
-        fun createInstance(): WSMarshaller {
-            val tmpInst = inst ?: WSMarshallerFactory()
+		@Throws(WSMarshallerException::class)
+		fun createInstance(): WSMarshaller {
+			val tmpInst = inst ?: WSMarshallerFactory()
 
-            try {
-                return tmpInst.factory.instance
-            } catch (ex: GenericFactoryException) {
-                throw WSMarshallerException(ex)
-            }
-        }
-    }
+			try {
+				return tmpInst.factory.instance
+			} catch (ex: GenericFactoryException) {
+				throw WSMarshallerException(ex)
+			}
+		}
+	}
 }

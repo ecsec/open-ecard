@@ -35,36 +35,40 @@ import java.util.regex.Pattern
  * @author Tobias Wich
  */
 class RegexProxySelector(
-    private val parent: ProxySelector,
-    private val hosts: List<Pattern>
+	private val parent: ProxySelector,
+	private val hosts: List<Pattern>,
 ) : ProxySelector() {
-    /**
-     * Checks if the given URL must be excluded from being proxied.
-     *
-     * @param uri URI to check for exclusion. Only Hostname and port are used.
-     * @return `true` if the URI is excluded, `false` otherwise.
-     */
-    fun isExclusion(uri: URI): Boolean {
-        val hostPort = "${uri.host}:${uri.port}"
-        // check if any of the patterns matches, if so do not proxy
-        for (next in hosts) {
-            val m = next.matcher(hostPort)
-            if (m.matches()) {
-                return true
-            }
-        }
-        return false
-    }
+	/**
+	 * Checks if the given URL must be excluded from being proxied.
+	 *
+	 * @param uri URI to check for exclusion. Only Hostname and port are used.
+	 * @return `true` if the URI is excluded, `false` otherwise.
+	 */
+	fun isExclusion(uri: URI): Boolean {
+		val hostPort = "${uri.host}:${uri.port}"
+		// check if any of the patterns matches, if so do not proxy
+		for (next in hosts) {
+			val m = next.matcher(hostPort)
+			if (m.matches()) {
+				return true
+			}
+		}
+		return false
+	}
 
-    override fun select(uri: URI): List<Proxy> {
-        if (isExclusion(uri)) {
-            return listOf(Proxy.NO_PROXY)
-        }
-        // no match so far, ask parent selector
-        return parent.select(uri)
-    }
+	override fun select(uri: URI): List<Proxy> {
+		if (isExclusion(uri)) {
+			return listOf(Proxy.NO_PROXY)
+		}
+		// no match so far, ask parent selector
+		return parent.select(uri)
+	}
 
-    override fun connectFailed(uri: URI, sa: SocketAddress, ioe: IOException) {
-        parent.connectFailed(uri, sa, ioe)
-    }
+	override fun connectFailed(
+		uri: URI,
+		sa: SocketAddress,
+		ioe: IOException,
+	) {
+		parent.connectFailed(uri, sa, ioe)
+	}
 }

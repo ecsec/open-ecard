@@ -20,61 +20,49 @@ import org.openecard.ws.jaxb.JAXBMarshaller
  */
 class OpeneCard internal constructor(
 	private val contextManager: ContextManager,
-	private val activationUtils: CommonActivationUtils
-): ActivationSource {
+	private val activationUtils: CommonActivationUtils,
+) : ActivationSource {
+	fun context(): ContextManager = contextManager
 
-	fun context(): ContextManager {
-		return contextManager
-	}
+	override fun eacFactory(): EacControllerFactory = activationUtils.eacFactory()
 
-	override fun eacFactory(): EacControllerFactory {
-		return activationUtils.eacFactory()
-	}
+	override fun cardLinkFactory(): CardLinkControllerFactory = activationUtils.cardLinkFactory()
 
-	override fun cardLinkFactory(): CardLinkControllerFactory {
-		return activationUtils.cardLinkFactory()
-	}
-
-	override fun pinManagementFactory(): PinManagementControllerFactory {
-		return activationUtils.pinManagementFactory()
-	}
+	override fun pinManagementFactory(): PinManagementControllerFactory = activationUtils.pinManagementFactory()
 
 	companion object {
-
 		@JvmStatic
 		fun createInstance(): OpeneCard {
 			val ifdTerminalfactory = IFDTerminalFactory.configBackedInstance()
 			val terminalFactory = ifdTerminalfactory.instance
 
 			val config =
-                OpeneCardContextConfig(ifdTerminalfactory, JAXBMarshaller::class.java.getCanonicalName())
-			val activationUtils = CommonActivationUtils(config, object : NFCDialogMsgSetter {
-                override fun setText(msg: String) {}
+				OpeneCardContextConfig(ifdTerminalfactory, JAXBMarshaller::class.java.getCanonicalName())
+			val activationUtils =
+				CommonActivationUtils(
+					config,
+					object : NFCDialogMsgSetter {
+						override fun setText(msg: String) {}
 
-                override fun isSupported(): Boolean {
-                    return false
-                }
-            })
-			val contextManager = activationUtils.context(object: NFCCapabilities {
-				override fun isAvailable(): Boolean {
-					return try {
-						terminalFactory.terminals().list().isNotEmpty()
-					} catch (ex: SCIOException) {
-						false
-					}
-				}
+						override fun isSupported(): Boolean = false
+					},
+				)
+			val contextManager =
+				activationUtils.context(
+					object : NFCCapabilities {
+						override fun isAvailable(): Boolean =
+							try {
+								terminalFactory.terminals().list().isNotEmpty()
+							} catch (ex: SCIOException) {
+								false
+							}
 
-				override fun isEnabled(): Boolean {
-					return true
-				}
+						override fun isEnabled(): Boolean = true
 
-				override fun checkExtendedLength(): NfcCapabilityResult {
-					return NfcCapabilityResult.QUERY_NOT_ALLOWED
-				}
-
-			})
+						override fun checkExtendedLength(): NfcCapabilityResult = NfcCapabilityResult.QUERY_NOT_ALLOWED
+					},
+				)
 			return OpeneCard(contextManager, activationUtils)
 		}
 	}
-
 }

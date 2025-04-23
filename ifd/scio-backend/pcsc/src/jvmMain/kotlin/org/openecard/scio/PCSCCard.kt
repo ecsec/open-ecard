@@ -38,9 +38,11 @@ import javax.smartcardio.CommandAPDU
  * @author Wael Alkhatib
  * @author Tobias Wich
  */
-class PCSCCard internal constructor(override val terminal: PCSCTerminal, private val card: Card) : SCIOCard {
-
-    override val isContactless: Boolean by lazy {
+class PCSCCard internal constructor(
+	override val terminal: PCSCTerminal,
+	private val card: Card,
+) : SCIOCard {
+	override val isContactless: Boolean by lazy {
 		try {
 			val getUidCmd = CardCommandAPDU(0xFF.toByte(), 0xCA.toByte(), 0x00.toByte(), 0x00.toByte(), 0xFF.toShort())
 			val convertCommand = CommandAPDU(getUidCmd.toByteArray())
@@ -53,69 +55,71 @@ class PCSCCard internal constructor(override val terminal: PCSCTerminal, private
 		}
 	}
 
-    override val aTR: SCIOATR
-        get() {
-            val atr = card.atr
-            return SCIOATR(atr.bytes)
-        }
+	override val aTR: SCIOATR
+		get() {
+			val atr = card.atr
+			return SCIOATR(atr.bytes)
+		}
 
-    override val protocol: SCIOProtocol
-        get() {
-            val proto = card.protocol
-            return getType(proto)
-        }
+	override val protocol: SCIOProtocol
+		get() {
+			val proto = card.protocol
+			return getType(proto)
+		}
 
+	override val basicChannel: PCSCChannel
+		get() = PCSCChannel(this, card.basicChannel)
 
-    override val basicChannel: PCSCChannel
-        get() = PCSCChannel(this, card.basicChannel)
+	@Throws(SCIOException::class)
+	override fun openLogicalChannel(): PCSCChannel {
+		try {
+			return PCSCChannel(this, card.openLogicalChannel())
+		} catch (ex: CardException) {
+			val msg = "Failed to open logical channel to card in terminal '%s'."
+			throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun openLogicalChannel(): PCSCChannel {
-        try {
-            return PCSCChannel(this, card.openLogicalChannel())
-        } catch (ex: CardException) {
-            val msg = "Failed to open logical channel to card in terminal '%s'."
-            throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun beginExclusive() {
+		try {
+			card.beginExclusive()
+		} catch (ex: CardException) {
+			val msg = "Failed to get exclusive access to the card in terminal '%s'."
+			throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun beginExclusive() {
-        try {
-            card.beginExclusive()
-        } catch (ex: CardException) {
-            val msg = "Failed to get exclusive access to the card in terminal '%s'."
-            throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun endExclusive() {
+		try {
+			card.endExclusive()
+		} catch (ex: CardException) {
+			val msg = "Failed to release exclusive access to the card in terminal '%s'."
+			throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun endExclusive() {
-        try {
-            card.endExclusive()
-        } catch (ex: CardException) {
-            val msg = "Failed to release exclusive access to the card in terminal '%s'."
-            throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun transmitControlCommand(
+		controlCode: Int,
+		command: ByteArray,
+	): ByteArray {
+		try {
+			return card.transmitControlCommand(controlCode, command)
+		} catch (ex: CardException) {
+			val msg = "Failed to transmit control command to the terminal '%s'."
+			throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun transmitControlCommand(controlCode: Int, command: ByteArray): ByteArray {
-        try {
-            return card.transmitControlCommand(controlCode, command)
-        } catch (ex: CardException) {
-            val msg = "Failed to transmit control command to the terminal '%s'."
-            throw SCIOException(String.format(msg, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
-
-    @Throws(SCIOException::class)
-    override fun disconnect(reset: Boolean) {
-        try {
-            card.disconnect(reset)
-        } catch (ex: CardException) {
-            val msg = "Failed to disconnect (reset=%b) the card in terminal '%s'."
-            throw SCIOException(String.format(msg, reset, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun disconnect(reset: Boolean) {
+		try {
+			card.disconnect(reset)
+		} catch (ex: CardException) {
+			val msg = "Failed to disconnect (reset=%b) the card in terminal '%s'."
+			throw SCIOException(String.format(msg, reset, terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 }

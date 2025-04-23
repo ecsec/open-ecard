@@ -48,39 +48,40 @@ private val logger = KotlinLogging.logger {}
  * @author Moritz Horsch
  */
 class PACETest {
-    @Test(groups = ["interactive"])
-    @Throws(
-        UnsupportedDataTypeException::class,
-        JAXBException::class,
-        SAXException::class,
-        WSMarshallerException::class
-    )
-    fun executePACE_PIN() {
-        val env = ClientEnv()
-        env.gui = SwingUserConsent(SwingDialogWrapper())
-        val dispatcher = MessageDispatcher(env)
-        val ifd = IFD()
-        ifd.setEnvironment(env)
+	@Test(groups = ["interactive"])
+	@Throws(
+		UnsupportedDataTypeException::class,
+		JAXBException::class,
+		SAXException::class,
+		WSMarshallerException::class,
+	)
+	fun executePACE_PIN() {
+		val env = ClientEnv()
+		env.gui = SwingUserConsent(SwingDialogWrapper())
+		val dispatcher = MessageDispatcher(env)
+		val ifd = IFD()
+		ifd.setEnvironment(env)
 
-        env.ifd = ifd
-        env.dispatcher = dispatcher
-        ifd.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
+		env.ifd = ifd
+		env.dispatcher = dispatcher
+		ifd.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
 
-        val eCtx = EstablishContext()
-        val ctxHandle = ifd.establishContext(eCtx).contextHandle
+		val eCtx = EstablishContext()
+		val ctxHandle = ifd.establishContext(eCtx).contextHandle
 
-        val listIFDs = ListIFDs()
-        listIFDs.contextHandle = ctxHandle
-        val ifdName = ifd.listIFDs(listIFDs).ifdName[0]
+		val listIFDs = ListIFDs()
+		listIFDs.contextHandle = ctxHandle
+		val ifdName = ifd.listIFDs(listIFDs).ifdName[0]
 
-        val connect = Connect()
-        connect.contextHandle = ctxHandle
-        connect.ifdName = ifdName
-        connect.slot = BigInteger.ZERO
-        val slotHandle = ifd.connect(connect).slotHandle
+		val connect = Connect()
+		connect.contextHandle = ctxHandle
+		connect.ifdName = ifdName
+		connect.slot = BigInteger.ZERO
+		val slotHandle = ifd.connect(connect).slotHandle
 
-        // PinID: 02 = CAN, 03 = PIN
-        val xmlCall = """
+		// PinID: 02 = CAN, 03 = PIN
+		val xmlCall =
+			"""
 			<?xml version="1.0" encoding="UTF-8"?>
 			<iso:EstablishChannel xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema">
 			  <iso:SlotHandle>${ByteUtils.toHexString(slotHandle)}</iso:SlotHandle>
@@ -91,17 +92,16 @@ class PACETest {
 			  </iso:AuthenticationProtocolData>
 			</iso:EstablishChannel>
 			""".trimIndent()
-        val m = createInstance()
-        val eCh = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
+		val m = createInstance()
+		val eCh = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
 
-        val eChR = ifd.establishChannel(eCh)
+		val eChR = ifd.establishChannel(eCh)
 
-        logger.info { "PACE result: ${eChR.result.resultMajor}" }
-        try {
+		logger.info { "PACE result: ${eChR.result.resultMajor}" }
+		try {
 			logger.info { "${eChR.result.resultMinor}" }
 			logger.info { "${eChR.result.resultMessage.value}" }
-        } catch (ignore: Exception) {
-        }
-    }
-
+		} catch (ignore: Exception) {
+		}
+	}
 }

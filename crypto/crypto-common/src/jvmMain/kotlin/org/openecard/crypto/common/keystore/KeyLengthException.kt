@@ -21,10 +21,11 @@
  ***************************************************************************/
 package org.openecard.crypto.common.keystore
 
-
 /**
  * Exception indicating that a key is too weak.
  *
  * @author Tobias Wich
  */
-class KeyLengthException(message: String) : Exception(message)
+class KeyLengthException(
+	message: String,
+) : Exception(message)

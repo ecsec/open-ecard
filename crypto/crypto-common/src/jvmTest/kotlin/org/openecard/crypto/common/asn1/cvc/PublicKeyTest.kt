@@ -35,61 +35,62 @@ import kotlin.test.assertEquals
  * @author Moritz Horsch
  */
 class PublicKeyTest {
-    private lateinit var chain: CardVerifiableCertificateChain
+	private lateinit var chain: CardVerifiableCertificateChain
 
-    @BeforeTest
-    @Throws(Exception::class)
-    fun setUp() {
-        try {
-            val cvca = loadTestFile("cert_cvca.cvcert")
-            val dv = loadTestFile("cert_dv.cvcert")
-            val at = loadTestFile("cert_at.cvcert")
+	@BeforeTest
+	@Throws(Exception::class)
+	fun setUp() {
+		try {
+			val cvca = loadTestFile("cert_cvca.cvcert")
+			val dv = loadTestFile("cert_dv.cvcert")
+			val at = loadTestFile("cert_at.cvcert")
 
-            val certificates = listOf(
-				CardVerifiableCertificate(cvca),
-				CardVerifiableCertificate(dv),
-				CardVerifiableCertificate(at),
-			)
-            chain = CardVerifiableCertificateChain(certificates)
-        } catch (ex: Exception) {
-            Assert.fail(ex.message)
-        }
-    }
+			val certificates =
+				listOf(
+					CardVerifiableCertificate(cvca),
+					CardVerifiableCertificate(dv),
+					CardVerifiableCertificate(at),
+				)
+			chain = CardVerifiableCertificateChain(certificates)
+		} catch (ex: Exception) {
+			Assert.fail(ex.message)
+		}
+	}
 
-    @Test
-    @Throws(Exception::class)
-    fun testKeyCVCA() {
-        val pk = chain.cVCACertificates[0].getPublicKey()
-        assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
-    }
+	@Test
+	@Throws(Exception::class)
+	fun testKeyCVCA() {
+		val pk = chain.cVCACertificates[0].getPublicKey()
+		assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
+	}
 
-    @Test
-    @Throws(Exception::class)
-    fun testKeyDV() {
-        val pk = chain.dVCertificates[0].getPublicKey()
-        assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
-    }
+	@Test
+	@Throws(Exception::class)
+	fun testKeyDV() {
+		val pk = chain.dVCertificates[0].getPublicKey()
+		assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
+	}
 
-    @Test
-    @Throws(Exception::class)
-    fun testKeyTerminal() {
-        val pk = chain.terminalCertificate!!.getPublicKey()
-        assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
-    }
+	@Test
+	@Throws(Exception::class)
+	fun testKeyTerminal() {
+		val pk = chain.terminalCertificate!!.getPublicKey()
+		assertEquals(TAObjectIdentifier.id_TA_ECDSA_SHA_512, pk.objectIdentifier)
+	}
 
-    @Throws(Exception::class)
-    private fun loadTestFile(file: String): ByteArray {
-        val path = "/$file"
-        val ins = EFCardAccessTest::class.java.getResourceAsStream(path)
-        val baos = ByteArrayOutputStream(ins!!.available())
-        try {
-            var b: Int
-            while ((ins.read().also { b = it }) != -1) {
-                baos.write(b.toByte().toInt())
-            }
-        } catch (e: Exception) {
-            Assert.fail(e.message)
-        }
-        return baos.toByteArray()
-    }
+	@Throws(Exception::class)
+	private fun loadTestFile(file: String): ByteArray {
+		val path = "/$file"
+		val ins = EFCardAccessTest::class.java.getResourceAsStream(path)
+		val baos = ByteArrayOutputStream(ins!!.available())
+		try {
+			var b: Int
+			while ((ins.read().also { b = it }) != -1) {
+				baos.write(b.toByte().toInt())
+			}
+		} catch (e: Exception) {
+			Assert.fail(e.message)
+		}
+		return baos.toByteArray()
+	}
 }

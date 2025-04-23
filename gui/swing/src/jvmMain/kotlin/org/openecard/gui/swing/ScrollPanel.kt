@@ -23,34 +23,44 @@ import javax.swing.Scrollable
  *
  * @author Tobias Wich
  */
-class ScrollPanel : JPanel(), Scrollable {
-    override fun getPreferredScrollableViewportSize(): Dimension? {
-        //tell the JScrollPane that we want to be our 'preferredSize'
-        // but later, we'll say that vertically, it should scroll.
-        return super.getPreferredSize()
-    }
+class ScrollPanel :
+	JPanel(),
+	Scrollable {
+	override fun getPreferredScrollableViewportSize(): Dimension? {
+		// tell the JScrollPane that we want to be our 'preferredSize'
+		// but later, we'll say that vertically, it should scroll.
+		return super.getPreferredSize()
+	}
 
-    override fun getScrollableUnitIncrement(visibleRect: Rectangle?, orientation: Int, direction: Int): Int {
-        // 16 seems reasonable
-        return 16
-    }
+	override fun getScrollableUnitIncrement(
+		visibleRect: Rectangle?,
+		orientation: Int,
+		direction: Int,
+	): Int {
+		// 16 seems reasonable
+		return 16
+	}
 
-    override fun getScrollableBlockIncrement(visibleRect: Rectangle?, orientation: Int, direction: Int): Int {
-        // 16 seems reasonable
-        return 16
-    }
+	override fun getScrollableBlockIncrement(
+		visibleRect: Rectangle?,
+		orientation: Int,
+		direction: Int,
+	): Int {
+		// 16 seems reasonable
+		return 16
+	}
 
-    override fun getScrollableTracksViewportWidth(): Boolean {
-        // track the width, and re-size as needed
-        return true
-    }
+	override fun getScrollableTracksViewportWidth(): Boolean {
+		// track the width, and re-size as needed
+		return true
+	}
 
-    override fun getScrollableTracksViewportHeight(): Boolean {
-        // we don't want to track the height, because we want to scroll vertically
-        return false
-    }
+	override fun getScrollableTracksViewportHeight(): Boolean {
+		// we don't want to track the height, because we want to scroll vertically
+		return false
+	}
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	companion object {
+		private const val serialVersionUID = 1L
+	}
 }

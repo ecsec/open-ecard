@@ -30,15 +30,17 @@ import java.io.OutputStream
  *
  * @author Tobias Wich
  */
-class StreamSessionOutputBuffer(out: OutputStream?, bufsize: Int) :
-    SessionOutputBufferImpl(HttpTransportMetricsImpl(), bufsize) {
-    /**
-     * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
-     *
-     * @param out The destination output stream.
-     * @param bufsize The size of the internal buffer.
-     */
-    init {
-        bind(out)
-    }
+class StreamSessionOutputBuffer(
+	out: OutputStream?,
+	bufsize: Int,
+) : SessionOutputBufferImpl(HttpTransportMetricsImpl(), bufsize) {
+	/**
+	 * Creates a StreamSessionOutputBuffer instance based on a given OutputStream.
+	 *
+	 * @param out The destination output stream.
+	 * @param bufsize The size of the internal buffer.
+	 */
+	init {
+		bind(out)
+	}
 }

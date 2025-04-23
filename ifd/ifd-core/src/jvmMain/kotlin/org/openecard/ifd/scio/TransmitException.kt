@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.ifd.scio
 
-
 /**
  * Exception indicating an expected error in a transmit command.
  * This is caused by unexpected responses.
@@ -29,13 +28,13 @@ package org.openecard.ifd.scio
  * @author Tobias Wich
  */
 class TransmitException : IFDException {
-    val responseAPDU: ByteArray
+	val responseAPDU: ByteArray
 
-    constructor(rapdu: ByteArray, msg: String) : super(msg) {
-        this.responseAPDU = rapdu
-    }
+	constructor(rapdu: ByteArray, msg: String) : super(msg) {
+		this.responseAPDU = rapdu
+	}
 
-    constructor(rapdu: ByteArray) : super("Unexpected response code.") {
-        this.responseAPDU = rapdu
-    }
+	constructor(rapdu: ByteArray) : super("Unexpected response code.") {
+		this.responseAPDU = rapdu
+	}
 }

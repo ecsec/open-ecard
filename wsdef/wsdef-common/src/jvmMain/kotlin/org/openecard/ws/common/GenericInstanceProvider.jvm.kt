@@ -19,5 +19,5 @@ package org.openecard.ws.common
  */
 interface GenericInstanceProvider<T> {
 	@get:Throws(GenericFactoryException::class)
-    val instance: T
+	val instance: T
 }

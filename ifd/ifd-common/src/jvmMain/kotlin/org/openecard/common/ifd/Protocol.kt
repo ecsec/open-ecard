@@ -33,43 +33,47 @@ import org.openecard.gui.UserConsent
  */
 // TODO: replace with addon IFD protocols
 interface Protocol {
-    /**
-     * Perform protocol and thereby set up a secure messaging channel.
-     *
-     * @param req Request data needed for the protocol
-     * @param dispatcher Dispatcher containing IFD instance to perform commands on the terminal
-     * @param gui UserConsent GUI which can be used to get secrets (e.g. PIN) from the user
-     * @return Protocol response data
-     */
-    fun establish(req: EstablishChannel, dispatcher: Dispatcher, gui: UserConsent): EstablishChannelResponse
+	/**
+	 * Perform protocol and thereby set up a secure messaging channel.
+	 *
+	 * @param req Request data needed for the protocol
+	 * @param dispatcher Dispatcher containing IFD instance to perform commands on the terminal
+	 * @param gui UserConsent GUI which can be used to get secrets (e.g. PIN) from the user
+	 * @return Protocol response data
+	 */
+	fun establish(
+		req: EstablishChannel,
+		dispatcher: Dispatcher,
+		gui: UserConsent,
+	): EstablishChannelResponse
 
-    /**
-     * Filter function to perform secure messaging after the protocol has been established.<br></br>
-     * Apply secure messaging encryption to APDU.
-     *
-     * @param commandAPDU Command APDU which should be encrypted
-     * @return Command APDU which is encrypted
-     */
-    @Throws(
-        InvalidInputApduInSecureMessaging::class,
-        SecureMessagingCryptoException::class,
-        MissingSecureMessagingChannel::class
-    )
-    fun applySM(commandAPDU: ByteArray): ByteArray
+	/**
+	 * Filter function to perform secure messaging after the protocol has been established.<br></br>
+	 * Apply secure messaging encryption to APDU.
+	 *
+	 * @param commandAPDU Command APDU which should be encrypted
+	 * @return Command APDU which is encrypted
+	 */
+	@Throws(
+		InvalidInputApduInSecureMessaging::class,
+		SecureMessagingCryptoException::class,
+		MissingSecureMessagingChannel::class,
+	)
+	fun applySM(commandAPDU: ByteArray): ByteArray
 
-    /**
-     * Filter function to perform secure messaging after the protocol has been established.<br></br>
-     * Remove secure messaging encryption from APDU.
-     *
-     * @param responseAPDU Response APDU which should be decrypted
-     * @return Response APDU which is encrypted
-     */
-    @Throws(
-        SecureMessagingParseException::class,
-        SecureMessagingCryptoException::class,
-        SecureMessagingRejectedByIcc::class,
-        UnsupportedSecureMessagingFeature::class,
-        MissingSecureMessagingChannel::class
-    )
-    fun removeSM(responseAPDU: ByteArray): ByteArray
+	/**
+	 * Filter function to perform secure messaging after the protocol has been established.<br></br>
+	 * Remove secure messaging encryption from APDU.
+	 *
+	 * @param responseAPDU Response APDU which should be decrypted
+	 * @return Response APDU which is encrypted
+	 */
+	@Throws(
+		SecureMessagingParseException::class,
+		SecureMessagingCryptoException::class,
+		SecureMessagingRejectedByIcc::class,
+		UnsupportedSecureMessagingFeature::class,
+		MissingSecureMessagingChannel::class,
+	)
+	fun removeSM(responseAPDU: ByteArray): ByteArray
 }

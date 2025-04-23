@@ -28,90 +28,82 @@ import org.openecard.common.util.ByteUtils
  *
  * @author Moritz Horsch
  */
-class PublicKeyReference(private val reference: ByteArray) {
-    /**
-     * Returns the country code.
-     *
-     * @return Country code
-     */
-    // Country Code; Encoding: ISO 3166-1 ALPHA-2; Length: 2F
-    val countryCode: String
+class PublicKeyReference(
+	private val reference: ByteArray,
+) {
+	/**
+	 * Returns the country code.
+	 *
+	 * @return Country code
+	 */
+	// Country Code; Encoding: ISO 3166-1 ALPHA-2; Length: 2F
+	val countryCode: String
 
-    /**
-     * Returns the holder mnemonic.
-     *
-     * @return Holder mnemonice
-     */
-    // Sequence Number; Encoding: ISO/IEC 8859-1; Length: 9V
-    val holderMnemonic: String
+	/**
+	 * Returns the holder mnemonic.
+	 *
+	 * @return Holder mnemonice
+	 */
+	// Sequence Number; Encoding: ISO/IEC 8859-1; Length: 9V
+	val holderMnemonic: String
 
-    /**
-     * Returns the sequence number.
-     *
-     * @return Sequence number.
-     */
-    // Sequence Number; Encoding: ISO/IEC 8859-1; Length: 5F
-    val sequenceNumber: String
+	/**
+	 * Returns the sequence number.
+	 *
+	 * @return Sequence number.
+	 */
+	// Sequence Number; Encoding: ISO/IEC 8859-1; Length: 5F
+	val sequenceNumber: String
 
-    /**
-     * Creates a new public key reference.
-     *
-     * @param reference Public key reference
-     */
-    constructor(reference: String) : this(reference.toByteArray())
+	/**
+	 * Creates a new public key reference.
+	 *
+	 * @param reference Public key reference
+	 */
+	constructor(reference: String) : this(reference.toByteArray())
 
-    /**
-     * Creates a new public key reference.
-     *
-     * @param reference Public key reference
-     */
-    init {
-        val length = reference.size
+	/**
+	 * Creates a new public key reference.
+	 *
+	 * @param reference Public key reference
+	 */
+	init {
+		val length = reference.size
 
-        countryCode = String(ByteUtils.copy(reference, 0, 2))
-        holderMnemonic = String(ByteUtils.copy(reference, 2, length - 7))
-        sequenceNumber = String(ByteUtils.copy(reference, length - 5, 5))
-    }
+		countryCode = String(ByteUtils.copy(reference, 0, 2))
+		holderMnemonic = String(ByteUtils.copy(reference, 2, length - 7))
+		sequenceNumber = String(ByteUtils.copy(reference, length - 5, 5))
+	}
 
-    /**
-     * Returns the public key reference as a byte array.
-     *
-     * @return Byte array
-     */
-    fun toByteArray(): ByteArray {
-        return reference
-    }
+	/**
+	 * Returns the public key reference as a byte array.
+	 *
+	 * @return Byte array
+	 */
+	fun toByteArray(): ByteArray = reference
 
-    /**
-     * Compares the public key reference.
-     *
-     * @param publicKeyReference PublicKeyReference
-     * @return True if they are equal, otherwise false
-     */
-    fun compare(publicKeyReference: PublicKeyReference): Boolean {
-        return compare(publicKeyReference.toByteArray())
-    }
+	/**
+	 * Compares the public key reference.
+	 *
+	 * @param publicKeyReference PublicKeyReference
+	 * @return True if they are equal, otherwise false
+	 */
+	fun compare(publicKeyReference: PublicKeyReference): Boolean = compare(publicKeyReference.toByteArray())
 
-    /**
-     * Compares the public key reference.
-     *
-     * @param publicKeyReference PublicKeyReference
-     * @return True if they are equal, otherwise false
-     */
-    fun compare(publicKeyReference: ByteArray): Boolean {
-        return ByteUtils.compare(reference, publicKeyReference)
-    }
+	/**
+	 * Compares the public key reference.
+	 *
+	 * @param publicKeyReference PublicKeyReference
+	 * @return True if they are equal, otherwise false
+	 */
+	fun compare(publicKeyReference: ByteArray): Boolean = ByteUtils.compare(reference, publicKeyReference)
 
-    /**
-     * Returns the public key reference as a hex string.
-     *
-     * @return Hex string
-     */
-    fun toHexString(): String {
-        return ByteUtils.toHexString(reference, true)
-    }
+	/**
+	 * Returns the public key reference as a hex string.
+	 *
+	 * @return Hex string
+	 */
+	fun toHexString(): String = ByteUtils.toHexString(reference, true)
 
-    override fun toString(): String {
-        return String(reference)
-    }
+	override fun toString(): String = String(reference)
 }

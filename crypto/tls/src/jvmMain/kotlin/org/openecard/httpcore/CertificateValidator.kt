@@ -31,24 +31,27 @@ import java.net.URL
  * @author Tobias Wich
  */
 interface CertificateValidator {
-    /**
-     * Result indicating whether to proceed or stop execution.
-     * Errors in the validation are signaled with exceptions in the `validate` function itself.
-     */
-    enum class VerifierResult {
-        CONTINUE,
-        DONTCARE,
-        FINISH
-    }
+	/**
+	 * Result indicating whether to proceed or stop execution.
+	 * Errors in the validation are signaled with exceptions in the `validate` function itself.
+	 */
+	enum class VerifierResult {
+		CONTINUE,
+		DONTCARE,
+		FINISH,
+	}
 
-    /**
-     * Validate the given tuple.
-     *
-     * @param url Url of the last connection.
-     * @param cert Certificate chain of the last connection.
-     * @return Status indicating how to proceed.
-     * @throws ValidationError Thrown in case the validation failed.
-     */
-    @Throws(ValidationError::class)
-    fun validate(url: URL, cert: TlsServerCertificate): VerifierResult
+	/**
+	 * Validate the given tuple.
+	 *
+	 * @param url Url of the last connection.
+	 * @param cert Certificate chain of the last connection.
+	 * @return Status indicating how to proceed.
+	 * @throws ValidationError Thrown in case the validation failed.
+	 */
+	@Throws(ValidationError::class)
+	fun validate(
+		url: URL,
+		cert: TlsServerCertificate,
+	): VerifierResult
 }

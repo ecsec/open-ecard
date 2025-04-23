@@ -25,78 +25,83 @@ package org.openecard.ifd.scio.reader
  *
  * @author Tobias Wich
  */
-class EstablishPACEResponse(response: ByteArray) {
+class EstablishPACEResponse(
+	response: ByteArray,
+) {
+	val status: ByteArray
+	private var efCardAccessLength: Short
+	val eFCardAccess: ByteArray
 
-    val status: ByteArray
-    private var efCardAccessLength: Short
-    val eFCardAccess: ByteArray
+	// eID attributes
+	private var currentCARLength: Byte = 0
+	val currentCAR: ByteArray?
+	private var previousCARLength: Byte = 0
+	val previousCAR: ByteArray?
+	private var idiccLength: Short = 0
+	val iDICC: ByteArray?
 
-    // eID attributes
-    private var currentCARLength: Byte = 0
-    val currentCAR: ByteArray?
-    private var previousCARLength: Byte = 0
-    val previousCAR: ByteArray?
-    private var idiccLength: Short = 0
-    val iDICC: ByteArray?
-
-    init {
-        val dataLen = response.size
-        var idx = 4
-        // read status
-        this.status = response.copyOfRange(0, 2)
-        // read card access (& 0xFF produces unsigned numbers)
-        efCardAccessLength = ((response[2].toInt() and 0xFF) + ((response[3].toInt() and 0xFF) shl 8)).toShort()
-        eFCardAccess = if (efCardAccessLength > 0) {
-            idx += efCardAccessLength.toInt()
-			response.copyOfRange(idx, idx + efCardAccessLength)
-        } else {
-			// TODO: check if this is correct or an error would be better
-            ByteArray(0)
-        }
-        // read car
-		currentCAR = if (dataLen > idx + 1) {
-            currentCARLength = (response[idx].toInt() and 0xFF).toByte()
-            idx++
-            if (currentCARLength > 0) {
-                idx += currentCARLength.toInt()
-				response.copyOfRange(idx, idx + currentCARLength)
-            } else {
+	init {
+		val dataLen = response.size
+		var idx = 4
+		// read status
+		this.status = response.copyOfRange(0, 2)
+		// read card access (& 0xFF produces unsigned numbers)
+		efCardAccessLength = ((response[2].toInt() and 0xFF) + ((response[3].toInt() and 0xFF) shl 8)).toShort()
+		eFCardAccess =
+			if (efCardAccessLength > 0) {
+				idx += efCardAccessLength.toInt()
+				response.copyOfRange(idx, idx + efCardAccessLength)
+			} else {
+				// TODO: check if this is correct or an error would be better
+				ByteArray(0)
+			}
+		// read car
+		currentCAR =
+			if (dataLen > idx + 1) {
+				currentCARLength = (response[idx].toInt() and 0xFF).toByte()
+				idx++
+				if (currentCARLength > 0) {
+					idx += currentCARLength.toInt()
+					response.copyOfRange(idx, idx + currentCARLength)
+				} else {
+					null
+				}
+			} else {
 				null
 			}
-		} else {
-			null
-		}
 		// read car prev
-		previousCAR = if (dataLen > idx + 1) {
-            previousCARLength = (response[idx].toInt() and 0xFF).toByte()
-            idx++
-            if (previousCARLength > 0) {
-                idx += previousCARLength.toInt()
-				response.copyOfRange(idx, idx + previousCARLength)
-            } else {
+		previousCAR =
+			if (dataLen > idx + 1) {
+				previousCARLength = (response[idx].toInt() and 0xFF).toByte()
+				idx++
+				if (previousCARLength > 0) {
+					idx += previousCARLength.toInt()
+					response.copyOfRange(idx, idx + previousCARLength)
+				} else {
+					null
+				}
+			} else {
 				null
 			}
-		} else {
-			null
-		}
 		// read id icc
-		this.iDICC = if (dataLen > idx + 2) {
-            idiccLength = ((response[idx].toInt() and 0xFF) + ((response[idx + 1].toInt() and 0xFF) shl 8)).toShort()
-            idx += 2
-            if (idiccLength > 0) {
-                idx += idiccLength.toInt()
-				response.copyOfRange(idx, idx + idiccLength)
-            } else {
+		this.iDICC =
+			if (dataLen > idx + 2) {
+				idiccLength = ((response[idx].toInt() and 0xFF) + ((response[idx + 1].toInt() and 0xFF) shl 8)).toShort()
+				idx += 2
+				if (idiccLength > 0) {
+					idx += idiccLength.toInt()
+					response.copyOfRange(idx, idx + idiccLength)
+				} else {
+					null
+				}
+			} else {
 				null
 			}
-        } else {
-			null
-		}
 	}
 
-    val retryCounter: Byte
-        get() {
-            // TODO: verify that retry counter is extracted from 63CX statusword
+	val retryCounter: Byte
+		get() {
+			// TODO: verify that retry counter is extracted from 63CX statusword
 			return if (this.status[0].toInt() == 0x63 && (this.status[1].toInt() and 0xF0) == 0xC0) {
 				(this.status[1].toInt() and 0x0F).toByte()
 			} else {
@@ -104,21 +109,13 @@ class EstablishPACEResponse(response: ByteArray) {
 				// default 3 seems to make sense
 				3
 			}
-        }
+		}
 
-    fun hasEFCardAccess(): Boolean {
-        return efCardAccessLength > 0
-    }
+	fun hasEFCardAccess(): Boolean = efCardAccessLength > 0
 
-    fun hasCurrentCAR(): Boolean {
-        return currentCARLength > 0
-    }
+	fun hasCurrentCAR(): Boolean = currentCARLength > 0
 
-    fun hasPreviousCAR(): Boolean {
-        return previousCARLength > 0
-    }
+	fun hasPreviousCAR(): Boolean = previousCARLength > 0
 
-    fun hasIDICC(): Boolean {
-        return idiccLength > 0
-    }
+	fun hasIDICC(): Boolean = idiccLength > 0
 }

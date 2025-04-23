@@ -31,24 +31,26 @@ import java.net.URI
  *
  * @author Tobias Wich
  */
-class UpdatingProxySelector(private val supplier: SelectorSupplier) : ProxySelector() {
-    private var lastUpdate: Long = System.currentTimeMillis()
-    private var lastSelector: ProxySelector = loadSelector()
+class UpdatingProxySelector(
+	private val supplier: SelectorSupplier,
+) : ProxySelector() {
+	private var lastUpdate: Long = System.currentTimeMillis()
+	private var lastSelector: ProxySelector = loadSelector()
 
-    @Synchronized
-    private fun updateSelector() {
-        val now = System.currentTimeMillis()
-        val diff = now - lastUpdate
-        if (lastUpdate == 0L || diff > UPDATE_DELTA) {
-            lastUpdate = now
+	@Synchronized
+	private fun updateSelector() {
+		val now = System.currentTimeMillis()
+		val diff = now - lastUpdate
+		if (lastUpdate == 0L || diff > UPDATE_DELTA) {
+			lastUpdate = now
 
-            var selector = supplier.find()
-            if (selector == null) {
-                selector = NoProxySelector()
-            }
-            this.lastSelector = loadSelector()
-        }
-    }
+			var selector = supplier.find()
+			if (selector == null) {
+				selector = NoProxySelector()
+			}
+			this.lastSelector = loadSelector()
+		}
+	}
 
 	private fun loadSelector(): ProxySelector {
 		var selector = supplier.find()
@@ -58,14 +60,18 @@ class UpdatingProxySelector(private val supplier: SelectorSupplier) : ProxySelec
 		return selector
 	}
 
-    override fun select(uri: URI): List<Proxy> {
-        updateSelector()
-        return lastSelector.select(uri)
-    }
+	override fun select(uri: URI): List<Proxy> {
+		updateSelector()
+		return lastSelector.select(uri)
+	}
 
-    override fun connectFailed(uri: URI, sa: SocketAddress, ioe: IOException) {
-        lastSelector.connectFailed(uri, sa, ioe)
-    }
+	override fun connectFailed(
+		uri: URI,
+		sa: SocketAddress,
+		ioe: IOException,
+	) {
+		lastSelector.connectFailed(uri, sa, ioe)
+	}
 }
 
 // 30s update interval

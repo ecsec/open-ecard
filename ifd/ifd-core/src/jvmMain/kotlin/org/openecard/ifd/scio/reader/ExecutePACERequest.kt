@@ -29,47 +29,47 @@ import java.io.ByteArrayOutputStream
  * @author Tobias Wich
  */
 class ExecutePACERequest {
-    enum class Function(internal val code: Byte) {
-        GetReaderPACECapabilities(1.toByte()),
-        EstablishPACEChannel(2.toByte()),
-        DestroyPACEChannel(3.toByte())
-    }
+	enum class Function(
+		internal val code: Byte,
+	) {
+		GetReaderPACECapabilities(1.toByte()),
+		EstablishPACEChannel(2.toByte()),
+		DestroyPACEChannel(3.toByte()),
+	}
 
-
-    constructor(f: Function) {
-        this.function = f
+	constructor(f: Function) {
+		this.function = f
 		this.dataLength = 0
 		this.data = null
-    }
+	}
 
-    constructor(f: Function, data: ByteArray) {
-        this.function = f
-        this.dataLength = data.size.toShort()
-        this.data = data
-    }
+	constructor(f: Function, data: ByteArray) {
+		this.function = f
+		this.dataLength = data.size.toShort()
+		this.data = data
+	}
 
+	private val function: Function
+	private val dataLength: Short
+	private val data: ByteArray?
 
-    private val function: Function
-    private val dataLength: Short
-    private val data: ByteArray?
+	fun toBytes(): ByteArray {
+		val o = ByteArrayOutputStream()
+		o.write(function.code.toInt())
+		// write data length
+		val dataLengthBytes = ShortUtils.toByteArray(dataLength)
+		for (i in dataLengthBytes.indices.reversed()) {
+			o.write(dataLengthBytes[i].toInt())
+		}
+		// write missing bytes to length field
+		for (i in dataLengthBytes.size..1) {
+			o.write(0)
+		}
+		// write data if there is a positive length
+		if (dataLength > 0) {
+			o.write(data!!, 0, data.size)
+		}
 
-    fun toBytes(): ByteArray {
-        val o = ByteArrayOutputStream()
-        o.write(function.code.toInt())
-        // write data length
-        val dataLengthBytes = ShortUtils.toByteArray(dataLength)
-        for (i in dataLengthBytes.indices.reversed()) {
-            o.write(dataLengthBytes[i].toInt())
-        }
-        // write missing bytes to length field
-        for (i in dataLengthBytes.size..1) {
-            o.write(0)
-        }
-        // write data if there is a positive length
-        if (dataLength > 0) {
-            o.write(data!!, 0, data.size)
-        }
-
-        return o.toByteArray()
-    }
+		return o.toByteArray()
+	}
 }

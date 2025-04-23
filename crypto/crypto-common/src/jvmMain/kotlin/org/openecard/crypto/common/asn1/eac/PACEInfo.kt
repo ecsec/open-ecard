@@ -30,7 +30,9 @@ import org.openecard.crypto.common.asn1.eac.oid.PACEObjectIdentifier
  *
  * @author Moritz Horsch
  */
-class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
+class PACEInfo(
+	seq: ASN1Sequence,
+) : SecurityInfo(seq) {
 	/**
 	 * Returns the object identifier of the protocol.
 	 *
@@ -50,11 +52,12 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 	 *
 	 * @return parameter identifier
 	 */
-	val parameterID: Int = if (seq.size() == 3) {
-		(optionalData as ASN1Integer).value.toInt()
-	} else {
-		-1
-	}
+	val parameterID: Int =
+		if (seq.size() == 3) {
+			(optionalData as ASN1Integer).value.toInt()
+		} else {
+			-1
+		}
 
 	val isGM: Boolean
 		/**
@@ -63,8 +66,10 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 		 * @return True if generic mapping is used, otherwise false
 		 */
 		get() {
-			return (protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_GM)
-				|| protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_GM))
+			return (
+				protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_GM) ||
+					protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_GM)
+			)
 		}
 
 	val isIM: Boolean
@@ -74,8 +79,10 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 		 * @return True if integrated mapping is used, otherwise false
 		 */
 		get() {
-			return (protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_IM)
-				|| protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_IM))
+			return (
+				protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_IM) ||
+					protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_IM)
+			)
 		}
 
 	val isDH: Boolean
@@ -85,8 +92,10 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 		 * @return True if Diffie-Hellman is used, otherwise false
 		 */
 		get() {
-			return (protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_GM)
-				|| protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_IM))
+			return (
+				protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_GM) ||
+					protocol.startsWith(PACEObjectIdentifier.id_PACE_DH_IM)
+			)
 		}
 
 	val isECDH: Boolean
@@ -96,8 +105,10 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 		 * @return True if elliptic curve Diffie-Hellman is used, otherwise false
 		 */
 		get() {
-			return (protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_GM)
-				|| protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_IM))
+			return (
+				protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_GM) ||
+					protocol.startsWith(PACEObjectIdentifier.id_PACE_ECDH_IM)
+			)
 		}
 
 	val kdfLength: Int
@@ -111,24 +122,25 @@ class PACEInfo(seq: ASN1Sequence) : SecurityInfo(seq) {
 		}
 
 	companion object {
-		private val protocols: Array<String?> = arrayOf(
-			PACEObjectIdentifier.id_PACE_DH_GM_3DES_CBC_CBC,
-			PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_128,
-			PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_192,
-			PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_256,
-			PACEObjectIdentifier.id_PACE_DH_IM_3DES_CBC_CBC,
-			PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_128,
-			PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_192,
-			PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_256,
-			PACEObjectIdentifier.id_PACE_ECDH_GM_3DES_CBC_CBC,
-			PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128,
-			PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192,
-			PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256,
-			PACEObjectIdentifier.id_PACE_ECDH_IM_3DES_CBC_CBC,
-			PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_128,
-			PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_192,
-			PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_256
-		)
+		private val protocols: Array<String?> =
+			arrayOf(
+				PACEObjectIdentifier.id_PACE_DH_GM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_DH_IM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_256,
+			)
 
 		/**
 		 * Compares the object identifier.

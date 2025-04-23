@@ -25,31 +25,32 @@ import javax.swing.JFrame
  * @author Tobias Wich
  */
 class TestPdfFrame {
-
-    @Test(enabled = false)
-    @Throws(IOException::class, InterruptedException::class, ExecutionException::class)
-    fun startFrame() {
-        val f = JFrame()
-        f.setSize(800, 600)
+	@Test(enabled = false)
+	@Throws(IOException::class, InterruptedException::class, ExecutionException::class)
+	fun startFrame() {
+		val f = JFrame()
+		f.setSize(800, 600)
 		f.layout = BorderLayout()
-        f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE)
+		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE)
 
-        val `in` = RunGUI::class.java.getResourceAsStream("/description.pdf")
-        val doc = PDDocument.load(`in`)
-        val pdfComp = PdfComponent(doc)
-        pdfComp.setCurrentPage(0)
+		val `in` = RunGUI::class.java.getResourceAsStream("/description.pdf")
+		val doc = PDDocument.load(`in`)
+		val pdfComp = PdfComponent(doc)
+		pdfComp.setCurrentPage(0)
 
-        f.add(pdfComp, BorderLayout.CENTER)
+		f.add(pdfComp, BorderLayout.CENTER)
 
-        val closed: CompletableFuture<*> = CompletableFuture<Any?>()
-        f.addWindowListener(object : WindowAdapter() {
-            override fun windowClosed(e: WindowEvent?) {
-                closed.complete(null)
-                super.windowClosed(e)
-            }
-        })
+		val closed: CompletableFuture<*> = CompletableFuture<Any?>()
+		f.addWindowListener(
+			object : WindowAdapter() {
+				override fun windowClosed(e: WindowEvent?) {
+					closed.complete(null)
+					super.windowClosed(e)
+				}
+			},
+		)
 
 		f.isVisible = true
-        closed.get()
-    }
+		closed.get()
+	}
 }

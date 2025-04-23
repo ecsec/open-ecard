@@ -27,14 +27,14 @@ import java.security.spec.AlgorithmParameterSpec
  *
  * @author Moritz Horsch
  */
-abstract class DomainParameters (
-    /**
-     * Gets the domain parameter.
-     *
-     * @return Domain parameter
-     */
-    /**
-     * Stores the domain parameter.
-     */
-    val parameter: AlgorithmParameterSpec
+abstract class DomainParameters(
+	/**
+	 * Gets the domain parameter.
+	 *
+	 * @return Domain parameter
+	 */
+	/**
+	 * Stores the domain parameter.
+	 */
+	val parameter: AlgorithmParameterSpec,
 )

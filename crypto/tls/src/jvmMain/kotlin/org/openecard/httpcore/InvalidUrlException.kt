@@ -9,10 +9,12 @@
  */
 package org.openecard.httpcore
 
-
 /**
  * Base error for problems with URLs seen during the execution of an HTTP exchange.
  *
  * @author Tobias Wich
  */
-open class InvalidUrlException(msg: String?, cause: Throwable? = null) : Exception(msg, cause)
+open class InvalidUrlException(
+	msg: String?,
+	cause: Throwable? = null,
+) : Exception(msg, cause)

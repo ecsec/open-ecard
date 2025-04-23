@@ -21,10 +21,12 @@
  ***************************************************************************/
 package org.openecard.crypto.common.sal.did
 
-
 /**
  * Exception stating that a signing credential has missing permissions to fulfil the operation.
  *
  * @author Tobias Wich
  */
-class CredentialPermissionDenied(message: String, cause: Throwable? = null) : Exception(message, cause)
+class CredentialPermissionDenied(
+	message: String,
+	cause: Throwable? = null,
+) : Exception(message, cause)

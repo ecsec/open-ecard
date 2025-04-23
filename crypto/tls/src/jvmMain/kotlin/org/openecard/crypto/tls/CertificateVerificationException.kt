@@ -28,4 +28,9 @@ import java.io.IOException
  *
  * @author Tobias Wich
  */
-class CertificateVerificationException @JvmOverloads constructor(message: String?, cause: Throwable? = null) : IOException(message, cause)
+class CertificateVerificationException
+	@JvmOverloads
+	constructor(
+		message: String?,
+		cause: Throwable? = null,
+	) : IOException(message, cause)

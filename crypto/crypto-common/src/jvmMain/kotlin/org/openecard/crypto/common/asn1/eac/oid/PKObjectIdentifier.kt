@@ -21,20 +21,19 @@
  ***************************************************************************/
 package org.openecard.crypto.common.asn1.eac.oid
 
-
 /**
  * See BSI-TR-03110, version 2.10
  *
  * @author Moritz Horsch
  */
 object PKObjectIdentifier {
-    /**
-     * id-PK-DH OBJECT IDENTIFIER ::= {id-PK 1}
-     */
-    val id_PK_DH: String = EACObjectIdentifier.id_PK + ".1"
+	/**
+	 * id-PK-DH OBJECT IDENTIFIER ::= {id-PK 1}
+	 */
+	val id_PK_DH: String = EACObjectIdentifier.id_PK + ".1"
 
-    /**
-     * id-PK-ECDH OBJECT IDENTIFIER ::= {id-PK 2}
-     */
-    val id_PK_ECDH: String = EACObjectIdentifier.id_PK + ".2"
+	/**
+	 * id-PK-ECDH OBJECT IDENTIFIER ::= {id-PK 2}
+	 */
+	val id_PK_ECDH: String = EACObjectIdentifier.id_PK + ".2"
 }

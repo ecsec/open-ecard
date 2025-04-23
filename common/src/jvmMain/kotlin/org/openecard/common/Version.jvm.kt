@@ -35,72 +35,74 @@ const val UNKNOWN_VERSION: String = "UNKNOWN"
  *
  * @author Tobias Wich
  */
-class Version(name: String?, ver: String?, specName: String?, specVer: String?) {
-    @JvmField
+class Version(
+	name: String?,
+	ver: String?,
+	specName: String?,
+	specVer: String?,
+) {
+	@JvmField
 	val version: SemanticVersion
 
-    /**
-     * Gets the name of the application.
-     * @return Name of the app or the UNKNOWN if the name is unavailable.
-     */
-    val name: String
+	/**
+	 * Gets the name of the application.
+	 * @return Name of the app or the UNKNOWN if the name is unavailable.
+	 */
+	val name: String
 
-    /**
-     * Get the name of the specification.
-     *
-     * @return The name of the specification which is `BSI-TR-03124`.
-     */
-    val specName: String
+	/**
+	 * Get the name of the specification.
+	 *
+	 * @return The name of the specification which is `BSI-TR-03124`.
+	 */
+	val specName: String
 
 	/**
 	 * Get the versions of specification this application is compatible to.
 	 */
-    val specVersions: List<String>
+	val specVersions: List<String>
 
-    init {
-        this.specName = fixName(specName)
-        this.specVersions = loadVersionLine(specVer)
-        this.name = fixName(name)
-        this.version = SemanticVersion(ver)
-    }
+	init {
+		this.specName = fixName(specName)
+		this.specVersions = loadVersionLine(specVer)
+		this.name = fixName(name)
+		this.version = SemanticVersion(ver)
+	}
 
-    private fun fixName(name: String?): String {
-        return name ?: UNKNOWN_NAME
-    }
+	private fun fixName(name: String?): String = name ?: UNKNOWN_NAME
 
+	val latestSpecVersion: String
+		/**
+		 * Get the latest version of the specification which is compatible to the application.
+		 *
+		 * @return Latest compatible specification version.
+		 */
+		get() = specVersions[specVersions.size - 1]
 
-    val latestSpecVersion: String
-        /**
-         * Get the latest version of the specification which is compatible to the application.
-         *
-         * @return Latest compatible specification version.
-         */
-        get() = specVersions[specVersions.size - 1]
+	companion object {
+		private fun loadVersionLine(inStream: String?): List<String> {
+			val versions = ArrayList<String>()
+			if (inStream == null) {
+				versions.add(UNKNOWN_VERSION)
+			} else {
+				val r = BufferedReader(StringReader(inStream))
+				try {
+					var line = r.readLine()
+					do {
+						if (line == null) {
+							versions.add(UNKNOWN_VERSION)
+						} else {
+							versions.add(line)
+						}
 
-    companion object {
-        private fun loadVersionLine(inStream: String?): List<String> {
-            val versions = ArrayList<String>()
-            if (inStream == null) {
-                versions.add(UNKNOWN_VERSION)
-            } else {
-                val r = BufferedReader(StringReader(inStream))
-                try {
-                    var line = r.readLine()
-                    do {
-                        if (line == null) {
-                            versions.add(UNKNOWN_VERSION)
-                        } else {
-                            versions.add(line)
-                        }
-
-                        line = r.readLine()
-                    } while (line != null)
-                } catch (ex: IOException) {
-                    versions.clear()
-                    versions.add(UNKNOWN_VERSION)
-                }
-            }
-            return versions
-        }
-    }
+						line = r.readLine()
+					} while (line != null)
+				} catch (ex: IOException) {
+					versions.clear()
+					versions.add(UNKNOWN_VERSION)
+				}
+			}
+			return versions
+		}
+	}
 }

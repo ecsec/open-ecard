@@ -22,7 +22,6 @@
 
 package org.openecard.addon.bind
 
-
 /**
  * Class containing the available binding results which are mapped to HTTP status codes.
  *
@@ -30,60 +29,59 @@ package org.openecard.addon.bind
  * @author Hans-Martin Haase
  */
 enum class BindingResultCode {
-    /**
-     * Indicates that an depending host is not available.
-     */
-    DEPENDING_HOST_UNREACHABLE,
+	/**
+	 * Indicates that an depending host is not available.
+	 */
+	DEPENDING_HOST_UNREACHABLE,
 
-    /**
-     * Indicates an internal error of the issuing component.
-     */
-    INTERNAL_ERROR,
+	/**
+	 * Indicates an internal error of the issuing component.
+	 */
+	INTERNAL_ERROR,
 
-    /**
-     * Indicates the absence of a required parameter.
-     */
-    MISSING_PARAMETER,
+	/**
+	 * Indicates the absence of a required parameter.
+	 */
+	MISSING_PARAMETER,
 
-    /**
-     * Indicates that the request was processed successfully.
-     */
-    OK,
+	/**
+	 * Indicates that the request was processed successfully.
+	 */
+	OK,
 
-    /**
-     * Indicates to redirect the caller.
-     */
-    REDIRECT,
+	/**
+	 * Indicates to redirect the caller.
+	 */
+	REDIRECT,
 
-    /**
-     * Indicates that the resource is locked for example if a request arrives while an other one is currently processed.
-     */
-    RESOURCE_LOCKED,
+	/**
+	 * Indicates that the resource is locked for example if a request arrives while an other one is currently processed.
+	 */
+	RESOURCE_LOCKED,
 
-    /**
-     * Indicates that the requested resource is not available.
-     */
-    RESOURCE_UNAVAILABLE,
+	/**
+	 * Indicates that the requested resource is not available.
+	 */
+	RESOURCE_UNAVAILABLE,
 
-    /**
-     * Indicates that the component has run into a timeout while the processing of the request.
-     */
-    TIMEOUT,
+	/**
+	 * Indicates that the component has run into a timeout while the processing of the request.
+	 */
+	TIMEOUT,
 
-    /**
-     * Indicates that there are to many requests to handle.
-     */
-    TOO_MANY_REQUESTS,
+	/**
+	 * Indicates that there are to many requests to handle.
+	 */
+	TOO_MANY_REQUESTS,
 
-    /**
-     * Indicates that a required parameter is wrong.
-     */
-    WRONG_PARAMETER,
+	/**
+	 * Indicates that a required parameter is wrong.
+	 */
+	WRONG_PARAMETER,
 
-    /**
-     * Indicates a thread interruption, either explicitly by the user or implicitly by a shutdown of a
-     * subsystem or the whole system.
-     */
-    INTERRUPTED,
-	;
+	/**
+	 * Indicates a thread interruption, either explicitly by the user or implicitly by a shutdown of a
+	 * subsystem or the whole system.
+	 */
+	INTERRUPTED,
 }

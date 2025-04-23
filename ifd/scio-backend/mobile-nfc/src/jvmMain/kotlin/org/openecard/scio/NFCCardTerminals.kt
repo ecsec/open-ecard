@@ -27,7 +27,6 @@ import org.openecard.common.ifd.scio.SCIOTerminal
 import org.openecard.common.ifd.scio.SCIOTerminals
 import org.openecard.common.ifd.scio.TerminalWatcher
 
-
 /**
  * NFC implementation of smartcardio's CardTerminals interface.
  *
@@ -35,47 +34,44 @@ import org.openecard.common.ifd.scio.TerminalWatcher
  * @author Daniel Nemmert
  * @author Mike Prechtl
  */
-class NFCCardTerminals(private val nfcTerminal: NFCCardTerminal<*>) : SCIOTerminals {
-    @Throws(SCIOException::class)
-    override fun prepareDevices(): Boolean {
-        return this.nfcTerminal.prepareDevices()
-    }
+class NFCCardTerminals(
+	private val nfcTerminal: NFCCardTerminal<*>,
+) : SCIOTerminals {
+	@Throws(SCIOException::class)
+	override fun prepareDevices(): Boolean = this.nfcTerminal.prepareDevices()
 
-    override fun powerDownDevices(): Boolean {
-        return this.nfcTerminal.powerDownDevices()
-    }
+	override fun powerDownDevices(): Boolean = this.nfcTerminal.powerDownDevices()
 
-    @Throws(SCIOException::class)
-    override fun list(state: SCIOTerminals.State): List<SCIOTerminal> {
-        when (state) {
-            SCIOTerminals.State.ALL -> return listOf(this.nfcTerminal)
-            SCIOTerminals.State.CARD_ABSENT -> if (!nfcTerminal.isCardPresent) {
-                return listOf(this.nfcTerminal)
-            }
+	@Throws(SCIOException::class)
+	override fun list(state: SCIOTerminals.State): List<SCIOTerminal> {
+		when (state) {
+			SCIOTerminals.State.ALL -> return listOf(this.nfcTerminal)
+			SCIOTerminals.State.CARD_ABSENT ->
+				if (!nfcTerminal.isCardPresent) {
+					return listOf(this.nfcTerminal)
+				}
 
-            SCIOTerminals.State.CARD_PRESENT -> if (nfcTerminal.isCardPresent) {
-                return listOf(this.nfcTerminal)
-            }
-        }
-        return listOf()
-    }
+			SCIOTerminals.State.CARD_PRESENT ->
+				if (nfcTerminal.isCardPresent) {
+					return listOf(this.nfcTerminal)
+				}
+		}
+		return listOf()
+	}
 
-    @Throws(SCIOException::class)
-    override fun list(): List<SCIOTerminal> {
-        return list(SCIOTerminals.State.ALL)
-    }
+	@Throws(SCIOException::class)
+	override fun list(): List<SCIOTerminal> = list(SCIOTerminals.State.ALL)
 
-    @Throws(NoSuchTerminal::class)
-    override fun getTerminal(name: String): SCIOTerminal {
-        if (nfcTerminal.name == name) {
-            return this.nfcTerminal
-        }
-        val errorMsg = String.format("There is no terminal with the name '%s' available.", name)
-        throw NoSuchTerminal(errorMsg)
-    }
+	@Throws(NoSuchTerminal::class)
+	override fun getTerminal(name: String): SCIOTerminal {
+		if (nfcTerminal.name == name) {
+			return this.nfcTerminal
+		}
+		val errorMsg = String.format("There is no terminal with the name '%s' available.", name)
+		throw NoSuchTerminal(errorMsg)
+	}
 
-    @get:Throws(SCIOException::class)
+	@get:Throws(SCIOException::class)
 	override val watcher: TerminalWatcher
-        get() = NFCCardWatcher(this, nfcTerminal)
-
+		get() = NFCCardWatcher(this, nfcTerminal)
 }

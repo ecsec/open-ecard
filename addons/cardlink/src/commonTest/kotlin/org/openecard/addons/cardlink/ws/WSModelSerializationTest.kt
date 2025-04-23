@@ -30,94 +30,98 @@ import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.util.*
 
-
 private val logger = KotlinLogging.logger {}
 
 /**
  * @author Mike Prechtl
  */
 class WSModelSerializationTest {
-
 	@OptIn(ExperimentalSerializationApi::class)
 	@DataProvider(name = "egkPayloads")
-	fun egkPayloads(): Array<Array<Any?>> {
-		return arrayOf(
+	fun egkPayloads(): Array<Array<Any?>> =
+		arrayOf(
 			arrayOf(
-			 	RegisterEgk(
+				RegisterEgk(
 					cardSessionId = "foo",
 					atr = "atr".encodeToByteArray(),
 					gdo = "gdo".encodeToByteArray(),
 					cvcCA = "cvcCA".encodeToByteArray(),
 					cvcAuth = "cvcAuth".encodeToByteArray(),
 					cardVersion = "cardVersion".encodeToByteArray(),
-					x509AuthECC = "x509".encodeToByteArray()
+					x509AuthECC = "x509".encodeToByteArray(),
 				),
-				RegisterEgk.serializer().descriptor.serialName
+				RegisterEgk.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				SendApdu(
 					cardSessionId = "foo",
-					apdu = "apdu".encodeToByteArray()
+					apdu = "apdu".encodeToByteArray(),
 				),
-				SendApdu.serializer().descriptor.serialName
+				SendApdu.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				SendApduResponse(
 					cardSessionId = "foo",
-					response = "resp".encodeToByteArray()
+					response = "resp".encodeToByteArray(),
 				),
-				SendApduResponse.serializer().descriptor.serialName
+				SendApduResponse.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				SendPhoneNumber(
-					phoneNumber = "+49 123456"
+					phoneNumber = "+49 123456",
 				),
-				SendPhoneNumber.serializer().descriptor.serialName
+				SendPhoneNumber.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				SendTan(
 					smsCode = "123456",
-					tan = "123456"
+					tan = "123456",
 				),
-				SendTan.serializer().descriptor.serialName
+				SendTan.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				ConfirmTan(
 					resultCode = ResultCode.SUCCESS,
-					errorMessage = null
+					errorMessage = null,
 				),
-				ConfirmTan.serializer().descriptor.serialName
+				ConfirmTan.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				ConfirmTan(
 					resultCode = ResultCode.TAN_EXPIRED,
-					errorMessage = "Tan expired."
+					errorMessage = "Tan expired.",
 				),
-				ConfirmTan.serializer().descriptor.serialName
+				ConfirmTan.serializer().descriptor.serialName,
 			),
 			arrayOf(
 				ConfirmPhoneNumber(
 					resultCode = ResultCode.SUCCESS,
-					errorMessage = null
+					errorMessage = null,
 				),
-				ConfirmPhoneNumber.serializer().descriptor.serialName
-			)
+				ConfirmPhoneNumber.serializer().descriptor.serialName,
+			),
 		)
-	}
 
 	@Test(dataProvider = "egkPayloads")
-	fun testEgkPayloadSerialization(egkPayload: CardLinkPayload, serialName: String) {
+	fun testEgkPayloadSerialization(
+		egkPayload: CardLinkPayload,
+		serialName: String,
+	) {
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkPayload)
 		logger.info { jsonString }
 	}
 
 	@Test(dataProvider = "egkPayloads")
-	fun testEgkEnvelopeSerialization(egkPayload: CardLinkPayload, serialName: String) {
-		val egkEnvelope = GematikEnvelope(
-			cardSessionId = "foobar",
-			correlationId = UUID.randomUUID().toString(),
-			payload = egkPayload,
-		)
+	fun testEgkEnvelopeSerialization(
+		egkPayload: CardLinkPayload,
+		serialName: String,
+	) {
+		val egkEnvelope =
+			GematikEnvelope(
+				cardSessionId = "foobar",
+				correlationId = UUID.randomUUID().toString(),
+				payload = egkPayload,
+			)
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		logger.info { jsonString }
 

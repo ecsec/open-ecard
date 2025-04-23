@@ -36,123 +36,122 @@ import java.io.File
  * @author Tobias Wich
  */
 class RunFileChooser {
-    private lateinit var uc: UserConsent
+	private lateinit var uc: UserConsent
 
-    @BeforeTest
-    fun initialize() {
-        uc = SwingUserConsent(SwingDialogWrapper())
-    }
+	@BeforeTest
+	fun initialize() {
+		uc = SwingUserConsent(SwingDialogWrapper())
+	}
 
-    @Test(enabled = !true)
-    fun openFile() {
-        val dialog = uc.obtainFileDialog()
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun openFile() {
+		val dialog = uc.obtainFileDialog()
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun saveFile() {
-        val dialog = uc.obtainFileDialog()
-        val result = dialog.showSave()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun saveFile() {
+		val dialog = uc.obtainFileDialog()
+		val result = dialog.showSave()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun setCurrentDir() {
-        val dialog = uc.obtainFileDialog()
-        val currentDir = File("/tmp")
-        dialog.setCurrentDirectory(currentDir)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun setCurrentDir() {
+		val dialog = uc.obtainFileDialog()
+		val currentDir = File("/tmp")
+		dialog.setCurrentDirectory(currentDir)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun setSelectedFile() {
-        val dialog = uc.obtainFileDialog()
-        val selectedFile = File("/etc/issue")
-        dialog.setSelectedFiles(selectedFile)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun setSelectedFile() {
+		val dialog = uc.obtainFileDialog()
+		val selectedFile = File("/etc/issue")
+		dialog.setSelectedFiles(selectedFile)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun setSelectedFiles() {
-        val dialog = uc.obtainFileDialog()
-        //dialog.setMultiSelectionEnabled(true);
-        val selectedFile1 = File("/etc/issue")
-        val selectedFile2 = File("/etc/passwd")
-        dialog.setSelectedFiles(selectedFile1, selectedFile2)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun setSelectedFiles() {
+		val dialog = uc.obtainFileDialog()
+		// dialog.setMultiSelectionEnabled(true);
+		val selectedFile1 = File("/etc/issue")
+		val selectedFile2 = File("/etc/passwd")
+		dialog.setSelectedFiles(selectedFile1, selectedFile2)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun clearSelectedFiles() {
-        val dialog = uc.obtainFileDialog()
-        val selectedFile1 = File("/etc/issue")
-        val selectedFile2 = File("/etc/passwd")
-        dialog.setSelectedFiles(selectedFile1, selectedFile2)
-        dialog.clearSelectedFiles()
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun clearSelectedFiles() {
+		val dialog = uc.obtainFileDialog()
+		val selectedFile1 = File("/etc/issue")
+		val selectedFile2 = File("/etc/passwd")
+		dialog.setSelectedFiles(selectedFile1, selectedFile2)
+		dialog.clearSelectedFiles()
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun setFileFilter() {
-        val dialog = uc.obtainFileDialog()
-        dialog.addFileFilter(FileEndingFilter("xml"))
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun setFileFilter() {
+		val dialog = uc.obtainFileDialog()
+		dialog.addFileFilter(FileEndingFilter("xml"))
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun setCombiningFileFilter() {
-        val dialog = uc.obtainFileDialog()
-        val filter = CombiningOrFilter(FileEndingFilter("xml"), FileEndingFilter("png"))
-        dialog.addFileFilter(filter)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun setCombiningFileFilter() {
+		val dialog = uc.obtainFileDialog()
+		val filter = CombiningOrFilter(FileEndingFilter("xml"), FileEndingFilter("png"))
+		dialog.addFileFilter(filter)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun clearFileFilter() {
-        val dialog = uc.obtainFileDialog()
-        dialog.addFileFilter(FileEndingFilter("xml"))
-        dialog.clearFileFilters()
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun clearFileFilter() {
+		val dialog = uc.obtainFileDialog()
+		dialog.addFileFilter(FileEndingFilter("xml"))
+		dialog.clearFileFilters()
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun showHiddenFiles() {
-        val dialog = uc.obtainFileDialog()
-        dialog.setShowHiddenFiles(true)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun showHiddenFiles() {
+		val dialog = uc.obtainFileDialog()
+		dialog.setShowHiddenFiles(true)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun folderSelectable() {
-        val dialog = uc.obtainFileDialog()
-        dialog.setFolderSelectable(true)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun folderSelectable() {
+		val dialog = uc.obtainFileDialog()
+		dialog.setFolderSelectable(true)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-    @Test(enabled = !true)
-    fun selectMultipleFiles() {
-        val dialog = uc.obtainFileDialog()
-        dialog.setMultiSelectionEnabled(true)
-        val result = dialog.showOpen()
-        checkResult(result)
-    }
+	@Test(enabled = !true)
+	fun selectMultipleFiles() {
+		val dialog = uc.obtainFileDialog()
+		dialog.setMultiSelectionEnabled(true)
+		val result = dialog.showOpen()
+		checkResult(result)
+	}
 
-
-    private fun checkResult(result: FileDialogResult) {
-        if (result.isOK) {
-            Assert.assertTrue(!result.selectedFiles.isEmpty())
-        } else {
-            Assert.assertTrue(result.selectedFiles.isEmpty())
-        }
-    }
+	private fun checkResult(result: FileDialogResult) {
+		if (result.isOK) {
+			Assert.assertTrue(!result.selectedFiles.isEmpty())
+		} else {
+			Assert.assertTrue(result.selectedFiles.isEmpty())
+		}
+	}
 }

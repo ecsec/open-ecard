@@ -9,10 +9,11 @@
  */
 package org.openecard.httpcore
 
-
 /**
  * Exception indicating an error in a redirect response.
  *
  * @author Tobias Wich
  */
-class InvalidRedirectResponseSyntax(msg: String) : HttpResourceException(msg)
+class InvalidRedirectResponseSyntax(
+	msg: String,
+) : HttpResourceException(msg)

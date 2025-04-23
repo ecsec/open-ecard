@@ -36,28 +36,28 @@ import java.io.IOException
  *
  * @author Tobias Wich
  */
-class DefaultTlsClientImpl(hostName: String) :
-    ClientCertDefaultTlsClient(BcTlsCrypto(ReusableSecureRandom.instance), hostName, true) {
-    @Throws(IOException::class)
-	override fun getAuthentication(): TlsAuthentication {
-        return object : TlsAuthentication {
-            @Throws(IOException::class)
-            override fun notifyServerCertificate(crtfct: TlsServerCertificate) {
-                val v = JavaSecVerifier()
+class DefaultTlsClientImpl(
+	hostName: String,
+) : ClientCertDefaultTlsClient(BcTlsCrypto(ReusableSecureRandom.instance), hostName, true) {
+	@Throws(IOException::class)
+	override fun getAuthentication(): TlsAuthentication =
+		object : TlsAuthentication {
+			@Throws(IOException::class)
+			override fun notifyServerCertificate(crtfct: TlsServerCertificate) {
+				val v = JavaSecVerifier()
 
-                val cv = CertificateVerifierBuilder()
-                    .and(HostnameVerifier())
-                    .and(v)
-                    .and(KeyLengthVerifier())
-                    .build()
-                val hostname = Strings.fromUTF8ByteArray(serverNames[0].nameData)
-                cv.isValid(crtfct, hostname)
-            }
+				val cv =
+					CertificateVerifierBuilder()
+						.and(HostnameVerifier())
+						.and(v)
+						.and(KeyLengthVerifier())
+						.build()
+				val hostname = Strings.fromUTF8ByteArray(serverNames[0].nameData)
+				cv.isValid(crtfct, hostname)
+			}
 
-            @Throws(IOException::class)
-            override fun getClientCredentials(cr: CertificateRequest): TlsCredentials {
-                throw UnsupportedOperationException("Not supported yet.")
-            }
-        }
-    }
+			@Throws(IOException::class)
+			override fun getClientCredentials(cr: CertificateRequest): TlsCredentials =
+				throw UnsupportedOperationException("Not supported yet.")
+		}
 }

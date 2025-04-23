@@ -26,8 +26,7 @@ import java.net.HttpCookie
 import java.net.MalformedURLException
 import java.net.URI
 
-
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * The class represents a Cookie manager used to manage cookies according to RFC 6265.
@@ -44,245 +43,264 @@ private val LOG = KotlinLogging.logger {  }
  * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-class CookieManager(private val cookieMap: MutableMap<String, MutableList<HttpCookie>> = mutableMapOf()) {
-    private val maxCookiesPerDomain = 50
-    private val maxCookies = 3000
+class CookieManager(
+	private val cookieMap: MutableMap<String, MutableList<HttpCookie>> = mutableMapOf(),
+) {
+	private val maxCookiesPerDomain = 50
+	private val maxCookies = 3000
 
-    private var currentCookieCount = 0
+	private var currentCookieCount = 0
 
-
-    /**
-     * Adds a cookie to the manager instance.
-     *
-     * @param domain Address of the caller which want to set the cookie.
-     * @param cookieHeaderValue The Set-Cookie header.
-     * @throws CookieException If the cookie can't be added to the storage.
-     */
-    @Throws(CookieException::class)
-    fun addCookie(domain: String, cookieHeaderValue: String) {
-        val cookies = HttpCookie.parse(cookieHeaderValue)
-        if ((cookies.size + currentCookieCount) <= maxCookies) {
-            for (cookie in cookies) {
-                try {
-                    val domainKey = createDomainKey(domain, cookie)
-                    addCookie(domainKey, cookie)
-                } catch (ex: MalformedURLException) {
-                    var msg = "Invalid value (%s) in the \"domain\" parameter received."
-                    msg = String.format(msg, domain)
+	/**
+	 * Adds a cookie to the manager instance.
+	 *
+	 * @param domain Address of the caller which want to set the cookie.
+	 * @param cookieHeaderValue The Set-Cookie header.
+	 * @throws CookieException If the cookie can't be added to the storage.
+	 */
+	@Throws(CookieException::class)
+	fun addCookie(
+		domain: String,
+		cookieHeaderValue: String,
+	) {
+		val cookies = HttpCookie.parse(cookieHeaderValue)
+		if ((cookies.size + currentCookieCount) <= maxCookies) {
+			for (cookie in cookies) {
+				try {
+					val domainKey = createDomainKey(domain, cookie)
+					addCookie(domainKey, cookie)
+				} catch (ex: MalformedURLException) {
+					var msg = "Invalid value (%s) in the \"domain\" parameter received."
+					msg = String.format(msg, domain)
 					LOG.error(ex) { msg }
-                    throw CookieException(msg, ex)
-                }
-            }
-        } else {
-            val msg = "The cookie storage is full."
+					throw CookieException(msg, ex)
+				}
+			}
+		} else {
+			val msg = "The cookie storage is full."
 			LOG.error { msg }
-            throw CookieException(msg)
-        }
-    }
+			throw CookieException(msg)
+		}
+	}
 
-    @Throws(CookieException::class)
-    private fun addCookie(domainKey: String, cookie: HttpCookie) {
-        if (!update(domainKey, cookie)) {
-            var cookies = cookieMap[domainKey] ?: mutableListOf()
+	@Throws(CookieException::class)
+	private fun addCookie(
+		domainKey: String,
+		cookie: HttpCookie,
+	) {
+		if (!update(domainKey, cookie)) {
+			var cookies = cookieMap[domainKey] ?: mutableListOf()
 
-            if (cookies.size == maxCookiesPerDomain) {
-                val msg = "Maximal number of cookies per domain reached."
+			if (cookies.size == maxCookiesPerDomain) {
+				val msg = "Maximal number of cookies per domain reached."
 				LOG.error { msg }
-                throw CookieException(msg)
-            }
+				throw CookieException(msg)
+			}
 
-            if (LOG.isDebugEnabled()) {
-                var msg = "Setting cookie %s for domain %s."
-                msg = String.format(msg, cookie, domainKey)
+			if (LOG.isDebugEnabled()) {
+				var msg = "Setting cookie %s for domain %s."
+				msg = String.format(msg, cookie, domainKey)
 				LOG.debug { msg }
-            }
-            cookies.add(cookie)
-            cookieMap.put(domainKey, cookies)
-            currentCookieCount++
-        }
-    }
+			}
+			cookies.add(cookie)
+			cookieMap.put(domainKey, cookies)
+			currentCookieCount++
+		}
+	}
 
-    /**
-     * Deletes all cookies from the store.
-     */
-    fun deleteAllCookies() {
-        cookieMap.clear()
-        currentCookieCount = 0
-    }
+	/**
+	 * Deletes all cookies from the store.
+	 */
+	fun deleteAllCookies() {
+		cookieMap.clear()
+		currentCookieCount = 0
+	}
 
-    /**
-     * Deletes the specified cookie from the store.
-     *
-     * @param domain URL which identifies the cookies of a domain in the storage.
-     * @param name Name of the cookie.
-     * @throws CookieException If the given `domain` is no valid URL.
-     */
-    @Throws(CookieException::class)
-    fun deleteCookie(domain: String, name: String) {
-        val url = try {
-            URI(domain)
-        } catch (ex: MalformedURLException) {
-            val msg = "The \"domain\" parameter contains an invalid URL."
-            throw CookieException(msg, ex)
-        }
+	/**
+	 * Deletes the specified cookie from the store.
+	 *
+	 * @param domain URL which identifies the cookies of a domain in the storage.
+	 * @param name Name of the cookie.
+	 * @throws CookieException If the given `domain` is no valid URL.
+	 */
+	@Throws(CookieException::class)
+	fun deleteCookie(
+		domain: String,
+		name: String,
+	) {
+		val url =
+			try {
+				URI(domain)
+			} catch (ex: MalformedURLException) {
+				val msg = "The \"domain\" parameter contains an invalid URL."
+				throw CookieException(msg, ex)
+			}
 
-        val cookies = cookieMap[url.host]
-        if (cookies != null && !cookies.isEmpty()) {
-            for (i in cookies.indices) {
-                val c = cookies[i]
-                if (c.name == name) {
-                    cookies.removeAt(i)
-                    currentCookieCount--
-                    break
-                }
-            }
-        }
-    }
+		val cookies = cookieMap[url.host]
+		if (cookies != null && !cookies.isEmpty()) {
+			for (i in cookies.indices) {
+				val c = cookies[i]
+				if (c.name == name) {
+					cookies.removeAt(i)
+					currentCookieCount--
+					break
+				}
+			}
+		}
+	}
 
-    /**
-     * Creates a string containing all the cookies set by the given domain.
-     *
-     * @param domain The domain for which the cookies shall be returned.
-     * @return A String containing all cookies (according to RFC 6265) registered for `domain` or `NULL` if
-     * no cookies exist for `domain`.
-     * @throws CookieException If the given `domain` parameter is an invalid URL.
-     */
-    @Throws(CookieException::class)
-    fun getCookieHeaderValue(domain: String): String? {
-        try {
-            val keySet = cookieMap.keys
-            val usableCookies = mutableListOf<HttpCookie>()
-            val domAsURL = URI(domain)
+	/**
+	 * Creates a string containing all the cookies set by the given domain.
+	 *
+	 * @param domain The domain for which the cookies shall be returned.
+	 * @return A String containing all cookies (according to RFC 6265) registered for `domain` or `NULL` if
+	 * no cookies exist for `domain`.
+	 * @throws CookieException If the given `domain` parameter is an invalid URL.
+	 */
+	@Throws(CookieException::class)
+	fun getCookieHeaderValue(domain: String): String? {
+		try {
+			val keySet = cookieMap.keys
+			val usableCookies = mutableListOf<HttpCookie>()
+			val domAsURL = URI(domain)
 
-            for (key in keySet) {
-                if (domAsURL.host.endsWith(key)) {
-                    val domainCookies = cookieMap[key]
-                    val cleanList = mutableListOf<HttpCookie>()
-                    if (domainCookies != null && domainCookies.isNotEmpty()) {
-                        for (c in domainCookies) {
-                            // according to RFC 6265 it is not allowed to return the cookie to a subdomain or so in case
-                            // there is no Domain attribute in the cookie. This mean if we got a cookie from example.com it
-                            // is not allowed to return the cookie to www.example.com or foo.example.com just to example.com.
-                            if (c.domain == null || c.domain.isEmpty()) {
-                                if (key == domAsURL.host) {
-                                    if (c.path == null || c.path.isEmpty()) {
-                                        usableCookies.add(c)
-                                        cleanList.add(c)
-                                    } else {
-                                        if (domAsURL.path.startsWith(c.path)) {
-                                            usableCookies.add(c)
-                                            cleanList.add(c)
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (c.path == null || c.path.isEmpty() || domAsURL.path.startsWith(c.path)) {
-                                    usableCookies.add(c)
-                                    cleanList.add(c)
-                                }
-                            }
-                        }
-                    }
+			for (key in keySet) {
+				if (domAsURL.host.endsWith(key)) {
+					val domainCookies = cookieMap[key]
+					val cleanList = mutableListOf<HttpCookie>()
+					if (domainCookies != null && domainCookies.isNotEmpty()) {
+						for (c in domainCookies) {
+							// according to RFC 6265 it is not allowed to return the cookie to a subdomain or so in case
+							// there is no Domain attribute in the cookie. This mean if we got a cookie from example.com it
+							// is not allowed to return the cookie to www.example.com or foo.example.com just to example.com.
+							if (c.domain == null || c.domain.isEmpty()) {
+								if (key == domAsURL.host) {
+									if (c.path == null || c.path.isEmpty()) {
+										usableCookies.add(c)
+										cleanList.add(c)
+									} else {
+										if (domAsURL.path.startsWith(c.path)) {
+											usableCookies.add(c)
+											cleanList.add(c)
+										}
+									}
+								}
+							} else {
+								if (c.path == null || c.path.isEmpty() || domAsURL.path.startsWith(c.path)) {
+									usableCookies.add(c)
+									cleanList.add(c)
+								}
+							}
+						}
+					}
 
-                    for (c in cleanList) {
-                        clean(key, c)
-                    }
-                }
-            }
+					for (c in cleanList) {
+						clean(key, c)
+					}
+				}
+			}
 
-            val headerValue = StringBuilder()
-            for (c in usableCookies) {
-                headerValue.append(c.name)
-                headerValue.append("=")
-                headerValue.append(c.value)
-                headerValue.append("; ")
-            }
+			val headerValue = StringBuilder()
+			for (c in usableCookies) {
+				headerValue.append(c.name)
+				headerValue.append("=")
+				headerValue.append(c.value)
+				headerValue.append("; ")
+			}
 
-            if (headerValue.isNotEmpty()) {
-                val lastSemicolon = headerValue.lastIndexOf("; ")
-                headerValue.delete(lastSemicolon, lastSemicolon + 2)
-                return headerValue.toString()
-            }
-        } catch (ex: MalformedURLException) {
-            var msg = "The given value (%s) of the \"domain\" parameter is not valid URL."
-            msg = String.format(msg, domain)
+			if (headerValue.isNotEmpty()) {
+				val lastSemicolon = headerValue.lastIndexOf("; ")
+				headerValue.delete(lastSemicolon, lastSemicolon + 2)
+				return headerValue.toString()
+			}
+		} catch (ex: MalformedURLException) {
+			var msg = "The given value (%s) of the \"domain\" parameter is not valid URL."
+			msg = String.format(msg, domain)
 			LOG.error(ex) { msg }
-            throw CookieException(msg, ex)
-        }
+			throw CookieException(msg, ex)
+		}
 
-        return null
-    }
+		return null
+	}
 
-    /**
-     * Creates the key which is used to store the list of cookies for a domain.
-     *
-     * @param domain Full server name.
-     * @param cookie A cookie which may contain a `Domain` attribute.
-     * @return `domain` in case the cookie does not contain a `Domain` attribute or the content of the
-     * `Domain` attribute in case it is set.
-     * @throws MalformedURLException if the domain parameter is no valid URI.
-     */
-    @Throws(MalformedURLException::class)
-    private fun createDomainKey(domain: String, cookie: HttpCookie): String {
-        // just to check whether we have a valid url.
-        val url = URI(domain)
-        var domainAttr = cookie.domain
-        if (!(domainAttr == null || domainAttr.isEmpty())) {
-            if (domainAttr.startsWith(".")) {
-                domainAttr = domainAttr.substring(1)
-            }
-            return domainAttr
-        } else {
-            return url.host
-        }
-    }
+	/**
+	 * Creates the key which is used to store the list of cookies for a domain.
+	 *
+	 * @param domain Full server name.
+	 * @param cookie A cookie which may contain a `Domain` attribute.
+	 * @return `domain` in case the cookie does not contain a `Domain` attribute or the content of the
+	 * `Domain` attribute in case it is set.
+	 * @throws MalformedURLException if the domain parameter is no valid URI.
+	 */
+	@Throws(MalformedURLException::class)
+	private fun createDomainKey(
+		domain: String,
+		cookie: HttpCookie,
+	): String {
+		// just to check whether we have a valid url.
+		val url = URI(domain)
+		var domainAttr = cookie.domain
+		if (!(domainAttr == null || domainAttr.isEmpty())) {
+			if (domainAttr.startsWith(".")) {
+				domainAttr = domainAttr.substring(1)
+			}
+			return domainAttr
+		} else {
+			return url.host
+		}
+	}
 
-    /**
-     * Removes the specified cookie from the storage.
-     *
-     * If the cookie was the last one for a key than the map entry for the domain is removed.
-     *
-     * @param key Domain key which identifies the list of cookies containing `c`.
-     * @param c [Cookie] object to delete.
-     */
-    private fun clean(key: String, c: HttpCookie) {
-        if (c.hasExpired()) {
-            cookieMap[key]?.let { domainCookies ->
+	/**
+	 * Removes the specified cookie from the storage.
+	 *
+	 * If the cookie was the last one for a key than the map entry for the domain is removed.
+	 *
+	 * @param key Domain key which identifies the list of cookies containing `c`.
+	 * @param c [Cookie] object to delete.
+	 */
+	private fun clean(
+		key: String,
+		c: HttpCookie,
+	) {
+		if (c.hasExpired()) {
+			cookieMap[key]?.let { domainCookies ->
 				domainCookies.remove(c)
 				currentCookieCount--
 				if (domainCookies.isEmpty()) {
 					cookieMap.remove(key)
 				}
 			}
-        }
-    }
+		}
+	}
 
-    /**
-     * Updates the cookie.
-     * <br></br>
-     * This means expiration time update.
-     *
-     * @param domainKey The key which addresses the cookie, may be a full server address or just a domain.
-     * @param cookie The new cookie which may replace an old one.
-     * @return `TRUE` if an update was performed else `FALSE`.
-     */
-    private fun update(domainKey: String, cookie: HttpCookie): Boolean {
-        val cookies = cookieMap[domainKey]
-        if (cookies == null || cookies.isEmpty()) {
-            return false
-        }
+	/**
+	 * Updates the cookie.
+	 * <br></br>
+	 * This means expiration time update.
+	 *
+	 * @param domainKey The key which addresses the cookie, may be a full server address or just a domain.
+	 * @param cookie The new cookie which may replace an old one.
+	 * @return `TRUE` if an update was performed else `FALSE`.
+	 */
+	private fun update(
+		domainKey: String,
+		cookie: HttpCookie,
+	): Boolean {
+		val cookies = cookieMap[domainKey]
+		if (cookies == null || cookies.isEmpty()) {
+			return false
+		}
 
-        for (c in cookies) {
-            if (c == cookie) {
-                clean(domainKey, c)
-                if (!cookie.hasExpired()) {
-                    cookies.add(cookie)
-                }
-                return true
-            }
-        }
+		for (c in cookies) {
+			if (c == cookie) {
+				clean(domainKey, c)
+				if (!cookie.hasExpired()) {
+					cookies.add(cookie)
+				}
+				return true
+			}
+		}
 
-        return false
-    }
-
+		return false
+	}
 }

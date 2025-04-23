@@ -27,6 +27,7 @@ import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType
  *
  * @author Tobias Wich
  */
-class PinCompareMarkerType(marker: DIDAbstractMarkerType)
-    : AbstractMarkerType(marker)
+class PinCompareMarkerType(
+	marker: DIDAbstractMarkerType,
+) : AbstractMarkerType(marker)
 // TODO: add accessor functions

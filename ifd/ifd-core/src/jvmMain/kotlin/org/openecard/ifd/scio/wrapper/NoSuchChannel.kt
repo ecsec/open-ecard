@@ -21,9 +21,13 @@
  ***************************************************************************/
 package org.openecard.ifd.scio.wrapper
 
-
 /**
  *
  * @author Tobias Wich
  */
-class NoSuchChannel @JvmOverloads constructor(message: String, cause: Throwable? = null) : Exception(message, cause)
+class NoSuchChannel
+	@JvmOverloads
+	constructor(
+		message: String,
+		cause: Throwable? = null,
+	) : Exception(message, cause)

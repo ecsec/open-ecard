@@ -21,10 +21,12 @@
  ***************************************************************************/
 package org.openecard.httpcore.cookies
 
-
 /**
  * Exception implementation which shall be used for the CookieManager and the Cookie class.
  *
  * @author Hans-Martin Haase
  */
-class CookieException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class CookieException(
+	message: String,
+	cause: Throwable? = null,
+) : Exception(message, cause)

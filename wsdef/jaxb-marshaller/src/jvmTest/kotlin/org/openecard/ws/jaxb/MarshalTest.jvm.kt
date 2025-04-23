@@ -44,7 +44,7 @@ import javax.xml.transform.TransformerException
  * @author Tobias Wich
  */
 class MarshalTest {
-    var xmlStr = """<?xml version="1.0" encoding="UTF-8"?>
+	var xmlStr = """<?xml version="1.0" encoding="UTF-8"?>
 <soap11:Envelope xmlns:soap11="http://schemas.xmlsoap.org/soap/envelope/" xmlns:addr="http://www.w3.org/2005/03/addressing" xmlns:paos20="urn:liberty:paos:2006-08">
   <soap11:Header>
     <paos20:PAOS soap11:actor="http://schemas.xmlsoap.org/soap/actor/next" soap11:mustUnderstand="1">
@@ -86,113 +86,113 @@ class MarshalTest {
   </soap11:Body>
 </soap11:Envelope>"""
 
-    @Test
-    @Throws(Exception::class)
-    fun testConversion() {
-        val m = JAXBMarshaller()
-        var doc = m.str2doc(xmlStr)
+	@Test
+	@Throws(Exception::class)
+	fun testConversion() {
+		val m = JAXBMarshaller()
+		var doc = m.str2doc(xmlStr)
 
-        val msg = m.doc2soap(doc)
-        val body = msg.soapBody
-        val result: Node = body.childElements[0]
+		val msg = m.doc2soap(doc)
+		val body = msg.soapBody
+		val result: Node = body.childElements[0]
 
-        //System.out.println(m.doc2str(result));
-        val o = m.unmarshal(result)
-        doc = m.marshal(o)
-        Assert.assertNotNull(doc)
-        //System.out.println(m.doc2str(doc));
-    }
+		// System.out.println(m.doc2str(result));
+		val o = m.unmarshal(result)
+		doc = m.marshal(o)
+		Assert.assertNotNull(doc)
+		// System.out.println(m.doc2str(doc));
+	}
 
-    @Test
-    @Throws(Exception::class)
-    fun testSOAPMarshal() {
-        val m = JAXBMarshaller()
-        var doc = m.str2doc(xmlStr)
-        val msg = m.doc2soap(doc)
+	@Test
+	@Throws(Exception::class)
+	fun testSOAPMarshal() {
+		val m = JAXBMarshaller()
+		var doc = m.str2doc(xmlStr)
+		val msg = m.doc2soap(doc)
 
-        val o = m.unmarshal(msg.soapBody.childElements[0])
-        doc = m.marshal(o)
+		val o = m.unmarshal(msg.soapBody.childElements[0])
+		doc = m.marshal(o)
 
-        val factory = MessageFactory.newInstance()
-        val soapMsg = factory.createMessage()
-        soapMsg.soapBody.addDocument(doc)
-        //soapMsg.writeTo(System.out);
-    }
+		val factory = MessageFactory.newInstance()
+		val soapMsg = factory.createMessage()
+		soapMsg.soapBody.addDocument(doc)
+		// soapMsg.writeTo(System.out);
+	}
 
-    @Test
-    @Throws(
-        MarshallingTypeException::class,
-        TransformerException::class,
-        SOAPException::class,
-        ParserConfigurationException::class
-    )
-    fun testConversionOfDIDAuthenticateResponseAndInitializeFrameworkResponse() {
-        val m = JAXBMarshaller()
+	@Test
+	@Throws(
+		MarshallingTypeException::class,
+		TransformerException::class,
+		SOAPException::class,
+		ParserConfigurationException::class,
+	)
+	fun testConversionOfDIDAuthenticateResponseAndInitializeFrameworkResponse() {
+		val m = JAXBMarshaller()
 
-        val didAuthenticateResponse = DIDAuthenticateResponse()
-        val r = Result()
-        r.resultMajor = "major"
-        r.resultMinor = "minor"
-        val internationalStringType = InternationalStringType()
-        internationalStringType.lang = "en"
-        internationalStringType.value = "message"
-        r.resultMessage = internationalStringType
-        didAuthenticateResponse.result = r
+		val didAuthenticateResponse = DIDAuthenticateResponse()
+		val r = Result()
+		r.resultMajor = "major"
+		r.resultMinor = "minor"
+		val internationalStringType = InternationalStringType()
+		internationalStringType.lang = "en"
+		internationalStringType.value = "message"
+		r.resultMessage = internationalStringType
+		didAuthenticateResponse.result = r
 
-        val didAuthenticationDataType = EAC2OutputType()
+		val didAuthenticationDataType = EAC2OutputType()
 
-        val factory = DocumentBuilderFactory.newInstance()
-        factory.isNamespaceAware = true
-        val builder = factory.newDocumentBuilder()
-        val d = builder.newDocument()
+		val factory = DocumentBuilderFactory.newInstance()
+		factory.isNamespaceAware = true
+		val builder = factory.newDocumentBuilder()
+		val d = builder.newDocument()
 
-        val e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature")
-        e.textContent =
-            "7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9"
-        didAuthenticationDataType.any.add(e)
+		val e = d.createElementNS("urn:iso:std:iso-iec:24727:tech:schema", "Signature")
+		e.textContent =
+			"7117D7BF95D8D6BD437A0D43DE48F42528273A98F2605758D6A3A2BFC38141E7577CABB4F8FBC8DF152E3A097D1B3A703597331842425FE4A9D0F1C9067AC4A9"
+		didAuthenticationDataType.any.add(e)
 
-        didAuthenticateResponse.authenticationProtocolData = didAuthenticationDataType
+		didAuthenticateResponse.authenticationProtocolData = didAuthenticationDataType
 
-        var doc = m.marshal(didAuthenticateResponse)
+		var doc = m.marshal(didAuthenticateResponse)
 
-        println(m.doc2str(doc)) //test ok if this works
+		println(m.doc2str(doc)) // test ok if this works
 
-        val initializeFrameworkResponse = InitializeFrameworkResponse()
-        val version = InitializeFrameworkResponse.Version()
-        version.major = BigInteger("11")
-        version.minor = BigInteger("22")
-        version.subMinor = BigInteger("33")
+		val initializeFrameworkResponse = InitializeFrameworkResponse()
+		val version = InitializeFrameworkResponse.Version()
+		version.major = BigInteger("11")
+		version.minor = BigInteger("22")
+		version.subMinor = BigInteger("33")
 
-        initializeFrameworkResponse.version = version
+		initializeFrameworkResponse.version = version
 
-        r.resultMessage = internationalStringType
-        initializeFrameworkResponse.result = r
+		r.resultMessage = internationalStringType
+		initializeFrameworkResponse.result = r
 
-        doc = m.marshal(initializeFrameworkResponse)
+		doc = m.marshal(initializeFrameworkResponse)
 
-        println(m.doc2str(doc)) //test ok if this works
-    }
+		println(m.doc2str(doc)) // test ok if this works
+	}
 
-    @Test
-    @Throws(Exception::class)
-    fun testSoapHeaderAdd() {
-        val m = JAXBMarshaller()
-        val doc = m.str2doc(xmlStr)
-        val msg = m.doc2soap(doc)
+	@Test
+	@Throws(Exception::class)
+	fun testSoapHeaderAdd() {
+		val m = JAXBMarshaller()
+		val doc = m.str2doc(xmlStr)
+		val msg = m.doc2soap(doc)
 
-        var msgId: Element? = null
-        // check if messageid is present
-        for (next in msg.soapHeader.childElements) {
-            if (next.nodeName == "MessageID" && next.namespaceURI == "http://www.w3.org/2005/03/addressing") {
-                msgId = next
-            }
-        }
-        Assert.assertNotNull(msgId)
+		var msgId: Element? = null
+		// check if messageid is present
+		for (next in msg.soapHeader.childElements) {
+			if (next.nodeName == "MessageID" && next.namespaceURI == "http://www.w3.org/2005/03/addressing") {
+				msgId = next
+			}
+		}
+		Assert.assertNotNull(msgId)
 
-        // add relates to
-        val relates = msg.soapHeader.addHeaderElement(QName("http://www.w3.org/2005/03/addressing", "RelatesTo"))
-        relates.textContent = "relates to fancy id"
+		// add relates to
+		val relates = msg.soapHeader.addHeaderElement(QName("http://www.w3.org/2005/03/addressing", "RelatesTo"))
+		relates.textContent = "relates to fancy id"
 
-        println(m.doc2str(msg.document))
-    }
+		println(m.doc2str(msg.document))
+	}
 }

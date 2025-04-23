@@ -21,50 +21,49 @@
  ***************************************************************************/
 package org.openecard.crypto.common.asn1.eac.oid
 
-
 /**
  * See BSI-TR-03110, version 2.10
  *
  * @author Moritz Horsch
  */
 object RIObjectIdentifier {
-    /**
-     * id-RI-DH OBJECT IDENTIFIER ::= {id-RI 1}
-     */
-    val id_RI_DH: String = EACObjectIdentifier.id_RI + ".1"
+	/**
+	 * id-RI-DH OBJECT IDENTIFIER ::= {id-RI 1}
+	 */
+	val id_RI_DH: String = EACObjectIdentifier.id_RI + ".1"
 
-    /**
-     * id-RI-DH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-DH 1}
-     */
-    val id_RI_DH_SHA_1: String = id_RI_DH + ".1"
+	/**
+	 * id-RI-DH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-DH 1}
+	 */
+	val id_RI_DH_SHA_1: String = id_RI_DH + ".1"
 
-    /**
-     * id-RI-DH-SHA-224 OBJECT IDENTIFIER ::= {id-RI-DH 2}
-     */
-    val id_RI_DH_SHA_224: String = id_RI_DH + ".2"
+	/**
+	 * id-RI-DH-SHA-224 OBJECT IDENTIFIER ::= {id-RI-DH 2}
+	 */
+	val id_RI_DH_SHA_224: String = id_RI_DH + ".2"
 
-    /**
-     * id-RI-DH-SHA-256 OBJECT IDENTIFIER ::= {id-RI-DH 3}
-     */
-    val id_RI_DH_SHA_256: String = id_RI_DH + ".3"
+	/**
+	 * id-RI-DH-SHA-256 OBJECT IDENTIFIER ::= {id-RI-DH 3}
+	 */
+	val id_RI_DH_SHA_256: String = id_RI_DH + ".3"
 
-    /**
-     * id-RI-ECDH OBJECT IDENTIFIER ::= {id-RI 2}
-     */
-    val id_RI_ECDH: String = EACObjectIdentifier.id_RI + ".2"
+	/**
+	 * id-RI-ECDH OBJECT IDENTIFIER ::= {id-RI 2}
+	 */
+	val id_RI_ECDH: String = EACObjectIdentifier.id_RI + ".2"
 
-    /**
-     * id-RI-ECDH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-ECDH 1}
-     */
-    val id_RI_ECDH_SHA_1: String = id_RI_ECDH + ".1"
+	/**
+	 * id-RI-ECDH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-ECDH 1}
+	 */
+	val id_RI_ECDH_SHA_1: String = id_RI_ECDH + ".1"
 
-    /**
-     * id-RI-ECDH-SHA-224 OBJECT IDENTIFIER ::= {id-RI-ECDH 2}
-     */
-    val id_RI_ECDH_SHA_224: String = id_RI_ECDH + ".2"
+	/**
+	 * id-RI-ECDH-SHA-224 OBJECT IDENTIFIER ::= {id-RI-ECDH 2}
+	 */
+	val id_RI_ECDH_SHA_224: String = id_RI_ECDH + ".2"
 
-    /**
-     * id-RI-ECDH-SHA-256 OBJECT IDENTIFIER ::= {id-RI-ECDH 3}
-     */
-    val id_RI_ECDH_SHA_256: String = id_RI_ECDH + ".3"
+	/**
+	 * id-RI-ECDH-SHA-256 OBJECT IDENTIFIER ::= {id-RI-ECDH 3}
+	 */
+	val id_RI_ECDH_SHA_256: String = id_RI_ECDH + ".3"
 }

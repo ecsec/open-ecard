@@ -27,4 +27,6 @@ import org.w3c.dom.Element
  *
  * @author Tobias Wich
  */
-class SOAPEnvelope(element: Element) : SOAPElement(element)
+class SOAPEnvelope(
+	element: Element,
+) : SOAPElement(element)

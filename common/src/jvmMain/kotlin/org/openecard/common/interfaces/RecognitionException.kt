@@ -29,12 +29,11 @@ import org.openecard.common.ECardException
  * @author Tobias Wich
  */
 class RecognitionException : ECardException {
-    constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
+	constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
 
-    constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
+	constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
 
-    constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
+	constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
 
-    constructor(cause: Throwable) : super(makeOasisResultTraitImpl(), cause)
-
+	constructor(cause: Throwable) : super(makeOasisResultTraitImpl(), cause)
 }

@@ -30,34 +30,37 @@ import javax.xml.namespace.QName
  *
  * @author Tobias Wich
  */
-open class SOAPElement protected constructor(protected val element: Element) {
-    val childElements: List<Element>
-        get() {
-            val result = mutableListOf<Element>()
-            val nodes = element.childNodes
-            for (i in 0 until nodes.length) {
-                val n = nodes.item(i)
-                if (Node.ELEMENT_NODE == n.nodeType) {
-                    result.add(n as Element)
-                }
-            }
-            return result.toList()
-        }
+open class SOAPElement protected constructor(
+	protected val element: Element,
+) {
+	val childElements: List<Element>
+		get() {
+			val result = mutableListOf<Element>()
+			val nodes = element.childNodes
+			for (i in 0 until nodes.length) {
+				val n = nodes.item(i)
+				if (Node.ELEMENT_NODE == n.nodeType) {
+					result.add(n as Element)
+				}
+			}
+			return result.toList()
+		}
 
-    @Throws(SOAPException::class)
-    fun addChildElement(parent: Element, elementName: QName): Element {
-        val doc = element.ownerDocument
-        // check if the document is the same
-        if (doc !== parent.ownerDocument) {
-            throw SOAPException("Given nodes have different owner documents.")
-        }
+	@Throws(SOAPException::class)
+	fun addChildElement(
+		parent: Element,
+		elementName: QName,
+	): Element {
+		val doc = element.ownerDocument
+		// check if the document is the same
+		if (doc !== parent.ownerDocument) {
+			throw SOAPException("Given nodes have different owner documents.")
+		}
 
-        val e = doc.createElementNS(elementName.namespaceURI, elementName.localPart)
-        return parent.appendChild(e) as Element
-    }
+		val e = doc.createElementNS(elementName.namespaceURI, elementName.localPart)
+		return parent.appendChild(e) as Element
+	}
 
-    @Throws(SOAPException::class)
-    fun addChildElement(elementName: QName): Element {
-        return addChildElement(element, elementName)
-    }
+	@Throws(SOAPException::class)
+	fun addChildElement(elementName: QName): Element = addChildElement(element, elementName)
 }

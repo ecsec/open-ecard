@@ -25,36 +25,35 @@ import org.openecard.crypto.tls.proxy.ProxySettingsLoader.Companion.parseExclusi
 import org.testng.Assert
 import kotlin.test.Test
 
-
 /**
  *
  * @author Tobias Wich
  */
 class HostTest {
-    @Test
-    fun testPatternCreation() {
-        Assert.assertEquals(parseExclusionHosts("").size, 0)
-        Assert.assertEquals(parseExclusionHosts("foo;").size, 1)
-        Assert.assertEquals(parseExclusionHosts("foo;bar;").size, 2)
-        Assert.assertEquals(parseExclusionHosts("foo;bar;;").size, 2)
-        Assert.assertEquals(parseExclusionHosts(";foo;bar;").size, 2)
-    }
+	@Test
+	fun testPatternCreation() {
+		Assert.assertEquals(parseExclusionHosts("").size, 0)
+		Assert.assertEquals(parseExclusionHosts("foo;").size, 1)
+		Assert.assertEquals(parseExclusionHosts("foo;bar;").size, 2)
+		Assert.assertEquals(parseExclusionHosts("foo;bar;;").size, 2)
+		Assert.assertEquals(parseExclusionHosts(";foo;bar;").size, 2)
+	}
 
-    @Test
-    fun testPatternMatch() {
-        var p = parseExclusionHosts("*.example.com")[0]
-        Assert.assertTrue(p.matcher("foo.example.com").matches())
-        Assert.assertTrue(p.matcher("foo.example.com:80").matches())
-        Assert.assertFalse(p.matcher("example.com").matches())
-        Assert.assertFalse(p.matcher("example.com:80").matches())
-        p = parseExclusionHosts("*.example.com:80")[0]
-        Assert.assertFalse(p.matcher("foo.example.com").matches())
-        Assert.assertFalse(p.matcher("foo.example.com:443").matches())
-        Assert.assertTrue(p.matcher("foo.example.com:80").matches())
-        p = parseExclusionHosts("*.example.com:*")[0]
-        Assert.assertTrue(p.matcher("foo.example.com:443").matches())
-        Assert.assertTrue(p.matcher("foo.example.com:80").matches())
-        p = parseExclusionHosts("*")[0]
-        Assert.assertTrue(p.matcher("foo.example.com:443").matches())
-    }
+	@Test
+	fun testPatternMatch() {
+		var p = parseExclusionHosts("*.example.com")[0]
+		Assert.assertTrue(p.matcher("foo.example.com").matches())
+		Assert.assertTrue(p.matcher("foo.example.com:80").matches())
+		Assert.assertFalse(p.matcher("example.com").matches())
+		Assert.assertFalse(p.matcher("example.com:80").matches())
+		p = parseExclusionHosts("*.example.com:80")[0]
+		Assert.assertFalse(p.matcher("foo.example.com").matches())
+		Assert.assertFalse(p.matcher("foo.example.com:443").matches())
+		Assert.assertTrue(p.matcher("foo.example.com:80").matches())
+		p = parseExclusionHosts("*.example.com:*")[0]
+		Assert.assertTrue(p.matcher("foo.example.com:443").matches())
+		Assert.assertTrue(p.matcher("foo.example.com:80").matches())
+		p = parseExclusionHosts("*")[0]
+		Assert.assertTrue(p.matcher("foo.example.com:443").matches())
+	}
 }

@@ -13,7 +13,6 @@ plugins {
 
 val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
-
 kotlin {
 	sourceSets {
 		val commonMain by getting {
@@ -52,7 +51,7 @@ kotlin {
 		}
 	}
 
-	jvm() {
+	jvm {
 		val main by compilations.getting {
 			compileJavaTaskProvider?.configure {
 
@@ -78,18 +77,18 @@ kotlin {
 	}
 }
 
-
 val iosHeaders by configurations.creating {
 	isCanBeResolved = true
 }
 
-val shareHeader = tasks.register("shareHeader") {
-	dependsOn("classes")
+val shareHeader =
+	tasks.register("shareHeader") {
+		dependsOn("classes")
 
-	outputs.file(
-		layout.buildDirectory.dir(roboHeaderTargetDirStr)
-	)
-}
+		outputs.file(
+			layout.buildDirectory.dir(roboHeaderTargetDirStr),
+		)
+	}
 
 tasks.named("build") {
 	dependsOn("shareHeader")

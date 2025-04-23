@@ -23,58 +23,57 @@ package org.openecard.common.ifd.scio
 
 import org.openecard.common.ECardConstants
 
-
 /**
  * ISO/IEC card protocol types.
  *
  * @author Tobias Wich
  */
-enum class SCIOProtocol(@JvmField val identifier: String) {
-    /**
-     * Byte oriented T=0 protocol.
-     */
-    T0("T=0"),
+enum class SCIOProtocol(
+	@JvmField val identifier: String,
+) {
+	/**
+	 * Byte oriented T=0 protocol.
+	 */
+	T0("T=0"),
 
-    /**
-     * Block oriented T=1 protocol.
-     */
-    T1("T=1"),
+	/**
+	 * Block oriented T=1 protocol.
+	 */
+	T1("T=1"),
 
-    /**
-     * Contactless protocol.
-     */
-    TCL("T=CL"),
+	/**
+	 * Contactless protocol.
+	 */
+	TCL("T=CL"),
 
-    /**
-     * Any protocol.
-     * This value may be used to connect cards and to indicate some unknown protocol type.
-     */
-    ANY("*");
+	/**
+	 * Any protocol.
+	 * This value may be used to connect cards and to indicate some unknown protocol type.
+	 */
+	ANY("*"),
+	;
 
-    override fun toString(): String {
-        return identifier
-    }
+	override fun toString(): String = identifier
 
-    fun toUri(): String? {
-		return when (this) {
+	fun toUri(): String? =
+		when (this) {
 			T0 -> ECardConstants.IFD.Protocol.T0
 			T1 -> ECardConstants.IFD.Protocol.T1
 			TCL -> ECardConstants.IFD.Protocol.TYPE_A
 			else -> null // no distinct protocol known
 		}
-    }
 
-    companion object {
-        /**
-         * Gets the element matching the given protocol.
-         * If the protocol is not known or can not be determined, [ANY] is returned.
-         *
-         * @param protocol The protocol string to translate to the enum.
-         * @return The enum closest to representing the given protocol string.
-         */
+	companion object {
+		/**
+		 * Gets the element matching the given protocol.
+		 * If the protocol is not known or can not be determined, [ANY] is returned.
+		 *
+		 * @param protocol The protocol string to translate to the enum.
+		 * @return The enum closest to representing the given protocol string.
+		 */
 		@JvmStatic
-        fun getType(protocol: String): SCIOProtocol {
-			return if (T0.identifier == protocol) {
+		fun getType(protocol: String): SCIOProtocol =
+			if (T0.identifier == protocol) {
 				T0
 			} else if (T1.identifier == protocol) {
 				T1
@@ -83,6 +82,5 @@ enum class SCIOProtocol(@JvmField val identifier: String) {
 			} else {
 				ANY
 			}
-        }
-    }
+	}
 }

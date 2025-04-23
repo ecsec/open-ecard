@@ -21,60 +21,58 @@
  ***************************************************************************/
 package org.openecard.common.ifd.scio
 
-
 /**
  * Provides an interface for SCIO terminals.
  *
  * @author Wael Alkhatib
  */
 interface SCIOTerminal {
+	val name: String
 
-    val name: String
+	/**
+	 * Connects the card inserted in this terminal.
+	 * If a connection has previously established using the specified protocol, this method returns the same Card object
+	 * as the previous call.
+	 *
+	 * @param protocol The protocol to use.
+	 * @return Connected card instance.
+	 * @throws SCIOException Thrown if a connection could not be established using the specified protocol or if a
+	 * connection has previously been established using a different protocol.
+	 * @throws IllegalStateException Thrown if the terminal or the card is not available anymore.
+	 * @throws NullPointerException Thrown if the given protocol is `null`.
+	 * @throws SecurityException Thrown in case this operation is not allowed.
+	 */
+	@Throws(SCIOException::class, IllegalStateException::class)
+	fun connect(protocol: SCIOProtocol): SCIOCard
 
-    /**
-     * Connects the card inserted in this terminal.
-     * If a connection has previously established using the specified protocol, this method returns the same Card object
-     * as the previous call.
-     *
-     * @param protocol The protocol to use.
-     * @return Connected card instance.
-     * @throws SCIOException Thrown if a connection could not be established using the specified protocol or if a
-     * connection has previously been established using a different protocol.
-     * @throws IllegalStateException Thrown if the terminal or the card is not available anymore.
-     * @throws NullPointerException Thrown if the given protocol is `null`.
-     * @throws SecurityException Thrown in case this operation is not allowed.
-     */
-    @Throws(SCIOException::class, IllegalStateException::class)
-    fun connect(protocol: SCIOProtocol): SCIOCard
+	@get:Throws(SCIOException::class)
+	val isCardPresent: Boolean
 
-    @get:Throws(SCIOException::class)
-    val isCardPresent: Boolean
+	/**
+	 * Waits until a card is present in the terminal.
+	 * The call blocks either until a card is present, or timeout is reached. If a card is already present, this
+	 * function returns immediately.
+	 *
+	 * @param timeout Timeout in milliseconds. 0 indicates an infinite timeout. Negative values are forbidden.
+	 * @return `true` When the function returned due to a card present event, `false` when timeout has been
+	 * reached.
+	 * @throws SCIOException Thrown if the operation failed.
+	 * @throws IllegalArgumentException Thrown in case timeout was negative.
+	 */
+	@Throws(SCIOException::class)
+	fun waitForCardPresent(timeout: Long): Boolean
 
-    /**
-     * Waits until a card is present in the terminal.
-     * The call blocks either until a card is present, or timeout is reached. If a card is already present, this
-     * function returns immediately.
-     *
-     * @param timeout Timeout in milliseconds. 0 indicates an infinite timeout. Negative values are forbidden.
-     * @return `true` When the function returned due to a card present event, `false` when timeout has been
-     * reached.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalArgumentException Thrown in case timeout was negative.
-     */
-    @Throws(SCIOException::class)
-    fun waitForCardPresent(timeout: Long): Boolean
-
-    /**
-     * Waits until a card is removed from the terminal.
-     * The call blocks either until the card is removed, or timeout is reached. If no card is present, this function
-     * returns immediately.
-     *
-     * @param timeout Timeout in milliseconds. 0 indicates an infinite timeout. Negative values are forbidden.
-     * @return `true` When the function returned due to a card removed event, `false` when timeout has been
-     * reached.
-     * @throws SCIOException Thrown if the operation failed.
-     * @throws IllegalArgumentException Thrown in case timeout was negative.
-     */
-    @Throws(SCIOException::class)
-    fun waitForCardAbsent(timeout: Long): Boolean
+	/**
+	 * Waits until a card is removed from the terminal.
+	 * The call blocks either until the card is removed, or timeout is reached. If no card is present, this function
+	 * returns immediately.
+	 *
+	 * @param timeout Timeout in milliseconds. 0 indicates an infinite timeout. Negative values are forbidden.
+	 * @return `true` When the function returned due to a card removed event, `false` when timeout has been
+	 * reached.
+	 * @throws SCIOException Thrown if the operation failed.
+	 * @throws IllegalArgumentException Thrown in case timeout was negative.
+	 */
+	@Throws(SCIOException::class)
+	fun waitForCardAbsent(timeout: Long): Boolean
 }

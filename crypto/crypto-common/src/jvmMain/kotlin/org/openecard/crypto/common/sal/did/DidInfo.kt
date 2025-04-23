@@ -48,7 +48,6 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  */
 class DidInfo {
-
 	private val didInfos: DidInfos
 	private val application: ByteArray
 	private val didTarget: TargetNameType
@@ -143,7 +142,7 @@ class DidInfo {
 
 	@get:Throws(
 		WSHelper.WSException::class,
-		SecurityConditionUnsatisfiable::class
+		SecurityConditionUnsatisfiable::class,
 	)
 	val missingDids: List<DIDStructureType>
 		get() {
@@ -155,7 +154,7 @@ class DidInfo {
 	@get:Throws(
 		WSHelper.WSException::class,
 		SecurityConditionUnsatisfiable::class,
-		NoSuchDid::class
+		NoSuchDid::class,
 	)
 	val missingDidInfos: MutableList<DidInfo>
 		get() {
@@ -173,11 +172,12 @@ class DidInfo {
 				val missingDids = this.missingDids
 				// check if there is anything other than a pin did in the list
 				for (missingDid in missingDids) {
-					val infoObj: DidInfo = if (missingDid.getDIDScope() == DIDScopeType.GLOBAL) {
-						didInfos.getDidInfo(missingDid.getDIDName())
-					} else {
-						didInfos.getDidInfo(application, missingDid.getDIDName())
-					}
+					val infoObj: DidInfo =
+						if (missingDid.getDIDScope() == DIDScopeType.GLOBAL) {
+							didInfos.getDidInfo(missingDid.getDIDName())
+						} else {
+							didInfos.getDidInfo(application, missingDid.getDIDName())
+						}
 					if (!infoObj.isPinDid) {
 						return false
 					}
@@ -193,8 +193,8 @@ class DidInfo {
 				throw createException(
 					makeResultError(
 						ECardConstants.Minor.App.INT_ERROR,
-						msg
-					)
+						msg,
+					),
 				)
 			}
 		}
@@ -205,11 +205,12 @@ class DidInfo {
 			val missingDids = this.missingDids
 			// check if there is a pin did in the list
 			for (missingDid in missingDids) {
-				val infoObj = if (missingDid.getDIDScope() == DIDScopeType.GLOBAL) {
-					didInfos.getDidInfo(missingDid.getDIDName())
-				} else {
-					didInfos.getDidInfo(application, missingDid.getDIDName())
-				}
+				val infoObj =
+					if (missingDid.getDIDScope() == DIDScopeType.GLOBAL) {
+						didInfos.getDidInfo(missingDid.getDIDName())
+					} else {
+						didInfos.getDidInfo(application, missingDid.getDIDName())
+					}
 				if (infoObj.isPinDid) {
 					return true
 				}
@@ -223,11 +224,9 @@ class DidInfo {
 		}
 	}
 
-
 	@get:Throws(WSHelper.WSException::class)
 	val rawMarker: DIDAbstractMarkerType
 		get() = this.DID.getDIDMarker()
-
 
 	@get:Throws(WSHelper.WSException::class)
 	val isPinDid: Boolean
@@ -272,7 +271,6 @@ class DidInfo {
 			throw IllegalStateException(msg)
 		}
 	}
-
 
 	@get:Throws(WSHelper.WSException::class)
 	val isCryptoDid: Boolean
@@ -326,7 +324,7 @@ class DidInfo {
 					for (cert in m.certificateRefs) {
 						val datasetName = cert.getDataSetName()
 
-						//String dsiName = cert.getDSIName();
+						// String dsiName = cert.getDSIName();
 
 						// add if it is not already present in the result list
 						if (!foundDataSets.contains(datasetName)) {
@@ -344,8 +342,8 @@ class DidInfo {
 				throw createException(
 					makeResultError(
 						ECardConstants.Minor.App.INT_ERROR,
-						msg
-					)
+						msg,
+					),
 				)
 			}
 		}
@@ -354,7 +352,7 @@ class DidInfo {
 		WSHelper.WSException::class,
 		CertificateException::class,
 		SecurityConditionUnsatisfiable::class,
-		NoSuchDid::class
+		NoSuchDid::class,
 	)
 	@get:Synchronized
 	val relatedCertificateChain: List<X509Certificate> by lazy {
@@ -384,7 +382,6 @@ class DidInfo {
 			listOf()
 		}
 	}
-
 
 	@Throws(CertificateException::class)
 	private fun parseCerts(certsData: MutableList<ByteArray>): List<X509Certificate> {
@@ -418,5 +415,4 @@ class DidInfo {
 			}
 		}
 	}
-
 }

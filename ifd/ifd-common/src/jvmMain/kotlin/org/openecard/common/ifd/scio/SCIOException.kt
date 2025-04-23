@@ -21,13 +21,16 @@
  ***************************************************************************/
 package org.openecard.common.ifd.scio
 
-
 /**
  * Exception indicating problems in the ISO/IEC 7816 stack.
  *
  * @author Moritz Horsch
  * @author Tobias Wich
  */
-class SCIOException(message: String, val code: SCIOErrorCode, cause: Throwable? = null) : Exception(message, cause) {
+class SCIOException(
+	message: String,
+	val code: SCIOErrorCode,
+	cause: Throwable? = null,
+) : Exception(message, cause) {
 	constructor(message: String, code: SCIOErrorCode) : this(message, code, null)
 }

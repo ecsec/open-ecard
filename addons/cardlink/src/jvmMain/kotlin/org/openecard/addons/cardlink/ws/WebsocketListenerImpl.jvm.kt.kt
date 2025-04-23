@@ -29,36 +29,44 @@ import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
 import kotlin.time.Duration
 
-
 private val logger = KotlinLogging.logger {}
 
 /**
  * @author Mike Prechtl
  */
-class WebsocketListenerImpl: WebsocketListener {
-
+class WebsocketListenerImpl : WebsocketListener {
 	private lateinit var messageChannel: Channel<GematikEnvelope>
 
-	private var isOpen : Boolean = false
+	private var isOpen: Boolean = false
 
 	override fun onOpen(webSocket: Websocket) {
 		messageChannel = Channel()
 		isOpen = true
 	}
 
-	override fun onClose(webSocket: Websocket, statusCode: Int, reason: String?) {
+	override fun onClose(
+		webSocket: Websocket,
+		statusCode: Int,
+		reason: String?,
+	) {
 		logger.warn { "websocket received close with $statusCode - $reason" }
 		messageChannel.close()
 		isOpen = false
 	}
 
-	override fun onError(webSocket: Websocket, error: String) {
+	override fun onError(
+		webSocket: Websocket,
+		error: String,
+	) {
 		// TODO: Implement onError handler
 		logger.error { "onError handler not implemented yet" }
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun onText(webSocket: Websocket, data: String) {
+	override fun onText(
+		webSocket: Websocket,
+		data: String,
+	) {
 		GlobalScope.launch {
 			logger.debug { "websocket received message: $data" }
 			val egkEnvelope = cardLinkJsonFormatter.decodeFromString<GematikEnvelope>(data)
@@ -66,9 +74,7 @@ class WebsocketListenerImpl: WebsocketListener {
 		}
 	}
 
-	fun isOpen() : Boolean {
-		return isOpen
-	}
+	fun isOpen(): Boolean = isOpen
 
 	fun waitForOpenChannel(timeout: Duration = Duration.parse("10s")) {
 		runBlocking {
@@ -85,13 +91,12 @@ class WebsocketListenerImpl: WebsocketListener {
 		}
 	}
 
-	fun nextMessageBlocking() : GematikEnvelope? {
-		return runBlocking {
+	fun nextMessageBlocking(): GematikEnvelope? =
+		runBlocking {
 			nextMessage()
 		}
-	}
 
-	suspend fun nextMessage(timeout: Duration = Duration.parse("30s")) : GematikEnvelope? {
+	suspend fun nextMessage(timeout: Duration = Duration.parse("30s")): GematikEnvelope? {
 		try {
 			return withTimeoutOrNull(timeout) {
 				return@withTimeoutOrNull messageChannel.receive()

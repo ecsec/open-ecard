@@ -54,25 +54,32 @@ private val LOG = KotlinLogging.logger { }
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
+class SmartCardSignerCredential(
+	private val did: DidInfo,
+) : TlsSigner {
 	@Throws(IOException::class)
-	override fun generateRawSignature(algorithm: SignatureAndHashAlgorithm?, hash: ByteArray): ByteArray {
-		return genSig(algorithm, hash)
-	}
+	override fun generateRawSignature(
+		algorithm: SignatureAndHashAlgorithm?,
+		hash: ByteArray,
+	): ByteArray = genSig(algorithm, hash)
 
 	@Throws(IOException::class)
-	private fun genSig(algorithm: SignatureAndHashAlgorithm?, sigData: ByteArray): ByteArray {
+	private fun genSig(
+		algorithm: SignatureAndHashAlgorithm?,
+		sigData: ByteArray,
+	): ByteArray {
 		var sigData = sigData
 		val didAlg = this.didAlgorithm
 		LOG.debug { "Using DID with algorithm=${didAlg.jcaAlg}." }
 
 		if (algorithm != null) {
-			val reqAlgStr = String.format(
-				"%s-%s",
-				SignatureAlgorithm.getText(algorithm.getSignature()),
-				HashAlgorithm.getText(algorithm.getHash())
-			)
-			LOG.debug { "Performing TLS 1.2 signature for algorithm=${reqAlgStr}." }
+			val reqAlgStr =
+				String.format(
+					"%s-%s",
+					SignatureAlgorithm.getText(algorithm.getSignature()),
+					HashAlgorithm.getText(algorithm.getHash()),
+				)
+			LOG.debug { "Performing TLS 1.2 signature for algorithm=$reqAlgStr." }
 
 			if (isRawSignature(didAlg)) {
 				if (algorithm.getSignature() == SignatureAlgorithm.rsa) {
@@ -80,7 +87,7 @@ class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
 					val hashAlgId = TlsUtils.getOIDForHashAlgorithm(algorithm.getHash())
 					val digestInfo = DigestInfo(AlgorithmIdentifier(hashAlgId, DERNull.INSTANCE), sigData)
 					sigData = digestInfo.getEncoded(ASN1Encoding.DER)
-					LOG.debug { "Signing DigestInfo with algorithm=${hashAlgId}." }
+					LOG.debug { "Signing DigestInfo with algorithm=$hashAlgId." }
 				} else if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
 					// cah be implemented with more recent BC versions by using the createRawSigner function
 					// when implementing this, also adjust the filter function BaseSmartCardCredentialFactory.isSafeForNoneDid
@@ -91,7 +98,9 @@ class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
 					// signer.update(hash, 0, hash.length);
 					// return signer.generateSignature();
 
-					throw UnsupportedOperationException("RSA-PSS with raw signature DIDs is not supported with this version of BouncyCastle.")
+					throw UnsupportedOperationException(
+						"RSA-PSS with raw signature DIDs is not supported with this version of BouncyCastle.",
+					)
 				}
 			}
 		} else {
@@ -123,9 +132,10 @@ class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
 		get() {
 			try {
 				val algInfo = did.genericCryptoMarker.algorithmInfo
-				val alg = fromAlgId(
-					algInfo!!.getAlgorithmIdentifier().getAlgorithm()
-				)
+				val alg =
+					fromAlgId(
+						algInfo!!.getAlgorithmIdentifier().getAlgorithm(),
+					)
 				return alg
 			} catch (ex: UnsupportedAlgorithmException) {
 				throw RuntimeException("Error evaluating algorithm", ex)
@@ -147,31 +157,29 @@ class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
 
 		try {
 			if (algorithm != null && supportsExternalHashing()) {
-				val hashAlg: Short = if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
-					SignatureAlgorithm.getRSAPSSHashAlgorithm(algorithm.getSignature())
-				} else {
-					algorithm.getHash()
-				}
+				val hashAlg: Short =
+					if (SignatureAlgorithm.isRSAPSS(algorithm.getSignature())) {
+						SignatureAlgorithm.getRSAPSSHashAlgorithm(algorithm.getSignature())
+					} else {
+						algorithm.getHash()
+					}
 
 				val digestName = HashAlgorithm.getName(hashAlg)
 				val md = MessageDigest.getInstance(digestName)
-				val os: OutputStream = object : OutputStream() {
-					@Throws(IOException::class)
-					override fun write(b: Int) {
-						md.update(b.toByte())
+				val os: OutputStream =
+					object : OutputStream() {
+						@Throws(IOException::class)
+						override fun write(b: Int) {
+							md.update(b.toByte())
+						}
 					}
-				}
 				// create stream signer for use with real data, not the hash of it
 				return object : TlsStreamSigner {
 					@Throws(IOException::class)
-					override fun getOutputStream(): OutputStream {
-						return os
-					}
+					override fun getOutputStream(): OutputStream = os
 
 					@Throws(IOException::class)
-					override fun getSignature(): ByteArray {
-						return genSig(algorithm, md.digest())
-					}
+					override fun getSignature(): ByteArray = genSig(algorithm, md.digest())
 				}
 			} else {
 				return null
@@ -182,17 +190,10 @@ class SmartCardSignerCredential(private val did: DidInfo) : TlsSigner {
 			throw IOException("Failed to create stream signer.", ex)
 		}
 	}
-
 }
 
-private fun isRawSignature(alg: SignatureAlgorithms): Boolean {
-	return isRawRSA(alg) || isRawECDSA(alg)
-}
+private fun isRawSignature(alg: SignatureAlgorithms): Boolean = isRawRSA(alg) || isRawECDSA(alg)
 
-private fun isRawRSA(alg: SignatureAlgorithms): Boolean {
-	return alg == SignatureAlgorithms.CKM_RSA_PKCS
-}
+private fun isRawRSA(alg: SignatureAlgorithms): Boolean = alg == SignatureAlgorithms.CKM_RSA_PKCS
 
-private fun isRawECDSA(alg: SignatureAlgorithms): Boolean {
-	return alg == SignatureAlgorithms.CKM_ECDSA
-}
+private fun isRawECDSA(alg: SignatureAlgorithms): Boolean = alg == SignatureAlgorithms.CKM_ECDSA

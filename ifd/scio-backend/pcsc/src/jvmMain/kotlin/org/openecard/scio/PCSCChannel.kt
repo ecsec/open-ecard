@@ -31,7 +31,7 @@ import javax.smartcardio.CardChannel
 import javax.smartcardio.CardException
 import javax.smartcardio.CommandAPDU
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * PC/SC channel implementation of the SCIOChannel.
@@ -41,60 +41,60 @@ private val LOG = KotlinLogging.logger {  }
  */
 class PCSCChannel internal constructor(
 	override val card: PCSCCard,
-	private val channel: CardChannel
+	private val channel: CardChannel,
 ) : SCIOChannel {
-
 	// pretend channel num = 0 in case there is something really fucked up during init of the card
-	override val channelNumber: Int = try {
-		channel.channelNumber
-	} catch (ex: IllegalStateException) {
-		// very unlikely event, that the card is removed during the connect phase
-		LOG.error { "Card disconnected during connect phase, pretending to be channel 0 regardless of what it is." }
-		0
-	}
+	override val channelNumber: Int =
+		try {
+			channel.channelNumber
+		} catch (ex: IllegalStateException) {
+			// very unlikely event, that the card is removed during the connect phase
+			LOG.error { "Card disconnected during connect phase, pretending to be channel 0 regardless of what it is." }
+			0
+		}
 
 	override val isBasicChannel: Boolean = channelNumber == 0
 
-    override val isLogicalChannel: Boolean = !isBasicChannel
+	override val isLogicalChannel: Boolean = !isBasicChannel
 
-    @Throws(SCIOException::class)
-    override fun transmit(command: ByteArray): CardResponseAPDU {
-        try {
-            val convertCommand = CommandAPDU(command)
-            val response = channel.transmit(convertCommand)
-            return CardResponseAPDU(response.bytes)
-        } catch (ex: CardException) {
-            val msg = "Failed to transmit APDU to the card in terminal '%s'."
-            throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun transmit(command: ByteArray): CardResponseAPDU {
+		try {
+			val convertCommand = CommandAPDU(command)
+			val response = channel.transmit(convertCommand)
+			return CardResponseAPDU(response.bytes)
+		} catch (ex: CardException) {
+			val msg = "Failed to transmit APDU to the card in terminal '%s'."
+			throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun transmit(apdu: CardCommandAPDU): CardResponseAPDU {
-        return transmit(apdu.toByteArray())
-    }
+	@Throws(SCIOException::class)
+	override fun transmit(apdu: CardCommandAPDU): CardResponseAPDU = transmit(apdu.toByteArray())
 
-    @Throws(SCIOException::class)
-    override fun transmit(command: ByteBuffer, response: ByteBuffer): Int {
-        try {
-            return channel.transmit(command, response)
-        } catch (ex: CardException) {
-            val msg = "Failed to transmit APDU to the card in terminal '%s'."
-            throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun transmit(
+		command: ByteBuffer,
+		response: ByteBuffer,
+	): Int {
+		try {
+			return channel.transmit(command, response)
+		} catch (ex: CardException) {
+			val msg = "Failed to transmit APDU to the card in terminal '%s'."
+			throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+		}
+	}
 
-    @Throws(SCIOException::class)
-    override fun close() {
-        // only close logical channels
-        if (isLogicalChannel) {
-            try {
-                channel.close()
-            } catch (ex: CardException) {
-                val msg = "Failed to close channel to card in terminal '%s'."
-                throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
-            }
-        }
-    }
-
+	@Throws(SCIOException::class)
+	override fun close() {
+		// only close logical channels
+		if (isLogicalChannel) {
+			try {
+				channel.close()
+			} catch (ex: CardException) {
+				val msg = "Failed to close channel to card in terminal '%s'."
+				throw SCIOException(String.format(msg, card.terminal.name), PCSCExceptionExtractor.getCode(ex), ex)
+			}
+		}
+	}
 }

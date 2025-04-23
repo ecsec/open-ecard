@@ -36,47 +36,47 @@ import javax.swing.border.EmptyBorder
  * @author Dirk Petrautzki
  */
 class Logo : JPanel() {
-    /**
-     * Load logo from classpath and instantiate panel.
-     */
-    init {
-        val logo: ImageIcon = loadLogoIcon()
-        val lbl = JLabel(logo)
+	/**
+	 * Load logo from classpath and instantiate panel.
+	 */
+	init {
+		val logo: ImageIcon = loadLogoIcon()
+		val lbl = JLabel(logo)
 
-        // set a horizontal box layout (logo on the left, separator on the right)
-        setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
-        add(lbl)
+		// set a horizontal box layout (logo on the left, separator on the right)
+		setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
+		add(lbl)
 
-        // add the panel containing the separator
-        val separatorPanel = JPanel()
-        // set a vertical box layout (dummy on the top, separator on the bottom)
-        separatorPanel.setLayout(BoxLayout(separatorPanel, BoxLayout.Y_AXIS))
-        val separator = JSeparator(SwingConstants.HORIZONTAL)
+		// add the panel containing the separator
+		val separatorPanel = JPanel()
+		// set a vertical box layout (dummy on the top, separator on the bottom)
+		separatorPanel.setLayout(BoxLayout(separatorPanel, BoxLayout.Y_AXIS))
+		val separator = JSeparator(SwingConstants.HORIZONTAL)
 		val dummyPanel = JPanel()
 		dummyPanel.preferredSize = Dimension(10, 6)
-        separatorPanel.add(dummyPanel)
-        separatorPanel.add(separator)
-        add(separatorPanel)
+		separatorPanel.add(dummyPanel)
+		separatorPanel.add(separator)
+		add(separatorPanel)
 
-        // add a space of 10 at the bottom
-        setBorder(EmptyBorder(0, 0, 10, 0))
-    }
+		// add a space of 10 at the bottom
+		setBorder(EmptyBorder(0, 0, 10, 0))
+	}
 
-    companion object {
-        private const val serialVersionUID = 1L
+	companion object {
+		private const val serialVersionUID = 1L
 
-        fun loadLogoIcon(): ImageIcon {
-            val logo = ImageIcon()
-            val url = resolveResourceAsURL(Logo::class.java, "openecard_logo.png")
+		fun loadLogoIcon(): ImageIcon {
+			val logo = ImageIcon()
+			val url = resolveResourceAsURL(Logo::class.java, "openecard_logo.png")
 
-            if (url != null) {
-                val toolkit = Toolkit.getDefaultToolkit()
-                var image = toolkit.getImage(url)
-                image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH)
-                logo.setImage(image)
-            }
+			if (url != null) {
+				val toolkit = Toolkit.getDefaultToolkit()
+				var image = toolkit.getImage(url)
+				image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH)
+				logo.setImage(image)
+			}
 
-            return logo
-        }
-    }
+			return logo
+		}
+	}
 }

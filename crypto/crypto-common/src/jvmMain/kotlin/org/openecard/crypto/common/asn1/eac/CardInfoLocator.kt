@@ -29,57 +29,59 @@ import org.openecard.bouncycastle.asn1.DERIA5String
  *
  * @author Moritz Horsch
  */
-class CardInfoLocator(seq: ASN1Sequence) {
-    val protocol: String
+class CardInfoLocator(
+	seq: ASN1Sequence,
+) {
+	val protocol: String
 
-    /**
-     * Gets the URL.
-     *
-     * @return the URL
-     */
-    val uRL: String
+	/**
+	 * Gets the URL.
+	 *
+	 * @return the URL
+	 */
+	val uRL: String
 
-    /**
-     * Gets the EFCardInfo fileID.
-     *
-     * @return the EFCardInfo fileID
-     */
-    val eFCardInfo: FileID?
+	/**
+	 * Gets the EFCardInfo fileID.
+	 *
+	 * @return the EFCardInfo fileID
+	 */
+	val eFCardInfo: FileID?
 
-    /**
-     * Instantiates a new card info locator.
-     *
-     * @param seq the ASN1 encoded sequence
-     */
-    init {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            this.uRL = DERIA5String.getInstance(seq.getObjectAt(1)).string
+	/**
+	 * Instantiates a new card info locator.
+	 *
+	 * @param seq the ASN1 encoded sequence
+	 */
+	init {
+		if (seq.size() == 2) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			this.uRL = DERIA5String.getInstance(seq.getObjectAt(1)).string
 			this.eFCardInfo = null
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            this.uRL = DERIA5String.getInstance(seq.getObjectAt(1)).string
-            this.eFCardInfo = FileID.Companion.getInstance(seq.getObjectAt(2))
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for CardInfoLocator")
-        }
-    }
+		} else if (seq.size() == 3) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			this.uRL = DERIA5String.getInstance(seq.getObjectAt(1)).string
+			this.eFCardInfo = FileID.Companion.getInstance(seq.getObjectAt(2))
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for CardInfoLocator")
+		}
+	}
 
-    companion object {
-        /**
-         * Gets the single instance of CardInfoLocator.
-         *
-         * @param obj
-         * @return single instance of CardInfoLocator
-         */
-        fun getInstance(obj: Any): CardInfoLocator {
-            if (obj is CardInfoLocator) {
-                return obj
-            } else if (obj is ASN1Sequence) {
-                return CardInfoLocator(obj)
-            }
+	companion object {
+		/**
+		 * Gets the single instance of CardInfoLocator.
+		 *
+		 * @param obj
+		 * @return single instance of CardInfoLocator
+		 */
+		fun getInstance(obj: Any): CardInfoLocator {
+			if (obj is CardInfoLocator) {
+				return obj
+			} else if (obj is ASN1Sequence) {
+				return CardInfoLocator(obj)
+			}
 
-            throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
-        }
-    }
+			throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
+		}
+	}
 }

@@ -34,7 +34,7 @@ import org.openecard.crypto.tls.CertificateVerificationException
 import org.openecard.crypto.tls.CertificateVerifier
 import java.io.IOException
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Certificate verifier which only checks the hostname against the received certificate.
@@ -42,81 +42,90 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 class HostnameVerifier : CertificateVerifier {
+	@Throws(CertificateVerificationException::class)
+	override fun isValid(
+		chain: TlsServerCertificate,
+		hostOrIp: String,
+	) {
+		try {
+			val tlsCert = chain.certificate.getCertificateAt(0)
+			val cert = Certificate.getInstance(tlsCert.encoded)
+			validInt(cert, hostOrIp)
+		} catch (ex: IOException) {
+			throw CertificateVerificationException("Invalid certificate received from server.", ex)
+		}
+	}
 
-    @Throws(CertificateVerificationException::class)
-    override fun isValid(chain: TlsServerCertificate, hostOrIp: String) {
-        try {
-            val tlsCert = chain.certificate.getCertificateAt(0)
-            val cert = Certificate.getInstance(tlsCert.encoded)
-            validInt(cert, hostOrIp)
-        } catch (ex: IOException) {
-            throw CertificateVerificationException("Invalid certificate received from server.", ex)
-        }
-    }
+	@Throws(CertificateVerificationException::class)
+	private fun validInt(
+		cert: Certificate,
+		hostOrIp: String,
+	) {
+		var success = false
+		val isIPAddr = IPAddress.isValid(hostOrIp)
 
-    @Throws(CertificateVerificationException::class)
-    private fun validInt(cert: Certificate, hostOrIp: String) {
-        var success = false
-        val isIPAddr = IPAddress.isValid(hostOrIp)
-
-        // check hostname against Subject CN
-        if (!isIPAddr) {
-            val cn = cert.subject.getRDNs(BCStrictStyle.CN)
-            if (cn.size != 0) {
-                // CN is always a string type
-                val hostNameReference = cn[0].first.value.toString()
-                success = checkWildcardName(hostOrIp, hostNameReference)
-            } else {
+		// check hostname against Subject CN
+		if (!isIPAddr) {
+			val cn = cert.subject.getRDNs(BCStrictStyle.CN)
+			if (cn.size != 0) {
+				// CN is always a string type
+				val hostNameReference = cn[0].first.value.toString()
+				success = checkWildcardName(hostOrIp, hostNameReference)
+			} else {
 				LOG.debug { "No CN entry in certificate's Subject." }
-            }
-        } else {
+			}
+		} else {
 			LOG.debug { "Given name is an IP Address. Validation relies solely on the SubjectAlternativeName." }
-        }
-        // stop execution when we found a valid name
-        if (success) {
-            return
-        }
+		}
+		// stop execution when we found a valid name
+		if (success) {
+			return
+		}
 
-        // evaluate subject alternative name
-        val ext = cert.tbsCertificate.getExtensions()
-        val subjAltExt = ext.getExtension(Extension.subjectAlternativeName)
-        if (subjAltExt != null) {
-            // extract SubjAltName from Extensions
-            val gns = GeneralNames.fromExtensions(ext, Extension.subjectAlternativeName)
-            val names = gns.names
-            for (name in names) {
-                val reference = name.name
-                when (name.tagNo) {
-                    GeneralName.dNSName -> if (!isIPAddr) {
-                        success = checkWildcardName(hostOrIp, reference.toString())
-                    }
+		// evaluate subject alternative name
+		val ext = cert.tbsCertificate.getExtensions()
+		val subjAltExt = ext.getExtension(Extension.subjectAlternativeName)
+		if (subjAltExt != null) {
+			// extract SubjAltName from Extensions
+			val gns = GeneralNames.fromExtensions(ext, Extension.subjectAlternativeName)
+			val names = gns.names
+			for (name in names) {
+				val reference = name.name
+				when (name.tagNo) {
+					GeneralName.dNSName ->
+						if (!isIPAddr) {
+							success = checkWildcardName(hostOrIp, reference.toString())
+						}
 
-                    GeneralName.iPAddress -> if (isIPAddr) {
-                        // TODO: validate IP Addresses
-						LOG.warn { "IP Address verification not supported." }
-                    }
+					GeneralName.iPAddress ->
+						if (isIPAddr) {
+							// TODO: validate IP Addresses
+							LOG.warn { "IP Address verification not supported." }
+						}
 
-                    else -> LOG.debug { "Unsupported GeneralName (${name.tagNo}) tag in SubjectAlternativeName." }
-                }
-                // stop execution when we found a valid name
-                if (success) {
-                    return
-                }
-            }
-        }
+					else -> LOG.debug { "Unsupported GeneralName (${name.tagNo}) tag in SubjectAlternativeName." }
+				}
+				// stop execution when we found a valid name
+				if (success) {
+					return
+				}
+			}
+		}
 
-        // evaluate result
-        if (!success) {
-            val errorMsg = "Hostname in certificate differs from actually requested host."
-            throw CertificateVerificationException(errorMsg)
-        }
-    }
-
+		// evaluate result
+		if (!success) {
+			val errorMsg = "Hostname in certificate differs from actually requested host."
+			throw CertificateVerificationException(errorMsg)
+		}
+	}
 }
 
 @Throws(CertificateVerificationException::class)
-private fun checkWildcardName(givenHost: String, wildcardHost: String): Boolean {
-	LOG.debug { "Comparing connection hostname against certificate hostname: [${givenHost}] [${wildcardHost}]" }
+private fun checkWildcardName(
+	givenHost: String,
+	wildcardHost: String,
+): Boolean {
+	LOG.debug { "Comparing connection hostname against certificate hostname: [$givenHost] [$wildcardHost]" }
 	try {
 		return DomainUtils.checkHostName(wildcardHost, givenHost, true)
 	} catch (ex: IllegalArgumentException) {

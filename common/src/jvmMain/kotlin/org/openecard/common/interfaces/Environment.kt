@@ -31,30 +31,34 @@ import org.openecard.ws.SAL
  * @author Johannes Schmoelz
  */
 interface Environment {
+	var gui: UserConsent?
 
-    var gui: UserConsent?
+	var ifd: IFD?
 
-    var ifd: IFD?
+	fun addIfdCtx(ctx: ByteArray)
 
-    fun addIfdCtx(ctx: ByteArray)
-    fun removeIfdCtx(ctx: ByteArray)
+	fun removeIfdCtx(ctx: ByteArray)
 
-    val ifdCtx: List<ByteArray>
+	val ifdCtx: List<ByteArray>
 
-    var sal: SAL?
+	var sal: SAL?
 
-    var eventDispatcher: EventDispatcher?
+	var eventDispatcher: EventDispatcher?
 
-    var dispatcher: Dispatcher?
+	var dispatcher: Dispatcher?
 
-    var recognition: CardRecognition?
+	var recognition: CardRecognition?
 
-    var cifProvider: CIFProvider?
+	var cifProvider: CIFProvider?
 
-    var salSelector: SalSelector?
+	var salSelector: SalSelector?
 
-    fun setGenericComponent(id: String, component: Any)
-    fun getGenericComponent(id: String): Any?
+	fun setGenericComponent(
+		id: String,
+		component: Any,
+	)
 
-    var management: Management?
+	fun getGenericComponent(id: String): Any?
+
+	var management: Management?
 }

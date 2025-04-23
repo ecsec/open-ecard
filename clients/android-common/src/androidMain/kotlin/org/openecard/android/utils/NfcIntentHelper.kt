@@ -29,15 +29,15 @@ import android.provider.Settings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-
 /**
  * Provides methods to enable/disable the nfc dispatch or to jump to the nfc settings.
  *
  * @author Mike Prechtl
  * @author Neil Crossley
  */
-class NfcIntentHelper(innerHelper: NfcCapabilityHelper<Activity>) {
-
+class NfcIntentHelper(
+	innerHelper: NfcCapabilityHelper<Activity>,
+) {
 	private val capabilityHelper: NfcCapabilityHelper<Activity> = innerHelper
 
 	/**

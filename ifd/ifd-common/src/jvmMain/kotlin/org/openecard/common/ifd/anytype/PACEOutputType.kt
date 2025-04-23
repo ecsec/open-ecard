@@ -22,7 +22,6 @@
 package org.openecard.common.ifd.anytype
 
 import org.openecard.common.anytype.AuthDataMap
-import org.openecard.common.anytype.AuthDataResponse
 import org.openecard.common.util.ByteUtils
 
 /**
@@ -38,7 +37,7 @@ class PACEOutputType
  * @param authMap AuthDataMap
  */
 (
-	private val authMap: AuthDataMap
+	private val authMap: AuthDataMap,
 ) {
 	private var efCardAccess: ByteArray? = null
 	private var currentCAR: ByteArray? = null
@@ -98,31 +97,35 @@ class PACEOutputType
 		 * @return DIDAuthenticationDataType
 		 */
 		get() {
-			val authResponse = authMap.createResponse(iso.std.iso_iec._24727.tech.schema.PACEOutputType())
+			val authResponse =
+				authMap.createResponse(
+					iso.std.iso_iec._24727.tech.schema
+						.PACEOutputType(),
+				)
 			authResponse.addElement(
 				RETRY_COUNTER,
-				retryCounter.toInt().toString()
+				retryCounter.toInt().toString(),
 			)
 			authResponse.addElement(
 				EF_CARD_ACCESS,
-				ByteUtils.toHexString(efCardAccess)
+				ByteUtils.toHexString(efCardAccess),
 			)
 			if (currentCAR != null) {
 				authResponse.addElement(
 					CURRENT_CAR,
-					ByteUtils.toHexString(currentCAR)
+					ByteUtils.toHexString(currentCAR),
 				)
 			}
 			if (previousCAR != null) {
 				authResponse.addElement(
 					PREVIOUS_CAR,
-					ByteUtils.toHexString(previousCAR)
+					ByteUtils.toHexString(previousCAR),
 				)
 			}
 			if (idpicc != null) {
 				authResponse.addElement(
 					ID_PICC,
-					ByteUtils.toHexString(idpicc)
+					ByteUtils.toHexString(idpicc),
 				)
 			}
 			return authResponse.getResponse()

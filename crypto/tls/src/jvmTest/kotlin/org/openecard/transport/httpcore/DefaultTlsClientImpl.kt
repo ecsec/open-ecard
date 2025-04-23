@@ -30,19 +30,19 @@ import java.io.IOException
  *
  * @author Tobias Wich
  */
-open class DefaultTlsClientImpl(crypto: TlsCrypto) : DefaultTlsClient(crypto) {
-    @Throws(IOException::class)
-    override fun getAuthentication(): TlsAuthentication {
-        return object : TlsAuthentication {
-            @Throws(IOException::class)
-            override fun notifyServerCertificate(serverCertificate: TlsServerCertificate) {
-                // ignore
-            }
+open class DefaultTlsClientImpl(
+	crypto: TlsCrypto,
+) : DefaultTlsClient(crypto) {
+	@Throws(IOException::class)
+	override fun getAuthentication(): TlsAuthentication =
+		object : TlsAuthentication {
+			@Throws(IOException::class)
+			override fun notifyServerCertificate(serverCertificate: TlsServerCertificate) {
+				// ignore
+			}
 
-            @Throws(IOException::class)
-            override fun getClientCredentials(cr: CertificateRequest): TlsCredentials {
-                throw UnsupportedOperationException("Not supported yet.")
-            }
-        }
-    }
+			@Throws(IOException::class)
+			override fun getClientCredentials(cr: CertificateRequest): TlsCredentials =
+				throw UnsupportedOperationException("Not supported yet.")
+		}
 }

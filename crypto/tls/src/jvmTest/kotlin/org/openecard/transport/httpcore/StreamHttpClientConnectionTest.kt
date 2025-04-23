@@ -52,78 +52,81 @@ import java.util.*
  */
 @Test(groups = ["it"])
 class StreamHttpClientConnectionTest {
-    private var rand: SecureRandom? = null
+	private var rand: SecureRandom? = null
 
-    @BeforeClass
-    fun setup() {
-        rand = SecureRandom()
-    }
+	@BeforeClass
+	fun setup() {
+		rand = SecureRandom()
+	}
 
-    @Test
-    @Throws(IOException::class, HttpException::class)
-    fun testRequestHttpGoogle() {
-        val hostName = "www.google.com"
-        // open connection
-        val socket = Socket(hostName, 80)
-        Assert.assertTrue(socket.isConnected)
-        val conn = StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream())
-        Assert.assertTrue(conn.isOpen)
+	@Test
+	@Throws(IOException::class, HttpException::class)
+	fun testRequestHttpGoogle() {
+		val hostName = "www.google.com"
+		// open connection
+		val socket = Socket(hostName, 80)
+		Assert.assertTrue(socket.isConnected)
+		val conn = StreamHttpClientConnection(socket.getInputStream(), socket.getOutputStream())
+		Assert.assertTrue(conn.isOpen)
 
-        consumeEntity(conn, hostName, 2)
-    }
+		consumeEntity(conn, hostName, 2)
+	}
 
-    @Test
-    @Throws(IOException::class, HttpException::class)
-    fun testRequestHttpsGoogle() {
-        val hostName = "www.google.com"
-        // open connection
-        val socket = Socket(hostName, 443)
-        Assert.assertTrue(socket.isConnected)
-        val tlsClient: DefaultTlsClient = object : DefaultTlsClientImpl(BcTlsCrypto(rand)) {
-            override fun getSNIServerNames(): Vector<*> {
-                return Vector(listOf(ServerName(0.toShort(), hostName.toByteArray())))
-            }
-        }
-        val handler = TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
-        handler.connect(tlsClient)
-        val conn = StreamHttpClientConnection(handler.inputStream, handler.outputStream)
-        Assert.assertTrue(conn.isOpen)
+	@Test
+	@Throws(IOException::class, HttpException::class)
+	fun testRequestHttpsGoogle() {
+		val hostName = "www.google.com"
+		// open connection
+		val socket = Socket(hostName, 443)
+		Assert.assertTrue(socket.isConnected)
+		val tlsClient: DefaultTlsClient =
+			object : DefaultTlsClientImpl(BcTlsCrypto(rand)) {
+				override fun getSNIServerNames(): Vector<*> = Vector(listOf(ServerName(0.toShort(), hostName.toByteArray())))
+			}
+		val handler = TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
+		handler.connect(tlsClient)
+		val conn = StreamHttpClientConnection(handler.inputStream, handler.outputStream)
+		Assert.assertTrue(conn.isOpen)
 
-        consumeEntity(conn, hostName, 2)
-    }
+		consumeEntity(conn, hostName, 2)
+	}
 
-    @Throws(IOException::class, HttpException::class)
-    private fun consumeEntity(conn: StreamHttpClientConnection, hostName: String, numIt: Int) {
-        val ctx: HttpContext = BasicHttpContext()
-        val httpexecutor = HttpRequestExecutor()
-        var response: HttpResponse? = null
-        val reuse = DefaultConnectionReuseStrategy()
+	@Throws(IOException::class, HttpException::class)
+	private fun consumeEntity(
+		conn: StreamHttpClientConnection,
+		hostName: String,
+		numIt: Int,
+	) {
+		val ctx: HttpContext = BasicHttpContext()
+		val httpexecutor = HttpRequestExecutor()
+		var response: HttpResponse? = null
+		val reuse = DefaultConnectionReuseStrategy()
 
-        var i = 0
-        while (i == 0 || (i < numIt && reuse.keepAlive(response, ctx))) {
-            i++
-            // send request and receive response
-            val request: HttpRequest = BasicHttpRequest("GET", "/")
-            setDefaultHeader(request, hostName)
-            response = httpexecutor.execute(request, conn, ctx)
-            conn.receiveResponseEntity(response)
-            val entity = response.entity
-            Assert.assertNotNull(entity)
+		var i = 0
+		while (i == 0 || (i < numIt && reuse.keepAlive(response, ctx))) {
+			i++
+			// send request and receive response
+			val request: HttpRequest = BasicHttpRequest("GET", "/")
+			setDefaultHeader(request, hostName)
+			response = httpexecutor.execute(request, conn, ctx)
+			conn.receiveResponseEntity(response)
+			val entity = response.entity
+			Assert.assertNotNull(entity)
 
-            // consume entity
-            val content = toByteArray(entity!!.content)
+			// consume entity
+			val content = toByteArray(entity!!.content)
 
-            // read header and check if content size is correct
-            val lengthHeader = response.getFirstHeader("Content-Length")
-            if (lengthHeader != null) {
-                val length = lengthHeader.value.toLong()
-                Assert.assertNotNull(lengthHeader)
-                Assert.assertEquals(entity.contentLength, length)
-                Assert.assertEquals(content.size.toLong(), length)
-            }
+			// read header and check if content size is correct
+			val lengthHeader = response.getFirstHeader("Content-Length")
+			if (lengthHeader != null) {
+				val length = lengthHeader.value.toLong()
+				Assert.assertNotNull(lengthHeader)
+				Assert.assertEquals(entity.contentLength, length)
+				Assert.assertEquals(content.size.toLong(), length)
+			}
 
-            // consume everything from the entity and close stream
-            EntityUtils.consume(entity)
-        }
-    }
+			// consume everything from the entity and close stream
+			EntityUtils.consume(entity)
+		}
+	}
 }

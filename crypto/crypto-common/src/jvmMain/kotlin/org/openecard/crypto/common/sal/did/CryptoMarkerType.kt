@@ -42,7 +42,9 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  * @author Sebastian Schuberth
  */
-class CryptoMarkerType(baseType: DIDAbstractMarkerType) : AbstractMarkerType(baseType) {
+class CryptoMarkerType(
+	baseType: DIDAbstractMarkerType,
+) : AbstractMarkerType(baseType) {
 	private val m: WSMarshaller
 
 	/**
@@ -144,7 +146,8 @@ class CryptoMarkerType(baseType: DIDAbstractMarkerType) : AbstractMarkerType(bas
 							"SupportedOperations" -> {
 								val supportedOperations =
 									node.textContent.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-								algInfo.getSupportedOperations()
+								algInfo
+									.getSupportedOperations()
 									.addAll(supportedOperations)
 							}
 
@@ -173,8 +176,12 @@ class CryptoMarkerType(baseType: DIDAbstractMarkerType) : AbstractMarkerType(bas
 					}
 				}
 
-				"SignatureGenerationInfo" -> signatureGenerationInfo =
-					elem.textContent.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+				"SignatureGenerationInfo" ->
+					signatureGenerationInfo =
+						elem.textContent
+							.split(" ".toRegex())
+							.dropLastWhile { it.isEmpty() }
+							.toTypedArray()
 
 				"LegacySignatureGenerationInfo" -> {
 					// get outputFormat attribute
@@ -278,5 +285,4 @@ class CryptoMarkerType(baseType: DIDAbstractMarkerType) : AbstractMarkerType(bas
 
 		return if (refPresent) keyRef else null
 	}
-
 }

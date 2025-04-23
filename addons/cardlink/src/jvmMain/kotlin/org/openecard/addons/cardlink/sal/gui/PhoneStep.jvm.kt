@@ -41,7 +41,6 @@ import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 import java.util.*
 
-
 private val logger = KotlinLogging.logger {}
 
 private const val PHONE_ENTER_STEP_ID = "PROTOCOL_CARDLINK_GUI_STEP_PHONE"
@@ -52,36 +51,47 @@ private const val PHONE_RETRY_TITLE = "Phone Number Retry Entry"
 
 private const val PHONE_ID = "CARDLINK_FIELD_PHONE"
 
-
 abstract class PhoneStepAbstract(
 	open val ws: WsPair,
 	stepId: String,
-	title: String
+	title: String,
 ) : Step(stepId, title)
 
-class PhoneStep(override val ws: WsPair) : PhoneStepAbstract(ws, PHONE_ENTER_STEP_ID, PHONE_ENTER_TITLE) {
+class PhoneStep(
+	override val ws: WsPair,
+) : PhoneStepAbstract(ws, PHONE_ENTER_STEP_ID, PHONE_ENTER_TITLE) {
 	init {
 		setAction(PhoneStepAction(this))
 
-		inputInfoUnits.add(TextField(PHONE_ID).also {
-			it.minLength = 6
-		})
+		inputInfoUnits.add(
+			TextField(PHONE_ID).also {
+				it.minLength = 6
+			},
+		)
 	}
 }
 
-class PhoneRetryStep(override val ws: WsPair) : PhoneStepAbstract(ws, PHONE_RETRY_STEP_ID, PHONE_RETRY_TITLE) {
+class PhoneRetryStep(
+	override val ws: WsPair,
+) : PhoneStepAbstract(ws, PHONE_RETRY_STEP_ID, PHONE_RETRY_TITLE) {
 	init {
 		setAction(PhoneStepAction(this))
 
-		inputInfoUnits.add(TextField(PHONE_ID).also {
-			it.minLength = 6
-		})
+		inputInfoUnits.add(
+			TextField(PHONE_ID).also {
+				it.minLength = 6
+			},
+		)
 	}
 }
 
-class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(phoneStep) {
-
-	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
+class PhoneStepAction(
+	private val phoneStep: PhoneStepAbstract,
+) : StepAction(phoneStep) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
 		val phoneNumber = (oldResults[stepID]!!.getResult(PHONE_ID) as TextField).value.concatToString()
 		val sendPhoneStatus = sendPhoneNumber(phoneNumber)
 
@@ -94,17 +104,18 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)
-		val egkEnvelope = GematikEnvelope(
-			sendPhoneNumber,
-			correlationId,
-			cardSessionId,
-		)
+		val egkEnvelope =
+			GematikEnvelope(
+				sendPhoneNumber,
+				correlationId,
+				cardSessionId,
+			)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = phoneStep.ws
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		val phoneNumberResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
+		val phoneNumberResponse: GematikEnvelope? = wsListener.nextMessageBlocking()
 
 		if (phoneNumberResponse == null) {
 			val errorMsg = "Timeout happened during waiting for $REQUEST_SMS_TAN_RESPONSE from CardLink-Service."
@@ -116,7 +127,7 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
-				)
+				),
 			)
 		}
 
@@ -125,7 +136,8 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 
 		if (egkPayload is TasklistErrorPayload) {
 			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
-			val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+			val errorResultCode =
+				CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
 			logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
 			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, errorResultCode)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
@@ -137,30 +149,37 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 
 			return if (
 				(egkPayload.resultCode == ResultCode.SUCCESS && egkPayload.errorMessage == null) ||
-				//support old server variants not sending success code
+				// support old server variants not sending success code
 				(egkPayload.resultCode == null && egkPayload.minor == null && egkPayload.errorMessage == null)
 			) {
 				logger.debug { "Continue with next" }
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
-				logger.error { "Received error in Phone step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
+				logger.error {
+					"Received error in Phone step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})"
+				}
 
 				val resCode = egkPayload.resultCode ?: egkPayload.minor
 
-				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR)
+				dynCtx.put(
+					CardLinkKeys.SERVICE_ERROR_CODE,
+					resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR,
+				)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
-				val resultStatus = when (resCode) {
-					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> StepActionResultStatus.REPEAT
-					ResultCode.INVALID_REQUEST -> StepActionResultStatus.REPEAT
-					else -> StepActionResultStatus.CANCEL
-				}
+				val resultStatus =
+					when (resCode) {
+						ResultCode.NUMBER_FROM_WRONG_COUNTRY -> StepActionResultStatus.REPEAT
+						ResultCode.INVALID_REQUEST -> StepActionResultStatus.REPEAT
+						else -> StepActionResultStatus.CANCEL
+					}
 
-				val retryStep = when (resCode) {
-					ResultCode.NUMBER_FROM_WRONG_COUNTRY -> PhoneRetryStep(phoneStep.ws)
-					ResultCode.INVALID_REQUEST -> PhoneRetryStep(phoneStep.ws)
-					else -> null
-				}
+				val retryStep =
+					when (resCode) {
+						ResultCode.NUMBER_FROM_WRONG_COUNTRY -> PhoneRetryStep(phoneStep.ws)
+						ResultCode.INVALID_REQUEST -> PhoneRetryStep(phoneStep.ws)
+						else -> null
+					}
 
 				StepActionResult(resultStatus, retryStep)
 			}
@@ -174,7 +193,7 @@ class PhoneStepAction(private val phoneStep: PhoneStepAbstract) : StepAction(pho
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
-				)
+				),
 			)
 		}
 	}

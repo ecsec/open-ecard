@@ -9,9 +9,11 @@
  */
 package org.openecard.httpcore
 
-
 /**
  *
  * @author Tobias Wich
  */
-class InsecureUrlException(msg: String, cause: Throwable? = null) : InvalidUrlException(msg, cause)
+class InsecureUrlException(
+	msg: String,
+	cause: Throwable? = null,
+) : InvalidUrlException(msg, cause)

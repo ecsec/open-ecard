@@ -26,16 +26,14 @@ import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.tech.TagTechnology
 import android.os.Build
-import java.lang.reflect.Field
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 import org.openecard.mobile.activation.NfcCapabilityResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
+import java.lang.reflect.Field
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 
 object NfcExtendedHelper {
-
 	private val LOG: Logger = LoggerFactory.getLogger(NfcExtendedHelper::class.java)
 
 	/**

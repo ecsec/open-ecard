@@ -32,11 +32,13 @@ import java.net.URI
  * @author Tobias Wich
  */
 class NoProxySelector : ProxySelector() {
-    override fun select(uri: URI): List<Proxy> {
-        return listOf(Proxy.NO_PROXY)
-    }
+	override fun select(uri: URI): List<Proxy> = listOf(Proxy.NO_PROXY)
 
-    override fun connectFailed(uri: URI, sa: SocketAddress, ioe: IOException) {
-        // boohu
-    }
+	override fun connectFailed(
+		uri: URI,
+		sa: SocketAddress,
+		ioe: IOException,
+	) {
+		// boohu
+	}
 }

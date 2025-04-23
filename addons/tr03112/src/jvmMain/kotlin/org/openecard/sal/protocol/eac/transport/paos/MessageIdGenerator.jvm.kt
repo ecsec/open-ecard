@@ -31,41 +31,41 @@ import org.openecard.common.util.ValueGenerators.generateUUID
  * @author Tobias Wich
  */
 class MessageIdGenerator {
-    /**
-     * Gets the last remote message ID of this instance.
-     *
-     * @return The last remote message ID.
-     */
-    var remoteID: String? = null
-        private set
-    private var myMsg: String? = null
+	/**
+	 * Gets the last remote message ID of this instance.
+	 *
+	 * @return The last remote message ID.
+	 */
+	var remoteID: String? = null
+		private set
+	private var myMsg: String? = null
 
-    /**
-     * Sets the remote message ID of this instance.
-     * This function does nothing if the last ID does not match the given ID.
-     *
-     * @param newID The new remote message ID.
-     * @return `true` if the last ID matches, `false` otherwise.
-     */
-    fun setRemoteID(newID: String): Boolean {
-        if (myMsg != null && newID == myMsg) {
-            // messages don't fit together
-            return false
-        }
-        remoteID = newID
-        return true
-    }
+	/**
+	 * Sets the remote message ID of this instance.
+	 * This function does nothing if the last ID does not match the given ID.
+	 *
+	 * @param newID The new remote message ID.
+	 * @return `true` if the last ID matches, `false` otherwise.
+	 */
+	fun setRemoteID(newID: String): Boolean {
+		if (myMsg != null && newID == myMsg) {
+			// messages don't fit together
+			return false
+		}
+		remoteID = newID
+		return true
+	}
 
-    /**
-     * Create a new message ID for the local message that should be sent.
-     * This function also saves the new ID in order to match it in the next [.setRemoteID]
-     * invocation.
-     *
-     * @return The new ID for the message that should be sent.
-     */
-    fun createNewID(): String {
+	/**
+	 * Create a new message ID for the local message that should be sent.
+	 * This function also saves the new ID in order to match it in the next [.setRemoteID]
+	 * invocation.
+	 *
+	 * @return The new ID for the message that should be sent.
+	 */
+	fun createNewID(): String {
 		val newId = generateUUID()
-        myMsg = newId
-        return newId
-    }
+		myMsg = newId
+		return newId
+	}
 }

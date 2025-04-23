@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.common.interfaces
 
-
 /**
  * Exception class indicating reflection or runtime errors in the dispatcher.
  * This exception indicates a failure to read webservice interface definitions and invocations with unknown types.
@@ -30,13 +29,12 @@ package org.openecard.common.interfaces
  * @author Tobias Wich
  */
 class DispatcherExceptionUnchecked : RuntimeException {
-    /**
-     * Creates an instance and initializes the exception with a message and a cause.
-     *
-     * @param message The message describing the error.
-     * @param cause The exception causing the error.
-     */
+	/**
+	 * Creates an instance and initializes the exception with a message and a cause.
+	 *
+	 * @param message The message describing the error.
+	 * @param cause The exception causing the error.
+	 */
 	@JvmOverloads
-    constructor(message: String?, cause: Throwable? = null) : super(message, cause)
-
+	constructor(message: String?, cause: Throwable? = null) : super(message, cause)
 }

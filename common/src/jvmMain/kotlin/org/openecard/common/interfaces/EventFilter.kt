@@ -29,5 +29,8 @@ import org.openecard.common.event.EventType
  * @author Tobias Wich
  */
 interface EventFilter {
-    fun matches(t: EventType, o: EventObject): Boolean
+	fun matches(
+		t: EventType,
+		o: EventObject,
+	): Boolean
 }

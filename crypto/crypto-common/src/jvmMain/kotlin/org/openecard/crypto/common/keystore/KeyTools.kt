@@ -46,8 +46,8 @@ import javax.crypto.interfaces.DHKey
  * @author Tobias Wich
  */
 object KeyTools {
-	fun getKeySize(key: Key): Int {
-		return when (key) {
+	fun getKeySize(key: Key): Int =
+		when (key) {
 			is RSAKey -> {
 				val rsaPk = key as RSAKey
 				val mod = rsaPk.modulus
@@ -93,10 +93,9 @@ object KeyTools {
 				-1
 			}
 		}
-	}
 
-	fun getKeySize(key: AsymmetricKeyParameter): Int {
-		return when (key) {
+	fun getKeySize(key: AsymmetricKeyParameter): Int =
+		when (key) {
 			is RSAKeyParameters -> {
 				val rsaKey = key
 				val mod = rsaKey.modulus
@@ -131,7 +130,6 @@ object KeyTools {
 				-1
 			}
 		}
-	}
 
 	fun getReferenceKeySize(key: AsymmetricKeyParameter): Int {
 		if (Calendar.getInstance().get(Calendar.YEAR) < 2025) {
@@ -194,7 +192,10 @@ object KeyTools {
 	}
 
 	@Throws(KeyLengthException::class)
-	private fun assertKeyLength(key: AsymmetricKeyParameter, subj: X500Name?) {
+	private fun assertKeyLength(
+		key: AsymmetricKeyParameter,
+		subj: X500Name?,
+	) {
 		val subStr = if (subj != null) IETFUtils.valueToString(subj) else "UNKNOWN"
 		val keyClass = key.javaClass.getName()
 		val reference = getReferenceKeySize(key)
@@ -219,9 +220,8 @@ object KeyTools {
 	 * @throws IOException Thrown in case there is en encoding error.
 	 */
 	@Throws(CertificateException::class, IOException::class)
-	fun convertCertificates(chain: org.openecard.bouncycastle.tls.Certificate): CertPath {
-		return convertCertificates(*chain.getCertificateList())
-	}
+	fun convertCertificates(chain: org.openecard.bouncycastle.tls.Certificate): CertPath =
+		convertCertificates(*chain.getCertificateList())
 
 	/**
 	 * Converts the given certificate chain to a JCA CertPath.
@@ -247,7 +247,7 @@ object KeyTools {
 		return cf.generateCertPath(result)
 	}
 
-    //
+	//
 	//    /**
 	//     * Converts the given certificate chain to a BouncyCastle Certificate chain.
 	//     *
@@ -256,16 +256,16 @@ object KeyTools {
 	//     * @throws CertificateException Thrown in case one of the given certificates could not be encoded.
 	//     */
 	//    public static Certificate convertCertificates(java.security.cert.Certificate... chain) throws CertificateException {
-	//	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
-	//	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
+	// 	org.openecard.bouncycastle.asn1.x509.Certificate[] certs;
+	// 	certs = new org.openecard.bouncycastle.asn1.x509.Certificate[chain.length];
 	//
-	//	for (int i = 0; i < chain.length; i++) {
-	//	    java.security.cert.Certificate next = chain[i];
-	//	    byte[] encCert = next.getEncoded();
-	//	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
-	//	}
+	// 	for (int i = 0; i < chain.length; i++) {
+	// 	    java.security.cert.Certificate next = chain[i];
+	// 	    byte[] encCert = next.getEncoded();
+	// 	    certs[i] = org.openecard.bouncycastle.asn1.x509.Certificate.getInstance(encCert);
+	// 	}
 	//
-	//	Certificate cert = new Certificate(certs);
-	//	return cert;
+	// 	Certificate cert = new Certificate(certs);
+	// 	return cert;
 	//    }
 }

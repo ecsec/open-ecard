@@ -33,12 +33,15 @@ import org.openecard.common.event.EventType
  * @author Johannes Schmoelz
  */
 interface EventCallback {
-    /**
-     * Callback function for IFD events.
-     * This function gets called for each registered event in the [EventDispatcher].
-     *
-     * @param eventType Type of the event.
-     * @param eventData Data describing the event further.
-     */
-    fun signalEvent(eventType: EventType, eventData: EventObject)
+	/**
+	 * Callback function for IFD events.
+	 * This function gets called for each registered event in the [EventDispatcher].
+	 *
+	 * @param eventType Type of the event.
+	 * @param eventData Data describing the event further.
+	 */
+	fun signalEvent(
+		eventType: EventType,
+		eventData: EventObject,
+	)
 }

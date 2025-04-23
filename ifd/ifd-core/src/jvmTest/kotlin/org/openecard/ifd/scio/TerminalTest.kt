@@ -46,74 +46,71 @@ import kotlin.test.assertEquals
  * @author Tobias Wich
  */
 class TerminalTest {
-    private var ifd: IFD? = null
-    private var ctxHandle: ByteArray? = null
-    private var ifdName: String? = null
+	private var ifd: IFD? = null
+	private var ctxHandle: ByteArray? = null
+	private var ifdName: String? = null
 
-
-    fun init() {
-        val env: ClientEnv = ClientEnv()
+	fun init() {
+		val env: ClientEnv = ClientEnv()
 		env.gui = SwingUserConsent(SwingDialogWrapper())
 
-        ifd = IFD()
-        ifd!!.setEnvironment(env)
+		ifd = IFD()
+		ifd!!.setEnvironment(env)
 
-        val eCtx = EstablishContext()
-        ctxHandle = ifd!!.establishContext(eCtx).getContextHandle()
+		val eCtx = EstablishContext()
+		ctxHandle = ifd!!.establishContext(eCtx).getContextHandle()
 
-        val listIFDs: ListIFDs = ListIFDs()
-        listIFDs.setContextHandle(ctxHandle)
-        ifdName = ifd!!.listIFDs(listIFDs).getIFDName().get(0)
-    }
+		val listIFDs: ListIFDs = ListIFDs()
+		listIFDs.setContextHandle(ctxHandle)
+		ifdName = ifd!!.listIFDs(listIFDs).getIFDName().get(0)
+	}
 
-    @AfterTest
-    fun kill() {
-        if (ifd != null) {
-            val rCtx = ReleaseContext()
-            rCtx.setContextHandle(ctxHandle)
-            ifd!!.releaseContext(rCtx)
-        }
-        ifd = null
-    }
+	@AfterTest
+	fun kill() {
+		if (ifd != null) {
+			val rCtx = ReleaseContext()
+			rCtx.setContextHandle(ctxHandle)
+			ifd!!.releaseContext(rCtx)
+		}
+		ifd = null
+	}
 
+	@Test(enabled = false)
+	fun testTransmit() {
+		init()
 
-    @Test(enabled = false)
-    fun testTransmit() {
-        init()
-
-        val con: Connect = Connect()
-        con.setContextHandle(ctxHandle)
-        con.setIFDName(ifdName)
-        con.setSlot(BigInteger.ZERO)
+		val con: Connect = Connect()
+		con.setContextHandle(ctxHandle)
+		con.setIFDName(ifdName)
+		con.setSlot(BigInteger.ZERO)
 		con.isExclusive = Boolean.FALSE
-        val slotHandle = ifd!!.connect(con).getSlotHandle()
+		val slotHandle = ifd!!.connect(con).getSlotHandle()
 
-        val t = Transmit()
-        val apdu = InputAPDUInfoType()
-        apdu.getAcceptableStatusCode().add(byteArrayOf(0x90.toByte(), 0x00.toByte()))
-        apdu.setInputAPDU(byteArrayOf(0x00.toByte(), 0xA4.toByte(), 0x04.toByte(), 0x0C.toByte()))
-        t.getInputAPDUInfo().add(apdu)
-        t.setSlotHandle(slotHandle)
+		val t = Transmit()
+		val apdu = InputAPDUInfoType()
+		apdu.getAcceptableStatusCode().add(byteArrayOf(0x90.toByte(), 0x00.toByte()))
+		apdu.setInputAPDU(byteArrayOf(0x00.toByte(), 0xA4.toByte(), 0x04.toByte(), 0x0C.toByte()))
+		t.getInputAPDUInfo().add(apdu)
+		t.setSlotHandle(slotHandle)
 
-        val res = ifd!!.transmit(t)
-        assertEquals(ECardConstants.Major.OK, res.getResult().getResultMajor())
-    }
+		val res = ifd!!.transmit(t)
+		assertEquals(ECardConstants.Major.OK, res.getResult().getResultMajor())
+	}
 
+	@Test(enabled = false)
+	fun testFeatures() {
+		init()
 
-    @Test(enabled = false)
-    fun testFeatures() {
-        init()
-
-        val con: Connect = Connect()
-        con.setContextHandle(ctxHandle)
-        con.setIFDName(ifdName)
-        con.setSlot(BigInteger.ZERO)
+		val con: Connect = Connect()
+		con.setContextHandle(ctxHandle)
+		con.setIFDName(ifdName)
+		con.setSlot(BigInteger.ZERO)
 		con.isExclusive = Boolean.FALSE
-        val slotHandle = ifd!!.connect(con).getSlotHandle()
+		val slotHandle = ifd!!.connect(con).getSlotHandle()
 
-        val cap = GetIFDCapabilities()
-        cap.setContextHandle(ctxHandle)
-        cap.setIFDName(ifdName)
-        val capR = ifd!!.getIFDCapabilities(cap)
-    }
+		val cap = GetIFDCapabilities()
+		cap.setContextHandle(ctxHandle)
+		cap.setIFDName(ifdName)
+		val capR = ifd!!.getIFDCapabilities(cap)
+	}
 }

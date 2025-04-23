@@ -21,12 +21,14 @@
  ***************************************************************************/
 package org.openecard.common.ifd.scio
 
-
 /**
  * Exception indicating that the requested terminal is not available in the system.
  *
  * @author Tobias Wich
  */
-class NoSuchTerminal(message: String, cause: Throwable? = null) : Exception(message, cause) {
+class NoSuchTerminal(
+	message: String,
+	cause: Throwable? = null,
+) : Exception(message, cause) {
 	constructor(message: String) : this(message, null)
 }

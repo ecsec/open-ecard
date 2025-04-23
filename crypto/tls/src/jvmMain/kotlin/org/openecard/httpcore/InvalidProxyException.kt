@@ -9,9 +9,11 @@
  */
 package org.openecard.httpcore
 
-
 /**
  *
  * @author Tobias Wich
  */
-class InvalidProxyException(msg: String, cause: Throwable? = null) : Exception(msg, cause)
+class InvalidProxyException(
+	msg: String,
+	cause: Throwable? = null,
+) : Exception(msg, cause)

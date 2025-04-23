@@ -32,134 +32,124 @@ import org.openecard.common.util.Pair
 import org.openecard.common.util.ValueGenerators.generateRandom
 import java.util.*
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  *
  * @author Tobias Wich
  * @author Benedikt Biallowons
  */
-class ChannelManager(private val termFact: TerminalFactory) {
-
-    private val baseChannels: MutableMap<String, SingleThreadChannel> = mutableMapOf()
+class ChannelManager(
+	private val termFact: TerminalFactory,
+) {
+	private val baseChannels: MutableMap<String, SingleThreadChannel> = mutableMapOf()
 	private val handledChannels: MutableMap<ByteArray, SingleThreadChannel> = TreeMap(ByteArrayComparator())
 	private val ifdNameToHandles: MutableMap<String, MutableSet<ByteArray>> = mutableMapOf()
 
 	val terminals: SCIOTerminals
-        get() = termFact.terminals()
+		get() = termFact.terminals()
 
-    @Throws(SCIOException::class)
-    fun prepareDevices(): Boolean {
-        return this.terminals.prepareDevices()
-    }
+	@Throws(SCIOException::class)
+	fun prepareDevices(): Boolean = this.terminals.prepareDevices()
 
-    fun powerDownDevices(): Boolean {
-        return this.terminals.powerDownDevices()
-    }
+	fun powerDownDevices(): Boolean = this.terminals.powerDownDevices()
 
-    @Synchronized
-    @Throws(NoSuchTerminal::class, SCIOException::class)
-    fun openMasterChannel(ifdName: String): SingleThreadChannel {
-        return baseChannels[ifdName]?.let {
-            LOG.warn { "Terminal '${ifdName}' is already connected." }
-            it
-        } ?: run {
+	@Synchronized
+	@Throws(NoSuchTerminal::class, SCIOException::class)
+	fun openMasterChannel(ifdName: String): SingleThreadChannel =
+		baseChannels[ifdName]?.let {
+			LOG.warn { "Terminal '$ifdName' is already connected." }
+			it
+		} ?: run {
 			val t = this.terminals.getTerminal(ifdName)
 			val ch = SingleThreadChannel(t)
 			baseChannels.put(ifdName, ch)
 			ifdNameToHandles.put(ifdName, TreeSet<ByteArray>(ByteArrayComparator()))
 			ch
 		}
-    }
 
-    @Synchronized
-    @Throws(NoSuchTerminal::class, SCIOException::class)
-    fun openSlaveChannel(ifdName: String): Pair<ByteArray, SingleThreadChannel> {
-        val baseCh = getMasterChannel(ifdName)
-        val slaveCh = SingleThreadChannel(baseCh, true)
-        val slotHandle = createSlotHandle()
-        handledChannels.put(slotHandle, slaveCh)
-        ifdNameToHandles[ifdName]!!.add(slotHandle)
-        return Pair(slotHandle, slaveCh)
-    }
+	@Synchronized
+	@Throws(NoSuchTerminal::class, SCIOException::class)
+	fun openSlaveChannel(ifdName: String): Pair<ByteArray, SingleThreadChannel> {
+		val baseCh = getMasterChannel(ifdName)
+		val slaveCh = SingleThreadChannel(baseCh, true)
+		val slotHandle = createSlotHandle()
+		handledChannels.put(slotHandle, slaveCh)
+		ifdNameToHandles[ifdName]!!.add(slotHandle)
+		return Pair(slotHandle, slaveCh)
+	}
 
-    @Synchronized
-    @Throws(NoSuchTerminal::class)
-    fun getMasterChannel(ifdName: String): SingleThreadChannel {
-        val ch = baseChannels[ifdName]
-        if (ch == null) {
-            throw NoSuchTerminal("No terminal with name '$ifdName' available.")
-        } else {
-            return ch
-        }
-    }
+	@Synchronized
+	@Throws(NoSuchTerminal::class)
+	fun getMasterChannel(ifdName: String): SingleThreadChannel {
+		val ch = baseChannels[ifdName]
+		if (ch == null) {
+			throw NoSuchTerminal("No terminal with name '$ifdName' available.")
+		} else {
+			return ch
+		}
+	}
 
-    @Synchronized
-    @Throws(NoSuchChannel::class)
-    fun getSlaveChannel(slotHandle: ByteArray): SingleThreadChannel {
-        val ch = handledChannels[slotHandle]
-        if (ch == null) {
-            throw NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.")
-        } else {
-            return ch
-        }
-    }
+	@Synchronized
+	@Throws(NoSuchChannel::class)
+	fun getSlaveChannel(slotHandle: ByteArray): SingleThreadChannel {
+		val ch = handledChannels[slotHandle]
+		if (ch == null) {
+			throw NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.")
+		} else {
+			return ch
+		}
+	}
 
-    @Synchronized
-    fun closeMasterChannel(ifdName: String?) {
+	@Synchronized
+	fun closeMasterChannel(ifdName: String?) {
 		LOG.debug { "Closing MasterChannel" }
-        val slotHandles = ifdNameToHandles[ifdName]
-        if (slotHandles != null) {
-            // iterate over copy of the list as the closeSlaveHandle call modifies the original slotHandles list
-            for (slotHandle in slotHandles.toSet()) {
-                try {
-                    closeSlaveChannel(slotHandle)
-                } catch (ex: NoSuchChannel) {
-					LOG.warn(ex) { "Failed to close channel for terminal '${ifdName}'." }
-                } catch (ex: SCIOException) {
-					LOG.warn(ex) { "Failed to close channel for terminal '${ifdName}'." }
-                }
-            }
-            ifdNameToHandles.remove(ifdName)
-        }
+		val slotHandles = ifdNameToHandles[ifdName]
+		if (slotHandles != null) {
+			// iterate over copy of the list as the closeSlaveHandle call modifies the original slotHandles list
+			for (slotHandle in slotHandles.toSet()) {
+				try {
+					closeSlaveChannel(slotHandle)
+				} catch (ex: NoSuchChannel) {
+					LOG.warn(ex) { "Failed to close channel for terminal '$ifdName'." }
+				} catch (ex: SCIOException) {
+					LOG.warn(ex) { "Failed to close channel for terminal '$ifdName'." }
+				}
+			}
+			ifdNameToHandles.remove(ifdName)
+		}
 
-        val ch = baseChannels.remove(ifdName)
-        if (ch == null) {
-			LOG.warn { "No master channel for terminal '${ifdName}' available." }
-        } else {
-            try {
-                ch.shutdown()
-            } catch (ex: SCIOException) {
-				LOG.warn { "Failed to shut down master channel for terminal '${ifdName}'." }
-            }
-        }
-    }
+		val ch = baseChannels.remove(ifdName)
+		if (ch == null) {
+			LOG.warn { "No master channel for terminal '$ifdName' available." }
+		} else {
+			try {
+				ch.shutdown()
+			} catch (ex: SCIOException) {
+				LOG.warn { "Failed to shut down master channel for terminal '$ifdName'." }
+			}
+		}
+	}
 
-    @Synchronized
-    @Throws(NoSuchChannel::class, SCIOException::class)
-    fun closeSlaveChannel(slotHandle: ByteArray) {
+	@Synchronized
+	@Throws(NoSuchChannel::class, SCIOException::class)
+	fun closeSlaveChannel(slotHandle: ByteArray) {
 		LOG.debug { "Closing SlaveChannel" }
-        val ch = handledChannels.remove(slotHandle)
-        if (ch == null) {
-            throw NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.")
-        } else {
-            val ifdName = ch.channel.card.terminal.name
-            ifdNameToHandles[ifdName]!!.remove(slotHandle)
-            ch.shutdown()
-        }
-    }
+		val ch = handledChannels.remove(slotHandle)
+		if (ch == null) {
+			throw NoSuchChannel("No channel for slot '" + ByteUtils.toHexString(slotHandle) + "' available.")
+		} else {
+			val ifdName = ch.channel.card.terminal.name
+			ifdNameToHandles[ifdName]!!.remove(slotHandle)
+			ch.shutdown()
+		}
+	}
 
-    companion object {
-        fun createHandle(size: Int): ByteArray {
-            return generateRandom(size * 2)
-        }
+	companion object {
+		fun createHandle(size: Int): ByteArray = generateRandom(size * 2)
 
-        fun createSlotHandle(): ByteArray {
-            return createHandle(ECardConstants.SLOT_HANDLE_DEFAULT_SIZE)
-        }
+		fun createSlotHandle(): ByteArray = createHandle(ECardConstants.SLOT_HANDLE_DEFAULT_SIZE)
 
-        fun createCtxHandle(): ByteArray {
-            return createHandle(ECardConstants.CONTEXT_HANDLE_DEFAULT_SIZE)
-        }
-    }
+		fun createCtxHandle(): ByteArray = createHandle(ECardConstants.CONTEXT_HANDLE_DEFAULT_SIZE)
+	}
 }

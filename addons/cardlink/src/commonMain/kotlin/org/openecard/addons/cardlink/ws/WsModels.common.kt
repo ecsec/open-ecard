@@ -29,10 +29,8 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.*
 import org.openecard.mobile.activation.CardLinkErrorCodes
-import org.openecard.mobile.activation.ErrorCodes
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-
 
 const val READY = "ready"
 const val REGISTER_EGK = "registerEGK"
@@ -52,7 +50,6 @@ const val SESSION_INFO = "sessionInformation"
 const val REGISTER_EGK_FINISH = "registerEgkFinish"
 const val ICCSN_REASSIGNMENT = "ICCSNReassignment"
 
-
 @Serializable(with = GematikMessageSerializer::class)
 data class GematikEnvelope(
 	val payload: CardLinkPayload?,
@@ -62,47 +59,67 @@ data class GematikEnvelope(
 
 object GematikMessageSerializer : KSerializer<GematikEnvelope> {
 	// Not really used, but must be implemented
-	override val descriptor : SerialDescriptor = buildClassSerialDescriptor("GematikMessage") {
-		element<String>("cardSessionId")
-		element<String>("correlationId")
-		element<CardLinkPayload>("payload")
-		element<String>("payloadType")
-	}
+	override val descriptor: SerialDescriptor =
+		buildClassSerialDescriptor("GematikMessage") {
+			element<String>("cardSessionId")
+			element<String>("correlationId")
+			element<CardLinkPayload>("payload")
+			element<String>("payloadType")
+		}
 
 	@OptIn(ExperimentalEncodingApi::class)
-	override fun serialize(encoder: Encoder, value: GematikEnvelope) {
-		val payloadType = value.payload?.let {
-			it::class.java.getAnnotation(SerialName::class.java)?.value
-		}
-		val base64EncodedPayload: String = value.payload.let {
-			val payloadJsonStr = cardLinkJsonFormatter.encodeToString(it)
-			Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
-				.encode(payloadJsonStr.encodeToByteArray())
-		}
-		val jsonPayload = buildJsonObject {
-			put("type", payloadType)
-			put("payload", base64EncodedPayload)
-		}
-		val jsonElement = buildJsonArray {
-			add(jsonPayload)
-			value.cardSessionId?.let { add(it) }
-			value.correlationId?.let { add(it) }
-		}
+	override fun serialize(
+		encoder: Encoder,
+		value: GematikEnvelope,
+	) {
+		val payloadType =
+			value.payload?.let {
+				it::class.java.getAnnotation(SerialName::class.java)?.value
+			}
+		val base64EncodedPayload: String =
+			value.payload.let {
+				val payloadJsonStr = cardLinkJsonFormatter.encodeToString(it)
+				Base64
+					.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+					.encode(payloadJsonStr.encodeToByteArray())
+			}
+		val jsonPayload =
+			buildJsonObject {
+				put("type", payloadType)
+				put("payload", base64EncodedPayload)
+			}
+		val jsonElement =
+			buildJsonArray {
+				add(jsonPayload)
+				value.cardSessionId?.let { add(it) }
+				value.correlationId?.let { add(it) }
+			}
 		encoder.encodeSerializableValue(JsonElement.serializer(), jsonElement)
 	}
 
 	override fun deserialize(decoder: Decoder): GematikEnvelope {
 		val websocketMessage = decoder.decodeSerializableValue(JsonElement.serializer())
 
-		val gematikMessage = websocketMessage.jsonArray.getOrNull(0)?.jsonObject
-			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload.")
-		val cardSessionId = websocketMessage.jsonArray.getOrNull(1)?.jsonPrimitive?.content
-		val correlationId = websocketMessage.jsonArray.getOrNull(2)?.jsonPrimitive?.content
+		val gematikMessage =
+			websocketMessage.jsonArray.getOrNull(0)?.jsonObject
+				?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload.")
+		val cardSessionId =
+			websocketMessage.jsonArray
+				.getOrNull(1)
+				?.jsonPrimitive
+				?.content
+		val correlationId =
+			websocketMessage.jsonArray
+				.getOrNull(2)
+				?.jsonPrimitive
+				?.content
 
-		val payloadType = gematikMessage["type"]?.jsonPrimitive?.content
-			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a type.")
-		val payload = gematikMessage["payload"]?.jsonPrimitive?.content
-			?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload value.")
+		val payloadType =
+			gematikMessage["type"]?.jsonPrimitive?.content
+				?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a type.")
+		val payload =
+			gematikMessage["payload"]?.jsonPrimitive?.content
+				?: throw IllegalArgumentException("Web-Socket Gematik message does not contain a payload value.")
 
 		val typedJsonElement = toTypedJsonElement(payload, payloadType)
 		val cardLinkPayload = cardLinkJsonFormatter.decodeFromJsonElement<CardLinkPayload>(typedJsonElement)
@@ -111,56 +128,74 @@ object GematikMessageSerializer : KSerializer<GematikEnvelope> {
 	}
 
 	@OptIn(ExperimentalEncodingApi::class)
-	fun toTypedJsonElement(base64EncodedPayload: String, payloadType: String) : JsonObject {
-		val jsonPayload = Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
-			.decode(base64EncodedPayload)
-			.toString(Charsets.UTF_8)
+	fun toTypedJsonElement(
+		base64EncodedPayload: String,
+		payloadType: String,
+	): JsonObject {
+		val jsonPayload =
+			Base64
+				.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+				.decode(base64EncodedPayload)
+				.toString(Charsets.UTF_8)
 		val jsonElement = Json.parseToJsonElement(jsonPayload)
-		return JsonObject(jsonElement.jsonObject.toMutableMap().apply {
-			put(Json.configuration.classDiscriminator, JsonPrimitive(payloadType))
-		})
+		return JsonObject(
+			jsonElement.jsonObject.toMutableMap().apply {
+				put(Json.configuration.classDiscriminator, JsonPrimitive(payloadType))
+			},
+		)
 	}
 }
 
-
-typealias ByteArrayAsBase64 = @Serializable(ByteArrayAsBase64Serializer::class) ByteArray
+typealias ByteArrayAsBase64 =
+	@Serializable(ByteArrayAsBase64Serializer::class)
+	ByteArray
 
 @OptIn(ExperimentalEncodingApi::class)
 object ByteArrayAsBase64Serializer : KSerializer<ByteArray> {
-	override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ByteArrayAsBase64Serializer", PrimitiveKind.STRING)
+	override val descriptor: SerialDescriptor =
+		PrimitiveSerialDescriptor("ByteArrayAsBase64Serializer", PrimitiveKind.STRING)
 
-	override fun serialize(encoder: Encoder, value: ByteArray) {
+	override fun serialize(
+		encoder: Encoder,
+		value: ByteArray,
+	) {
 		encoder.encodeString(
-			Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(value)
+			Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(value),
 		)
 	}
 
-	override fun deserialize(decoder: Decoder): ByteArray {
-		return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
+	override fun deserialize(decoder: Decoder): ByteArray =
+		Base64
+			.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
 			.decode(decoder.decodeString())
-	}
 }
 
-val module = SerializersModule {
-	polymorphic(CardLinkPayload::class) {
-		subclass(RegisterEgk::class)
-		subclass(SendApdu::class)
-		subclass(SendApduResponse::class)
-		subclass(SendPhoneNumber::class)
-		subclass(SendTan::class)
-		subclass(ConfirmTan::class)
-		subclass(ConfirmPhoneNumber::class)
-		subclass(RegisterEgkFinish::class)
-		subclass(SessionInformation::class)
-		subclass(TasklistErrorPayload::class)
-		subclass(ICCSNReassignment::class)
+val module =
+	SerializersModule {
+		polymorphic(CardLinkPayload::class) {
+			subclass(RegisterEgk::class)
+			subclass(SendApdu::class)
+			subclass(SendApduResponse::class)
+			subclass(SendPhoneNumber::class)
+			subclass(SendTan::class)
+			subclass(ConfirmTan::class)
+			subclass(ConfirmPhoneNumber::class)
+			subclass(RegisterEgkFinish::class)
+			subclass(SessionInformation::class)
+			subclass(TasklistErrorPayload::class)
+			subclass(ICCSNReassignment::class)
+		}
 	}
-}
 
-val cardLinkJsonFormatter = Json { serializersModule = module; classDiscriminatorMode = ClassDiscriminatorMode.NONE; ignoreUnknownKeys = true }
+val cardLinkJsonFormatter =
+	Json {
+		serializersModule = module
+		classDiscriminatorMode = ClassDiscriminatorMode.NONE
+		ignoreUnknownKeys =
+			true
+	}
 
 sealed interface CardLinkPayload
-
 
 @Serializable
 @SerialName(SESSION_INFO)
@@ -208,7 +243,9 @@ data class TasklistErrorPayload(
 
 @Serializable
 @SerialName(REQUEST_SMS_TAN)
-data class SendPhoneNumber(val phoneNumber: String) : CardLinkPayload
+data class SendPhoneNumber(
+	val phoneNumber: String,
+) : CardLinkPayload
 
 @Serializable
 @SerialName(REQUEST_SMS_TAN_RESPONSE)
@@ -236,7 +273,7 @@ data class ConfirmTan(
 @Serializable
 @SerialName(ICCSN_REASSIGNMENT)
 data class ICCSNReassignment(
-	val lastAssignment: String
+	val lastAssignment: String,
 ) : CardLinkPayload
 
 @Serializable
@@ -257,9 +294,8 @@ data class RegisterEgkFinish(
 	val removeCard: Boolean,
 ) : CardLinkPayload
 
-
-fun ResultCode.toCardLinkErrorCode(): CardLinkErrorCodes.CardLinkCodes? {
-	return when(this) {
+fun ResultCode.toCardLinkErrorCode(): CardLinkErrorCodes.CardLinkCodes? =
+	when (this) {
 		ResultCode.NUMBER_FROM_WRONG_COUNTRY -> CardLinkErrorCodes.CardLinkCodes.NUMBER_FROM_WRONG_COUNTRY
 		ResultCode.NUMBER_BLOCKED -> CardLinkErrorCodes.CardLinkCodes.NUMBER_BLOCKED
 		ResultCode.TAN_EXPIRED -> CardLinkErrorCodes.CardLinkCodes.TAN_EXPIRED
@@ -269,4 +305,3 @@ fun ResultCode.toCardLinkErrorCode(): CardLinkErrorCodes.CardLinkCodes? {
 		ResultCode.UNKNOWN_ERROR -> CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
 		else -> null
 	}
-}

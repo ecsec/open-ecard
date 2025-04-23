@@ -39,37 +39,39 @@ import org.openecard.ifd.scio.wrapper.TerminalInfo
  * @author Tobias Wich
  */
 class NativePinStepAction(
-    stepName: String,
-    private val pinInput: PinInputType,
-    private val ch: SingleThreadChannel,
-    private val termInfo: TerminalInfo,
-    private val template: ByteArray
+	stepName: String,
+	private val pinInput: PinInputType,
+	private val ch: SingleThreadChannel,
+	private val termInfo: TerminalInfo,
+	private val template: ByteArray,
 ) : StepAction(stepName) {
+	var exception: IFDException? = null
+	var response: ByteArray? = null
 
-    var exception: IFDException? = null
-    var response: ByteArray? = null
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>?,
+		result: StepResult?,
+	): StepActionResult {
+		try {
+			response = nativePinVerify()
+		} catch (ex: SCIOException) {
+			exception = IFDException(ex)
+		} catch (ex: IFDException) {
+			exception = ex
+		} catch (ex: InterruptedException) {
+			exception = IFDException(ex)
+		}
+		return StepActionResult(StepActionResultStatus.NEXT)
+	}
 
-    override fun perform(oldResults: MutableMap<String, ExecutionResults>?, result: StepResult?): StepActionResult {
-        try {
-            response = nativePinVerify()
-        } catch (ex: SCIOException) {
-            exception = IFDException(ex)
-        } catch (ex: IFDException) {
-            exception = ex
-        } catch (ex: InterruptedException) {
-            exception = IFDException(ex)
-        }
-        return StepActionResult(StepActionResultStatus.NEXT)
-    }
-
-    @Throws(IFDException::class, SCIOException::class, InterruptedException::class)
-    private fun nativePinVerify(): ByteArray {
-        // get data for verify command and perform it
-        val verifyStruct = PCSCPinVerify(pinInput.getPasswordAttributes(), template)
-        val verifyStructData = verifyStruct.toBytes()
-        // only called when this terminal has the capability
-        val features = termInfo.featureCodes
-        val result = ch.transmitControlCommand(features[PCSCFeatures.VERIFY_PIN_DIRECT]!!, verifyStructData)
-        return result
-    }
+	@Throws(IFDException::class, SCIOException::class, InterruptedException::class)
+	private fun nativePinVerify(): ByteArray {
+		// get data for verify command and perform it
+		val verifyStruct = PCSCPinVerify(pinInput.getPasswordAttributes(), template)
+		val verifyStructData = verifyStruct.toBytes()
+		// only called when this terminal has the capability
+		val features = termInfo.featureCodes
+		val result = ch.transmitControlCommand(features[PCSCFeatures.VERIFY_PIN_DIRECT]!!, verifyStructData)
+		return result
+	}
 }

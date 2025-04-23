@@ -31,13 +31,16 @@ import java.net.URI
  *
  * @author Tobias WIch
  */
-class SingleProxySelector(private val proxy: Proxy) : ProxySelector() {
+class SingleProxySelector(
+	private val proxy: Proxy,
+) : ProxySelector() {
+	override fun select(uri: URI): List<Proxy> = listOf(proxy)
 
-    override fun select(uri: URI): List<Proxy> {
-        return listOf(proxy)
-    }
-
-    override fun connectFailed(uri: URI, sa: SocketAddress, ioe: IOException) {
-        // override for yourself if you want
-    }
+	override fun connectFailed(
+		uri: URI,
+		sa: SocketAddress,
+		ioe: IOException,
+	) {
+		// override for yourself if you want
+	}
 }

@@ -23,8 +23,6 @@ package org.openecard.gui.swing.common
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.resolveResourceAsURL
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.awt.*
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
@@ -52,13 +50,12 @@ object GUIDefaults {
 	// Swing UIDefaults
 	private val DEFAULTS: UIDefaults = UIManager.getDefaults()
 	private val OWN_DEFAULTS = UIDefaults()
-	private val COLOR_PROPERTIES = listOf("foreground", "background", "selectionBackground", "selectionForeground", "disabledText")
+	private val COLOR_PROPERTIES =
+		listOf("foreground", "background", "selectionBackground", "selectionForeground", "disabledText")
 	private val FONT_PROPERTIES = listOf("font", "titleFont", "acceleratorFont")
 	private val ICON_PROPERTIES = listOf("icon", "selectedIcon", "disabledIcon", "disabledSelectedIcon")
 
-	private fun getProperty(identifier: String): Any? {
-		return OWN_DEFAULTS[identifier]
-	}
+	private fun getProperty(identifier: String): Any? = OWN_DEFAULTS[identifier]
 
 	fun getColor(identifier: String): Color {
 		val color = getProperty(identifier) as Color?
@@ -70,8 +67,12 @@ object GUIDefaults {
 		return font ?: Font(Font.SANS_SERIF, Font.PLAIN, 12)
 	}
 
-	fun getImage(identifier: String, width: Int, height: Int): ImageIcon? {
-		return (getProperty(identifier) as ImageIcon?) ?.let { icon ->
+	fun getImage(
+		identifier: String,
+		width: Int,
+		height: Int,
+	): ImageIcon? =
+		(getProperty(identifier) as ImageIcon?) ?.let { icon ->
 			if (width > -1 || height > -1) {
 				var image = icon.getImage()
 				image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
@@ -80,28 +81,26 @@ object GUIDefaults {
 				icon
 			}
 		}
-	}
 
 	@JvmStatic
-	fun getImage(identifier: String): ImageIcon? {
-		return getImage(identifier, -1, -1)
-	}
+	fun getImage(identifier: String): ImageIcon? = getImage(identifier, -1, -1)
 
 	@JvmStatic
-	fun getImageStream(identifier: String, width: Int, height: Int): InputStream? {
-		return getImage(identifier, width, height)?.let {getImageStream(it) }
-	}
+	fun getImageStream(
+		identifier: String,
+		width: Int,
+		height: Int,
+	): InputStream? = getImage(identifier, width, height)?.let { getImageStream(it) }
 
-	fun getImageStream(identifier: String): InputStream? {
-		return getImage(identifier)?.let { getImageStream(it) }
-	}
+	fun getImageStream(identifier: String): InputStream? = getImage(identifier)?.let { getImageStream(it) }
 
 	private fun getImageStream(icon: ImageIcon): InputStream {
-		val bi = BufferedImage(
-			icon.iconWidth,
-			icon.iconHeight,
-			BufferedImage.TYPE_INT_ARGB
-		)
+		val bi =
+			BufferedImage(
+				icon.iconWidth,
+				icon.iconHeight,
+				BufferedImage.TYPE_INT_ARGB,
+			)
 		val g: Graphics = bi.createGraphics()
 		// paint the Icon to the BufferedImage
 		icon.paintIcon(null, g, 0, 0)
@@ -119,6 +118,7 @@ object GUIDefaults {
 	}
 
 	private var isInitialized = false
+
 	@JvmStatic
 	fun initialize() {
 		if (isInitialized) {
@@ -127,7 +127,7 @@ object GUIDefaults {
 
 		try {
 			// disabled as this causes hangs with gtk native calls inside swing and systray
-			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
 			val toolkit = Toolkit.getDefaultToolkit()
 			val guiProps = GUIProperties()

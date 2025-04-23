@@ -34,7 +34,11 @@ import java.util.*
  *
  * @author Tobias Wich
  */
-class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHandleType) {
+class DidInfos(
+	val dispatcher: Dispatcher,
+	pin: CharArray?,
+	handle: ConnectionHandleType,
+) {
 	private var pin: CharArray?
 
 	private val handle: ConnectionHandleType
@@ -45,7 +49,8 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 
 		val res = dispatcher.safeDeliver(req) as CardApplicationListResponse
 		checkResult<CardApplicationListResponse>(res)
-			.cardApplicationNameList?.cardApplicationName ?: emptyList()
+			.cardApplicationNameList
+			?.cardApplicationName ?: emptyList()
 	}
 
 	val didNames: Map<ByteArray, MutableList<String>> by lazy {
@@ -61,13 +66,13 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 
 				val res = dispatcher.safeDeliver(req) as DIDListResponse
 				checkResult<DIDListResponse>(
-					res
+					res,
 				)
 
 				if (res.getDIDNameList() != null) {
 					tmpDidNames.put(
 						application,
-						res.getDIDNameList().getDIDName()
+						res.getDIDNameList().getDIDName(),
 					)
 				}
 			} catch (_: WSHelper.WSException) {
@@ -113,16 +118,13 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 		}
 	}
 
-	fun getHandle(): ConnectionHandleType {
-		return HandlerUtils.copyHandle(handle)
-	}
+	fun getHandle(): ConnectionHandleType = HandlerUtils.copyHandle(handle)
 
 	fun getHandle(application: ByteArray?): ConnectionHandleType {
 		val newHandle = HandlerUtils.copyHandle(handle)
 		newHandle.setCardApplication(ByteUtils.clone(application))
 		return newHandle
 	}
-
 
 	fun setPin(pin: CharArray?) {
 		if (pin != null) {
@@ -140,7 +142,6 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 		return result.toList()
 	}
 
-
 	@Throws(WSHelper.WSException::class)
 	fun getDidNames(application: ByteArray): List<String> {
 		val result = this.didNames[application]
@@ -148,11 +149,10 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 	}
 
 	@Throws(WSHelper.WSException::class, NoSuchDid::class)
-	fun getDidInfos(application: ByteArray): List<DidInfo> {
-		return getDidNames(application).map {
+	fun getDidInfos(application: ByteArray): List<DidInfo> =
+		getDidNames(application).map {
 			getDidInfo(application, it)
 		}
-	}
 
 	@get:Throws(WSHelper.WSException::class, NoSuchDid::class)
 	val didInfos: MutableList<DidInfo>
@@ -176,7 +176,6 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 
 	val cryptoDidInfos: List<DidInfo> by lazy { didInfos.filter { it.isCryptoDid } }
 
-
 	@Throws(NoSuchDid::class, WSHelper.WSException::class)
 	fun getDidInfo(name: String): DidInfo {
 		for (application in getApplications()) {
@@ -190,7 +189,10 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 	}
 
 	@Throws(NoSuchDid::class, WSHelper.WSException::class)
-	fun getDidInfo(application: ByteArray, name: String): DidInfo {
+	fun getDidInfo(
+		application: ByteArray,
+		name: String,
+	): DidInfo {
 		val appCache = getDidCache(application)
 		var result = appCache[name]
 
@@ -226,7 +228,10 @@ class DidInfos(val dispatcher: Dispatcher, pin: CharArray?, handle: ConnectionHa
 	}
 
 	@Throws(NoSuchDataSet::class, WSHelper.WSException::class)
-	fun getDataSetInfo(application: ByteArray, name: String): DataSetInfo {
+	fun getDataSetInfo(
+		application: ByteArray,
+		name: String,
+	): DataSetInfo {
 		val appCache = getDataSetCache(application)
 		var result = appCache[name]
 

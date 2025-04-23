@@ -18,15 +18,15 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-				//	api(libs.jaxb.api)
-				//	api(libs.jaxb.ws.api)
-				//	api(libs.slf4j.api)
+				// 	api(libs.jaxb.api)
+				// 	api(libs.jaxb.ws.api)
+				// 	api(libs.slf4j.api)
 				api(project(":common"))
-				//	api(project(":wsdef:wsdef-client"))
-				//	implementation(project(":i18n"))
-				//	api(libs.bc.prov)
-				//	api(libs.bc.tls)
-				//	api(libs.httpcore)
+				// 	api(project(":wsdef:wsdef-client"))
+				// 	implementation(project(":i18n"))
+				// 	api(libs.bc.prov)
+				// 	api(libs.bc.tls)
+				// 	api(libs.httpcore)
 
 				implementation(libs.annotations)
 			}

@@ -44,200 +44,198 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  */
 class MarshallerImpl {
-    private var userOverride = false
-    private val userClasses: TreeSet<Class<*>> = TreeSet(ClassComparator())
+	private var userOverride = false
+	private val userClasses: TreeSet<Class<*>> = TreeSet(ClassComparator())
 
 	private var marshaller: Marshaller? = null
-    private var unmarshaller: Unmarshaller? = null
-
+	private var unmarshaller: Unmarshaller? = null
 
 	/**
-     * Adds the specified JAXB element types class to the list of supported JAXB types.
-     * This method triggers a recreation of the wrapped marshaller and unmarshaller.
-     *
-     * @param c Class of the JAXB element type.
-     */
-    @Synchronized
-    fun addXmlClass(c: Class<*>) {
-        addBaseClasses()
-        if (!userClasses.contains(c)) {
-            //addJaxbClasses(c);
-            userClasses.add(c)
-            // class added to set
-            userOverride = true
-            resetMarshaller()
-        }
-    }
+	 * Adds the specified JAXB element types class to the list of supported JAXB types.
+	 * This method triggers a recreation of the wrapped marshaller and unmarshaller.
+	 *
+	 * @param c Class of the JAXB element type.
+	 */
+	@Synchronized
+	fun addXmlClass(c: Class<*>) {
+		addBaseClasses()
+		if (!userClasses.contains(c)) {
+			// addJaxbClasses(c);
+			userClasses.add(c)
+			// class added to set
+			userOverride = true
+			resetMarshaller()
+		}
+	}
 
-    private fun addBaseClasses() {
-        // add all base classes if the user did not delete them before
-        if (!userOverride) {
-            userClasses.addAll(baseXmlElementClasses)
-        }
-    }
+	private fun addBaseClasses() {
+		// add all base classes if the user did not delete them before
+		if (!userOverride) {
+			userClasses.addAll(baseXmlElementClasses)
+		}
+	}
 
-    /**
-     * Remove all JAXB element types from this instance.
-     * New types must be added first before this instance is usable for marshalling and unmarshalling again.
-     */
-    @Synchronized
-    fun removeAllClasses() {
-        userOverride = true
-        userClasses.clear()
-        resetMarshaller()
-    }
+	/**
+	 * Remove all JAXB element types from this instance.
+	 * New types must be added first before this instance is usable for marshalling and unmarshalling again.
+	 */
+	@Synchronized
+	fun removeAllClasses() {
+		userOverride = true
+		userClasses.clear()
+		resetMarshaller()
+	}
 
+	/**
+	 * Gets the wrapped JAXB marshaller instance.
+	 *
+	 * @return The wrapped JAXB marshaller instance.
+	 * @throws JAXBException If the marshaller could not be created.
+	 */
+	@kotlin.Throws(JAXBException::class)
+	fun getMarshaller(): Marshaller {
+		if (marshaller == null) {
+			loadInstances()
+		}
+		return marshaller!!
+	}
 
-    /**
-     * Gets the wrapped JAXB marshaller instance.
-     *
-     * @return The wrapped JAXB marshaller instance.
-     * @throws JAXBException If the marshaller could not be created.
-     */
-    @kotlin.Throws(JAXBException::class)
-    fun getMarshaller(): Marshaller {
-        if (marshaller == null) {
-            loadInstances()
-        }
-        return marshaller!!
-    }
+	/**
+	 * Gets the wrapped JAXB unmarshaller instance.
+	 *
+	 * @return The wrapped JAXB unmarshaller instance.
+	 * @throws JAXBException If the unmarshaller could not be created.
+	 */
+	@kotlin.Throws(JAXBException::class)
+	fun getUnmarshaller(): Unmarshaller {
+		if (unmarshaller == null) {
+			loadInstances()
+		}
+		return unmarshaller!!
+	}
 
-    /**
-     * Gets the wrapped JAXB unmarshaller instance.
-     *
-     * @return The wrapped JAXB unmarshaller instance.
-     * @throws JAXBException If the unmarshaller could not be created.
-     */
-    @kotlin.Throws(JAXBException::class)
-    fun getUnmarshaller(): Unmarshaller {
-        if (unmarshaller == null) {
-            loadInstances()
-        }
-        return unmarshaller!!
-    }
+	private fun resetMarshaller() {
+		marshaller = null
+		unmarshaller = null
+	}
 
+	@Synchronized
+	@kotlin.Throws(JAXBException::class)
+	private fun loadInstances() {
+		var jaxbCtx: JAXBContext
+		if (userOverride) {
+			val classHash = calculateClassesHash()
+			synchronized(specificContexts) {
+				if (!specificContexts.containsKey(classHash)) {
+					jaxbCtx = JAXBContext.newInstance(*userClasses.toArray(arrayOfNulls<Class<*>>(userClasses.size)))
+					specificContexts.put(classHash, jaxbCtx)
+				} else {
+					jaxbCtx = specificContexts[classHash]!!
+				}
+			}
+		} else {
+			try {
+				jaxbCtx = baseJaxbContext.get()
+			} catch (ex: ExecutionException) {
+				LOG.error(ex) { "Failed to create JAXBContext instance." }
+				throw RuntimeException("Failed to create JAXBContext.")
+			} catch (ex: InterruptedException) {
+				LOG.error(ex) { "Thread terminated waiting for the JAXBContext to be created.." }
+				throw RuntimeException("Thread interrupted during waiting on the creation of the JAXBContext.")
+			}
+		}
+		marshaller = jaxbCtx.createMarshaller()
+		unmarshaller = jaxbCtx.createUnmarshaller()
+	}
 
-    private fun resetMarshaller() {
-        marshaller = null
-        unmarshaller = null
-    }
+	private fun calculateClassesHash(): String {
+		try {
+			val md: MessageDigest = MessageDigest.getInstance("SHA-256")
+			for (c in userClasses) {
+				md.update(c.getName().toByteArray())
+			}
+			val digest: ByteArray = md.digest()
+			return toHexString(digest)
+		} catch (ex: NoSuchAlgorithmException) {
+			throw RuntimeException("SHA-256 hash algorithm is not supported on your platform.", ex)
+		}
+	}
 
-    @Synchronized
-    @kotlin.Throws(JAXBException::class)
-    private fun loadInstances() {
-        var jaxbCtx: JAXBContext
-        if (userOverride) {
-            val classHash = calculateClassesHash()
-            synchronized(specificContexts) {
-                if (!specificContexts.containsKey(classHash)) {
-                    jaxbCtx = JAXBContext.newInstance(*userClasses.toArray(arrayOfNulls<Class<*>>(userClasses.size)))
-                    specificContexts.put(classHash, jaxbCtx)
-                } else {
-                    jaxbCtx = specificContexts[classHash]!!
-                }
-            }
-        } else {
-            try {
-                jaxbCtx = baseJaxbContext.get()
-            } catch (ex: ExecutionException) {
-                LOG.error(ex) { "Failed to create JAXBContext instance." }
-                throw RuntimeException("Failed to create JAXBContext.")
-            } catch (ex: InterruptedException) {
-                LOG.error(ex) { "Thread terminated waiting for the JAXBContext to be created.." }
-                throw RuntimeException("Thread interrupted during waiting on the creation of the JAXBContext.")
-            }
-        }
-        marshaller = jaxbCtx.createMarshaller()
-        unmarshaller = jaxbCtx.createUnmarshaller()
-    }
+	companion object {
+		private val baseXmlElementClasses = arrayListOf<Class<*>>()
+		private val baseJaxbContext: FutureTask<JAXBContext>
+		private val specificContexts: HashMap<String, JAXBContext>
 
+		init {
+			// load predefined classes
+			baseXmlElementClasses.addAll(jaxbClasses)
 
-    private fun calculateClassesHash(): String {
-        try {
-            val md: MessageDigest = MessageDigest.getInstance("SHA-256")
-            for (c in userClasses) {
-                md.update(c.getName().toByteArray())
-            }
-            val digest: ByteArray = md.digest()
-            return toHexString(digest)
-        } catch (ex: NoSuchAlgorithmException) {
-            throw RuntimeException("SHA-256 hash algorithm is not supported on your platform.", ex)
-        }
-    }
+			baseJaxbContext =
+				FutureTask(
+					object : Callable<JAXBContext> {
+						@kotlin.Throws(Exception::class)
+						override fun call(): JAXBContext {
+							try {
+								return JAXBContext.newInstance(*jaxbClasses)
+							} catch (ex: JAXBException) {
+								LOG.error(ex) { "Failed to create JAXBContext instance." }
+								throw RuntimeException("Failed to create JAXBContext.")
+							}
+						}
+					},
+				)
+			Thread(baseJaxbContext, "JAXB-Classload").start()
 
-    companion object {
-        private val baseXmlElementClasses = arrayListOf<Class<*>>()
-        private val baseJaxbContext: FutureTask<JAXBContext>
-        private val specificContexts: HashMap<String, JAXBContext>
+			specificContexts = HashMap()
+		}
 
-        init {
-            // load predefined classes
-            baseXmlElementClasses.addAll(jaxbClasses)
+		private val jaxbClasses: Array<Class<*>>
+			get() {
+				val cl: ClassLoader = Thread.currentThread().getContextClassLoader()
+				val classes = arrayListOf<Class<*>>()
+				val classListStream =
+					cl.getResourceAsStream("classes.lst")
+						?: cl.getResourceAsStream("/classes.lst")
 
-            baseJaxbContext = FutureTask(object : Callable<JAXBContext> {
-                @kotlin.Throws(Exception::class)
-                override fun call(): JAXBContext {
-                    try {
-                        return JAXBContext.newInstance(*jaxbClasses)
-                    } catch (ex: JAXBException) {
-                        LOG.error(ex) { "Failed to create JAXBContext instance." }
-                        throw RuntimeException("Failed to create JAXBContext.")
-                    }
-                }
-            })
-            Thread(baseJaxbContext, "JAXB-Classload").start()
+				try {
+					if (classListStream == null) {
+						throw IOException("Failed to load classes.lst.")
+					} else {
+						val r = LineNumberReader(InputStreamReader(classListStream))
+						var next: String?
+						// read all entries from file
+						while ((r.readLine().also { next = it }) != null) {
+							try {
+								// load class and see if it is a JAXB class
+								val c = cl.loadClass(next)
+								if (isJaxbClass(c)) {
+									classes.add(c)
+								}
+							} catch (ex: ClassNotFoundException) {
+								LOG.error(ex) { "Failed to load class: $next" }
+							}
+						}
+					}
+				} catch (ex: IOException) {
+					LOG.error(ex) { "Failed to read classes from file classes.lst." }
+				}
 
-            specificContexts = HashMap()
-        }
+				return classes.toTypedArray()
+			}
 
+		private fun isJaxbClass(c: Class<*>): Boolean =
+			c.isAnnotationPresent(XmlType::class.java) ||
+				c.isAnnotationPresent(XmlRegistry::class.java)
 
-        private val jaxbClasses: Array<Class<*>>
-            get() {
-                val cl: ClassLoader = Thread.currentThread().getContextClassLoader()
-                val classes = arrayListOf<Class<*>>()
-				val classListStream = cl.getResourceAsStream("classes.lst")
-					?: cl.getResourceAsStream("/classes.lst")
+		private fun toHexString(bytes: ByteArray): String {
+			val writer = StringWriter(bytes.size * 2)
+			val out = PrintWriter(writer)
 
-                try {
-                    if (classListStream == null) {
-                        throw IOException("Failed to load classes.lst.")
-                    } else {
-                        val r = LineNumberReader(InputStreamReader(classListStream))
-                        var next: String?
-                        // read all entries from file
-                        while ((r.readLine().also { next = it }) != null) {
-                            try {
-                                // load class and see if it is a JAXB class
-                                val c = cl.loadClass(next)
-                                if (isJaxbClass(c)) {
-                                    classes.add(c)
-                                }
-                            } catch (ex: ClassNotFoundException) {
-                                LOG.error(ex) { "Failed to load class: $next" }
-                            }
-                        }
-                    }
-                } catch (ex: IOException) {
-                    LOG.error(ex) { "Failed to read classes from file classes.lst." }
-                }
+			for (i in 1..bytes.size) {
+				out.printf("%02X", bytes[i - 1])
+			}
 
-                return classes.toTypedArray()
-            }
-
-        private fun isJaxbClass(c: Class<*>): Boolean {
-            return c.isAnnotationPresent(XmlType::class.java) ||
-                    c.isAnnotationPresent(XmlRegistry::class.java)
-        }
-
-        private fun toHexString(bytes: ByteArray): String {
-            val writer = StringWriter(bytes.size * 2)
-            val out = PrintWriter(writer)
-
-            for (i in 1..bytes.size) {
-                out.printf("%02X", bytes[i - 1])
-            }
-
-            return writer.toString()
-        }
-    }
+			return writer.toString()
+		}
+	}
 }

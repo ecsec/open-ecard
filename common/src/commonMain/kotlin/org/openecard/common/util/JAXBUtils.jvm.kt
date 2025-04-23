@@ -32,13 +32,15 @@ import javax.annotation.Nonnull
  * @author Tobias Wich
  */
 object JAXBUtils {
-    @JvmStatic
+	@JvmStatic
 	@Nonnull
-    @Throws(MarshallingTypeException::class, WSMarshallerException::class)
-    fun <T : Any> deepCopy(@Nonnull input: T): T {
-        val m = createInstance()
-        val d = m.marshal(input)
-        val out = m.unmarshal(d)
-        return input.javaClass.cast(out)
-    }
+	@Throws(MarshallingTypeException::class, WSMarshallerException::class)
+	fun <T : Any> deepCopy(
+		@Nonnull input: T,
+	): T {
+		val m = createInstance()
+		val d = m.marshal(input)
+		val out = m.unmarshal(d)
+		return input.javaClass.cast(out)
+	}
 }

@@ -28,9 +28,9 @@ import javax.xml.namespace.QName
  *
  * @author Tobias Wich
  */
-class SOAPHeader internal constructor(element: Element) : SOAPElement(element) {
-    @Throws(SOAPException::class)
-    fun addHeaderElement(elementName: QName): Element {
-        return addChildElement(elementName)
-    }
+class SOAPHeader internal constructor(
+	element: Element,
+) : SOAPElement(element) {
+	@Throws(SOAPException::class)
+	fun addHeaderElement(elementName: QName): Element = addChildElement(elementName)
 }

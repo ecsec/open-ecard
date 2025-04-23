@@ -32,7 +32,7 @@ import java.net.IDN
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * PSK TLS client also implementing the ClientCertTlsClient interface. <br></br>
@@ -41,172 +41,182 @@ private val LOG = KotlinLogging.logger {  }
  *
  * @author Tobias Wich
  */
-class ClientCertPSKTlsClient(tcf: TlsCrypto, pskId: TlsPSKIdentity, private val host: String, doSni: Boolean) :
-    PSKTlsClient(tcf, pskId), ClientCertTlsClient {
-    private var tlsAuth: TlsAuthentication? = null
+class ClientCertPSKTlsClient(
+	tcf: TlsCrypto,
+	pskId: TlsPSKIdentity,
+	private val host: String,
+	doSni: Boolean,
+) : PSKTlsClient(tcf, pskId),
+	ClientCertTlsClient {
+	private var tlsAuth: TlsAuthentication? = null
 
-    private var serverNames: MutableList<ServerName> = mutableListOf()
+	private var serverNames: MutableList<ServerName> = mutableListOf()
 	override var clientVersion: ProtocolVersion = ProtocolVersion.TLSv12
-    private var minClientVersion: ProtocolVersion? = ProtocolVersion.TLSv12
+	private var minClientVersion: ProtocolVersion? = ProtocolVersion.TLSv12
 
-    /**
-     * Create a ClientCertPSKTlsClient for the given parameters.
-     *
-     * @param tcf Cipher factory to use in this client.
-     * @param pskId PSK to use for this connection.
-     * @param host Host or IP address. Value must not be null.
-     * @param doSni Control whether the server should send the SNI Header in the Client Hello.
-     */
-    init {
+	/**
+	 * Create a ClientCertPSKTlsClient for the given parameters.
+	 *
+	 * @param tcf Cipher factory to use in this client.
+	 * @param pskId PSK to use for this connection.
+	 * @param host Host or IP address. Value must not be null.
+	 * @param doSni Control whether the server should send the SNI Header in the Client Hello.
+	 */
+	init {
 		if (doSni) {
-            this.serverNames.add(makeServerName(host!!))
-        }
-        val legacyTls = OpenecardProperties.getProperty("legacy.tls1").toBoolean()
-        if (legacyTls) {
-            this.minClientVersion = ProtocolVersion.TLSv10
-        }
-    }
+			this.serverNames.add(makeServerName(host!!))
+		}
+		val legacyTls = OpenecardProperties.getProperty("legacy.tls1").toBoolean()
+		if (legacyTls) {
+			this.minClientVersion = ProtocolVersion.TLSv10
+		}
+	}
 
-    fun setServerName(serverName: String) {
-        serverNames.clear()
-        serverNames.add(makeServerName(serverName))
-    }
+	fun setServerName(serverName: String) {
+		serverNames.clear()
+		serverNames.add(makeServerName(serverName))
+	}
 
-    fun setServerNames(serverNames: List<String>) {
-        this.serverNames.clear()
-        for (next in serverNames) {
-            this.serverNames.add(makeServerName(next))
-        }
-    }
+	fun setServerNames(serverNames: List<String>) {
+		this.serverNames.clear()
+		for (next in serverNames) {
+			this.serverNames.add(makeServerName(next))
+		}
+	}
 
-    override fun getSNIServerNames(): Vector<*>? {
-        return if (serverNames.isEmpty()) null else Vector(serverNames)
-    }
+	override fun getSNIServerNames(): Vector<*>? = if (serverNames.isEmpty()) null else Vector(serverNames)
 
-    private fun makeServerName(name: String): ServerName {
-        var name = name
-        name = IDN.toASCII(name)
-        return ServerName(NameType.host_name, name.toByteArray(StandardCharsets.US_ASCII))
-    }
+	private fun makeServerName(name: String): ServerName {
+		var name = name
+		name = IDN.toASCII(name)
+		return ServerName(NameType.host_name, name.toByteArray(StandardCharsets.US_ASCII))
+	}
 
-    override fun setMinimumVersion(minClientVersion: ProtocolVersion) {
-        this.minClientVersion = minClientVersion
-    }
+	override fun setMinimumVersion(minClientVersion: ProtocolVersion) {
+		this.minClientVersion = minClientVersion
+	}
 
-    fun getMinimumVersion(): ProtocolVersion? {
-        return this.minClientVersion
-    }
+	fun getMinimumVersion(): ProtocolVersion? = this.minClientVersion
 
-    override fun getSupportedVersions(): Array<ProtocolVersion> {
-        val desiredVersion = clientVersion
-        val minVersion = getMinimumVersion()
+	override fun getSupportedVersions(): Array<ProtocolVersion> {
+		val desiredVersion = clientVersion
+		val minVersion = getMinimumVersion()
 
 		return if (!desiredVersion.isLaterVersionOf(minVersion)) {
 			arrayOf(desiredVersion)
 		} else {
 			clientVersion.downTo(minVersion)
 		}
-    }
+	}
 
-    override fun getCipherSuites(): IntArray {
-        val ciphers = mutableListOf<Int>(
-            // recommended ciphers from TR-02102-2 sec. 3.3.1
-                CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
-                CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
-                CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,  // must have according to TR-03124-1 sec. 4.4
-                CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA
-        )
+	override fun getCipherSuites(): IntArray {
+		val ciphers =
+			mutableListOf<Int>(
+				// recommended ciphers from TR-02102-2 sec. 3.3.1
+				CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+				CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+				CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+				CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256, // must have according to TR-03124-1 sec. 4.4
+				CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+			)
 
-        // remove unsupported cipher suites
-        val it = ciphers.iterator()
-        while (it.hasNext()) {
-            val cipher = it.next()
-            if (!TlsUtils.isValidCipherSuiteForVersion(cipher, clientVersion)) {
-                it.remove()
-            }
-        }
+		// remove unsupported cipher suites
+		val it = ciphers.iterator()
+		while (it.hasNext()) {
+			val cipher = it.next()
+			if (!TlsUtils.isValidCipherSuiteForVersion(cipher, clientVersion)) {
+				it.remove()
+			}
+		}
 
 		return ciphers.toIntArray()
-    }
+	}
 
-    @Synchronized
-    @Throws(IOException::class)
-    override fun getAuthentication(): TlsAuthentication {
-        if (tlsAuth == null) {
-            tlsAuth = DynamicAuthentication(host)
-        }
-        if (tlsAuth is ContextAware) {
-            (tlsAuth as ContextAware).setContext(context)
-        }
-        return tlsAuth!!
-    }
+	@Synchronized
+	@Throws(IOException::class)
+	override fun getAuthentication(): TlsAuthentication {
+		if (tlsAuth == null) {
+			tlsAuth = DynamicAuthentication(host)
+		}
+		if (tlsAuth is ContextAware) {
+			(tlsAuth as ContextAware).setContext(context)
+		}
+		return tlsAuth!!
+	}
 
-    @Synchronized
-    override fun setAuthentication(tlsAuth: TlsAuthentication?) {
-        this.tlsAuth = tlsAuth
-    }
+	@Synchronized
+	override fun setAuthentication(tlsAuth: TlsAuthentication?) {
+		this.tlsAuth = tlsAuth
+	}
 
-    override fun getSupportedSignatureAlgorithms(): Vector<*> {
-        val crypto = context.crypto
+	override fun getSupportedSignatureAlgorithms(): Vector<*> {
+		val crypto = context.crypto
 
-        val result: Vector<*> = ClientCertDefaultTlsClient.Companion.getDefaultSignatureAlgorithms(
-            crypto,
-            minClientVersion === ProtocolVersion.TLSv10
-        )
-        return result
-    }
+		val result: Vector<*> =
+			ClientCertDefaultTlsClient.Companion.getDefaultSignatureAlgorithms(
+				crypto,
+				minClientVersion === ProtocolVersion.TLSv10,
+			)
+		return result
+	}
 
-    override fun getSupportedGroups(namedGroupRoles: Vector<*>): Vector<*> {
-        val groups: Vector<Int> = Vector()
+	override fun getSupportedGroups(namedGroupRoles: Vector<*>): Vector<*> {
+		val groups: Vector<Int> = Vector()
 
-        if (namedGroupRoles.contains(NamedGroupRole.ecdh) || namedGroupRoles.contains(NamedGroupRole.ecdsa)) {
-            // other possible parameters TR-02102-2 sec. 3.6
-            groups.add(NamedGroup.brainpoolP512r1)
-            groups.add(NamedGroup.brainpoolP384r1)
-            groups.add(NamedGroup.secp384r1)
-            // required parameters TR-03116-4 sec. 4.1.4
-            groups.add(NamedGroup.brainpoolP256r1)
-            groups.add(NamedGroup.secp256r1)
-            groups.add(NamedGroup.secp224r1)
-        }
+		if (namedGroupRoles.contains(NamedGroupRole.ecdh) || namedGroupRoles.contains(NamedGroupRole.ecdsa)) {
+			// other possible parameters TR-02102-2 sec. 3.6
+			groups.add(NamedGroup.brainpoolP512r1)
+			groups.add(NamedGroup.brainpoolP384r1)
+			groups.add(NamedGroup.secp384r1)
+			// required parameters TR-03116-4 sec. 4.1.4
+			groups.add(NamedGroup.brainpoolP256r1)
+			groups.add(NamedGroup.secp256r1)
+			groups.add(NamedGroup.secp224r1)
+		}
 
-        return groups
-    }
+		return groups
+	}
 
-    override fun notifyAlertRaised(alertLevel: Short, alertDescription: Short, message: String?, cause: Throwable?) {
-        val error = TlsError(alertLevel, alertDescription, message, cause)
-        if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	override fun notifyAlertRaised(
+		alertLevel: Short,
+		alertDescription: Short,
+		message: String?,
+		cause: Throwable?,
+	) {
+		val error = TlsError(alertLevel, alertDescription, message, cause)
+		if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
 			LOG.info { "TLS warning sent." }
-            if (LOG.isDebugEnabled()) {
+			if (LOG.isDebugEnabled()) {
 				LOG.info(cause) { error.toString() }
-            } else {
+			} else {
 				LOG.info { error.toString() }
-            }
-        } else if (alertLevel == AlertLevel.fatal) {
+			}
+		} else if (alertLevel == AlertLevel.fatal) {
 			LOG.error { "TLS error sent." }
 			LOG.error(cause) { error.toString() }
-        }
+		}
 
-        super.notifyAlertRaised(alertLevel, alertDescription, message, cause)
-    }
+		super.notifyAlertRaised(alertLevel, alertDescription, message, cause)
+	}
 
-    override fun notifyAlertReceived(alertLevel: Short, alertDescription: Short) {
-        val error = TlsError(alertLevel, alertDescription)
-        if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
+	override fun notifyAlertReceived(
+		alertLevel: Short,
+		alertDescription: Short,
+	) {
+		val error = TlsError(alertLevel, alertDescription)
+		if (alertLevel == AlertLevel.warning && LOG.isInfoEnabled()) {
 			LOG.info { "TLS warning received." }
 			LOG.info { error.toString() }
-        } else if (alertLevel == AlertLevel.fatal) {
+		} else if (alertLevel == AlertLevel.fatal) {
 			LOG.error { "TLS error received." }
 			LOG.error { error.toString() }
-        }
+		}
 
-        super.notifyAlertReceived(alertLevel, alertDescription)
-    }
+		super.notifyAlertReceived(alertLevel, alertDescription)
+	}
 
-    @Throws(IOException::class)
-    override fun notifySecureRenegotiation(secureRenegotiation: Boolean) {
-        // pretend we accept it
-    }
-
+	@Throws(IOException::class)
+	override fun notifySecureRenegotiation(secureRenegotiation: Boolean) {
+		// pretend we accept it
+	}
 }

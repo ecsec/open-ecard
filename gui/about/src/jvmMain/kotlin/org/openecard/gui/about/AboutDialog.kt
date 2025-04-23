@@ -29,8 +29,6 @@ import org.openecard.common.util.StringUtils
 import org.openecard.gui.graphics.GraphicsUtil.createImage
 import org.openecard.gui.graphics.OecLogo
 import org.openecard.gui.swing.common.SwingUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font
@@ -48,7 +46,7 @@ import javax.swing.event.HyperlinkListener
 import javax.swing.text.html.HTMLDocument
 import javax.swing.text.html.HTMLEditorKit
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * This class is used to create a Swing based about dialog.
@@ -59,178 +57,189 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 class AboutDialog private constructor() : JFrame() {
+	private val tabIndices = mutableMapOf<String, Int>()
+	private var tabbedPane = JTabbedPane(JTabbedPane.TOP)
 
-    private val tabIndices = mutableMapOf<String, Int>()
-    private var tabbedPane = JTabbedPane(JTabbedPane.TOP)
+	/**
+	 * Creates a new instance of this class.
+	 */
+	init {
+		setupUI()
+	}
 
-    /**
-     * Creates a new instance of this class.
-     */
-    init {
-        setupUI()
-    }
+	private fun setupUI() {
+		val logo = createImage(OecLogo::class.java, 147, 147)
 
-    private fun setupUI() {
-        val logo = createImage(OecLogo::class.java, 147, 147)
+		setSize(730, 480)
+		// use null layout with absolute positioning
+		contentPane.setLayout(null)
+		contentPane.setBackground(Color.white)
 
-        setSize(730, 480)
-        // use null layout with absolute positioning
-        contentPane.setLayout(null)
-        contentPane.setBackground(Color.white)
-
-        val txtpnHeading = JTextPane()
-        txtpnHeading.setFont(Font(Font.SANS_SERIF, Font.BOLD, 20))
+		val txtpnHeading = JTextPane()
+		txtpnHeading.setFont(Font(Font.SANS_SERIF, Font.BOLD, 20))
 		txtpnHeading.isEditable = false
 		txtpnHeading.text = LANG.translationForKey("about.heading", AppVersion.name)
-        txtpnHeading.setBounds(12, 12, 692, 30)
-        contentPane.add(txtpnHeading)
+		txtpnHeading.setBounds(12, 12, 692, 30)
+		contentPane.add(txtpnHeading)
 
-        val txtpnVersion = JTextPane()
-        txtpnVersion.setFont(Font(Font.SANS_SERIF, Font.PLAIN, 9))
+		val txtpnVersion = JTextPane()
+		txtpnVersion.setFont(Font(Font.SANS_SERIF, Font.PLAIN, 9))
 		txtpnVersion.isEditable = false
 		txtpnVersion.text = LANG.translationForKey("about.version", version)
-        txtpnVersion.setBounds(12, 54, 692, 18)
-        contentPane.add(txtpnVersion)
+		txtpnVersion.setBounds(12, 54, 692, 18)
+		contentPane.add(txtpnVersion)
 
-        val label = JLabel()
-        label.setHorizontalAlignment(SwingConstants.CENTER)
-        label.setIcon(ImageIcon(logo))
-        label.setBounds(12, 84, 155, 320)
-        contentPane.add(label)
+		val label = JLabel()
+		label.setHorizontalAlignment(SwingConstants.CENTER)
+		label.setIcon(ImageIcon(logo))
+		label.setBounds(12, 84, 155, 320)
+		contentPane.add(label)
 
-        tabbedPane.setBounds(185, 84, 529, 320)
-        tabbedPane.setBackground(Color.white)
-        var tabIdx = 0
-        tabbedPane.addTab(LANG.translationForKey("about.tab.about"), createTabContent(ABOUT_TAB))
-        tabIndices.put(ABOUT_TAB, tabIdx++)
-        tabbedPane.addTab(LANG.translationForKey("about.tab.feedback"), createTabContent(FEEDBACK_TAB))
-        tabIndices.put(FEEDBACK_TAB, tabIdx++)
-        tabbedPane.addTab(LANG.translationForKey("about.tab.support"), createTabContent(SUPPORT_TAB))
-        tabIndices.put(SUPPORT_TAB, tabIdx++)
-        tabbedPane.addTab(LANG.translationForKey("about.tab.license"), createTabContent(LICENSE_TAB))
-        tabIndices.put(LICENSE_TAB, tabIdx++)
-        contentPane.add(tabbedPane)
+		tabbedPane.setBounds(185, 84, 529, 320)
+		tabbedPane.setBackground(Color.white)
+		var tabIdx = 0
+		tabbedPane.addTab(LANG.translationForKey("about.tab.about"), createTabContent(ABOUT_TAB))
+		tabIndices.put(ABOUT_TAB, tabIdx++)
+		tabbedPane.addTab(LANG.translationForKey("about.tab.feedback"), createTabContent(FEEDBACK_TAB))
+		tabIndices.put(FEEDBACK_TAB, tabIdx++)
+		tabbedPane.addTab(LANG.translationForKey("about.tab.support"), createTabContent(SUPPORT_TAB))
+		tabIndices.put(SUPPORT_TAB, tabIdx++)
+		tabbedPane.addTab(LANG.translationForKey("about.tab.license"), createTabContent(LICENSE_TAB))
+		tabIndices.put(LICENSE_TAB, tabIdx++)
+		contentPane.add(tabbedPane)
 
-        val btnClose: JButton = JButton(LANG.translationForKey("about.button.close"))
-        btnClose.setBounds(587, 416, 117, 25)
-        btnClose.addActionListener(ActionListener { e: ActionEvent? ->
-            dispose()
-        })
-        contentPane.add(btnClose)
+		val btnClose: JButton = JButton(LANG.translationForKey("about.button.close"))
+		btnClose.setBounds(587, 416, 117, 25)
+		btnClose.addActionListener(
+			ActionListener { e: ActionEvent? ->
+				dispose()
+			},
+		)
+		contentPane.add(btnClose)
 
 		iconImage = logo
-        setTitle(LANG.translationForKey("about.title", AppVersion.name))
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE)
-        setResizable(false)
-        setLocationRelativeTo(null)
-    }
+		setTitle(LANG.translationForKey("about.title", AppVersion.name))
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE)
+		setResizable(false)
+		setLocationRelativeTo(null)
+	}
 
-    private fun createTabContent(resourceName: String?): JPanel {
-        val kit = HTMLEditorKit()
+	private fun createTabContent(resourceName: String?): JPanel {
+		val kit = HTMLEditorKit()
 		kit.isAutoFormSubmission = false // don't follow form link, use hyperlink handler instead
-        val doc = kit.createDefaultDocument() as HTMLDocument?
+		val doc = kit.createDefaultDocument() as HTMLDocument?
 
-        val editorPane = JEditorPane()
+		val editorPane = JEditorPane()
 		editorPane.isEditable = false
-        editorPane.setEditorKit(kit)
-        editorPane.setDocument(doc)
+		editorPane.setEditorKit(kit)
+		editorPane.setDocument(doc)
 
-        try {
-            val url: URL = LANG.translationForFile(resourceName, "html")
-            editorPane.setPage(url)
-        } catch (ex: IOException) {
+		try {
+			val url: URL = LANG.translationForFile(resourceName, "html")
+			editorPane.setPage(url)
+		} catch (ex: IOException) {
 			editorPane.text = "Page not found."
-        }
+		}
 
-        editorPane.addHyperlinkListener(HyperlinkListener { e ->
-            openUrl(e)
-        })
+		editorPane.addHyperlinkListener(
+			HyperlinkListener { e ->
+				openUrl(e)
+			},
+		)
 
-        val scrollPane = JScrollPane(editorPane)
+		val scrollPane = JScrollPane(editorPane)
 
-        val panel = JPanel()
-        panel.setLayout(BorderLayout())
-        panel.add(scrollPane, BorderLayout.CENTER)
+		val panel = JPanel()
+		panel.setLayout(BorderLayout())
+		panel.add(scrollPane, BorderLayout.CENTER)
 
-        return panel
-    }
+		return panel
+	}
 
-    private fun openUrl(event: HyperlinkEvent) {
-        val type = event.eventType
-        if (type == HyperlinkEvent.EventType.ACTIVATED) {
-            val url = event.url
-            SwingUtils.openUrl(URI.create(url.toExternalForm()), true)
-        }
-    }
+	private fun openUrl(event: HyperlinkEvent) {
+		val type = event.eventType
+		if (type == HyperlinkEvent.EventType.ACTIVATED) {
+			val url = event.url
+			SwingUtils.openUrl(URI.create(url.toExternalForm()), true)
+		}
+	}
 
-    companion object {
-        private const val serialVersionUID = 1L
-        private val LANG: I18n = I18n.getTranslation("about")
+	companion object {
+		private const val serialVersionUID = 1L
+		private val LANG: I18n = I18n.getTranslation("about")
 
-        const val ABOUT_TAB: String = "about"
-        const val FEEDBACK_TAB: String = "feedback"
-        const val LICENSE_TAB: String = "license"
-        const val SUPPORT_TAB: String = "support"
+		const val ABOUT_TAB: String = "about"
+		const val FEEDBACK_TAB: String = "feedback"
+		const val LICENSE_TAB: String = "license"
+		const val SUPPORT_TAB: String = "support"
 
-        private var runningDialog: AboutDialog? = null
+		private var runningDialog: AboutDialog? = null
 
-        init {
-            try {
-                // create user.home.url property
-                val userHome = System.getProperty("user.home")
-                val f = File(userHome)
-                // strip file:// as this must be written in the html file
-                val userHomeUrl = f.toURI().toString().substring(5)
+		init {
+			try {
+				// create user.home.url property
+				val userHome = System.getProperty("user.home")
+				val f = File(userHome)
+				// strip file:// as this must be written in the html file
+				val userHomeUrl = f.toURI().toString().substring(5)
 				LOG.debug { "user.home.url = $userHomeUrl" }
-                System.setProperty("user.home.url", userHomeUrl)
-            } catch (ex: SecurityException) {
+				System.setProperty("user.home.url", userHomeUrl)
+			} catch (ex: SecurityException) {
 				LOG.error(ex) { "Failed to calculate property 'user.home.url'." }
-            }
-        }
+			}
+		}
 
-        /**
-         * Shows an about dialog and selects the specified index.
-         * This method makes sure, that there is only one about dialog.
-         *
-         * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as constants
-         * in this class.
-         */
-        /**
-         * Shows an about dialog.
-         * This method makes sure, that there is only one about dialog.
-         */
+		/**
+		 * Shows an about dialog and selects the specified index.
+		 * This method makes sure, that there is only one about dialog.
+		 *
+		 * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as constants
+		 * in this class.
+		 */
+
+		/**
+		 * Shows an about dialog.
+		 * This method makes sure, that there is only one about dialog.
+		 */
 		@JvmStatic
-        @JvmOverloads
-        fun showDialog(selectedTab: String? = ABOUT_TAB) {
-            if (runningDialog == null) {
-                val dialog = AboutDialog()
-                dialog.addWindowListener(object : WindowListener {
-                    override fun windowOpened(e: WindowEvent?) {}
-                    override fun windowClosing(e: WindowEvent?) {}
-                    override fun windowClosed(e: WindowEvent?) {
-                        runningDialog = null
-                    }
+		@JvmOverloads
+		fun showDialog(selectedTab: String? = ABOUT_TAB) {
+			if (runningDialog == null) {
+				val dialog = AboutDialog()
+				dialog.addWindowListener(
+					object : WindowListener {
+						override fun windowOpened(e: WindowEvent?) {}
 
-                    override fun windowIconified(e: WindowEvent?) {}
-                    override fun windowDeiconified(e: WindowEvent?) {}
-                    override fun windowActivated(e: WindowEvent?) {}
-                    override fun windowDeactivated(e: WindowEvent?) {}
-                })
+						override fun windowClosing(e: WindowEvent?) {}
+
+						override fun windowClosed(e: WindowEvent?) {
+							runningDialog = null
+						}
+
+						override fun windowIconified(e: WindowEvent?) {}
+
+						override fun windowDeiconified(e: WindowEvent?) {}
+
+						override fun windowActivated(e: WindowEvent?) {}
+
+						override fun windowDeactivated(e: WindowEvent?) {}
+					},
+				)
 				dialog.isVisible = true
-                runningDialog = dialog
-            } else {
-                runningDialog!!.toFront()
-            }
+				runningDialog = dialog
+			} else {
+				runningDialog!!.toFront()
+			}
 
-            // select tab if it exists
-            val idx = runningDialog!!.tabIndices[StringUtils.nullToEmpty(selectedTab)]
-            if (idx != null) {
-                try {
-                    runningDialog!!.tabbedPane.setSelectedIndex(idx)
-                } catch (ex: ArrayIndexOutOfBoundsException) {
+			// select tab if it exists
+			val idx = runningDialog!!.tabIndices[StringUtils.nullToEmpty(selectedTab)]
+			if (idx != null) {
+				try {
+					runningDialog!!.tabbedPane.setSelectedIndex(idx)
+				} catch (ex: ArrayIndexOutOfBoundsException) {
 					LOG.error { "Invalid index selected." }
-                }
-            }
-        }
-    }
+				}
+			}
+		}
+	}
 }

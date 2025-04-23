@@ -21,15 +21,16 @@
  ***************************************************************************/
 package org.openecard.addon.bind
 
-
 /**
  * Simple immutable header entry.
  * It contains the name and the value of a header.
  *
  * @author Tobias Wich
  */
-class HeaderEntry(val name: String, val value: String)
-
+class HeaderEntry(
+	val name: String,
+	val value: String,
+)
 
 /**
  * Container with an ordered list of header entries.
@@ -48,7 +49,10 @@ class Headers {
 	 * @param name Name of the header.
 	 * @param value Value of the header.
 	 */
-	fun addHeader(name: String, value: String) {
+	fun addHeader(
+		name: String,
+		value: String,
+	) {
 		addHeader(HeaderEntry(name, value))
 	}
 
@@ -67,7 +71,10 @@ class Headers {
 	 * @param name Name of the header.
 	 * @param value Value of the header.
 	 */
-	fun setHeader(name: String, value: String) {
+	fun setHeader(
+		name: String,
+		value: String,
+	) {
 		setHeader(HeaderEntry(name, value))
 	}
 
@@ -114,9 +121,7 @@ class Headers {
 	 * @param name Header name.
 	 * @return The first entry, or `null` if no such header exists.
 	 */
-	fun getFirstHeader(name: String): HeaderEntry? {
-		return getHeaders(name).firstOrNull()
-	}
+	fun getFirstHeader(name: String): HeaderEntry? = getHeaders(name).firstOrNull()
 
 	/**
 	 * Gets all header entry values for a given header name.
@@ -124,9 +129,7 @@ class Headers {
 	 * @param name Header name.
 	 * @return Header entry values matching the given header name, or an empty collection if no such header exists.
 	 */
-	fun getHeaderValues(name: String): List<String> {
-		return getHeaders(name).map { it.value }
-	}
+	fun getHeaderValues(name: String): List<String> = getHeaders(name).map { it.value }
 
 	val headerNames: Collection<String>
 		/**

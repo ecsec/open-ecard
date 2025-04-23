@@ -1,14 +1,13 @@
 package org.openecard.mobile.activation
 
-
 enum class ErrorCodes {
 	CAN_EMPTY,
 	CAN_STEP_INTERRUPTED,
 	CARD_REMOVED,
 	CAN_INCORRECT,
 }
-class CardLinkErrorCodes {
 
+class CardLinkErrorCodes {
 	enum class ClientCodes {
 		// no CAN provided
 		CAN_EMPTY,
@@ -44,7 +43,9 @@ class CardLinkErrorCodes {
 		OTHER_CLIENT_ERROR,
 	}
 
-	enum class CardLinkCodes(val statusCode: Int) {
+	enum class CardLinkCodes(
+		val statusCode: Int,
+	) {
 		// Requested Entity Not found
 		NOT_FOUND(1004),
 
@@ -109,15 +110,13 @@ class CardLinkErrorCodes {
 		TAN_RETRY_LIMIT_EXCEEDED(1024),
 
 		// If the client does not receive an APDU message from the CardLink service
-		SERVER_TIMEOUT(1025);
+		SERVER_TIMEOUT(1025),
+		;
 
 		companion object {
 			private var codesByStatus: Map<Int, CardLinkCodes> = entries.associateBy { it.statusCode }
 
-			fun byStatus(statusCode: Int): CardLinkCodes? {
-				return codesByStatus[statusCode]
-			}
+			fun byStatus(statusCode: Int): CardLinkCodes? = codesByStatus[statusCode]
 		}
 	}
-
 }

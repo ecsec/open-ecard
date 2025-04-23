@@ -21,13 +21,12 @@
  ***************************************************************************/
 package org.openecard.gui.swing.common
 
-
 /**
  * @author Moritz Horsch
  */
 object GUIConstants {
-    const val BUTTON_NEXT: String = "Button.next"
-    const val BUTTON_BACK: String = "Button.back"
-    const val BUTTON_FINISH: String = "Button.finish"
-    const val BUTTON_CANCEL: String = "Button.cancel"
+	const val BUTTON_NEXT: String = "Button.next"
+	const val BUTTON_BACK: String = "Button.back"
+	const val BUTTON_FINISH: String = "Button.finish"
+	const val BUTTON_CANCEL: String = "Button.cancel"
 }

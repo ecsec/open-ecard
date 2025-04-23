@@ -26,8 +26,6 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.ifd.scio.SCIOTerminals
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 
 private val LOG = KotlinLogging.logger { }
@@ -48,14 +46,10 @@ class AndroidNFCFactory : org.openecard.common.ifd.scio.TerminalFactory {
 		this.terminals = NFCCardTerminals(terminal)
 	}
 
-
 	override val type: String
 		get() = ALGORITHM
 
-
-	override fun terminals(): SCIOTerminals {
-		return terminals
-	}
+	override fun terminals(): SCIOTerminals = terminals
 
 	@Throws(IOException::class)
 	fun setNFCTag(tag: Tag) {
@@ -72,11 +66,13 @@ class AndroidNFCFactory : org.openecard.common.ifd.scio.TerminalFactory {
 	 * @param timeout current timeout for transceive(byte[]) in milliseconds.
 	 */
 	@Throws(IOException::class)
-	fun setNFCTag(tag: IsoDep, timeout: Int) {
+	fun setNFCTag(
+		tag: IsoDep,
+		timeout: Int,
+	) {
 		tag.timeout = timeout
 		terminal.setNFCTag(tag, timeout)
 	}
-
 }
 
 private const val ALGORITHM = "AndroidNFC"

@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.common.interfaces
 
-
 /**
  * Exception indicating problems in the validation of an object.
  *
@@ -29,5 +28,5 @@ package org.openecard.common.interfaces
  */
 class DocumentValidatorException : Exception {
 	@JvmOverloads
-    constructor(message: String, cause: Throwable? = null) : super(message, cause)
+	constructor(message: String, cause: Throwable? = null) : super(message, cause)
 }

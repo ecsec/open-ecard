@@ -27,15 +27,20 @@ import javax.swing.JCheckBox
 /**
  * @author Moritz Horsch
  */
-class CheckBoxItem @JvmOverloads constructor(text: String, selected: Boolean = true) : JCheckBox(text, selected) {
-    init {
-        setIcon(GUIDefaults.getImage("CheckBox.icon"))
-        setDisabledIcon(GUIDefaults.getImage("CheckBox.disabledIcon"))
-        setDisabledSelectedIcon(GUIDefaults.getImage("CheckBox.disabledSelectedIcon"))
-        setSelectedIcon(GUIDefaults.getImage("CheckBox.selectedIcon"))
-    }
+class CheckBoxItem
+	@JvmOverloads
+	constructor(
+		text: String,
+		selected: Boolean = true,
+	) : JCheckBox(text, selected) {
+		init {
+			setIcon(GUIDefaults.getImage("CheckBox.icon"))
+			setDisabledIcon(GUIDefaults.getImage("CheckBox.disabledIcon"))
+			setDisabledSelectedIcon(GUIDefaults.getImage("CheckBox.disabledSelectedIcon"))
+			setSelectedIcon(GUIDefaults.getImage("CheckBox.selectedIcon"))
+		}
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
-}
+		companion object {
+			private const val serialVersionUID = 1L
+		}
+	}

@@ -29,9 +29,12 @@ import java.util.Comparator
  * @author Tobias Wich
  */
 class ClassComparator : Comparator<Class<*>> {
-    override fun compare(c1: Class<*>, c2: Class<*>): Int {
-        val n1: String = c1.getName()
-        val n2: String = c2.getName()
-        return n1.compareTo(n2)
-    }
+	override fun compare(
+		c1: Class<*>,
+		c2: Class<*>,
+	): Int {
+		val n1: String = c1.getName()
+		val n2: String = c2.getName()
+		return n1.compareTo(n2)
+	}
 }

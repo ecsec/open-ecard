@@ -60,16 +60,20 @@ class DirectConnectStep(
 	val addonCtx: Context,
 	val sessHandle: ConnectionHandleType,
 	stepId: String = STEP_ID,
-	title: String = STEP_TITLE
+	title: String = STEP_TITLE,
 ) : StepWithConnection(stepId, title, sessHandle) {
 	init {
 		setAction(DirectConnectStepAction(this))
 	}
 }
 
-class DirectConnectStepAction(private val directConnectStep: DirectConnectStep) : StepAction(directConnectStep) {
-
-	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
+class DirectConnectStepAction(
+	private val directConnectStep: DirectConnectStep,
+) : StepAction(directConnectStep) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
 		try {
@@ -82,22 +86,20 @@ class DirectConnectStepAction(private val directConnectStep: DirectConnectStep) 
 			// safe for later process
 			dynCtx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle)
 
-			//if we have a wired card we can procede with cardlink
-			return if(isWired(cardHandle, dynCtx)){
+			// if we have a wired card we can procede with cardlink
+			return if (isWired(cardHandle, dynCtx)) {
 				StepActionResult(StepActionResultStatus.NEXT)
-			//we have radio based connection, we will net CAN
+				// we have radio based connection, we will net CAN
 			} else {
 				StepActionResult(
 					StepActionResultStatus.REPEAT,
 					EnterCanStep(
 						directConnectStep.ws,
 						directConnectStep.addonCtx,
-						directConnectStep.sessHandle
-					)
+						directConnectStep.sessHandle,
+					),
 				)
 			}
-
-
 		} catch (ex: WSException) {
 			// for people which think they have to remove the card in the process
 			if (ex.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
@@ -111,8 +113,9 @@ class DirectConnectStepAction(private val directConnectStep: DirectConnectStep) 
 					StepActionResultStatus.REPEAT,
 					ErrorStep(
 						lang.translationForKey(ERROR_TITLE),
-						langPin.translationForKey(ERROR_CARD_REMOVED), ex
-					)
+						langPin.translationForKey(ERROR_CARD_REMOVED),
+						ex,
+					),
 				)
 			}
 
@@ -126,8 +129,9 @@ class DirectConnectStepAction(private val directConnectStep: DirectConnectStep) 
 				StepActionResultStatus.CANCEL,
 				ErrorStep(
 					langPin.translationForKey(ERROR_TITLE),
-					langPin.translationForKey(ERROR_UNKNOWN), ex
-				)
+					langPin.translationForKey(ERROR_UNKNOWN),
+					ex,
+				),
 			)
 		} catch (ex: InterruptedException) {
 			val errorMessage = "Connect step action interrupted."
@@ -141,20 +145,24 @@ class DirectConnectStepAction(private val directConnectStep: DirectConnectStep) 
 	}
 
 	@Throws(WSException::class)
-	private fun isWired(conHandle: ConnectionHandleType, dynCtx: DynamicContext): Boolean {
-		val req = GetIFDCapabilities().apply {
-			contextHandle = conHandle.contextHandle
-			ifdName = conHandle.ifdName
-		}
+	private fun isWired(
+		conHandle: ConnectionHandleType,
+		dynCtx: DynamicContext,
+	): Boolean {
+		val req =
+			GetIFDCapabilities().apply {
+				contextHandle = conHandle.contextHandle
+				ifdName = conHandle.ifdName
+			}
 
-        val capabilitiesResponse = directConnectStep.addonCtx.dispatcher.safeDeliver(req) as GetIFDCapabilitiesResponse
-        checkResult(capabilitiesResponse)
+		val capabilitiesResponse = directConnectStep.addonCtx.dispatcher.safeDeliver(req) as GetIFDCapabilitiesResponse
+		checkResult(capabilitiesResponse)
 
-		val isWired = capabilitiesResponse.ifdCapabilities.slotCapability
-			.flatMap{ it.protocol }
-			.firstOrNull { p -> ECardConstants.IFD.Protocol.isWired(p) }
+		val isWired =
+			capabilitiesResponse.ifdCapabilities.slotCapability
+				.flatMap { it.protocol }
+				.firstOrNull { p -> ECardConstants.IFD.Protocol.isWired(p) }
 
 		return isWired != null
-
 	}
 }

@@ -28,23 +28,24 @@ import java.awt.event.ActionEvent
  * @author Tobias Wich
  */
 enum class NavigationEvent {
-    NEXT,
-    BACK,
-    CANCEL;
+	NEXT,
+	BACK,
+	CANCEL,
+	;
 
-    companion object {
-        fun fromEvent(e: ActionEvent): NavigationEvent? {
-            val command = e.getActionCommand()
-            if (command == GUIConstants.BUTTON_BACK) {
-                return BACK
-            } else if (command == GUIConstants.BUTTON_NEXT) {
-                return NEXT
-            } else if (command == GUIConstants.BUTTON_FINISH) {
-                return NEXT
-            } else if (command == GUIConstants.BUTTON_CANCEL) {
-                return CANCEL
-            }
-            return null
-        }
-    }
+	companion object {
+		fun fromEvent(e: ActionEvent): NavigationEvent? {
+			val command = e.getActionCommand()
+			if (command == GUIConstants.BUTTON_BACK) {
+				return BACK
+			} else if (command == GUIConstants.BUTTON_NEXT) {
+				return NEXT
+			} else if (command == GUIConstants.BUTTON_FINISH) {
+				return NEXT
+			} else if (command == GUIConstants.BUTTON_CANCEL) {
+				return CANCEL
+			}
+			return null
+		}
+	}
 }

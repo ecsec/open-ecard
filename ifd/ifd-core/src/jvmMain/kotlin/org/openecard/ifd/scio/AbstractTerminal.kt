@@ -61,7 +61,7 @@ internal class AbstractTerminal(
 	private val channel: SingleThreadChannel,
 	private val gui: UserConsent?,
 	private val ctxHandle: ByteArray?,
-	private val displayIdx: BigInteger?
+	private val displayIdx: BigInteger?,
 ) {
 	private val terminalInfo: TerminalInfo = TerminalInfo(cm, channel)
 
@@ -73,7 +73,10 @@ internal class AbstractTerminal(
 	private val keyIdx: BigInteger? = null
 
 	@Throws(IFDException::class)
-	fun output(ifdName: String?, outInfo: OutputInfoType) {
+	fun output(
+		ifdName: String?,
+		outInfo: OutputInfoType,
+	) {
 		getCapabilities()
 
 		// extract values from outInfo for convenience
@@ -120,7 +123,6 @@ internal class AbstractTerminal(
 			}
 		}
 	}
-
 
 	@Throws(SCIOException::class, IFDException::class, InterruptedException::class)
 	fun verifyUser(verify: VerifyUser): VerifyUserResponse {
@@ -169,29 +171,33 @@ internal class AbstractTerminal(
 					val msg = "PIN entry cancelled by user."
 					LOG.warn { msg }
 					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						result
-					)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							result,
+						)
 				} else if (pinAction.exception != null) {
 					LOG.warn(pinAction.exception) { pinAction.exception!!.message }
-					result = makeResultError(
-						ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
-						pinAction.exception!!.message
-					)
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						result
-					)
+					result =
+						makeResultError(
+							ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
+							pinAction.exception!!.message,
+						)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							result,
+						)
 				} else {
 					// input by user
 					val verifyResponse = pinAction.response
 					// evaluate result
 					result = checkNativePinVerify(verifyResponse!!)
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						result
-					)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							result,
+						)
 					response.setResponse(verifyResponse)
 				}
 
@@ -208,10 +214,11 @@ internal class AbstractTerminal(
 					val msg = "PIN entry cancelled by user."
 					LOG.warn { msg }
 					result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, msg)
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						result
-					)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							result,
+						)
 					return response
 				}
 
@@ -225,10 +232,11 @@ internal class AbstractTerminal(
 					val msg = "Failed to create the verifyTransmit message."
 					LOG.error(e) { msg }
 					result = makeResultError(ECardConstants.Minor.IFD.UNKNOWN_ERROR, msg)
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						result
-					)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							result,
+						)
 					return response
 				} finally {
 					Arrays.fill(rawPIN, ' ')
@@ -251,18 +259,23 @@ internal class AbstractTerminal(
 				// produce messages
 				if (transResp.getResult().getResultMajor() == ECardConstants.Major.ERROR) {
 					if (transResp.getOutputAPDU().isEmpty()) {
-						result = makeResultError(
-							ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
-							transResp.getResult().getResultMessage().getValue()
-						)
-						response = WSHelper.makeResponse(
-							VerifyUserResponse::class.java, result
-						)
+						result =
+							makeResultError(
+								ECardConstants.Minor.IFD.AUTHENTICATION_FAILED,
+								transResp.getResult().getResultMessage().getValue(),
+							)
+						response =
+							WSHelper.makeResponse(
+								VerifyUserResponse::class.java,
+								result,
+							)
 						return response
 					} else {
-						response = WSHelper.makeResponse(
-							VerifyUserResponse::class.java, transResp.getResult()!!
-						)
+						response =
+							WSHelper.makeResponse(
+								VerifyUserResponse::class.java,
+								transResp.getResult()!!,
+							)
 						response.setResponse(transResp.getOutputAPDU()[0])
 
 						// repeat if the response apdu signals that there are tries left
@@ -283,10 +296,11 @@ internal class AbstractTerminal(
 						return response
 					}
 				} else {
-					response = WSHelper.makeResponse(
-						VerifyUserResponse::class.java,
-						transResp.getResult()!!
-					)
+					response =
+						WSHelper.makeResponse(
+							VerifyUserResponse::class.java,
+							transResp.getResult()!!,
+						)
 					response.setResponse(transResp.getOutputAPDU()[0])
 					return response
 				}
@@ -303,7 +317,6 @@ internal class AbstractTerminal(
 		}
 	}
 
-
 	private fun beep() {
 		if (canBeep()) {
 			// TODO: implement
@@ -316,7 +329,10 @@ internal class AbstractTerminal(
 		}
 	}
 
-	private fun display(msg: String?, timeout: BigInteger?) {
+	private fun display(
+		msg: String?,
+		timeout: BigInteger?,
+	) {
 		if (canDisplay()) {
 			// TODO: implement
 		}
@@ -413,7 +429,6 @@ internal class AbstractTerminal(
 	private val isVirtual: Boolean
 		get() = gui != null
 
-
 	@Throws(IFDException::class)
 	private fun getCapabilities() {
 		val capabilitiesReq = GetIFDCapabilities()
@@ -430,14 +445,18 @@ internal class AbstractTerminal(
 		this.capabilities = cap.getIFDCapabilities()
 	}
 
-
-	private fun pinUserConsent(title: String, minLength: Int, maxLength: Int): UserConsentDescription {
+	private fun pinUserConsent(
+		title: String,
+		minLength: Int,
+		maxLength: Int,
+	): UserConsentDescription {
 		val uc = UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog")
 		// create step
-		val s = Step(
-			"enter-pin",
-			LANG.translationForKey("action.changepin.userconsent.pinstep.title")
-		)
+		val s =
+			Step(
+				"enter-pin",
+				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
+			)
 		uc.getSteps().add(s)
 		// add text instructing user
 		// add text instructing user
@@ -454,13 +473,17 @@ internal class AbstractTerminal(
 		return uc
 	}
 
-	private fun pinUserConsent(title: String, action: StepAction): UserConsentDescription {
+	private fun pinUserConsent(
+		title: String,
+		action: StepAction,
+	): UserConsentDescription {
 		val uc = UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog")
 		// create step
-		val s = Step(
-			"enter-pin",
-			LANG.translationForKey("action.changepin.userconsent.pinstep.title")
-		)
+		val s =
+			Step(
+				"enter-pin",
+				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
+			)
 		s.setAction(action)
 		uc.getSteps().add(s)
 		s.isInstantReturn = true
@@ -471,9 +494,7 @@ internal class AbstractTerminal(
 
 		return uc
 	}
-
 }
-
 
 private val LANG: I18n = I18n.getTranslation("pinplugin")
 
@@ -509,7 +530,6 @@ private fun getMessagesOrDefaults(messages: AltVUMessagesType?): AltVUMessagesTy
 	return allMsgs
 }
 
-
 private fun checkNativePinVerify(response: ByteArray): Result {
 	val sw1 = response[0]
 	val sw2 = response[1]
@@ -519,7 +539,7 @@ private fun checkNativePinVerify(response: ByteArray): Result {
 		} else if (sw2 == 0x01.toByte()) {
 			return makeResultError(
 				ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
-				"Verify operation was cancelled with the cancel button."
+				"Verify operation was cancelled with the cancel button.",
 			)
 		} else if (sw2 == 0x02.toByte()) {
 			return makeResultUnknownError("Modify PIN operation failed because two PINs were different.")

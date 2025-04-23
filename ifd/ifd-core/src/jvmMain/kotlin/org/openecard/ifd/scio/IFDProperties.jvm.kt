@@ -20,13 +20,12 @@
  *
  ***************************************************************************/
 
-package org.openecard.ifd.scio;
+package org.openecard.ifd.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.ws.common.OverridingProperties
 import java.io.IOException
 import java.util.*
-
 
 private val LOG = KotlinLogging.logger {}
 
@@ -37,8 +36,8 @@ private val LOG = KotlinLogging.logger {}
  * @author Tobias Wich
  */
 object IFDProperties {
-
 	private val properties = loadProperties()
+
 	private fun loadProperties(): OverridingProperties {
 		try {
 			return OverridingProperties("ifd.properties")
@@ -50,18 +49,14 @@ object IFDProperties {
 	}
 
 	@JvmStatic
-	fun getProperty(key: String): String? {
-		return properties.getProperty(key)
-	}
+	fun getProperty(key: String): String? = properties.getProperty(key)
 
 	@JvmStatic
-	fun setProperty(key: String, value: String): Any? {
-		return properties.setProperty(key, value)
-	}
+	fun setProperty(
+		key: String,
+		value: String,
+	): Any? = properties.setProperty(key, value)
 
 	@JvmStatic
-	fun properties(): Properties {
-		return properties.properties()
-	}
-
+	fun properties(): Properties = properties.properties()
 }

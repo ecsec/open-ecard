@@ -28,7 +28,7 @@ import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  *
@@ -37,42 +37,43 @@ private val LOG = KotlinLogging.logger {  }
  */
 class SecurityInfos
 /**
- * Instantiates a new set of SecurityInfos.
- *
- * @param securityInfos the ASN1 encoded SecurityInfos set
- */ private constructor(
-    /**
-     * Gets the SecurityInfos.
-     *
-     * @return the SecurityInfos
-     */
-    val securityInfos: ASN1Set
-) {
-    companion object {
-        /**
-         * Gets the single instance of SecurityInfos.
-         *
-         * @param obj
-         * @return single instance of SecurityInfos
-         */
-        @JvmStatic
-        fun getInstance(obj: Any): SecurityInfos {
-            if (obj is SecurityInfos) {
-                return obj
-            } else if (obj is ASN1Set) {
-                return SecurityInfos(obj)
-            } else if (obj is ByteArray) {
-                return getInstance(ByteArrayInputStream(obj))
-            } else if (obj is InputStream) {
-                try {
-                    val sp = ASN1StreamParser(obj)
-                    val enc = sp.readObject()
-                    return getInstance(enc.toASN1Primitive())
-                } catch (e: IOException) {
-					LOG.error(e) { "Cannot parse SecurityInfos" }
-                }
-            }
-            throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass)
-        }
-    }
-}
+	 * Instantiates a new set of SecurityInfos.
+	 *
+	 * @param securityInfos the ASN1 encoded SecurityInfos set
+	 */
+	private constructor(
+		/**
+		 * Gets the SecurityInfos.
+		 *
+		 * @return the SecurityInfos
+		 */
+		val securityInfos: ASN1Set,
+	) {
+		companion object {
+			/**
+			 * Gets the single instance of SecurityInfos.
+			 *
+			 * @param obj
+			 * @return single instance of SecurityInfos
+			 */
+			@JvmStatic
+			fun getInstance(obj: Any): SecurityInfos {
+				if (obj is SecurityInfos) {
+					return obj
+				} else if (obj is ASN1Set) {
+					return SecurityInfos(obj)
+				} else if (obj is ByteArray) {
+					return getInstance(ByteArrayInputStream(obj))
+				} else if (obj is InputStream) {
+					try {
+						val sp = ASN1StreamParser(obj)
+						val enc = sp.readObject()
+						return getInstance(enc.toASN1Primitive())
+					} catch (e: IOException) {
+						LOG.error(e) { "Cannot parse SecurityInfos" }
+					}
+				}
+				throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass)
+			}
+		}
+	}

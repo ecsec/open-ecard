@@ -33,7 +33,7 @@ import kotlin.String
 
 open class InsertCardHelper(
 	protected val ctx: Context,
-	protected var conHandle: ConnectionHandleType
+	protected var conHandle: ConnectionHandleType,
 ) {
 	fun isConnected(): Boolean {
 		val hasSlotHandle = conHandle.slotHandle != null
@@ -57,10 +57,15 @@ open class InsertCardHelper(
 			val sessionIdentifier: String = conHandle.channelHandle.sessionIdentifier
 
 			// wait for eid card
-			val connectorUtil = CardConnectorUtil(
-				ctx.dispatcher, ctx.eventDispatcher, possibleCardTypes,
-				sessionIdentifier, conHandle.contextHandle, conHandle.ifdName
-			)
+			val connectorUtil =
+				CardConnectorUtil(
+					ctx.dispatcher,
+					ctx.eventDispatcher,
+					possibleCardTypes,
+					sessionIdentifier,
+					conHandle.contextHandle,
+					conHandle.ifdName,
+				)
 			val path = connectorUtil.waitForCard()
 			var channelHandle = path.channelHandle
 			if (channelHandle == null) {

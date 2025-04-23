@@ -29,11 +29,11 @@ import org.openecard.addon.LifecycleTrait
  * @author Tobias Wich
  */
 interface AppPluginAction : LifecycleTrait {
-    fun execute(
-        body: RequestBody?,
-        parameters: Map<String, String>?,
-        headers: Headers?,
-        attachments: List<Attachment>?,
-        extraParams: Map<String, Any>?,
-    ): BindingResult
+	fun execute(
+		body: RequestBody?,
+		parameters: Map<String, String>?,
+		headers: Headers?,
+		attachments: List<Attachment>?,
+		extraParams: Map<String, Any>?,
+	): BindingResult
 }

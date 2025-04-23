@@ -44,7 +44,7 @@ private val LOG = KotlinLogging.logger { }
 class EventWatcher(
 	private val cm: ChannelManager,
 	private val timeout: Long,
-	private val callback: ChannelHandleType?
+	private val callback: ChannelHandleType?,
 ) : Callable<List<IFDStatusType>> {
 	private val watcher: TerminalWatcher = cm.terminals.watcher
 
@@ -96,7 +96,6 @@ class EventWatcher(
 		return diff
 	}
 
-
 	private fun updateState(event: TerminalWatcher.StateChangeEvent) {
 		val name = event.getTerminal()
 		if (event.state == TerminalWatcher.EventType.TERMINAL_ADDED) {
@@ -108,19 +107,20 @@ class EventWatcher(
 				val slot = next.getSlotStatus()[0]
 				if (next.getIFDName() == name) {
 					when (event.state) {
-						TerminalWatcher.EventType.CARD_INSERTED -> try {
-							val ch = cm.openMasterChannel(name)
-							slot.isCardAvailable = true
-							slot.setATRorATS(ch.channel.card.aTR.bytes)
-						} catch (ex: NoSuchTerminal) {
-							LOG.error(ex) { "Failed to open master channel for terminal '${name}'." }
-							slot.isCardAvailable = false
-							cm.closeMasterChannel(name)
-						} catch (ex: SCIOException) {
-							LOG.error(ex) { "Failed to open master channel for terminal '${name}'." }
-							slot.isCardAvailable = false
-							cm.closeMasterChannel(name)
-						}
+						TerminalWatcher.EventType.CARD_INSERTED ->
+							try {
+								val ch = cm.openMasterChannel(name)
+								slot.isCardAvailable = true
+								slot.setATRorATS(ch.channel.card.aTR.bytes)
+							} catch (ex: NoSuchTerminal) {
+								LOG.error(ex) { "Failed to open master channel for terminal '$name'." }
+								slot.isCardAvailable = false
+								cm.closeMasterChannel(name)
+							} catch (ex: SCIOException) {
+								LOG.error(ex) { "Failed to open master channel for terminal '$name'." }
+								slot.isCardAvailable = false
+								cm.closeMasterChannel(name)
+							}
 
 						TerminalWatcher.EventType.CARD_REMOVED -> {
 							cm.closeMasterChannel(name)
@@ -185,7 +185,6 @@ class EventWatcher(
 		// clone entries, to prevent altering the state of this object from the outside
 		return clone(remaining)
 	}
-
 
 	private fun convert(terminals: List<TerminalState>): MutableList<IFDStatusType> {
 		val result = mutableListOf<IFDStatusType>()
@@ -253,7 +252,10 @@ class EventWatcher(
 			return slot
 		}
 
-		private fun isStateEqual(a: IFDStatusType, b: IFDStatusType): Boolean {
+		private fun isStateEqual(
+			a: IFDStatusType,
+			b: IFDStatusType,
+		): Boolean {
 			if (a.getIFDName() != b.getIFDName()) {
 				return false
 			}
@@ -274,7 +276,10 @@ class EventWatcher(
 			return true
 		}
 
-		private fun isSlotEqual(a: SlotStatusType, b: SlotStatusType): Boolean {
+		private fun isSlotEqual(
+			a: SlotStatusType,
+			b: SlotStatusType,
+		): Boolean {
 			if (a.isCardAvailable != b.isCardAvailable) {
 				return false
 			}
@@ -283,12 +288,12 @@ class EventWatcher(
 			}
 			// ATR is ignored, because it is not read by the conversion function
 			return true
-			//	if (a.getATRorATS() == null && b.getATRorATS() == null) {
-//	    return true;
-//	} else {
-//	    // this method returns false when both are null, thatswhy the if before
-//	    return ByteUtils.compare(a.getATRorATS(), b.getATRorATS());
-//	}
+			// 	if (a.getATRorATS() == null && b.getATRorATS() == null) {
+// 	    return true;
+// 	} else {
+// 	    // this method returns false when both are null, thatswhy the if before
+// 	    return ByteUtils.compare(a.getATRorATS(), b.getATRorATS());
+// 	}
 		}
 	}
 }

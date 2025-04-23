@@ -29,7 +29,6 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported
 import org.openecard.mobile.ex.NFCTagNotSupported
 import java.io.IOException
 
-
 /**
  *
  * @author Neil Crossley

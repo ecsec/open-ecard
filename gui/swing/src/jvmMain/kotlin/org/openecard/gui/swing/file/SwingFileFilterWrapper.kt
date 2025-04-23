@@ -35,12 +35,11 @@ class SwingFileFilterWrapper
  * Create a FileFilter wrapper instance for the given FileFilter.
  *
  * @param wrappedFilter The FileFilter that needs to be wrapped.
- */(private val wrappedFilter: FileFilter) : javax.swing.filechooser.FileFilter() {
-    override fun accept(f: File): Boolean {
-        return wrappedFilter.accept(f)
-    }
+ */
+(
+	private val wrappedFilter: FileFilter,
+) : javax.swing.filechooser.FileFilter() {
+	override fun accept(f: File): Boolean = wrappedFilter.accept(f)
 
-    override fun getDescription(): String {
-        return wrappedFilter.getDescription()
-    }
+	override fun getDescription(): String = wrappedFilter.getDescription()
 }

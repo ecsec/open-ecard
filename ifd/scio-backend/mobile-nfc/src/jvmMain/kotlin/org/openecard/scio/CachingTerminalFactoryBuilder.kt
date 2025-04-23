@@ -29,16 +29,17 @@ import org.openecard.ws.common.GenericInstanceProvider
  *
  * @author Neil Crossley
  */
-class CachingTerminalFactoryBuilder<T : TerminalFactory>(private val delegate: GenericInstanceProvider<T>) :
-    GenericInstanceProvider<TerminalFactory> {
-    var previousInstance: T? = null
-        private set
+class CachingTerminalFactoryBuilder<T : TerminalFactory>(
+	private val delegate: GenericInstanceProvider<T>,
+) : GenericInstanceProvider<TerminalFactory> {
+	var previousInstance: T? = null
+		private set
 
-    @get:Throws(GenericFactoryException::class)
+	@get:Throws(GenericFactoryException::class)
 	override val instance: T
-        get() {
+		get() {
 			val next = delegate.instance
-            previousInstance = next
-            return next
-        }
+			previousInstance = next
+			return next
+		}
 }

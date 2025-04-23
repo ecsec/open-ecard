@@ -31,6 +31,6 @@ kotlin {
 }
 
 configurations.api {
-    exclude(group= "com.google.code.findbugs", module= "jsr305")
-    exclude(group= "com.google.code.findbugs", module= "annotations")
+	exclude(group = "com.google.code.findbugs", module = "jsr305")
+	exclude(group = "com.google.code.findbugs", module = "annotations")
 }

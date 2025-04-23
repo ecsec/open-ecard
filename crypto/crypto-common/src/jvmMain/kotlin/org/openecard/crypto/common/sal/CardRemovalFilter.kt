@@ -14,19 +14,22 @@ import org.openecard.common.event.EventObject
 import org.openecard.common.event.EventType
 import org.openecard.common.interfaces.EventFilter
 
-private var LOG = KotlinLogging.logger {  }
+private var LOG = KotlinLogging.logger { }
 
 /**
  *
  * @author Neil Crossley
  */
 class CardRemovalFilter : EventFilter {
-    override fun matches(t: EventType, o: EventObject): Boolean {
-        if (t == EventType.CARD_REMOVED) {
+	override fun matches(
+		t: EventType,
+		o: EventObject,
+	): Boolean {
+		if (t == EventType.CARD_REMOVED) {
 			LOG.debug { "Card removal detected." }
-            return true
-        }
+			return true
+		}
 
-        return false
-    }
+		return false
+	}
 }

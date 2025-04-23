@@ -24,19 +24,18 @@ package org.openecard.ifd.protocol.pace.crypto
 
 import org.openecard.common.util.StringUtils
 import org.testng.annotations.Test
-import java.security.GeneralSecurityException
 
 /**
  *
  * @author Tobias Wich
  */
 class AuthenticationTokenTest {
-    @Test(groups = ["broken"])
-    fun runTest() {
-        val dataStr = "7C1C86087997B6007844F957871044454356434165494443543030303031"
-        val data = StringUtils.toByteArray(dataStr)
+	@Test(groups = ["broken"])
+	fun runTest() {
+		val dataStr = "7C1C86087997B6007844F957871044454356434165494443543030303031"
+		val data = StringUtils.toByteArray(dataStr)
 		// need to set token value (7997b6007844f957) in target class
-        val token = AuthenticationToken(null)
-        token.verifyToken(data, true)
-    }
+		val token = AuthenticationToken(null)
+		token.verifyToken(data, true)
+	}
 }

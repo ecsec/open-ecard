@@ -53,9 +53,9 @@ private val LOG = KotlinLogging.logger { }
 
 abstract class BaseSmartCardCredentialFactory protected constructor(
 	protected val dispatcher: Dispatcher,
-	protected val filterAlwaysReadable: Boolean
-) : CredentialFactory, ContextAware {
-
+	protected val filterAlwaysReadable: Boolean,
+) : CredentialFactory,
+	ContextAware {
 	protected var ctx: TlsContext? = null
 	protected val tokenCache: TokenCache = TokenCache(dispatcher)
 
@@ -67,7 +67,7 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 
 	protected fun getClientCredentialsForCard(
 		cr: CertificateRequest,
-		handle: ConnectionHandleType
+		handle: ConnectionHandleType,
 	): List<TlsCredentialedSigner> {
 		val credentials = mutableListOf<TlsCredentialedSigner>()
 		val tlsCrypto = TlsCryptoParameters(ctx)
@@ -76,14 +76,16 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		var crSigAlgs = getCrSigAlgs(cr)
 		crSigAlgs = removeUnsupportedAlgs(crSigAlgs)
 		for (reqAlg in crSigAlgs) {
-			val reqAlgStr = String.format(
-				"%s-%s", SignatureAlgorithm.getText(reqAlg.getSignature()),
-				HashAlgorithm.getText(reqAlg.getHash())
-			)
+			val reqAlgStr =
+				String.format(
+					"%s-%s",
+					SignatureAlgorithm.getText(reqAlg.getSignature()),
+					HashAlgorithm.getText(reqAlg.getHash()),
+				)
 			LOG.debug { "  $reqAlgStr" }
 		}
 
-		//	try {
+		// 	try {
 		val didInfos = tokenCache.getInfo(null, handle)
 		var infos = didInfos.cryptoDidInfos
 
@@ -96,7 +98,7 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		infos = removeUnsupportedDidAlgs(infos)
 		infos = removeUnsupportedCerts(cr, infos)
 
-		//infos = nonRawFirst(infos);
+		// infos = nonRawFirst(infos);
 		LOG.info { "Creating signer instances for the TLS Client Certificate signature." }
 
 		// TLS < 1.2
@@ -154,7 +156,7 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 							val cred = DefaultTlsCredentialedSigner(tlsCrypto, signer, clientCert, reqAlg)
 							credentials.add(cred)
 							break
-							//return credentials;
+							// return credentials;
 						}
 					} catch (ex: SecurityConditionUnsatisfiable) {
 						LOG.error(ex) { "Failed to read certificates from card. Skipping DID ${info.didName}." }
@@ -173,9 +175,9 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 			}
 		}
 
-		//	} catch (NoSuchDid | WSHelper.WSException ex) {
-//	    LOG.error("Failed to access DIDs of smartcard. Proceeding without client authentication.", ex);
-//	}
+		// 	} catch (NoSuchDid | WSHelper.WSException ex) {
+// 	    LOG.error("Failed to access DIDs of smartcard. Proceeding without client authentication.", ex);
+// 	}
 		return credentials
 	}
 
@@ -191,7 +193,10 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		return needsPin
 	}
 
-	private fun matchesCertReq(cr: CertificateRequest, chain: List<X509Certificate>): Boolean {
+	private fun matchesCertReq(
+		cr: CertificateRequest,
+		chain: List<X509Certificate>,
+	): Boolean {
 		// no issuers mean accept anything
 		if (cr.getCertificateAuthorities().isEmpty()) {
 			LOG.debug { "Any certificate matches." }
@@ -220,7 +225,10 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 	}
 
 	@Throws(WSHelper.WSException::class)
-	private fun isAuthCert(info: DidInfo, chain: List<X509Certificate>): Boolean {
+	private fun isAuthCert(
+		info: DidInfo,
+		chain: List<X509Certificate>,
+	): Boolean {
 		val algInfo = info.genericCryptoMarker.algorithmInfo
 		if (!algInfo!!.getSupportedOperations().contains("Compute-signature")) {
 			LOG.debug { "DID (${info.didName}): AlgorithmInfo does not provide Compute-signature flag." }
@@ -239,8 +247,10 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		return true
 	}
 
-
-	private fun matchesAlg(reqAlg: SignatureAndHashAlgorithm, alg: SignatureAlgorithms): Boolean {
+	private fun matchesAlg(
+		reqAlg: SignatureAndHashAlgorithm,
+		alg: SignatureAlgorithms,
+	): Boolean {
 		try {
 			val bcAlg = getCompatibleAlgorithms(alg)
 
@@ -272,16 +282,18 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		return SignatureAlgorithms.CKM_RSA_PKCS == alg
 	}
 
-	private fun convertSigType(sigType: Short): KeyTypes? {
-		return when (sigType) {
+	private fun convertSigType(sigType: Short): KeyTypes? =
+		when (sigType) {
 			SignatureAlgorithm.rsa_pss_pss_sha256, SignatureAlgorithm.rsa_pss_pss_sha384, SignatureAlgorithm.rsa_pss_pss_sha512, SignatureAlgorithm.rsa_pss_rsae_sha256, SignatureAlgorithm.rsa_pss_rsae_sha384, SignatureAlgorithm.rsa_pss_rsae_sha512, SignatureAlgorithm.rsa -> KeyTypes.CKK_RSA
 			SignatureAlgorithm.ecdsa -> KeyTypes.CKK_EC
 			else -> null
 		}
-	}
 
 	@Throws(IOException::class, CertificateEncodingException::class)
-	private fun convertCert(crypto: TlsCrypto, chain: List<X509Certificate>): Certificate {
+	private fun convertCert(
+		crypto: TlsCrypto,
+		chain: List<X509Certificate>,
+	): Certificate {
 		val cert = crypto.createCertificate(chain[0].encoded)
 		return Certificate(arrayOf(cert))
 	}
@@ -353,7 +365,10 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		return result
 	}
 
-	private fun removeUnsupportedCerts(cr: CertificateRequest, infos: List<DidInfo>): List<DidInfo> {
+	private fun removeUnsupportedCerts(
+		cr: CertificateRequest,
+		infos: List<DidInfo>,
+	): List<DidInfo> {
 		val result = mutableListOf<DidInfo>()
 
 		for (next in infos) {
@@ -406,8 +421,8 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 						val pw = PemWriter(out)
 						pw.writeObject(PemObject("CERTIFICATE", cert.encoded))
 						pw.close()
-						LOG.debug { "Certificate for DID ${next.didName}\n${out}" }
-						LOG.debug { "Certificate details\n${cert}" }
+						LOG.debug { "Certificate for DID ${next.didName}\n$out" }
+						LOG.debug { "Certificate details\n$cert" }
 					}
 				}
 			} catch (ex: SecurityConditionUnsatisfiable) {
@@ -444,9 +459,11 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 					SignatureAlgorithms.CKM_SHA512_RSA_PKCS,
 					SignatureAlgorithms.CKM_SHA256_RSA_PKCS_PSS,
 					SignatureAlgorithms.CKM_SHA384_RSA_PKCS_PSS,
-					SignatureAlgorithms.CKM_SHA512_RSA_PKCS_PSS -> result.add(
-						next
-					)
+					SignatureAlgorithms.CKM_SHA512_RSA_PKCS_PSS,
+					->
+						result.add(
+							next,
+						)
 
 					else -> {}
 				}
@@ -470,7 +487,8 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 				SignatureAlgorithm.rsa,
 				SignatureAlgorithm.rsa_pss_rsae_sha256,
 				SignatureAlgorithm.rsa_pss_rsae_sha384,
-				SignatureAlgorithm.rsa_pss_rsae_sha512 -> {
+				SignatureAlgorithm.rsa_pss_rsae_sha512,
+				-> {
 				}
 
 				else -> {
@@ -488,7 +506,8 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 			when (hashAlg) {
 				HashAlgorithm.sha512,
 				HashAlgorithm.sha384,
-				HashAlgorithm.sha256 -> {
+				HashAlgorithm.sha256,
+				-> {
 				}
 
 				else -> {
@@ -501,7 +520,6 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 		return crSigAlgs
 	}
 
-
 	private fun isSafeForNoneDid(reqAlg: SignatureAndHashAlgorithm): Boolean {
 		// PSS is currently not supported by the stack
 		if (SignatureAlgorithm.isRSAPSS(reqAlg.getSignature())) {
@@ -513,7 +531,8 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 			HashAlgorithm.sha224,
 			HashAlgorithm.sha256,
 			HashAlgorithm.sha384,
-			HashAlgorithm.sha512 -> true
+			HashAlgorithm.sha512,
+			-> true
 
 			else -> false
 		}
@@ -554,23 +573,25 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 				return setOf(pssAlg, rsaeAlg)
 			}
 
-			val hash = if (hashAlg != null) {
-				when (hashAlg) {
-					HashAlgorithms.CKM_SHA_1 -> HashAlgorithm.sha1
-					HashAlgorithms.CKM_SHA224 -> HashAlgorithm.sha224
-					HashAlgorithms.CKM_SHA256 -> HashAlgorithm.sha256
-					HashAlgorithms.CKM_SHA384 -> HashAlgorithm.sha384
-					HashAlgorithms.CKM_SHA512 -> HashAlgorithm.sha512
+			val hash =
+				if (hashAlg != null) {
+					when (hashAlg) {
+						HashAlgorithms.CKM_SHA_1 -> HashAlgorithm.sha1
+						HashAlgorithms.CKM_SHA224 -> HashAlgorithm.sha224
+						HashAlgorithms.CKM_SHA256 -> HashAlgorithm.sha256
+						HashAlgorithms.CKM_SHA384 -> HashAlgorithm.sha384
+						HashAlgorithms.CKM_SHA512 -> HashAlgorithm.sha512
+					}
+				} else {
+					return setOf<SignatureAndHashAlgorithm>()
 				}
-			} else {
-				return setOf<SignatureAndHashAlgorithm>()
-			}
 
-			val sig = when (keyType) {
-				KeyTypes.CKK_RSA -> SignatureAlgorithm.rsa
-				KeyTypes.CKK_EC -> SignatureAlgorithm.ecdsa
-				else -> throw IllegalArgumentException("Unsupported signature algorithm selected.")
-			}
+			val sig =
+				when (keyType) {
+					KeyTypes.CKK_RSA -> SignatureAlgorithm.rsa
+					KeyTypes.CKK_EC -> SignatureAlgorithm.ecdsa
+					else -> throw IllegalArgumentException("Unsupported signature algorithm selected.")
+				}
 
 			return setOf(SignatureAndHashAlgorithm(hash, sig))
 		}

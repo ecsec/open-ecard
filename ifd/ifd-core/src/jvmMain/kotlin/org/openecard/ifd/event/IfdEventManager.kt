@@ -42,8 +42,7 @@ import kotlin.ByteArray
 import kotlin.RuntimeException
 import kotlin.String
 
-
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Main class of the event system.
@@ -54,113 +53,126 @@ private val LOG = KotlinLogging.logger {  }
  */
 class IfdEventManager(
 	protected val env: Environment,
-	protected val ctx: ByteArray
+	protected val ctx: ByteArray,
 ) {
-
-    protected val sessionId: String = genBase64Session()
-	private val builder: HandlerBuilder = HandlerBuilder.create()
-.setContextHandle(ctx)
-.setSessionId(sessionId)
+	protected val sessionId: String = genBase64Session()
+	private val builder: HandlerBuilder =
+		HandlerBuilder
+			.create()
+			.setContextHandle(ctx)
+			.setSessionId(sessionId)
 
 	protected var threadPool: ExecutorService? = null
 
-    private var eventRunner: IfdEventRunner? = null
-    private var watcher: Future<*>? = null
+	private var eventRunner: IfdEventRunner? = null
+	private var watcher: Future<*>? = null
 
 	@Synchronized
-    fun initialize() {
-        threadPool = Executors.newCachedThreadPool(object : ThreadFactory {
-            private val num = AtomicInteger(0)
-            private val group = ThreadGroup("IFD Event Manager")
-            override fun newThread(r: Runnable): Thread {
-                val name = String.format("IFD Watcher %d", num.getAndIncrement())
-                val t = Thread(group, r, name)
-                t.setDaemon(false)
-                return t
-            }
-        })
-        // start watcher thread
-        try {
-            eventRunner = IfdEventRunner(env, this, builder, ctx)
-            watcher = threadPool!!.submit(eventRunner!!)
-        } catch (ex: WSHelper.WSException) {
-            throw RuntimeException("Failed to request initial status from IFD.")
-        }
-    }
+	fun initialize() {
+		threadPool =
+			Executors.newCachedThreadPool(
+				object : ThreadFactory {
+					private val num = AtomicInteger(0)
+					private val group = ThreadGroup("IFD Event Manager")
 
-    @Synchronized
-    fun terminate() {
-        eventRunner!!.setStoppedFlag()
-        watcher!!.cancel(true)
-        threadPool!!.shutdownNow()
-    }
+					override fun newThread(r: Runnable): Thread {
+						val name = String.format("IFD Watcher %d", num.getAndIncrement())
+						val t = Thread(group, r, name)
+						t.setDaemon(false)
+						return t
+					}
+				},
+			)
+		// start watcher thread
+		try {
+			eventRunner = IfdEventRunner(env, this, builder, ctx)
+			watcher = threadPool!!.submit(eventRunner!!)
+		} catch (ex: WSHelper.WSException) {
+			throw RuntimeException("Failed to request initial status from IFD.")
+		}
+	}
 
-    @Throws(WSHelper.WSException::class)
-    fun wait(lastKnown: List<IFDStatusType>): List<IFDStatusType> {
-        val wait = Wait()
-        wait.setContextHandle(ctx)
-        wait.getIFDStatus().addAll(lastKnown)
-        val resp = env.ifd!!.wait(wait)
+	@Synchronized
+	fun terminate() {
+		eventRunner!!.setStoppedFlag()
+		watcher!!.cancel(true)
+		threadPool!!.shutdownNow()
+	}
 
-        try {
-            checkResult(resp)
-            val result = resp.getIFDEvent()
-            return result
-        } catch (ex: WSHelper.WSException) {
-            if (ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE == ex.resultMinor) {
-                // this can only happen when the PCSC stack is reloaded, notify all cards have disappeared
-                val result = mutableListOf<IFDStatusType>()
-                if (!lastKnown.isEmpty()) {
+	@Throws(WSHelper.WSException::class)
+	fun wait(lastKnown: List<IFDStatusType>): List<IFDStatusType> {
+		val wait = Wait()
+		wait.setContextHandle(ctx)
+		wait.getIFDStatus().addAll(lastKnown)
+		val resp = env.ifd!!.wait(wait)
+
+		try {
+			checkResult(resp)
+			val result = resp.getIFDEvent()
+			return result
+		} catch (ex: WSHelper.WSException) {
+			if (ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE == ex.resultMinor) {
+				// this can only happen when the PCSC stack is reloaded, notify all cards have disappeared
+				val result = mutableListOf<IFDStatusType>()
+				if (!lastKnown.isEmpty()) {
 					LOG.info { "PCSC stack seemed to disappear. Signalling that no cards are available anymore." }
-                    for (next in lastKnown) {
+					for (next in lastKnown) {
 						LOG.debug { "Removing terminal ${next.getIFDName()}." }
-                        val newStatus = IFDStatusType()
-                        newStatus.setIFDName(next.getIFDName())
+						val newStatus = IFDStatusType()
+						newStatus.setIFDName(next.getIFDName())
 						newStatus.isConnected = Boolean.FALSE
-                        result.add(newStatus)
-                    }
-                }
-                return result
-            } else {
-                throw ex
-            }
-        }
-    }
+						result.add(newStatus)
+					}
+				}
+				return result
+			} else {
+				throw ex
+			}
+		}
+	}
 
-    /**
-     * Resets a card given as connection handle.
-     *
-     * @param cHandleRm [ConnectionHandleType] object representing a card which shall be removed.
-     * @param cHandleIn [ConnectionHandleType] object representing a card which shall be inserted.
-     * @param ifaceProtocol Interface protocol of the connected card.
-     */
-    fun emitResetCardEvent(cHandleRm: ConnectionHandleType, cHandleIn: ConnectionHandleType, ifaceProtocol: String?) {
-        // determine if the reader has a protected auth path
-        val slotCapabilities = getCapabilities(cHandleRm.getContextHandle(), cHandleRm.getIFDName())
-        val protectedAuthPath =
-            if (slotCapabilities != null) !slotCapabilities.getKeyPadCapability().isEmpty() else false
+	/**
+	 * Resets a card given as connection handle.
+	 *
+	 * @param cHandleRm [ConnectionHandleType] object representing a card which shall be removed.
+	 * @param cHandleIn [ConnectionHandleType] object representing a card which shall be inserted.
+	 * @param ifaceProtocol Interface protocol of the connected card.
+	 */
+	fun emitResetCardEvent(
+		cHandleRm: ConnectionHandleType,
+		cHandleIn: ConnectionHandleType,
+		ifaceProtocol: String?,
+	) {
+		// determine if the reader has a protected auth path
+		val slotCapabilities = getCapabilities(cHandleRm.getContextHandle(), cHandleRm.getIFDName())
+		val protectedAuthPath =
+			if (slotCapabilities != null) !slotCapabilities.getKeyPadCapability().isEmpty() else false
 
-        val chBuilder = HandlerBuilder.create()
-        val cInNew = chBuilder.setSessionId(sessionId)
-            .setCardType(cHandleIn.getRecognitionInfo())
-            .setCardIdentifier(cHandleIn.getRecognitionInfo())
-            .setContextHandle(cHandleIn.getContextHandle())
-            .setIfdName(cHandleIn.getIFDName())
-            .setSlotIdx(BigInteger.ZERO)
-            .setSlotHandle(cHandleIn.getSlotHandle())
-            .setProtectedAuthPath(protectedAuthPath)
-            .buildConnectionHandle()
-        env.eventDispatcher!!.notify(EventType.CARD_RESET, IfdEventObject(cInNew, ifaceProtocol, true))
-    }
+		val chBuilder = HandlerBuilder.create()
+		val cInNew =
+			chBuilder
+				.setSessionId(sessionId)
+				.setCardType(cHandleIn.getRecognitionInfo())
+				.setCardIdentifier(cHandleIn.getRecognitionInfo())
+				.setContextHandle(cHandleIn.getContextHandle())
+				.setIfdName(cHandleIn.getIFDName())
+				.setSlotIdx(BigInteger.ZERO)
+				.setSlotHandle(cHandleIn.getSlotHandle())
+				.setProtectedAuthPath(protectedAuthPath)
+				.buildConnectionHandle()
+		env.eventDispatcher!!.notify(EventType.CARD_RESET, IfdEventObject(cInNew, ifaceProtocol, true))
+	}
 
-    private fun getCapabilities(ctxHandle: ByteArray?, ifdName: String?): IFDCapabilitiesType? {
-        val req = GetIFDCapabilities()
-        req.setContextHandle(ctxHandle)
-        req.setIFDName(ifdName)
-        val res = env.dispatcher!!.safeDeliver(req) as GetIFDCapabilitiesResponse
-        return res.getIFDCapabilities()
-    }
-
+	private fun getCapabilities(
+		ctxHandle: ByteArray?,
+		ifdName: String?,
+	): IFDCapabilitiesType? {
+		val req = GetIFDCapabilities()
+		req.setContextHandle(ctxHandle)
+		req.setIFDName(ifdName)
+		val res = env.dispatcher!!.safeDeliver(req) as GetIFDCapabilitiesResponse
+		return res.getIFDCapabilities()
+	}
 }
 
 private val THREAD_NUM = AtomicInteger(1)

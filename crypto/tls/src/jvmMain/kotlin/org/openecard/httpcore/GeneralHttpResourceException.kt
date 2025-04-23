@@ -9,9 +9,11 @@
  */
 package org.openecard.httpcore
 
-
 /**
  *
  * @author Tobias Wich
  */
-class GeneralHttpResourceException(msg: String, cause: Throwable? = null) : HttpResourceException(msg, cause)
+class GeneralHttpResourceException(
+	msg: String,
+	cause: Throwable? = null,
+) : HttpResourceException(msg, cause)

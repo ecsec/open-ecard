@@ -29,109 +29,109 @@ package org.openecard.crypto.common.asn1.eac
  * @author Tobias Wich
  */
 class PACESecurityInfos {
-    /**
-     * Returns the PACEDomainParameterInfos.
-     *
-     * @return PACEDomainParameterInfos
-     */
-    /**
-     * Sets the PACEDomainParameterInfos.
-     *
-     * @param paceDomainParameterInfos PACEDomainParameterInfos
-     */
-    var pACEDomainParameterInfos: MutableList<PACEDomainParameterInfo> = mutableListOf()
 	/**
-     * Returns the PACEInfos.
-     *
-     * @return PACEInfos
-     */
-    /**
-     * Sets the PACEInfos.
-     *
-     * @param paceInfos PACEInfos
-     */
-    var pACEInfos: MutableList<PACEInfo> = mutableListOf()
+	 * Returns the PACEDomainParameterInfos.
+	 *
+	 * @return PACEDomainParameterInfos
+	 */
+	/**
+	 * Sets the PACEDomainParameterInfos.
+	 *
+	 * @param paceDomainParameterInfos PACEDomainParameterInfos
+	 */
+	var pACEDomainParameterInfos: MutableList<PACEDomainParameterInfo> = mutableListOf()
+	/**
+	 * Returns the PACEInfos.
+	 *
+	 * @return PACEInfos
+	 */
+	/**
+	 * Sets the PACEInfos.
+	 *
+	 * @param paceInfos PACEInfos
+	 */
+	var pACEInfos: MutableList<PACEInfo> = mutableListOf()
 
 	/**
 	 * Gets the PACEInfo pairs that are contained in SecurityInfos object.
 	 *
 	 * @return List containing all PACEInfo pairs.
 	 */
-	 val pACEInfoPairs: List<PACESecurityInfoPair> by lazy {
+	val pACEInfoPairs: List<PACESecurityInfoPair> by lazy {
 		createPACEInfoPairs()
 	}
+
 	/**
-     * Adds a PACEDomainParameterInfo.
-     *
-     * @param paceDomainParameterInfo PACEDomainParameterInfo
-     */
-    fun addPACEDomainParameterInfo(paceDomainParameterInfo: PACEDomainParameterInfo) {
-        this.pACEDomainParameterInfos.add(paceDomainParameterInfo)
-    }
+	 * Adds a PACEDomainParameterInfo.
+	 *
+	 * @param paceDomainParameterInfo PACEDomainParameterInfo
+	 */
+	fun addPACEDomainParameterInfo(paceDomainParameterInfo: PACEDomainParameterInfo) {
+		this.pACEDomainParameterInfos.add(paceDomainParameterInfo)
+	}
 
-    /**
-     * Adds a PACEInfo.
-     *
-     * @param paceInfo PACEInfo
-     */
-    fun addPACEInfo(paceInfo: PACEInfo) {
-        this.pACEInfos.add(paceInfo)
-    }
+	/**
+	 * Adds a PACEInfo.
+	 *
+	 * @param paceInfo PACEInfo
+	 */
+	fun addPACEInfo(paceInfo: PACEInfo) {
+		this.pACEInfos.add(paceInfo)
+	}
 
+	fun getPACEInfoPairs(
+		supportedProtocols: List<String>,
+		supportedParams: List<Int>,
+	): List<PACESecurityInfoPair> {
+		val result = mutableListOf<PACESecurityInfoPair>()
+		for (next in getPACEInfoPairs(supportedProtocols)) {
+			if (supportedParams.contains(next.pACEInfo.parameterID)) {
+				result.add(next)
+			}
+		}
+		return result
+	}
 
-    fun getPACEInfoPairs(
-        supportedProtocols: List<String>,
-        supportedParams: List<Int>,
-    ): List<PACESecurityInfoPair> {
-        val result = mutableListOf<PACESecurityInfoPair>()
-        for (next in getPACEInfoPairs(supportedProtocols)) {
-            if (supportedParams.contains(next.pACEInfo.parameterID)) {
-                result.add(next)
-            }
-        }
-        return result
-    }
+	fun getPACEInfoPairs(supportedProtocols: List<String>): List<PACESecurityInfoPair> {
+		val result = mutableListOf<PACESecurityInfoPair>()
+		for (next in this.pACEInfoPairs) {
+			if (supportedProtocols.contains(next.pACEInfo.protocol)) {
+				result.add(next)
+			}
+		}
+		return result
+	}
 
-    fun getPACEInfoPairs(supportedProtocols: List<String>): List<PACESecurityInfoPair> {
-        val result = mutableListOf<PACESecurityInfoPair>()
-        for (next in this.pACEInfoPairs) {
-            if (supportedProtocols.contains(next.pACEInfo.protocol)) {
-                result.add(next)
-            }
-        }
-        return result
-    }
+	private fun createPACEInfoPairs(): MutableList<PACESecurityInfoPair> {
+		val result = mutableListOf<PACESecurityInfoPair>()
 
-    private fun createPACEInfoPairs(): MutableList<PACESecurityInfoPair> {
-        val result = mutableListOf<PACESecurityInfoPair>()
+		// special case when there is only one element
+		// in that case the parameter id is optional because a binding of explicit Domain Parameters is implicit
+		if (pACEInfos.size == 1) {
+			if (pACEDomainParameterInfos.isEmpty()) {
+				result.add(PACESecurityInfoPair(pACEInfos[0], null))
+			} else {
+				result.add(PACESecurityInfoPair(pACEInfos[0], pACEDomainParameterInfos[0]))
+			}
+			return result
+		}
 
-        // special case when there is only one element
-        // in that case the parameter id is optional because a binding of explicit Domain Parameters is implicit
-        if (pACEInfos.size == 1) {
-            if (pACEDomainParameterInfos.isEmpty()) {
-                result.add(PACESecurityInfoPair(pACEInfos[0], null))
-            } else {
-                result.add(PACESecurityInfoPair(pACEInfos[0], pACEDomainParameterInfos[0]))
-            }
-            return result
-        }
-
-        for (pi in this.pACEInfos) {
-            val id = pi.parameterID
-            var found = false
-            if (id != -1) {
-                for (dpi in this.pACEDomainParameterInfos) {
-                    if (id == dpi.parameterID) {
-                        found = true
-                        result.add(PACESecurityInfoPair(pi, dpi))
-                        break
-                    }
-                }
-            }
-            if (!found) {
-                result.add(PACESecurityInfoPair(pi, null))
-            }
-        }
-        return result
-    }
+		for (pi in this.pACEInfos) {
+			val id = pi.parameterID
+			var found = false
+			if (id != -1) {
+				for (dpi in this.pACEDomainParameterInfos) {
+					if (id == dpi.parameterID) {
+						found = true
+						result.add(PACESecurityInfoPair(pi, dpi))
+						break
+					}
+				}
+			}
+			if (!found) {
+				result.add(PACESecurityInfoPair(pi, null))
+			}
+		}
+		return result
+	}
 }

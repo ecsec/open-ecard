@@ -32,7 +32,7 @@ import org.openecard.common.WSHelper.makeResultUnknownError
  * @author Tobias Wich
  */
 class AppExtensionException : WSHelper.WSException {
-    constructor(minor: String, msg: String) : super(makeResultError(minor, msg))
+	constructor(minor: String, msg: String) : super(makeResultError(minor, msg))
 
-    constructor(msg: String) : super(makeResultUnknownError(msg))
+	constructor(msg: String) : super(makeResultUnknownError(msg))
 }

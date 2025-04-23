@@ -23,8 +23,6 @@
 package org.openecard.scio
 
 import android.nfc.tech.IsoDep
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 
 /**
@@ -32,30 +30,31 @@ import java.io.IOException
  * @author Neil Crossley
  */
 class AndroidNFCCardTerminal : NFCCardTerminal<AndroidNFCCard>() {
+	override fun prepareDevices(): Boolean {
+		val card = AndroidNFCCard(this)
+		return this.setNFCCard(card)
+	}
 
-    override fun prepareDevices(): Boolean {
-        val card = AndroidNFCCard(this)
-        return this.setNFCCard(card)
-    }
+	override val isCardPresent: Boolean
+		get() {
+			synchronized(cardLock) {
+				val currentCard: AndroidNFCCard? = this.nFCCard
+				return currentCard != null && currentCard.isTagPresent
+			}
+		}
 
-    override val isCardPresent: Boolean
-        get() {
-            synchronized(cardLock) {
-                val currentCard: AndroidNFCCard? = this.nFCCard
-                return currentCard != null && currentCard.isTagPresent
-            }
-        }
-
-    @Throws(IOException::class)
-    fun setNFCTag(tag: IsoDep, timeout: Int) {
-        kotlin.synchronized(cardLock) {
-            val card = nFCCard
-            if (card == null) {
-                throw IOException("The NFC stack was not initialized and cannot prematurely accept the NFC tag.")
-            }
-            card.setTag(tag, timeout)
-        }
-        this.notifyCardPresent()
-    }
-
+	@Throws(IOException::class)
+	fun setNFCTag(
+		tag: IsoDep,
+		timeout: Int,
+	) {
+		kotlin.synchronized(cardLock) {
+			val card = nFCCard
+			if (card == null) {
+				throw IOException("The NFC stack was not initialized and cannot prematurely accept the NFC tag.")
+			}
+			card.setTag(tag, timeout)
+		}
+		this.notifyCardPresent()
+	}
 }

@@ -28,17 +28,18 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class VersionCheckTest {
-
-	private val releaseInfo = ReleaseInfo(
-		version = "2.2.4".toVersion(),
-		latestVersion = VersionData("2.2.4".toVersion(), listOf()),
-		maintenanceVersions = listOf(VersionData("2.1.4".toVersion(), listOf())),
-		artifacts = listOf(),
-		versionStatus = VersionStatus(
-			maintained = listOf("~2.1.0".toConstraint()),
-			security = listOf(">=2.1.0 <=2.1.2".toConstraint()),
-		),
-	)
+	private val releaseInfo =
+		ReleaseInfo(
+			version = "2.2.4".toVersion(),
+			latestVersion = VersionData("2.2.4".toVersion(), listOf()),
+			maintenanceVersions = listOf(VersionData("2.1.4".toVersion(), listOf())),
+			artifacts = listOf(),
+			versionStatus =
+				VersionStatus(
+					maintained = listOf("~2.1.0".toConstraint()),
+					security = listOf(">=2.1.0 <=2.1.2".toConstraint()),
+				),
+		)
 
 	@Test
 	fun `test no update`() {

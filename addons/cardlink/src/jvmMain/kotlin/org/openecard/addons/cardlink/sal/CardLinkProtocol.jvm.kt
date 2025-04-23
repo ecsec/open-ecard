@@ -29,14 +29,14 @@ import org.openecard.common.DynamicContext
 
 const val CARDLINK_PROTOCOL_ID = "https://gematik.de/protocols/cardlink"
 
-
-fun setWsPair(dynCtx: DynamicContext, ws: WsPair) {
+fun setWsPair(
+	dynCtx: DynamicContext,
+	ws: WsPair,
+) {
 	dynCtx.put(CardLinkKeys.WEBSOCKET, ws)
 }
 
-fun getWsPair(dynCtx: DynamicContext): WsPair {
-	return dynCtx.getPromise(CardLinkKeys.WEBSOCKET).deref() as WsPair
-}
+fun getWsPair(dynCtx: DynamicContext): WsPair = dynCtx.getPromise(CardLinkKeys.WEBSOCKET).deref() as WsPair
 
 class CardLinkProtocol : SALProtocolBaseImpl() {
 	override fun init(aCtx: Context) {

@@ -21,7 +21,6 @@
  ***************************************************************************/
 package org.openecard.common.util
 
-
 /**
  * Parameterized pair class.
  * This simple immutable pair (or tuple) can hold arbitrary values, whose types must be specified by generics.
@@ -30,13 +29,14 @@ package org.openecard.common.util
  */
 class Pair<P1, P2>
 /**
- * Creates a Pair instance for the given parameters.
- *
- * @param p1 First value which is later accessible as `p1`.
- * @param p2 Second value which is later accessible as `p2`.
- */
-constructor(
-	@JvmField
-	val p1: P1, @JvmField
-	val p2: P2
-)
+	 * Creates a Pair instance for the given parameters.
+	 *
+	 * @param p1 First value which is later accessible as `p1`.
+	 * @param p2 Second value which is later accessible as `p2`.
+	 */
+	constructor(
+		@JvmField
+		val p1: P1,
+		@JvmField
+		val p2: P2,
+	)

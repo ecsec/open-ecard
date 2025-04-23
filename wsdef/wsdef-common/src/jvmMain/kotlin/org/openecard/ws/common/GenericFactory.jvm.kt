@@ -35,68 +35,68 @@ import java.util.*
  *
  * @author Tobias Wich
  */
-class GenericFactory<T> @Throws(GenericFactoryException::class) constructor(
-	private val typeClass: Class<T>,
-	properties: Properties,
-	key: String
-) :
-	GenericInstanceProvider<T> {
-    private val actualClass: Class<out T>
-    private val constructor: Constructor<out T>
+class GenericFactory<T>
+	@Throws(GenericFactoryException::class)
+	constructor(
+		private val typeClass: Class<T>,
+		properties: Properties,
+		key: String,
+	) : GenericInstanceProvider<T> {
+		private val actualClass: Class<out T>
+		private val constructor: Constructor<out T>
 
-    init {
-        val className = properties.getProperty(key)
-            ?: throw GenericFactoryException("No factory class defined for the specified key '$key'.")
+		init {
+			val className =
+				properties.getProperty(key)
+					?: throw GenericFactoryException("No factory class defined for the specified key '$key'.")
 
-        try {
-            actualClass = loadClass(className)
-            constructor = getConstructor(actualClass)
-        } catch (ex: ClassNotFoundException) {
-            throw GenericFactoryException(ex)
-        } catch (ex: NoSuchMethodException) {
-            throw GenericFactoryException(ex)
-        }
-    }
+			try {
+				actualClass = loadClass(className)
+				constructor = getConstructor(actualClass)
+			} catch (ex: ClassNotFoundException) {
+				throw GenericFactoryException(ex)
+			} catch (ex: NoSuchMethodException) {
+				throw GenericFactoryException(ex)
+			}
+		}
 
+		@get:Throws(GenericFactoryException::class)
+		override val instance: T
+			get() {
+				try {
+					val o = constructor.newInstance() // default constructor
+					return o // type is asserted by method definition
+				} catch (ex: InstantiationException) {
+					throw GenericFactoryException(ex)
+				} catch (ex: IllegalAccessException) {
+					throw GenericFactoryException(ex)
+				} catch (ex: IllegalArgumentException) {
+					throw GenericFactoryException(ex)
+				} catch (ex: InvocationTargetException) {
+					throw GenericFactoryException(ex)
+				}
+			}
 
-    @get:Throws(GenericFactoryException::class)
-    override val instance: T
-        get() {
-            try {
-                val o = constructor.newInstance() // default constructor
-                return o // type is asserted by method definition
-            } catch (ex: InstantiationException) {
-                throw GenericFactoryException(ex)
-            } catch (ex: IllegalAccessException) {
-                throw GenericFactoryException(ex)
-            } catch (ex: IllegalArgumentException) {
-                throw GenericFactoryException(ex)
-            } catch (ex: InvocationTargetException) {
-                throw GenericFactoryException(ex)
-            }
-        }
+		@Throws(GenericFactoryException::class, NoSuchMethodException::class)
+		private fun getConstructor(clazz: Class<out T>): Constructor<out T> {
+			val m = clazz.getConstructor()
+			if (Modifier.isPublic(m.modifiers)) {
+				return m
+			} else {
+				val msg = String.format("Constructor of class %s is not publicly available.", clazz.name)
+				throw GenericFactoryException(msg)
+			}
+		}
 
-
-    @Throws(GenericFactoryException::class, NoSuchMethodException::class)
-    private fun getConstructor(clazz: Class<out T>): Constructor<out T> {
-        val m = clazz.getConstructor()
-        if (Modifier.isPublic(m.modifiers)) {
-            return m
-        } else {
-            val msg = String.format("Constructor of class %s is not publicly available.", clazz.name)
-            throw GenericFactoryException(msg)
-        }
-    }
-
-    @Throws(ClassNotFoundException::class, GenericFactoryException::class)
-    private fun loadClass(className: String): Class<out T> {
-        val c = Class.forName(className)
-        try {
-            val c2 = c.asSubclass(typeClass)
-            return c2
-        } catch (ex: ClassCastException) {
-            val msg = String.format("Referenced class %s is not a compatible subtype for this factory.", c.name)
-            throw GenericFactoryException(msg)
-        }
-    }
-}
+		@Throws(ClassNotFoundException::class, GenericFactoryException::class)
+		private fun loadClass(className: String): Class<out T> {
+			val c = Class.forName(className)
+			try {
+				val c2 = c.asSubclass(typeClass)
+				return c2
+			} catch (ex: ClassCastException) {
+				val msg = String.format("Referenced class %s is not a compatible subtype for this factory.", c.name)
+				throw GenericFactoryException(msg)
+			}
+		}
+	}

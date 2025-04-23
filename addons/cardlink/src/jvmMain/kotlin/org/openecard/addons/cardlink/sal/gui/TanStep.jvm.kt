@@ -40,8 +40,6 @@ import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
-import java.net.URI
-
 
 private val logger = KotlinLogging.logger {}
 
@@ -53,38 +51,49 @@ private const val TAN_RETRY_TITLE = "TAN Retry Verification"
 
 private const val TAN_ID = "CARDLINK_FIELD_TAN"
 
-
 abstract class TanStepAbstract(
 	open val ws: WsPair,
 	stepId: String,
-	title: String
+	title: String,
 ) : Step(stepId, title)
 
-class TanStep(override val ws: WsPair) : TanStepAbstract(ws, TAN_ENTER_STEP_ID, TAN_ENTER_TITLE) {
+class TanStep(
+	override val ws: WsPair,
+) : TanStepAbstract(ws, TAN_ENTER_STEP_ID, TAN_ENTER_TITLE) {
 	init {
 		setAction(TanStepAction(this))
 
-		inputInfoUnits.add(TextField(TAN_ID).also {
-			it.minLength = 6
-			it.description = "Please enter the TAN you received via SMS."
-		})
+		inputInfoUnits.add(
+			TextField(TAN_ID).also {
+				it.minLength = 6
+				it.description = "Please enter the TAN you received via SMS."
+			},
+		)
 	}
 }
 
-class TanRetryStep(override val ws: WsPair) : TanStepAbstract(ws, TAN_RETRY_STEP_ID, TAN_RETRY_TITLE) {
+class TanRetryStep(
+	override val ws: WsPair,
+) : TanStepAbstract(ws, TAN_RETRY_STEP_ID, TAN_RETRY_TITLE) {
 	init {
 		setAction(TanStepAction(this))
 
-		inputInfoUnits.add(TextField(TAN_ID).also {
-			it.minLength = 6
-			it.description = "Please enter the TAN you received via SMS."
-		})
+		inputInfoUnits.add(
+			TextField(TAN_ID).also {
+				it.minLength = 6
+				it.description = "Please enter the TAN you received via SMS."
+			},
+		)
 	}
 }
 
-class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) {
-
-	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
+class TanStepAction(
+	private val tanStep: TanStepAbstract,
+) : StepAction(tanStep) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
 		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
 		val sendTanStatus = sendTan(tan)
 
@@ -96,16 +105,17 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		val correlationId = dynCtx.get(CardLinkKeys.CORRELATION_ID_TAN_PROCESS) as String
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
-		//second tan is for older services
-		val sendTan = SendTan(tan,tan)
-		val egkEnvelope = GematikEnvelope(
-			sendTan,
-			correlationId,
-			cardSessionId,
-		)
+		// second tan is for older services
+		val sendTan = SendTan(tan, tan)
+		val egkEnvelope =
+			GematikEnvelope(
+				sendTan,
+				correlationId,
+				cardSessionId,
+			)
 		val egkEnvelopeMsg = cardLinkJsonFormatter.encodeToString(egkEnvelope)
 		val ws = tanStep.ws
-		if(!ws.socket.isOpen){
+		if (!ws.socket.isOpen) {
 			var builder = UrlBuilder.fromUrl(ws.socket.url)
 			builder = builder.queryParam("token", dynCtx.get(CardLinkKeys.WS_SESSION_ID) as String)
 			ws.socket.url = builder.build().toString()
@@ -115,9 +125,9 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 		ws.socket.send(egkEnvelopeMsg)
 
 		val wsListener = ws.listener
-		var tanConfirmResponse : GematikEnvelope? = wsListener.nextMessageBlocking()
+		var tanConfirmResponse: GematikEnvelope? = wsListener.nextMessageBlocking()
 
-		if(tanConfirmResponse?.payload is SessionInformation){
+		if (tanConfirmResponse?.payload is SessionInformation) {
 			logger.debug { "Ignore ${SESSION_INFO} during TAN-Step." }
 			tanConfirmResponse = wsListener.nextMessageBlocking()
 		}
@@ -132,7 +142,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
-				)
+				),
 			)
 		}
 
@@ -141,7 +151,8 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 
 		if (egkPayload is TasklistErrorPayload) {
 			val errorMsg = egkPayload.errormessage ?: "Received an unknown error from CardLink service."
-			val errorResultCode = CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
+			val errorResultCode =
+				CardLinkErrorCodes.CardLinkCodes.byStatus(egkPayload.status) ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR
 			logger.warn { "Received '${TASK_LIST_ERROR}': $errorMsg (Result Code: $errorResultCode)" }
 			dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, errorResultCode)
 			dynCtx.put(CardLinkKeys.ERROR_MESSAGE, errorMsg)
@@ -158,7 +169,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
-				)
+				),
 			)
 		}
 
@@ -170,22 +181,29 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 				logger.debug { "Continue with next" }
 				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
-				logger.error { "Received error in Tan step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})" }
+				logger.error {
+					"Received error in Tan step from CardLink Service: ${egkPayload.errorMessage} (Status Code: ${egkPayload.resultCode})"
+				}
 
 				val resCode = egkPayload.resultCode ?: egkPayload.minor
 
-				dynCtx.put(CardLinkKeys.SERVICE_ERROR_CODE, resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR )
+				dynCtx.put(
+					CardLinkKeys.SERVICE_ERROR_CODE,
+					resCode?.toCardLinkErrorCode() ?: CardLinkErrorCodes.CardLinkCodes.UNKNOWN_ERROR,
+				)
 				dynCtx.put(CardLinkKeys.ERROR_MESSAGE, egkPayload.errorMessage)
 
-				val resultStatus = when (resCode) {
-					ResultCode.TAN_INCORRECT -> StepActionResultStatus.REPEAT
-					else -> StepActionResultStatus.CANCEL
-				}
+				val resultStatus =
+					when (resCode) {
+						ResultCode.TAN_INCORRECT -> StepActionResultStatus.REPEAT
+						else -> StepActionResultStatus.CANCEL
+					}
 
-				val retryStep = when (resCode) {
-					ResultCode.TAN_INCORRECT -> TanRetryStep(tanStep.ws)
-					else -> null
-				}
+				val retryStep =
+					when (resCode) {
+						ResultCode.TAN_INCORRECT -> TanRetryStep(tanStep.ws)
+						else -> null
+					}
 
 				StepActionResult(resultStatus, retryStep)
 			}
@@ -199,7 +217,7 @@ class TanStepAction(private val tanStep: TanStepAbstract) : StepAction(tanStep) 
 				ErrorStep(
 					"CardLink Error",
 					errorMsg,
-				)
+				),
 			)
 		}
 	}

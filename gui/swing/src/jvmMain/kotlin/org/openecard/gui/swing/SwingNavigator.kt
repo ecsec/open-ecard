@@ -28,15 +28,13 @@ import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.Step
 import org.openecard.gui.swing.common.GUIConstants
 import org.openecard.gui.swing.common.NavigationEvent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.awt.Container
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicInteger
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Implementation of the UserConsentNavigator interface for the Swing GUI.
@@ -46,213 +44,207 @@ private val LOG = KotlinLogging.logger {  }
  * @author Moritz Horsch
  */
 class SwingNavigator(
-    private val dialogWrapper: SwingDialogWrapper,
-    private val dialogType: String,
-    steps: MutableList<Step>,
-    private val stepContainer: Container,
-    navPanel: NavigationBar,
-    stepBar: StepBar
-) : UserConsentNavigator, ActionListener {
+	private val dialogWrapper: SwingDialogWrapper,
+	private val dialogType: String,
+	steps: MutableList<Step>,
+	private val stepContainer: Container,
+	navPanel: NavigationBar,
+	stepBar: StepBar,
+) : UserConsentNavigator,
+	ActionListener {
+	private val stepFrames: MutableList<StepFrame>
+	private val navBar: NavigationBar
+	private val stepBar: StepBar
 
-    private val stepFrames: MutableList<StepFrame>
-    private val navBar: NavigationBar
-    private val stepBar: StepBar
+	private var stepPointer: Int
+	private var action: Future<*>? = null
 
-    private var stepPointer: Int
-    private var action: Future<*>? = null
+	init {
+		this.stepPointer = -1
+		this.stepFrames = createStepFrames(steps, dialogType)
+		this.navBar = navPanel
+		this.stepBar = stepBar
 
+		this.dialogWrapper.show()
+	}
 
-    init {
-        this.stepPointer = -1
-        this.stepFrames = createStepFrames(steps, dialogType)
-        this.navBar = navPanel
-        this.stepBar = stepBar
+	override fun hasNext(): Boolean = stepPointer < (stepFrames.size - 1)
 
-        this.dialogWrapper.show()
-    }
+	override fun current(): StepResult? {
+		stepBar.disableLoaderImage()
+		selectIdx(stepPointer)
+		val frame = stepFrames[stepPointer]
 
-    override fun hasNext(): Boolean {
-        return stepPointer < (stepFrames.size - 1)
-    }
+		// click next button without giving the user the possibility to interfere
+		clickIfInstantReturn(frame)
 
-    override fun current(): StepResult? {
-        stepBar.disableLoaderImage()
-        selectIdx(stepPointer)
-        val frame = stepFrames[stepPointer]
+		return frame.getStepResult()
+	}
 
-        // click next button without giving the user the possibility to interfere
-        clickIfInstantReturn(frame)
+	override fun next(): StepResult? {
+		stepBar.disableLoaderImage()
+		if (hasNext()) {
+			selectIdx(stepPointer + 1)
+			val frame = stepFrames[stepPointer]
 
-        return frame.getStepResult()
-    }
+			// click next button without giving the user the possibility to interfere
+			clickIfInstantReturn(frame)
 
-    override fun next(): StepResult? {
-        stepBar.disableLoaderImage()
-        if (hasNext()) {
-            selectIdx(stepPointer + 1)
-            val frame = stepFrames[stepPointer]
+			return frame.getStepResult()
+		}
+		return SwingStepResult(null, ResultStatus.CANCEL)
+	}
 
-            // click next button without giving the user the possibility to interfere
-            clickIfInstantReturn(frame)
+	override fun previous(): StepResult? {
+		stepBar.disableLoaderImage()
+		if (stepPointer > 0) {
+			selectIdx(stepPointer - 1)
+			val frame = stepFrames[stepPointer]
 
-            return frame.getStepResult()
-        }
-        return SwingStepResult(null, ResultStatus.CANCEL)
-    }
+			// click next button without giving the user the possibility to interfere
+			clickIfInstantReturn(frame)
 
-    override fun previous(): StepResult? {
-        stepBar.disableLoaderImage()
-        if (stepPointer > 0) {
-            selectIdx(stepPointer - 1)
-            val frame = stepFrames[stepPointer]
+			return frame.getStepResult()
+		}
+		return SwingStepResult(null, ResultStatus.CANCEL)
+	}
 
-            // click next button without giving the user the possibility to interfere
-            clickIfInstantReturn(frame)
+	override fun replaceCurrent(step: Step): StepResult {
+		stepBar.disableLoaderImage()
+		stepFrames.removeAt(stepPointer)
+		val sf = StepFrame(step, dialogType)
+		stepFrames.add(stepPointer, sf)
+		selectIdx(stepPointer)
 
-            return frame.getStepResult()
-        }
-        return SwingStepResult(null, ResultStatus.CANCEL)
-    }
+		// click next button without giving the user the possibility to interfere
+		clickIfInstantReturn(sf)
 
-    override fun replaceCurrent(step: Step): StepResult {
-        stepBar.disableLoaderImage()
-        stepFrames.removeAt(stepPointer)
-        val sf = StepFrame(step, dialogType)
-        stepFrames.add(stepPointer, sf)
-        selectIdx(stepPointer)
+		return sf.getStepResult()
+	}
 
-        // click next button without giving the user the possibility to interfere
-        clickIfInstantReturn(sf)
+	override fun replaceNext(step: Step): StepResult {
+		stepBar.disableLoaderImage()
+		stepPointer = stepPointer + 1
+		if (stepPointer < stepFrames.size) {
+			stepFrames.removeAt(stepPointer)
+		}
 
-        return sf.getStepResult()
-    }
+		val sf = StepFrame(step, dialogType)
+		stepFrames.add(stepPointer, sf)
+		selectIdx(stepPointer)
 
-    override fun replaceNext(step: Step): StepResult {
-        stepBar.disableLoaderImage()
-        stepPointer = stepPointer + 1
-        if (stepPointer < stepFrames.size) {
-            stepFrames.removeAt(stepPointer)
-        }
+		// click next button without giving the user the possibility to interfere
+		clickIfInstantReturn(sf)
 
-        val sf = StepFrame(step, dialogType)
-        stepFrames.add(stepPointer, sf)
-        selectIdx(stepPointer)
+		return sf.getStepResult()
+	}
 
-        // click next button without giving the user the possibility to interfere
-        clickIfInstantReturn(sf)
+	override fun replacePrevious(step: Step): StepResult {
+		stepBar.disableLoaderImage()
+		if (stepPointer > 0) {
+			stepPointer = stepPointer - 1
+			stepFrames.removeAt(stepPointer)
+		}
 
-        return sf.getStepResult()
-    }
+		val sf = StepFrame(step, dialogType)
+		stepFrames.add(stepPointer, sf)
+		selectIdx(stepPointer)
 
-    override fun replacePrevious(step: Step): StepResult {
-        stepBar.disableLoaderImage()
-        if (stepPointer > 0) {
-            stepPointer = stepPointer - 1
-            stepFrames.removeAt(stepPointer)
-        }
+		// click next button without giving the user the possibility to interfere
+		clickIfInstantReturn(sf)
 
-        val sf = StepFrame(step, dialogType)
-        stepFrames.add(stepPointer, sf)
-        selectIdx(stepPointer)
+		return sf.getStepResult()
+	}
 
-        // click next button without giving the user the possibility to interfere
-        clickIfInstantReturn(sf)
+	override fun setRunningAction(action: Future<*>) {
+		this.action = action
+	}
 
-        return sf.getStepResult()
-    }
+	override fun close() {
+		dialogWrapper.hide()
+	}
 
-
-    override fun setRunningAction(action: Future<*>) {
-        this.action = action
-    }
-
-
-    override fun close() {
-        dialogWrapper.hide()
-    }
-
-
-    private fun createStepFrames(steps: List<Step>, dialogType: String): ArrayList<StepFrame> {
-        val frames = ArrayList<StepFrame>(steps.size)
-        for (i in steps.indices) {
-            if (i == 0) {
+	private fun createStepFrames(
+		steps: List<Step>,
+		dialogType: String,
+	): ArrayList<StepFrame> {
+		val frames = ArrayList<StepFrame>(steps.size)
+		for (i in steps.indices) {
+			if (i == 0) {
 				steps[0].isReversible = false
-            }
-            val s = steps[i]
-            val sf = StepFrame(s, dialogType)
-            frames.add(sf)
-        }
-        return frames
-    }
+			}
+			val s = steps[i]
+			val sf = StepFrame(s, dialogType)
+			frames.add(sf)
+		}
+		return frames
+	}
 
+	private fun selectIdx(idx: Int) {
+		// Content replacement
+		val nextStep = stepFrames[idx]
+		stepBar.selectIdx(idx)
+		navBar.selectIdx(idx, nextStep.step)
+		val nextPanel = nextStep.getPanel()
+		nextStep.resetResult()
 
-    private fun selectIdx(idx: Int) {
-        // Content replacement
-        val nextStep = stepFrames[idx]
-        stepBar.selectIdx(idx)
-        navBar.selectIdx(idx, nextStep.step)
-        val nextPanel = nextStep.getPanel()
-        nextStep.resetResult()
+		stepContainer.removeAll()
+		stepContainer.add(nextPanel)
+		stepContainer.validate()
+		stepContainer.repaint()
 
-        stepContainer.removeAll()
-        stepContainer.add(nextPanel)
-        stepContainer.validate()
-        stepContainer.repaint()
+		stepPointer = idx
 
-        stepPointer = idx
+		nextStep.updateFrame()
+		nextStep.unlockControls()
+		navBar.unlockControls()
 
-        nextStep.updateFrame()
-        nextStep.unlockControls()
-        navBar.unlockControls()
+		val reversible = nextStep.step.isReversible
+		navBar.setReversible(reversible)
+	}
 
-        val reversible = nextStep.step.isReversible
-        navBar.setReversible(reversible)
-    }
+	private fun clickIfInstantReturn(frame: StepFrame) {
+		if (frame.isInstantReturn) {
+			val command = GUIConstants.BUTTON_NEXT
+			val e = ActionEvent(frame.step, ActionEvent.ACTION_PERFORMED, command)
+			// create async invocation of the action
+			object : Thread("Instant-Return-Thread-" + THREAD_NUM.getAndIncrement()) {
+				override fun run() {
+					actionPerformed(e)
+				}
+			}.start()
+		}
+	}
 
-
-    private fun clickIfInstantReturn(frame: StepFrame) {
-        if (frame.isInstantReturn) {
-            val command = GUIConstants.BUTTON_NEXT
-            val e = ActionEvent(frame.step, ActionEvent.ACTION_PERFORMED, command)
-            // create async invocation of the action
-            object : Thread("Instant-Return-Thread-" + THREAD_NUM.getAndIncrement()) {
-                override fun run() {
-                    actionPerformed(e)
-                }
-            }.start()
-        }
-    }
-
-    override fun actionPerformed(e: ActionEvent) {
+	override fun actionPerformed(e: ActionEvent) {
 		LOG.debug { "Received event: ${e.getActionCommand()}" }
 
-        val event: NavigationEvent? = NavigationEvent.Companion.fromEvent(e)
-        if (event == null) {
+		val event: NavigationEvent? = NavigationEvent.Companion.fromEvent(e)
+		if (event == null) {
 			error { "Unknown event received: ${e.getActionCommand()}" }
-            return
-        }
+			return
+		}
 
-        // in case the user wants to proceed check if all components are valid
-        val curStep = stepFrames[stepPointer]
-        if (event == NavigationEvent.NEXT && !curStep.validateComponents()) {
+		// in case the user wants to proceed check if all components are valid
+		val curStep = stepFrames[stepPointer]
+		if (event == NavigationEvent.NEXT && !curStep.validateComponents()) {
 			LOG.debug { "Validation of components failed." }
-            return
-        }
+			return
+		}
 
-        // in case there is a running action, kill it and bail out
-        if (action != null && !action!!.isDone) {
+		// in case there is a running action, kill it and bail out
+		if (action != null && !action!!.isDone) {
 			LOG.debug { "Canceling execution of the currently running StepAction." }
-            action!!.cancel(true)
-            return
-        }
+			action!!.cancel(true)
+			return
+		}
 
-        // lock controls and update current step result
-        stepBar.enableLoaderImage()
-        navBar.lockControls()
-        curStep.lockControls()
-        curStep.updateResult(event)
-    }
-
+		// lock controls and update current step result
+		stepBar.enableLoaderImage()
+		navBar.lockControls()
+		curStep.lockControls()
+		curStep.updateResult(event)
+	}
 }
 
 private val THREAD_NUM = AtomicInteger(1)

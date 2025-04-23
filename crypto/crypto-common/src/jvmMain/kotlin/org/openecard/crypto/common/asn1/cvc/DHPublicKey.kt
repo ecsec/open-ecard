@@ -28,12 +28,14 @@ import org.openecard.common.tlv.TLV
  *
  * @author Moritz Horsch
  */
-class DHPublicKey protected constructor(tlv: TLV) : PublicKey() {
-    /**
-     * Creates a new DHPublicKey.
-     *
-     * @param tlv TLV encoded key
-     */
+class DHPublicKey protected constructor(
+	tlv: TLV,
+) : PublicKey() {
+	/**
+	 * Creates a new DHPublicKey.
+	 *
+	 * @param tlv TLV encoded key
+	 */
 	init {
 		throw UnsupportedOperationException("Not supported yet.")
 	}
@@ -44,7 +46,5 @@ class DHPublicKey protected constructor(tlv: TLV) : PublicKey() {
 	override val tLVEncoded: TLV
 		get() = throw UnsupportedOperationException("Not supported yet.")
 
-	override fun compare(pk: PublicKey): Boolean {
-		throw UnsupportedOperationException("Not supported yet.")
-	}
+	override fun compare(pk: PublicKey): Boolean = throw UnsupportedOperationException("Not supported yet.")
 }

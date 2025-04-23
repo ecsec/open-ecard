@@ -35,7 +35,6 @@ import javax.swing.JRootPane
  * @author Moritz Horsch
  */
 class SwingDialogWrapper {
-
 	private lateinit var screenDevice: GraphicsDevice
 	val dialog: JFrame by lazy {
 		JFrame().apply {
@@ -73,7 +72,10 @@ class SwingDialogWrapper {
 		this.title = title
 	}
 
-	fun setSize(width: Int, height: Int) {
+	fun setSize(
+		width: Int,
+		height: Int,
+	) {
 		dialog.setSize(width, height)
 	}
 
@@ -116,9 +118,7 @@ class SwingDialogWrapper {
 		screenDevice.setFullScreenWindow(null)
 	}
 
-	fun derive(): SwingDialogWrapper {
-		return SwingDialogWrapper(this)
-	}
+	fun derive(): SwingDialogWrapper = SwingDialogWrapper(this)
 
 	private val isChangeResolution: Boolean
 		get() = false
@@ -133,7 +133,7 @@ class SwingDialogWrapper {
 					mode.width,
 					mode.height,
 					mode.bitDepth,
-					mode.refreshRate
+					mode.refreshRate,
 				)
 			}
 

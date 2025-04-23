@@ -29,4 +29,4 @@ package org.openecard.common.interfaces
  * @author Hans-Martin Haase
  */
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Publish 
+annotation class Publish

@@ -33,70 +33,70 @@ import java.io.IOException
  * @author Tobias Wich
  */
 object ObjectIdentifierUtils {
-    /**
-     * Converts a ASN1 object identifier to a byte array
-     *
-     * @param oid String
-     * @return TLV encoded object identifier
-     * @throws TLVException
-     */
-    @JvmStatic
+	/**
+	 * Converts a ASN1 object identifier to a byte array
+	 *
+	 * @param oid String
+	 * @return TLV encoded object identifier
+	 * @throws TLVException
+	 */
+	@JvmStatic
 	@Throws(TLVException::class)
-    fun toByteArray(oid: String): ByteArray {
-        try {
-            return ASN1ObjectIdentifier(oid).encoded
-        } catch (ex: IllegalArgumentException) {
-            throw TLVException("Failed to parse OID.", ex)
-        } catch (ex: IOException) {
-            throw TLVException("Failed to parse OID.", ex)
-        }
-    }
+	fun toByteArray(oid: String): ByteArray {
+		try {
+			return ASN1ObjectIdentifier(oid).encoded
+		} catch (ex: IllegalArgumentException) {
+			throw TLVException("Failed to parse OID.", ex)
+		} catch (ex: IOException) {
+			throw TLVException("Failed to parse OID.", ex)
+		}
+	}
 
-    /**
-     * Converts a ASN1 object identifier in byte array form to a String.
-     *
-     * @param oid Object Identifier either as TLV structure or plain.
-     * @return Object Identifier string.
-     * @throws TLVException
-     */
-    @JvmStatic
+	/**
+	 * Converts a ASN1 object identifier in byte array form to a String.
+	 *
+	 * @param oid Object Identifier either as TLV structure or plain.
+	 * @return Object Identifier string.
+	 * @throws TLVException
+	 */
+	@JvmStatic
 	@Throws(TLVException::class)
-    fun toString(oid: ByteArray): String {
-        try {
-            var obj: TLV
-            try {
-                obj = TLV.fromBER(oid)
-            } catch (ex: TLVException) {
-                // read as plain value
-                obj = TLV()
-                obj.tagNum = 0x06
+	fun toString(oid: ByteArray): String {
+		try {
+			var obj: TLV
+			try {
+				obj = TLV.fromBER(oid)
+			} catch (ex: TLVException) {
+				// read as plain value
+				obj = TLV()
+				obj.tagNum = 0x06
 				obj.value = oid
-            }
-            return ASN1ObjectIdentifier.getInstance(obj.toBER()).id
-        } catch (ex: IllegalArgumentException) {
-            throw TLVException("Failed to parse OID.", ex)
-        }
-    }
+			}
+			return ASN1ObjectIdentifier.getInstance(obj.toBER()).id
+		} catch (ex: IllegalArgumentException) {
+			throw TLVException("Failed to parse OID.", ex)
+		}
+	}
 
-    /**
-     * Converts a ASN1 object identifier to a byte array.
-     * Returns only the value without the length and 0x06 tag.
-     *
-     * @param oid String
-     * @return Value of the object identifier
-     * @throws TLVException
-     */
-    @JvmStatic
+	/**
+	 * Converts a ASN1 object identifier to a byte array.
+	 * Returns only the value without the length and 0x06 tag.
+	 *
+	 * @param oid String
+	 * @return Value of the object identifier
+	 * @throws TLVException
+	 */
+	@JvmStatic
 	@Throws(TLVException::class)
-    fun getValue(oid: String): ByteArray {
-        try {
-            val oidObj = ASN1ObjectIdentifier(oid)
-            val oidTlv = TLV.fromBER(oidObj.encoded)
-            return oidTlv.value
-        } catch (ex: IllegalArgumentException) {
-            throw TLVException("Failed to parse OID.", ex)
-        } catch (ex: IOException) {
-            throw TLVException("Failed to parse OID.", ex)
-        }
-    }
+	fun getValue(oid: String): ByteArray {
+		try {
+			val oidObj = ASN1ObjectIdentifier(oid)
+			val oidTlv = TLV.fromBER(oidObj.encoded)
+			return oidTlv.value
+		} catch (ex: IllegalArgumentException) {
+			throw TLVException("Failed to parse OID.", ex)
+		} catch (ex: IOException) {
+			throw TLVException("Failed to parse OID.", ex)
+		}
+	}
 }

@@ -30,4 +30,9 @@ import org.apache.http.HttpException
  *
  * @author Tobias Wich
  */
-class InvalidResultStatus(val code: Int = 0, val reason: String? = null, message: String, cause: Throwable? = null) : HttpException(message, cause)
+class InvalidResultStatus(
+	val code: Int = 0,
+	val reason: String? = null,
+	message: String,
+	cause: Throwable? = null,
+) : HttpException(message, cause)

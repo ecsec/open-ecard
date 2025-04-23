@@ -30,46 +30,45 @@ import org.testng.annotations.Test
  * @author Tobias Wich
  */
 class WaitTest {
-    private val ifd: IFD = IFD()
-
+	private val ifd: IFD = IFD()
 
 	@Test(enabled = false)
-    fun testBlockingWait() {
-        val ctxHandle = ifd.establishContext(EstablishContext()).getContextHandle()
-        val gs = GetStatus()
-        gs.setContextHandle(ctxHandle)
-        val statusResp = ifd.getStatus(gs)
-        // wait until first terminal is added without smartcard
-        val waitReq = Wait()
-        waitReq.getIFDStatus().addAll(statusResp.getIFDStatus())
-        waitReq.setContextHandle(ctxHandle)
-        //        waitReq.setTimeOut(new BigInteger("1000"));
-        val wr = ifd.wait(waitReq)
+	fun testBlockingWait() {
+		val ctxHandle = ifd.establishContext(EstablishContext()).getContextHandle()
+		val gs = GetStatus()
+		gs.setContextHandle(ctxHandle)
+		val statusResp = ifd.getStatus(gs)
+		// wait until first terminal is added without smartcard
+		val waitReq = Wait()
+		waitReq.getIFDStatus().addAll(statusResp.getIFDStatus())
+		waitReq.setContextHandle(ctxHandle)
+		//        waitReq.setTimeOut(new BigInteger("1000"));
+		val wr = ifd.wait(waitReq)
 
-        Assert.assertTrue(
+		Assert.assertTrue(
 			wr.getIFDEvent()[0].getSlotStatus()[0].isCardAvailable == true,
-			"Wait test failed"
+			"Wait test failed",
 		)
 
-        // add second terminal without smartcard
-        val waitReq2 = Wait()
-        waitReq2.getIFDStatus().addAll(wr.getIFDEvent())
-        waitReq2.setContextHandle(ctxHandle)
-        val wr2 = ifd.wait(waitReq2)
+		// add second terminal without smartcard
+		val waitReq2 = Wait()
+		waitReq2.getIFDStatus().addAll(wr.getIFDEvent())
+		waitReq2.setContextHandle(ctxHandle)
+		val wr2 = ifd.wait(waitReq2)
 
-        Assert.assertTrue(
-            wr2.getIFDEvent()[1].getSlotStatus()[0].isCardAvailable == false,
-            "Wait test failed"
-        )
-        // insert a terminal
-        val waitReq3 = Wait()
-        waitReq3.getIFDStatus().addAll(wr2.getIFDEvent())
-        waitReq3.setContextHandle(ctxHandle)
-        val wr3 = ifd.wait(waitReq3)
+		Assert.assertTrue(
+			wr2.getIFDEvent()[1].getSlotStatus()[0].isCardAvailable == false,
+			"Wait test failed",
+		)
+		// insert a terminal
+		val waitReq3 = Wait()
+		waitReq3.getIFDStatus().addAll(wr2.getIFDEvent())
+		waitReq3.setContextHandle(ctxHandle)
+		val wr3 = ifd.wait(waitReq3)
 
-        Assert.assertTrue(
+		Assert.assertTrue(
 			wr3.getIFDEvent().size == 1,
-			"Wait test failed"
+			"Wait test failed",
 		)
-    }
+	}
 }

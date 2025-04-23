@@ -22,7 +22,6 @@
 
 package org.openecard.addon.bind
 
-
 /**
  * Constants for use in the auxiliary data map.
  * Auxiliary data are open, but some of the sued keys share a common meaning. The constants here help to establish a
@@ -31,9 +30,9 @@ package org.openecard.addon.bind
  * @author Tobias Wich
  */
 object AuxDataKeys {
-    private const val PREFIX = "org.openecard.addon.bind.aux_data."
+	private const val PREFIX = "org.openecard.addon.bind.aux_data."
 
-    const val REDIRECT_LOCATION: String = "${PREFIX}redirect_location"
-    const val RESPONSE_HEADERS: String = "${PREFIX}response_headers"
-    const val MINOR_PROCESS_RESULT: String = "${PREFIX}minor_result"
+	const val REDIRECT_LOCATION: String = "${PREFIX}redirect_location"
+	const val RESPONSE_HEADERS: String = "${PREFIX}response_headers"
+	const val MINOR_PROCESS_RESULT: String = "${PREFIX}minor_result"
 }

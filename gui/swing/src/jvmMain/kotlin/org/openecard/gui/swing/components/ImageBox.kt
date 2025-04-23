@@ -33,14 +33,15 @@ import javax.swing.JLabel
  *
  * @author Tobias Wich
  */
-class ImageBox(imageBox: ImageBox) : StepComponent {
+class ImageBox(
+	imageBox: ImageBox,
+) : StepComponent {
 	private val imageLabel: JLabel
 	private val image: ImageIcon = ImageIcon(imageBox.getImageData())
 
 	init {
 		this.imageLabel = JLabel(image)
 	}
-
 
 	override val component: Component
 		get() {
@@ -52,9 +53,7 @@ class ImageBox(imageBox: ImageBox) : StepComponent {
 			throw UnsupportedOperationException("Not supported yet.")
 		}
 
-	override fun validate(): Boolean {
-		throw UnsupportedOperationException("Not supported yet.")
-	}
+	override fun validate(): Boolean = throw UnsupportedOperationException("Not supported yet.")
 
 	override val value: OutputInfoUnit?
 		get() {

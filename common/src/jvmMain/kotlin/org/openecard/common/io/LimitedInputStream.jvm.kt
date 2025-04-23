@@ -33,52 +33,57 @@ import java.io.InputStream
  */
 class LimitedInputStream
 /**
- * Creates a new limited input stream.
- *
- * @param inputStream Input stream
- */
-@JvmOverloads constructor(inputStream: InputStream, private var limit: Int = 1048576) :
-	FilterInputStream(inputStream) {
-    /**
-     * Creates a new limited input stream.
-     *
-     * @param inputStream Input stream
-     * @param limit Limit
-     */
-    @Throws(IOException::class)
-    override fun read(): Int {
-        val res = super.read()
-        if (res != -1) {
-            limit--
-            checkLimit()
-        }
-        return res
-    }
+	 * Creates a new limited input stream.
+	 *
+	 * @param inputStream Input stream
+	 */
+	@JvmOverloads
+	constructor(
+		inputStream: InputStream,
+		private var limit: Int = 1048576,
+	) : FilterInputStream(inputStream) {
+		/**
+		 * Creates a new limited input stream.
+		 *
+		 * @param inputStream Input stream
+		 * @param limit Limit
+		 */
+		@Throws(IOException::class)
+		override fun read(): Int {
+			val res = super.read()
+			if (res != -1) {
+				limit--
+				checkLimit()
+			}
+			return res
+		}
 
-    @Throws(IOException::class)
-    override fun read(b: ByteArray): Int {
-        return this.read(b, 0, b.size)
-    }
+		@Throws(IOException::class)
+		override fun read(b: ByteArray): Int = this.read(b, 0, b.size)
 
-    @Throws(IOException::class)
-    override fun read(b: ByteArray, off: Int, len: Int): Int {
-        val res = super.read(b, off, len)
-        if (res != -1) {
-            limit -= len
-            checkLimit()
-        }
-        return res
-    }
+		@Throws(IOException::class)
+		override fun read(
+			b: ByteArray,
+			off: Int,
+			len: Int,
+		): Int {
+			val res = super.read(b, off, len)
+			if (res != -1) {
+				limit -= len
+				checkLimit()
+			}
+			return res
+		}
 
-    /**
-     * Checks if the limit of the stream is reached.
-     *
-     * @throws IOException
-     */
-    @Throws(IOException::class)
-    private fun checkLimit() {
-        if (limit < 1) {
-            throw IOException("Input streams limit is reached.")
-        }
-    }
-}
+		/**
+		 * Checks if the limit of the stream is reached.
+		 *
+		 * @throws IOException
+		 */
+		@Throws(IOException::class)
+		private fun checkLimit() {
+			if (limit < 1) {
+				throw IOException("Input streams limit is reached.")
+			}
+		}
+	}

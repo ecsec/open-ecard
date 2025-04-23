@@ -33,19 +33,22 @@ import kotlin.math.min
  * @author Tobias Wich
  */
 internal class ByteArrayComparator : Comparator<ByteArray> {
-    override fun compare(o1: ByteArray, o2: ByteArray): Int {
-        val minLen = min(o1.size.toDouble(), o2.size.toDouble()).toInt()
-        // compare elements
-        for (i in 0..<minLen) {
-            if (o1[i] != o2[i]) {
-                return o1[i] - o2[i]
-            }
-        }
-        // compare length of arrays
-        if (o1.size != o2.size) {
-            return o1.size - o2.size
-        }
-        // equal
-        return 0
-    }
+	override fun compare(
+		o1: ByteArray,
+		o2: ByteArray,
+	): Int {
+		val minLen = min(o1.size.toDouble(), o2.size.toDouble()).toInt()
+		// compare elements
+		for (i in 0..<minLen) {
+			if (o1[i] != o2[i]) {
+				return o1[i] - o2[i]
+			}
+		}
+		// compare length of arrays
+		if (o1.size != o2.size) {
+			return o1.size - o2.size
+		}
+		// equal
+		return 0
+	}
 }

@@ -34,33 +34,36 @@ import org.openecard.addon.Context
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-class AppPluginActionProxy(implClass: String, classLoader: ClassLoader) :
-    AbstractFactory<AppPluginAction>(implClass, classLoader), AppPluginAction {
-    private var c: AppPluginAction? = null
+class AppPluginActionProxy(
+	implClass: String,
+	classLoader: ClassLoader,
+) : AbstractFactory<AppPluginAction>(implClass, classLoader),
+	AppPluginAction {
+	private var c: AppPluginAction? = null
 
 //    val actionDescription: Unit
 //        get() {
 //            throw UnsupportedOperationException()
 //        }
 
-    override fun execute(
-        body: RequestBody?,
-        parameters: Map<String, String>?,
-        headers: Headers?,
-        attachments: List<Attachment>?,
-        extraParams: Map<String, Any>?
-    ): BindingResult {
-        //TODO use annotations to find the right function
-        return c?.execute(body, parameters, headers, attachments, extraParams)
+	override fun execute(
+		body: RequestBody?,
+		parameters: Map<String, String>?,
+		headers: Headers?,
+		attachments: List<Attachment>?,
+		extraParams: Map<String, Any>?,
+	): BindingResult {
+		// TODO use annotations to find the right function
+		return c?.execute(body, parameters, headers, attachments, extraParams)
 			?: throw IllegalStateException("AppPluginAction not initialized")
-    }
+	}
 
-    @Throws(ActionInitializationException::class)
-    override fun init(aCtx: Context) {
-        c = loadInstance(aCtx, AppPluginAction::class.java)
-    }
+	@Throws(ActionInitializationException::class)
+	override fun init(aCtx: Context) {
+		c = loadInstance(aCtx, AppPluginAction::class.java)
+	}
 
-    override fun destroy(force: Boolean) {
-        c?.destroy(force)
-    }
+	override fun destroy(force: Boolean) {
+		c?.destroy(force)
+	}
 }

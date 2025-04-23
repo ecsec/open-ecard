@@ -33,37 +33,42 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-
 @Serializable
-class VersionStatus (
+class VersionStatus(
 	val maintained: List<SemverConstraint>,
 	val security: List<SemverConstraint>,
 )
 
+typealias SemverVersion =
+	@Serializable(SemverVersionSerializer::class)
+	Version
 
-typealias SemverVersion = @Serializable(SemverVersionSerializer::class) Version
-object SemverVersionSerializer: KSerializer<Version> {
+object SemverVersionSerializer : KSerializer<Version> {
 	override val descriptor = PrimitiveSerialDescriptor("SemverVersion", PrimitiveKind.STRING)
 
-	override fun deserialize(decoder: Decoder): Version {
-		return decoder.decodeString().toVersion()
-	}
+	override fun deserialize(decoder: Decoder): Version = decoder.decodeString().toVersion()
 
-	override fun serialize(encoder: Encoder, value: Version) {
+	override fun serialize(
+		encoder: Encoder,
+		value: Version,
+	) {
 		encoder.encodeString(value.toString())
 	}
-
 }
 
-typealias SemverConstraint = @Serializable(SemverConstraintSerializer::class) Constraint
-object SemverConstraintSerializer: KSerializer<Constraint> {
+typealias SemverConstraint =
+	@Serializable(SemverConstraintSerializer::class)
+	Constraint
+
+object SemverConstraintSerializer : KSerializer<Constraint> {
 	override val descriptor = PrimitiveSerialDescriptor("SemverConstraint", PrimitiveKind.STRING)
 
-	override fun deserialize(decoder: Decoder): Constraint {
-		return decoder.decodeString().toConstraint()
-	}
+	override fun deserialize(decoder: Decoder): Constraint = decoder.decodeString().toConstraint()
 
-	override fun serialize(encoder: Encoder, value: Constraint) {
+	override fun serialize(
+		encoder: Encoder,
+		value: Constraint,
+	) {
 		encoder.encodeString(value.toString())
 	}
 }

@@ -29,31 +29,31 @@ import java.util.*
  * @author Tobias Wich
  */
 object WhitespaceFilter {
-    fun filter(root: Node) {
-        val childNodes = root.childNodes
+	fun filter(root: Node) {
+		val childNodes = root.childNodes
 
-        // remove afterwards else the nodelist indices may not be correct
-        val toRemove = LinkedList<Node>()
+		// remove afterwards else the nodelist indices may not be correct
+		val toRemove = LinkedList<Node>()
 
-        for (i in 0 until childNodes.length) {
-            val next = childNodes.item(i)
+		for (i in 0 until childNodes.length) {
+			val next = childNodes.item(i)
 
-            // only one textnode
-            if ((next.nodeType == Node.TEXT_NODE) && childNodes.length == 1) {
-                next.nodeValue = next.nodeValue.trim { it <= ' ' }
-            } else if (next.nodeType == Node.TEXT_NODE) {
-                val strippedData = next.nodeValue.trim { it <= ' ' }
-                if (strippedData.isEmpty()) {
-                    toRemove.addFirst(next)
-                }
-            } else {
-                filter(next)
-            }
-        }
+			// only one textnode
+			if ((next.nodeType == Node.TEXT_NODE) && childNodes.length == 1) {
+				next.nodeValue = next.nodeValue.trim { it <= ' ' }
+			} else if (next.nodeType == Node.TEXT_NODE) {
+				val strippedData = next.nodeValue.trim { it <= ' ' }
+				if (strippedData.isEmpty()) {
+					toRemove.addFirst(next)
+				}
+			} else {
+				filter(next)
+			}
+		}
 
-        // remove all this bullshit
-        for (n in toRemove) {
-            root.removeChild(n)
-        }
-    }
+		// remove all this bullshit
+		for (n in toRemove) {
+			root.removeChild(n)
+		}
+	}
 }

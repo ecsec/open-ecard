@@ -30,12 +30,12 @@ import java.security.SecureRandom
  * @author Tobias Wich
  */
 object ReusableSecureRandom {
-    /**
-     * Gets a singleton instance of the systems default SecureRandom.
-     * The instance is properly seeded and ready to use.
-     *
-     * @return Seeded [SecureRandom] instance.
-     */
-    @JvmField
-    val instance: SecureRandom = SecureRandomFactory.create(32)
+	/**
+	 * Gets a singleton instance of the systems default SecureRandom.
+	 * The instance is properly seeded and ready to use.
+	 *
+	 * @return Seeded [SecureRandom] instance.
+	 */
+	@JvmField
+	val instance: SecureRandom = SecureRandomFactory.create(32)
 }

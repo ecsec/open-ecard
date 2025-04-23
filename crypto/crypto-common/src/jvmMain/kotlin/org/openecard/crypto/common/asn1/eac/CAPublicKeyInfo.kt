@@ -30,44 +30,46 @@ import org.openecard.bouncycastle.asn1.ASN1Sequence
  *
  * @author Moritz Horsch
  */
-class CAPublicKeyInfo(seq: ASN1Sequence) {
-    /**
-     * Gets the protocol.
-     *
-     * @return Protocol
-     */
-    val protocol: String
+class CAPublicKeyInfo(
+	seq: ASN1Sequence,
+) {
+	/**
+	 * Gets the protocol.
+	 *
+	 * @return Protocol
+	 */
+	val protocol: String
 
-    /**
-     * Gets the SubjectPublicKeyInfo.
-     *
-     * @return SubjectPublicKeyInfo
-     */
-    val subjectPublicKeyInfo: SubjectPublicKeyInfo
+	/**
+	 * Gets the SubjectPublicKeyInfo.
+	 *
+	 * @return SubjectPublicKeyInfo
+	 */
+	val subjectPublicKeyInfo: SubjectPublicKeyInfo
 
-    /**
-     * Gets the key id.
-     *
-     * @return Key identifier
-     */
-    val keyID: Int
+	/**
+	 * Gets the key id.
+	 *
+	 * @return Key identifier
+	 */
+	val keyID: Int
 
-    /**
-     * Instantiates a new ChipAuthenticationPublicKeyInfo.
-     *
-     * @param seq the ASN1 encoded sequence
-     */
-    init {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            subjectPublicKeyInfo = SubjectPublicKeyInfo.Companion.getInstance(seq.getObjectAt(1))
+	/**
+	 * Instantiates a new ChipAuthenticationPublicKeyInfo.
+	 *
+	 * @param seq the ASN1 encoded sequence
+	 */
+	init {
+		if (seq.size() == 2) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			subjectPublicKeyInfo = SubjectPublicKeyInfo.Companion.getInstance(seq.getObjectAt(1))
 			keyID = 0
-        } else if (seq.size() == 3) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            subjectPublicKeyInfo = SubjectPublicKeyInfo.Companion.getInstance(seq.getObjectAt(1))
-            keyID = ASN1Integer.getInstance(seq.getObjectAt(2)).value.toInt()
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for CAPublicKeyInfo")
-        }
-    }
+		} else if (seq.size() == 3) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			subjectPublicKeyInfo = SubjectPublicKeyInfo.Companion.getInstance(seq.getObjectAt(1))
+			keyID = ASN1Integer.getInstance(seq.getObjectAt(2)).value.toInt()
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for CAPublicKeyInfo")
+		}
+	}
 }

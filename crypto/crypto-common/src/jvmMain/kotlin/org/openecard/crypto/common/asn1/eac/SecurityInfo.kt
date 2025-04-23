@@ -95,9 +95,7 @@ open class SecurityInfo {
 	 *
 	 * @return Object identifier
 	 */
-	fun getIdentifierString(): String {
-		return identifier.toString()
-	}
+	fun getIdentifierString(): String = identifier.toString()
 
 	companion object {
 		/**

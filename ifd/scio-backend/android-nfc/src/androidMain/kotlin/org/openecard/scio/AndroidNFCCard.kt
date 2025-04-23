@@ -31,14 +31,16 @@ import org.openecard.common.ifd.scio.SCIOException
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * NFC implementation of SCIO API card interface.
  *
  * @author Dirk Petrautzki
  */
-class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
+class AndroidNFCCard(
+	terminal: NFCCardTerminal<*>,
+) : AbstractNFCCard(terminal) {
 	private val connectLock: Object = Object()
 
 	@kotlin.concurrent.Volatile
@@ -60,7 +62,10 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 	private var monitor: Thread? = null
 
 	@kotlin.Throws(IOException::class)
-	fun setTag(tag: IsoDep, timeout: Int) {
+	fun setTag(
+		tag: IsoDep,
+		timeout: Int,
+	) {
 		LOG.debug { "Assigning tag $tag with timeout $timeout" }
 		kotlin.synchronized(connectLock) {
 			isodep = tag
@@ -87,7 +92,6 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 		this.monitor = executionThread
 		this.cardMonitor = createdMonitor
 	}
-
 
 	@Throws(IOException::class)
 	private fun connectTag() {
@@ -128,7 +132,6 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 			}
 		}
 
-
 	override fun tagWasPresent(): Boolean {
 		try {
 			val isodep = this.isodep
@@ -165,7 +168,10 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 	}
 
 	@Throws(IOException::class)
-	private fun terminateTag(monitor: Thread?, cardMonitor: NFCCardMonitoring?): Boolean {
+	private fun terminateTag(
+		monitor: Thread?,
+		cardMonitor: NFCCardMonitoring?,
+	): Boolean {
 		synchronized(connectLock) {
 			val isodep = this.isodep
 			if (cardMonitor != null) {
@@ -242,16 +248,17 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 		val cm = checkNotNull(cardMonitor)
 		cm.notifyStartTranceiving()
 		try {
-			val currentTag = synchronized(connectLock) {
-				while (tagPending) {
-					try {
-						connectLock.wait()
-					} catch (ex: InterruptedException) {
-						throw IOException(ex)
+			val currentTag =
+				synchronized(connectLock) {
+					while (tagPending) {
+						try {
+							connectLock.wait()
+						} catch (ex: InterruptedException) {
+							throw IOException(ex)
+						}
 					}
+					isodep
 				}
-				isodep
-			}
 			checkNotNull(currentTag) { "Transmit of apdu command failed, because the tag is not present." }
 			try {
 				return currentTag.transceive(apdu)
@@ -264,5 +271,4 @@ class AndroidNFCCard(terminal: NFCCardTerminal<*>) : AbstractNFCCard(terminal) {
 			cm.notifyStopTranceiving()
 		}
 	}
-
 }

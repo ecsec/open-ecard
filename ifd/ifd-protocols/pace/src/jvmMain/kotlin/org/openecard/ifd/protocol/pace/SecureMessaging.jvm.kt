@@ -36,7 +36,6 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-
 // ISO/IEC 7816-4 padding tag
 private const val PAD = 0x80.toByte()
 
@@ -60,8 +59,8 @@ enum class ReadState {
 	MAC,
 	;
 
-	fun selectNext(tag: Long): ReadState {
-		return when (this) {
+	fun selectNext(tag: Long): ReadState =
+		when (this) {
 			INIT -> {
 				when (tag) {
 					0x81L -> DATA
@@ -89,7 +88,6 @@ enum class ReadState {
 				throw SecureMessagingParseException("Malformed Secure Messaging APDU")
 			}
 		}
-	}
 }
 
 /**
@@ -129,11 +127,16 @@ class SecureMessaging(
 	 * @return Encrypted APDU
 	 */
 	@OptIn(ExperimentalStdlibApi::class)
-	private fun encrypt(apdu: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
+	private fun encrypt(
+		apdu: ByteArray,
+		secureMessagingSSC: BigInteger,
+	): ByteArray {
 		val baos = ByteArrayOutputStream()
 		val cAPDU = CardCommandAPDU(apdu)
 
-		if (cAPDU.isSecureMessaging) { throw InvalidInputApduInSecureMessaging("Input APDU already contains a SM CLA byte.", "6882".hexToByteArray()) }
+		if (cAPDU.isSecureMessaging) {
+			throw InvalidInputApduInSecureMessaging("Input APDU already contains a SM CLA byte.", "6882".hexToByteArray())
+		}
 
 		var data = cAPDU.data
 		val header = cAPDU.header
@@ -141,21 +144,22 @@ class SecureMessaging(
 
 		// Indicate Secure Messaging
 		// note: must be done before mac calculation
-		header[0] = ClassByte.parse(header[0]).let {
-			when (it) {
-				is InterIndustryClassByte -> {
-					it.sm = SecureMessagingIndication.SM_W_HEADER
-					it.byte
-				}
-				is ProprietaryClassByte -> {
-					// pretend the proprietary CLA has iso structure
-					it.toInterIndustry().let {
+		header[0] =
+			ClassByte.parse(header[0]).let {
+				when (it) {
+					is InterIndustryClassByte -> {
 						it.sm = SecureMessagingIndication.SM_W_HEADER
 						it.byte
 					}
+					is ProprietaryClassByte -> {
+						// pretend the proprietary CLA has iso structure
+						it.toInterIndustry().let {
+							it.sm = SecureMessagingIndication.SM_W_HEADER
+							it.byte
+						}
+					}
 				}
 			}
-		}
 
 		if (data.isNotEmpty()) {
 			// Encrypt data
@@ -225,7 +229,10 @@ class SecureMessaging(
 		} else if (leEncoded.size == 3) {
 			leEncoded.sliceArray(1 until leEncoded.size)
 		} else {
-			throw InvalidInputApduInSecureMessaging("Invalid LE field: ${ByteUtils.toHexString(leEncoded)}", "6700".hexToByteArray())
+			throw InvalidInputApduInSecureMessaging(
+				"Invalid LE field: ${ByteUtils.toHexString(leEncoded)}",
+				"6700".hexToByteArray(),
+			)
 		}
 	}
 
@@ -235,7 +242,12 @@ class SecureMessaging(
 	 * @param response the response
 	 * @return the byte[]
 	 */
-	@Throws(SecureMessagingParseException::class, SecureMessagingCryptoException::class, SecureMessagingRejectedByIcc::class, UnsupportedSecureMessagingFeature::class)
+	@Throws(
+		SecureMessagingParseException::class,
+		SecureMessagingCryptoException::class,
+		SecureMessagingRejectedByIcc::class,
+		UnsupportedSecureMessagingFeature::class,
+	)
 	fun decrypt(response: ByteArray): ByteArray {
 		parseRequire(response.size >= 2) { "Secure Messaging Response APDU does not have a trailer." }
 		val trailer = response.sliceArray(response.size - 2 until response.size)
@@ -250,8 +262,10 @@ class SecureMessaging(
 		}
 	}
 
-
-	private fun decrypt(responseNoTrailer: ByteArray, secureMessagingSSC: BigInteger): ByteArray {
+	private fun decrypt(
+		responseNoTrailer: ByteArray,
+		secureMessagingSSC: BigInteger,
+	): ByteArray {
 		// Status bytes of the response APDU. MUST be 2 bytes.
 		val statusBytes = ByteArray(2)
 		// plain data 0x81
@@ -290,7 +304,7 @@ class SecureMessaging(
 							else -> throw UnsupportedSecureMessagingFeature(
 								"Unsupported padding indicator byte 0x${
 									nextTlv.value.first().toString(16)
-								}"
+								}",
 							)
 						}
 						encDataObject = nextTlv.value.sliceArray(1 until nextTlv.value.size)
@@ -353,7 +367,6 @@ class SecureMessaging(
 		return baos.toByteArray()
 	}
 
-
 	//
 	// Cipher functions
 	//
@@ -367,7 +380,10 @@ class SecureMessaging(
 	 * @throws Exception the exception
 	 */
 	@Throws(Exception::class)
-	private fun getCipher(smssc: BigInteger, mode: Int): Cipher {
+	private fun getCipher(
+		smssc: BigInteger,
+		mode: Int,
+	): Cipher {
 		try {
 			val c = Cipher.getInstance("AES/CBC/NoPadding")
 			val key: Key = SecretKeySpec(keyENC, "AES")
@@ -422,7 +438,6 @@ class SecureMessaging(
 		}
 	}
 
-
 	//
 	// ISO/IEC 7816-4 padding functions
 	//
@@ -434,7 +449,10 @@ class SecureMessaging(
 	 * @param blockSize Block size
 	 * @return Padded data
 	 */
-	private fun pad(data: ByteArray, blockSize: Int): ByteArray {
+	private fun pad(
+		data: ByteArray,
+		blockSize: Int,
+	): ByteArray {
 		// as padding is mandatory, the result will contain an extra empty block in case the data is already a multiple of the block size
 		val result = ByteArray(data.size + (blockSize - data.size % blockSize))
 		System.arraycopy(data, 0, result, 0, data.size)
@@ -459,10 +477,12 @@ class SecureMessaging(
 		return data
 	}
 
-	private fun parseRequire(cond: Boolean, lazyMessage: () -> String) {
+	private fun parseRequire(
+		cond: Boolean,
+		lazyMessage: () -> String,
+	) {
 		if (!cond) {
 			throw SecureMessagingParseException(lazyMessage())
 		}
 	}
-
 }

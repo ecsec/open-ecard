@@ -37,32 +37,39 @@ import java.util.*
  *
  * @author Tobias Wich
  */
-class PCSCPinVerify(attributes: PasswordAttributesType, cmdTemplate: ByteArray) {
-
+class PCSCPinVerify(
+	attributes: PasswordAttributesType,
+	cmdTemplate: ByteArray,
+) {
 	private val pwdType = attributes.getPwdType()
 	private val minLen: Int = attributes.getMinLength().toInt()
 	private val storedLen: Int = attributes.getStoredLength().toInt()
-	private val maxLen: Int = if (attributes.getMaxLength() != null) {
-		attributes.getMaxLength().toInt()
-	} else {
-		if (pwdType == PasswordTypeType.ISO_9564_1) {
-			(storedLen * 2) - 2
-		} else if (pwdType == PasswordTypeType.BCD) {
-			storedLen * 2
+	private val maxLen: Int =
+		if (attributes.getMaxLength() != null) {
+			attributes.getMaxLength().toInt()
 		} else {
-			this.storedLen
+			if (pwdType == PasswordTypeType.ISO_9564_1) {
+				(storedLen * 2) - 2
+			} else if (pwdType == PasswordTypeType.BCD) {
+				storedLen * 2
+			} else {
+				this.storedLen
+			}
 		}
-	}
 
 	@Throws(IFDException::class)
-	private fun prepareStructure(attributes: PasswordAttributesType, cmdTemplate: ByteArray) {
+	private fun prepareStructure(
+		attributes: PasswordAttributesType,
+		cmdTemplate: ByteArray,
+	) {
 		// get apdu and pin template
-		val pinTemplate = try {
-			PINUtils.createPinMask(attributes)
-		} catch (e: UtilException) {
-			val ex = IFDException(e)
-			throw ex
-		}
+		val pinTemplate =
+			try {
+				PINUtils.createPinMask(attributes)
+			} catch (e: UtilException) {
+				val ex = IFDException(e)
+				throw ex
+			}
 
 		var template = cmdTemplate
 		if (pinTemplate.size > 0) {
@@ -102,7 +109,6 @@ class PCSCPinVerify(attributes: PasswordAttributesType, cmdTemplate: ByteArray) 
 		this.minPINSize = minLen.toByte()
 		this.maxPINSize = maxLen.toByte()
 	}
-
 
 	/** timeout in seconds, 0 means default  */
 	var bTimeOut: Byte = 0x3C.toByte()
@@ -158,7 +164,6 @@ class PCSCPinVerify(attributes: PasswordAttributesType, cmdTemplate: ByteArray) 
 	/** Data to send to the ICC  */
 	private var abData: ByteArray? = null
 
-
 	init {
 		// initialise content needed for serialisation
 		prepareStructure(attributes, cmdTemplate)
@@ -185,7 +190,6 @@ class PCSCPinVerify(attributes: PasswordAttributesType, cmdTemplate: ByteArray) 
 		wLangId = USBLangID.getCode(l)
 	}
 
-
 	fun toBytes(): ByteArray {
 		val o = ByteArrayOutputStream(42) // just a random magic number ^^
 		// write all numbers to the stream
@@ -198,8 +202,8 @@ class PCSCPinVerify(attributes: PasswordAttributesType, cmdTemplate: ByteArray) 
 		o.write(this.minPINSize.toInt())
 		o.write(bEntryValidationCondition.toInt())
 		o.write(bNumberMessage.toInt())
-		//byte lang_low  = (byte) (wLangId & 0xFF);
-		//byte lang_high = (byte) ((wLangId >> 8) & 0xFF);
+		// byte lang_low  = (byte) (wLangId & 0xFF);
+		// byte lang_high = (byte) ((wLangId >> 8) & 0xFF);
 		val langLow = ((wLangId.toInt() shr 8) and 0xFF).toByte()
 		val langHigh = (wLangId.toInt() and 0xFF).toByte()
 		o.write(langHigh.toInt())

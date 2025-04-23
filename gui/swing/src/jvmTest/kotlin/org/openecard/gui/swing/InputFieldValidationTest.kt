@@ -36,43 +36,41 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class InputFieldValidationTest {
-    @Test(enabled = false)
-    fun test() {
-        // create wait action
-        val action = WaitAction("step1", WAIT_TIME)
-        // create GUI
-        val nav = createNavigator(action)
-        val exec = ExecutionEngine(nav)
+	@Test(enabled = false)
+	fun test() {
+		// create wait action
+		val action = WaitAction("step1", WAIT_TIME)
+		// create GUI
+		val nav = createNavigator(action)
+		val exec = ExecutionEngine(nav)
 
-        exec.process()
-    }
+		exec.process()
+	}
 
+	private fun createNavigator(waitAction: StepAction?): UserConsentNavigator {
+		// create step
+		val ucd = UserConsentDescription("consent title")
 
-    private fun createNavigator(waitAction: StepAction?): UserConsentNavigator {
-        // create step
-        val ucd = UserConsentDescription("consent title")
-
-        val s = Step("step title")
-        ucd.getSteps().add(s)
+		val s = Step("step title")
+		ucd.getSteps().add(s)
 		s.id = "step1"
 
-        s.setAction(waitAction)
-        val desc1 = Text()
-        s.getInputInfoUnits().add(desc1)
-        desc1.setText(
-            "This test shows a text input field to the user with a minimum length of 4 and a maximum " +
-                    "length of 6 to test the input validation."
-        )
+		s.setAction(waitAction)
+		val desc1 = Text()
+		s.getInputInfoUnits().add(desc1)
+		desc1.setText(
+			"This test shows a text input field to the user with a minimum length of 4 and a maximum " +
+				"length of 6 to test the input validation.",
+		)
 
-        val input = TextField("input1")
+		val input = TextField("input1")
 		input.maxLength = 6
 		input.minLength = 4
-        s.getInputInfoUnits().add(input)
+		s.getInputInfoUnits().add(input)
 
-        val sc = SwingUserConsent(SwingDialogWrapper())
-        return sc.obtainNavigator(ucd)
-    }
-
+		val sc = SwingUserConsent(SwingDialogWrapper())
+		return sc.obtainNavigator(ucd)
+	}
 }
 
 // 2 seconds

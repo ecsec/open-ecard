@@ -21,60 +21,59 @@
  ***************************************************************************/
 package org.openecard.crypto.common.asn1.eac.oid
 
-
 /**
  * See BSI-TR-03110, version 2.10
  *
  * @author Moritz Horsch
  */
 object CAObjectIdentifier {
-    /**
-     * id-CA-DH OBJECT IDENTIFIER ::= {id-CA 1}
-     */
-    val id_CA_DH: String = EACObjectIdentifier.id_CA + ".1"
+	/**
+	 * id-CA-DH OBJECT IDENTIFIER ::= {id-CA 1}
+	 */
+	val id_CA_DH: String = EACObjectIdentifier.id_CA + ".1"
 
-    /**
-     * id-CA-DH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-DH 1}
-     */
-    val id_CA_DH_3DES_CBC_CBC: String = id_CA_DH + ".1"
+	/**
+	 * id-CA-DH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-DH 1}
+	 */
+	val id_CA_DH_3DES_CBC_CBC: String = id_CA_DH + ".1"
 
-    /**
-     * id-CA-DH-AES-CBC-CMAC-128 OBJECT IDENTIFIER ::= {id-CA-DH 2}
-     */
-    val id_CA_DH_AES_CBC_CMAC_128: String = id_CA_DH + ".2"
+	/**
+	 * id-CA-DH-AES-CBC-CMAC-128 OBJECT IDENTIFIER ::= {id-CA-DH 2}
+	 */
+	val id_CA_DH_AES_CBC_CMAC_128: String = id_CA_DH + ".2"
 
-    /**
-     * id-CA-DH-AES-CBC-CMAC-192 OBJECT IDENTIFIER ::= {id-CA-DH 3}
-     */
-    val id_CA_DH_AES_CBC_CMAC_192: String = id_CA_DH + ".3"
+	/**
+	 * id-CA-DH-AES-CBC-CMAC-192 OBJECT IDENTIFIER ::= {id-CA-DH 3}
+	 */
+	val id_CA_DH_AES_CBC_CMAC_192: String = id_CA_DH + ".3"
 
-    /**
-     * id-CA-DH-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-CA-DH 4}
-     */
-    val id_CA_DH_AES_CBC_CMAC_256: String = id_CA_DH + ".4"
+	/**
+	 * id-CA-DH-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-CA-DH 4}
+	 */
+	val id_CA_DH_AES_CBC_CMAC_256: String = id_CA_DH + ".4"
 
-    /**
-     * id-CA-ECDH OBJECT IDENTIFIER ::= {id-CA 2}
-     */
-    val id_CA_ECDH: String = EACObjectIdentifier.id_CA + ".2"
+	/**
+	 * id-CA-ECDH OBJECT IDENTIFIER ::= {id-CA 2}
+	 */
+	val id_CA_ECDH: String = EACObjectIdentifier.id_CA + ".2"
 
-    /**
-     * id-CA-ECDH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-ECDH 1}
-     */
-    val id_CA_ECDH_3DES_CBC_CBC: String = id_CA_ECDH + ".1"
+	/**
+	 * id-CA-ECDH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-ECDH 1}
+	 */
+	val id_CA_ECDH_3DES_CBC_CBC: String = id_CA_ECDH + ".1"
 
-    /**
-     * id-CA-ECDH-AES-CBC-CMAC-128 OBJECT IDENTIFIER ::= {id-CA-ECDH 2}
-     */
-    val id_CA_ECDH_AES_CBC_CMAC_128: String = id_CA_ECDH + ".2"
+	/**
+	 * id-CA-ECDH-AES-CBC-CMAC-128 OBJECT IDENTIFIER ::= {id-CA-ECDH 2}
+	 */
+	val id_CA_ECDH_AES_CBC_CMAC_128: String = id_CA_ECDH + ".2"
 
-    /**
-     * id-CA-ECDH-AES-CBC-CMAC-192 OBJECT IDENTIFIER ::= {id-CA-ECDH 3}
-     */
-    val id_CA_ECDH_AES_CBC_CMAC_192: String = id_CA_ECDH + ".3"
+	/**
+	 * id-CA-ECDH-AES-CBC-CMAC-192 OBJECT IDENTIFIER ::= {id-CA-ECDH 3}
+	 */
+	val id_CA_ECDH_AES_CBC_CMAC_192: String = id_CA_ECDH + ".3"
 
-    /**
-     * id-CA-ECDH-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-CA-ECDH 4}
-     */
-    val id_CA_ECDH_AES_CBC_CMAC_256: String = id_CA_ECDH + ".4"
+	/**
+	 * id-CA-ECDH-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-CA-ECDH 4}
+	 */
+	val id_CA_ECDH_AES_CBC_CMAC_256: String = id_CA_ECDH + ".4"
 }

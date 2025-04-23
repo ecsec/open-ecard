@@ -19,11 +19,11 @@ import org.openecard.bouncycastle.tls.TlsContext
  * @author Tobias Wich
  */
 interface ContextAware {
-    /**
-     * Sets the TLS context in this instance.
-     * The context must match the currently running connection.
-     *
-     * @param context TLS context object of the currently open connection.
-     */
-    fun setContext(context: TlsContext)
+	/**
+	 * Sets the TLS context in this instance.
+	 * The context must match the currently running connection.
+	 *
+	 * @param context TLS context object of the currently open connection.
+	 */
+	fun setContext(context: TlsContext)
 }

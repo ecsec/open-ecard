@@ -28,24 +28,23 @@ import org.openecard.common.tlv.TLV
  *
  * @author Moritz Horsch
  */
-class RSAPublicKey(tlv: TLV) : PublicKey() {
-    /**
-     * Creates a new RSAPublicKey.
-     *
-     * @param tlv TLV encoded key
-     */
-    init {
-        throw UnsupportedOperationException("Not supported yet.")
-    }
+class RSAPublicKey(
+	tlv: TLV,
+) : PublicKey() {
+	/**
+	 * Creates a new RSAPublicKey.
+	 *
+	 * @param tlv TLV encoded key
+	 */
+	init {
+		throw UnsupportedOperationException("Not supported yet.")
+	}
 
 	override val objectIdentifier: String
 		get() = throw UnsupportedOperationException("Not supported yet.")
 
-    override val tLVEncoded: TLV
+	override val tLVEncoded: TLV
 		get() = throw UnsupportedOperationException("Not supported yet.")
 
-	override fun compare(pk: PublicKey): Boolean {
-		throw UnsupportedOperationException("Not supported yet.")
-	}
-
+	override fun compare(pk: PublicKey): Boolean = throw UnsupportedOperationException("Not supported yet.")
 }

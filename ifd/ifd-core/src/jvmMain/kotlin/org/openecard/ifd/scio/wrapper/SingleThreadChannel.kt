@@ -33,7 +33,6 @@ import org.openecard.ifd.scio.TransmitException
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
-
 private val LOG = KotlinLogging.logger { }
 
 /**
@@ -86,16 +85,17 @@ class SingleThreadChannel : IfdChannel {
 		}
 	}
 
-	private fun createExecutor(): ExecutorService {
-		return Executors.newSingleThreadExecutor(ThreadFactory { r: Runnable? ->
-			val num = channel.channelNumber
-			val termName = channel.card.terminal.name
-			val name = "Channel-${THREAD_NUM.getAndIncrement()} $num '${termName}'"
-			val t = Thread(r, name)
-			t.setDaemon(true)
-			t
-		})
-	}
+	private fun createExecutor(): ExecutorService =
+		Executors.newSingleThreadExecutor(
+			ThreadFactory { r: Runnable? ->
+				val num = channel.channelNumber
+				val termName = channel.card.terminal.name
+				val name = "Channel-${THREAD_NUM.getAndIncrement()} $num '$termName'"
+				val t = Thread(r, name)
+				t.setDaemon(true)
+				t
+			},
+		)
 
 	@Throws(SCIOException::class)
 	override fun shutdown() {
@@ -118,7 +118,6 @@ class SingleThreadChannel : IfdChannel {
 			throw RuntimeException("Reconnect called on logical channel.")
 		}
 	}
-
 
 	/**
 	 * Transmits the given command APDU to the card.
@@ -197,12 +196,13 @@ class SingleThreadChannel : IfdChannel {
 	 * @throws NullPointerException Thrown in case the argument is `null`.
 	 */
 	@Throws(SCIOException::class, IllegalStateException::class, InterruptedException::class)
-	private fun transmit(command: CardCommandAPDU): CardResponseAPDU {
-		return transmit(command.toByteArray())
-	}
+	private fun transmit(command: CardCommandAPDU): CardResponseAPDU = transmit(command.toByteArray())
 
 	@Throws(TransmitException::class, SCIOException::class, IllegalStateException::class, InterruptedException::class)
-	override fun transmit(input: ByteArray, responses: List<ByteArray>): ByteArray {
+	override fun transmit(
+		input: ByteArray,
+		responses: List<ByteArray>,
+	): ByteArray {
 		var inputAPDU = input
 		var result: ByteArray
 
@@ -250,9 +250,12 @@ class SingleThreadChannel : IfdChannel {
 		SCIOException::class,
 		IllegalStateException::class,
 		NullPointerException::class,
-		InterruptedException::class
+		InterruptedException::class,
 	)
-	override fun transmitControlCommand(controlCode: Int, command: ByteArray): ByteArray {
+	override fun transmitControlCommand(
+		controlCode: Int,
+		command: ByteArray,
+	): ByteArray {
 		// send command
 		val result = exec.submit(Callable { channel.card.transmitControlCommand(controlCode, command) })
 		// return result or evaluate errors
@@ -290,15 +293,18 @@ class SingleThreadChannel : IfdChannel {
 	@Throws(SCIOException::class, IllegalStateException::class, InterruptedException::class)
 	private fun submitTransaction(start: Boolean) {
 		// send command
-		val result = exec.submit(Callable {
-			val card = channel.card
-			if (start) {
-				card.beginExclusive()
-			} else {
-				card.endExclusive()
-			}
-			null
-		})
+		val result =
+			exec.submit(
+				Callable {
+					val card = channel.card
+					if (start) {
+						card.beginExclusive()
+					} else {
+						card.endExclusive()
+					}
+					null
+				},
+			)
 		// return result or evaluate errors
 		try {
 			result.get()
@@ -332,30 +338,30 @@ class SingleThreadChannel : IfdChannel {
 	override fun removeSecureMessaging() {
 		this.smProtocol = null
 	}
-
 }
 
 private val THREAD_NUM = AtomicInteger(1)
 
 @Throws(SCIOException::class)
 private fun connectCard(term: SCIOTerminal): SCIOCard {
-	var card = try {
-		term.connect(SCIOProtocol.T1)
-	} catch (e1: SCIOException) {
+	var card =
 		try {
-			term.connect(SCIOProtocol.TCL)
-		} catch (e2: SCIOException) {
+			term.connect(SCIOProtocol.T1)
+		} catch (e1: SCIOException) {
 			try {
-				term.connect(SCIOProtocol.T0)
-			} catch (e3: SCIOException) {
+				term.connect(SCIOProtocol.TCL)
+			} catch (e2: SCIOException) {
 				try {
-					term.connect(SCIOProtocol.ANY)
-				} catch (ex: SCIOException) {
-					throw SCIOException("Reader refused to connect card with any protocol.", ex.code)
+					term.connect(SCIOProtocol.T0)
+				} catch (e3: SCIOException) {
+					try {
+						term.connect(SCIOProtocol.ANY)
+					} catch (ex: SCIOException) {
+						throw SCIOException("Reader refused to connect card with any protocol.", ex.code)
+					}
 				}
 			}
 		}
-	}
 	LOG.info { "Card connected with protocol ${card.protocol}." }
 	return card
 }

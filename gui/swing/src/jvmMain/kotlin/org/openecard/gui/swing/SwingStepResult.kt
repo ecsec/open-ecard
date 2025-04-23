@@ -35,91 +35,86 @@ import java.util.concurrent.Exchanger
  *
  * @author Tobias Wich
  */
-class SwingStepResult @JvmOverloads constructor(
-	private val step: Step?,
-	private var status: ResultStatus? = null
-) : StepResult {
+class SwingStepResult
+	@JvmOverloads
+	constructor(
+		private val step: Step?,
+		private var status: ResultStatus? = null,
+	) : StepResult {
+		var syncPoint = Exchanger<Void>()
+		private var replacement: Step? = null
+		private var results: List<OutputInfoUnit?> = listOf()
 
-    var syncPoint = Exchanger<Void>()
-    private var replacement: Step? = null
-    private var results: List<OutputInfoUnit?> = listOf()
+		fun setResultStatus(status: ResultStatus) {
+			this.status = status
+		}
 
-    fun setResultStatus(status: ResultStatus) {
-        this.status = status
-    }
+		fun setResult(results: List<OutputInfoUnit?>) {
+			this.results = results
+		}
 
-    fun setResult(results: List<OutputInfoUnit?>) {
-        this.results = results
-    }
+		override fun getStep(): Step? = step
 
-    override fun getStep(): Step? {
-        return step
-    }
+		override fun getStepID(): String? = step?.id
 
-    override fun getStepID(): String? {
-        return step?.id
-    }
+		override fun getStatus(): ResultStatus? {
+			synchronize()
+			return status
+		}
 
-    override fun getStatus(): ResultStatus? {
-        synchronize()
-        return status
-    }
+		override fun isOK(): Boolean {
+			// wait until values are present (blocks until triggered
+			synchronize()
+			synchronized(this) {
+				return getStatus() == ResultStatus.OK
+			}
+		}
 
-    override fun isOK(): Boolean {
-        // wait until values are present (blocks until triggered
-        synchronize()
-        synchronized(this) {
-            return getStatus() == ResultStatus.OK
-        }
-    }
+		override fun isBack(): Boolean {
+			// wait until values are present
+			synchronize()
+			synchronized(this) {
+				return getStatus() == ResultStatus.BACK
+			}
+		}
 
-    override fun isBack(): Boolean {
-        // wait until values are present
-        synchronize()
-        synchronized(this) {
-            return getStatus() == ResultStatus.BACK
-        }
-    }
+		override fun isCancelled(): Boolean {
+			// wait until values are present
+			synchronize()
+			synchronized(this) {
+				return getStatus() == ResultStatus.CANCEL
+			}
+		}
 
-    override fun isCancelled(): Boolean {
-        // wait until values are present
-        synchronize()
-        synchronized(this) {
-            return getStatus() == ResultStatus.CANCEL
-        }
-    }
+		override fun isReload(): Boolean {
+			// wait until values are present
+			synchronize()
+			synchronized(this) {
+				return getStatus() == ResultStatus.RELOAD
+			}
+		}
 
-    override fun isReload(): Boolean {
-        // wait until values are present
-        synchronize()
-        synchronized(this) {
-            return getStatus() == ResultStatus.RELOAD
-        }
-    }
+		override fun getResults(): List<OutputInfoUnit?> {
+			// wait until values are present
+			synchronize()
+			synchronized(this) {
+				return results
+			}
+		}
 
-    override fun getResults(): List<OutputInfoUnit?> {
-        // wait until values are present
-        synchronize()
-        synchronized(this) {
-            return results
-        }
-    }
+		fun setReplacement(replacement: Step?) {
+			this.replacement = replacement
+		}
 
-    fun setReplacement(replacement: Step?) {
-        this.replacement = replacement
-    }
+		override fun getReplacement(): Step? = replacement
 
-    override fun getReplacement(): Step? {
-        return replacement
-    }
-
-    private fun synchronize() {
-        if (status == null) {
-            try {
-                syncPoint.exchange(null)
-            } catch (ex: InterruptedException) {
-                status = ResultStatus.INTERRUPTED
-            }
-        }
-    }
-}
+		private fun synchronize() {
+			if (status == null) {
+				try {
+					syncPoint.exchange(null)
+				} catch (ex: InterruptedException) {
+					status = ResultStatus.INTERRUPTED
+				}
+			}
+		}
+	}

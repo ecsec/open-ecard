@@ -29,50 +29,52 @@ import org.openecard.bouncycastle.asn1.ASN1Set
  *
  * @author Moritz Horsch
  */
-class PrivilegedTerminalInfo(seq: ASN1Sequence) {
-    /**
-     * Gets the protocol.
-     *
-     * @return the protocol
-     */
-    val protocol: String
+class PrivilegedTerminalInfo(
+	seq: ASN1Sequence,
+) {
+	/**
+	 * Gets the protocol.
+	 *
+	 * @return the protocol
+	 */
+	val protocol: String
 
-    /**
-     * Gets the privileged terminal info.
-     *
-     * @return the privileged terminal info
-     */
-    val privilegedTerminalInfo: SecurityInfos
+	/**
+	 * Gets the privileged terminal info.
+	 *
+	 * @return the privileged terminal info
+	 */
+	val privilegedTerminalInfo: SecurityInfos
 
-    /**
-     * Instantiates a new privileged terminal info.
-     *
-     * @param seq ASN1 encoded sequence
-     */
-    init {
-        if (seq.size() == 2) {
-            protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
-            privilegedTerminalInfo = SecurityInfos.Companion.getInstance(seq.getObjectAt(1) as ASN1Set)
-        } else {
-            throw IllegalArgumentException("Sequence wrong size for PrivilegedTerminalInfo")
-        }
-    }
+	/**
+	 * Instantiates a new privileged terminal info.
+	 *
+	 * @param seq ASN1 encoded sequence
+	 */
+	init {
+		if (seq.size() == 2) {
+			protocol = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0)).toString()
+			privilegedTerminalInfo = SecurityInfos.Companion.getInstance(seq.getObjectAt(1) as ASN1Set)
+		} else {
+			throw IllegalArgumentException("Sequence wrong size for PrivilegedTerminalInfo")
+		}
+	}
 
-    companion object {
-        /**
-         * Gets the single instance of PrivilegedTerminalInfo.
-         *
-         * @param obj
-         * @return single instance of PrivilegedTerminalInfo
-         */
-        fun getInstance(obj: Any): PrivilegedTerminalInfo {
-            if (obj is PrivilegedTerminalInfo) {
-                return obj
-            } else if (obj is ASN1Sequence) {
-                return PrivilegedTerminalInfo(obj)
-            }
+	companion object {
+		/**
+		 * Gets the single instance of PrivilegedTerminalInfo.
+		 *
+		 * @param obj
+		 * @return single instance of PrivilegedTerminalInfo
+		 */
+		fun getInstance(obj: Any): PrivilegedTerminalInfo {
+			if (obj is PrivilegedTerminalInfo) {
+				return obj
+			} else if (obj is ASN1Sequence) {
+				return PrivilegedTerminalInfo(obj)
+			}
 
-            throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
-        }
-    }
+			throw IllegalArgumentException("Unknown object in factory: " + obj.javaClass.getName())
+		}
+	}
 }

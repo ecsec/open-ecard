@@ -30,16 +30,18 @@ import java.io.InputStream
  *
  * @author Tobias Wich
  */
-class StreamSessionInputBuffer(`in`: InputStream?, bufsize: Int) :
-    SessionInputBufferImpl(HttpTransportMetricsImpl(), bufsize) {
-    /**
-     * Creates a StreamSessionInputBuffer instance based on a given InputStream.
-     *
-     * @param in The destination input stream.
-     * @param bufsize The size of the internal buffer.
-     */
-    init {
-        // use a buffer stream, so the mark/reset operation is supported
-        bind(`in`)
-    }
+class StreamSessionInputBuffer(
+	`in`: InputStream?,
+	bufsize: Int,
+) : SessionInputBufferImpl(HttpTransportMetricsImpl(), bufsize) {
+	/**
+	 * Creates a StreamSessionInputBuffer instance based on a given InputStream.
+	 *
+	 * @param in The destination input stream.
+	 * @param bufsize The size of the internal buffer.
+	 */
+	init {
+		// use a buffer stream, so the mark/reset operation is supported
+		bind(`in`)
+	}
 }

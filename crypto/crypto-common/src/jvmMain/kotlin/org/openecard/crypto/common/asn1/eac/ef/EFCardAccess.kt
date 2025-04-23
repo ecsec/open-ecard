@@ -67,20 +67,12 @@ class EFCardAccess(
 	 */
 	val privilegedTerminalInfo: PrivilegedTerminalInfo?,
 ) {
-
-
 	companion object {
+		@JvmStatic
+		fun getInstance(sis: SecurityInfos): EFCardAccess = decodeSecurityInfos(sis)
 
 		@JvmStatic
-		fun getInstance(sis: SecurityInfos): EFCardAccess {
-			return decodeSecurityInfos(sis)
-		}
-
-		@JvmStatic
-		fun getInstance(sis: ByteArray): EFCardAccess {
-			return decodeSecurityInfos(SecurityInfos.Companion.getInstance(sis))
-		}
-
+		fun getInstance(sis: ByteArray): EFCardAccess = decodeSecurityInfos(SecurityInfos.Companion.getInstance(sis))
 
 		/**
 		 * Decode the SecurityInfos.
@@ -140,5 +132,4 @@ class EFCardAccess(
 			return EFCardAccess(sis, psi, tsi, csi, cil, pti)
 		}
 	}
-
 }

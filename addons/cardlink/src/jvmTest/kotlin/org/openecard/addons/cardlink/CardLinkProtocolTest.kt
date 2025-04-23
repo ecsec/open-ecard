@@ -51,46 +51,51 @@ const val wrongCan = "1231234"
 const val correctCan = "123123"
 
 @OptIn(ExperimentalEncodingApi::class)
-fun String.toB64() : String {
-	return Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(this.toByteArray())
-}
+fun String.toB64(): String = Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(this.toByteArray())
 
 /**
  * @author Mike Prechtl
  */
 @Test(groups = ["interactive"])
 class CardLinkProtocolTest {
-
 	private lateinit var activationUtils: CommonActivationUtils
 	private lateinit var callbackController: ControllerCallback
 	private lateinit var cardLinkInteraction: CardLinkInteraction
 
 	private fun setupContext(isContextInitialized: Promise<Boolean>) {
-		val pcscFactory : GenericInstanceProvider<TerminalFactory?> = object : GenericInstanceProvider<TerminalFactory?> {
-			override val instance = PCSCFactory()
-		}
-
-		val msgSetter = object : NFCDialogMsgSetter {
-			override fun setText(msg: String) { }
-			override fun isSupported(): Boolean { return false }
-		}
-
-		val nfcCapabilities = object : NFCCapabilities {
-			override fun isAvailable(): Boolean { return true }
-			override fun isEnabled(): Boolean { return true }
-			override fun checkExtendedLength(): NfcCapabilityResult { return NfcCapabilityResult.SUPPORTED }
-		}
-
-		val startServiceHandler = object : StartServiceHandler {
-			override fun onSuccess(source: ActivationSource?) {
-				logger.info { "[ServiceHandler] onSuccess" }
-				isContextInitialized.deliver(true)
+		val pcscFactory: GenericInstanceProvider<TerminalFactory?> =
+			object : GenericInstanceProvider<TerminalFactory?> {
+				override val instance = PCSCFactory()
 			}
-			override fun onFailure(response: ServiceErrorResponse?) {
-				logger.info { "[ServiceHandler] onFailure: ${response?.errorMessage}" }
-				isContextInitialized.deliver(false)
+
+		val msgSetter =
+			object : NFCDialogMsgSetter {
+				override fun setText(msg: String) { }
+
+				override fun isSupported(): Boolean = false
 			}
-		}
+
+		val nfcCapabilities =
+			object : NFCCapabilities {
+				override fun isAvailable(): Boolean = true
+
+				override fun isEnabled(): Boolean = true
+
+				override fun checkExtendedLength(): NfcCapabilityResult = NfcCapabilityResult.SUPPORTED
+			}
+
+		val startServiceHandler =
+			object : StartServiceHandler {
+				override fun onSuccess(source: ActivationSource?) {
+					logger.info { "[ServiceHandler] onSuccess" }
+					isContextInitialized.deliver(true)
+				}
+
+				override fun onFailure(response: ServiceErrorResponse?) {
+					logger.info { "[ServiceHandler] onFailure: ${response?.errorMessage}" }
+					isContextInitialized.deliver(false)
+				}
+			}
 
 		val config = OpeneCardContextConfig(pcscFactory, JAXBMarshaller::class.java.getCanonicalName())
 		activationUtils = CommonActivationUtils(config, msgSetter)
@@ -102,7 +107,10 @@ class CardLinkProtocolTest {
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	private fun setupWebsocketMock(answerWithError: Boolean = false, websocketListenerHash: Promise<Int>): Websocket {
+	private fun setupWebsocketMock(
+		answerWithError: Boolean = false,
+		websocketListenerHash: Promise<Int>,
+	): Websocket {
 		val webSocketMock = Mockito.mock(Websocket::class.java)
 		val correlationIdTan = UUID.randomUUID().toString()
 		val correlationIdMseApdu = UUID.randomUUID().toString()
@@ -116,8 +124,10 @@ class CardLinkProtocolTest {
 		Mockito.`when`(webSocketMock.connect()).then {
 			logger.info { "[WS-MOCK] Websocket connect was called with cardSessionId: $cardSessionId." }
 			argumentCaptor.value.onOpen(webSocketMock)
-			/* Use payload eyAid2ViU29ja2V0SWQiOiAiMTIzNDU2IiwgInBob25lUmVnaXN0ZXJlZCI6IHRydWUgfQ for registered phone */
-			argumentCaptor.value.onText(webSocketMock, """
+			// Use payload eyAid2ViU29ja2V0SWQiOiAiMTIzNDU2IiwgInBob25lUmVnaXN0ZXJlZCI6IHRydWUgfQ for registered phone
+			argumentCaptor.value.onText(
+				webSocketMock,
+				"""
 				[
 					{
 						"type":"$SESSION_INFO",
@@ -125,7 +135,8 @@ class CardLinkProtocolTest {
 					},
 					"$cardSessionId"
 				]
-			""")
+			""",
+			)
 		}
 
 		Mockito.`when`(webSocketMock.setListener(argumentCaptor.capture())).then {
@@ -140,7 +151,9 @@ class CardLinkProtocolTest {
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REQUEST_SMS_TAN))).then {
 			logger.info { "[WS-MOCK] Received $REQUEST_SMS_TAN_RESPONSE message from App:\n${it.arguments[0]}" }
-			argumentCaptor.value.onText(webSocketMock, """
+			argumentCaptor.value.onText(
+				webSocketMock,
+				"""
 				[
 					{
 						"type":"$REQUEST_SMS_TAN_RESPONSE",
@@ -149,38 +162,43 @@ class CardLinkProtocolTest {
 					"$cardSessionId",
 					"$correlationIdTan"
 				]
-			""")
+			""",
+			)
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(CONFIRM_TAN))).then {
 			logger.info { "[WS-MOCK] Received $CONFIRM_TAN message from App:\n${it.arguments[0]}" }
-			argumentCaptor.value.onText(webSocketMock, """
+			argumentCaptor.value.onText(
+				webSocketMock,
+				"""
 				[
 					{
 						"type":"$CONFIRM_TAN_RESPONSE",
 						"payload":"${
-							if(answerWithError) {
-								"""{"resultCode":"UNKNOWN_ERROR","errorMessage":""}""".toB64()
-							} else {
-								"""{"resultCode":"SUCCESS","errorMessage":null}""".toB64()
-							}
-						}"
+					if (answerWithError) {
+						"""{"resultCode":"UNKNOWN_ERROR","errorMessage":""}""".toB64()
+					} else {
+						"""{"resultCode":"SUCCESS","errorMessage":null}""".toB64()
+					}
+				}"
 					},
 					"$cardSessionId",
 					"$correlationIdTan"
 				]
-			""")
+			""",
+			)
 		}
 
 		Mockito.`when`(webSocketMock.send(Mockito.contains(REGISTER_EGK))).then {
 			logger.info { "[WS-MOCK] Received $REGISTER_EGK message from App:\n${it.arguments[0]}" }
 
 			val mseApdu = "002241A406840109800100".hexToByteArray()
-			val mseMessage = GematikEnvelope(
-				SendApdu(cardSessionId, mseApdu),
-				correlationIdMseApdu,
-				cardSessionId,
-			)
+			val mseMessage =
+				GematikEnvelope(
+					SendApdu(cardSessionId, mseApdu),
+					correlationIdMseApdu,
+					cardSessionId,
+				)
 
 			argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(mseMessage))
 		}
@@ -188,21 +206,24 @@ class CardLinkProtocolTest {
 		Mockito.`when`(webSocketMock.send(Mockito.contains(SEND_APDU_RESPONSE))).then {
 			val sendApduResponse = it.arguments[0] as String
 
-			logger.info { "[WS-MOCK] Received $SEND_APDU_RESPONSE message from App:\n${sendApduResponse}" }
+			logger.info { "[WS-MOCK] Received $SEND_APDU_RESPONSE message from App:\n$sendApduResponse" }
 
 			if (sendApduResponse.contains(correlationIdMseApdu)) {
 				logger.info { "[WS-MOCK] Received sendAPDUResponse for MSE message in CardLink-Mock." }
 				val randomBytes = Random.nextBytes(32).toHexString()
 				val internalAuthApdu = "0088000020${randomBytes}00".hexToByteArray()
-				val internalAuthMessage = GematikEnvelope(
-					SendApdu(cardSessionId, internalAuthApdu),
-					UUID.randomUUID().toString(),
-					cardSessionId,
-				)
+				val internalAuthMessage =
+					GematikEnvelope(
+						SendApdu(cardSessionId, internalAuthApdu),
+						UUID.randomUUID().toString(),
+						cardSessionId,
+					)
 				argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(internalAuthMessage))
 			} else {
 				logger.info { "[WS-MOCK] Received sendAPDUResponse for Internal Authenticate in CardLink-Mock." }
-				argumentCaptor.value.onText(webSocketMock, """
+				argumentCaptor.value.onText(
+					webSocketMock,
+					"""
 					[
 						{
 							"type":"$REGISTER_EGK_FINISH",
@@ -211,7 +232,8 @@ class CardLinkProtocolTest {
 						"$cardSessionId",
 						"$correlationIdTan"
 					]
-				""")
+				""",
+				)
 			}
 		}
 		return webSocketMock
@@ -232,50 +254,78 @@ class CardLinkProtocolTest {
 
 	@BeforeClass
 	fun setupCardLinkInteraction() {
-		this.cardLinkInteraction = object : CardLinkInteraction {
-			override fun requestCardInsertion() { logger.info { "requestCardInsertion" } }
-			override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler) { logger.info { "requestCardInsertion" } }
-			override fun onCardInteractionComplete() { logger.info { "onCardInteractionComplete" } }
-			override fun onCardInserted() { logger.info { "onCardInserted" } }
-			override fun onCardInsufficient() { logger.info { "onCardInsufficient" } }
-			override fun onCardRecognized() { logger.info { "onCardRecognized" } }
-			override fun onCardRemoved() { logger.info { "onCardRemoved" } }
-			override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
-				logger.info { "onCanRequest" }
-				enterCan.confirmPassword(wrongCan)
-			}
-			override fun onCanRetry(enterCan: ConfirmPasswordOperation, resultCode: String?, errorMessage: String?) {
-				logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
-				enterCan.confirmPassword(correctCan)
-			}
+		this.cardLinkInteraction =
+			object : CardLinkInteraction {
+				override fun requestCardInsertion() {
+					logger.info { "requestCardInsertion" }
+				}
 
-			override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {
-				logger.info { "onPhoneNumberRequest" }
-				enterPhoneNumber.confirmText("+491517264234")
-			}
-			override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) {
-				logger.info { "onSmsCodeRequest" }
-				smsCode.confirmPassword("123456")
-			}
-			override fun onPhoneNumberRetry(
-				enterPhoneNumber: ConfirmTextOperation,
-				resultCode: String?,
-				errorMessage: String?,
-			) {
-				logger.info { "onPhoneNumberRetry: $errorMessage (Status Code: $resultCode)" }
-				enterPhoneNumber.confirmText("+491517264234")
-			}
+				override fun requestCardInsertion(msgHandler: NFCOverlayMessageHandler) {
+					logger.info { "requestCardInsertion" }
+				}
 
-			override fun onSmsCodeRetry(
-				smsCode: ConfirmPasswordOperation,
-				resultCode: String?,
-				errorMessage: String?,
-			) {
-				logger.info { "onSmsCodeRetry: $errorMessage (Status Code: $resultCode)" }
-				smsCode.confirmPassword("123456")
-			}
+				override fun onCardInteractionComplete() {
+					logger.info { "onCardInteractionComplete" }
+				}
 
-		}
+				override fun onCardInserted() {
+					logger.info { "onCardInserted" }
+				}
+
+				override fun onCardInsufficient() {
+					logger.info { "onCardInsufficient" }
+				}
+
+				override fun onCardRecognized() {
+					logger.info { "onCardRecognized" }
+				}
+
+				override fun onCardRemoved() {
+					logger.info { "onCardRemoved" }
+				}
+
+				override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
+					logger.info { "onCanRequest" }
+					enterCan.confirmPassword(wrongCan)
+				}
+
+				override fun onCanRetry(
+					enterCan: ConfirmPasswordOperation,
+					resultCode: String?,
+					errorMessage: String?,
+				) {
+					logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
+					enterCan.confirmPassword(correctCan)
+				}
+
+				override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {
+					logger.info { "onPhoneNumberRequest" }
+					enterPhoneNumber.confirmText("+491517264234")
+				}
+
+				override fun onSmsCodeRequest(smsCode: ConfirmPasswordOperation) {
+					logger.info { "onSmsCodeRequest" }
+					smsCode.confirmPassword("123456")
+				}
+
+				override fun onPhoneNumberRetry(
+					enterPhoneNumber: ConfirmTextOperation,
+					resultCode: String?,
+					errorMessage: String?,
+				) {
+					logger.info { "onPhoneNumberRetry: $errorMessage (Status Code: $resultCode)" }
+					enterPhoneNumber.confirmText("+491517264234")
+				}
+
+				override fun onSmsCodeRetry(
+					smsCode: ConfirmPasswordOperation,
+					resultCode: String?,
+					errorMessage: String?,
+				) {
+					logger.info { "onSmsCodeRetry: $errorMessage (Status Code: $resultCode)" }
+					smsCode.confirmPassword("123456")
+				}
+			}
 	}
 
 	@Test
@@ -312,7 +362,7 @@ class CardLinkProtocolTest {
 
 		val webSocketListenerSuccessor = Mockito.mock(WebsocketListener::class.java)
 		val cardLinkFactory = activationUtils.cardLinkFactory()
-		cardLinkFactory.create(wsListener , callbackController, cardLinkInteraction, webSocketListenerSuccessor)
+		cardLinkFactory.create(wsListener, callbackController, cardLinkInteraction, webSocketListenerSuccessor)
 
 		val result = activationResult.deref()
 		Assert.assertNotNull(result)
@@ -321,5 +371,4 @@ class CardLinkProtocolTest {
 		Mockito.verify(callbackController, Mockito.times(1)).onAuthenticationCompletion(Mockito.any())
 		Assert.assertEquals(websocketListenerHash.deref(2, TimeUnit.SECONDS)!!, webSocketListenerSuccessor.hashCode())
 	}
-
 }

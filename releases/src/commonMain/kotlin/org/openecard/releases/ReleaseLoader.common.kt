@@ -33,32 +33,37 @@ data class ReleaseInfoResult(
 	val releaseInfo: ReleaseInfo,
 )
 
-suspend fun loadReleaseInfo(releaseInfoUrl: String): Result<ReleaseInfoResult> = runCatching {
-	val client = createHttpClient()
-	val jws: String = client.get(releaseInfoUrl) {
-		header("Accept", "application/jwt")
-	}.body()
-	val json = verifyReleaseInfoJwt(jws).getOrThrow()
-	val releaseInfo: ReleaseInfo = Json.decodeFromJsonElement(json)
-	ReleaseInfoResult(jws, releaseInfo)
-}
+suspend fun loadReleaseInfo(releaseInfoUrl: String): Result<ReleaseInfoResult> =
+	runCatching {
+		val client = createHttpClient()
+		val jws: String =
+			client
+				.get(releaseInfoUrl) {
+					header("Accept", "application/jwt")
+				}.body()
+		val json = verifyReleaseInfoJwt(jws).getOrThrow()
+		val releaseInfo: ReleaseInfo = Json.decodeFromJsonElement(json)
+		ReleaseInfoResult(jws, releaseInfo)
+	}
 
-suspend fun verifyReleaseInfoJwt(jwtStr: String): Result<JsonObject> = runCatching {
-	val verificationKey = MR.files.release_verifier_pem.readText()
-	val jwt = JWT.from(jwtStr)
-	val valid = jwt.verify {
-		es256 {
-			pem(verificationKey)
+suspend fun verifyReleaseInfoJwt(jwtStr: String): Result<JsonObject> =
+	runCatching {
+		val verificationKey = MR.files.release_verifier_pem.readText()
+		val jwt = JWT.from(jwtStr)
+		val valid =
+			jwt.verify {
+				es256 {
+					pem(verificationKey)
+				}
+				issuer("https://openecard.org")
+				audience("https://openecard.org/app")
+				// notBefore()
+			}
+
+		if (!valid) {
+			throw IllegalArgumentException("JWT verification failed")
 		}
-		issuer("https://openecard.org")
-		audience("https://openecard.org/app")
-		//notBefore()
-	}
 
-	if (!valid) {
-		throw IllegalArgumentException("JWT verification failed")
+		jwt.claims["release-info"]?.jsonObject
+			?: throw IllegalArgumentException("JWT does not contain release-info")
 	}
-
-	jwt.claims["release-info"]?.jsonObject
-		?: throw IllegalArgumentException("JWT does not contain release-info")
-}

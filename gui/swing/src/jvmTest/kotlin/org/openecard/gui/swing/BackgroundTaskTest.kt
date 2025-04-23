@@ -36,29 +36,30 @@ import org.testng.annotations.Test
  * @author Tobias Wich
  */
 class BackgroundTaskTest {
-    // TODO: skip test only in ci
-    @Test(enabled = false)
-    fun testWait() {
-        val uc: UserConsent = SwingUserConsent(SwingDialogWrapper())
+	// TODO: skip test only in ci
+	@Test(enabled = false)
+	fun testWait() {
+		val uc: UserConsent = SwingUserConsent(SwingDialogWrapper())
 
-        val ucd = UserConsentDescription("Test background wait")
-        val s = Step("Wait Step")
-        s.getInputInfoUnits().add(Text("Please wait for the background task to complete ..."))
-		s.backgroundTask = object : BackgroundTask {
-			@Throws(Exception::class)
-			override fun call(): StepActionResult {
-				// first wait
-				Thread.sleep(1000)
-				// then repeat ;-)
-				val replacement = Step("Replacement Step")
-				replacement.getInputInfoUnits().add(Text("Super cool it works."))
-				replacement.isInstantReturn = true
-				return StepActionResult(StepActionResultStatus.REPEAT, replacement)
+		val ucd = UserConsentDescription("Test background wait")
+		val s = Step("Wait Step")
+		s.getInputInfoUnits().add(Text("Please wait for the background task to complete ..."))
+		s.backgroundTask =
+			object : BackgroundTask {
+				@Throws(Exception::class)
+				override fun call(): StepActionResult {
+					// first wait
+					Thread.sleep(1000)
+					// then repeat ;-)
+					val replacement = Step("Replacement Step")
+					replacement.getInputInfoUnits().add(Text("Super cool it works."))
+					replacement.isInstantReturn = true
+					return StepActionResult(StepActionResultStatus.REPEAT, replacement)
+				}
 			}
-		}
-        ucd.getSteps().add(s)
+		ucd.getSteps().add(s)
 
-        val e = ExecutionEngine(uc.obtainNavigator(ucd))
-        e.process()
-    }
+		val e = ExecutionEngine(uc.obtainNavigator(ucd))
+		e.process()
+	}
 }

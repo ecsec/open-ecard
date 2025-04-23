@@ -4,12 +4,11 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.logging.*
 
-actual fun createHttpClient(): HttpClient {
-	return HttpClient(CIO) {
+actual fun createHttpClient(): HttpClient =
+	HttpClient(CIO) {
 		// Configure client here
 		install(Logging)
-//		install(ContentNegotiation) {
-//			json()
-//		}
+// 		install(ContentNegotiation) {
+// 			json()
+// 		}
 	}
-}

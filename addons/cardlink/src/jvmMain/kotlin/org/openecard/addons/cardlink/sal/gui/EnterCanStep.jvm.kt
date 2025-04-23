@@ -71,42 +71,55 @@ private const val ERROR_CARD_REMOVED = "action.error.card.removed"
 private const val ERROR_TITLE = "action.error.title"
 private const val ERROR_UNKNOWN = "action.error.unknown"
 
-
 abstract class EnterCanStepAbstract(
 	open val ws: WsPair,
 	open val addonCtx: Context,
 	open val sessHandle: ConnectionHandleType,
 	stepId: String,
-	title: String
+	title: String,
 ) : StepWithConnection(stepId, title, sessHandle)
 
-class EnterCanStep(override val ws: WsPair, override val addonCtx: Context, override val sessHandle: ConnectionHandleType)
-		: EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_STEP_ID, CAN_TITLE) {
+class EnterCanStep(
+	override val ws: WsPair,
+	override val addonCtx: Context,
+	override val sessHandle: ConnectionHandleType,
+) : EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_STEP_ID, CAN_TITLE) {
 	init {
 		setAction(EnterCanStepAction(this))
 
-		inputInfoUnits.add(TextField(CAN_ID).also {
-			it.minLength = 6
-			it.maxLength = 6
-		})
+		inputInfoUnits.add(
+			TextField(CAN_ID).also {
+				it.minLength = 6
+				it.maxLength = 6
+			},
+		)
 	}
 }
 
-class EnterCanRetryStep(override val ws: WsPair, override val addonCtx: Context, override val sessHandle: ConnectionHandleType)
-	: EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_RETRY_STEP_ID, CAN_RETRY_TITLE) {
+class EnterCanRetryStep(
+	override val ws: WsPair,
+	override val addonCtx: Context,
+	override val sessHandle: ConnectionHandleType,
+) : EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_RETRY_STEP_ID, CAN_RETRY_TITLE) {
 	init {
 		setAction(EnterCanStepAction(this))
 
-		inputInfoUnits.add(TextField(CAN_ID).also {
-			it.minLength = 6
-			it.maxLength = 6
-		})
+		inputInfoUnits.add(
+			TextField(CAN_ID).also {
+				it.minLength = 6
+				it.maxLength = 6
+			},
+		)
 	}
 }
 
-class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(enterCanStep) {
-
-	override fun perform(oldResults: MutableMap<String, ExecutionResults>, result: StepResult): StepActionResult {
+class EnterCanStepAction(
+	val enterCanStep: EnterCanStepAbstract,
+) : StepAction(enterCanStep) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
 		try {
@@ -123,7 +136,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
-					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 				)
 			}
 
@@ -139,7 +152,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
-					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 				)
 			}
 
@@ -153,7 +166,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
-					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+					EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 				)
 			}
 
@@ -184,7 +197,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 					)
 				} else if (establishChannelResponse.result.resultMinor == ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE) {
 					val errorMessage = "Card was removed."
@@ -196,7 +209,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+						EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 					)
 				} else {
 					checkResult(establishChannelResponse)
@@ -228,8 +241,9 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 					StepActionResultStatus.REPEAT,
 					ErrorStep(
 						lang.translationForKey(ERROR_TITLE),
-						langPin.translationForKey(ERROR_CARD_REMOVED), ex
-					)
+						langPin.translationForKey(ERROR_CARD_REMOVED),
+						ex,
+					),
 				)
 			}
 
@@ -244,8 +258,9 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 				StepActionResultStatus.REPEAT,
 				ErrorStep(
 					langPin.translationForKey(ERROR_TITLE),
-					langPin.translationForKey(ERROR_UNKNOWN), ex
-				)
+					langPin.translationForKey(ERROR_UNKNOWN),
+					ex,
+				),
 			)
 		} catch (ex: InterruptedException) {
 			val errorMessage = "CAN step action interrupted."
@@ -256,7 +271,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 			)
 		} catch (ex: PinOrCanEmptyException) {
 			val errorMessage = "CAN was empty."
@@ -267,7 +282,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle)
+				EnterCanRetryStep(enterCanStep.ws, enterCanStep.addonCtx, enterCanStep.sessHandle),
 			)
 		}
 	}
@@ -275,7 +290,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 	@Throws(WSException::class, InterruptedException::class, CanLengthInvalidException::class)
 	private fun performPACEWithCAN(
 		canValue: String,
-		conHandle: ConnectionHandleType
+		conHandle: ConnectionHandleType,
 	): EstablishChannelResponse {
 		val pinIdCan = "2"
 		val paceInput = DIDAuthenticationDataType()
@@ -295,7 +310,7 @@ class EnterCanStepAction(val enterCanStep: EnterCanStepAbstract) : StepAction(en
 
 	private fun createEstablishChannelStructure(
 		conHandle: ConnectionHandleType,
-		paceInputMap: AuthDataResponse<*>
+		paceInputMap: AuthDataResponse<*>,
 	): EstablishChannel {
 		// EstablishChannel
 		return EstablishChannel().apply {

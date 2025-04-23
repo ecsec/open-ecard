@@ -30,68 +30,68 @@ import org.openecard.common.ifd.scio.SCIOException
 import org.openecard.common.ifd.scio.SCIOProtocol
 import java.io.IOException
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * NFC implementation of SCIO API card interface.
  *
  * @author Dirk Petrautzki
  */
-abstract class AbstractNFCCard(override val terminal: NFCCardTerminal<*>) : SCIOCard {
-
+abstract class AbstractNFCCard(
+	override val terminal: NFCCardTerminal<*>,
+) : SCIOCard {
 	protected val nfcCardChannel: NFCCardChannel = NFCCardChannel(this)
 
 	abstract val isTagPresent: Boolean
 
-    abstract fun tagWasPresent(): Boolean
+	abstract fun tagWasPresent(): Boolean
 
-    @Throws(SCIOException::class)
-    abstract fun terminateTag(): Boolean
+	@Throws(SCIOException::class)
+	abstract fun terminateTag(): Boolean
 
-    @Throws(SCIOException::class)
-    override fun beginExclusive() {
+	@Throws(SCIOException::class)
+	override fun beginExclusive() {
 		LOG.warn { "beginExclusive not supported" }
-    }
+	}
 
-    @Throws(SCIOException::class)
-    override fun endExclusive() {
+	@Throws(SCIOException::class)
+	override fun endExclusive() {
 		LOG.warn { "endExclusive not supported" }
-    }
+	}
 
-    @Throws(SCIOException::class)
-    override fun disconnect(reset: Boolean) {
-    }
+	@Throws(SCIOException::class)
+	override fun disconnect(reset: Boolean) {
+	}
 
 	abstract override val aTR: SCIOATR
 
-    override val basicChannel: SCIOChannel = this.nfcCardChannel
+	override val basicChannel: SCIOChannel = this.nfcCardChannel
 
 	// NFC is contactless
-    override val protocol: SCIOProtocol = SCIOProtocol.TCL
+	override val protocol: SCIOProtocol = SCIOProtocol.TCL
 
-    override val isContactless: Boolean = true
+	override val isContactless: Boolean = true
 
-    @Throws(SCIOException::class)
-    override fun openLogicalChannel(): SCIOChannel {
-        throw SCIOException("Logical channels are not supported.", SCIOErrorCode.SCARD_E_UNSUPPORTED_FEATURE)
-    }
+	@Throws(SCIOException::class)
+	override fun openLogicalChannel(): SCIOChannel =
+		throw SCIOException("Logical channels are not supported.", SCIOErrorCode.SCARD_E_UNSUPPORTED_FEATURE)
 
-    @Throws(SCIOException::class)
-    override fun transmitControlCommand(controlCode: Int, command: ByteArray): ByteArray {
-        if (controlCode == (0x42000000 + 3400)) {
-            // GET_FEATURE_REQUEST_CTLCODE
-            return ByteArray(0)
-        } else {
-            val msg = "Control command not supported."
-            throw SCIOException(msg, SCIOErrorCode.SCARD_E_INVALID_PARAMETER)
-        }
-    }
+	@Throws(SCIOException::class)
+	override fun transmitControlCommand(
+		controlCode: Int,
+		command: ByteArray,
+	): ByteArray {
+		if (controlCode == (0x42000000 + 3400)) {
+			// GET_FEATURE_REQUEST_CTLCODE
+			return ByteArray(0)
+		} else {
+			val msg = "Control command not supported."
+			throw SCIOException(msg, SCIOErrorCode.SCARD_E_INVALID_PARAMETER)
+		}
+	}
 
-    @Throws(IOException::class)
-    abstract fun transceive(apdu: ByteArray): ByteArray
+	@Throws(IOException::class)
+	abstract fun transceive(apdu: ByteArray): ByteArray
 
-    open fun setDialogMsg(msg: String) {
-        throw UnsupportedOperationException("Not supported.")
-    }
-
+	open fun setDialogMsg(msg: String): Unit = throw UnsupportedOperationException("Not supported.")
 }

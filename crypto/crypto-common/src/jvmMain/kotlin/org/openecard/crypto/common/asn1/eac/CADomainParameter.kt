@@ -32,48 +32,47 @@ class CADomainParameter(
 	private val csi: CASecurityInfos,
 	var domainParameter: AlgorithmParameterSpec,
 ) {
-
-    private val ci: CAInfo = requireNotNull(csi.cAInfo)
+	private val ci: CAInfo = requireNotNull(csi.cAInfo)
 
 	/**
-     * Create new CADomainParameter.
-     *
-     * @param csi CASecurityInfos
-     */
-    constructor(csi: CASecurityInfos) : this(csi, loadParameters(csi))
+	 * Create new CADomainParameter.
+	 *
+	 * @param csi CASecurityInfos
+	 */
+	constructor(csi: CASecurityInfos) : this(csi, loadParameters(csi))
 
+	var parameter: AlgorithmParameterSpec
+		/**
+		 * Returns the domain parameter.
+		 *
+		 * @return Domain parameter
+		 */
+		get() = domainParameter
 
-    var parameter: AlgorithmParameterSpec
-        /**
-         * Returns the domain parameter.
-         *
-         * @return Domain parameter
-         */
-        get() = domainParameter
-        /**
-         * Sets the domain parameter.
-         *
-         * @param domainParameter Domain parameter
-         */
-        set(domainParameter) {
-            this.domainParameter = domainParameter
-        }
+		/**
+		 * Sets the domain parameter.
+		 *
+		 * @param domainParameter Domain parameter
+		 */
+		set(domainParameter) {
+			this.domainParameter = domainParameter
+		}
 
-    val isDH: Boolean
-        /**
-         * Checks if the protocol identifier indicates Diffie-Hellman.
-         *
-         * @return True if Diffie-Hellman is used, otherwise false
-         */
-        get() = ci.isDH
+	val isDH: Boolean
+		/**
+		 * Checks if the protocol identifier indicates Diffie-Hellman.
+		 *
+		 * @return True if Diffie-Hellman is used, otherwise false
+		 */
+		get() = ci.isDH
 
-    val isECDH: Boolean
-        /**
-         * Checks if the protocol identifier indicates elliptic curve Diffie-Hellman.
-         *
-         * @return True if elliptic curve Diffie-Hellman is used, otherwise false
-         */
-        get() = ci.isECDH
+	val isECDH: Boolean
+		/**
+		 * Checks if the protocol identifier indicates elliptic curve Diffie-Hellman.
+		 *
+		 * @return True if elliptic curve Diffie-Hellman is used, otherwise false
+		 */
+		get() = ci.isECDH
 
 	companion object {
 		private fun loadParameters(csi: CASecurityInfos): AlgorithmParameterSpec {

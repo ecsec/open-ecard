@@ -32,38 +32,36 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 open class DispatcherException : I18nException {
-
-    /**
-     * Creates an instance and initializes the exception with a message and a cause.
-     *
-     * @param message The message describing the error.
-     * @param cause The exception causing the error.
-     */
+	/**
+	 * Creates an instance and initializes the exception with a message and a cause.
+	 *
+	 * @param message The message describing the error.
+	 * @param cause The exception causing the error.
+	 */
 	@JvmOverloads
-    constructor(message: String?, cause: Throwable? = null) : super(message, cause)
+	constructor(message: String?, cause: Throwable? = null) : super(message, cause)
 
-    /**
-     * Creates a DispatcherException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     */
-    protected constructor(lang: I18n, key: I18nKey, vararg params: Any) : super(lang, key, *params)
+	/**
+	 * Creates a DispatcherException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 */
+	protected constructor(lang: I18n, key: I18nKey, vararg params: Any) : super(lang, key, *params)
 
-    /**
-     * Creates a DispatcherException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     * @param cause Exception causing the problem.
-     */
-    protected constructor(lang: I18n, key: I18nKey, cause: Throwable, vararg params: Any) : super(
-        lang,
-        key,
-        cause,
-        *params
-    )
-
+	/**
+	 * Creates a DispatcherException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 * @param cause Exception causing the problem.
+	 */
+	protected constructor(lang: I18n, key: I18nKey, cause: Throwable, vararg params: Any) : super(
+		lang,
+		key,
+		cause,
+		*params,
+	)
 }

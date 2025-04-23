@@ -31,11 +31,11 @@ import org.openecard.ws.SAL
  * @author Tobias Wich
  */
 interface SalSelector {
-    fun getSalForCardType(cardType: String): SAL
+	fun getSalForCardType(cardType: String): SAL
 
-    fun getSalForProtocol(protocolUri: String): List<SAL>
+	fun getSalForProtocol(protocolUri: String): List<SAL>
 
-    fun getSalForHandle(handle: ConnectionHandleType): SAL
+	fun getSalForHandle(handle: ConnectionHandleType): SAL
 
-    fun getSalForPath(path: CardApplicationPathType): SAL
+	fun getSalForPath(path: CardApplicationPathType): SAL
 }

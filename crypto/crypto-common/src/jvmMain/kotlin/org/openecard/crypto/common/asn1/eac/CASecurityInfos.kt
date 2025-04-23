@@ -31,82 +31,83 @@ class CASecurityInfos {
 	/**
 	 * Gets the CADomainParameterInfos.
 	 */
-    var cADomainParameterInfos: MutableList<CADomainParameterInfo> = ArrayList()
+	var cADomainParameterInfos: MutableList<CADomainParameterInfo> = ArrayList()
 	private var cadpiIndex = 0
-   /**
-     * Gets the CAInfos.
-     */
-    var cAInfos: MutableList<CAInfo> = ArrayList()
-    private var caiIndex = 0
+
+	/**
+	 * Gets the CAInfos.
+	 */
+	var cAInfos: MutableList<CAInfo> = ArrayList()
+	private var caiIndex = 0
 
 	val cADomainParameterInfo: CADomainParameterInfo?
-        /**
-         * Returns the selected CADomainParameterInfo.
-         *
-         * @return CADomainParameterInfo
-         */
-        get() = cADomainParameterInfos[cadpiIndex]
+		/**
+		 * Returns the selected CADomainParameterInfo.
+		 *
+		 * @return CADomainParameterInfo
+		 */
+		get() = cADomainParameterInfos[cadpiIndex]
 
-    /**
-     * Adds a CADomainParameterInfo.
-     *
-     * @param caDomainParameterInfo CADomainParameterInfo
-     */
-    fun addCADomainParameterInfo(caDomainParameterInfo: CADomainParameterInfo) {
-        this.cADomainParameterInfos.add(caDomainParameterInfo)
-    }
+	/**
+	 * Adds a CADomainParameterInfo.
+	 *
+	 * @param caDomainParameterInfo CADomainParameterInfo
+	 */
+	fun addCADomainParameterInfo(caDomainParameterInfo: CADomainParameterInfo) {
+		this.cADomainParameterInfos.add(caDomainParameterInfo)
+	}
 
-    /**
-     * Selects a CADomainParameterInfo.
-     *
-     * @param index Index
-     */
-    fun selectCADomainParameterInfo(index: Int) {
-        require(!(index < 0 || index > cADomainParameterInfos.size - 1)) { "Index out of range." }
-        this.cadpiIndex = index
-    }
+	/**
+	 * Selects a CADomainParameterInfo.
+	 *
+	 * @param index Index
+	 */
+	fun selectCADomainParameterInfo(index: Int) {
+		require(!(index < 0 || index > cADomainParameterInfos.size - 1)) { "Index out of range." }
+		this.cadpiIndex = index
+	}
 
-    val cAInfo: CAInfo?
-        /**
-         * Returns the selected CAInfo.
-         *
-         * @return CAInfos
-         */
-        get() = cAInfos[caiIndex]
+	val cAInfo: CAInfo?
+		/**
+		 * Returns the selected CAInfo.
+		 *
+		 * @return CAInfos
+		 */
+		get() = cAInfos[caiIndex]
 
-    /**
-     * Adds a CAInfo.
-     *
-     * @param caInfo CAInfo
-     */
-    fun addCAInfo(caInfo: CAInfo) {
-        this.cAInfos.add(caInfo)
-    }
+	/**
+	 * Adds a CAInfo.
+	 *
+	 * @param caInfo CAInfo
+	 */
+	fun addCAInfo(caInfo: CAInfo) {
+		this.cAInfos.add(caInfo)
+	}
 
-    /**
-     * Selects a CAInfo.
-     *
-     * @param index Index
-     */
-    fun selectCAInfo(index: Int) {
-        require(!(index < 0 || index > cAInfos.size - 1)) { "Index out of range." }
-        this.caiIndex = index
-    }
+	/**
+	 * Selects a CAInfo.
+	 *
+	 * @param index Index
+	 */
+	fun selectCAInfo(index: Int) {
+		require(!(index < 0 || index > cAInfos.size - 1)) { "Index out of range." }
+		this.caiIndex = index
+	}
 
-    companion object {
-        /**
-         * Checks if the object identifier is a CA object identifier.
-         *
-         * @param oid Object Identifier
-         * @return true if the object identifier is a CA object identifier, otherwise false
-         */
-        fun isObjectIdentifier(oid: String): Boolean {
-            if (CAInfo.Companion.isObjectIdentifier(oid)) {
-                return true
-            } else if (CADomainParameterInfo.Companion.isObjectIdentifier(oid)) {
-                return true
-            }
-            return false
-        }
-    }
+	companion object {
+		/**
+		 * Checks if the object identifier is a CA object identifier.
+		 *
+		 * @param oid Object Identifier
+		 * @return true if the object identifier is a CA object identifier, otherwise false
+		 */
+		fun isObjectIdentifier(oid: String): Boolean {
+			if (CAInfo.Companion.isObjectIdentifier(oid)) {
+				return true
+			} else if (CADomainParameterInfo.Companion.isObjectIdentifier(oid)) {
+				return true
+			}
+			return false
+		}
+	}
 }

@@ -54,7 +54,7 @@ kotlin {
 		}
 	}
 
-	jvm() {
+	jvm {
 		compilations {
 			val main by getting
 			val roboMain by compilations.creating {
@@ -90,7 +90,6 @@ kotlin {
 	}
 }
 
-
 val ios by configurations.creating {
 	isCanBeConsumed = true
 	isCanBeResolved = false
@@ -100,22 +99,22 @@ val iosHeaders by configurations.creating {
 	isCanBeResolved = true
 }
 
+val shareHeader =
+	tasks.register("shareHeader") {
+		dependsOn("roboMainClasses")
 
-val shareHeader = tasks.register("shareHeader") {
-	dependsOn("roboMainClasses")
+		outputs.file(
+			layout.buildDirectory.dir(roboHeaderTargetDirStr),
+		)
+	}
 
-	outputs.file(
-		layout.buildDirectory.dir(roboHeaderTargetDirStr)
-	)
-}
-
-
-val iosJar = tasks.register("iosJar", Jar::class) {
-	group = "build"
-	dependsOn("roboMainClasses")
-	from(sourceSets.getByName("roboMain").output)
-	archiveClassifier.set("iOS")
-}
+val iosJar =
+	tasks.register("iosJar", Jar::class) {
+		group = "build"
+		dependsOn("roboMainClasses")
+		from(sourceSets.getByName("roboMain").output)
+		archiveClassifier.set("iOS")
+	}
 tasks.named("build") {
 	dependsOn("iosJar")
 	dependsOn("shareHeader")

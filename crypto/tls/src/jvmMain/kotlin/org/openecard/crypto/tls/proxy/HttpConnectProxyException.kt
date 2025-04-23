@@ -29,4 +29,8 @@ import java.net.SocketException
  *
  * @author Tobias Wich
  */
-class HttpConnectProxyException(msg: String, val code: Int, val description: String?) : SocketException(msg)
+class HttpConnectProxyException(
+	msg: String,
+	val code: Int,
+	val description: String?,
+) : SocketException(msg)

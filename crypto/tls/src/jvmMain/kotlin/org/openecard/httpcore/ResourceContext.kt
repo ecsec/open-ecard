@@ -31,7 +31,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Implements a grabber to fetch TCTokens from a URL.
@@ -41,58 +41,55 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 open class ResourceContext(
-    val tlsClient: ClientCertTlsClient?,
+	val tlsClient: ClientCertTlsClient?,
 	val tlsClientProto: TlsClientProtocol?,
-    val certs: List<Pair<URL, TlsServerCertificate>>,
-	val stream: InputStream?
+	val certs: List<Pair<URL, TlsServerCertificate>>,
+	val stream: InputStream?,
 ) {
-    @get:Throws(IOException::class)
-    @get:Synchronized
-    var data: String? = null
-        get() {
-            // load data from stream first
-            if (field == null) {
-                try {
-                    field = stream?.let { FileUtils.toString(it) }
-                } finally {
-                    stream?.let {
-                        try {
-                            stream.close()
-                        } catch (ex: IOException) {
+	@get:Throws(IOException::class)
+	@get:Synchronized
+	var data: String? = null
+		get() {
+			// load data from stream first
+			if (field == null) {
+				try {
+					field = stream?.let { FileUtils.toString(it) }
+				} finally {
+					stream?.let {
+						try {
+							stream.close()
+						} catch (ex: IOException) {
 							LOG.debug(ex) { "Failed to close stream." }
-                        }
-                    }
-                }
-            }
-            return field
-        }
-        private set
+						}
+					}
+				}
+			}
+			return field
+		}
+		private set
 
-    constructor(
-        tlsClient: ClientCertTlsClient?,
+	constructor(
+		tlsClient: ClientCertTlsClient?,
 		tlsClientProto: TlsClientProtocol?,
-        certs: List<Pair<URL, TlsServerCertificate>>
-    ) : this(tlsClient, tlsClientProto, certs, null)
+		certs: List<Pair<URL, TlsServerCertificate>>,
+	) : this(tlsClient, tlsClientProto, certs, null)
 
-    fun closeStream() {
-        if (stream != null) {
-            try {
-                stream.close()
-            } catch (ex: IOException) {
+	fun closeStream() {
+		if (stream != null) {
+			try {
+				stream.close()
+			} catch (ex: IOException) {
 				LOG.debug(ex) { "Failed to close stream." }
-            }
-        }
-        if (tlsClientProto != null) {
-            try {
-                tlsClientProto.close()
-            } catch (ex: IOException) {
+			}
+		}
+		if (tlsClientProto != null) {
+			try {
+				tlsClientProto.close()
+			} catch (ex: IOException) {
 				LOG.debug(ex) { "Failed to close connection." }
-            }
-        }
-    }
+			}
+		}
+	}
 
-    fun hasData(): Boolean {
-        return stream != null
-    }
-
+	fun hasData(): Boolean = stream != null
 }

@@ -34,48 +34,50 @@ import java.net.Socket
  */
 @Test(groups = ["it"])
 class JavaSecVerifierTest {
-    @Test
-    @Throws(IOException::class)
-    fun testVerificationNoError() {
-        val hostName = "github.com"
-        val c: DefaultTlsClientImpl?
-		val handler = try {
-            // open connection
-            val socket = Socket(hostName, 443)
-            Assert.assertTrue(socket.isConnected)
-            Assert.assertTrue(socket.isBound)
-            Assert.assertFalse(socket.isClosed)
-            // connect client
-            c = DefaultTlsClientImpl(hostName)
-            TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
-        } catch (ex: Exception) {
-            throw SkipException("Unable to create TLS client.")
-        }
-        // do TLS handshake
-        handler.connect(c)
-        handler.close()
-    }
+	@Test
+	@Throws(IOException::class)
+	fun testVerificationNoError() {
+		val hostName = "github.com"
+		val c: DefaultTlsClientImpl?
+		val handler =
+			try {
+				// open connection
+				val socket = Socket(hostName, 443)
+				Assert.assertTrue(socket.isConnected)
+				Assert.assertTrue(socket.isBound)
+				Assert.assertFalse(socket.isClosed)
+				// connect client
+				c = DefaultTlsClientImpl(hostName)
+				TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
+			} catch (ex: Exception) {
+				throw SkipException("Unable to create TLS client.")
+			}
+		// do TLS handshake
+		handler.connect(c)
+		handler.close()
+	}
 
-    @Test(expectedExceptions = [IOException::class])
-    @Throws(IOException::class)
-    fun testVerificationError() {
-        val hostName = "www.google.com"
-        val actualHostName = "github.com"
-        val c: DefaultTlsClientImpl?
-		val handler = try {
-            // open connection
-            val socket = Socket(actualHostName, 443)
-            Assert.assertTrue(socket.isConnected)
-            Assert.assertTrue(socket.isBound)
-            Assert.assertFalse(socket.isClosed)
-            // connect client
-            c = DefaultTlsClientImpl(hostName)
-            TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
-        } catch (ex: Exception) {
-            throw SkipException("Unable to create TLS client.")
-        }
-        // do TLS handshake
-        handler.connect(c)
-        handler.close()
-    }
+	@Test(expectedExceptions = [IOException::class])
+	@Throws(IOException::class)
+	fun testVerificationError() {
+		val hostName = "www.google.com"
+		val actualHostName = "github.com"
+		val c: DefaultTlsClientImpl?
+		val handler =
+			try {
+				// open connection
+				val socket = Socket(actualHostName, 443)
+				Assert.assertTrue(socket.isConnected)
+				Assert.assertTrue(socket.isBound)
+				Assert.assertFalse(socket.isClosed)
+				// connect client
+				c = DefaultTlsClientImpl(hostName)
+				TlsClientProtocol(socket.getInputStream(), socket.getOutputStream())
+			} catch (ex: Exception) {
+				throw SkipException("Unable to create TLS client.")
+			}
+		// do TLS handshake
+		handler.connect(c)
+		handler.close()
+	}
 }

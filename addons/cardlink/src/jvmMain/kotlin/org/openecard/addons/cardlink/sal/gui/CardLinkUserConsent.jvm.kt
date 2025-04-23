@@ -27,23 +27,27 @@ import org.openecard.addon.Context
 import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.common.util.SysUtils
 import org.openecard.gui.definition.UserConsentDescription
-import org.openecard.mobile.activation.Websocket
 
 private const val title = "CardLink User Consent"
 const val CONSENT_TYPE = "CardLink"
 
-class CardLinkUserConsent(ws: WsPair, addonCtx: Context, isPhoneRegistered: Boolean, sessionHandle: ConnectionHandleType) : UserConsentDescription(title, CONSENT_TYPE) {
+class CardLinkUserConsent(
+	ws: WsPair,
+	addonCtx: Context,
+	isPhoneRegistered: Boolean,
+	sessionHandle: ConnectionHandleType,
+) : UserConsentDescription(title, CONSENT_TYPE) {
 	init {
 		steps.apply {
 			if (!isPhoneRegistered) {
 				add(PhoneStep(ws))
 				add(TanStep(ws))
 			}
-			//on mobile we definitely have NFC so we will need a CAN
-			if(SysUtils.isMobileDevice()) {
+			// on mobile we definitely have NFC so we will need a CAN
+			if (SysUtils.isMobileDevice()) {
 				add(EnterCanStep(ws, addonCtx, sessionHandle))
-			//desktop might have a contact based reader allowing to connect without can
-			//if direct connect fails, EnterCanStep will be added by DirectConnectStep
+				// desktop might have a contact based reader allowing to connect without can
+				// if direct connect fails, EnterCanStep will be added by DirectConnectStep
 			} else {
 				add(DirectConnectStep(ws, addonCtx, sessionHandle))
 			}

@@ -62,280 +62,284 @@ import kotlin.test.assertEquals
  * @author Tobias Wich
  */
 class PINTest {
-    @Test
-    @Throws(UtilException::class)
-    fun testISO() {
-        val pwdAttr = create(true, ISO_9564_1, 4, 8, 12)
+	@Test
+	@Throws(UtilException::class)
+	fun testISO() {
+		val pwdAttr = create(true, ISO_9564_1, 4, 8, 12)
 
-        val pinMask = PINUtils.createPinMask(pwdAttr)
-        Assert.assertEquals(
-            byteArrayOf(
-                0x20,
-                0xFF.toByte(),
-                0xFF.toByte(),
-                0xFF.toByte(),
-                0xFF.toByte(),
-                0xFF.toByte(),
-                0xFF.toByte(),
-                0xFF.toByte()
-            ), pinMask
-        )
+		val pinMask = PINUtils.createPinMask(pwdAttr)
+		Assert.assertEquals(
+			byteArrayOf(
+				0x20,
+				0xFF.toByte(),
+				0xFF.toByte(),
+				0xFF.toByte(),
+				0xFF.toByte(),
+				0xFF.toByte(),
+				0xFF.toByte(),
+				0xFF.toByte(),
+			),
+			pinMask,
+		)
 
-        val pinResult: ByteArray? = PINUtils.encodePin("123456789".toCharArray(), pwdAttr)
-        Assert.assertEquals(
-            byteArrayOf(0x29, 0x12, 0x34, 0x56, 0x78, 0x9F.toByte(), 0xFF.toByte(), 0xFF.toByte()),
-            pinResult
-        )
-    }
+		val pinResult: ByteArray? = PINUtils.encodePin("123456789".toCharArray(), pwdAttr)
+		Assert.assertEquals(
+			byteArrayOf(0x29, 0x12, 0x34, 0x56, 0x78, 0x9F.toByte(), 0xFF.toByte(), 0xFF.toByte()),
+			pinResult,
+		)
+	}
 
-    @Test
-    @Throws(UtilException::class)
-    fun testBCD() {
-        val pwdAttr = create(true, BCD, 4, 3, 6)
-        pwdAttr.setPadChar(byteArrayOf(0xFF.toByte()))
+	@Test
+	@Throws(UtilException::class)
+	fun testBCD() {
+		val pwdAttr = create(true, BCD, 4, 3, 6)
+		pwdAttr.setPadChar(byteArrayOf(0xFF.toByte()))
 
-        val pinMask: ByteArray = PINUtils.createPinMask(pwdAttr)
-        Assert.assertEquals(byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte()), pinMask)
+		val pinMask: ByteArray = PINUtils.createPinMask(pwdAttr)
+		Assert.assertEquals(byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte()), pinMask)
 
-        val pinResult: ByteArray? = PINUtils.encodePin("12345".toCharArray(), pwdAttr)
-        Assert.assertEquals(byteArrayOf(0x12.toByte(), 0x34.toByte(), 0x5F.toByte()), pinResult)
-    }
+		val pinResult: ByteArray? = PINUtils.encodePin("12345".toCharArray(), pwdAttr)
+		Assert.assertEquals(byteArrayOf(0x12.toByte(), 0x34.toByte(), 0x5F.toByte()), pinResult)
+	}
 
-    @Test
-    @Throws(UtilException::class)
-    fun testASCII() {
-        var pwdAttr = create(false, ASCII_NUMERIC, 6, 6)
+	@Test
+	@Throws(UtilException::class)
+	fun testASCII() {
+		var pwdAttr = create(false, ASCII_NUMERIC, 6, 6)
 
-        val pinResult: ByteArray? = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
-        Assert.assertEquals(byteArrayOf(0x31, 0x32, 0x33, 0x34, 0x35, 0x36), pinResult)
+		val pinResult: ByteArray? = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
+		Assert.assertEquals(byteArrayOf(0x31, 0x32, 0x33, 0x34, 0x35, 0x36), pinResult)
 
-        try {
-            pwdAttr = create(true, ASCII_NUMERIC, 6, 6)
-            PINUtils.encodePin("123456".toCharArray(), pwdAttr)
-            Assert.fail() // padding needed, but no char given
-        } catch (ex: UtilException) {
-        }
-        //	try {
-//	    pwdAttr = create(false, ASCII_NUMERIC, 6, 7);
-//	    PINUtils.encodePin("123456", pwdAttr);
-//	    fail(); // padding inferred, but no char given
-//	} catch (UtilException ex) {
-//	}
-    }
+		try {
+			pwdAttr = create(true, ASCII_NUMERIC, 6, 6)
+			PINUtils.encodePin("123456".toCharArray(), pwdAttr)
+			Assert.fail() // padding needed, but no char given
+		} catch (ex: UtilException) {
+		}
+		// 	try {
+// 	    pwdAttr = create(false, ASCII_NUMERIC, 6, 7);
+// 	    PINUtils.encodePin("123456", pwdAttr);
+// 	    fail(); // padding inferred, but no char given
+// 	} catch (UtilException ex) {
+// 	}
+	}
 
-    @Test
-    @Throws(UtilException::class)
-    fun testHalfNibble() {
-        var pwdAttr = create(false, HALF_NIBBLE_BCD, 6, 6)
+	@Test
+	@Throws(UtilException::class)
+	fun testHalfNibble() {
+		var pwdAttr = create(false, HALF_NIBBLE_BCD, 6, 6)
 
-        var pinResult: ByteArray? = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
-        Assert.assertEquals(
-            byteArrayOf(
-                0xF1.toByte(),
-                0xF2.toByte(),
-                0xF3.toByte(),
-                0xF4.toByte(),
-                0xF5.toByte(),
-                0xF6.toByte()
-            ), pinResult
-        )
+		var pinResult: ByteArray? = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
+		Assert.assertEquals(
+			byteArrayOf(
+				0xF1.toByte(),
+				0xF2.toByte(),
+				0xF3.toByte(),
+				0xF4.toByte(),
+				0xF5.toByte(),
+				0xF6.toByte(),
+			),
+			pinResult,
+		)
 
-        pwdAttr = create(true, HALF_NIBBLE_BCD, 6, 7)
-        pwdAttr.setPadChar(byteArrayOf(0xFF.toByte()))
+		pwdAttr = create(true, HALF_NIBBLE_BCD, 6, 7)
+		pwdAttr.setPadChar(byteArrayOf(0xFF.toByte()))
 
-        pinResult = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
-        Assert.assertEquals(
-            byteArrayOf(
-                0xF1.toByte(),
-                0xF2.toByte(),
-                0xF3.toByte(),
-                0xF4.toByte(),
-                0xF5.toByte(),
-                0xF6.toByte(),
-                0xFF.toByte()
-            ), pinResult
-        )
-    }
+		pinResult = PINUtils.encodePin("123456".toCharArray(), pwdAttr)
+		Assert.assertEquals(
+			byteArrayOf(
+				0xF1.toByte(),
+				0xF2.toByte(),
+				0xF3.toByte(),
+				0xF4.toByte(),
+				0xF5.toByte(),
+				0xF6.toByte(),
+				0xFF.toByte(),
+			),
+			pinResult,
+		)
+	}
 
-    @Test
-    @Throws(IFDException::class)
-    fun verifyISO() {
-        val pwdAttr = create(true, ISO_9564_1, 4, 8)
-        val ctrlStruct = PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"))
-        ctrlStruct.setLang(Locale.GERMANY)
-        val structData: ByteArray = ctrlStruct.toBytes()
-        val pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF" // length=13
-        val ctrlStr = "3C 00 89 47 04 0E04 02 01 0704 00 000000 0D000000"
-        val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
-        Assert.assertEquals(referenceData, structData)
-    }
+	@Test
+	@Throws(IFDException::class)
+	fun verifyISO() {
+		val pwdAttr = create(true, ISO_9564_1, 4, 8)
+		val ctrlStruct = PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"))
+		ctrlStruct.setLang(Locale.GERMANY)
+		val structData: ByteArray = ctrlStruct.toBytes()
+		val pinStr = "00 20 00 01 08 20 FF FF FF FF FF FF FF" // length=13
+		val ctrlStr = "3C 00 89 47 04 0E04 02 01 0704 00 000000 0D000000"
+		val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
+		Assert.assertEquals(referenceData, structData)
+	}
 
-    @Test
-    @Throws(IFDException::class)
-    fun verifyASCII() {
-        val pwdAttr = create(false, ASCII_NUMERIC, 4, 4)
-        val ctrlStruct = PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"))
-        ctrlStruct.setLang(Locale.GERMANY)
-        val structData: ByteArray = ctrlStruct.toBytes()
-        val pinStr = "00 20 00 01" // length=5
-        val ctrlStr = "3C 00 82 04 00 0404 02 01 0704 00 000000 04000000"
-        val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
-        Assert.assertEquals(referenceData, structData)
-    }
-
-    @Test(enabled = false)
-    @Throws(IFDException::class, WSMarshallerException::class, SAXException::class)
-    fun testModifyPin() {
-        val ifd = IFD()
-        val env = ClientEnv()
-		env.gui = SwingUserConsent(SwingDialogWrapper())
-        ifd.setEnvironment(env)
-        val eCtx = EstablishContext()
-        val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
-
-        val listIFDs = ListIFDs()
-        listIFDs.setContextHandle(ctxHandle)
-        val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
-
-        val connect: Connect = Connect()
-        connect.setContextHandle(ctxHandle)
-        connect.setIFDName(ifdName)
-        connect.setSlot(BigInteger.ZERO)
-        val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
-
-        // prepare pace call
-        val xmlCall = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n" +
-                "  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n" +
-                "  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n" +
-                "    <iso:PinID>03</iso:PinID>\n" +
-                "  </iso:AuthenticationProtocolData>\n" +
-                "</iso:EstablishChannel>"
-        val m = WSMarshallerFactory.createInstance()
-        val eCh: EstablishChannel = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
-
-        // send pace call
-        val eChR = ifd.establishChannel(eCh)
-        assertEquals(ECardConstants.Major.OK, eChR.getResult().getResultMajor())
-
-        val pwdAttr = create(true, ASCII_NUMERIC, 6, 6, 6)
-        pwdAttr.setPadChar(byteArrayOf(0x3F.toByte()))
-        val ctrlStruct = PCSCPinModify(pwdAttr, StringUtils.toByteArray("002C0203"))
-        val structData: ByteArray = ctrlStruct.toBytes()
-        val pinStr = "00 2C 02 03 06 3F3F3F3F3F3F"
-        val ctrlStr = "15 05 82 06 00 00 00 0606 01 02 02 0407 00 01 02 000000 0B000000"
-
-        // This is the command the 'AusweisApp' sends
-        //String ausweisApp = "150582080000000606010202090400010200000005000000002C020300";
-        val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
-        Assert.assertEquals(referenceData, structData)
-
-        val controlIFD = ControlIFD()
-        controlIFD.setCommand(ByteUtils.concatenate(PCSCFeatures.MODIFY_PIN_DIRECT.toByte(), structData))
-        controlIFD.setSlotHandle(slotHandle)
-        val response = ifd.controlIFD(controlIFD)
-    }
+	@Test
+	@Throws(IFDException::class)
+	fun verifyASCII() {
+		val pwdAttr = create(false, ASCII_NUMERIC, 4, 4)
+		val ctrlStruct = PCSCPinVerify(pwdAttr, StringUtils.toByteArray("00200001"))
+		ctrlStruct.setLang(Locale.GERMANY)
+		val structData: ByteArray = ctrlStruct.toBytes()
+		val pinStr = "00 20 00 01" // length=5
+		val ctrlStr = "3C 00 82 04 00 0404 02 01 0704 00 000000 04000000"
+		val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
+		Assert.assertEquals(referenceData, structData)
+	}
 
 	@Test(enabled = false)
-    fun verifyeGK() {
-        val ifd = IFD()
-        val env: ClientEnv = ClientEnv()
+	@Throws(IFDException::class, WSMarshallerException::class, SAXException::class)
+	fun testModifyPin() {
+		val ifd = IFD()
+		val env = ClientEnv()
 		env.gui = SwingUserConsent(SwingDialogWrapper())
-        ifd.setEnvironment(env)
-        val eCtx: EstablishContext = EstablishContext()
-        val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
+		ifd.setEnvironment(env)
+		val eCtx = EstablishContext()
+		val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
 
-        val listIFDs: ListIFDs = ListIFDs()
-        listIFDs.setContextHandle(ctxHandle)
-        val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
+		val listIFDs = ListIFDs()
+		listIFDs.setContextHandle(ctxHandle)
+		val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
 
-        val connect: Connect = Connect()
-        connect.setContextHandle(ctxHandle)
-        connect.setIFDName(ifdName)
-        connect.setSlot(BigInteger.ZERO)
-        val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
+		val connect: Connect = Connect()
+		connect.setContextHandle(ctxHandle)
+		connect.setIFDName(ifdName)
+		connect.setSlot(BigInteger.ZERO)
+		val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
 
-        val verify = VerifyUser()
-        verify.setSlotHandle(slotHandle)
-        val inputUnit = InputUnitType()
-        verify.setInputUnit(inputUnit)
-        val pinInput = PinInputType()
-        inputUnit.setPinInput(pinInput)
-        pinInput.setIndex(BigInteger.ZERO)
-        pinInput.setPasswordAttributes(create(true, ISO_9564_1, 6, 8, 8))
-        verify.setTemplate(StringUtils.toByteArray("00 20 00 01", true))
-        val verifyR = ifd.verifyUser(verify)
-        val responseCode: ByteArray? = verifyR.getResponse()
-    }
+		// prepare pace call
+		val xmlCall =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n" +
+				"  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n" +
+				"  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n" +
+				"    <iso:PinID>03</iso:PinID>\n" +
+				"  </iso:AuthenticationProtocolData>\n" +
+				"</iso:EstablishChannel>"
+		val m = WSMarshallerFactory.createInstance()
+		val eCh: EstablishChannel = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
 
+		// send pace call
+		val eChR = ifd.establishChannel(eCh)
+		assertEquals(ECardConstants.Major.OK, eChR.getResult().getResultMajor())
 
-    @Test(enabled = false)
-    @Throws(
-        UnsupportedDataTypeException::class,
-        JAXBException::class,
-        SAXException::class,
-        WSMarshallerException::class
-    )
-    fun executePACE_PIN() {
-        val ifd = IFD()
-        val env: ClientEnv = ClientEnv()
-        env.gui = SwingUserConsent(SwingDialogWrapper())
-        ifd.setEnvironment(env)
-        val eCtx: EstablishContext = EstablishContext()
-        val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
+		val pwdAttr = create(true, ASCII_NUMERIC, 6, 6, 6)
+		pwdAttr.setPadChar(byteArrayOf(0x3F.toByte()))
+		val ctrlStruct = PCSCPinModify(pwdAttr, StringUtils.toByteArray("002C0203"))
+		val structData: ByteArray = ctrlStruct.toBytes()
+		val pinStr = "00 2C 02 03 06 3F3F3F3F3F3F"
+		val ctrlStr = "15 05 82 06 00 00 00 0606 01 02 02 0407 00 01 02 000000 0B000000"
 
-        val listIFDs: ListIFDs = ListIFDs()
-        listIFDs.setContextHandle(ctxHandle)
-        val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
+		// This is the command the 'AusweisApp' sends
+		// String ausweisApp = "150582080000000606010202090400010200000005000000002C020300";
+		val referenceData = StringUtils.toByteArray(ctrlStr + pinStr, true)
+		Assert.assertEquals(referenceData, structData)
 
-        val connect: Connect = Connect()
-        connect.setContextHandle(ctxHandle)
-        connect.setIFDName(ifdName)
-        connect.setSlot(BigInteger.ZERO)
-        val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
+		val controlIFD = ControlIFD()
+		controlIFD.setCommand(ByteUtils.concatenate(PCSCFeatures.MODIFY_PIN_DIRECT.toByte(), structData))
+		controlIFD.setSlotHandle(slotHandle)
+		val response = ifd.controlIFD(controlIFD)
+	}
 
-        // prepare pace call
-        val xmlCall = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n" +
-                "  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n" +
-                "  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n" +
-                "    <iso:PinID>03</iso:PinID>\n" +
-                "  </iso:AuthenticationProtocolData>\n" +
-                "</iso:EstablishChannel>"
-        val m = WSMarshallerFactory.createInstance()
-        val eCh: EstablishChannel = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
+	@Test(enabled = false)
+	fun verifyeGK() {
+		val ifd = IFD()
+		val env: ClientEnv = ClientEnv()
+		env.gui = SwingUserConsent(SwingDialogWrapper())
+		ifd.setEnvironment(env)
+		val eCtx: EstablishContext = EstablishContext()
+		val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
 
-        // send pace call
-        val eChR = ifd.establishChannel(eCh)
-    }
+		val listIFDs: ListIFDs = ListIFDs()
+		listIFDs.setContextHandle(ctxHandle)
+		val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
 
-    companion object {
-        private fun create(
-            needsPadding: Boolean,
-            pwdType: PasswordTypeType?,
-            minLen: Int,
-            storedLen: Int,
-            maxLen: Int
-        ): PasswordAttributesType {
-            val r: PasswordAttributesType = create(needsPadding, pwdType, minLen, storedLen)
-            r.setMaxLength(BigInteger.valueOf(maxLen.toLong()))
-            return r
-        }
+		val connect: Connect = Connect()
+		connect.setContextHandle(ctxHandle)
+		connect.setIFDName(ifdName)
+		connect.setSlot(BigInteger.ZERO)
+		val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
 
-        private fun create(
-            needsPadding: Boolean,
-            pwdType: PasswordTypeType?,
-            minLen: Int,
-            storedLen: Int
-        ): PasswordAttributesType {
-            val r: PasswordAttributesType = PasswordAttributesType()
-            r.setMinLength(BigInteger.valueOf(minLen.toLong()))
-            r.setStoredLength(BigInteger.valueOf(storedLen.toLong()))
-            r.setPwdType(pwdType)
-            if (needsPadding) {
-                r.getPwdFlags().add("needs-padding")
-            }
-            return r
-        }
-    }
+		val verify = VerifyUser()
+		verify.setSlotHandle(slotHandle)
+		val inputUnit = InputUnitType()
+		verify.setInputUnit(inputUnit)
+		val pinInput = PinInputType()
+		inputUnit.setPinInput(pinInput)
+		pinInput.setIndex(BigInteger.ZERO)
+		pinInput.setPasswordAttributes(create(true, ISO_9564_1, 6, 8, 8))
+		verify.setTemplate(StringUtils.toByteArray("00 20 00 01", true))
+		val verifyR = ifd.verifyUser(verify)
+		val responseCode: ByteArray? = verifyR.getResponse()
+	}
+
+	@Test(enabled = false)
+	@Throws(
+		UnsupportedDataTypeException::class,
+		JAXBException::class,
+		SAXException::class,
+		WSMarshallerException::class,
+	)
+	fun executePACE_PIN() {
+		val ifd = IFD()
+		val env: ClientEnv = ClientEnv()
+		env.gui = SwingUserConsent(SwingDialogWrapper())
+		ifd.setEnvironment(env)
+		val eCtx: EstablishContext = EstablishContext()
+		val ctxHandle: ByteArray? = ifd.establishContext(eCtx).getContextHandle()
+
+		val listIFDs: ListIFDs = ListIFDs()
+		listIFDs.setContextHandle(ctxHandle)
+		val ifdName: String? = ifd.listIFDs(listIFDs).getIFDName().get(0)
+
+		val connect: Connect = Connect()
+		connect.setContextHandle(ctxHandle)
+		connect.setIFDName(ifdName)
+		connect.setSlot(BigInteger.ZERO)
+		val slotHandle: ByteArray? = ifd.connect(connect).getSlotHandle()
+
+		// prepare pace call
+		val xmlCall =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"<iso:EstablishChannel xmlns:iso=\"urn:iso:std:iso-iec:24727:tech:schema\">\n" +
+				"  <iso:SlotHandle>" + ByteUtils.toHexString(slotHandle) + "</iso:SlotHandle>\n" +
+				"  <iso:AuthenticationProtocolData Protocol=\"urn:oid:0.4.0.127.0.7.2.2.4\">\n" +
+				"    <iso:PinID>03</iso:PinID>\n" +
+				"  </iso:AuthenticationProtocolData>\n" +
+				"</iso:EstablishChannel>"
+		val m = WSMarshallerFactory.createInstance()
+		val eCh: EstablishChannel = m.unmarshal(m.str2doc(xmlCall)) as EstablishChannel
+
+		// send pace call
+		val eChR = ifd.establishChannel(eCh)
+	}
+
+	companion object {
+		private fun create(
+			needsPadding: Boolean,
+			pwdType: PasswordTypeType?,
+			minLen: Int,
+			storedLen: Int,
+			maxLen: Int,
+		): PasswordAttributesType {
+			val r: PasswordAttributesType = create(needsPadding, pwdType, minLen, storedLen)
+			r.setMaxLength(BigInteger.valueOf(maxLen.toLong()))
+			return r
+		}
+
+		private fun create(
+			needsPadding: Boolean,
+			pwdType: PasswordTypeType?,
+			minLen: Int,
+			storedLen: Int,
+		): PasswordAttributesType {
+			val r: PasswordAttributesType = PasswordAttributesType()
+			r.setMinLength(BigInteger.valueOf(minLen.toLong()))
+			r.setStoredLength(BigInteger.valueOf(storedLen.toLong()))
+			r.setPwdType(pwdType)
+			if (needsPadding) {
+				r.getPwdFlags().add("needs-padding")
+			}
+			return r
+		}
+	}
 }

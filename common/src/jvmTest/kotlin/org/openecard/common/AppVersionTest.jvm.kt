@@ -37,46 +37,46 @@ import java.util.*
  * @author Tobias Wich
  */
 class AppVersionTest {
-    @Test
-    fun testVersion() {
-        // read app name from file
-        val nameScan = Scanner(AppVersionTest::class.java.getResourceAsStream("/openecard/APPNAME")!!, "UTF-8")
-        val refName = nameScan.useDelimiter("\\A").next().trim { it <= ' ' }
-        Assert.assertFalse(refName.isEmpty())
+	@Test
+	fun testVersion() {
+		// read app name from file
+		val nameScan = Scanner(AppVersionTest::class.java.getResourceAsStream("/openecard/APPNAME")!!, "UTF-8")
+		val refName = nameScan.useDelimiter("\\A").next().trim { it <= ' ' }
+		Assert.assertFalse(refName.isEmpty())
 
-        val name = name
-        Assert.assertEquals(name, refName)
+		val name = name
+		Assert.assertEquals(name, refName)
 
-        val version = versionString
-        val major = major
-        val minor = minor
-        val patch = patch
-        val buildId = buildId
-        var reconstructedVersion = "$major.$minor.$patch"
-        if (buildId != null) {
-            reconstructedVersion += "-$buildId"
-        }
+		val version = versionString
+		val major = major
+		val minor = minor
+		val patch = patch
+		val buildId = buildId
+		var reconstructedVersion = "$major.$minor.$patch"
+		if (buildId != null) {
+			reconstructedVersion += "-$buildId"
+		}
 
-        Assert.assertEquals(reconstructedVersion, version)
-    }
+		Assert.assertEquals(reconstructedVersion, version)
+	}
 
-    @Test
-    fun compareVersions() {
-        val old = Version(null, "1.0.0", null, null)
-        val new1 = Version(null, "1.1.0", null, null)
-        val new2 = Version(null, "1.1.0", null, null)
-        val snap = Version(null, "1.1.0-rc1", null, null)
+	@Test
+	fun compareVersions() {
+		val old = Version(null, "1.0.0", null, null)
+		val new1 = Version(null, "1.1.0", null, null)
+		val new2 = Version(null, "1.1.0", null, null)
+		val snap = Version(null, "1.1.0-rc1", null, null)
 
-        Assert.assertTrue(old.version.isOlder(new1.version))
-        Assert.assertFalse(new1.version.isOlder(old.version))
+		Assert.assertTrue(old.version.isOlder(new1.version))
+		Assert.assertFalse(new1.version.isOlder(old.version))
 
-        Assert.assertFalse(new1.version.isNewer(new2.version))
-        Assert.assertFalse(new2.version.isNewer(new1.version))
-        Assert.assertFalse(new1.version.isOlder(new2.version))
-        Assert.assertFalse(new2.version.isOlder(new1.version))
-        Assert.assertTrue(new1.version.isSame(new2.version))
+		Assert.assertFalse(new1.version.isNewer(new2.version))
+		Assert.assertFalse(new2.version.isNewer(new1.version))
+		Assert.assertFalse(new1.version.isOlder(new2.version))
+		Assert.assertFalse(new2.version.isOlder(new1.version))
+		Assert.assertTrue(new1.version.isSame(new2.version))
 
-        Assert.assertFalse(new1.version.isSame(snap.version))
-        Assert.assertTrue(new1.version.isNewer(snap.version))
-    }
+		Assert.assertFalse(new1.version.isSame(snap.version))
+		Assert.assertTrue(new1.version.isNewer(snap.version))
+	}
 }

@@ -118,10 +118,16 @@ object GUIDefaults {
 		}
 	}
 
+	private var isInitialized = false
 	@JvmStatic
 	fun initialize() {
+		if (isInitialized) {
+			return
+		}
+
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+			// disabled as this causes hangs with gtk native calls inside swing and systray
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
 			val toolkit = Toolkit.getDefaultToolkit()
 			val guiProps = GUIProperties()
@@ -171,6 +177,8 @@ object GUIDefaults {
 		} catch (e: Exception) {
 			LOG.error { e.message }
 		}
+
+		isInitialized = true
 	}
 
 	@Throws(IllegalArgumentException::class)

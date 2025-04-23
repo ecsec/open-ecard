@@ -39,7 +39,7 @@ import java.net.Socket
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
-import java.util.*
+import java.util.Locale
 
 private val LOG = KotlinLogging.logger { }
 

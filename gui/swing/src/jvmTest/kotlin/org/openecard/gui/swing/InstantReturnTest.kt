@@ -30,17 +30,19 @@ import org.openecard.gui.executor.StepAction
 import org.testng.Assert
 import org.testng.annotations.Test
 
+// TODO: make Selenium test which really proves, that the GUI works correctly
+
 /**
  *
  * @author Tobias Wich
  */
 class InstantReturnTest {
-	// TODO: make Selenium test which really proves, that the GUI works correctly
+	// TODO: skip test only in ci
+
 	/**
 	 * Test if the GUI closes itself after executing an action with instantreturn set.
 	 * There is no way to determine whether the GUI is displayed at all. This check must be part of a Selenium test.
 	 */
-	// TODO: skip test only in ci
 	@Test(enabled = false)
 	fun testInstantReturn() {
 		// create wait action

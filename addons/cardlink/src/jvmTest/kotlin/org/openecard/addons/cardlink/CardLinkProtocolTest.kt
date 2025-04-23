@@ -26,10 +26,34 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.encodeToString
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
-import org.openecard.addons.cardlink.ws.*
+import org.openecard.addons.cardlink.ws.CONFIRM_TAN
+import org.openecard.addons.cardlink.ws.CONFIRM_TAN_RESPONSE
+import org.openecard.addons.cardlink.ws.GematikEnvelope
+import org.openecard.addons.cardlink.ws.REGISTER_EGK
+import org.openecard.addons.cardlink.ws.REGISTER_EGK_FINISH
+import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN
+import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
+import org.openecard.addons.cardlink.ws.SEND_APDU_RESPONSE
+import org.openecard.addons.cardlink.ws.SESSION_INFO
+import org.openecard.addons.cardlink.ws.SendApdu
+import org.openecard.addons.cardlink.ws.WebsocketListenerImpl
+import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
 import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.Promise
-import org.openecard.mobile.activation.*
+import org.openecard.mobile.activation.ActivationResult
+import org.openecard.mobile.activation.ActivationResultCode
+import org.openecard.mobile.activation.ActivationSource
+import org.openecard.mobile.activation.CardLinkInteraction
+import org.openecard.mobile.activation.ConfirmPasswordOperation
+import org.openecard.mobile.activation.ConfirmTextOperation
+import org.openecard.mobile.activation.ControllerCallback
+import org.openecard.mobile.activation.NFCCapabilities
+import org.openecard.mobile.activation.NFCOverlayMessageHandler
+import org.openecard.mobile.activation.NfcCapabilityResult
+import org.openecard.mobile.activation.ServiceErrorResponse
+import org.openecard.mobile.activation.StartServiceHandler
+import org.openecard.mobile.activation.Websocket
+import org.openecard.mobile.activation.WebsocketListener
 import org.openecard.mobile.activation.common.CommonActivationUtils
 import org.openecard.mobile.activation.common.NFCDialogMsgSetter
 import org.openecard.mobile.system.OpeneCardContextConfig
@@ -39,7 +63,7 @@ import org.openecard.ws.jaxb.JAXBMarshaller
 import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -47,8 +71,8 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
-const val wrongCan = "1231234"
-const val correctCan = "123123"
+const val WRONG_CAN = "1231234"
+const val CORRECT_CAN = "123123"
 
 @OptIn(ExperimentalEncodingApi::class)
 fun String.toB64(): String = Base64.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL).encode(this.toByteArray())
@@ -286,7 +310,7 @@ class CardLinkProtocolTest {
 
 				override fun onCanRequest(enterCan: ConfirmPasswordOperation) {
 					logger.info { "onCanRequest" }
-					enterCan.confirmPassword(wrongCan)
+					enterCan.confirmPassword(WRONG_CAN)
 				}
 
 				override fun onCanRetry(
@@ -295,7 +319,7 @@ class CardLinkProtocolTest {
 					errorMessage: String?,
 				) {
 					logger.info { "onCanRetry: $errorMessage (Status Code: $resultCode)" }
-					enterCan.confirmPassword(correctCan)
+					enterCan.confirmPassword(CORRECT_CAN)
 				}
 
 				override fun onPhoneNumberRequest(enterPhoneNumber: ConfirmTextOperation) {

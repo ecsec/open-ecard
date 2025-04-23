@@ -25,7 +25,16 @@ package org.openecard.addons.cardlink.sal.gui
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.encodeToString
 import org.openecard.addons.cardlink.sal.CardLinkKeys
-import org.openecard.addons.cardlink.ws.*
+import org.openecard.addons.cardlink.ws.ConfirmPhoneNumber
+import org.openecard.addons.cardlink.ws.GematikEnvelope
+import org.openecard.addons.cardlink.ws.REQUEST_SMS_TAN_RESPONSE
+import org.openecard.addons.cardlink.ws.ResultCode
+import org.openecard.addons.cardlink.ws.SendPhoneNumber
+import org.openecard.addons.cardlink.ws.TASK_LIST_ERROR
+import org.openecard.addons.cardlink.ws.TasklistErrorPayload
+import org.openecard.addons.cardlink.ws.WsPair
+import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
+import org.openecard.addons.cardlink.ws.toCardLinkErrorCode
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.WSHelper
@@ -39,7 +48,7 @@ import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
-import java.util.*
+import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 

@@ -27,11 +27,12 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.gui.UserConsent
 
+// TODO: replace with addon IFD protocols
+
 /**
  *
  * @author Tobias Wich
  */
-// TODO: replace with addon IFD protocols
 interface Protocol {
 	/**
 	 * Perform protocol and thereby set up a secure messaging channel.

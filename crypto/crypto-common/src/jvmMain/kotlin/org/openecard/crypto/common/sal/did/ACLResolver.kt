@@ -22,13 +22,25 @@
 package org.openecard.crypto.common.sal.did
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ACLList
+import iso.std.iso_iec._24727.tech.schema.ACLListResponse
+import iso.std.iso_iec._24727.tech.schema.AccessRuleType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType
+import iso.std.iso_iec._24727.tech.schema.DIDGet
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType
+import iso.std.iso_iec._24727.tech.schema.NamedDataServiceActionName
+import iso.std.iso_iec._24727.tech.schema.SecurityConditionType
+import iso.std.iso_iec._24727.tech.schema.TargetNameType
 import org.openecard.common.SecurityConditionUnsatisfiable
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.util.HandlerUtils
-import java.util.*
+import java.util.TreeSet
 
 private val LOG = KotlinLogging.logger { }
 

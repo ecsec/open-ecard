@@ -23,7 +23,7 @@ package org.openecard.crypto.common.asn1.cvc
 
 import org.openecard.common.util.StringUtils
 import org.testng.Assert
-import java.util.*
+import java.util.GregorianCalendar
 import kotlin.test.Test
 
 /**

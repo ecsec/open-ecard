@@ -22,7 +22,16 @@
 package org.openecard.crypto.common.sal.did
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ACLList
+import iso.std.iso_iec._24727.tech.schema.ACLListResponse
+import iso.std.iso_iec._24727.tech.schema.AccessControlListType
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType
+import iso.std.iso_iec._24727.tech.schema.DIDStructureType
+import iso.std.iso_iec._24727.tech.schema.DSIRead
+import iso.std.iso_iec._24727.tech.schema.DSIReadResponse
+import iso.std.iso_iec._24727.tech.schema.DataSetSelect
+import iso.std.iso_iec._24727.tech.schema.DataSetSelectResponse
+import iso.std.iso_iec._24727.tech.schema.TargetNameType
 import org.openecard.common.ECardConstants
 import org.openecard.common.SecurityConditionUnsatisfiable
 import org.openecard.common.WSHelper

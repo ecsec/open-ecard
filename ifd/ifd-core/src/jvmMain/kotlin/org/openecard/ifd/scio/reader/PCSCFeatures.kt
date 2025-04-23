@@ -22,7 +22,7 @@
 package org.openecard.ifd.scio.reader
 
 import org.openecard.common.util.ByteUtils
-import java.util.*
+import java.util.Locale
 
 /**
  *
@@ -50,9 +50,9 @@ object PCSCFeatures {
 	const val CCID_ESC_COMMAND: Int = 0x13
 	const val EXECUTE_PACE: Int = 0x20
 
-	fun GET_FEATURE_REQUEST_CTLCODE(): Int = PCSCFeatures.SCARD_CTL_CODE(3400)
+	fun getFeatureRequestCtlCode(): Int = PCSCFeatures.scardCtlCode(3400)
 
-	private fun SCARD_CTL_CODE(code: Int): Int =
+	private fun scardCtlCode(code: Int): Int =
 		if (PCSCFeatures.isWindows) {
 			(0x31 shl 16 or (code shl 2))
 		} else {

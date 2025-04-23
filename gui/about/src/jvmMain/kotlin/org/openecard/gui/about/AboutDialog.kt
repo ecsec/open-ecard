@@ -40,7 +40,16 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.net.URL
-import javax.swing.*
+import javax.swing.ImageIcon
+import javax.swing.JButton
+import javax.swing.JEditorPane
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JTabbedPane
+import javax.swing.JTextPane
+import javax.swing.SwingConstants
 import javax.swing.event.HyperlinkEvent
 import javax.swing.event.HyperlinkListener
 import javax.swing.text.html.HTMLDocument
@@ -195,11 +204,6 @@ class AboutDialog private constructor() : JFrame() {
 		 *
 		 * @param selectedTab The identifier of the tab which should be selected. Valid identifiers are defined as constants
 		 * in this class.
-		 */
-
-		/**
-		 * Shows an about dialog.
-		 * This method makes sure, that there is only one about dialog.
 		 */
 		@JvmStatic
 		@JvmOverloads

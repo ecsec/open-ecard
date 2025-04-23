@@ -30,7 +30,7 @@ object PACEObjectIdentifier {
 	/**
 	 * id-PACE-DH-GM OBJECT IDENTIFIER ::= {id-PACE 1}
 	 */
-	val id_PACE_DH_GM: String = EACObjectIdentifier.id_PACE + ".1"
+	val id_PACE_DH_GM: String = EACObjectIdentifier.ID_PACE + ".1"
 
 	/**
 	 * id-PACE-DH-GM-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-PACE-DH-GM 1}
@@ -56,7 +56,7 @@ object PACEObjectIdentifier {
 	 * id-PACE-ECDH-GM OBJECT IDENTIFIER ::= {id-PACE 2}
 	 */
 	@JvmField
-	val id_PACE_ECDH_GM: String = EACObjectIdentifier.id_PACE + ".2"
+	val id_PACE_ECDH_GM: String = EACObjectIdentifier.ID_PACE + ".2"
 
 	/**
 	 * id-PACE-ECDH-GM-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-PACE-ECDH-GM 1}
@@ -84,7 +84,7 @@ object PACEObjectIdentifier {
 	/**
 	 * id-PACE-DH-IM OBJECT IDENTIFIER ::= {id-PACE 3}
 	 */
-	val id_PACE_DH_IM: String = EACObjectIdentifier.id_PACE + ".3"
+	val id_PACE_DH_IM: String = EACObjectIdentifier.ID_PACE + ".3"
 
 	/**
 	 * id-PACE-DH-IM-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-PACE-DH-IM 1}
@@ -109,7 +109,7 @@ object PACEObjectIdentifier {
 	/**
 	 * id-PACE-ECDH-IM OBJECT IDENTIFIER ::= {id-PACE 4}
 	 */
-	val id_PACE_ECDH_IM: String = EACObjectIdentifier.id_PACE + ".4"
+	val id_PACE_ECDH_IM: String = EACObjectIdentifier.ID_PACE + ".4"
 
 	/**
 	 * id-PACE-ECDH-IM-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-PACE-ECDH-IM 1}

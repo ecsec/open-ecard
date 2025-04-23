@@ -23,7 +23,6 @@
 package org.openecard.common
 
 import java.math.BigInteger
-import java.util.*
 
 /**
  * Constants regarding the eCard-API-Framework.
@@ -91,7 +90,7 @@ object ECardConstants {
 		)
 
 	@Deprecated("")
-	fun URI2Msg(uri: String): String {
+	fun uri2Msg(uri: String): String {
 		val result = msgMap[uri]
 		return if ((result != null)) result else ""
 	}
@@ -393,9 +392,10 @@ object ECardConstants {
 			 * Node not reachable.
 			 */
 			const val NODE_NOT_REACHABLE: String = DP_PREFIX + "#nodeNotReachable"
-			// this one is mentioned in EstablishContexResponse TR-03112-6
+
 			/**
 			 * Invalid channel handle.
+			 * Mentioned in EstablishContexResponse TR-03112-6
 			 */
 			const val INVALID_CHANNEL_HANDLE: String = DP_PREFIX + "#invalidChannelHandle"
 		}

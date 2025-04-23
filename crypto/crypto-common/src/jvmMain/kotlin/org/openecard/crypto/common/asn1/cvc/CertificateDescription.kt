@@ -22,7 +22,12 @@
 package org.openecard.crypto.common.asn1.cvc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.bouncycastle.asn1.*
+import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.openecard.bouncycastle.asn1.ASN1OctetString
+import org.openecard.bouncycastle.asn1.ASN1Sequence
+import org.openecard.bouncycastle.asn1.ASN1Set
+import org.openecard.bouncycastle.asn1.ASN1String
+import org.openecard.bouncycastle.asn1.DERTaggedObject
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier
 import java.io.IOException
 import java.nio.charset.Charset

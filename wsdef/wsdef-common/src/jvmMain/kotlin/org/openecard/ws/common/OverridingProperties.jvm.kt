@@ -22,8 +22,12 @@
 package org.openecard.ws.common
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import java.io.*
-import java.util.*
+import java.io.IOException
+import java.io.InputStream
+import java.io.Reader
+import java.io.StringReader
+import java.io.StringWriter
+import java.util.Properties
 
 private val LOG = KotlinLogging.logger {}
 

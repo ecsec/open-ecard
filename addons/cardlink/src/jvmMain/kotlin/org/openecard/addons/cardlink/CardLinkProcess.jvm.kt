@@ -23,14 +23,39 @@
 package org.openecard.addons.cardlink
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.CreateSession
+import iso.std.iso_iec._24727.tech.schema.CreateSessionResponse
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
+import iso.std.iso_iec._24727.tech.schema.DestroySession
+import iso.std.iso_iec._24727.tech.schema.DestroySessionResponse
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices
+import iso.std.iso_iec._24727.tech.schema.Transmit
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
-import org.openecard.addons.cardlink.sal.*
-import org.openecard.addons.cardlink.ws.*
+import org.openecard.addons.cardlink.sal.CARDLINK_PROTOCOL_ID
+import org.openecard.addons.cardlink.sal.CardLinkKeys
+import org.openecard.addons.cardlink.sal.setWsPair
+import org.openecard.addons.cardlink.ws.GematikEnvelope
+import org.openecard.addons.cardlink.ws.ICCSNReassignment
+import org.openecard.addons.cardlink.ws.ICCSN_REASSIGNMENT
+import org.openecard.addons.cardlink.ws.REGISTER_EGK_FINISH
+import org.openecard.addons.cardlink.ws.RegisterEgkFinish
+import org.openecard.addons.cardlink.ws.SESSION_INFO
+import org.openecard.addons.cardlink.ws.SendApdu
+import org.openecard.addons.cardlink.ws.SendApduResponse
+import org.openecard.addons.cardlink.ws.SessionInformation
+import org.openecard.addons.cardlink.ws.TASK_LIST_ERROR
+import org.openecard.addons.cardlink.ws.TasklistErrorPayload
+import org.openecard.addons.cardlink.ws.WsPair
+import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.WSHelper
@@ -39,7 +64,7 @@ import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
-import java.util.*
+import java.util.UUID
 import kotlin.time.Duration
 
 private val logger = KotlinLogging.logger {}

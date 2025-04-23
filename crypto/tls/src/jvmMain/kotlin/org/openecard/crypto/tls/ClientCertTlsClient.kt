@@ -24,7 +24,6 @@ package org.openecard.crypto.tls
 import org.openecard.bouncycastle.tls.ProtocolVersion
 import org.openecard.bouncycastle.tls.TlsAuthentication
 import org.openecard.bouncycastle.tls.TlsClient
-import org.openecard.common.AppVersion.version
 
 /**
  * Interface extending the BouncyCastle TlsClient interface with externally settable TlsAuthentication implementations.
@@ -40,15 +39,7 @@ interface ClientCertTlsClient : TlsClient {
 	fun setAuthentication(tlsAuth: TlsAuthentication?)
 
 	/**
-	 * Get the desired TLS protocol version.
-	 *
-	 * @return Returns the TLS protocol version.
-	 */
-
-	/**
-	 * Sets the desired TLS protocol version.
-	 *
-	 * @param version TLS protocol version.
+	 * The desired TLS protocol version.
 	 */
 	var clientVersion: ProtocolVersion
 

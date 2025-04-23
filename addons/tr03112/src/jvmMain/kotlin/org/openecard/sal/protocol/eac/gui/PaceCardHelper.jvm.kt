@@ -22,7 +22,14 @@
 
 package org.openecard.sal.protocol.eac.gui
 
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.DIDGet
+import iso.std.iso_iec._24727.tech.schema.DIDGetResponse
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType
+import iso.std.iso_iec._24727.tech.schema.Transmit
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse
 import org.openecard.addon.Context
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult

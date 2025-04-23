@@ -35,7 +35,11 @@ import org.openecard.crypto.tls.verify.JavaSecVerifier
 import org.openecard.crypto.tls.verify.KeyLengthVerifier
 import java.io.IOException
 import java.io.InputStream
-import java.net.*
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.Socket
+import java.net.SocketAddress
+import java.net.SocketException
 import java.util.regex.Pattern
 
 /**
@@ -43,21 +47,16 @@ import java.util.regex.Pattern
  * This class is initialised with the proxy parameters and can then establish a tunnel with the getSocket method.
  * The authentication parameters are optional. Scheme must be one of http and https.
  *
- * @author Tobias Wich
- */
-class HttpConnectProxy
-/**
- * Create a HTTP proxy instance configured with the given values.
- * This method does not perform any reachability checks, it only saves the values for later use.
- *
  * @param proxyScheme HTTP or HTTPS
  * @param proxyValidate Flag indicating whether to perform a certificate validation of the proxy server connection.
  * @param proxyHost Hostname of the proxy
  * @param proxyPort Port of the proxy.
  * @param proxyUser Optional username for authentication against the proxy.
  * @param proxyPass Optional pass for authentication against the proxy.
+ *
+ * @author Tobias Wich
  */
-(
+class HttpConnectProxy(
 	private val proxyScheme: String,
 	private val proxyValidate: Boolean,
 	private val proxyHost: String,

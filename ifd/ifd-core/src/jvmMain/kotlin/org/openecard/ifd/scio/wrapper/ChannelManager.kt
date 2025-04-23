@@ -30,7 +30,8 @@ import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.Pair
 import org.openecard.common.util.ValueGenerators.generateRandom
-import java.util.*
+import java.util.TreeMap
+import java.util.TreeSet
 
 private val LOG = KotlinLogging.logger { }
 

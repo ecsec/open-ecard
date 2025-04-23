@@ -28,7 +28,7 @@ import org.openecard.addons.cardlink.ws.WsPair
 import org.openecard.common.util.SysUtils
 import org.openecard.gui.definition.UserConsentDescription
 
-private const val title = "CardLink User Consent"
+private const val TITLE = "CardLink User Consent"
 const val CONSENT_TYPE = "CardLink"
 
 class CardLinkUserConsent(
@@ -36,7 +36,7 @@ class CardLinkUserConsent(
 	addonCtx: Context,
 	isPhoneRegistered: Boolean,
 	sessionHandle: ConnectionHandleType,
-) : UserConsentDescription(title, CONSENT_TYPE) {
+) : UserConsentDescription(TITLE, CONSENT_TYPE) {
 	init {
 		steps.apply {
 			if (!isPhoneRegistered) {

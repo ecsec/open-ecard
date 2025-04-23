@@ -23,7 +23,13 @@
 package org.openecard.crypto.tls.auth
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.AlertDescription
+import org.openecard.bouncycastle.tls.CertificateRequest
+import org.openecard.bouncycastle.tls.TlsAuthentication
+import org.openecard.bouncycastle.tls.TlsContext
+import org.openecard.bouncycastle.tls.TlsCredentials
+import org.openecard.bouncycastle.tls.TlsFatalAlert
+import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.crypto.tls.CertificateVerifier
 import org.openecard.crypto.tls.verify.CertificateVerifierBuilder
 import org.openecard.crypto.tls.verify.ExpirationVerifier
@@ -36,18 +42,13 @@ private val LOG = KotlinLogging.logger { }
 /**
  * Implementation of the TlsAuthentication interface for certificate verification.
  *
- * @author Tobias Wich
- */
-class DynamicAuthentication
-/**
- * Create a new DynamicAuthentication using the given parameters.
- * They can later be changed using the setter functions.
- *
  * @param hostname Name or IP of the host that will be used for certificate validation when a verifier is set.
  * @param certVerifier Verifier used for server certificate checks.
  * @param credentialFactory Factory that provides client credentials when they are requested from the server.
+ *
+ * @author Tobias Wich
  */
-(
+class DynamicAuthentication(
 	private var hostname: String,
 	private var certVerifier: CertificateVerifier?,
 	private var credentialFactory: CredentialFactory?,

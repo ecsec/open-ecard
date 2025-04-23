@@ -41,12 +41,12 @@ class ExplicitDomainParameters(
 		/**
 		 * dhpublicnumber OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x942(10046) number-type(2) 1}
 		 */
-		const val dhpublicnumber: String = "1.2.840.10046.2.1"
+		const val DH_PUBLIC_NUMBER: String = "1.2.840.10046.2.1"
 
 		/**
 		 * ecPublicKey OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840) ansi-x962(10045) keyType(2) 1}
 		 */
-		const val ecPublicKey: String = "1.2.840.10045.2.1"
+		const val EC_PUBLIC_KEY: String = "1.2.840.10045.2.1"
 
 		/**
 		 * Creates new ExplicitDomainParameters.
@@ -55,9 +55,9 @@ class ExplicitDomainParameters(
 		 */
 		private fun loadParameters(ai: AlgorithmIdentifier): ECParameterSpec {
 			val oid = ai.objectIdentifier
-			return if (oid == dhpublicnumber) {
+			return if (oid == DH_PUBLIC_NUMBER) {
 				loadDHParameter(ai.parameters as ASN1Sequence)
-			} else if (oid == ecPublicKey) {
+			} else if (oid == EC_PUBLIC_KEY) {
 				loadECDHParameter((ai.parameters as ASN1Sequence))
 			} else {
 				throw IllegalArgumentException("Cannot parse explicit domain parameters")

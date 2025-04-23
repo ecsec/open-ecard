@@ -23,7 +23,6 @@ package org.openecard.crypto.common.asn1.cvc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.security.cert.CertificateException
-import java.util.*
 
 private val LOG = KotlinLogging.logger { }
 

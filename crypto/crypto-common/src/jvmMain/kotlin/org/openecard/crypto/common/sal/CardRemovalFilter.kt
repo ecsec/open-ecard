@@ -14,7 +14,7 @@ import org.openecard.common.event.EventObject
 import org.openecard.common.event.EventType
 import org.openecard.common.interfaces.EventFilter
 
-private var LOG = KotlinLogging.logger { }
+private val LOG = KotlinLogging.logger { }
 
 /**
  *

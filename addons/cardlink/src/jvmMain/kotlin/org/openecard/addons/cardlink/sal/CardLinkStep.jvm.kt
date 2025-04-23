@@ -31,10 +31,17 @@ import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
 import org.openecard.addons.cardlink.sal.gui.CardLinkUserConsent
-import org.openecard.addons.cardlink.ws.*
+import org.openecard.addons.cardlink.ws.GematikEnvelope
+import org.openecard.addons.cardlink.ws.RegisterEgk
+import org.openecard.addons.cardlink.ws.WsPair
+import org.openecard.addons.cardlink.ws.cardLinkJsonFormatter
 import org.openecard.binding.tctoken.TR03112Keys
-import org.openecard.common.*
+import org.openecard.common.DynamicContext
+import org.openecard.common.ECardConstants
+import org.openecard.common.ThreadTerminateException
+import org.openecard.common.WSHelper
 import org.openecard.common.tlv.TLV
+import org.openecard.common.toException
 import org.openecard.crypto.common.sal.did.DidInfos
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
@@ -42,7 +49,7 @@ import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.UUID
 import java.util.zip.GZIPInputStream
 
 private val logger = KotlinLogging.logger {}

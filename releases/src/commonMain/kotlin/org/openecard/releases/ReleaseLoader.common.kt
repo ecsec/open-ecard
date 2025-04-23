@@ -22,11 +22,18 @@
 
 package org.openecard.releases
 
-import com.appstractive.jwt.*
+import com.appstractive.jwt.JWT
+import com.appstractive.jwt.from
 import com.appstractive.jwt.signatures.es256
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import kotlinx.serialization.json.*
+import com.appstractive.jwt.verify
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlin.getOrThrow
 
 data class ReleaseInfoResult(
 	val jwt: String,

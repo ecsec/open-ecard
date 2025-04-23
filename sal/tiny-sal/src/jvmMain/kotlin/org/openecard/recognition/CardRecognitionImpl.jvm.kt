@@ -23,7 +23,25 @@
 package org.openecard.recognition
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.BeginTransaction
+import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse
+import iso.std.iso_iec._24727.tech.schema.CardCall
+import iso.std.iso_iec._24727.tech.schema.CardInfoType
+import iso.std.iso_iec._24727.tech.schema.Connect
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.DataMaskType
+import iso.std.iso_iec._24727.tech.schema.Disconnect
+import iso.std.iso_iec._24727.tech.schema.DisconnectResponse
+import iso.std.iso_iec._24727.tech.schema.EndTransaction
+import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse
+import iso.std.iso_iec._24727.tech.schema.GetCardInfoOrACDResponse
+import iso.std.iso_iec._24727.tech.schema.InputAPDUInfoType
+import iso.std.iso_iec._24727.tech.schema.MatchingDataType
+import iso.std.iso_iec._24727.tech.schema.RecognitionTree
+import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType
+import iso.std.iso_iec._24727.tech.schema.Transmit
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.AppVersion.name
 import org.openecard.common.ECardConstants

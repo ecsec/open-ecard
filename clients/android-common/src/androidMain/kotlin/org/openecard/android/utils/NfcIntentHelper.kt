@@ -26,8 +26,9 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.provider.Settings
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Provides methods to enable/disable the nfc dispatch or to jump to the nfc settings.
@@ -50,7 +51,7 @@ class NfcIntentHelper(
 
 	fun enableNFCDispatch() {
 		if (capabilityHelper.isNFCEnabled) {
-			LOG.debug("Enable NFC foreground dispatch...")
+			LOG.debug { "Enable NFC foreground dispatch..." }
 			val activity: Activity = capabilityHelper.context
 			val activityIntent: Intent =
 				Intent(activity, activity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -63,15 +64,13 @@ class NfcIntentHelper(
 
 	fun disableNFCDispatch() {
 		if (capabilityHelper.isNFCEnabled) {
-			LOG.debug("Disable NFC foreground dispatch...")
+			LOG.debug { "Disable NFC foreground dispatch..." }
 			// disable dispatch of messages with nfc tag
 			capabilityHelper.getNfcAdapter()?.disableForegroundDispatch(capabilityHelper.context)
 		}
 	}
 
 	companion object {
-		var LOG: Logger = LoggerFactory.getLogger(NfcIntentHelper::class.java)
-
 		@JvmStatic
 		fun create(activity: Activity): NfcIntentHelper {
 			requireNotNull(activity) { "activity cannot be null" }

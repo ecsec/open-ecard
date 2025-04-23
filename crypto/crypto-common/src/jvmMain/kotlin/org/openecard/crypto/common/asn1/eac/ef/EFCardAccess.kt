@@ -23,7 +23,17 @@ package org.openecard.crypto.common.asn1.eac.ef
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.bouncycastle.asn1.ASN1Sequence
-import org.openecard.crypto.common.asn1.eac.*
+import org.openecard.crypto.common.asn1.eac.CADomainParameterInfo
+import org.openecard.crypto.common.asn1.eac.CAInfo
+import org.openecard.crypto.common.asn1.eac.CASecurityInfos
+import org.openecard.crypto.common.asn1.eac.CardInfoLocator
+import org.openecard.crypto.common.asn1.eac.PACEDomainParameterInfo
+import org.openecard.crypto.common.asn1.eac.PACEInfo
+import org.openecard.crypto.common.asn1.eac.PACESecurityInfos
+import org.openecard.crypto.common.asn1.eac.PrivilegedTerminalInfo
+import org.openecard.crypto.common.asn1.eac.SecurityInfos
+import org.openecard.crypto.common.asn1.eac.TAInfo
+import org.openecard.crypto.common.asn1.eac.TASecurityInfos
 import org.openecard.crypto.common.asn1.eac.oid.EACObjectIdentifier
 
 private val LOG = KotlinLogging.logger { }
@@ -91,37 +101,37 @@ class EFCardAccess(
 				val securityInfo = securityInfos.getObjectAt(i) as ASN1Sequence
 				val oid = securityInfo.getObjectAt(0).toString()
 
-				// PACEInfo (REQUIRED)
 				if (PACEInfo.Companion.isPACEObjectIdentifer(oid)) {
+					// PACEInfo (REQUIRED)
 					LOG.debug { "Found PACEInfo object identifier" }
 					val pi = PACEInfo(securityInfo)
 					psi.addPACEInfo(pi)
-				} // PACEDoaminParameterInfo (CONDITIONAL)
-				else if (PACEDomainParameterInfo.Companion.isPACEObjectIdentifer(oid)) {
+				} else if (PACEDomainParameterInfo.Companion.isPACEObjectIdentifer(oid)) {
+					// PACEDoaminParameterInfo (CONDITIONAL)
 					LOG.debug { "Found PACEDomainParameterInfo object identifier" }
 					val pdp = PACEDomainParameterInfo(securityInfo)
 					psi.addPACEDomainParameterInfo(pdp)
-				} // ChipAuthenticationInfo (CONDITIONAL)
-				else if (CAInfo.Companion.isObjectIdentifier(oid)) {
+				} else if (CAInfo.Companion.isObjectIdentifier(oid)) {
+					// ChipAuthenticationInfo (CONDITIONAL)
 					LOG.debug { "Found ChipAuthenticationInfo object identifier" }
 					val ci = CAInfo(securityInfo)
 					csi.addCAInfo(ci)
-				} // ChipAuthenticationDomainParameterInfo (CONDITIONAL)
-				else if (CADomainParameterInfo.Companion.isObjectIdentifier(oid)) {
+				} else if (CADomainParameterInfo.Companion.isObjectIdentifier(oid)) {
+					// ChipAuthenticationDomainParameterInfo (CONDITIONAL)
 					LOG.debug { "Found ChipAuthenticationDomainParameterInfo object identifier" }
 					val cdp = CADomainParameterInfo(securityInfo)
 					csi.addCADomainParameterInfo(cdp)
-				} // TerminalAuthenticationInfo (CONDITIONAL)
-				else if (EACObjectIdentifier.id_TA == oid) {
+				} else if (EACObjectIdentifier.ID_TA == oid) {
+					// TerminalAuthenticationInfo (CONDITIONAL)
 					LOG.debug { "Found TerminalAuthenticationInfo object identifier" }
 					val ta = TAInfo(securityInfo)
 					tsi.addTAInfo(ta)
-				} // CardInfoLocator (RECOMMENDED)
-				else if (EACObjectIdentifier.id_CI == oid) {
+				} else if (EACObjectIdentifier.ID_CI == oid) {
+					// CardInfoLocator (RECOMMENDED)
 					LOG.debug { "Found CardInfoLocator object identifier" }
 					cil = CardInfoLocator.Companion.getInstance(securityInfo)
-				} // PrivilegedTerminalInfo (CONDITIONAL)
-				else if (EACObjectIdentifier.id_PT == oid) {
+				} else if (EACObjectIdentifier.ID_PT == oid) {
+					// PrivilegedTerminalInfo (CONDITIONAL)
 					LOG.debug { "Found PrivilegedTerminalInfo object identifier" }
 					pti = PrivilegedTerminalInfo.Companion.getInstance(securityInfo)
 				} else {

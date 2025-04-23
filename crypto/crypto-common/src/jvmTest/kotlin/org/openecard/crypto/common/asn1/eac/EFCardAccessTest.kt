@@ -123,7 +123,7 @@ class EFCardAccessTest {
 		Assert.assertEquals(cdpi.protocol, "0.4.0.127.0.7.2.2.3.2")
 		Assert.assertEquals(cdpi.protocol, CAObjectIdentifier.id_CA_ECDH)
 		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, "0.4.0.127.0.7.1.2")
-		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, EACObjectIdentifier.standardized_Domain_Parameters)
+		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, EACObjectIdentifier.STANDARDIZED_DOMAIN_PARAMETERS)
 		Assert.assertEquals(cdpi.domainParameter.parameters.toString(), "13")
 		Assert.assertEquals(cdpi.keyID, 65)
 
@@ -131,7 +131,7 @@ class EFCardAccessTest {
 		Assert.assertEquals(cdpi.protocol, "0.4.0.127.0.7.2.2.3.2")
 		Assert.assertEquals(cdpi.protocol, CAObjectIdentifier.id_CA_ECDH)
 		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, "0.4.0.127.0.7.1.2")
-		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, EACObjectIdentifier.standardized_Domain_Parameters)
+		Assert.assertEquals(cdpi.domainParameter.objectIdentifier, EACObjectIdentifier.STANDARDIZED_DOMAIN_PARAMETERS)
 		Assert.assertEquals(cdpi.domainParameter.parameters.toString(), "13")
 		Assert.assertEquals(cdpi.keyID, 69)
 
@@ -157,14 +157,14 @@ class EFCardAccessTest {
 		var ti = tsi.tAInfos[0]
 
 		Assert.assertEquals(ti.protocol, "0.4.0.127.0.7.2.2.2")
-		Assert.assertEquals(ti.protocol, EACObjectIdentifier.id_TA)
+		Assert.assertEquals(ti.protocol, EACObjectIdentifier.ID_TA)
 		Assert.assertEquals(ti.version, 2)
 
 		tsi = efcaB.tASecurityInfos
 		ti = tsi.tAInfos[0]
 
 		Assert.assertEquals(ti.protocol, "0.4.0.127.0.7.2.2.2")
-		Assert.assertEquals(ti.protocol, EACObjectIdentifier.id_TA)
+		Assert.assertEquals(ti.protocol, EACObjectIdentifier.ID_TA)
 		Assert.assertEquals(ti.version, 2)
 	}
 
@@ -174,14 +174,14 @@ class EFCardAccessTest {
 		var cil = efcaA.cardInfoLocator
 
 		Assert.assertEquals(cil!!.protocol, "0.4.0.127.0.7.2.2.6")
-		Assert.assertEquals(cil.protocol, EACObjectIdentifier.id_CI)
+		Assert.assertEquals(cil.protocol, EACObjectIdentifier.ID_CI)
 		Assert.assertEquals(cil.uRL, NPA_CARD_TYPE)
 		Assert.assertNull(cil.eFCardInfo)
 
 		cil = efcaB.cardInfoLocator
 
 		Assert.assertEquals(cil!!.protocol, "0.4.0.127.0.7.2.2.6")
-		Assert.assertEquals(cil.protocol, EACObjectIdentifier.id_CI)
+		Assert.assertEquals(cil.protocol, EACObjectIdentifier.ID_CI)
 		Assert.assertEquals(cil.uRL, "AwT ePA - BDr GmbH - Testkarte v1.0")
 		Assert.assertNull(cil.eFCardInfo)
 	}

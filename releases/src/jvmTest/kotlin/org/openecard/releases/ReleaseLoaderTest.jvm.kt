@@ -26,7 +26,10 @@ import com.appstractive.jwt.jwt
 import com.appstractive.jwt.sign
 import com.appstractive.jwt.signatures.es256
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.containing
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.okForContentType
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.Options
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock

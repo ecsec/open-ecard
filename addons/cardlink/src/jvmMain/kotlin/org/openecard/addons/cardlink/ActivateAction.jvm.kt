@@ -24,7 +24,12 @@ package org.openecard.addons.cardlink
 
 import org.openecard.addon.ActionInitializationException
 import org.openecard.addon.Context
-import org.openecard.addon.bind.*
+import org.openecard.addon.bind.AppPluginAction
+import org.openecard.addon.bind.Attachment
+import org.openecard.addon.bind.BindingResult
+import org.openecard.addon.bind.BindingResultCode
+import org.openecard.addon.bind.Headers
+import org.openecard.addon.bind.RequestBody
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
 import org.openecard.mobile.activation.common.CommonCardLinkControllerFactory.WS_KEY

@@ -22,7 +22,21 @@
 package org.openecard.crypto.tls
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.AlertLevel
+import org.openecard.bouncycastle.tls.CipherSuite
+import org.openecard.bouncycastle.tls.DefaultTlsClient
+import org.openecard.bouncycastle.tls.HashAlgorithm
+import org.openecard.bouncycastle.tls.NameType
+import org.openecard.bouncycastle.tls.NamedGroup
+import org.openecard.bouncycastle.tls.NamedGroupRole
+import org.openecard.bouncycastle.tls.ProtocolVersion
+import org.openecard.bouncycastle.tls.ServerName
+import org.openecard.bouncycastle.tls.SignatureAlgorithm
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm
+import org.openecard.bouncycastle.tls.TlsAuthentication
+import org.openecard.bouncycastle.tls.TlsClientContext
+import org.openecard.bouncycastle.tls.TlsSession
+import org.openecard.bouncycastle.tls.TlsUtils
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto
 import org.openecard.common.OpenecardProperties
 import org.openecard.common.util.ByteUtils
@@ -31,7 +45,7 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication
 import java.io.IOException
 import java.net.IDN
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Vector
 
 private val LOG = KotlinLogging.logger { }
 
@@ -152,22 +166,21 @@ open class ClientCertDefaultTlsClient(
 				CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
 				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 				CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, // acceptable in case DHE is not available
+				// acceptable in case DHE is not available
+				CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
 				// there seems to be a problem with DH and besides that I don't like them anyways
-			/*
-	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
-	CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
-	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
-	CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
-	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
-	CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
-	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
-	CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
-	CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
-	CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
-	CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-	CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256
-			 */
+				// 	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+				// 	CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+				// 	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+				// 	CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+				// 	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+				// 	CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+				// 	CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+				// 	CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+				// 	CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384,
+				// 	CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
+				// 	CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
+				// 	CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256
 			)
 
 		// when doing TLS 1.0, we need the old SHA1 cipher suites
@@ -180,14 +193,12 @@ open class ClientCertDefaultTlsClient(
 					CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
 					CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, // acceptable in case DHE is not available
 					// there seems to be a problem with DH and besides that I don't like them anyways
-					/*
-			CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
-			CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
-			CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
-			CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-			CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-			CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
-					 */
+					// CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+					// CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+					// CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+					// CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+					// CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+					// CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA
 				),
 			)
 		}

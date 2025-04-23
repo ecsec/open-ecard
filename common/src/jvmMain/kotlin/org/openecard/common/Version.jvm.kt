@@ -25,7 +25,6 @@ package org.openecard.common
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.StringReader
-import java.util.*
 
 const val UNKNOWN_NAME: String = "UNKNOWN"
 const val UNKNOWN_VERSION: String = "UNKNOWN"

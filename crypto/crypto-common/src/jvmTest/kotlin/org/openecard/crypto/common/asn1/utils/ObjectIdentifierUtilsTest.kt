@@ -35,7 +35,7 @@ import org.testng.annotations.Test
 class ObjectIdentifierUtilsTest {
 	@Test
 	fun testToByteArray() {
-		val oid = EACObjectIdentifier.id_PACE
+		val oid = EACObjectIdentifier.ID_PACE
 		val expResult = byteArrayOf(0x06, 0x08, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
 		val result = toByteArray(oid)
 		Assert.assertEquals(expResult, result)
@@ -59,7 +59,7 @@ class ObjectIdentifierUtilsTest {
 
 	@Test
 	fun testGetValue() {
-		val oid = EACObjectIdentifier.id_PACE
+		val oid = EACObjectIdentifier.ID_PACE
 		val expResult = byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04)
 		val result = getValue(oid)
 		Assert.assertEquals(expResult, result)

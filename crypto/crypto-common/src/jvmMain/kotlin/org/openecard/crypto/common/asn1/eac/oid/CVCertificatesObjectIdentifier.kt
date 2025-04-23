@@ -31,7 +31,7 @@ object CVCertificatesObjectIdentifier {
 	 * Certificate Extensions.
 	 * id-extensions OBJECT IDENTIFIER ::= {bsi-de applictions(3) mrtd(1) 3}
 	 */
-	val id_extensions: String = EACObjectIdentifier.bsi_de + ".3.1.3"
+	val id_extensions: String = EACObjectIdentifier.BSI_DE + ".3.1.3"
 
 	/**
 	 * Certificate Description.
@@ -67,7 +67,7 @@ object CVCertificatesObjectIdentifier {
 	 * Roles and Authorization Levels.
 	 * id-roles OBJECT IDENTIFIER ::= {bsi-de applications(3) mrtd(1) 2}
 	 */
-	val id_roles: String = EACObjectIdentifier.bsi_de + ".3.1.2"
+	val id_roles: String = EACObjectIdentifier.BSI_DE + ".3.1.2"
 
 	/**
 	 * Inspection Systems.

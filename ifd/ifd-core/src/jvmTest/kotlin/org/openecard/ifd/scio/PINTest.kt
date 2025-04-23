@@ -54,7 +54,7 @@ import org.testng.Assert
 import org.testng.annotations.Test
 import org.xml.sax.SAXException
 import java.math.BigInteger
-import java.util.*
+import java.util.Locale
 import kotlin.test.assertEquals
 
 /**

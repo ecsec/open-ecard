@@ -22,7 +22,16 @@
 package org.openecard.ifd.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.AltVUMessagesType
+import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
+import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType
+import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType
+import iso.std.iso_iec._24727.tech.schema.OutputInfoType
+import iso.std.iso_iec._24727.tech.schema.Transmit
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse
+import iso.std.iso_iec._24727.tech.schema.VerifyUser
+import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.ECardConstants
 import org.openecard.common.I18n
@@ -47,7 +56,6 @@ import org.openecard.ifd.scio.wrapper.ChannelManager
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel
 import org.openecard.ifd.scio.wrapper.TerminalInfo
 import java.math.BigInteger
-import java.util.*
 
 private val LOG = KotlinLogging.logger { }
 
@@ -239,7 +247,7 @@ internal class AbstractTerminal(
 						)
 					return response
 				} finally {
-					Arrays.fill(rawPIN, ' ')
+					rawPIN.fill(' ')
 				}
 
 				// send to reader
@@ -250,9 +258,7 @@ internal class AbstractTerminal(
 					// blank PIN APDU
 					for (apdu in verifyTransmit.getInputAPDUInfo()) {
 						val rawApdu = apdu.getInputAPDU()
-						if (rawApdu != null) {
-							Arrays.fill(rawApdu, 0.toByte())
-						}
+						rawApdu?.fill(0.toByte())
 					}
 				}
 

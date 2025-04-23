@@ -24,16 +24,11 @@ package org.openecard.crypto.common.asn1.eac
 /**
  * Wrapper to bind [PACEInfo] and [PACEDomainParameterInfo] together.
  *
- * @author Tobias Wich
- */
-class PACESecurityInfoPair
-/**
- * Creates pair based on the given values.
- *
  * @param pACEInfo PACEInfo object.
  * @param pACEDomainParameterInfo Domain Parameters. `null` for standard parameters.
+ * @author Tobias Wich
  */
-(
+class PACESecurityInfoPair(
 	val pACEInfo: PACEInfo,
 	val pACEDomainParameterInfo: PACEDomainParameterInfo?,
 ) {

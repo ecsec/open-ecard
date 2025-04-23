@@ -29,7 +29,6 @@ import org.openecard.gui.swing.file.SwingFileFilterWrapper
 import java.awt.Component
 import java.awt.Dimension
 import java.io.File
-import java.util.*
 import javax.swing.JDialog
 import javax.swing.JFileChooser
 

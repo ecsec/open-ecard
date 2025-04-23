@@ -24,7 +24,7 @@ package org.openecard.ws.common
 import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
-import java.util.*
+import java.util.Properties
 
 /**
  * Generic factory capable of creating instances for a type defined in a config file.

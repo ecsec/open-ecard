@@ -28,7 +28,7 @@ import kotlinx.serialization.encodeToString
 import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.util.*
+import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 

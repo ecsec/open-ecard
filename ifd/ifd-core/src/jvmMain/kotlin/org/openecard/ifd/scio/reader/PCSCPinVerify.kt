@@ -31,7 +31,7 @@ import org.openecard.common.util.PINUtils
 import org.openecard.common.util.UtilException
 import org.openecard.ifd.scio.IFDException
 import java.io.ByteArrayOutputStream
-import java.util.*
+import java.util.Locale
 
 /**
  *

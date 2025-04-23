@@ -41,18 +41,14 @@ import javax.swing.JPanel
  * Swing implementation of the UserConsent interface.
  * The implementation encapsulates a DialogWrapper which is needed to supply a root pane for all draw operations.
  *
+ * @param baseDialogWrapper
+ *
  * @author Tobias Wich
  * @author Florian Feldmann
  * @author Moritz Horsch
  * @author Hans-Martin Haase
  */
-class SwingUserConsent
-/**
- * Instantiate SwingUserConsent.
- *
- * @param baseDialogWrapper
- */
-(
+class SwingUserConsent(
 	private val baseDialogWrapper: SwingDialogWrapper,
 ) : UserConsent {
 	override fun obtainNavigator(parameters: UserConsentDescription): UserConsentNavigator {

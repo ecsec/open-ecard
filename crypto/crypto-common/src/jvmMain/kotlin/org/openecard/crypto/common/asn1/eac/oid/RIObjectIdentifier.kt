@@ -30,7 +30,7 @@ object RIObjectIdentifier {
 	/**
 	 * id-RI-DH OBJECT IDENTIFIER ::= {id-RI 1}
 	 */
-	val id_RI_DH: String = EACObjectIdentifier.id_RI + ".1"
+	val id_RI_DH: String = EACObjectIdentifier.ID_RI + ".1"
 
 	/**
 	 * id-RI-DH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-DH 1}
@@ -50,7 +50,7 @@ object RIObjectIdentifier {
 	/**
 	 * id-RI-ECDH OBJECT IDENTIFIER ::= {id-RI 2}
 	 */
-	val id_RI_ECDH: String = EACObjectIdentifier.id_RI + ".2"
+	val id_RI_ECDH: String = EACObjectIdentifier.ID_RI + ".2"
 
 	/**
 	 * id-RI-ECDH-SHA-1 OBJECT IDENTIFIER ::= {id-RI-ECDH 1}

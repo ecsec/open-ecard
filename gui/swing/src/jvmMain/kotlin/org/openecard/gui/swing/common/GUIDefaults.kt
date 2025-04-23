@@ -23,7 +23,11 @@ package org.openecard.gui.swing.common
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.resolveResourceAsURL
-import java.awt.*
+import java.awt.Color
+import java.awt.Font
+import java.awt.Graphics
+import java.awt.Image
+import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -139,8 +143,8 @@ object GUIDefaults {
 					val propertyAttribute = property.substring(propertyName.length + 1, property.length)
 					var value = props.getProperty(property) as String
 
-					// Parse color property
 					if (COLOR_PROPERTIES.contains(propertyAttribute)) {
+						// Parse color property
 						validateHexColor(value)
 						if (value.length == 4) {
 							val sb = StringBuilder("#")
@@ -153,13 +157,13 @@ object GUIDefaults {
 						val color = Color.decode(value)
 						DEFAULTS.put(property, color)
 						OWN_DEFAULTS.put(property, color)
-					} // Parse font property
-					else if (FONT_PROPERTIES.contains(propertyAttribute)) {
+					} else if (FONT_PROPERTIES.contains(propertyAttribute)) {
+						// Parse font property
 						val font = Font.decode(value)
 						DEFAULTS.put(property, font)
 						OWN_DEFAULTS.put(property, font)
-					} // Parse icon property
-					else if (ICON_PROPERTIES.contains(propertyAttribute)) {
+					} else if (ICON_PROPERTIES.contains(propertyAttribute)) {
+						// Parse icon property
 						val url = resolveResourceAsURL(guiProps.javaClass, value)
 						if (url == null) {
 							LOG.error { "Cannot parse the property: $property" }

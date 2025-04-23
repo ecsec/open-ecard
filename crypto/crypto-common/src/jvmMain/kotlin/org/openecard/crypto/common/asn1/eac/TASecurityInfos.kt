@@ -67,6 +67,6 @@ class TASecurityInfos {
 		 * @param oid Object identifier
 		 * @return true if o is a TA object identifier, else false.
 		 */
-		fun isObjectIdentifier(oid: String): Boolean = oid == EACObjectIdentifier.id_TA
+		fun isObjectIdentifier(oid: String): Boolean = oid == EACObjectIdentifier.ID_TA
 	}
 }

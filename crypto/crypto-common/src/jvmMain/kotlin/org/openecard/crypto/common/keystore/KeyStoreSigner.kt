@@ -34,7 +34,12 @@ import org.openecard.bouncycastle.tls.TlsUtils
 import org.openecard.crypto.common.ReusableSecureRandom
 import org.openecard.crypto.common.sal.did.CredentialPermissionDenied
 import java.io.IOException
-import java.security.*
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
+import java.security.PrivateKey
+import java.security.SignatureException
+import java.security.UnrecoverableKeyException
 import java.security.cert.Certificate
 import java.security.cert.CertificateException
 import java.security.interfaces.RSAPrivateKey
@@ -42,18 +47,14 @@ import java.security.interfaces.RSAPrivateKey
 /**
  * Wrapper for the sign functionality of keystore entries.
  *
- * @author Dirk Petrautzki
- * @author Tobias Wich
- */
-class KeyStoreSigner
-/**
- * Creates a KeyStoreSigner and defines the InputStream to load from and the password and alias.
- *
  * @param keyStore
  * @param password
  * @param alias
+ *
+ * @author Dirk Petrautzki
+ * @author Tobias Wich
  */
-(
+class KeyStoreSigner(
 	private val keyStore: KeyStore,
 	private val password: CharArray?,
 	private val alias: String,
@@ -134,7 +135,8 @@ class KeyStoreSigner
 			}
 		} catch (ex: KeyStoreException) {
 			throw IllegalStateException("Keystore is not initialized.", ex)
-		} catch ( /*| InvalidKeyException*/ex: UnrecoverableKeyException) {
+		} catch (ex: UnrecoverableKeyException) {
+			// | InvalidKeyException
 			throw CredentialPermissionDenied("No usable key could be retrieved from the keystore.", ex)
 		} catch (ex: NoSuchAlgorithmException) {
 			throw SignatureException("Requested algorithm is not available.", ex)

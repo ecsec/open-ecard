@@ -24,7 +24,13 @@ package org.openecard.crypto.tls.proxy
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.SysUtils
 import java.io.IOException
-import java.net.*
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.Socket
+import java.net.SocketAddress
+import java.net.URI
+import java.net.URISyntaxException
 
 private val LOG = KotlinLogging.logger { }
 
@@ -36,16 +42,11 @@ private val LOG = KotlinLogging.logger { }
  *  * proxy.host
  *  * proxy.port
  *
+ * @param selector Currently active proxy selector.
  *
  * @author Tobias Wich
  */
-class ProxySettings
-/**
- * Create instance with default settings read from the system.
- *
- * @param selector Currently active proxy selector.
- */
-(
+class ProxySettings(
 	private val selector: ProxySelector,
 ) {
 	/**

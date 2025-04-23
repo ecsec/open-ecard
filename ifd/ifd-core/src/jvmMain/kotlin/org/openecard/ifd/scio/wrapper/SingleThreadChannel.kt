@@ -27,10 +27,19 @@ import org.openecard.common.apdu.common.CardCommandStatus
 import org.openecard.common.apdu.common.CardResponseAPDU
 import org.openecard.common.ifd.Protocol
 import org.openecard.common.ifd.RecoverableSecureMessagingException
-import org.openecard.common.ifd.scio.*
+import org.openecard.common.ifd.scio.SCIOCard
+import org.openecard.common.ifd.scio.SCIOChannel
+import org.openecard.common.ifd.scio.SCIOErrorCode
+import org.openecard.common.ifd.scio.SCIOException
+import org.openecard.common.ifd.scio.SCIOProtocol
+import org.openecard.common.ifd.scio.SCIOTerminal
 import org.openecard.common.util.ByteUtils
 import org.openecard.ifd.scio.TransmitException
-import java.util.concurrent.*
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 private val LOG = KotlinLogging.logger { }

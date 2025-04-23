@@ -25,7 +25,7 @@ package org.openecard.ifd.scio
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.ws.common.OverridingProperties
 import java.io.IOException
-import java.util.*
+import java.util.Properties
 
 private val LOG = KotlinLogging.logger {}
 

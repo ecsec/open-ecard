@@ -27,7 +27,6 @@ import org.openecard.gui.definition.PasswordField
 import org.openecard.gui.definition.TextField
 import java.awt.Dimension
 import java.awt.FlowLayout
-import java.util.*
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JPasswordField
@@ -129,7 +128,7 @@ class AbstractInput private constructor(
 		get() {
 			val textValue = this.fieldValue
 			result.setValue(textValue)
-			Arrays.fill(textValue, ' ')
+			textValue.fill(' ')
 			return result
 		}
 

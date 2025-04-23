@@ -26,7 +26,7 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.crypto.tls.CertificateVerificationException
 import org.openecard.crypto.tls.CertificateVerifier
 import java.io.IOException
-import java.util.*
+import java.util.Date
 
 /**
  * Verifier checking the expiration date of each certificate in the chain.

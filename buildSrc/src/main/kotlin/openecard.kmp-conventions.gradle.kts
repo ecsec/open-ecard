@@ -37,4 +37,16 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 			}
 		}
 	}
+
+	filter {
+		// don't check generated sources
+		exclude {
+			val generatedRoot =
+				layout.buildDirectory
+					.dir("generated")
+					.get()
+					.asFile
+			it.file.startsWith(generatedRoot)
+		}
+	}
 }

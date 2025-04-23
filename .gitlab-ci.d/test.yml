@@ -38,3 +38,5 @@ kotlin-quality:
       policy: pull-push
   needs:
     - compile
+  before_script:
+    - apt update && apt -y install jq

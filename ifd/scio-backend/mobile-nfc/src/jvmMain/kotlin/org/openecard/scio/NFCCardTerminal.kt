@@ -22,7 +22,11 @@
 package org.openecard.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.ifd.scio.*
+import org.openecard.common.ifd.scio.SCIOCard
+import org.openecard.common.ifd.scio.SCIOErrorCode
+import org.openecard.common.ifd.scio.SCIOException
+import org.openecard.common.ifd.scio.SCIOProtocol
+import org.openecard.common.ifd.scio.SCIOTerminal
 
 private val LOG = KotlinLogging.logger { }
 

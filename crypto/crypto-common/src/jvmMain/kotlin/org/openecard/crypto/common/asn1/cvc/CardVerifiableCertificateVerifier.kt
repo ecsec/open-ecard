@@ -30,7 +30,7 @@ import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.cert.CertificateException
-import java.util.*
+import java.util.Date
 
 private val LOG = KotlinLogging.logger { }
 

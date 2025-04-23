@@ -30,7 +30,7 @@ import org.openecard.common.AppVersion.patch
 import org.openecard.common.AppVersion.versionString
 import org.testng.Assert
 import org.testng.annotations.Test
-import java.util.*
+import java.util.Scanner
 
 /**
  *

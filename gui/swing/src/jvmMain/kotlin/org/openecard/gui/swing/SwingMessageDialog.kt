@@ -27,7 +27,6 @@ import org.openecard.gui.message.MessageDialogResult
 import org.openecard.gui.message.OptionType
 import org.openecard.gui.message.ReturnType
 import org.openecard.gui.swing.common.GUIDefaults
-import java.util.*
 import javax.swing.ImageIcon
 import javax.swing.JOptionPane
 

@@ -22,7 +22,15 @@
 package org.openecard.ifd.event
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse
+import iso.std.iso_iec._24727.tech.schema.GetStatus
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse
+import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType
+import iso.std.iso_iec._24727.tech.schema.IFDStatusType
+import iso.std.iso_iec._24727.tech.schema.ListIFDs
+import iso.std.iso_iec._24727.tech.schema.SlotStatusType
 import org.openecard.common.ECardConstants
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult

@@ -21,7 +21,11 @@
  ***************************************************************************/
 package org.openecard.crypto.common.sal
 
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.interfaces.Dispatcher

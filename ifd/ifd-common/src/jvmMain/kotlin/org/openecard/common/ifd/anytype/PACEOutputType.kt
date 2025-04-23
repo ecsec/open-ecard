@@ -28,15 +28,11 @@ import org.openecard.common.util.ByteUtils
  * Implements the PACEOutputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.3.5.
  *
+ * @param authMap AuthDataMap
+ *
  * @author Tobias Wich
  */
-class PACEOutputType
-/**
- * Creates a new PACEOutputType.
- *
- * @param authMap AuthDataMap
- */
-(
+class PACEOutputType(
 	private val authMap: AuthDataMap,
 ) {
 	private var efCardAccess: ByteArray? = null

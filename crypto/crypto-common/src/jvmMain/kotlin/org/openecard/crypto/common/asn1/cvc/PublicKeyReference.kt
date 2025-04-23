@@ -33,26 +33,23 @@ class PublicKeyReference(
 ) {
 	/**
 	 * Returns the country code.
-	 *
+	 * Country Code; Encoding: ISO 3166-1 ALPHA-2; Length: 2F
 	 * @return Country code
 	 */
-	// Country Code; Encoding: ISO 3166-1 ALPHA-2; Length: 2F
 	val countryCode: String
 
 	/**
 	 * Returns the holder mnemonic.
-	 *
+	 * Sequence Number; Encoding: ISO/IEC 8859-1; Length: 9V
 	 * @return Holder mnemonice
 	 */
-	// Sequence Number; Encoding: ISO/IEC 8859-1; Length: 9V
 	val holderMnemonic: String
 
 	/**
 	 * Returns the sequence number.
-	 *
+	 * Sequence Number; Encoding: ISO/IEC 8859-1; Length: 5F
 	 * @return Sequence number.
 	 */
-	// Sequence Number; Encoding: ISO/IEC 8859-1; Length: 5F
 	val sequenceNumber: String
 
 	/**

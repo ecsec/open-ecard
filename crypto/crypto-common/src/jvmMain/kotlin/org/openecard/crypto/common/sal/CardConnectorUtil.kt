@@ -10,7 +10,13 @@
 package org.openecard.crypto.common.sal
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect
+import iso.std.iso_iec._24727.tech.schema.CardApplicationConnectResponse
+import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPath
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathResponse
+import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.common.ECardException
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.event.EventObject

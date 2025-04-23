@@ -23,7 +23,9 @@
 package org.openecard.addons.cardlink.sal.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse
 import org.openecard.addon.Context
 import org.openecard.addons.cardlink.sal.CardLinkKeys
 import org.openecard.addons.cardlink.ws.WsPair

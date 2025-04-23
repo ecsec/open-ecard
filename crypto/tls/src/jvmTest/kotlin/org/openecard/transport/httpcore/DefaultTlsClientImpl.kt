@@ -21,7 +21,11 @@
  ***************************************************************************/
 package org.openecard.transport.httpcore
 
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.CertificateRequest
+import org.openecard.bouncycastle.tls.DefaultTlsClient
+import org.openecard.bouncycastle.tls.TlsAuthentication
+import org.openecard.bouncycastle.tls.TlsCredentials
+import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto
 import java.io.IOException
 

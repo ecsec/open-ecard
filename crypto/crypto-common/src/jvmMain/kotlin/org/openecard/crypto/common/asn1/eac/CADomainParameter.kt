@@ -79,7 +79,7 @@ class CADomainParameter(
 			val cdp = requireNotNull(csi.cADomainParameterInfo)
 			val ai = cdp.domainParameter
 
-			return if (ai.objectIdentifier == EACObjectIdentifier.standardized_Domain_Parameters) {
+			return if (ai.objectIdentifier == EACObjectIdentifier.STANDARDIZED_DOMAIN_PARAMETERS) {
 				val index = ai.parameters.toString().toInt()
 				StandardizedDomainParameters(index).parameter
 			} else {

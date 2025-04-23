@@ -22,7 +22,6 @@
 package org.openecard.ifd.scio
 
 import org.openecard.common.ifd.ProtocolFactory
-import java.util.*
 
 /**
  * Simple class to memorise different protocol factories.

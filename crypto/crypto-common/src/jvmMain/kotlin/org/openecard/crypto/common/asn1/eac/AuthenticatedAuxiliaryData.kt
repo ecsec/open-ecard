@@ -30,7 +30,7 @@ import org.openecard.common.tlv.TagClass
 import org.openecard.common.tlv.iso7816.TLVList
 import org.openecard.common.util.ByteUtils
 import org.openecard.crypto.common.asn1.eac.oid.EACObjectIdentifier
-import java.util.*
+import java.util.Calendar
 
 /**
  * Data object for the AuthenticatedAuxiliaryData according to TR-03110-3 Sec. A.6.5.
@@ -71,13 +71,13 @@ class AuthenticatedAuxiliaryData(
 
 	val ageVerificationData: Calendar?
 		get() {
-			val reqOID = ASN1ObjectIdentifier(EACObjectIdentifier.id_DateOfBirth)
+			val reqOID = ASN1ObjectIdentifier(EACObjectIdentifier.ID_DATE_OF_BIRTH)
 			return templates.get(reqOID)?.let { convertDate(it.discretionaryData) }
 		}
 
 	val documentValidityVerificationData: Calendar?
 		get() {
-			val reqOID = ASN1ObjectIdentifier(EACObjectIdentifier.id_DateOfExpiry)
+			val reqOID = ASN1ObjectIdentifier(EACObjectIdentifier.ID_DATE_OF_EXPIRY)
 			if (templates.containsKey(reqOID)) {
 				val t: DiscretionaryDataTemplate = templates.get(reqOID)!!
 				return convertDate(t.discretionaryData)
@@ -89,7 +89,7 @@ class AuthenticatedAuxiliaryData(
 	val communityIDVerificationData: ByteArray?
 		get() {
 			val reqOID =
-				ASN1ObjectIdentifier(EACObjectIdentifier.id_CommunityID)
+				ASN1ObjectIdentifier(EACObjectIdentifier.ID_COMMUNITY_ID)
 			if (templates.containsKey(reqOID)) {
 				val t: DiscretionaryDataTemplate = templates.get(reqOID)!!
 				return ByteUtils.clone(t.discretionaryData)

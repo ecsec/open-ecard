@@ -21,7 +21,16 @@
  ***************************************************************************/
 package org.openecard.gui.swing.steplayout
 
-import org.openecard.gui.definition.*
+import org.openecard.gui.definition.Checkbox
+import org.openecard.gui.definition.Hyperlink
+import org.openecard.gui.definition.ImageBox
+import org.openecard.gui.definition.InfoUnitElementType
+import org.openecard.gui.definition.InputInfoUnit
+import org.openecard.gui.definition.PasswordField
+import org.openecard.gui.definition.Radiobox
+import org.openecard.gui.definition.Text
+import org.openecard.gui.definition.TextField
+import org.openecard.gui.definition.ToggleText
 import org.openecard.gui.swing.Logo
 import org.openecard.gui.swing.ScrollPanel
 import org.openecard.gui.swing.components.AbstractInput
@@ -29,7 +38,14 @@ import org.openecard.gui.swing.components.Radiobutton
 import org.openecard.gui.swing.components.StepComponent
 import java.awt.BorderLayout
 import java.awt.Dimension
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
 import javax.swing.border.EmptyBorder
 
 /**
@@ -50,7 +66,7 @@ class PinEntryStepLayouter(
 
 		// Add a panel containing step title and separator
 		val pageStart = JPanel(BorderLayout())
-		val logo: ImageIcon = Logo.Companion.loadLogoIcon()
+		val logo = Logo.Companion.loadLogoIcon()
 		val title = JLabel("<html><h3>$stepName</h3></html>")
 		title.setIcon(logo)
 		title.setIconTextGap(20)

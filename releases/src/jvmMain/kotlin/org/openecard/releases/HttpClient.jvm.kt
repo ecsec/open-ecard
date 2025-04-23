@@ -1,8 +1,8 @@
 package org.openecard.releases
 
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.logging.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.logging.Logging
 
 actual fun createHttpClient(): HttpClient =
 	HttpClient(CIO) {

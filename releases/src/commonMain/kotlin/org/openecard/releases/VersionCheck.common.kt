@@ -33,17 +33,18 @@ fun ReleaseInfo.checkVersion(versionString: String): Result<UpdateAdvice> =
 
 fun ReleaseInfo.checkVersion(version: Version): Result<UpdateAdvice> =
 	runCatching {
-		// check if the version is newer than the release
 		if (version >= this.latestVersion.version) {
+			// check if the version is newer than the release
+			
 			UpdateAdvice.NO_UPDATE
 		} else {
-			// check if the version has a security problem
 			if (this.versionStatus.security.any { it.satisfiedBy(version) }) {
+				// check if the version has a security problem
+				
 				UpdateAdvice.SECURITY_UPDATE
-			}
+			} else if (this.versionStatus.maintained.any { it.satisfiedBy(version) }) {
+				// check if the version is still maintained
 
-			// check if the version is still maintained
-			else if (this.versionStatus.maintained.any { it.satisfiedBy(version) }) {
 				// check if we are older than the latest maintenance version
 				val latestMaintVersion =
 					this.maintenanceVersions.find {
@@ -54,15 +55,13 @@ fun ReleaseInfo.checkVersion(version: Version): Result<UpdateAdvice> =
 				} else {
 					UpdateAdvice.MAINTAINED_NO_UPDATE
 				}
-			}
+			} else if (version.major == this.latestVersion.version.major && version.minor == this.latestVersion.version.minor) {
+				// we have a noncritical update
 
-			// we have a noncritical update
-			else if (version.major == this.latestVersion.version.major && version.minor == this.latestVersion.version.minor) {
 				UpdateAdvice.UPDATE
-			}
+			} else {
+				// we are not maintained anymore
 
-			// we are not maintained anymore
-			else {
 				UpdateAdvice.UNMAINTAINED
 			}
 		}

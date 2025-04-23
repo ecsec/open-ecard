@@ -22,7 +22,6 @@
 package org.openecard.ws.marshal
 
 import org.w3c.dom.Node
-import java.util.*
 
 /**
  *
@@ -33,7 +32,7 @@ object WhitespaceFilter {
 		val childNodes = root.childNodes
 
 		// remove afterwards else the nodelist indices may not be correct
-		val toRemove = LinkedList<Node>()
+		val toRemove = mutableListOf<Node>()
 
 		for (i in 0 until childNodes.length) {
 			val next = childNodes.item(i)
@@ -44,7 +43,7 @@ object WhitespaceFilter {
 			} else if (next.nodeType == Node.TEXT_NODE) {
 				val strippedData = next.nodeValue.trim { it <= ' ' }
 				if (strippedData.isEmpty()) {
-					toRemove.addFirst(next)
+					toRemove.add(0, next)
 				}
 			} else {
 				filter(next)

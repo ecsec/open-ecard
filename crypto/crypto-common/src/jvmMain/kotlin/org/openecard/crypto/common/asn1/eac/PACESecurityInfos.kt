@@ -30,25 +30,12 @@ package org.openecard.crypto.common.asn1.eac
  */
 class PACESecurityInfos {
 	/**
-	 * Returns the PACEDomainParameterInfos.
-	 *
-	 * @return PACEDomainParameterInfos
-	 */
-	/**
-	 * Sets the PACEDomainParameterInfos.
-	 *
-	 * @param paceDomainParameterInfos PACEDomainParameterInfos
+	 * The PACEDomainParameterInfos.
 	 */
 	var pACEDomainParameterInfos: MutableList<PACEDomainParameterInfo> = mutableListOf()
+
 	/**
-	 * Returns the PACEInfos.
-	 *
-	 * @return PACEInfos
-	 */
-	/**
-	 * Sets the PACEInfos.
-	 *
-	 * @param paceInfos PACEInfos
+	 * The PACEInfos.
 	 */
 	var pACEInfos: MutableList<PACEInfo> = mutableListOf()
 

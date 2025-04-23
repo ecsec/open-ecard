@@ -22,7 +22,16 @@
 package org.openecard.crypto.common.sal.did
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.AlgorithmIdentifierType
+import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType
+import iso.std.iso_iec._24727.tech.schema.CardCallTemplateType
+import iso.std.iso_iec._24727.tech.schema.CertificateRefType
+import iso.std.iso_iec._24727.tech.schema.CryptoKeyInfoType
+import iso.std.iso_iec._24727.tech.schema.DIDAbstractMarkerType
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType
+import iso.std.iso_iec._24727.tech.schema.KeyRefType
+import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType
+import iso.std.iso_iec._24727.tech.schema.StateInfo
 import org.openecard.bouncycastle.util.encoders.Base64
 import org.openecard.common.util.StringUtils
 import org.openecard.ws.marshal.WSMarshaller
@@ -30,7 +39,6 @@ import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
 import org.w3c.dom.Node
 import java.math.BigInteger
-import java.util.*
 
 private val LOG = KotlinLogging.logger {}
 

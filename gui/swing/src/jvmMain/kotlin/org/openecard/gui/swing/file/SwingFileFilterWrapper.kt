@@ -28,15 +28,10 @@ import java.io.File
  * Wrapper class for a Open eCard FileFilter.
  * It wraps the Open eCard FileFilter in Swing FileFilter, so that it can be used in a JFileChooser.
  *
+ * @param wrappedFilter The FileFilter that needs to be wrapped.
  * @author Tobias Wich
  */
-class SwingFileFilterWrapper
-/**
- * Create a FileFilter wrapper instance for the given FileFilter.
- *
- * @param wrappedFilter The FileFilter that needs to be wrapped.
- */
-(
+class SwingFileFilterWrapper(
 	private val wrappedFilter: FileFilter,
 ) : javax.swing.filechooser.FileFilter() {
 	override fun accept(f: File): Boolean = wrappedFilter.accept(f)

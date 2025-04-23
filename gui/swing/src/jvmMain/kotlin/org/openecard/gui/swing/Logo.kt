@@ -25,7 +25,12 @@ import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import java.awt.Dimension
 import java.awt.Image
 import java.awt.Toolkit
-import javax.swing.*
+import javax.swing.BoxLayout
+import javax.swing.ImageIcon
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
 import javax.swing.border.EmptyBorder
 
 /**

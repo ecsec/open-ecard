@@ -25,7 +25,11 @@ import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Checkbox
 import org.openecard.gui.definition.OutputInfoUnit
 import org.openecard.gui.swing.StepFrame
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Component
+import java.awt.GridBagConstraints
+import java.awt.GridLayout
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel

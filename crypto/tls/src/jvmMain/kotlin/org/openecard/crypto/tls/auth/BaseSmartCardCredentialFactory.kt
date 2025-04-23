@@ -25,7 +25,14 @@ package org.openecard.crypto.tls.auth
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.bouncycastle.asn1.x500.X500Name
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.Certificate
+import org.openecard.bouncycastle.tls.CertificateRequest
+import org.openecard.bouncycastle.tls.DefaultTlsCredentialedSigner
+import org.openecard.bouncycastle.tls.HashAlgorithm
+import org.openecard.bouncycastle.tls.SignatureAlgorithm
+import org.openecard.bouncycastle.tls.SignatureAndHashAlgorithm
+import org.openecard.bouncycastle.tls.TlsContext
+import org.openecard.bouncycastle.tls.TlsCredentialedSigner
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto
 import org.openecard.bouncycastle.tls.crypto.TlsCryptoParameters
 import org.openecard.bouncycastle.tls.crypto.TlsSigner
@@ -284,8 +291,17 @@ abstract class BaseSmartCardCredentialFactory protected constructor(
 
 	private fun convertSigType(sigType: Short): KeyTypes? =
 		when (sigType) {
-			SignatureAlgorithm.rsa_pss_pss_sha256, SignatureAlgorithm.rsa_pss_pss_sha384, SignatureAlgorithm.rsa_pss_pss_sha512, SignatureAlgorithm.rsa_pss_rsae_sha256, SignatureAlgorithm.rsa_pss_rsae_sha384, SignatureAlgorithm.rsa_pss_rsae_sha512, SignatureAlgorithm.rsa -> KeyTypes.CKK_RSA
-			SignatureAlgorithm.ecdsa -> KeyTypes.CKK_EC
+			SignatureAlgorithm.rsa_pss_pss_sha256,
+			SignatureAlgorithm.rsa_pss_pss_sha384,
+			SignatureAlgorithm.rsa_pss_pss_sha512,
+			SignatureAlgorithm.rsa_pss_rsae_sha256,
+			SignatureAlgorithm.rsa_pss_rsae_sha384,
+			SignatureAlgorithm.rsa_pss_rsae_sha512,
+			SignatureAlgorithm.rsa,
+			-> KeyTypes.CKK_RSA
+
+			SignatureAlgorithm.ecdsa,
+			-> KeyTypes.CKK_EC
 			else -> null
 		}
 

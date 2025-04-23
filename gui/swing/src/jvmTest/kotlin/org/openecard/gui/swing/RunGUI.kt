@@ -24,8 +24,19 @@ package org.openecard.gui.swing
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.StepResult
-import org.openecard.gui.definition.*
-import org.openecard.gui.executor.*
+import org.openecard.gui.definition.BoxItem
+import org.openecard.gui.definition.Checkbox
+import org.openecard.gui.definition.Document
+import org.openecard.gui.definition.PasswordField
+import org.openecard.gui.definition.Step
+import org.openecard.gui.definition.Text
+import org.openecard.gui.definition.ToggleText
+import org.openecard.gui.definition.UserConsentDescription
+import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.gui.executor.ExecutionResults
+import org.openecard.gui.executor.StepAction
+import org.openecard.gui.executor.StepActionResult
+import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.gui.swing.common.GUIDefaults.initialize
 import org.testng.annotations.BeforeTest
 import org.testng.annotations.Test
@@ -64,17 +75,17 @@ class RunGUI {
 	}
 
 	private fun identityCheckStep(): Step {
-		val identityCheck_ServerConnection_Step = Step("Start") // ("Identitätsnachweis wird gestartet");
+		val identityCheckServerConnectionStep = Step("Start") // ("Identitätsnachweis wird gestartet");
 		val serverConnectionText = Text()
 		serverConnectionText.setText("Verbindung zum Server wird aufgebaut")
-		identityCheck_ServerConnection_Step.getInputInfoUnits().add(serverConnectionText)
+		identityCheckServerConnectionStep.getInputInfoUnits().add(serverConnectionText)
 
-		val providerName_Text1 = ToggleText()
-		providerName_Text1.title = "Name"
-		providerName_Text1.setText("Frauenhofer FOKUS\n\n")
+		val providerNameText1 = ToggleText()
+		providerNameText1.title = "Name"
+		providerNameText1.setText("Frauenhofer FOKUS\n\n")
 
 		// 	identityCheck_ServerConnection_Step.getInputInfoUnits().add(providerName_Text1);
-		return identityCheck_ServerConnection_Step
+		return identityCheckServerConnectionStep
 	}
 
 	@Throws(IOException::class)
@@ -146,13 +157,13 @@ class RunGUI {
 
 	@Throws(Exception::class)
 	private fun requestedDataStep(): Step {
-		val requestedData_Step1 = Step("Angefragte Daten")
-		requestedData_Step1.setAction(RequestedDataAction(requestedData_Step1))
+		val requestedDataStep1 = Step("Angefragte Daten")
+		requestedDataStep1.setAction(RequestedDataAction(requestedDataStep1))
 		val requestedDataDescription = Text()
 		requestedDataDescription.setText(
 			"Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:",
 		)
-		requestedData_Step1.getInputInfoUnits().add(requestedDataDescription)
+		requestedDataStep1.getInputInfoUnits().add(requestedDataDescription)
 
 		// 	Hyperlink dataPrivacyDescriptionLink = new Hyperlink();
 // 	dataPrivacyDescriptionLink.setHref("http://www.dataprivacy.eu");
@@ -231,7 +242,7 @@ class RunGUI {
 // 	dataToSendSelection.getBoxItems().add(certificationcountryBoxItem);
 // 	dataToSendSelection.getBoxItems().add(habitationBoxItem);
 // 	dataToSendSelection.getBoxItems().add(ageverificationBoxItem);
-		requestedData_Step1.getInputInfoUnits().add(dataToSendSelection)
+		requestedDataStep1.getInputInfoUnits().add(dataToSendSelection)
 
 		val requestedDataDescription1 = ToggleText()
 		requestedDataDescription1.title = "Hinweis"
@@ -239,50 +250,50 @@ class RunGUI {
 			"Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.",
 		)
 		requestedDataDescription1.isCollapsed = false
-		requestedData_Step1.getInputInfoUnits().add(requestedDataDescription1)
+		requestedDataStep1.getInputInfoUnits().add(requestedDataDescription1)
 
-		return requestedData_Step1
+		return requestedDataStep1
 	}
 
 	private fun checkDataStep(): Step {
-		val dataTransaction_Step = Step("Identitätsnachweis") // wird durchgeführt");
-		val requestedPIN_Text = Text()
-		requestedPIN_Text.setText("Eingegebene PIN")
+		val dataTransactionStep = Step("Identitätsnachweis") // wird durchgeführt");
+		val requestedPINText = Text()
+		requestedPINText.setText("Eingegebene PIN")
 		val pinCorrekt = BoxItem()
 		pinCorrekt.name = "pinCorrect"
 		pinCorrekt.isChecked = true
 		pinCorrekt.text = "OK"
-		dataTransaction_Step.getInputInfoUnits().add(requestedPIN_Text)
+		dataTransactionStep.getInputInfoUnits().add(requestedPINText)
 
-		val cerificate_Text = Text()
-		cerificate_Text.setText("Berechtigungszertifikat")
+		val cerificateText = Text()
+		cerificateText.setText("Berechtigungszertifikat")
 		val certificateCorrekt = BoxItem()
 		certificateCorrekt.name = "certificateCorrekt"
 		certificateCorrekt.isChecked = true
 		certificateCorrekt.text = "OK"
 		//        statusMessages_CheckBox.getBoxItems().add(certificateCorrekt);
-		dataTransaction_Step.getInputInfoUnits().add(cerificate_Text)
+		dataTransactionStep.getInputInfoUnits().add(cerificateText)
 
-		val eCard_Text = Text()
-		eCard_Text.setText("Verwendete Karte")
+		val eCardText = Text()
+		eCardText.setText("Verwendete Karte")
 		val eCardCorrekt = BoxItem()
 		eCardCorrekt.name = "eCardCorrekt"
 		eCardCorrekt.isChecked = true
 		eCardCorrekt.text = "OK"
-		dataTransaction_Step.getInputInfoUnits().add(eCard_Text)
+		dataTransactionStep.getInputInfoUnits().add(eCardText)
 
 		//        statusMessages_CheckBox.getBoxItems().add(eCardCorrekt);
-		val dataTransaction_Text = Text()
-		dataTransaction_Text.setText("Datenübermittlung wird geprüft")
+		val dataTransactionText = Text()
+		dataTransactionText.setText("Datenübermittlung wird geprüft")
 		val dataTransactionCorrekt = BoxItem()
 		dataTransactionCorrekt.name = "dataTransactionCorrekt"
 		dataTransactionCorrekt.isChecked = true
 		dataTransactionCorrekt.text = "OK"
 		//        statusMessages_CheckBox.getBoxItems().add(dataTransactionCorrekt);
-		dataTransaction_Step.getInputInfoUnits().add(dataTransaction_Text)
+		dataTransactionStep.getInputInfoUnits().add(dataTransactionText)
 
 		//        dataTransaction_Step.getInputInfoUnits().add(statusMessages_CheckBox);
-		return dataTransaction_Step
+		return dataTransactionStep
 	}
 
 	@Throws(Exception::class)
@@ -351,8 +362,8 @@ class RunGUI {
 		ageverificationBoxItem.isDisabled = true
 		ageverificationBoxItem.text = "Altersverifikation"
 
-		val sendAgreement_Text = Text()
-		sendAgreement_Text.setText(
+		val sendAgreementText = Text()
+		sendAgreementText.setText(
 			(
 				"Wenn Sie mit der Übermittlung der ausgewählten\n" +
 					"Daten einverstanden sind, geben Sie bitte\n" +

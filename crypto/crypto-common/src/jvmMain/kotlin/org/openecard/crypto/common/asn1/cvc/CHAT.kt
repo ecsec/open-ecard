@@ -28,7 +28,8 @@ import org.openecard.common.tlv.TagClass
 import org.openecard.common.util.ByteUtils
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils
-import java.util.*
+import java.util.EnumMap
+import java.util.TreeMap
 
 private val LOG = KotlinLogging.logger {}
 

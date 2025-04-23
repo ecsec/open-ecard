@@ -61,7 +61,8 @@ enum class PacePinStatus(
 	 * PIN blocked, 0 tries left.
 	 */
 	BLOCKED(
-		StringUtils.toByteArray("63C0"), // blocked, deactivated or suspended, we hope the best and pretend it is blocked, so the user has a chance to fix it
+		// blocked, deactivated or suspended, we hope the best and pretend it is blocked, so the user has a chance to fix it
+		StringUtils.toByteArray("63C0"),
 		StringUtils.toByteArray("6982"),
 		StringUtils.toByteArray("6983"),
 	),

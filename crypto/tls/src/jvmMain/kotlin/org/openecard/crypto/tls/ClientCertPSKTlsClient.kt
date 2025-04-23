@@ -22,7 +22,17 @@
 package org.openecard.crypto.tls
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.AlertLevel
+import org.openecard.bouncycastle.tls.CipherSuite
+import org.openecard.bouncycastle.tls.NameType
+import org.openecard.bouncycastle.tls.NamedGroup
+import org.openecard.bouncycastle.tls.NamedGroupRole
+import org.openecard.bouncycastle.tls.PSKTlsClient
+import org.openecard.bouncycastle.tls.ProtocolVersion
+import org.openecard.bouncycastle.tls.ServerName
+import org.openecard.bouncycastle.tls.TlsAuthentication
+import org.openecard.bouncycastle.tls.TlsPSKIdentity
+import org.openecard.bouncycastle.tls.TlsUtils
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto
 import org.openecard.common.OpenecardProperties
 import org.openecard.crypto.tls.auth.ContextAware
@@ -30,7 +40,7 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication
 import java.io.IOException
 import java.net.IDN
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Vector
 
 private val LOG = KotlinLogging.logger { }
 

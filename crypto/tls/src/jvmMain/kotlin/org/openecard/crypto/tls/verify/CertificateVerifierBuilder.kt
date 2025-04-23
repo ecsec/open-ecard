@@ -24,7 +24,7 @@ package org.openecard.crypto.tls.verify
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.crypto.tls.CertificateVerificationException
 import org.openecard.crypto.tls.CertificateVerifier
-import java.util.*
+import java.util.Collections
 
 /**
  * Builder class for CertificateVerifier instances.

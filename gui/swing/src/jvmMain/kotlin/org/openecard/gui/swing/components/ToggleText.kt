@@ -31,15 +31,33 @@ import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.OutputInfoUnit
 import org.openecard.gui.definition.ToggleText
 import org.openecard.gui.swing.common.GUIDefaults
-import java.awt.*
+import java.awt.Color
+import java.awt.Component
+import java.awt.Desktop
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.io.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.charset.IllegalCharsetNameException
 import java.nio.charset.StandardCharsets
 import java.nio.charset.UnsupportedCharsetException
-import javax.swing.*
+import javax.swing.Icon
+import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JTextArea
+import javax.swing.JTextPane
+import javax.swing.SwingConstants
+import javax.swing.UIManager
 import javax.swing.border.EmptyBorder
 import javax.swing.text.BadLocationException
 import javax.swing.text.ChangedCharSetException
@@ -238,7 +256,7 @@ class ToggleText(
 		try {
 			val kit = HTMLEditorKit()
 			val doc = kit.createDefaultDocument() as HTMLDocument?
-			kit.read(InputStreamReader(ByteArrayInputStream(content)), doc, 0)
+			kit.read(InputStreamReader(content.inputStream()), doc, 0)
 		} catch (ex: ChangedCharSetException) {
 			try {
 				val spec = ex.getCharSetSpec()

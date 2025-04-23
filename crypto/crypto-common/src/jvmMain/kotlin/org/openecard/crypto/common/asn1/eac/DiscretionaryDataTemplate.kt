@@ -23,7 +23,11 @@ package org.openecard.crypto.common.asn1.eac
 
 import org.openecard.bouncycastle.asn1.ASN1ObjectIdentifier
 import org.openecard.bouncycastle.asn1.eac.EACTags
-import org.openecard.common.tlv.*
+import org.openecard.common.tlv.Parser
+import org.openecard.common.tlv.TLV
+import org.openecard.common.tlv.TLVException
+import org.openecard.common.tlv.Tag
+import org.openecard.common.tlv.TagClass
 import org.openecard.common.tlv.iso7816.TLVList
 import org.openecard.common.util.ByteUtils
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils

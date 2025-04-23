@@ -23,7 +23,51 @@
 package org.openecard.ifd.scio
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.ActionType
+import iso.std.iso_iec._24727.tech.schema.BeginTransaction
+import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse
+import iso.std.iso_iec._24727.tech.schema.Cancel
+import iso.std.iso_iec._24727.tech.schema.CancelResponse
+import iso.std.iso_iec._24727.tech.schema.ChannelHandleType
+import iso.std.iso_iec._24727.tech.schema.Connect
+import iso.std.iso_iec._24727.tech.schema.ConnectResponse
+import iso.std.iso_iec._24727.tech.schema.ControlIFD
+import iso.std.iso_iec._24727.tech.schema.ControlIFDResponse
+import iso.std.iso_iec._24727.tech.schema.DestroyChannel
+import iso.std.iso_iec._24727.tech.schema.DestroyChannelResponse
+import iso.std.iso_iec._24727.tech.schema.Disconnect
+import iso.std.iso_iec._24727.tech.schema.DisconnectResponse
+import iso.std.iso_iec._24727.tech.schema.EndTransaction
+import iso.std.iso_iec._24727.tech.schema.EndTransactionResponse
+import iso.std.iso_iec._24727.tech.schema.EstablishChannel
+import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
+import iso.std.iso_iec._24727.tech.schema.EstablishContext
+import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilities
+import iso.std.iso_iec._24727.tech.schema.GetIFDCapabilitiesResponse
+import iso.std.iso_iec._24727.tech.schema.GetStatus
+import iso.std.iso_iec._24727.tech.schema.GetStatusResponse
+import iso.std.iso_iec._24727.tech.schema.IFDCapabilitiesType
+import iso.std.iso_iec._24727.tech.schema.IFDStatusType
+import iso.std.iso_iec._24727.tech.schema.ListIFDs
+import iso.std.iso_iec._24727.tech.schema.ListIFDsResponse
+import iso.std.iso_iec._24727.tech.schema.ModifyVerificationData
+import iso.std.iso_iec._24727.tech.schema.ModifyVerificationDataResponse
+import iso.std.iso_iec._24727.tech.schema.Output
+import iso.std.iso_iec._24727.tech.schema.OutputResponse
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevices
+import iso.std.iso_iec._24727.tech.schema.PowerDownDevicesResponse
+import iso.std.iso_iec._24727.tech.schema.PrepareDevices
+import iso.std.iso_iec._24727.tech.schema.PrepareDevicesResponse
+import iso.std.iso_iec._24727.tech.schema.ReleaseContext
+import iso.std.iso_iec._24727.tech.schema.ReleaseContextResponse
+import iso.std.iso_iec._24727.tech.schema.SlotStatusType
+import iso.std.iso_iec._24727.tech.schema.Transmit
+import iso.std.iso_iec._24727.tech.schema.TransmitResponse
+import iso.std.iso_iec._24727.tech.schema.VerifyUser
+import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse
+import iso.std.iso_iec._24727.tech.schema.Wait
+import iso.std.iso_iec._24727.tech.schema.WaitResponse
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.ECardConstants
 import org.openecard.common.ThreadTerminateException
@@ -38,7 +82,11 @@ import org.openecard.common.event.IfdEventObject
 import org.openecard.common.ifd.PACECapabilities
 import org.openecard.common.ifd.ProtocolFactory
 import org.openecard.common.ifd.anytype.PACEInputType
-import org.openecard.common.ifd.scio.*
+import org.openecard.common.ifd.scio.NoSuchTerminal
+import org.openecard.common.ifd.scio.SCIOErrorCode
+import org.openecard.common.ifd.scio.SCIOException
+import org.openecard.common.ifd.scio.SCIOTerminal
+import org.openecard.common.ifd.scio.TerminalFactory
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked
 import org.openecard.common.interfaces.Publish
@@ -46,7 +94,11 @@ import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.HandlerBuilder
 import org.openecard.common.util.ValueGenerators.genBase64Session
 import org.openecard.ifd.event.IfdEventManager
-import org.openecard.ifd.scio.reader.*
+import org.openecard.ifd.scio.reader.EstablishPACERequest
+import org.openecard.ifd.scio.reader.EstablishPACEResponse
+import org.openecard.ifd.scio.reader.ExecutePACERequest
+import org.openecard.ifd.scio.reader.ExecutePACEResponse
+import org.openecard.ifd.scio.reader.PCSCFeatures
 import org.openecard.ifd.scio.wrapper.ChannelManager
 import org.openecard.ifd.scio.wrapper.IFDTerminalFactory
 import org.openecard.ifd.scio.wrapper.NoSuchChannel
@@ -54,8 +106,13 @@ import org.openecard.ifd.scio.wrapper.TerminalInfo
 import org.openecard.ws.IFD
 import org.openecard.ws.common.GenericFactoryException
 import java.math.BigInteger
-import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.ConcurrentSkipListMap
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 private val LOG = KotlinLogging.logger { }
@@ -446,7 +503,7 @@ class IFD : IFD {
 		}
 
 		// get specific ifd or all if no specific one is requested
-		val ifds: MutableList<SCIOTerminal> = LinkedList<SCIOTerminal>()
+		val ifds = mutableListOf<SCIOTerminal>()
 		try {
 			val requestedIfd = parameters.getIFDName()
 			if (requestedIfd != null) {
@@ -1137,7 +1194,12 @@ class IFD : IFD {
 				val msg: String?
 				val minor: String?
 				when (ex.code) {
-					SCIOErrorCode.SCARD_W_RESET_CARD, SCIOErrorCode.SCARD_W_REMOVED_CARD, SCIOErrorCode.SCARD_E_READER_UNAVAILABLE, SCIOErrorCode.SCARD_E_NO_SMARTCARD, SCIOErrorCode.SCARD_E_NO_SERVICE -> {
+					SCIOErrorCode.SCARD_W_RESET_CARD,
+					SCIOErrorCode.SCARD_W_REMOVED_CARD,
+					SCIOErrorCode.SCARD_E_READER_UNAVAILABLE,
+					SCIOErrorCode.SCARD_E_NO_SMARTCARD,
+					SCIOErrorCode.SCARD_E_NO_SERVICE,
+					-> {
 						msg = String.format("Slot handle is not available [%s].", ex.code.name)
 						minor = ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE
 						LOG.debug(ex) { msg }

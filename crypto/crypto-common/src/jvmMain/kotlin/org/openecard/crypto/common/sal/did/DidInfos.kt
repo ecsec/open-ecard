@@ -21,14 +21,23 @@
  ***************************************************************************/
 package org.openecard.crypto.common.sal.did
 
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.CardApplicationList
+import iso.std.iso_iec._24727.tech.schema.CardApplicationListResponse
+import iso.std.iso_iec._24727.tech.schema.CardApplicationSelect
+import iso.std.iso_iec._24727.tech.schema.CardApplicationSelectResponse
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.DIDList
+import iso.std.iso_iec._24727.tech.schema.DIDListResponse
+import iso.std.iso_iec._24727.tech.schema.DIDQualifierType
+import iso.std.iso_iec._24727.tech.schema.DataSetList
+import iso.std.iso_iec._24727.tech.schema.DataSetListResponse
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.util.ByteComparator
 import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.HandlerUtils
-import java.util.*
+import java.util.TreeMap
 
 /**
  *

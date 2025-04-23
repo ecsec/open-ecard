@@ -23,12 +23,20 @@
 package org.openecard.common.util
 
 import org.openecard.common.io.LimitedInputStream
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
+import java.io.UnsupportedEncodingException
 import java.net.MalformedURLException
 import java.net.URISyntaxException
 import java.net.URL
 import java.net.URLDecoder
-import java.util.*
+import java.util.Scanner
+import java.util.TreeMap
 import java.util.jar.JarFile
 
 /**

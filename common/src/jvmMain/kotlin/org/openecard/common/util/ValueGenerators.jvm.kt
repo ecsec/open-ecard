@@ -23,7 +23,7 @@
 package org.openecard.common.util
 
 import java.security.SecureRandom
-import java.util.*
+import java.util.UUID
 
 /**
  * Implements convenience methods to generates random values.

@@ -24,7 +24,7 @@ package org.openecard.crypto.common.sal.did
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.util.ByteComparator
-import java.util.*
+import java.util.TreeMap
 
 /**
  * Simple cache for the DIDInfos entry point to card data.

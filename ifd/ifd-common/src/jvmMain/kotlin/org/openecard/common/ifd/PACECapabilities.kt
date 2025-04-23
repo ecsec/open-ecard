@@ -22,7 +22,7 @@
 package org.openecard.common.ifd
 
 import org.openecard.common.ECardConstants
-import java.util.*
+import java.util.BitSet
 
 /**
  *

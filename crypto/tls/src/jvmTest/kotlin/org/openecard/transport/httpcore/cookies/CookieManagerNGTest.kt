@@ -82,8 +82,8 @@ class CookieManagerNGTest {
 	// @Test
 	@Throws(Exception::class)
 	fun testAddCookieSubdomain() {
-		val COOKIE = "JSESSIONID=123_84fsggasd; Domain=test.example.com; Max-Age=30; Path=/"
-		manager.addCookie("https://example.com", COOKIE)
+		val cookie = "JSESSIONID=123_84fsggasd; Domain=test.example.com; Max-Age=30; Path=/"
+		manager.addCookie("https://example.com", cookie)
 		Assert.assertNull(manager.getCookieHeaderValue("https://example.com"))
 		Assert.assertEquals(manager.getCookieHeaderValue("https://test.example.com"), "JSESSIONID=123_84fsggasd")
 		Assert.assertEquals(manager.getCookieHeaderValue("https://bla.test.example.com"), "JSESSIONID=123_84fsggasd")
@@ -93,11 +93,11 @@ class CookieManagerNGTest {
 	// @Test
 	@Throws(Exception::class)
 	fun testUpdate() {
-		val COOKIE = "JSESSIONID=123_84fsggasd; Domain=example.com; Max-Age=30; Path=/"
-		val C2 = "JSESSIONID=123_84fsggasd; Domain=example.com; Max-Age=0; Path=/"
-		manager.addCookie("https://example.com", COOKIE)
+		val cookie = "JSESSIONID=123_84fsggasd; Domain=example.com; Max-Age=30; Path=/"
+		val c2 = "JSESSIONID=123_84fsggasd; Domain=example.com; Max-Age=0; Path=/"
+		manager.addCookie("https://example.com", cookie)
 		Assert.assertEquals(manager.getCookieHeaderValue("https://example.com"), "JSESSIONID=123_84fsggasd")
-		manager.addCookie("https://example.com", C2)
+		manager.addCookie("https://example.com", c2)
 		Assert.assertNull(manager.getCookieHeaderValue("https://example.com"))
 	}
 }

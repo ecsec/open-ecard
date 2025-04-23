@@ -25,7 +25,6 @@ import org.openecard.gui.ResultStatus
 import org.openecard.gui.StepResult
 import org.openecard.gui.definition.OutputInfoUnit
 import org.openecard.gui.definition.Step
-import java.util.*
 import java.util.concurrent.Exchanger
 
 /**

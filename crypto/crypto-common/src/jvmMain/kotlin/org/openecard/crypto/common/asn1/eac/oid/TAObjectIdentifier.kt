@@ -30,7 +30,7 @@ object TAObjectIdentifier {
 	/**
 	 * id-TA-RSA OBJECT IDENTIFIER ::= {id-TA 1}
 	 */
-	val id_TA_RSA: String = EACObjectIdentifier.id_TA + ".1"
+	val id_TA_RSA: String = EACObjectIdentifier.ID_TA + ".1"
 
 	/**
 	 * id-TA-RSA-v1-5-SHA-1 OBJECT IDENTIFIER ::= {id-TA-RSA 1}
@@ -65,7 +65,7 @@ object TAObjectIdentifier {
 	/**
 	 * id-TA-ECDSA OBJECT IDENTIFIER ::= {id-TA 2}
 	 */
-	val id_TA_ECDSA: String = EACObjectIdentifier.id_TA + ".2"
+	val id_TA_ECDSA: String = EACObjectIdentifier.ID_TA + ".2"
 
 	/**
 	 * id-TA-ECDSA-SHA-1 OBJECT IDENTIFIER ::= {id-TA-ECDSA 1}

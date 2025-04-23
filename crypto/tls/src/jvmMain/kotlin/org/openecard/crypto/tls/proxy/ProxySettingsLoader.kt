@@ -26,8 +26,14 @@ import com.github.markusbernhardt.proxy.selector.fixed.FixedSocksSelector
 import com.github.markusbernhardt.proxy.selector.misc.ProtocolDispatchSelector
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.OpenecardProperties
-import java.net.*
-import java.util.*
+import java.net.Authenticator
+import java.net.InetSocketAddress
+import java.net.PasswordAuthentication
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.URI
+import java.util.Locale
+import java.util.Scanner
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 

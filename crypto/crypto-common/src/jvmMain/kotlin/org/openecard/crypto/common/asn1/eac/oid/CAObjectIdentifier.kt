@@ -30,7 +30,7 @@ object CAObjectIdentifier {
 	/**
 	 * id-CA-DH OBJECT IDENTIFIER ::= {id-CA 1}
 	 */
-	val id_CA_DH: String = EACObjectIdentifier.id_CA + ".1"
+	val id_CA_DH: String = EACObjectIdentifier.ID_CA + ".1"
 
 	/**
 	 * id-CA-DH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-DH 1}
@@ -55,7 +55,7 @@ object CAObjectIdentifier {
 	/**
 	 * id-CA-ECDH OBJECT IDENTIFIER ::= {id-CA 2}
 	 */
-	val id_CA_ECDH: String = EACObjectIdentifier.id_CA + ".2"
+	val id_CA_ECDH: String = EACObjectIdentifier.ID_CA + ".2"
 
 	/**
 	 * id-CA-ECDH-3DES-CBC-CBC OBJECT IDENTIFIER ::= {id-CA-ECDH 1}

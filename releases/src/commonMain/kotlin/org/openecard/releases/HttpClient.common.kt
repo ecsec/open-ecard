@@ -22,6 +22,6 @@
 
 package org.openecard.releases
 
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 
 expect fun createHttpClient(): HttpClient

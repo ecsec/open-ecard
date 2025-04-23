@@ -151,14 +151,19 @@ class PCSCPinModify(
 	 *  * 0xFF default CCID message  */
 	private val bNumberMessage = 0x02.toByte()
 
+	// this software is international, so use german of course ;-)
+
 	/** Language for messages  */
-	private val wLangId = USBLangID.German_Standard.code // this software is international, so use german of course ;-)
-	/** Message index (should be 00).
+	private val wLangId = USBLangID.German_Standard.code
+
+	/* Message index (should be 00).
 	 *
 	 * The first three messages should be as follows in the reader:
 	 *  * 0x0 PIN insertion prompt: "ENTER PIN"
 	 *  * 0x1 PIN modification prompt: "ENTER NEW PIN"
-	 *  * 0x2 New PIN confirmation prompt: "CONFIRM NEW PIN"  */
+	 *  * 0x2 New PIN confirmation prompt: "CONFIRM NEW PIN"
+	 */
+
 	/** Index of 1st prompting message  */
 	private val bMsgIndex1: Byte = 0x00
 

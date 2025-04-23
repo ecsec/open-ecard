@@ -114,9 +114,28 @@ class PACEInfo(
 	val kdfLength: Int
 		get() {
 			return when (protocol) {
-				PACEObjectIdentifier.id_PACE_DH_GM_3DES_CBC_CBC, PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_128, PACEObjectIdentifier.id_PACE_DH_IM_3DES_CBC_CBC, PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_128, PACEObjectIdentifier.id_PACE_ECDH_GM_3DES_CBC_CBC, PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128, PACEObjectIdentifier.id_PACE_ECDH_IM_3DES_CBC_CBC, PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_128 -> 16
-				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_192, PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_192, PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192, PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_192 -> 24
-				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_256, PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_256, PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256, PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_256 -> 32
+				PACEObjectIdentifier.id_PACE_DH_GM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_DH_IM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_3DES_CBC_CBC,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_128,
+				-> 16
+
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_192,
+				-> 24
+
+				PACEObjectIdentifier.id_PACE_DH_GM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_DH_IM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256,
+				PACEObjectIdentifier.id_PACE_ECDH_IM_AES_CBC_CMAC_256,
+				-> 32
+				
 				else -> throw IllegalArgumentException("Unknown PACE protocol: $protocol")
 			}
 		}

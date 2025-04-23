@@ -24,7 +24,7 @@ package org.openecard.crypto.common.asn1.cvc
 import org.openecard.common.tlv.TLV
 import org.openecard.common.util.ByteUtils
 import java.security.cert.CertificateEncodingException
-import java.util.*
+import java.util.Calendar
 
 /**
  * Implements a Card Verifiable Certificate.
@@ -42,7 +42,6 @@ class CardVerifiableCertificate(
 	 *
 	 * @return Body
 	 */
-	// Certificate body
 	val body: ByteArray
 
 	/**
@@ -50,7 +49,6 @@ class CardVerifiableCertificate(
 	 *
 	 * @return Signature
 	 */
-	// Certificate signature
 	val signature: ByteArray
 
 	/**
@@ -58,7 +56,6 @@ class CardVerifiableCertificate(
 	 *
 	 * @return CPI
 	 */
-	// Certificate Profile Identifier (CPI)
 	var cPI: ByteArray? = null
 		private set
 
@@ -85,7 +82,6 @@ class CardVerifiableCertificate(
 	 *
 	 * @return Extensions
 	 */
-	// Certificate Extension
 	var extensions: ByteArray? = null
 		private set
 
@@ -94,15 +90,14 @@ class CardVerifiableCertificate(
 	 *
 	 * @return Certificate
 	 */
-	// TLV encoded certificate
 	val certificate: TLV
 
 	/**
 	 * Create a new Card Verifiable Certificate.
 	 *
 	 * @param cvc CardVerifiableCertificate
-	 * @throws CertificateException
-	 * @throws TLVException
+	 * @throws java.security.cert.CertificateException
+	 * @throws org.openecard.common.tlv.TLVException
 	 */
 	constructor(cvc: ByteArray) : this(TLV.fromBER(cvc))
 
@@ -110,7 +105,7 @@ class CardVerifiableCertificate(
 	 * Create a new Card Verifiable Certificate.
 	 *
 	 * @param cvc TLV encoded certificate
-	 * @throws CertificateException
+	 * @throws java.security.cert.CertificateException
 	 */
 	init {
 		try {

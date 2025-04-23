@@ -51,12 +51,13 @@ class PACEInputType(
 	 */
 	val pINID: Byte = authMap.getContentAsBytes(PIN_ID)[0]
 
+	// optional elements
+
 	/**
 	 * Returns the CHAT.
 	 *
 	 * @return CHAT
 	 */
-	// optional elements
 	val cHAT: ByteArray? = authMap.getContentAsBytes(CHAT)
 
 	/**

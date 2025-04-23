@@ -27,19 +27,20 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.IOException
 import java.net.URL
-import java.util.*
+import java.util.Properties
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 
 private val logger = KotlinLogging.logger { }
+
+// TODO: remove integration test as soon as OpenJDK 8 in Debian can handle JPEGs correctly
+// see also https://dev.openecard.org/issues/369
 
 /**
  * Test to evaluate the availability of the images.
  *
  * @author Tobias Wich
  */
-// TODO: remove integration test as soon as OpenJDK 8 in Debian can handle JPEGs correctly
-// see also https://dev.openecard.org/issues/369
 @Test(groups = ["it"])
 class ImageChecker {
 	private lateinit var imageUrls: MutableList<URL>

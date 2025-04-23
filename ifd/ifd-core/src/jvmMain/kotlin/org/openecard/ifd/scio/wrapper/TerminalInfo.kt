@@ -22,7 +22,12 @@
 package org.openecard.ifd.scio.wrapper
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.BioSensorCapabilityType
+import iso.std.iso_iec._24727.tech.schema.DisplayCapabilityType
+import iso.std.iso_iec._24727.tech.schema.IFDStatusType
+import iso.std.iso_iec._24727.tech.schema.KeyPadCapabilityType
+import iso.std.iso_iec._24727.tech.schema.SlotCapabilityType
+import iso.std.iso_iec._24727.tech.schema.SlotStatusType
 import org.openecard.common.ECardConstants
 import org.openecard.common.ifd.PACECapabilities
 import org.openecard.common.ifd.scio.NoSuchTerminal
@@ -49,7 +54,7 @@ class TerminalInfo {
 
 	@get:Throws(SCIOException::class, InterruptedException::class)
 	val featureCodes: Map<Int, Int> by lazy {
-		val code = PCSCFeatures.GET_FEATURE_REQUEST_CTLCODE()
+		val code = PCSCFeatures.getFeatureRequestCtlCode()
 		try {
 			val response = channel!!.transmitControlCommand(code, ByteArray(0))
 			PCSCFeatures.featureMapFromRequest(response)

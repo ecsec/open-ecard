@@ -25,7 +25,7 @@ package org.openecard.common
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
+import java.util.Scanner
 
 private const val APPNAME_FILE = "openecard/APPNAME"
 private const val APPVERSION_FILE = "openecard/VERSION"

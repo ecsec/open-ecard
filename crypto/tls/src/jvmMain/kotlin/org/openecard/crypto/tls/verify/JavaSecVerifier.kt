@@ -31,8 +31,20 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
 import java.security.NoSuchAlgorithmException
-import java.security.cert.*
+import java.security.cert.CertPath
+import java.security.cert.CertPathBuilder
+import java.security.cert.CertPathBuilderException
+import java.security.cert.CertPathBuilderResult
+import java.security.cert.CertStore
+import java.security.cert.Certificate
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.security.cert.CollectionCertStoreParameters
+import java.security.cert.PKIXBuilderParameters
 import java.security.cert.PKIXRevocationChecker
+import java.security.cert.TrustAnchor
+import java.security.cert.X509CertSelector
+import java.security.cert.X509Certificate
 
 /**
  * Java Security based certificate verifier.

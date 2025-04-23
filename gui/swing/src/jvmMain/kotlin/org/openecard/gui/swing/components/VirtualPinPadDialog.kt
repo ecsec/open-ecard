@@ -30,7 +30,11 @@ import java.awt.Window
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.WindowEvent
-import javax.swing.*
+import javax.swing.ImageIcon
+import javax.swing.JButton
+import javax.swing.JDialog
+import javax.swing.JPanel
+import javax.swing.SwingUtilities
 import javax.swing.text.JTextComponent
 
 /**
@@ -91,7 +95,7 @@ class VirtualPinPadDialog(
 		val button = JButton()
 		// setButtonFont(button);
 		button.addActionListener(RemoveSingleElementListener())
-		val ico: Icon = ImageIcon(resolveResourceAsURL(VirtualPinPadDialog::class.java, "arrow.png"))
+		val ico = ImageIcon(resolveResourceAsURL(VirtualPinPadDialog::class.java, "arrow.png"))
 		button.setIcon(ico)
 		val marginInset = button.margin
 		button.setMargin(Insets(marginInset.top, 5, marginInset.bottom, 5))

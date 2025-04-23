@@ -26,12 +26,18 @@ import iso.std.iso_iec._24727.tech.schema.RequestType
 import iso.std.iso_iec._24727.tech.schema.ResponseType
 import org.openecard.common.event.ApiCallEventObject
 import org.openecard.common.event.EventType
-import org.openecard.common.interfaces.*
+import org.openecard.common.interfaces.Dispatchable
+import org.openecard.common.interfaces.Dispatcher
+import org.openecard.common.interfaces.DispatcherException
+import org.openecard.common.interfaces.DispatcherExceptionUnchecked
+import org.openecard.common.interfaces.Environment
+import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked
 import org.openecard.common.util.HandlerUtils
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.*
+import java.util.TreeMap
+import java.util.TreeSet
 
 private val LOG = KotlinLogging.logger { }
 
@@ -173,8 +179,10 @@ class MessageDispatcher : Dispatcher {
 
 				// check if the service is already defined
 				if (this.serviceInstMap.containsKey(returnType.name)) {
-					val msg = "Omitting service type ${returnType.getName()}, because its type already associated with another service."
-					LOG.warn { msg }
+					LOG.warn {
+						"Omitting service type ${returnType.getName()}, " +
+							"because its type already associated with another service."
+					}
 					continue
 				}
 
@@ -204,9 +212,11 @@ class MessageDispatcher : Dispatcher {
 
 				for (reqClass in service.getRequestClasses()) {
 					if (serviceMap.containsKey(reqClass.getName())) {
-						var msg = "Omitting method with parameter type ${reqClass.getName()} in service interface ${returnType.getName()} because its "
-						msg += "type already associated with another service."
-						LOG.warn { msg }
+						LOG.warn {
+							"Omitting method with parameter type ${reqClass.getName()} " +
+								"in service interface ${returnType.getName()} " +
+								"because its type already associated with another service."
+						}
 					} else {
 						serviceMap.put(reqClass.getName(), service)
 					}
@@ -217,7 +227,7 @@ class MessageDispatcher : Dispatcher {
 
 	override val serviceList: List<String>
 		get() {
-			return Collections.unmodifiableList<String?>(availableServiceNames)
+			return availableServiceNames.toList()
 		}
 
 	override val filter: Dispatcher

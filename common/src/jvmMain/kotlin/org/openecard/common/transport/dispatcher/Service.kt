@@ -30,7 +30,7 @@ import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.util.*
+import java.util.TreeMap
 import javax.xml.transform.TransformerException
 
 private val LOG = KotlinLogging.logger { }

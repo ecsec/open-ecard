@@ -24,7 +24,12 @@ package org.openecard.crypto.common.keystore
 import org.openecard.bouncycastle.asn1.x500.X500Name
 import org.openecard.bouncycastle.asn1.x500.style.IETFUtils
 import org.openecard.bouncycastle.asn1.x509.Certificate
-import org.openecard.bouncycastle.crypto.params.*
+import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter
+import org.openecard.bouncycastle.crypto.params.DHKeyParameters
+import org.openecard.bouncycastle.crypto.params.DSAKeyParameters
+import org.openecard.bouncycastle.crypto.params.ECKeyParameters
+import org.openecard.bouncycastle.crypto.params.ElGamalKeyParameters
+import org.openecard.bouncycastle.crypto.params.RSAKeyParameters
 import org.openecard.bouncycastle.crypto.util.PublicKeyFactory
 import org.openecard.bouncycastle.tls.crypto.TlsCertificate
 import java.io.ByteArrayInputStream
@@ -36,7 +41,7 @@ import java.security.cert.CertificateFactory
 import java.security.interfaces.DSAKey
 import java.security.interfaces.ECKey
 import java.security.interfaces.RSAKey
-import java.util.*
+import java.util.Calendar
 import javax.crypto.SecretKey
 import javax.crypto.interfaces.DHKey
 

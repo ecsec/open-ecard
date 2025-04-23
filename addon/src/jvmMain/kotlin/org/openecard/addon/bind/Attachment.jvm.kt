@@ -32,6 +32,6 @@ class Attachment {
 	val mIMEType: String? = null
 	val encoding: String? = null
 	val value: InputStream? = null
-	private val _name: String? = null
-	private val _filename: String? = null
+	val name: String? = null
+	val filename: String? = null
 }

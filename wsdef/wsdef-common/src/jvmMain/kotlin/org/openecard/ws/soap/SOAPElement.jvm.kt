@@ -23,7 +23,6 @@ package org.openecard.ws.soap
 
 import org.w3c.dom.Element
 import org.w3c.dom.Node
-import java.util.*
 import javax.xml.namespace.QName
 
 /**

@@ -21,7 +21,9 @@
  ***************************************************************************/
 package org.openecard.ifd.scio
 
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.EstablishContext
+import iso.std.iso_iec._24727.tech.schema.GetStatus
+import iso.std.iso_iec._24727.tech.schema.Wait
 import org.testng.Assert
 import org.testng.annotations.Test
 

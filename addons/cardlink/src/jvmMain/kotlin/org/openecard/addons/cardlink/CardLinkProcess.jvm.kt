@@ -79,12 +79,7 @@ class CardLinkProcess(
 	fun start(): BindingResult {
 		// ensure that switch to successor is called in any case
 		val wsPair = WsPair.withNewListener(ws, successorListener)
-		try {
-			return internalProcessing(wsPair)
-		} finally {
-			// replace listener with the provided successor, so the application can continue
-			wsPair.switchToSuccessorListener()
-		}
+		return wsPair.use { internalProcessing(it) }
 	}
 
 	private fun internalProcessing(wsPair: WsPair): BindingResult {

@@ -9,8 +9,8 @@ private val logger = KotlinLogging.logger { }
 class WsPair(
 	val socket: Websocket,
 	val listener: WebsocketListenerImpl,
-	val successor: WebsocketListener,
-) {
+	private val successor: WebsocketListener,
+) : AutoCloseable {
 	companion object {
 		fun withNewListener(
 			ws: Websocket,
@@ -22,8 +22,12 @@ class WsPair(
 		}
 	}
 
-	fun switchToSuccessorListener() {
+	private fun switchToSuccessorListener() {
 		logger.info { "Replacing websocket listener with provided successor." }
 		socket.setListener(successor)
+	}
+
+	override fun close() {
+		switchToSuccessorListener()
 	}
 }

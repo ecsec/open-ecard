@@ -21,8 +21,8 @@
  */
 package org.openecard.control.binding.http.interceptor
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.http.HttpEntity
-import org.apache.http.HttpException
 import org.apache.http.HttpResponse
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.entity.ContentType
@@ -31,11 +31,9 @@ import org.apache.http.protocol.HttpContext
 import org.openecard.common.I18n
 import org.openecard.common.util.HTMLUtils
 import org.openecard.control.binding.http.common.*
-import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
-import java.io.IOException
+
+private val logger = KotlinLogging.logger{}
 
 /**
  * An HttpResponseInterceptor implementation for errors.
@@ -50,7 +48,7 @@ import java.io.IOException
  */
 class ErrorResponseInterceptor @JvmOverloads constructor(
     documentRoot: DocumentRoot, template: String,
-    private val errorCodes: List<Int?> = generateErrorCodes()
+    private val errorCodes: List<Int> = generateErrorCodes()
 ) :
     HttpResponseInterceptor {
     private val template = HTTPTemplate(documentRoot, template)
@@ -63,13 +61,12 @@ class ErrorResponseInterceptor @JvmOverloads constructor(
      * @param errorCodes List of HTTP error status codes which shall be handled by this interceptor.
      */
 
-    @Throws(HttpException::class, IOException::class)
     override fun process(httpResponse: HttpResponse, httpContext: HttpContext) {
         val statusLine = httpResponse.statusLine
         val statusCode = statusLine.statusCode
 
         if (errorCodes.contains(statusCode)) {
-            LOG.debug("HTTP response intercepted")
+            logger.debug{"HTTP response intercepted"}
             val contentType = httpResponse.getFirstHeader(HeaderTypes.CONTENT_TYPE.fieldName())
             if (contentType != null) {
                 // Intercept response with the content type "text/plain"
@@ -79,9 +76,9 @@ class ErrorResponseInterceptor @JvmOverloads constructor(
                     httpResponse.removeHeaders(HeaderTypes.CONTENT_LENGTH.fieldName())
 
                     // Read message body
-                    var content: String? = readEntity(httpResponse.entity)
+                    var content: String = readEntity(httpResponse.entity)
                     // escape string to prevent script content to be injected into the template (XSS)
-                    content = HTMLUtils.escapeHtml(content)
+                    content = HTMLUtils.escapeHtml(content) ?: content
 
                     template.setProperty("%%%MESSAGE%%%", content)
                 }
@@ -103,7 +100,6 @@ class ErrorResponseInterceptor @JvmOverloads constructor(
         }
     }
 
-    @Throws(IOException::class)
     private fun readEntity(httpEntity: HttpEntity): String {
         val baos = ByteArrayOutputStream()
         httpEntity.writeTo(baos)
@@ -113,10 +109,9 @@ class ErrorResponseInterceptor @JvmOverloads constructor(
     }
 
     companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(ErrorResponseInterceptor::class.java)
         private val lang: I18n = I18n.getTranslation("http")
-        private fun generateErrorCodes(): ArrayList<Int> {
-            val result = ArrayList<Int>()
+        private fun generateErrorCodes(): List<Int> {
+            val result = mutableListOf<Int>()
             for (i in 400..417) {
                 result.add(i)
             }

@@ -21,18 +21,19 @@
  */
 package org.openecard.control.binding.http.common
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.getResourceFileListing
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * @author Moritz Horsch
  */
 class DocumentRoot(rootPath: String, listFile: String) {
-    private var files: Map<String, URL>? = null
+    private var files: Map<String, URL>
 
     /**
      * Creates a new DocumentRoot.
@@ -46,7 +47,7 @@ class DocumentRoot(rootPath: String, listFile: String) {
             // load all paths
             files = getResourceFileListing(DocumentRoot::class.java, rootPath, listFile)
         } catch (ex: IOException) {
-            _logger.error("Invalid path {}", rootPath)
+            logger.error {"Invalid path $rootPath"}
             throw FileNotFoundException(ex.message)
         }
     }
@@ -58,7 +59,7 @@ class DocumentRoot(rootPath: String, listFile: String) {
      * @return True if the document root contains the file, otherwise false
      */
     fun contains(file: String): Boolean {
-        return files!!.containsKey(file)
+        return files.containsKey(file)
     }
 
     /**
@@ -68,7 +69,7 @@ class DocumentRoot(rootPath: String, listFile: String) {
      * @return Files and directories in the document root
      */
     fun getFiles(): List<URL> {
-        return ArrayList(files!!.values)
+        return ArrayList(files.values)
     }
 
     /**
@@ -78,14 +79,11 @@ class DocumentRoot(rootPath: String, listFile: String) {
      * @return File or directory in the document root
      */
     fun getFile(fileName: String): URL? {
-        val file = files!![fileName]
+        val file = files[fileName]
         if (file == null) {
-            _logger.error("Cannot load file: {} ", fileName)
+            logger.error {"Cannot load file: $fileName"}
         }
         return file
     }
 
-    companion object {
-        private val _logger: Logger = LoggerFactory.getLogger(DocumentRoot::class.java)
-    }
 }

@@ -21,13 +21,13 @@
  */
 package org.openecard.control.binding.http
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.http.*
 import org.apache.http.HttpException
 import org.apache.http.impl.DefaultBHttpServerConnection
 import org.apache.http.impl.DefaultConnectionReuseStrategy
 import org.apache.http.impl.DefaultHttpResponseFactory
 import org.apache.http.protocol.*
-import org.openecard.control.binding.http.HttpServiceError
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -37,18 +37,20 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.nio.charset.Charset
 
+private val logger = KotlinLogging.logger{}
+
 /**
  *
  * @author Moritz Horsch
  * @author Tobias Wich
  */
 class HttpService(
-    port: Int, handler: HttpRequestHandler, reqInterceptors: List<HttpRequestInterceptor?>?,
-    respInterceptors: List<HttpResponseInterceptor?>?
+    port: Int, handler: HttpRequestHandler, reqInterceptors: List<HttpRequestInterceptor>,
+    respInterceptors: List<HttpResponseInterceptor>
 ) : Runnable {
     private val thread: Thread
     private val service: org.apache.http.protocol.HttpService
-    protected val server: ServerSocket
+    protected val server: ServerSocket = ServerSocket(port, BACKLOG, InetAddress.getByName("127.0.0.1"))
 
     /**
      * Creates a new HTTPService.
@@ -60,11 +62,9 @@ class HttpService(
      * @throws Exception
      */
     init {
-        server = ServerSocket(port, BACKLOG, InetAddress.getByName("127.0.0.1"))
-        LOG.debug(
-            "Starting HTTP Binding on port {}",
-            this.port
-        )
+        logger.debug{
+            "Starting HTTP Binding on port ${this.port}"
+        }
         thread = Thread(this, "Open-eCard Localhost-Binding-" + this.port)
 
         // Reuse strategy
@@ -76,7 +76,7 @@ class HttpService(
 
         // Set up handler registry
         val handlerRegistry = UriHttpRequestHandlerMapper()
-        LOG.debug("Add handler [{}] for ID [{}]", *arrayOf<Any>(handler.javaClass.canonicalName, "*"))
+        logger.debug{"Add handler [${handler.javaClass.canonicalName}] for ID[*]"}
         handlerRegistry.register("*", handler)
 
         // create service instance
@@ -124,9 +124,9 @@ class HttpService(
                         } catch (ex: ConnectionClosedException) {
                             // connection closed by client, this is the expected outcome
                         } catch (ex: HttpException) {
-                            LOG.error("Error processing HTTP request or response.", ex)
+                            logger.error(ex){"Error processing HTTP request or response."}
                         } catch (ex: IOException) {
-                            LOG.error("IO Error while processing HTTP request or response.", ex)
+                            logger.error(ex){"IO Error while processing HTTP request or response."}
                         } finally {
                             try {
                                 connection.shutdown()
@@ -138,14 +138,14 @@ class HttpService(
             } catch (ex: IOException) {
                 // if interrupted the error is intentionally (SocketClosedException)
                 if (!Thread.interrupted()) {
-                    LOG.error(ex.message, ex)
+                    logger.error(ex) { "${ex.message}" }
                 } else {
                     // set interrupt status again after reading it
                     thread.interrupt()
                 }
             } catch (ex: HttpServiceError) {
                 if (!Thread.interrupted()) {
-                    LOG.error(ex.message, ex)
+                    logger.error(ex) { "${ex.message}" }
                 } else {
                     thread.interrupt()
                 }
@@ -162,7 +162,6 @@ class HttpService(
         get() = server.localPort
 
     companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(HttpService::class.java)
         private const val BACKLOG = 10
     }
 }

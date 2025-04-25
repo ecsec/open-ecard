@@ -21,6 +21,7 @@
  */
 package org.openecard.control.binding.http.handler
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
@@ -28,9 +29,9 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.protocol.HttpContext
 import org.openecard.control.binding.http.HttpException
 import org.openecard.control.binding.http.common.Http11Response
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @author Moritz Horsch
@@ -68,9 +69,8 @@ abstract class ControlCommonHandler : HttpControlHandler {
      * @throws HttpException
      * @throws IOException
      */
-    @Throws(org.apache.http.HttpException::class, IOException::class)
     override fun handle(request: HttpRequest, response: HttpResponse, context: HttpContext) {
-        _logger.debug("HTTP request: {}", request.toString())
+        logger.debug {"HTTP request: $request"}
         var httpResponse: HttpResponse? = null
 
         try {
@@ -82,22 +82,18 @@ abstract class ControlCommonHandler : HttpControlHandler {
             httpResponse = Http11Response(HttpStatus.SC_BAD_REQUEST)
             httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
 
-            if (e.message != null && !e.message!!.isEmpty()) {
+            if (e.message != null && e.message!!.isNotEmpty()) {
                 httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
             }
 
             httpResponse.setStatusCode(e.httpStatusCode)
         } catch (e: Exception) {
             httpResponse = Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-            _logger.error(e.message, e)
+            logger.error(e){e.message}
         } finally {
-            Http11Response.Companion.copyHttpResponse(httpResponse!!, response)
-            _logger.debug("HTTP response: {}", response)
-            _logger.debug("HTTP request handled by: {}", javaClass.name)
+            Http11Response.copyHttpResponse(httpResponse!!, response)
+            logger.debug{"HTTP response: $response"}
+            logger.debug{"HTTP request handled by: ${javaClass.name}"}
         }
-    }
-
-    companion object {
-        private val _logger: Logger = LoggerFactory.getLogger(ControlCommonHandler::class.java)
     }
 }

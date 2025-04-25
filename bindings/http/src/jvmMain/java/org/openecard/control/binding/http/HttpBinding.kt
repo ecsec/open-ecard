@@ -48,7 +48,7 @@ class HttpBinding @JvmOverloads constructor(
     private var service: HttpService? = null
     private var addonManager: AddonManager? = null
 
-    fun setAddonManager(addonManager: AddonManager?) {
+    fun setAddonManager(addonManager: AddonManager) {
         this.addonManager = addonManager
     }
 
@@ -72,34 +72,29 @@ class HttpBinding @JvmOverloads constructor(
 
     @Throws(Exception::class)
     fun start() {
-        // Add default interceptors if none are given
-        if (reqInterceptors == null) {
-            reqInterceptors = emptyList()
-        }
-        if (respInterceptors == null) {
-            respInterceptors = Arrays.asList(
-                StatusLineResponseInterceptor(),
-                ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
-                ServerHeaderResponseInterceptor(),
-                SecurityHeaderResponseInterceptor(),
-                CacheControlHeaderResponseInterceptor()
-            )
-        }
+        val actualRequestInterceptor: List<HttpRequestInterceptor> = reqInterceptors ?: emptyList()
+        reqInterceptors = actualRequestInterceptor
+
+        val actualResponseInterceptor: List<HttpResponseInterceptor> = respInterceptors ?: listOf(
+            StatusLineResponseInterceptor(),
+            ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
+            ServerHeaderResponseInterceptor(),
+            SecurityHeaderResponseInterceptor(),
+            CacheControlHeaderResponseInterceptor()
+        )
 
         if (addonManager == null) {
             throw HttpServiceError("Trying to use uninitialized HttpBinding instance.")
         } else {
             val handler = HttpAppPluginActionHandler(addonManager)
-            service = HttpService(port, handler, reqInterceptors, respInterceptors)
+            service = HttpService(port, handler, actualRequestInterceptor, actualResponseInterceptor)
             service!!.start()
         }
     }
 
     @Throws(Exception::class)
     fun stop() {
-        if (service != null) {
-            service!!.interrupt()
-        }
+        service?.interrupt()
     }
 
     /**
@@ -108,6 +103,6 @@ class HttpBinding @JvmOverloads constructor(
      * @return Port
      */
     fun getPort(): Int {
-        return service.getPort()
+        return service?.port ?: port
     }
 }

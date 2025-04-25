@@ -29,7 +29,6 @@ import org.openecard.control.binding.http.common.Http11Method
 import org.openecard.control.binding.http.common.Http11Response
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.*
 import javax.annotation.Nonnull
 
 /**
@@ -132,11 +131,9 @@ class CORSFilter {
     }
 
     companion object {
-        private val NO_CORS_PATHS: Collection<String> = LinkedList()
-
-        init {
-            NO_CORS_PATHS.add("/eID-Client?ShowUI")
-            NO_CORS_PATHS.add("/eID-Client?tcTokenURL")
-        }
-    }
+        private val NO_CORS_PATHS: List<String> = listOf(
+			"/eID-Client?ShowUI",
+			"/eID-Client?tcTokenURL"
+		)
+	}
 }

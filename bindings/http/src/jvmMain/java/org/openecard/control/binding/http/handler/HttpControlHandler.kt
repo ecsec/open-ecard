@@ -38,5 +38,5 @@ abstract class HttpControlHandler
  * @param resource Identifier
  */ protected constructor(
     /** Identifier to register the handler for  */
-    var resourcePath: String
+    val resourcePath: String
 ) : HttpRequestHandler

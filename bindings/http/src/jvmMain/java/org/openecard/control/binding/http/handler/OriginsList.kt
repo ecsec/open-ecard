@@ -21,16 +21,16 @@
  */
 package org.openecard.control.binding.http.handler
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.homeConfigDir
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.*
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.annotation.Nonnull
+
+private val logger = KotlinLogging.logger{}
 
 /**
  * Helper for managing a CORS origin whitelist.
@@ -38,16 +38,14 @@ import javax.annotation.Nonnull
  * @author Tobias Wich
  */
 object OriginsList {
-    private val LOG: Logger = LoggerFactory.getLogger(OriginsList::class.java)
 
-    private var whitelist: Set<URI>? = null
+    private var whitelist: Set<URI>
 
     init {
-        load()
+        whitelist = load()
     }
 
-    @Synchronized
-    private fun load() {
+    private fun load(): Set<URI> {
         val wl = TreeSet<URI>()
 
         try {
@@ -65,15 +63,14 @@ object OriginsList {
                 readWhitelist(wl, homeWl)
             }
         } catch (ex: IOException) {
-            LOG.error("Failed to read CORS whitelist.", ex)
+            logger.error(ex){"Failed to read CORS whitelist."}
         } catch (ex: SecurityException) {
-            LOG.error("Failed to read CORS whitelist.", ex)
+            logger.error(ex){"Failed to read CORS whitelist."}
         }
 
-        whitelist = wl
+        return wl
     }
 
-    @Throws(IOException::class)
     private fun readWhitelist(wl: MutableSet<URI>, `is`: InputStream) {
         val br = BufferedReader(InputStreamReader(`is`, StandardCharsets.UTF_8))
         var nextLine: String
@@ -88,15 +85,13 @@ object OriginsList {
             try {
                 val nextUri = URI(nextLine)
                 wl.add(nextUri)
-                LOG.debug("Added '{}' to origin whitelist.", nextLine)
+                logger.debug{"Added '$nextLine' to origin whitelist."}
             } catch (ex: URISyntaxException) {
-                LOG.warn("Failed to add URL '{}' to the whitelist.", nextLine)
+                logger.warn{"Failed to add URL '$nextLine' to the whitelist."}
             }
         }
     }
 
-    @get:Throws(IOException::class, SecurityException::class)
-    @get:Nonnull
     val userWhitelist: File
         get() {
             val homePath = homeConfigDir
@@ -120,14 +115,13 @@ object OriginsList {
         }
 
 
-    @Throws(URISyntaxException::class)
-    fun isValidOrigin(@Nonnull origin: String?): Boolean {
+	fun isValidOrigin(origin: String): Boolean {
         val uri = URI(origin)
         return isValidOrigin(uri)
     }
 
-    fun isValidOrigin(@Nonnull origin: URI): Boolean {
-        val whitelisted = whitelist!!.contains(origin)
+    fun isValidOrigin(origin: URI): Boolean {
+        val whitelisted = whitelist.contains(origin)
         return whitelisted
     }
 }

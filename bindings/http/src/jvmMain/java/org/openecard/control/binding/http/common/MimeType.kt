@@ -51,38 +51,26 @@ enum class MimeType(
 
     APPLICATION_JS("js", "application/javascript");
 
-
-    /**
-     * Creates a new MimeType from a String.
-     *
-     * @param mimeType MimeType
-     * @return MimeType
-     */
-    fun fromMineType(mimeType: String): MimeType? {
-        for (item in entries) {
-            if (item.mimeType == mimeType) {
-                return item
-            }
-        }
-
-        return null
-    }
-
     companion object {
+		private val byMimeType = entries.associateBy { it.mimeType }
+		private val byFilenameExtension = entries.associateBy { it.filenameExtension }
+		/**
+		 * Creates a new MimeType from a String.
+		 *
+		 * @param mimeType MimeType
+		 * @return MimeType
+		 */
+		fun fromMineType(mimeType: String): MimeType? {
+			return byMimeType[mimeType]
+		}
         /**
          * Creates a new MineType from a String.
          *
          * @param filenameExtension FilenameExtension
          * @return MimeType
          */
-        fun fromFilenameExtension(filenameExtension: String): MimeType? {
-            for (item in entries) {
-                if (item.filenameExtension == filenameExtension) {
-                    return item
-                }
-            }
-
-            return null
+		fun fromFilenameExtension(filenameExtension: String): MimeType? {
+			return byFilenameExtension[filenameExtension]
         }
     }
 }

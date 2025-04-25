@@ -24,7 +24,6 @@ package org.openecard.control.binding.http.handler
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
-import org.openecard.control.binding.http.HttpException
 import org.openecard.control.binding.http.common.HeaderTypes
 import org.openecard.control.binding.http.common.Http11Response
 
@@ -37,7 +36,7 @@ class IndexHandler
  * Create a new debug handler.
  */
     : ControlCommonHandler("/") {
-    @Throws(HttpException::class, Exception::class)
+
     override fun handle(httpRequest: HttpRequest): HttpResponse {
         val httpResponse: HttpResponse = Http11Response(HttpStatus.SC_SEE_OTHER)
         httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html")

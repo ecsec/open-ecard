@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -21,23 +21,24 @@
  */
 package org.openecard.control.binding.http.interceptor
 
-import org.apache.http.HttpException
 import org.apache.http.HttpResponse
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.protocol.HttpContext
-import java.io.IOException
 
 /**
- * HttpResponseInterceptor implementation which adds a `Cache-Control` header to the response.
- * <br></br>
- * <br></br>
- * The header sets the directive `no-store` to advise the user agent to do not cache the response.
+ * HttpResponseInterceptor implementation which adds security related headers to all responses sent by the HTTP Binding.
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-class CacheControlHeaderResponseInterceptor : HttpResponseInterceptor {
-    @Throws(HttpException::class, IOException::class)
+class SecurityHeaderResponseInterceptor : HttpResponseInterceptor {
+
     override fun process(hr: HttpResponse, hc: HttpContext) {
-        hr.addHeader("Cache-Control", "no-store")
+        hr.addHeader("X-XSS-Protection", "1")
+        hr.addHeader(
+            "Content-Security-Policy",
+            "default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self'"
+        )
+        hr.addHeader("X-Content-Type-Options", "nosniff")
+        hr.addHeader("X-Frame-Options", "SAMEORIGIN")
     }
 }

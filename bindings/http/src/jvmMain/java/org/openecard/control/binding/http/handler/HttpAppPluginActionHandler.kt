@@ -21,6 +21,7 @@
  */
 package org.openecard.control.binding.http.handler
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.http.*
 import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.ContentType
@@ -36,8 +37,6 @@ import org.openecard.common.util.HttpRequestLineUtils
 import org.openecard.control.binding.http.common.DocumentRoot
 import org.openecard.control.binding.http.common.HeaderTypes
 import org.openecard.control.binding.http.common.Http11Response
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URI
 import java.nio.charset.Charset
@@ -45,25 +44,29 @@ import java.nio.charset.UnsupportedCharsetException
 import java.util.*
 import javax.annotation.Nonnull
 
+private val logger = KotlinLogging.logger{}
+private const val METHOD_HDR: String = "X-OeC-Method"
+
+
 /**
  *
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpControlHandler("*") {
+class HttpAppPluginActionHandler(addonManager: AddonManager?) : HttpControlHandler("*") {
     private val selector = AddonSelector(addonManager)
 
     @Throws(HttpException::class, IOException::class)
     override fun handle(httpRequest: HttpRequest, httpResponse: HttpResponse, context: HttpContext) {
-        LOG.debug("HTTP request: {}", httpRequest.toString())
+        logger.debug{"HTTP request: $httpRequest"}
 
         val corsFilter = CORSFilter()
         val corsResp = corsFilter.preProcess(httpRequest, context)
         if (corsResp != null) {
             // CORS Response created, return it to the caller
             // This is either a preflight response, or a block, because the Origin mismatched
-            LOG.debug("HTTP response: {}", corsResp)
-            Http11Response.Companion.copyHttpResponse(corsResp, httpResponse)
+            logger.debug{"HTTP response: $corsResp"}
+            Http11Response.copyHttpResponse(corsResp, httpResponse)
             return
         }
 
@@ -86,7 +89,7 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
 
             var body: RequestBody? = null
             if (httpRequest is HttpEntityEnclosingRequest) {
-                LOG.debug("Request contains an entity.")
+                logger.debug{"Request contains an entity."}
                 body = getRequestBody(httpRequest, resourceName)
             }
 
@@ -98,8 +101,8 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
 
             val response = createHTTPResponseFromBindingResult(bindingResult)
             response.params = httpRequest.params
-            LOG.debug("HTTP response: {}", response)
-            Http11Response.Companion.copyHttpResponse(response, httpResponse)
+            logger.debug{"HTTP response: $response"}
+            Http11Response.copyHttpResponse(response, httpResponse)
 
             // CORS post processing
             corsFilter.postProcess(httpRequest, httpResponse, context)
@@ -153,14 +156,14 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
     private fun addHTTPEntity(response: HttpResponse, bindingResult: BindingResult) {
         val responseBody = bindingResult.body
         if (responseBody != null && responseBody.hasValue()) {
-            LOG.debug("BindingResult contains a body.")
+            logger.debug{"BindingResult contains a body."}
             // determine content type
             val ct = ContentType.create(responseBody.mimeType, responseBody.encoding)
 
             val entity = ByteArrayEntity(responseBody.value, ct)
             response.entity = entity
         } else {
-            LOG.debug("BindingResult contains no body.")
+            logger.debug{"BindingResult contains no body."}
             if (bindingResult.resultMessage != null) {
                 val ct = ContentType.create("text/plain", Charset.forName("UTF-8"))
                 val entity = StringEntity(bindingResult.resultMessage, ct)
@@ -171,18 +174,18 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
 
     private fun createHTTPResponseFromBindingResult(bindingResult: BindingResult): HttpResponse {
         val resultCode = bindingResult.resultCode
-        LOG.debug("Recieved BindingResult with ResultCode {}", resultCode)
+        logger.debug{"Recieved BindingResult with ResultCode $resultCode"}
         var response: HttpResponse
         when (resultCode) {
             BindingResultCode.OK -> response = Http11Response(HttpStatus.SC_OK)
             BindingResultCode.REDIRECT -> {
                 response = Http11Response(HttpStatus.SC_SEE_OTHER)
                 val location = bindingResult.auxResultData[AuxDataKeys.REDIRECT_LOCATION]
-                if (location != null && !location.isEmpty()) {
+                if (!location.isNullOrEmpty()) {
                     response.addHeader(HeaderTypes.LOCATION.fieldName(), location)
                 } else {
                     // redirect requires a location field
-                    LOG.error("No redirect address available in given BindingResult instance.")
+                    logger.error{"No redirect address available in given BindingResult instance."}
                     response = Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                 }
             }
@@ -205,7 +208,7 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
                 response = Http11Response(429)
 
             else -> {
-                LOG.error("Untreated result code: {}", resultCode)
+                logger.error{"Untreated result code: $resultCode"}
                 response = Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR)
             }
         }
@@ -229,9 +232,9 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
             body.setValue(value, cs, mimeType)
             return body
         } catch (e: UnsupportedCharsetException) {
-            LOG.error("Failed to create request body.", e)
+            logger.error(e){"Failed to create request body."}
         } catch (e: ParseException) {
-            LOG.error("Failed to create request body.", e)
+            logger.error(e){"Failed to create request body."}
         }
 
         return null
@@ -240,20 +243,14 @@ class HttpAppPluginActionHandler(@Nonnull addonManager: AddonManager?) : HttpCon
     private fun createQueryMap(): MutableMap<String, String> {
         val caseInsensitivePath = OpenecardProperties.getProperty("legacy.case_insensitive_path").toBoolean()
         return if (!caseInsensitivePath) {
-            HashMap(0)
+            mutableMapOf()
         } else {
-            TreeMap { o1, o2 ->
+            sortedMapOf ({ o1, o2 ->
                 o1.compareTo(
                     o2,
                     ignoreCase = true
                 )
-            }
+            })
         }
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(HttpAppPluginActionHandler::class.java)
-
-        const val METHOD_HDR: String = "X-OeC-Method"
     }
 }

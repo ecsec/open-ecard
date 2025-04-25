@@ -21,7 +21,6 @@
  */
 package org.openecard.control.binding.http.interceptor
 
-import org.apache.http.HttpException
 import org.apache.http.HttpResponse
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.protocol.HttpContext
@@ -29,7 +28,6 @@ import org.openecard.common.AppVersion.name
 import org.openecard.common.AppVersion.specName
 import org.openecard.common.AppVersion.specVersions
 import org.openecard.common.AppVersion.version
-import java.io.IOException
 
 /**
  * HttpResponseInterceptor implementation which adds the `Server` header to all responses sent by the HTTP Binding.
@@ -37,7 +35,7 @@ import java.io.IOException
  * @author Hans-Martin Haase
  */
 class ServerHeaderResponseInterceptor : HttpResponseInterceptor {
-    @Throws(HttpException::class, IOException::class)
+
     override fun process(hr: HttpResponse, hc: HttpContext) {
         hr.addHeader("Server", buildServerHeaderValue())
     }

@@ -26,8 +26,6 @@ import org.apache.http.HttpRequest
 import org.apache.http.util.EntityUtils
 import org.openecard.common.AppVersion.name
 import org.openecard.common.util.HttpRequestLineUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.URI
@@ -39,7 +37,7 @@ import java.net.URI
  */
 class HttpRequestWrapper(private val request: HttpRequest) {
     private val parameterMap: MutableMap<String, MutableList<String>> =
-        HashMap()
+        mutableMapOf()
 
     /**
      * Create HttpRequestWrapper instance.
@@ -57,7 +55,7 @@ class HttpRequestWrapper(private val request: HttpRequest) {
          * @return parameter map
          */
         get() {
-            if (!parameterMap.isEmpty()) {
+            if (parameterMap.isNotEmpty()) {
                 return this.parameterMap
             }
 
@@ -107,11 +105,11 @@ class HttpRequestWrapper(private val request: HttpRequest) {
                 HttpRequestLineUtils.transformRaw(query)
             }
 
-            for ((name1, value): Map.Entry<String, String> in queries) {
+            for ((name1, value) in queries) {
                 if (parameterMap.containsKey(name)) {
                     parameterMap[name]!!.add(value)
                 } else {
-                    val values: MutableList<String> = ArrayList()
+                    val values: MutableList<String> = mutableListOf()
                     values.add(value)
                     parameterMap[name] = values
                 }
@@ -129,9 +127,5 @@ class HttpRequestWrapper(private val request: HttpRequest) {
         }
 
         return parameterMap
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(HttpRequestWrapper::class.java)
     }
 }

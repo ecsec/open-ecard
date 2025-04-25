@@ -21,16 +21,17 @@
  */
 package org.openecard.control.binding.http.common
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.toString
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.UnsupportedEncodingException
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @author Moritz Horsch
  */
 class HTTPTemplate(documentRoot: DocumentRoot, templatePath: String) {
-    private val properties = HashMap<String, String>()
+    private val properties = mutableMapOf<String, String>()
     private var content: String? = null
 
     /**
@@ -44,7 +45,7 @@ class HTTPTemplate(documentRoot: DocumentRoot, templatePath: String) {
             val url = documentRoot.getFile(templatePath)
             content = toString(url!!.openStream())
         } catch (e: Exception) {
-            LOG.error(e.message, e)
+            logger.error(e) {e.message}
         }
     }
 
@@ -87,9 +88,5 @@ class HTTPTemplate(documentRoot: DocumentRoot, templatePath: String) {
             }
         }
         return out.toString()
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(HTTPTemplate::class.java)
     }
 }

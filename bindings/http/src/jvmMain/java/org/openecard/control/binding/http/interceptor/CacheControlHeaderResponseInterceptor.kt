@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,40 +19,23 @@
  * you and ecsec GmbH.
  *
  */
-package org.openecard.control.binding.http
+package org.openecard.control.binding.http.interceptor
 
+import org.apache.http.HttpResponse
+import org.apache.http.HttpResponseInterceptor
+import org.apache.http.protocol.HttpContext
 
 /**
- * @author Moritz Horsch
+ * HttpResponseInterceptor implementation which adds a `Cache-Control` header to the response.
+ * <br></br>
+ * <br></br>
+ * The header sets the directive `no-store` to advise the user agent to do not cache the response.
+ *
+ * @author Hans-Martin Haase
  */
-class HttpException : Exception {
-    /**
-     * Returns the HTTPStatusCode.
-     *
-     * @return HTTPStatusCode
-     */
-    val hTTPStatusCode: Int
+class CacheControlHeaderResponseInterceptor : HttpResponseInterceptor {
 
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     */
-    constructor(httpStatusCode: Int) {
-        this.hTTPStatusCode = httpStatusCode
-    }
-
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     * @param message Message
-     */
-    constructor(httpStatusCode: Int, message: String?) : super(message) {
-        this.hTTPStatusCode = httpStatusCode
-    }
-
-    companion object {
-        private const val serialVersionUID = 1L
+    override fun process(hr: HttpResponse, hc: HttpContext) {
+        hr.addHeader("Cache-Control", "no-store")
     }
 }

@@ -30,7 +30,7 @@ import org.apache.http.message.BasicHttpResponse
  *
  * @author Tobias Wich
  */
-class Http11Response @JvmOverloads constructor(code: Int, reason: String? = null) :
+class Http11Response constructor(code: Int, reason: String? = null) :
     BasicHttpResponse(HttpVersion.HTTP_1_1, code, reason) {
     constructor(statusline: StatusLine) : this(statusline.statusCode, statusline.reasonPhrase)
 

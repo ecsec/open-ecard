@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 ecsec GmbH.
+ * Copyright (C) 2015 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,37 +18,26 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.control.binding.http.interceptor
 
-package org.openecard.control.binding.http.handler;
-
-import org.apache.http.protocol.HttpRequestHandler;
-
+import org.apache.http.HttpException
+import org.apache.http.HttpResponse
+import org.apache.http.HttpResponseInterceptor
+import org.apache.http.protocol.HttpContext
+import java.io.IOException
 
 /**
- * @author Moritz Horsch
+ * HttpResponseInterceptor implementation which adds a `Cache-Control` header to the response.
+ * <br></br>
+ * <br></br>
+ * The header sets the directive `no-store` to advise the user agent to do not cache the response.
+ *
+ * @author Hans-Martin Haase
  */
-public abstract class HttpControlHandler implements HttpRequestHandler {
-
-    /** Identifier to register the handler for */
-    protected String resource;
-
-    /**
-     * Create a new HttpControlHandler.
-     *
-     * @param resource Identifier
-     */
-    protected HttpControlHandler(String resource) {
-	this.resource = resource;
+class CacheControlHeaderResponseInterceptor : HttpResponseInterceptor {
+    @Throws(HttpException::class, IOException::class)
+    override fun process(hr: HttpResponse, hc: HttpContext) {
+        hr.addHeader("Cache-Control", "no-store")
     }
-
-    /**
-     * Return the ID to register the handler for.
-     *
-     * @return Identifier
-     */
-    public String getResourcePath() {
-	return resource;
-    }
-
 }

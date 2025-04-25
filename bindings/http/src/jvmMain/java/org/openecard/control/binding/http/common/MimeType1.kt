@@ -18,16 +18,27 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.control.binding.http.common;
+ */
+package org.openecard.control.binding.http.common
 
 
 /**
  * @author Moritz Horsch
  */
-public enum MimeType {
-
+enum class MimeType(
+    /**
+     * Returns the FilenameExtension.
+     *
+     * @return FilenameExtension
+     */
+    val filenameExtension: String,
+    /**
+     * Returns the MimeType.
+     *
+     * @return MimeType
+     */
+    val mimeType: String
+) {
     TEXT_PLAIN("txt", "text/plain"),
     TEXT_HTML("html", "text/html"),
     TEXT_CSS("css", "text/css"),
@@ -40,48 +51,6 @@ public enum MimeType {
 
     APPLICATION_JS("js", "application/javascript");
 
-    private String filenameExtension;
-    private String mimeType;
-
-    private MimeType(String filenameExtension, String mimeType) {
-	this.filenameExtension = filenameExtension;
-	this.mimeType = mimeType;
-    }
-
-
-    /**
-     * Returns the FilenameExtension.
-     *
-     * @return FilenameExtension
-     */
-    public String getFilenameExtension() {
-	return filenameExtension;
-    }
-
-    /**
-     * Returns the MimeType.
-     *
-     * @return MimeType
-     */
-    public String getMimeType() {
-	return mimeType;
-    }
-
-    /**
-     * Creates a new MineType from a String.
-     *
-     * @param filenameExtension FilenameExtension
-     * @return MimeType
-     */
-    public static MimeType fromFilenameExtension(String filenameExtension) {
-	for (MimeType item : MimeType.values()) {
-	    if (item.getFilenameExtension().equals(filenameExtension)) {
-		return item;
-	    }
-	}
-
-	return null;
-    }
 
     /**
      * Creates a new MimeType from a String.
@@ -89,14 +58,31 @@ public enum MimeType {
      * @param mimeType MimeType
      * @return MimeType
      */
-    public MimeType fromMineType(String mimeType) {
-	for (MimeType item : MimeType.values()) {
-	    if (item.getMimeType().equals(mimeType)) {
-		return item;
-	    }
-	}
+    fun fromMineType(mimeType: String): MimeType? {
+        for (item in entries) {
+            if (item.mimeType == mimeType) {
+                return item
+            }
+        }
 
-	return null;
+        return null
     }
 
+    companion object {
+        /**
+         * Creates a new MineType from a String.
+         *
+         * @param filenameExtension FilenameExtension
+         * @return MimeType
+         */
+        fun fromFilenameExtension(filenameExtension: String): MimeType? {
+            for (item in entries) {
+                if (item.filenameExtension == filenameExtension) {
+                    return item
+                }
+            }
+
+            return null
+        }
+    }
 }

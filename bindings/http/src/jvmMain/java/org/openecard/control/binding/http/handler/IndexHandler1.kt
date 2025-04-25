@@ -18,38 +18,30 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.control.binding.http.handler
 
-package org.openecard.control.binding.http.common;
-
+import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
+import org.apache.http.HttpStatus
+import org.openecard.control.binding.http.HttpException
+import org.openecard.control.binding.http.common.HeaderTypes
+import org.openecard.control.binding.http.common.Http11Response
 
 /**
- * HTTP/1.1 methods
  *
- * @author Benedikt Biallowons
+ * @author Moritz Horsch
  */
-public enum Http11Method {
+class IndexHandler
+/**
+ * Create a new debug handler.
+ */
+    : ControlCommonHandler("/") {
+    @Throws(HttpException::class, Exception::class)
+    override fun handle(httpRequest: HttpRequest): HttpResponse {
+        val httpResponse: HttpResponse = Http11Response(HttpStatus.SC_SEE_OTHER)
+        httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html")
 
-    GET("GET"),
-    POST("POST"),
-    HEAD("HEAD"),
-    PUT("PUT"),
-    DELETE("DELETE"),
-    OPTIONS("OPTIONS"),
-    TRACE("TRACE"),
-    CONNECT("CONNECT");
-
-    private String methodString;
-
-    Http11Method(String methodString) {
-	this.methodString = methodString;
+        return httpResponse
     }
-
-    /**
-     * @return HTTP method name as string
-     */
-    public String getMethodString() {
-	return this.methodString;
-    }
-
 }

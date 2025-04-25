@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,24 +18,25 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.control.binding.http.handler
 
-package org.openecard.control.binding.http;
-
+import org.apache.http.protocol.HttpRequestHandler
 
 /**
- * Exception indicationg a problem while initializing the HttpServer.
+ * Return the ID to register the handler for.
  *
- * @author Tobias Wich
+ * @return Identifier
  */
-public class HttpServiceError extends Exception {
-
-    public HttpServiceError(String message) {
-	super(message);
-    }
-
-    public HttpServiceError(String message, Throwable cause) {
-	super(message, cause);
-    }
-
-}
+/**
+ * @author Moritz Horsch
+ */
+abstract class HttpControlHandler
+/**
+ * Create a new HttpControlHandler.
+ *
+ * @param resource Identifier
+ */ protected constructor(
+    /** Identifier to register the handler for  */
+    var resourcePath: String
+) : HttpRequestHandler

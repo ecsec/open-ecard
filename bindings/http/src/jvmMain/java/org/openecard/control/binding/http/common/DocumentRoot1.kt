@@ -18,29 +18,21 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.control.binding.http.common
 
-package org.openecard.control.binding.http.common;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.openecard.common.util.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.openecard.common.util.FileUtils.getResourceFileListing
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.net.URL
 
 /**
  * @author Moritz Horsch
  */
-public class DocumentRoot {
-
-    private static final Logger _logger = LoggerFactory.getLogger(DocumentRoot.class);
-
-    private Map<String,URL> files;
+class DocumentRoot(rootPath: String, listFile: String) {
+    private var files: Map<String, URL>? = null
 
     /**
      * Creates a new DocumentRoot.
@@ -48,15 +40,15 @@ public class DocumentRoot {
      * @param rootPath Path of the document root.
      * @throws IOException
      */
-    public DocumentRoot(String rootPath, String listFile) throws IOException {
-	// strip leading / for the listing code
-	try {
-	    // load all paths
-	    files = FileUtils.getResourceFileListing(DocumentRoot.class, rootPath, listFile);
-	} catch (IOException ex) {
-	    _logger.error("Invalid path {}", rootPath);
-	    throw new FileNotFoundException(ex.getMessage());
-	}
+    init {
+        // strip leading / for the listing code
+        try {
+            // load all paths
+            files = getResourceFileListing(DocumentRoot::class.java, rootPath, listFile)
+        } catch (ex: IOException) {
+            _logger.error("Invalid path {}", rootPath)
+            throw FileNotFoundException(ex.message)
+        }
     }
 
     /**
@@ -65,8 +57,8 @@ public class DocumentRoot {
      * @param file File
      * @return True if the document root contains the file, otherwise false
      */
-    public boolean contains(String file) {
-	return files.containsKey(file);
+    fun contains(file: String): Boolean {
+        return files!!.containsKey(file)
     }
 
     /**
@@ -75,8 +67,8 @@ public class DocumentRoot {
      *
      * @return Files and directories in the document root
      */
-    public List<URL> getFiles() {
-	return new ArrayList<URL>(files.values());
+    fun getFiles(): List<URL> {
+        return ArrayList(files!!.values)
     }
 
     /**
@@ -85,12 +77,15 @@ public class DocumentRoot {
      * @param fileName File name
      * @return File or directory in the document root
      */
-    public URL getFile(String fileName) {
-	URL file = files.get(fileName);
-	if (file == null) {
-	    _logger.error("Cannot load file: {} ", fileName);
-	}
-	return file;
+    fun getFile(fileName: String): URL? {
+        val file = files!![fileName]
+        if (file == null) {
+            _logger.error("Cannot load file: {} ", fileName)
+        }
+        return file
     }
 
+    companion object {
+        private val _logger: Logger = LoggerFactory.getLogger(DocumentRoot::class.java)
+    }
 }

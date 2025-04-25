@@ -18,34 +18,27 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.control.binding.http.handler;
-
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HttpException;
-import org.openecard.control.binding.http.common.Http11Response;
+ */
+package org.openecard.control.binding.http.common
 
 
 /**
+ * HTTP/1.1 methods
  *
- * @author Moritz Horsch
+ * @author Benedikt Biallowons
  */
-public class DefaultHandler extends ControlCommonHandler {
-
+enum class Http11Method(
     /**
-     * Creates a new default handler.
+     * @return HTTP method name as string
      */
-    public DefaultHandler() {
-	super("*");
-    }
-
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
-	// Always return 404 Not Found
-	return new Http11Response(HttpStatus.SC_NOT_FOUND);
-    }
-
+    val methodString: String
+) {
+    GET("GET"),
+    POST("POST"),
+    HEAD("HEAD"),
+    PUT("PUT"),
+    DELETE("DELETE"),
+    OPTIONS("OPTIONS"),
+    TRACE("TRACE"),
+    CONNECT("CONNECT")
 }

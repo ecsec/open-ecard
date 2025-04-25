@@ -18,37 +18,41 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.control.binding.http.handler;
-
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.openecard.control.binding.http.HttpException;
-import org.openecard.control.binding.http.common.HeaderTypes;
-import org.openecard.control.binding.http.common.Http11Response;
+ */
+package org.openecard.control.binding.http
 
 
 /**
- *
  * @author Moritz Horsch
  */
-public class IndexHandler extends ControlCommonHandler {
+class HttpException : Exception {
+    /**
+     * Returns the HTTPStatusCode.
+     *
+     * @return HTTPStatusCode
+     */
+    val hTTPStatusCode: Int
 
     /**
-     * Create a new debug handler.
+     * Create a new HTTPException.
+     *
+     * @param httpStatusCode HTTPStatusCode
      */
-    public IndexHandler() {
-	super("/");
+    constructor(httpStatusCode: Int) {
+        this.hTTPStatusCode = httpStatusCode
     }
 
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws HttpException, Exception {
-	HttpResponse httpResponse = new Http11Response(HttpStatus.SC_SEE_OTHER);
-	httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html");
-
-	return httpResponse;
+    /**
+     * Create a new HTTPException.
+     *
+     * @param httpStatusCode HTTPStatusCode
+     * @param message Message
+     */
+    constructor(httpStatusCode: Int, message: String?) : super(message) {
+        this.hTTPStatusCode = httpStatusCode
     }
 
+    companion object {
+        private const val serialVersionUID = 1L
+    }
 }

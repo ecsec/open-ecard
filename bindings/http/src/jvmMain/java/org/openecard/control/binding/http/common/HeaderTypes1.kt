@@ -18,16 +18,14 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.control.binding.http.common;
+ */
+package org.openecard.control.binding.http.common
 
 
 /**
  * @author Tobias Wich
  */
-public enum HeaderTypes {
-
+enum class HeaderTypes(private val fieldName: String) {
     // entity headers
     ALLOW("Allow"),
     CONTENT_ENCODING("Content-Encoding"),
@@ -71,6 +69,7 @@ public enum HeaderTypes {
     REFERER("Referer"),
     TE("TE"),
     USER_AGENT("User-Agent"),
+
     // CORS headers. See http://www.w3.org/TR/cors/
     ORIGIN("Origin"),
     ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method"),
@@ -86,6 +85,7 @@ public enum HeaderTypes {
     SERVER("Server"),
     VARY("Vary"),
     WWW_AUTHENTICATE("WWW-Authenticate"),
+
     // CORS headers. See http://www.w3.org/TR/cors/
     ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
     ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials"),
@@ -95,14 +95,7 @@ public enum HeaderTypes {
     ACCESS_CONTROL_ALLOW_HEADERS("Access-Control-Allow-Headers");
 
 
-    private String fieldName;
-
-    private HeaderTypes(String fieldName) {
-	this.fieldName = fieldName;
+    fun fieldName(): String {
+        return fieldName
     }
-
-    public String fieldName() {
-	return fieldName;
-    }
-
 }

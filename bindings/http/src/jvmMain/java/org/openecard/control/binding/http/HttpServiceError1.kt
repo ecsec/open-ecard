@@ -18,30 +18,17 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.control.binding.http.interceptor;
-
-import java.io.IOException;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.protocol.HttpContext;
+ */
+package org.openecard.control.binding.http
 
 
 /**
- * HttpResponseInterceptor implementation which adds a {@code Cache-Control} header to the response.
- * <br>
- * <br>
- * The header sets the directive {@code no-store} to advise the user agent to do not cache the response.
+ * Exception indicationg a problem while initializing the HttpServer.
  *
- * @author Hans-Martin Haase
+ * @author Tobias Wich
  */
-public class CacheControlHeaderResponseInterceptor implements HttpResponseInterceptor {
+class HttpServiceError : Exception {
+    constructor(message: String?) : super(message)
 
-    @Override
-    public void process(HttpResponse hr, HttpContext hc) throws HttpException, IOException {
-	hr.addHeader("Cache-Control", "no-store");
-    }
-
+    constructor(message: String?, cause: Throwable?) : super(message, cause)
 }

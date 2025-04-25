@@ -18,47 +18,27 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.control.binding.http.handler
 
-package org.openecard.control.binding.http;
-
+import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
+import org.apache.http.HttpStatus
+import org.openecard.control.binding.http.HttpException
+import org.openecard.control.binding.http.common.Http11Response
 
 /**
+ *
  * @author Moritz Horsch
  */
-public class HttpException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    private int httpStatusCode;
-
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     */
-    public HttpException(int httpStatusCode) {
-	this.httpStatusCode = httpStatusCode;
+class DefaultHandler
+/**
+ * Creates a new default handler.
+ */
+    : ControlCommonHandler("*") {
+    @Throws(HttpException::class, Exception::class)
+    override fun handle(httpRequest: HttpRequest): HttpResponse {
+        // Always return 404 Not Found
+        return Http11Response(HttpStatus.SC_NOT_FOUND)
     }
-
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     * @param message Message
-     */
-    public HttpException(int httpStatusCode, String message) {
-	super(message);
-	this.httpStatusCode = httpStatusCode;
-    }
-
-    /**
-     * Returns the HTTPStatusCode.
-     *
-     * @return HTTPStatusCode
-     */
-    public int getHTTPStatusCode() {
-	return httpStatusCode;
-    }
-
 }

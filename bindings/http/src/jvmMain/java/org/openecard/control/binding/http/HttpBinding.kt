@@ -27,7 +27,6 @@ import org.openecard.addon.AddonManager
 import org.openecard.control.binding.http.common.DocumentRoot
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler
 import org.openecard.control.binding.http.interceptor.*
-import java.util.*
 
 /**
  * Implements a HTTP binding for the control interface.
@@ -58,10 +57,9 @@ class HttpBinding @JvmOverloads constructor(
      * @param port Port used for the binding. If the port is 0, then chose a port randomly.
      * @param documentRootPath Path of the document root
      * @param listFile
-     * @throws IOException If the document root cannot be read
+     * @throws java.io.IOException If the document root cannot be read
      * @throws Exception
      */
-
     fun setRequestInterceptors(reqInterceptors: List<HttpRequestInterceptor>?) {
         this.reqInterceptors = reqInterceptors
     }

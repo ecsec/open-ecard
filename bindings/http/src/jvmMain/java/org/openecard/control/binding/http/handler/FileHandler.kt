@@ -21,6 +21,7 @@
  */
 package org.openecard.control.binding.http.handler
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
@@ -31,6 +32,7 @@ import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
 
+private val logger = KotlinLogging.logger { }
 
 /**
  *

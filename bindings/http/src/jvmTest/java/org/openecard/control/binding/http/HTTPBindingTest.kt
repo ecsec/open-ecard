@@ -25,8 +25,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.ws.marshal.WSMarshaller
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
 import org.openecard.ws.schema.Status
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
@@ -61,7 +59,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
             val status = m!!.unmarshal(
                 m!!.str2doc(
                     response!!
@@ -75,7 +73,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
 
             Thread.sleep((30 * 1000).toLong())
             // Request a "waitForChange" with GET
@@ -84,7 +82,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
 
             Thread.sleep((45 * 1000).toLong())
             // Request a "waitForChange" with GET
@@ -93,7 +91,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
 
             Thread.sleep((70 * 1000).toLong())
             // Request a "waitForChange" with GET
@@ -129,7 +127,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
             val status = m!!.unmarshal(
                 m!!.str2doc(
                     response!!
@@ -143,7 +141,7 @@ class HTTPBindingTest {
 
             Assert.assertNotNull(response)
 
-            logger.debug(response)
+            logger.debug { response }
 
             // Request a "get status" with POST
             //response = httpRequest(u, true);

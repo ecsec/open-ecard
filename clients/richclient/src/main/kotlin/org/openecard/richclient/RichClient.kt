@@ -215,7 +215,7 @@ class RichClient {
 
                 // start HTTP server
                 httpBinding = HttpBinding(port)
-                httpBinding!!.setAddonManager(manager)
+                httpBinding!!.setAddonManager(manager!!)
                 httpBinding!!.start()
 
                 if (dispatcherMode) {

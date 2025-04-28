@@ -36,9 +36,9 @@ import org.openecard.control.binding.http.interceptor.*
  * @author Tobias Wich
  */
 class HttpBinding @JvmOverloads constructor(
-    private val port: Int,
-    documentRootPath: String = "/www",
-    listFile: String = "/www-files"
+	private val _port: Int,
+	documentRootPath: String = "/www",
+	listFile: String = "/www-files"
 ) {
     // Create document root
     private val documentRoot = DocumentRoot(documentRootPath, listFile)
@@ -54,7 +54,7 @@ class HttpBinding @JvmOverloads constructor(
     /**
      * Creates a new HTTPBinding using the given port and document root.
      *
-     * @param port Port used for the binding. If the port is 0, then chose a port randomly.
+     * @param _port Port used for the binding. If the port is 0, then chose a port randomly.
      * @param documentRootPath Path of the document root
      * @param listFile
      * @throws java.io.IOException If the document root cannot be read
@@ -85,7 +85,7 @@ class HttpBinding @JvmOverloads constructor(
             throw HttpServiceError("Trying to use uninitialized HttpBinding instance.")
         } else {
             val handler = HttpAppPluginActionHandler(addonManager)
-            service = HttpService(port, handler, actualRequestInterceptor, actualResponseInterceptor)
+            service = HttpService(_port, handler, actualRequestInterceptor, actualResponseInterceptor)
             service!!.start()
         }
     }
@@ -100,7 +100,8 @@ class HttpBinding @JvmOverloads constructor(
      *
      * @return Port
      */
-    fun getPort(): Int {
-        return service?.port ?: port
+    val port: Int
+		get() {
+        return service?.port ?: _port
     }
 }

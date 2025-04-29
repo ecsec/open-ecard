@@ -24,7 +24,6 @@ package org.openecard.control.binding.http.common
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.util.EntityUtils
-import org.openecard.common.AppVersion.name
 import org.openecard.common.util.HttpRequestLineUtils
 import java.io.IOException
 import java.io.UnsupportedEncodingException
@@ -105,7 +104,7 @@ class HttpRequestWrapper(private val request: HttpRequest) {
                 HttpRequestLineUtils.transformRaw(query)
             }
 
-            for ((name1, value) in queries) {
+            for ((name, value) in queries) {
                 if (parameterMap.containsKey(name)) {
                     parameterMap[name]!!.add(value)
                 } else {

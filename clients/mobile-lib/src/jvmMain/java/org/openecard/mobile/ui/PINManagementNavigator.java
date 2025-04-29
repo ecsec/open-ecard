@@ -165,7 +165,7 @@ public class PINManagementNavigator extends MobileNavigator {
 
     private StepResult askForPinCanNewPin(GenericPINStep curStep) throws InterruptedException {
 	this.stepCleanup = (Step step) -> {
-	    if (curStep != step || curStep.getPinState() != RecognizedState.PIN_resumed) {
+	    if (curStep != step || curStep.getPinState() != RecognizedState.PIN_RESUMED) {
 		tempCurrentPin = null;
 		tempNewPin = null;
 	    }
@@ -278,13 +278,13 @@ public class PINManagementNavigator extends MobileNavigator {
 	    RecognizedState recPinState = genPINStp.getPinState();
 
 	    switch (recPinState) {
-		case PIN_activated_RC3:
+		case PIN_ACTIVATED_RC3:
 		    return askForPIN(genPINStp, 3);
-		case PIN_activated_RC2:
+		case PIN_ACTIVATED_RC2:
 		    return askForPIN(genPINStp, 2);
-		case PIN_suspended:
+		case PIN_SUSPENDED:
 		    return askForPinCanNewPin(genPINStp);
-		case PIN_resumed:
+		case PIN_RESUMED:
 		    final char[] oldPinChars = this.tempCurrentPin == null ? new char[0] : this.tempCurrentPin.toCharArray();
 		    final char[] newPinChars = this.tempNewPin == null ? new char[0] : this.tempNewPin.toCharArray();
 		    this.tempCurrentPin = null;
@@ -300,11 +300,11 @@ public class PINManagementNavigator extends MobileNavigator {
 		    oldPinField.setValue(oldPinChars);
 		    lst.add(oldPinField);
 		    return new MobileResult(genPINStp, ResultStatus.OK, lst);
-		case PIN_blocked:
+		case PIN_BLOCKED:
 		    return askForPUK(genPINStp);
-		case PIN_deactivated:
+		case PIN_DEACTIVATED:
 		    return notifyDeactivated(genPINStp);
-		case PUK_blocked:
+		case PUK_BLOCKED:
 		    return notifyPukBlocked(genPINStp);
 		case UNKNOWN:
 		    LOG.debug("nextINTswitch: UNKNOWN");

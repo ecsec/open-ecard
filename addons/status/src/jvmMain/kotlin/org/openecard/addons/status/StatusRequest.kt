@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2014 ecsec GmbH.
+ * Copyright (C) 2013-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,36 +20,19 @@
  *
  ***************************************************************************/
 
-package org.openecard.addons.status;
-
+package org.openecard.addons.status
 
 /**
- * Implements an exception for connector errors.
+ * Wrapper for the status request message.
  *
  * @author Moritz Horsch
+ * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-public class StatusException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Create a new StatusException.
-     *
-     * @param message Message
-     */
-    public StatusException(String message) {
-	super(message);
-    }
-
-    /**
-     * Create a new StatusException.
-     *
-     * @param message Message
-     * @param throwable Throwable
-     */
-    public StatusException(String message, Throwable throwable) {
-	super(message, throwable);
-    }
-
+class StatusRequest(
+	val sessionIdentifier: String?,
+) {
+	val hasSessionIdentifier = sessionIdentifier != null
 }
+
+fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))

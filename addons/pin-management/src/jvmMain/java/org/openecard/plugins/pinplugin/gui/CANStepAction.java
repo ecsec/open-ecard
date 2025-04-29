@@ -95,7 +95,7 @@ public class CANStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack()) {
+	if (result.isBack) {
 	    return new StepActionResult(StepActionResultStatus.BACK);
 	}
 	if (!state.equals(RecognizedState.PIN_suspended)) {
@@ -114,7 +114,7 @@ public class CANStepAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (capturePin) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 
 	    if (! verifyUserInput(executionResults)) {
 		// let the user enter the can again, when input verification failed

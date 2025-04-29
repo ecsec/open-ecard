@@ -159,7 +159,7 @@ public class UnblockPINDialog {
 	} else {
 	    i1.setText(lang.translationForKey(PUKSTEP_DESCRIPTION));
 	    PasswordField pukField = new PasswordField(PUK_FIELD);
-	    pukField.setDescription(lang.translationForKey(PUKSTEP_PUK));
+	    pukField.description = lang.translationForKey(PUKSTEP_PUK);
 	    pukStep.getInputInfoUnits().add(pukField);
 	}
 

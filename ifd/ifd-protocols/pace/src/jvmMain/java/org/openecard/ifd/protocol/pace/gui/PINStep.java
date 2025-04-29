@@ -62,7 +62,7 @@ public class PINStep {
     }
 
     private void initialize() {
-	step.setDescription(lang.translationForKey(STEP_DESCRIPTION));
+	step.description = lang.translationForKey(STEP_DESCRIPTION);
 
 	String decriptionText = lang.translationForKey(DESCRIPTION, passwordType);
 	Text description = new Text();
@@ -70,7 +70,7 @@ public class PINStep {
 	step.getInputInfoUnits().add(description);
 
 	PasswordField pinInputField = new PasswordField(passwordType);
-	pinInputField.setDescription(lang.translationForKey(passwordType));
+	pinInputField.description = lang.translationForKey(passwordType);
 	step.getInputInfoUnits().add(pinInputField);
     }
 

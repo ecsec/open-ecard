@@ -123,8 +123,8 @@ class RunGUI {
 		val termsofUsageHtml = ToggleText()
 		termsofUsageHtml.title = "Nutzungsbestimmungen (HTML)"
 		val usageTextHtml = RunGUI::class.java.getResourceAsStream("/description.html")!!.readAllBytes()
-		termsofUsageHtml.setDocument(Document("text/html", usageTextHtml))
-		termsofUsageHtml.setCollapsed(true)
+        termsofUsageHtml.document = Document("text/html", usageTextHtml)
+        termsofUsageHtml.setCollapsed(true)
 		step.getInputInfoUnits().add(termsofUsageHtml)
 
 		val termsofUsagePdf = ToggleText()
@@ -419,7 +419,7 @@ class RunGUI {
 			oldResults: MutableMap<String?, ExecutionResults?>?,
 			result: StepResult,
 		): StepActionResult {
-			val d = result.getResults().toTypedArray()
+			val d = result.results.toTypedArray()
 			var cc: Checkbox? = null
 			for (i in d.indices) {
 				if (d[i] is Checkbox) {
@@ -435,7 +435,7 @@ class RunGUI {
 
 			val data = step.getInputInfoUnits().toTypedArray()
 			// 		    Object[] data = uc.getSteps().get(uc.getSteps().indexOf("PIN-Eingabe"));
-			when (result.getStatus()) {
+			when (result.status) {
 				ResultStatus.BACK -> // 			    for (int i = 0; i < data.length; i++) {
 // 				if (data[i] instanceof Checkbox) {
 // 				    Checkbox c = (Checkbox) data[i];
@@ -478,7 +478,7 @@ class RunGUI {
 // 			    d = e.getResults().toArray();
 // 			}
 // 		    }
-			val d = result.getResults().toTypedArray()
+			val d = result.results.toTypedArray()
 			var cc: Checkbox? = null
 			for (i in d.indices) {
 				if (d[i] is Checkbox) {
@@ -492,7 +492,7 @@ class RunGUI {
 			}
 			// 		    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();
 			val data = requestedData_Step1.getInputInfoUnits().toTypedArray()
-			when (result.getStatus()) {
+			when (result.status) {
 				ResultStatus.BACK -> {
 					var i = 0
 					while (i < data.size) {

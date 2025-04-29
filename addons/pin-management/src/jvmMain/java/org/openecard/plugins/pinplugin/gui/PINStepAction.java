@@ -110,7 +110,7 @@ public class PINStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack()) {
+	if (result.isBack) {
 	    return new StepActionResult(StepActionResultStatus.BACK);
 	}
 
@@ -126,7 +126,7 @@ public class PINStepAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (capturePin) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 
 	    if (!verifyUserInput(executionResults)) {
 		// let the user enter the pin again, when input verification failed

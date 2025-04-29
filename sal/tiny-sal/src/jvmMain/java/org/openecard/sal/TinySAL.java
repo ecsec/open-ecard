@@ -1209,7 +1209,7 @@ public class TinySAL implements SAL {
 			cardStateEntry.getFCPOfSelectedEF().getFileIdentifiers().get(0));
 		Assert.securityConditionDataSet(cardStateEntry, cardApplicationID, dataSet.getDataSetName(),
 			NamedDataServiceActionName.DSI_CREATE);
-		DataElements dElements = cardStateEntry.getFCPOfSelectedEF().getDataElements();
+		DataElements dElements = cardStateEntry.getFCPOfSelectedEF().dataElements;
 
 		if (dElements.isTransparent()) {
 		    WriteBinary writeBin = new WriteBinary(WriteBinary.INS_WRITE_BINARY_DATA, (byte) 0x00, (byte) 0x00,
@@ -1298,7 +1298,7 @@ public class TinySAL implements SAL {
 		}
 	    };
 
-	    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isLinear()) {
+	    if (cardStateEntry.getFCPOfSelectedEF().dataElements.isLinear()) {
 		EraseRecord rmRecord = new EraseRecord(dsi.getDSIPath().getIndex()[0], EraseRecord.ERASE_JUST_P1);
 		rmRecord.transmit(env.getDispatcher(), connectionHandle.getSlotHandle(), responses);
 	    } else {
@@ -1364,7 +1364,7 @@ public class TinySAL implements SAL {
 	    }
 
 	    byte[] slotHandle = connectionHandle.getSlotHandle();
-	    if (cardStateEntry.getFCPOfSelectedEF().getDataElements().isTransparent()) {
+	    if (cardStateEntry.getFCPOfSelectedEF().dataElements.isTransparent()) {
 		// currently assuming that the index encodes the offset
 		byte[] index = dsi.getDSIPath().getIndex();
 		UpdateBinary updateBin = new UpdateBinary(index[0], index[1], updateData);
@@ -1488,7 +1488,7 @@ public class TinySAL implements SAL {
 			allowedResponse.add(new byte[]{(byte) 0x90, (byte) 0x00});
 			allowedResponse.add(new byte[]{(byte) 0x62, (byte) 0x82});
 
-			if (fcp != null && fcp.getDataElements().isLinear()) {
+			if (fcp != null && fcp.dataElements.isLinear()) {
 			    // in this case we use the index as record number and the length as length of record
 			    ReadRecord readRecord = new ReadRecord(index[0]);
 			    // NOTE: For record based files TR-0312-4 states to ignore the length field in case of records

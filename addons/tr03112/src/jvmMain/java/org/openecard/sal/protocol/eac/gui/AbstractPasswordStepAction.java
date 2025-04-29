@@ -72,7 +72,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 	AuthDataResponse paceInputMap = paceAuthMap.createResponse(protoData);
 
 	if (capturePin) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 	    PasswordField p = (PasswordField) executionResults.getResult(PINStep.PIN_FIELD);
 	    if (p == null) {
 		throw new PinOrCanEmptyException("The PIN field is missing");
@@ -113,7 +113,7 @@ public abstract class AbstractPasswordStepAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (capturePin) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 	    PasswordField canField = (PasswordField) executionResults.getResult(PINStep.CAN_FIELD);
 	    if (canField == null) {
 		throw new CanLengthInvalidException("The CAN field is missing");

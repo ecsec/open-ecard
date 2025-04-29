@@ -164,7 +164,7 @@ public class CardCommandAPDUTest {
 	assertEquals((byte) 0x01, capdu.getLC());
 	assertEquals(511, capdu.getLE());
 	assertEquals(new byte[]{(byte) 0x01}, capdu.getData());
-	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.header);
 
 	// test constructor CardCommandAPDU(byte[] commandAPDU) with Case 1 APDU
 	capdu = new CardCommandAPDU(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE});
@@ -175,7 +175,7 @@ public class CardCommandAPDUTest {
 	assertEquals(-1, capdu.getLC());
 	assertEquals(-1, capdu.getLE());
 	assertEquals(capdu.getData(), new byte[0]);
-	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.getHeader());
+	assertEquals(new byte[]{(byte) 0x00, (byte) 0xAB, (byte) 0xBC, (byte) 0xDE}, capdu.header);
     }
 
     @Test

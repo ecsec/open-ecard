@@ -121,7 +121,7 @@ public class GenericPINAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isCancelled()) {
+	if (result.isCancelled) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -169,7 +169,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 	    PasswordField oldPINField = (PasswordField) executionResults.getResult(GenericPINStep.OLD_PIN_FIELD);
 	    if (oldPINField == null) {
 		return null;
@@ -199,7 +199,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 	    PasswordField canField = (PasswordField) executionResults.getResult(GenericPINStep.CAN_FIELD);
 	    if (canField == null) {
 		return null;
@@ -229,7 +229,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(getStepID());
+	    ExecutionResults executionResults = oldResults.get(stepID);
 	    PasswordField pukField = (PasswordField) executionResults.getResult(GenericPINStep.PUK_FIELD);
 	    if (pukField == null) {
 		return null;
@@ -266,7 +266,7 @@ public class GenericPINAction extends StepAction {
 	String newPINRepeatValue = null;
  	if (this.cardView.capturePin()) {
 	    try {
-		ExecutionResults executionResults = oldResults.get(getStepID());
+		ExecutionResults executionResults = oldResults.get(stepID);
 		PasswordField newPINField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_FIELD);
 		PasswordField newPINRepeatField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_REPEAT_FIELD);
 		if (newPINField == null || newPINRepeatField == null) {

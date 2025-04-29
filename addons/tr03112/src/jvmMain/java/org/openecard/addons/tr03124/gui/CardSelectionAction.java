@@ -79,14 +79,14 @@ public class CardSelectionAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isOK()) {
-	    ExecutionResults results = oldResults.get(getStepID());
+	if (result.isOK) {
+	    ExecutionResults results = oldResults.get(stepID);
 	    OutputInfoUnit out = results.getResult("credentialSelectionBox");
 	    Radiobox rBox = (Radiobox) out;
 
 	    for (BoxItem item : rBox.getBoxItems()) {
 		if (item.isChecked()) {
-		    this.resultCardTypetName = item.getName();
+		    this.resultCardTypetName = item.name;
 		    break;
 		}
 	    }
@@ -98,7 +98,7 @@ public class CardSelectionAction extends StepAction {
 	    }
 	} else {
 	    // user has added or removed a card
-	    if (result.isReload()) {
+	    if (result.isReload) {
 		updateCards();
 		step.update(avCard);
 		if (avCard.isEmpty()) {

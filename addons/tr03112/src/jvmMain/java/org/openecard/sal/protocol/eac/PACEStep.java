@@ -208,7 +208,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
 
 	    // define GUI depending on the PIN status
 	    final UserConsentDescription uc = new UserConsentDescription(LANG.translationForKey(TITLE));
-	    uc.setDialogType("EAC");
+	    uc.dialogType = "EAC";
 
 	    // create GUI and init executor
 	    CVCStep cvcStep = new CVCStep(eacData);

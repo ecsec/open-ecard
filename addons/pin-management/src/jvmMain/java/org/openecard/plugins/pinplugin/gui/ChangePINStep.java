@@ -87,15 +87,15 @@ public class ChangePINStep extends Step {
 	    i1.setText(lang.translationForKey(PINSTEP_DESCRIPTION));
 
 	    PasswordField oldPIN = new PasswordField(OLD_PIN_FIELD);
-	    oldPIN.setDescription(lang.translationForKey(PINSTEP_OLDPIN));
+	    oldPIN.description = lang.translationForKey(PINSTEP_OLDPIN);
 	    getInputInfoUnits().add(oldPIN);
 
 	    PasswordField newPIN = new PasswordField(NEW_PIN_FIELD);
-	    newPIN.setDescription(lang.translationForKey(PINSTEP_NEWPIN));
+	    newPIN.description = lang.translationForKey(PINSTEP_NEWPIN);
 	    getInputInfoUnits().add(newPIN);
 
 	    PasswordField newPINRepeat = new PasswordField(NEW_PIN_REPEAT_FIELD);
-	    newPINRepeat.setDescription(lang.translationForKey(PINSTEP_NEWPINREPEAT));
+	    newPINRepeat.description = lang.translationForKey(PINSTEP_NEWPINREPEAT);
 	    getInputInfoUnits().add(newPINRepeat);
 	}
 

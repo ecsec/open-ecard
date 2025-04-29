@@ -43,7 +43,7 @@ public class CVCStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack()) {
+	if (result.isBack) {
 	    // no going back to the initialization step
 	    return new StepActionResult(StepActionResultStatus.REPEAT);
 	}

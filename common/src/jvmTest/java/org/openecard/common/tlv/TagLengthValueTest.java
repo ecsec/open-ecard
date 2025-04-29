@@ -91,7 +91,7 @@ public class TagLengthValueTest {
 
 	assertEquals(input.length, t.getRawLength());
 	assertEquals(1, t.getValueLength());
-	assertEquals(new byte[] {(byte)0xFF}, t.getValue());
+	assertEquals(new byte[] {(byte)0xFF}, t.value);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TagLengthValueTest {
 
 	assertEquals(input.length, t.getRawLength());
 	assertEquals(1, t.getValueLength());
-	assertEquals(new byte[] {(byte)0xFF}, t.getValue());
+	assertEquals(new byte[] {(byte)0xFF}, t.value);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TagLengthValueTest {
 
 	assertEquals(input.length, t.getRawLength());
 	assertEquals(1, t.getValueLength());
-	assertEquals(new byte[] {(byte)0xFF}, t.getValue());
+	assertEquals(new byte[] {(byte)0xFF}, t.value);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class TagLengthValueTest {
 	TLV t = TLV.fromBER(input);
 
 	// perform some checks
-	assertNull(t.getNext());
+	assertNull(t.next);
 	assertTrue(t.findChildTags(0).isEmpty());
 	assertTrue(t.findChildTags(0x8B).size() == 1);
 	assertTrue(t.findChildTags(0x8B).get(0).getTagNumWithClass() == 0x8B);

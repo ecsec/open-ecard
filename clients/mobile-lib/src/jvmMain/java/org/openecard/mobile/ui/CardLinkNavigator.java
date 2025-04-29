@@ -218,7 +218,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 			StepWithConnection canStep = (StepWithConnection) curStep;
 
 			return displayAndExecuteBackground(canStep, () -> {
-				List<EventCallback> hooks = pauseExecution(canStep.getConnectionHandle());
+				List<EventCallback> hooks = pauseExecution(canStep.connectionHandle);
 
 				final Promise<List<OutputInfoUnit>> waitForCan = new Promise<>();
 				final ConfirmPasswordOperation confirmCan = new ConfirmCardLinkCanImpl(waitForCan, canStep, interaction,msgSetter,this);
@@ -240,7 +240,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 			StepWithConnection canStep = (StepWithConnection) curStep;
 
 			return displayAndExecuteBackground(canStep, () -> {
-				List<EventCallback> hooks = pauseExecution(canStep.getConnectionHandle());
+				List<EventCallback> hooks = pauseExecution(canStep.connectionHandle);
 
 				final Promise<List<OutputInfoUnit>> waitForCan = new Promise<>();
 				final ConfirmPasswordOperation confirmCan = new ConfirmCardLinkCanImpl(waitForCan, canStep, interaction,msgSetter,this);
@@ -354,18 +354,18 @@ public final class CardLinkNavigator extends MobileNavigator {
 		ArrayList<OutputInfoUnit> result = new ArrayList<>();
 		for (InputInfoUnit nextIn : step.getInputInfoUnits()) {
 			// TODO: Use Step IDs from Cardlink Addon, maybe move them to Mobile Lib?
-			if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_PHONE")) {
-				TextField tf = new TextField(nextIn.getID());
+			if (value != null && nextIn instanceof TextField && nextIn.iD.equals("CARDLINK_FIELD_PHONE")) {
+				TextField tf = new TextField(nextIn.iD);
 				tf.copyContentFrom(nextIn);
 				tf.setValue(value.toCharArray());
 				result.add(tf);
-			} else if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_TAN")) {
-				TextField tf = new TextField(nextIn.getID());
+			} else if (value != null && nextIn instanceof TextField && nextIn.iD.equals("CARDLINK_FIELD_TAN")) {
+				TextField tf = new TextField(nextIn.iD);
 				tf.copyContentFrom(nextIn);
 				tf.setValue(value.toCharArray());
 				result.add(tf);
-			} else if (value != null && nextIn instanceof TextField && nextIn.getID().equals("CARDLINK_FIELD_CAN")) {
-				TextField tf = new TextField(nextIn.getID());
+			} else if (value != null && nextIn instanceof TextField && nextIn.iD.equals("CARDLINK_FIELD_CAN")) {
+				TextField tf = new TextField(nextIn.iD);
 				tf.copyContentFrom(nextIn);
 				tf.setValue(value.toCharArray());
 				result.add(tf);

@@ -49,7 +49,7 @@ public class InsertCardNavigatorFactory implements UserConsentNavigatorFactory<A
 
     @Override
     public boolean canCreateFrom(UserConsentDescription uc) {
-	return "insert_card_dialog".equals(uc.getDialogType());
+	return "insert_card_dialog".equals(uc.dialogType);
     }
 
     @Override

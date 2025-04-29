@@ -83,7 +83,7 @@ public class CHATStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isOK()) {
+	if (result.isOK) {
 	    processResult(oldResults);
 
 	    try {
@@ -160,17 +160,17 @@ public class CHATStepAction extends StepAction {
     private void processResult(Map<String, ExecutionResults> results) {
 	List<String> dataGroupsNames = getDataGroupNames();
 	List<String> specialFunctionsNames = getSpecialFunctionNames();
-	ExecutionResults executionResults = results.get(getStepID());
+	ExecutionResults executionResults = results.get(stepID);
 
 	// process read access and special functions
 	Checkbox cbRead = (Checkbox) executionResults.getResult(CHATStep.READ_CHAT_BOXES);
 	if (cbRead != null) {
 	    CHAT selectedCHAT = eacData.selectedCHAT;
 	    for (BoxItem item : cbRead.getBoxItems()) {
-		if (dataGroupsNames.contains(item.getName())) {
-		    selectedCHAT.setReadAccess(item.getName(), item.isChecked());
-		} else if (specialFunctionsNames.contains(item.getName())) {
-		    selectedCHAT.setSpecialFunction(item.getName(), item.isChecked());
+		if (dataGroupsNames.contains(item.name)) {
+		    selectedCHAT.setReadAccess(item.name, item.isChecked());
+		} else if (specialFunctionsNames.contains(item.name)) {
+		    selectedCHAT.setSpecialFunction(item.name, item.isChecked());
 		}
 	    }
 	}
@@ -180,8 +180,8 @@ public class CHATStepAction extends StepAction {
 	if (cbWrite != null) {
 	    CHAT selectedCHAT = eacData.selectedCHAT;
 	    for (BoxItem item : cbWrite.getBoxItems()) {
-		if (dataGroupsNames.contains(item.getName())) {
-		    selectedCHAT.setWriteAccess(item.getName(), item.isChecked());
+		if (dataGroupsNames.contains(item.name)) {
+		    selectedCHAT.setWriteAccess(item.name, item.isChecked());
 		}
 	    }
 	}

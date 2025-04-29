@@ -51,11 +51,11 @@ public class CardMonitorTask implements EventCallback, BackgroundTask {
     public void signalEvent(EventType eventType, EventObject eventData) {
 	switch (eventType) {
 	    case CARD_RECOGNIZED:
-		result = eventData.getHandle();
+		result = eventData.handle;
 		cardAction.deliver(null);
 		break;
 	    case CARD_REMOVED:
-		result = eventData.getHandle();
+		result = eventData.handle;
 		cardAction.deliver(null);
 		break;
 

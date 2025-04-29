@@ -124,7 +124,7 @@ public class CommonCardEventHandler {
 						handler.onCardInsufficient();
 						break;
 					case CARD_RECOGNIZED:
-						final ConnectionHandleType handle = eventData.getHandle();
+						final ConnectionHandleType handle = eventData.handle;
 						if (handle == null) {
 							break;
 						}

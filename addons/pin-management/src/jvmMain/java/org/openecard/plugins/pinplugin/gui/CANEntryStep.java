@@ -76,7 +76,7 @@ public class CANEntryStep extends Step {
 	} else {
 	    i2.setText(lang.translationForKey(CANSTEP_DESCRIPTION));
 	    PasswordField canField = new PasswordField(CAN_FIELD);
-	    canField.setDescription(lang.translationForKey(CANSTEP_CAN));
+	    canField.description = lang.translationForKey(CANSTEP_CAN);
 	    getInputInfoUnits().add(canField);
 	}
 

@@ -55,7 +55,7 @@ public class PINManagementNavigatorFactory implements UserConsentNavigatorFactor
 
     @Override
     public boolean canCreateFrom(UserConsentDescription uc) {
-	return "pin_change_dialog".equals(uc.getDialogType());
+	return "pin_change_dialog".equals(uc.dialogType);
     }
 
     @Override

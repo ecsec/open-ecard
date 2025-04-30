@@ -21,56 +21,54 @@
  */
 package org.openecard.control.binding.http.common
 
-
 /**
  * @author Moritz Horsch
  */
 enum class MimeType(
-    /**
-     * Returns the FilenameExtension.
-     *
-     * @return FilenameExtension
-     */
-    val filenameExtension: String,
-    /**
-     * Returns the MimeType.
-     *
-     * @return MimeType
-     */
-    val mimeType: String
+	/**
+	 * Returns the FilenameExtension.
+	 *
+	 * @return FilenameExtension
+	 */
+	val filenameExtension: String,
+	/**
+	 * Returns the MimeType.
+	 *
+	 * @return MimeType
+	 */
+	val mimeType: String,
 ) {
-    TEXT_PLAIN("txt", "text/plain"),
-    TEXT_HTML("html", "text/html"),
-    TEXT_CSS("css", "text/css"),
-    TEXT_XML("xml", "text/xml"),
+	TEXT_PLAIN("txt", "text/plain"),
+	TEXT_HTML("html", "text/html"),
+	TEXT_CSS("css", "text/css"),
+	TEXT_XML("xml", "text/xml"),
 
-    IMAGE_ICO("ico", "image/vnd.microsoft.icon"),
-    IMAGE_PNG("png", "image/png"),
-    IMAGE_JPEG("jpeg", "image/jpeg"),
-    IMAGE_GIF("gif", "image/gif"),
+	IMAGE_ICO("ico", "image/vnd.microsoft.icon"),
+	IMAGE_PNG("png", "image/png"),
+	IMAGE_JPEG("jpeg", "image/jpeg"),
+	IMAGE_GIF("gif", "image/gif"),
 
-    APPLICATION_JS("js", "application/javascript");
+	APPLICATION_JS("js", "application/javascript"),
+	;
 
-    companion object {
+	companion object {
 		private val byMimeType = entries.associateBy { it.mimeType }
 		private val byFilenameExtension = entries.associateBy { it.filenameExtension }
+
 		/**
 		 * Creates a new MimeType from a String.
 		 *
 		 * @param mimeType MimeType
 		 * @return MimeType
 		 */
-		fun fromMineType(mimeType: String): MimeType? {
-			return byMimeType[mimeType]
-		}
-        /**
-         * Creates a new MineType from a String.
-         *
-         * @param filenameExtension FilenameExtension
-         * @return MimeType
-         */
-		fun fromFilenameExtension(filenameExtension: String): MimeType? {
-			return byFilenameExtension[filenameExtension]
-        }
-    }
+		fun fromMineType(mimeType: String): MimeType? = byMimeType[mimeType]
+
+		/**
+		 * Creates a new MineType from a String.
+		 *
+		 * @param filenameExtension FilenameExtension
+		 * @return MimeType
+		 */
+		fun fromFilenameExtension(filenameExtension: String): MimeType? = byFilenameExtension[filenameExtension]
+	}
 }

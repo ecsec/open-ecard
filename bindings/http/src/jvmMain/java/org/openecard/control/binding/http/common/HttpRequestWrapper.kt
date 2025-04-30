@@ -34,97 +34,98 @@ import java.net.URI
  *
  * @author Benedikt Biallowons
  */
-class HttpRequestWrapper(private val request: HttpRequest) {
-    private val parameterMap: MutableMap<String, MutableList<String>> =
-        mutableMapOf()
+class HttpRequestWrapper(
+	private val request: HttpRequest,
+) {
+	private val parameterMap: MutableMap<String, MutableList<String>> =
+		mutableMapOf()
 
-    /**
-     * Create HttpRequestWrapper instance.
-     *
-     * @param request HttpRequest
-     */
-    init {
-        parseRequestParameters()
-    }
+	/**
+	 * Create HttpRequestWrapper instance.
+	 *
+	 * @param request HttpRequest
+	 */
+	init {
+		parseRequestParameters()
+	}
 
-    val requestParameters: Map<String, MutableList<String>>?
-        /**
-         * Returns a key value map of available parameters, null otherwise.
-         *
-         * @return parameter map
-         */
-        get() {
-            if (parameterMap.isNotEmpty()) {
-                return this.parameterMap
-            }
+	val requestParameters: Map<String, MutableList<String>>?
+		/**
+		 * Returns a key value map of available parameters, null otherwise.
+		 *
+		 * @return parameter map
+		 */
+		get() {
+			if (parameterMap.isNotEmpty()) {
+				return this.parameterMap
+			}
 
-            return null
-        }
+			return null
+		}
 
-    /**
-     * Returns a list of parameter values if the given parameter name is found,
-     * null otherwise.
-     *
-     * @param parameterName the request parameter name
-     * @return list of parameter values or null
-     */
-    fun getRequestParameter(parameterName: String): List<String>? {
-        if (parameterMap.containsKey(parameterName)) {
-            return parameterMap[parameterName]
-        }
+	/**
+	 * Returns a list of parameter values if the given parameter name is found,
+	 * null otherwise.
+	 *
+	 * @param parameterName the request parameter name
+	 * @return list of parameter values or null
+	 */
+	fun getRequestParameter(parameterName: String): List<String>? {
+		if (parameterMap.containsKey(parameterName)) {
+			return parameterMap[parameterName]
+		}
 
-        return null
-    }
+		return null
+	}
 
-    /**
-     * Returns true if the given parameter name is found, false otherwise.
-     *
-     * @param parameterName parameter name
-     * @return true or false
-     */
-    fun hasRequestParameter(parameterName: String): Boolean {
-        return parameterMap.containsKey(parameterName)
-    }
+	/**
+	 * Returns true if the given parameter name is found, false otherwise.
+	 *
+	 * @param parameterName parameter name
+	 * @return true or false
+	 */
+	fun hasRequestParameter(parameterName: String): Boolean = parameterMap.containsKey(parameterName)
 
-    /**
-     * Returns a key value map of available parameters. The map can be empty but
-     * never null.
-     *
-     * @return a parameter map
-     */
-    private fun parseRequestParameters(): Map<String, MutableList<String>> {
-        val method = request.requestLine.method
+	/**
+	 * Returns a key value map of available parameters. The map can be empty but
+	 * never null.
+	 *
+	 * @return a parameter map
+	 */
+	private fun parseRequestParameters(): Map<String, MutableList<String>> {
+		val method = request.requestLine.method
 
-        if (method == Http11Method.GET.methodString) {
-            // decoded query string
-            val query = URI.create(request.requestLine.uri).rawQuery ?: return parameterMap
-            var queries = try {
-                HttpRequestLineUtils.transform(query)
-            } catch (ex: UnsupportedEncodingException) {
-                HttpRequestLineUtils.transformRaw(query)
-            }
+		if (method == Http11Method.GET.methodString) {
+			// decoded query string
+			val query = URI.create(request.requestLine.uri).rawQuery ?: return parameterMap
+			var queries =
+				try {
+					HttpRequestLineUtils.transform(query)
+				} catch (ex: UnsupportedEncodingException) {
+					HttpRequestLineUtils.transformRaw(query)
+				}
 
-            for ((name, value) in queries) {
-                if (parameterMap.containsKey(name)) {
-                    parameterMap[name]!!.add(value)
-                } else {
-                    val values: MutableList<String> = mutableListOf()
-                    values.add(value)
-                    parameterMap[name] = values
-                }
-            }
-        } else if (method == Http11Method.POST.methodString
-            && request is HttpEntityEnclosingRequest
-        ) {
-            val entity = request.entity
-            val entityContent: String
-            try {
-                entityContent = EntityUtils.toString(entity, "UTF-8")
-                // TODO: implement POST request parameter parsing
-            } catch (e: IOException) {
-            }
-        }
+			for ((name, value) in queries) {
+				if (parameterMap.containsKey(name)) {
+					parameterMap[name]!!.add(value)
+				} else {
+					val values: MutableList<String> = mutableListOf()
+					values.add(value)
+					parameterMap[name] = values
+				}
+			}
+		} else if (method == Http11Method.POST.methodString &&
+			request is HttpEntityEnclosingRequest
+		) {
+			val entity = request.entity
+			val entityContent: String
+			try {
+				entityContent = EntityUtils.toString(entity, "UTF-8")
+				// TODO: implement POST request parameter parsing
+			} catch (e: IOException) {
+			}
+		}
 
-        return parameterMap
-    }
+		return parameterMap
+	}
 }

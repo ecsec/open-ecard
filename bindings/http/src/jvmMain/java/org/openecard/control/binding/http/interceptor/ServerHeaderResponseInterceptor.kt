@@ -35,37 +35,39 @@ import org.openecard.common.AppVersion.version
  * @author Hans-Martin Haase
  */
 class ServerHeaderResponseInterceptor : HttpResponseInterceptor {
+	override fun process(
+		hr: HttpResponse,
+		hc: HttpContext,
+	) {
+		hr.addHeader("Server", buildServerHeaderValue())
+	}
 
-    override fun process(hr: HttpResponse, hc: HttpContext) {
-        hr.addHeader("Server", buildServerHeaderValue())
-    }
+	/**
+	 * Creates the value of the `Server` header according to BSI-TR-03124-1 v1.2 section 2.2.2.1.
+	 *
+	 * @return A string containing the `Server` header value.
+	 */
+	fun buildServerHeaderValue(): String {
+		val builder = StringBuilder()
 
-    /**
-     * Creates the value of the `Server` header according to BSI-TR-03124-1 v1.2 section 2.2.2.1.
-     *
-     * @return A string containing the `Server` header value.
-     */
-    fun buildServerHeaderValue(): String {
-        val builder = StringBuilder()
+		builder.append(name)
+		builder.append("/")
+		builder.append(version)
 
-        builder.append(name)
-        builder.append("/")
-        builder.append(version)
+		builder.append(" (")
+		var firstSpec = true
+		for (version in specVersions) {
+			if (!firstSpec) {
+				builder.append(" ")
+			} else {
+				firstSpec = false
+			}
+			builder.append(specName)
+			builder.append("/")
+			builder.append(version)
+		}
+		builder.append(")")
 
-        builder.append(" (")
-        var firstSpec = true
-        for (version in specVersions) {
-            if (!firstSpec) {
-                builder.append(" ")
-            } else {
-                firstSpec = false
-            }
-            builder.append(specName)
-            builder.append("/")
-            builder.append(version)
-        }
-        builder.append(")")
-
-        return builder.toString()
-    }
+		return builder.toString()
+	}
 }

@@ -31,16 +31,11 @@ import org.openecard.control.binding.http.common.Http11Response
  *
  * @author Moritz Horsch
  */
-class IndexHandler
-/**
- * Create a new debug handler.
- */
-    : ControlCommonHandler("/") {
+class IndexHandler : ControlCommonHandler("/") {
+	override fun handle(httpRequest: HttpRequest): HttpResponse {
+		val httpResponse: HttpResponse = Http11Response(HttpStatus.SC_SEE_OTHER)
+		httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html")
 
-    override fun handle(httpRequest: HttpRequest): HttpResponse {
-        val httpResponse: HttpResponse = Http11Response(HttpStatus.SC_SEE_OTHER)
-        httpResponse.setHeader(HeaderTypes.LOCATION.fieldName(), "/index.html")
-
-        return httpResponse
-    }
+		return httpResponse
+	}
 }

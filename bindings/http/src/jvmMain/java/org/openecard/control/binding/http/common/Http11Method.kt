@@ -21,24 +21,23 @@
  */
 package org.openecard.control.binding.http.common
 
-
 /**
  * HTTP/1.1 methods
  *
  * @author Benedikt Biallowons
  */
 enum class Http11Method(
-    /**
-     * @return HTTP method name as string
-     */
-    val methodString: String
+	/**
+	 * @return HTTP method name as string
+	 */
+	val methodString: String,
 ) {
-    GET("GET"),
-    POST("POST"),
-    HEAD("HEAD"),
-    PUT("PUT"),
-    DELETE("DELETE"),
-    OPTIONS("OPTIONS"),
-    TRACE("TRACE"),
-    CONNECT("CONNECT")
+	GET("GET"),
+	POST("POST"),
+	HEAD("HEAD"),
+	PUT("PUT"),
+	DELETE("DELETE"),
+	OPTIONS("OPTIONS"),
+	TRACE("TRACE"),
+	CONNECT("CONNECT"),
 }

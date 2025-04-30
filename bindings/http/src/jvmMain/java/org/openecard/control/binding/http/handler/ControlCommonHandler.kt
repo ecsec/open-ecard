@@ -37,63 +37,67 @@ private val logger = KotlinLogging.logger {}
  * @author Moritz Horsch
  */
 abstract class ControlCommonHandler : HttpControlHandler {
-    /**
-     * Creates a new new ControlCommonHandler.
-     */
-    protected constructor() : super("*")
+	/**
+	 * Creates a new new ControlCommonHandler.
+	 */
+	protected constructor() : super("*")
 
-    /**
-     * Creates a new new ControlCommonHandler.
-     *
-     * @param path Path
-     */
-    protected constructor(path: String) : super(path)
+	/**
+	 * Creates a new new ControlCommonHandler.
+	 *
+	 * @param path Path
+	 */
+	protected constructor(path: String) : super(path)
 
-    /**
-     * Handles a HTTP request.
-     *
-     * @param httpRequest HTTPRequest
-     * @return HTTPResponse
-     * @throws HttpException
-     * @throws Exception
-     */
-    @Throws(org.apache.http.HttpException::class, Exception::class)
-    abstract fun handle(httpRequest: HttpRequest): HttpResponse
+	/**
+	 * Handles a HTTP request.
+	 *
+	 * @param httpRequest HTTPRequest
+	 * @return HTTPResponse
+	 * @throws HttpException
+	 * @throws Exception
+	 */
+	@Throws(org.apache.http.HttpException::class, Exception::class)
+	abstract fun handle(httpRequest: HttpRequest): HttpResponse
 
-    /**
-     * Handles a HTTP request.
-     *
-     * @param request HttpRequest
-     * @param response HttpResponse
-     * @param context HttpContext
-     * @throws HttpException
-     * @throws IOException
-     */
-    override fun handle(request: HttpRequest, response: HttpResponse, context: HttpContext) {
-        logger.debug {"HTTP request: $request"}
-        var httpResponse: HttpResponse? = null
+	/**
+	 * Handles a HTTP request.
+	 *
+	 * @param request HttpRequest
+	 * @param response HttpResponse
+	 * @param context HttpContext
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	override fun handle(
+		request: HttpRequest,
+		response: HttpResponse,
+		context: HttpContext,
+	) {
+		logger.debug { "HTTP request: $request" }
+		var httpResponse: HttpResponse? = null
 
-        try {
-            // Forward request parameters to response parameters
-            response.params = request.params
+		try {
+			// Forward request parameters to response parameters
+			response.params = request.params
 
-            httpResponse = handle(request)
-        } catch (e: HttpException) {
-            httpResponse = Http11Response(HttpStatus.SC_BAD_REQUEST)
-            httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
+			httpResponse = handle(request)
+		} catch (e: HttpException) {
+			httpResponse = Http11Response(HttpStatus.SC_BAD_REQUEST)
+			httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
 
-            if (e.message != null && e.message!!.isNotEmpty()) {
-                httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
-            }
+			if (e.message != null && e.message!!.isNotEmpty()) {
+				httpResponse.setEntity(StringEntity(e.message, "UTF-8"))
+			}
 
-            httpResponse.setStatusCode(e.httpStatusCode)
-        } catch (e: Exception) {
-            httpResponse = Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-            logger.error(e){e.message}
-        } finally {
-            Http11Response.copyHttpResponse(httpResponse!!, response)
-            logger.debug{"HTTP response: $response"}
-            logger.debug{"HTTP request handled by: ${javaClass.name}"}
-        }
-    }
+			httpResponse.setStatusCode(e.httpStatusCode)
+		} catch (e: Exception) {
+			httpResponse = Http11Response(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+			logger.error(e) { e.message }
+		} finally {
+			Http11Response.copyHttpResponse(httpResponse!!, response)
+			logger.debug { "HTTP response: $response" }
+			logger.debug { "HTTP request handled by: ${javaClass.name}" }
+		}
+	}
 }

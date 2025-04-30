@@ -27,7 +27,9 @@ import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
 import org.apache.http.entity.BasicHttpEntity
 import org.apache.http.entity.ContentType
-import org.openecard.control.binding.http.common.*
+import org.openecard.control.binding.http.common.DocumentRoot
+import org.openecard.control.binding.http.common.Http11Response
+import org.openecard.control.binding.http.common.MimeType
 import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
@@ -38,8 +40,9 @@ private val logger = KotlinLogging.logger { }
  *
  * @author Moritz Horsch
  */
-class FileHandler(private val documentRoot: DocumentRoot) : ControlCommonHandler("/*") {
-
+class FileHandler(
+	private val documentRoot: DocumentRoot,
+) : ControlCommonHandler("/*") {
 	override fun handle(httpRequest: HttpRequest): HttpResponse {
 		// Return 404 Not Found in the default case
 		val httpResponse = Http11Response(HttpStatus.SC_NOT_FOUND)
@@ -51,10 +54,10 @@ class FileHandler(private val documentRoot: DocumentRoot) : ControlCommonHandler
 			val filePath = documentRoot.getFile(URLDecoder.decode(requestURI.path, "UTF-8"))
 			if (filePath != null) {
 				// Handle file
-				logger.debug{"Handle file request"}
+				logger.debug { "Handle file request" }
 				handleFile(httpResponse, filePath)
 			} else {
-				logger.debug{"The DocumentRoot does not contain the URI: ${requestURI.path}"}
+				logger.debug { "The DocumentRoot does not contain the URI: ${requestURI.path}" }
 			}
 		} else {
 			// Return 405 Method Not Allowed
@@ -64,7 +67,10 @@ class FileHandler(private val documentRoot: DocumentRoot) : ControlCommonHandler
 		return httpResponse
 	}
 
-	private fun handleFile(httpResponse: Http11Response, file: URL) {
+	private fun handleFile(
+		httpResponse: Http11Response,
+		file: URL,
+	) {
 		val fileName = file.toString()
 		val fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1)
 		val mimeType: MimeType? = MimeType.fromFilenameExtension(fileExtension)

@@ -32,58 +32,56 @@ private val logger = KotlinLogging.logger { }
 /**
  * @author Moritz Horsch
  */
-class DocumentRoot(rootPath: String, listFile: String) {
-    private var files: Map<String, URL>
+class DocumentRoot(
+	rootPath: String,
+	listFile: String,
+) {
+	private var files: Map<String, URL>
 
-    /**
-     * Creates a new DocumentRoot.
-     *
-     * @param rootPath Path of the document root.
-     * @throws IOException
-     */
-    init {
-        // strip leading / for the listing code
-        try {
-            // load all paths
-            files = getResourceFileListing(DocumentRoot::class.java, rootPath, listFile)
-        } catch (ex: IOException) {
-            logger.error {"Invalid path $rootPath"}
-            throw FileNotFoundException(ex.message)
-        }
-    }
+	/**
+	 * Creates a new DocumentRoot.
+	 *
+	 * @param rootPath Path of the document root.
+	 * @throws IOException
+	 */
+	init {
+		// strip leading / for the listing code
+		try {
+			// load all paths
+			files = getResourceFileListing(DocumentRoot::class.java, rootPath, listFile)
+		} catch (ex: IOException) {
+			logger.error { "Invalid path $rootPath" }
+			throw FileNotFoundException(ex.message)
+		}
+	}
 
-    /**
-     * Returns true if the document root contains the file, otherwise false.
-     *
-     * @param file File
-     * @return True if the document root contains the file, otherwise false
-     */
-    fun contains(file: String): Boolean {
-        return files.containsKey(file)
-    }
+	/**
+	 * Returns true if the document root contains the file, otherwise false.
+	 *
+	 * @param file File
+	 * @return True if the document root contains the file, otherwise false
+	 */
+	fun contains(file: String): Boolean = files.containsKey(file)
 
-    /**
-     * Returns files and directories in the document root.
-     * The list is an immutable copy of the internal file list.
-     *
-     * @return Files and directories in the document root
-     */
-    fun getFiles(): List<URL> {
-        return ArrayList(files.values)
-    }
+	/**
+	 * Returns files and directories in the document root.
+	 * The list is an immutable copy of the internal file list.
+	 *
+	 * @return Files and directories in the document root
+	 */
+	fun getFiles(): List<URL> = ArrayList(files.values)
 
-    /**
-     * Returns File or directory in the document root.
-     *
-     * @param fileName File name
-     * @return File or directory in the document root
-     */
-    fun getFile(fileName: String): URL? {
-        val file = files[fileName]
-        if (file == null) {
-            logger.error {"Cannot load file: $fileName"}
-        }
-        return file
-    }
-
+	/**
+	 * Returns File or directory in the document root.
+	 *
+	 * @param fileName File name
+	 * @return File or directory in the document root
+	 */
+	fun getFile(fileName: String): URL? {
+		val file = files[fileName]
+		if (file == null) {
+			logger.error { "Cannot load file: $fileName" }
+		}
+		return file
+	}
 }

@@ -37,103 +37,115 @@ import javax.annotation.Nonnull
  * @author Tobias Wich
  */
 class CORSFilter {
-    fun preProcess(httpRequest: HttpRequest, context: HttpContext?): HttpResponse? {
-        val origin = getOrigin(httpRequest)
+	fun preProcess(
+		httpRequest: HttpRequest,
+		context: HttpContext?,
+	): HttpResponse? {
+		val origin = getOrigin(httpRequest)
 
-        // check if we are dealing with a CORS request
-        if (origin != null) {
-            if (isPreflight(httpRequest)) {
-                // preflight response
-                val method = getMethod(httpRequest)
-                if (method != null) {
-                    val res: HttpResponse = Http11Response(HttpStatus.SC_OK)
-                    if (OriginsList.isValidOrigin(origin)) {
-                        postProcess(httpRequest, res, context)
-                    }
-                    return res
-                }
-            }
-        }
+		// check if we are dealing with a CORS request
+		if (origin != null) {
+			if (isPreflight(httpRequest)) {
+				// preflight response
+				val method = getMethod(httpRequest)
+				if (method != null) {
+					val res: HttpResponse = Http11Response(HttpStatus.SC_OK)
+					if (OriginsList.isValidOrigin(origin)) {
+						postProcess(httpRequest, res, context)
+					}
+					return res
+				}
+			}
+		}
 
-        // no CORS, just continue
-        return null
-    }
+		// no CORS, just continue
+		return null
+	}
 
-    fun postProcess(httpRequest: HttpRequest, httpResponse: HttpResponse, context: HttpContext?) {
-        // only process if this is an allowed resource for CORS
-        if (isNoCorsPath(httpRequest.requestLine.uri)) {
-            return
-        }
+	fun postProcess(
+		httpRequest: HttpRequest,
+		httpResponse: HttpResponse,
+		context: HttpContext?,
+	) {
+		// only process if this is an allowed resource for CORS
+		if (isNoCorsPath(httpRequest.requestLine.uri)) {
+			return
+		}
 
-        // only do this when client sent a CORS request
-        val origin = getOrigin(httpRequest)
-        if (origin != null) {
-            // add some common headers
-            httpResponse.addHeader("Vary", "Origin")
+		// only do this when client sent a CORS request
+		val origin = getOrigin(httpRequest)
+		if (origin != null) {
+			// add some common headers
+			httpResponse.addHeader("Vary", "Origin")
 
-            // add CORS Headers
-            httpResponse.addHeader("Access-Control-Allow-Origin", origin.toString())
-            httpResponse.addHeader("Access-Control-Allow-Credentials", "true")
+			// add CORS Headers
+			httpResponse.addHeader("Access-Control-Allow-Origin", origin.toString())
+			httpResponse.addHeader("Access-Control-Allow-Credentials", "true")
 
-            // preflight stuff
-            if (isPreflight(httpRequest)) {
-                val method = getMethod(httpRequest)
-                if (method != null) {
-                    httpResponse.addHeader("Access-Control-Allow-Methods", method)
-                }
-                // TODO: figure out if we need this header stuff
-                //httpResponse.addHeader("Access-Control-Allow-Headers", headers);
-            }
-        }
-    }
+			// preflight stuff
+			if (isPreflight(httpRequest)) {
+				val method = getMethod(httpRequest)
+				if (method != null) {
+					httpResponse.addHeader("Access-Control-Allow-Methods", method)
+				}
+				// TODO: figure out if we need this header stuff
+				// httpResponse.addHeader("Access-Control-Allow-Headers", headers);
+			}
+		}
+	}
 
-    private fun getOrigin(@Nonnull httpRequest: HttpRequest): URI? {
-        try {
-            val origin = httpRequest.getFirstHeader("Origin")
-            if (origin != null) {
-                var origStr = origin.value
-                if (origStr == null) {
-                    origStr = ""
-                }
-                return URI(origStr)
-            }
-        } catch (ex: URISyntaxException) {
-            // no or invalid URI given
-        }
-        return null
-    }
+	private fun getOrigin(
+		@Nonnull httpRequest: HttpRequest,
+	): URI? {
+		try {
+			val origin = httpRequest.getFirstHeader("Origin")
+			if (origin != null) {
+				var origStr = origin.value
+				if (origStr == null) {
+					origStr = ""
+				}
+				return URI(origStr)
+			}
+		} catch (ex: URISyntaxException) {
+			// no or invalid URI given
+		}
+		return null
+	}
 
-    private fun getMethod(@Nonnull httpRequest: HttpRequest): String? {
-        val acrm = httpRequest.getFirstHeader("Access-Control-Request-Method")
-        var acrmStr: String? = null
-        if (acrm != null) {
-            acrmStr = acrm.value
-            if (acrmStr != null && acrmStr.isEmpty()) {
-                acrmStr = null
-            }
-        }
-        return acrmStr
-    }
+	private fun getMethod(
+		@Nonnull httpRequest: HttpRequest,
+	): String? {
+		val acrm = httpRequest.getFirstHeader("Access-Control-Request-Method")
+		var acrmStr: String? = null
+		if (acrm != null) {
+			acrmStr = acrm.value
+			if (acrmStr != null && acrmStr.isEmpty()) {
+				acrmStr = null
+			}
+		}
+		return acrmStr
+	}
 
-    private fun isNoCorsPath(reqLineUri: String): Boolean {
-        for (nextPath in NO_CORS_PATHS) {
-            if (reqLineUri.startsWith(nextPath)) {
-                return true
-            }
-        }
+	private fun isNoCorsPath(reqLineUri: String): Boolean {
+		for (nextPath in NO_CORS_PATHS) {
+			if (reqLineUri.startsWith(nextPath)) {
+				return true
+			}
+		}
 
-        return false
-    }
+		return false
+	}
 
-    private fun isPreflight(req: HttpRequest): Boolean {
-        val method = req.requestLine.method
-        return Http11Method.OPTIONS.methodString == method
-    }
+	private fun isPreflight(req: HttpRequest): Boolean {
+		val method = req.requestLine.method
+		return Http11Method.OPTIONS.methodString == method
+	}
 
-    companion object {
-        private val NO_CORS_PATHS: List<String> = listOf(
-			"/eID-Client?ShowUI",
-			"/eID-Client?tcTokenURL"
-		)
+	companion object {
+		private val NO_CORS_PATHS: List<String> =
+			listOf(
+				"/eID-Client?ShowUI",
+				"/eID-Client?tcTokenURL",
+			)
 	}
 }

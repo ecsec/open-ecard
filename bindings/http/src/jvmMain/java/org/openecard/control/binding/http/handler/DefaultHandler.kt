@@ -24,21 +24,15 @@ package org.openecard.control.binding.http.handler
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
-import org.openecard.control.binding.http.HttpException
 import org.openecard.control.binding.http.common.Http11Response
 
 /**
  *
  * @author Moritz Horsch
  */
-class DefaultHandler
-/**
- * Creates a new default handler.
- */
-    : ControlCommonHandler("*") {
-    @Throws(HttpException::class, Exception::class)
-    override fun handle(httpRequest: HttpRequest): HttpResponse {
-        // Always return 404 Not Found
-        return Http11Response(HttpStatus.SC_NOT_FOUND)
-    }
+class DefaultHandler : ControlCommonHandler("*") {
+	override fun handle(httpRequest: HttpRequest): HttpResponse {
+		// Always return 404 Not Found
+		return Http11Response(HttpStatus.SC_NOT_FOUND)
+	}
 }

@@ -30,63 +30,69 @@ private val logger = KotlinLogging.logger {}
 /**
  * @author Moritz Horsch
  */
-class HTTPTemplate(documentRoot: DocumentRoot, templatePath: String) {
-    private val properties = mutableMapOf<String, String>()
-    private var content: String? = null
+class HTTPTemplate(
+	documentRoot: DocumentRoot,
+	templatePath: String,
+) {
+	private val properties = mutableMapOf<String, String>()
+	private var content: String? = null
 
-    /**
-     * Creates a new HTTPTemplate.
-     *
-     * @param documentRoot Document root
-     * @param templatePath Template path
-     */
-    init {
-        try {
-            val url = documentRoot.getFile(templatePath)
-            content = toString(url!!.openStream())
-        } catch (e: Exception) {
-            logger.error(e) {e.message}
-        }
-    }
+	/**
+	 * Creates a new HTTPTemplate.
+	 *
+	 * @param documentRoot Document root
+	 * @param templatePath Template path
+	 */
+	init {
+		try {
+			val url = documentRoot.getFile(templatePath)
+			content = toString(url!!.openStream())
+		} catch (e: Exception) {
+			logger.error(e) { e.message }
+		}
+	}
 
-    /**
-     * Sets a property of the template.
-     *
-     * @param key Key
-     * @param value Value
-     */
-    fun setProperty(key: String, value: String) {
-        properties[key] = value
-    }
+	/**
+	 * Sets a property of the template.
+	 *
+	 * @param key Key
+	 * @param value Value
+	 */
+	fun setProperty(
+		key: String,
+		value: String,
+	) {
+		properties[key] = value
+	}
 
-    /**
-     * Removes a property.
-     *
-     * @param key Key
-     */
-    fun removeProperty(key: String) {
-        properties.remove(key)
-    }
+	/**
+	 * Removes a property.
+	 *
+	 * @param key Key
+	 */
+	fun removeProperty(key: String) {
+		properties.remove(key)
+	}
 
-    @get:Throws(UnsupportedEncodingException::class)
-    val bytes: ByteArray
-        /**
-         * Returns the template as a byte array.
-         *
-         * @return Template as a byte array
-         * @throws UnsupportedEncodingException
-         */
-        get() = toString().toByteArray(charset("UTF-8"))
+	@get:Throws(UnsupportedEncodingException::class)
+	val bytes: ByteArray
+		/**
+		 * Returns the template as a byte array.
+		 *
+		 * @return Template as a byte array
+		 * @throws UnsupportedEncodingException
+		 */
+		get() = toString().toByteArray(charset("UTF-8"))
 
-    override fun toString(): String {
-        val out = StringBuilder(content)
-        for (key in properties.keys) {
-            val i = out.indexOf(key)
-            val j = i + key.length
-            if (i > 0 && j > 0) {
-                out.replace(i, j, properties[key])
-            }
-        }
-        return out.toString()
-    }
+	override fun toString(): String {
+		val out = StringBuilder(content)
+		for (key in properties.keys) {
+			val i = out.indexOf(key)
+			val j = i + key.length
+			if (i > 0 && j > 0) {
+				out.replace(i, j, properties[key])
+			}
+		}
+		return out.toString()
+	}
 }

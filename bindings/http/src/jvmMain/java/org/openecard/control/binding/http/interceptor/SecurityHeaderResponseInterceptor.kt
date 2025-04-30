@@ -31,14 +31,16 @@ import org.apache.http.protocol.HttpContext
  * @author Tobias Wich
  */
 class SecurityHeaderResponseInterceptor : HttpResponseInterceptor {
-
-    override fun process(hr: HttpResponse, hc: HttpContext) {
-        hr.addHeader("X-XSS-Protection", "1")
-        hr.addHeader(
-            "Content-Security-Policy",
-            "default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self'"
-        )
-        hr.addHeader("X-Content-Type-Options", "nosniff")
-        hr.addHeader("X-Frame-Options", "SAMEORIGIN")
-    }
+	override fun process(
+		hr: HttpResponse,
+		hc: HttpContext,
+	) {
+		hr.addHeader("X-XSS-Protection", "1")
+		hr.addHeader(
+			"Content-Security-Policy",
+			"default-src 'none'; script-src 'none'; style-src 'self'; img-src 'self'",
+		)
+		hr.addHeader("X-Content-Type-Options", "nosniff")
+		hr.addHeader("X-Frame-Options", "SAMEORIGIN")
+	}
 }

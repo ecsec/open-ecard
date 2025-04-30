@@ -30,7 +30,7 @@ import java.net.URISyntaxException
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-private val logger = KotlinLogging.logger{}
+private val logger = KotlinLogging.logger {}
 
 /**
  * Helper for managing a CORS origin whitelist.
@@ -38,90 +38,94 @@ private val logger = KotlinLogging.logger{}
  * @author Tobias Wich
  */
 object OriginsList {
+	private var whitelist: Set<URI>
 
-    private var whitelist: Set<URI>
+	init {
+		whitelist = load()
+	}
 
-    init {
-        whitelist = load()
-    }
+	private fun load(): Set<URI> {
+		val wl = TreeSet<URI>()
 
-    private fun load(): Set<URI> {
-        val wl = TreeSet<URI>()
+		try {
+			// read bundled whitelist
+			val bundledWl =
+				resolveResourceAsStream(
+					OriginsList::class.java,
+					"/binding/origins.whitelist",
+				)
+			readWhitelist(wl, bundledWl!!)
 
-        try {
-            // read bundled whitelist
-            val bundledWl = resolveResourceAsStream(
-                OriginsList::class.java, "/binding/origins.whitelist"
-            )
-            readWhitelist(wl, bundledWl!!)
+			// read user supplied whitelist
+			val homePath = homeConfigDir
+			val cfgFile = File(homePath, "origins.whitelist")
+			if (cfgFile.isFile && cfgFile.canRead()) {
+				val homeWl: InputStream = FileInputStream(cfgFile)
+				readWhitelist(wl, homeWl)
+			}
+		} catch (ex: IOException) {
+			logger.error(ex) { "Failed to read CORS whitelist." }
+		} catch (ex: SecurityException) {
+			logger.error(ex) { "Failed to read CORS whitelist." }
+		}
 
-            // read user supplied whitelist
-            val homePath = homeConfigDir
-            val cfgFile = File(homePath, "origins.whitelist")
-            if (cfgFile.isFile && cfgFile.canRead()) {
-                val homeWl: InputStream = FileInputStream(cfgFile)
-                readWhitelist(wl, homeWl)
-            }
-        } catch (ex: IOException) {
-            logger.error(ex){"Failed to read CORS whitelist."}
-        } catch (ex: SecurityException) {
-            logger.error(ex){"Failed to read CORS whitelist."}
-        }
+		return wl
+	}
 
-        return wl
-    }
+	private fun readWhitelist(
+		wl: MutableSet<URI>,
+		`is`: InputStream,
+	) {
+		val br = BufferedReader(InputStreamReader(`is`, StandardCharsets.UTF_8))
+		var nextLine: String
+		while ((br.readLine().also { nextLine = it }) != null) {
+			nextLine = nextLine.trim { it <= ' ' }
+			// skip comments and empty lines
+			if (nextLine.startsWith("#") || nextLine.isEmpty()) {
+				continue
+			}
 
-    private fun readWhitelist(wl: MutableSet<URI>, `is`: InputStream) {
-        val br = BufferedReader(InputStreamReader(`is`, StandardCharsets.UTF_8))
-        var nextLine: String
-        while ((br.readLine().also { nextLine = it }) != null) {
-            nextLine = nextLine.trim { it <= ' ' }
-            // skip comments and empty lines
-            if (nextLine.startsWith("#") || nextLine.isEmpty()) {
-                continue
-            }
+			// create URI and add it to the list
+			try {
+				val nextUri = URI(nextLine)
+				wl.add(nextUri)
+				logger.debug { "Added '$nextLine' to origin whitelist." }
+			} catch (ex: URISyntaxException) {
+				logger.warn { "Failed to add URL '$nextLine' to the whitelist." }
+			}
+		}
+	}
 
-            // create URI and add it to the list
-            try {
-                val nextUri = URI(nextLine)
-                wl.add(nextUri)
-                logger.debug{"Added '$nextLine' to origin whitelist."}
-            } catch (ex: URISyntaxException) {
-                logger.warn{"Failed to add URL '$nextLine' to the whitelist."}
-            }
-        }
-    }
-
-    val userWhitelist: File
-        get() {
-            val homePath = homeConfigDir
-            val cfgFile = File(homePath, "origins.whitelist")
-            if (!cfgFile.exists()) {
-                val w: Writer = OutputStreamWriter(
-                    FileOutputStream(cfgFile),
-                    StandardCharsets.UTF_8
-                )
-                PrintWriter(w).use { pw ->
-                    pw.println("##")
-                    pw.println("## List of allowed CORS origins")
-                    pw.println("## ----------------------------")
-                    pw.println("## Entries must follow the CORS specification. One origin entry per file.")
-                    pw.println("## Comments begin with the # character.")
-                    pw.println("## Example: https://example.com")
-                    pw.println("##")
-                }
-            }
-            return cfgFile
-        }
-
+	val userWhitelist: File
+		get() {
+			val homePath = homeConfigDir
+			val cfgFile = File(homePath, "origins.whitelist")
+			if (!cfgFile.exists()) {
+				val w: Writer =
+					OutputStreamWriter(
+						FileOutputStream(cfgFile),
+						StandardCharsets.UTF_8,
+					)
+				PrintWriter(w).use { pw ->
+					pw.println("##")
+					pw.println("## List of allowed CORS origins")
+					pw.println("## ----------------------------")
+					pw.println("## Entries must follow the CORS specification. One origin entry per file.")
+					pw.println("## Comments begin with the # character.")
+					pw.println("## Example: https://example.com")
+					pw.println("##")
+				}
+			}
+			return cfgFile
+		}
 
 	fun isValidOrigin(origin: String): Boolean {
-        val uri = URI(origin)
-        return isValidOrigin(uri)
-    }
+		val uri = URI(origin)
+		return isValidOrigin(uri)
+	}
 
-    fun isValidOrigin(origin: URI): Boolean {
-        val whitelisted = whitelist.contains(origin)
-        return whitelisted
-    }
+	fun isValidOrigin(origin: URI): Boolean {
+		val whitelisted = whitelist.contains(origin)
+		return whitelisted
+	}
 }

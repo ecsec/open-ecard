@@ -28,15 +28,12 @@ import org.apache.http.protocol.HttpRequestHandler
  *
  * @return Identifier
  */
+
 /**
  * @author Moritz Horsch
  */
 abstract class HttpControlHandler
-/**
- * Create a new HttpControlHandler.
- *
- * @param resource Identifier
- */ protected constructor(
-    /** Identifier to register the handler for  */
-    val resourcePath: String
-) : HttpRequestHandler
+	protected constructor(
+		/** Identifier to register the handler for  */
+		val resourcePath: String,
+	) : HttpRequestHandler

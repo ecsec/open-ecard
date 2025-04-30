@@ -34,12 +34,9 @@ import org.openecard.management.TinyManagement
 import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.sal.TinySAL
 import org.openecard.transport.dispatcher.MessageDispatcher
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.InputStream
 
-val LOG = KotlinLogging.logger{}
-
+val LOG = KotlinLogging.logger {}
 
 /**
  * Implements a TestClient to test the HttpBinding.
@@ -48,90 +45,85 @@ val LOG = KotlinLogging.logger{}
  * @author Dirk Petrautzki
  */
 class TestClient {
-    // Service Access Layer (SAL)
-    private val sal: TinySAL? = null
+	// Service Access Layer (SAL)
+	private val sal: TinySAL? = null
 
-    init {
-        try {
-            setup()
-        } catch (e: Exception) {
+	init {
+		try {
+			setup()
+		} catch (e: Exception) {
 			LOG.error(e) { "${e.message}" }
-        }
-    }
+		}
+	}
 
-    @Throws(Exception::class)
-    private fun setup() {
-        // Set up client environment
-        val env = ClientEnv()
+	@Throws(Exception::class)
+	private fun setup() {
+		// Set up client environment
+		val env = ClientEnv()
 
-        // Set up the IFD
-        val ifd = IFD()
-        env.ifd = ifd
+		// Set up the IFD
+		val ifd = IFD()
+		env.ifd = ifd
 
-        // Set up Management
-        val management = TinyManagement(env)
-        env.management = management
+		// Set up Management
+		val management = TinyManagement(env)
+		env.management = management
 
-        // Set up the Dispatcher
-        val dispatcher = MessageDispatcher(env)
-        env.dispatcher = dispatcher
+		// Set up the Dispatcher
+		val dispatcher = MessageDispatcher(env)
+		env.dispatcher = dispatcher
 
-        // Perform an EstablishContext to get a ContextHandle
-        val establishContext = EstablishContext()
-        val establishContextResponse = ifd.establishContext(establishContext)
+		// Perform an EstablishContext to get a ContextHandle
+		val establishContext = EstablishContext()
+		val establishContextResponse = ifd.establishContext(establishContext)
 
-        val contextHandle = ifd.establishContext(establishContext).contextHandle
+		val contextHandle = ifd.establishContext(establishContext).contextHandle
 
-        val recognition = CardRecognitionImpl(env)
-        env.recognition = recognition
+		val recognition = CardRecognitionImpl(env)
+		env.recognition = recognition
 
-        env.cifProvider = object : CIFProvider {
-            override fun getCardInfo(type: ConnectionHandleType?, cardType: String): CardInfoType? {
-                return recognition.getCardInfo(cardType)
-            }
+		env.cifProvider =
+			object : CIFProvider {
+				override fun getCardInfo(
+					type: ConnectionHandleType?,
+					cardType: String,
+				): CardInfoType? = recognition.getCardInfo(cardType)
 
-            override fun needsRecognition(atr: ByteArray): Boolean {
-                return true
-            }
+				override fun needsRecognition(atr: ByteArray): Boolean = true
 
-            @Throws(RuntimeException::class)
-            override fun getCardInfo(cardType: String): CardInfoType? {
-                return recognition.getCardInfo(cardType)
-            }
+				@Throws(RuntimeException::class)
+				override fun getCardInfo(cardType: String): CardInfoType? = recognition.getCardInfo(cardType)
 
-            override fun getCardImage(cardType: String): InputStream? {
-                return recognition.getCardImage(cardType)
-            }
-        }
+				override fun getCardImage(cardType: String): InputStream? = recognition.getCardImage(cardType)
+			}
 
-        // Set up EventManager
-        val ed: EventDispatcher = EventDispatcherImpl()
-        env.eventDispatcher = ed
+		// Set up EventManager
+		val ed: EventDispatcher = EventDispatcherImpl()
+		env.eventDispatcher = ed
 
-        // Set up SALStateCallback
-        // TODO: fix tests
-//	cardStates = new CardStateMap();
-//	SALStateCallback salCallback = new SALStateCallback(env, cardStates);
-//	ed.add(salCallback);
+		// Set up SALStateCallback
+		// TODO: fix tests
+// 	cardStates = new CardStateMap();
+// 	SALStateCallback salCallback = new SALStateCallback(env, cardStates);
+// 	ed.add(salCallback);
 //
-//	// Set up SAL
-//	sal = new TinySAL(env, cardStates);
-//	env.setSAL(sal);
+// 	// Set up SAL
+// 	sal = new TinySAL(env, cardStates);
+// 	env.setSAL(sal);
 //
-//	// Set up GUI
-//	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
-//	sal.setGUI(gui);
-//	ifd.setGUI(gui);
+// 	// Set up GUI
+// 	SwingUserConsent gui = new SwingUserConsent(new SwingDialogWrapper());
+// 	sal.setGUI(gui);
+// 	ifd.setGUI(gui);
 //
-//	// Initialize the EventManager
-//	ed.start();
+// 	// Initialize the EventManager
+// 	ed.start();
 //
-//	AddonManager manager = new AddonManager(env, gui, null);
-//	sal.setAddonManager(manager);
+// 	AddonManager manager = new AddonManager(env, gui, null);
+// 	sal.setAddonManager(manager);
 //
-//	HttpBinding binding = new HttpBinding(24727);
-//	binding.setAddonManager(manager);
-//	binding.start();
-    }
-
+// 	HttpBinding binding = new HttpBinding(24727);
+// 	binding.setAddonManager(manager);
+// 	binding.start();
+	}
 }

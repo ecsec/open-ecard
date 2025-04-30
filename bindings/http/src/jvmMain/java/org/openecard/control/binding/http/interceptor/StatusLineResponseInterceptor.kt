@@ -26,7 +26,7 @@ import org.apache.http.HttpResponseInterceptor
 import org.apache.http.impl.EnglishReasonPhraseCatalog
 import org.apache.http.message.BasicStatusLine
 import org.apache.http.protocol.HttpContext
-import java.util.*
+import java.util.Locale
 
 /**
  * Interceptor to correct incomplete HTTP status line.
@@ -34,29 +34,34 @@ import java.util.*
  * @author Tobias Wich
  */
 class StatusLineResponseInterceptor : HttpResponseInterceptor {
+	override fun process(
+		hr: HttpResponse,
+		hc: HttpContext,
+	) {
+		val statusLine = hr.statusLine
+		val statusCode = statusLine.statusCode
+		val locale = hr.locale
+		var reason = statusLine.reasonPhrase
+		reason = reason ?: reasonForCode(statusCode, locale)
+		hr.statusLine = BasicStatusLine(statusLine.protocolVersion, statusCode, reason)
+	}
 
-    override fun process(hr: HttpResponse, hc: HttpContext) {
-        val statusLine = hr.statusLine
-        val statusCode = statusLine.statusCode
-        val locale = hr.locale
-        var reason = statusLine.reasonPhrase
-        reason = reason ?: reasonForCode(statusCode, locale)
-        hr.statusLine = BasicStatusLine(statusLine.protocolVersion, statusCode, reason)
-    }
-
-    companion object {
-        /**
-         * Get reason phrase for HTTP status code.
-         *
-         * @param code HTTP status code
-         * @param locale Langue the reason should be written in, or null for ENGLISH.
-         * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
-         */
-        private fun reasonForCode(code: Int, locale: Locale?): String {
-            var locale = locale
-            locale = locale ?: Locale.ENGLISH
-            val reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, locale)
-            return reason ?: "Extension Code"
-        }
-    }
+	companion object {
+		/**
+		 * Get reason phrase for HTTP status code.
+		 *
+		 * @param code HTTP status code
+		 * @param locale Langue the reason should be written in, or null for ENGLISH.
+		 * @return Reason phrase, or "Extension Code" if code is not defined in the RFC.
+		 */
+		private fun reasonForCode(
+			code: Int,
+			locale: Locale?,
+		): String {
+			var locale = locale
+			locale = locale ?: Locale.ENGLISH
+			val reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(code, locale)
+			return reason ?: "Extension Code"
+		}
+	}
 }

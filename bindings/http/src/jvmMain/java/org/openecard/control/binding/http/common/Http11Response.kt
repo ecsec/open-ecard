@@ -30,52 +30,57 @@ import org.apache.http.message.BasicHttpResponse
  *
  * @author Tobias Wich
  */
-class Http11Response constructor(code: Int, reason: String? = null) :
-    BasicHttpResponse(HttpVersion.HTTP_1_1, code, reason) {
-    constructor(statusline: StatusLine) : this(statusline.statusCode, statusline.reasonPhrase)
+class Http11Response(
+	code: Int,
+	reason: String? = null,
+) : BasicHttpResponse(HttpVersion.HTTP_1_1, code, reason) {
+	constructor(statusline: StatusLine) : this(statusline.statusCode, statusline.reasonPhrase)
 
-    companion object {
-        /**
-         * Copy the content of a HttpResponse to another instance.
-         *
-         * @param in HttpResponse
-         * @param out HttpResponse
-         */
-        fun copyHttpResponse(`in`: HttpResponse, out: HttpResponse) {
-            // remove and copy headers
-            var headIt = out.headerIterator()
-            while (headIt.hasNext()) {
-                headIt.nextHeader()
-                headIt.remove()
-            }
-            headIt = `in`.headerIterator()
-            while (headIt.hasNext()) {
-                val next = headIt.nextHeader()
-                out.addHeader(next)
-            }
+	companion object {
+		/**
+		 * Copy the content of a HttpResponse to another instance.
+		 *
+		 * @param in HttpResponse
+		 * @param out HttpResponse
+		 */
+		fun copyHttpResponse(
+			`in`: HttpResponse,
+			out: HttpResponse,
+		) {
+			// remove and copy headers
+			var headIt = out.headerIterator()
+			while (headIt.hasNext()) {
+				headIt.nextHeader()
+				headIt.remove()
+			}
+			headIt = `in`.headerIterator()
+			while (headIt.hasNext()) {
+				val next = headIt.nextHeader()
+				out.addHeader(next)
+			}
 
-            // set entity stuff
-            if (`in`.entity != null) {
-                val entity = `in`.entity
-                out.entity = entity
-                if (entity.contentType != null) {
-                    out.setHeader(entity.contentType)
-                }
-                if (entity.contentEncoding != null) {
-                    out.setHeader(entity.contentEncoding)
-                }
-                if (entity.contentLength > 0) {
-                    out.setHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), entity.contentLength.toString())
-                }
-                // TODO: use chunked, repeatable and streaming attribute from entity
-            }
+			// set entity stuff
+			if (`in`.entity != null) {
+				val entity = `in`.entity
+				out.entity = entity
+				if (entity.contentType != null) {
+					out.setHeader(entity.contentType)
+				}
+				if (entity.contentEncoding != null) {
+					out.setHeader(entity.contentEncoding)
+				}
+				if (entity.contentLength > 0) {
+					out.setHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), entity.contentLength.toString())
+				}
+				// TODO: use chunked, repeatable and streaming attribute from entity
+			}
 
-            // copy rest
-            val l = `in`.locale
-            if (l != null) {
-                out.locale = l
-            }
-            out.statusLine = `in`.statusLine
-        }
-    }
+			// copy rest
+			val l = `in`.locale
+			if (l != null) {
+				out.locale = l
+			}
+			out.statusLine = `in`.statusLine
+		}
+	}
 }

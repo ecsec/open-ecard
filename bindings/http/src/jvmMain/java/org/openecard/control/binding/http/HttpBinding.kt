@@ -26,7 +26,11 @@ import org.apache.http.HttpResponseInterceptor
 import org.openecard.addon.AddonManager
 import org.openecard.control.binding.http.common.DocumentRoot
 import org.openecard.control.binding.http.handler.HttpAppPluginActionHandler
-import org.openecard.control.binding.http.interceptor.*
+import org.openecard.control.binding.http.interceptor.CacheControlHeaderResponseInterceptor
+import org.openecard.control.binding.http.interceptor.ErrorResponseInterceptor
+import org.openecard.control.binding.http.interceptor.SecurityHeaderResponseInterceptor
+import org.openecard.control.binding.http.interceptor.ServerHeaderResponseInterceptor
+import org.openecard.control.binding.http.interceptor.StatusLineResponseInterceptor
 
 /**
  * Implements a HTTP binding for the control interface.
@@ -35,73 +39,74 @@ import org.openecard.control.binding.http.interceptor.*
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class HttpBinding @JvmOverloads constructor(
+class HttpBinding(
 	private val _port: Int,
 	documentRootPath: String = "/www",
-	listFile: String = "/www-files"
+	listFile: String = "/www-files",
 ) {
-    // Create document root
-    private val documentRoot = DocumentRoot(documentRootPath, listFile)
-    private var reqInterceptors: List<HttpRequestInterceptor>? = null
-    private var respInterceptors: List<HttpResponseInterceptor>? = null
-    private var service: HttpService? = null
-    private var addonManager: AddonManager? = null
+	// Create document root
+	private val documentRoot = DocumentRoot(documentRootPath, listFile)
+	private var reqInterceptors: List<HttpRequestInterceptor>? = null
+	private var respInterceptors: List<HttpResponseInterceptor>? = null
+	private var service: HttpService? = null
+	private var addonManager: AddonManager? = null
 
-    fun setAddonManager(addonManager: AddonManager) {
-        this.addonManager = addonManager
-    }
+	fun setAddonManager(addonManager: AddonManager) {
+		this.addonManager = addonManager
+	}
 
-    /**
-     * Creates a new HTTPBinding using the given port and document root.
-     *
-     * @param _port Port used for the binding. If the port is 0, then chose a port randomly.
-     * @param documentRootPath Path of the document root
-     * @param listFile
-     * @throws java.io.IOException If the document root cannot be read
-     * @throws Exception
-     */
-    fun setRequestInterceptors(reqInterceptors: List<HttpRequestInterceptor>?) {
-        this.reqInterceptors = reqInterceptors
-    }
+	/**
+	 * Creates a new HTTPBinding using the given port and document root.
+	 *
+	 * @param _port Port used for the binding. If the port is 0, then chose a port randomly.
+	 * @param documentRootPath Path of the document root
+	 * @param listFile
+	 * @throws java.io.IOException If the document root cannot be read
+	 * @throws Exception
+	 */
+	fun setRequestInterceptors(reqInterceptors: List<HttpRequestInterceptor>?) {
+		this.reqInterceptors = reqInterceptors
+	}
 
-    fun setResponseInterceptors(respInterceptors: List<HttpResponseInterceptor>?) {
-        this.respInterceptors = respInterceptors
-    }
+	fun setResponseInterceptors(respInterceptors: List<HttpResponseInterceptor>?) {
+		this.respInterceptors = respInterceptors
+	}
 
-    @Throws(Exception::class)
-    fun start() {
-        val actualRequestInterceptor: List<HttpRequestInterceptor> = reqInterceptors ?: emptyList()
-        reqInterceptors = actualRequestInterceptor
+	@Throws(Exception::class)
+	fun start() {
+		val actualRequestInterceptor: List<HttpRequestInterceptor> = reqInterceptors ?: emptyList()
+		reqInterceptors = actualRequestInterceptor
 
-        val actualResponseInterceptor: List<HttpResponseInterceptor> = respInterceptors ?: listOf(
-            StatusLineResponseInterceptor(),
-            ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
-            ServerHeaderResponseInterceptor(),
-            SecurityHeaderResponseInterceptor(),
-            CacheControlHeaderResponseInterceptor()
-        )
+		val actualResponseInterceptor: List<HttpResponseInterceptor> =
+			respInterceptors ?: listOf(
+				StatusLineResponseInterceptor(),
+				ErrorResponseInterceptor(documentRoot, "/templates/error.html"),
+				ServerHeaderResponseInterceptor(),
+				SecurityHeaderResponseInterceptor(),
+				CacheControlHeaderResponseInterceptor(),
+			)
 
-        if (addonManager == null) {
-            throw HttpServiceError("Trying to use uninitialized HttpBinding instance.")
-        } else {
-            val handler = HttpAppPluginActionHandler(addonManager)
-            service = HttpService(_port, handler, actualRequestInterceptor, actualResponseInterceptor)
-            service!!.start()
-        }
-    }
+		if (addonManager == null) {
+			throw HttpServiceError("Trying to use uninitialized HttpBinding instance.")
+		} else {
+			val handler = HttpAppPluginActionHandler(addonManager)
+			service = HttpService(_port, handler, actualRequestInterceptor, actualResponseInterceptor)
+			service!!.start()
+		}
+	}
 
-    @Throws(Exception::class)
-    fun stop() {
-        service?.interrupt()
-    }
+	@Throws(Exception::class)
+	fun stop() {
+		service?.interrupt()
+	}
 
-    /**
-     * Returns the port number on which the HTTP binding is listening.
-     *
-     * @return Port
-     */
-    val port: Int
+	/**
+	 * Returns the port number on which the HTTP binding is listening.
+	 *
+	 * @return Port
+	 */
+	val port: Int
 		get() {
-        return service?.port ?: _port
-    }
+			return service?.port ?: _port
+		}
 }

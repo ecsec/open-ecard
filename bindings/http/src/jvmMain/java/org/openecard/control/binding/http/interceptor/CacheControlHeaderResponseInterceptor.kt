@@ -34,8 +34,10 @@ import org.apache.http.protocol.HttpContext
  * @author Hans-Martin Haase
  */
 class CacheControlHeaderResponseInterceptor : HttpResponseInterceptor {
-
-    override fun process(hr: HttpResponse, hc: HttpContext) {
-        hr.addHeader("Cache-Control", "no-store")
-    }
+	override fun process(
+		hr: HttpResponse,
+		hc: HttpContext,
+	) {
+		hr.addHeader("Cache-Control", "no-store")
+	}
 }

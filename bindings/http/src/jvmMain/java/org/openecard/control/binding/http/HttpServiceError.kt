@@ -21,14 +21,13 @@
  */
 package org.openecard.control.binding.http
 
-
 /**
  * Exception indicationg a problem while initializing the HttpServer.
  *
  * @author Tobias Wich
  */
 class HttpServiceError : Exception {
-    constructor(message: String?) : super(message)
+	constructor(message: String?) : super(message)
 
-    constructor(message: String?, cause: Throwable?) : super(message, cause)
+	constructor(message: String?, cause: Throwable?) : super(message, cause)
 }

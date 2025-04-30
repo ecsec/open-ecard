@@ -21,34 +21,33 @@
  */
 package org.openecard.control.binding.http
 
-
 /**
  * @author Moritz Horsch
  */
 class HttpException : Exception {
-    /**
-     * Returns the HTTPStatusCode.
-     *
-     * @return HTTPStatusCode
-     */
-    val httpStatusCode: Int
+	/**
+	 * Returns the HTTPStatusCode.
+	 *
+	 * @return HTTPStatusCode
+	 */
+	val httpStatusCode: Int
 
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     */
-    constructor(httpStatusCode: Int) {
-        this.httpStatusCode = httpStatusCode
-    }
+	/**
+	 * Create a new HTTPException.
+	 *
+	 * @param httpStatusCode HTTPStatusCode
+	 */
+	constructor(httpStatusCode: Int) {
+		this.httpStatusCode = httpStatusCode
+	}
 
-    /**
-     * Create a new HTTPException.
-     *
-     * @param httpStatusCode HTTPStatusCode
-     * @param message Message
-     */
-    constructor(httpStatusCode: Int, message: String?) : super(message) {
-        this.httpStatusCode = httpStatusCode
-    }
+	/**
+	 * Create a new HTTPException.
+	 *
+	 * @param httpStatusCode HTTPStatusCode
+	 * @param message Message
+	 */
+	constructor(httpStatusCode: Int, message: String?) : super(message) {
+		this.httpStatusCode = httpStatusCode
+	}
 }

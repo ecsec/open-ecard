@@ -30,10 +30,13 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.protocol.HttpContext
 import org.openecard.common.I18n
 import org.openecard.common.util.HTMLUtils
-import org.openecard.control.binding.http.common.*
+import org.openecard.control.binding.http.common.DocumentRoot
+import org.openecard.control.binding.http.common.HTTPTemplate
+import org.openecard.control.binding.http.common.HeaderTypes
+import org.openecard.control.binding.http.common.MimeType
 import java.io.ByteArrayOutputStream
 
-private val logger = KotlinLogging.logger{}
+private val logger = KotlinLogging.logger {}
 
 /**
  * An HttpResponseInterceptor implementation for errors.
@@ -46,84 +49,88 @@ private val logger = KotlinLogging.logger{}
  * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-class ErrorResponseInterceptor @JvmOverloads constructor(
-    documentRoot: DocumentRoot, template: String,
-    private val errorCodes: List<Int> = generateErrorCodes()
-) :
-    HttpResponseInterceptor {
-    private val template = HTTPTemplate(documentRoot, template)
+class ErrorResponseInterceptor(
+	documentRoot: DocumentRoot,
+	template: String,
+	private val errorCodes: List<Int> = generateErrorCodes(),
+) : HttpResponseInterceptor {
+	private val template = HTTPTemplate(documentRoot, template)
 
-    /**
-     * Create a new ErrorInterceptor form the given `documentRoot`, the `template` and the given `errorCodes`.
-     *
-     * @param documentRoot Document root
-     * @param template HTML template used to render the message content.
-     * @param errorCodes List of HTTP error status codes which shall be handled by this interceptor.
-     */
+	/**
+	 * Create a new ErrorInterceptor form the given `documentRoot`, the `template` and the given `errorCodes`.
+	 *
+	 * @param documentRoot Document root
+	 * @param template HTML template used to render the message content.
+	 * @param errorCodes List of HTTP error status codes which shall be handled by this interceptor.
+	 */
 
-    override fun process(httpResponse: HttpResponse, httpContext: HttpContext) {
-        val statusLine = httpResponse.statusLine
-        val statusCode = statusLine.statusCode
+	override fun process(
+		httpResponse: HttpResponse,
+		httpContext: HttpContext,
+	) {
+		val statusLine = httpResponse.statusLine
+		val statusCode = statusLine.statusCode
 
-        if (errorCodes.contains(statusCode)) {
-            logger.debug{"HTTP response intercepted"}
-            val contentType = httpResponse.getFirstHeader(HeaderTypes.CONTENT_TYPE.fieldName())
-            if (contentType != null) {
-                // Intercept response with the content type "text/plain"
-                if (contentType.value.contains(MimeType.TEXT_PLAIN.mimeType)) {
-                    // Remove old headers
-                    httpResponse.removeHeaders(HeaderTypes.CONTENT_TYPE.fieldName())
-                    httpResponse.removeHeaders(HeaderTypes.CONTENT_LENGTH.fieldName())
+		if (errorCodes.contains(statusCode)) {
+			logger.debug { "HTTP response intercepted" }
+			val contentType = httpResponse.getFirstHeader(HeaderTypes.CONTENT_TYPE.fieldName())
+			if (contentType != null) {
+				// Intercept response with the content type "text/plain"
+				if (contentType.value.contains(MimeType.TEXT_PLAIN.mimeType)) {
+					// Remove old headers
+					httpResponse.removeHeaders(HeaderTypes.CONTENT_TYPE.fieldName())
+					httpResponse.removeHeaders(HeaderTypes.CONTENT_LENGTH.fieldName())
 
-                    // Read message body
-                    var content: String = readEntity(httpResponse.entity)
-                    // escape string to prevent script content to be injected into the template (XSS)
-                    content = HTMLUtils.escapeHtml(content) ?: content
+					// Read message body
+					var content: String = readEntity(httpResponse.entity)
+					// escape string to prevent script content to be injected into the template (XSS)
+					content = HTMLUtils.escapeHtml(content) ?: content
 
-                    template.setProperty("%%%MESSAGE%%%", content)
-                }
-            } else {
-                template.setProperty("%%%MESSAGE%%%", lang.translationForKey("http.$statusCode"))
-            }
+					template.setProperty("%%%MESSAGE%%%", content)
+				}
+			} else {
+				template.setProperty("%%%MESSAGE%%%", lang.translationForKey("http.$statusCode"))
+			}
 
-            template.setProperty("%%%TITLE%%%", "Error")
-            val reason = statusLine.reasonPhrase
-            template.setProperty("%%%HEADLINE%%%", reason)
+			template.setProperty("%%%TITLE%%%", "Error")
+			val reason = statusLine.reasonPhrase
+			template.setProperty("%%%HEADLINE%%%", reason)
 
-            // Add new content
-            httpResponse.entity = StringEntity(template.toString(), "UTF-8")
-            httpResponse.addHeader(
-                HeaderTypes.CONTENT_TYPE.fieldName(),
-                MimeType.TEXT_HTML.mimeType + "; charset=utf-8"
-            )
-            httpResponse.addHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), template.bytes.size.toString())
-        }
-    }
+			// Add new content
+			httpResponse.entity = StringEntity(template.toString(), "UTF-8")
+			httpResponse.addHeader(
+				HeaderTypes.CONTENT_TYPE.fieldName(),
+				MimeType.TEXT_HTML.mimeType + "; charset=utf-8",
+			)
+			httpResponse.addHeader(HeaderTypes.CONTENT_LENGTH.fieldName(), template.bytes.size.toString())
+		}
+	}
 
-    private fun readEntity(httpEntity: HttpEntity): String {
-        val baos = ByteArrayOutputStream()
-        httpEntity.writeTo(baos)
+	private fun readEntity(httpEntity: HttpEntity): String {
+		val baos = ByteArrayOutputStream()
+		httpEntity.writeTo(baos)
 
-        val type = ContentType.getOrDefault(httpEntity)
-        return String(baos.toByteArray(), type.charset)
-    }
+		val type = ContentType.getOrDefault(httpEntity)
+		return String(baos.toByteArray(), type.charset)
+	}
 
-    companion object {
-        private val lang: I18n = I18n.getTranslation("http")
-        private fun generateErrorCodes(): List<Int> {
-            val result = mutableListOf<Int>()
-            for (i in 400..417) {
-                result.add(i)
-            }
+	companion object {
+		private val lang: I18n = I18n.getTranslation("http")
 
-            // additional codes used by the HttpAppPluginActionHandler
-            result.add(423) // Locked
-            result.add(429) // Too many requests
+		private fun generateErrorCodes(): List<Int> {
+			val result = mutableListOf<Int>()
+			for (i in 400..417) {
+				result.add(i)
+			}
 
-            for (i in 500..505) {
-                result.add(i)
-            }
-            return result
-        }
-    }
+			// additional codes used by the HttpAppPluginActionHandler
+			result.add(423) // Locked
+			result.add(429) // Too many requests
+
+			for (i in 500..505) {
+				result.add(i)
+			}
+			return result
+		}
+	}
 }

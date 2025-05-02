@@ -50,7 +50,6 @@ import java.io.IOException
 import java.net.URI
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException
-import java.util.*
 import javax.annotation.Nonnull
 
 private val logger = KotlinLogging.logger {}

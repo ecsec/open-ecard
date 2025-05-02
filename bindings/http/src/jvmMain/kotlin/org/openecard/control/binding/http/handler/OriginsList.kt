@@ -24,11 +24,19 @@ package org.openecard.control.binding.http.handler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.FileUtils.homeConfigDir
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
-import java.io.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.PrintWriter
+import java.io.Writer
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.StandardCharsets
-import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -45,7 +53,7 @@ object OriginsList {
 	}
 
 	private fun load(): Set<URI> {
-		val wl = TreeSet<URI>()
+		val wl = sortedSetOf<URI>()
 
 		try {
 			// read bundled whitelist

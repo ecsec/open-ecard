@@ -24,12 +24,6 @@ package org.openecard.control.binding.http.handler
 import org.apache.http.protocol.HttpRequestHandler
 
 /**
- * Return the ID to register the handler for.
- *
- * @return Identifier
- */
-
-/**
  * @author Moritz Horsch
  */
 abstract class HttpControlHandler

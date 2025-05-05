@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012 HS Coburg.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,9 +19,28 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography.apdu
+
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
- * This package includes all APDUs needed by the generic crypthography protocol that are not 
- * provided by the common apdu package.
+ * Implements a Compute Digital Signature operation.
+ * See ISO/IEC 7816-8, section 11.7.
+ *
+ * @author Moritz Horsch
  */
-package org.openecard.sal.protocol.genericcryptography.apdu;
+class PSOComputeDigitalSignature(
+	message: ByteArray,
+	le: Byte,
+) : PerformSecurityOperation(0x9E.toByte(), 0x9A.toByte()) {
+	/**
+	 * Creates a new PSO Compute Cryptographic Checksum APDU.
+	 *
+	 * @param message Message to be signed
+	 * @param le expected length of the response
+	 */
+	init {
+		setData(message)
+		setLE(le)
+	}
+}

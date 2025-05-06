@@ -4,7 +4,9 @@ plugins {
 }
 
 kotlin {
-	androidTarget {}
+	androidTarget {
+		publishAllLibraryVariants()
+	}
 	androidLibrary {
 		minSdk = 21
 		compileSdk = 34

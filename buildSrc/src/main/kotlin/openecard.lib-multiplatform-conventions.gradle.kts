@@ -9,7 +9,6 @@ plugins {
 
 kotlin {
 	jvm {
-		withJava()
 		compilations {
 			val test by getting {
 				tasks.named<Test>("jvmTest") {

@@ -1,9 +1,11 @@
 package org.openecard.sc.pcsc
 
+import org.junit.jupiter.api.Tag
 import org.openecard.sc.iface.withContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Tag("pcsc")
 class ConnectionTest {
 	@Test
 	fun `connect terminal twice`() {

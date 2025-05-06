@@ -19,13 +19,11 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography
 
-package org.openecard.sal.protocol.genericcryptography;
-
-import org.openecard.addon.ActionInitializationException;
-import org.openecard.addon.Context;
-import org.openecard.addon.sal.SALProtocolBaseImpl;
-
+import org.openecard.addon.ActionInitializationException
+import org.openecard.addon.Context
+import org.openecard.addon.sal.SALProtocolBaseImpl
 
 /**
  * Implements the Generic cryptography protocol.
@@ -34,19 +32,16 @@ import org.openecard.addon.sal.SALProtocolBaseImpl;
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-public class GenericCryptoProtocol extends SALProtocolBaseImpl {
+class GenericCryptoProtocol : SALProtocolBaseImpl() {
+	@Throws(ActionInitializationException::class)
+	override fun init(ctx: Context) {
+		addStatelessStep(HashStep(ctx.dispatcher))
+		addStatelessStep(SignStep(ctx.dispatcher))
+		addStatelessStep(DecipherStep(ctx.dispatcher))
+		addStatelessStep(VerifySignatureStep(ctx.dispatcher))
+	}
 
-    @Override
-    public void init(Context ctx) throws ActionInitializationException {
-	addStatelessStep(new HashStep(ctx.getDispatcher()));
-	addStatelessStep(new SignStep(ctx.getDispatcher()));
-	addStatelessStep(new DecipherStep(ctx.getDispatcher()));
-	addStatelessStep(new VerifySignatureStep(ctx.getDispatcher()));
-    }
-
-    @Override
-    public void destroy(boolean force) {
-	// nothing to see here ... move along
-    }
-
+	override fun destroy(force: Boolean) {
+		// nothing to see here ... move along
+	}
 }

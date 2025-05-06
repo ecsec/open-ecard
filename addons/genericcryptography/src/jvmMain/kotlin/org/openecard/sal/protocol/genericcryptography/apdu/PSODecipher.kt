@@ -19,10 +19,25 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography.apdu
+
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
- * This package represents the generic cryptography protocol implementation.
- * It contains the protocol, the protocol factory and the steps implementing the functions supported by the generic
- * crypthography protocol.
+ * Implements a Deciper operation.
+ * See ISO/IEC 7816-8, section 11.13.
+ *
+ * @author Dirk Petrautzki
  */
-package org.openecard.sal.protocol.genericcryptography;
+class PSODecipher(message: ByteArray?, le: Byte) : PerformSecurityOperation(0x80.toByte(), 0x86.toByte()) {
+    /**
+     * Creates a new PSO Decipher APDU.
+     *
+     * @param message Message to be deciphered
+     * @param le expected length of response
+     */
+    init {
+        setLE(le)
+        setData(message)
+    }
+}

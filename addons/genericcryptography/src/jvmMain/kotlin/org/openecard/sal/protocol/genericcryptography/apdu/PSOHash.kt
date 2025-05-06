@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014 ecsec GmbH.
+ * Copyright (C) 2014-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,11 +19,9 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography.apdu
 
-package org.openecard.sal.protocol.genericcryptography.apdu;
-
-import org.openecard.common.apdu.PerformSecurityOperation;
-
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
  * Implements a Hash operation.
@@ -32,18 +30,7 @@ import org.openecard.common.apdu.PerformSecurityOperation;
  * @author Moritz Horsch
  * @author Hans-Martin Haase
  */
-public final class PSOHash extends PerformSecurityOperation {
-
-    /**
-     * P2 value for complete hash generation on the card.
-     */
-    public static final byte P2_HASH_MESSAGE = (byte) 0x80;
-
-    /**
-     * P2 value for setting a HashValue or specific parameters.
-     */
-    public static final byte P2_SET_HASH_OR_PART = (byte) 0xA0;
-
+class PSOHash(p2: Byte, data: ByteArray?) : PerformSecurityOperation(0x90.toByte(), p2) {
     /**
      * Creates a new PSO Hash APDU.
      * APDU: 0x00 0x2A 0x90 0x80|0xA0 Lc data
@@ -52,9 +39,19 @@ public final class PSOHash extends PerformSecurityOperation {
      * @param p2 P2 value according to ISO7816-98 section 11.8.3. The class provides two public variables for this
      * purpose.
      */
-    public PSOHash(byte p2, byte[] data) {
-	super((byte) 0x90, p2);
-	setData(data);
+    init {
+        setData(data)
     }
 
+    companion object {
+        /**
+         * P2 value for complete hash generation on the card.
+         */
+        val P2_HASH_MESSAGE: Byte = 0x80.toByte()
+
+        /**
+         * P2 value for setting a HashValue or specific parameters.
+         */
+        val P2_SET_HASH_OR_PART: Byte = 0xA0.toByte()
+    }
 }

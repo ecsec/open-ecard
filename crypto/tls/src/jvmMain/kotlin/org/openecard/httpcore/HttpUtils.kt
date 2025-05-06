@@ -163,7 +163,7 @@ object KHttpUtils {
 		logger: KLogger,
 		req: HttpRequest,
 	) {
-		dumpHttpRequest(logger, null, req)
+		KHttpUtils.dumpHttpRequest(logger, null, req)
 	}
 
 	/**

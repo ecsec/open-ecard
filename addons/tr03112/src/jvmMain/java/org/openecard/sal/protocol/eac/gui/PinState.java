@@ -37,16 +37,12 @@ public class PinState {
     }
 
     public int getAttempts() {
-	switch (state) {
-	    case RC3:
-		return 3;
-	    case RC2:
-		return 2;
-	    case RC1:
-		return 1;
-	    default:
-		return 0;
-	}
+		return switch (state) {
+			case RC3 -> 3;
+			case RC2 -> 2;
+			case RC1 -> 1;
+			default -> 0;
+		};
     }
 
     public boolean isRequestCan() {

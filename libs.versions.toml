@@ -1,20 +1,20 @@
 [versions]
-kotlin = "2.0.21"
+kotlin = "2.1.20"
 ktlint = "1.5.0"
 ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "12.2.+"
-kx-co = "1.9.+"
-kx-serde = "1.7.+"
+kx-co = "1.10.+"
+kx-serde = "1.8.+"
 kt-logging = "7.0.+"
 kx-datetime = "0.6.1"
 compose = "1.7.0"
 
-ktor = "2.3.+"
+ktor = "3.1.+"
 kover = "0.9.1"
 
 moko = "0.24.3"
 
-agp = "8.6+"
+agp = "8.7.+"
 androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
@@ -35,7 +35,7 @@ jwtkt = "1.1.0"
 
 jgit = "7.1.0.202411261347-r"
 
-wiremock = "3.9.2"
+wiremock = "3.13.+"
 
 
 [libraries]

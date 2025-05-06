@@ -41,81 +41,85 @@ import java.net.URL
  *
  * @author Tobias Wich
  */
-class RedirectCertificateValidator(redirectChecks: Boolean) : CertificateValidator {
-    private val descPromise: Promise<Any?>
-    private val redirectChecks: Boolean
+class RedirectCertificateValidator(
+	redirectChecks: Boolean,
+) : CertificateValidator {
+	private val descPromise: Promise<Any>
+	private val redirectChecks: Boolean
 
-    private var certDescExists = false
-    private var lastURL: URL? = null
+	private var certDescExists = false
+	private var lastURL: URL? = null
 
-    /**
-     * Creates an object of this class bound to the values in the current dynamic context.
-     *
-     * @param redirectChecks True if the TR-03112 checks must be performed.
-     */
-    init {
-        val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-        descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC)
-        this.redirectChecks = redirectChecks
-    }
+	/**
+	 * Creates an object of this class bound to the values in the current dynamic context.
+	 *
+	 * @param redirectChecks True if the TR-03112 checks must be performed.
+	 */
+	init {
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC)
+		this.redirectChecks = redirectChecks
+	}
 
+	@Throws(ValidationError::class)
+	override fun validate(
+		url: URL,
+		cert: TlsServerCertificate,
+	): CertificateValidator.VerifierResult {
+		try {
+			// disable certificate checks according to BSI TR03112-7 in some situations
+			if (redirectChecks) {
+				val desc = descPromise.derefNonblocking() as CertificateDescription?
+				certDescExists = desc != null
 
-    @Throws(ValidationError::class)
-    override fun validate(url: URL, cert: TlsServerCertificate): CertificateValidator.VerifierResult {
-        try {
-            // disable certificate checks according to BSI TR03112-7 in some situations
-            if (redirectChecks) {
-                val desc = descPromise.derefNonblocking() as CertificateDescription?
-                certDescExists = desc != null
+				val host =
+					url.getProtocol() + "://" + url.getHost() + (if (url.getPort() == -1) "" else (":" + url.getPort()))
+				// check points certificate (but just in case we have a certificate description)
+				if (certDescExists && !TR03112Utils.isInCommCertificates(cert, desc!!.getCommCertificates(), host)) {
+					LOG.error(
+						"The retrieved server certificate is NOT contained in the CommCertificates of " +
+							"the CertificateDescription extension of the eService certificate.",
+					)
+					throw ValidationError(LANG, ErrorTranslations.INVALID_REDIRECT)
+				}
 
-                val host =
-                    url.getProtocol() + "://" + url.getHost() + (if (url.getPort() == -1) "" else (":" + url.getPort()))
-                // check points certificate (but just in case we have a certificate description)
-                if (certDescExists && !TR03112Utils.isInCommCertificates(cert, desc!!.getCommCertificates(), host)) {
-                    LOG.error(
-                        "The retrieved server certificate is NOT contained in the CommCertificates of "
-                                + "the CertificateDescription extension of the eService certificate."
-                    )
-                    throw ValidationError(LANG, ErrorTranslations.INVALID_REDIRECT)
-                }
+				// check if we match the SOP
+				val sopUrl: URL?
+				if (certDescExists && desc!!.subjectURL != null && !desc.subjectURL!!.isEmpty()) {
+					sopUrl = URL(desc.subjectURL)
+				} else {
+					val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+					sopUrl = dynCtx.get(TR03112Keys.TCTOKEN_URL) as URL?
+				}
+				// determine the URL that has to be SOP checked (TR-03124 Determine refreshURL)
+				// on th efirst invocation this is the current URL, on the following invocations this is the last used
+				if (lastURL == null) {
+					lastURL = url
+				}
 
-                // check if we match the SOP
-                val sopUrl: URL?
-                if (certDescExists && desc!!.subjectURL != null && !desc.subjectURL!!.isEmpty()) {
-                    sopUrl = URL(desc.subjectURL)
-                } else {
-                    val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-                    sopUrl = dynCtx.get(TR03112Keys.TCTOKEN_URL) as URL?
-                }
-                // determine the URL that has to be SOP checked (TR-03124 Determine refreshURL)
-                // on th efirst invocation this is the current URL, on the following invocations this is the last used
-                if (lastURL == null) {
-                    lastURL = url
-                }
+				// check SOP for last URL and update the URL
+				val sop = TR03112Utils.checkSameOriginPolicy(lastURL, sopUrl)
+				lastURL = url
+				return if (!sop) {
+					// there is more to come
+					CertificateValidator.VerifierResult.CONTINUE
+				} else {
+					// SOP fulfilled
+					CertificateValidator.VerifierResult.FINISH
+				}
+			} else {
+				// without the nPA there is no sensible exit point and as a result the last call is executed twice
+				// in that case its equally valid to let the browser do the redirects
+				return CertificateValidator.VerifierResult.FINISH
+			}
+		} catch (ex: MalformedURLException) {
+			throw ValidationError(LANG, ErrorTranslations.REDIRECT_MALFORMED_URL, ex)
+		}
+	}
 
-                // check SOP for last URL and update the URL
-                val SOP = TR03112Utils.checkSameOriginPolicy(lastURL, sopUrl)
-                lastURL = url
-                if (!SOP) {
-                    // there is more to come
-                    return CertificateValidator.VerifierResult.CONTINUE
-                } else {
-                    // SOP fulfilled
-                    return CertificateValidator.VerifierResult.FINISH
-                }
-            } else {
-                // without the nPA there is no sensible exit point and as a result the last call is executed twice
-                // in that case its equally valid to let the browser do the redirects
-                return CertificateValidator.VerifierResult.FINISH
-            }
-        } catch (ex: MalformedURLException) {
-            throw ValidationError(LANG, ErrorTranslations.REDIRECT_MALFORMED_URL, ex)
-        }
-    }
+	companion object {
+		private val LOG: Logger = LoggerFactory.getLogger(RedirectCertificateValidator::class.java)
 
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(RedirectCertificateValidator::class.java)
-
-        private val LANG: I18n = I18n.getTranslation("tr03112")
-    }
+		private val LANG: I18n = I18n.getTranslation("tr03112")
+	}
 }

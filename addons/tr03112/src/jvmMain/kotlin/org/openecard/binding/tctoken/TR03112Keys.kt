@@ -21,7 +21,6 @@
  */
 package org.openecard.binding.tctoken
 
-
 /**
  * Class with keys to access values inside a DynamicContext.
  *
@@ -29,20 +28,20 @@ package org.openecard.binding.tctoken
  * @author Hans-Martin Haase
  */
 object TR03112Keys {
-    const val INSTANCE_KEY: String = "tr03112"
+	const val INSTANCE_KEY: String = "tr03112"
 
-    const val TCTOKEN_CHECKS: String = "tctoken_checks"
-    const val ACTIVATION_THREAD: String = "activation_thread"
-    const val SESSION_CON_HANDLE: String = "session_connection_handle"
-    const val CONNECTION_HANDLE: String = "connection_handle"
-    const val SAME_CHANNEL: String = "same_channel"
-    const val ESERVICE_CERTIFICATE_DESC: String = "eservice_certificate_description"
-    const val EIDSERVER_CERTIFICATE: String = "eservice_certificate"
-    const val TCTOKEN_URL: String = "TCTokenURL"
-    const val TCTOKEN_SERVER_CERTIFICATES: String = "tctoken_server_certificates"
-    const val IS_REFRESH_URL_VALID: String = "is_refresh_url_valid"
-    const val OPEN_USER_CONSENT_THREAD: String = "user_consent_thread"
-    const val COOKIE_MANAGER: String = "cookie_mananger"
-    const val CARD_SELECTION_CANCELLATION: String = "card_selection_canceld"
-    const val ACTIVATION_CARD_TYPE: String = "activation_card_type"
+	const val TCTOKEN_CHECKS: String = "tctoken_checks"
+	const val ACTIVATION_THREAD: String = "activation_thread"
+	const val SESSION_CON_HANDLE: String = "session_connection_handle"
+	const val CONNECTION_HANDLE: String = "connection_handle"
+	const val SAME_CHANNEL: String = "same_channel"
+	const val ESERVICE_CERTIFICATE_DESC: String = "eservice_certificate_description"
+	const val EIDSERVER_CERTIFICATE: String = "eservice_certificate"
+	const val TCTOKEN_URL: String = "TCTokenURL"
+	const val TCTOKEN_SERVER_CERTIFICATES: String = "tctoken_server_certificates"
+	const val IS_REFRESH_URL_VALID: String = "is_refresh_url_valid"
+	const val OPEN_USER_CONSENT_THREAD: String = "user_consent_thread"
+	const val COOKIE_MANAGER: String = "cookie_mananger"
+	const val CARD_SELECTION_CANCELLATION: String = "card_selection_canceld"
+	const val ACTIVATION_CARD_TYPE: String = "activation_card_type"
 }

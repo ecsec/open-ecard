@@ -41,73 +41,80 @@ import org.openecard.sal.protocol.eac.crypto.CAKey
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class AuthenticationHelper(private val ta: TerminalAuthentication, private val ca: ChipAuthentication) {
-    @Throws(ProtocolException::class, TLVException::class)
-    fun performAuth(eac2Output: EAC2OutputType, internalData: MutableMap<String?, Any?>): EAC2OutputType {
-        // get needed values from context
-        val terminalCertificate: CardVerifiableCertificate
-        terminalCertificate = internalData.get(EACConstants.IDATA_TERMINAL_CERTIFICATE) as CardVerifiableCertificate
-        val key = internalData.get(EACConstants.IDATA_PK_PCD) as ByteArray
-        val signature = internalData.get(EACConstants.IDATA_SIGNATURE) as ByteArray?
-        val securityInfos = internalData.get(EACConstants.IDATA_SECURITY_INFOS) as SecurityInfos
-        val aadObj: AuthenticatedAuxiliaryData
-        aadObj = internalData.get(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA) as AuthenticatedAuxiliaryData
+class AuthenticationHelper(
+	private val ta: TerminalAuthentication,
+	private val ca: ChipAuthentication,
+) {
+	@Throws(ProtocolException::class, TLVException::class)
+	fun performAuth(
+		eac2Output: EAC2OutputType,
+		internalData: Map<String, Any?>,
+	): EAC2OutputType {
+		// get needed values from context
+		val terminalCertificate: CardVerifiableCertificate =
+			internalData[EACConstants.IDATA_TERMINAL_CERTIFICATE] as CardVerifiableCertificate
+		val key = internalData[EACConstants.IDATA_PK_PCD] as ByteArray
+		val signature = internalData[EACConstants.IDATA_SIGNATURE] as? ByteArray
+		val securityInfos = internalData[EACConstants.IDATA_SECURITY_INFOS] as SecurityInfos
+		val aadObj: AuthenticatedAuxiliaryData =
+			internalData[EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA] as AuthenticatedAuxiliaryData
 
+		// ///////////////////////////////////////////////////////////////
+		// BEGIN TA PART
+		// ///////////////////////////////////////////////////////////////
+		// TA: Step 2 - MSE:SET AT
+		val oid = getValue(terminalCertificate.getPublicKey().objectIdentifier)
+		val chr = terminalCertificate.cHR.toByteArray()
+		val aad = aadObj.data
 
-        /**////////////////////////////////////////////////////////////////// */
-        // BEGIN TA PART
-        /**////////////////////////////////////////////////////////////////// */
-        // TA: Step 2 - MSE:SET AT
-        val oid = getValue(terminalCertificate.getPublicKey().objectIdentifier)
-        val chr = terminalCertificate.cHR.toByteArray()
-        val aad = aadObj.data
+		// Calculate comp(key)
+		val efca = EFCardAccess.getInstance(securityInfos)
+		val cas = efca.cASecurityInfos
+		val cdp = CADomainParameter(cas)
+		val caKey = CAKey(cdp)
+		caKey.decodePublicKey(key)
+		val compKey = caKey.encodedCompressedPublicKey
 
-        // Calculate comp(key)
-        val efca = EFCardAccess.getInstance(securityInfos)
-        val cas = efca.cASecurityInfos
-        val cdp = CADomainParameter(cas)
-        val caKey = CAKey(cdp)
-        caKey.decodePublicKey(key)
-        val compKey = caKey.getEncodedCompressedPublicKey()
+		// TA: Step 4 - MSE SET AT
+		ta.mseSetAT(oid, chr, compKey, aad)
 
-        // TA: Step 4 - MSE SET AT
-        ta.mseSetAT(oid, chr, compKey, aad)
+		// TA: Step 4 - External Authentication
+		ta.externalAuthentication(signature)
 
-        // TA: Step 4 - External Authentication
-        ta.externalAuthentication(signature)
+		// ///////////////////////////////////////////////////////////////
+		// END TA PART
+		// ///////////////////////////////////////////////////////////////
 
-        /**////////////////////////////////////////////////////////////////// */
-        // END TA PART
-        /**////////////////////////////////////////////////////////////////// */ /**////////////////////////////////////////////////////////////////// */
-        // BEGIN CA PART
-        /**////////////////////////////////////////////////////////////////// */
-        // Read EF.CardSecurity
-        val efCardSecurity = ca.readEFCardSecurity()
+		// ////////////////////////////////////////////////////////////////
+		// BEGIN CA PART
+		// ///////////////////////////////////////////////////////////////
+		// Read EF.CardSecurity
+		val efCardSecurity = ca.readEFCardSecurity()
 
-        // CA: Step 1 - MSE:SET AT
-        val oID = getValue(cas.cAInfo!!.protocol)
-        val keyID = IntegerUtils.toByteArray(cas.cAInfo!!.keyID)
-        ca.mseSetAT(oID, keyID)
+		// CA: Step 1 - MSE:SET AT
+		val oID = getValue(cas.cAInfo!!.protocol)
+		val keyID = IntegerUtils.toByteArray(cas.cAInfo!!.keyID)
+		ca.mseSetAT(oID, keyID)
 
-        // CA: Step 2 - General Authenticate
-        val responseData = ca.generalAuthenticate(key)
+		// CA: Step 2 - General Authenticate
+		val responseData = ca.generalAuthenticate(key)
 
-        val tlv = TLV.fromBER(responseData)
-        val nonce = tlv.findChildTags(0x81).get(0).getValue()
-        val token = tlv.findChildTags(0x82).get(0).getValue()
+		val tlv = TLV.fromBER(responseData)
+		val nonce = tlv.findChildTags(0x81)[0].value
+		val token = tlv.findChildTags(0x82)[0].value
 
-        // Disable Secure Messaging
-        ca.destroySecureChannel()
+		// Disable Secure Messaging
+		ca.destroySecureChannel()
 
-        /**////////////////////////////////////////////////////////////////// */
-        // END CA PART
-        /**////////////////////////////////////////////////////////////////// */
+		// ///////////////////////////////////////////////////////////////
+		// END CA PART
+		// ///////////////////////////////////////////////////////////////
 
-        // Create response
-        eac2Output.setEFCardSecurity(efCardSecurity)
-        eac2Output.setNonce(nonce)
-        eac2Output.setToken(token)
+		// Create response
+		eac2Output.setEFCardSecurity(efCardSecurity)
+		eac2Output.setNonce(nonce)
+		eac2Output.setToken(token)
 
-        return eac2Output
-    }
+		return eac2Output
+	}
 }

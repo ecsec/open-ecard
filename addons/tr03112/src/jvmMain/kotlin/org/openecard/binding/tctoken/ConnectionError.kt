@@ -30,16 +30,15 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 class ConnectionError : I18nException {
-    constructor(msg: String?) : super(lang, msg)
+	constructor(msg: String?) : super(lang, msg)
 
-    constructor(msg: String?, ex: Throwable?) : super(lang, msg, ex)
+	constructor(msg: String?, ex: Throwable?) : super(lang, msg, ex)
 
-    constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
 
-    constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
+	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 
-    companion object {
-        private const val serialVersionUID = 1L
-        private val lang: I18n = I18n.getTranslation("tr03112")
-    }
+	companion object {
+		private val lang: I18n = I18n.getTranslation("tr03112")
+	}
 }

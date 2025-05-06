@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
 import org.openecard.addon.Context
@@ -34,9 +35,9 @@ import org.openecard.common.WSHelper.makeResultUnknownError
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.tlv.TLVException
 import org.openecard.sal.protocol.eac.anytype.EACAdditionalInputType
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import javax.xml.parsers.ParserConfigurationException
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implements Chip Authentication protocol step according to BSI-TR-03112-7.
@@ -47,72 +48,60 @@ import javax.xml.parsers.ParserConfigurationException
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class ChipAuthenticationStep(ctx: Context) : ProtocolStep<DIDAuthenticate?, DIDAuthenticateResponse?> {
-    private val dispatcher: Dispatcher?
+class ChipAuthenticationStep(
+	ctx: Context,
+) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
+	private val dispatcher: Dispatcher = ctx.dispatcher
 
-    /**
-     * Creates a new Chip Authentication step.
-     *
-     * @param ctx Context
-     */
-    init {
-        this.dispatcher = ctx.getDispatcher()
-    }
+	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
 
-    override fun getFunctionType(): FunctionType {
-        return FunctionType.DIDAuthenticate
-    }
+	override fun perform(
+		didAuthenticate: DIDAuthenticate,
+		internalData: MutableMap<String, Any?>,
+	): DIDAuthenticateResponse {
+		val response: DIDAuthenticateResponse =
+			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
+				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
+				org.openecard.common.WSHelper
+					.makeResultOK(),
+			)
 
-    override fun perform(
-        didAuthenticate: DIDAuthenticate,
-        internalData: MutableMap<String?, Any?>
-    ): DIDAuthenticateResponse {
-        val response: DIDAuthenticateResponse =
-            WSHelper.makeResponse<Class<DIDAuthenticateResponse?>, DIDAuthenticateResponse>(
-                iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-                org.openecard.common.WSHelper.makeResultOK()
-            )!!
+		// EACProtocol.setEmptyResponseData(response);
+		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
-        //EACProtocol.setEmptyResponseData(response);
-        val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
-        val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		try {
+			val eacAdditionalInput = EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData())
+			var eac2Output = eacAdditionalInput.outputType
 
-        try {
-            val eacAdditionalInput = EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData())
-            var eac2Output = eacAdditionalInput.getOutputType()
+			val ta = TerminalAuthentication(dispatcher, slotHandle)
+			val ca = ChipAuthentication(dispatcher, slotHandle)
 
-            val ta = TerminalAuthentication(dispatcher, slotHandle)
-            val ca = ChipAuthentication(dispatcher, slotHandle)
+			// save signature, it is needed in the authentication step
+			val signature = eacAdditionalInput.signature
+			internalData.put(EACConstants.IDATA_SIGNATURE, signature)
 
-            // save signature, it is needed in the authentication step
-            val signature = eacAdditionalInput.getSignature()
-            internalData.put(EACConstants.IDATA_SIGNATURE, signature)
+			// perform TA and CA authentication
+			val auth = AuthenticationHelper(ta, ca)
+			eac2Output = auth.performAuth(eac2Output, internalData)
 
-            // perform TA and CA authentication
-            val auth = AuthenticationHelper(ta, ca)
-            eac2Output = auth.performAuth(eac2Output, internalData)
+			response.setAuthenticationProtocolData(eac2Output.authDataType)
+		} catch (e: ECardException) {
+			logger.error(e) { e.message }
+			response.setResult(e.result)
+			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+		} catch (e: ParserConfigurationException) {
+			logger.error(e) { "${e.message}" }
+			response.setResult(makeResultUnknownError(e.message))
+			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+		} catch (e: TLVException) {
+			logger.error(e) { "${e.message}" }
+			response.setResult(makeResultUnknownError(e.message))
+			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+		}
 
-            response.setAuthenticationProtocolData(eac2Output.getAuthDataType())
-        } catch (e: ECardException) {
-            LOG.error(e.message, e)
-            response.setResult(e.result)
-            dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
-        } catch (e: ParserConfigurationException) {
-            LOG.error(e.message, e)
-            response.setResult(makeResultUnknownError(e.message))
-            dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
-        } catch (e: TLVException) {
-            LOG.error(e.message, e)
-            response.setResult(makeResultUnknownError(e.message))
-            dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
-        }
-
-        // authentication finished, notify GUI
-        dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, true)
-        return response
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(ChipAuthenticationStep::class.java.getName())
-    }
+		// authentication finished, notify GUI
+		dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, true)
+		return response
+	}
 }

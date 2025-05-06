@@ -21,15 +21,16 @@
  */
 package org.openecard.binding.tctoken
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.ex.*
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
 import org.openecard.common.util.Pair
 import org.openecard.httpcore.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URL
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Class to fetch a TCToken.
@@ -38,12 +39,10 @@ import java.net.URL
  * @author Tobias Wich
  */
 class TCTokenContext private constructor(
-	val token: TCToken?,
+	val token: TCToken,
 	base: ResourceContext,
 ) : ResourceContext(base.tlsClient, base.tlsClientProto, base.certs) {
 	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(TCTokenContext::class.java)
-
 		@JvmStatic
 		@Throws(
 			InvalidTCTokenException::class,
@@ -59,7 +58,7 @@ class TCTokenContext private constructor(
 			// Get TCToken from the given url
 			try {
 				val ctx = TrResourceContextLoader().getStream(tcTokenURL)
-				return Companion.generateTCToken(ctx!!.data!!, ctx)
+				return generateTCToken(ctx!!.data!!, ctx)
 			} catch (ex: InsecureUrlException) {
 				throw InvalidAddressException(ErrorTranslations.INVALID_ADDRESS)
 			} catch (ex: InvalidRedirectChain) {
@@ -90,9 +89,9 @@ class TCTokenContext private constructor(
 		): TCTokenContext {
 			// correct common TCToken shortcomings
 			var data = data
-			LOG.debug("Received TCToken:\n{}", data)
+			logger.debug { "Received TCToken:\n$data" }
 			data = TCTokenHacks.fixPathSecurityParameters(data)
-			LOG.debug("Cleaned up TCToken:\n{}", data)
+			logger.debug { "Cleaned up TCToken:\n$data" }
 
 			// Parse the TCToken
 			val parser = TCTokenParser()
@@ -105,16 +104,16 @@ class TCTokenContext private constructor(
 			// Verify the TCToken
 			val token = tokens.get(0)
 			val ver = TCTokenVerifier(token, base)
-			if (ver.isErrorToken()) {
+			if (ver.isErrorToken) {
 				val minor = ResultMinor.CLIENT_ERROR
 				throw AuthServerException(token.getComErrorAddressWithParams(minor), ErrorTranslations.ESERVICE_ERROR)
 			}
 
 			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-			val resultPoints: MutableList<Pair<URL?, TlsServerCertificate?>> = base.certs
+			val resultPoints: List<Pair<URL, TlsServerCertificate>> = base.certs
 			// probably just for tests
 			if (!resultPoints.isEmpty()) {
-				val last = resultPoints.get(0)
+				val last = resultPoints[0]
 				dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1)
 			}
 

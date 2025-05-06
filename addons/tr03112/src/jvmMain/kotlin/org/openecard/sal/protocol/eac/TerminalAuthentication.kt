@@ -39,97 +39,99 @@ import org.openecard.sal.protocol.eac.apdu.PSOVerifyCertificate
  *
  * @author Moritz Horsch
  */
-class TerminalAuthentication
-/**
- * Creates a new Terminal Authentication.
- *
- * @param dispatcher Dispatcher
- * @param slotHandle Slot handle
- */(private val dispatcher: Dispatcher?, private val slotHandle: ByteArray?) {
-    /**
-     * Verify certificates.
-     * Sends an MSE:Set DST APDU and PSO:Verify Certificate APDU per certificate. (Protocol step 1)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.4.
-     * See BSI-TR-03110, version 2.10, part 3, B.11.5.
-     *
-     * @param certificateChain Certificate chain
-     * @throws ProtocolException
-     */
-    @Throws(ProtocolException::class)
-    fun verifyCertificates(certificateChain: CardVerifiableCertificateChain) {
-        try {
-            for (cvc in certificateChain.certificates) {
-                // MSE:SetDST APDU
-                val mseSetDST: CardCommandAPDU = MSESetDST(cvc.cAR.toByteArray())
-                mseSetDST.transmit(dispatcher, slotHandle)
-                // PSO:Verify Certificate  APDU
-                val psovc: CardCommandAPDU = PSOVerifyCertificate(cvc.certificate.getValue())
-                psovc.transmit(dispatcher, slotHandle)
-            }
-        } catch (e: APDUException) {
-            throw ProtocolException(e.result)
-        }
-    }
+class TerminalAuthentication(
+	private val dispatcher: Dispatcher,
+	private val slotHandle: ByteArray,
+) {
+	/**
+	 * Verify certificates.
+	 * Sends an MSE:Set DST APDU and PSO:Verify Certificate APDU per certificate. (Protocol step 1)
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.4.
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.5.
+	 *
+	 * @param certificateChain Certificate chain
+	 * @throws ProtocolException
+	 */
+	@Throws(ProtocolException::class)
+	fun verifyCertificates(certificateChain: CardVerifiableCertificateChain) {
+		try {
+			for (cvc in certificateChain.certificates) {
+				// MSE:SetDST APDU
+				val mseSetDST: CardCommandAPDU = MSESetDST(cvc.cAR.toByteArray())
+				mseSetDST.transmit(dispatcher, slotHandle)
+				// PSO:Verify Certificate  APDU
+				val psovc: CardCommandAPDU = PSOVerifyCertificate(cvc.certificate.value)
+				psovc.transmit(dispatcher, slotHandle)
+			}
+		} catch (e: APDUException) {
+			throw ProtocolException(e.result)
+		}
+	}
 
-    /**
-     * Initializes the Terminal Authentication protocol.
-     * Sends an MSE:Set AT APDU. (Protocol step 2)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.1.
-     *
-     * @param oID Terminal Authentication object identifier
-     * @param chr Certificate Holder Reference (CHR)
-     * @param key Ephemeral public key
-     * @param aad Authenticated Auxiliary Data (AAD)
-     * @throws ProtocolException
-     */
-    @Throws(ProtocolException::class)
-    fun mseSetAT(oID: ByteArray?, chr: ByteArray?, key: ByteArray?, aad: ByteArray?) {
-        try {
-            val mseSetAT: CardCommandAPDU = MSESetATTA(oID, chr, key, aad)
-            mseSetAT.transmit(dispatcher, slotHandle)
-        } catch (e: APDUException) {
-            throw ProtocolException(e.result)
-        }
-    }
+	/**
+	 * Initializes the Terminal Authentication protocol.
+	 * Sends an MSE:Set AT APDU. (Protocol step 2)
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.1.
+	 *
+	 * @param oID Terminal Authentication object identifier
+	 * @param chr Certificate Holder Reference (CHR)
+	 * @param key Ephemeral public key
+	 * @param aad Authenticated Auxiliary Data (AAD)
+	 * @throws ProtocolException
+	 */
+	@Throws(ProtocolException::class)
+	fun mseSetAT(
+		oID: ByteArray,
+		chr: ByteArray?,
+		key: ByteArray?,
+		aad: ByteArray?,
+	) {
+		try {
+			val mseSetAT: CardCommandAPDU = MSESetATTA(oID, chr, key, aad)
+			mseSetAT.transmit(dispatcher, slotHandle)
+		} catch (e: APDUException) {
+			throw ProtocolException(e.result)
+		}
+	}
 
-    /**
-     * Performs an External Authentication.
-     * Sends an External Authentication APDU. (Protocol step 4)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.7.
-     *
-     * @param terminalSignature Terminal signature
-     * @throws ProtocolException
-     */
-    @Throws(ProtocolException::class)
-    fun externalAuthentication(terminalSignature: ByteArray?) {
-        try {
-            val externalAuthentication: CardCommandAPDU = ExternalAuthentication(terminalSignature)
-            externalAuthentication.transmit(dispatcher, slotHandle)
-        } catch (e: APDUException) {
-            throw ProtocolException(e.result)
-        }
-    }
+	/**
+	 * Performs an External Authentication.
+	 * Sends an External Authentication APDU. (Protocol step 4)
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.7.
+	 *
+	 * @param terminalSignature Terminal signature
+	 * @throws ProtocolException
+	 */
+	@Throws(ProtocolException::class)
+	fun externalAuthentication(terminalSignature: ByteArray?) {
+		try {
+			val externalAuthentication: CardCommandAPDU = ExternalAuthentication(terminalSignature)
+			externalAuthentication.transmit(dispatcher, slotHandle)
+		} catch (e: APDUException) {
+			throw ProtocolException(e.result)
+		}
+	}
 
-    @get:Throws(ProtocolException::class)
-    val challenge: ByteArray?
-        /**
-         * Gets a challenge from the PICC.
-         * Sends a Get Challenge APDU. (Protocol step 3)
-         * See BSI-TR-03110, version 2.10, part 3, B.11.6.
-         *
-         * @return Challenge
-         * @throws ProtocolException
-         */
-        get() {
-            try {
-                val getChallenge: CardCommandAPDU =
-                    GetChallenge()
-                val response =
-                    getChallenge.transmit(dispatcher, slotHandle)
+	@get:Throws(ProtocolException::class)
+	val challenge: ByteArray?
+		/**
+		 * Gets a challenge from the PICC.
+		 * Sends a Get Challenge APDU. (Protocol step 3)
+		 * See BSI-TR-03110, version 2.10, part 3, B.11.6.
+		 *
+		 * @return Challenge
+		 * @throws ProtocolException
+		 */
+		get() {
+			try {
+				val getChallenge: CardCommandAPDU =
+					GetChallenge()
+				val response =
+					getChallenge.transmit(dispatcher, slotHandle)
 
-                return response.getData()
-            } catch (e: APDUException) {
-                throw ProtocolException(e.result)
-            }
-        }
+				return response.getData()
+			} catch (e: APDUException) {
+				throw ProtocolException(e.result)
+			}
+		}
 }

@@ -26,6 +26,10 @@ import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.util.StringUtils
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate
 
+private const val CERTIFICATE: String = "Certificate"
+private const val SIGNATURE: String = "Signature"
+private const val EPHEMERAL_PUBLIC_KEY: String = "EphemeralPublicKey"
+
 /**
  * Implements the EAC2InputType data structure.
  * See BSI-TR-03112, version 1.1.2, part 7, section 4.6.6.
@@ -34,63 +38,57 @@ import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate
  * @author Moritz Horsch
  * @author Tobias Wich
  */
-class EAC2InputType(baseType: DIDAuthenticationDataType) {
-    //
-    private val authMap: AuthDataMap
+class EAC2InputType(
+	baseType: DIDAuthenticationDataType,
+) {
+	//
+	private val authMap: AuthDataMap = AuthDataMap(baseType)
 
-    /**
-     * Returns the set of certificates.
-     *
-     * @return Certificates
-     */
-    val certificates: ArrayList<CardVerifiableCertificate?>
+	/**
+	 * Returns the set of certificates.
+	 *
+	 * @return Certificates
+	 */
+	val certificates: MutableList<CardVerifiableCertificate> = mutableListOf()
 
-    /**
-     * Returns the ephemeral public key.
-     *
-     * @return Ephemeral public key
-     */
-    val ephemeralPublicKey: ByteArray?
+	/**
+	 * Returns the ephemeral public key.
+	 *
+	 * @return Ephemeral public key
+	 */
+	val ephemeralPublicKey: ByteArray?
 
-    /**
-     * Returns the signature.
-     *
-     * @return Signature
-     */
-    val signature: ByteArray?
+	/**
+	 * Returns the signature.
+	 *
+	 * @return Signature
+	 */
+	val signature: ByteArray?
 
-    /**
-     * Creates a new EAC2InputType.
-     *
-     * @param baseType DIDAuthenticationDataType
-     * @throws Exception Thrown in cause the type iss errornous.
-     */
-    init {
-        this.authMap = AuthDataMap(baseType)
+	/**
+	 * Creates a new EAC2InputType.
+	 *
+	 * @param baseType DIDAuthenticationDataType
+	 * @throws Exception Thrown in cause the type iss errornous.
+	 */
+	init {
 
-        certificates = ArrayList<CardVerifiableCertificate?>()
-        for (element in baseType.getAny()) {
-            if (element.getLocalName() == CERTIFICATE) {
-                val value = StringUtils.toByteArray(element.getTextContent())
-                val cvc = CardVerifiableCertificate(value)
-                certificates.add(cvc)
-            }
-        }
-        ephemeralPublicKey = authMap.getContentAsBytes(EPHEMERAL_PUBLIC_KEY)
-        signature = authMap.getContentAsBytes(SIGNATURE)
-    }
+		for (element in baseType.getAny()) {
+			if (element.localName == CERTIFICATE) {
+				val value = StringUtils.toByteArray(element.textContent)
+				val cvc = CardVerifiableCertificate(value)
+				certificates.add(cvc)
+			}
+		}
+		ephemeralPublicKey = authMap.getContentAsBytes(EPHEMERAL_PUBLIC_KEY)
+		signature = authMap.getContentAsBytes(SIGNATURE)
+	}
 
-    val outputType: EAC2OutputType
-        /**
-         * Returns a new EAC2OutputType.
-         *
-         * @return EAC2OutputType
-         */
-        get() = EAC2OutputType(authMap)
-
-    companion object {
-        const val CERTIFICATE: String = "Certificate"
-        const val SIGNATURE: String = "Signature"
-        const val EPHEMERAL_PUBLIC_KEY: String = "EphemeralPublicKey"
-    }
+	val outputType: EAC2OutputType
+		/**
+		 * Returns a new EAC2OutputType.
+		 *
+		 * @return EAC2OutputType
+		 */
+		get() = EAC2OutputType(authMap)
 }

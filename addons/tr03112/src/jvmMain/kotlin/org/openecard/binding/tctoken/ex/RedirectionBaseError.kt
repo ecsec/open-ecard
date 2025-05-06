@@ -32,28 +32,31 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 abstract class RedirectionBaseError : ActivationError {
-    constructor(errorUrl: String?, msg: String) : super(makeBindingResult(errorUrl), msg)
+	constructor(errorUrl: String?, msg: String) : super(makeBindingResult(errorUrl), msg)
 
-    constructor(errorUrl: String?, msg: String, ex: Throwable?) : super(makeBindingResult(errorUrl), msg, ex)
+	constructor(errorUrl: String?, msg: String, ex: Throwable?) : super(makeBindingResult(errorUrl), msg, ex)
 
-    constructor(errorUrl: String?, ex: Throwable?) : super(makeBindingResult(errorUrl), ex)
+	constructor(errorUrl: String?, ex: Throwable?) : super(makeBindingResult(errorUrl), ex)
 
-    constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(
-        makeBindingResult(errorUrl),
-        key,
-        *params
-    )
+	constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(
+		makeBindingResult(errorUrl),
+		key,
+		*params,
+	)
 
-    constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        makeBindingResult(
-            errorUrl
-        ), key, cause, *params
-    )
+	constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+		makeBindingResult(
+			errorUrl,
+		),
+		key,
+		cause,
+		*params,
+	)
 
-    companion object {
-        private fun makeBindingResult(errorUrl: String?): BindingResult {
-            val result = BindingResult(BindingResultCode.REDIRECT)
-            return result.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl)
-        }
-    }
+	companion object {
+		private fun makeBindingResult(errorUrl: String?): BindingResult {
+			val result = BindingResult(BindingResultCode.REDIRECT)
+			return result.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl)
+		}
+	}
 }

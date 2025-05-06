@@ -23,10 +23,16 @@ package org.openecard.binding.tctoken
 
 import generated.TCTokenType
 import org.openecard.binding.tctoken.ex.ErrorTranslations
-import org.openecard.bouncycastle.tls.*
+import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity
+import org.openecard.bouncycastle.tls.ProtocolVersion
+import org.openecard.bouncycastle.tls.TlsClient
+import org.openecard.bouncycastle.tls.TlsClientProtocol
+import org.openecard.bouncycastle.tls.TlsPSKIdentity
 import org.openecard.bouncycastle.tls.crypto.TlsCrypto
 import org.openecard.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto
 import org.openecard.common.DynamicContext
+import org.openecard.common.ECardConstants.PATH_SEC_PROTO_MTLS
+import org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK
 import org.openecard.crypto.common.ReusableSecureRandom
 import org.openecard.crypto.tls.ClientCertDefaultTlsClient
 import org.openecard.crypto.tls.ClientCertPSKTlsClient
@@ -49,144 +55,133 @@ import kotlin.Throws
  *
  * @author Tobias Wich
  */
-class TlsConnectionHandler(private val tokenRequest: TCTokenRequest) {
-    private var serverAddress: URL? = null
-    private var hostname: String? = null
-    var port: Int = 0
-        private set
-    private var resource: String? = null
-    private var sessionId: String? = null
-    private var tlsClient: ClientCertTlsClient? = null
-    private var verifyCertificates = true
-    private var credentialFactory: CredentialFactory? = null
+class TlsConnectionHandler(
+	private val tokenRequest: TCTokenRequest,
+) {
+	private var serverAddress: URL? = null
+	private var hostname: String? = null
+	var port: Int = 0
+		private set
+	private var resource: String? = null
+	private var sessionId: String? = null
+	private var tlsClient: ClientCertTlsClient? = null
+	private var verifyCertificates = true
+	private var credentialFactory: CredentialFactory? = null
 
+	fun setSmartCardCredential(credentialFactory: CredentialFactory?) {
+		this.credentialFactory = credentialFactory
+	}
 
-    fun setSmartCardCredential(credentialFactory: CredentialFactory?) {
-        this.credentialFactory = credentialFactory
-    }
+	@Throws(ConnectionError::class)
+	fun setUpClient() {
+		try {
+			val token: TCTokenType = tokenRequest.tCToken
 
-    @Throws(ConnectionError::class)
-    fun setUpClient() {
-        try {
-            val token: TCTokenType = tokenRequest.getTCToken()
+			sessionId = token.getSessionIdentifier()
+			serverAddress = URL(token.getServerAddress())
+			val serverHost = serverAddress!!.getHost()
 
-            sessionId = token.getSessionIdentifier()
-            serverAddress = URL(token.getServerAddress())
-            val serverHost = serverAddress!!.getHost()
+			// extract connection parameters from endpoint
+			hostname = serverAddress!!.getHost()
+			port = serverAddress!!.getPort()
+			if (port == -1) {
+				port = serverAddress!!.getDefaultPort()
+			}
+			resource = serverAddress!!.getFile()
+			resource = if (resource!!.isEmpty()) "/" else resource
 
-            // extract connection parameters from endpoint
-            hostname = serverAddress!!.getHost()
-            port = serverAddress!!.getPort()
-            if (port == -1) {
-                port = serverAddress!!.getDefaultPort()
-            }
-            resource = serverAddress!!.getFile()
-            resource = if (resource!!.isEmpty()) "/" else resource
+			val secProto = token.getPathSecurityProtocol()
+			// use same channel as demanded in TR-03124 sec. 2.4.3
+			if (tokenRequest.isSameChannel) {
+				tlsClient = tokenRequest.tokenContext.tlsClient
+				if (tlsClient is ClientCertDefaultTlsClient) {
+					(tlsClient as ClientCertDefaultTlsClient).setEnforceSameSession(true)
+				}
+				// save the info that we have a same channel situation
+				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE)
+			} else {
+				// kill open channel in tctoken request, it is not needed anymore
+				tokenRequest.tokenContext.closeStream()
 
-            val secProto = token.getPathSecurityProtocol()
-            // use same channel as demanded in TR-03124 sec. 2.4.3
-            if (tokenRequest.isSameChannel()) {
-                tlsClient = tokenRequest.getTokenContext().tlsClient
-                if (tlsClient is ClientCertDefaultTlsClient) {
-                    (tlsClient as ClientCertDefaultTlsClient).setEnforceSameSession(true)
-                }
-                // save the info that we have a same channel situation
-                val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-                dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE)
-            } else {
-                // kill open channel in tctoken request, it is not needed anymore
-                if (tokenRequest.getTokenContext() != null) {
-                    tokenRequest.getTokenContext().closeStream()
-                }
+				// Set up TLS connection
+				val tlsAuth = DynamicAuthentication(serverHost)
 
-                // Set up TLS connection
-                val tlsAuth = DynamicAuthentication(serverHost)
+				val crypto: TlsCrypto = BcTlsCrypto(ReusableSecureRandom.instance)
+				when (secProto) {
+					PATH_SEC_PROTO_TLS_PSK -> {
+						val psk = token.getPathSecurityParameters().getPSK()
+						val pskId: TlsPSKIdentity = BasicTlsPSKIdentity(sessionId, psk)
+						tlsClient = ClientCertPSKTlsClient(crypto, pskId, serverHost, true)
+					}
 
-                val crypto: TlsCrypto = BcTlsCrypto(ReusableSecureRandom.instance)
-                when (secProto) {
-                    PATH_SEC_PROTO_TLS_PSK -> {
-                        val psk = token.getPathSecurityParameters().getPSK()
-                        val pskId: TlsPSKIdentity = BasicTlsPSKIdentity(sessionId, psk)
-                        tlsClient = ClientCertPSKTlsClient(crypto, pskId, serverHost, true)
-                    }
+					PATH_SEC_PROTO_MTLS -> {
+						// use a smartcard for client authentication if one is set
+						tlsAuth.setCredentialFactory(credentialFactory)
+						tlsClient = ClientCertDefaultTlsClient(crypto, serverHost, true)
+						// add PKIX verifier
+						if (verifyCertificates) {
+							tlsAuth.addCertificateVerifier(JavaSecVerifier())
+						}
+					}
 
-                    PATH_SEC_PROTO_MTLS -> {
-                        // use a smartcard for client authentication if one is set
-                        tlsAuth.setCredentialFactory(credentialFactory)
-                        tlsClient = ClientCertDefaultTlsClient(crypto, serverHost, true)
-                        // add PKIX verifier
-                        if (verifyCertificates) {
-                            tlsAuth.addCertificateVerifier(JavaSecVerifier())
-                        }
-                    }
+					else -> throw ConnectionError(ErrorTranslations.UNKNOWN_SEC_PROTOCOL, secProto)
+				}
 
-                    else -> throw ConnectionError(ErrorTranslations.UNKNOWN_SEC_PROTOCOL, secProto)
-                }
+				// make sure nobody changes the server when the connection gets reestablished
+				tlsAuth.addCertificateVerifier(SameCertVerifier())
+				// save eService certificate for use in EAC
+				tlsAuth.addCertificateVerifier(SaveEidServerCertHandler())
 
-                // make sure nobody changes the server when the connection gets reestablished
-                tlsAuth.addCertificateVerifier(SameCertVerifier())
-                // save eService certificate for use in EAC
-                tlsAuth.addCertificateVerifier(SaveEidServerCertHandler())
+				// set the authentication class in the tls client
+				tlsClient!!.setAuthentication(tlsAuth)
+			}
+		} catch (ex: MalformedURLException) {
+			throw ConnectionError(ErrorTranslations.MALFORMED_URL, ex, "ServerAddress")
+		}
+	}
 
-                // set the authentication class in the tls client
-                tlsClient!!.setAuthentication(tlsAuth)
-            }
-        } catch (ex: MalformedURLException) {
-            throw ConnectionError(ErrorTranslations.MALFORMED_URL, ex, "ServerAddress")
-        }
-    }
+	fun setVerifyCertificates(verifyCertificates: kotlin.Boolean) {
+		this.verifyCertificates = verifyCertificates
+	}
 
-    fun setVerifyCertificates(verifyCertificates: kotlin.Boolean) {
-        this.verifyCertificates = verifyCertificates
-    }
+	fun getServerAddress(): URL = serverAddress!!
 
-    fun getServerAddress(): URL {
-        return serverAddress!!
-    }
+	fun getHostname(): String = hostname!!
 
-    fun getHostname(): String {
-        return hostname!!
-    }
+	fun getResource(): String = resource!!
 
-    fun getResource(): String {
-        return resource!!
-    }
+	fun getSessionId(): String = sessionId!!
 
-    fun getSessionId(): String {
-        return sessionId!!
-    }
+	fun getTlsClient(): TlsClient? = tlsClient
 
-    fun getTlsClient(): TlsClient? {
-        return tlsClient
-    }
+	@JvmOverloads
+	@Throws(IOException::class, URISyntaxException::class)
+	fun createTlsConnection(tlsVersion: ProtocolVersion = tlsClient!!.clientVersion): TlsClientProtocol {
+		if (!tokenRequest.isSameChannel) {
+			// normal procedure, create a new channel
+			return createNewTlsConnection(tlsVersion)
+		} else {
+			// if something fucks up the channel we may try session resumption
+			val proto = tokenRequest.tokenContext.tlsClientProto
+			if (proto!!.isClosed) {
+				return createNewTlsConnection(tlsVersion)
+			} else {
+				return proto
+			}
+		}
+	}
 
-    @JvmOverloads
-    @Throws(IOException::class, URISyntaxException::class)
-    fun createTlsConnection(tlsVersion: ProtocolVersion = tlsClient!!.clientVersion): TlsClientProtocol {
-        if (!tokenRequest.isSameChannel()) {
-            // normal procedure, create a new channel
-            return createNewTlsConnection(tlsVersion)
-        } else {
-            // if something fucks up the channel we may try session resumption
-            val proto = tokenRequest.getTokenContext().tlsClientProto
-            if (proto!!.isClosed()) {
-                return createNewTlsConnection(tlsVersion)
-            } else {
-                return proto
-            }
-        }
-    }
+	@Throws(IOException::class, URISyntaxException::class)
+	private fun createNewTlsConnection(tlsVersion: ProtocolVersion): TlsClientProtocol {
+		val socket = default.getSocket("https", hostname!!, port)
+		tlsClient!!.clientVersion = tlsVersion
+		// TLS
+		val sockIn = socket.getInputStream()
+		val sockOut = socket.getOutputStream()
+		val handler = TlsClientProtocol(sockIn, sockOut)
+		handler.connect(tlsClient)
 
-    @Throws(IOException::class, URISyntaxException::class)
-    private fun createNewTlsConnection(tlsVersion: ProtocolVersion): TlsClientProtocol {
-        val socket = default.getSocket("https", hostname!!, port)
-        tlsClient!!.clientVersion = tlsVersion
-        // TLS
-        val sockIn = socket.getInputStream()
-        val sockOut = socket.getOutputStream()
-        val handler = TlsClientProtocol(sockIn, sockOut)
-        handler.connect(tlsClient)
-
-        return handler
-    }
+		return handler
+	}
 }

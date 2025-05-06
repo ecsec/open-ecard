@@ -86,7 +86,7 @@ class EACProtocol : SALProtocolBaseImpl() {
 				LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
 				finished = true
 				try {
-					val failed = !p.deref() as Boolean
+					val failed = !(p.deref() as Boolean)
 					if (failed) {
 						LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.")
 					} else {

@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac.anytype
 
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.EAC2OutputType
 import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.anytype.AuthDataResponse
@@ -34,90 +35,85 @@ import org.openecard.common.util.ByteUtils
  * @author Moritz Horsch
  * @author Tobias Wich
  */
-class EAC2OutputType
-/**
- * Creates a new EAC2OutputType.
- *
- * @param authMap DIDAuthenticationDataType
- */(//
-    private val authMap: AuthDataMap
+class EAC2OutputType(
+	private val authMap: AuthDataMap,
 ) {
-    private var challenge: ByteArray?
-    private var efCardSecurity: ByteArray?
-    private var token: ByteArray?
-    private var nonce: ByteArray?
+	private var challenge: ByteArray? = null
+	private var efCardSecurity: ByteArray? = null
+	private var token: ByteArray? = null
+	private var nonce: ByteArray? = null
 
-    /**
-     * Sets the challenge.
-     *
-     * @param challenge Challenge value.
-     */
-    fun setChallenge(challenge: ByteArray?) {
-        this.challenge = challenge
-    }
+	/**
+	 * Sets the challenge.
+	 *
+	 * @param challenge Challenge value.
+	 */
+	fun setChallenge(challenge: ByteArray?) {
+		this.challenge = challenge
+	}
 
-    /**
-     * Sets the file content of the EF.CardSecurity.
-     *
-     * @param efCardSecurity EF.CardSecurity
-     */
-    fun setEFCardSecurity(efCardSecurity: ByteArray?) {
-        this.efCardSecurity = efCardSecurity
-    }
+	/**
+	 * Sets the file content of the EF.CardSecurity.
+	 *
+	 * @param efCardSecurity EF.CardSecurity
+	 */
+	fun setEFCardSecurity(efCardSecurity: ByteArray?) {
+		this.efCardSecurity = efCardSecurity
+	}
 
-    /**
-     * Sets the nonce r_PICC,CA.
-     *
-     * @param nonce Nonce r_PICC,CA
-     */
-    fun setNonce(nonce: ByteArray?) {
-        this.nonce = nonce
-    }
+	/**
+	 * Sets the nonce r_PICC,CA.
+	 *
+	 * @param nonce Nonce r_PICC,CA
+	 */
+	fun setNonce(nonce: ByteArray?) {
+		this.nonce = nonce
+	}
 
-    /**
-     * Sets the AuthenticationToken T_PICC.
-     *
-     * @param token AuthenticationToken T_PICC
-     */
-    fun setToken(token: ByteArray?) {
-        this.token = token
-    }
+	/**
+	 * Sets the AuthenticationToken T_PICC.
+	 *
+	 * @param token AuthenticationToken T_PICC
+	 */
+	fun setToken(token: ByteArray?) {
+		this.token = token
+	}
 
-    val authDataType: DIDAuthenticationDataType?
-        /**
-         * Returns the DIDAuthenticationDataType.
-         *
-         * @return DIDAuthenticationDataType
-         */
-        get() {
-            val authResponse: AuthDataResponse<*> =
-                authMap.createResponse<EAC2OutputType?>(EAC2OutputType())
-            if (challenge != null) {
-                authResponse.addElement(
-                    CHALLENGE,
-                    ByteUtils.toHexString(challenge)
-                )
-            } else {
-                authResponse.addElement(
-                    EF_CARDSECURITY,
-                    ByteUtils.toHexString(efCardSecurity)
-                )
-                authResponse.addElement(
-                    TOKEN,
-                    ByteUtils.toHexString(token)
-                )
-                authResponse.addElement(
-                    NONCE,
-                    ByteUtils.toHexString(nonce)
-                )
-            }
-            return authResponse.getResponse()
-        }
+	val authDataType: DIDAuthenticationDataType?
+		/**
+		 * Returns the DIDAuthenticationDataType.
+		 *
+		 * @return DIDAuthenticationDataType
+		 */
+		get() {
+			val authResponse: AuthDataResponse<*> =
+				authMap.createResponse<EAC2OutputType?>(EAC2OutputType())
+			if (challenge != null) {
+				authResponse.addElement(
+					CHALLENGE,
+					ByteUtils.toHexString(challenge),
+				)
+			} else {
+				authResponse.addElement(
+					EF_CARDSECURITY,
+					ByteUtils.toHexString(efCardSecurity),
+				)
+				authResponse.addElement(
+					TOKEN,
+					ByteUtils.toHexString(token),
+				)
+				authResponse.addElement(
+					NONCE,
+					ByteUtils.toHexString(nonce),
+				)
+			}
+			return authResponse.getResponse()
+		}
 
-    companion object {
-        const val CHALLENGE: String = "Challenge"
-        const val EF_CARDSECURITY: String = "EFCardSecurity"
-        const val TOKEN: String = "AuthenticationToken"
-        const val NONCE: String = "Nonce"
-    }
+	companion object {
+		const val CHALLENGE: String = "Challenge"
+		const val EF_CARDSECURITY: String = "EFCardSecurity"
+		const val TOKEN: String = "AuthenticationToken"
+		const val NONCE: String = "Nonce"
+	}
 }

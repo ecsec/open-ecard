@@ -21,11 +21,12 @@
  */
 package org.openecard.sal.protocol.eac.apdu
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.apdu.ManageSecurityEnvironment
 import org.openecard.common.apdu.common.CardAPDUOutputStream
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implements a new MSE:Set AT APDU for Terminal Authentication.
@@ -35,48 +36,44 @@ import java.io.IOException
  * @author Moritz Horsch
  */
 class MSESetATTA : ManageSecurityEnvironment {
-    /**
-     * Creates a new MSE:Set AT for Terminal Authentication.
-     */
-    constructor() : super(0x81.toByte(), AT)
+	/**
+	 * Creates a new MSE:Set AT for Terminal Authentication.
+	 */
+	constructor() : super(0x81.toByte(), AT)
 
-    /**
-     * Creates a new MSE:Set AT for Terminal Authentication.
-     *
-     * @param oID Terminal Authentication object identifier
-     * @param chr Certificate Holder Reference
-     * @param pkPCD Ephemeral Public Key
-     * @param aad Auxiliary Data Verification
-     */
-    constructor(oID: ByteArray, chr: ByteArray?, pkPCD: ByteArray?, aad: ByteArray?) : super(0x81.toByte(), AT) {
-        val caos = CardAPDUOutputStream()
-        try {
-            caos.writeTLV(0x80.toByte(), oID)
+	/**
+	 * Creates a new MSE:Set AT for Terminal Authentication.
+	 *
+	 * @param oID Terminal Authentication object identifier
+	 * @param chr Certificate Holder Reference
+	 * @param pkPCD Ephemeral Public Key
+	 * @param aad Auxiliary Data Verification
+	 */
+	constructor(oID: ByteArray, chr: ByteArray?, pkPCD: ByteArray?, aad: ByteArray?) : super(0x81.toByte(), AT) {
+		val caos = CardAPDUOutputStream()
+		try {
+			caos.writeTLV(0x80.toByte(), oID)
 
-            if (chr != null) {
-                caos.writeTLV(0x83.toByte(), chr)
-            }
-            if (pkPCD != null) {
-                caos.writeTLV(0x91.toByte(), pkPCD)
-            }
-            if (aad != null) {
-                caos.write(aad)
-            }
+			if (chr != null) {
+				caos.writeTLV(0x83.toByte(), chr)
+			}
+			if (pkPCD != null) {
+				caos.writeTLV(0x91.toByte(), pkPCD)
+			}
+			if (aad != null) {
+				caos.write(aad)
+			}
 
-            caos.flush()
-        } catch (e: IOException) {
-            logger.error(e.message, e)
-        } finally {
-            try {
-                caos.close()
-            } catch (ignore: IOException) {
-            }
-        }
+			caos.flush()
+		} catch (e: IOException) {
+			logger.error(e) { "${e.message}" }
+		} finally {
+			try {
+				caos.close()
+			} catch (ignore: IOException) {
+			}
+		}
 
-        setData(caos.toByteArray())
-    }
-
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(MSESetATTA::class.java)
-    }
+		setData(caos.toByteArray())
+	}
 }

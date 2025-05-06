@@ -32,13 +32,18 @@ import org.openecard.gui.executor.StepActionResultStatus
  *
  * @author Tobias Wich
  */
-class CVCStepAction(step: Step) : StepAction(step) {
-    override fun perform(oldResults: MutableMap<String?, ExecutionResults?>?, result: StepResult): StepActionResult {
-        if (result.isBack()) {
-            // no going back to the initialization step
-            return StepActionResult(StepActionResultStatus.REPEAT)
-        }
+class CVCStepAction(
+	step: Step,
+) : StepAction(step) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
+		if (result.isBack()) {
+			// no going back to the initialization step
+			return StepActionResult(StepActionResultStatus.REPEAT)
+		}
 
-        return StepActionResult(StepActionResultStatus.NEXT)
-    }
+		return StepActionResult(StepActionResultStatus.NEXT)
+	}
 }

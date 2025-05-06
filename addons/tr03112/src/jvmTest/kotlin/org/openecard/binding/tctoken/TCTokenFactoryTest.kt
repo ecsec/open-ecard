@@ -32,11 +32,11 @@ import org.testng.annotations.Test
  * @author Johannes Schmölz
  */
 class TCTokenFactoryTest {
-    @Test(expectedExceptions = [InvalidAddressException::class])
-    @Throws(ActivationError::class)
-    fun testGenerateTCToken_TCTokenType() {
-        val tcTokenURL = resolveResourceAsURL(TCTokenFactoryTest::class.java, "TCToken.xml")
-        // should fail, since a non-https-URL is used
-        TCTokenContext.generateTCToken(tcTokenURL!!)
-    }
+	@Test(expectedExceptions = [InvalidAddressException::class])
+	@Throws(ActivationError::class)
+	fun testGenerateTCToken_TCTokenType() {
+		val tcTokenURL = resolveResourceAsURL(TCTokenFactoryTest::class.java, "TCToken.xml")
+		// should fail, since a non-https-URL is used
+		TCTokenContext.generateTCToken(tcTokenURL!!)
+	}
 }

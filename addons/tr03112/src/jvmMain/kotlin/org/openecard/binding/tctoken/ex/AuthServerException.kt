@@ -29,16 +29,16 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 class AuthServerException : RedirectionBaseError {
-    constructor(errorUrl: String?, msg: String?) : super(errorUrl, msg)
+	constructor(errorUrl: String?, msg: String) : super(errorUrl, msg)
 
-    constructor(errorUrl: String?, msg: String?, ex: Throwable?) : super(errorUrl, msg, ex)
+	constructor(errorUrl: String?, msg: String, ex: Throwable?) : super(errorUrl, msg, ex)
 
-    constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(errorUrl, key, *params)
+	constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(errorUrl, key, *params)
 
-    constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        errorUrl,
-        key,
-        cause,
-        *params
-    )
+	constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+		errorUrl,
+		key,
+		cause,
+		*params,
+	)
 }

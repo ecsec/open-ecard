@@ -34,34 +34,41 @@ import org.openecard.gui.executor.StepActionResultStatus
  *
  * @author Hans-Martin Haase
  */
-class CardMonitorTask(cardTypes: MutableList<String?>?, step: CardSelectionStep?) : EventCallback, BackgroundTask {
-    private var cardAction: Promise<Void?>
-    var result: ConnectionHandleType? = null
-        private set
+class CardMonitorTask(
+	cardTypes: MutableList<String>,
+	step: CardSelectionStep?,
+) : EventCallback,
+	BackgroundTask {
+	private var cardAction: Promise<Void?>
+	var result: ConnectionHandleType? = null
+		private set
 
+	init {
+		cardAction = Promise<Void?>()
+	}
 
-    init {
-        cardAction = Promise<Void?>()
-    }
+	override fun signalEvent(
+		eventType: EventType,
+		eventData: EventObject,
+	) {
+		when (eventType) {
+			EventType.CARD_RECOGNIZED -> {
+				result = eventData.handle
+				cardAction.deliver(null)
+			}
 
-    override fun signalEvent(eventType: EventType, eventData: EventObject) {
-        when (eventType) {
-            EventType.CARD_RECOGNIZED -> {
-                result = eventData.getHandle()
-                cardAction.deliver(null)
-            }
+			EventType.CARD_REMOVED -> {
+				result = eventData.handle
+				cardAction.deliver(null)
+			}
+			else -> {}
+		}
+	}
 
-            EventType.CARD_REMOVED -> {
-                result = eventData.getHandle()
-                cardAction.deliver(null)
-            }
-        }
-    }
-
-    @Throws(Exception::class)
-    override fun call(): StepActionResult {
-        cardAction.deref()
-        cardAction = Promise<Void?>()
-        return StepActionResult(StepActionResultStatus.REPEAT)
-    }
+	@Throws(Exception::class)
+	override fun call(): StepActionResult {
+		cardAction.deref()
+		cardAction = Promise<Void?>()
+		return StepActionResult(StepActionResultStatus.REPEAT)
+	}
 }

@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.addon.Context
 import org.openecard.binding.tctoken.TR03112Keys
@@ -45,194 +46,177 @@ import org.openecard.ifd.protocol.pace.common.PasswordID.Companion.parse
 import org.openecard.sal.protocol.eac.EACData
 import org.openecard.sal.protocol.eac.EACProtocol
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+
+private val logger = KotlinLogging.logger { }
+
+private val LANG: I18n = I18n.getTranslation("pace")!!
+private val PIN: String? = LANG.translationForKey("pin")
+private val PUK: String? = LANG.translationForKey("puk")
 
 /**
  * StepAction for evaluation of CHAT value items on the EAC GUI.
  *
  * @author Tobias Wich
  */
-class CHATStepAction(private val addonCtx: Context, private val eacData: EACData, step: Step) : StepAction(step) {
-    override fun perform(oldResults: MutableMap<String?, ExecutionResults>, result: StepResult): StepActionResult {
-        if (result.isOK()) {
-            processResult(oldResults)
+class CHATStepAction(
+	private val addonCtx: Context,
+	private val eacData: EACData,
+	step: Step,
+) : StepAction(step) {
+	override fun perform(
+		oldResults: MutableMap<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
+		if (result.isOK()) {
+			processResult(oldResults)
 
-            try {
-                val nextStep = preparePinStep()
+			try {
+				val nextStep = preparePinStep()
 
-                return StepActionResult(StepActionResultStatus.NEXT, nextStep)
-            } catch (ex: WSHelper.WSException) {
-                LOG.error("Failed to prepare PIN step.", ex)
-                return StepActionResult(StepActionResultStatus.CANCEL)
-            } catch (ex: InterruptedException) {
-                LOG.warn("CHAT step action interrupted.", ex)
-                return StepActionResult(StepActionResultStatus.CANCEL)
-            }
-        } else {
-            // cancel can not happen, so only back is left to be handled
-            return StepActionResult(StepActionResultStatus.BACK)
-        }
-    }
+				return StepActionResult(StepActionResultStatus.NEXT, nextStep)
+			} catch (ex: WSHelper.WSException) {
+				logger.error(ex) { "Failed to prepare PIN step." }
+				return StepActionResult(StepActionResultStatus.CANCEL)
+			} catch (ex: InterruptedException) {
+				logger.warn(ex) { "CHAT step action interrupted." }
+				return StepActionResult(StepActionResultStatus.CANCEL)
+			}
+		} else {
+			// cancel can not happen, so only back is left to be handled
+			return StepActionResult(StepActionResultStatus.BACK)
+		}
+	}
 
-    @Throws(WSHelper.WSException::class, InterruptedException::class)
-    private fun preparePinStep(): Step {
-        val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+	@Throws(WSHelper.WSException::class, InterruptedException::class)
+	private fun preparePinStep(): Step {
+		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
-        initContextVars(ctx)
-        val nextStep = buildPinStep(ctx)
+		initContextVars(ctx)
+		val nextStep = buildPinStep(ctx)
 
-        return nextStep
-    }
+		return nextStep
+	}
 
-    @Throws(WSHelper.WSException::class, InterruptedException::class)
-    private fun initContextVars(ctx: DynamicContext) {
-        var status = ctx.get(EACProtocol.Companion.PIN_STATUS) as PinState?
+	@Throws(WSHelper.WSException::class, InterruptedException::class)
+	private fun initContextVars(ctx: DynamicContext) {
+		var status = ctx.get(EACProtocol.Companion.PIN_STATUS) as? PinState
 
-        // only process once
-        if (status == null) {
-            status = PinState()
-            val nativePace: Boolean
-            val sessHandle = ctx.get(TR03112Keys.SESSION_CON_HANDLE) as ConnectionHandleType?
-            val cardHandle: ConnectionHandleType?
-            val paceMarker: PACEMarkerType?
+		// only process once
+		if (status == null) {
+			status = PinState()
+			val nativePace: Boolean
+			val sessHandle = ctx.get(TR03112Keys.SESSION_CON_HANDLE) as ConnectionHandleType
+			val cardHandle: ConnectionHandleType
+			val paceMarker: PACEMarkerType
 
-            val passwordType = parse(eacData.pinID)
+			val passwordType = parse(eacData.pinID)
 
-            val ph = PaceCardHelper(addonCtx, sessHandle!!)
-            if (!SysUtils.isMobileDevice()) {
-                cardHandle = ph.connectCardIfNeeded(
-                    object : HashSet<String?>() {
-                        init {
-                            add(ECardConstants.NPA_CARD_TYPE)
-                        }
-                    }
-                )
-                if (passwordType == PasswordID.PIN) {
-                    val pinState = ph.pinStatus
-                    status.update(pinState)
-                }
-                nativePace = ph.isNativePinEntry
+			val ph = PaceCardHelper(addonCtx, sessHandle)
+			if (!SysUtils.isMobileDevice()) {
+				cardHandle =
+					ph.connectCardIfNeeded(
+						setOf(ECardConstants.NPA_CARD_TYPE),
+					)
+				if (passwordType == PasswordID.PIN) {
+					val pinState = ph.pinStatus
+					status.update(pinState)
+				}
+				nativePace = ph.isNativePinEntry
 
-                // get the PACEMarker
-                paceMarker = ph.getPaceMarker(passwordType!!.name, ECardConstants.NPA_CARD_TYPE)
-            } else {
-                // mobile device, pick only available reader and proceed
-                status.update(PacePinStatus.UNKNOWN)
-                cardHandle = ph.getMobileReader()
-                nativePace = false
-                paceMarker = ph.getPaceMarker(passwordType!!.name, ECardConstants.NPA_CARD_TYPE)
-            }
+				// get the PACEMarker
+				paceMarker = ph.getPaceMarker(passwordType!!.name, ECardConstants.NPA_CARD_TYPE)
+			} else {
+				// mobile device, pick only available reader and proceed
+				status.update(PacePinStatus.UNKNOWN)
+				cardHandle = ph.getMobileReader()
+				nativePace = false
+				paceMarker = ph.getPaceMarker(passwordType!!.name, ECardConstants.NPA_CARD_TYPE)
+			}
 
-            // save values in dynctx
-            ctx.put(EACProtocol.Companion.PIN_STATUS, status)
-            ctx.put(EACProtocol.Companion.IS_NATIVE_PACE, nativePace)
-            ctx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle)
-            ctx.put(EACProtocol.Companion.PACE_MARKER, paceMarker)
-        }
-    }
+			// save values in dynctx
+			ctx.put(EACProtocol.Companion.PIN_STATUS, status)
+			ctx.put(EACProtocol.Companion.IS_NATIVE_PACE, nativePace)
+			ctx.put(TR03112Keys.CONNECTION_HANDLE, cardHandle)
+			ctx.put(EACProtocol.Companion.PACE_MARKER, paceMarker)
+		}
+	}
 
+	private fun processResult(results: Map<String, ExecutionResults>) {
+		val dataGroupsNames = this.dataGroupNames
+		val specialFunctionsNames = this.specialFunctionNames
+		val executionResults: ExecutionResults = results[stepID]!!
 
-    private fun processResult(results: MutableMap<String?, ExecutionResults>) {
-        val dataGroupsNames = this.dataGroupNames
-        val specialFunctionsNames = this.specialFunctionNames
-        val executionResults: ExecutionResults = results.get(getStepID())!!
+		// process read access and special functions
+		val cbRead = executionResults.getResult(CHATStep.Companion.READ_CHAT_BOXES) as? Checkbox
+		if (cbRead != null) {
+			val selectedCHAT = eacData.selectedCHAT
+			for (item in cbRead.getBoxItems()) {
+				if (dataGroupsNames.contains(item.name)) {
+					selectedCHAT.setReadAccess(item.name, item.isChecked)
+				} else if (specialFunctionsNames.contains(item.name)) {
+					selectedCHAT.setSpecialFunction(item.name, item.isChecked)
+				}
+			}
+		}
 
-        // process read access and special functions
-        val cbRead = executionResults.getResult(CHATStep.Companion.READ_CHAT_BOXES) as Checkbox?
-        if (cbRead != null) {
-            val selectedCHAT = eacData.selectedCHAT
-            for (item in cbRead.getBoxItems()) {
-                if (dataGroupsNames.contains(item.getName())) {
-                    selectedCHAT.setReadAccess(item.getName(), item.isChecked())
-                } else if (specialFunctionsNames.contains(item.getName())) {
-                    selectedCHAT.setSpecialFunction(item.getName(), item.isChecked())
-                }
-            }
-        }
+		// process write access
+		val cbWrite = executionResults.getResult(CHATStep.Companion.WRITE_CHAT_BOXES) as? Checkbox
+		if (cbWrite != null) {
+			val selectedCHAT = eacData.selectedCHAT
+			for (item in cbWrite.getBoxItems()) {
+				if (dataGroupsNames.contains(item.name)) {
+					selectedCHAT.setWriteAccess(item.name, item.isChecked)
+				}
+			}
+		}
+	}
 
-        // process write access
-        val cbWrite = executionResults.getResult(CHATStep.Companion.WRITE_CHAT_BOXES) as Checkbox?
-        if (cbWrite != null) {
-            val selectedCHAT = eacData.selectedCHAT
-            for (item in cbWrite.getBoxItems()) {
-                if (dataGroupsNames.contains(item.getName())) {
-                    selectedCHAT.setWriteAccess(item.getName(), item.isChecked())
-                }
-            }
-        }
-    }
+	private val specialFunctionNames: List<String>
+		/**
+		 * Returns a list containing the names of all special functions.
+		 * @return list containing the names of all special functions.
+		 */
+		get() {
+			return CHAT.SpecialFunction.entries.map { it.name }
+		}
 
-    private val specialFunctionNames: MutableList<String?>
-        /**
-         * Returns a list containing the names of all special functions.
-         * @return list containing the names of all special functions.
-         */
-        get() {
-            val specialFunctionNames: MutableList<String?> =
-                ArrayList<String?>()
-            for (dg in CHAT.SpecialFunction.values()) {
-                specialFunctionNames.add(dg.name)
-            }
-            return specialFunctionNames
-        }
+	private val dataGroupNames: List<String>
+		/**
+		 * Returns a list containing the names of all data groups.
+		 * @return list containing the names of all data groups.
+		 */
+		get() {
+			return CHAT.DataGroup.entries.map { it.name }
+		}
 
-    private val dataGroupNames: MutableList<String?>
-        /**
-         * Returns a list containing the names of all data groups.
-         * @return list containing the names of all data groups.
-         */
-        get() {
-            val dataGroupNames: MutableList<String?> = ArrayList<String?>()
-            for (dg in CHAT.DataGroup.values()) {
-                dataGroupNames.add(dg.name)
-            }
-            return dataGroupNames
-        }
+	private fun buildPinStep(ctx: DynamicContext): Step {
+		val status = ctx.get(EACProtocol.Companion.PIN_STATUS) as? PinState
+		val nativePace = ctx.get(EACProtocol.Companion.IS_NATIVE_PACE) as Boolean
+		val paceMarker = ctx.get(EACProtocol.Companion.PACE_MARKER) as PACEMarkerType
+		checkNotNull(status)
 
-    private fun buildPinStep(ctx: DynamicContext): Step {
-        val status = ctx.get(EACProtocol.Companion.PIN_STATUS) as PinState?
-        val nativePace = ctx.get(EACProtocol.Companion.IS_NATIVE_PACE) as Boolean
-        val paceMarker = ctx.get(EACProtocol.Companion.PACE_MARKER) as PACEMarkerType?
-        checkNotNull(status)
-
-        if (status.isBlocked()) {
-            return ErrorStep(
-                LANG.translationForKey("step_error_title_blocked", PIN),
-                LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
-                createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked."))
-            )
-        } else if (status.isDeactivated()) {
-            return ErrorStep(
-                LANG.translationForKey("step_error_title_deactivated"),
-                LANG.translationForKey("step_error_pin_deactivated"),
-                createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated."))
-            )
-        } else {
-            val pinStep = PINStep(eacData, !nativePace, paceMarker)
-            val pinAction: StepAction?
-            if (eacData.pinID == PasswordID.CAN.byte) {
-                pinAction = CANStepAction(addonCtx, eacData, !nativePace, pinStep)
-            } else {
-                pinAction = PINStepAction(addonCtx, eacData, !nativePace, pinStep)
-            }
-            pinStep.setAction(pinAction)
-            return pinStep
-        }
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(CHATStepAction::class.java)
-
-        private val LANG: I18n
-        private val PIN: String?
-        private val PUK: String?
-
-        init {
-            val lang = I18n.getTranslation("pace")
-            LANG = lang
-            PIN = lang.translationForKey("pin")
-            PUK = lang.translationForKey("puk")
-        }
-    }
+		if (status.isBlocked) {
+			return ErrorStep(
+				LANG.translationForKey("step_error_title_blocked", PIN),
+				LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+				createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")),
+			)
+		} else if (status.isDeactivated) {
+			return ErrorStep(
+				LANG.translationForKey("step_error_title_deactivated"),
+				LANG.translationForKey("step_error_pin_deactivated"),
+				createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")),
+			)
+		} else {
+			val pinStep = PINStep(eacData, !nativePace, paceMarker)
+			val pinAction =
+				if (eacData.pinID == PasswordID.CAN.byte) {
+					CANStepAction(addonCtx, eacData, !nativePace, pinStep)
+				} else {
+					PINStepAction(addonCtx, eacData, !nativePace, pinStep)
+				}
+			pinStep.setAction(pinAction)
+			return pinStep
+		}
+	}
 }

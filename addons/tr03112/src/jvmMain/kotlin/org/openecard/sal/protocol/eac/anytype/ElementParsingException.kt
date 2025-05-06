@@ -26,20 +26,23 @@ import org.openecard.common.I18nException
 import org.openecard.common.I18nKey
 import javax.annotation.Nonnull
 
+private val lang: I18n = I18n.getTranslation("tr03112")
+
 /**
  *
  * @author Hans-Martin Haase
  */
 class ElementParsingException : I18nException {
-    constructor(@Nonnull message: String) : super(message)
+	constructor(
+		@Nonnull message: String,
+	) : super(message)
 
-    constructor(@Nonnull message: String, cause: Throwable?) : super(message, cause)
+	constructor(
+		@Nonnull message: String,
+		cause: Throwable?,
+	) : super(message, cause)
 
-    constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
 
-    constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
-
-    companion object {
-        private val lang: I18n = I18n.getTranslation("tr03112")
-    }
+	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 }

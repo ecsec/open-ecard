@@ -43,111 +43,116 @@ import java.util.concurrent.Future
  * @author Tobias Wich
  */
 class TCTokenResponse : BindingResult() {
-    private var result: Result? = null
-    private var token: TCToken? = null
-    var bindingTask: Future<*>? = null
+	private var result: Result? = null
+	private var token: TCToken? = null
+	var bindingTask: Future<*>? = null
 
-    /**
-     * Returns the result of the client request.
-     *
-     * @return Result
-     */
-    fun getResult(): Result {
-        if (result == null) {
-            result = makeResultOK()
-        }
-        return result!!
-    }
+	/**
+	 * Returns the result of the client request.
+	 *
+	 * @return Result
+	 */
+	fun getResult(): Result {
+		if (result == null) {
+			result = makeResultOK()
+		}
+		return result!!
+	}
 
-    /**
-     * Sets the result of the client request.
-     *
-     * @param result
-     */
-    fun setResult(result: Result?) {
-        this.result = result
-    }
+	/**
+	 * Sets the result of the client request.
+	 *
+	 * @param result
+	 */
+	fun setResult(result: Result?) {
+		this.result = result
+	}
 
-    fun setAdditionalResultMinor(minor: String?) {
-        this.addAuxResultData(AuxDataKeys.MINOR_PROCESS_RESULT, minor)
-    }
+	fun setAdditionalResultMinor(minor: String?) {
+		this.addAuxResultData(AuxDataKeys.MINOR_PROCESS_RESULT, minor)
+	}
 
-    var tCToken: TCToken
-        /**
-         * Gets the TCToken of the request.
-         *
-         * @return The TCToken.
-         */
-        get() = token!!
-        /**
-         * Sets the TCToken as received in the request.
-         *
-         * @param token The TCToken.
-         */
-        set(token) {
-            this.token = token
-        }
+	var tCToken: TCToken
+		/**
+		 * Gets the TCToken of the request.
+		 *
+		 * @return The TCToken.
+		 */
+		get() = token!!
 
-    var refreshAddress: String?
-        /**
-         * Returns the refresh address.
-         *
-         * @return Refresh address
-         */
-        get() = token!!.getRefreshAddress()
-        /**
-         * Sets the refresh address in the underlying TCToken.
-         *
-         * @param addr The new refresh address.
-         */
-        set(addr) {
-            token!!.setRefreshAddress(addr)
-        }
+		/**
+		 * Sets the TCToken as received in the request.
+		 *
+		 * @param token The TCToken.
+		 */
+		set(token) {
+			this.token = token
+		}
 
-    /**
-     * Completes the response, so that it can be used in the binding.
-     * The values extended include result code, result message and the redirect address.
-     *
-     * @throws InvalidRedirectUrlException Thrown in case the error redirect URL could not be determined.
-     */
-    @Throws(InvalidRedirectUrlException::class)
-    fun finishResponse() {
-        try {
-            val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-            val ub = UrlBuilder.fromUrl(this.refreshAddress)
-            if (ECardConstants.Major.OK == result!!.getResultMajor()) {
-                resultCode = BindingResultCode.REDIRECT
-                val refreshURL: String? = ub.queryParam("ResultMajor", "ok").build().toString()
-                auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, refreshURL)
-            } else {
-                val isRefreshAddressValid = dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID) as Boolean
-                val minor = result!!.getResultMinor()
-                resultCode = BindingResultCode.REDIRECT
-                val refreshURL: String?
+	var refreshAddress: String?
+		/**
+		 * Returns the refresh address.
+		 *
+		 * @return Refresh address
+		 */
+		get() = token!!.getRefreshAddress()
 
-                if (isRefreshAddressValid) {
-                    val fixedMinor = TCTokenHacks.fixResultMinor(minor)
-                    refreshURL = ub.queryParam("ResultMajor", "error")
-                        .queryParamUrl("ResultMinor", fixedMinor)
-                        .build().toString()
-                } else {
-                    refreshURL = token!!.getComErrorAddressWithParams(minor)
-                }
+		/**
+		 * Sets the refresh address in the underlying TCToken.
+		 *
+		 * @param addr The new refresh address.
+		 */
+		set(addr) {
+			token!!.setRefreshAddress(addr)
+		}
 
-                auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, refreshURL)
+	/**
+	 * Completes the response, so that it can be used in the binding.
+	 * The values extended include result code, result message and the redirect address.
+	 *
+	 * @throws InvalidRedirectUrlException Thrown in case the error redirect URL could not be determined.
+	 */
+	@Throws(InvalidRedirectUrlException::class)
+	fun finishResponse() {
+		try {
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val ub = UrlBuilder.fromUrl(this.refreshAddress)
+			if (ECardConstants.Major.OK == result!!.getResultMajor()) {
+				resultCode = BindingResultCode.REDIRECT
+				val refreshURL: String? = ub.queryParam("ResultMajor", "ok").build().toString()
+				addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, refreshURL)
+			} else {
+				val isRefreshAddressValid = dynCtx.get(TR03112Keys.IS_REFRESH_URL_VALID) as Boolean
+				val minor = result!!.getResultMinor()
+				resultCode = BindingResultCode.REDIRECT
+				val refreshURL: String?
 
-                if (result!!.getResultMessage().getValue() != null) {
-                    setResultMessage(result!!.getResultMessage().getValue())
-                }
-            }
-        } catch (ex: URISyntaxException) {
-            // this is a code failure as the URLs are verified upfront
-            // TODO: translate when exception changes
-            throw IllegalArgumentException(LANG.getOriginalMessage(ErrorTranslations.INVALID_URL), ex)
-        }
-    }
+				if (isRefreshAddressValid) {
+					val fixedMinor = TCTokenHacks.fixResultMinor(minor)
+					refreshURL =
+						ub
+							.queryParam("ResultMajor", "error")
+							.queryParamUrl("ResultMinor", fixedMinor)
+							.build()
+							.toString()
+				} else {
+					refreshURL = token!!.getComErrorAddressWithParams(minor)
+				}
 
-    companion object {
-        private val LANG: I18n = I18n.getTranslation("tr03112")
-    }
+				addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, refreshURL)
+
+				if (result!!.getResultMessage().getValue() != null) {
+					setResultMessage(result!!.getResultMessage().getValue())
+				}
+			}
+		} catch (ex: URISyntaxException) {
+			// this is a code failure as the URLs are verified upfront
+			// TODO: translate when exception changes
+			throw IllegalArgumentException(LANG.getOriginalMessage(ErrorTranslations.INVALID_URL), ex)
+		}
+	}
+
+	companion object {
+		private val LANG: I18n = I18n.getTranslation("tr03112")
+	}
 }

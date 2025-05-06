@@ -48,109 +48,101 @@ import org.slf4j.LoggerFactory
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class TerminalAuthenticationStep(ctx: Context) : ProtocolStep<DIDAuthenticate?, DIDAuthenticateResponse?> {
-    private val dispatcher: Dispatcher?
+class TerminalAuthenticationStep(
+	ctx: Context,
+) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
+	private val dispatcher: Dispatcher = ctx.dispatcher
 
+	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
 
-    /**
-     * Creates a new Terminal Authentication protocol step.
-     *
-     * @param ctx Context
-     */
-    init {
-        this.dispatcher = ctx.getDispatcher()
-    }
+	override fun perform(
+		didAuthenticate: DIDAuthenticate,
+		internalData: MutableMap<String, Any?>,
+	): DIDAuthenticateResponse {
+		val response: DIDAuthenticateResponse =
+			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
+				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
+				org.openecard.common.WSHelper
+					.makeResultOK(),
+			)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
-    override fun getFunctionType(): FunctionType {
-        return FunctionType.DIDAuthenticate
-    }
+		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
 
-    override fun perform(
-        didAuthenticate: DIDAuthenticate,
-        internalData: MutableMap<String?, Any?>
-    ): DIDAuthenticateResponse {
-        val response: DIDAuthenticateResponse =
-            WSHelper.makeResponse<Class<DIDAuthenticateResponse?>, DIDAuthenticateResponse>(
-                iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-                org.openecard.common.WSHelper.makeResultOK()
-            )!!
-        //EACProtocol.setEmptyResponseData(response);
-        val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		try {
+			val eac2Input = EAC2InputType(didAuthenticate.getAuthenticationProtocolData())
+			var eac2Output = eac2Input.outputType
 
-        val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
+			val ta = TerminalAuthentication(dispatcher, slotHandle)
 
-        try {
-            val eac2Input = EAC2InputType(didAuthenticate.getAuthenticationProtocolData())
-            var eac2Output = eac2Input.getOutputType()
+			// Build certificate chain
+			var certificateChain: CardVerifiableCertificateChain =
+				internalData.get(
+					EACConstants.IDATA_CERTIFICATES,
+				) as CardVerifiableCertificateChain
+			certificateChain.addCertificates(eac2Input.certificates)
 
-            val ta = TerminalAuthentication(dispatcher, slotHandle)
+			val currentCAR = internalData.get(EACConstants.IDATA_CURRENT_CAR) as ByteArray
+			val previousCAR = internalData.get(EACConstants.IDATA_PREVIOUS_CAR) as ByteArray?
+			var tmpChain = certificateChain.getCertificateChainFromCAR(currentCAR)
+			// try again with previous car if it didn't work
+			if (tmpChain.certificates.isEmpty() && previousCAR != null) {
+				tmpChain = certificateChain.getCertificateChainFromCAR(previousCAR)
+			}
+			certificateChain = tmpChain
 
-            // Build certificate chain
-            var certificateChain: CardVerifiableCertificateChain
-            certificateChain = internalData.get(EACConstants.IDATA_CERTIFICATES) as CardVerifiableCertificateChain
-            certificateChain.addCertificates(eac2Input.getCertificates())
+			if (certificateChain.certificates.isEmpty()) {
+				val msg = "Failed to create a valid certificate chain from the transmitted certificates."
+				LOG.error(msg)
+				response.setResult(makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg))
+				return response
+			}
 
-            val currentCAR = internalData.get(EACConstants.IDATA_CURRENT_CAR) as ByteArray
-            val previousCAR = internalData.get(EACConstants.IDATA_PREVIOUS_CAR) as ByteArray?
-            var tmpChain = certificateChain.getCertificateChainFromCAR(currentCAR)
-            // try again with previous car if it didn't work
-            if (tmpChain.certificates.isEmpty() && previousCAR != null) {
-                tmpChain = certificateChain.getCertificateChainFromCAR(previousCAR)
-            }
-            certificateChain = tmpChain
+			// TA: Step 1 - Verify certificates
+			ta.verifyCertificates(certificateChain)
 
-            if (certificateChain.certificates.isEmpty()) {
-                val msg = "Failed to create a valid certificate chain from the transmitted certificates."
-                LOG.error(msg)
-                response.setResult(makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg))
-                return response
-            }
+			// save values for later use
+			val terminalCertificate = certificateChain.terminalCertificate
+			val key = eac2Input.ephemeralPublicKey
+			val signature = eac2Input.signature
+			internalData.put(EACConstants.IDATA_PK_PCD, key)
+			internalData.put(EACConstants.IDATA_SIGNATURE, signature)
+			internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate)
 
-            // TA: Step 1 - Verify certificates
-            ta.verifyCertificates(certificateChain)
+			if (signature != null) {
+				LOG.trace("Signature has been provided in EAC2InputType.")
 
-            // save values for later use
-            val terminalCertificate = certificateChain.terminalCertificate
-            val key = eac2Input.getEphemeralPublicKey()
-            val signature = eac2Input.getSignature()
-            internalData.put(EACConstants.IDATA_PK_PCD, key)
-            internalData.put(EACConstants.IDATA_SIGNATURE, signature)
-            internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate)
+				// perform TA and CA authentication
+				val ca = ChipAuthentication(dispatcher, slotHandle)
+				val auth = AuthenticationHelper(ta, ca)
+				eac2Output = auth.performAuth(eac2Output, internalData)
 
-            if (signature != null) {
-                LOG.trace("Signature has been provided in EAC2InputType.")
+				// no third step needed, notify GUI
+				val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				ctx.put(EACProtocol.Companion.AUTHENTICATION_DONE, true)
+			} else {
+				LOG.trace("Signature has not been provided in EAC2InputType.")
 
-                // perform TA and CA authentication
-                val ca = ChipAuthentication(dispatcher, slotHandle)
-                val auth = AuthenticationHelper(ta, ca)
-                eac2Output = auth.performAuth(eac2Output, internalData)
+				// send challenge again
+				val rPICC = internalData[EACConstants.IDATA_CHALLENGE] as ByteArray
+				eac2Output.setChallenge(rPICC)
+			}
 
-                // no third step needed, notify GUI
-                val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-                ctx.put(EACProtocol.Companion.AUTHENTICATION_DONE, true)
-            } else {
-                LOG.trace("Signature has not been provided in EAC2InputType.")
+			response.setAuthenticationProtocolData(eac2Output.authDataType)
+		} catch (e: ECardException) {
+			LOG.error(e.message, e)
+			response.setResult(e.result)
+			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+		} catch (e: Exception) {
+			LOG.error(e.message, e)
+			response.setResult(makeResultUnknownError(e.message))
+			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+		}
 
-                // send challenge again
-                val rPICC = internalData.get(EACConstants.IDATA_CHALLENGE) as ByteArray?
-                eac2Output.setChallenge(rPICC)
-            }
+		return response
+	}
 
-            response.setAuthenticationProtocolData(eac2Output.getAuthDataType())
-        } catch (e: ECardException) {
-            LOG.error(e.message, e)
-            response.setResult(e.result)
-            dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
-        } catch (e: Exception) {
-            LOG.error(e.message, e)
-            response.setResult(makeResultUnknownError(e.message))
-            dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
-        }
-
-        return response
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(TerminalAuthenticationStep::class.java.getName())
-    }
+	companion object {
+		private val LOG: Logger = LoggerFactory.getLogger(TerminalAuthenticationStep::class.java.getName())
+	}
 }

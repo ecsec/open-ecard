@@ -21,37 +21,36 @@
  */
 package org.openecard.binding.tctoken.ex
 
-
 /**
  * The class contains constants for the result minor according to BSI-TR-03124-1 v1.2 section 2.5.5.2.
  *
  * @author Hans-Martin Haase
  */
 object ResultMinor {
-    /**
-     * Indicates that the eID-Client failed to set up a trusted channel to the eID-Server.
-     */
-    const val TRUSTED_CHANNEL_ESTABLISHMENT_FAILED: String = "trustedChannelEstablishmentFailed"
+	/**
+	 * Indicates that the eID-Client failed to set up a trusted channel to the eID-Server.
+	 */
+	const val TRUSTED_CHANNEL_ESTABLISHMENT_FAILED: String = "trustedChannelEstablishmentFailed"
 
-    /**
-     * Indicates that the user aborted the authentication.
-     * This includes also the abortion due to entering a wrong PIN or if no card is available.
-     */
-    const val CANCELLATION_BY_USER: String = "cancellationByUser"
+	/**
+	 * Indicates that the user aborted the authentication.
+	 * This includes also the abortion due to entering a wrong PIN or if no card is available.
+	 */
+	const val CANCELLATION_BY_USER: String = "cancellationByUser"
 
-    /**
-     * Indicates that the eID-Server encountered an error.
-     * The exact error is communicated to the eService directly by the eID-Server.
-     */
-    const val SERVER_ERROR: String = "serverError"
+	/**
+	 * Indicates that the eID-Server encountered an error.
+	 * The exact error is communicated to the eService directly by the eID-Server.
+	 */
+	const val SERVER_ERROR: String = "serverError"
 
-    /**
-     * Indicates that an error occurred which is not covered by the other error codes.
-     */
-    const val CLIENT_ERROR: String = "clientError"
+	/**
+	 * Indicates that an error occurred which is not covered by the other error codes.
+	 */
+	const val CLIENT_ERROR: String = "clientError"
 
-    /**
-     * Indicates that no refresh URL could be determined.
-     */
-    const val COMMUNICATION_ERROR: String = "communicationError"
+	/**
+	 * Indicates that no refresh URL could be determined.
+	 */
+	const val COMMUNICATION_ERROR: String = "communicationError"
 }

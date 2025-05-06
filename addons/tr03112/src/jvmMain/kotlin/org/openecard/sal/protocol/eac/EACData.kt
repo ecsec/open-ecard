@@ -37,8 +37,8 @@ class EACData {
 	/**
 	 * CVC Step Data
 	 */
-	var certificate: CardVerifiableCertificate? = null
-	var certificateDescription: CertificateDescription? = null
+	lateinit var certificate: CardVerifiableCertificate
+	lateinit var certificateDescription: CertificateDescription
 	var rawCertificateDescription: ByteArray? = null
 
 	@JvmField
@@ -47,10 +47,10 @@ class EACData {
 	/**
 	 * CHAT Step Data
 	 */
-	var requiredCHAT: CHAT? = null
-	var optionalCHAT: CHAT? = null
-	var selectedCHAT: CHAT? = null
-	var aad: AuthenticatedAuxiliaryData? = null
+	lateinit var requiredCHAT: CHAT
+	lateinit var optionalCHAT: CHAT
+	lateinit var selectedCHAT: CHAT
+	lateinit var aad: AuthenticatedAuxiliaryData
 
 	/**
 	 * PIN Step Data
@@ -62,6 +62,6 @@ class EACData {
 	/**
 	 * DID Data needed for execution
 	 */
-	var didRequest: DIDAuthenticate? = null
+	lateinit var didRequest: DIDAuthenticate
 	var paceResponse: EstablishChannelResponse? = null
 }

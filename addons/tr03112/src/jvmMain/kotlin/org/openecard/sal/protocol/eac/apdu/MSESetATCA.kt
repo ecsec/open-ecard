@@ -21,12 +21,13 @@
  */
 package org.openecard.sal.protocol.eac.apdu
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.apdu.ManageSecurityEnvironment
 import org.openecard.common.apdu.common.CardAPDUOutputStream
 import org.openecard.common.util.ByteUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implements a MSE:Set AT APDU for Chip Authentication.
@@ -36,47 +37,43 @@ import java.io.IOException
  * @author Moritz Horsch
  */
 class MSESetATCA : ManageSecurityEnvironment {
-    /**
-     * Creates a MSE:Set AT APDU for Chip Authentication.
-     */
-    constructor() : super(0x41.toByte(), AT)
+	/**
+	 * Creates a MSE:Set AT APDU for Chip Authentication.
+	 */
+	constructor() : super(0x41.toByte(), AT)
 
-    /**
-     * Creates a MSE:Set AT APDU for Chip Authentication.
-     *
-     * @param oid Chip Authentication object identifier
-     */
-    constructor(oid: ByteArray) : this(oid, null)
+	/**
+	 * Creates a MSE:Set AT APDU for Chip Authentication.
+	 *
+	 * @param oid Chip Authentication object identifier
+	 */
+	constructor(oid: ByteArray) : this(oid, null)
 
-    /**
-     * Creates a MSE:Set AT APDU for Chip Authentication.
-     *
-     * @param oID Chip Authentication object identifier
-     * @param keyID Reference of a private key
-     */
-    constructor(oID: ByteArray, keyID: ByteArray?) : super(0x41.toByte(), AT) {
-        val caos = CardAPDUOutputStream()
-        try {
-            caos.writeTLV(0x80.toByte(), oID)
+	/**
+	 * Creates a MSE:Set AT APDU for Chip Authentication.
+	 *
+	 * @param oID Chip Authentication object identifier
+	 * @param keyID Reference of a private key
+	 */
+	constructor(oID: ByteArray, keyID: ByteArray?) : super(0x41.toByte(), AT) {
+		val caos = CardAPDUOutputStream()
+		try {
+			caos.writeTLV(0x80.toByte(), oID)
 
-            if (keyID != null) {
-                caos.writeTLV(0x84.toByte(), ByteUtils.cutLeadingNullBytes(keyID))
-            }
+			if (keyID != null) {
+				caos.writeTLV(0x84.toByte(), ByteUtils.cutLeadingNullBytes(keyID))
+			}
 
-            caos.flush()
-        } catch (e: IOException) {
-            logger.error(e.message, e)
-        } finally {
-            try {
-                caos.close()
-            } catch (ignore: IOException) {
-            }
-        }
+			caos.flush()
+		} catch (e: IOException) {
+			logger.error(e) { "${e.message}" }
+		} finally {
+			try {
+				caos.close()
+			} catch (ignore: IOException) {
+			}
+		}
 
-        setData(caos.toByteArray())
-    }
-
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(MSESetATCA::class.java)
-    }
+		setData(caos.toByteArray())
+	}
 }

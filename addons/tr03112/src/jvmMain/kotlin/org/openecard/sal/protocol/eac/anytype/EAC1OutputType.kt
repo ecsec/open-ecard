@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac.anytype
 
+import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.EAC1OutputType
 import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.anytype.AuthDataResponse
@@ -34,134 +35,131 @@ import org.openecard.common.util.ByteUtils
  * @author Moritz Horsch
  * @author Tobias Wich
  */
-class EAC1OutputType
-/**
- * Creates a new EAC1OutputType.
- *
- * @param authMap DIDAuthenticationDataType
- */(private val authMap: AuthDataMap) {
-    private var retryCounter: Int? = null
-    private var chat: ByteArray?
-    private var currentCar: ByteArray
-    private var previousCar: ByteArray?
-    private var efCardAccess: ByteArray?
-    private var idpicc: ByteArray?
-    private var challenge: ByteArray?
+class EAC1OutputType(
+	private val authMap: AuthDataMap,
+) {
+	private var retryCounter: Int? = null
+	private var chat: ByteArray? = null
+	private var currentCar: ByteArray? = null
+	private var previousCar: ByteArray? = null
+	private var efCardAccess: ByteArray? = null
+	private var idpicc: ByteArray? = null
+	private var challenge: ByteArray? = null
 
-    /**
-     * Sets the retry counter.
-     *
-     * @param retryCounter Retry counter.
-     */
-    fun setRetryCounter(retryCounter: Int?) {
-        this.retryCounter = retryCounter
-    }
+	/**
+	 * Sets the retry counter.
+	 *
+	 * @param retryCounter Retry counter.
+	 */
+	fun setRetryCounter(retryCounter: Int?) {
+		this.retryCounter = retryCounter
+	}
 
-    /**
-     * Sets the Certificate Holder Authorization Template (CHAT).
-     *
-     * @param chat Certificate Holder Authorization Template (CHAT).
-     */
-    fun setCHAT(chat: ByteArray?) {
-        this.chat = chat
-    }
+	/**
+	 * Sets the Certificate Holder Authorization Template (CHAT).
+	 *
+	 * @param chat Certificate Holder Authorization Template (CHAT).
+	 */
+	fun setCHAT(chat: ByteArray?) {
+		this.chat = chat
+	}
 
-    /**
-     * Sets the most recent Certification Authority Reference (CAR).
-     *
-     * @param car Certification Authority Reference (CAR).
-     */
-    fun setCurrentCAR(car: ByteArray) {
-        this.currentCar = car
-    }
+	/**
+	 * Sets the most recent Certification Authority Reference (CAR).
+	 *
+	 * @param car Certification Authority Reference (CAR).
+	 */
+	fun setCurrentCAR(car: ByteArray) {
+		this.currentCar = car
+	}
 
-    /**
-     * Sets the previous Certification Authority Reference (CAR).
-     *
-     * @param car Certification Authority Reference (CAR).
-     */
-    fun setPreviousCAR(car: ByteArray?) {
-        this.previousCar = car
-    }
+	/**
+	 * Sets the previous Certification Authority Reference (CAR).
+	 *
+	 * @param car Certification Authority Reference (CAR).
+	 */
+	fun setPreviousCAR(car: ByteArray?) {
+		this.previousCar = car
+	}
 
-    /**
-     * Sets the file content of the EF.CardAccess.
-     *
-     * @param efCardAccess EF.CardAccess
-     */
-    fun setEFCardAccess(efCardAccess: ByteArray?) {
-        this.efCardAccess = efCardAccess
-    }
+	/**
+	 * Sets the file content of the EF.CardAccess.
+	 *
+	 * @param efCardAccess EF.CardAccess
+	 */
+	fun setEFCardAccess(efCardAccess: ByteArray?) {
+		this.efCardAccess = efCardAccess
+	}
 
-    /**
-     * Sets the card identifier ID_PICC.
-     *
-     * @param idpicc Card identifier ID_PICC.
-     */
-    fun setIDPICC(idpicc: ByteArray?) {
-        this.idpicc = idpicc
-    }
+	/**
+	 * Sets the card identifier ID_PICC.
+	 *
+	 * @param idpicc Card identifier ID_PICC.
+	 */
+	fun setIDPICC(idpicc: ByteArray?) {
+		this.idpicc = idpicc
+	}
 
-    /**
-     * Sets the challenge.
-     *
-     * @param challenge Challenge.
-     */
-    fun setChallenge(challenge: ByteArray?) {
-        this.challenge = challenge
-    }
+	/**
+	 * Sets the challenge.
+	 *
+	 * @param challenge Challenge.
+	 */
+	fun setChallenge(challenge: ByteArray?) {
+		this.challenge = challenge
+	}
 
-    val authDataType: DIDAuthenticationDataType?
-        /**
-         * Returns the DIDAuthenticationDataType.
-         *
-         * @return DIDAuthenticationDataType
-         */
-        get() {
-            val authResponse: AuthDataResponse<*> =
-                authMap.createResponse<EAC1OutputType?>(EAC1OutputType())
-            if (retryCounter != null) {
-                authResponse.addElement(
-                    RETRY_COUNTER,
-                    retryCounter.toString()
-                )
-            }
-            authResponse.addElement(
-                CHAT,
-                ByteUtils.toHexString(chat)
-            )
-            authResponse.addElement(
-                CAR,
-                String(currentCar)
-            )
-            if (previousCar != null) {
-                authResponse.addElement(
-                    CAR,
-                    kotlin.text.String(previousCar!!)
-                )
-            }
-            authResponse.addElement(
-                EF_CARDACCESS,
-                ByteUtils.toHexString(efCardAccess)
-            )
-            authResponse.addElement(
-                ID_PICC,
-                ByteUtils.toHexString(idpicc)
-            )
-            authResponse.addElement(
-                CHALLENGE,
-                ByteUtils.toHexString(challenge)
-            )
+	val authDataType: DIDAuthenticationDataType?
+		/**
+		 * Returns the DIDAuthenticationDataType.
+		 *
+		 * @return DIDAuthenticationDataType
+		 */
+		get() {
+			val authResponse: AuthDataResponse<EAC1OutputType> =
+				authMap.createResponse<EAC1OutputType>(EAC1OutputType())
+			if (retryCounter != null) {
+				authResponse.addElement(
+					RETRY_COUNTER,
+					retryCounter.toString(),
+				)
+			}
+			authResponse.addElement(
+				CHAT,
+				ByteUtils.toHexString(chat),
+			)
+			authResponse.addElement(
+				CAR,
+				String(currentCar!!),
+			)
+			if (previousCar != null) {
+				authResponse.addElement(
+					CAR,
+					String(previousCar!!),
+				)
+			}
+			authResponse.addElement(
+				EF_CARDACCESS,
+				ByteUtils.toHexString(efCardAccess),
+			)
+			authResponse.addElement(
+				ID_PICC,
+				ByteUtils.toHexString(idpicc),
+			)
+			authResponse.addElement(
+				CHALLENGE,
+				ByteUtils.toHexString(challenge),
+			)
 
-            return authResponse.getResponse()
-        }
+			return authResponse.getResponse()
+		}
 
-    companion object {
-        const val RETRY_COUNTER: String = "RetryCounter"
-        const val CHAT: String = "CertificateHolderAuthorizationTemplate"
-        const val CAR: String = "CertificationAuthorityReference"
-        const val EF_CARDACCESS: String = "EFCardAccess"
-        const val ID_PICC: String = "IDPICC"
-        const val CHALLENGE: String = "Challenge"
-    }
+	companion object {
+		const val RETRY_COUNTER: String = "RetryCounter"
+		const val CHAT: String = "CertificateHolderAuthorizationTemplate"
+		const val CAR: String = "CertificationAuthorityReference"
+		const val EF_CARDACCESS: String = "EFCardAccess"
+		const val ID_PICC: String = "IDPICC"
+		const val CHALLENGE: String = "Challenge"
+	}
 }

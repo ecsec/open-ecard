@@ -21,12 +21,11 @@
  */
 package org.openecard.binding.tctoken
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidTCTokenException
 import org.openecard.common.I18n
 import org.openecard.common.io.LimitedInputStream
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXNotRecognizedException
@@ -34,9 +33,10 @@ import org.xml.sax.SAXNotSupportedException
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
-import javax.annotation.Nonnull
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParserFactory
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implements a parser for TCTokens.
@@ -45,79 +45,71 @@ import javax.xml.parsers.SAXParserFactory
  * @author Tobias Wich
  */
 class TCTokenParser {
-    private val lang: I18n? = I18n.getTranslation("tr03112")
-    private val saxFactory: SAXParserFactory
-    private val saxHandler: TCTokenSAXHandler
+	private val lang: I18n? = I18n.getTranslation("tr03112")
+	private val saxFactory: SAXParserFactory = SAXParserFactory.newInstance()
+	private val saxHandler: TCTokenSAXHandler = TCTokenSAXHandler()
 
-    /**
-     * Creates a new parser for TCTokens.
-     *
-     * @throws IllegalArgumentException Thrown when the parser could not be initialized with the specified parameters.
-     */
-    init {
-        saxFactory = SAXParserFactory.newInstance()
-        saxHandler = TCTokenSAXHandler()
+	/**
+	 * Creates a new parser for TCTokens.
+	 *
+	 * @throws IllegalArgumentException Thrown when the parser could not be initialized with the specified parameters.
+	 */
+	init {
 
-        try {
-            saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-        } catch (ex: ParserConfigurationException) {
-            LOG.warn(ex.message, ex)
-            // Android doesn't support the corresponding xml feature
-            // TODO: translate when exception changes
-            //throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
-        } catch (ex: SAXNotRecognizedException) {
-            LOG.warn(ex.message, ex)
-        } catch (ex: SAXNotSupportedException) {
-            LOG.warn(ex.message, ex)
-        }
-    }
+		try {
+			saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+		} catch (ex: ParserConfigurationException) {
+			logger.warn(ex.message, ex)
+			// Android doesn't support the corresponding xml feature
+			// TODO: translate when exception changes
+			// throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
+		} catch (ex: SAXNotRecognizedException) {
+			logger.warn(ex.message, ex)
+		} catch (ex: SAXNotSupportedException) {
+			logger.warn(ex.message, ex)
+		}
+	}
 
-    /**
-     * Parse TCTokens from the input stream.
-     *
-     * @param data Data
-     * @return List of TCTokens
-     * @throws InvalidTCTokenException Thrown in case the SAX parser had an error.
-     */
-    @Throws(InvalidTCTokenException::class)
-    fun parse(@Nonnull data: String): MutableList<TCToken?>? {
-        return parse(ByteArrayInputStream(data.toByteArray()))
-    }
+	/**
+	 * Parse TCTokens from the input stream.
+	 *
+	 * @param data Data
+	 * @return List of TCTokens
+	 * @throws InvalidTCTokenException Thrown in case the SAX parser had an error.
+	 */
+	@Throws(InvalidTCTokenException::class)
+	fun parse(data: String): List<TCToken> = parse(ByteArrayInputStream(data.toByteArray()))
 
-    /**
-     * Parse TCTokens from given the input stream.
-     *
-     * @param inputStream Input stream
-     * @return List of TCTokens
-     * @throws InvalidTCTokenException Thrown in case the SAX parser had an error reading the stream.
-     */
-    @Throws(InvalidTCTokenException::class)
-    fun parse(@Nonnull inputStream: InputStream): MutableList<TCToken?>? {
-        try {
-            // Parse TCTokens
-            val saxParser = saxFactory.newSAXParser()
-            val reader = saxParser.getXMLReader()
-            reader.setContentHandler(saxHandler)
-            val stream = LimitedInputStream(inputStream)
-            reader.parse(InputSource(stream))
+	/**
+	 * Parse TCTokens from given the input stream.
+	 *
+	 * @param inputStream Input stream
+	 * @return List of TCTokens
+	 * @throws InvalidTCTokenException Thrown in case the SAX parser had an error reading the stream.
+	 */
+	@Throws(InvalidTCTokenException::class)
+	fun parse(inputStream: InputStream): List<TCToken> {
+		try {
+			// Parse TCTokens
+			val saxParser = saxFactory.newSAXParser()
+			val reader = saxParser.getXMLReader()
+			reader.setContentHandler(saxHandler)
+			val stream = LimitedInputStream(inputStream)
+			reader.parse(InputSource(stream))
 
-            // Get TCTokens
-            val tokens = saxHandler.getTCTokens()
+			// Get TCTokens
+			val tokens = saxHandler.tCTokens
 
-            return tokens
-        } catch (ex: ParserConfigurationException) {
-            LOG.error(ex.message, ex)
-            throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
-        } catch (ex: SAXException) {
-            LOG.error(ex.message, ex)
-            throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
-        } catch (ex: IOException) {
-            LOG.error(ex.message, ex)
-            throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
-        }
-    }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(TCTokenParser::class.java)
-    }
+			return tokens
+		} catch (ex: ParserConfigurationException) {
+			logger.error(ex) { "${ex.message}" }
+			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
+		} catch (ex: SAXException) {
+			logger.error(ex) { "${ex.message}" }
+			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
+		} catch (ex: IOException) {
+			logger.error(ex) { "${ex.message}" }
+			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
+		}
+	}
 }

@@ -51,76 +51,76 @@ import java.util.concurrent.Callable
  * @author Hans-Martin Haase
  */
 class PAOSTask(
-    private val dispatcher: Dispatcher,
-    private val connectionHandle: ConnectionHandleType?,
-    private val supportedDIDs: MutableList<String?>,
-    private val tokenRequest: TCTokenRequest?,
-    private val schemaValidator: Promise<DocumentSchemaValidator?>
-) : Callable<StartPAOSResponse?> {
-    @Throws(
-        MalformedURLException::class,
-        PAOSException::class,
-        DispatcherException::class,
-        InvocationTargetException::class,
-        ConnectionError::class,
-        PAOSConnectionException::class
-    )
-    override fun call(): StartPAOSResponse? {
-        try {
-            val tlsHandler = TlsConnectionHandler(tokenRequest)
-            tlsHandler.setUpClient()
+	private val dispatcher: Dispatcher,
+	private val connectionHandle: ConnectionHandleType?,
+	private val supportedDIDs: MutableList<String?>,
+	private val tokenRequest: TCTokenRequest,
+	private val schemaValidator: Promise<DocumentSchemaValidator>,
+) : Callable<StartPAOSResponse> {
+	@Throws(
+		MalformedURLException::class,
+		PAOSException::class,
+		DispatcherException::class,
+		InvocationTargetException::class,
+		ConnectionError::class,
+		PAOSConnectionException::class,
+	)
+	override fun call(): StartPAOSResponse {
+		try {
+			val tlsHandler = TlsConnectionHandler(tokenRequest)
+			tlsHandler.setUpClient()
 
-            val v: DocumentSchemaValidator?
-            try {
-                v = schemaValidator.deref()
-            } catch (ex: InterruptedException) {
-                // TODO: add i18n
-                throw PAOSException(ErrorTranslations.PAOS_INTERRUPTED)
-            }
+			val v: DocumentSchemaValidator
+			try {
+				v = schemaValidator.deref()!!
+			} catch (ex: InterruptedException) {
+				// TODO: add i18n
+				throw PAOSException(ErrorTranslations.PAOS_INTERRUPTED)
+			}
 
-            // Set up PAOS connection
-            val p = PAOS(dispatcher, tlsHandler, v!!)
+			// Set up PAOS connection
+			val p = PAOS(dispatcher, tlsHandler, v)
 
-            // Create StartPAOS message
-            val sp = StartPAOS()
-            sp.setProfile(ECardConstants.Profile.ECARD_1_1)
-            sp.getConnectionHandle().add(this.handleForServer)
-            sp.setSessionIdentifier(tlsHandler.getSessionId())
+			// Create StartPAOS message
+			val sp = StartPAOS()
+			sp.setProfile(ECardConstants.Profile.ECARD_1_1)
+			sp.getConnectionHandle().add(this.handleForServer)
+			sp.setSessionIdentifier(tlsHandler.getSessionId())
 
-            val ua = StartPAOS.UserAgent()
-            ua.setName(name)
-            ua.setVersionMajor(BigInteger.valueOf(major.toLong()))
-            ua.setVersionMinor(BigInteger.valueOf(minor.toLong()))
-            ua.setVersionSubminor(BigInteger.valueOf(patch.toLong()))
-            sp.setUserAgent(ua)
+			val ua = StartPAOS.UserAgent()
+			ua.setName(name)
+			ua.setVersionMajor(BigInteger.valueOf(major.toLong()))
+			ua.setVersionMinor(BigInteger.valueOf(minor.toLong()))
+			ua.setVersionSubminor(BigInteger.valueOf(patch.toLong()))
+			sp.setUserAgent(ua)
 
-            val sv = StartPAOS.SupportedAPIVersions()
-            sv.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR)
-            sv.setMinor(ECardConstants.ECARD_API_VERSION_MINOR)
-            sv.setSubminor(ECardConstants.ECARD_API_VERSION_SUBMINOR)
-            sp.getSupportedAPIVersions().add(sv)
+			val sv = StartPAOS.SupportedAPIVersions()
+			sv.setMajor(ECardConstants.ECARD_API_VERSION_MAJOR)
+			sv.setMinor(ECardConstants.ECARD_API_VERSION_MINOR)
+			sv.setSubminor(ECardConstants.ECARD_API_VERSION_SUBMINOR)
+			sp.getSupportedAPIVersions().add(sv)
 
-            sp.getSupportedDIDProtocols().addAll(supportedDIDs)
-            return p.sendStartPAOS(sp)
-        } finally {
-            try {
-                TCTokenHandler.Companion.disconnectHandle(dispatcher, connectionHandle)
-            } catch (ex: Exception) {
-                LOG.warn("Error disconnecting finished handle.", ex)
-            }
-        }
-    }
+			sp.getSupportedDIDProtocols().addAll(supportedDIDs)
+			return p.sendStartPAOS(sp)
+		} finally {
+			try {
+				TCTokenHandler.Companion.disconnectHandle(dispatcher, connectionHandle)
+			} catch (ex: Exception) {
+				LOG.warn("Error disconnecting finished handle.", ex)
+			}
+		}
+	}
 
-    private val handleForServer: ConnectionHandleType
-        get() {
-            val result =
-                HandlerUtils.copyHandle(connectionHandle)
-            // this is our own extension and servers might not understand it
-            result.setSlotInfo(null)
-            return result
-        }
+	private val handleForServer: ConnectionHandleType
+		get() {
+			val result =
+				HandlerUtils.copyHandle(connectionHandle)
+			// this is our own extension and servers might not understand it
+			result.setSlotInfo(null)
+			return result
+		}
 
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(PAOSTask::class.java)
-    }
+	companion object {
+		private val LOG: Logger = LoggerFactory.getLogger(PAOSTask::class.java)
+	}
 }

@@ -23,7 +23,6 @@ package org.openecard.binding.tctoken
 
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
-import org.openecard.crypto.tls.CertificateVerificationException
 import org.openecard.crypto.tls.CertificateVerifier
 
 /**
@@ -32,14 +31,16 @@ import org.openecard.crypto.tls.CertificateVerifier
  * @author Tobias Wich
  */
 class SaveEidServerCertHandler : CertificateVerifier {
-    var firstCert: Boolean = true
+	var firstCert: Boolean = true
 
-    @Throws(CertificateVerificationException::class)
-    override fun isValid(chain: TlsServerCertificate?, hostOrIP: String?) {
-        if (firstCert) {
-            firstCert = false
-            val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-            dynCtx.put(TR03112Keys.EIDSERVER_CERTIFICATE, chain)
-        }
-    }
+	override fun isValid(
+		chain: TlsServerCertificate,
+		hostOrIP: String,
+	) {
+		if (firstCert) {
+			firstCert = false
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			dynCtx.put(TR03112Keys.EIDSERVER_CERTIFICATE, chain)
+		}
+	}
 }

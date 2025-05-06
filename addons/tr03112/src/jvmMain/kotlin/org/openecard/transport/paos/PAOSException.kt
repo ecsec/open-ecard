@@ -25,6 +25,8 @@ import org.openecard.common.I18n
 import org.openecard.common.I18nException
 import org.openecard.common.I18nKey
 
+private val lang: I18n = I18n.getTranslation("tr03112")
+
 /**
  * Exception for the PAOS system.
  * This exception abstracts transport specific exceptions.
@@ -32,42 +34,37 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 class PAOSException : I18nException {
-    var additionalResultMinor: String? = null
+	var additionalResultMinor: String? = null
 
-    /**
-     * Creates an instance and initializes the exception with a cause.
-     *
-     * @param cause The exception causing the error.
-     */
-    constructor(cause: Throwable?) : super(cause)
+	/**
+	 * Creates an instance and initializes the exception with a cause.
+	 *
+	 * @param cause The exception causing the error.
+	 */
+	constructor(cause: Throwable?) : super(cause)
 
-    /**
-     * Creates an instance and initializes the exception with a message and a cause.
-     *
-     * @param msg The message describing the error.
-     * @param cause The exception causing the error.
-     */
-    constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+	/**
+	 * Creates an instance and initializes the exception with a message and a cause.
+	 *
+	 * @param msg The message describing the error.
+	 * @param cause The exception causing the error.
+	 */
+	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
 
-    /**
-     * Creates an instance and initializes the exception with a localized message.
-     *
-     * @param key Translation key.
-     * @param params Parameters adding values into the translation.
-     */
-    constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	/**
+	 * Creates an instance and initializes the exception with a localized message.
+	 *
+	 * @param key Translation key.
+	 * @param params Parameters adding values into the translation.
+	 */
+	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
 
-    /**
-     * Creates an instance and initializes the exception with a localized message.
-     *
-     * @param key Translation key.
-     * @param cause The exception causing the error.
-     * @param params Parameters adding values into the translation.
-     */
-    constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
-
-    companion object {
-        private const val serialVersionUID = 1L
-        private val lang: I18n = I18n.getTranslation("tr03112")
-    }
+	/**
+	 * Creates an instance and initializes the exception with a localized message.
+	 *
+	 * @param key Translation key.
+	 * @param cause The exception causing the error.
+	 * @param params Parameters adding values into the translation.
+	 */
+	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 }

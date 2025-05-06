@@ -10,6 +10,7 @@
 package org.openecard.binding.tctoken
 
 import org.openecard.common.DynamicContext
+import org.openecard.common.ECardConstants.NPA_CARD_TYPE
 import org.openecard.httpcore.ResourceContextLoader
 import org.openecard.httpcore.cookies.CookieManager
 
@@ -19,27 +20,32 @@ import org.openecard.httpcore.cookies.CookieManager
  * @author Tobias Wich
  */
 class TrResourceContextLoader : ResourceContextLoader() {
-    val cookieManager: CookieManager?
-        get() {
-            val dynCtx =
-                DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-            val cManager =
-                dynCtx.get(TR03112Keys.COOKIE_MANAGER) as CookieManager?
-            return cManager
-        }
+	override var cookieManager: CookieManager?
+		get() {
+			val dynCtx =
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val cManager =
+				dynCtx.get(TR03112Keys.COOKIE_MANAGER) as CookieManager?
+			return cManager
+		}
+		set(value) {
+			val dynCtx =
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			dynCtx.put(TR03112Keys.COOKIE_MANAGER, value)
+		}
 
-    val isPKIXVerify: Boolean
-        get() {
-            val dynCtx =
-                DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-            val cardTypeP =
-                dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE)
-            val cardType = cardTypeP.derefNonblocking()
-            // verify when the value is not set or when no nPA is requested
-            if (cardType != null && NPA_CARD_TYPE != cardType) {
-                return true
-            } else {
-                return false
-            }
-        }
+	override val isPKIXVerify: Boolean
+		get() {
+			val dynCtx =
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val cardTypeP =
+				dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE)
+			val cardType = cardTypeP.derefNonblocking()
+			// verify when the value is not set or when no nPA is requested
+			if (cardType != null && NPA_CARD_TYPE != cardType) {
+				return true
+			} else {
+				return false
+			}
+		}
 }

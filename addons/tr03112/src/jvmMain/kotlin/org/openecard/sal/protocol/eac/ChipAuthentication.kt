@@ -51,82 +51,89 @@ class ChipAuthentication
  *
  * @param dispatcher Dispatcher
  * @param slotHandle Slot handle
- */(private val dispatcher: Dispatcher, private val slotHandle: ByteArray?) {
-    /**
-     * Initializes the Chip Authentication protocol.
-     * Sends an MSE:Set AT APDU. (Protocol step 1)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.1.
-     *
-     * @param oID Chip Authentication object identifier
-     * @param keyID Key identifier
-     * @throws ProtocolException
-     */
-    @Throws(ProtocolException::class)
-    fun mseSetAT(oID: ByteArray?, keyID: ByteArray?) {
-        try {
-            val mseSetAT: CardCommandAPDU = MSESetATCA(oID, keyID)
-            mseSetAT.transmit(dispatcher, slotHandle)
-        } catch (e: APDUException) {
-            throw ProtocolException(e.result)
-        }
-    }
+ */
+(
+	private val dispatcher: Dispatcher,
+	private val slotHandle: ByteArray?,
+) {
+	/**
+	 * Initializes the Chip Authentication protocol.
+	 * Sends an MSE:Set AT APDU. (Protocol step 1)
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.1.
+	 *
+	 * @param oID Chip Authentication object identifier
+	 * @param keyID Key identifier
+	 * @throws ProtocolException
+	 */
+	@Throws(ProtocolException::class)
+	fun mseSetAT(
+		oID: ByteArray,
+		keyID: ByteArray?,
+	) {
+		try {
+			val mseSetAT: CardCommandAPDU = MSESetATCA(oID, keyID)
+			mseSetAT.transmit(dispatcher, slotHandle)
+		} catch (e: APDUException) {
+			throw ProtocolException(e.result)
+		}
+	}
 
-    /**
-     * Performs a General Authenticate.
-     * Sends an General Authenticate APDU. (Protocol step 2)
-     * See BSI-TR-03110, version 2.10, part 3, B.11.2.
-     *
-     * @param key Ephemeral Public Key
-     * @return Response APDU
-     * @throws ProtocolException
-     */
-    @Throws(ProtocolException::class)
-    fun generalAuthenticate(key: ByteArray): ByteArray? {
-        var key = key
-        try {
-            if (key[0] != 0x04.toByte()) {
-                key = ByteUtils.concatenate(0x04.toByte(), key)
-            }
-            val generalAuthenticate: CardCommandAPDU = GeneralAuthenticate(0x80.toByte(), key)
-            val response = generalAuthenticate.transmit(dispatcher, slotHandle)
+	/**
+	 * Performs a General Authenticate.
+	 * Sends an General Authenticate APDU. (Protocol step 2)
+	 * See BSI-TR-03110, version 2.10, part 3, B.11.2.
+	 *
+	 * @param key Ephemeral Public Key
+	 * @return Response APDU
+	 * @throws ProtocolException
+	 */
+	@Throws(ProtocolException::class)
+	fun generalAuthenticate(key: ByteArray): ByteArray? {
+		var key = key
+		try {
+			if (key[0] != 0x04.toByte()) {
+				key = ByteUtils.concatenate(0x04.toByte(), key)
+			}
+			val generalAuthenticate: CardCommandAPDU = GeneralAuthenticate(0x80.toByte(), key)
+			val response = generalAuthenticate.transmit(dispatcher, slotHandle)
 
-            return response.getData()
-        } catch (e: APDUException) {
-            throw ProtocolException(e.result)
-        }
-    }
+			return response.getData()
+		} catch (e: APDUException) {
+			throw ProtocolException(e.result)
+		}
+	}
 
-    /**
-     * Reads the EFCardSecurity from the card.
-     *
-     * @return EFCardSecurtiy
-     * @throws ProtocolException Thrown in case there is a problem reading the file.
-     */
-    @Throws(ProtocolException::class)
-    fun readEFCardSecurity(): ByteArray {
-        try {
-            val file = ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID)
-            val resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null, FileControlParameters.FCP)
-            val efCardSecurityFCP = FCP(TLV.fromBER(resp.getData()))
-            val efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle, false)
-            return efCardSecurity
-        } catch (ex: APDUException) {
-            throw ProtocolException(ex.result)
-        } catch (ex: TLVException) {
-            throw ProtocolException("Failed to parse FCP.", ex)
-        }
-    }
+	/**
+	 * Reads the EFCardSecurity from the card.
+	 *
+	 * @return EFCardSecurtiy
+	 * @throws ProtocolException Thrown in case there is a problem reading the file.
+	 */
+	@Throws(ProtocolException::class)
+	fun readEFCardSecurity(): ByteArray {
+		try {
+			val file = ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID)
+			val resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null, FileControlParameters.FCP)
+			val efCardSecurityFCP = FCP(TLV.fromBER(resp.getData()))
+			val efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle, false)
+			return efCardSecurity
+		} catch (ex: APDUException) {
+			throw ProtocolException(ex.result)
+		} catch (ex: TLVException) {
+			throw ProtocolException("Failed to parse FCP.", ex)
+		}
+	}
 
-    /**
-     * Destroys a previously established PACE channel.
-     */
-    fun destroySecureChannel() {
-        val destroyChannel = DestroyChannel()
-        destroyChannel.setSlotHandle(slotHandle)
-        dispatcher.safeDeliver(destroyChannel)
-    }
+	/**
+	 * Destroys a previously established PACE channel.
+	 */
+	fun destroySecureChannel() {
+		val destroyChannel = DestroyChannel()
+		destroyChannel.setSlotHandle(slotHandle)
+		dispatcher.safeDeliver(destroyChannel)
+	}
 
-    companion object {
-        private val LOG: Logger? = LoggerFactory.getLogger(ChipAuthentication::class.java)
-    }
+	companion object {
+		private val LOG: Logger? = LoggerFactory.getLogger(ChipAuthentication::class.java)
+	}
 }

@@ -25,4 +25,6 @@ package org.openecard.sal.protocol.eac.gui
  *
  * @author Florian Otto
  */
-class CanLengthInvalidException(msg: String?) : Exception(msg)
+class CanLengthInvalidException(
+	msg: String?,
+) : Exception(msg)

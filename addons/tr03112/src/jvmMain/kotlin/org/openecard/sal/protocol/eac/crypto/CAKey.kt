@@ -21,7 +21,13 @@
  */
 package org.openecard.sal.protocol.eac.crypto
 
-import org.openecard.bouncycastle.crypto.params.*
+import org.openecard.bouncycastle.crypto.params.AsymmetricKeyParameter
+import org.openecard.bouncycastle.crypto.params.ECDomainParameters
+import org.openecard.bouncycastle.crypto.params.ECPrivateKeyParameters
+import org.openecard.bouncycastle.crypto.params.ECPublicKeyParameters
+import org.openecard.bouncycastle.crypto.params.ElGamalParameters
+import org.openecard.bouncycastle.crypto.params.ElGamalPrivateKeyParameters
+import org.openecard.bouncycastle.crypto.params.ElGamalPublicKeyParameters
 import org.openecard.bouncycastle.jce.spec.ECParameterSpec
 import org.openecard.bouncycastle.jce.spec.ElGamalParameterSpec
 import org.openecard.common.tlv.TLV
@@ -36,171 +42,171 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 
+private val LOG: Logger = LoggerFactory.getLogger(CAKey::class.java)
+private val RAND: SecureRandom = SecureRandomFactory.create(32)
+private var counter: Long = 0
+
+private fun reseed() {
+	counter++
+	RAND.setSeed(counter)
+	RAND.setSeed(System.nanoTime())
+}
+
 /**
  * Implements an abstract key for chip authentication.
  *
  * @author Moritz Horsch
  */
-class CAKey
-/**
- * Creates a new key for CA.
- *
- * @param cdp CADomainParameter
- */(private val cdp: CADomainParameter) {
-    private var sk: AsymmetricKeyParameter? = null
-    private var pk: AsymmetricKeyParameter? = null
+class CAKey(
+	private val cdp: CADomainParameter,
+) {
+	private var sk: AsymmetricKeyParameter? = null
+	private var pk: AsymmetricKeyParameter? = null
 
-    /**
-     * Decodes a public key from a byte array.
-     *
-     * @param data Encoded key
-     * @return Decoded key
-     * @throws TLVException
-     * @throws IllegalArgumentException
-     */
-    @Throws(TLVException::class)
-    fun decodePublicKey(data: ByteArray): ByteArray? {
-        val keyBytes: ByteArray?
+	/**
+	 * Decodes a public key from a byte array.
+	 *
+	 * @param data Encoded key
+	 * @return Decoded key
+	 * @throws TLVException
+	 * @throws IllegalArgumentException
+	 */
+	@Throws(TLVException::class)
+	fun decodePublicKey(data: ByteArray): ByteArray? {
+		val keyBytes: ByteArray?
 
-        if (data[0] == 0x7C.toByte()) {
-            keyBytes = TLV.fromBER(data).getChild().getValue()
-        } else if (data[0].toInt() != 4) {
-            keyBytes = ByteUtils.concatenate(0x04.toByte(), data)
-        } else {
-            keyBytes = data
-        }
+		if (data[0] == 0x7C.toByte()) {
+			keyBytes = TLV.fromBER(data).getChild().getValue()
+		} else if (data[0].toInt() != 4) {
+			keyBytes = ByteUtils.concatenate(0x04.toByte(), data)
+		} else {
+			keyBytes = data
+		}
 
-        if (cdp.isECDH) {
-            val p = cdp.parameter as ECParameterSpec
-            val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
+		if (cdp.isECDH) {
+			val p = cdp.parameter as ECParameterSpec
+			val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
 
-            val q = p.getCurve().decodePoint(keyBytes)
-            pk = ECPublicKeyParameters(q, ecp)
+			val q = p.getCurve().decodePoint(keyBytes)
+			pk = ECPublicKeyParameters(q, ecp)
 
-            return this.encodedPublicKey
-        } else if (cdp.isDH) {
-            //TODO
-            LOG.error("Not implemented yet.")
-            throw UnsupportedOperationException("Not implemented yet.")
-        } else {
-            throw IllegalArgumentException()
-        }
-    }
+			return this.encodedPublicKey
+		} else if (cdp.isDH) {
+			// TODO
+			LOG.error("Not implemented yet.")
+			throw UnsupportedOperationException("Not implemented yet.")
+		} else {
+			throw IllegalArgumentException()
+		}
+	}
 
-    /**
-     * Generate a key pair.
-     */
-    fun generateKeyPair() {
-        reseed()
-        if (cdp.isDH) {
-            val p = cdp.parameter as ElGamalParameterSpec
-            val numBits = p.getG().bitLength()
-            val d: BigInteger = BigInteger(numBits, RAND)
-            val egp = ElGamalParameters(p.getP(), p.getG())
+	/**
+	 * Generate a key pair.
+	 */
+	fun generateKeyPair() {
+		reseed()
+		if (cdp.isDH) {
+			val p = cdp.parameter as ElGamalParameterSpec
+			val numBits = p.getG().bitLength()
+			val d: BigInteger = BigInteger(numBits, RAND)
+			val egp = ElGamalParameters(p.getP(), p.getG())
 
-            sk = ElGamalPrivateKeyParameters(d, egp)
-            pk = ElGamalPublicKeyParameters(egp.getG().multiply(d), egp)
-        } else if (cdp.isECDH) {
-            val p = cdp.parameter as ECParameterSpec
-            val numBits = p.getN().bitLength()
-            val d: BigInteger = BigInteger(numBits, RAND)
-            val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
+			sk = ElGamalPrivateKeyParameters(d, egp)
+			pk = ElGamalPublicKeyParameters(egp.getG().multiply(d), egp)
+		} else if (cdp.isECDH) {
+			val p = cdp.parameter as ECParameterSpec
+			val numBits = p.getN().bitLength()
+			val d: BigInteger = BigInteger(numBits, RAND)
+			val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
 
-            sk = ECPrivateKeyParameters(d, ecp)
-            pk = ECPublicKeyParameters(ecp.getG().multiply(d), ecp)
-        } else {
-            throw IllegalArgumentException()
-        }
-    }
+			sk = ECPrivateKeyParameters(d, ecp)
+			pk = ECPublicKeyParameters(ecp.getG().multiply(d), ecp)
+		} else {
+			throw IllegalArgumentException()
+		}
+	}
 
-    val publicKey: AsymmetricKeyParameter
-        /**
-         * Returns the public key.
-         *
-         * @return Public key
-         */
-        get() = pk
+	val publicKey: AsymmetricKeyParameter
+		/**
+		 * Returns the public key.
+		 *
+		 * @return Public key
+		 */
+		get() = pk!!
 
-    val encodedPublicKey: ByteArray?
-        /**
-         * Returns the byte encoded public key.
-         *
-         * @return Public key
-         */
-        get() {
-            if (cdp.isDH) {
-                return (pk as ElGamalPublicKeyParameters).getY().toByteArray()
-            } else if (cdp.isECDH) {
-                return (pk as ECPublicKeyParameters).getQ().getEncoded(false)
-            } else {
-                throw IllegalArgumentException()
-            }
-        }
+	val encodedPublicKey: ByteArray?
+		/**
+		 * Returns the byte encoded public key.
+		 *
+		 * @return Public key
+		 */
+		get() {
+			if (cdp.isDH) {
+				return (pk as ElGamalPublicKeyParameters).getY().toByteArray()
+			} else if (cdp.isECDH) {
+				return (pk as ECPublicKeyParameters).getQ().getEncoded(false)
+			} else {
+				throw IllegalArgumentException()
+			}
+		}
 
-    val encodedCompressedPublicKey: ByteArray?
-        /**
-         * Returns the byte encoded compressed public key.
-         *
-         * @return Public key
-         */
-        get() {
-            if (cdp.isDH) {
-                try {
-                    val md = MessageDigest.getInstance("SHA-1")
-                    val input =
-                        (pk as ElGamalPublicKeyParameters).getY()
-                            .toByteArray()
-                    val compKey = md.digest(input)
+	val encodedCompressedPublicKey: ByteArray?
+		/**
+		 * Returns the byte encoded compressed public key.
+		 *
+		 * @return Public key
+		 */
+		get() {
+			if (cdp.isDH) {
+				try {
+					val md = MessageDigest.getInstance("SHA-1")
+					val input =
+						(pk as ElGamalPublicKeyParameters)
+							.getY()
+							.toByteArray()
+					val compKey = md.digest(input)
 
-                    return compKey
-                } catch (e: NoSuchAlgorithmException) {
-                    LOG.error(e.message, e)
-                    throw RuntimeException(e)
-                }
-            } else if (cdp.isECDH) {
-                val compKey =
-                    (pk as ECPublicKeyParameters).getQ().getAffineXCoord()
-                        .toBigInteger().toByteArray()
-                return ByteUtils.cutLeadingNullByte(compKey)
-            } else {
-                throw IllegalArgumentException()
-            }
-        }
+					return compKey
+				} catch (e: NoSuchAlgorithmException) {
+					LOG.error(e.message, e)
+					throw RuntimeException(e)
+				}
+			} else if (cdp.isECDH) {
+				val compKey =
+					(pk as ECPublicKeyParameters)
+						.getQ()
+						.getAffineXCoord()
+						.toBigInteger()
+						.toByteArray()
+				return ByteUtils.cutLeadingNullByte(compKey)
+			} else {
+				throw IllegalArgumentException()
+			}
+		}
 
-    val privateKey: AsymmetricKeyParameter
-        /**
-         * Returns the private key.
-         *
-         * @return Private key
-         */
-        get() = sk
+	val privateKey: AsymmetricKeyParameter
+		/**
+		 * Returns the private key.
+		 *
+		 * @return Private key
+		 */
+		get() = sk!!
 
-    val encodedPrivateKey: ByteArray
-        /**
-         * Returns the byte encoded private key.
-         *
-         * @return Private key
-         */
-        get() {
-            if (cdp.isDH) {
-                return (sk as ElGamalPrivateKeyParameters).getX()
-                    .toByteArray()
-            } else if (cdp.isECDH) {
-                return (sk as ECPrivateKeyParameters).getD().toByteArray()
-            } else {
-                throw IllegalArgumentException()
-            }
-        }
-
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(CAKey::class.java)
-        private val RAND: SecureRandom = SecureRandomFactory.create(32)
-        private var counter: Long = 0
-
-        private fun reseed() {
-            counter++
-            RAND.setSeed(counter)
-            RAND.setSeed(System.nanoTime())
-        }
-    }
+	val encodedPrivateKey: ByteArray
+		/**
+		 * Returns the byte encoded private key.
+		 *
+		 * @return Private key
+		 */
+		get() {
+			if (cdp.isDH) {
+				return (sk as ElGamalPrivateKeyParameters)
+					.getX()
+					.toByteArray()
+			} else if (cdp.isECDH) {
+				return (sk as ECPrivateKeyParameters).getD().toByteArray()
+			} else {
+				throw IllegalArgumentException()
+			}
+		}
 }

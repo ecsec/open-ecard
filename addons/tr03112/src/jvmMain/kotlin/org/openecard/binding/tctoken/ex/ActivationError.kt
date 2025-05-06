@@ -34,34 +34,53 @@ import javax.annotation.Nonnull
  * @author Tobias Wich
  */
 abstract class ActivationError : I18nException {
-    val bindingResult: BindingResult
+	val bindingResult: BindingResult
 
-    constructor(@Nonnull result: BindingResult, @Nonnull message: String) : super(message) {
-        this.bindingResult = result.setResultMessage(getLocalizedMessage())
-    }
+	constructor(
+		@Nonnull result: BindingResult,
+		@Nonnull message: String,
+	) : super(message) {
+		this.bindingResult = result.setResultMessage(localizedMessage)
+	}
 
-    constructor(@Nonnull result: BindingResult, @Nonnull message: String, cause: Throwable?) : super(message, cause) {
-        this.bindingResult = result.setResultMessage(getLocalizedMessage())
-    }
+	constructor(
+		@Nonnull result: BindingResult,
+		@Nonnull message: String,
+		cause: Throwable?,
+	) : super(message, cause) {
+		this.bindingResult = result.setResultMessage(localizedMessage)
+	}
 
-    constructor(@Nonnull result: BindingResult, cause: Throwable?) : super(cause) {
-        this.bindingResult = result.setResultMessage(getLocalizedMessage())
-    }
+	constructor(
+		@Nonnull result: BindingResult,
+		cause: Throwable?,
+	) : super(cause) {
+		this.bindingResult = result.setResultMessage(localizedMessage)
+	}
 
-    constructor(@Nonnull result: BindingResult, key: I18nKey?, vararg params: Any?) : super(lang, key, *params) {
-        this.bindingResult = result.setResultMessage(getLocalizedMessage())
-    }
+	constructor(
+		@Nonnull result: BindingResult,
+		key: I18nKey?,
+		vararg params: Any?,
+	) : super(lang, key, *params) {
+		this.bindingResult = result.setResultMessage(localizedMessage)
+	}
 
-    constructor(@Nonnull result: BindingResult, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        lang,
-        key,
-        cause,
-        *params
-    ) {
-        this.bindingResult = result.setResultMessage(getLocalizedMessage())
-    }
+	constructor(
+		@Nonnull result: BindingResult,
+		key: I18nKey?,
+		cause: Throwable?,
+		vararg params: Any?,
+	) : super(
+		lang,
+		key,
+		cause,
+		*params,
+	) {
+		this.bindingResult = result.setResultMessage(getLocalizedMessage())
+	}
 
-    companion object {
-        protected val lang: I18n = I18n.getTranslation("tr03112")
-    }
+	companion object {
+		protected val lang: I18n = I18n.getTranslation("tr03112")
+	}
 }

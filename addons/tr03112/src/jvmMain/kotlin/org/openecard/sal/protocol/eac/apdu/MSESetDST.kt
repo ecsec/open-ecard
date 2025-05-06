@@ -21,11 +21,12 @@
  */
 package org.openecard.sal.protocol.eac.apdu
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.apdu.ManageSecurityEnvironment
 import org.openecard.common.apdu.common.CardAPDUOutputStream
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
+
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implements a MSE:Set DST APDU for Terminal Authentication.
@@ -34,35 +35,31 @@ import java.io.IOException
  * @author Moritz Horsch
  */
 class MSESetDST : ManageSecurityEnvironment {
-    /**
-     * Creates a new MSE:Set DST APDU.
-     */
-    constructor() : super(0x81.toByte(), DST)
+	/**
+	 * Creates a new MSE:Set DST APDU.
+	 */
+	constructor() : super(0x81.toByte(), DST)
 
-    /**
-     * Creates a new MSE:Set DST APDU.
-     *
-     * @param chr Certificate Holder Reference
-     */
-    constructor(chr: ByteArray) : super(0x81.toByte(), DST) {
-        val caos = CardAPDUOutputStream()
-        try {
-            caos.writeTLV(0x83.toByte(), chr)
+	/**
+	 * Creates a new MSE:Set DST APDU.
+	 *
+	 * @param chr Certificate Holder Reference
+	 */
+	constructor(chr: ByteArray) : super(0x81.toByte(), DST) {
+		val caos = CardAPDUOutputStream()
+		try {
+			caos.writeTLV(0x83.toByte(), chr)
 
-            caos.flush()
-        } catch (e: IOException) {
-            logger.error(e.message, e)
-        } finally {
-            try {
-                caos.close()
-            } catch (ignore: IOException) {
-            }
-        }
+			caos.flush()
+		} catch (e: IOException) {
+			logger.error(e) { "${e.message}" }
+		} finally {
+			try {
+				caos.close()
+			} catch (ignore: IOException) {
+			}
+		}
 
-        setData(caos.toByteArray())
-    }
-
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(MSESetATCA::class.java)
-    }
+		setData(caos.toByteArray())
+	}
 }

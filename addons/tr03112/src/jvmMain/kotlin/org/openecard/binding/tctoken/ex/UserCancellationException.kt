@@ -21,13 +21,12 @@
  */
 package org.openecard.binding.tctoken.ex
 
-
 /**
  *
  * @author Hans-Martin Haase
  */
 class UserCancellationException : RedirectionBaseError {
-    constructor(errorUrl: String?, msg: String?) : super(errorUrl, msg)
+	constructor(errorUrl: String?, msg: String) : super(errorUrl, msg)
 
-    constructor(errorUrl: String?, cause: Throwable?) : super(errorUrl, cause)
+	constructor(errorUrl: String?, cause: Throwable?) : super(errorUrl, cause)
 }

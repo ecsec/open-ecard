@@ -30,16 +30,16 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 class InvalidTCTokenUrlException : InvalidTCTokenException {
-    constructor(msg: String?) : super(BindingResultCode.RESOURCE_UNAVAILABLE, msg)
+	constructor(msg: String) : super(BindingResultCode.RESOURCE_UNAVAILABLE, msg)
 
-    constructor(msg: String?, ex: Throwable?) : super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex)
+	constructor(msg: String, ex: Throwable?) : super(BindingResultCode.RESOURCE_UNAVAILABLE, msg, ex)
 
-    constructor(key: I18nKey?, vararg params: Any?) : super(BindingResultCode.RESOURCE_UNAVAILABLE, key, *params)
+	constructor(key: I18nKey, vararg params: Any?) : super(BindingResultCode.RESOURCE_UNAVAILABLE, key, *params)
 
-    constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        BindingResultCode.RESOURCE_UNAVAILABLE,
-        key,
-        cause,
-        *params
-    )
+	constructor(key: I18nKey, cause: Throwable, vararg params: Any?) : super(
+		BindingResultCode.RESOURCE_UNAVAILABLE,
+		key,
+		cause,
+		*params,
+	)
 }

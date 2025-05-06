@@ -28,7 +28,6 @@ import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Radiobox
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
-import java.util.*
 import javax.annotation.Nonnull
 
 /**
@@ -37,73 +36,74 @@ import javax.annotation.Nonnull
  * @author Hans-Martin Haase
  */
 class CardSelectionStep(
-    @Nonnull title: String, @Nonnull availableCards: MutableList<ConnectionHandleType>,
-    @Nonnull rec: CardRecognition
+	@Nonnull title: String,
+	@Nonnull availableCards: MutableList<ConnectionHandleType>,
+	@Nonnull rec: CardRecognition,
 ) : Step(ID, title) {
-    private val avCardWithName = TreeMap<String?, ConnectionHandleType?>()
-    private val lang: I18n = I18n.getTranslation("tr03112")
-    private val rec: CardRecognition
+	private val avCardWithName = mutableMapOf<String, ConnectionHandleType>()
+	private val lang: I18n = I18n.getTranslation("tr03112")
+	private val rec: CardRecognition
 
-    /**
-     * Creates a new CardSelectionStep from the given title, the available cards and the card recognition.
-     *
-     * @param title Title of this step.
-     * @param availableCards List of [ConnectionHandleType] objects representing the available credentials.
-     * @param rec [CardRecognition] object used to translate cardTypeNames into human understandable strings.
-     */
-    init {
-        setReversible(false)
+	/**
+	 * Creates a new CardSelectionStep from the given title, the available cards and the card recognition.
+	 *
+	 * @param title Title of this step.
+	 * @param availableCards List of [ConnectionHandleType] objects representing the available credentials.
+	 * @param rec [CardRecognition] object used to translate cardTypeNames into human understandable strings.
+	 */
+	init {
+		isReversible = false
 
-        for (conHandle in availableCards) {
-            avCardWithName.put(rec.getTranslatedCardName(conHandle.getRecognitionInfo().getCardType()), conHandle)
-        }
-        this.rec = rec
-        addElements()
-    }
+		for (conHandle in availableCards) {
+			avCardWithName.put(rec.getTranslatedCardName(conHandle.getRecognitionInfo().getCardType()), conHandle)
+		}
+		this.rec = rec
+		addElements()
+	}
 
-    /**
-     * Add the UI elements to the step.
-     */
-    private fun addElements() {
-        val description = Text()
-        description.setText(lang.translationForKey("card.selection.message"))
-        val radioBox = Radiobox("credentialSelectionBox")
-        radioBox.setGroupText("Available Credentials")
-        for (cardName in avCardWithName.keys) {
-            val item = BoxItem()
-            item.setName(avCardWithName.get(cardName)!!.getRecognitionInfo().getCardType())
-            item.setText(cardName)
-            radioBox.getBoxItems().add(item)
-        }
+	/**
+	 * Add the UI elements to the step.
+	 */
+	private fun addElements() {
+		val description = Text()
+		description.setText(lang.translationForKey("card.selection.message"))
+		val radioBox = Radiobox("credentialSelectionBox")
+		radioBox.groupText = "Available Credentials"
+		for (cardName in avCardWithName.keys) {
+			val item = BoxItem()
+			item.name = avCardWithName[cardName]!!.getRecognitionInfo().getCardType()
+			item.text = cardName
+			radioBox.getBoxItems().add(item)
+		}
 
-        getInputInfoUnits().add(description)
-        getInputInfoUnits().add(radioBox)
-    }
+		getInputInfoUnits().add(description)
+		getInputInfoUnits().add(radioBox)
+	}
 
-    /**
-     * Update the step with a new list of connection handles.
-     *
-     * @param availableCards List of available cards represented by connection handles.
-     */
-    fun update(availableCards: MutableList<ConnectionHandleType>) {
-        this.avCardWithName.clear()
-        for (handle in availableCards) {
-            avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle)
-        }
+	/**
+	 * Update the step with a new list of connection handles.
+	 *
+	 * @param availableCards List of available cards represented by connection handles.
+	 */
+	fun update(availableCards: MutableList<ConnectionHandleType>) {
+		this.avCardWithName.clear()
+		for (handle in availableCards) {
+			avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle)
+		}
 
-        val task = getBackgroundTask() as CardMonitorTask?
-        if (task != null) {
-            val handle = task.getResult()
-            if (handle.getRecognitionInfo() != null && handle.getRecognitionInfo().getCardType() != null) {
-                avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle)
-            }
-        }
+		val task = backgroundTask as CardMonitorTask?
+		if (task != null) {
+			val handle = task.result!!
+			if (handle.getRecognitionInfo() != null && handle.getRecognitionInfo().getCardType() != null) {
+				avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle)
+			}
+		}
 
-        getInputInfoUnits().clear()
-        addElements()
-    }
+		getInputInfoUnits().clear()
+		addElements()
+	}
 
-    companion object {
-        private const val ID = "CredentialSelection"
-    }
+	companion object {
+		private const val ID = "CredentialSelection"
+	}
 }

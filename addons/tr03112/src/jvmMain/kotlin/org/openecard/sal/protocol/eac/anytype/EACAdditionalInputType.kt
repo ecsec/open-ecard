@@ -31,36 +31,27 @@ import org.openecard.common.anytype.AuthDataMap
  * @author Dirk Petrautzki
  * @author Moritz Horsch
  */
-class EACAdditionalInputType(baseType: DIDAuthenticationDataType) {
-    private val authMap: AuthDataMap
+class EACAdditionalInputType(
+	baseType: DIDAuthenticationDataType,
+) {
+	private val authMap: AuthDataMap = AuthDataMap(baseType)
 
-    /**
-     * Returns the signature.
-     *
-     * @return Signature
-     */
-    val signature: ByteArray?
+	/**
+	 * Returns the signature.
+	 *
+	 * @return Signature
+	 */
+	val signature: ByteArray? = authMap.getContentAsBytes(SIGNATURE)
 
-    /**
-     * Creates a new EACAdditionalInputType.
-     *
-     * @param baseType DIDAuthenticationDataType
-     * @throws ParserConfigurationException Thrown in case the parser couldn't be loaded.
-     */
-    init {
-        authMap = AuthDataMap(baseType)
-        signature = authMap.getContentAsBytes(SIGNATURE)
-    }
+	val outputType: EAC2OutputType
+		/**
+		 * Returns EAC1OutputType.
+		 *
+		 * @return EAC1OutputType
+		 */
+		get() = EAC2OutputType(authMap)
 
-    val outputType: EAC2OutputType
-        /**
-         * Returns EAC1OutputType.
-         *
-         * @return EAC1OutputType
-         */
-        get() = EAC2OutputType(authMap)
-
-    companion object {
-        const val SIGNATURE: String = "Signature"
-    }
+	companion object {
+		const val SIGNATURE: String = "Signature"
+	}
 }

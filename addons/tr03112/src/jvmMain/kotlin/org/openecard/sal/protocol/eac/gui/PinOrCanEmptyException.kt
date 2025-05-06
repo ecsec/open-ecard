@@ -25,4 +25,6 @@ package org.openecard.sal.protocol.eac.gui
  *
  * @author Florian Otto
  */
-class PinOrCanEmptyException(msg: String?) : Exception(msg)
+class PinOrCanEmptyException(
+	msg: String?,
+) : Exception(msg)

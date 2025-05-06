@@ -38,38 +38,40 @@ import org.openecard.sal.protocol.eac.EACProtocol
  *
  * @author Hans-Martin Haase
  */
-class ErrorStep @JvmOverloads constructor(
-    title: String?,
-    errorText: String,
-    paceException: WSHelper.WSException? = null
+class ErrorStep(
+	title: String?,
+	errorText: String,
+	paceException: WSHelper.WSException? = null,
 ) : Step(title) {
-    private val ctx: DynamicContext
+	private val ctx: DynamicContext
 
-    init {
-        setID(STEP_ID)
+	init {
+		id = STEP_ID
 
-        ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
-        // TODO: remove instantreturn to actually display an error
-        //setInstantReturn(true);
-        setReversible(false)
-        val pinBlockedNote = Text(errorText)
-        getInputInfoUnits().add(pinBlockedNote)
+		// TODO: remove instantreturn to actually display an error
+		// setInstantReturn(true);
+		isReversible = false
+		val pinBlockedNote = Text(errorText)
+		getInputInfoUnits().add(pinBlockedNote)
 
-        setAction(object : StepAction(getID()) {
-            override fun perform(
-                oldResults: MutableMap<String?, ExecutionResults?>?,
-                result: StepResult?
-            ): StepActionResult {
-                if (paceException != null) {
-                    ctx.put(EACProtocol.Companion.PACE_EXCEPTION, paceException)
-                }
-                return StepActionResult(StepActionResultStatus.CANCEL)
-            }
-        })
-    }
+		setAction(
+			object : StepAction(getID()) {
+				override fun perform(
+					oldResults: MutableMap<String, ExecutionResults>,
+					result: StepResult?,
+				): StepActionResult {
+					if (paceException != null) {
+						ctx.put(EACProtocol.Companion.PACE_EXCEPTION, paceException)
+					}
+					return StepActionResult(StepActionResultStatus.CANCEL)
+				}
+			},
+		)
+	}
 
-    companion object {
-        const val STEP_ID: String = "PROTOCOL_EAC_GUI_STEP_ERROR"
-    }
+	companion object {
+		const val STEP_ID: String = "PROTOCOL_EAC_GUI_STEP_ERROR"
+	}
 }

@@ -60,30 +60,50 @@ val setAppName = "Open-eCard-App"
 val setAppVendor = "ecsec GmbH"
 val setAppLicenseFile: String = projectDir.resolve("../../LICENSE.GPL").path
 val setAppAboutUrl = "https://openecard.org/"
-val setAppVersion = VersionNumber.parse(project.version.toString()).let {
-	"${it.major}.${it.minor}.${it.micro}"
-}
-val macSigningId = System.getenv("MAC_SIGNING_ID")
+val setAppVersion =
+	VersionNumber.parse(project.version.toString()).let {
+		"${it.major}.${it.minor}.${it.micro}"
+	}
+val macSigningId: String? = System.getenv("MAC_SIGNING_ID")
 
-task("copyDependencies", Copy::class) {
+tasks.register<Copy>("copyDependencies") {
 	from(configurations.runtimeClasspath).into(layout.buildDirectory.dir("jars"))
 }
-task("copyJar", Copy::class) {
+tasks.register<Copy>("copyJar") {
 	from(tasks.jar).into(layout.buildDirectory.dir("jars"))
 }
 
-fun JPackageTask.applyDefaults(){
-	input  = layout.buildDirectory.dir("jars").get().toString()
-	mainJar = tasks.jar.get().archiveFileName.get()
+fun JPackageTask.applyDefaults() {
+	input =
+		layout.buildDirectory
+			.dir("jars")
+			.get()
+			.toString()
+	mainJar =
+		tasks.jar
+			.get()
+			.archiveFileName
+			.get()
 	mainClass = application.mainClass.get()
 
-	destination = layout.buildDirectory.dir("dist").get().toString()
-	javaOptions = listOf(
-		"-XX:-UsePerfData", "-XX:-Inline",
-		"-Xms16m", "-Xmx64m",
-		"-XX:+UseG1GC", "-XX:MinHeapFreeRatio=1", "-XX:MaxHeapFreeRatio=5", "-XX:G1ReservePercent=5",
-		"-Djavax.xml.stream.isSupportingExternalEntities=false", "-Djavax.xml.stream.supportDTD=false",
-	)
+	destination =
+		layout.buildDirectory
+			.dir("dist")
+			.get()
+			.toString()
+	javaOptions =
+		listOf(
+			"-XX:-UsePerfData",
+			"-XX:-Inline",
+			"-Xms16m",
+			"-Xmx64m",
+			"-XX:+UseG1GC",
+			"-XX:MinHeapFreeRatio=1",
+			"-XX:MaxHeapFreeRatio=5",
+			"-XX:G1ReservePercent=5",
+			"-Djavax.xml.stream.isSupportingExternalEntities=false",
+			"-Djavax.xml.stream.supportDTD=false",
+		)
 	appName = setAppName
 	appVersion = setAppVersion
 	vendor = setAppVendor
@@ -92,22 +112,24 @@ fun JPackageTask.applyDefaults(){
 	copyright = "Copyright (C) ${LocalDate.now().year} ecsec GmbH"
 	appDescription = "Client side implementation of the eCard-API-Framework (BSI TR-03112)"
 
-    System.getenv("RUNTIME_JDK_PATH")?.let {
-        jLinkOptions.add("--modulePath")
-        jLinkOptions.add(it)
-    }
+	System.getenv("RUNTIME_JDK_PATH")?.let {
+		jLinkOptions.add("--modulePath")
+		jLinkOptions.add(it)
+	}
 }
+
 fun JPackageTask.linuxConfigs() {
-//	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
+// 	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
 	icon = layout.projectDirectory.dir("src/main/package/linux/Open-eCard-App.png").toString()
 	linuxDebMaintainer = "tobias.wich@ecsec.de"
 	linuxPackageName = "open-ecard-app"
 	linuxAppCategory = "utils"
-//	linuxRpmLicenseType = "GPLv3+"
+// 	linuxRpmLicenseType = "GPLv3+"
 	linuxMenuGroup = "Network"
-//	linuxPackageDeps = false
+// 	linuxPackageDeps = false
 }
-fun JPackageTask.windowsConfigs(){
+
+fun JPackageTask.windowsConfigs() {
 	resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
 
 	icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
@@ -118,8 +140,8 @@ fun JPackageTask.windowsConfigs(){
 	winShortcut = true
 	winShortcutPrompt = true
 }
-fun JPackageTask.macConfigs(){
 
+fun JPackageTask.macConfigs() {
 	resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
 
 	icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
@@ -131,10 +153,9 @@ fun JPackageTask.macConfigs(){
 		?: throw IllegalStateException("Please provide a signing id (Apple TeamID) via the env variable 'MAC_SIGNING_ID'.")
 	macSigningKeychain = System.getenv("MAC_SIGNING_KEYCHAIN")
 		?: throw IllegalStateException("Please provide a signing keychain via the env variable 'MAC_SIGNING_KEYCHAIN'.")
-
 }
 
-tasks.register("packageDeb", JPackageTask::class){
+tasks.register("packageDeb", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DEB package for installation."
 
@@ -146,7 +167,7 @@ tasks.register("packageDeb", JPackageTask::class){
 
 	type = ImageType.DEB
 }
-tasks.register("packageRpm", JPackageTask::class){
+tasks.register("packageRpm", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a RPM package for installation."
 
@@ -158,41 +179,55 @@ tasks.register("packageRpm", JPackageTask::class){
 
 	type = ImageType.RPM
 }
-tasks.register("prepareMacBundle") {
-    dependsOn("build", "copyDependencies", "copyJar")
-    outputs.upToDateWhen { false }
-    outputs.cacheIf { false }
 
-    doLast {
-        // The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
-        // If we need to sign in future additional libraries, this can also be done here
-        val jnaFiles = fileTree("build/jars") { include("jna-*.jar") }
-        for (jnaFile in jnaFiles) {
-            exec { commandLine("jar", "xf", jnaFile.path, "com/sun/jna/darwin-x86-64/libjnidispatch.jnilib", "com/sun/jna/darwin-aarch64/libjnidispatch.jnilib") }
+@Inject
+lateinit var execProvider: ExecOperations
+tasks.register<Exec>("prepareMacBundle") {
+	dependsOn("build", "copyDependencies", "copyJar")
+	outputs.upToDateWhen { false }
+	outputs.cacheIf { false }
 
-            val jnaLibFiles = fileTree("com/sun/jna/") { include("darwin-*/libjnidispatch.jnilib") }
-            for (jnaLibFile in jnaLibFiles) {
-                val relativeFilePath = jnaLibFile.relativeTo(project.projectDir).path
-                exec { commandLine(
-                    "codesign",
-                    "-vvv",
-                    "--display",
-                    "--strict",
-                    "--force",
-                    "--deep",
-                    "--options=runtime",
-                    "--timestamp",
-                    "-s",
-                    "Developer ID Application: $macSigningId",
-                    relativeFilePath
-                ) }
-                exec { commandLine("jar", "uf", jnaFile.path, relativeFilePath) }
-                jnaLibFile.delete()
-            }
-        }
-    }
+	doLast {
+		// The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
+		// If we need to sign in future additional libraries, this can also be done here
+		val jnaFiles = fileTree("build/jars") { include("jna-*.jar") }
+		for (jnaFile in jnaFiles) {
+			execProvider.exec {
+				commandLine(
+					"jar",
+					"xf",
+					jnaFile.path,
+					"com/sun/jna/darwin-x86-64/libjnidispatch.jnilib",
+					"com/sun/jna/darwin-aarch64/libjnidispatch.jnilib",
+				)
+			}
+
+			val jnaLibFiles = fileTree("com/sun/jna/") { include("darwin-*/libjnidispatch.jnilib") }
+			for (jnaLibFile in jnaLibFiles) {
+				val relativeFilePath = jnaLibFile.relativeTo(project.projectDir).path
+
+				execProvider.exec {
+					commandLine(
+						"codesign",
+						"-vvv",
+						"--display",
+						"--strict",
+						"--force",
+						"--deep",
+						"--options=runtime",
+						"--timestamp",
+						"-s",
+						"Developer ID Application: $macSigningId",
+						relativeFilePath,
+					)
+				}
+				execProvider.exec { commandLine("jar", "uf", jnaFile.path, relativeFilePath) }
+				jnaLibFile.delete()
+			}
+		}
+	}
 }
-tasks.register("packageDmg", JPackageTask::class){
+tasks.register("packageDmg", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DMG package for installation."
 
@@ -204,7 +239,7 @@ tasks.register("packageDmg", JPackageTask::class){
 
 	type = ImageType.DMG
 }
-tasks.register("packagePkg", JPackageTask::class){
+tasks.register("packagePkg", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a PKG package for installation."
 
@@ -216,7 +251,7 @@ tasks.register("packagePkg", JPackageTask::class){
 
 	type = ImageType.PKG
 }
-tasks.register("packageMsi", JPackageTask::class){
+tasks.register("packageMsi", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a MSI package for installation."
 
@@ -231,14 +266,13 @@ tasks.register("packageMsi", JPackageTask::class){
 	assert(Platform.isWindows())
 	dependsOn("build", "copyDependencies", "copyJar")
 
-
 	applyDefaults()
 	windowsConfigs()
 
 	type = ImageType.MSI
 }
 val issWorkDir = layout.buildDirectory.dir("iscc")
-tasks.register("prepareIsccFile", Copy::class){
+tasks.register("prepareIsccFile", Copy::class) {
 
 	val iconPath = projectDir.resolve("src/main/package/win/Open-eCard-App.ico").toString()
 	val bmpPath = projectDir.resolve("src/main/package/win/Open-eCard-App-setup-icon.bmp").toString()
@@ -246,23 +280,24 @@ tasks.register("prepareIsccFile", Copy::class){
 	from("src/main/package/win")
 
 	include("Open-eCard-App.iss")
-	filter {line ->
-		line.replace("\$appName", setAppName)
-		.replace("\$appVersion" , setAppVersion)
-		.replace("\$vendor" , setAppVendor)
-		.replace("\$appUrl" , setAppAboutUrl)
-		.replace("\$identifier" , setAppName)
-		.replace("\$licensePath" , setAppLicenseFile)
-		.replace("\$outPath" , "$projectDir\\build\\dist")
-		.replace("\$iconFile" , iconPath)
-		.replace("\$bmpPath" , bmpPath)
-		.replace("\$msiPath" , "$projectDir\\build\\jpfiles\\images\\win-msi.image\\Open-eCard-App")
+	filter { line ->
+		line
+			.replace("\$appName", setAppName)
+			.replace("\$appVersion", setAppVersion)
+			.replace("\$vendor", setAppVendor)
+			.replace("\$appUrl", setAppAboutUrl)
+			.replace("\$identifier", setAppName)
+			.replace("\$licensePath", setAppLicenseFile)
+			.replace("\$outPath", "$projectDir\\build\\dist")
+			.replace("\$iconFile", iconPath)
+			.replace("\$bmpPath", bmpPath)
+			.replace("\$msiPath", "$projectDir\\build\\jpfiles\\images\\win-msi.image\\Open-eCard-App")
 	}
 
 	into(issWorkDir)
 	outputs.upToDateWhen { false }
 }
-tasks.register("packageExe", Exec::class){
+tasks.register("packageExe", Exec::class) {
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
@@ -272,11 +307,9 @@ tasks.register("packageExe", Exec::class){
 	workingDir(issWorkDir)
 	executable("iscc")
 	args("Open-eCard-App.iss")
-
-
 }
 
-tasks.register("packageLinux"){
+tasks.register("packageLinux") {
 	group = "Distribution"
 	description = "Creates DEB and RPM packages for linux systems."
 
@@ -285,7 +318,7 @@ tasks.register("packageLinux"){
 		"packageRpm",
 	)
 }
-tasks.register("packageWindows"){
+tasks.register("packageWindows") {
 	group = "Distribution"
 	description = "Creates EXE and MSI packages for Windows systems."
 
@@ -294,7 +327,7 @@ tasks.register("packageWindows"){
 		"packageMsi",
 	)
 }
-tasks.register("packageMac"){
+tasks.register("packageMac") {
 	group = "Distribution"
 	description = "Creates DMG and PKG packages for Mac systems."
 
@@ -303,4 +336,3 @@ tasks.register("packageMac"){
 		"packageDmg",
 	)
 }
-

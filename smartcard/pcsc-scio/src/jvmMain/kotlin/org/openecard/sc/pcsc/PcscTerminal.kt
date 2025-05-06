@@ -58,6 +58,8 @@ class PcscTerminal internal constructor(
 
 	@Throws(ReaderUnavailable::class)
 	internal fun getScioTerminal(): CardTerminal = terminals.getScioTerminal(name) ?: throw ReaderUnavailable()
+
+	override fun toString(): String = "PcscTerminal[name=$name, isCardPresent=$isCardPresent]"
 }
 
 internal fun PreferredCardProtocol.toScioProtocol(): String =

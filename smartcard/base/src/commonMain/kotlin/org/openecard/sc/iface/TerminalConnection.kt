@@ -2,8 +2,9 @@ package org.openecard.sc.iface
 
 interface TerminalConnection : AutoCloseable {
 	val terminal: Terminal
-	val capabilities: TerminalCapabilities
-	val isConnected: Boolean
+
+// 	val capabilities: TerminalCapabilities
+	val isCardConnected: Boolean
 	val card: Card?
 
 	fun disconnect(disposition: CardDisposition = CardDisposition.LEAVE)
@@ -18,12 +19,11 @@ interface TerminalConnection : AutoCloseable {
 		disposition: CardDisposition = CardDisposition.LEAVE,
 	)
 
-	fun controlCommand(
-		code: Int,
-		command: ByteArray,
-	): ByteArray
+	val features: Set<Feature>
 
 	fun beginTransaction()
 
 	fun endTransaction()
 }
+
+inline fun <reified FT : Feature> TerminalConnection.feature(): FT? = features.filterIsInstance<FT>().firstOrNull()

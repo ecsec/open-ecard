@@ -2,9 +2,9 @@ package org.openecard.sc.pcsc
 
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardDisposition
+import org.openecard.sc.iface.Feature
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
-import org.openecard.sc.iface.TerminalCapabilities
 import org.openecard.sc.iface.TerminalConnection
 
 class PcscTerminalConnection(
@@ -25,10 +25,10 @@ class PcscTerminalConnection(
 		}
 	}
 
-	override val capabilities: TerminalCapabilities
-		get() = TODO("Not yet implemented")
+// 	override val capabilities: TerminalCapabilities
+// 		get() = TODO("Not yet implemented")
 
-	override val isConnected: Boolean
+	override val isCardConnected: Boolean
 		get() = card != null
 
 	override fun disconnect(disposition: CardDisposition) {
@@ -45,10 +45,16 @@ class PcscTerminalConnection(
 		setInternalCard()
 	}
 
-	override fun controlCommand(
+	fun controlCommand(
 		code: Int,
 		command: ByteArray,
 	): ByteArray = scioCard.transmitControlCommand(code, command)
+
+	override val features: Set<Feature>
+		get() {
+			val info = FeatureInfo(this)
+			return info.featureMap.toFeatures(this)
+		}
 
 	override fun beginTransaction() {
 		scioCard.beginExclusive()

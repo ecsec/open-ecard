@@ -13,4 +13,13 @@ class ConnectionTest {
 			}
 		}
 	}
+
+	@Test
+	fun `get terminal features`() {
+		PcscTerminalFactory.instance.load().withContext { ctx ->
+			val terminal = ctx.list()[1]
+			val con = terminal.connectTerminalOnly()
+			val features = con.features
+		}
+	}
 }

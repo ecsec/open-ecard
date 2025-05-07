@@ -1,14 +1,16 @@
 package org.openecard.sc.pcsc
 
-import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Assumptions
 import org.openecard.sc.iface.withContext
+import org.openecard.sc.pcsc.testutils.WhenPcscStack
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-@Tag("pcsc")
+@WhenPcscStack
 class ConnectionTest {
 	@Test
-	fun `connect terminal twice`() {
+	fun `connect context twice`() {
 		PcscTerminalFactory.instance.load().withContext { ctx1 ->
 			PcscTerminalFactory.instance.load().withContext { ctx2 ->
 				assertEquals(ctx1.list().map { it.name }, ctx2.list().map { it.name })
@@ -19,9 +21,10 @@ class ConnectionTest {
 	@Test
 	fun `get terminal features`() {
 		PcscTerminalFactory.instance.load().withContext { ctx ->
-			val terminal = ctx.list()[1]
+			val terminal = ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") } ?: Assumptions.abort()
 			val con = terminal.connectTerminalOnly()
 			val features = con.features
+			assertTrue { features.isEmpty() }
 		}
 	}
 }

@@ -5,6 +5,11 @@ sealed class SmartcardException(
 	cause: Throwable?,
 ) : Exception(msg, cause)
 
+class SmartCardStackMissing(
+	msg: String,
+	cause: Throwable?,
+) : Exception(msg, cause)
+
 class InternalSystemError(
 	msg: String? = null,
 	cause: Throwable? = null,

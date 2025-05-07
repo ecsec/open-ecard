@@ -37,7 +37,7 @@ import org.openecard.ws.marshal.WSMarshallerException
 class ApiCallEventObject<Request : RequestType?, Response : ResponseType?>(
 	handle: ConnectionHandleType?,
 	req: Request,
-) : EventObject(handle!!) {
+) : EventObject(handle) {
 	val request: Request
 	protected var res: Response? = null
 

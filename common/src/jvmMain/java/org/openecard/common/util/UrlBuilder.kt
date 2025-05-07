@@ -25,7 +25,6 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 import javax.annotation.Nonnull
-import javax.annotation.concurrent.Immutable
 
 /**
  * Simple URL builder class.
@@ -35,7 +34,6 @@ import javax.annotation.concurrent.Immutable
  *
  * @author Tobias Wich
  */
-@Immutable
 class UrlBuilder {
 	private val encoder: UrlEncoder
 
@@ -44,18 +42,18 @@ class UrlBuilder {
 	private var host: String
 	private var port: Int
 	private var path: String
-	private val queryParams: HashMap<String?, String?>
+	private val queryParams: HashMap<String, String?>
 	private var fragment: String?
 
 	private constructor(
 		encoder: UrlEncoder,
 		scheme: String,
-		userInfo: String,
+		userInfo: String?,
 		host: String,
 		port: Int,
 		path: String,
-		queryParams: HashMap<String?, String?>,
-		fragment: String,
+		queryParams: HashMap<String, String?>,
+		fragment: String?,
 	) {
 		this.encoder = encoder
 		this.scheme = scheme
@@ -309,9 +307,9 @@ class UrlBuilder {
 		k: String,
 		v: String?,
 	) {
-		var k: String? = k
+		var k = k
 		var v = v
-		k = encoder.encodeQueryParam(k)
+		k = encoder.encodeQueryParam(k)!!
 		v = encoder.encodeQueryParam(v)
 		queryParams[k] = v
 	}

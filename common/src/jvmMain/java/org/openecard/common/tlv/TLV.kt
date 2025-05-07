@@ -210,28 +210,22 @@ open class TLV {
 
 	override fun toString(): String = toString("")
 
+	@OptIn(ExperimentalStdlibApi::class)
 	fun toString(prefix: String): String {
-		var result = prefix + String.format("%02X", tagNumWithClass)
+		var result = prefix + tagNumWithClass.toUShort().toHexString()
 
 		result +=
 			if (!hasChild()) {
 				" " + tag.valueLength + " " + ByteUtils.toHexString(tag.value)
 			} else {
-				"""
-				
-				${child!!.toString("$prefix  ")}
-				""".trimIndent()
+				child!!.toString("$prefix  ")
 			}
 
 		if (hasNext()) {
-			result +=
-				"""
-				
-				${next!!.toString(prefix)}
-				""".trimIndent()
+			result += next!!.toString(prefix)
 		}
 
-		return result
+		return "[TLV $result]"
 	}
 
 	companion object {
@@ -240,14 +234,14 @@ open class TLV {
 		 */
 		@JvmStatic
 		@Throws(TLVException::class)
-		fun fromBER(input: ByteArray?): TLV {
+		fun fromBER(input: ByteArray): TLV {
 			var rest = input
 
 			val first = TLV()
 			var isFirst = true
 			var last = first
 			// build as long as there is input left
-			while (rest!!.isNotEmpty()) {
+			while (rest.isNotEmpty()) {
 				val next: TLV
 				next =
 					if (isFirst) {
@@ -261,7 +255,7 @@ open class TLV {
 					return first
 				}
 				// convert bytes to flat TLV data
-				next.tag = TagLengthValue.Companion.fromBER(rest)
+				next.tag = TagLengthValue.fromBER(rest)
 				// if constructed build child structure
 				if (!next.tag.isPrimitive && next.tag.valueLength > 0) {
 					next.child = fromBER(next.tag.value)

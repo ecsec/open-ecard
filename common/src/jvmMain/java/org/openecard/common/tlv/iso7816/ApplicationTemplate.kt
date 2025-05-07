@@ -99,7 +99,7 @@ class ApplicationTemplate(
 		}
 	}
 
-	constructor(data: ByteArray?) : this(TLV.Companion.fromBER(data))
+	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
 
 	fun hasApplicationLabel(): Boolean = applicationLabel != null
 

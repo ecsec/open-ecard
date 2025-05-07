@@ -148,6 +148,7 @@ class TagLengthValueTest {
 		input.contentEquals(result)
 	}
 
+	@OptIn(ExperimentalStdlibApi::class)
 	@Test
 	fun testEvalFCP() {
 		val inputStr =
@@ -163,11 +164,38 @@ class TagLengthValueTest {
 
 		val t = fromBER(input)
 
+		Assert.assertEquals(
+			t
+				.toBER()
+				.toHexString()
+				.uppercase()
+				.replace(" ", ""),
+			inputStr.replace(" ", ""),
+		)
+
 		// perform some checks
 		Assert.assertNull(t.next)
 		Assert.assertTrue(t.findChildTags(0).isEmpty())
 		Assert.assertTrue(t.findChildTags(0x8B).size == 1)
 		Assert.assertTrue(t.findChildTags(0x8B)[0].tagNumWithClass == 0x8BL)
+	}
+
+	@OptIn(ExperimentalStdlibApi::class)
+	@Test
+	fun testEvalFCPTail() {
+		val inputStr = "A0 00"
+		val input = toByteArray(inputStr, true)
+
+		val t = fromBER(input)
+
+		Assert.assertEquals(
+			t
+				.toBER()
+				.toHexString()
+				.uppercase()
+				.replace(" ", ""),
+			inputStr.replace(" ", ""),
+		)
 	}
 
 	@Test

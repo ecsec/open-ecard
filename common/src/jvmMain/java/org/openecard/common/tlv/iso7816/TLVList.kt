@@ -57,7 +57,7 @@ open class TLVList {
 		}
 	}
 
-	constructor(data: ByteArray?) : this(fromBER(data))
+	constructor(data: ByteArray) : this(fromBER(data))
 
 	val content: List<TLV?>
 		get() {

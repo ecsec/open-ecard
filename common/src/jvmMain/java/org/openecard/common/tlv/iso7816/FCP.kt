@@ -281,7 +281,7 @@ class FCP(
 		dataElements = DataElements(descriptorBytes)
 	}
 
-	constructor(data: ByteArray?) : this(TLV.Companion.fromBER(data))
+	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
 
 	/**
 	 * Gets the corresponding byte array of the FCP object.

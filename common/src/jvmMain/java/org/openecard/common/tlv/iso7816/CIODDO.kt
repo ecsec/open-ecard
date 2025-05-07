@@ -73,7 +73,7 @@ class CIODDO(
 		}
 	}
 
-	constructor(data: ByteArray?) : this(fromBER(data))
+	constructor(data: ByteArray) : this(fromBER(data))
 
 	fun hasProviderId(): Boolean = providerId != null
 

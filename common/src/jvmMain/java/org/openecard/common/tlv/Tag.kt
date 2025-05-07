@@ -54,9 +54,7 @@ class Tag constructor( // char strings 18-22, 25-30
 	/** Set when created from BER. This is needed when creating a TagLengthValue instance from BER  */
 	var numOctets: Int = 0
 
-	constructor(tag: Tag) : this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum())
-
-	init {
+	constructor(tag: Tag) : this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum()) {
 		calculateTagNumWithClass()
 	}
 
@@ -105,10 +103,11 @@ class Tag constructor( // char strings 18-22, 25-30
 
 	fun toBER(): ByteArray = toByteArray(tagNumWithClass)
 
+	@OptIn(ExperimentalStdlibApi::class)
 	override fun toString(): String =
-		"[" + tagClass.toString() + " " +
+		"[$tagClass " +
 			(if (primitive) "prim " else "cons ") +
-			tagNum + " (0x" + java.lang.Long.toHexString(tagNumWithClass) + ")]"
+			tagNum + " (0x" + tagNumWithClass.toUByte().toHexString() + ")]"
 
 	override fun equals(obj: Any?): Boolean {
 		if (obj is Tag) {
@@ -154,7 +153,7 @@ class Tag constructor( // char strings 18-22, 25-30
 			// how many octets made up this tag?
 			var numOctets = 1
 			// get common values independed from encoding type
-			val tagClass: TagClass = TagClass.Companion.getTagClass(data[0])
+			val tagClass: TagClass = TagClass.getTagClass(data[0])
 			val primitive = ((data[0].toInt() shr 5) and 0x01) == 0x00
 
 			// get value so it can be seen if short or long form is present

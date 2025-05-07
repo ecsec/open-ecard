@@ -142,9 +142,12 @@ internal class TagLengthValue private constructor(
 		}
 	}
 
+	@OptIn(ExperimentalStdlibApi::class)
+	override fun toString(): String = "[TagLengthValue $tag ${valueLength.toHexString()} ${value.toHexString()}]"
+
 	companion object {
 		fun fromBER(data: ByteArray): TagLengthValue {
-			val tag: Tag = Tag.Companion.fromBER(data)
+			val tag: Tag = Tag.fromBER(data)
 			// how many octets made up this tag?
 			var numOctets = tag.numOctets
 

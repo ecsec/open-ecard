@@ -28,5 +28,5 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
  * @author Tobias Wich
  */
 abstract class EventObject(
-	val handle: ConnectionHandleType,
+	val handle: ConnectionHandleType?,
 )

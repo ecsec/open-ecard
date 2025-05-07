@@ -62,7 +62,7 @@ class EF_DIR(
 		}
 	}
 
-	constructor(data: ByteArray?) : this(TLV.Companion.fromBER(data))
+	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
 
 	val applicationIds: List<ByteArray?>
 		get() = applicationIdentifiers

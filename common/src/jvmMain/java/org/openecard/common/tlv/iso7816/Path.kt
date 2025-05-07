@@ -57,7 +57,7 @@ class Path(
 		}
 	}
 
-	constructor(data: ByteArray?) : this(TLV.Companion.fromBER(data))
+	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
 
 	fun efIdOrPath(): ByteArray? = efIdOrPath
 }

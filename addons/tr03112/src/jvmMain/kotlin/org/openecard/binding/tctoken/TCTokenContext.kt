@@ -22,11 +22,21 @@
 package org.openecard.binding.tctoken
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.binding.tctoken.ex.*
+import org.openecard.binding.tctoken.ex.AuthServerException
+import org.openecard.binding.tctoken.ex.ErrorTranslations
+import org.openecard.binding.tctoken.ex.InvalidAddressException
+import org.openecard.binding.tctoken.ex.InvalidTCTokenException
+import org.openecard.binding.tctoken.ex.ResultMinor
+import org.openecard.binding.tctoken.ex.TCTokenRetrievalException
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
 import org.openecard.common.util.Pair
-import org.openecard.httpcore.*
+import org.openecard.httpcore.HttpResourceException
+import org.openecard.httpcore.InsecureUrlException
+import org.openecard.httpcore.InvalidProxyException
+import org.openecard.httpcore.InvalidRedirectChain
+import org.openecard.httpcore.ResourceContext
+import org.openecard.httpcore.ValidationError
 import java.io.IOException
 import java.net.URL
 
@@ -43,17 +53,6 @@ class TCTokenContext private constructor(
 	base: ResourceContext,
 ) : ResourceContext(base.tlsClient, base.tlsClientProto, base.certs) {
 	companion object {
-		@JvmStatic
-		@Throws(
-			InvalidTCTokenException::class,
-			AuthServerException::class,
-			InvalidRedirectUrlException::class,
-			InvalidTCTokenElement::class,
-			InvalidTCTokenUrlException::class,
-			SecurityViolationException::class,
-			InvalidAddressException::class,
-			UserCancellationException::class,
-		)
 		fun generateTCToken(tcTokenURL: URL): TCTokenContext {
 			// Get TCToken from the given url
 			try {
@@ -74,15 +73,6 @@ class TCTokenContext private constructor(
 			}
 		}
 
-		@Throws(
-			InvalidTCTokenException::class,
-			AuthServerException::class,
-			InvalidRedirectUrlException::class,
-			InvalidTCTokenElement::class,
-			InvalidTCTokenUrlException::class,
-			SecurityViolationException::class,
-			UserCancellationException::class,
-		)
 		private fun generateTCToken(
 			data: String,
 			base: ResourceContext,
@@ -112,7 +102,7 @@ class TCTokenContext private constructor(
 			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 			val resultPoints: List<Pair<URL, TlsServerCertificate>> = base.certs
 			// probably just for tests
-			if (!resultPoints.isEmpty()) {
+			if (resultPoints.isNotEmpty()) {
 				val last = resultPoints[0]
 				dynCtx.put(TR03112Keys.TCTOKEN_URL, last.p1)
 			}

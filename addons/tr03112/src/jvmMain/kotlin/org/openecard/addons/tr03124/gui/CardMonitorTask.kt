@@ -65,7 +65,6 @@ class CardMonitorTask(
 		}
 	}
 
-	@Throws(Exception::class)
 	override fun call(): StepActionResult {
 		cardAction.deref()
 		cardAction = Promise<Void?>()

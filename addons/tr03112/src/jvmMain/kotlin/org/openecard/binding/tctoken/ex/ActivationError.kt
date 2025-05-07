@@ -25,7 +25,6 @@ import org.openecard.addon.bind.BindingResult
 import org.openecard.common.I18n
 import org.openecard.common.I18nException
 import org.openecard.common.I18nKey
-import javax.annotation.Nonnull
 
 /**
  * The superclass of all errors which are visible to the activation action of the plug-in.
@@ -37,29 +36,29 @@ abstract class ActivationError : I18nException {
 	val bindingResult: BindingResult
 
 	constructor(
-		@Nonnull result: BindingResult,
-		@Nonnull message: String,
+		result: BindingResult,
+		message: String,
 	) : super(message) {
 		this.bindingResult = result.setResultMessage(localizedMessage)
 	}
 
 	constructor(
-		@Nonnull result: BindingResult,
-		@Nonnull message: String,
+		result: BindingResult,
+		message: String,
 		cause: Throwable?,
 	) : super(message, cause) {
 		this.bindingResult = result.setResultMessage(localizedMessage)
 	}
 
 	constructor(
-		@Nonnull result: BindingResult,
+		result: BindingResult,
 		cause: Throwable?,
 	) : super(cause) {
 		this.bindingResult = result.setResultMessage(localizedMessage)
 	}
 
 	constructor(
-		@Nonnull result: BindingResult,
+		result: BindingResult,
 		key: I18nKey?,
 		vararg params: Any?,
 	) : super(lang, key, *params) {
@@ -67,7 +66,7 @@ abstract class ActivationError : I18nException {
 	}
 
 	constructor(
-		@Nonnull result: BindingResult,
+		result: BindingResult,
 		key: I18nKey?,
 		cause: Throwable?,
 		vararg params: Any?,

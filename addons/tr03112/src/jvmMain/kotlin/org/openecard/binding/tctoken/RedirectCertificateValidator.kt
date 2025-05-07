@@ -21,6 +21,7 @@
  */
 package org.openecard.binding.tctoken
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
@@ -30,8 +31,6 @@ import org.openecard.common.util.TR03112Utils
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription
 import org.openecard.httpcore.CertificateValidator
 import org.openecard.httpcore.ValidationError
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -41,6 +40,9 @@ import java.net.URL
  *
  * @author Tobias Wich
  */
+
+private val LOG = KotlinLogging.logger { }
+
 class RedirectCertificateValidator(
 	redirectChecks: Boolean,
 ) : CertificateValidator {
@@ -61,7 +63,6 @@ class RedirectCertificateValidator(
 		this.redirectChecks = redirectChecks
 	}
 
-	@Throws(ValidationError::class)
 	override fun validate(
 		url: URL,
 		cert: TlsServerCertificate,
@@ -76,10 +77,10 @@ class RedirectCertificateValidator(
 					url.getProtocol() + "://" + url.getHost() + (if (url.getPort() == -1) "" else (":" + url.getPort()))
 				// check points certificate (but just in case we have a certificate description)
 				if (certDescExists && !TR03112Utils.isInCommCertificates(cert, desc!!.getCommCertificates(), host)) {
-					LOG.error(
+					LOG.error {
 						"The retrieved server certificate is NOT contained in the CommCertificates of " +
-							"the CertificateDescription extension of the eService certificate.",
-					)
+							"the CertificateDescription extension of the eService certificate."
+					}
 					throw ValidationError(LANG, ErrorTranslations.INVALID_REDIRECT)
 				}
 
@@ -118,8 +119,6 @@ class RedirectCertificateValidator(
 	}
 
 	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(RedirectCertificateValidator::class.java)
-
 		private val LANG: I18n = I18n.getTranslation("tr03112")
 	}
 }

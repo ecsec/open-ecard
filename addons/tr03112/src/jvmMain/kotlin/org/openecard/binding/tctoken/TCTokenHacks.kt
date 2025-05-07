@@ -21,8 +21,6 @@
  */
 package org.openecard.binding.tctoken
 
-import javax.annotation.Nonnull
-
 /**
  * Helper class to fixObjectTag common problems with TCTokens.
  * TCToken provider may handle the TCToken generation in sloppy way. According to the specification, it is up to the
@@ -39,7 +37,6 @@ object TCTokenHacks {
 	 * @param input Possibly errornous string containing the token.
 	 * @return Fixed data.
 	 */
-	@JvmStatic
 	fun fixPathSecurityParameters(input: String): String {
 		var input = input
 		if (!input.contains("PathSecurity-Parameters")) {
@@ -61,10 +58,7 @@ object TCTokenHacks {
 	 * @param minor
 	 * @return Code part of the minor code URL.
 	 */
-	@Nonnull
-	fun fixResultMinor(
-		@Nonnull minor: String,
-	): String {
+	fun fixResultMinor(minor: String): String {
 		// each URL should be in the form <prefix>#<code>. We must return only the code part
 		var minor = minor
 		var idx = minor.lastIndexOf("#")

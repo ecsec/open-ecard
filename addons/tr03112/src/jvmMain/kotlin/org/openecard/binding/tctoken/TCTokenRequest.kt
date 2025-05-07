@@ -117,16 +117,6 @@ class TCTokenRequest {
 	companion object {
 		private const val TC_TOKEN_URL_KEY = "tcTokenURL"
 
-		@Throws(
-			InvalidRedirectUrlException::class,
-			SecurityViolationException::class,
-			UserCancellationException::class,
-			InvalidTCTokenException::class,
-			InvalidTCTokenElement::class,
-			MissingActivationParameterException::class,
-			AuthServerException::class,
-			InvalidAddressException::class,
-		)
 		fun fetchTCToken(parameters: Map<String, String>): TCTokenRequest {
 			val copyParams: Map<String, String> = parameters.toMap()
 			val tokenInfo: Pair<TCTokenContext, URL> = extractTCTokenContext(copyParams)
@@ -142,7 +132,6 @@ class TCTokenRequest {
 		 * @return A TCTokenRequest wrapping the parameters.
 		 * @throws MissingActivationParameterException
 		 */
-		@Throws(MissingActivationParameterException::class)
 		fun convert(
 			parameters: Map<String, String>,
 			tokenInfo: Pair<TCTokenContext, URL>,
@@ -151,7 +140,6 @@ class TCTokenRequest {
 			return result
 		}
 
-		@Throws(MissingActivationParameterException::class)
 		private fun parseTCTokenRequestURI(
 			queries: Map<String, String>,
 			tokenInfo: Pair<TCTokenContext, URL>,
@@ -199,17 +187,7 @@ class TCTokenRequest {
 		 * @throws InvalidTCTokenException
 		 * @throws InvalidTCTokenUrlException
 		 */
-		@Throws(
-			AuthServerException::class,
-			InvalidRedirectUrlException::class,
-			InvalidAddressException::class,
-			InvalidTCTokenElement::class,
-			SecurityViolationException::class,
-			UserCancellationException::class,
-			MissingActivationParameterException::class,
-			InvalidTCTokenException::class,
-			InvalidTCTokenUrlException::class,
-		)
+
 		private fun extractTCTokenContext(queries: Map<String, String>): Pair<TCTokenContext, URL> {
 			val tcTokenUrl = queries[TC_TOKEN_URL_KEY]
 
@@ -217,17 +195,6 @@ class TCTokenRequest {
 			return result
 		}
 
-		@Throws(
-			AuthServerException::class,
-			InvalidRedirectUrlException::class,
-			InvalidAddressException::class,
-			InvalidTCTokenElement::class,
-			SecurityViolationException::class,
-			UserCancellationException::class,
-			MissingActivationParameterException::class,
-			InvalidTCTokenException::class,
-			InvalidTCTokenUrlException::class,
-		)
 		private fun extractTCTokenContextInt(activationTokenUrl: String?): Pair<TCTokenContext, URL> {
 			if (activationTokenUrl == null) {
 				throw MissingActivationParameterException(ErrorTranslations.NO_TOKEN)

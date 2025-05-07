@@ -24,7 +24,6 @@ package org.openecard.sal.protocol.eac.anytype
 import org.openecard.common.I18n
 import org.openecard.common.I18nException
 import org.openecard.common.I18nKey
-import javax.annotation.Nonnull
 
 private val lang: I18n = I18n.getTranslation("tr03112")
 
@@ -34,11 +33,11 @@ private val lang: I18n = I18n.getTranslation("tr03112")
  */
 class ElementParsingException : I18nException {
 	constructor(
-		@Nonnull message: String,
+		message: String,
 	) : super(message)
 
 	constructor(
-		@Nonnull message: String,
+		message: String,
 		cause: Throwable?,
 	) : super(message, cause)
 

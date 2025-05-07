@@ -71,7 +71,6 @@ class CAKey(
 	 * @throws TLVException
 	 * @throws IllegalArgumentException
 	 */
-	@Throws(TLVException::class)
 	fun decodePublicKey(data: ByteArray): ByteArray? {
 		val keyBytes: ByteArray?
 

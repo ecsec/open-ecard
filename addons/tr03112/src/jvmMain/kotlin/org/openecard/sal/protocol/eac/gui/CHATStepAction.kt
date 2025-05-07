@@ -87,7 +87,6 @@ class CHATStepAction(
 		}
 	}
 
-	@Throws(WSHelper.WSException::class, InterruptedException::class)
 	private fun preparePinStep(): Step {
 		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
@@ -97,7 +96,6 @@ class CHATStepAction(
 		return nextStep
 	}
 
-	@Throws(WSHelper.WSException::class, InterruptedException::class)
 	private fun initContextVars(ctx: DynamicContext) {
 		var status = ctx.get(EACProtocol.Companion.PIN_STATUS) as? PinState
 

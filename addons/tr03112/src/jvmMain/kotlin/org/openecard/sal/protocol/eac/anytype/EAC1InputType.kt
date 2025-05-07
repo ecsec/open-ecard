@@ -159,7 +159,6 @@ class EAC1InputType(
 	 * @param baseType
 	 * @throws ElementParsingException
 	 */
-	@Throws(ElementParsingException::class)
 	private fun parseCertificateDescriptionElement(baseType: DIDAuthenticationDataType) {
 		var counter = 0
 		for (element in baseType.getAny()) {

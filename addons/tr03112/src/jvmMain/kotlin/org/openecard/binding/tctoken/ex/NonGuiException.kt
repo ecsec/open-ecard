@@ -23,27 +23,26 @@ package org.openecard.binding.tctoken.ex
 
 import org.openecard.addon.bind.BindingResult
 import org.openecard.common.I18nKey
-import javax.annotation.Nonnull
 
 /**
  *
  * @author Hans-Martin Haase
  */
 class NonGuiException : ActivationError {
-    constructor(@Nonnull result: BindingResult, @Nonnull message: String) : super(result, message)
+	constructor(result: BindingResult, message: String) : super(result, message)
 
-    constructor(@Nonnull result: BindingResult, @Nonnull message: String, cause: Throwable?) : super(
-        result,
-        message,
-        cause
-    )
+	constructor(result: BindingResult, message: String, cause: Throwable?) : super(
+		result,
+		message,
+		cause,
+	)
 
-    constructor(@Nonnull result: BindingResult, key: I18nKey?, vararg params: Any?) : super(result, key, *params)
+	constructor(result: BindingResult, key: I18nKey?, vararg params: Any?) : super(result, key, *params)
 
-    constructor(@Nonnull result: BindingResult, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        result,
-        key,
-        cause,
-        *params
-    )
+	constructor(result: BindingResult, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+		result,
+		key,
+		cause,
+		*params,
+	)
 }

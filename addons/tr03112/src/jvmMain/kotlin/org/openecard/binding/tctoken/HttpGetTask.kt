@@ -23,7 +23,6 @@ package org.openecard.binding.tctoken
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse
-import org.apache.http.HttpException
 import org.apache.http.impl.DefaultConnectionReuseStrategy
 import org.apache.http.message.BasicHttpEntityEnclosingRequest
 import org.apache.http.protocol.BasicHttpContext
@@ -43,10 +42,7 @@ import org.openecard.httpcore.HttpUtils.dumpHttpResponse
 import org.openecard.httpcore.StreamHttpClientConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.net.URISyntaxException
 import java.util.concurrent.Callable
-import javax.annotation.Nonnull
 
 /**
  *
@@ -55,7 +51,7 @@ import javax.annotation.Nonnull
 class HttpGetTask(
 	private val dispatcher: Dispatcher,
 	private val evtDispatcher: EventDispatcher,
-	@param:Nonnull private val connectionHandle: ConnectionHandleType,
+	private val connectionHandle: ConnectionHandleType,
 	private val tokenRequest: TCTokenRequest,
 ) : Callable<StartPAOSResponse?> {
 	private val ctxHandle: ByteArray?
@@ -67,7 +63,6 @@ class HttpGetTask(
 		this.credentialFac = makeSmartcardCredentialFactory()
 	}
 
-	@Throws(Exception::class)
 	override fun call(): StartPAOSResponse {
 		try {
 			this.doRequest()
@@ -119,12 +114,6 @@ class HttpGetTask(
 		}
 	}
 
-	@Throws(
-		IOException::class,
-		ConnectionError::class,
-		URISyntaxException::class,
-		HttpException::class,
-	)
 	private fun doRequest() {
 		val tlsHandler =
 			TlsConnectionHandler(tokenRequest)

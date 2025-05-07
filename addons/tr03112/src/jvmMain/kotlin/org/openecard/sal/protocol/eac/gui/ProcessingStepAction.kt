@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
@@ -33,8 +34,6 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.sal.protocol.eac.EACProtocol
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -44,42 +43,49 @@ import java.util.concurrent.TimeoutException
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class ProcessingStepAction(step: Step) : StepAction(step) {
-    private val ctx: DynamicContext
+private val LOG = KotlinLogging.logger { }
 
-    init {
-        ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-    }
+class ProcessingStepAction(
+	step: Step,
+) : StepAction(step) {
+	private val ctx: DynamicContext
 
-    override fun perform(oldResults: MutableMap<String?, ExecutionResults?>?, result: StepResult?): StepActionResult {
-        val pAuthDone = ctx.getPromise(EACProtocol.Companion.AUTHENTICATION_DONE)
-        try {
-            pAuthDone.deref(120, TimeUnit.SECONDS)
-            return StepActionResult(StepActionResultStatus.NEXT)
-        } catch (ex: InterruptedException) {
-            LOG.error("ProcessingStepAction interrupted by the user or an other thread.", ex)
-            ctx.put(
-                EACProtocol.Companion.PACE_EXCEPTION, createException(
-                    makeResultError(
-                        ECardConstants.Minor.SAL.CANCELLATION_BY_USER, "User canceled the EAC dialog."
-                    )
-                )
-            )
-            return StepActionResult(StepActionResultStatus.CANCEL)
-        } catch (ex: TimeoutException) {
-            LOG.info("Timeout while waiting for the authentication to finish.", ex)
-            ctx.put(
-                EACProtocol.Companion.PACE_EXCEPTION, createException(
-                    makeResultError(
-                        ECardConstants.Minor.Disp.TIMEOUT, "Timeout during EAC process."
-                    )
-                )
-            )
-            return StepActionResult(StepActionResultStatus.CANCEL)
-        }
-    }
+	init {
+		ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+	}
 
-    companion object {
-        private val LOG: Logger = LoggerFactory.getLogger(ProcessingStepAction::class.java)
-    }
+	override fun perform(
+		oldResults: MutableMap<String?, ExecutionResults?>?,
+		result: StepResult?,
+	): StepActionResult {
+		val pAuthDone = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE)
+		try {
+			pAuthDone.deref(120, TimeUnit.SECONDS)
+			return StepActionResult(StepActionResultStatus.NEXT)
+		} catch (ex: InterruptedException) {
+			LOG.error(ex) { "ProcessingStepAction interrupted by the user or an other thread." }
+			ctx.put(
+				EACProtocol.PACE_EXCEPTION,
+				createException(
+					makeResultError(
+						ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
+						"User canceled the EAC dialog.",
+					),
+				),
+			)
+			return StepActionResult(StepActionResultStatus.CANCEL)
+		} catch (ex: TimeoutException) {
+			LOG.info(ex) { "Timeout while waiting for the authentication to finish." }
+			ctx.put(
+				EACProtocol.PACE_EXCEPTION,
+				createException(
+					makeResultError(
+						ECardConstants.Minor.Disp.TIMEOUT,
+						"Timeout during EAC process.",
+					),
+				),
+			)
+			return StepActionResult(StepActionResultStatus.CANCEL)
+		}
+	}
 }

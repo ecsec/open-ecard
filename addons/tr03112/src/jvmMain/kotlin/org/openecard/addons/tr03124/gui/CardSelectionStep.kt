@@ -28,7 +28,6 @@ import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Radiobox
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
-import javax.annotation.Nonnull
 
 /**
  * Step implementation which represents a card selection dialog in case the are multiple valid cards available.
@@ -36,9 +35,9 @@ import javax.annotation.Nonnull
  * @author Hans-Martin Haase
  */
 class CardSelectionStep(
-	@Nonnull title: String,
-	@Nonnull availableCards: MutableList<ConnectionHandleType>,
-	@Nonnull rec: CardRecognition,
+	title: String,
+	availableCards: MutableList<ConnectionHandleType>,
+	rec: CardRecognition,
 ) : Step(ID, title) {
 	private val avCardWithName = mutableMapOf<String, ConnectionHandleType>()
 	private val lang: I18n = I18n.getTranslation("tr03112")

@@ -21,9 +21,7 @@
  */
 package org.openecard.sal.protocol.eac
 
-import org.openecard.common.sal.protocol.exception.ProtocolException
 import org.openecard.common.tlv.TLV
-import org.openecard.common.tlv.TLVException
 import org.openecard.common.util.IntegerUtils
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate
 import org.openecard.crypto.common.asn1.eac.AuthenticatedAuxiliaryData
@@ -45,7 +43,6 @@ class AuthenticationHelper(
 	private val ta: TerminalAuthentication,
 	private val ca: ChipAuthentication,
 ) {
-	@Throws(ProtocolException::class, TLVException::class)
 	fun performAuth(
 		eac2Output: EAC2OutputType,
 		internalData: Map<String, Any?>,

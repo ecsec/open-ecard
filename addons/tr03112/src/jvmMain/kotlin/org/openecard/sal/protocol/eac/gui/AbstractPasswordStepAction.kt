@@ -18,7 +18,6 @@ import org.openecard.addon.Context
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
-import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.makeResult
 import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.anytype.AuthDataResponse
@@ -48,7 +47,6 @@ abstract class AbstractPasswordStepAction(
 	) {
 	protected val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
-	@Throws(WSHelper.WSException::class, InterruptedException::class, PinOrCanEmptyException::class)
 	protected fun performPACEWithPIN(
 		oldResults: Map<String, ExecutionResults>,
 		conHandle: ConnectionHandleType,
@@ -92,7 +90,6 @@ abstract class AbstractPasswordStepAction(
 		return res
 	}
 
-	@Throws(WSHelper.WSException::class, InterruptedException::class, CanLengthInvalidException::class)
 	protected fun performPACEWithCAN(
 		oldResults: Map<String, ExecutionResults>,
 		conHandle: ConnectionHandleType,

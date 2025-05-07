@@ -21,6 +21,7 @@
  */
 package org.openecard.binding.tctoken
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.StartPAOS
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse
@@ -31,18 +32,12 @@ import org.openecard.common.AppVersion.name
 import org.openecard.common.AppVersion.patch
 import org.openecard.common.ECardConstants
 import org.openecard.common.interfaces.Dispatcher
-import org.openecard.common.interfaces.DispatcherException
 import org.openecard.common.interfaces.DocumentSchemaValidator
 import org.openecard.common.util.HandlerUtils
 import org.openecard.common.util.Promise
 import org.openecard.transport.paos.PAOS
-import org.openecard.transport.paos.PAOSConnectionException
 import org.openecard.transport.paos.PAOSException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.lang.reflect.InvocationTargetException
 import java.math.BigInteger
-import java.net.MalformedURLException
 import java.util.concurrent.Callable
 
 /**
@@ -50,6 +45,9 @@ import java.util.concurrent.Callable
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
+
+private val LOG = KotlinLogging.logger { }
+
 class PAOSTask(
 	private val dispatcher: Dispatcher,
 	private val connectionHandle: ConnectionHandleType?,
@@ -57,14 +55,6 @@ class PAOSTask(
 	private val tokenRequest: TCTokenRequest,
 	private val schemaValidator: Promise<DocumentSchemaValidator>,
 ) : Callable<StartPAOSResponse> {
-	@Throws(
-		MalformedURLException::class,
-		PAOSException::class,
-		DispatcherException::class,
-		InvocationTargetException::class,
-		ConnectionError::class,
-		PAOSConnectionException::class,
-	)
 	override fun call(): StartPAOSResponse {
 		try {
 			val tlsHandler = TlsConnectionHandler(tokenRequest)
@@ -106,7 +96,7 @@ class PAOSTask(
 			try {
 				TCTokenHandler.Companion.disconnectHandle(dispatcher, connectionHandle)
 			} catch (ex: Exception) {
-				LOG.warn("Error disconnecting finished handle.", ex)
+				LOG.warn(ex) { "Error disconnecting finished handle." }
 			}
 		}
 	}
@@ -119,8 +109,4 @@ class PAOSTask(
 			result.setSlotInfo(null)
 			return result
 		}
-
-	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(PAOSTask::class.java)
-	}
 }

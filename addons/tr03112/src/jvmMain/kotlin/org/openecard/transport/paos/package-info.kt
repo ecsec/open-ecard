@@ -18,8 +18,7 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- */
-/**
+
  * PAOS transport module.
  * The PAOS transport abstracts TLS specific changes with the BouncyCastle TLS module.<br></br>
  * This module sends a [iso.std.iso_iec._24727.tech.schema.StartPAOS] message, the server takes over and sends

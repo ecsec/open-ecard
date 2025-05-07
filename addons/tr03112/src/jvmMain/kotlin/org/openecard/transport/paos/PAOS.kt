@@ -124,10 +124,8 @@ class PAOS(
 		}
 	}
 
-	@Throws(SOAPException::class)
 	private fun getRelatesTo(msg: SOAPMessage): String? = getHeaderElement(msg, RELATES_TO)
 
-	@Throws(SOAPException::class)
 	private fun setRelatesTo(
 		msg: SOAPMessage,
 		value: String?,
@@ -136,7 +134,6 @@ class PAOS(
 		elem.textContent = value
 	}
 
-	@Throws(SOAPException::class)
 	private fun getHeaderElement(
 		msg: SOAPMessage,
 		elem: QName,
@@ -145,7 +142,6 @@ class PAOS(
 		return headerElem?.textContent?.trim { it <= ' ' }
 	}
 
-	@Throws(SOAPException::class)
 	private fun getHeaderElement(
 		msg: SOAPMessage,
 		elem: QName,
@@ -167,7 +163,6 @@ class PAOS(
 		return result
 	}
 
-	@Throws(SOAPException::class)
 	private fun addMessageIDs(msg: SOAPMessage) {
 		val otherID = idGenerator.remoteID
 		val newID = idGenerator.createNewID() // also swaps messages in
@@ -180,7 +175,6 @@ class PAOS(
 		setMessageID(msg, newID)
 	}
 
-	@Throws(PAOSException::class)
 	private fun updateMessageID(msg: SOAPMessage) {
 		try {
 			val id = getMessageID(msg)
@@ -197,10 +191,8 @@ class PAOS(
 		}
 	}
 
-	@Throws(SOAPException::class)
 	private fun getMessageID(msg: SOAPMessage): String? = getHeaderElement(msg, MESSAGE_ID)
 
-	@Throws(SOAPException::class)
 	private fun setMessageID(
 		msg: SOAPMessage,
 		value: String?,
@@ -209,7 +201,6 @@ class PAOS(
 		elem.textContent = value
 	}
 
-	@Throws(PAOSException::class, DocumentValidatorException::class)
 	private fun processPAOSRequest(content: InputStream): Any {
 		try {
 			val doc = m.str2doc(content)
@@ -265,7 +256,6 @@ class PAOS(
 		}
 	}
 
-	@Throws(MarshallingTypeException::class, SOAPException::class, TransformerException::class)
 	private fun createPAOSResponse(obj: Any): String {
 		val msg = createSOAPMessage(obj)
 		val result = m.doc2str(msg.document)
@@ -275,7 +265,6 @@ class PAOS(
 		return result
 	}
 
-	@Throws(MarshallingTypeException::class, SOAPException::class)
 	private fun createSOAPMessage(content: Any): SOAPMessage {
 		val contentDoc = m.marshal(content)
 
@@ -328,7 +317,6 @@ class PAOS(
 	 * @throws PAOSException In case there were errors in the transport layer.
 	 * @throws PAOSConnectionException
 	 */
-	@Throws(DispatcherException::class, PAOSException::class, PAOSConnectionException::class)
 	fun sendStartPAOS(message: StartPAOS): StartPAOSResponse {
 		var msg: Any? = message
 		var conn: StreamHttpClientConnection? = null
@@ -546,7 +534,6 @@ class PAOS(
 		return currentSlotHandle
 	}
 
-	@Throws(PAOSConnectionException::class)
 	private fun openHttpStream(): StreamHttpClientConnection {
 		val conn: StreamHttpClientConnection
 		try {
@@ -569,7 +556,6 @@ class PAOS(
 	 * @param statusCode The status code we received from the server
 	 * @throws PAOSException If the server returned a HTTP error code
 	 */
-	@Throws(PAOSConnectionException::class)
 	private fun checkHTTPStatusCode(statusCode: Int) {
 		// Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
 		// All tested test servers return 200 so accept both but generate a warning message in case of 200

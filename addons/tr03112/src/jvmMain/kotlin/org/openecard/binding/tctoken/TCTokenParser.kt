@@ -77,7 +77,6 @@ class TCTokenParser {
 	 * @return List of TCTokens
 	 * @throws InvalidTCTokenException Thrown in case the SAX parser had an error.
 	 */
-	@Throws(InvalidTCTokenException::class)
 	fun parse(data: String): List<TCToken> = parse(ByteArrayInputStream(data.toByteArray()))
 
 	/**
@@ -87,7 +86,6 @@ class TCTokenParser {
 	 * @return List of TCTokens
 	 * @throws InvalidTCTokenException Thrown in case the SAX parser had an error reading the stream.
 	 */
-	@Throws(InvalidTCTokenException::class)
 	fun parse(inputStream: InputStream): List<TCToken> {
 		try {
 			// Parse TCTokens

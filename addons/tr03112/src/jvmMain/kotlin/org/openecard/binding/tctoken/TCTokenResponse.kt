@@ -112,7 +112,6 @@ class TCTokenResponse : BindingResult() {
 	 *
 	 * @throws InvalidRedirectUrlException Thrown in case the error redirect URL could not be determined.
 	 */
-	@Throws(InvalidRedirectUrlException::class)
 	fun finishResponse() {
 		try {
 			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)

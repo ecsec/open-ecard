@@ -156,7 +156,6 @@ class TCTokenVerifier(
 	 * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
 	 * @throws InvalidTCTokenUrlException Thrown in case a tested URL does not conform to the specification.
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class, InvalidTCTokenUrlException::class)
 	fun verifyCommunicationErrorAddress() {
 		val value = token.getCommunicationErrorAddress()
 		if (!checkEmpty(value)) {
@@ -171,7 +170,6 @@ class TCTokenVerifier(
 	 * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
 	 * @throws InvalidTCTokenElement Thrown in case one of the values to test is errornous.
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class)
 	fun verifyBinding() {
 		val value = token.getBinding()
 		assertRequired("Binding", value)
@@ -188,13 +186,7 @@ class TCTokenVerifier(
 	 * @throws UserCancellationException Thrown in case the user aborted the insert card dialog but this should never
 	 * happen in this case.
 	 */
-	@Throws(
-		InvalidRedirectUrlException::class,
-		InvalidTCTokenElement::class,
-		InvalidTCTokenUrlException::class,
-		SecurityViolationException::class,
-		UserCancellationException::class,
-	)
+
 	fun verifyPathSecurity() {
 		val proto = token.getPathSecurityProtocol()
 		val psp = token.getPathSecurityParameters()
@@ -267,7 +259,6 @@ class TCTokenVerifier(
 	 * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
 	 * @throws InvalidTCTokenElement Thrown in case the value is not equal to any of the reference values.
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class)
 	private fun checkEqualOR(
 		name: String,
 		value: String,
@@ -292,7 +283,6 @@ class TCTokenVerifier(
 	 * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
 	 * @throws InvalidTCTokenElement Thrown in case the value is null or empty.
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class)
 	private fun assertRequired(
 		name: String,
 		value: Any?,
@@ -304,7 +294,6 @@ class TCTokenVerifier(
 		}
 	}
 
-	@Throws(InvalidTCTokenUrlException::class)
 	private fun assertURL(
 		name: String,
 		value: String,
@@ -316,7 +305,6 @@ class TCTokenVerifier(
 		}
 	}
 
-	@Throws(InvalidTCTokenUrlException::class)
 	private fun assertHttpsURL(
 		name: String,
 		value: String,
@@ -329,7 +317,6 @@ class TCTokenVerifier(
 		}
 	}
 
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenUrlException::class, SecurityViolationException::class)
 	private fun assertSameChannel(
 		name: String,
 		address: String,
@@ -357,7 +344,6 @@ class TCTokenVerifier(
 	 * @return An [URL] object containing the error query parameters.
 	 * @throws URISyntaxException Thrown if the given `refreshAddress` is not a valid URL.
 	 */
-	@Throws(URISyntaxException::class)
 	private fun createUrlWithErrorParams(
 		refreshAddress: String?,
 		minor: String,
@@ -376,7 +362,6 @@ class TCTokenVerifier(
 	 * @throws InvalidRedirectUrlException
 	 * @throws InvalidTCTokenElement
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class)
 	private fun initialUrlTokenCheck() {
 		if (token.getCommunicationErrorAddress() != null &&
 			!token.getCommunicationErrorAddress().isEmpty() &&
@@ -399,7 +384,6 @@ class TCTokenVerifier(
 	 * @throws InvalidTCTokenElement If a determination of a refresh or CommunicationError address was successful.
 	 * @throws UserCancellationException Thrown in case `ex` is an instance of [UserCancellationException].
 	 */
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class, UserCancellationException::class)
 	private fun determineRefreshAddress(ex: ActivationError) {
 		if (token.getRefreshAddress() != null) {
 			try {
@@ -454,7 +438,6 @@ class TCTokenVerifier(
 		}
 	}
 
-	@Throws(InvalidRedirectUrlException::class, InvalidTCTokenElement::class, UserCancellationException::class)
 	private fun checkUserCancellation() {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 		val ex = dynCtx.get(TR03112Keys.CARD_SELECTION_CANCELLATION) as UserCancellationException?

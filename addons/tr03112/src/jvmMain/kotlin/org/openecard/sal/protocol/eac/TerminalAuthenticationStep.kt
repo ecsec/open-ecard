@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.eac
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
 import org.openecard.addon.Context
@@ -36,8 +37,6 @@ import org.openecard.common.WSHelper.makeResultUnknownError
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain
 import org.openecard.sal.protocol.eac.anytype.EAC2InputType
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Implements TerminalAuthentication protocol step according to BSI-TR-03112-7.
@@ -48,6 +47,9 @@ import org.slf4j.LoggerFactory
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
+
+private val LOG = KotlinLogging.logger { }
+
 class TerminalAuthenticationStep(
 	ctx: Context,
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
@@ -93,7 +95,7 @@ class TerminalAuthenticationStep(
 
 			if (certificateChain.certificates.isEmpty()) {
 				val msg = "Failed to create a valid certificate chain from the transmitted certificates."
-				LOG.error(msg)
+				LOG.error { msg }
 				response.setResult(makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, msg))
 				return response
 			}
@@ -110,7 +112,7 @@ class TerminalAuthenticationStep(
 			internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate)
 
 			if (signature != null) {
-				LOG.trace("Signature has been provided in EAC2InputType.")
+				LOG.trace { "Signature has been provided in EAC2InputType." }
 
 				// perform TA and CA authentication
 				val ca = ChipAuthentication(dispatcher, slotHandle)
@@ -119,9 +121,9 @@ class TerminalAuthenticationStep(
 
 				// no third step needed, notify GUI
 				val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-				ctx.put(EACProtocol.Companion.AUTHENTICATION_DONE, true)
+				ctx.put(EACProtocol.AUTHENTICATION_DONE, true)
 			} else {
-				LOG.trace("Signature has not been provided in EAC2InputType.")
+				LOG.trace { "Signature has not been provided in EAC2InputType." }
 
 				// send challenge again
 				val rPICC = internalData[EACConstants.IDATA_CHALLENGE] as ByteArray
@@ -130,19 +132,15 @@ class TerminalAuthenticationStep(
 
 			response.setAuthenticationProtocolData(eac2Output.authDataType)
 		} catch (e: ECardException) {
-			LOG.error(e.message, e)
+			LOG.error(e) { e.message }
 			response.setResult(e.result)
-			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+			dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false)
 		} catch (e: Exception) {
-			LOG.error(e.message, e)
+			LOG.error(e) { "${e.message}" }
 			response.setResult(makeResultUnknownError(e.message))
-			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
+			dynCtx.put(EACProtocol.AUTHENTICATION_DONE, false)
 		}
 
 		return response
-	}
-
-	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(TerminalAuthenticationStep::class.java.getName())
 	}
 }

@@ -42,14 +42,11 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication
 import org.openecard.crypto.tls.proxy.ProxySettings.Companion.default
 import org.openecard.crypto.tls.verify.JavaSecVerifier
 import org.openecard.crypto.tls.verify.SameCertVerifier
-import java.io.IOException
 import java.lang.Boolean
 import java.net.MalformedURLException
-import java.net.URISyntaxException
 import java.net.URL
 import kotlin.Int
 import kotlin.String
-import kotlin.Throws
 
 /**
  *
@@ -72,7 +69,6 @@ class TlsConnectionHandler(
 		this.credentialFactory = credentialFactory
 	}
 
-	@Throws(ConnectionError::class)
 	fun setUpClient() {
 		try {
 			val token: TCTokenType = tokenRequest.tCToken
@@ -155,8 +151,6 @@ class TlsConnectionHandler(
 
 	fun getTlsClient(): TlsClient? = tlsClient
 
-	@JvmOverloads
-	@Throws(IOException::class, URISyntaxException::class)
 	fun createTlsConnection(tlsVersion: ProtocolVersion = tlsClient!!.clientVersion): TlsClientProtocol {
 		if (!tokenRequest.isSameChannel) {
 			// normal procedure, create a new channel
@@ -172,7 +166,6 @@ class TlsConnectionHandler(
 		}
 	}
 
-	@Throws(IOException::class, URISyntaxException::class)
 	private fun createNewTlsConnection(tlsVersion: ProtocolVersion): TlsClientProtocol {
 		val socket = default.getSocket("https", hostname!!, port)
 		tlsClient!!.clientVersion = tlsVersion

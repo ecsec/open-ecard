@@ -56,7 +56,6 @@ class TCToken : TCTokenType() {
 	 * @return The error URL.
 	 * @throws InvalidRedirectUrlException In case the address is not present or a valid URL.
 	 */
-	@Throws(InvalidRedirectUrlException::class)
 	fun getComErrorAddressWithParams(minor: String): String {
 		try {
 			val errorUrl = getCommunicationErrorAddress()

@@ -21,7 +21,6 @@
  */
 package org.openecard.binding.tctoken
 
-import org.openecard.binding.tctoken.ex.ActivationError
 import org.openecard.binding.tctoken.ex.InvalidAddressException
 import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import org.testng.annotations.Test
@@ -33,7 +32,6 @@ import org.testng.annotations.Test
  */
 class TCTokenFactoryTest {
 	@Test(expectedExceptions = [InvalidAddressException::class])
-	@Throws(ActivationError::class)
 	fun testGenerateTCToken_TCTokenType() {
 		val tcTokenURL = resolveResourceAsURL(TCTokenFactoryTest::class.java, "TCToken.xml")
 		// should fail, since a non-https-URL is used

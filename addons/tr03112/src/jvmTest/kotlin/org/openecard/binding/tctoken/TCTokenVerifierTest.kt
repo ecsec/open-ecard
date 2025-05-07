@@ -22,7 +22,6 @@
 package org.openecard.binding.tctoken
 
 import generated.TCTokenType
-import org.openecard.binding.tctoken.ex.ActivationError
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement
 import org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
@@ -38,7 +37,6 @@ class TCTokenVerifierTest {
 	private var verifier: TCTokenVerifier? = null
 
 	@BeforeTest
-	@Throws(Exception::class)
 	fun initTestObject() {
 		val testFile = resolveResourceAsStream(javaClass, "TCToken.xml")
 
@@ -49,27 +47,23 @@ class TCTokenVerifierTest {
 	}
 
 	@Test
-	@Throws(Exception::class)
 	fun testVerify() {
 		verifier!!.verifyUrlToken()
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class])
-	@Throws(ActivationError::class)
 	fun testVerifyServerAddress() {
 		token!!.setServerAddress(null)
 		verifier!!.verifyServerAddress()
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class])
-	@Throws(ActivationError::class)
 	fun testVerifySessionIdentifier() {
 		token!!.setSessionIdentifier("")
 		verifier!!.verifySessionIdentifier()
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class])
-	@Throws(ActivationError::class)
 	fun testVerifyRefreshAddress() {
 		token!!.setRefreshAddress(null)
 		token!!.setCommunicationErrorAddress("https://localhost/error")
@@ -77,21 +71,18 @@ class TCTokenVerifierTest {
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class])
-	@Throws(ActivationError::class)
 	fun testVerifyBinding() {
 		token!!.setBinding("urn:liberty:city:2006-08")
 		verifier!!.verifyBinding()
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class], enabled = false)
-	@Throws(ActivationError::class)
 	fun testVerifyPathSecurityProtocol() {
 		token!!.setPathSecurityProtocol(PATH_SEC_PROTO_TLS_PSK + "1")
 		verifier!!.verifyPathSecurity()
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class], enabled = false)
-	@Throws(ActivationError::class)
 	fun testVerifyPathSecurityParameters() {
 		token!!.setPathSecurityProtocol(PATH_SEC_PROTO_TLS_PSK)
 		token!!.setPathSecurityParameters(null)
@@ -99,7 +90,6 @@ class TCTokenVerifierTest {
 	}
 
 	@Test(expectedExceptions = [InvalidTCTokenElement::class], enabled = false)
-	@Throws(ActivationError::class)
 	fun testVerifyPathSecurityParameters2() {
 		val psp = TCTokenType.PathSecurityParameters()
 		psp.setPSK(null)

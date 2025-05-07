@@ -24,7 +24,6 @@ package org.openecard.binding.tctoken
 import generated.TCTokenType
 import org.openecard.common.util.StringUtils
 import org.xml.sax.Attributes
-import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
 import java.util.Locale
 
@@ -39,20 +38,17 @@ class TCTokenSAXHandler : DefaultHandler() {
 	private var tokens: MutableList<TCToken> = mutableListOf()
 	private var token: TCToken? = null
 
-	@Throws(SAXException::class)
 	override fun startDocument() {
 		tokens = mutableListOf()
 		sb = StringBuilder(2048)
 	}
 
-	@Throws(SAXException::class)
 	override fun endDocument() {
 		token = null
 		read = false
 		sb.clear()
 	}
 
-	@Throws(SAXException::class)
 	override fun startElement(
 		uri: String?,
 		localName: String?,
@@ -68,7 +64,6 @@ class TCTokenSAXHandler : DefaultHandler() {
 		}
 	}
 
-	@Throws(SAXException::class)
 	override fun endElement(
 		uri: String?,
 		localName: String?,
@@ -128,7 +123,6 @@ class TCTokenSAXHandler : DefaultHandler() {
 		}
 	}
 
-	@Throws(SAXException::class)
 	override fun characters(
 		ch: CharArray,
 		start: Int,

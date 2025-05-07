@@ -35,7 +35,6 @@ import org.testng.annotations.Test
  */
 class TCTokenParserTest {
 	@Test(enabled = true)
-	@Throws(Exception::class)
 	fun testParse() {
 		val testFile = resolveResourceAsStream(javaClass, "TCToken.xml")
 
@@ -53,7 +52,6 @@ class TCTokenParserTest {
 	}
 
 	@Test
-	@Throws(Exception::class)
 	fun testParseMalformed() {
 		var data = FileUtils.toString(resolveResourceAsStream(javaClass, "TCToken-malformed.xml")!!)
 

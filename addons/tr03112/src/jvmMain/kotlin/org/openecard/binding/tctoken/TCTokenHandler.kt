@@ -21,6 +21,7 @@
  */
 package org.openecard.binding.tctoken
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.*
 import org.openecard.addon.AddonManager
 import org.openecard.addon.Context
@@ -47,8 +48,6 @@ import org.openecard.transport.paos.PAOSConnectionException
 import org.openecard.transport.paos.PAOSException
 import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.SAXException
@@ -60,7 +59,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
-import javax.annotation.Nonnull
 import javax.xml.transform.TransformerException
 
 /**
@@ -83,6 +81,9 @@ import javax.xml.transform.TransformerException
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
+
+private val LOG = KotlinLogging.logger { }
+
 class TCTokenHandler(
 	ctx: Context,
 ) {
@@ -100,24 +101,21 @@ class TCTokenHandler(
 					try {
 						return@Callable JAXPSchemaValidator.load("Management.xsd")
 					} catch (ex: SAXException) {
-						LOG.warn("No Schema Validator available, skipping schema validation.", ex)
+						LOG.warn(ex) { "No Schema Validator available, skipping schema validation." }
 					}
 				}
 				// always valid
-				LOG.warn("Schema validation is disabled.")
+				LOG.warn { "Schema validation is disabled." }
 				object : DocumentSchemaValidator {
-					@Throws(DocumentValidatorException::class)
 					override fun validate(doc: Document) {
 					}
 
-					@Throws(DocumentValidatorException::class)
 					override fun validate(doc: Element) {
 					}
 				}
 			},
 		)
 
-	@Throws(WSHelper.WSException::class)
 	private fun preparePaosHandle(): ConnectionHandleType {
 		// Perform a CreateSession to initialize the SAL.
 		val createSession = CreateSession()
@@ -132,7 +130,6 @@ class TCTokenHandler(
 		return connectionHandle
 	}
 
-	@Throws(WSHelper.WSException::class)
 	private fun prepareTlsHandle(connectionHandle: ConnectionHandleType?): ConnectionHandleType? {
 		// Perform a CardApplicationPath and CardApplicationConnect to connect to the card application
 		var connectionHandle = connectionHandle
@@ -166,7 +163,6 @@ class TCTokenHandler(
 	 * @throws DispatcherException If there was a problem dispatching a request from the server.
 	 * @throws PAOSException If there was a transport error.
 	 */
-	@Throws(PAOSException::class, DispatcherException::class, MissingActivationParameterException::class)
 	private fun processBinding(
 		ctx: Context?,
 		tokenReq: TCTokenRequest,
@@ -183,7 +179,7 @@ class TCTokenHandler(
 					prepareForTask(tokenReq, connectionHandle)
 					val supportedDIDs = this.supportedDIDs
 					val task = PAOSTask(dispatcher, connectionHandle, supportedDIDs, tokenReq, schemaValidator)
-					taskResult = FutureTask<StartPAOSResponse?>(task)
+					taskResult = FutureTask(task)
 					taskName = "PAOS"
 				}
 
@@ -196,7 +192,7 @@ class TCTokenHandler(
 					prepareForTask(tokenReq, connectionHandle)
 					// get first handle, currently we just support one and this is likely not to change soon
 					val task = HttpGetTask(dispatcher, evtDispatcher, connectionHandle, tokenReq)
-					taskResult = FutureTask<StartPAOSResponse?>(task)
+					taskResult = FutureTask(task)
 					taskName = "TLS Auth"
 				}
 
@@ -216,7 +212,7 @@ class TCTokenHandler(
 			return response
 		} catch (ex: WSHelper.WSException) {
 			val msg = "Failed to connect to card."
-			LOG.error(msg, ex)
+			LOG.error(ex) { msg }
 
 			if (ECardConstants.Minor.IFD.CANCELLATION_BY_USER == ex.resultMinor) {
 				throw PAOSException(ex)
@@ -235,12 +231,7 @@ class TCTokenHandler(
 	 * @throws SecurityViolationException
 	 * @throws NonGuiException
 	 */
-	@Throws(
-		InvalidRedirectUrlException::class,
-		SecurityViolationException::class,
-		NonGuiException::class,
-		ActivationError::class,
-	)
+
 	fun handleActivate(
 		params: Map<String, String>,
 		ctx: Context?,
@@ -248,26 +239,12 @@ class TCTokenHandler(
 		var tokenReq: TCTokenRequest? = null
 		try {
 			tokenReq = TCTokenRequest.fetchTCToken(params)
-			return this.handleActivateInner(ctx, tokenReq!!)
+			return this.handleActivateInner(ctx, tokenReq)
 		} finally {
-			if (tokenReq != null) {
-				// close connection to tctoken server in case PAOS didn't already perform this action
-				tokenReq.tokenContext.closeStream()
-			}
+			tokenReq?.tokenContext?.closeStream()
 		}
 	}
 
-	@Throws(
-		InvalidRedirectUrlException::class,
-		SecurityViolationException::class,
-		NonGuiException::class,
-		AuthServerException::class,
-		InvalidAddressException::class,
-		InvalidTCTokenElement::class,
-		UserCancellationException::class,
-		MissingActivationParameterException::class,
-		InvalidTCTokenException::class,
-	)
 	fun handleActivateInner(
 		ctx: Context?,
 		tokenReq: TCTokenRequest,
@@ -276,7 +253,7 @@ class TCTokenHandler(
 		if (LOG.isDebugEnabled()) {
 			try {
 				val m = createInstance()
-				LOG.debug("TCToken:\n{}", m.doc2str(m.marshal(token)))
+				LOG.debug { "${"TCToken:\n{}"} ${m.doc2str(m.marshal(token))}" }
 			} catch (ex: TransformerException) {
 				// it's no use
 			} catch (ex: WSMarshallerException) {
@@ -308,14 +285,14 @@ class TCTokenHandler(
 			response.finishResponse()
 			return response
 		} catch (w: DispatcherException) {
-			LOG.error(w.message, w)
+			LOG.error(w) { "${w.message}" }
 
 			response.resultCode = BindingResultCode.INTERNAL_ERROR
 			response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
 			showErrorMessage(w.message)
 			throw NonGuiException(response, w.message!!, w)
 		} catch (w: PAOSException) {
-			LOG.error(w.message, w)
+			LOG.error(w) { "${w.message}" }
 
 			// find actual error to display to the user
 			var innerException = w.cause
@@ -345,7 +322,7 @@ class TCTokenHandler(
 						LANG_TR.translationForKey(ErrorTranslations.INTERNAL_TLS_ERROR)
 			}
 
-			LOG.debug("Processing InnerException.", innerException)
+			LOG.debug(innerException) { "Processing InnerException." }
 			if (innerException is WSHelper.WSException) {
 				val ex = innerException
 				errorMsg = createResponseFromWsEx(ex, response)
@@ -374,9 +351,9 @@ class TCTokenHandler(
 
 			val paosAdditionalMinor = w.additionalResultMinor
 			if (paosAdditionalMinor != null) {
-				LOG.debug("Replacing minor from inner exception with minor from PAOSException.")
-				LOG.debug("InnerException minor: {}", response.auxResultData.get(AuxDataKeys.MINOR_PROCESS_RESULT))
-				LOG.debug("PAOSException minor: {}", paosAdditionalMinor)
+				LOG.debug { "Replacing minor from inner exception with minor from PAOSException." }
+				LOG.debug { "${"InnerException minor: {}"} ${response.auxResultData.get(AuxDataKeys.MINOR_PROCESS_RESULT)}" }
+				LOG.debug { "${"PAOSException minor: {}"} $paosAdditionalMinor" }
 				response.setAdditionalResultMinor(paosAdditionalMinor)
 			}
 
@@ -387,7 +364,7 @@ class TCTokenHandler(
 				response = determineRefreshURL(tokenReq, response)
 				response.finishResponse()
 			} catch (ex: InvalidRedirectUrlException) {
-				LOG.error(ex.message, ex)
+				LOG.error(ex) { "${ex.message}" }
 				// in case we were interrupted before, use INTERRUPTED as result status
 				if (innerException is InterruptedException) {
 					response.resultCode = BindingResultCode.INTERRUPTED
@@ -402,7 +379,7 @@ class TCTokenHandler(
 					"The RefreshAddress contained in the TCToken is invalid. Redirecting to the " +
 						"CommunicationErrorAddress."
 				)
-				LOG.error(msg2, ex)
+				LOG.error(ex) { msg2 }
 				response.resultCode = BindingResultCode.REDIRECT
 				response.setResult(makeResultError(ResultMinor.COMMUNICATION_ERROR, msg2))
 				response.addAuxResultData(
@@ -539,9 +516,7 @@ class TCTokenHandler(
 	 * @param w An PAOSException containing a not handled inner exception.
 	 * @return A sting containing an error message.
 	 */
-	private fun createMessageFromUnknownError(
-		@Nonnull w: PAOSException,
-	): String {
+	private fun createMessageFromUnknownError(w: PAOSException): String {
 		var errorMsg = "\n"
 		errorMsg += LANG_TR.translationForKey(ErrorTranslations.UNHANDLED_INNER_EXCEPTION)
 		errorMsg += "\n"
@@ -550,8 +525,6 @@ class TCTokenHandler(
 	}
 
 	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(TCTokenHandler::class.java)
-
 		private val LANG_TR: I18n = I18n.getTranslation("tr03112")
 		private val LANG_TOKEN: I18n = I18n.getTranslation("tctoken")
 		private val LANG_PIN: I18n = I18n.getTranslation("pinplugin")
@@ -588,7 +561,7 @@ class TCTokenHandler(
 			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 			val performChecks = request.isPerformTR03112Checks
 			if (!performChecks) {
-				LOG.warn("Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled.")
+				LOG.warn { "Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled." }
 			}
 			dynCtx.put(TR03112Keys.ACTIVATION_THREAD, Thread.currentThread())
 			dynCtx.put(TR03112Keys.TCTOKEN_CHECKS, performChecks)
@@ -597,16 +570,15 @@ class TCTokenHandler(
 			dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(connectionHandle))
 		}
 
-		@Throws(PAOSException::class, DispatcherException::class)
 		private fun waitForTask(task: Future<*>) {
 			try {
 				task.get()
 			} catch (ex: InterruptedException) {
-				LOG.info("Waiting for PAOS Task to finish has been interrupted. Cancelling authentication.")
+				LOG.info { "Waiting for PAOS Task to finish has been interrupted. Cancelling authentication." }
 				task.cancel(true)
 				throw PAOSException(ex)
 			} catch (ex: ExecutionException) {
-				LOG.warn("The result of PAOS Task could not be retieved.", ex)
+				LOG.warn(ex) { "The result of PAOS Task could not be retieved." }
 				// perform conversion of ExecutionException from the Future to the really expected exceptions
 				when (ex.cause) {
 					is PAOSException -> {
@@ -634,7 +606,6 @@ class TCTokenHandler(
 		 * @return Modified response with the final address the browser should be redirected to.
 		 * @throws InvalidRedirectUrlException Thrown in case no redirect URL could be determined.
 		 */
-		@Throws(InvalidRedirectUrlException::class, SecurityViolationException::class)
 		private fun determineRefreshURL(
 			request: TCTokenRequest,
 			response: TCTokenResponse,
@@ -661,7 +632,7 @@ class TCTokenHandler(
 				val last = resultPoints.get(resultPoints.size - 1)
 				endpoint = last.p1
 				dynCtx.put(TR03112Keys.IS_REFRESH_URL_VALID, true)
-				LOG.debug("Setting redirect address to '{}'.", endpoint)
+				LOG.debug { "${"Setting redirect address to '{}'."} $endpoint" }
 				response.refreshAddress = endpoint.toString()
 				return response
 			} catch (ex: MalformedURLException) {
@@ -670,7 +641,7 @@ class TCTokenHandler(
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
 
-				if (!communicationErrorAddress.isEmpty()) {
+				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
 						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
@@ -682,7 +653,7 @@ class TCTokenHandler(
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
 
-				if (!communicationErrorAddress.isEmpty()) {
+				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
 						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
@@ -694,7 +665,7 @@ class TCTokenHandler(
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
 
-				if (!communicationErrorAddress.isEmpty()) {
+				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
 						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
@@ -706,7 +677,7 @@ class TCTokenHandler(
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
 
-				if (!communicationErrorAddress.isEmpty()) {
+				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
 						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
@@ -718,7 +689,7 @@ class TCTokenHandler(
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
 
-				if (!communicationErrorAddress.isEmpty()) {
+				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
 						ErrorTranslations.REFRESH_DETERMINATION_FAILED,

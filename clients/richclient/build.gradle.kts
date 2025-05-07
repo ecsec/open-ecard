@@ -246,7 +246,7 @@ abstract class MacSignLibrariesTask
 							"--options=runtime",
 							"--timestamp",
 							"-s",
-							"Developer ID Application: $signingId",
+							"Developer ID Application: ${signingId.get()}",
 							relativeFilePath,
 						)
 					}

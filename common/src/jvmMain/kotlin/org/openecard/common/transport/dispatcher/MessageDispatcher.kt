@@ -91,7 +91,7 @@ class MessageDispatcher : Dispatcher {
 	override fun deliver(req: Any): Any {
 		val disp = environment.eventDispatcher
 		// send API CALL STARTED event
-		val handle = HandlerUtils.extractHandle(req)
+		val handle = HandlerUtils.extractHandle(req as Object)
 		if (disp != null && req is RequestType) {
 			val startEvt = ApiCallEventObject<RequestType, ResponseType>(handle, req)
 			LOG.debug { "Sending API_CALL_STARTED event." }

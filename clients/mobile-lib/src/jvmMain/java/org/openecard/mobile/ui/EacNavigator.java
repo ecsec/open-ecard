@@ -151,11 +151,11 @@ public final class EacNavigator extends MobileNavigator {
 
     private StepResult nextInt(Step curStep) {
 	// handle step display
-	if (CVCStep.STEP_ID.equals(curStep.getID())) {
+	if (CVCStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    // step over CVC step, its data is processed in the next step
 	    return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-	} else if (CHATStep.STEP_ID.equals(curStep.getID())) {
+	} else if (CHATStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    Step cvcStep = steps.get(0);
 	    Step chatStep = steps.get(1);
@@ -175,7 +175,7 @@ public final class EacNavigator extends MobileNavigator {
 		    return new MobileResult(cvcStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 		}
 	    });
-	} else if (PINStep.STEP_ID.equals(curStep.getID())) {
+	} else if (PINStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    Step pinStep = curStep;
 
@@ -217,7 +217,7 @@ public final class EacNavigator extends MobileNavigator {
 		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
 	    });
 
-	} else if (ProcessingStep.STEP_ID.equals(curStep.getID())) {
+	} else if (ProcessingStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
@@ -225,7 +225,7 @@ public final class EacNavigator extends MobileNavigator {
 		interaction.onCardAuthenticationSuccessful();
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
-	} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
+	} else if (ErrorStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {

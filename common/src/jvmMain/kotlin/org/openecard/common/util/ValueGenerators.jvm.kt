@@ -60,7 +60,7 @@ object ValueGenerators {
 	@JvmOverloads
 	fun genBase64Session(nibbleLength: Int = 32): String {
 		val random = generateRandom(nibbleLength)
-		return ByteUtils.toWebSafeBase64String(random)
+		return ByteUtils.toWebSafeBase64String(random)!!
 	}
 
 	/**
@@ -92,7 +92,7 @@ object ValueGenerators {
 	 * @return Secure random hex string.
 	 */
 	@JvmStatic
-	fun generateRandomHex(nibbleLength: Int): String = ByteUtils.toHexString(generateRandom(nibbleLength))
+	fun generateRandomHex(nibbleLength: Int): String = ByteUtils.toHexString(generateRandom(nibbleLength))!!
 
 	/**
 	 * Generates a secure random value.

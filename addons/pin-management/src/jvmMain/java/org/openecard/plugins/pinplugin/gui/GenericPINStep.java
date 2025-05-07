@@ -350,7 +350,7 @@ public class GenericPINStep extends Step {
     }
 
     private void createErrorGui() {
-	setID("error");
+	setId("error");
 	setReversible(false);
 	Text errorText = new Text();
 	switch (this.getPinState()) {

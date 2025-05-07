@@ -53,7 +53,7 @@ public class ErrorStep extends Step {
 
     public ErrorStep(String title, String errorText, final WSHelper.WSException paceException) {
 	super(title);
-	setID(STEP_ID);
+	setId(STEP_ID);
 
 	ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);
 
@@ -63,7 +63,7 @@ public class ErrorStep extends Step {
 	Text pinBlockedNote = new Text(errorText);
 	getInputInfoUnits().add(pinBlockedNote);
 
-	setAction(new StepAction(getID()) {
+	setAction(new StepAction(getId()) {
 	    @Override
 	    public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
 		if (paceException != null) {

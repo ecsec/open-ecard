@@ -89,7 +89,7 @@ public class PINStep {
      * @param results Results
      */
     public void processResult(Map<String, ExecutionResults> results) {
-	ExecutionResults executionResults = results.get(step.getID());
+	ExecutionResults executionResults = results.get(step.getId());
 
 	if (executionResults == null) {
 	    return;

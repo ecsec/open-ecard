@@ -59,7 +59,7 @@ public class MobileResult implements StepResult {
 
     @Override
     public String getStepID() {
-	return step.getID();
+	return step.getId();
     }
 
     @Override

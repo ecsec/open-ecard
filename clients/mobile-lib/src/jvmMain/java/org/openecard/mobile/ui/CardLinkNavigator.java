@@ -138,7 +138,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 	private StepResult nextInt(Step curStep) {
 		// handle step display
 		// TODO: Use Step IDs from Cardlink Addon, maybe move them to Mobile Lib?
-		if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE".equals(curStep.getID())) {
+		if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE".equals(curStep.getId())) {
 			idx++;
 			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForPhoneNumber = new Promise<>();
@@ -152,7 +152,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE_RETRY".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_PHONE_RETRY".equals(curStep.getId())) {
 			idx++;
 			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForPhoneNumber = new Promise<>();
@@ -173,7 +173,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN".equals(curStep.getId())) {
 			idx++;
 			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForTan = new Promise<>();
@@ -187,7 +187,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN_RETRY".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_TAN_RETRY".equals(curStep.getId())) {
 			idx++;
 			return displayAndExecuteBackground(curStep, () -> {
 				final Promise<List<OutputInfoUnit>> waitForTan = new Promise<>();
@@ -208,11 +208,11 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(curStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_DIRECT_CONNECT".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_DIRECT_CONNECT".equals(curStep.getId())) {
 			idx++;
 			interaction.requestCardInsertion();
 			return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN".equals(curStep.getId())) {
 			idx++;
 
 			StepWithConnection canStep = (StepWithConnection) curStep;
@@ -234,7 +234,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN_RETRY".equals(curStep.getID())) {
+		} else if ("PROTOCOL_CARDLINK_GUI_STEP_ENTER_CAN_RETRY".equals(curStep.getId())) {
 			idx++;
 
 			StepWithConnection canStep = (StepWithConnection) curStep;
@@ -264,7 +264,7 @@ public final class CardLinkNavigator extends MobileNavigator {
 					return new MobileResult(canStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 				}
 			});
-		} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
+		} else if (ErrorStep.STEP_ID.equals(curStep.getId())) {
 			return new MobileResult(curStep, ResultStatus.CANCEL, Collections.emptyList());
 		} else {
 			idx++;

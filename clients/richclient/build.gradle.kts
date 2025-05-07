@@ -223,13 +223,18 @@ abstract class MacSignLibrariesTask
 
 		@TaskAction
 		fun signFiles() {
+			val buildDir = "build/mac-sign"
+			File(buildDir).deleteRecursively()
 			// The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
 			// If we need to sign in future additional libraries, this can also be done here
 			for (jnaFile in jnaFiles) {
 				execProvider.exec {
 					commandLine(
 						"jar",
-						"xf",
+						"-x",
+						"-C",
+						buildDir,
+						"-f",
 						jnaFile.path,
 						"com/sun/jna/darwin-x86-64/libjnidispatch.jnilib",
 						"com/sun/jna/darwin-aarch64/libjnidispatch.jnilib",
@@ -253,10 +258,20 @@ abstract class MacSignLibrariesTask
 							"--timestamp",
 							"-s",
 							"Developer ID Application: ${signingId.get()}",
+							"$buildDir/relativeFilePath",
+						)
+					}
+					execProvider.exec {
+						commandLine(
+							"jar",
+							"-u",
+							"-C",
+							buildDir,
+							"-f",
+							jnaFile.path,
 							relativeFilePath,
 						)
 					}
-					execProvider.exec { commandLine("jar", "uf", jnaFile.path, relativeFilePath) }
 					jnaLibFile.delete()
 				}
 			}

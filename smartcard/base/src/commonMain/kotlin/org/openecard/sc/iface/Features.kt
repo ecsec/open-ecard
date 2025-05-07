@@ -1,8 +1,8 @@
 package org.openecard.sc.iface
 
-sealed interface Feature
+import org.openecard.sc.utils.PrintableByteArray
 
-interface PaceFeature : Feature
+sealed interface Feature
 
 interface ModifyPinFeature : Feature
 
@@ -47,3 +47,50 @@ enum class PasswordType {
 	UTF_8,
 	HALF_NIBBLE_BCD,
 }
+
+interface PaceFeature : Feature {
+	val paceCapabilities: Set<PaceCapability>
+
+	fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
+		establishChannel(req.pinId.code, req.chat.v, req.pin.v)
+
+	fun establishChannel(
+		pinId: UByte,
+		chat: ByteArray,
+		pin: ByteArray,
+	): PaceEstablishChannelResponse
+
+	fun destroyChannel()
+}
+
+enum class PaceCapability(
+	val code: UByte,
+) {
+	QES(0x10u),
+	GERMAN_EID(0x20u),
+	GENERIC_PACE(0x40u),
+	DESTROY_CHANNEL(0x80u),
+}
+
+enum class PacePinId(
+	val code: UByte,
+) {
+	MRZ(0x1u),
+	CAN(0x2u),
+	PIN(0x3u),
+	PUK(0x4u),
+}
+
+data class PaceEstablishChannelRequest(
+	val pinId: PacePinId,
+	val chat: PrintableByteArray,
+	val pin: PrintableByteArray,
+)
+
+data class PaceEstablishChannelResponse(
+	val status: UShort,
+	val efCardAccess: PrintableByteArray,
+	val carCurr: PrintableByteArray,
+	val carPrev: PrintableByteArray,
+	val idIcc: PrintableByteArray,
+)

@@ -8,8 +8,9 @@ class PcscCardChannel internal constructor(
 	override val card: PcscCard,
 	internal val channel: javax.smartcardio.CardChannel,
 ) : CardChannel {
-	override val channelNumber: Int
-		get() = channel.channelNumber
+	override val channelNumber: Int by lazy {
+		channel.channelNumber
+	}
 
 	private val smHandler: MutableList<SecureMessaging> = mutableListOf()
 

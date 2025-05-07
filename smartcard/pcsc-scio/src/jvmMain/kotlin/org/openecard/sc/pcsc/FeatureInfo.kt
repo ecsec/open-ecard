@@ -91,9 +91,18 @@ internal fun Map<ControlCodeType, Int>.toFeatures(terminalConnection: PcscTermin
 	val result = mutableSetOf<Feature>()
 
 	// verifyPin
-	val verifyPinCode = get(ControlCodeType.VERIFY_PIN_DIRECT)
-	if (verifyPinCode != null) {
-		result.add(PcscVerifyPinFeature(terminalConnection, verifyPinCode))
+	get(ControlCodeType.VERIFY_PIN_DIRECT)?.let {
+		result.add(PcscVerifyPinFeature(terminalConnection, it))
+	}
+
+	// modifyPin
+	get(ControlCodeType.MODIFY_PIN_DIRECT)?.let {
+		result.add(PcscModifyPinFeature(terminalConnection, it))
+	}
+
+	// PACE
+	get(ControlCodeType.EXECUTE_PACE)?.let {
+		result.add(PcscPaceFeature(terminalConnection, it))
 	}
 
 	return result

@@ -13,10 +13,12 @@ class PcscCard(
 	override val terminalConnection: PcscTerminalConnection,
 	internal val scioCard: javax.smartcardio.Card,
 ) : Card {
-	override val atr: Atr
-		get() = scioCard.atr.toAtr()
-	override val protocol: CardProtocol
-		get() = scioCard.protocol.toCardProtocol(isContactless)
+	override val atr: Atr by lazy {
+		scioCard.atr.toAtr()
+	}
+	override val protocol: CardProtocol by lazy {
+		scioCard.protocol.toCardProtocol(isContactless)
+	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val isContactless: Boolean by lazy {
@@ -29,8 +31,7 @@ class PcscCard(
 			false
 		}
 	}
-	override val basicChannel: CardChannel
-		get() = PcscCardChannel(this, scioCard.basicChannel)
+	override val basicChannel: CardChannel by lazy { PcscCardChannel(this, scioCard.basicChannel) }
 
 	override fun openLogicalChannel(): CardChannel = PcscCardChannel(this, scioCard.openLogicalChannel())
 }

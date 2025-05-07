@@ -25,9 +25,6 @@ class PcscTerminalConnection(
 		}
 	}
 
-// 	override val capabilities: TerminalCapabilities
-// 		get() = TODO("Not yet implemented")
-
 	override val isCardConnected: Boolean
 		get() = card != null
 
@@ -50,11 +47,10 @@ class PcscTerminalConnection(
 		command: ByteArray,
 	): ByteArray = scioCard.transmitControlCommand(code, command)
 
-	override val features: Set<Feature>
-		get() {
-			val info = FeatureInfo(this)
-			return info.featureMap.toFeatures(this)
-		}
+	override val features: Set<Feature> by lazy {
+		val info = FeatureInfo(this)
+		info.featureMap.toFeatures(this)
+	}
 
 	override fun beginTransaction() {
 		scioCard.beginExclusive()

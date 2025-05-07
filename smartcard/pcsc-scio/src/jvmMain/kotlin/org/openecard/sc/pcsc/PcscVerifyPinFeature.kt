@@ -5,8 +5,8 @@ import org.openecard.sc.iface.ResponseApdu
 import org.openecard.sc.iface.VerifyPinFeature
 
 class PcscVerifyPinFeature(
-	terminalConnection: PcscTerminalConnection,
-	verifyPinCode: Int,
+	private val terminalConnection: PcscTerminalConnection,
+	private val verifyPinDirectCode: Int,
 ) : VerifyPinFeature {
 	override fun verifyPin(
 		passwordAttributes: PasswordAttributes,

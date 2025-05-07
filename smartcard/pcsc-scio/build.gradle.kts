@@ -7,20 +7,20 @@ plugins {
 
 kotlin {
 	sourceSets {
-		val commonMain by getting {
+		commonMain {
 			dependencies {
 				implementation(libs.kotlin.logging)
 				api(project(":smartcard:base"))
 			}
 		}
-		val commonTest by getting {
-			dependencies {
-				implementation(libs.bundles.test.basics.kotlin)
-			}
-		}
-		val jvmMain by getting {
+		jvmMain {
 			dependencies {
 				implementation(libs.scio)
+			}
+		}
+		commonTest {
+			dependencies {
+				implementation(libs.bundles.test.basics.kotlin)
 			}
 		}
 	}

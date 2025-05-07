@@ -8,12 +8,12 @@ plugins {
 
 kotlin {
 	sourceSets {
-		val commonMain by getting {
+		commonMain {
 			dependencies {
 				implementation(libs.kotlin.logging)
 			}
 		}
-		val commonTest by getting {
+		commonTest {
 			dependencies {
 				implementation(libs.bundles.test.basics.kotlin)
 			}

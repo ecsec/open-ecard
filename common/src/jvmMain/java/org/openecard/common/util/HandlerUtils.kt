@@ -29,6 +29,8 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo
 import iso.std.iso_iec._24727.tech.schema.PathSecurityType
 import java.util.Formatter
 import javax.xml.datatype.XMLGregorianCalendar
+import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 private val LOG = KotlinLogging.logger { }
 
@@ -113,13 +115,13 @@ class HandlerUtils {
 			return result
 		}
 
-		fun extractHandle(obj: Object): ConnectionHandleType? {
+		fun extractHandle(obj: Any): ConnectionHandleType? {
 			// SAL calls
 			val handle =
 				getMember(
 					obj,
-					"getConnectionHandle",
-					ConnectionHandleType::class.java,
+					"connectionHandle",
+					ConnectionHandleType::class,
 				)
 			if (handle != null) {
 				LOG.debug { "${"Found ConnectionHandle in object of type {}."} ${obj.javaClass.simpleName}" }
@@ -130,17 +132,17 @@ class HandlerUtils {
 			val ctxHandle =
 				getMember(
 					obj,
-					"getContextHandle",
-					ByteArray::class.java,
+					"contextHandle",
+					ByteArray::class,
 				)
 			if (ctxHandle != null) {
 				LOG.debug { "${"Found ContextHandle in object of type {}."} ${obj.javaClass.simpleName}" }
-				val ifdName = getMember(obj, "getIFDName", String::class.java)
+				val ifdName = getMember(obj, "getIFDName", String::class)
 				val sessionId =
 					getMember(
 						obj,
-						"getSessionIdentifier",
-						String::class.java,
+						"sessionIdentifier",
+						String::class,
 					)
 				return HandlerBuilder.Companion
 					.create()
@@ -154,8 +156,8 @@ class HandlerUtils {
 			val slotHandle =
 				getMember(
 					obj,
-					"getSlotHandle",
-					ByteArray::class.java,
+					"slotHandle",
+					ByteArray::class,
 				)
 			if (slotHandle != null) {
 				LOG.debug { "${"Found SlotHandle in object of type {}."} ${obj.javaClass.simpleName}" }
@@ -169,20 +171,20 @@ class HandlerUtils {
 			return null
 		}
 
-		private fun <T> getMember(
-			obj: Object,
+		private fun <T : Any> getMember(
+			obj: Any,
 			methodName: String,
-			memberType: Class<T>,
+			memberType: KClass<T>,
 		): T? {
-			try {
-				val getter = obj.javaClass.getMethod(methodName)
-				if (memberType == getter.returnType) {
-					return memberType.cast(getter.invoke(obj))
+			val getter =
+				obj::class.memberProperties.firstOrNull {
+					it.name == methodName
 				}
-			} catch (ex: ReflectiveOperationException) {
-				// nothing found
+			if (getter != null) {
+				return getter.call(obj) as? T
+			} else {
+				return null
 			}
-			return null
 		}
 
 		fun print(handle: ConnectionHandleType): String = print(handle, "", "  ")

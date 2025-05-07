@@ -33,6 +33,7 @@ import org.openecard.sc.iface.InvalidHandle
 import org.openecard.sc.iface.InvalidParameter
 import org.openecard.sc.iface.InvalidTarget
 import org.openecard.sc.iface.InvalidValue
+import org.openecard.sc.iface.LogicalChannelException
 import org.openecard.sc.iface.NoAccess
 import org.openecard.sc.iface.NoDir
 import org.openecard.sc.iface.NoFile
@@ -86,7 +87,7 @@ fun <R> mapScioError(block: () -> R): R {
 	} catch (ex: JnaPCSCException) {
 		throw ex.toScException()
 	} catch (ex: JnaCardException) {
-		throw UnsupportedFeature(ex.message, ex)
+		throw LogicalChannelException(ex.message, ex)
 	} catch (ex: CardException) {
 		throw InternalSystemError(ex.message, ex.cause)
 	}

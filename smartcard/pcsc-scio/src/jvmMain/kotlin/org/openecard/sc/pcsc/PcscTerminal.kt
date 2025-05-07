@@ -13,17 +13,14 @@ class PcscTerminal internal constructor(
 	override val terminals: PcscTerminals,
 	override val name: String,
 ) : Terminal {
-	override val isCardPresent: Boolean
-		get() = state == TerminalStateType.PRESENT
+	override fun isCardPresent(): Boolean = getState() == TerminalStateType.PRESENT
 
-	override val state: TerminalStateType
-		get() {
-			return getScioTerminal().let {
-				if (it.isCardPresent) {
-					TerminalStateType.PRESENT
-				} else {
-					TerminalStateType.ABSENT
-				}
+	override fun getState(): TerminalStateType =
+		getScioTerminal().let {
+			if (it.isCardPresent) {
+				TerminalStateType.PRESENT
+			} else {
+				TerminalStateType.ABSENT
 			}
 		}
 
@@ -59,7 +56,7 @@ class PcscTerminal internal constructor(
 	@Throws(ReaderUnavailable::class)
 	internal fun getScioTerminal(): CardTerminal = terminals.getScioTerminal(name) ?: throw ReaderUnavailable()
 
-	override fun toString(): String = "PcscTerminal[name=$name, isCardPresent=$isCardPresent]"
+	override fun toString(): String = "PcscTerminal[name=$name, isCardPresent=${isCardPresent()}]"
 }
 
 internal fun PreferredCardProtocol.toScioProtocol(): String =

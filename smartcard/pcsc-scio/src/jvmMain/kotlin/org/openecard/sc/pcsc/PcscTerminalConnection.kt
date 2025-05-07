@@ -47,10 +47,12 @@ class PcscTerminalConnection(
 		command: ByteArray,
 	): ByteArray = scioCard.transmitControlCommand(code, command)
 
-	override val features: Set<Feature> by lazy {
+	private val featureSet by lazy {
 		val info = FeatureInfo(this)
 		info.featureMap.toFeatures(this)
 	}
+
+	override fun getFeatures(): Set<Feature> = featureSet
 
 	override fun beginTransaction() {
 		scioCard.beginExclusive()

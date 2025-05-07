@@ -10,6 +10,11 @@ class SmartCardStackMissing(
 	cause: Throwable?,
 ) : Exception(msg, cause)
 
+class LogicalChannelException(
+	msg: String?,
+	cause: Throwable?,
+) : Exception(msg ?: "Error with logical channel.", cause)
+
 class InternalSystemError(
 	msg: String? = null,
 	cause: Throwable? = null,

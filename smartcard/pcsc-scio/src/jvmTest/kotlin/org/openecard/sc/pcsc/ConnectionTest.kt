@@ -23,7 +23,7 @@ class ConnectionTest {
 		PcscTerminalFactory.instance.load().withContext { ctx ->
 			val terminal = ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") } ?: Assumptions.abort()
 			val con = terminal.connectTerminalOnly()
-			val features = con.features
+			val features = con.getFeatures()
 			assertTrue { features.isEmpty() }
 		}
 	}

@@ -38,6 +38,9 @@ class PcscTerminals internal constructor(
 		}
 	}
 
+	/**
+	 *
+	 */
 	@Throws(InvalidHandle::class)
 	internal fun getScioTerminal(name: String): CardTerminal? {
 		val scioTerminals = assertInitialized()

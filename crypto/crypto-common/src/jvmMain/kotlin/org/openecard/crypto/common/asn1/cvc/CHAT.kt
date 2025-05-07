@@ -584,7 +584,7 @@ class CHAT {
 		val chatObject = TLV()
 		chatObject.setTagNum(0x4C.toByte())
 		chatObject.tagClass = TagClass.APPLICATION
-		chatObject.setChild(oidObject)
+		chatObject.child = oidObject
 
 		return chatObject.toBER(true)
 	}
@@ -618,7 +618,7 @@ class CHAT {
 
 	override fun toString(): String {
 		try {
-			return ByteUtils.toHexString(toByteArray())
+			return ByteUtils.toHexString(toByteArray())!!
 		} catch (ex: TLVException) {
 			LOG.error(ex) { "${ex.message}" }
 			return ""

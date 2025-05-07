@@ -87,13 +87,13 @@ public class EventHandler implements EventCallback {
 
     @Override
     public void signalEvent(EventType eventType, EventObject eventData) {
-	ConnectionHandleType connectionHandle = eventData.handle;
+	ConnectionHandleType connectionHandle = eventData.getHandle();
 
 	for (Map.Entry<String, LinkedBlockingQueue<StatusChange>> entry : eventQueues.entrySet()) {
 	    try {
 		LinkedBlockingQueue<StatusChange> queue = entry.getValue();
 		StatusChange statusChange = new StatusChange();
-		statusChange.setAction(eventType.eventTypeIdentifier);
+		statusChange.setAction(eventType.getEventTypeIdentifier());
 		statusChange.setConnectionHandle(connectionHandle);
 		queue.put(statusChange);
 	    } catch (InterruptedException ignore) {

@@ -579,7 +579,7 @@ open class CardCommandAPDU : CardAPDU {
 	 *
 	 * @return Hex encoded string of the APDU
 	 */
-	fun toHexString(): String? = ByteUtils.toHexString(toByteArray())
+	fun toHexString(): String = ByteUtils.toHexString(toByteArray())!!
 
 	/**
 	 * Returns the bytes of the APDU as a hex encoded string.

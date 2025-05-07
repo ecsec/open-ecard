@@ -238,6 +238,7 @@ abstract class MacSignLibrariesTask
 
 				val jnaLibFiles = project.fileTree("com/sun/jna/") { include("darwin-*/libjnidispatch.jnilib") }
 				for (jnaLibFile in jnaLibFiles) {
+					println("Singing file: ${jnaLibFile.path}")
 					val relativeFilePath = jnaLibFile.relativeTo(project.projectDir).path
 
 					execProvider.exec {

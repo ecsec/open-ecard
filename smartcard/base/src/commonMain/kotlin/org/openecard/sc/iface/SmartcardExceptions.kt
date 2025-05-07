@@ -86,7 +86,7 @@ class ProtoMismatch(
 		cause,
 	)
 
-class NotReady(
+class DeviceNotReady(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SmartcardException(msg ?: "The reader or smart card is not ready to accept commands.", cause)
@@ -161,7 +161,7 @@ class ServiceStopped(
 	cause: Throwable? = null,
 ) : SmartcardException(msg ?: "The Smart card resource manager has shut down.", cause)
 
-class Unexpected(
+class UnexpectedCardError(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SmartcardException(msg ?: "An unexpected card error has occurred.", cause)
@@ -256,6 +256,21 @@ class ServerTooBusy(
 	cause: Throwable? = null,
 ) : SmartcardException(msg ?: "The Smart Card Resource Manager is too busy to complete this operation.", cause)
 
+class PinCacheExpired(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The smart card PIN cache has expired.", cause)
+
+class NoPinCache(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The smart card PIN cannot be cached.", cause)
+
+class CardReadOnly(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The smart card is read-only and cannot be written to.", cause)
+
 class UnsupportedCard(
 	msg: String? = null,
 	cause: Throwable? = null,
@@ -319,3 +334,18 @@ class CardNotAuthenticated(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SmartcardException(msg ?: "No PIN was presented to the smart card.", cause)
+
+class CacheItemNotFound(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The requested item could not be found in the cache.", cause)
+
+class CacheItemStale(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The requested cache item is too old and was deleted from the cache.", cause)
+
+class CacheItemTooBig(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SmartcardException(msg ?: "The new cache item exceeds the maximum per-item size defined for the cache.", cause)

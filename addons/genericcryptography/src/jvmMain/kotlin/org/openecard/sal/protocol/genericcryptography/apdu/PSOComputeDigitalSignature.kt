@@ -19,20 +19,28 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography.apdu
 
-package org.openecard.addons.status
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
- * Wrapper for the status request message.
+ * Implements a Compute Digital Signature operation.
+ * See ISO/IEC 7816-8, section 11.7.
  *
  * @author Moritz Horsch
- * @author Dirk Petrautzki
- * @author Tobias Wich
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
+class PSOComputeDigitalSignature(
+	message: ByteArray,
+	le: Byte,
+) : PerformSecurityOperation(0x9E.toByte(), 0x9A.toByte()) {
+	/**
+	 * Creates a new PSO Compute Cryptographic Checksum APDU.
+	 *
+	 * @param message Message to be signed
+	 * @param le expected length of the response
+	 */
+	init {
+		setData(message)
+		setLE(le)
+	}
 }
-
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))

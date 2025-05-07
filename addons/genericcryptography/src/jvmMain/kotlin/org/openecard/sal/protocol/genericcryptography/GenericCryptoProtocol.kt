@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2012-2016 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,20 +19,29 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography
 
-package org.openecard.addons.status
+import org.openecard.addon.ActionInitializationException
+import org.openecard.addon.Context
+import org.openecard.addon.sal.SALProtocolBaseImpl
 
 /**
- * Wrapper for the status request message.
+ * Implements the Generic cryptography protocol.
+ * See BSI-TR-03112, version 1.1.2, part 7, section 4.9.
  *
- * @author Moritz Horsch
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
-}
+class GenericCryptoProtocol : SALProtocolBaseImpl() {
+	@Throws(ActionInitializationException::class)
+	override fun init(ctx: Context) {
+		addStatelessStep(HashStep(ctx.dispatcher))
+		addStatelessStep(SignStep(ctx.dispatcher))
+		addStatelessStep(DecipherStep(ctx.dispatcher))
+		addStatelessStep(VerifySignatureStep(ctx.dispatcher))
+	}
 
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))
+	override fun destroy(force: Boolean) {
+		// nothing to see here ... move along
+	}
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2019-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,20 +19,23 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.addons.status
+package org.openecard.plugins.pinplugin
 
 /**
- * Wrapper for the status request message.
  *
- * @author Moritz Horsch
- * @author Dirk Petrautzki
- * @author Tobias Wich
+ * @author Neil Crossley
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
-}
+class DelegatingCardStateView internal constructor(
+	var delegate: CardStateView,
+) : CardStateView {
+	override val handle
+		get() = delegate.handle
+	override val pinState
+		get() = delegate.pinState
+	override val isRemoved
+		get() = delegate.isRemoved
 
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))
+	override fun capturePin() = delegate.capturePin()
+
+	override fun preparedDeviceSession() = delegate.preparedDeviceSession()
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,20 +19,8 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.plugins.pinplugin.gui
 
-package org.openecard.addons.status
+import org.openecard.gui.definition.AbstractTextField
 
-/**
- * Wrapper for the status request message.
- *
- * @author Moritz Horsch
- * @author Dirk Petrautzki
- * @author Tobias Wich
- */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
-}
-
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))
+fun AbstractTextField?.strOrEmpty(): String = this?.let { String(it.value) } ?: ""

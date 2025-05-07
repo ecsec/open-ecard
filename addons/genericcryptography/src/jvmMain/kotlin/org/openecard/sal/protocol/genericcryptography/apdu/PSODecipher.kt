@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,20 +19,25 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.genericcryptography.apdu
 
-package org.openecard.addons.status
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
- * Wrapper for the status request message.
+ * Implements a Deciper operation.
+ * See ISO/IEC 7816-8, section 11.13.
  *
- * @author Moritz Horsch
  * @author Dirk Petrautzki
- * @author Tobias Wich
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
+class PSODecipher(message: ByteArray?, le: Byte) : PerformSecurityOperation(0x80.toByte(), 0x86.toByte()) {
+    /**
+     * Creates a new PSO Decipher APDU.
+     *
+     * @param message Message to be deciphered
+     * @param le expected length of response
+     */
+    init {
+        setLE(le)
+        setData(message)
+    }
 }
-
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2012 HS Coburg.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,20 +19,20 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-
-package org.openecard.addons.status
+package org.openecard.plugins.pinplugin
 
 /**
- * Wrapper for the status request message.
+ * Enumeration for recognized PIN states.
  *
- * @author Moritz Horsch
  * @author Dirk Petrautzki
- * @author Tobias Wich
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
+enum class RecognizedState {
+	PIN_ACTIVATED_RC3, // RESPONSE_RC3
+	PIN_ACTIVATED_RC2, // RESPONSE_RC2
+	PIN_SUSPENDED, // RESPONSE_SUSPENDED
+	PIN_RESUMED,
+	PIN_DEACTIVATED, // RESPONSE_DEACTIVATED
+	PIN_BLOCKED, // RESPONSE_BLOCKED
+	PUK_BLOCKED,
+	UNKNOWN,
 }
-
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2025 ecsec GmbH.
+ * Copyright (C) 2019-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,19 +20,22 @@
  *
  ***************************************************************************/
 
-package org.openecard.addons.status
+package org.openecard.plugins.pinplugin
+
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 
 /**
- * Wrapper for the status request message.
  *
- * @author Moritz Horsch
- * @author Dirk Petrautzki
- * @author Tobias Wich
+ * @author Neil Crossley
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
-}
+interface CardStateView {
+	val handle: ConnectionHandleType
 
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))
+	val pinState: RecognizedState
+
+	fun capturePin(): Boolean
+
+	val isRemoved: Boolean
+
+	fun preparedDeviceSession(): Int
+}

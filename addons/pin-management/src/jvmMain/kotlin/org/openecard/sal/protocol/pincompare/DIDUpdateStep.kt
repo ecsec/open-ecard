@@ -19,20 +19,35 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
+package org.openecard.sal.protocol.pincompare
 
-package org.openecard.addons.status
+import iso.std.iso_iec._24727.tech.schema.DIDUpdate
+import iso.std.iso_iec._24727.tech.schema.DIDUpdateResponse
+import org.openecard.addon.sal.FunctionType
+import org.openecard.addon.sal.ProtocolStep
+import org.openecard.common.WSHelper
+import org.openecard.common.interfaces.Dispatcher
 
 /**
- * Wrapper for the status request message.
+ * Implements the DIDUpdate step of the PIN Compare protocol.
+ * See TR-03112, version 1.1.2, part 7, section 4.1.3.
  *
  * @author Moritz Horsch
- * @author Dirk Petrautzki
- * @author Tobias Wich
+ * Creates a new DIDAuthenticateStep.
+ *
+ * @param dispatcher Dispatcher
  */
-class StatusRequest(
-	val sessionIdentifier: String?,
-) {
-	val hasSessionIdentifier = sessionIdentifier != null
-}
+class DIDUpdateStep(
+	private val dispatcher: Dispatcher?,
+) : ProtocolStep<DIDUpdate?, DIDUpdateResponse?> {
+	override fun getFunctionType(): FunctionType = FunctionType.DIDUpdate
 
-fun statusRequest(parameters: Map<String, String>?) = StatusRequest(parameters?.get("session"))
+	override fun perform(
+		request: DIDUpdate?,
+		internalData: Map<String?, Any?>?,
+	): DIDUpdateResponse =
+		WSHelper.makeResponse(
+			DIDUpdateResponse::class.java,
+			WSHelper.makeResultUnknownError("Not supported yet."),
+		)
+}

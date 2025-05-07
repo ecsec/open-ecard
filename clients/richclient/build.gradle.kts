@@ -215,11 +215,16 @@ abstract class MacSignLibrariesTask
 		@get:Input
 		abstract val signingId: Property<String>
 
+		@get:InputFiles
+		abstract val jnaFiles: ConfigurableFileTree
+
+		@get:OutputFiles
+		abstract val jnaFilesSigned: ConfigurableFileTree
+
 		@TaskAction
-		fun doTaskAction() {
+		fun signFiles() {
 			// The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
 			// If we need to sign in future additional libraries, this can also be done here
-			val jnaFiles = project.fileTree("build/jars") { include("jna-*.jar") }
 			for (jnaFile in jnaFiles) {
 				execProvider.exec {
 					commandLine(
@@ -270,8 +275,8 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 		enabled = false
 	}
 
-	outputs.upToDateWhen { false }
-	outputs.cacheIf { false }
+	jnaFiles.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
+	jnaFilesSigned.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
 }
 
 tasks.register("packageDmg", JPackageTask::class) {

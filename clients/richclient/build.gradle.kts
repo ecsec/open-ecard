@@ -169,7 +169,9 @@ tasks.register("packageDeb", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DEB package for installation."
 
-	assert(Platform.isLinux())
+	onlyIf("OS is not Linux") {
+		Platform.isLinux()
+	}
 	dependsOn("build", "copyDependencies", "copyJar")
 
 	applyDefaults()
@@ -182,7 +184,9 @@ tasks.register("packageRpm", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a RPM package for installation."
 
-	assert(Platform.isLinux())
+	onlyIf("OS is not Linux") {
+		Platform.isLinux()
+	}
 	dependsOn("build", "copyDependencies", "copyJar")
 
 	applyDefaults()
@@ -254,7 +258,9 @@ abstract class MacSignLibrariesTask
 	}
 
 tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
-	assert(Platform.isMac())
+	onlyIf("OS is not Mac") {
+		Platform.isMac()
+	}
 	dependsOn("build", "copyDependencies", "copyJar")
 
 	// skip this task if no signingId is configured
@@ -272,7 +278,9 @@ tasks.register("packageDmg", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a DMG package for installation."
 
-	assert(Platform.isMac())
+	onlyIf("OS is not Mac") {
+		Platform.isMac()
+	}
 	dependsOn("prepareMacBundle")
 
 	applyDefaults()
@@ -285,7 +293,9 @@ tasks.register("packagePkg", JPackageTask::class) {
 	group = "Distribution"
 	description = "Creates a PKG package for installation."
 
-	assert(Platform.isMac())
+	onlyIf("OS is not Mac") {
+		Platform.isMac()
+	}
 	dependsOn("prepareMacBundle")
 
 	applyDefaults()
@@ -318,7 +328,9 @@ tasks.register("packageMsi", JPackageTask::class) {
 	}
 	temp = "/build/jpfiles"
 
-	assert(Platform.isWindows())
+	onlyIf("OS is not Windows") {
+		Platform.isWindows()
+	}
 	dependsOn("build", "copyDependencies", "copyJar")
 
 	applyDefaults()
@@ -358,7 +370,9 @@ tasks.register("packageExe", Exec::class) {
 	group = "Distribution"
 	description = "Creates a EXE for installation."
 
-	assert(Platform.isWindows())
+	onlyIf("OS is not Windows") {
+		Platform.isWindows()
+	}
 	dependsOn("build", "copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
 
 	workingDir(issWorkDir)

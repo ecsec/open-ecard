@@ -40,8 +40,10 @@ internal class FeatureInfo(
 	private val terminal: PcscTerminalConnection,
 ) {
 	val featureMap: Map<ControlCodeType, Int> by lazy {
-		val response = terminal.controlCommand(featureControlCode, byteArrayOf())
-		buildFeatureMap(response)
+		mapScioError {
+			val response = terminal.controlCommand(featureControlCode, byteArrayOf())
+			buildFeatureMap(response)
+		}
 	}
 
 	val featureControlCode by lazy {

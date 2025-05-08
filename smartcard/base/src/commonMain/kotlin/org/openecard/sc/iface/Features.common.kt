@@ -49,7 +49,7 @@ enum class PasswordType {
 }
 
 interface PaceFeature : Feature {
-	val paceCapabilities: Set<PaceCapability>
+	fun getPaceCapabilities(): Set<PaceCapability>
 
 	fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
 		establishChannel(req.pinId.code, req.chat.v, req.pin.v)

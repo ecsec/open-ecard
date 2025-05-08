@@ -31,9 +31,14 @@ class PcscCard(
 			false
 		}
 	}
-	override val basicChannel: CardChannel by lazy { PcscCardChannel(this, scioCard.basicChannel) }
+	override val basicChannel: CardChannel by lazy {
+		PcscCardChannel(this, scioCard.basicChannel)
+	}
 
-	override fun openLogicalChannel(): CardChannel = PcscCardChannel(this, scioCard.openLogicalChannel())
+	override fun openLogicalChannel(): CardChannel =
+		mapScioError {
+			PcscCardChannel(this, scioCard.openLogicalChannel())
+		}
 }
 
 internal fun ATR.toAtr(): Atr = Atr(this.bytes)

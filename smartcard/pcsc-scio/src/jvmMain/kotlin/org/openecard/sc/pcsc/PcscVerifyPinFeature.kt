@@ -11,7 +11,8 @@ class PcscVerifyPinFeature(
 	override fun verifyPin(
 		passwordAttributes: PasswordAttributes,
 		template: ByteArray,
-	): ResponseApdu {
-		TODO("Not yet implemented")
-	}
+	): ResponseApdu =
+		mapScioError {
+			TODO("Not yet implemented")
+		}
 }

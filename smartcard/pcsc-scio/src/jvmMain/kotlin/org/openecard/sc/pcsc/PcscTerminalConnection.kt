@@ -28,15 +28,16 @@ class PcscTerminalConnection(
 	override val isCardConnected: Boolean
 		get() = card != null
 
-	override fun disconnect(disposition: CardDisposition) {
-		scioCard.disconnect(disposition != CardDisposition.LEAVE)
-	}
+	override fun disconnect(disposition: CardDisposition) =
+		mapScioError {
+			scioCard.disconnect(disposition != CardDisposition.LEAVE)
+		}
 
 	override fun reconnect(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) {
+	) = mapScioError {
 		scioCard.disconnect(disposition != CardDisposition.LEAVE)
 		scioCard = terminal.connectInternal(protocol, shareMode)
 		setInternalCard()
@@ -45,20 +46,26 @@ class PcscTerminalConnection(
 	fun controlCommand(
 		code: Int,
 		command: ByteArray,
-	): ByteArray = scioCard.transmitControlCommand(code, command)
+	): ByteArray =
+		mapScioError {
+			scioCard.transmitControlCommand(code, command)
+		}
 
 	private val featureSet by lazy {
+
 		val info = FeatureInfo(this)
 		info.featureMap.toFeatures(this)
 	}
 
 	override fun getFeatures(): Set<Feature> = featureSet
 
-	override fun beginTransaction() {
-		scioCard.beginExclusive()
-	}
+	override fun beginTransaction() =
+		mapScioError {
+			scioCard.beginExclusive()
+		}
 
-	override fun endTransaction() {
-		scioCard.endExclusive()
-	}
+	override fun endTransaction() =
+		mapScioError {
+			scioCard.endExclusive()
+		}
 }

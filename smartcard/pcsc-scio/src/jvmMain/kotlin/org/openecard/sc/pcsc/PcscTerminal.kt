@@ -29,19 +29,23 @@ class PcscTerminal internal constructor(
 		}
 
 	override fun connectTerminalOnly(): TerminalConnection =
-		terminals.getScioTerminal(name)?.let {
-			val card = it.connect("DIRECT")
-			PcscTerminalConnection(this, card)
-		} ?: throw ReaderUnavailable()
+		mapScioError {
+			terminals.getScioTerminal(name)?.let {
+				val card = it.connect("DIRECT")
+				PcscTerminalConnection(this, card)
+			} ?: throw ReaderUnavailable()
+		}
 
 	internal fun connectInternal(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
-	) = getScioTerminal().let {
-		val shareMode = if (shareMode == ShareMode.EXCLUSIVE) "EXCLUSIVE;" else ""
-		val protocol = protocol.toScioProtocol()
-		val card = it.connect("$shareMode$protocol")
-		card
+	) = mapScioError {
+		getScioTerminal().let {
+			val shareMode = if (shareMode == ShareMode.EXCLUSIVE) "EXCLUSIVE;" else ""
+			val protocol = protocol.toScioProtocol()
+			val card = it.connect("$shareMode$protocol")
+			card
+		}
 	}
 
 	override fun connect(
@@ -51,18 +55,33 @@ class PcscTerminal internal constructor(
 
 	override suspend fun waitForCardPresent() {
 		val t = getScioTerminal()
-		waitForCard { t.waitForCardPresent(WAIT_INTERVAL) }
+		waitForCard {
+			mapScioError {
+				t.waitForCardPresent(WAIT_INTERVAL)
+			}
+		}
 	}
 
 	override suspend fun waitForCardAbsent() {
 		val t = getScioTerminal()
-		waitForCard { t.waitForCardAbsent(WAIT_INTERVAL) }
+		waitForCard {
+			mapScioError {
+				t.waitForCardAbsent(WAIT_INTERVAL)
+			}
+		}
 	}
 
 	@Throws(ReaderUnavailable::class)
-	internal fun getScioTerminal(): CardTerminal = terminals.getScioTerminal(name) ?: throw ReaderUnavailable()
+	internal fun getScioTerminal(): CardTerminal =
+		mapScioError {
+			terminals.getScioTerminal(name)
+				?: throw ReaderUnavailable()
+		}
 
-	override fun toString(): String = "PcscTerminal[name=$name, isCardPresent=${isCardPresent()}]"
+	override fun toString(): String {
+		val cardPresentString = runCatching { isCardPresent().toString() }.getOrElse { "Error(${it.message})" }
+		return "PcscTerminal[name=$name, isCardPresent=$cardPresentString]"
+	}
 }
 
 internal fun PreferredCardProtocol.toScioProtocol(): String =

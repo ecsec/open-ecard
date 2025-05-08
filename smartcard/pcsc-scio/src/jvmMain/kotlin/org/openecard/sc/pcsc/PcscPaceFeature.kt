@@ -9,23 +9,27 @@ class PcscPaceFeature(
 	private val terminalConnection: PcscTerminalConnection,
 	private val executePaceCtrlCode: Int,
 ) : PaceFeature {
-	override val paceCapabilities: Set<PaceCapability> by lazy {
-		TODO("Not yet implemented")
-	}
+	override fun getPaceCapabilities(): Set<PaceCapability> =
+		mapScioError {
+			TODO("Not yet implemented")
+		}
 
-	override fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse {
-		TODO("Not yet implemented")
-	}
+	override fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
+		mapScioError {
+			TODO("Not yet implemented")
+		}
 
 	override fun establishChannel(
 		pinId: UByte,
 		chat: ByteArray,
 		pin: ByteArray,
-	): PaceEstablishChannelResponse {
-		TODO("Not yet implemented")
-	}
+	): PaceEstablishChannelResponse =
+		mapScioError {
+			TODO("Not yet implemented")
+		}
 
-	override fun destroyChannel() {
-		TODO("Not yet implemented")
-	}
+	override fun destroyChannel() =
+		mapScioError {
+			TODO("Not yet implemented")
+		}
 }

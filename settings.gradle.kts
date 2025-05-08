@@ -12,6 +12,9 @@ plugins {
 
 rootProject.name = "openecard-app"
 
+include("smartcard:base")
+include("smartcard:pcsc-scio")
+
 include("releases")
 include("wsdef:wsdef-common")
 include("wsdef:wsdef-client")
@@ -55,7 +58,7 @@ include("clients:desktop-lib")
 dependencyResolutionManagement {
 
 	repositories {
-		mavenLocal()
+		// mavenLocal()
 		google()
 		mavenCentral()
 

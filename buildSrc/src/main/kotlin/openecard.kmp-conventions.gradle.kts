@@ -15,7 +15,7 @@ kotlin {
 val testHeapSize: String by project
 tasks.withType<Test> {
 	maxHeapSize = testHeapSize
-	useJUnitPlatform()
+	useJUnitPlatform { }
 }
 
 // configure ktlint

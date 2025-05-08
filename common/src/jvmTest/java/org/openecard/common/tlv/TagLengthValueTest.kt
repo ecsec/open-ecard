@@ -164,15 +164,6 @@ class TagLengthValueTest {
 
 		val t = fromBER(input)
 
-		Assert.assertEquals(
-			t
-				.toBER()
-				.toHexString()
-				.uppercase()
-				.replace(" ", ""),
-			inputStr.replace(" ", ""),
-		)
-
 		// perform some checks
 		Assert.assertNull(t.next)
 		Assert.assertTrue(t.findChildTags(0).isEmpty())

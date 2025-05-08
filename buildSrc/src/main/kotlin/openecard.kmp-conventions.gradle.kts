@@ -12,6 +12,12 @@ kotlin {
 	applyDefaultHierarchyTemplate()
 }
 
+val testHeapSize: String by project
+tasks.withType<Test> {
+	maxHeapSize = testHeapSize
+	useJUnitPlatform()
+}
+
 // configure ktlint
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
 	ignoreFailures = project.findProperty("ktlint.ignoreFailures")?.toString().toBoolean()

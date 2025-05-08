@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalPathApi::class)
-
-import org.jetbrains.kotlin.incremental.createDirectory
 import java.nio.file.Files
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
+import kotlin.io.path.createDirectories
+
 
 description = "ios-common"
 
@@ -65,33 +62,35 @@ kotlin {
 				outputs.dir(roboHeaderTargetDir)
 
 				doLast {
-					val genHeaders = layout.buildDirectory.dir("classes/java/main/roboheaders").get()
-					roboHeaderTargetDir.asFile.toPath().deleteRecursively()
-					roboHeaderTargetDir.asFile.parentFile.createDirectory()
+					val genHeaders = layout.buildDirectory.dir("classes/java/jvmMain/roboheaders").get()
+					roboHeaderTargetDir.asFile.let {
+						it.deleteRecursively()
+						it.parentFile.toPath().createDirectories()
+					}
 					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
 				}
 			}
 		}
+
+		val iosHeaders by configurations.creating {
+			isCanBeResolved = true
+		}
+
+		val shareHeader =
+			tasks.register("shareHeader") {
+				dependsOn("jvmMainClasses")
+
+				outputs.file(
+					layout.buildDirectory.dir(roboHeaderTargetDirStr),
+				)
+			}
+
+		tasks.named("build") {
+			dependsOn("shareHeader")
+		}
+
+		artifacts {
+			add(iosHeaders.name, shareHeader)
+		}
 	}
-}
-
-val iosHeaders by configurations.creating {
-	isCanBeResolved = true
-}
-
-val shareHeader =
-	tasks.register("shareHeader") {
-		dependsOn("classes")
-
-		outputs.file(
-			layout.buildDirectory.dir(roboHeaderTargetDirStr),
-		)
-	}
-
-tasks.named("build") {
-	dependsOn("shareHeader")
-}
-
-artifacts {
-	add(iosHeaders.name, shareHeader)
 }

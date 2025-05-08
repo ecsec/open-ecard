@@ -1,3 +1,5 @@
+// Deprecated
+
 plugins {
 	id("openecard.kmp-conventions")
 	id("openecard.publish-conventions")
@@ -7,11 +9,10 @@ plugins {
 
 kotlin {
 	jvm {
-		withJava()
 		compilations {
 			val test by getting {
 				tasks.named<Test>("jvmTest") {
-					useTestNG() {
+					useTestNG {
 						excludeGroups("interactive", "broken")
 					}
 				}
@@ -24,19 +25,16 @@ kotlin {
 
 					// Run only the tests from this compilation's outputs:
 					testClassesDirs = output.classesDirs
-					useTestNG() {
+					useTestNG {
 						includeGroups("interactive")
 					}
 				}
 			}
 		}
 	}
-
 }
 
-val testHeapSize: String by project
 tasks.withType<Test> {
-	maxHeapSize = testHeapSize
 	useTestNG()
 }
 

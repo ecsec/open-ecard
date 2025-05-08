@@ -2,12 +2,12 @@ pluginManagement {
 	repositories {
 		gradlePluginPortal()
 		google()
-        mavenCentral()
-    }
+		mavenCentral()
+	}
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+	id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
 rootProject.name = "openecard-app"
@@ -52,7 +52,6 @@ include("clients:android-lib")
 include("clients:ios-framework")
 include("clients:desktop-lib")
 
-
 dependencyResolutionManagement {
 
 	repositories {
@@ -79,10 +78,10 @@ dependencyResolutionManagement {
 		create("libs") {
 			from(files("libs.versions.toml"))
 
-//			library("nimbus-oidc", "com.nimbusds:oauth2-oidc-sdk:9.5.3")
+// 			library("nimbus-oidc", "com.nimbusds:oauth2-oidc-sdk:9.5.3")
 //
-//			plugin("xjc-codegen", "com.github.bjornvester.xjc").version("1.8.1")
-//			plugin("jsonschema2pojo", "org.jsonschema2pojo").version("1.2.1")
+// 			plugin("xjc-codegen", "com.github.bjornvester.xjc").version("1.8.1")
+// 			plugin("jsonschema2pojo", "org.jsonschema2pojo").version("1.2.1")
 		}
 	}
 }

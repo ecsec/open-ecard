@@ -10,12 +10,12 @@ val iosHeaders: Configuration by configurations.creating {
 }
 
 dependencies {
-	iosHeaders(project(path=":clients:mobile-lib", configuration=iosHeaders.name))
-	iosHeaders(project(path=":clients:ios-common", configuration=iosHeaders.name))
-	iosHeaders(project(path=":clients:ios-lib", configuration=iosHeaders.name))
+	iosHeaders(project(path = ":clients:mobile-lib", configuration = iosHeaders.name))
+	iosHeaders(project(path = ":clients:ios-common", configuration = iosHeaders.name))
+	iosHeaders(project(path = ":clients:ios-lib", configuration = iosHeaders.name))
 
 	api(libs.slf4j.jdk14)
-	api(project(path=":clients:ios-lib-shade", configuration="shadow"))
+	api(project(path = ":clients:ios-lib-shade", configuration = "shadow"))
 	implementation(libs.robovm.rt)
 	implementation(libs.robovm.cocoa)
 	api(project(":management"))
@@ -33,7 +33,7 @@ robovm {
 	isEnableBitcode = false
 }
 
-tasks.register("copyHeaders", Copy::class){
+tasks.register("copyHeaders", Copy::class) {
 	dependsOn("compileJava")
 	val sharedFiles = iosHeaders
 	inputs.files(sharedFiles)
@@ -43,9 +43,8 @@ tasks.register("copyHeaders", Copy::class){
 }
 
 tasks.named("robovmInstall") { dependsOn("copyHeaders") }
-tasks.create("buildIosFramework"){
+tasks.register("buildIosFramework") {
 	group = "Distribution"
 	description = "Alias for robovmInstall creating xcFramework for iOS"
 	dependsOn("robovmInstall")
-
 }

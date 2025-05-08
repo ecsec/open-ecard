@@ -1,6 +1,6 @@
 package org.openecard.sc.iface
 
-interface CardChannel : AutoCloseable {
+interface CardChannel {
 	val card: Card
 	val channelNumber: Int
 	val isBasicChannel: Boolean
@@ -37,7 +37,7 @@ interface CardChannel : AutoCloseable {
 		RemovedCard::class,
 		LogicalChannelException::class,
 	)
-	override fun close()
+	fun close()
 
 	fun pushSecureMessaging(sm: SecureMessaging)
 

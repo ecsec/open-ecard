@@ -1,6 +1,6 @@
 package org.openecard.sc.iface
 
-interface TerminalConnection : AutoCloseable {
+interface TerminalConnection {
 	val terminal: Terminal
 
 	val isCardConnected: Boolean
@@ -14,17 +14,6 @@ interface TerminalConnection : AutoCloseable {
 		CommError::class,
 	)
 	fun disconnect(disposition: CardDisposition = CardDisposition.LEAVE)
-
-	@Throws(
-		InvalidHandle::class,
-		InvalidValue::class,
-		NoService::class,
-		NoSmartcard::class,
-		CommError::class,
-	)
-	override fun close() {
-		disconnect(CardDisposition.LEAVE)
-	}
 
 	@Throws(
 		InsufficientBuffer::class,

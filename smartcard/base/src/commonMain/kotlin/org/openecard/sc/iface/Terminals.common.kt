@@ -1,5 +1,7 @@
 package org.openecard.sc.iface
 
+import kotlin.coroutines.cancellation.CancellationException
+
 interface Terminals {
 	val factory: TerminalFactory
 	val isEstablished: Boolean
@@ -83,6 +85,8 @@ fun <T : Terminals, R> T.withContext(block: (T) -> R): R {
 	NoService::class,
 	CommError::class,
 	InternalSystemError::class,
+	// coroutines
+	CancellationException::class,
 )
 suspend fun <T : Terminals, R> T.withContextSuspend(block: suspend (T) -> R): R {
 	establishContext()

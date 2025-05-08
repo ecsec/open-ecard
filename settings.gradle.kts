@@ -58,7 +58,7 @@ include("clients:desktop-lib")
 dependencyResolutionManagement {
 
 	repositories {
-		mavenLocal()
+		// mavenLocal()
 		google()
 		mavenCentral()
 

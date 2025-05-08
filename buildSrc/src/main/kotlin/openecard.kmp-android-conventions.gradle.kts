@@ -5,7 +5,7 @@ plugins {
 
 kotlin {
 	androidTarget {
-		publishAllLibraryVariants()
+		publishLibraryVariants("release", "debug")
 	}
 	androidLibrary {
 		minSdk = 21

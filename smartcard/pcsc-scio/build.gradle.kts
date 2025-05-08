@@ -7,21 +7,17 @@ plugins {
 
 kotlin {
 	sourceSets {
-		commonMain {
-			dependencies {
-				implementation(libs.kotlin.logging)
-				api(project(":smartcard:base"))
-			}
+		commonMain.dependencies {
+			implementation(libs.kotlin.logging)
+			api(project(":smartcard:base"))
 		}
-		jvmMain {
-			dependencies {
-				implementation(libs.scio)
-			}
+
+		jvmMain.dependencies {
+			implementation(libs.scio)
 		}
-		commonTest {
-			dependencies {
-				implementation(libs.bundles.test.basics.kotlin)
-			}
+
+		commonTest.dependencies {
+			implementation(libs.bundles.test.basics.kotlin)
 		}
 	}
 

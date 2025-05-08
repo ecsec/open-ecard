@@ -8,15 +8,12 @@ plugins {
 
 kotlin {
 	sourceSets {
-		commonMain {
-			dependencies {
-				implementation(libs.kotlin.logging)
-			}
+		commonMain.dependencies {
+			// implementation(libs.kotlin.logging)
 		}
-		commonTest {
-			dependencies {
-				implementation(libs.bundles.test.basics.kotlin)
-			}
+
+		commonTest.dependencies {
+			// implementation(libs.bundles.test.basics.kotlin)
 		}
 	}
 }

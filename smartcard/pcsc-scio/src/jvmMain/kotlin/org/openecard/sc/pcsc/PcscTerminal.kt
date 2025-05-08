@@ -1,13 +1,17 @@
 package org.openecard.sc.pcsc
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnavailable
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.TerminalStateType
+import java.util.concurrent.CancellationException
 import javax.smartcardio.CardTerminal
-import kotlin.time.Duration
+
+private const val WAIT_INTERVAL = 500L
 
 class PcscTerminal internal constructor(
 	override val terminals: PcscTerminals,
@@ -45,12 +49,14 @@ class PcscTerminal internal constructor(
 		shareMode: ShareMode,
 	): TerminalConnection = PcscTerminalConnection(this, connectInternal(protocol, shareMode))
 
-	override suspend fun waitForCardPresent(timeout: Duration) {
-		TODO("Not yet implemented")
+	override suspend fun waitForCardPresent() {
+		val t = getScioTerminal()
+		waitForCard { t.waitForCardPresent(WAIT_INTERVAL) }
 	}
 
-	override suspend fun waitForCardAbsent(timeout: Duration) {
-		TODO("Not yet implemented")
+	override suspend fun waitForCardAbsent() {
+		val t = getScioTerminal()
+		waitForCard { t.waitForCardAbsent(WAIT_INTERVAL) }
 	}
 
 	@Throws(ReaderUnavailable::class)
@@ -65,4 +71,18 @@ internal fun PreferredCardProtocol.toScioProtocol(): String =
 		PreferredCardProtocol.T1 -> "T=1"
 		PreferredCardProtocol.RAW -> throw IllegalArgumentException("RAW mode is not supported")
 		PreferredCardProtocol.ANY -> "*"
+	}
+
+private suspend inline fun waitForCard(crossinline waitFun: suspend () -> Boolean) =
+	coroutineScope {
+		while (true) {
+			if (!isActive) {
+				// job has been cancelled, stop loop
+				throw CancellationException("Waiting for a card event has been cancelled.")
+			}
+			if (waitFun()) {
+				// change detected
+				break
+			}
+		}
 	}

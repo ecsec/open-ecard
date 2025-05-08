@@ -10,6 +10,7 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			// implementation(libs.kotlin.logging)
+			implementation(libs.kotlin.coroutines.core)
 		}
 
 		commonTest.dependencies {

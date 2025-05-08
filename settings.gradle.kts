@@ -49,10 +49,8 @@ include("clients:richclient")
 include("clients:mobile-lib")
 include("clients:ios-common")
 include("clients:ios-lib")
-include("clients:ios-lib-shade")
 include("clients:android-common")
 include("clients:android-lib")
-include("clients:ios-framework")
 include("clients:desktop-lib")
 
 dependencyResolutionManagement {

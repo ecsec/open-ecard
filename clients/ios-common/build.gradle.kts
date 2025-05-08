@@ -1,14 +1,8 @@
-import java.nio.file.Files
-import kotlin.io.path.createDirectories
-
-
 description = "ios-common"
 
 plugins {
 	id("openecard.lib-multiplatform-conventions")
 }
-
-val roboHeaderTargetDirStr = "generated/sources/headers/roboface/main"
 
 kotlin {
 	sourceSets {
@@ -29,10 +23,7 @@ kotlin {
 				compileOnly(libs.roboface.annots)
 				implementation(libs.roboface.marshal)
 
-				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
-				compileOnly(libs.roboface.processor)
-
-				api(project(":clients:mobile-lib", "ios"))
+				api(project(":clients:mobile-lib"))
 				api(project(":ifd:scio-backend:ios-nfc"))
 
 				implementation(libs.xerces.imp)
@@ -43,54 +34,6 @@ kotlin {
 		val jvmTest by getting {
 			dependencies {
 			}
-		}
-	}
-
-	jvm {
-		val main by compilations.getting {
-			compileJavaTaskProvider?.configure {
-
-				options.annotationProcessorPath = compileDependencyFiles
-				options.compilerArgs.let {
-					it.add("-processor")
-					it.add("org.openecard.robovm.processor.RobofaceProcessor")
-					it.add("-Aroboface.headername=open-ecard-ios-common.h")
-					it.add("-Aroboface.include.headers=open-ecard-mobile-lib.h")
-				}
-
-				val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-				outputs.dir(roboHeaderTargetDir)
-
-				doLast {
-					val genHeaders = layout.buildDirectory.dir("classes/java/jvmMain/roboheaders").get()
-					roboHeaderTargetDir.asFile.let {
-						it.deleteRecursively()
-						it.parentFile.toPath().createDirectories()
-					}
-					Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
-				}
-			}
-		}
-
-		val iosHeaders by configurations.creating {
-			isCanBeResolved = true
-		}
-
-		val shareHeader =
-			tasks.register("shareHeader") {
-				dependsOn("jvmMainClasses")
-
-				outputs.file(
-					layout.buildDirectory.dir(roboHeaderTargetDirStr),
-				)
-			}
-
-		tasks.named("build") {
-			dependsOn("shareHeader")
-		}
-
-		artifacts {
-			add(iosHeaders.name, shareHeader)
 		}
 	}
 }

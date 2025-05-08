@@ -1,13 +1,8 @@
-import java.nio.file.Files
-import kotlin.io.path.createDirectories
-
 description = "mobile-lib"
 
 plugins {
 	id("openecard.lib-multiplatform-conventions")
 }
-
-val roboHeaderTargetDirStr = "generated/sources/headers/roboface/jvmRoboMain"
 
 kotlin {
 	sourceSets {
@@ -28,9 +23,6 @@ kotlin {
 				compileOnly(libs.roboface.annots)
 				implementation(libs.roboface.marshal)
 
-				// must be compileOnly instead of annotationProcessor, otherwise it is not accessible in the additional compilation
-				compileOnly(libs.roboface.processor)
-
 				api(project(":management"))
 				api(project(":sal:tiny-sal"))
 				api(project(":addons:tr03112"))
@@ -46,79 +38,6 @@ kotlin {
 			dependencies {
 				implementation(project(":ifd:scio-backend:mobile-nfc"))
 				implementation(project(":wsdef:jaxb-marshaller"))
-			}
-		}
-	}
-
-	jvm {
-		compilations {
-			val main by getting
-			val roboMain by compilations.creating {
-
-				compileJavaTaskProvider?.configure {
-
-					options.annotationProcessorPath = main.compileDependencyFiles
-					options.compilerArgs.let {
-						it.add("-processor")
-						it.add("org.openecard.robovm.processor.RobofaceProcessor")
-						it.add("-Aroboface.headername=open-ecard-mobile-lib.h")
-						it.add("-Aroboface.inheritance.blacklist=java.io.Serializable")
-					}
-
-					val roboHeaderTargetDir = layout.buildDirectory.dir(roboHeaderTargetDirStr).get()
-					outputs.dir(roboHeaderTargetDir)
-
-					doLast {
-						val genHeaders = layout.buildDirectory.dir("classes/java/jvmRoboMain/roboheaders").get()
-						roboHeaderTargetDir.asFile.let {
-							it.deleteRecursively()
-							it.parentFile.toPath().createDirectories()
-						}
-						Files.move(genHeaders.asFile.toPath(), roboHeaderTargetDir.asFile.toPath())
-					}
-				}
-
-				defaultSourceSet {
-					dependencies {
-						implementation(main.compileDependencyFiles + main.output.classesDirs)
-					}
-				}
-			}
-
-			val ios by configurations.creating {
-				isCanBeConsumed = true
-				isCanBeResolved = false
-			}
-
-			val iosHeaders by configurations.creating {
-				isCanBeResolved = true
-			}
-
-			val shareHeader =
-				tasks.register("shareHeader") {
-					dependsOn("jvmRoboMainClasses")
-
-					outputs.file(
-						layout.buildDirectory.dir(roboHeaderTargetDirStr),
-					)
-				}
-
-			val iosJar =
-				tasks.register("iosJar", Jar::class) {
-					group = "build"
-					dependsOn("jvmRoboMainClasses")
-					from(roboMain.output)
-					archiveClassifier.set("iOS")
-				}
-
-			tasks.named("build") {
-				dependsOn("iosJar")
-				dependsOn("shareHeader")
-			}
-
-			artifacts {
-				add(ios.name, iosJar)
-				add(iosHeaders.name, shareHeader)
 			}
 		}
 	}

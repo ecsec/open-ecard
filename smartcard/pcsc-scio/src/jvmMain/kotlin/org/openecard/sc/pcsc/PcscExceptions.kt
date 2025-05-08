@@ -105,7 +105,6 @@ fun mapToScException(
 	cause: Throwable,
 ): SmartcardException =
 	when (code) {
-		// TODO: handle all PCSC codes
 		0x80100001 -> InternalSystemError(msg, cause)
 		0x80100002 -> Cancelled(msg, cause)
 		0x80100003 -> InvalidHandle(msg, cause)

@@ -14,7 +14,7 @@ kotlin {
 		}
 
 		commonTest.dependencies {
-			// implementation(libs.bundles.test.basics.kotlin)
+			implementation(libs.bundles.test.basics.kotlin)
 		}
 	}
 }

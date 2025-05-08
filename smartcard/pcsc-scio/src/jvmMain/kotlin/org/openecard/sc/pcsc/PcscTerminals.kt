@@ -26,11 +26,17 @@ class PcscTerminals internal constructor(
 		scioTerminals = null
 	}
 
+	/**
+	 * This implementation does not throw [org.openecard.sc.iface.NoReadersAvailable], but returns an empty list instead.
+	 */
 	override fun list(): List<Terminal> {
 		val scioTerminals = assertInitialized()
 		return scioTerminals.list().map { PcscTerminal(this, it.name) }
 	}
 
+	/**
+	 * This implementation does not throw [org.openecard.sc.iface.NoReadersAvailable], but returns an empty list instead.
+	 */
 	override fun getTerminal(name: String): Terminal? {
 		val scioTerminals = assertInitialized()
 		return scioTerminals.list().find { it.name == name }?.let {

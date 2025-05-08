@@ -29,7 +29,6 @@ interface Terminals {
 		InvalidHandle::class,
 		InvalidParameter::class,
 		NoMemory::class,
-		// TODO: check if this can happen, or we simply get no readers
 		NoReadersAvailable::class,
 		NoService::class,
 		InvalidValue::class,
@@ -45,7 +44,6 @@ interface Terminals {
 		InvalidHandle::class,
 		InvalidParameter::class,
 		NoMemory::class,
-		// TODO: check if this can happen, or we simply get no readers
 		NoReadersAvailable::class,
 		NoService::class,
 		InvalidValue::class,

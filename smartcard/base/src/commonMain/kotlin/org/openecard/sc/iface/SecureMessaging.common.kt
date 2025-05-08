@@ -1,7 +1,9 @@
 package org.openecard.sc.iface
 
 interface SecureMessaging {
-	fun processRequest(requestApdu: ByteArray): ByteArray
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun processRequest(requestApdu: UByteArray): UByteArray
 
-	fun processResponse(responseApdu: ByteArray): ByteArray
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun processResponse(responseApdu: UByteArray): UByteArray
 }

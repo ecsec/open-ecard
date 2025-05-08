@@ -14,10 +14,11 @@ class PcscCardChannel internal constructor(
 
 	private val smHandler: MutableList<SecureMessaging> = mutableListOf()
 
-	override fun transmit(apdu: ByteArray): ByteArray {
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun transmit(apdu: UByteArray): UByteArray {
 		val input = smHandler.foldRight(apdu) { sm, last -> sm.processRequest(last) }
-		var response = channel.transmit(CommandAPDU(input)).bytes
-		return smHandler.fold(response) { last, sm -> sm.processResponse(last) }
+		var response = channel.transmit(CommandAPDU(input.toByteArray())).bytes
+		return smHandler.fold(response.toUByteArray()) { last, sm -> sm.processResponse(last) }
 	}
 
 	override fun close() {

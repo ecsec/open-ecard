@@ -8,6 +8,7 @@ interface CardChannel {
 	val isLogicalChannel: Boolean
 		get() = !isBasicChannel
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	@Throws(
 		InsufficientBuffer::class,
 		InvalidHandle::class,
@@ -21,7 +22,7 @@ interface CardChannel {
 		ResetCard::class,
 		RemovedCard::class,
 	)
-	fun transmit(apdu: ByteArray): ByteArray
+	fun transmit(apdu: UByteArray): UByteArray
 
 	@Throws(
 		InsufficientBuffer::class,
@@ -46,6 +47,7 @@ interface CardChannel {
 	fun cleanSecureMessaging()
 }
 
+@OptIn(ExperimentalUnsignedTypes::class)
 @Throws(
 	InsufficientBuffer::class,
 	InvalidHandle::class,

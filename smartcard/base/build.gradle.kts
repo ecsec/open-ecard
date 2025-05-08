@@ -16,5 +16,9 @@ kotlin {
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
 		}
+
+		jvmTest.dependencies {
+			implementation(libs.junit.params)
+		}
 	}
 }

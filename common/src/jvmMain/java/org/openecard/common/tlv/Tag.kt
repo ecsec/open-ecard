@@ -41,20 +41,24 @@ class Tag constructor( // char strings 18-22, 25-30
 	private var primitive: Boolean = true,
 	private var tagNum: Long = 0,
 ) {
-	var tagNumWithClass: Long = 0
-		
+	private var _tagNumWithClass: Long = 0
+	var tagNumWithClass: Long
+		get() = _tagNumWithClass
 		set(value) {
 			val newTag = fromBER(toByteArray(value))
 			this.tagClass = newTag.tagClass
 			this.primitive = newTag.primitive
 			this.tagNum = newTag.tagNum
-			field = value
+			_tagNumWithClass = value
 		}
 
 	/** Set when created from BER. This is needed when creating a TagLengthValue instance from BER  */
 	var numOctets: Int = 0
 
 	constructor(tag: Tag) : this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum()) {
+	}
+
+	init {
 		calculateTagNumWithClass()
 	}
 
@@ -98,7 +102,7 @@ class Tag constructor( // char strings 18-22, 25-30
 		}
 
 		val resultBytes = ByteUtils.concatenate(leading, rest)
-		this.tagNumWithClass = ByteUtils.toLong(resultBytes)
+		this._tagNumWithClass = ByteUtils.toLong(resultBytes)
 	}
 
 	fun toBER(): ByteArray = toByteArray(tagNumWithClass)

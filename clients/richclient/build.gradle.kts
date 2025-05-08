@@ -2,7 +2,15 @@ import com.sun.jna.Platform
 import org.gradle.util.internal.VersionNumber
 import org.panteleyev.jpackage.ImageType
 import org.panteleyev.jpackage.JPackageTask
+import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.time.LocalDate
+import java.util.regex.Pattern
+import java.util.zip.Deflater
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 description = "richclient"
 
@@ -216,63 +224,76 @@ abstract class MacSignLibrariesTask
 		abstract val signingId: Property<String>
 
 		@get:InputFiles
-		abstract val jnaFiles: ConfigurableFileTree
+		abstract val jarFiles: ConfigurableFileTree
 
-		@get:OutputFiles
-		abstract val jnaFilesSigned: ConfigurableFileTree
+		@get:Input
+		abstract var filesToSign: List<String>
+
+		@get:Input
+		var compressionLevel: Int = Deflater.BEST_COMPRESSION
+
+		@get:OutputDirectory
+		abstract var jarFilesSignedOutputDir: Path
 
 		@TaskAction
 		fun signFiles() {
-			val buildDir = "build/mac-sign"
-			File(buildDir).deleteRecursively()
+			val buildDirectory = Path.of(project.layout.buildDirectory.asFile.get().path, "mac-sign")
+			buildDirectory.toFile().deleteRecursively()
+			Files.createDirectory(buildDirectory)
+
 			// The JNA libraries are not signed, so we're signing them as soon as all JARS are copied to the build folder
 			// If we need to sign in future additional libraries, this can also be done here
-			for (jnaFile in jnaFiles) {
-				execProvider.exec {
-					commandLine(
-						"jar",
-						"-x",
-						"-C",
-						buildDir,
-						"-f",
-						jnaFile.path,
-						"com/sun/jna/darwin-x86-64/libjnidispatch.jnilib",
-						"com/sun/jna/darwin-aarch64/libjnidispatch.jnilib",
-					)
-				}
+			for (jarFile in jarFiles) {
+				val zipFile = ZipFile(jarFile)
 
-				val jnaLibFiles = project.fileTree("com/sun/jna/") { include("darwin-*/libjnidispatch.jnilib") }
-				for (jnaLibFile in jnaLibFiles) {
-					val relativeFilePath = jnaLibFile.relativeTo(project.projectDir).path
+				val zipFileSignedPath = buildDirectory.resolve(jarFile.name)
+				val zipFileSigned = ZipOutputStream(zipFileSignedPath.toFile().outputStream())
+				zipFile.comment?.let { zipFileSigned.setComment(it) }
+				zipFileSigned.setLevel(compressionLevel)
 
-					execProvider.exec {
-						commandLine(
-							"codesign",
-							"-vvv",
-							"--display",
-							"--strict",
-							"--force",
-							"--deep",
-							"--options=runtime",
-							"--timestamp",
-							"-s",
-							"Developer ID Application: ${signingId.get()}",
-							"$buildDir/relativeFilePath",
-						)
+				zipFile.entries().iterator().forEach { e ->
+					zipFileSigned.putNextEntry(e)
+
+					val mustBeSigned = filesToSign.any { Pattern.matches(it, e.name) }
+
+					if (mustBeSigned) {
+						val fileContentToSign = zipFile.getInputStream(e).readAllBytes()
+
+						val fileToSign = buildDirectory.resolve(e.name).toFile()
+						fileToSign.deleteOnExit()
+						fileToSign.parentFile.mkdirs()
+						fileToSign.createNewFile()
+
+						val fileToSignOutputStream = FileOutputStream(fileToSign)
+						fileToSignOutputStream.write(fileContentToSign)
+						fileToSignOutputStream.close()
+
+						execProvider.exec {
+							commandLine(
+								"codesign",
+								"-vvv",
+								"--display",
+								"--strict",
+								"--force",
+								"--deep",
+								"--options=runtime",
+								"--timestamp",
+								"-s",
+								"Developer ID Application: ${signingId.get()}",
+								fileToSign.path,
+							)
+						}
+
+						zipFileSigned.write(fileToSign.inputStream().readAllBytes())
+					} else {
+						zipFileSigned.write(zipFile.getInputStream(e).readAllBytes())
 					}
-					execProvider.exec {
-						commandLine(
-							"jar",
-							"-u",
-							"-C",
-							buildDir,
-							"-f",
-							jnaFile.path,
-							relativeFilePath,
-						)
-					}
-					jnaLibFile.delete()
+					zipFileSigned.closeEntry()
 				}
+				zipFileSigned.finish()
+
+				val signedJarOutputLocation = jarFilesSignedOutputDir.resolve(jarFile.name)
+				Files.copy(zipFileSignedPath, signedJarOutputLocation, StandardCopyOption.REPLACE_EXISTING)
 			}
 		}
 	}
@@ -290,8 +311,12 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 		enabled = false
 	}
 
-	jnaFiles.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
-	jnaFilesSigned.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
+	jarFiles.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
+	jarFilesSignedOutputDir = Path.of(layout.buildDirectory.dir("jars").get().asFile.toURI())
+	filesToSign = listOf(
+		"com/sun/jna/darwin-.*/libjnidispatch.jnilib"
+	)
+	compressionLevel = Deflater.BEST_COMPRESSION
 }
 
 tasks.register("packageDmg", JPackageTask::class) {

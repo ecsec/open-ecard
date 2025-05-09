@@ -48,7 +48,8 @@ import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.sal.protocol.eac.gui.ErrorStep
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -107,9 +108,10 @@ class PhoneStepAction(
 		return sendPhoneStatus
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	private fun sendPhoneNumber(phoneNumber: String): StepActionResult {
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-		val correlationId = UUID.randomUUID().toString()
+		val correlationId = Uuid.random().toString()
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 
 		val sendPhoneNumber = SendPhoneNumber(phoneNumber)

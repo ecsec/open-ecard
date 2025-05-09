@@ -63,11 +63,12 @@ import org.openecard.ws.jaxb.JAXBMarshaller
 import org.testng.Assert
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -130,15 +131,15 @@ class CardLinkProtocolTest {
 		isContextInitialized.deref()
 	}
 
-	@OptIn(ExperimentalStdlibApi::class)
+	@OptIn(ExperimentalStdlibApi::class, ExperimentalUuidApi::class)
 	private fun setupWebsocketMock(
 		answerWithError: Boolean = false,
 		websocketListenerHash: Promise<Int>,
 	): Websocket {
 		val webSocketMock = Mockito.mock(Websocket::class.java)
-		val correlationIdTan = UUID.randomUUID().toString()
-		val correlationIdMseApdu = UUID.randomUUID().toString()
-		val cardSessionId = UUID.randomUUID().toString()
+		val correlationIdTan = Uuid.random().toString()
+		val correlationIdMseApdu = Uuid.random().toString()
+		val cardSessionId = Uuid.random().toString()
 		val argumentCaptor = ArgumentCaptor.forClass(WebsocketListener::class.java)
 
 		Mockito.`when`(webSocketMock.getUrl()).then {
@@ -239,7 +240,7 @@ class CardLinkProtocolTest {
 				val internalAuthMessage =
 					GematikEnvelope(
 						SendApdu(cardSessionId, internalAuthApdu),
-						UUID.randomUUID().toString(),
+						Uuid.random().toString(),
 						cardSessionId,
 					)
 				argumentCaptor.value.onText(webSocketMock, cardLinkJsonFormatter.encodeToString(internalAuthMessage))

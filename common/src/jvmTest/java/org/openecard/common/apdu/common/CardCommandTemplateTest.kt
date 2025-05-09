@@ -32,14 +32,16 @@ import java.math.BigInteger
  * @author Tobias Wich
  */
 class CardCommandTemplateTest {
-	private var CTX: MutableMap<String, Any>? = null
+	private lateinit var ctx: Map<String, Any>
 
 	@BeforeClass
 	fun init() {
-		CTX = HashMap()
-		CTX!!["val1"] = "00ff"
-		CTX!!["val2"] = "1234"
-		CTX!!["tlv"] = TLVFunction()
+		ctx =
+			mutableMapOf(
+				"val1" to "00ff",
+				"val2" to "1234",
+				"tlv" to TLVFunction(),
+			)
 	}
 
 	@Test
@@ -66,27 +68,27 @@ class CardCommandTemplateTest {
 		templateType.headerTemplate = "00a4020c"
 		templateType.dataTemplate = "{val1}"
 		var t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C0200FF")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C0200FF")
 
 		templateType.dataTemplate = "ab{val1}"
 		t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C03AB00FF")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C03AB00FF")
 
 		templateType.dataTemplate = "{val1}ab"
 		t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C0300FFAB")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C0300FFAB")
 
 		templateType.dataTemplate = "ba{val1}ab"
 		t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C04BA00FFAB")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C04BA00FFAB")
 
 		templateType.dataTemplate = "ba{val1}ab{val2}cd"
 		t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C07BA00FFAB1234CD")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C07BA00FFAB1234CD")
 
 		templateType.dataTemplate = "ba{val1}{val2}cd"
 		t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C06BA00FF1234CD")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C06BA00FF1234CD")
 	}
 
 	@Test
@@ -96,7 +98,7 @@ class CardCommandTemplateTest {
 		templateType.headerTemplate = "00a4020c"
 		templateType.dataTemplate = "{tlv 0x01 val1}"
 		val t = CardCommandTemplate(templateType)
-		Assert.assertEquals(t.evaluate(CTX!!).toHexString(), "00A4020C04010200FF")
+		Assert.assertEquals(t.evaluate(ctx!!).toHexString(), "00A4020C04010200FF")
 	}
 
 	companion object {

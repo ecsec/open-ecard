@@ -31,27 +31,27 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class UpdateRecordTest {
-    @Test
-    fun test() {
-        val updatingData = "UPDATE".toByteArray()
-        var updateRecord = UpdateRecord(updatingData)
-        var expected = toByteArray("00 DC 01 04 06 55 50 44 41 54 45", true)
-        Assert.assertEquals(updateRecord.toByteArray(), expected)
+	@Test
+	fun test() {
+		val updatingData = "UPDATE".toByteArray()
+		var updateRecord = UpdateRecord(updatingData)
+		var expected = toByteArray("00 DC 01 04 06 55 50 44 41 54 45", true)
+		Assert.assertEquals(updateRecord.toByteArray(), expected)
 
-        updateRecord = UpdateRecord(0x02.toByte(), updatingData)
-        expected = toByteArray("00 DC 02 04 06 55 50 44 41 54 45", true)
-        Assert.assertEquals(updateRecord.toByteArray(), expected)
+		updateRecord = UpdateRecord(0x02.toByte(), updatingData)
+		expected = toByteArray("00 DC 02 04 06 55 50 44 41 54 45", true)
+		Assert.assertEquals(updateRecord.toByteArray(), expected)
 
-        updateRecord = UpdateRecord(0x09.toByte(), 0x02.toByte(), updatingData)
-        expected = toByteArray("00 DC 02 4C 06 55 50 44 41 54 45", true)
-        Assert.assertEquals(updateRecord.toByteArray(), expected)
+		updateRecord = UpdateRecord(0x09.toByte(), 0x02.toByte(), updatingData)
+		expected = toByteArray("00 DC 02 4C 06 55 50 44 41 54 45", true)
+		Assert.assertEquals(updateRecord.toByteArray(), expected)
 
-        updateRecord = UpdateRecord(0x02.toByte(), 12.toShort(), updatingData)
-        expected = toByteArray("00 DD 02 04 09 54 0C 53 55 50 44 41 54 45", true)
-        Assert.assertEquals(updateRecord.toByteArray(), expected)
+		updateRecord = UpdateRecord(0x02.toByte(), 12.toShort(), updatingData)
+		expected = toByteArray("00 DD 02 04 09 54 0C 53 55 50 44 41 54 45", true)
+		Assert.assertEquals(updateRecord.toByteArray(), expected)
 
-        updateRecord = UpdateRecord(0x09.toByte(), 0x02.toByte(), 12.toShort(), updatingData)
-        expected = toByteArray("00 DD 02 4C 09 54 0C 53 55 50 44 41 54 45", true)
-        Assert.assertEquals(updateRecord.toByteArray(), expected)
-    }
+		updateRecord = UpdateRecord(0x09.toByte(), 0x02.toByte(), 12.toShort(), updatingData)
+		expected = toByteArray("00 DD 02 4C 09 54 0C 53 55 50 44 41 54 45", true)
+		Assert.assertEquals(updateRecord.toByteArray(), expected)
+	}
 }

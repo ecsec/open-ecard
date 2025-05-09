@@ -31,26 +31,26 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class ReadRecordTest {
-    @Test
-    fun test() {
-        var readRecord = ReadRecord()
-        var expected = toByteArray("00 B2 01 04 FF", true)
-        Assert.assertEquals(readRecord.toByteArray(), expected)
+	@Test
+	fun test() {
+		var readRecord = ReadRecord()
+		var expected = toByteArray("00 B2 01 04 FF", true)
+		Assert.assertEquals(readRecord.toByteArray(), expected)
 
-        readRecord = ReadRecord(0x02.toByte())
-        expected = toByteArray("00 B2 02 04 FF", true)
-        Assert.assertEquals(readRecord.toByteArray(), expected)
+		readRecord = ReadRecord(0x02.toByte())
+		expected = toByteArray("00 B2 02 04 FF", true)
+		Assert.assertEquals(readRecord.toByteArray(), expected)
 
-        readRecord = ReadRecord(0x09.toByte(), 0x02.toByte())
-        expected = toByteArray("00 B2 02 4C FF", true)
-        Assert.assertEquals(readRecord.toByteArray(), expected)
+		readRecord = ReadRecord(0x09.toByte(), 0x02.toByte())
+		expected = toByteArray("00 B2 02 4C FF", true)
+		Assert.assertEquals(readRecord.toByteArray(), expected)
 
-        readRecord = ReadRecord(0x02.toByte(), 12.toShort(), 6.toShort())
-        expected = toByteArray("00 B3 02 04 02 54 0C 06", true)
-        Assert.assertEquals(readRecord.toByteArray(), expected)
+		readRecord = ReadRecord(0x02.toByte(), 12.toShort(), 6.toShort())
+		expected = toByteArray("00 B3 02 04 02 54 0C 06", true)
+		Assert.assertEquals(readRecord.toByteArray(), expected)
 
-        readRecord = ReadRecord(0x09.toByte(), 0x02.toByte(), 12.toShort(), 6.toShort())
-        expected = toByteArray("00 B3 02 4C 02 54 0C 06", true)
-        Assert.assertEquals(readRecord.toByteArray(), expected)
-    }
+		readRecord = ReadRecord(0x09.toByte(), 0x02.toByte(), 12.toShort(), 6.toShort())
+		expected = toByteArray("00 B3 02 4C 02 54 0C 06", true)
+		Assert.assertEquals(readRecord.toByteArray(), expected)
+	}
 }

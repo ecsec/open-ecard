@@ -31,60 +31,60 @@ import org.testng.annotations.Test
  * @author Hans-Martin Haase
  */
 class HttpRequestLineUtilsTest {
-    /**
-     * Test to check whether the transformRaw method works correct in case there is just a key in the query.
-     */
-    @Test
-    fun transformRawTestKeyNoValue() {
-        val query = "testkey"
-        val map = transformRaw(query)
-        Assert.assertEquals(map.size, 1)
-        for (key in map.keys) {
-            Assert.assertEquals(key, "testkey")
-            Assert.assertEquals(map[key], "")
-        }
-    }
+	/**
+	 * Test to check whether the transformRaw method works correct in case there is just a key in the query.
+	 */
+	@Test
+	fun transformRawTestKeyNoValue() {
+		val query = "testkey"
+		val map = transformRaw(query)
+		Assert.assertEquals(map.size, 1)
+		for (key in map.keys) {
+			Assert.assertEquals(key, "testkey")
+			Assert.assertEquals(map[key], "")
+		}
+	}
 
-    /**
-     * Test to check whether the transformRaw method works correct in case there is a key with an empty value in the query.
-     */
-    @Test
-    fun transformRawTestKeyEmptyValue() {
-        val query = "testkey="
-        val map = transformRaw(query)
-        Assert.assertEquals(map.size, 1)
-        for (key in map.keys) {
-            Assert.assertEquals(key, "testkey")
-            Assert.assertEquals(map[key], "")
-        }
-    }
+	/**
+	 * Test to check whether the transformRaw method works correct in case there is a key with an empty value in the query.
+	 */
+	@Test
+	fun transformRawTestKeyEmptyValue() {
+		val query = "testkey="
+		val map = transformRaw(query)
+		Assert.assertEquals(map.size, 1)
+		for (key in map.keys) {
+			Assert.assertEquals(key, "testkey")
+			Assert.assertEquals(map[key], "")
+		}
+	}
 
-    /**
-     * Test to check whether the transformRaw method works correct in case there is a key with a value in the query.
-     */
-    @Test
-    fun transformRawTestKeyWithValue() {
-        val query = "testkey=blablub"
-        val map = transformRaw(query)
-        Assert.assertEquals(map.size, 1)
-        for (key in map.keys) {
-            Assert.assertEquals(key, "testkey")
-            Assert.assertEquals(map[key], "blablub")
-        }
-    }
+	/**
+	 * Test to check whether the transformRaw method works correct in case there is a key with a value in the query.
+	 */
+	@Test
+	fun transformRawTestKeyWithValue() {
+		val query = "testkey=blablub"
+		val map = transformRaw(query)
+		Assert.assertEquals(map.size, 1)
+		for (key in map.keys) {
+			Assert.assertEquals(key, "testkey")
+			Assert.assertEquals(map[key], "blablub")
+		}
+	}
 
-    /**
-     * Test to check whether the transformRaw method works correct in case there is a key with a value while the value
-     * contains an equal sign.
-     */
-    @Test
-    fun transformRawTestKeyWithValueContainingEqualsSign() {
-        val query = "testkey=blablub=test"
-        val map = transformRaw(query)
-        Assert.assertEquals(map.size, 1)
-        for (key in map.keys) {
-            Assert.assertEquals(key, "testkey")
-            Assert.assertEquals(map[key], "blablub=test")
-        }
-    }
+	/**
+	 * Test to check whether the transformRaw method works correct in case there is a key with a value while the value
+	 * contains an equal sign.
+	 */
+	@Test
+	fun transformRawTestKeyWithValueContainingEqualsSign() {
+		val query = "testkey=blablub=test"
+		val map = transformRaw(query)
+		Assert.assertEquals(map.size, 1)
+		for (key in map.keys) {
+			Assert.assertEquals(key, "testkey")
+			Assert.assertEquals(map[key], "blablub=test")
+		}
+	}
 }

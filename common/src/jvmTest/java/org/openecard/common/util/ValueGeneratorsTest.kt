@@ -34,38 +34,38 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class ValueGeneratorsTest {
-    @Test
-    fun testGeneratePSK() {
-        val psk = generatePSK()
-        Assert.assertEquals(psk.length, 64)
-    }
+	@Test
+	fun testGeneratePSK() {
+		val psk = generatePSK()
+		Assert.assertEquals(psk.length, 64)
+	}
 
-    @Test
-    fun testGenHexSession() {
-        var session = genHexSession()
-        Assert.assertEquals(session.length, 32)
-        session = genHexSession(64)
-        Assert.assertEquals(session.length, 64)
-    }
+	@Test
+	fun testGenHexSession() {
+		var session = genHexSession()
+		Assert.assertEquals(session.length, 32)
+		session = genHexSession(64)
+		Assert.assertEquals(session.length, 64)
+	}
 
-    @Test
-    fun testGenBase64Session() {
-        var session = genBase64Session()
-        Assert.assertEquals(session.length, 22)
-        session = genBase64Session(64)
-        Assert.assertEquals(session.length, 43)
-    }
+	@Test
+	fun testGenBase64Session() {
+		var session = genBase64Session()
+		Assert.assertEquals(session.length, 22)
+		session = genBase64Session(64)
+		Assert.assertEquals(session.length, 43)
+	}
 
-    @Test
-    fun testGenerateRandomHex() {
-        val randomHex = generateRandomHex(40)
-        Assert.assertEquals(randomHex.length, 40)
-    }
+	@Test
+	fun testGenerateRandomHex() {
+		val randomHex = generateRandomHex(40)
+		Assert.assertEquals(randomHex.length, 40)
+	}
 
-    @Test
-    fun testGenerateUUID() {
-        val uuid = generateUUID()
-        Assert.assertTrue(uuid.startsWith("urn:uuid:"))
-        Assert.assertEquals(uuid.length, 45)
-    }
+	@Test
+	fun testGenerateUUID() {
+		val uuid = generateUUID()
+		Assert.assertTrue(uuid.startsWith("urn:uuid:"))
+		Assert.assertEquals(uuid.length, 45)
+	}
 }

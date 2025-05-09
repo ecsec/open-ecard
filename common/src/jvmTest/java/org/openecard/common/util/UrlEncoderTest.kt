@@ -29,22 +29,22 @@ import org.testng.annotations.Test
  * @author Tobias Wich
  */
 class UrlEncoderTest {
-    @Test
-    fun testQueryParamEncode() {
-        val url = "http://openecard.org/?query1=foo&query2=bar%20ui"
-        val result = UrlEncoder().encodeQueryParam(url)
-        Assert.assertEquals(result, "http%3A%2F%2Fopenecard.org%2F%3Fquery1%3Dfoo%26query2%3Dbar%20ui")
-    }
+	@Test
+	fun testQueryParamEncode() {
+		val url = "http://openecard.org/?query1=foo&query2=bar%20ui"
+		val result = UrlEncoder().encodeQueryParam(url)
+		Assert.assertEquals(result, "http%3A%2F%2Fopenecard.org%2F%3Fquery1%3Dfoo%26query2%3Dbar%20ui")
+	}
 
-    @Test
-    fun testQueryParamEncodeNullValue() {
-        val result = UrlEncoder().encodeQueryParam(null)
-        Assert.assertNull(result)
-    }
+	@Test
+	fun testQueryParamEncodeNullValue() {
+		val result = UrlEncoder().encodeQueryParam(null)
+		Assert.assertNull(result)
+	}
 
-    @Test
-    fun testQueryParamEncodeEmptyValue() {
-        val result = UrlEncoder().encodeQueryParam("")
-        Assert.assertEquals(result, "")
-    }
+	@Test
+	fun testQueryParamEncodeEmptyValue() {
+		val result = UrlEncoder().encodeQueryParam("")
+		Assert.assertEquals(result, "")
+	}
 }

@@ -21,7 +21,6 @@
  */
 package org.openecard.transport.dispatcher
 
-
 /**
  * Test environment.
  * The instance is used to check if the interfaces are also found if the actual annotations are defined in a superclass.

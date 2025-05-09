@@ -74,9 +74,8 @@ class TestIFD : IFD {
 	override fun prepareDevices(parameters: PrepareDevices): PrepareDevicesResponse =
 		throw UnsupportedOperationException("Not supported yet.")
 
-	override fun powerDownDevices(parameters: PowerDownDevices): PowerDownDevicesResponse {
-		throw UnsupportedOperationException("Not supported yet.") // To change body of generated methods, choose Tools | Templates.
-	}
+	override fun powerDownDevices(parameters: PowerDownDevices): PowerDownDevicesResponse =
+		throw UnsupportedOperationException("Not supported yet.")
 
 	override fun establishChannel(parameters: EstablishChannel): EstablishChannelResponse =
 		throw UnsupportedOperationException("Not supported yet.")

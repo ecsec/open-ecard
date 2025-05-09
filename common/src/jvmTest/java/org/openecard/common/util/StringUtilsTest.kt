@@ -34,38 +34,38 @@ import org.testng.annotations.Test
  * @author Tobias Wich
  */
 class StringUtilsTest {
-    @Test
-    fun testToByteArray() {
-        val hex = "00112233"
-        val hex2 = "00             11        22 33"
-        var array = toByteArray(hex)
-        var expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
-        Assert.assertEquals(expected, array)
+	@Test
+	fun testToByteArray() {
+		val hex = "00112233"
+		val hex2 = "00             11        22 33"
+		var array = toByteArray(hex)
+		var expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
+		Assert.assertEquals(expected, array)
 
-        array = toByteArray(hex2, true)
-        expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
-        Assert.assertEquals(expected, array)
+		array = toByteArray(hex2, true)
+		expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
+		Assert.assertEquals(expected, array)
 
-        array = toByteArray(hex, false)
-        expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
-        Assert.assertEquals(expected, array)
-    }
+		array = toByteArray(hex, false)
+		expected = byteArrayOf(0x00, 0x11, 0x22, 0x33)
+		Assert.assertEquals(expected, array)
+	}
 
-    @Test
-    fun testNullFunctions() {
-        Assert.assertTrue(isNullOrEmpty(""))
-        Assert.assertTrue(isNullOrEmpty(null))
-        Assert.assertFalse(isNullOrEmpty(" "))
-        Assert.assertFalse(isNullOrEmpty("foo"))
+	@Test
+	fun testNullFunctions() {
+		Assert.assertTrue(isNullOrEmpty(""))
+		Assert.assertTrue(isNullOrEmpty(null))
+		Assert.assertFalse(isNullOrEmpty(" "))
+		Assert.assertFalse(isNullOrEmpty("foo"))
 
-        Assert.assertNull(emptyToNull(""))
-        Assert.assertNull(emptyToNull(null))
-        Assert.assertEquals(emptyToNull(" "), " ")
-        Assert.assertEquals(emptyToNull("foo"), "foo")
+		Assert.assertNull(emptyToNull(""))
+		Assert.assertNull(emptyToNull(null))
+		Assert.assertEquals(emptyToNull(" "), " ")
+		Assert.assertEquals(emptyToNull("foo"), "foo")
 
-        Assert.assertEquals(nullToEmpty(null), "")
-        Assert.assertEquals(nullToEmpty(""), "")
-        Assert.assertEquals(nullToEmpty(" "), " ")
-        Assert.assertEquals(nullToEmpty("foo"), "foo")
-    }
+		Assert.assertEquals(nullToEmpty(null), "")
+		Assert.assertEquals(nullToEmpty(""), "")
+		Assert.assertEquals(nullToEmpty(" "), " ")
+		Assert.assertEquals(nullToEmpty("foo"), "foo")
+	}
 }

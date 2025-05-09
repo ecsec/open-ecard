@@ -31,13 +31,13 @@ import java.net.IDN
  * @author Tobias Wich
  */
 class DomainUtilsTest {
-    @Test
-    fun compareWildcardDomains() {
-        Assert.assertTrue(checkWildcardHostName("foö.bär.com", "foö.bär.com"))
-        Assert.assertTrue(checkWildcardHostName("foö.bär.com", IDN.toASCII("foö.bär.com")))
-        Assert.assertTrue(checkWildcardHostName("*.bär.com", "foö.bär.com"))
-        Assert.assertFalse(checkWildcardHostName("*.bär.com", "bar.com"))
-        Assert.assertFalse(checkWildcardHostName("bär.com", "foö.bar.com"))
-        Assert.assertFalse(checkWildcardHostName("*.com", "foö.bar.com"))
-    }
+	@Test
+	fun compareWildcardDomains() {
+		Assert.assertTrue(checkWildcardHostName("foö.bär.com", "foö.bär.com"))
+		Assert.assertTrue(checkWildcardHostName("foö.bär.com", IDN.toASCII("foö.bär.com")))
+		Assert.assertTrue(checkWildcardHostName("*.bär.com", "foö.bär.com"))
+		Assert.assertFalse(checkWildcardHostName("*.bär.com", "bar.com"))
+		Assert.assertFalse(checkWildcardHostName("bär.com", "foö.bar.com"))
+		Assert.assertFalse(checkWildcardHostName("*.com", "foö.bar.com"))
+	}
 }

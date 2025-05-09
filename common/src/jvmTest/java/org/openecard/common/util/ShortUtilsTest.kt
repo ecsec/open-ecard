@@ -29,27 +29,27 @@ import org.testng.annotations.Test
  * @author Dirk Petrautzki
  */
 class ShortUtilsTest {
-    @Test
-    fun testToByteArray() {
-        var result = ShortUtils.toByteArray(Short.MAX_VALUE)
-        var expected = byteArrayOf(0x7F, 0xFF.toByte())
-        Assert.assertEquals(expected, result)
+	@Test
+	fun testToByteArray() {
+		var result = ShortUtils.toByteArray(Short.MAX_VALUE)
+		var expected = byteArrayOf(0x7F, 0xFF.toByte())
+		Assert.assertEquals(expected, result)
 
-        result = ShortUtils.toByteArray(Short.MAX_VALUE, true)
-        expected = byteArrayOf(0x7F, 0xFF.toByte())
-        Assert.assertEquals(expected, result)
+		result = ShortUtils.toByteArray(Short.MAX_VALUE, true)
+		expected = byteArrayOf(0x7F, 0xFF.toByte())
+		Assert.assertEquals(expected, result)
 
-        result = ShortUtils.toByteArray(0.toShort(), true)
-        expected = byteArrayOf(0x00, 0x00)
-        Assert.assertEquals(expected, result)
+		result = ShortUtils.toByteArray(0.toShort(), true)
+		expected = byteArrayOf(0x00, 0x00)
+		Assert.assertEquals(expected, result)
 
-        result = ShortUtils.toByteArray(0.toShort(), false)
-        expected = byteArrayOf(0x00)
-        Assert.assertEquals(expected, result)
+		result = ShortUtils.toByteArray(0.toShort(), false)
+		expected = byteArrayOf(0x00)
+		Assert.assertEquals(expected, result)
 
-        // and a real life example
-        result = ShortUtils.toByteArray(0x9000.toShort())
-        expected = byteArrayOf(0x90.toByte(), 0x00)
-        Assert.assertEquals(expected, result)
-    }
+		// and a real life example
+		result = ShortUtils.toByteArray(0x9000.toShort())
+		expected = byteArrayOf(0x90.toByte(), 0x00)
+		Assert.assertEquals(expected, result)
+	}
 }

@@ -35,7 +35,7 @@ import org.openecard.common.util.ShortUtils
  */
 class ReadBinary : CardCommandAPDU {
 	/**
-	 * Creates an new READ BINARY APDU.
+	 * Creates a new READ BINARY APDU.
 	 */
 	constructor() : super(x00, READ_BINARY_INS_1, x00, xFF)
 

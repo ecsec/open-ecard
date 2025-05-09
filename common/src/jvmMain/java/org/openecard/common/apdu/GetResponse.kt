@@ -29,16 +29,16 @@ import org.openecard.common.apdu.common.CardCommandAPDU
  *
  * @author Hans-Martin Haase
  */
-class GetResponse
-/**
- * Creates a new GET RESPONSE command.
- * <br></br><br></br>
- * APDU: 0x00 0xC0 0x00 0x00 0x00
- */
-    : CardCommandAPDU(
-    x00,
-    0xC0.toByte(),
-    x00,
-    x00,
-    x00
-)
+class GetResponse :
+	/**
+	* Creates a new GET RESPONSE command.
+	* <br></br><br></br>
+	* APDU: 0x00 0xC0 0x00 0x00 0x00
+	*/
+	CardCommandAPDU(
+		x00,
+		0xC0.toByte(),
+		x00,
+		x00,
+		x00,
+	)

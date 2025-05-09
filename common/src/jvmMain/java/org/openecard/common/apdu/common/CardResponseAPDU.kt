@@ -35,16 +35,12 @@ private val logger = KotlinLogging.logger { }
  * @author Moritz Horsch
  * @author Tobias Wich
  */
-@Suppress("ktlint:standard:no-consecutive-comments")
 class CardResponseAPDU : CardAPDU {
-	// lateinit var trailer: ByteArray
-
 	/**
 	 * Sets the trailer (status bytes) of the APDU.
 	 *
 	 * @param trailer Trailer (SW1, SW2)
 	 */
-
 	var trailer: ByteArray = ByteArray(2)
 		set(value) {
 			require(value.size == 2) { "Given trailer is not exactly two bytes long." }
@@ -114,7 +110,7 @@ class CardResponseAPDU : CardAPDU {
 		/**
 		 * Sets the status byte SW2.
 		 *
-		 * @param sw2 SW2
+		 * @param sW2 SW2
 		 */
 		protected set(sw2) {
 			trailer[1] = sw2

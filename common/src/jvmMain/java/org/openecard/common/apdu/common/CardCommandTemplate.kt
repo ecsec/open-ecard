@@ -109,15 +109,19 @@ class CardCommandTemplate(
 		o: Any,
 		params: Array<Any?> = arrayOfNulls(0),
 	): String? {
-		if (o is ByteArray) {
-			val result = ByteUtils.toHexString(o)
-			return result
-		} else if (o is APDUTemplateFunction) {
-			val result = o.call(*params)!!
-			return result
-		} else {
-			// this also includes the String class where it is the identity function
-			return o.toString()
+		when (o) {
+			is ByteArray -> {
+				val result = ByteUtils.toHexString(o)
+				return result
+			}
+			is APDUTemplateFunction -> {
+				val result = o.call(*params)!!
+				return result
+			}
+			else -> {
+				// this also includes the String class where it is the identity function
+				return o.toString()
+			}
 		}
 	}
 

@@ -31,41 +31,61 @@ import javax.xml.namespace.QName
  * @author Tobias Wich
  * @param <T> Specialized type of the DIDAuthenticationData.
 </T> */
-class AuthDataResponse<T : DIDAuthenticationDataType?>(private val xmlDoc: Document, val response: T) {
-    fun addElement(qname: QName, data: String?): Element {
-        val e = if (qname.namespaceURI != null) {
-            xmlDoc.createElementNS(qname.namespaceURI, qname.localPart)
-        } else {
-            xmlDoc.createElement(qname.localPart)
-        }
-        e.textContent = data
-        // add to list and return
-        response!!.any.add(e)
-        return e
-    }
+class AuthDataResponse<T : DIDAuthenticationDataType?>(
+	private val xmlDoc: Document,
+	val response: T,
+) {
+	fun addElement(
+		qname: QName,
+		data: String?,
+	): Element {
+		val e =
+			if (qname.namespaceURI != null) {
+				xmlDoc.createElementNS(qname.namespaceURI, qname.localPart)
+			} else {
+				xmlDoc.createElement(qname.localPart)
+			}
+		e.textContent = data
+		// add to list and return
+		response!!.any.add(e)
+		return e
+	}
 
-    fun addElement(ns: String?, localName: String, data: String?): Element {
-        return addElement(QName(ns, localName), data)
-    }
+	fun addElement(
+		ns: String?,
+		localName: String,
+		data: String?,
+	): Element = addElement(QName(ns, localName), data)
 
-    fun addElement(localName: String, data: String?): Element {
-        return addElement(QName(ISO_NS, localName), data)
-    }
+	fun addElement(
+		localName: String,
+		data: String?,
+	): Element = addElement(QName(ISO_NS, localName), data)
 
-    fun addAttribute(qname: QName?, data: String?) {
-        response!!.otherAttributes[qname] = data
-    }
+	fun addAttribute(
+		qname: QName?,
+		data: String?,
+	) {
+		response!!.otherAttributes[qname] = data
+	}
 
-    fun addAttribute(ns: String?, localName: String, data: String?) {
-        addAttribute(QName(ns, localName), data)
-    }
+	fun addAttribute(
+		ns: String?,
+		localName: String,
+		data: String?,
+	) {
+		addAttribute(QName(ns, localName), data)
+	}
 
-    fun addAttribute(localName: String, data: String?) {
-        addAttribute(QName(null, localName), data)
-    }
+	fun addAttribute(
+		localName: String,
+		data: String?,
+	) {
+		addAttribute(QName(null, localName), data)
+	}
 
-    companion object {
-        const val ISO_NS: String = "urn:iso:std:iso-iec:24727:tech:schema"
-        const val OEC_NS: String = "https://openecard.org/app"
-    }
+	companion object {
+		const val ISO_NS: String = "urn:iso:std:iso-iec:24727:tech:schema"
+		const val OEC_NS: String = "https://openecard.org/app"
+	}
 }

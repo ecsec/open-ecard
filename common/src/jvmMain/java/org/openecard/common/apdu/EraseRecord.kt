@@ -30,47 +30,46 @@ import org.openecard.common.apdu.common.CardCommandAPDU
  * @author Hans-Martin Haase
  */
 class EraseRecord : CardCommandAPDU {
-    /**
-     * Creates a new ERASE RECORD APDU.
-     * APDU: 0x00 0x0C P1 P2 - - -
-     *
-     * @param p1 A record number.
-     * @param p2 Indicates whether just erase the record with the record number from P1 or erase all record from P1 to
-     * the last. There are two public variables in this class for setting p2.
-     */
-    constructor(p1: Byte, p2: Byte) : super(x00, ERASE_RECORD_INS, p1, p2)
+	/**
+	 * Creates a new ERASE RECORD APDU.
+	 * APDU: 0x00 0x0C P1 P2 - - -
+	 *
+	 * @param p1 A record number.
+	 * @param p2 Indicates whether just erase the record with the record number from P1 or erase all record from P1 to
+	 * the last. There are two public variables in this class for setting p2.
+	 */
+	constructor(p1: Byte, p2: Byte) : super(x00, ERASE_RECORD_INS, p1, p2)
 
-    /**
-     * Creates a new ERASE RECORD APDU.
-     * APDU: 0x00 0x0C P1 P2 - - -
-     *
-     * @param p1 A record number.
-     * @param p2EraseBehavior Indicates whether just erase the record with the record number from P1 or delete all
-     * record from P1 to the last. There are two public variables in this class for setting p2.
-     * @param shortFID A short file identifier for the file which contains the record to erase.
-     */
-    constructor(p1: Byte, p2EraseBehavior: Byte, shortFID: Byte) : super(
-        x00,
-        ERASE_RECORD_INS,
-        p1,
-        ((shortFID * 8) + p2EraseBehavior).toByte()
-    )
+	/**
+	 * Creates a new ERASE RECORD APDU.
+	 * APDU: 0x00 0x0C P1 P2 - - -
+	 *
+	 * @param p1 A record number.
+	 * @param p2EraseBehavior Indicates whether just erase the record with the record number from P1 or delete all
+	 * record from P1 to the last. There are two public variables in this class for setting p2.
+	 * @param shortFID A short file identifier for the file which contains the record to erase.
+	 */
+	constructor(p1: Byte, p2EraseBehavior: Byte, shortFID: Byte) : super(
+		x00,
+		ERASE_RECORD_INS,
+		p1,
+		((shortFID * 8) + p2EraseBehavior).toByte(),
+	)
 
-    companion object {
-        /**
-         * Instruction byte for the ERASE RECORD command according to ISO 7816 part 4.
-         */
-        private const val ERASE_RECORD_INS = 0x0C.toByte()
+	companion object {
+		/**
+		 * Instruction byte for the ERASE RECORD command according to ISO 7816 part 4.
+		 */
+		private const val ERASE_RECORD_INS = 0x0C.toByte()
 
+		/**
+		 * P2 value for erasing the record with the record number from P1.
+		 */
+		const val ERASE_JUST_P1: Byte = 0x04.toByte()
 
-        /**
-         * P2 value for erasing the record with the record number from P1.
-         */
-        const val ERASE_JUST_P1: Byte = 0x04.toByte()
-
-        /**
-         * P2 value for erasing the records from P1 up to the last record.
-         */
-        const val ERASE_P1_UP_TO_LAST: Byte = 0x05.toByte()
-    }
+		/**
+		 * P2 value for erasing the records from P1 up to the last record.
+		 */
+		const val ERASE_P1_UP_TO_LAST: Byte = 0x05.toByte()
+	}
 }

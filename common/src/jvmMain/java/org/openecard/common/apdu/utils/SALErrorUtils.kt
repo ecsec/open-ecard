@@ -42,6 +42,7 @@ object SALErrorUtils {
 			ECardConstants.Major.ERROR
 		}
 	}
+
 	@JvmStatic
 	fun getMinor(code: ByteArray): String? {
 		require(code.size == 2) { "Given response code is not exactly two bytes long." }

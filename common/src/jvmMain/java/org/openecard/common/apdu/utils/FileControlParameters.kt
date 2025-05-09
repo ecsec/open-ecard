@@ -22,8 +22,8 @@
 package org.openecard.common.apdu.utils
 
 enum class FileControlParameters {
-    NONE,
-    FCI,
-    FCP,
-    FMD,
+	NONE,
+	FCI,
+	FCP,
+	FMD,
 }

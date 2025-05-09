@@ -21,8 +21,6 @@
  */
 package org.openecard.common.apdu.common
 
-@Suppress("ktlint:standard:property-naming")
-
 /**
  * Base for all APDU types.
  *
@@ -34,6 +32,11 @@ open class CardAPDU {
 	protected var protectedData = ByteArray(0)
 
 	open var data: ByteArray
+		/**
+		 * Returns the data field of the APDU.
+		 *
+		 * @return Data field. May be empty if no data is available
+		 */
 		get() {
 			if (protectedData.isEmpty()) {
 				return ByteArray(0)
@@ -44,43 +47,24 @@ open class CardAPDU {
 				return ret
 			}
 		}
+
+		/*
+		 * Sets the data field of the APDU.
+		 *
+		 * @param data Data field
+		 */
 		set(value) {
 			protectedData = value
 		}
 
-// 	fun getData(): ByteArray {
-// 		if (data.isEmpty()) {
-// 			return ByteArray(0)
-// 		} else {
-// 			val ret = ByteArray(data.size)
-// 			System.arraycopy(data, 0, ret, 0, data.size)
-//
-// 			return ret
-// 		}
-// 	}
-//
-// 	open fun setData(data: ByteArray) {
-// 		this.data = data
-// 	}
-
-	/**
-	 * Returns the data field of the APDU.
-	 *
-	 * @return Data field. May be empty if no data is available
-
-	 * Sets the data field of the APDU.
-	 *
-	 * @param data Data field
-	 */
-
 	companion object {
-		// TODO: what is this comment "do not use with bitmask
-
+		@Suppress("ktlint:standard:property-naming")
 		const val x00: Byte = 0x00.toByte()
 
 		/**
 		 * 0xFF byte. Do not use me with a bit mask!
 		 */
+		@Suppress("ktlint:standard:property-naming")
 		const val xFF: Byte = 0xFF.toByte()
 	}
 }

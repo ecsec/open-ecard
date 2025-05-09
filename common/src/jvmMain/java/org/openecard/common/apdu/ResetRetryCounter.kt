@@ -22,7 +22,7 @@
 package org.openecard.common.apdu
 
 import org.openecard.common.apdu.common.CardCommandAPDU
-import org.openecard.common.util.*
+import org.openecard.common.util.ByteUtils
 
 /**
  * RESET RETRY COUNTER command

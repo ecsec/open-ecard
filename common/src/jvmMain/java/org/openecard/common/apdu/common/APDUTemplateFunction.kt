@@ -28,15 +28,15 @@ package org.openecard.common.apdu.common
  * @author Tobias Wich
  */
 interface APDUTemplateFunction {
-    /**
-     * Calls the function and computes a result.
-     * The function can receive either byte[] or String values and must emit a String representing a hex binary value.
-     * `null` values should be also permitted where applicable.
-     *
-     * @param params Parameters of the function
-     * @return Result of the function.
-     * @throws APDUTemplateException Thrown when an anfixable error occurs.
-     */
+	/**
+	 * Calls the function and computes a result.
+	 * The function can receive either byte[] or String values and must emit a String representing a hex binary value.
+	 * `null` values should be also permitted where applicable.
+	 *
+	 * @param params Parameters of the function
+	 * @return Result of the function.
+	 * @throws APDUTemplateException Thrown when an anfixable error occurs.
+	 */
 
-    fun call(vararg params: Any?): String?
+	fun call(vararg params: Any?): String?
 }

@@ -21,18 +21,17 @@
  */
 package org.openecard.common.apdu.common
 
-
 /**
  * Exception for errors in the APDU template evaluation.
  *
  * @author Tobias Wich
  */
 class APDUTemplateException : Exception {
-    constructor(msg: String?) : super(msg)
+	constructor(msg: String?) : super(msg)
 
-    constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	companion object {
+		private const val serialVersionUID = 1L
+	}
 }

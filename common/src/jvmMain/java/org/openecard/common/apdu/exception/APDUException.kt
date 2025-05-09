@@ -31,86 +31,86 @@ import org.openecard.common.apdu.common.CardResponseAPDU
  * @author Moritz Horsch
  */
 class APDUException : ECardException {
-    /**
-     * Returns the TransmitResponse.
-     *
-     * @return TransmitResponseTransmitResponse
-     */
-    var transmitResponse: TransmitResponse? = null
-        private set
+	/**
+	 * Returns the TransmitResponse.
+	 *
+	 * @return TransmitResponseTransmitResponse
+	 */
+	var transmitResponse: TransmitResponse? = null
+		private set
 
-    /**
-     * Returns the ResponseAPDU.
-     *
-     * @return ResponseAPDU
-     */
-    var responseAPDU: CardResponseAPDU? = null
-        private set
+	/**
+	 * Returns the ResponseAPDU.
+	 *
+	 * @return ResponseAPDU
+	 */
+	var responseAPDU: CardResponseAPDU? = null
+		private set
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param msg Message
-     */
-    constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param msg Message
+	 */
+	constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param minor Minor message
-     * @param msg Message
-     */
-    constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param minor Minor message
+	 * @param msg Message
+	 */
+	constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param r Result
-     */
-    constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param r Result
+	 */
+	constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param cause Cause
-     */
-    constructor(cause: Throwable?) : super(makeOasisResultTraitImpl(), cause)
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param cause Cause
+	 */
+	constructor(cause: Throwable?) : super(makeOasisResultTraitImpl(), cause)
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param ex WSException
-     */
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param ex WSException
+	 */
 
 	constructor(cause: Throwable?, r: Result) : super(makeOasisResultTraitImpl(r), cause)
 
 	/**
-     * Creates a new APDUException.
-     *
-     * @param cause Cause
-     * @param tr TransmitResponse
-     */
-    constructor(cause: Throwable?, tr: TransmitResponse) : this(cause) {
-        transmitResponse = tr
-        if (tr.outputAPDU.isNotEmpty()) {
-            responseAPDU = CardResponseAPDU(tr)
-        }
-    }
+	 * Creates a new APDUException.
+	 *
+	 * @param cause Cause
+	 * @param tr TransmitResponse
+	 */
+	constructor(cause: Throwable?, tr: TransmitResponse) : this(cause) {
+		transmitResponse = tr
+		if (tr.outputAPDU.isNotEmpty()) {
+			responseAPDU = CardResponseAPDU(tr)
+		}
+	}
 
-    /**
-     * Creates a new APDUException.
-     *
-     * @param ex WSException
-     * @param tr TransmitResponse
-     */
-    constructor(ex: WSException?, tr: TransmitResponse) : this(ex) {
-        transmitResponse = tr
-        if (!tr.outputAPDU.isEmpty()) {
-            responseAPDU = CardResponseAPDU(tr)
-        }
-    }
+	/**
+	 * Creates a new APDUException.
+	 *
+	 * @param ex WSException
+	 * @param tr TransmitResponse
+	 */
+	constructor(ex: WSException?, tr: TransmitResponse) : this(ex) {
+		transmitResponse = tr
+		if (!tr.outputAPDU.isEmpty()) {
+			responseAPDU = CardResponseAPDU(tr)
+		}
+	}
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	companion object {
+		private const val serialVersionUID = 1L
+	}
 }

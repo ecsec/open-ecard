@@ -30,28 +30,28 @@ import org.openecard.common.apdu.common.CardCommandAPDU
  * @author Moritz Horsch
  */
 open class PerformSecurityOperation : CardCommandAPDU {
-    /**
-     * Creates a new PERFORM SECURITY OPERATION Command.
-     */
-    constructor() : super(
-        x00,
-        PERFORM_SECURITY_OPERATION_INS,
-        x00,
-        x00
-    )
+	/**
+	 * Creates a new PERFORM SECURITY OPERATION Command.
+	 */
+	constructor() : super(
+		x00,
+		PERFORM_SECURITY_OPERATION_INS,
+		x00,
+		x00,
+	)
 
-    /**
-     * Creates a new PERFORM SECURITY OPERATION APDU.
-     *
-     * @param p1 Parameter byte P1
-     * @param p2 Parameter byte P2
-     */
-    constructor(p1: Byte, p2: Byte) : super(x00, PERFORM_SECURITY_OPERATION_INS, p1, p2)
+	/**
+	 * Creates a new PERFORM SECURITY OPERATION APDU.
+	 *
+	 * @param p1 Parameter byte P1
+	 * @param p2 Parameter byte P2
+	 */
+	constructor(p1: Byte, p2: Byte) : super(x00, PERFORM_SECURITY_OPERATION_INS, p1, p2)
 
-    companion object {
-        /**
-         * PERFORM SECURITY OPERATION command instruction byte
-         */
-        private const val PERFORM_SECURITY_OPERATION_INS = 0x2A.toByte()
-    }
+	companion object {
+		/**
+		 * PERFORM SECURITY OPERATION command instruction byte
+		 */
+		private const val PERFORM_SECURITY_OPERATION_INS = 0x2A.toByte()
+	}
 }

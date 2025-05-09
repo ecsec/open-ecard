@@ -40,8 +40,6 @@ import org.openecard.common.tlv.TLV
 import org.openecard.common.util.ByteUtils
 import org.openecard.crypto.common.sal.did.CryptoMarkerType
 import org.openecard.sal.protocol.genericcryptography.apdu.PSODecipher
-import java.io.ByteArrayOutputStream
-import java.math.BigInteger
 
 private val logger = KotlinLogging.logger { }
 
@@ -110,9 +108,9 @@ class DecipherStep(
 			apdu.transmit(dispatcher, slotHandle)
 
 			val ciphertext = request!!.cipherText
-			val baos = ByteArrayOutputStream()
-			val bitKeySize = cryptoMarker.cryptoKeyInfo!!.keySize
-			val blocksize = bitKeySize.divide(BigInteger("8")).toInt()
+			val baos = mutableListOf<Byte>()
+			val bitKeySize = cryptoMarker.cryptoKeyInfo!!.keySize.toInt()
+			val blocksize = bitKeySize / 8
 
 			// check if the ciphertext length is divisible by the blocksize without rest
 			if ((ciphertext.size % blocksize) != 0) {
@@ -131,7 +129,7 @@ class DecipherStep(
 				val ciphertextblock = ByteUtils.copy(ciphertext, offset, blocksize)
 				apdu = PSODecipher(ByteUtils.concatenate(PADDING_INDICATOR_BYTE, ciphertextblock), blocksize.toByte())
 				val responseAPDU = apdu.transmit(dispatcher, slotHandle)
-				baos.write(responseAPDU.getData())
+				baos.addAll(responseAPDU.getData().asList())
 				offset += blocksize
 			}
 

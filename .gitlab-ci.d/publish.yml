@@ -58,6 +58,8 @@ publish-to-github:
     - "package-win"
     # - "package-ios-framework"
   needs:
+    - "compile"
+    - "test"
     - "package-linux"
     - "package-osx"
     - "package-win"

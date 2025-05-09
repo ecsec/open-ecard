@@ -22,10 +22,22 @@
 package org.openecard.sal.protocol.genericcryptography
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.*
+import iso.std.iso_iec._24727.tech.schema.AlgorithmInfoType
+import iso.std.iso_iec._24727.tech.schema.CardCallTemplateType
+import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
+import iso.std.iso_iec._24727.tech.schema.CryptographicServiceActionName
+import iso.std.iso_iec._24727.tech.schema.DIDScopeType
+import iso.std.iso_iec._24727.tech.schema.HashGenerationInfoType
+import iso.std.iso_iec._24727.tech.schema.LegacySignatureGenerationType
+import iso.std.iso_iec._24727.tech.schema.Sign
+import iso.std.iso_iec._24727.tech.schema.SignResponse
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
-import org.openecard.bouncycastle.asn1.*
+import org.openecard.bouncycastle.asn1.ASN1EncodableVector
+import org.openecard.bouncycastle.asn1.ASN1Encoding
+import org.openecard.bouncycastle.asn1.ASN1Integer
+import org.openecard.bouncycastle.asn1.DERNull
+import org.openecard.bouncycastle.asn1.DERSequence
 import org.openecard.bouncycastle.asn1.x509.AlgorithmIdentifier
 import org.openecard.bouncycastle.asn1.x509.DigestInfo
 import org.openecard.common.ECardConstants
@@ -59,7 +71,7 @@ import org.openecard.sal.protocol.genericcryptography.apdu.PSOHash
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.math.BigInteger
-import java.util.*
+import kotlin.jvm.java
 
 private val LOG = KotlinLogging.logger { }
 

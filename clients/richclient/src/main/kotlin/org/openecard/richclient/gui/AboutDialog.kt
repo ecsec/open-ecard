@@ -19,7 +19,7 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.gui.about
+package org.openecard.richclient.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.AppVersion
@@ -54,6 +54,7 @@ import javax.swing.event.HyperlinkEvent
 import javax.swing.event.HyperlinkListener
 import javax.swing.text.html.HTMLDocument
 import javax.swing.text.html.HTMLEditorKit
+import kotlin.jvm.java
 
 private val LOG = KotlinLogging.logger { }
 

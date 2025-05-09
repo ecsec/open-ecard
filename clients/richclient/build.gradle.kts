@@ -40,7 +40,8 @@ dependencies {
 	implementation(project(":sal:tiny-sal"))
 	implementation(project(":management"))
 	implementation(project(":bindings:http"))
-	implementation(project(":gui:about"))
+	implementation(project(":gui:swing"))
+	implementation(project(":gui:graphics"))
 
 	// addons
 	implementation(project(":addons:chipgateway"))
@@ -237,7 +238,13 @@ abstract class MacSignLibrariesTask
 
 		@TaskAction
 		fun signFiles() {
-			val buildDirectory = Path.of(project.layout.buildDirectory.asFile.get().path, "mac-sign")
+			val buildDirectory =
+				Path.of(
+					project.layout.buildDirectory.asFile
+						.get()
+						.path,
+					"mac-sign",
+				)
 			buildDirectory.toFile().deleteRecursively()
 			Files.createDirectory(buildDirectory)
 
@@ -312,10 +319,18 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	}
 
 	jarFiles.setDir(layout.buildDirectory.dir("jars")).include("jna-*.jar")
-	jarFilesSignedOutputDir = Path.of(layout.buildDirectory.dir("jars").get().asFile.toURI())
-	filesToSign = listOf(
-		"com/sun/jna/darwin-.*/libjnidispatch.jnilib"
-	)
+	jarFilesSignedOutputDir =
+		Path.of(
+			layout.buildDirectory
+				.dir("jars")
+				.get()
+				.asFile
+				.toURI(),
+		)
+	filesToSign =
+		listOf(
+			"com/sun/jna/darwin-.*/libjnidispatch.jnilib",
+		)
 	compressionLevel = Deflater.BEST_COMPRESSION
 }
 

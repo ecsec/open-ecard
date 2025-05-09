@@ -30,7 +30,7 @@ import iso.std.iso_iec._24727.tech.schema.PathSecurityType
 import java.util.Formatter
 import javax.xml.datatype.XMLGregorianCalendar
 import kotlin.reflect.KClass
-import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.memberFunctions
 
 private val LOG = KotlinLogging.logger { }
 
@@ -123,7 +123,7 @@ class HandlerUtils {
 			val handle =
 				getMember(
 					obj,
-					"connectionHandle",
+					"getConnectionHandle",
 					ConnectionHandleType::class,
 				)
 			if (handle != null) {
@@ -135,7 +135,7 @@ class HandlerUtils {
 			val ctxHandle =
 				getMember(
 					obj,
-					"contextHandle",
+					"getContextHandle",
 					ByteArray::class,
 				)
 			if (ctxHandle != null) {
@@ -144,7 +144,7 @@ class HandlerUtils {
 				val sessionId =
 					getMember(
 						obj,
-						"sessionIdentifier",
+						"getSessionIdentifier",
 						String::class,
 					)
 				return HandlerBuilder.Companion
@@ -159,7 +159,7 @@ class HandlerUtils {
 			val slotHandle =
 				getMember(
 					obj,
-					"slotHandle",
+					"getSlotHandle",
 					ByteArray::class,
 				)
 			if (slotHandle != null) {
@@ -180,7 +180,7 @@ class HandlerUtils {
 			memberType: KClass<T>,
 		): T? {
 			val getter =
-				obj::class.memberProperties.firstOrNull {
+				obj::class.memberFunctions.firstOrNull {
 					it.name == methodName
 				}
 			if (getter != null) {

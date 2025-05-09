@@ -35,10 +35,10 @@ class FacadeInvocationHandler(
 	override fun invoke(
 		proxy: Any,
 		method: Method,
-		args: Array<Any>,
+		args: Array<Any>?,
 	): Any {
 		try {
-			return method.invoke(target, *args)
+			return method.invoke(target, *(args ?: arrayOf()))
 		} catch (ex: InvocationTargetException) {
 			throw ex.cause!!
 		}

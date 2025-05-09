@@ -63,7 +63,7 @@ public class CVCStep extends Step {
     public CVCStep(EACData eacData) {
 	super(STEP_ID, LANG.translationForKey(TITLE));
 	this.eacData = eacData;
-	description = LANG.translationForKey(STEP_DESCRIPTION);
+	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
@@ -71,8 +71,8 @@ public class CVCStep extends Step {
 
     public static Step createDummy() {
 	Step s = new Step(STEP_ID);
-	s.title = LANG.translationForKey(TITLE);
-	s.description = LANG.translationForKey(STEP_DESCRIPTION);
+	s.setTitle(LANG.translationForKey(TITLE));
+	s.setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 	return s;
     }
 
@@ -84,14 +84,14 @@ public class CVCStep extends Step {
 	// SubjectName
 	ToggleText subjectName = new ToggleText();
 	subjectName.setId("SubjectName");
-	subjectName.title = LANG.translationForKey(SUBJECT_NAME);
+	subjectName.setTitle(LANG.translationForKey(SUBJECT_NAME));
 	subjectName.setText(eacData.certificateDescription.getSubjectName());
 	getInputInfoUnits().add(subjectName);
 
 	// SubjectURL
 	ToggleText subjectURL = new ToggleText();
 	subjectURL.setId("SubjectURL");
-	subjectURL.title = LANG.translationForKey(SUBJECT_URL);
+	subjectURL.setTitle(LANG.translationForKey(SUBJECT_URL));
 	if (eacData.certificateDescription.getSubjectURL() != null) {
 	    subjectURL.setText(eacData.certificateDescription.getSubjectURL());
 	} else {
@@ -102,11 +102,11 @@ public class CVCStep extends Step {
 	// TermsOfUsage
 	ToggleText termsOfUsage = new ToggleText();
 	termsOfUsage.setId("TermsOfUsage");
-	termsOfUsage.title = LANG.translationForKey(TERMS_OF_USAGE);
+	termsOfUsage.setTitle(LANG.translationForKey(TERMS_OF_USAGE));
 	Document doc = new Document();
-	doc.mimeType = eacData.certificateDescription.getTermsOfUsageMimeType();
+	doc.setMimeType(eacData.certificateDescription.getTermsOfUsageMimeType());
 	doc.setValue(eacData.certificateDescription.getTermsOfUsageBytes());
-	termsOfUsage.document = doc;
+	termsOfUsage.setDocument(doc);
 	termsOfUsage.setCollapsed(true);
 	getInputInfoUnits().add(termsOfUsage);
 
@@ -128,7 +128,7 @@ public class CVCStep extends Step {
 
 	ToggleText validity = new ToggleText();
 	validity.setId("Validity");
-	validity.title = LANG.translationForKey(VALIDITY);
+	validity.setTitle(LANG.translationForKey(VALIDITY));
 	validity.setText(sb.toString());
 	validity.setCollapsed(true);
 	getInputInfoUnits().add(validity);
@@ -136,7 +136,7 @@ public class CVCStep extends Step {
 	// IssuerName
 	ToggleText issuerName = new ToggleText();
 	issuerName.setId("IssuerName");
-	issuerName.title = LANG.translationForKey(ISSUER_NAME);
+	issuerName.setTitle(LANG.translationForKey(ISSUER_NAME));
 	issuerName.setText(eacData.certificateDescription.getIssuerName());
 	issuerName.setCollapsed(true);
 	getInputInfoUnits().add(issuerName);
@@ -144,7 +144,7 @@ public class CVCStep extends Step {
 	// IssuerURL
 	ToggleText issuerURL = new ToggleText();
 	issuerURL.setId("IssuerURL");
-	issuerURL.title = LANG.translationForKey(ISSUER_URL);
+	issuerURL.setTitle(LANG.translationForKey(ISSUER_URL));
 	// issuer url is optional so perform a null check
 	if (eacData.certificateDescription.getIssuerURL() != null) {
 	    issuerURL.setText(eacData.certificateDescription.getIssuerURL());

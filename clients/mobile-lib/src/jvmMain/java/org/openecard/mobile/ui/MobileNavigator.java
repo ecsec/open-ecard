@@ -71,7 +71,7 @@ public abstract class MobileNavigator implements UserConsentNavigator {
 	CompletionService<StepResult> completionService = new ExecutorCompletionService<>(executor);
 	Future<StepResult> stepThread = completionService.submit(step);
 	Future<StepResult> backThread = null;
-	BackgroundTask background = stepObj.backgroundTask;
+	BackgroundTask background = stepObj.getBackgroundTask();
 	if (background != null) {
 	    completionService.submit(convertResult(stepObj, background));
 	}
@@ -110,7 +110,7 @@ public abstract class MobileNavigator implements UserConsentNavigator {
 	return () -> {
 	    StepActionResult sar = task.call();
 	    ResultStatus r;
-	    switch (sar.status) {
+	    switch (sar.getStatus()) {
 		case NEXT:
 		    r = ResultStatus.OK;
 		    break;
@@ -124,7 +124,7 @@ public abstract class MobileNavigator implements UserConsentNavigator {
 		default:
 		    r = ResultStatus.CANCEL;
 	    }
-	    return new MobileResult(stepObj, r, Collections.emptyList(), sar.replacement);
+	    return new MobileResult(stepObj, r, Collections.emptyList(), sar.getReplacement());
 	};
     }
 

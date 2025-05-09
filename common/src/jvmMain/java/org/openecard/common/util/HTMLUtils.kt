@@ -49,6 +49,7 @@ object HTMLUtils {
 	 * @return The encoded string, or `null` if `null` was given as input.
 	 * @see [OWASP XSS Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet.RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content)
 	 */
+	@JvmStatic
 	fun escapeHtml(input: String?): String? {
 		// shortcut if the string does not contain anything interesting
 		if (input == null || input.isEmpty()) {
@@ -69,6 +70,7 @@ object HTMLUtils {
 	 * @return The encoded string, or `null` if `null` was given as input.
 	 * @see [OWASP XSS Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet.RULE_.232_-_Attribute_Escape_Before_Inserting_Untrusted_Data_into_HTML_Common_Attributes)
 	 */
+	@JvmStatic
 	fun escapeAttribute(input: String?): String? {
 		// shortcut if the string does not contain anything interesting
 		if (input == null || input.isEmpty()) {

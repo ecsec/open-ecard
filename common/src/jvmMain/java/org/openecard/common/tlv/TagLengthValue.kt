@@ -85,12 +85,15 @@ internal class TagLengthValue private constructor(
 
 	var tagNumWithClass: Long
 		get() = tag.tagNumWithClass
+
+		@Throws(TLVException::class)
 		set(tagNumWithClass) {
 			tag.tagNumWithClass = tagNumWithClass
 		}
 
+	@Throws(TLVException::class)
 	fun setTagNumWithClass(tagNumWithClass: ByteArray) {
-		this.tag = Tag.Companion.fromBER(tagNumWithClass)
+		this.tag = Tag.fromBER(tagNumWithClass)
 	}
 
 	val valueLength: Int

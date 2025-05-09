@@ -35,30 +35,38 @@ object SysUtils {
 	private val name: String
 		get() = System.getProperty("os.name").lowercase(Locale.getDefault())
 
+	@JvmStatic
 	val isWin: Boolean
 		get() = name.contains("win")
 
+	@JvmStatic
 	val isMacOSX: Boolean
 		get() = name.contains("mac")
 
+	@JvmStatic
 	val isUnix: Boolean
 		get() {
 			val os = name
 			return os.contains("nux") || os.contains("nix") || os.contains("aix")
 		}
 
+	@JvmStatic
 	val isDebianOrDerivate: Boolean
 		get() = File("/etc/debian_version").exists()
 
+	@JvmStatic
 	val isRedhatOrDerivate: Boolean
 		get() = File("/etc/redhat-release").exists()
 
+	@JvmStatic
 	val isArchLinuxOrDerivate: Boolean
 		get() = File("/etc/arch-release").exists()
 
+	@JvmStatic
 	val isSuSEOrDerivate: Boolean
 		get() = File("/etc/SuSE-release").exists()
 
+	@JvmStatic
 	val isMobileDevice: Boolean
 		get() = isAndroid || isIOS
 
@@ -66,15 +74,20 @@ object SysUtils {
 	private val PLAIN_VAR_ENV: Pattern = Pattern.compile("(\\\\)?(\\$([A-Za-z0-9_]+))")
 	private val CURLY_VAR_SYS: Pattern = Pattern.compile("(\\\\)?(\\$\\{([A-Za-z0-9_\\.]+)\\})")
 
+	@JvmStatic
 	var isAndroid: Boolean = false
 		private set
+
+	@JvmStatic
 	var isIOS: Boolean = false
 		private set
 
+	@JvmStatic
 	fun setIsIOS() {
 		isIOS = true
 	}
 
+	@JvmStatic
 	fun setIsAndroid() {
 		isAndroid = true
 	}

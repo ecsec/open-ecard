@@ -36,14 +36,15 @@ private val LOG = KotlinLogging.logger { }
  * @author Dirk Petrautzki
  */
 object TR03112Utils {
-	private const val SHA256 = "SHA-256"
-
 	/**
 	 * This switch enables the developer mode described in TR-03124-1.
 	 * When enabled the Communication Certificate checks do not fail but issue a warning instead.
 	 */
+	@JvmField
 	@Suppress("ktlint:standard:property-naming")
 	var DEVELOPER_MODE: Boolean = false
+
+	private const val SHA256 = "SHA-256"
 
 	/**
 	 * Check if the two given URLs comply the Same-Origin-Policy.
@@ -52,6 +53,7 @@ object TR03112Utils {
 	 * @param url2 the second URL
 	 * @return `true` if the Same-Origin-Policy has been complied with, `false` otherwise
 	 */
+	@JvmStatic
 	fun checkSameOriginPolicy(
 		url1: URL,
 		url2: URL,
@@ -100,6 +102,7 @@ object TR03112Utils {
 	 * verbose description such as eService.
 	 * @return `true` if the hash is contained; `false` otherwise
 	 */
+	@JvmStatic
 	fun isInCommCertificates(
 		serverCertificate: TlsServerCertificate,
 		commCertificates: List<ByteArray?>,
@@ -140,6 +143,7 @@ object TR03112Utils {
 	 * @param statusCode the status code to check
 	 * @return `true` if the status code indicates a redirect, `false` otherwise
 	 */
+	@JvmStatic
 	fun isRedirectStatusCode(statusCode: Int): Boolean =
 		when (statusCode) {
 			301, 302, 303, 307 -> true

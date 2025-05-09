@@ -37,6 +37,7 @@ import org.openecard.common.tlv.iso7816.FCP
 import org.openecard.common.util.ShortUtils.toByteArray
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.jvm.Throws
 
 private val LOG = KotlinLogging.logger { }
 
@@ -56,7 +57,8 @@ object CardUtils {
 	 * @param slotHandle Slot handle
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectMF(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray?,
@@ -74,7 +76,8 @@ object CardUtils {
 	 * @return The CardResponseAPDU from the selection of the file
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectFile(
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
@@ -90,7 +93,8 @@ object CardUtils {
 	 * @return CardREsponseAPDU containing the File Control Parameters
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectFile(
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
@@ -109,7 +113,8 @@ object CardUtils {
 	 * @return A CardResponseAPDU object with the requested response data.
 	 * @throws APDUException Thrown if the selection of a file failed.
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectFileWithOptions(
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
@@ -211,7 +216,8 @@ object CardUtils {
 	 * @return The [CardResponseAPDU] from the last select which means the select of the application to select.
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectApplicationByFID(
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
@@ -249,7 +255,8 @@ object CardUtils {
 	 * @return Response APDU of the select command.
 	 * @throws APDUException Thrown in case there was an error while processing the command APDU.
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectApplicationByAID(
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
@@ -262,6 +269,8 @@ object CardUtils {
 		return result
 	}
 
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun readFile(
 		fcp: FCP?,
 		dispatcher: Dispatcher,
@@ -279,7 +288,8 @@ object CardUtils {
 	 * @return File content
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun readFile(
 		fcp: FCP?,
 		shortEf: Byte?,
@@ -406,7 +416,8 @@ object CardUtils {
 	 * @return File content
 	 * @throws APDUException
 	 */
-
+	@JvmStatic
+	@Throws(APDUException::class)
 	fun selectReadFile(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray?,
@@ -434,8 +445,10 @@ object CardUtils {
 		}
 	}
 
+	@JvmStatic
 	fun isShortEFIdentifier(fileID: ByteArray): Boolean = fileID.size == 1
 
+	@JvmStatic
 	fun writeFile(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray,

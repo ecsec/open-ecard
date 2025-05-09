@@ -29,25 +29,27 @@ import org.openecard.gui.definition.Step
  *
  * @author Tobias Wich
  */
-class StepActionResult constructor(
-	/**
-	 * Gets the status of the action result.
-	 *
-	 * @return The status of the action result.
-	 */
-	val status: StepActionResultStatus,
-	/**
-	 * Gets the replacement step for the step referenced by the status.
-	 *
-	 * @return The replacement for the referenced step, or null if none is set.
-	 */
-	val replacement: Step? = null,
-) {
-	/**
-	 * Creates a new StepActionResult instance, initializes it with the given status and sets a replacement for the
-	 * step referenced in the status.
-	 *
-	 * @param status The result status of the step action.
-	 * @param replacement The replacement step for the step which is next according to the action status..
-	 */
-}
+class StepActionResult
+	@JvmOverloads
+	constructor(
+		/**
+		 * Gets the status of the action result.
+		 *
+		 * @return The status of the action result.
+		 */
+		val status: StepActionResultStatus,
+		/**
+		 * Gets the replacement step for the step referenced by the status.
+		 *
+		 * @return The replacement for the referenced step, or null if none is set.
+		 */
+		val replacement: Step? = null,
+	) {
+		/**
+		 * Creates a new StepActionResult instance, initializes it with the given status and sets a replacement for the
+		 * step referenced in the status.
+		 *
+		 * @param status The result status of the step action.
+		 * @param replacement The replacement step for the step which is next according to the action status..
+		 */
+	}

@@ -38,6 +38,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 9000
 		 */
+		@JvmStatic
 		fun OK(): ByteArray = byteArrayOf(0x90.toByte(), 0x00.toByte())
 	}
 
@@ -51,6 +52,7 @@ class TrailerConstants {
 		 *
 		 * @return @return Code: 6300
 		 */
+		@JvmStatic
 		fun NON_VOLATILE_MEMORY_HAS_CHANGED_NO_INFO(): ByteArray = byteArrayOf(0x63.toByte(), 0x00.toByte())
 
 		/**
@@ -59,6 +61,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6381
 		 */
+		@JvmStatic
 		fun FILE_FILLED_UP(): ByteArray = byteArrayOf(0x63.toByte(), 0x81.toByte())
 
 		/**
@@ -67,6 +70,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C0
 		 */
+		@JvmStatic
 		fun COUNTER_0(): ByteArray = byteArrayOf(0x63.toByte(), 0xC0.toByte())
 
 		/**
@@ -75,6 +79,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C1
 		 */
+		@JvmStatic
 		fun COUNTER_1(): ByteArray = byteArrayOf(0x63.toByte(), 0xC1.toByte())
 
 		/**
@@ -83,6 +88,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C2
 		 */
+		@JvmStatic
 		fun COUNTER_2(): ByteArray = byteArrayOf(0x63.toByte(), 0xC2.toByte())
 
 		/**
@@ -91,6 +97,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C3
 		 */
+		@JvmStatic
 		fun COUNTER_3(): ByteArray = byteArrayOf(0x63.toByte(), 0xC3.toByte())
 
 		/**
@@ -99,6 +106,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C4
 		 */
+		@JvmStatic
 		fun COUNTER_4(): ByteArray = byteArrayOf(0x63.toByte(), 0xC4.toByte())
 
 		/**
@@ -107,6 +115,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C5
 		 */
+		@JvmStatic
 		fun COUNTER_5(): ByteArray = byteArrayOf(0x63.toByte(), 0xC5.toByte())
 
 		/**
@@ -115,6 +124,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C6
 		 */
+		@JvmStatic
 		fun COUNTER_6(): ByteArray = byteArrayOf(0x63.toByte(), 0xC6.toByte())
 
 		/**
@@ -123,6 +133,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C7
 		 */
+		@JvmStatic
 		fun COUNTER_7(): ByteArray = byteArrayOf(0x63.toByte(), 0xC7.toByte())
 
 		/**
@@ -131,6 +142,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C8
 		 */
+		@JvmStatic
 		fun COUNTER_8(): ByteArray = byteArrayOf(0x63.toByte(), 0xC8.toByte())
 
 		/**
@@ -139,6 +151,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63C9
 		 */
+		@JvmStatic
 		fun COUNTER_9(): ByteArray = byteArrayOf(0x63.toByte(), 0xC9.toByte())
 
 		/**
@@ -147,6 +160,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CA
 		 */
+		@JvmStatic
 		fun COUNTER_10(): ByteArray = byteArrayOf(0x63.toByte(), 0xCA.toByte())
 
 		/**
@@ -155,6 +169,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CB
 		 */
+		@JvmStatic
 		fun COUNTER_11(): ByteArray = byteArrayOf(0x63.toByte(), 0xCB.toByte())
 
 		/**
@@ -163,6 +178,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CC
 		 */
+		@JvmStatic
 		fun COUNTER_12(): ByteArray = byteArrayOf(0x63.toByte(), 0xCC.toByte())
 
 		/**
@@ -171,6 +187,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CD
 		 */
+		@JvmStatic
 		fun COUNTER_13(): ByteArray = byteArrayOf(0x63.toByte(), 0xCD.toByte())
 
 		/**
@@ -179,6 +196,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CE
 		 */
+		@JvmStatic
 		fun COUNTER_14(): ByteArray = byteArrayOf(0x63.toByte(), 0xCE.toByte())
 
 		/**
@@ -187,6 +205,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 63CF
 		 */
+		@JvmStatic
 		fun COUNTER_15(): ByteArray = byteArrayOf(0x63.toByte(), 0xCF.toByte())
 	}
 
@@ -199,6 +218,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6700
 		 */
+		@JvmStatic
 		fun WRONG_LENGTH(): ByteArray = byteArrayOf(0x67.toByte(), 0x00.toByte())
 
 		/**
@@ -207,6 +227,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6982
 		 */
+		@JvmStatic
 		fun SECURITY_STATUS_NOT_SATISFIED(): ByteArray = byteArrayOf(0x69.toByte(), 0x82.toByte())
 
 		/**
@@ -215,6 +236,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6A80
 		 */
+		@JvmStatic
 		fun INCORRECT_COMMAND_DATA(): ByteArray = byteArrayOf(0x6A.toByte(), 0x80.toByte())
 
 		/**
@@ -231,6 +253,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6B00
 		 */
+		@JvmStatic
 		fun WRONG_PARAMETERS_P1_2(): ByteArray = byteArrayOf(0x6B.toByte(), 0x00.toByte())
 
 		/**
@@ -238,6 +261,7 @@ class TrailerConstants {
 		 *
 		 * @return Code: 6D00
 		 */
+		@JvmStatic
 		fun INS_NOT_SUPPORTED_OR_INVALID(): ByteArray = byteArrayOf(0x6D.toByte(), 0x00.toByte())
 	}
 }

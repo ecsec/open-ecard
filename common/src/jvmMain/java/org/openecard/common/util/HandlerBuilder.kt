@@ -380,6 +380,7 @@ data class HandlerBuilder private constructor(
 		 *
 		 * @return Empty instance of a `HandlerBuilder`.
 		 */
+		@JvmStatic
 		fun create(): HandlerBuilder = HandlerBuilder()
 	}
 }

@@ -28,6 +28,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
  * @author Tobias Wich
  */
 class IfdEventObject // TODO: move this class to IFD package, but this needs refactoring of StateMap as well
+	@JvmOverloads
 	constructor(
 		handle: ConnectionHandleType,
 		val ifaceProtocol: String? = null,

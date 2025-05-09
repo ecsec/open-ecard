@@ -55,6 +55,7 @@ object PINUtils {
 	 * @return Transmit containing the built verify APDU
 	 * @throws UtilException if an pin related error occurs (e.g. wrong PIN length)
 	 */
+	@JvmStatic
 	fun buildVerifyTransmit(
 		rawPIN: CharArray,
 		attributes: PasswordAttributesType,
@@ -75,7 +76,7 @@ object PINUtils {
 		transmit.inputAPDUInfo.add(pinApdu)
 		return transmit
 	}
-
+	@JvmStatic
 	fun encodePin(
 		rawPin: CharArray,
 		attributes: PasswordAttributesType,
@@ -124,7 +125,7 @@ object PINUtils {
 			throw UtilException(ex)
 		}
 	}
-
+	@JvmStatic
 	fun createPinMask(attributes: PasswordAttributesType): ByteArray {
 		// extract attributes
 		val pwdType = attributes.pwdType
@@ -160,6 +161,7 @@ object PINUtils {
 		return mask
 	}
 
+	@JvmStatic
 	@Suppress("DefaultLocale")
 	fun encodeTextPin(
 		encoding: String?,

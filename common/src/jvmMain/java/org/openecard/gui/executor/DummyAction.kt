@@ -40,11 +40,11 @@ class DummyAction(
 	step: Step,
 ) : StepAction(step) {
 	override fun perform(
-		oldResults: Map<String?, ExecutionResults?>?,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		// REPEAT must be performed explicitly
-		return when (result.status) {
+		return when (result.getStatus()) {
 			ResultStatus.BACK -> StepActionResult(StepActionResultStatus.BACK)
 			ResultStatus.OK -> StepActionResult(StepActionResultStatus.NEXT)
 			ResultStatus.CANCEL -> StepActionResult(StepActionResultStatus.CANCEL)

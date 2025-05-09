@@ -23,6 +23,7 @@ package org.openecard.common.util
 
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
+import kotlin.jvm.Throws
 
 /**
  * Utility class to transform various aspects of an HTTP request line into more usable data structures.
@@ -39,7 +40,7 @@ object HttpRequestLineUtils {
 	 */
 	@JvmStatic
 	fun transformRaw(queryStr: String?): Map<String, String> {
-		val result = HashMap<String, String>()
+		val result = mutableMapOf<String, String>()
 
 		if (queryStr != null) {
 			val queries = queryStr.split("&".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -60,6 +61,10 @@ object HttpRequestLineUtils {
 		return result
 	}
 
+	@JvmStatic
+	@Throws(UnsupportedEncodingException::class)
+	fun transform(queryStr: String?): Map<String, String?> = transform(queryStr, "UTF-8")
+
 	/**
 	 * Transform query parameters into a java map and URL decode the values.
 	 * The parameters are not decoded, but taken as is. The query string has the form
@@ -79,20 +84,19 @@ object HttpRequestLineUtils {
 	 * @throws UnsupportedEncodingException Thrown if the strings decoded from the URL encoded value have a different
 	 * encoding than UTF-8.
 	 */
+	@JvmStatic
+	@Throws(UnsupportedEncodingException::class)
 	fun transform(
 		queryStr: String?,
-		encoding: String = "UTF-8",
-	): Map<String?, String?> {
+		encoding: String,
+	): Map<String, String> {
 		// copy the raw strings
 		val resultRaw = transformRaw(queryStr)
-		val result = HashMap<String?, String?>()
+		val result = mutableMapOf<String, String>()
 		for (next in resultRaw.entries) {
-			var k: String? = next.key
-			var v: String? = next.value
-			// URL decode both values
-			k = decodeValue(k, encoding)
-			v = decodeValue(v, encoding)
-			result[k] = v
+			val key = decodeValue(next.key, encoding)!!
+			val value = decodeValue(next.value, encoding)!!
+			result[key] = value
 		}
 
 		return result

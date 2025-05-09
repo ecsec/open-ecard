@@ -39,6 +39,7 @@ object ByteUtils {
 	 * @param input the byte array to clone
 	 * @return new byte array, or null if input is null
 	 */
+	@JvmStatic
 	fun clone(input: ByteArray?): ByteArray? {
 		if (input == null) {
 			return null
@@ -55,6 +56,7 @@ object ByteUtils {
 	 * @param y byte array
 	 * @return x || y
 	 */
+	@JvmStatic
 	fun concatenate(
 		x: ByteArray?,
 		y: ByteArray?,
@@ -78,6 +80,7 @@ object ByteUtils {
 	 * @param y byte array
 	 * @return x || y
 	 */
+	@JvmStatic
 	fun concatenate(
 		x: Byte,
 		y: ByteArray?,
@@ -90,6 +93,7 @@ object ByteUtils {
 	 * @param y byte
 	 * @return x || y
 	 */
+	@JvmStatic
 	fun concatenate(
 		x: ByteArray?,
 		y: Byte,
@@ -102,6 +106,7 @@ object ByteUtils {
 	 * @param y byte
 	 * @return x || y
 	 */
+	@JvmStatic
 	fun concatenate(
 		x: Byte,
 		y: Byte,
@@ -113,6 +118,7 @@ object ByteUtils {
 	 * @param input
 	 * @return byte array without leading null bytes
 	 */
+	@JvmStatic
 	fun cutLeadingNullBytes(input: ByteArray?): ByteArray? {
 		if (input == null) {
 			return null
@@ -133,6 +139,7 @@ object ByteUtils {
 	 * @param input Byte array
 	 * @return byte array without leading null bytes
 	 */
+	@JvmStatic
 	fun cutLeadingNullByte(input: ByteArray?): ByteArray? {
 		if (input == null) {
 			return null
@@ -151,6 +158,7 @@ object ByteUtils {
 	 * @param length the length
 	 * @return the byte[]
 	 */
+	@JvmStatic
 	fun copy(
 		input: ByteArray?,
 		offset: Int,
@@ -171,6 +179,7 @@ object ByteUtils {
 	 * @param y byte array
 	 * @return true if x = y, otherwise false
 	 */
+	@JvmStatic
 	fun compare(
 		x: ByteArray?,
 		y: ByteArray?,
@@ -191,6 +200,7 @@ object ByteUtils {
 	 * @param y byte array
 	 * @return true if x = y, otherwise false
 	 */
+	@JvmStatic
 	fun compareUnsigned(
 		x: ByteArray?,
 		y: ByteArray?,
@@ -203,6 +213,7 @@ object ByteUtils {
 	 * @param y byte array
 	 * @return true if x = y, otherwise false
 	 */
+	@JvmStatic
 	fun compare(
 		x: Byte,
 		y: ByteArray?,
@@ -215,6 +226,7 @@ object ByteUtils {
 	 * @param y byte
 	 * @return true if x = y, otherwise false
 	 */
+	@JvmStatic
 	fun compare(
 		x: ByteArray?,
 		y: Byte,
@@ -227,6 +239,7 @@ object ByteUtils {
 	 * @param y byte
 	 * @return true if x = y, otherwise false
 	 */
+	@JvmStatic
 	fun compare(
 		x: Byte,
 		y: Byte,
@@ -241,6 +254,7 @@ object ByteUtils {
 	 * @return `true` if the first value is a prefix, `false` if it is not, any of the values is null, or
 	 * the data value is shorter than the prefix.
 	 */
+	@JvmStatic
 	fun isPrefix(
 		prefix: ByteArray?,
 		data: ByteArray?,
@@ -279,6 +293,7 @@ object ByteUtils {
 	 * @param in The array to reverse.
 	 * @return The reversed array or null, if null was given.
 	 */
+	@JvmStatic
 	fun reverse(`in`: ByteArray?): ByteArray? {
 		if (`in` == null) {
 			return null
@@ -296,6 +311,7 @@ object ByteUtils {
 	 * @param bytes Input
 	 * @return Hex string only compose of digits, no 0x and no spaces.
 	 */
+	@JvmStatic
 	fun toHexString(bytes: ByteArray?): String? = toHexString(bytes, "%02X", false)
 
 	/**
@@ -305,6 +321,7 @@ object ByteUtils {
 	 * @param formatted If true the string is formatted to 0xXX presentation
 	 * @return Hex string
 	 */
+	@JvmStatic
 	fun toHexString(
 		bytes: ByteArray?,
 		formatted: Boolean,
@@ -318,6 +335,7 @@ object ByteUtils {
 	 * @param addLinebreak If true the string is formatted to 16 value per line
 	 * @return Hex string
 	 */
+	@JvmStatic
 	fun toHexString(
 		bytes: ByteArray?,
 		formatted: Boolean,
@@ -361,6 +379,7 @@ object ByteUtils {
 	 * @return Base 64 coded string or `null` if no data was given.
 	 * @see .toFileSafeBase64String
 	 */
+	@JvmStatic
 	fun toWebSafeBase64String(bytes: ByteArray?): String? = toFileSafeBase64String(bytes, false)
 
 	/**
@@ -379,6 +398,8 @@ object ByteUtils {
 	 * @return Base 64 coded string or `null` if no data was given.
 	 * @see .toFileSafeBase64String
 	 */
+	@JvmStatic
+	@JvmOverloads
 	fun toFileSafeBase64String(
 		bytes: ByteArray?,
 		withPadding: Boolean = true,
@@ -409,6 +430,8 @@ object ByteUtils {
 	 * @param bytes Byte array to be converted.
 	 * @return short
 	 */
+	@JvmStatic
+	@JvmOverloads
 	fun toShort(
 		bytes: ByteArray,
 		bigEndian: Boolean = true,
@@ -433,7 +456,8 @@ object ByteUtils {
 	 * @param bytes Byte array to be converted.
 	 * @return int
 	 */
-
+	@JvmStatic
+	@JvmOverloads
 	fun toInteger(
 		bytes: ByteArray,
 		bigEndian: Boolean = true,
@@ -458,6 +482,7 @@ object ByteUtils {
 	 * @param bytes Byte array to be converted.
 	 * @return long
 	 */
+	@JvmStatic
 	fun toLong(
 		bytes: ByteArray,
 		bigEndian: Boolean = true,
@@ -487,6 +512,7 @@ object ByteUtils {
 	 * @return True if the bit is set, false otherwise
 	 * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
 	 */
+	@JvmStatic
 	fun isBitSet(
 		position: Int,
 		array: ByteArray,
@@ -502,6 +528,7 @@ object ByteUtils {
 	 * @param array Array
 	 * @throws IllegalArgumentException if position is negative or greater than the number of bits in this array
 	 */
+	@JvmStatic
 	fun setBit(
 		position: Int,
 		array: ByteArray,

@@ -157,7 +157,7 @@ class DynamicContext private constructor() {
 		 * @param key Lookup key for the desired variable.
 		 * @return The DynamicContext instance of this thread.
 		 */
-
+		@JvmStatic
 		fun getInstance(key: String): DynamicContext? {
 			val local: MutableMap<String, DynamicContext> = LOCAL_MAP.get()
 			synchronized(local) {
@@ -179,6 +179,7 @@ class DynamicContext private constructor() {
 		 *
 		 * @see ThreadLocal.remove
 		 */
+		@JvmStatic
 		@Synchronized
 		fun remove() {
 			LOG.debug { "${"Removing DynamicContext which contains {} map entries."} ${LOCAL_MAP.get().size}" }

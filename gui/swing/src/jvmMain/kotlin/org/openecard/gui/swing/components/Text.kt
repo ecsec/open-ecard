@@ -42,7 +42,7 @@ class Text(
 	private val textArea: JTextPane
 
 	init {
-		val textValue = text.document
+		val textValue = text.document!!
 
 		val textString =
 			when (textValue.mimeType) {

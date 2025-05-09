@@ -25,6 +25,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 import javax.annotation.Nonnull
+import kotlin.jvm.Throws
 
 /**
  * Simple URL builder class.
@@ -82,6 +83,7 @@ class UrlBuilder {
 	 * @return New URI instance resembling the values from the builder.
 	 * @throws URISyntaxException Thrown in case the values in the builder do not create a valid URI.
 	 */
+	@Throws(URISyntaxException::class)
 	fun build(): URI {
 		val sb = StringBuilder()
 		sb.append(scheme).append("://")
@@ -321,6 +323,7 @@ class UrlBuilder {
 		 * @param baseUri The URI to use as a template for the builder that should be constructed.
 		 * @return UriBuilder instance for the given URI.
 		 */
+		@JvmStatic
 		fun fromUrl(baseUri: URI): UrlBuilder {
 			val encoder = UrlEncoder()
 
@@ -346,6 +349,8 @@ class UrlBuilder {
 		 * @throws URISyntaxException Thrown in case the given URL could not be converted to the URI class and therefore is
 		 * not a valid URI.
 		 */
+		@JvmStatic
+		@Throws(URISyntaxException::class)
 		fun fromUrl(baseUrl: URL): UrlBuilder = fromUrl(baseUrl.toURI())
 
 		/**
@@ -356,6 +361,8 @@ class UrlBuilder {
 		 * @throws URISyntaxException Thrown in case the given URL could not be converted to the URI class and therefore is
 		 * not a valid URI.
 		 */
+		@JvmStatic
+		@Throws(URISyntaxException::class)
 		fun fromUrl(baseUrl: String): UrlBuilder = fromUrl(URI(baseUrl))
 	}
 }

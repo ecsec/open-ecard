@@ -40,8 +40,9 @@ object StringUtils {
 	 * @return Byte array
 	 * @throws NumberFormatException Thrown in case the hex string contains invalid characters.
 	 */
+	@JvmStatic
 	fun toByteArray(
-		@Nonnull hex: String,
+		hex: String,
 	): ByteArray {
 		var hex = hex
 		if ((hex.length % 2) != 0) {
@@ -62,8 +63,9 @@ object StringUtils {
 	 * @param removeWhitespace
 	 * @return Byte array
 	 */
+	@JvmStatic
 	fun toByteArray(
-		@Nonnull hex: String,
+		hex: String,
 		removeWhitespace: Boolean,
 	): ByteArray {
 		var hex = hex
@@ -79,6 +81,7 @@ object StringUtils {
 	 * @param value String to check.
 	 * @return `true` if string is `null` or empty, `false` otherwise.
 	 */
+	@JvmStatic
 	fun isNullOrEmpty(value: String?): Boolean = value.isNullOrEmpty()
 
 	/**
@@ -87,6 +90,7 @@ object StringUtils {
 	 * @param s String to normalize.
 	 * @return The empty string if the given string was `null` or empty, the given string otherwise.
 	 */
+	@JvmStatic
 	fun nullToEmpty(s: String?): String = s ?: ""
 
 	/**
@@ -95,5 +99,6 @@ object StringUtils {
 	 * @param s String to normalize.
 	 * @return `null` if the given string was `null` or empty, the given string otherwise.
 	 */
+	@JvmStatic
 	fun emptyToNull(s: String?): String? = if (s != null && s.isEmpty()) null else s
 }

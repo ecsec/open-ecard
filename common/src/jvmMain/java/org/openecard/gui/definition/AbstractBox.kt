@@ -53,21 +53,14 @@ abstract class AbstractBox(
 	 * @param groupText The text for title of this group.
 	 */
 	var groupText: String? = null
-	var boxItems: MutableList<BoxItem>? = null
-		/**
-		 * Get writable list of box items.
-		 * The box items form the actual selectable content of this type. Modifications made to this list directly influence
-		 * this instance.
-		 *
-		 * @return List of box items.
-		 */
-		get() {
-			if (field == null) {
-				field = ArrayList()
-			}
-			return field
-		}
-		private set
+	/**
+	 * Get writable list of box items.
+	 * The box items form the actual selectable content of this type. Modifications made to this list directly influence
+	 * this instance.
+	 *
+	 * @return List of box items.
+	 */
+	val boxItems: MutableList<BoxItem> by lazy { mutableListOf() }
 
 	/**
 	 * {@inheritDoc}

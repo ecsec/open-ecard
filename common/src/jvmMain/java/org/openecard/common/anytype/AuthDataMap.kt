@@ -28,136 +28,140 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import javax.xml.namespace.QName
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
+import kotlin.jvm.Throws
 
 /**
  * Helper class to make life with DIDAuthenticationDataTypes much easier.
  *
  * @author Tobias Wich
  */
-class AuthDataMap(
-	data: DIDAuthenticationDataType,
-) {
-	private val ignoreNs = OpenecardProperties.getProperty("legacy.invalid_schema").toBoolean()
-	val protocol: String
-	private val contentMap = mutableMapOf<QName, Element>()
-	private val attributeMap: MutableMap<QName, String>
-	private val xmlDoc: Document
+class AuthDataMap
+	@Throws(ParserConfigurationException::class)
+	constructor(
+		data: DIDAuthenticationDataType,
+	) {
+		private val ignoreNs = OpenecardProperties.getProperty("legacy.invalid_schema").toBoolean()
+		val protocol: String
+		private val contentMap = mutableMapOf<QName, Element>()
+		private val attributeMap: MutableMap<QName, String>
+		private val xmlDoc: Document
 
-	init {
-		this.protocol = data.protocol
-		// read content
-		val content = data.any
-		for (next in content) {
-			val name = next.localName
-			val ns = next.namespaceURI
-			var qname = QName(ns, name)
-			// when ns should be ignored, always omit the ns part
+		init {
+			this.protocol = data.protocol
+			// read content
+			val content = data.any
+			for (next in content) {
+				val name = next.localName
+				val ns = next.namespaceURI
+				var qname = QName(ns, name)
+				// when ns should be ignored, always omit the ns part
+				if (ignoreNs) {
+					qname = QName(qname.localPart)
+				}
+				contentMap[qname] = next
+			}
+			// read other attributes
+			attributeMap = data.otherAttributes.toMutableMap()
+			// save document so new elements can be created -- there must always be an element, or this thing won't work
+			xmlDoc = if (content.isEmpty()) loadXMLBuilder() else content[0].ownerDocument
+		}
+
+		private fun loadXMLBuilder(): Document {
+			val factory = DocumentBuilderFactory.newInstance()
+			factory.isNamespaceAware = true
+			val builder = factory.newDocumentBuilder()
+			return builder.newDocument()
+		}
+
+		fun <T : DIDAuthenticationDataType?> createResponse(responseObj: T): AuthDataResponse<T> {
+			responseObj!!.protocol = protocol
+			return AuthDataResponse(xmlDoc, responseObj)
+		}
+
+		fun containsContent(qname: QName): Boolean {
+			var qname = qname
 			if (ignoreNs) {
 				qname = QName(qname.localPart)
 			}
-			contentMap[qname] = next
+			return contentMap.containsKey(qname)
 		}
-		// read other attributes
-		attributeMap = data.otherAttributes.toMutableMap()
-		// save document so new elements can be created -- there must always be an element, or this thing won't work
-		xmlDoc = if (content.isEmpty()) loadXMLBuilder() else content[0].ownerDocument
-	}
 
-	private fun loadXMLBuilder(): Document {
-		val factory = DocumentBuilderFactory.newInstance()
-		factory.isNamespaceAware = true
-		val builder = factory.newDocumentBuilder()
-		return builder.newDocument()
-	}
+		fun containsContent(
+			ns: String?,
+			localName: String,
+		): Boolean = containsContent(QName(ns, localName))
 
-	fun <T : DIDAuthenticationDataType?> createResponse(responseObj: T): AuthDataResponse<T> {
-		responseObj!!.protocol = protocol
-		return AuthDataResponse(xmlDoc, responseObj)
-	}
+		fun containsContent(localName: String): Boolean = containsContent(QName(ISONS, localName))
 
-	fun containsContent(qname: QName): Boolean {
-		var qname = qname
-		if (ignoreNs) {
-			qname = QName(qname.localPart)
+		fun getContent(qname: QName): Element? {
+			var qname = qname
+			if (ignoreNs) {
+				qname = QName(qname.localPart)
+			}
+			return contentMap[qname]
 		}
-		return contentMap.containsKey(qname)
-	}
 
-	fun containsContent(
-		ns: String?,
-		localName: String,
-	): Boolean = containsContent(QName(ns, localName))
+		fun getContent(
+			ns: String?,
+			localName: String,
+		): Element? = getContent(QName(ns, localName))
 
-	fun containsContent(localName: String): Boolean = containsContent(QName(ISONS, localName))
+		fun getContent(localName: String): Element? = getContent(QName(ISONS, localName))
 
-	fun getContent(qname: QName): Element? {
-		var qname = qname
-		if (ignoreNs) {
-			qname = QName(qname.localPart)
+		fun getContentAsString(qname: QName): String? {
+			if (containsContent(qname)) {
+				val content = getContent(qname)
+				val contentStr = content!!.textContent
+				return contentStr
+			} else {
+				return null
+			}
 		}
-		return contentMap[qname]
-	}
 
-	fun getContent(
-		ns: String?,
-		localName: String,
-	): Element? = getContent(QName(ns, localName))
+		fun getContentAsString(
+			ns: String?,
+			localName: String,
+		): String? = getContentAsString(QName(ns, localName))
 
-	fun getContent(localName: String): Element? = getContent(QName(ISONS, localName))
+		fun getContentAsString(localName: String): String? = getContentAsString(QName(ISONS, localName))
 
-	fun getContentAsString(qname: QName): String? {
-		if (containsContent(qname)) {
-			val content = getContent(qname)
-			val contentStr = content!!.textContent
-			return contentStr
-		} else {
-			return null
+		fun getContentAsBytes(qname: QName): ByteArray? {
+			if (containsContent(qname)) {
+				val content = getContentAsString(qname)
+				val contentBytes = StringUtils.toByteArray(content!!, true)
+				return contentBytes
+			} else {
+				return null
+			}
+		}
+
+		fun getContentAsBytes(
+			ns: String?,
+			localName: String,
+		): ByteArray? = getContentAsBytes(QName(ns, localName))
+
+		fun getContentAsBytes(localName: String): ByteArray? = getContentAsBytes(QName(ISONS, localName))
+
+		fun containsAttribute(qname: QName): Boolean = attributeMap.containsKey(qname)
+
+		fun containsAttribute(
+			ns: String?,
+			name: String,
+		): Boolean = containsAttribute(QName(ns, name))
+
+		fun containsAttribute(name: String): Boolean = containsAttribute(QName(ISONS, name))
+
+		fun getAttribute(qname: QName): String? = attributeMap[qname]
+
+		fun getAttribute(
+			ns: String?,
+			name: String,
+		): String? = getAttribute(QName(ns, name))
+
+		fun getAttribute(name: String): String? = getAttribute(QName(ISONS, name))
+
+		companion object {
+			private const val ISONS = "urn:iso:std:iso-iec:24727:tech:schema"
 		}
 	}
-
-	fun getContentAsString(
-		ns: String?,
-		localName: String,
-	): String? = getContentAsString(QName(ns, localName))
-
-	fun getContentAsString(localName: String): String? = getContentAsString(QName(ISONS, localName))
-
-	fun getContentAsBytes(qname: QName): ByteArray? {
-		if (containsContent(qname)) {
-			val content = getContentAsString(qname)
-			val contentBytes = StringUtils.toByteArray(content!!, true)
-			return contentBytes
-		} else {
-			return null
-		}
-	}
-
-	fun getContentAsBytes(
-		ns: String?,
-		localName: String,
-	): ByteArray? = getContentAsBytes(QName(ns, localName))
-
-	fun getContentAsBytes(localName: String): ByteArray? = getContentAsBytes(QName(ISONS, localName))
-
-	fun containsAttribute(qname: QName): Boolean = attributeMap.containsKey(qname)
-
-	fun containsAttribute(
-		ns: String?,
-		name: String,
-	): Boolean = containsAttribute(QName(ns, name))
-
-	fun containsAttribute(name: String): Boolean = containsAttribute(QName(ISONS, name))
-
-	fun getAttribute(qname: QName): String? = attributeMap[qname]
-
-	fun getAttribute(
-		ns: String?,
-		name: String,
-	): String? = getAttribute(QName(ns, name))
-
-	fun getAttribute(name: String): String? = getAttribute(QName(ISONS, name))
-
-	companion object {
-		private const val ISONS = "urn:iso:std:iso-iec:24727:tech:schema"
-	}
-}

@@ -33,7 +33,7 @@ import java.util.concurrent.Callable
  */
 internal class StepActionCallable(
 	private val action: StepAction,
-	private val oldResults: Map<String?, ExecutionResults>,
+	private val oldResults: Map<String, ExecutionResults>,
 	private val result: StepResult,
 ) : Callable<StepActionResult?> {
 	@Throws(Exception::class)

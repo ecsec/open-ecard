@@ -31,6 +31,7 @@ import org.openecard.common.util.ByteUtils
  * @author Tobias Wich
  */
 object SALErrorUtils {
+	@JvmStatic
 	fun getMajor(code: ByteArray): String {
 		require(code.size == 2) { "Given response code is not exactly two bytes long." }
 		val codeStr = ByteUtils.toHexString(code)
@@ -41,7 +42,7 @@ object SALErrorUtils {
 			ECardConstants.Major.ERROR
 		}
 	}
-
+	@JvmStatic
 	fun getMinor(code: ByteArray): String? {
 		require(code.size == 2) { "Given response code is not exactly two bytes long." }
 		val codeStr = ByteUtils.toHexString(code)

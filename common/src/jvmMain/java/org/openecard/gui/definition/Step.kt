@@ -70,7 +70,8 @@ open class Step(
 	 * @param action The action to be associated with this step, or `null` if the current action should be
 	 * removed.
 	 */
-	var action: StepAction? = null
+	private var _action: StepAction? = null
+	var action: StepAction
 		/**
 		 * Gets the action associated with this step.
 		 * Actions are a way to bind code to the step which is executed after the step is finished. The
@@ -79,10 +80,10 @@ open class Step(
 		 * @return The action associated with this step, or a [DummyAction] if none is set.
 		 */
 		get() {
-			if (field == null) {
-				return DummyAction(this)
-			}
-			return field
+			return _action ?: DummyAction(this)
+		}
+		set(action) {
+			_action = action
 		}
 
 	/**
@@ -141,20 +142,14 @@ open class Step(
 	 * @param resetOnLoad `true` if this step resets its values, `false` otherwise.
 	 */
 	var isResetOnLoad: Boolean = false
-	var inputInfoUnits: List<InputInfoUnit>? = null
-		/**
-		 * Gets the list of elements of this step.
-		 * The returned list is modifiable and can be used to add and remove elements from the step.
-		 *
-		 * @return Modifiable list of the elements of this step.
-		 */
-		get() {
-			if (field == null) {
-				field = ArrayList()
-			}
-			return field
-		}
-		private set
+
+	/**
+	 * Gets the list of elements of this step.
+	 * The returned list is modifiable and can be used to add and remove elements from the step.
+	 *
+	 * @return Modifiable list of the elements of this step.
+	 */
+	val inputInfoUnits: MutableList<InputInfoUnit> by lazy { mutableListOf() }
 
 	/**
 	 * Creates a step with the given title and a generated ID.

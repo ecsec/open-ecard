@@ -203,9 +203,9 @@ private fun InfoFrame.setStatusPane(statusObj: Status) {
 private fun SystemTray.getTrayIconImage(name: String): Image {
 	val dim: Dimension = trayImageSize.let { Dimension(it, it) }
 
-	return if (SysUtils.isUnix()) {
+	return if (SysUtils.isUnix) {
 		getImageLinux(name, dim)
-	} else if (SysUtils.isMacOSX()) {
+	} else if (SysUtils.isMacOSX) {
 		getImageMacOSX(name, dim)
 	} else {
 		getImageDefault(name, dim)

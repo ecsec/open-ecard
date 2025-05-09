@@ -47,27 +47,31 @@ class GetData
  * @param p1 see ISO 7816-4 section 7.4.2.
  * @param p2 see ISO 7816-4 section 7.4.2.
  */
-    (ins: Byte, p1: Byte, p2: Byte) : CardCommandAPDU(x00, ins, p1, p2, xFF) {
-    companion object {
-        /**
-         * GET DATA instruction byte for the case of a complete file dump or card-originated byte strings.
-         */
-        var INS_DATA: Byte = 0xCA.toByte()
+(
+	ins: Byte,
+	p1: Byte,
+	p2: Byte,
+) : CardCommandAPDU(x00, ins, p1, p2, xFF) {
+	companion object {
+		/**
+		 * GET DATA instruction byte for the case of a complete file dump or card-originated byte strings.
+		 */
+		const val INS_DATA: Byte = 0xCA.toByte()
 
-        /**
-         * GET DATA instruction byte for the request of a tag list data object, header list data object or extended header
-         * list data object.
-         */
-        var INS_TAG_LIST: Byte = 0xCB.toByte()
+		/**
+		 * GET DATA instruction byte for the request of a tag list data object, header list data object or extended header
+		 * list data object.
+		 */
+		const val INS_TAG_LIST: Byte = 0xCB.toByte()
 
-        /**
-         * P1 byte for a Simple-TLV tag in P2.
-         */
-        var SIMPLE_TLV: Byte = 0x02.toByte()
+		/**
+		 * P1 byte for a Simple-TLV tag in P2.
+		 */
+		const val SIMPLE_TLV: Byte = 0x02.toByte()
 
-        /**
-         * P1 byte for a one byte BER-TLV tag in P2.
-         */
-        var BER_TLV_ONE_BYTE: Byte = 0x00.toByte()
-    }
+		/**
+		 * P1 byte for a one byte BER-TLV tag in P2.
+		 */
+		const val BER_TLV_ONE_BYTE: Byte = 0x00.toByte()
+	}
 }

@@ -35,14 +35,14 @@ interface StepResult {
 	 *
 	 * @return The step instance which belongs to this result.
 	 */
-	val step: Step?
+	fun getStep(): Step?
 
 	/**
 	 * Get ID value of the matching step.
 	 *
 	 * @return ID of the step.
 	 */
-	val stepID: String?
+	fun getStepID(): String?
 
 	/**
 	 * Get result status of the step this result belongs to.
@@ -53,37 +53,37 @@ interface StepResult {
 	 *
 	 * @return Result status of the step.
 	 */
-	val status: ResultStatus?
+	fun getStatus(): ResultStatus?
 
 	/**
 	 * Convenience method for [.getStatus] with check if the status is [ResultStatus.OK].
 	 *
 	 * @return `true` if result status is OK, `false` otherwise.
 	 */
-	val isOK: Boolean
+	fun isOK(): Boolean
 
 	/**
 	 * Convenience method for [.getStatus] with check if the status is [ResultStatus.BACK].
 	 *
 	 * @return `true` if result status is BACK, `false` otherwise.
 	 */
-	val isBack: Boolean
+	fun isBack(): Boolean
 
 	/**
 	 * Convenience method for [.getStatus] with check if the status is [ResultStatus.CANCEL].
 	 *
 	 * @return `true` if result status is CANCEL, `false` otherwise.
 	 */
-	val isCancelled: Boolean
+	fun isCancelled(): Boolean
 
 	/**
 	 * Convenience method for [.getStatus] with check if the status is [ResultStatus.RELOAD].
 	 *
 	 * @return `true` if result status is RELOAD, `false` otherwise.
 	 */
-	val isReload: Boolean
+	fun isReload(): Boolean
 
-	val results: List<OutputInfoUnit>
+	fun getResults(): List<OutputInfoUnit>
 
 	/**
 	 * Returns the replacement step for the next display.
@@ -92,5 +92,20 @@ interface StepResult {
 	 *
 	 * @return The replacement step, or `null` if no replacement should be performed.
 	 */
-	val replacement: Step?
+	fun getReplacement(): Step?
 }
+
+val StepResult.step: Step?
+	get() = this.getStep()
+
+val StepResult.stepID: String?
+	get() = this.getStepID()
+
+val StepResult.status: ResultStatus?
+	get() = this.getStatus()
+
+val StepResult.results: List<OutputInfoUnit>
+	get() = this.getResults()
+
+val StepResult.replacement: Step?
+	get() = this.getReplacement()

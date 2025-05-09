@@ -46,7 +46,7 @@ class AuthenticatedAuxiliaryData(
 	init {
 		// convert content to DiscretionaryDataTemplates
 		val ts = ArrayList<DiscretionaryDataTemplate>()
-		for (next in getContent()) {
+		for (next in content) {
 			val d = DiscretionaryDataTemplate(next)
 			ts.add(d)
 		}

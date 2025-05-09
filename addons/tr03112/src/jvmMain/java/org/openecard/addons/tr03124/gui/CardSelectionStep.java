@@ -73,11 +73,11 @@ public class CardSelectionStep extends Step {
 	Text description = new Text();
 	description.setText(lang.translationForKey("card.selection.message"));
 	Radiobox radioBox = new Radiobox("credentialSelectionBox");
-	radioBox.groupText = "Available Credentials";
+	radioBox.setGroupText("Available Credentials");
 	for (String cardName : avCardWithName.keySet()) {
 	    BoxItem item = new BoxItem();
-	    item.name = avCardWithName.get(cardName).getRecognitionInfo().getCardType();
-	    item.text = cardName;
+	    item.setName(avCardWithName.get(cardName).getRecognitionInfo().getCardType());
+	    item.setText(cardName);
 	    radioBox.getBoxItems().add(item);
 	}
 
@@ -96,7 +96,7 @@ public class CardSelectionStep extends Step {
 	    avCardWithName.put(rec.getTranslatedCardName(handle.getRecognitionInfo().getCardType()), handle);
 	}
 
-	CardMonitorTask task = (CardMonitorTask) backgroundTask;
+	CardMonitorTask task = (CardMonitorTask) getBackgroundTask();
 	if (task != null) {
 	    ConnectionHandleType handle = task.getResult();
 	    if (handle.getRecognitionInfo() != null && handle.getRecognitionInfo().getCardType() != null) {

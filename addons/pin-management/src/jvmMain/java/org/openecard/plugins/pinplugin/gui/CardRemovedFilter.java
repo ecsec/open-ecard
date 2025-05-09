@@ -53,7 +53,7 @@ public class CardRemovedFilter implements EventFilter {
 	LOG.debug("Received event.");
 	if (t.equals(EventType.CARD_REMOVED)) {
 	    LOG.debug("Received CARD_REMOVED event.");
-	    ConnectionHandleType conHandle = o.handle;
+	    ConnectionHandleType conHandle = o.getHandle();
 
 	    if (conHandle != null && ifdName.equals(conHandle.getIFDName()) && slotIdx.equals(conHandle.getSlotIndex())) {
 		LOG.info("Card removed during processing of PIN Management GUI.");

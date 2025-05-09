@@ -44,6 +44,7 @@ class HandlerUtils {
 
 	companion object {
 		// TODO: use builder to copy handles
+		@JvmStatic
 		fun copyHandle(handle: ConnectionHandleType): ConnectionHandleType {
 			val result = ConnectionHandleType()
 			copyPath(result, handle)
@@ -53,6 +54,7 @@ class HandlerUtils {
 			return result
 		}
 
+		@JvmStatic
 		fun copyPath(handle: CardApplicationPathType): CardApplicationPathType {
 			val result = CardApplicationPathType()
 			copyPath(result, handle)
@@ -115,6 +117,7 @@ class HandlerUtils {
 			return result
 		}
 
+		@JvmStatic
 		fun extractHandle(obj: Any): ConnectionHandleType? {
 			// SAL calls
 			val handle =
@@ -187,8 +190,10 @@ class HandlerUtils {
 			}
 		}
 
+		@JvmStatic
 		fun print(handle: ConnectionHandleType): String = print(handle, "", "  ")
 
+		@JvmStatic
 		fun print(
 			handle: ConnectionHandleType,
 			prefix: String,

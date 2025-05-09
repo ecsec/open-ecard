@@ -26,7 +26,6 @@ import org.openecard.common.tlv.TLV.Companion.fromBER
 import org.openecard.common.tlv.TLVException
 import org.openecard.common.tlv.Tag
 import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
-import java.util.LinkedList
 
 /**
  *
@@ -59,11 +58,11 @@ open class TLVList {
 
 	constructor(data: ByteArray) : this(fromBER(data))
 
-	val content: List<TLV?>
+	val content: List<TLV>
 		get() {
 			if (tlv.hasChild()) {
 				return tlv.child!!.asList()
 			}
-			return LinkedList()
+			return listOf()
 		}
 }

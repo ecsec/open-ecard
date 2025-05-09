@@ -31,8 +31,11 @@ import org.openecard.gui.definition.Step
  *
  * @author Tobias Wich
  */
-class CancelAction(step: Step) : StepAction(step) {
-    override fun perform(oldResults: Map<String?, ExecutionResults?>?, result: StepResult): StepActionResult {
-        return StepActionResult(StepActionResultStatus.CANCEL)
-    }
+class CancelAction(
+	step: Step,
+) : StepAction(step) {
+	override fun perform(
+		oldResults: Map<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult = StepActionResult(StepActionResultStatus.CANCEL)
 }

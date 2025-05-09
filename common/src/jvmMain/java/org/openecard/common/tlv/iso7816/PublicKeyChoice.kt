@@ -32,7 +32,7 @@ import org.openecard.common.tlv.TagClass
  * @author Hans-Martin Haase
  */
 class PublicKeyChoice(
-	tlv: TLV?,
+	tlv: TLV,
 ) : TLVType(tlv) {
 	/**
 	 * Gets the corresponding TLV object to the element name.

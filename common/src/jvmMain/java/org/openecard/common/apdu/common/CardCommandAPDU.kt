@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
+import kotlin.jvm.Throws
 
 private val LOG = KotlinLogging.logger { }
 
@@ -628,7 +629,7 @@ open class CardCommandAPDU : CardAPDU {
 	 * @return Response APDU
 	 * @throws APDUException
 	 */
-
+	@Throws(APDUException::class)
 	fun transmit(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray?,
@@ -643,7 +644,7 @@ open class CardCommandAPDU : CardAPDU {
 	 * @return Response APDU
 	 * @throws APDUException
 	 */
-
+	@Throws(APDUException::class)
 	fun transmit(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray?,
@@ -679,7 +680,7 @@ open class CardCommandAPDU : CardAPDU {
 		 * @param commandAPDU Command APDU
 		 * @return Header of the APDU
 		 */
-
+		@JvmStatic
 		fun getHeader(commandAPDU: ByteArray): ByteArray? {
 			require(commandAPDU.size >= 4) { "Malformed APDU" }
 
@@ -692,7 +693,7 @@ open class CardCommandAPDU : CardAPDU {
 		 * @param commandAPDU Command APDU
 		 * @return Body of the APDU
 		 */
-
+		@JvmStatic
 		fun getBody(commandAPDU: ByteArray): ByteArray? {
 			require(commandAPDU.size >= 4) { "Malformed APDU" }
 

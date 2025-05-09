@@ -45,6 +45,8 @@ object DomainUtils {
 	 * @throws IllegalArgumentException Thrown in case any of the given host names is invalid.
 	 * @see .checkHostName
 	 */
+	@JvmStatic
+	@Throws(IllegalArgumentException::class)
 	fun checkWildcardHostName(
 		referenceHost: String,
 		actualHost: String?,
@@ -76,6 +78,8 @@ object DomainUtils {
 	 * @throws IllegalArgumentException Thrown in case any of the given host names is invalid.
 	 * @see .checkHostName
 	 */
+	@JvmStatic
+	@Throws(IllegalArgumentException::class)
 	fun checkHostName(
 		referenceHost: String,
 		actualHost: String?,

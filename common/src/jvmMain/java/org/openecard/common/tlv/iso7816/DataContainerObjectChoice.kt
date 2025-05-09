@@ -30,27 +30,29 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Hans-Martin Haase
  */
-class DataContainerObjectChoice(tlv: TLV?) : TLVType(tlv) {
-    var opaqueDO: GenericDataContainerObject<TLV>? = null
-        private set
-    var iso7816DO: GenericDataContainerObject<TLV>? = null
-        private set
-    var oidDO: GenericDataContainerObject<TLV>? = null
-        private set
-    var extension: TLV? = null
-        private set
+class DataContainerObjectChoice(
+	tlv: TLV,
+) : TLVType(tlv) {
+	var opaqueDO: GenericDataContainerObject<TLV>? = null
+		private set
+	var iso7816DO: GenericDataContainerObject<TLV>? = null
+		private set
+	var oidDO: GenericDataContainerObject<TLV>? = null
+		private set
+	var extension: TLV? = null
+		private set
 
-    init {
-        val p = Parser(tlv)
+	init {
+		val p = Parser(tlv)
 
-        if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
-            opaqueDO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-            iso7816DO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
-            oidDO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
-        } else {
-            extension = p.next(0)
-        }
-    }
+		if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
+			opaqueDO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+			iso7816DO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+			oidDO = GenericDataContainerObject(p.next(0)!!, TLV::class.java)
+		} else {
+			extension = p.next(0)
+		}
+	}
 }

@@ -125,7 +125,7 @@ public class GenericPINStep extends Step {
 		generateGuiPinActivatedRc3();
 		break;
 	    case PIN_activated_RC2:
-		title = lang.translationForKey(CHANGE_PIN_TITLE);
+		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 2;
 		if (capturePin()) {
 		    createPINChangeGui();
@@ -134,7 +134,7 @@ public class GenericPINStep extends Step {
 		}
 		break;
 	    case PIN_blocked:
-		title = lang.translationForKey(PUKSTEP_TITLE);
+		setTitle(lang.translationForKey(PUKSTEP_TITLE));
 		retryCounterPIN = 0;
 		if (capturePin()) {
 		    createPUKGui();
@@ -143,7 +143,7 @@ public class GenericPINStep extends Step {
 		}
 		break;
 	    case PIN_suspended:
-		title = lang.translationForKey(CANSTEP_TITLE);
+		setTitle(lang.translationForKey(CANSTEP_TITLE));
 		retryCounterPIN = 1;
 		if (capturePin()) {
 		    createCANGui();
@@ -152,7 +152,7 @@ public class GenericPINStep extends Step {
 		}
 		break;
 	    case PIN_resumed:
-		title = lang.translationForKey(CHANGE_PIN_TITLE);
+		setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 		retryCounterPIN = 1;
 		canSuccess = true;
 		if (capturePin()) {
@@ -162,24 +162,24 @@ public class GenericPINStep extends Step {
 		}
 		break;
 	    case PIN_deactivated:
-		title = lang.translationForKey(ERROR_TITLE);
+		setTitle(lang.translationForKey(ERROR_TITLE));
 		retryCounterPIN = -1;
 		createErrorGui();
 		break;
 	    case UNKNOWN:
-		title = lang.translationForKey(ERROR_TITLE);
+		setTitle(lang.translationForKey(ERROR_TITLE));
 		retryCounterPIN = -2;
 		createErrorGui();
 		break;
 	    case PUK_blocked:
-		title = lang.translationForKey(ERROR_TITLE);
+		setTitle(lang.translationForKey(ERROR_TITLE));
 		createErrorGui();
 		retryCounterPUK = 0;
 	}
     }
 
     public void generateGuiPinActivatedRc3() {
-	title = lang.translationForKey(CHANGE_PIN_TITLE);
+	setTitle(lang.translationForKey(CHANGE_PIN_TITLE));
 	retryCounterPIN = 3;
 	if (capturePin()) {
 	    createPINChangeGui();
@@ -234,24 +234,24 @@ public class GenericPINStep extends Step {
 	getInputInfoUnits().add(pinText);
 
 	PasswordField oldPIN = new PasswordField(OLD_PIN_FIELD);
-	oldPIN.minLength = 5; // in case of transport pin
-	oldPIN.maxLength = 6;
+	oldPIN.setMinLength(5); // in case of transport pin
+	oldPIN.setMaxLength(6);
 	getInputInfoUnits().add(oldPIN);
 
 	Text newPinText = new Text(lang.translationForKey(PINSTEP_NEWPIN));
 	getInputInfoUnits().add(newPinText);
 
 	PasswordField newPIN = new PasswordField(NEW_PIN_FIELD);
-	newPIN.maxLength = 6;
-	newPIN.minLength = 6;
+	newPIN.setMaxLength(6);
+	newPIN.setMinLength(6);
 	getInputInfoUnits().add(newPIN);
 
 	Text newPinAgainText = new Text(lang.translationForKey(PINSTEP_NEWPINREPEAT));
 	getInputInfoUnits().add(newPinAgainText);
 
 	PasswordField newPINRepeat = new PasswordField(NEW_PIN_REPEAT_FIELD);
-	newPINRepeat.maxLength = 6;
-	newPINRepeat.minLength = 6;
+	newPINRepeat.setMaxLength(6);
+	newPINRepeat.setMinLength(6);
 	getInputInfoUnits().add(newPINRepeat);
 
 	if (wrongPINFormat) {
@@ -289,9 +289,9 @@ public class GenericPINStep extends Step {
 
 	i1.setText(lang.translationForKey(PUKSTEP_DESCRIPTION));
 	PasswordField pukField = new PasswordField(PUK_FIELD);
-	pukField.maxLength = 10;
-	pukField.minLength = 10;
-	pukField.description = lang.translationForKey(PUKSTEP_PUK);
+	pukField.setMaxLength(10);
+	pukField.setMinLength(10);
+	pukField.setDescription(lang.translationForKey(PUKSTEP_PUK));
 	getInputInfoUnits().add(pukField);
 
 	// show the puk try counter
@@ -331,9 +331,9 @@ public class GenericPINStep extends Step {
 	// add description and input fields depending on terminal type
 	i2.setText(lang.translationForKey(CANSTEP_DESCRIPTION));
 	PasswordField canField = new PasswordField(CAN_FIELD);
-	canField.minLength = 6;
-	canField.maxLength = 6;
-	canField.description = lang.translationForKey(CANSTEP_CAN);
+	canField.setMinLength(6);
+	canField.setMaxLength(6);
+	canField.setDescription(lang.translationForKey(CANSTEP_CAN));
 	getInputInfoUnits().add(canField);
 
 	if (wrongCANFormat) {

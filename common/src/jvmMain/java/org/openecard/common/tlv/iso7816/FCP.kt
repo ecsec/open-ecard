@@ -281,6 +281,7 @@ class FCP(
 		dataElements = DataElements(descriptorBytes)
 	}
 
+	@Throws(TLVException::class)
 	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
 
 	/**

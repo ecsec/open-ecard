@@ -28,10 +28,9 @@ import org.openecard.common.tlv.TLV
  * @author Tobias Wich
  */
 abstract class TLVType {
-    protected var tlv: TLV? = null
+	protected var tlv: TLV
 
-    private constructor()
-    constructor(tlv: TLV?) {
-        this.tlv = tlv
-    }
+	constructor(tlv: TLV) {
+		this.tlv = tlv
+	}
 }

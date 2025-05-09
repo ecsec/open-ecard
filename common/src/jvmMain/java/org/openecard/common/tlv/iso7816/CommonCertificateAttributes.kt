@@ -32,7 +32,7 @@ import org.openecard.common.util.ByteUtils.toInteger
  * @author Hans-Martin Haase
  */
 class CommonCertificateAttributes(
-	tlv: TLV?,
+	tlv: TLV,
 ) : TLVType(tlv) {
 	var id: ByteArray?
 		private set

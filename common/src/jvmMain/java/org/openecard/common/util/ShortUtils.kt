@@ -36,7 +36,8 @@ object ShortUtils {
 	 * @param bigEndian `true` when output should be in Big Endian, `false` for Little Endian.
 	 * @return byte[]
 	 */
-
+	@JvmStatic
+	@JvmOverloads
 	fun toByteArray(
 		value: Short,
 		numBits: Int = 8,
@@ -58,7 +59,8 @@ object ShortUtils {
 	 * @param bigEndian `true` when output should be in Big Endian, `false` for Little Endian.
 	 * @return byte[]
 	 */
-
+	@JvmStatic
+	@JvmOverloads
 	fun toByteArray(
 		value: Short,
 		padArrayToTypeLength: Boolean,

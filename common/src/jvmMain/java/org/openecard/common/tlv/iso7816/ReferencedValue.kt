@@ -33,7 +33,7 @@ import org.openecard.common.tlv.TagClass
  * @author Hans-Martin Haase
  */
 class ReferencedValue(
-	tlv: TLV?,
+	tlv: TLV,
 ) : TLVType(tlv) {
 	var path: Path? = null
 		private set

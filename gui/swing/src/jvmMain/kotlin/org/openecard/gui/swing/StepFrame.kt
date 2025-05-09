@@ -68,7 +68,7 @@ class StepFrame(
 	}
 
 	private fun initComponents() {
-		val stepLayouter: StepLayouter = StepLayouter.Companion.create(step.getInputInfoUnits(), dialogType, step.title)
+		val stepLayouter: StepLayouter = StepLayouter.create(step.inputInfoUnits, dialogType, step.title!!)
 		val contentPanel = stepLayouter.panel
 		panel.add(contentPanel, BorderLayout.CENTER)
 
@@ -105,17 +105,18 @@ class StepFrame(
 		return true
 	}
 
-	val resultContent: MutableList<OutputInfoUnit?>
+	val resultContent: MutableList<OutputInfoUnit>
 		/**
 		 * Get result for all components on the frame that support result values.
 		 *
 		 * @return List containing all result values. As a matter of fact this list can be empty.
 		 */
 		get() {
-			val result = mutableListOf<OutputInfoUnit?>()
+			val result = mutableListOf<OutputInfoUnit>()
 			for (next in components) {
-				if (next.isValueType) {
-					result.add(next.value)
+				val value = next.value
+				if (value != null && next.isValueType) {
+					result.add(value)
 				}
 			}
 			return result
@@ -264,7 +265,7 @@ class StepFrame(
 					object : Runnable {
 						override fun run() {
 							try {
-								val result = task.call()
+								val result = task.call()!!
 								LOG.debug { "Background thread terminated before the GUI." }
 								forceResult(result)
 							} catch (ex: InterruptedException) {

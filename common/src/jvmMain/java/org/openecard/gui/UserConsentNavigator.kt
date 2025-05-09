@@ -31,68 +31,68 @@ import java.util.concurrent.Future
  * @author Tobias Wich
  */
 interface UserConsentNavigator {
-    /**
-     * Checks whether there is a successor step to display.
-     *
-     * @return `true` if a successor step can be displayed, `false` otherwise.
-     */
-    fun hasNext(): Boolean
+	/**
+	 * Checks whether there is a successor step to display.
+	 *
+	 * @return `true` if a successor step can be displayed, `false` otherwise.
+	 */
+	fun hasNext(): Boolean
 
-    /**
-     * Redisplays current dialog step.
-     *
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun current(): StepResult?
+	/**
+	 * Redisplays current dialog step.
+	 *
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun current(): StepResult
 
-    /**
-     * Displays next dialog step.
-     *
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun next(): StepResult?
+	/**
+	 * Displays next dialog step.
+	 *
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun next(): StepResult?
 
-    /**
-     * Displays previous dialog step.
-     *
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun previous(): StepResult?
+	/**
+	 * Displays previous dialog step.
+	 *
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun previous(): StepResult?
 
-    /**
-     * Replaces the current step in the step list and displays the new step.
-     *
-     * @param step Replacement for the current step.
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun replaceCurrent(step: Step?): StepResult?
+	/**
+	 * Replaces the current step in the step list and displays the new step.
+	 *
+	 * @param step Replacement for the current step.
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun replaceCurrent(step: Step): StepResult
 
-    /**
-     * Replaces the next step in the step list and displays the new step.
-     *
-     * @param step Replacement for the next step.
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun replaceNext(step: Step?): StepResult?
+	/**
+	 * Replaces the next step in the step list and displays the new step.
+	 *
+	 * @param step Replacement for the next step.
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun replaceNext(step: Step): StepResult
 
-    /**
-     * Replaces the previous step in the step list and displays the new step.
-     *
-     * @param step Replacement for the previous step.
-     * @return Result of the step. The content of the result is available after the step is finished.
-     */
-    fun replacePrevious(step: Step?): StepResult?
+	/**
+	 * Replaces the previous step in the step list and displays the new step.
+	 *
+	 * @param step Replacement for the previous step.
+	 * @return Result of the step. The content of the result is available after the step is finished.
+	 */
+	fun replacePrevious(step: Step): StepResult
 
-    /**
-     * Sets the action in the navigator which is executed after calling this method.
-     * The action can be canceled from within the navigator if needed.
-     *
-     * @param action Future of the StepAction that is executed next.
-     */
-    fun setRunningAction(action: Future<*>?)
+	/**
+	 * Sets the action in the navigator which is executed after calling this method.
+	 * The action can be canceled from within the navigator if needed.
+	 *
+	 * @param action Future of the StepAction that is executed next.
+	 */
+	fun setRunningAction(action: Future<*>)
 
-    /**
-     * Closes the open dialog.
-     */
-    fun close()
+	/**
+	 * Closes the open dialog.
+	 */
+	fun close()
 }

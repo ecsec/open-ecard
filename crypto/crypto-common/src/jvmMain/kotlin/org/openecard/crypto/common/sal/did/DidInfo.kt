@@ -279,7 +279,7 @@ class DidInfo {
 			// check retry counter
 			val protoData = PINCompareDIDAuthenticateOutputType(res.getAuthenticationProtocolData())
 			val retryCounter = protoData.retryCounter
-			return retryCounter
+			return retryCounter!!
 		} catch (ex: ParserConfigurationException) {
 			val msg = "Unexpected protocol data received in PIN Compare output."
 			LOG.error(ex) { msg }

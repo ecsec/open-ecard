@@ -463,15 +463,15 @@ internal class AbstractTerminal(
 				"enter-pin",
 				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
 			)
-		uc.getSteps().add(s)
+		uc.steps.add(s)
 		// add text instructing user
 		// add text instructing user
 		val i1 = Text()
-		s.getInputInfoUnits().add(i1)
-		i1.setText(LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin"))
+		s.inputInfoUnits.add(i1)
+		i1.text = (LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin"))
 
 		val i2 = PasswordField("pin")
-		s.getInputInfoUnits().add(i2)
+		s.inputInfoUnits.add(i2)
 		i2.description = "PIN"
 		i2.minLength = minLength
 		i2.maxLength = maxLength
@@ -490,13 +490,13 @@ internal class AbstractTerminal(
 				"enter-pin",
 				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
 			)
-		s.setAction(action)
-		uc.getSteps().add(s)
+		s.action = action
+		uc.steps.add(s)
 		s.isInstantReturn = true
 		// add text instructing user
 		val i1 = Text()
-		s.getInputInfoUnits().add(i1)
-		i1.setText(LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin_term"))
+		s.inputInfoUnits.add(i1)
+		i1.text = LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin_term")
 
 		return uc
 	}

@@ -27,6 +27,11 @@ import org.openecard.common.interfaces.InvocationTargetExceptionUnchecked
 import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsentNavigator
 import org.openecard.gui.definition.InputInfoUnit
+import org.openecard.gui.replacement
+import org.openecard.gui.results
+import org.openecard.gui.status
+import org.openecard.gui.step
+import org.openecard.gui.stepID
 import java.util.Collections
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
@@ -44,7 +49,16 @@ private val LOG = KotlinLogging.logger { }
 class ExecutionEngine(
 	private val navigator: UserConsentNavigator,
 ) {
-	private val results = mutableMapOf<String, ExecutionResults>()
+	private val _results = mutableMapOf<String, ExecutionResults>()
+	val results: Map<String, ExecutionResults>
+		/**
+		 * Get all step results of the execution.
+		 *
+		 * @return Mapping of the step results with step ID as key.
+		 */
+		get() {
+			return Collections.unmodifiableMap(results)
+		}
 
 	/**
 	 * Processes the user consent associated with this instance. <br></br>
@@ -76,8 +90,8 @@ class ExecutionEngine(
 
 				// get result and put it in resultmap
 				val stepResults = next!!.results
-				val oldResults = Collections.unmodifiableMap(results)
-				results[next.stepID!!] = ExecutionResults(next.stepID!!, stepResults)
+				val oldResults = Collections.unmodifiableMap(_results)
+				_results[next.stepID!!] = ExecutionResults(next.stepID!!, stepResults)
 
 				// replace InfoInputUnit values in live list
 				if (!next.step?.isResetOnLoad!!) {
@@ -189,13 +203,6 @@ class ExecutionEngine(
 			navigator.close()
 		}
 	}
-
-	/**
-	 * Get all step results of the execution.
-	 *
-	 * @return Mapping of the step results with step ID as key.
-	 */
-	fun getResults(): Map<String?, ExecutionResults> = Collections.unmodifiableMap(results)
 
 	private fun convertStatus(`in`: StepActionResultStatus): ResultStatus =
 		when (`in`) {

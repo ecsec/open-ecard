@@ -223,7 +223,7 @@ public class CardCapturer {
 	synchronized (cardViewLock) {
 	    CardStateView currentView = this.cardStateView.getDelegate();
 
-	    ConnectionHandleType eventConnHandle = eventData.handle;
+	    ConnectionHandleType eventConnHandle = eventData.getHandle();
 	    ConnectionHandleType viewConnHandle = currentView.getHandle();
 
 	    if (eventConnHandle != null && viewConnHandle != null) {

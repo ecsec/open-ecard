@@ -34,7 +34,7 @@ import java.lang.reflect.InvocationTargetException
  * @author Tobias Wich
  */
 class GenericObjectValue<Type>(
-	tlv: TLV?,
+	tlv: TLV,
 	clazz: Class<Type>,
 ) : TLVType(tlv) {
 	private var indirect: ReferencedValue? = null
@@ -55,7 +55,7 @@ class GenericObjectValue<Type>(
 			p.match(Tag(TagClass.UNIVERSAL, true, 22)) ||
 			p.match(Tag(TagClass.CONTEXT, false, 3))
 		) {
-			indirect = ReferencedValue(p.next(0))
+			indirect = ReferencedValue(p.next(0)!!)
 		} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
 			try {
 				direct = c.newInstance(p.next(0)!!.child)

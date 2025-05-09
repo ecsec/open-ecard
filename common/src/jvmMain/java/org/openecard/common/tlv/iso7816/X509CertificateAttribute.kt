@@ -43,7 +43,7 @@ class X509CertificateAttribute(
 		val p = Parser(tlv.child)
 
 		// first value is validated by GenericObjectValue
-		value = GenericObjectValue(p.next(0), Certificate::class.java)
+		value = GenericObjectValue(p.next(0)!!, Certificate::class.java)
 
 		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
 			subject = p.next(0)

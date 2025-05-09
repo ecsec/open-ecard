@@ -116,11 +116,13 @@ object OpenecardProperties {
 	/**
 	 * @see OverridingProperties.getProperty
 	 */
+	@JvmStatic
 	fun getProperty(key: String): String? = properties!!.getProperty(key)
 
 	/**
 	 * @see OverridingProperties.properties
 	 */
+	@JvmStatic
 	fun properties(): Properties = properties!!.properties()
 
 	/**
@@ -130,6 +132,7 @@ object OpenecardProperties {
 	 * @param changes Properties to be written.
 	 * @throws IOException Thrown in case there was a problem reading or writing the config file.
 	 */
+	@JvmStatic
 	@Synchronized
 	fun writeChanges(changes: Properties) {
 		// load currently written properties

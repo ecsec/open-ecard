@@ -47,6 +47,7 @@ object SecureRandomFactory {
 	 * @return Seeded instance of SecureRandom.
 	 * @see SecureRandom.generateSeed
 	 */
+	@JvmStatic
 	fun create(numSeedBytes: Int): SecureRandom {
 		var numSeedBytes = numSeedBytes
 		numSeedBytes = if (numSeedBytes < 0) 0 else numSeedBytes

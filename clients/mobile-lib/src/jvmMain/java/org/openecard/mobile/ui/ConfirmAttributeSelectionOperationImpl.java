@@ -85,7 +85,7 @@ public class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeS
 	}
 	// copy changed values
 	for (BoxItem next : newBox.getBoxItems()) {
-	    String name = next.name;
+	    String name = next.getName();
 	    SelectableItem receivedItem = itemsByName.get(name);
 	    if (receivedItem != null) {
 		next.setChecked(receivedItem.isChecked());

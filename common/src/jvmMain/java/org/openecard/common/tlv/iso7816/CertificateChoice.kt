@@ -32,7 +32,7 @@ import org.openecard.common.tlv.TagClass
  * @author Hans-Martin Haase
  */
 class CertificateChoice(
-	tlv: TLV?,
+	tlv: TLV,
 ) : TLVType(tlv) {
 	var x509Certificate: GenericCertificateObject<X509CertificateAttribute>? = null // X509CertificateAttributes
 		private set

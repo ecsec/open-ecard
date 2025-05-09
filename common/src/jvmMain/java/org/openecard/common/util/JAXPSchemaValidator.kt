@@ -102,6 +102,8 @@ class JAXPSchemaValidator : DocumentSchemaValidator {
 		 * @throws IOException Thrown in case the schemas could not be loaded from the given resources.
 		 * @throws SAXException Thrown in case the XML schemas are errornous.
 		 */
+		@JvmStatic
+		@Throws(IOException::class, SAXException::class)
 		fun load(vararg schemaNames: String): DocumentSchemaValidator {
 			try {
 				if (schemaNames.isEmpty()) {

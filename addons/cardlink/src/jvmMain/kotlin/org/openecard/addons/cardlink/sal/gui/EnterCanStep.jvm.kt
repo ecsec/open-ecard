@@ -85,7 +85,7 @@ class EnterCanStep(
 	override val sessHandle: ConnectionHandleType,
 ) : EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_STEP_ID, CAN_TITLE) {
 	init {
-		setAction(EnterCanStepAction(this))
+		action = EnterCanStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(CAN_ID).also {
@@ -102,7 +102,7 @@ class EnterCanRetryStep(
 	override val sessHandle: ConnectionHandleType,
 ) : EnterCanStepAbstract(ws, addonCtx, sessHandle, CAN_RETRY_STEP_ID, CAN_RETRY_TITLE) {
 	init {
-		setAction(EnterCanStepAction(this))
+		action = EnterCanStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(CAN_ID).also {
@@ -117,10 +117,10 @@ class EnterCanStepAction(
 	val enterCanStep: EnterCanStepAbstract,
 ) : StepAction(enterCanStep) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
 			val canValue = (oldResults[stepID]!!.getResult(CAN_ID) as TextField).value.concatToString()
@@ -174,7 +174,7 @@ class EnterCanStepAction(
 				dynCtx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType? ?: enterCanStep.sessHandle
 			val ph = InsertCardHelper(enterCanStep.addonCtx, conHandle)
 
-			if (SysUtils.isMobileDevice()) {
+			if (SysUtils.isMobileDevice) {
 				// mobile device, pick only available reader and proceed
 				ph.useMobileReader()
 			}

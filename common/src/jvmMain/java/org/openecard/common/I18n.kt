@@ -338,7 +338,8 @@ class I18n private constructor(
 		 * @return I18n instance responsible for specified component.
 		 * @see .getTranslation
 		 */
-		fun getTranslation(component: String): I18n? = getTranslation(I18n::class.java, component)
+		@JvmStatic
+		fun getTranslation(component: String): I18n = getTranslation(I18n::class.java, component)
 
 		/**
 		 * Load a translation for the specified component.
@@ -351,13 +352,14 @@ class I18n private constructor(
 		 * @param component String describing the component. This must also be the filename prefix of the translation.
 		 * @return I18n instance responsible for specified component.
 		 */
+		@JvmStatic
 		@Synchronized
 		fun getTranslation(
 			loaderReference: Class<*>,
 			component: String,
-		): I18n? {
+		): I18n {
 			if (translations.containsKey(component)) {
-				return translations[component]
+				return translations[component]!!
 			} else {
 				val t = I18n(loaderReference, component)
 				translations[component] = t
@@ -365,6 +367,7 @@ class I18n private constructor(
 			}
 		}
 
+		@JvmStatic
 		val locale: Locale
 			get() = Locale.getDefault()
 

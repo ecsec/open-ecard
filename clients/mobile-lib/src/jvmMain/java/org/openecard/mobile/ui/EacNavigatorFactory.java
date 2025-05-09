@@ -56,7 +56,7 @@ public class EacNavigatorFactory implements UserConsentNavigatorFactory<EacInter
 
     @Override
     public boolean canCreateFrom(UserConsentDescription uc) {
-	return "EAC".equals(uc.dialogType);
+	return "EAC".equals(uc.getDialogType());
     }
 
     @Override

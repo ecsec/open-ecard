@@ -78,8 +78,8 @@ public final class PINStep extends Step {
 	this.paceMarker = paceMarker;
 	this.hasAttemptsCounter = eacData.pinID != PasswordID.CAN.getByte();
 	this.capturePin = capturePin;
-	title = LANG_PACE.translationForKey(TITLE, pinType);
-	description = LANG_PACE.translationForKey(STEP_DESCRIPTION);
+	setTitle(LANG_PACE.translationForKey(TITLE, pinType));
+	setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	setReversible(false);
 
 	// TransactionInfo
@@ -117,8 +117,8 @@ public final class PINStep extends Step {
     public static Step createDummy(byte pinId) {
 	Step s = new Step(STEP_ID);
 	String pinType = LANG_PACE.translationForKey(PasswordID.parse(pinId).name());
-	s.title = LANG_PACE.translationForKey(TITLE, pinType);
-	s.description = LANG_PACE.translationForKey(STEP_DESCRIPTION);
+	s.setTitle(LANG_PACE.translationForKey(TITLE, pinType));
+	s.setDescription(LANG_PACE.translationForKey(STEP_DESCRIPTION));
 	return s;
     }
 
@@ -129,9 +129,9 @@ public final class PINStep extends Step {
 	getInputInfoUnits().add(description);
 
 	PasswordField pinInputField = new PasswordField(PIN_FIELD);
-	pinInputField.description = pinType;
-	pinInputField.minLength = paceMarker.getMinLength();
-	pinInputField.maxLength = paceMarker.getMaxLength();
+	pinInputField.setDescription(pinType);
+	pinInputField.setMinLength(paceMarker.getMinLength());
+	pinInputField.setMaxLength(paceMarker.getMaxLength());
 	getInputInfoUnits().add(pinInputField);
 
 	if (hasAttemptsCounter) {
@@ -169,18 +169,18 @@ public final class PINStep extends Step {
 	boolean hasCanField = false;
 	boolean hasCanNotice = false;
 	for (InputInfoUnit inputInfoUnit : inputInfoUnits) {
-	    if (CAN_FIELD.equals(inputInfoUnit.iD)) {
+	    if (CAN_FIELD.equals(inputInfoUnit.getId())) {
 		hasCanField = true;
 	    }
-	    if (CAN_NOTICE_ID.equals(inputInfoUnit.iD)) {
+	    if (CAN_NOTICE_ID.equals(inputInfoUnit.getId())) {
 		hasCanNotice = true;
 	    }
 	}
 	if (!hasCanField) {
 	    PasswordField canField = new PasswordField(CAN_FIELD);
-	    canField.description = LANG_PACE.translationForKey("can");
-	    canField.maxLength = 6;
-	    canField.minLength = 6;
+	    canField.setDescription(LANG_PACE.translationForKey("can"));
+	    canField.setMaxLength(6);
+	    canField.setMinLength(6);
 	    inputInfoUnits.add(canField);
 	}
 	if (!hasCanNotice) {
@@ -214,7 +214,7 @@ public final class PINStep extends Step {
 
     private void updateAttemptsDisplay() {
 	for (InputInfoUnit unit : getInputInfoUnits()) {
-	    if (unit.iD.equals(PIN_ATTEMPTS_ID)) {
+	    if (unit.getId().equals(PIN_ATTEMPTS_ID)) {
 		int newValue;
 		switch (status.getState()) {
 		    case RC3:

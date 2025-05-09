@@ -47,6 +47,7 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
+import org.openecard.recognition.RecognitionProperties.action
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 import java.util.UUID
 
@@ -70,7 +71,7 @@ class PhoneStep(
 	override val ws: WsPair,
 ) : PhoneStepAbstract(ws, PHONE_ENTER_STEP_ID, PHONE_ENTER_TITLE) {
 	init {
-		setAction(PhoneStepAction(this))
+		action = PhoneStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(PHONE_ID).also {
@@ -84,7 +85,7 @@ class PhoneRetryStep(
 	override val ws: WsPair,
 ) : PhoneStepAbstract(ws, PHONE_RETRY_STEP_ID, PHONE_RETRY_TITLE) {
 	init {
-		setAction(PhoneStepAction(this))
+		action = PhoneStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(PHONE_ID).also {
@@ -98,7 +99,7 @@ class PhoneStepAction(
 	private val phoneStep: PhoneStepAbstract,
 ) : StepAction(phoneStep) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		val phoneNumber = (oldResults[stepID]!!.getResult(PHONE_ID) as TextField).value.concatToString()
@@ -108,7 +109,7 @@ class PhoneStepAction(
 	}
 
 	private fun sendPhoneNumber(phoneNumber: String): StepActionResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val correlationId = UUID.randomUUID().toString()
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 

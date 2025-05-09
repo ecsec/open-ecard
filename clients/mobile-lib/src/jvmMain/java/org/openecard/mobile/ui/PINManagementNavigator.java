@@ -105,7 +105,7 @@ public class PINManagementNavigator extends MobileNavigator {
 	Step curStep = steps.get(0);
 
 	for (Step s : this.steps) {
-	    LOG.debug("Step: {}", s.description);
+	    LOG.debug("Step: {}", s.getDescription());
 	}
 
 	// TODO: remove this statement and implement it properly

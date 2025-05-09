@@ -24,6 +24,7 @@ package org.openecard.common.util
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import kotlin.jvm.Throws
 
 /**
  * Implementation of a promise inspired by clojure's promise.
@@ -84,6 +85,7 @@ open class Promise<T> {
 	 * @throws IllegalStateException Thrown in case the promise is already delivered when this function gets called.
 	 */
 	@Synchronized
+	@Throws(IllegalStateException::class)
 	open fun deliver(value: T?): T? {
 		if (!isDelivered) {
 			if (!isCancelled) {
@@ -103,6 +105,7 @@ open class Promise<T> {
 	 * @return The value that has been delivered to the promise.
 	 * @throws InterruptedException Thrown in case the current thread has been interrupted while waiting.
 	 */
+	@Throws(InterruptedException::class)
 	fun deref(): T? =
 		try {
 			// wait an infinite time, most certainly longer than the machine running this program exists :p
@@ -123,6 +126,7 @@ open class Promise<T> {
 	 * includes a cancellation of the promise.
 	 * @throws TimeoutException Thrown in case a timeout occured.
 	 */
+	@Throws(InterruptedException::class, TimeoutException::class)
 	fun deref(
 		timeout: Long,
 		unit: TimeUnit?,

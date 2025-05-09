@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+
+import kotlin.jvm.Throws;
 import org.openecard.common.DynamicContext;
 import org.openecard.common.ECardConstants;
 import org.openecard.common.I18n;
@@ -121,7 +123,7 @@ public class GenericPINAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isCancelled) {
+	if (result.isCancelled()) {
 	    return new StepActionResult(StepActionResultStatus.CANCEL);
 	}
 
@@ -169,7 +171,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(stepID);
+	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField oldPINField = (PasswordField) executionResults.getResult(GenericPINStep.OLD_PIN_FIELD);
 	    if (oldPINField == null) {
 		return null;
@@ -199,7 +201,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(stepID);
+	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField canField = (PasswordField) executionResults.getResult(GenericPINStep.CAN_FIELD);
 	    if (canField == null) {
 		return null;
@@ -229,7 +231,7 @@ public class GenericPINAction extends StepAction {
 
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 	if (this.cardView.capturePin()) {
-	    ExecutionResults executionResults = oldResults.get(stepID);
+	    ExecutionResults executionResults = oldResults.get(getStepID());
 	    PasswordField pukField = (PasswordField) executionResults.getResult(GenericPINStep.PUK_FIELD);
 	    if (pukField == null) {
 		return null;
@@ -266,7 +268,7 @@ public class GenericPINAction extends StepAction {
 	String newPINRepeatValue = null;
  	if (this.cardView.capturePin()) {
 	    try {
-		ExecutionResults executionResults = oldResults.get(stepID);
+		ExecutionResults executionResults = oldResults.get(getStepID());
 		PasswordField newPINField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_FIELD);
 		PasswordField newPINRepeatField = (PasswordField) executionResults.getResult(GenericPINStep.NEW_PIN_REPEAT_FIELD);
 		if (newPINField == null || newPINRepeatField == null) {

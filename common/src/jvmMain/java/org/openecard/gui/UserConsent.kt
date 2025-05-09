@@ -29,28 +29,28 @@ import org.openecard.gui.definition.UserConsentDescription
  * @author Tobias Wich
  */
 interface UserConsent {
-    /**
-     * Obtain an instance of a user consent navigator.
-     * It is up to the implementation whether the navigator can be reused after display.
-     *
-     * @param uc The abstract description of the user consent and its components. May not be null.
-     * @return A class instance implementing the [UserConsentNavigator] interface.
-     */
-    fun obtainNavigator(uc: UserConsentDescription?): UserConsentNavigator?
+	/**
+	 * Obtain an instance of a user consent navigator.
+	 * It is up to the implementation whether the navigator can be reused after display.
+	 *
+	 * @param uc The abstract description of the user consent and its components. May not be null.
+	 * @return A class instance implementing the [UserConsentNavigator] interface.
+	 */
+	fun obtainNavigator(uc: UserConsentDescription): UserConsentNavigator
 
-    /**
-     * Obtain an instance of a file dialog.
-     * It is up to the implementation whether the dialog can be reused after display.
-     *
-     * @return A class instance implementing the [FileDialog] interface.
-     */
-    fun obtainFileDialog(): FileDialog?
+	/**
+	 * Obtain an instance of a file dialog.
+	 * It is up to the implementation whether the dialog can be reused after display.
+	 *
+	 * @return A class instance implementing the [FileDialog] interface.
+	 */
+	fun obtainFileDialog(): FileDialog
 
-    /**
-     * Obtain an instance of a message dialog.
-     * It is up to the implementation whether the dialog can be reused after display.
-     *
-     * @return A class instance implementing the [MessageDialog] interface.
-     */
-    fun obtainMessageDialog(): MessageDialog?
+	/**
+	 * Obtain an instance of a message dialog.
+	 * It is up to the implementation whether the dialog can be reused after display.
+	 *
+	 * @return A class instance implementing the [MessageDialog] interface.
+	 */
+	fun obtainMessageDialog(): MessageDialog
 }

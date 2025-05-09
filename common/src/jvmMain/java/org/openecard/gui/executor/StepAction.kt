@@ -36,7 +36,7 @@ abstract class StepAction(
 	 *
 	 * @return The step ID that this instance is associated with.
 	 */
-	val stepID: String?,
+	val stepID: String,
 ) {
 	/**
 	 * Creates a step action and saves the steps ID it is associated with.
@@ -54,7 +54,7 @@ abstract class StepAction(
 	 * @return Result of the action.
 	 */
 	abstract fun perform(
-		oldResults: Map<String?, ExecutionResults?>?,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult
 }

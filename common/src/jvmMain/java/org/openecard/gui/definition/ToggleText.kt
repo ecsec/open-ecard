@@ -40,10 +40,6 @@ class ToggleText :
 	 * Gets the title of this instance.
 	 *
 	 * @return The title of this instance.
-
-	 * Sets the title of this instance.
-	 *
-	 * @param title The title of this instance.
 	 */
 	var title: String? = null
 

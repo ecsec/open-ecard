@@ -143,7 +143,7 @@ public class DIDAuthenticateStep implements ProtocolStep<DIDAuthenticate, DIDAut
 
 	    CardResponseAPDU verifyResponseAPDU = new CardResponseAPDU(responseCode);
 	    if (verifyResponseAPDU.isWarningProcessed()) {
-		pinCompareOutput.retryCounter = new BigInteger(Integer.toString((verifyResponseAPDU.getSW2() & 0x0F)));
+		pinCompareOutput.setRetryCounter(new BigInteger(Integer.toString((verifyResponseAPDU.getSW2() & 0x0F))));
 	    }
 
 	    cardStateEntry.addAuthenticated(didName, cardApplication);

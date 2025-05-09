@@ -207,7 +207,7 @@ class RichClient {
                 }
                 if (!dispatcherMode) {
                     try {
-                        port = OpenecardProperties.getProperty("http-binding.port").toInt()
+                        port = OpenecardProperties.getProperty("http-binding.port")!!.toInt()
                     } catch (ex: NumberFormatException) {
 						LOG.warn { "Error in config file, HTTP binding port is malformed." }
                     }

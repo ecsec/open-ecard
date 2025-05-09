@@ -62,7 +62,7 @@ public class CardLinkNavigatorFactory implements UserConsentNavigatorFactory<Car
 
 	@Override
 	public boolean canCreateFrom(UserConsentDescription uc) {
-		return "CardLink".equals(uc.dialogType);
+		return "CardLink".equals(uc.getDialogType());
 	}
 
 	@Override

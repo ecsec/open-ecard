@@ -45,7 +45,7 @@ class CardResponseAPDU : CardAPDU {
 	 * @param trailer Trailer (SW1, SW2)
 	 */
 
-	open var trailer: ByteArray = ByteArray(2)
+	var trailer: ByteArray = ByteArray(2)
 		set(value) {
 			require(value.size == 2) { "Given trailer is not exactly two bytes long." }
 			System.arraycopy(value, 0, field, 0, 2)
@@ -258,10 +258,11 @@ class CardResponseAPDU : CardAPDU {
 		 * @param responseAPDU Response APDU
 		 * @return Data field of the APDU
 		 */
-		fun getData(responseAPDU: ByteArray): ByteArray? {
+		@JvmStatic
+		fun getData(responseAPDU: ByteArray): ByteArray {
 			require(responseAPDU.size >= 2) { "Malformed APDU" }
 
-			return ByteUtils.copy(responseAPDU, 0, responseAPDU.size - 2)
+			return ByteUtils.copy(responseAPDU, 0, responseAPDU.size - 2)!!
 		}
 
 		/**
@@ -270,10 +271,11 @@ class CardResponseAPDU : CardAPDU {
 		 * @param responseAPDU Response APDU
 		 * @return Trailer of the APDU
 		 */
-		fun getTrailer(responseAPDU: ByteArray): ByteArray? {
+		@JvmStatic
+		fun getTrailer(responseAPDU: ByteArray): ByteArray {
 			require(responseAPDU.size >= 2) { "Malformed APDU" }
 
-			return ByteUtils.copy(responseAPDU, responseAPDU.size - 2, 2)
+			return ByteUtils.copy(responseAPDU, responseAPDU.size - 2, 2)!!
 		}
 	}
 }

@@ -71,8 +71,8 @@ class PCSCPinModify(
 
 		var template = cmdTemplate
 		if (pinTemplate.size > 0) {
-			template = ByteUtils.concatenate(cmdTemplate, pinTemplate.size.toByte())
-			template = ByteUtils.concatenate(template, pinTemplate)
+			template = ByteUtils.concatenate(cmdTemplate, pinTemplate.size.toByte())!!
+			template = ByteUtils.concatenate(template, pinTemplate)!!
 		}
 		setData(template)
 

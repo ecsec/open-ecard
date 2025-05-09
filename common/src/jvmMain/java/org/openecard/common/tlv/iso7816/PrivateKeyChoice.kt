@@ -31,39 +31,41 @@ import org.openecard.common.tlv.TagClass
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class PrivateKeyChoice(tlv: TLV?) : TLVType(tlv) {
-    var privateRSAKey: GenericPrivateKeyObject<PrivateRSAKeyAttributes>? = null
-        private set
-    var privateECKey: GenericPrivateKeyObject<PrivateECKeyAttributes>? = null
-        private set
-    var privateDHKey: GenericPrivateKeyObject<TLV>? = null
-        private set
-    var privateDSAKey: GenericPrivateKeyObject<TLV>? = null
-        private set
-    var privateKEAKey: GenericPrivateKeyObject<TLV>? = null
-        private set
-    var genericPrivateKey: GenericPrivateKeyObject<TLV>? = null
-        private set
-    var ext: TLV? = null
-        private set
+class PrivateKeyChoice(
+	tlv: TLV,
+) : TLVType(tlv) {
+	var privateRSAKey: GenericPrivateKeyObject<PrivateRSAKeyAttributes>? = null
+		private set
+	var privateECKey: GenericPrivateKeyObject<PrivateECKeyAttributes>? = null
+		private set
+	var privateDHKey: GenericPrivateKeyObject<TLV>? = null
+		private set
+	var privateDSAKey: GenericPrivateKeyObject<TLV>? = null
+		private set
+	var privateKEAKey: GenericPrivateKeyObject<TLV>? = null
+		private set
+	var genericPrivateKey: GenericPrivateKeyObject<TLV>? = null
+		private set
+	var ext: TLV? = null
+		private set
 
-    init {
-        val p = Parser(tlv)
+	init {
+		val p = Parser(tlv)
 
-        if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
-            privateRSAKey = GenericPrivateKeyObject(p.next(0)!!, PrivateRSAKeyAttributes::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-            privateECKey = GenericPrivateKeyObject(p.next(0)!!, PrivateECKeyAttributes::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
-            privateDHKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
-            privateDSAKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 3))) {
-            privateKEAKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
-        } else if (p.match(Tag(TagClass.CONTEXT, false, 4))) {
-            genericPrivateKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
-        } else {
-            ext = p.next(0)
-        }
-    }
+		if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
+			privateRSAKey = GenericPrivateKeyObject(p.next(0)!!, PrivateRSAKeyAttributes::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+			privateECKey = GenericPrivateKeyObject(p.next(0)!!, PrivateECKeyAttributes::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+			privateDHKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
+			privateDSAKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 3))) {
+			privateKEAKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
+		} else if (p.match(Tag(TagClass.CONTEXT, false, 4))) {
+			genericPrivateKey = GenericPrivateKeyObject(p.next(0)!!, TLV::class.java)
+		} else {
+			ext = p.next(0)
+		}
+	}
 }

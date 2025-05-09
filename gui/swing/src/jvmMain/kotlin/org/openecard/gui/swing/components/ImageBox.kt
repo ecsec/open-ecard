@@ -37,7 +37,7 @@ class ImageBox(
 	imageBox: ImageBox,
 ) : StepComponent {
 	private val imageLabel: JLabel
-	private val image: ImageIcon = ImageIcon(imageBox.getImageData())
+	private val image: ImageIcon = ImageIcon(imageBox.imageData)
 
 	init {
 		this.imageLabel = JLabel(image)

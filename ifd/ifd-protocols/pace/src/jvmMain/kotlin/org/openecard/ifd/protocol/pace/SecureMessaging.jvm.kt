@@ -207,7 +207,7 @@ class SecureMessaging(
 		}
 
 		cmac.doFinal(mac, 0)
-		mac = ByteUtils.copy(mac, 0, 8)
+		mac = ByteUtils.copy(mac, 0, 8)!!
 
 		//
 		// Build APDU
@@ -347,7 +347,7 @@ class SecureMessaging(
 			cmac.update(paddedData, 0, paddedData.size)
 
 			cmac.doFinal(mac, 0)
-			mac = ByteUtils.copy(mac, 0, 8)
+			mac = ByteUtils.copy(mac, 0, 8)!!
 		}
 
 		// Verify MAC
@@ -478,7 +478,7 @@ class SecureMessaging(
 	private fun unpad(data: ByteArray): ByteArray {
 		for (i in data.indices.reversed()) {
 			if (data[i] == PAD) {
-				return ByteUtils.copy(data, 0, i)
+				return ByteUtils.copy(data, 0, i)!!
 			}
 		}
 

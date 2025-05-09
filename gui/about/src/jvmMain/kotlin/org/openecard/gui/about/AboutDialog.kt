@@ -133,7 +133,7 @@ class AboutDialog private constructor() : JFrame() {
 		setLocationRelativeTo(null)
 	}
 
-	private fun createTabContent(resourceName: String?): JPanel {
+	private fun createTabContent(resourceName: String): JPanel {
 		val kit = HTMLEditorKit()
 		kit.isAutoFormSubmission = false // don't follow form link, use hyperlink handler instead
 		val doc = kit.createDefaultDocument() as HTMLDocument?

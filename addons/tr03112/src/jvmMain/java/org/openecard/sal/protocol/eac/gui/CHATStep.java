@@ -68,7 +68,7 @@ public class CHATStep extends Step {
     public CHATStep(EACData eacData) {
 	super(STEP_ID, LANG.translationForKey(TITLE));
 	this.eacData = eacData;
-	description = LANG.translationForKey(STEP_DESCRIPTION);
+	setDescription(LANG.translationForKey(STEP_DESCRIPTION));
 
 	// create step elements
 	addElements();
@@ -83,7 +83,7 @@ public class CHATStep extends Step {
 	// process read access and special functions
 	Checkbox readAccessCheckBox = new Checkbox(READ_CHAT_BOXES);
 	boolean displayReadAccessCheckBox = false;
-	readAccessCheckBox.groupText = LANG.translationForKey(READ_ACCESS_DESC);
+	readAccessCheckBox.setGroupText(LANG.translationForKey(READ_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredReadAccess = eacData.requiredCHAT.getReadAccess();
 	Map<CHAT.DataGroup, Boolean> optionalReadAccess = eacData.optionalCHAT.getReadAccess();
 	Map<CHAT.SpecialFunction, Boolean> requiredSpecialFunctions = eacData.requiredCHAT.getSpecialFunctions();
@@ -148,7 +148,7 @@ public class CHATStep extends Step {
 	// process write access
 	Checkbox writeAccessCheckBox = new Checkbox(WRITE_CHAT_BOXES);
 	boolean displayWriteAccessCheckBox = false;
-	writeAccessCheckBox.groupText = LANG.translationForKey(WRITE_ACCESS_DESC);
+	writeAccessCheckBox.setGroupText(LANG.translationForKey(WRITE_ACCESS_DESC));
 	Map<CHAT.DataGroup, Boolean> requiredWriteAccess = eacData.requiredCHAT.getWriteAccess();
 	Map<CHAT.DataGroup, Boolean> optionalWriteAccess = eacData.optionalCHAT.getWriteAccess();
 
@@ -172,7 +172,7 @@ public class CHATStep extends Step {
 	}
 
 	ToggleText requestedDataDescription = new ToggleText();
-	requestedDataDescription.title = LANG.translationForKey(NOTE);
+	requestedDataDescription.setTitle(LANG.translationForKey(NOTE));
 	requestedDataDescription.setText(LANG.translationForKey(NOTE_CONTENT));
 	requestedDataDescription.setCollapsed(!true);
 	getInputInfoUnits().add(requestedDataDescription);
@@ -181,10 +181,10 @@ public class CHATStep extends Step {
     private BoxItem makeBoxItem(Enum<?> value, boolean checked, boolean disabled, Object... textData) {
 	BoxItem item = new BoxItem();
 
-	item.name = value.name();
+	item.setName(value.name());
 	item.setChecked(checked);
 	item.setDisabled(disabled);
-	item.text = LANG.translationForKey(value.name(), textData);
+	item.setText(LANG.translationForKey(value.name(), textData));
 
 	return item;
     }

@@ -49,7 +49,7 @@ class PACEInputType(
 	 *
 	 * @return PIN ID
 	 */
-	val pINID: Byte = authMap.getContentAsBytes(PIN_ID)[0]
+	val pINID: Byte = authMap.getContentAsBytes(PIN_ID)!![0]
 
 	// optional elements
 

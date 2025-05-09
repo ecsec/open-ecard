@@ -80,7 +80,7 @@ public class PUKStepAction extends StepAction {
 
     @Override
     public StepActionResult perform(Map<String, ExecutionResults> oldResults, StepResult result) {
-	if (result.isBack) {
+	if (result.isBack()) {
 	    return new StepActionResult(StepActionResultStatus.BACK);
 	}
 
@@ -97,7 +97,7 @@ public class PUKStepAction extends StepAction {
 	AuthDataResponse paceInputMap = tmp.createResponse(paceInput);
 
 	if (capturePin) {
-	    ExecutionResults executionResults = oldResults.get(stepID);
+	    ExecutionResults executionResults = oldResults.get(getStepID());
 
 	    if (!verifyUserInput(executionResults)) {
 		// let the user enter the pin again, when there is none entered

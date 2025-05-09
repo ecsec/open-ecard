@@ -47,6 +47,8 @@ object IntegerUtils {
 	 * @param value integer to be converted
 	 * @return byte[]
 	 */
+	@JvmStatic
+	@JvmOverloads
 	fun toByteArray(
 		value: Int,
 		numBits: Int = 8,
@@ -67,6 +69,8 @@ object IntegerUtils {
 	 * @param padArrayToTypeLength
 	 * @return byte[]
 	 */
+	@JvmStatic
+	@JvmOverloads
 	fun toByteArray(
 		value: Int,
 		padArrayToTypeLength: Boolean,

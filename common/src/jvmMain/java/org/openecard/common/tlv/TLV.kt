@@ -33,18 +33,21 @@ import java.util.LinkedList
  * @author Tobias Wich
  */
 open class TLV {
-	private var tag: TagLengthValue
+	private var _tag: TagLengthValue
+	var tag: Tag
+		get() = _tag.getTag()
+		set(value) = _tag.setTag(value)
 
 	// protected TLV parent = null;
 	var next: TLV? = null
 	var child: TLV? = null
 
 	constructor() {
-		tag = TagLengthValue()
+		_tag = TagLengthValue()
 	}
 
 	constructor(obj: TLV) {
-		this.tag = obj.tag
+		this._tag = obj._tag
 		this.next = if (obj.next != null) TLV(obj.next!!) else null
 		this.child = if (obj.child != null) TLV(obj.child!!) else null
 	}
@@ -52,58 +55,54 @@ open class TLV {
 	/**
 	 * deferred setters for TLV container
 	 */
-	fun getTag(): Tag = tag.getTag()
-
-	fun setTag(tag: Tag) {
-		this.tag.setTag(tag)
-	}
 
 	var tagClass: TagClass?
-		get() = tag.tagClass
+		get() = _tag.tagClass
 		set(tagClass) {
-			tag.tagClass = tagClass
+			_tag.tagClass = tagClass
 		}
 
 	var isPrimitive: Boolean
-		get() = tag.isPrimitive
+		get() = _tag.isPrimitive
 		set(primitive) {
-			tag.isPrimitive = primitive
+			_tag.isPrimitive = primitive
 		}
 
 	val tagNum: Long
-		get() = tag.tagNum
+		get() = _tag.tagNum
 
 	fun setTagNum(tagNum: Byte) {
 		setTagNum((tagNum.toInt() and 0xFF).toLong())
 	}
 
 	fun setTagNum(tagNum: Long) {
-		tag.tagNum = tagNum
+		_tag.tagNum = tagNum
 	}
 
 	open var tagNumWithClass: Long
 		get() {
-			return tag.tagNumWithClass
+			return _tag.tagNumWithClass
 		}
 		set(value) {
-			tag.tagNumWithClass = value
+			_tag.tagNumWithClass = value
 		}
 
+	@Throws(TLVException::class)
 	fun setTagNumWithClass(tagNumWithClass: Byte) {
-		tag.tagNumWithClass = (tagNumWithClass.toInt() and 0xFF).toLong()
+		_tag.tagNumWithClass = (tagNumWithClass.toInt() and 0xFF).toLong()
 	}
 
 	fun setTagNumWithClass(tagNumWithClass: ByteArray) {
-		tag.setTagNumWithClass(tagNumWithClass)
+		_tag.setTagNumWithClass(tagNumWithClass)
 	}
 
 	val valueLength: Int
-		get() = tag.valueLength
+		get() = _tag.valueLength
 
 	var value: ByteArray
-		get() = tag.value
+		get() = _tag.value
 		set(value) {
-			tag.value = value
+			_tag.value = value
 		}
 
 	/**
@@ -195,13 +194,13 @@ open class TLV {
 	) {
 		if (child != null) {
 			val childBytes = child!!.toBER(true)
-			tag.isPrimitive = false
-			tag.value = childBytes
+			_tag.isPrimitive = false
+			_tag.value = childBytes
 		} else {
-			tag.isPrimitive = true
+			_tag.isPrimitive = true
 		}
 		// write child to output stream
-		out.write(tag.toBER())
+		out.write(_tag.toBER())
 
 		if (withSuccessors && next != null) {
 			next!!.toBER(out, withSuccessors)
@@ -216,7 +215,7 @@ open class TLV {
 
 		result +=
 			if (!hasChild()) {
-				" " + tag.valueLength + " " + ByteUtils.toHexString(tag.value)
+				" " + _tag.valueLength + " " + ByteUtils.toHexString(_tag.value)
 			} else {
 				child!!.toString("$prefix  ")
 			}
@@ -255,10 +254,10 @@ open class TLV {
 					return first
 				}
 				// convert bytes to flat TLV data
-				next.tag = TagLengthValue.fromBER(rest)
+				next._tag = TagLengthValue.fromBER(rest)
 				// if constructed build child structure
-				if (!next.tag.isPrimitive && next.tag.valueLength > 0) {
-					next.child = fromBER(next.tag.value)
+				if (!next._tag.isPrimitive && next._tag.valueLength > 0) {
+					next.child = fromBER(next._tag.value)
 				}
 
 				// set next as sibling in last
@@ -270,7 +269,7 @@ open class TLV {
 				last = next
 
 				// get rest of the bytes for next iteration
-				rest = last.tag.extractRest(rest)
+				rest = last._tag.extractRest(rest)
 			}
 
 			return first

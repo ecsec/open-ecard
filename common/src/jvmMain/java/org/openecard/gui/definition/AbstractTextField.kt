@@ -21,6 +21,7 @@
  */
 package org.openecard.gui.definition
 
+import com.sun.tools.javac.code.TypeAnnotationPosition.field
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.Arrays
 
@@ -53,7 +54,23 @@ abstract class AbstractTextField(
 	 * @param description String describing the text field.
 	 */
 	var description: String? = null
-	private var value: CharArray
+	var value: CharArray = CharArray(0)
+		/**
+		 * Gets the value of the text field.
+		 *
+		 * @return The value of the text field.
+		 */
+		get(): CharArray = field.clone()
+
+		/**
+		 * Sets the value of the text field.
+		 *
+		 * @param value The value of the text field.
+		 */
+		set(value) {
+			Arrays.fill(field, ' ')
+			field = value.clone()
+		}
 
 	/**
 	 * Gets the minimum length of the text field value.
@@ -95,26 +112,8 @@ abstract class AbstractTextField(
 	 * @param id The id to initialize the instance with.
 	 */
 	init {
-		this.value = CharArray(0)
 		this.minLength = 0
 		this.maxLength = Int.MAX_VALUE
-	}
-
-	/**
-	 * Gets the value of the text field.
-	 *
-	 * @return The value of the text field.
-	 */
-	fun getValue(): CharArray = value.clone()
-
-	/**
-	 * Sets the value of the text field.
-	 *
-	 * @param value The value of the text field.
-	 */
-	fun setValue(value: CharArray) {
-		Arrays.fill(this.value, ' ')
-		this.value = value.clone()
 	}
 
 	/**

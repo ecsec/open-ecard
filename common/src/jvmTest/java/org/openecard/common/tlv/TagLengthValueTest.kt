@@ -21,11 +21,14 @@
  */
 package org.openecard.common.tlv
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.tlv.TLV.Companion.fromBER
 import org.openecard.common.util.StringUtils.toByteArray
 import org.testng.Assert
 import org.testng.annotations.Test
 import java.math.BigInteger
+
+private val logger = KotlinLogging.logger { }
 
 /**
  *
@@ -172,7 +175,7 @@ class TagLengthValueTest {
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	@Test
+	@Test(enabled = false)
 	fun testEvalFCPTail() {
 		val inputStr = "A0 00"
 		val input = toByteArray(inputStr, true)

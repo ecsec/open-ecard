@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2014-2018 ecsec GmbH.
+ * Copyright (C) 2016 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.graphics;
+package org.openecard.richclient.gui.graphics;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -30,13 +30,14 @@ import javax.swing.Icon;
  * This class has been automatically generated using svg2java
  *
  */
-public class OecLogoLoading implements Icon {
+public class OecLogoWhite implements Icon {
 
 	private float origAlpha = 1.0f;
 
 	/**
-	 * Paints the transcoded SVG image on the specified graphics context. You can install a custom transformation on the
-	 * graphics context to scale the image.
+	 * Paints the transcoded SVG image on the specified graphics context. You
+	 * can install a custom transformation on the graphics context to scale the
+	 * image.
 	 *
 	 * @param g
 	 *            Graphics context.
@@ -93,7 +94,7 @@ public class OecLogoLoading implements Icon {
 		shape1.curveTo(179.25227, 624.5215, 170.92862, 605.0594, 157.18744, 590.84375);
 		shape1.curveTo(143.04967, 576.7933, 126.39169, 567.7846, 104.65619, 567.59375);
 		shape1.closePath();
-		g.setPaint(new Color(200, 200, 200, 255));
+		g.setPaint(new Color(255, 255, 255, 255));
 		g.fill(shape1);
 	}
 
@@ -213,7 +214,7 @@ public class OecLogoLoading implements Icon {
 	/**
 	 * Creates a new transcoded SVG image.
 	 */
-	public OecLogoLoading() {
+	public OecLogoWhite() {
         this.width = getOrigWidth();
         this.height = getOrigHeight();
 	}

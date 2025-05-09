@@ -19,8 +19,10 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.gui.graphics
+package org.openecard.richclient
 
+import org.openecard.richclient.gui.graphics.GraphicsUtil
+import org.openecard.richclient.gui.graphics.OecLogo
 import org.testng.Assert
 import org.testng.annotations.Test
 

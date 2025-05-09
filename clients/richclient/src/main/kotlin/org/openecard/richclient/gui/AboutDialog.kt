@@ -25,9 +25,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.AppVersion
 import org.openecard.common.AppVersion.version
 import org.openecard.common.I18n
-import org.openecard.gui.graphics.GraphicsUtil.createImage
-import org.openecard.gui.graphics.OecLogo
 import org.openecard.gui.swing.common.SwingUtils
+import org.openecard.richclient.gui.graphics.GraphicsUtil.createImage
+import org.openecard.richclient.gui.graphics.OecLogo
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font

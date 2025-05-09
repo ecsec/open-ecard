@@ -31,8 +31,12 @@ import org.openecard.common.AppVersion.name
 import org.openecard.common.I18n
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
-import org.openecard.gui.graphics.*
 import org.openecard.richclient.RichClient
+import org.openecard.richclient.gui.graphics.GraphicsUtil
+import org.openecard.richclient.gui.graphics.OecLogo
+import org.openecard.richclient.gui.graphics.OecLogoBlack
+import org.openecard.richclient.gui.graphics.OecLogoLoading
+import org.openecard.richclient.gui.graphics.OecLogoWhite
 import org.openecard.richclient.gui.manage.ManagementDialog
 import java.awt.*
 import java.awt.event.ActionEvent

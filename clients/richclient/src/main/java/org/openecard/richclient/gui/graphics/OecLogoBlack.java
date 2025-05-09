@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.graphics;
+package org.openecard.richclient.gui.graphics;
 
 import java.awt.*;
 import java.awt.geom.*;

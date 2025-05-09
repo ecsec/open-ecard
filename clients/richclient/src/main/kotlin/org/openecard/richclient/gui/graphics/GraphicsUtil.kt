@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.gui.graphics
+package org.openecard.richclient.gui.graphics
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Component

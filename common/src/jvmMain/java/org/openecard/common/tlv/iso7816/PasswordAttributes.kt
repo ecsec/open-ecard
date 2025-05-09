@@ -59,39 +59,39 @@ class PasswordAttributes(
 	init {
 		val p = Parser(tlv.child)
 
-		if (p.match(Tag.Companion.BITSTRING_TAG)) {
+		if (p.match(Tag.BITSTRING_TAG)) {
 			passwordFlags = TLVBitString(p.next(0)!!)
 		} else {
 			throw TLVException("passwordFlags element missing.")
 		}
-		if (p.match(Tag.Companion.ENUMERATED_TAG)) {
-			passwordType = toInteger(p.next(0)!!.value!!)
+		if (p.match(Tag.ENUMERATED_TAG)) {
+			passwordType = toInteger(p.next(0)!!.value)
 		} else {
 			throw TLVException("passwordType element missing.")
 		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
-			minLength = toInteger(p.next(0)!!.value!!)
+		if (p.match(Tag.INTEGER_TAG)) {
+			minLength = toInteger(p.next(0)!!.value)
 		} else {
 			throw TLVException("minLength element missing.")
 		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
-			storedLength = toInteger(p.next(0)!!.value!!)
+		if (p.match(Tag.INTEGER_TAG)) {
+			storedLength = toInteger(p.next(0)!!.value)
 		} else {
 			throw TLVException("storedLength element missing.")
 		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
-			maxLength = toInteger(p.next(0)!!.value!!)
+		if (p.match(Tag.INTEGER_TAG)) {
+			maxLength = toInteger(p.next(0)!!.value)
 		}
 		if (p.match(Tag(TagClass.CONTEXT, true, 0))) {
-			passwordReference = toInteger(p.next(0)!!.value!!)
+			passwordReference = toInteger(p.next(0)!!.value)
 		}
-		if (p.match(Tag.Companion.OCTETSTRING_TAG)) {
-			padChar = p.next(0)!!.value?.get(0)
+		if (p.match(Tag.OCTETSTRING_TAG)) {
+			padChar = p.next(0)!!.value[0]
 		}
 		if (p.match(Tag(TagClass.UNIVERSAL, true, 24))) {
 			lastPasswordChange = p.next(0)
 		}
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
+		if (p.match(Tag.SEQUENCE_TAG)) {
 			path = Path(p.next(0)!!)
 		}
 	}

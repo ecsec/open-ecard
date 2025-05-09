@@ -29,11 +29,9 @@ import org.openecard.common.util.ValueGenerators.genBase64Session
  *
  * @author Tobias Wich
  */
-abstract class IDTrait constructor(
-	id: String = genBase64Session(16),
+abstract class IDTrait(
+	override var id: String = genBase64Session(16),
 ) : InfoUnit {
-	override var id: String = id
-
 	/**
 	 * Creates an IDTrait instance and initializes its ID to the given value.
 	 *

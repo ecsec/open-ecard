@@ -47,6 +47,7 @@ class CombinedPromise<T>(
 	 * @return
 	 * @throws InterruptedException
 	 */
+	@Throws(InterruptedException::class)
 	fun retrieveFirst(): T {
 		val futures = ArrayList<Future<T>>()
 		try {

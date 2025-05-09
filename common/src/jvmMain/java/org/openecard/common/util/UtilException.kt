@@ -30,17 +30,13 @@ import org.openecard.common.ECardException
  * @author Dirk Petrautzki
  */
 class UtilException : ECardException {
-    constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
+	constructor(msg: String) : super(makeOasisResultTraitImpl(msg), null)
 
-    constructor(msg: String, cause: Throwable?) : super(makeOasisResultTraitImpl(msg), cause)
+	constructor(msg: String, cause: Throwable?) : super(makeOasisResultTraitImpl(msg), cause)
 
-    constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
+	constructor(minor: String, msg: String?) : super(makeOasisResultTraitImpl(minor, msg), null)
 
-    constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
+	constructor(r: Result) : super(makeOasisResultTraitImpl(r), null)
 
-    constructor(cause: Throwable?) : super(makeOasisResultTraitImpl(), cause)
-
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	constructor(cause: Throwable?) : super(makeOasisResultTraitImpl(), cause)
 }

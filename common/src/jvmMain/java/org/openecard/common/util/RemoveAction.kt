@@ -21,11 +21,12 @@
  */
 package org.openecard.common.util
 
-
 /**
  *
  * @author Tobias Wich
  */
-abstract class RemoveAction<V>(protected val v: V) {
-    abstract fun perform()
+abstract class RemoveAction<V>(
+	protected val v: V,
+) {
+	abstract fun perform()
 }

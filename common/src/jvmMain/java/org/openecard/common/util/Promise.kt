@@ -129,7 +129,7 @@ open class Promise<T> {
 	@Throws(InterruptedException::class, TimeoutException::class)
 	fun deref(
 		timeout: Long,
-		unit: TimeUnit?,
+		unit: TimeUnit,
 	): T? {
 		val delivered = gate.await(timeout, unit)
 		synchronized(this) {

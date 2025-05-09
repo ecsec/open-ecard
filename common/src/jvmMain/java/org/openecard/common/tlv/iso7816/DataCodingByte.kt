@@ -28,18 +28,18 @@ import org.openecard.common.util.ByteUtils
  *
  * @author Tobias Wich
  */
-class DataCodingByte(private val data: Byte) {
-    // TODO: implement
-    fun toString(prefix: String?): String {
-        val b = StringBuilder(64)
-        b.append(prefix)
-        b.append("DataCoding-Byte: ")
-        b.append(ByteUtils.toHexString(byteArrayOf(data)))
+class DataCodingByte(
+	private val data: Byte,
+) {
+	// TODO: implement
+	fun toString(prefix: String?): String {
+		val b = StringBuilder(64)
+		b.append(prefix)
+		b.append("DataCoding-Byte: ")
+		b.append(ByteUtils.toHexString(byteArrayOf(data)))
 
-        return b.toString()
-    }
+		return b.toString()
+	}
 
-    override fun toString(): String {
-        return toString("")
-    }
+	override fun toString(): String = toString("")
 }

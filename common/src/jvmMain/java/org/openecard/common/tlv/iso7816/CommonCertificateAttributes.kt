@@ -77,7 +77,7 @@ class CommonCertificateAttributes(
 			}
 		}
 
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
+		if (p.match(Tag.SEQUENCE_TAG)) {
 			identifier = p.next(0)
 		}
 

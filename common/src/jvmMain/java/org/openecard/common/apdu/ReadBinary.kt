@@ -127,16 +127,14 @@ class ReadBinary : CardCommandAPDU {
 	 * @param slotHandle Slot handle
 	 * @return Transmit
 	 */
-	override fun makeTransmit(slotHandle: ByteArray?): Transmit {
-		val defaultResponses: ArrayList<ByteArray?> =
-			object : ArrayList<ByteArray?>() {
-				init {
-					add(byteArrayOf(0x90.toByte(), 0x00.toByte()))
-					add(byteArrayOf(0x62.toByte(), 0x82.toByte()))
-				}
-			}
-		return makeTransmit(slotHandle, defaultResponses)
-	}
+	override fun makeTransmit(slotHandle: ByteArray?): Transmit =
+		makeTransmit(
+			slotHandle,
+			listOf(
+				byteArrayOf(0x90.toByte(), 0x00.toByte()),
+				byteArrayOf(0x62.toByte(), 0x82.toByte()),
+			),
+		)
 
 	companion object {
 		/**

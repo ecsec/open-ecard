@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.definition
 
-
 /**
  * GUI component types.
  * Each element type is listed in this enum to operate with the [InfoUnit] type without performing the instanceof
@@ -30,13 +29,13 @@ package org.openecard.gui.definition
  * @author Tobias Wich
  */
 enum class InfoUnitElementType {
-    TEXT,
-    TOGGLE_TEXT,
-    HYPERLINK,
-    IMAGE_BOX,
-    CHECK_BOX,
-    RADIO_BOX,
-    TEXT_FIELD,
-    PASSWORD_FIELD,
-    SIGNAUTRE_FIELD
+	TEXT,
+	TOGGLE_TEXT,
+	HYPERLINK,
+	IMAGE_BOX,
+	CHECK_BOX,
+	RADIO_BOX,
+	TEXT_FIELD,
+	PASSWORD_FIELD,
+	SIGNAUTRE_FIELD,
 }

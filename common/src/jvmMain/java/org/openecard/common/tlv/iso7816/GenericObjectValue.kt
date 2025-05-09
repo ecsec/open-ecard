@@ -33,39 +33,41 @@ import java.lang.reflect.InvocationTargetException
  *
  * @author Tobias Wich
  */
-class GenericObjectValue<Type>(
-	tlv: TLV,
-	clazz: Class<Type>,
-) : TLVType(tlv) {
-	private var indirect: ReferencedValue? = null
-	private var direct: Type? = null
+class GenericObjectValue<Type>
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+		clazz: Class<Type>,
+	) : TLVType(tlv) {
+		private var indirect: ReferencedValue? = null
+		private var direct: Type? = null
 
-	init {
-		val c: Constructor<Type>
-		try {
-			c = clazz.getConstructor(TLV::class.java)
-		} catch (ex: Exception) {
-			throw TLVException("Type supplied doesn't have a constructor Type(TLV).")
-		}
-
-		val p = Parser(tlv)
-
-		if (p.match(Tag.Companion.SEQUENCE_TAG) ||
-			p.match(Tag(TagClass.UNIVERSAL, true, 19)) ||
-			p.match(Tag(TagClass.UNIVERSAL, true, 22)) ||
-			p.match(Tag(TagClass.CONTEXT, false, 3))
-		) {
-			indirect = ReferencedValue(p.next(0)!!)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+		init {
+			val c: Constructor<Type>
 			try {
-				direct = c.newInstance(p.next(0)!!.child)
-			} catch (ex: InvocationTargetException) {
-				throw TLVException(ex)
+				c = clazz.getConstructor(TLV::class.java)
 			} catch (ex: Exception) {
 				throw TLVException("Type supplied doesn't have a constructor Type(TLV).")
 			}
-		} else {
-			throw TLVException("Unexpected element in ObjectValue.")
+
+			val p = Parser(tlv)
+
+			if (p.match(Tag.SEQUENCE_TAG) ||
+				p.match(Tag(TagClass.UNIVERSAL, true, 19)) ||
+				p.match(Tag(TagClass.UNIVERSAL, true, 22)) ||
+				p.match(Tag(TagClass.CONTEXT, false, 3))
+			) {
+				indirect = ReferencedValue(p.next(0)!!)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+				try {
+					direct = c.newInstance(p.next(0)!!.child)
+				} catch (ex: InvocationTargetException) {
+					throw TLVException(ex)
+				} catch (ex: Exception) {
+					throw TLVException("Type supplied doesn't have a constructor Type(TLV).")
+				}
+			} else {
+				throw TLVException("Unexpected element in ObjectValue.")
+			}
 		}
 	}
-}

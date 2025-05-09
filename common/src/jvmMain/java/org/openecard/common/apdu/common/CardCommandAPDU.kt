@@ -595,7 +595,7 @@ open class CardCommandAPDU : CardAPDU {
 	 * @param slotHandle Slot handle
 	 * @return Transmit
 	 */
-	open fun makeTransmit(slotHandle: ByteArray?): Transmit = makeTransmit(slotHandle, ArrayList(0))
+	open fun makeTransmit(slotHandle: ByteArray?): Transmit = makeTransmit(slotHandle, listOf())
 
 	/**
 	 * Creates a new Transmit message.
@@ -606,7 +606,7 @@ open class CardCommandAPDU : CardAPDU {
 	 */
 	fun makeTransmit(
 		slotHandle: ByteArray?,
-		responses: List<ByteArray?>,
+		responses: List<ByteArray>,
 	): Transmit {
 		val apdu = InputAPDUInfoType()
 		apdu.inputAPDU = toByteArray()
@@ -648,7 +648,7 @@ open class CardCommandAPDU : CardAPDU {
 	fun transmit(
 		dispatcher: Dispatcher,
 		slotHandle: ByteArray?,
-		responses: List<ByteArray?>?,
+		responses: List<ByteArray>?,
 	): CardResponseAPDU {
 		val t: Transmit
 		var tr: TransmitResponse? = null

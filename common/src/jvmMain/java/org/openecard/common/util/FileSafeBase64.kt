@@ -91,6 +91,7 @@ class FileSafeBase64 : Base64Encoder() {
 		 * @return The number of bytes produced.
 		 * @throws java.io.IOException Thrown when writing to the stream failed.
 		 */
+		@Throws(IOException::class)
 		fun encodeData(
 			data: ByteArray,
 			out: OutputStream?,
@@ -126,6 +127,7 @@ class FileSafeBase64 : Base64Encoder() {
 		 * @return The number of bytes produced.
 		 * @throws java.io.IOException
 		 */
+		@Throws(IOException::class)
 		fun decodeData(
 			data: ByteArray,
 			out: OutputStream?,
@@ -158,6 +160,7 @@ class FileSafeBase64 : Base64Encoder() {
 		 * @return The number of bytes produced.
 		 * @throws java.io.IOException
 		 */
+		@Throws(IOException::class)
 		fun decodeData(
 			data: String?,
 			out: OutputStream?,

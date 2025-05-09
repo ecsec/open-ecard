@@ -29,7 +29,7 @@ import java.io.File
  *
  * @author Tobias Wich
  */
-class FileEndingFilter constructor(
+class FileEndingFilter(
 	fileEnding: String,
 	withDot: Boolean = true,
 ) : FileFilter {

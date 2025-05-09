@@ -25,7 +25,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.util.Promise
 import java.util.concurrent.ConcurrentSkipListMap
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Thread local dynamic context implemented as a singleton.
@@ -182,7 +182,7 @@ class DynamicContext private constructor() {
 		@JvmStatic
 		@Synchronized
 		fun remove() {
-			LOG.debug { "${"Removing DynamicContext which contains {} map entries."} ${LOCAL_MAP.get().size}" }
+			logger.debug { "${"Removing DynamicContext which contains {} map entries."} ${LOCAL_MAP.get().size}" }
 			LOCAL_MAP.remove()
 		}
 	}

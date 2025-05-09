@@ -23,13 +23,12 @@ package org.openecard.common
 
 import java.util.Locale
 
-@Suppress("ktlint:standard:enum-entry-name-case")
-
 /**
  * Taken from http://www.usb.org/developers/docs/USB_LANGIDs.pdf
  *
  * @author Tobias Wich
  */
+@Suppress("ktlint:standard:enum-entry-name-case")
 enum class USBLangID(
 	code: Int,
 ) {
@@ -191,42 +190,61 @@ enum class USBLangID(
 			val country = l.country
 
 			if (lang == Locale("de").language) {
-				return if (country == Locale("ch").country) {
-					German_Switzerland.code
-				} else if (country == Locale("at").country) {
-					German_Austria.code
-				} else if (country == Locale("li").country) {
-					German_Liechtenstein.code
-				} else if (country == Locale("lu").country) {
-					German_Luxembourg.code
-				} else {
-					German_Standard.code
+				return when (country) {
+					Locale("ch").country -> {
+						German_Switzerland.code
+					}
+					Locale("at").country -> {
+						German_Austria.code
+					}
+					Locale("li").country -> {
+						German_Liechtenstein.code
+					}
+					Locale("lu").country -> {
+						German_Luxembourg.code
+					}
+					else -> {
+						German_Standard.code
+					}
 				}
 			} else if (lang == Locale("en").language) {
-				if (country == Locale("gb").country) {
-					return English_United_Kingdom.code
-				} else if (country == Locale("us").country) {
-					return English_United_States.code
-				} else if (country == Locale("au").country) {
-					return English_Australian.code
-				} else if (country == Locale("bz").country) {
-					return English_Belize.code
-				} else if (country == Locale("ca").country) {
-					return English_Canadian.code
-				} else if (country == Locale("ie").country) {
-					return English_Ireland.code
-				} else if (country == Locale("jm").country) {
-					return English_Jamaica.code
-				} else if (country == Locale("nz").country) {
-					return English_New_Zealand.code
-				} else if (country == Locale("ph").country) {
-					return English_Philippines.code
-				} else if (country == Locale("za").country) {
-					return English_South_Africa.code
-				} else if (country == Locale("tt").country) {
-					return English_Trinidad.code
-				} else if (country == Locale("zw").country) {
-					return English_Zimbabwe.code
+				when (country) {
+					Locale("gb").country -> {
+						return English_United_Kingdom.code
+					}
+					Locale("us").country -> {
+						return English_United_States.code
+					}
+					Locale("au").country -> {
+						return English_Australian.code
+					}
+					Locale("bz").country -> {
+						return English_Belize.code
+					}
+					Locale("ca").country -> {
+						return English_Canadian.code
+					}
+					Locale("ie").country -> {
+						return English_Ireland.code
+					}
+					Locale("jm").country -> {
+						return English_Jamaica.code
+					}
+					Locale("nz").country -> {
+						return English_New_Zealand.code
+					}
+					Locale("ph").country -> {
+						return English_Philippines.code
+					}
+					Locale("za").country -> {
+						return English_South_Africa.code
+					}
+					Locale("tt").country -> {
+						return English_Trinidad.code
+					}
+					Locale("zw").country -> {
+						return English_Zimbabwe.code
+					}
 				}
 			}
 

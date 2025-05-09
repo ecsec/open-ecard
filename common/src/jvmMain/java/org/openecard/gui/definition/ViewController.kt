@@ -21,20 +21,19 @@
  */
 package org.openecard.gui.definition
 
-
 /**
  * Interface which provides the possibility to display the Settings dialog and the default view of a client implementation.
  *
  * @author Hans-Martin Haase
  */
 interface ViewController {
-    /**
-     * Display the Settings GUI of the used client implementation.
-     */
-    fun showSettingsUI()
+	/**
+	 * Display the Settings GUI of the used client implementation.
+	 */
+	fun showSettingsUI()
 
-    /**
-     * Display the default view of the client implementation.
-     */
-    fun showDefaultViewUI()
+	/**
+	 * Display the default view of the client implementation.
+	 */
+	fun showDefaultViewUI()
 }

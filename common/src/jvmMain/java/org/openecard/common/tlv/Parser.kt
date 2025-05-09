@@ -71,7 +71,7 @@ class Parser(
 		i: Int,
 		vararg tagsWithClass: Long,
 	): Boolean {
-		val lookahead = LA(i)
+		val lookahead = lookAhead(i)
 		return match(lookahead, tagsWithClass)
 	}
 
@@ -86,7 +86,7 @@ class Parser(
 		i: Int,
 		vararg tags: Tag,
 	): Boolean {
-		val lookahead = LA(i)
+		val lookahead = lookAhead(i)
 		return match(lookahead, convertTags(*tags))
 	}
 
@@ -145,7 +145,7 @@ class Parser(
 		return nextTLV
 	}
 
-	private fun LA(i: Int): TLV? {
+	private fun lookAhead(i: Int): TLV? {
 		if (next == null || i < 0) {
 			return null
 		}

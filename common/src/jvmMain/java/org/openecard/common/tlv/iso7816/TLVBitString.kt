@@ -32,6 +32,7 @@ import java.util.Arrays
  */
 open class TLVBitString
 	@JvmOverloads
+	@Throws(TLVException::class)
 	constructor(
 		tlv: TLV,
 		tagNumWithClass: Long = BITSTRING_TAG.tagNumWithClass,

@@ -31,43 +31,45 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Tobias Wich
  */
-class PrivateECKeyAttribute(
-	tlv: TLV,
-) : TLVType(tlv) {
-	private var value: Path? = null
+class PrivateECKeyAttribute
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		private var value: Path? = null
 
-	// KeyInfo sequence
-	// ECDomainParameters - Choice
-	private var implicitCA: TLV? = null // NULL
-	private var named: TLV? = null // ObjectIdentifier
-	private var specified: TLV? = null // SpecifiedECDomain
+		// KeyInfo sequence
+		// ECDomainParameters - Choice
+		private var implicitCA: TLV? = null // NULL
+		private var named: TLV? = null // ObjectIdentifier
+		private var specified: TLV? = null // SpecifiedECDomain
 
-	// PublicKeyOperations alias for Operations
-	private var operations: TLVBitString? = null
+		// PublicKeyOperations alias for Operations
+		private var operations: TLVBitString? = null
 
-	init {
-		val p = Parser(tlv.child)
+		init {
+			val p = Parser(tlv.child)
 
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			value = Path(p.next(0)!!)
-		} else {
-			throw TLVException("No value element in structure.")
-		}
-		// only match sequence not Reference (historical)
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			val p1 = Parser(p.next(0)!!.child)
-			if (p1.match(Tag(TagClass.UNIVERSAL, true, 5))) {
-				implicitCA = p1.next(0)
-			} else if (p1.match(Tag(TagClass.UNIVERSAL, true, 6))) {
-				named = p1.next(0)
-			} else if (p1.match(Tag.Companion.SEQUENCE_TAG)) {
-				specified = p1.next(0)
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				value = Path(p.next(0)!!)
 			} else {
-				throw TLVException("No parameters element in structure.")
+				throw TLVException("No value element in structure.")
 			}
-			if (p1.match(Tag(TagClass.UNIVERSAL, true, 3))) {
-				operations = TLVBitString(p1.next(0)!!, Tag(TagClass.UNIVERSAL, true, 3).tagNumWithClass)
+			// only match sequence not Reference (historical)
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				val p1 = Parser(p.next(0)!!.child)
+				if (p1.match(Tag(TagClass.UNIVERSAL, true, 5))) {
+					implicitCA = p1.next(0)
+				} else if (p1.match(Tag(TagClass.UNIVERSAL, true, 6))) {
+					named = p1.next(0)
+				} else if (p1.match(Tag.SEQUENCE_TAG)) {
+					specified = p1.next(0)
+				} else {
+					throw TLVException("No parameters element in structure.")
+				}
+				if (p1.match(Tag(TagClass.UNIVERSAL, true, 3))) {
+					operations = TLVBitString(p1.next(0)!!, Tag(TagClass.UNIVERSAL, true, 3).tagNumWithClass)
+				}
 			}
 		}
 	}
-}

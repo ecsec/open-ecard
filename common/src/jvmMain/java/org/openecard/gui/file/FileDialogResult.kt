@@ -31,10 +31,10 @@ import java.util.Collections
  *
  * @author Tobias Wich
  */
-class FileDialogResult constructor(
+class FileDialogResult(
 	selectedFiles: List<File>? = null,
 ) : Serializable {
-	private var selectedFiles: List<File>? = null
+	private var selectedFiles: List<File>
 
 	/**
 	 * Creates a result with status OK.
@@ -70,7 +70,7 @@ class FileDialogResult constructor(
 		 *
 		 * @return `true` if the dialog was cancelled and no file was selected, `false` otherwise.
 		 */
-		get() = selectedFiles!!.isEmpty()
+		get() = selectedFiles.isEmpty()
 
 	/**
 	 * Returns the list of selected files.

@@ -35,7 +35,7 @@ import java.math.BigInteger
  *
  * @author Tobias Wich
  */
-data class HandlerBuilder private constructor(
+data class HandlerBuilder(
 	private val contextHandle: ByteArray? = null,
 	private val ifdName: String? = null,
 	private val slotIdx: BigInteger? = null,
@@ -372,6 +372,42 @@ data class HandlerBuilder private constructor(
 				protectedAuthPath,
 			)
 		return b
+	}
+
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+
+		other as HandlerBuilder
+
+		if (protectedAuthPath != other.protectedAuthPath) return false
+		if (!contextHandle.contentEquals(other.contextHandle)) return false
+		if (ifdName != other.ifdName) return false
+		if (slotIdx != other.slotIdx) return false
+		if (!cardApp.contentEquals(other.cardApp)) return false
+		if (!slotHandle.contentEquals(other.slotHandle)) return false
+		if (cardType != other.cardType) return false
+		if (!cardIdentifier.contentEquals(other.cardIdentifier)) return false
+		if (protocolEndpoint != other.protocolEndpoint) return false
+		if (sessionId != other.sessionId) return false
+		if (binding != other.binding) return false
+
+		return true
+	}
+
+	override fun hashCode(): Int {
+		var result = protectedAuthPath?.hashCode() ?: 0
+		result = 31 * result + (contextHandle?.contentHashCode() ?: 0)
+		result = 31 * result + (ifdName?.hashCode() ?: 0)
+		result = 31 * result + (slotIdx?.hashCode() ?: 0)
+		result = 31 * result + (cardApp?.contentHashCode() ?: 0)
+		result = 31 * result + (slotHandle?.contentHashCode() ?: 0)
+		result = 31 * result + (cardType?.hashCode() ?: 0)
+		result = 31 * result + (cardIdentifier?.contentHashCode() ?: 0)
+		result = 31 * result + (protocolEndpoint?.hashCode() ?: 0)
+		result = 31 * result + (sessionId?.hashCode() ?: 0)
+		result = 31 * result + (binding?.hashCode() ?: 0)
+		return result
 	}
 
 	companion object {

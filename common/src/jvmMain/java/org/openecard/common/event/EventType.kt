@@ -28,7 +28,7 @@ package org.openecard.common.event
  * @author Benedikt Biallowons
  */
 enum class EventType(
-	val eventTypeIdentifier: String
+	val eventTypeIdentifier: String,
 ) {
 	CARD_INSERTED("http://openecard.org/event/card_inserted"),
 	CARD_REMOVED("http://openecard.org/event/card_removed"),

@@ -32,26 +32,28 @@ import org.openecard.common.tlv.TagClass
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class ReferencedValue(
-	tlv: TLV,
-) : TLVType(tlv) {
-	var path: Path? = null
-		private set
-	var uRL: TLV? = null
-		private set
+class ReferencedValue
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		var path: Path? = null
+			private set
+		var uRL: TLV? = null
+			private set
 
-	init {
-		val p = Parser(tlv)
+		init {
+			val p = Parser(tlv)
 
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			path = Path(p.next(0)!!)
-		} else if (p.match(Tag(TagClass.UNIVERSAL, true, 19)) ||
-			p.match(Tag(TagClass.UNIVERSAL, true, 22)) ||
-			p.match(Tag(TagClass.CONTEXT, false, 3))
-		) {
-			uRL = p.next(0) // TODO: create URL type
-		} else {
-			throw TLVException("Unexpected element in ObjectValue.")
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				path = Path(p.next(0)!!)
+			} else if (p.match(Tag(TagClass.UNIVERSAL, true, 19)) ||
+				p.match(Tag(TagClass.UNIVERSAL, true, 22)) ||
+				p.match(Tag(TagClass.CONTEXT, false, 3))
+			) {
+				uRL = p.next(0) // TODO: create URL type
+			} else {
+				throw TLVException("Unexpected element in ObjectValue.")
+			}
 		}
 	}
-}

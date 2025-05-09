@@ -36,92 +36,94 @@ import java.lang.reflect.InvocationTargetException
  * @author Hans-Martin Haase
  * @param <AuthAttributes>
 </AuthAttributes> */
-class GenericAuthenticationObject<AuthAttributes>(
-	tlv: TLV,
-	clazz: Class<AuthAttributes>,
-) {
-	/**
-	 * Gets the object itself as TLV.
-	 *
-	 * @return The object as TLV.
+class GenericAuthenticationObject<AuthAttributes>
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+		clazz: Class<AuthAttributes>,
+	) {
+		/**
+		 * Gets the object itself as TLV.
+		 *
+		 * @return The object as TLV.
 
-	 * The TLV which represents this object
-	 */
-	val genericAuthenticationObjectTLV: TLV
+		 * The TLV which represents this object
+		 */
+		val genericAuthenticationObjectTLV: TLV
 
-	/**
-	 * Gets the [CommonObjectAttributes] of the object.
-	 *
-	 * @return The CommonObjectAttribute of the object.
-	 */
-	var commonObjectAttributes: CommonObjectAttributes? = null
-		private set
+		/**
+		 * Gets the [CommonObjectAttributes] of the object.
+		 *
+		 * @return The CommonObjectAttribute of the object.
+		 */
+		var commonObjectAttributes: CommonObjectAttributes? = null
+			private set
 
-	/**
-	 * Gets the class attributes of this object.
-	 *
-	 * @return The class attributes of the object as TLV.
-	 */
-	var classAttributes: TLV? = null // CommonAuthObjectAttributes
-		private set
+		/**
+		 * Gets the class attributes of this object.
+		 *
+		 * @return The class attributes of the object as TLV.
+		 */
+		var classAttributes: TLV? = null // CommonAuthObjectAttributes
+			private set
 
-	/**
-	 * Gets the sub class attributes of the object.
-	 *
-	 * @return The sub class attributes as TLV.
-	 */
-	var subClassAttributes: TLV? = null // NULL
-		private set
+		/**
+		 * Gets the sub class attributes of the object.
+		 *
+		 * @return The sub class attributes as TLV.
+		 */
+		var subClassAttributes: TLV? = null // NULL
+			private set
 
-	/**
-	 * Gets the generic object of this datatype.
-	 * The returned data type depends on the specification in the constructor.
-	 *
-	 * @return The authentication attributes of the object.
-	 */
-	var authAttributes: AuthAttributes? = null // AuthObjectAttributes
-		private set
+		/**
+		 * Gets the generic object of this datatype.
+		 * The returned data type depends on the specification in the constructor.
+		 *
+		 * @return The authentication attributes of the object.
+		 */
+		var authAttributes: AuthAttributes? = null // AuthObjectAttributes
+			private set
 
-	/**
-	 * The constructor parses the input TLV and instantiates the generic part of the class.
-	 *
-	 * @param tlv The [TLV] which will be used to create the object.
-	 * @param clazz Class type of the generic attribute.
-	 * @throws TLVException
-	 */
-	init {
-		val c: Constructor<AuthAttributes>
-		try {
-			c = clazz.getConstructor(TLV::class.java)
-		} catch (ex: Exception) {
-			throw TLVException("AuthAttributes supplied doesn't have a constructor AuthAttributes(TLV).")
-		}
-
-		this.genericAuthenticationObjectTLV = tlv
-
-		// parse the tlv
-		val p = Parser(tlv.child)
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			commonObjectAttributes = CommonObjectAttributes(p.next(0)!!)
-		} else {
-			throw TLVException("CommonObjectAttributes not present.")
-		}
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			classAttributes = p.next(0)
-		} else {
-			throw TLVException("CommonObjectAttributes not present.")
-		}
-		if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-			subClassAttributes = p.next(0)!!.child
-		}
-		if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+		/**
+		 * The constructor parses the input TLV and instantiates the generic part of the class.
+		 *
+		 * @param tlv The [TLV] which will be used to create the object.
+		 * @param clazz Class type of the generic attribute.
+		 * @throws TLVException
+		 */
+		init {
+			val c: Constructor<AuthAttributes>
 			try {
-				authAttributes = c.newInstance(p.next(0)!!.child)
-			} catch (ex: InvocationTargetException) {
-				throw TLVException(ex)
+				c = clazz.getConstructor(TLV::class.java)
 			} catch (ex: Exception) {
 				throw TLVException("AuthAttributes supplied doesn't have a constructor AuthAttributes(TLV).")
 			}
+
+			this.genericAuthenticationObjectTLV = tlv
+
+			// parse the tlv
+			val p = Parser(tlv.child)
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				commonObjectAttributes = CommonObjectAttributes(p.next(0)!!)
+			} else {
+				throw TLVException("CommonObjectAttributes not present.")
+			}
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				classAttributes = p.next(0)
+			} else {
+				throw TLVException("CommonObjectAttributes not present.")
+			}
+			if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+				subClassAttributes = p.next(0)!!.child
+			}
+			if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+				try {
+					authAttributes = c.newInstance(p.next(0)!!.child)
+				} catch (ex: InvocationTargetException) {
+					throw TLVException(ex)
+				} catch (ex: Exception) {
+					throw TLVException("AuthAttributes supplied doesn't have a constructor AuthAttributes(TLV).")
+				}
+			}
 		}
 	}
-}

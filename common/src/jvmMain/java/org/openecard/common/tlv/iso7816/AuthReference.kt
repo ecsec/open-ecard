@@ -72,7 +72,7 @@ class AuthReference(
 		}
 
 		if (p.match(Tag(TagClass.UNIVERSAL, true, 2))) {
-			securityEnvironmentId = toInteger(p.next(0)!!.value!!)
+			securityEnvironmentId = toInteger(p.next(0)!!.value)
 		}
 	}
 }

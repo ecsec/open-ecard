@@ -21,43 +21,49 @@
  */
 package org.openecard.common.tlv.iso7816
 
-import org.openecard.common.tlv.*
+import org.openecard.common.tlv.Parser
+import org.openecard.common.tlv.TLV
+import org.openecard.common.tlv.TLVException
+import org.openecard.common.tlv.Tag
+import org.openecard.common.tlv.TagClass
 import org.openecard.common.util.ByteUtils.toInteger
 
 /**
  *
  * @author Tobias Wich
  */
-class Path(
-	private val tlv: TLV,
-) {
-	private var efIdOrPath: ByteArray?
+class Path
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) {
+		private var efIdOrPath: ByteArray?
 
-	// optional
-	var index: Int?
-		private set
+		// optional
+		var index: Int?
+			private set
 
-	// optional
-	var length: Int?
-		private set
+		// optional
+		var length: Int?
+			private set
 
-	init {
-		val p = Parser(tlv.child)
+		init {
+			val p = Parser(tlv.child)
 
-		if (p.match(Tag(TagClass.UNIVERSAL, true, 4))) {
-			efIdOrPath = p.next(0)!!.value
-		} else {
-			throw TLVException("No efIdOrPath given.")
+			if (p.match(Tag(TagClass.UNIVERSAL, true, 4))) {
+				efIdOrPath = p.next(0)!!.value
+			} else {
+				throw TLVException("No efIdOrPath given.")
+			}
+			index = null
+			length = null
+			if (p.match(Tag(TagClass.UNIVERSAL, true, 2)) && p.matchLA(1, Tag(TagClass.CONTEXT, true, 0))) {
+				index = toInteger(p.next(0)!!.value)
+				length = toInteger(p.next(0)!!.value)
+			}
 		}
-		index = null
-		length = null
-		if (p.match(Tag(TagClass.UNIVERSAL, true, 2)) && p.matchLA(1, Tag(TagClass.CONTEXT, true, 0))) {
-			index = toInteger(p.next(0)!!.value!!)
-			length = toInteger(p.next(0)!!.value!!)
-		}
+
+		constructor(data: ByteArray) : this(TLV.fromBER(data))
+
+		fun efIdOrPath(): ByteArray? = efIdOrPath
 	}
-
-	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
-
-	fun efIdOrPath(): ByteArray? = efIdOrPath
-}

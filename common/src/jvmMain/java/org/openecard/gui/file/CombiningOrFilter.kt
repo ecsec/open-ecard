@@ -34,7 +34,7 @@ import java.util.Arrays
 class CombiningOrFilter(
 	filters: List<FileFilter>,
 ) : FileFilter {
-	private var filters: List<FileFilter>? = null
+	private var filters: List<FileFilter>
 	override val description: String
 
 	/**
@@ -43,7 +43,7 @@ class CombiningOrFilter(
 	 *
 	 * @param filters Filters to be combined.
 	 */
-	constructor(vararg filters: FileFilter?) : this(Arrays.asList<FileFilter>(*filters))
+	constructor(vararg filters: FileFilter) : this(listOf<FileFilter>(*filters))
 
 	/**
 	 * Creates a new CombiningFilter.
@@ -59,7 +59,7 @@ class CombiningOrFilter(
 		}
 
 		val sb = StringBuilder(32)
-		val it = this.filters!!.iterator()
+		val it = this.filters.iterator()
 		while (it.hasNext()) {
 			sb.append(it.next().description)
 			if (it.hasNext()) {
@@ -70,7 +70,7 @@ class CombiningOrFilter(
 	}
 
 	override fun accept(f: File): Boolean {
-		for (next in filters!!) {
+		for (next in filters) {
 			if (next.accept(f)) {
 				return true
 			}

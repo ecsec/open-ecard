@@ -31,7 +31,7 @@ class FileDescriptorByte(
 ) {
 	private val isFD: Boolean
 		// test msb
-		get() = if (((data.toInt() shr 7) and 0x01) == 1) false else true
+		get() = ((data.toInt() shr 7) and 0x01) != 1
 
 	fun shareable(): Boolean {
 		if (isFD) {

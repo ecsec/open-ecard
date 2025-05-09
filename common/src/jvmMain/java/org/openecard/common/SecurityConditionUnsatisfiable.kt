@@ -23,21 +23,20 @@ package org.openecard.common
 
 import org.openecard.common.ECardConstants.Minor
 
-
 /**
  * SAL exception stating that an element of the token could not be accessed due to security restrictions.
  *
  * @author Tobias Wich
  */
 class SecurityConditionUnsatisfiable : ECardException {
-    constructor(msg: String?) : super(makeOasisResultTraitImpl(Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), null)
+	constructor(msg: String?) : super(makeOasisResultTraitImpl(Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), null)
 
-    constructor(
-        msg: String?,
-        cause: Throwable?
-    ) : super(makeOasisResultTraitImpl(Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), cause)
+	constructor(
+		msg: String?,
+		cause: Throwable?,
+	) : super(makeOasisResultTraitImpl(Minor.SAL.SECURITY_CONDITION_NOT_SATISFIED, msg), cause)
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	companion object {
+		private const val serialVersionUID = 1L
+	}
 }

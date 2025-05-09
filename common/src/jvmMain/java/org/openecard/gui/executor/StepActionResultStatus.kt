@@ -21,12 +21,14 @@
  */
 package org.openecard.gui.executor
 
-
 /**
  * Result status of step actions.
  *
  * @author Tobias Wich
  */
 enum class StepActionResultStatus {
-    NEXT, BACK, REPEAT, CANCEL
+	NEXT,
+	BACK,
+	REPEAT,
+	CANCEL,
 }

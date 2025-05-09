@@ -34,6 +34,8 @@ import java.nio.CharBuffer
 import java.nio.charset.Charset
 import java.util.Arrays
 
+private val logger = KotlinLogging.logger { }
+
 /**
  * Implements convenience methods for dealing with PINs.
  *
@@ -41,8 +43,6 @@ import java.util.Arrays
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-
-private val LOG = KotlinLogging.logger { }
 
 object PINUtils {
 	/**
@@ -76,6 +76,7 @@ object PINUtils {
 		transmit.inputAPDUInfo.add(pinApdu)
 		return transmit
 	}
+
 	@JvmStatic
 	fun encodePin(
 		rawPin: CharArray,
@@ -115,7 +116,7 @@ object PINUtils {
 				else -> {
 					val msg = "Unsupported PIN encoding requested."
 					val ex = UtilException(Minor.IFD.IO.UNKNOWN_PIN_FORMAT, msg)
-					LOG.error(ex) { ex.message }
+					logger.error(ex) { ex.message }
 					throw ex
 				}
 			}
@@ -125,6 +126,7 @@ object PINUtils {
 			throw UtilException(ex)
 		}
 	}
+
 	@JvmStatic
 	fun createPinMask(attributes: PasswordAttributesType): ByteArray {
 		// extract attributes
@@ -270,7 +272,7 @@ object PINUtils {
 			return (c.code - '0'.code).toByte()
 		} else {
 			val ex = UtilException("Entered PIN contains invalid characters.")
-			LOG.error(ex) { ex.message }
+			logger.error(ex) { ex.message }
 			throw ex
 		}
 	}

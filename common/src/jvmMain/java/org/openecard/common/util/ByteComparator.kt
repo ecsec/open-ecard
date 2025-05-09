@@ -27,31 +27,34 @@ package org.openecard.common.util
  *
  * @author Tobias Wich
  */
-class ByteComparator : Comparator<ByteArray?> {
-    override fun compare(o1: ByteArray?, o2: ByteArray?): Int {
-        if (o1 == o2) {
-            return 0
-        }
-        if (o1 == null) {
-            return -1
-        }
-        if (o2 == null) {
-            return 1
-        }
-        if (o1.size != o2.size) {
-            return o1.size - o2.size
-        }
+class ByteComparator : Comparator<ByteArray> {
+	override fun compare(
+		o1: ByteArray?,
+		o2: ByteArray?,
+	): Int {
+		if (o1.contentEquals(o2)) {
+			return 0
+		}
+		if (o1 == null) {
+			return -1
+		}
+		if (o2 == null) {
+			return 1
+		}
+		if (o1.size != o2.size) {
+			return o1.size - o2.size
+		}
 
-        for (i in o1.indices) {
-            // use int so no overflow is possible
-            val b1 = o1[i].toInt()
-            val b2 = o2[i].toInt()
-            if (b1 != b2) {
-                return b1 - b2
-            }
-        }
+		for (i in o1.indices) {
+			// use int so no overflow is possible
+			val b1 = o1[i].toInt()
+			val b2 = o2[i].toInt()
+			if (b1 != b2) {
+				return b1 - b2
+			}
+		}
 
-        // equal arrays
-        return 0
-    }
+		// equal arrays
+		return 0
+	}
 }

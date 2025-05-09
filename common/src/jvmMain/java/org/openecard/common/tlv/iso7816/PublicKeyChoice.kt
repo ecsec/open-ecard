@@ -23,6 +23,7 @@ package org.openecard.common.tlv.iso7816
 
 import org.openecard.common.tlv.Parser
 import org.openecard.common.tlv.TLV
+import org.openecard.common.tlv.TLVException
 import org.openecard.common.tlv.Tag
 import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
 import org.openecard.common.tlv.TagClass
@@ -31,57 +32,59 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Hans-Martin Haase
  */
-class PublicKeyChoice(
-	tlv: TLV,
-) : TLVType(tlv) {
-	/**
-	 * Gets the corresponding TLV object to the element name.
-	 *
-	 * @return A TLV object containing a PublicKeyObject from ISO7816-15
-	 */
-	var elementValue: GenericPublicKeyObject<TLV>? = null
-		private set
-	private var extension: TLV? = null
+class PublicKeyChoice
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		/**
+		 * Gets the corresponding TLV object to the element name.
+		 *
+		 * @return A TLV object containing a PublicKeyObject from ISO7816-15
+		 */
+		var elementValue: GenericPublicKeyObject<TLV>? = null
+			private set
+		private var extension: TLV? = null
 
-	/**
-	 * The method returns the name of the key type which is contained in the PublicKeyChoice object.
-	 *
-	 * @return One of the following strings will be returned: <br></br>
-	 * - publicRSAKey<br></br>
-	 * - publicECKey<br></br>
-	 * - publicDHKey<br></br>
-	 * - publicDSAKey<br></br>
-	 * - publicKEAKey<br></br>
-	 * - genericPublicKey<br></br>
-	 * - extension
-	 */
-	var elementName: String? = null
-		private set
+		/**
+		 * The method returns the name of the key type which is contained in the PublicKeyChoice object.
+		 *
+		 * @return One of the following strings will be returned: <br></br>
+		 * - publicRSAKey<br></br>
+		 * - publicECKey<br></br>
+		 * - publicDHKey<br></br>
+		 * - publicDSAKey<br></br>
+		 * - publicKEAKey<br></br>
+		 * - genericPublicKey<br></br>
+		 * - extension
+		 */
+		var elementName: String? = null
+			private set
 
-	init {
-		val p = Parser(tlv)
+		init {
+			val p = Parser(tlv)
 
-		if (p.match(SEQUENCE_TAG)) {
-			elementName = "publicRSAKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-			elementName = "publicECKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
-			elementName = "publicDHKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
-			elementName = "publicDSAKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 3))) {
-			elementName = "publicKEAKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 4))) {
-			elementName = "genericPublicKey"
-			elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
-		} else {
-			elementName = "extension"
-			extension = p.next(0)
+			if (p.match(SEQUENCE_TAG)) {
+				elementName = "publicRSAKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+				elementName = "publicECKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+				elementName = "publicDHKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
+				elementName = "publicDSAKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 3))) {
+				elementName = "publicKEAKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 4))) {
+				elementName = "genericPublicKey"
+				elementValue = GenericPublicKeyObject(p.next(0)!!, TLV::class.java)
+			} else {
+				elementName = "extension"
+				extension = p.next(0)
+			}
 		}
 	}
-}

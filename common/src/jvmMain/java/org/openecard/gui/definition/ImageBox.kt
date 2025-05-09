@@ -23,7 +23,7 @@ package org.openecard.gui.definition
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * GUI component class which represents an image.
@@ -85,7 +85,7 @@ class ImageBox :
 
 	override fun copyContentFrom(origin: InfoUnit) {
 		if (this.javaClass != origin.javaClass) {
-			LOG.warn { "${"Trying to copy content from type {} to type {}."} ${origin.javaClass} ${this.javaClass}" }
+			logger.warn { "${"Trying to copy content from type {} to type {}."} ${origin.javaClass} ${this.javaClass}" }
 			return
 		}
 		val other = origin as ImageBox

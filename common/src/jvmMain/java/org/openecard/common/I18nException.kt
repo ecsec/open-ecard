@@ -21,100 +21,99 @@
  */
 package org.openecard.common
 
-
 /**
  * Localized exception based on I18n based translation.
  *
  * @author Tobias Wich
  */
 abstract class I18nException : Exception {
-    private val localMsg: String?
+	private val localMsg: String?
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param message Untranslated message.
-     */
-    constructor(message: String?) : super(message) {
-        this.localMsg = null
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param message Untranslated message.
+	 */
+	constructor(message: String?) : super(message) {
+		this.localMsg = null
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param cause Exception causing the problem.
-     */
-    constructor(cause: Throwable) : super(cause) {
-        this.localMsg = cause.localizedMessage
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param cause Exception causing the problem.
+	 */
+	constructor(cause: Throwable) : super(cause) {
+		this.localMsg = cause.localizedMessage
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param message Untranslated message.
-     * @param cause Exception causing the problem.
-     */
-    constructor(message: String?, cause: Throwable?) : super(cause) {
-        this.localMsg = null
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param message Untranslated message.
+	 * @param cause Exception causing the problem.
+	 */
+	constructor(message: String?, cause: Throwable?) : super(cause) {
+		this.localMsg = null
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     */
-    constructor(lang: I18n, key: String, vararg params: Any?) : super(lang.getOriginalMessage(key, *params)) {
-        this.localMsg = lang.translationForKey(key, *params)
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 */
+	constructor(lang: I18n, key: String, vararg params: Any?) : super(lang.getOriginalMessage(key, *params)) {
+		this.localMsg = lang.translationForKey(key, *params)
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     * @param cause Exception causing the problem.
-     */
-    constructor(lang: I18n, key: String, cause: Throwable?, vararg params: Any?) : super(
-        lang.getOriginalMessage(
-            key,
-            *params
-        ), cause
-    ) {
-        this.localMsg = lang.translationForKey(key, *params)
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 * @param cause Exception causing the problem.
+	 */
+	constructor(lang: I18n, key: String, cause: Throwable?, vararg params: Any?) : super(
+		lang.getOriginalMessage(
+			key,
+			*params,
+		),
+		cause,
+	) {
+		this.localMsg = lang.translationForKey(key, *params)
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     */
-    constructor(lang: I18n, key: I18nKey, vararg params: Any?) : super(lang.getOriginalMessage(key, *params)) {
-        this.localMsg = lang.translationForKey(key, *params)
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 */
+	constructor(lang: I18n, key: I18nKey, vararg params: Any?) : super(lang.getOriginalMessage(key, *params)) {
+		this.localMsg = lang.translationForKey(key, *params)
+	}
 
-    /**
-     * Creates an I18nException.
-     *
-     * @param lang I18n instance providing the translation database.
-     * @param key Key which is fed into the translation database.
-     * @param params Optional parameters for the translation.
-     * @param cause Exception causing the problem.
-     */
-    constructor(lang: I18n, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
-        lang.getOriginalMessage(
-            key,
-            *params
-        ), cause
-    ) {
-        this.localMsg = lang.translationForKey(key, *params)
-    }
+	/**
+	 * Creates an I18nException.
+	 *
+	 * @param lang I18n instance providing the translation database.
+	 * @param key Key which is fed into the translation database.
+	 * @param params Optional parameters for the translation.
+	 * @param cause Exception causing the problem.
+	 */
+	constructor(lang: I18n, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
+		lang.getOriginalMessage(
+			key,
+			*params,
+		),
+		cause,
+	) {
+		this.localMsg = lang.translationForKey(key, *params)
+	}
 
-    override fun getLocalizedMessage(): String {
-        return localMsg ?: super.getLocalizedMessage()
-    }
+	override fun getLocalizedMessage(): String = localMsg ?: super.getLocalizedMessage()
 }

@@ -31,44 +31,46 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Hans-Martin Haase
  */
-class PrivateRSAKeyAttributes(
-	tlv: TLV,
-) : TLVType(tlv) {
-	var value: Path? = null
-		private set
-	var modulusLength: ByteArray?
-		private set
+class PrivateRSAKeyAttributes
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		var value: Path? = null
+			private set
+		var modulusLength: ByteArray?
+			private set
 
-	// KeyInfo sequence
-	var parameters: TLV? = null // NULL, so not interesting
-		private set
-	var operations: TLVBitString? = null
-		private set
+		// KeyInfo sequence
+		var parameters: TLV? = null // NULL, so not interesting
+			private set
+		var operations: TLVBitString? = null
+			private set
 
-	init {
-		val p = Parser(tlv.child)
+		init {
+			val p = Parser(tlv.child)
 
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			value = Path(p.next(0)!!)
-		} else {
-			throw TLVException("No value element in structure.")
-		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
-			modulusLength = p.next(0)!!.value
-		} else {
-			throw TLVException("No modulusLength element in structure.")
-		}
-		// only match sequence not Reference (historical)
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
-			val p1 = Parser(p.next(0)!!.child)
-			if (p1.match(Tag.Companion.NULL_TAG)) {
-				parameters = p1.next(0)
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				value = Path(p.next(0)!!)
 			} else {
-				throw TLVException("No parameters element in structure.")
+				throw TLVException("No value element in structure.")
 			}
-			if (p1.match(Tag(TagClass.UNIVERSAL, true, 3))) {
-				operations = TLVBitString(p1.next(0)!!, Tag(TagClass.UNIVERSAL, true, 3).tagNumWithClass)
+			if (p.match(Tag.INTEGER_TAG)) {
+				modulusLength = p.next(0)!!.value
+			} else {
+				throw TLVException("No modulusLength element in structure.")
+			}
+			// only match sequence not Reference (historical)
+			if (p.match(Tag.SEQUENCE_TAG)) {
+				val p1 = Parser(p.next(0)!!.child)
+				if (p1.match(Tag.NULL_TAG)) {
+					parameters = p1.next(0)
+				} else {
+					throw TLVException("No parameters element in structure.")
+				}
+				if (p1.match(Tag(TagClass.UNIVERSAL, true, 3))) {
+					operations = TLVBitString(p1.next(0)!!, Tag(TagClass.UNIVERSAL, true, 3).tagNumWithClass)
+				}
 			}
 		}
 	}
-}

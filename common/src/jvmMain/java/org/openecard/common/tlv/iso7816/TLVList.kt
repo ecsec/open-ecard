@@ -34,8 +34,10 @@ import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
 open class TLVList {
 	protected val tlv: TLV
 
+	@Throws(TLVException::class)
 	protected constructor(tlv: TLV, expectedTag: Tag) : this(tlv, expectedTag.tagNumWithClass)
 
+	@Throws(TLVException::class)
 	constructor(tlv: TLV, expectedTagNum: Long = 0x61) {
 		if (tlv.tagNumWithClass != expectedTagNum) {
 			throw TLVException("Not of type TLVList.")
@@ -56,6 +58,7 @@ open class TLVList {
 		}
 	}
 
+	@Throws(TLVException::class)
 	constructor(data: ByteArray) : this(fromBER(data))
 
 	val content: List<TLV>

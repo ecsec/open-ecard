@@ -119,7 +119,7 @@ object CardUtils {
 		dispatcher: Dispatcher?,
 		slotHandle: ByteArray?,
 		fileIdOrPath: ByteArray,
-		responses: MutableList<ByteArray?>?,
+		responses: MutableList<ByteArray>?,
 		resultType: FileControlParameters,
 	): CardResponseAPDU {
 		var responses = responses

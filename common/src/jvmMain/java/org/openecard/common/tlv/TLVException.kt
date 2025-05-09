@@ -21,19 +21,14 @@
  */
 package org.openecard.common.tlv
 
-
 /**
  *
  * @author Tobias Wich
  */
 class TLVException : Exception {
-    constructor(msg: String?) : super(msg)
+	constructor(msg: String?) : super(msg)
 
-    constructor(t: Throwable?) : super(t)
+	constructor(t: Throwable?) : super(t)
 
-    constructor(msg: String?, t: Throwable?) : super(msg, t)
-
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	constructor(msg: String?, t: Throwable?) : super(msg, t)
 }

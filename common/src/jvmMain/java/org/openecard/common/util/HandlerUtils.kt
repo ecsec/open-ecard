@@ -183,10 +183,11 @@ class HandlerUtils {
 				obj::class.memberFunctions.firstOrNull {
 					it.name == methodName
 				}
-			if (getter != null) {
-				return getter.call(obj) as? T
+			return if (getter != null) {
+				@Suppress("UNCHECKED_CAST")
+				getter.call(obj) as? T?
 			} else {
-				return null
+				null
 			}
 		}
 

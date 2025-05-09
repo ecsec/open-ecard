@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.message
 
-
 /**
  * Type of the messagebox.
  * Controls the type of the messagebox such as error, or warning messages.
@@ -29,18 +28,18 @@ package org.openecard.gui.message
  * @author Tobias Wich
  */
 enum class DialogType {
-    /** Used for error messages.  */
-    ERROR_MESSAGE,
+	/** Used for error messages.  */
+	ERROR_MESSAGE,
 
-    /** Used for information messages.  */
-    INFORMATION_MESSAGE,
+	/** Used for information messages.  */
+	INFORMATION_MESSAGE,
 
-    /** Used for warning messages.  */
-    WARNING_MESSAGE,
+	/** Used for warning messages.  */
+	WARNING_MESSAGE,
 
-    /** Used for questions.  */
-    QUESTION_MESSAGE,
+	/** Used for questions.  */
+	QUESTION_MESSAGE,
 
-    /** No icon is used.  */
-    PLAIN_MESSAGE
+	/** No icon is used.  */
+	PLAIN_MESSAGE,
 }

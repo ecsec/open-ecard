@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.message
 
-
 /**
  * Return type of the messagebox.
  * Indicates which button was pressed to exit the message box.
@@ -29,12 +28,12 @@ package org.openecard.gui.message
  * @author Tobias Wich
  */
 enum class ReturnType {
-    /** Return value if the dialog finished with a user acknowledge.  */
-    OK,
+	/** Return value if the dialog finished with a user acknowledge.  */
+	OK,
 
-    /** Return value if the dialog finished with a user deny.  */
-    NO,
+	/** Return value if the dialog finished with a user deny.  */
+	NO,
 
-    /** Return value if the dialog was cancelled or otherwise aborted.  */
-    CANCEL,
+	/** Return value if the dialog was cancelled or otherwise aborted.  */
+	CANCEL,
 }

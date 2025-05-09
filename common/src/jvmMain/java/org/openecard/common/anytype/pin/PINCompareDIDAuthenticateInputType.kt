@@ -24,7 +24,9 @@ package org.openecard.common.anytype.pin
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateInputType
 import org.openecard.common.anytype.AuthDataMap
-import java.util.*
+import java.util.Arrays
+import javax.xml.parsers.ParserConfigurationException
+import kotlin.jvm.Throws
 
 /**
  * Implements the PINCompareDIDAuthenticateInputType.
@@ -33,66 +35,67 @@ import java.util.*
  * @author Dirk Petrautzki
  * @author Tobias Wich
  */
-class PINCompareDIDAuthenticateInputType(data: DIDAuthenticationDataType) {
-    private val authMap = AuthDataMap(data)
-    private var pin: CharArray?
+class PINCompareDIDAuthenticateInputType
+	/**
+	 * Creates a new PINCompareDIDAuthenticateInputType.
+	 *
+	 * @param data DIDAuthenticationDataType
+	 * @throws ParserConfigurationException
+	 */
+	@Throws(ParserConfigurationException::class)
+	constructor(
+		data: DIDAuthenticationDataType,
+	) {
+		private val authMap = AuthDataMap(data)
+		private var pin: CharArray?
 
-    /**
-     * Creates a new PINCompareDIDAuthenticateInputType.
-     *
-     * @param data DIDAuthenticationDataType
-     * @throws ParserConfigurationException
-     */
-    init {
-        // Optional contents
-        val tmpPin = authMap.getContentAsString("Pin")
-        pin = tmpPin?.toCharArray() ?: CharArray(0)
-    }
+		init {
+			// Optional contents
+			val tmpPin = authMap.getContentAsString("Pin")
+			pin = tmpPin?.toCharArray() ?: CharArray(0)
+		}
 
-    var pIN: CharArray?
-        /**
-         * Returns the PIN.
-         *
-         * @return PIN
-         */
-        get() = pin!!.clone()
-        set(pin) {
-            if (this.pin != null) {
-                Arrays.fill(this.pin, ' ')
-            }
-            if (pin != null) {
-                this.pin = pin.clone()
-            } else {
-                this.pin = null
-            }
-        }
+		var pIN: CharArray?
+			/**
+			 * Returns the PIN.
+			 *
+			 * @return PIN
+			 */
+			get() = pin?.clone()
+			set(pin) {
+				val oldPin = this.pin
+				if (oldPin != null) {
+					Arrays.fill(oldPin, ' ')
+				}
+				this.pin = pin?.clone()
+			}
 
-    val outputType: PINCompareDIDAuthenticateOutputType
-        /**
-         * Returns a new PINCompareDIDAuthenticateOutputType.
-         *
-         * @return PINCompareDIDAuthenticateOutputType
-         */
-        get() = PINCompareDIDAuthenticateOutputType(authMap)
+		val outputType: PINCompareDIDAuthenticateOutputType
+			/**
+			 * Returns a new PINCompareDIDAuthenticateOutputType.
+			 *
+			 * @return PINCompareDIDAuthenticateOutputType
+			 */
+			get() = PINCompareDIDAuthenticateOutputType(authMap)
 
-    val authDataType: PinCompareDIDAuthenticateInputType
-        get() {
-            val pinCompareOutput = PinCompareDIDAuthenticateInputType()
-            val authResponse =
-				authMap.createResponse(pinCompareOutput)
-            if (pin != null) {
-                // NOTE: no way to use char[] in XML DOM, so PIN can not be deleted from memory afterwards
-                authResponse.addElement(
-                    ISO_NS,
-                    "Pin",
-                    String(pin!!)
-                )
-            }
+		val authDataType: PinCompareDIDAuthenticateInputType
+			get() {
+				val pinCompareOutput = PinCompareDIDAuthenticateInputType()
+				val authResponse =
+					authMap.createResponse(pinCompareOutput)
+				if (pin != null) {
+					// NOTE: no way to use char[] in XML DOM, so PIN can not be deleted from memory afterwards
+					authResponse.addElement(
+						ISO_NS,
+						"Pin",
+						String(pin!!),
+					)
+				}
 
-            return authResponse.response
-        }
+				return authResponse.response
+			}
 
-    companion object {
-        private const val ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema"
-    }
-}
+		companion object {
+			private const val ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema"
+		}
+	}

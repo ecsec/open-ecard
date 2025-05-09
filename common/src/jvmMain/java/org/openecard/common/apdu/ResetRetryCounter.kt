@@ -25,6 +25,11 @@ import org.openecard.common.apdu.common.CardCommandAPDU
 import org.openecard.common.util.ByteUtils
 
 /**
+ * RESET RETRY COUNTER command instruction byte
+ */
+private const val RESET_RETRY_COUNTER_INS = 0x2C.toByte()
+
+/**
  * RESET RETRY COUNTER command
  * See ISO/IEC 7816-4 Section 7.5.10
  *
@@ -106,11 +111,4 @@ class ResetRetryCounter : CardCommandAPDU {
 		 * `FALSE`.
 		 */
 		get() = p1 == 0x01.toByte()
-
-	companion object {
-		/**
-		 * RESET RETRY COUNTER command instruction byte
-		 */
-		private const val RESET_RETRY_COUNTER_INS = 0x2C.toByte()
-	}
 }

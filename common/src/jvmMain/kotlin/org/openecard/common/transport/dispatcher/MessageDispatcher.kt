@@ -39,7 +39,7 @@ import java.lang.reflect.Modifier
 import java.util.TreeMap
 import java.util.TreeSet
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implementation of the `Dispatcher` interface.
@@ -94,7 +94,7 @@ class MessageDispatcher : Dispatcher {
 		val handle = HandlerUtils.extractHandle(req)
 		if (disp != null && req is RequestType) {
 			val startEvt = ApiCallEventObject<RequestType, ResponseType>(handle, req)
-			LOG.debug { "Sending API_CALL_STARTED event." }
+			logger.debug { "Sending API_CALL_STARTED event." }
 			disp.notify(EventType.API_CALL_STARTED, startEvt)
 		}
 
@@ -103,7 +103,7 @@ class MessageDispatcher : Dispatcher {
 			val s = getService(reqClass)
 			val serviceImpl = getServiceImpl(s)
 
-			LOG.debug { "Delivering message of type: ${req.javaClass.getName()}" }
+			logger.debug { "Delivering message of type: ${req.javaClass.getName()}" }
 
 			val result = s.invoke(serviceImpl, req)
 
@@ -111,7 +111,7 @@ class MessageDispatcher : Dispatcher {
 			if (disp != null && req is RequestType && result is ResponseType) {
 				val finEvt = ApiCallEventObject<RequestType, ResponseType>(handle, req)
 				finEvt.response = result
-				LOG.debug { "Sending API_CALL_FINISHED event." }
+				logger.debug { "Sending API_CALL_FINISHED event." }
 				disp.notify(EventType.API_CALL_FINISHED, finEvt)
 			}
 
@@ -175,11 +175,11 @@ class MessageDispatcher : Dispatcher {
 
 				// try to read class from annotation, if not take return value
 				val methodAnnotation = nextAccessor.getAnnotation(Dispatchable::class.java)
-				val returnType = methodAnnotation.interfaceClass.java
+				val returnType = methodAnnotation!!.interfaceClass.java
 
 				// check if the service is already defined
 				if (this.serviceInstMap.containsKey(returnType.name)) {
-					LOG.warn {
+					logger.warn {
 						"Omitting service type ${returnType.getName()}, " +
 							"because its type already associated with another service."
 					}
@@ -197,13 +197,13 @@ class MessageDispatcher : Dispatcher {
 						returnTypeImpl = result.javaClass
 					}
 				} catch (ex: IllegalAccessException) {
-					LOG.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
+					logger.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
 					continue
 				} catch (ex: IllegalArgumentException) {
-					LOG.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
+					logger.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
 					continue
 				} catch (ex: InvocationTargetException) {
-					LOG.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
+					logger.error(ex) { "Actual type could not be retrieved from method $nextAccessor." }
 					continue
 				}
 
@@ -212,7 +212,7 @@ class MessageDispatcher : Dispatcher {
 
 				for (reqClass in service.getRequestClasses()) {
 					if (serviceMap.containsKey(reqClass.getName())) {
-						LOG.warn {
+						logger.warn {
 							"Omitting method with parameter type ${reqClass.getName()} " +
 								"in service interface ${returnType.getName()} " +
 								"because its type already associated with another service."

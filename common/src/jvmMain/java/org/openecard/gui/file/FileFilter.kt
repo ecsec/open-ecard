@@ -35,19 +35,19 @@ import java.io.Serializable
  * @author Tobias Wich
  */
 interface FileFilter : Serializable {
-    /**
-     * Decide whether a file is accepted or not.
-     *
-     * @param file File to check whether it is accepted or not.
-     * @return `true` if the file is accepted, `false` otherwise.
-     */
-    fun accept(file: File): Boolean
+	/**
+	 * Decide whether a file is accepted or not.
+	 *
+	 * @param file File to check whether it is accepted or not.
+	 * @return `true` if the file is accepted, `false` otherwise.
+	 */
+	fun accept(file: File): Boolean
 
-    /**
-     * Gets the description text of this filter.
-     * The description may be shown to the user, if a selection of filters is desirable.
-     *
-     * @return The description text. `null` is not permitted.
-     */
-    val description: String
+	/**
+	 * Gets the description text of this filter.
+	 * The description may be shown to the user, if a selection of filters is desirable.
+	 *
+	 * @return The description text. `null` is not permitted.
+	 */
+	val description: String
 }

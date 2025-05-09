@@ -31,14 +31,11 @@ import org.openecard.common.tlv.TLV
 class EF_OD(
 	tlv: TLV,
 ) {
-	private val content: MutableList<CIOChoice>
+	private val content: List<CIOChoice>
 
 	init {
 		val tlvList = tlv.asList()
-		content = ArrayList(tlvList.size)
-		for (next in tlvList) {
-			content.add(CIOChoice(next))
-		}
+		content = tlvList.map { CIOChoice(it) }
 	}
 
 	fun getContent(): List<CIOChoice> = content

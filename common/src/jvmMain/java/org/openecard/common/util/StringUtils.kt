@@ -22,7 +22,6 @@
 package org.openecard.common.util
 
 import java.util.regex.Pattern
-import javax.annotation.Nonnull
 
 /**
  * A set of utility functions for Strings.
@@ -41,9 +40,7 @@ object StringUtils {
 	 * @throws NumberFormatException Thrown in case the hex string contains invalid characters.
 	 */
 	@JvmStatic
-	fun toByteArray(
-		hex: String,
-	): ByteArray {
+	fun toByteArray(hex: String): ByteArray {
 		var hex = hex
 		if ((hex.length % 2) != 0) {
 			hex = "0$hex"

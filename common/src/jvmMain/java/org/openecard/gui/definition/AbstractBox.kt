@@ -53,6 +53,7 @@ abstract class AbstractBox(
 	 * @param groupText The text for title of this group.
 	 */
 	var groupText: String? = null
+
 	/**
 	 * Get writable list of box items.
 	 * The box items form the actual selectable content of this type. Modifications made to this list directly influence
@@ -75,14 +76,14 @@ abstract class AbstractBox(
 		val other = origin as AbstractBox
 		// do copy
 		this.groupText = other.groupText
-		boxItems!!.clear()
-		for (next in other.boxItems!!) {
+		boxItems.clear()
+		for (next in other.boxItems) {
 			val copy = BoxItem()
 			copy.isChecked = next.isChecked
 			copy.isDisabled = next.isDisabled
 			copy.name = next.name
 			copy.text = next.text
-			boxItems!!.add(copy)
+			boxItems.add(copy)
 		}
 	}
 }

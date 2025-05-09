@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.message
 
-
 /**
  * Option type describing the messagebox.
  * Options can be either a yes, no question box, a yes, no question box with a cancel button or an OK, cancel question
@@ -30,7 +29,7 @@ package org.openecard.gui.message
  * @author Tobias Wich
  */
 enum class OptionType {
-    YES_NO_OPTION,
-    YES_NO_CANCEL_OPTION,
-    OK_CANCEL_OPTION
+	YES_NO_OPTION,
+	YES_NO_CANCEL_OPTION,
+	OK_CANCEL_OPTION,
 }

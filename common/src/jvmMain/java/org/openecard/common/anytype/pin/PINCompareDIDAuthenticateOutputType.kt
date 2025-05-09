@@ -26,8 +26,11 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.PinCompareDIDAuthenticateOutputType
 import org.openecard.common.anytype.AuthDataMap
 import java.math.BigInteger
+import javax.xml.parsers.ParserConfigurationException
 
-private val LOG = KotlinLogging.logger {  }
+private val logger = KotlinLogging.logger { }
+
+private const val ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema"
 
 /**
  * Implements the PINCompareDIDAuthenticateOutputType.
@@ -37,68 +40,58 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 class PINCompareDIDAuthenticateOutputType {
-    private val authMap: AuthDataMap
-    /**
-     * Returns the retry counter.
-     *
-     * @return Retry counter
-     */
-    /**
-     * Sets the retry counter.
-     *
-     * @param retryCounter Retry counter
-     */
-    var retryCounter: BigInteger? = null
+	private val authMap: AuthDataMap
 
-    /**
-     * Creates a new PINCompareDIDAuthenticateOutputType.
-     *
-     * @param data DIDAuthenticationDataType Generic type containing a PinCompareDIDAuthenticateOutputType.
-     * @throws ParserConfigurationException
-     */
-    constructor(data: DIDAuthenticationDataType) {
-        authMap = AuthDataMap(data)
+	/**
+	 * The retry counter.
+	 */
+	var retryCounter: BigInteger? = null
 
-        val retryCounterStr = authMap.getContentAsString(ISO_NS, "RetryCounter")
-        if (retryCounterStr != null) {
-            try {
-                retryCounter = BigInteger(retryCounterStr)
-            } catch (ex: NumberFormatException) {
-				LOG.warn(ex) { "Can not convert malformed RetryCounter value to an integer." }
-            }
-        }
-    }
+	/**
+	 * Creates a new PINCompareDIDAuthenticateOutputType.
+	 *
+	 * @param data DIDAuthenticationDataType Generic type containing a PinCompareDIDAuthenticateOutputType.
+	 * @throws ParserConfigurationException
+	 */
+	@Throws(ParserConfigurationException::class)
+	constructor(data: DIDAuthenticationDataType) {
+		authMap = AuthDataMap(data)
 
-    /**
-     * Creates a new PINCompareDIDAuthenticateOutputType.
-     *
-     * @param authMap AuthDataMap
-     */
-    constructor(authMap: AuthDataMap) {
-        this.authMap = authMap
-    }
+		val retryCounterStr = authMap.getContentAsString(ISO_NS, "RetryCounter")
+		if (retryCounterStr != null) {
+			try {
+				retryCounter = BigInteger(retryCounterStr)
+			} catch (ex: NumberFormatException) {
+				logger.warn(ex) { "Can not convert malformed RetryCounter value to an integer." }
+			}
+		}
+	}
 
-    val authDataType: PinCompareDIDAuthenticateOutputType
-        /**
-         *
-         * @return the PinCompareDIDAuthenticateOutputType
-         */
-        get() {
-            val pinCompareOutput = PinCompareDIDAuthenticateOutputType()
-            val authResponse =
+	/**
+	 * Creates a new PINCompareDIDAuthenticateOutputType.
+	 *
+	 * @param authMap AuthDataMap
+	 */
+	constructor(authMap: AuthDataMap) {
+		this.authMap = authMap
+	}
+
+	val authDataType: PinCompareDIDAuthenticateOutputType
+		/**
+		 *
+		 * @return the PinCompareDIDAuthenticateOutputType
+		 */
+		get() {
+			val pinCompareOutput = PinCompareDIDAuthenticateOutputType()
+			val authResponse =
 				authMap.createResponse(pinCompareOutput)
-            if (retryCounter != null) {
-                authResponse.addElement(
-                    ISO_NS,
-                    "RetryCounter",
-                    retryCounter.toString()
-                )
-            }
-
-            return authResponse.response
-        }
-
-    companion object {
-        private const val ISO_NS = "urn:iso:std:iso-iec:24727:tech:schema"
-    }
+			retryCounter?.let {
+				authResponse.addElement(
+					ISO_NS,
+					"RetryCounter",
+					it.toString(),
+				)
+			}
+			return authResponse.response
+		}
 }

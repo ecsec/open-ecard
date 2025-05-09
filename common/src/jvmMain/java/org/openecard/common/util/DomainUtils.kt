@@ -28,7 +28,7 @@ import java.net.IDN
  *
  * @author Tobias Wich
  */
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 object DomainUtils {
 	/**
@@ -125,7 +125,7 @@ object DomainUtils {
 			return true
 		} catch (ex: IllegalArgumentException) {
 			val msg = "Error normalizing international domain name."
-			LOG.warn(ex) { msg }
+			logger.warn(ex) { msg }
 			throw IllegalArgumentException(msg, ex)
 		}
 	}

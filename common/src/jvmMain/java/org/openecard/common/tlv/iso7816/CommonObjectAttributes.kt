@@ -58,10 +58,10 @@ class CommonObjectAttributes(
 		if (p.match(Tag(TagClass.UNIVERSAL, true, 4))) {
 			authId = p.next(0)?.value
 		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
+		if (p.match(Tag.INTEGER_TAG)) {
 			userConsent = toInteger(p.next(0)?.value!!)
 		}
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
+		if (p.match(Tag.SEQUENCE_TAG)) {
 			val list = TLVList(p.next(0)!!)
 			aCLS = list.content
 		}

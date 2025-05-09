@@ -21,11 +21,10 @@
  */
 package org.openecard.common.util
 
-
 /**
  *
  * @author Tobias Wich
  */
 interface RemoveActionFactory<V> {
-    fun create(v: V): RemoveAction<V>?
+	fun create(v: V): RemoveAction<V>?
 }

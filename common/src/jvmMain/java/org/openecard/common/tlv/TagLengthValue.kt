@@ -24,7 +24,6 @@ package org.openecard.common.tlv
 import org.openecard.common.util.IntegerUtils.toByteArray
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.Arrays
 
 /**
  * Internal class representing one entry with a TLV definition.
@@ -108,7 +107,7 @@ internal class TagLengthValue private constructor(
 		try {
 			val from = rawLength
 			val to = inputWithThisTag.size
-			return Arrays.copyOfRange(inputWithThisTag, from, to)
+			return inputWithThisTag.copyOfRange(from, to)
 		} catch (ex: ArrayIndexOutOfBoundsException) {
 			throw TLVException("Data length and claimed length do not match.", ex)
 		} catch (ex: IllegalArgumentException) {
@@ -215,7 +214,7 @@ internal class TagLengthValue private constructor(
 			}
 
 			// extract data based on calculated length
-			val dataField = Arrays.copyOfRange(data, numOctets, numOctets + dataLength)
+			val dataField = data.copyOfRange(numOctets, numOctets + dataLength)
 
 			// recalculate total length of datablock
 			numOctets = numOctets + dataLength

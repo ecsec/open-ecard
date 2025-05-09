@@ -31,50 +31,52 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Hans-Martin Haase
  */
-class SecurityConditionChoice(
-	tlv: TLV,
-) : TLVType(tlv) {
-	var isAlways: Boolean = false
-	var authIdentifier: ByteArray? = null
-		private set
-	var authReference: AuthReference? = null
-		private set
-	var not: SecurityConditionChoice? = null
-		private set
-	var and: List<TLV?>? = null
-		private set
-	var or: List<TLV?>? = null
-		private set
+class SecurityConditionChoice
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		var isAlways: Boolean = false
+		var authIdentifier: ByteArray? = null
+			private set
+		var authReference: AuthReference? = null
+			private set
+		var not: SecurityConditionChoice? = null
+			private set
+		var and: List<TLV>? = null
+			private set
+		var or: List<TLV>? = null
+			private set
 
-	init {
-		val p = Parser(tlv.child)
-		if (p.match(Tag(TagClass.UNIVERSAL, true, 5))) {
-			isAlways = true
-			p.next(0)
-		}
+		init {
+			val p = Parser(tlv.child)
+			if (p.match(Tag(TagClass.UNIVERSAL, true, 5))) {
+				isAlways = true
+				p.next(0)
+			}
 
-		if (p.match(Tag(TagClass.UNIVERSAL, true, 4))) {
-			authIdentifier = p.next(0)?.value
-		}
+			if (p.match(Tag(TagClass.UNIVERSAL, true, 4))) {
+				authIdentifier = p.next(0)?.value
+			}
 
-		if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
-			try {
-				authReference = AuthReference(p.next(0)!!)
-			} catch (ex: TLVException) {
-				throw TLVException("Malformed authReference")
+			if (p.match(Tag(TagClass.UNIVERSAL, false, 16))) {
+				try {
+					authReference = AuthReference(p.next(0)!!)
+				} catch (ex: TLVException) {
+					throw TLVException("Malformed authReference")
+				}
+			}
+
+			if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+				not = SecurityConditionChoice(p.next(0)!!)
+			}
+
+			if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+				and = p.next(0)!!.asList()
+			}
+
+			if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
+				or = p.next(0)!!.asList()
 			}
 		}
-
-		if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-			not = SecurityConditionChoice(p.next(0)!!)
-		}
-
-		if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
-			and = p.next(0)!!.asList()
-		}
-
-		if (p.match(Tag(TagClass.CONTEXT, false, 2))) {
-			or = p.next(0)!!.asList()
-		}
 	}
-}

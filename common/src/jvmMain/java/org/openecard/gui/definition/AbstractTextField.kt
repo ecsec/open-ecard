@@ -21,11 +21,10 @@
  */
 package org.openecard.gui.definition
 
-import com.sun.tools.javac.code.TypeAnnotationPosition.field
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.Arrays
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Base definition for text fields.
@@ -123,7 +122,7 @@ abstract class AbstractTextField(
 	 */
 	override fun copyContentFrom(origin: InfoUnit) {
 		if (this.javaClass != origin.javaClass) {
-			LOG.warn {
+			logger.warn {
 				"${"Trying to copy content from type {} to type {}."} ${origin.javaClass} ${
 					this.javaClass
 				}"

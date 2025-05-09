@@ -46,11 +46,11 @@ class CommonAuthenticationObjectAttributes(
 		}
 
 		if (p.match(Tag(TagClass.UNIVERSAL, true, 2))) {
-			authReference = toInteger(p.next(0)!!.value!!)
+			authReference = toInteger(p.next(0)!!.value)
 		}
 
 		if (p.match(Tag(TagClass.CONTEXT, true, 0))) {
-			securityEnvironmentID = toInteger(p.next(0)!!.value!!)
+			securityEnvironmentID = toInteger(p.next(0)!!.value)
 		}
 	}
 

@@ -38,38 +38,18 @@ class BoxItem {
 	/**
 	 * Gets the name of the item.
 	 * The name is used to identify the item and thus should be unique in the surrounding selection box group.
-	 *
-	 * @return The name of the item.
-
-	 * Sets the name of the item.
-	 * The name is used to identify the item and thus should be unique in the surrounding selection box group.
-	 *
-	 * @param name The name of the item.
 	 */
 	var name: String? = null
 
 	/**
 	 * Gets the display text of the item.
 	 * The text is displayed on the GUI to indicate the meaning of the option to the user.
-	 *
-	 * @return The text of the item.
-
-	 * Sets the display text of the item.
-	 * The text is displayed on the GUI to indicate the meaning of the option to the user.
-	 *
-	 * @param text The text of the item.
 	 */
 	var text: String? = null
 
 	/**
 	 * Gets the selection value of the box item.
-	 *
-	 * @return `true` if the item is checked/selected, `false` otherwise.
-
-	 * Sets the selection value of the box item.
-	 * This function is used to preselect items and to set the value when the step displaying this item is finished.
-	 *
-	 * @param checked `true` if the item is checked/selected, `false` otherwise.
+	 * This value is used to preselect items and to set the value when the step displaying this item is finished.
 	 */
 	var isChecked: Boolean = false
 
@@ -77,12 +57,6 @@ class BoxItem {
 	 * Gets whether the item is enabled, or disabled.
 	 * Disabled items can be used to show a preselected value to the user, but do not allow modification of the value.
 	 *
-	 * @return `true` if the item is disabled, `false` otherwise.
-
-	 * Sets whether the item is enabled, or disabled.
-	 * Disabled items can be used to show a preselected value to the user, but do not allow modification of the value.
-	 *
-	 * @param disabled `true` if the item is disabled, `false` otherwise.
 	 */
 	var isDisabled: Boolean = false
 }

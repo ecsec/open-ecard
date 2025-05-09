@@ -21,7 +21,6 @@
  */
 package org.openecard.gui.definition
 
-
 /**
  * Interface for all GUI description elements which have output values.
  * Output values are retrieved from the step after it is finished.

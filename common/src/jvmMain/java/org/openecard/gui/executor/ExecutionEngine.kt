@@ -37,7 +37,7 @@ import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Class capable of displaying and executing a user consent. <br></br>
@@ -80,7 +80,7 @@ class ExecutionEngine(
 			// loop over steps. break inside loop
 			while (true) {
 				val result = next?.status
-				LOG.debug { "${"Step {} finished with result {}."} ${next?.stepID} $result" }
+				logger.debug { "${"Step {} finished with result {}."} ${next?.stepID} $result" }
 				// close dialog on cancel and interrupt
 				if (result == ResultStatus.INTERRUPTED || Thread.currentThread().isInterrupted) {
 					throw ThreadTerminateException("GUI has been interrupted.")
@@ -113,7 +113,7 @@ class ExecutionEngine(
 				// replace step if told by result value
 				val replaceStep = next.replacement
 				if (replaceStep != null) {
-					LOG.debug { "${replaceStep.id} ${{ "Replacing with step.id={}." }}" }
+					logger.debug { "${replaceStep.id} ${{ "Replacing with step.id={}." }}" }
 					when (next.status) {
 						ResultStatus.BACK -> next = navigator.replacePrevious(replaceStep)
 						ResultStatus.OK ->
@@ -129,7 +129,7 @@ class ExecutionEngine(
 				} else {
 					// step replacement did not happen, so we can execute the action
 					val action = next.step!!.action
-					val actionCallable = StepActionCallable(action!!, oldResults, next)
+					val actionCallable = StepActionCallable(action, oldResults, next)
 					// use separate thread or tasks running outside the JVM context, like PCSC calls, won't stop on cancellation
 					val execService = Executors.newSingleThreadExecutor()
 					val actionFuture = execService.submit(actionCallable)
@@ -137,12 +137,12 @@ class ExecutionEngine(
 					val actionResult: StepActionResult
 					try {
 						actionResult = actionFuture.get()!!
-						LOG.debug { "${"Step Action {} finished with result {}."} ${action.stepID} ${actionResult.status}" }
+						logger.debug { "${"Step Action {} finished with result {}."} ${action.stepID} ${actionResult.status}" }
 					} catch (ex: CancellationException) {
-						LOG.info(ex) { "StepAction was canceled." }
+						logger.info(ex) { "StepAction was canceled." }
 						return ResultStatus.CANCEL
 					} catch (ex: InterruptedException) {
-						LOG.info(ex) { "StepAction was interrupted." }
+						logger.info(ex) { "StepAction was interrupted." }
 						navigator.close()
 						throw ThreadTerminateException("GUI has been interrupted.")
 					} catch (ex: ExecutionException) {
@@ -150,25 +150,25 @@ class ExecutionEngine(
 						if (ex.cause is InvocationTargetExceptionUnchecked) {
 							val iex = ex.cause as InvocationTargetExceptionUnchecked?
 							if (iex!!.cause is ThreadTerminateException) {
-								LOG.info(ex) { "StepAction was interrupted." }
+								logger.info(ex) { "StepAction was interrupted." }
 								throw ThreadTerminateException("GUI has been interrupted.")
 							}
 						}
 						// all other types
-						LOG.error(ex.cause) { "StepAction failed with error." }
+						logger.error(ex.cause) { "StepAction failed with error." }
 						return ResultStatus.CANCEL
 					}
 
 					// break out if cancel was returned
 					if (actionResult.status == StepActionResultStatus.CANCEL) {
-						LOG.info { "StepAction was canceled." }
+						logger.info { "StepAction was canceled." }
 						return ResultStatus.CANCEL
 					}
 
 					// replace step if told by result value
 					val actionReplace = actionResult.replacement
 					if (actionReplace != null) {
-						LOG.debug { "${actionReplace.id} ${{ "Replacing after action with step.id={}." }}" }
+						logger.debug { "${actionReplace.id} ${{ "Replacing after action with step.id={}." }}" }
 						when (actionResult.status) {
 							StepActionResultStatus.BACK -> next = navigator.replacePrevious(actionReplace)
 							StepActionResultStatus.NEXT ->
@@ -199,7 +199,7 @@ class ExecutionEngine(
 				}
 			}
 		} finally {
-			LOG.debug { "Closing UserConsentNavigator." }
+			logger.debug { "Closing UserConsentNavigator." }
 			navigator.close()
 		}
 	}

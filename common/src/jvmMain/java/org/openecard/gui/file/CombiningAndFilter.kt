@@ -21,9 +21,7 @@
  */
 package org.openecard.gui.file
 
-import org.openecard.gui.file.AcceptAllFilesFilter
 import java.io.File
-import java.util.Arrays
 
 /**
  * File filter checking all wrapped FileFilters.
@@ -34,7 +32,7 @@ import java.util.Arrays
 class CombiningAndFilter(
 	filters: List<FileFilter>,
 ) : FileFilter {
-	private var filters: List<FileFilter>? = null
+	private var filters: List<FileFilter>
 	override val description: String
 
 	/**
@@ -43,7 +41,7 @@ class CombiningAndFilter(
 	 *
 	 * @param filters Filters to be combined.
 	 */
-	constructor(vararg filters: FileFilter?) : this(Arrays.asList<FileFilter>(*filters))
+	constructor(vararg filters: FileFilter) : this(listOf<FileFilter>(*filters))
 
 	/**
 	 * Creates a new CombiningAndFilter.
@@ -59,7 +57,7 @@ class CombiningAndFilter(
 		}
 
 		val sb = StringBuilder(32)
-		val it = this.filters!!.iterator()
+		val it = this.filters.iterator()
 		while (it.hasNext()) {
 			sb.append(it.next().description)
 			if (it.hasNext()) {
@@ -70,7 +68,7 @@ class CombiningAndFilter(
 	}
 
 	override fun accept(f: File): Boolean {
-		for (next in filters!!) {
+		for (next in filters) {
 			if (!next.accept(f)) {
 				return false
 			}

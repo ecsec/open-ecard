@@ -21,7 +21,10 @@
  */
 package org.openecard.common.tlv.iso7816
 
-import org.openecard.common.tlv.*
+import org.openecard.common.tlv.Parser
+import org.openecard.common.tlv.TLV
+import org.openecard.common.tlv.TLVException
+import org.openecard.common.tlv.Tag
 import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
 
 /**
@@ -48,7 +51,7 @@ class Certificate(
 		} else {
 			throw TLVException("algorithmIdentifier element missing.")
 		}
-		if (p.match(Tag.Companion.BITSTRING_TAG)) {
+		if (p.match(Tag.BITSTRING_TAG)) {
 			encrypted = TLVBitString(p.next(0)!!)
 		} else {
 			throw TLVException("encrypted element missing.")

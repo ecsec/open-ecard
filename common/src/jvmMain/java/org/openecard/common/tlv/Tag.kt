@@ -28,7 +28,7 @@ import org.openecard.common.util.LongUtils.toByteArray
  *
  * @author Tobias Wich
  */
-class Tag constructor( // char strings 18-22, 25-30
+class Tag( // char strings 18-22, 25-30
 	// public static final Tag UTCTimeTag = new Tag(TagClass.UNIVERSAL, true, 23);
 	// public static final Tag GeneralizedTimeTag = new Tag(TagClass.UNIVERSAL, true, 24);
 	// public static final Tag DateTag = new Tag(TagClass.UNIVERSAL, true, 31);
@@ -55,8 +55,8 @@ class Tag constructor( // char strings 18-22, 25-30
 	/** Set when created from BER. This is needed when creating a TagLengthValue instance from BER  */
 	var numOctets: Int = 0
 
-	constructor(tag: Tag) : this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum()) {
-	}
+	constructor(tag: Tag) :
+		this(tag.getTagClass(), tag.isPrimitive(), tag.getTagNum())
 
 	init {
 		calculateTagNumWithClass()
@@ -113,13 +113,12 @@ class Tag constructor( // char strings 18-22, 25-30
 			(if (primitive) "prim " else "cons ") +
 			tagNum + " (0x" + tagNumWithClass.toUByte().toHexString() + ")]"
 
-	override fun equals(obj: Any?): Boolean {
+	override fun equals(obj: Any?): Boolean =
 		if (obj is Tag) {
-			return this.tagNumWithClass == obj.tagNumWithClass
+			this.tagNumWithClass == obj.tagNumWithClass
 		} else {
-			return false
+			false
 		}
-	}
 
 	override fun hashCode(): Int {
 		var hash = 7

@@ -27,7 +27,8 @@ import org.openecard.common.tlv.Parser
 import org.openecard.common.tlv.TLV
 import org.openecard.common.tlv.TLVException
 import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
-import java.util.LinkedList
+
+private val EF_DIR_FID = byteArrayOf(0x2F, 0x00)
 
 /**
  *
@@ -36,11 +37,11 @@ import java.util.LinkedList
  */
 @Suppress("ktlint:standard:class-naming")
 class EF_DIR(
-	tlv: TLV?,
+	tlv: TLV,
 ) {
 	private val tlv = TLV()
 
-	private var applicationIdentifiers: MutableList<ByteArray?>
+	private var applicationIdentifiers: MutableList<ByteArray>
 	private var applicationTemplates: MutableList<ApplicationTemplate>
 
 	init {
@@ -48,13 +49,13 @@ class EF_DIR(
 		this.tlv.child = tlv
 
 		val p = Parser(this.tlv.child)
-		applicationIdentifiers = LinkedList()
-		applicationTemplates = LinkedList()
+		applicationIdentifiers = mutableListOf()
+		applicationTemplates = mutableListOf()
 		while (p.match(0x61) || p.match(0x4F)) {
 			if (p.match(0x61)) {
 				applicationTemplates.add(ApplicationTemplate(p.next(0)!!))
 			} else if (p.match(0x4F)) {
-				applicationIdentifiers.add(p.next(0)?.value)
+				applicationIdentifiers.add(p.next(0)!!.value)
 			}
 		}
 		if (p.next(0) != null) {
@@ -62,16 +63,14 @@ class EF_DIR(
 		}
 	}
 
-	constructor(data: ByteArray) : this(TLV.Companion.fromBER(data))
+	constructor(data: ByteArray) : this(TLV.fromBER(data))
 
-	val applicationIds: List<ByteArray?>
+	val applicationIds: List<ByteArray>
 		get() = applicationIdentifiers
 
 	fun getApplicationTemplates(): List<ApplicationTemplate> = applicationTemplates
 
 	companion object {
-		private val EF_DIR_FID = byteArrayOf(0x2F, 0x00)
-
 		fun selectAndRead(
 			dispatcher: Dispatcher,
 			slotHandle: ByteArray?,

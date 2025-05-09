@@ -25,7 +25,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicInteger
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Implementation of a promise resembling the semantics of a future.
@@ -43,7 +43,7 @@ class FuturePromise<T>(
 			try {
 				result = function.call()
 			} catch (ex: Exception) {
-				LOG.error(ex) { "Failed to complete computation of the result." }
+				logger.error(ex) { "Failed to complete computation of the result." }
 				result = null
 			}
 			// We have either a result or an error

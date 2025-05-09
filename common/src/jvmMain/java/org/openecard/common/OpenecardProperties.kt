@@ -34,7 +34,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.Properties
 
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 /**
  * Openecard properties class.
@@ -66,13 +66,13 @@ object OpenecardProperties {
 			val fileName = "openecard_config/openecard.properties"
 			bundledProps = resolveResourceAsStream(OpenecardProperties::class.java, fileName)
 		} catch (ex: IOException) {
-			LOG.info(ex) { "Failed to load properties from config dir." }
+			logger.info(ex) { "Failed to load properties from config dir." }
 		}
 		try {
 			properties = OverridingProperties(bundledProps!!, homeProps)
 		} catch (ex: IOException) {
 			// in that case a null pointer occurs when properties is accessed
-			LOG.error(ex) { "${ex.message}" }
+			logger.error(ex) { "${ex.message}" }
 		}
 	}
 
@@ -88,7 +88,7 @@ object OpenecardProperties {
 				return testProps
 			}
 		} catch (ex: IOException) {
-			LOG.info(ex) { "Failed to load test properties from resources." }
+			logger.info(ex) { "Failed to load test properties from resources." }
 		}
 
 		try {
@@ -97,10 +97,10 @@ object OpenecardProperties {
 			val homeProps: InputStream = FileInputStream(cfgFile)
 			return homeProps
 		} catch (ex: FileNotFoundException) {
-			LOG.debug { "No properties file to load as it does not exist." }
+			logger.debug { "No properties file to load as it does not exist." }
 			return null
 		} catch (ex: IOException) {
-			LOG.warn(ex) { "Failed to load bundled properties." }
+			logger.warn(ex) { "Failed to load bundled properties." }
 			return null
 		}
 	}

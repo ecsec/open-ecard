@@ -23,7 +23,7 @@ package org.openecard.transport.dispatcher
 
 import iso.std.iso_iec._24727.tech.schema.EstablishContext
 import iso.std.iso_iec._24727.tech.schema.EstablishContextResponse
-import org.openecard.common.interfaces.*
+import org.openecard.common.interfaces.Environment
 import org.openecard.ws.IFD
 import org.testng.Assert
 import org.testng.annotations.Test

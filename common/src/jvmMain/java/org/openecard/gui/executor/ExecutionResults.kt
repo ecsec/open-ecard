@@ -30,31 +30,31 @@ import org.openecard.gui.definition.OutputInfoUnit
  * @author Tobias Wich
  */
 class ExecutionResults(
-    /**
-     * Gets the ID of the associated step.
-     *
-     * @return The step ID.
-     */
-    val stepID: String,
-    /**
-     * Gets all element result.
-     *
-     * @return The results of the step.
-     */
-    val results: List<OutputInfoUnit>
+	/**
+	 * Gets the ID of the associated step.
+	 *
+	 * @return The step ID.
+	 */
+	val stepID: String,
+	/**
+	 * Gets all element result.
+	 *
+	 * @return The results of the step.
+	 */
+	val results: List<OutputInfoUnit>,
 ) {
-    /**
-     * Gets element result with a specific element ID.
-     *
-     * @param id ID of the result element.
-     * @return Result element or null if none exists for the given ID.
-     */
-    fun getResult(id: String): OutputInfoUnit? {
-        for (next in results) {
-            if (next.id == id) {
-                return next
-            }
-        }
-        return null
-    }
+	/**
+	 * Gets element result with a specific element ID.
+	 *
+	 * @param id ID of the result element.
+	 * @return Result element or null if none exists for the given ID.
+	 */
+	fun getResult(id: String): OutputInfoUnit? {
+		for (next in results) {
+			if (next.id == id) {
+				return next
+			}
+		}
+		return null
+	}
 }

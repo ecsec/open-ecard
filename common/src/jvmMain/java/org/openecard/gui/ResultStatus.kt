@@ -21,7 +21,6 @@
  */
 package org.openecard.gui
 
-
 /**
  * Result status of a GUI step.
  * The statuses are equivalent to the buttons usually shown in the navigation section of the step.
@@ -29,9 +28,9 @@ package org.openecard.gui
  * @author Tobias Wich
  */
 enum class ResultStatus {
-    OK,
-    BACK,
-    CANCEL,
-    RELOAD,
-    INTERRUPTED // only used internally and never returned by ExecutionEngine
+	OK,
+	BACK,
+	CANCEL,
+	RELOAD,
+	INTERRUPTED, // only used internally and never returned by ExecutionEngine
 }

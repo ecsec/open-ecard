@@ -34,54 +34,56 @@ import java.lang.reflect.InvocationTargetException
  *
  * @author Hans-Martin Haase
  */
-class GenericPublicKeyObject<KeyAttributes>(
-	tlv: TLV,
-	clazz: Class<KeyAttributes>,
-) {
-	private val tlv: TLV
+class GenericPublicKeyObject<KeyAttributes>
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+		clazz: Class<KeyAttributes>,
+	) {
+		private val tlv: TLV
 
-	// from CIO
-	var commonObjectAttributes: CommonObjectAttributes? = null
-		private set
-	var classAttributes: CommonKeyAttributes? = null // CommonKeyAttributes
-		private set
-	var subClassAttributes: TLV? = null // CommonPublicKeyAttributes
-		private set
-	var typeAttributes: KeyAttributes? = null // KeyAttributes
-		private set
+		// from CIO
+		var commonObjectAttributes: CommonObjectAttributes? = null
+			private set
+		var classAttributes: CommonKeyAttributes? = null // CommonKeyAttributes
+			private set
+		var subClassAttributes: TLV? = null // CommonPublicKeyAttributes
+			private set
+		var typeAttributes: KeyAttributes? = null // KeyAttributes
+			private set
 
-	init {
-		val c: Constructor<KeyAttributes>
-		try {
-			c = clazz.getConstructor(TLV::class.java)
-		} catch (ex: Exception) {
-			throw TLVException("KeyAttributes supplied doesn't have a constructor KeyAttributes(TLV).")
-		}
-
-		this.tlv = tlv
-
-		val p = Parser(tlv.child)
-		if (p.match(SEQUENCE_TAG)) {
-			commonObjectAttributes = CommonObjectAttributes(p.next(0)!!)
-		} else {
-			throw TLVException("CommonObjectAttributes not present.")
-		}
-		if (p.match(SEQUENCE_TAG)) {
-			classAttributes = CommonKeyAttributes(p.next(0)!!)
-		} else {
-			throw TLVException("CommonObjectAttributes not present.")
-		}
-		if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
-			subClassAttributes = p.next(0)!!.child
-		}
-		if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+		init {
+			val c: Constructor<KeyAttributes>
 			try {
-				typeAttributes = c.newInstance(p.next(0)!!.child)
-			} catch (ex: InvocationTargetException) {
-				throw TLVException(ex)
+				c = clazz.getConstructor(TLV::class.java)
 			} catch (ex: Exception) {
 				throw TLVException("KeyAttributes supplied doesn't have a constructor KeyAttributes(TLV).")
 			}
+
+			this.tlv = tlv
+
+			val p = Parser(tlv.child)
+			if (p.match(SEQUENCE_TAG)) {
+				commonObjectAttributes = CommonObjectAttributes(p.next(0)!!)
+			} else {
+				throw TLVException("CommonObjectAttributes not present.")
+			}
+			if (p.match(SEQUENCE_TAG)) {
+				classAttributes = CommonKeyAttributes(p.next(0)!!)
+			} else {
+				throw TLVException("CommonObjectAttributes not present.")
+			}
+			if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
+				subClassAttributes = p.next(0)!!.child
+			}
+			if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
+				try {
+					typeAttributes = c.newInstance(p.next(0)!!.child)
+				} catch (ex: InvocationTargetException) {
+					throw TLVException(ex)
+				} catch (ex: Exception) {
+					throw TLVException("KeyAttributes supplied doesn't have a constructor KeyAttributes(TLV).")
+				}
+			}
 		}
 	}
-}

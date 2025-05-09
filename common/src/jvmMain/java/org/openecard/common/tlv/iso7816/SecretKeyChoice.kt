@@ -23,6 +23,7 @@ package org.openecard.common.tlv.iso7816
 
 import org.openecard.common.tlv.Parser
 import org.openecard.common.tlv.TLV
+import org.openecard.common.tlv.TLVException
 import org.openecard.common.tlv.Tag
 import org.openecard.common.tlv.Tag.Companion.SEQUENCE_TAG
 import org.openecard.common.tlv.TagClass
@@ -31,24 +32,26 @@ import org.openecard.common.tlv.TagClass
  *
  * @author Hans-Martin Haase
  */
-class SecretKeyChoice(
-	tlv: TLV,
-) : TLVType(tlv) {
-	var algIndependentKey: GenericSecretKeyObject<TLV>? = null
-		private set
-	var genericSecretKey: GenericSecretKeyObject<TLV>? = null
-		private set
-	var extension: TLV? = null
-		private set
+class SecretKeyChoice
+	@Throws(TLVException::class)
+	constructor(
+		tlv: TLV,
+	) : TLVType(tlv) {
+		var algIndependentKey: GenericSecretKeyObject<TLV>? = null
+			private set
+		var genericSecretKey: GenericSecretKeyObject<TLV>? = null
+			private set
+		var extension: TLV? = null
+			private set
 
-	init {
-		val p = Parser(tlv.child)
-		if (p.match(SEQUENCE_TAG)) {
-			algIndependentKey = GenericSecretKeyObject(p.next(0)!!, TLV::class.java)
-		} else if (p.match(Tag(TagClass.CONTEXT, false, 15))) {
-			genericSecretKey = GenericSecretKeyObject(p.next(0)!!, TLV::class.java)
-		} else {
-			extension = p.next(0)
+		init {
+			val p = Parser(tlv.child)
+			if (p.match(SEQUENCE_TAG)) {
+				algIndependentKey = GenericSecretKeyObject(p.next(0)!!, TLV::class.java)
+			} else if (p.match(Tag(TagClass.CONTEXT, false, 15))) {
+				genericSecretKey = GenericSecretKeyObject(p.next(0)!!, TLV::class.java)
+			} else {
+				extension = p.next(0)
+			}
 		}
 	}
-}

@@ -44,6 +44,8 @@ class CertificateChoice(
 		private set
 	var wtlsCertificate: GenericCertificateObject<TLV>? = null // WTLSCertificateAttributes
 		private set
+
+	@Suppress("ktlint:standard:property-naming")
 	var x9_68Certificate: GenericCertificateObject<TLV>? = null // X9-68CertificateAttributes
 		private set
 	var cvCertificate: GenericCertificateObject<TLV>? = null // CVCertificateAttributes

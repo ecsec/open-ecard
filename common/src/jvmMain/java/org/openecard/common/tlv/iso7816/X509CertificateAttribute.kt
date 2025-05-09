@@ -45,13 +45,13 @@ class X509CertificateAttribute(
 		// first value is validated by GenericObjectValue
 		value = GenericObjectValue(p.next(0)!!, Certificate::class.java)
 
-		if (p.match(Tag.Companion.SEQUENCE_TAG)) {
+		if (p.match(Tag.SEQUENCE_TAG)) {
 			subject = p.next(0)
 		}
 		if (p.match(Tag(TagClass.CONTEXT, false, 0))) {
 			issuer = p.next(0)
 		}
-		if (p.match(Tag.Companion.INTEGER_TAG)) {
+		if (p.match(Tag.INTEGER_TAG)) {
 			serialNumber = toInteger(p.next(0)?.value!!)
 		}
 	}

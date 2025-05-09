@@ -21,7 +21,6 @@
  */
 package org.openecard.common
 
-
 /**
  * Exception indicating that someone external forced the thread to terminate.
  * This is like an InterruptedException but implemented as a RuntimeException, so that it may be used without declaring
@@ -30,7 +29,7 @@ package org.openecard.common
  * @author Tobias Wich
  */
 class ThreadTerminateException : RuntimeException {
-    constructor(msg: String?) : super(msg)
+	constructor(msg: String?) : super(msg)
 
-    constructor(msg: String?, cause: Throwable?) : super(msg, cause)
+	constructor(msg: String?, cause: Throwable?) : super(msg, cause)
 }

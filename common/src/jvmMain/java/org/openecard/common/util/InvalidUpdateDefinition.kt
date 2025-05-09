@@ -21,13 +21,12 @@
  */
 package org.openecard.common.util
 
-
 /**
  *
  * @author Tobias Wich
  */
 class InvalidUpdateDefinition : Exception {
-    constructor(string: String?) : super(string)
+	constructor(string: String?) : super(string)
 
-    constructor(string: String?, cause: Throwable?) : super(string, cause)
+	constructor(string: String?, cause: Throwable?) : super(string, cause)
 }

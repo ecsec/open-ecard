@@ -30,28 +30,31 @@ import org.openecard.common.apdu.PerformSecurityOperation
  * @author Moritz Horsch
  * @author Hans-Martin Haase
  */
-class PSOHash(p2: Byte, data: ByteArray?) : PerformSecurityOperation(0x90.toByte(), p2) {
-    /**
-     * Creates a new PSO Hash APDU.
-     * APDU: 0x00 0x2A 0x90 0x80|0xA0 Lc data
-     *
-     * @param data Data to be hashed or hash or parameters for the hash according to ISO7816-8 section 11.8.3.
-     * @param p2 P2 value according to ISO7816-98 section 11.8.3. The class provides two public variables for this
-     * purpose.
-     */
-    init {
-        setData(data)
-    }
+class PSOHash(
+	p2: Byte,
+	data: ByteArray?,
+) : PerformSecurityOperation(0x90.toByte(), p2) {
+	/**
+	 * Creates a new PSO Hash APDU.
+	 * APDU: 0x00 0x2A 0x90 0x80|0xA0 Lc data
+	 *
+	 * @param data Data to be hashed or hash or parameters for the hash according to ISO7816-8 section 11.8.3.
+	 * @param p2 P2 value according to ISO7816-98 section 11.8.3. The class provides two public variables for this
+	 * purpose.
+	 */
+	init {
+		setData(data)
+	}
 
-    companion object {
-        /**
-         * P2 value for complete hash generation on the card.
-         */
-        val P2_HASH_MESSAGE: Byte = 0x80.toByte()
+	companion object {
+		/**
+		 * P2 value for complete hash generation on the card.
+		 */
+		val P2_HASH_MESSAGE: Byte = 0x80.toByte()
 
-        /**
-         * P2 value for setting a HashValue or specific parameters.
-         */
-        val P2_SET_HASH_OR_PART: Byte = 0xA0.toByte()
-    }
+		/**
+		 * P2 value for setting a HashValue or specific parameters.
+		 */
+		val P2_SET_HASH_OR_PART: Byte = 0xA0.toByte()
+	}
 }

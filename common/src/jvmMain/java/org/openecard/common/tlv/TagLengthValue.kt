@@ -213,8 +213,13 @@ internal class TagLengthValue private constructor(
 				}
 			}
 
-			// extract data based on calculated length
-			val dataField = data.copyOfRange(numOctets, numOctets + dataLength)
+			val dataField: ByteArray
+			try {
+				// extract data based on calculated length
+				dataField = data.copyOfRange(numOctets, numOctets + dataLength)
+			} catch (ex: IndexOutOfBoundsException) {
+				throw TLVException("Data length and claimed length do not match.", ex)
+			}
 
 			// recalculate total length of datablock
 			numOctets = numOctets + dataLength

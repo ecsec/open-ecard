@@ -32,7 +32,7 @@ import org.openecard.gui.executor.StepActionResultStatus
 private val LOG = KotlinLogging.logger { }
 
 class WaitAction(
-	stepId: String?,
+	stepId: String,
 	private val sleepTime: Long,
 ) : StepAction(stepId) {
 	var startTime: Long = 0
@@ -41,8 +41,8 @@ class WaitAction(
 	constructor(step: Step, sleepTime: Long) : this(step.id, sleepTime)
 
 	override fun perform(
-		oldResults: Map<String, ExecutionResults>?,
-		result: StepResult?,
+		oldResults: Map<String, ExecutionResults>,
+		result: StepResult,
 	): StepActionResult {
 		LOG.info { "sleeping for $sleepTime ms." }
 		startTime = System.currentTimeMillis()

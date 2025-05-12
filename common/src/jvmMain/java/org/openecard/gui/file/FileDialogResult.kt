@@ -23,7 +23,6 @@ package org.openecard.gui.file
 
 import java.io.File
 import java.io.Serializable
-import java.util.Collections
 
 /**
  * Result class of the file dialog.
@@ -34,7 +33,7 @@ import java.util.Collections
 class FileDialogResult(
 	selectedFiles: List<File>? = null,
 ) : Serializable {
-	private var selectedFiles: List<File>
+	var selectedFiles: List<File>
 
 	/**
 	 * Creates a result with status OK.
@@ -71,11 +70,4 @@ class FileDialogResult(
 		 * @return `true` if the dialog was cancelled and no file was selected, `false` otherwise.
 		 */
 		get() = selectedFiles.isEmpty()
-
-	/**
-	 * Returns the list of selected files.
-	 *
-	 * @return The list of selected files if the result of the dialog was OK, an empty list otherwise.
-	 */
-	fun getSelectedFiles(): List<File> = Collections.unmodifiableList(selectedFiles)
 }

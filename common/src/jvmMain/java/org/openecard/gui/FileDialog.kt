@@ -134,7 +134,7 @@ interface FileDialog {
 	 *
 	 * @return Result containing the outcome of the dialog and a list of files if the dialog was not canceled.
 	 */
-	fun showOpen(): FileDialogResult?
+	fun showOpen(): FileDialogResult
 
 	/**
 	 * Shows a 'Save File' dialog.

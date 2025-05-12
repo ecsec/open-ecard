@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2014 ecsec GmbH.
+ * Copyright (C) 2013-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -25,12 +25,27 @@ package org.openecard.richclient.gui.manage
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.I18n
-import org.openecard.richclient.gui.graphics.GraphicsUtil
-import org.openecard.richclient.gui.graphics.OecLogo
-import java.awt.*
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
+import java.awt.AlphaComposite
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Graphics2D
+import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.IOException
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JSeparator
+import javax.swing.JTabbedPane
+import javax.swing.ScrollPaneConstants
+import javax.swing.SwingConstants
 import javax.swing.border.Border
 import javax.swing.border.EmptyBorder
 
@@ -206,8 +221,8 @@ open class AddonPanel : JPanel {
 	private val defaultLogo: Image
 		get() {
 			val original: Image =
-				GraphicsUtil.createImage(
-					OecLogo::class.java,
+				oecImage(
+					OecIconType.COLORED,
 					LOGO_WIDTH,
 					LOGO_HEIGHT,
 				)

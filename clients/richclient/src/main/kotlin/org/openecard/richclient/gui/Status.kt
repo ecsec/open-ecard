@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *

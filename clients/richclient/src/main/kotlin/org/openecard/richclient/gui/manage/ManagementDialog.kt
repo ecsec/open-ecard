@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2013-2018 ecsec GmbH.
+ * Copyright (C) 2013-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -35,20 +35,33 @@ import org.openecard.common.AppVersion
 import org.openecard.common.I18n
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.common.util.FileUtils.toByteArray
-import org.openecard.richclient.gui.graphics.GraphicsUtil
-import org.openecard.richclient.gui.graphics.OecLogo
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsPanel
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createConnectionSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createGeneralSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createLogSettingsAddon
 import org.openecard.richclient.gui.manage.core.AddonPanelBuilder.createMiddlewareSelectionAddon
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Image
+import java.awt.Insets
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import java.io.IOException
 import java.io.InputStream
-import javax.swing.*
+import javax.swing.Box
+import javax.swing.ImageIcon
+import javax.swing.JComponent
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JList
+import javax.swing.JPanel
+import javax.swing.ListSelectionModel
 import javax.swing.border.EmptyBorder
 import javax.swing.event.ListSelectionEvent
 import javax.swing.event.ListSelectionListener
@@ -88,7 +101,7 @@ class ManagementDialog(
 		cpReg = manager.builtinRegistry
 		fileReg = manager.externalRegistry
 
-		val logo: Image = GraphicsUtil.createImage(OecLogo::class.java, 147, 147)
+		val logo: Image = oecImage(OecIconType.COLORED, 147, 147)
 		iconImage = logo
 		setTitle(lang.translationForKey("addon.title", AppVersion.name))
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE)

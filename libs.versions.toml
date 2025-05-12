@@ -39,7 +39,10 @@ junit = "5.12.+"
 wiremock = "3.13.+"
 
 
+apache-batik="1.19"
+
 [libraries]
+apache-batik = {module = "org.apache.xmlgraphics:batik-all", version.ref="apache-batik"}
 ktlint-githubreporter = { module = "io.github.tobi2k:ktlint-gitlab-reporter", version.ref = "ktlint-githubreporter" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 

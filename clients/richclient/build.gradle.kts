@@ -30,6 +30,8 @@ application {
 }
 
 dependencies {
+
+	implementation(libs.apache.batik)
 	implementation(libs.kotlin.logging)
 	implementation(libs.logback.classic)
 	implementation(project(":crypto:tls"))

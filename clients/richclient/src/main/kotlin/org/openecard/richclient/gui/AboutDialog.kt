@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -26,8 +26,8 @@ import org.openecard.common.AppVersion
 import org.openecard.common.AppVersion.version
 import org.openecard.common.I18n
 import org.openecard.gui.swing.common.SwingUtils
-import org.openecard.richclient.gui.graphics.GraphicsUtil.createImage
-import org.openecard.richclient.gui.graphics.OecLogo
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font
@@ -53,7 +53,6 @@ import javax.swing.event.HyperlinkEvent
 import javax.swing.event.HyperlinkListener
 import javax.swing.text.html.HTMLDocument
 import javax.swing.text.html.HTMLEditorKit
-import kotlin.jvm.java
 
 private val LOG = KotlinLogging.logger { }
 
@@ -69,15 +68,12 @@ class AboutDialog private constructor() : JFrame() {
 	private val tabIndices = mutableMapOf<String, Int>()
 	private var tabbedPane = JTabbedPane(JTabbedPane.TOP)
 
-	/**
-	 * Creates a new instance of this class.
-	 */
 	init {
 		setupUI()
 	}
 
 	private fun setupUI() {
-		val logo = createImage(OecLogo::class.java, 147, 147)
+		val logo = oecImage(OecIconType.COLORED, 147, 147)
 
 		setSize(730, 480)
 		// use null layout with absolute positioning
@@ -106,6 +102,7 @@ class AboutDialog private constructor() : JFrame() {
 			JLabel().apply {
 				horizontalAlignment = SwingConstants.CENTER
 				icon = ImageIcon(logo)
+// 				add(t)
 				setBounds(12, 84, 155, 320)
 			}
 		contentPane.add(label)

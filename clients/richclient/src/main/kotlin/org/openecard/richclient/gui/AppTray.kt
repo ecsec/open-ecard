@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,13 +32,14 @@ import org.openecard.common.I18n
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
 import org.openecard.richclient.RichClient
-import org.openecard.richclient.gui.graphics.GraphicsUtil
-import org.openecard.richclient.gui.graphics.OecLogo
-import org.openecard.richclient.gui.graphics.OecLogoBlack
-import org.openecard.richclient.gui.graphics.OecLogoLoading
-import org.openecard.richclient.gui.graphics.OecLogoWhite
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
-import java.awt.*
+import java.awt.Color
+import java.awt.Container
+import java.awt.Dimension
+import java.awt.Frame
+import java.awt.Image
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
@@ -61,17 +62,13 @@ private const val ICON_LOGO: String = "logo"
  * This class creates a tray icon on systems that do have a system tray.
  * Otherwise a normal window will be shown.
  *
+ * @param client RichClient
+ *
  * @author Moritz Horsch
  * @author Johannes Schmölz
  * @author Tobias Wich
  */
-class AppTray
-/**
- * Constructor of AppTray class.
- *
- * @param client RichClient
- */
-(
+class AppTray(
 	private val client: RichClient,
 ) {
 	private val lang: I18n = I18n.getTranslation("richclient")
@@ -189,12 +186,12 @@ class AppTray
 
 	private fun setupFrame(standalone: Boolean): InfoFrame =
 		InfoFrame(lang.translationForKey("tray.title", name)).also { frame ->
-			frame.iconImage = GraphicsUtil.createImage(OecLogo::class.java, 256, 256)
+			frame.iconImage = oecImage(OecIconType.COLORED, 256, 256)
 
 			if (standalone) {
 				frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
-				val logo = ImageIcon(GraphicsUtil.createImage(OecLogo::class.java, 256, 256))
+				val logo = ImageIcon(oecImage(OecIconType.COLORED, 256, 256))
 				val label = JLabel(logo)
 				val c: Container = frame.contentPane
 				c.preferredSize = Dimension(logo.iconWidth, logo.iconHeight)
@@ -240,22 +237,22 @@ private fun getImageLinux(
 	dim: Dimension,
 ): Image =
 	if (name == ICON_LOADER) {
-		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
+		oecImage(OecIconType.GRAY, dim.width, dim.height)
 	} else {
-		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
+		oecImage(OecIconType.COLORED, dim.width, dim.height)
 	}
 
 private fun getImageMacOSX(
 	name: String,
 	dim: Dimension,
 ): Image {
-	val c =
+	val kind =
 		if (isMacMenuBarDarkMode()) {
-			OecLogoWhite::class.java
+			OecIconType.WHITE
 		} else {
-			OecLogoBlack::class.java
+			OecIconType.BLACK
 		}
-	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1)
+	return oecImage(kind, dim.width, dim.height)
 }
 
 private fun getImageDefault(
@@ -263,9 +260,9 @@ private fun getImageDefault(
 	dim: Dimension,
 ): Image =
 	if (name == ICON_LOADER) {
-		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
+		oecImage(OecIconType.GRAY, dim.width, dim.height)
 	} else {
-		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
+		oecImage(OecIconType.COLORED, dim.width, dim.height)
 	}
 
 private fun isMacMenuBarDarkMode(): Boolean {

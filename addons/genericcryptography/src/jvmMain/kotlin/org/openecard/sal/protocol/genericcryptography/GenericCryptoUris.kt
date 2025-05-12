@@ -52,6 +52,7 @@ object GenericCryptoUris {
 	 */
 	const val sigS_ISO9796_2: String = "urn:oid:1.3.36.3.4.2"
 
+	@Suppress("ktlint:standard:property-naming")
 	/**
 	 * 1.3.36.3.4.2.3.
 	 */

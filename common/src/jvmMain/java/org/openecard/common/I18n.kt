@@ -103,33 +103,15 @@ class I18n private constructor(
 		this.translation = defaults
 		if (!loadedDefaults && !loadedLang && !loadedCountry) {
 			logger.warn {
-				"${"The loaded resource '{}' does not contain any translation resources for 'C', '{}' or '{}'."} ${
-					arrayOf<Any?>(
-						component,
-						lang,
-						country,
-					)
-				}"
+				"The loaded resource '$component' does not contain any translation resources for 'C', '$lang' or '$country'."
 			}
 		} else if (loadedDefaults && !(loadedLang || loadedCountry)) {
 			logger.warn {
-				"${"The loaded resource '{}' contains only standard text for 'C' but not translations for '{}' or '{}'."} ${
-					arrayOf<Any?>(
-						component,
-						lang,
-						country,
-					)
-				}"
+				"The loaded resource '$component' contains only standard text for 'C' but not translations for '$lang' or '$country'."
 			}
 		} else if (!loadedDefaults && (loadedLang || loadedCountry)) {
 			logger.warn {
-				"${"The loaded resource '{}' contains translations for '{}' or '{}', but no standard text for 'C'."} ${
-					arrayOf<Any?>(
-						component,
-						lang,
-						country,
-					)
-				}"
+				"The loaded resource '$component' contains translations for '$lang' or '$country', but no standard text for 'C'."
 			}
 		}
 		this.translatedFiles = mutableMapOf()

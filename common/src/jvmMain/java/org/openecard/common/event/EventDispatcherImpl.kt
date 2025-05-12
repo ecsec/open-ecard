@@ -134,7 +134,7 @@ class EventDispatcherImpl : EventDispatcher {
 				for (filter in value) {
 					// when there is a filter match, then fire out the event (only once!)
 					if (filter.matches(t, o)) {
-						LOG.debug { "${"Sending event notification {} to EventCallback {}."} $t $cb" }
+						LOG.debug { "Sending event notification $t to EventCallback $cb." }
 						val executor = threadPools!![cb]
 						executor!!.execute { cb.signalEvent(t, o) }
 						break

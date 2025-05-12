@@ -63,7 +63,7 @@ object HttpRequestLineUtils {
 
 	@JvmStatic
 	@Throws(UnsupportedEncodingException::class)
-	fun transform(queryStr: String?): Map<String, String?> = transform(queryStr, "UTF-8")
+	fun transform(queryStr: String?): Map<String, String> = transform(queryStr, "UTF-8")
 
 	/**
 	 * Transform query parameters into a java map and URL decode the values.

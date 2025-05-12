@@ -19,7 +19,7 @@ package-osx:
       - clients/richclient/build/dist
   script:
     - !reference [.versioning, script]
-    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW}
+    - security unlock-keychain -p ${MAC_OS_KEYCHAIN_PW} ${MAC_SIGNING_KEYCHAIN}
     - ./gradlew packageMac --no-daemon
   needs: [ "compile" ]
   rules:

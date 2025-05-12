@@ -64,8 +64,9 @@ import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
-import java.util.UUID
 import kotlin.time.Duration
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -272,6 +273,7 @@ class CardLinkProcess(
 		return response.outputAPDU[0]
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	private fun waitForSessionInformation(
 		dynCtx: DynamicContext,
 		wsPair: WsPair,
@@ -295,7 +297,7 @@ class CardLinkProcess(
 				}
 			} else {
 				// we generate our own cardSessionId
-				val cardSessionId = UUID.randomUUID().toString()
+				val cardSessionId = Uuid.random().toString()
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
 				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, false)
 				logger.debug { "Received no or a malformed SessionInformation message. Using $cardSessionId as cardSessionId." }

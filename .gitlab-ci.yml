@@ -31,7 +31,6 @@ include:
 - '/.gitlab-ci.d/package-linux.yml'
 - '/.gitlab-ci.d/package-osx.yml'
 - '/.gitlab-ci.d/package-win.yml'
-- '/.gitlab-ci.d/package-ios-framework.yml'
 - '/.gitlab-ci.d/post-package.yml'
 - '/.gitlab-ci.d/deploy.yml'
 - '/.gitlab-ci.d/publish.yml'

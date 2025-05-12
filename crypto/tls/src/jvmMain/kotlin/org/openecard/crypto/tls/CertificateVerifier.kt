@@ -35,12 +35,12 @@ interface CertificateVerifier {
 	 * The verification must at least check the certificate chain and the hosts name.
 	 *
 	 * @param chain Certificate chain to be verified.
-	 * @param hostOrIP Name of the host or its IP address used in the validation.
+	 * @param hostOrIp Name of the host or its IP address used in the validation.
 	 * @throws CertificateVerificationException Thrown in case the verification failed.
 	 */
 	@Throws(CertificateVerificationException::class)
 	fun isValid(
 		chain: TlsServerCertificate,
-		hostOrIP: String,
+		hostOrIp: String,
 	)
 }

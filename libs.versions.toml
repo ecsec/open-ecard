@@ -1,20 +1,20 @@
 [versions]
-kotlin = "2.0.21"
+kotlin = "2.1.20"
 ktlint = "1.5.0"
 ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "12.2.+"
-kx-co = "1.9.+"
-kx-serde = "1.7.+"
+kx-co = "1.10.+"
+kx-serde = "1.8.+"
 kt-logging = "7.0.+"
 kx-datetime = "0.6.1"
 compose = "1.7.0"
 
-ktor = "2.3.+"
+ktor = "3.1.+"
 kover = "0.9.1"
 
 moko = "0.24.3"
 
-agp = "8.6+"
+agp = "8.7.+"
 androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
@@ -35,7 +35,8 @@ jwtkt = "1.1.0"
 
 jgit = "7.1.0.202411261347-r"
 
-wiremock = "3.9.2"
+junit = "5.12.+"
+wiremock = "3.13.+"
 
 
 [libraries]
@@ -83,6 +84,7 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 
 # testing
+junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.+" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
@@ -112,7 +114,7 @@ proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole
 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
-scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "24.09.26" }
+scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
 
 robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
 robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
@@ -143,6 +145,7 @@ test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-class
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidSdkLoader = { id = "com.quittle.setup-android-sdk", version = "3.1.0" }
 

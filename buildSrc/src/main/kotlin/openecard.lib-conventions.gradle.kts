@@ -1,10 +1,12 @@
+// Deprecated
+
 plugins {
 	`java-library`
 	id("openecard.publish-conventions")
 }
 
 val javaToolchain: String by project
-//java.sourceCompatibility = JavaVersion.VERSION_1_8
+// java.sourceCompatibility = JavaVersion.VERSION_1_8
 java {
 	toolchain {
 		languageVersion.set(JavaLanguageVersion.of(javaToolchain))
@@ -13,8 +15,7 @@ java {
 	withJavadocJar()
 }
 
-
-tasks.named<Test>("test") {
+tasks.withType<Test> {
 	useTestNG()
 }
 

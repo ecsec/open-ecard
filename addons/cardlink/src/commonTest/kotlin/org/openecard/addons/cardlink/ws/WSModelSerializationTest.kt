@@ -24,11 +24,11 @@ package org.openecard.addons.cardlink.ws
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -111,6 +111,7 @@ class WSModelSerializationTest {
 		logger.info { jsonString }
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	@Test(dataProvider = "egkPayloads")
 	fun testEgkEnvelopeSerialization(
 		egkPayload: CardLinkPayload,
@@ -119,7 +120,7 @@ class WSModelSerializationTest {
 		val egkEnvelope =
 			GematikEnvelope(
 				cardSessionId = "foobar",
-				correlationId = UUID.randomUUID().toString(),
+				correlationId = Uuid.random().toString(),
 				payload = egkPayload,
 			)
 		val jsonString = cardLinkJsonFormatter.encodeToString(egkEnvelope)

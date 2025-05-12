@@ -31,7 +31,7 @@ import org.testng.annotations.Test
 class ByteComparatorTest {
 	@Test
 	fun testCompare() {
-		val comp: Comparator<ByteArray?> = ByteComparator()
+		val comp = ByteComparator()
 		val a = byteArrayOf(0x00, 0x01, 0x02)
 		val b = byteArrayOf(0x03, 0x04, 0x05)
 		val c = byteArrayOf(0x00, 0x01, 0x02)

@@ -26,7 +26,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
-import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
@@ -49,8 +48,9 @@ import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
-import java.util.UUID
 import java.util.zip.GZIPInputStream
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -165,12 +165,13 @@ class CardLinkStep(
 		)
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	private fun sendEgkData(
 		regEgk: RegisterEgk,
 		cardSessionId: String,
 		ws: WsPair,
 	) {
-		val correlationId = UUID.randomUUID().toString()
+		val correlationId = Uuid.random().toString()
 		val egkEnvelope =
 			GematikEnvelope(
 				regEgk,

@@ -27,15 +27,11 @@ package org.openecard.common.apdu.common
  *
  * @author Tobias Wich
  */
-class BaseTemplateContext : HashMap<String?, Any?>() {
+class BaseTemplateContext : HashMap<String, Any>() {
 	/**
 	 * Provision the map with basic values and functions.
 	 */
 	init {
 		put("tlv", TLVFunction())
-	}
-
-	companion object {
-		private const val serialVersionUID = 1L
 	}
 }

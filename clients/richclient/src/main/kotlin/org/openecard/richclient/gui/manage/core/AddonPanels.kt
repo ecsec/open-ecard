@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2024 ecsec GmbH.
+ * Copyright (C) 2024-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -32,39 +32,45 @@ import javax.swing.ImageIcon
 object AddonPanelBuilder {
 	private val lang: I18n = I18n.getTranslation("addon")
 
-	fun createConnectionSettingsAddon() = AddonPanel(
-		ConnectionsSettingsPanel(),
-		lang.translationForKey("addon.list.core.connection"),
-		null,
-		loadImage("images/network-wired.png"),
-	)
+	fun createConnectionSettingsAddon() =
+		AddonPanel(
+			ConnectionsSettingsPanel(),
+			lang.translationForKey("addon.list.core.connection"),
+			null,
+			loadImage("images/network-wired.png"),
+		)
 
-	fun createGeneralSettingsAddon() = AddonPanel(
-		GeneralSettingsPanel(),
-		lang.translationForKey("addon.list.core.general"),
-		null,
-		loadImage("images/general.png"),
-	)
+	fun createGeneralSettingsAddon() =
+		AddonPanel(
+			GeneralSettingsPanel(),
+			lang.translationForKey("addon.list.core.general"),
+			null,
+			loadImage("images/general.png"),
+		)
 
-	fun createLogSettingsAddon() = AddonPanel(
-		LogSettingsPanel(),
-		lang.translationForKey("addon.list.core.logging"),
-		null,
-		loadImage("images/logging.png"),
-	)
+	fun createLogSettingsAddon() =
+		AddonPanel(
+			LogSettingsPanel(),
+			lang.translationForKey("addon.list.core.logging"),
+			null,
+			loadImage("images/logging.png"),
+		)
 
-	fun createMiddlewareSelectionAddon() = AddonPanel(
-		MiddlewareSelectionPanel(),
-		lang.translationForKey("addon.list.core.middleware"),
-		null,
-		null,
-	)
+	fun createMiddlewareSelectionAddon() =
+		AddonPanel(
+			MiddlewareSelectionPanel(),
+			lang.translationForKey("addon.list.core.middleware"),
+			null,
+			null,
+		)
 
 	private fun loadImage(fName: String): Image? {
 		try {
-			val imageData = resolveResourceAsStream(
-				javaClass, fName
-			)
+			val imageData =
+				resolveResourceAsStream(
+					javaClass,
+					fName,
+				)
 			return imageData?.let {
 				val icon: ImageIcon = ImageIcon(imageData.readAllBytes())
 				icon.image

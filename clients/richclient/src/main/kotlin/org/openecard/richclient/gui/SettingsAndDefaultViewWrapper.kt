@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2015-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -23,7 +23,6 @@
 package org.openecard.richclient.gui
 
 import org.openecard.addon.AddonManager
-import org.openecard.gui.about.AboutDialog
 import org.openecard.gui.definition.ViewController
 import org.openecard.richclient.gui.manage.ManagementDialog
 
@@ -33,17 +32,17 @@ import org.openecard.richclient.gui.manage.ManagementDialog
  * @author Hans-Martin Haase
  */
 class SettingsAndDefaultViewWrapper : ViewController {
-    private var manager: AddonManager? = null
+	private var manager: AddonManager? = null
 
-    override fun showSettingsUI() {
-        ManagementDialog.Companion.showDialog(manager!!)
-    }
+	override fun showSettingsUI() {
+		ManagementDialog.Companion.showDialog(manager!!)
+	}
 
-    override fun showDefaultViewUI() {
-        AboutDialog.showDialog()
-    }
+	override fun showDefaultViewUI() {
+		AboutDialog.showDialog()
+	}
 
-    fun setAddonManager(manager: AddonManager?) {
-        this.manager = manager
-    }
+	fun setAddonManager(manager: AddonManager?) {
+		this.manager = manager
+	}
 }

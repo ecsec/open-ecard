@@ -31,7 +31,6 @@ import org.openecard.common.tlv.Tag.Companion.INTEGER_TAG
 import org.openecard.common.tlv.Tag.Companion.OCTETSTRING_TAG
 import org.openecard.common.tlv.TagClass
 import org.openecard.common.util.ByteUtils.toInteger
-import java.util.LinkedList
 
 /**
  *
@@ -92,7 +91,7 @@ class CommonKeyAttributes
 			if (p.match(Tag(TagClass.CONTEXT, false, 1))) {
 				val list = TLVList(p.next(0)!!, Tag(TagClass.CONTEXT, false, 1).tagNumWithClass)
 				for (next in list.content) {
-					(algRefs as LinkedList<Int>).add(toInteger(next.value))
+					algRefs.add(toInteger(next.value))
 				}
 			}
 		}

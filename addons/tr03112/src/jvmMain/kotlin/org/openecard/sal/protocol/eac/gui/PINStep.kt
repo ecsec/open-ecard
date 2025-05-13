@@ -112,9 +112,9 @@ class PINStep(
 		getInputInfoUnits().add(description)
 
 		val pinInputField = PasswordField(PIN_FIELD)
-		pinInputField.setDescription(pinType)
-		pinInputField.setMinLength(paceMarker.getMinLength())
-		pinInputField.setMaxLength(paceMarker.getMaxLength())
+		pinInputField.description = pinType
+		pinInputField.minLength = paceMarker.getMinLength()
+		pinInputField.maxLength = paceMarker.getMaxLength()
 		getInputInfoUnits().add(pinInputField)
 
 		if (hasAttemptsCounter) {

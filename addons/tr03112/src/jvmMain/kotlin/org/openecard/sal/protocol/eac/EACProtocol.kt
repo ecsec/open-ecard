@@ -42,10 +42,10 @@ import javax.annotation.Nonnull
  */
 class EACProtocol : SALProtocolBaseImpl() {
 	@Throws(ActionInitializationException::class)
-	override fun init(ctx: Context) {
-		addOrderStep(PACEStep(ctx))
-		addOrderStep(TerminalAuthenticationStep(ctx))
-		addOrderStep(ChipAuthenticationStep(ctx))
+	override fun init(aCtx: Context) {
+		addOrderStep(PACEStep(aCtx))
+		addOrderStep(TerminalAuthenticationStep(aCtx))
+		addOrderStep(ChipAuthenticationStep(aCtx))
 	}
 
 	override fun destroy(force: Boolean) {

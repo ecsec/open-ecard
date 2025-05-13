@@ -57,7 +57,7 @@ class ErrorStep(
 		getInputInfoUnits().add(pinBlockedNote)
 
 		setAction(
-			object : StepAction(getID()) {
+			object : StepAction(id) {
 				override fun perform(
 					oldResults: MutableMap<String, ExecutionResults>,
 					result: StepResult?,

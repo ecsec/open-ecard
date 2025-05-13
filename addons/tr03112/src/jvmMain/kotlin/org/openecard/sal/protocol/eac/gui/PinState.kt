@@ -30,11 +30,11 @@ class PinState {
 
 	val attempts: Int
 		get() {
-			when (state) {
-				PacePinStatus.RC3 -> return 3
-				PacePinStatus.RC2 -> return 2
-				PacePinStatus.RC1 -> return 1
-				else -> return 0
+			return when (state) {
+				PacePinStatus.RC3 -> 3
+				PacePinStatus.RC2 -> 2
+				PacePinStatus.RC1 -> 1
+				else -> 0
 			}
 		}
 

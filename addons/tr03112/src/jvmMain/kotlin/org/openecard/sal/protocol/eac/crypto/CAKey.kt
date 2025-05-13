@@ -71,22 +71,21 @@ class CAKey(
 	 * @throws TLVException
 	 * @throws IllegalArgumentException
 	 */
-	fun decodePublicKey(data: ByteArray): ByteArray? {
-		val keyBytes: ByteArray?
-
-		if (data[0] == 0x7C.toByte()) {
-			keyBytes = TLV.fromBER(data).getChild().getValue()
-		} else if (data[0].toInt() != 4) {
-			keyBytes = ByteUtils.concatenate(0x04.toByte(), data)
-		} else {
-			keyBytes = data
-		}
+	fun decodePublicKey(data: ByteArray): ByteArray {
+		val keyBytes =
+			if (data[0] == 0x7C.toByte()) {
+				TLV.fromBER(data).getChild().value!!
+			} else if (data[0].toInt() != 4) {
+				ByteUtils.concatenate(0x04.toByte(), data)!!
+			} else {
+				data
+			}
 
 		if (cdp.isECDH) {
 			val p = cdp.parameter as ECParameterSpec
-			val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
+			val ecp = ECDomainParameters(p.curve, p.g, p.n, p.h)
 
-			val q = p.getCurve().decodePoint(keyBytes)
+			val q = p.curve.decodePoint(keyBytes)
 			pk = ECPublicKeyParameters(q, ecp)
 
 			return this.encodedPublicKey
@@ -106,20 +105,20 @@ class CAKey(
 		reseed()
 		if (cdp.isDH) {
 			val p = cdp.parameter as ElGamalParameterSpec
-			val numBits = p.getG().bitLength()
-			val d: BigInteger = BigInteger(numBits, RAND)
-			val egp = ElGamalParameters(p.getP(), p.getG())
+			val numBits = p.g.bitLength()
+			val d = BigInteger(numBits, RAND)
+			val egp = ElGamalParameters(p.p, p.g)
 
 			sk = ElGamalPrivateKeyParameters(d, egp)
-			pk = ElGamalPublicKeyParameters(egp.getG().multiply(d), egp)
+			pk = ElGamalPublicKeyParameters(egp.g.multiply(d), egp)
 		} else if (cdp.isECDH) {
 			val p = cdp.parameter as ECParameterSpec
-			val numBits = p.getN().bitLength()
-			val d: BigInteger = BigInteger(numBits, RAND)
-			val ecp = ECDomainParameters(p.getCurve(), p.getG(), p.getN(), p.getH())
+			val numBits = p.n.bitLength()
+			val d = BigInteger(numBits, RAND)
+			val ecp = ECDomainParameters(p.curve, p.g, p.n, p.h)
 
 			sk = ECPrivateKeyParameters(d, ecp)
-			pk = ECPublicKeyParameters(ecp.getG().multiply(d), ecp)
+			pk = ECPublicKeyParameters(ecp.g.multiply(d), ecp)
 		} else {
 			throw IllegalArgumentException()
 		}
@@ -133,17 +132,17 @@ class CAKey(
 		 */
 		get() = pk!!
 
-	val encodedPublicKey: ByteArray?
+	val encodedPublicKey: ByteArray
 		/**
 		 * Returns the byte encoded public key.
 		 *
 		 * @return Public key
 		 */
 		get() {
-			if (cdp.isDH) {
-				return (pk as ElGamalPublicKeyParameters).getY().toByteArray()
+			return if (cdp.isDH) {
+				(pk as ElGamalPublicKeyParameters).y.toByteArray()
 			} else if (cdp.isECDH) {
-				return (pk as ECPublicKeyParameters).getQ().getEncoded(false)
+				(pk as ECPublicKeyParameters).q.getEncoded(false)
 			} else {
 				throw IllegalArgumentException()
 			}
@@ -161,7 +160,7 @@ class CAKey(
 					val md = MessageDigest.getInstance("SHA-1")
 					val input =
 						(pk as ElGamalPublicKeyParameters)
-							.getY()
+							.y
 							.toByteArray()
 					val compKey = md.digest(input)
 
@@ -173,8 +172,8 @@ class CAKey(
 			} else if (cdp.isECDH) {
 				val compKey =
 					(pk as ECPublicKeyParameters)
-						.getQ()
-						.getAffineXCoord()
+						.q
+						.affineXCoord
 						.toBigInteger()
 						.toByteArray()
 				return ByteUtils.cutLeadingNullByte(compKey)
@@ -198,12 +197,12 @@ class CAKey(
 		 * @return Private key
 		 */
 		get() {
-			if (cdp.isDH) {
-				return (sk as ElGamalPrivateKeyParameters)
-					.getX()
+			return if (cdp.isDH) {
+				(sk as ElGamalPrivateKeyParameters)
+					.x
 					.toByteArray()
 			} else if (cdp.isECDH) {
-				return (sk as ECPrivateKeyParameters).getD().toByteArray()
+				(sk as ECPrivateKeyParameters).getD().toByteArray()
 			} else {
 				throw IllegalArgumentException()
 			}

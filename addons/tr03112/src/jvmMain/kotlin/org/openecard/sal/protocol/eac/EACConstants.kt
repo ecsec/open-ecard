@@ -21,24 +21,23 @@
  */
 package org.openecard.sal.protocol.eac
 
-
 /**
  * Defines constants for the EAC protocol.
  *
  * @author Moritz Horsch
  */
 object EACConstants {
-    // EF.CardSecurity file identifier
-    val EF_CARDSECURITY_FID: Short = 0x011D.toShort()
+	// EF.CardSecurity file identifier
+	val EF_CARDSECURITY_FID: Short = 0x011D.toShort()
 
-    // Internal data
-    const val IDATA_CERTIFICATES: String = "Certificates"
-    const val IDATA_AUTHENTICATED_AUXILIARY_DATA: String = "AuthenticatedAuxiliaryData"
-    const val IDATA_PK_PCD: String = "PKPCD"
-    const val IDATA_SECURITY_INFOS: String = "SecurityInfos"
-    const val IDATA_CURRENT_CAR: String = "CurrentCAR"
-    const val IDATA_PREVIOUS_CAR: String = "PreviousCAR"
-    const val IDATA_CHALLENGE: String = "Challenge"
-    const val IDATA_SIGNATURE: String = "Signature"
-    const val IDATA_TERMINAL_CERTIFICATE: String = "TerminalCertificate"
+	// Internal data
+	const val IDATA_CERTIFICATES: String = "Certificates"
+	const val IDATA_AUTHENTICATED_AUXILIARY_DATA: String = "AuthenticatedAuxiliaryData"
+	const val IDATA_PK_PCD: String = "PKPCD"
+	const val IDATA_SECURITY_INFOS: String = "SecurityInfos"
+	const val IDATA_CURRENT_CAR: String = "CurrentCAR"
+	const val IDATA_PREVIOUS_CAR: String = "PreviousCAR"
+	const val IDATA_CHALLENGE: String = "Challenge"
+	const val IDATA_SIGNATURE: String = "Signature"
+	const val IDATA_TERMINAL_CERTIFICATE: String = "TerminalCertificate"
 }

@@ -229,10 +229,10 @@ class PINStepAction(
 				),
 			)
 		} catch (ex: InterruptedException) {
-			logger.warn("PIN step action interrupted.", ex)
+			logger.warn(ex) { "PIN step action interrupted." }
 			return StepActionResult(StepActionResultStatus.CANCEL)
 		} catch (ex: PinOrCanEmptyException) {
-			logger.warn("PIN was empty", ex)
+			logger.warn(ex) { "PIN was empty" }
 			return StepActionResult(StepActionResultStatus.REPEAT)
 		}
 	}

@@ -60,9 +60,9 @@ class ChipAuthenticationStep(
 		internalData: MutableMap<String, Any?>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
-			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
-				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-				org.openecard.common.WSHelper
+			WSHelper.makeResponse(
+				DIDAuthenticateResponse::class.java,
+				WSHelper
 					.makeResultOK(),
 			)
 

@@ -48,11 +48,7 @@ private val LOG = KotlinLogging.logger { }
 class ProcessingStepAction(
 	step: Step,
 ) : StepAction(step) {
-	private val ctx: DynamicContext
-
-	init {
-		ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-	}
+	private val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
 
 	override fun perform(
 		oldResults: MutableMap<String?, ExecutionResults?>?,

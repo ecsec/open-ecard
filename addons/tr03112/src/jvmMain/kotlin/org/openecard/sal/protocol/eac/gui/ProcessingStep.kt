@@ -32,25 +32,25 @@ import org.openecard.gui.definition.Text
  * @author Tobias Wich
  */
 class ProcessingStep : Step(STEP_ID, lang.translationForKey(TITLE)) {
-    init {
-        setDescription(lang.translationForKey(STEP_DESCRIPTION))
-        setInstantReturn(true)
-        setReversible(false)
+	init {
+		description = lang.translationForKey(STEP_DESCRIPTION)
+		isInstantReturn = true
+		isReversible = false
 
-        val desc = Text()
-        desc.setText(lang.translationForKey(DESCRIPTION, name))
-        getInputInfoUnits().add(desc)
-    }
+		val desc = Text()
+		desc.setText(lang.translationForKey(DESCRIPTION, name))
+		getInputInfoUnits().add(desc)
+	}
 
-    companion object {
-        private val lang: I18n = I18n.getTranslation("eac")
+	companion object {
+		private val lang: I18n = I18n.getTranslation("eac")
 
-        // step id
-        const val STEP_ID: String = "PROTOCOL_GUI_STEP_PROCESSING"
+		// step id
+		const val STEP_ID: String = "PROTOCOL_GUI_STEP_PROCESSING"
 
-        // GUI translation constants
-        private const val TITLE = "step_processing_title"
-        private const val STEP_DESCRIPTION = "step_processing_step_description"
-        private const val DESCRIPTION = "step_processing_description"
-    }
+		// GUI translation constants
+		private const val TITLE = "step_processing_title"
+		private const val STEP_DESCRIPTION = "step_processing_step_description"
+		private const val DESCRIPTION = "step_processing_description"
+	}
 }

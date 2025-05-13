@@ -115,9 +115,9 @@ class PACEStep(
 
 		val didAuthenticate = request
 		val response: DIDAuthenticateResponse =
-			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
-				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-				org.openecard.common.WSHelper
+			WSHelper.makeResponse(
+				DIDAuthenticateResponse::class.java,
+				WSHelper
 					.makeResultOK(),
 			)
 
@@ -359,7 +359,7 @@ class PACEStep(
 			response.setResult(makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (e: ECardException) {
-			logger.error(e) { "${e.message}" }
+			logger.error(e) { e.message }
 			response.setResult(e.result)
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (ex: ElementParsingException) {

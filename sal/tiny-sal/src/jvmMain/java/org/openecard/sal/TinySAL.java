@@ -265,8 +265,8 @@ public class TinySAL implements SAL {
     public Set<String> supportedProtocols() {
 	TreeSet<String> protos = new TreeSet<>();
 	for (AddonSpecification aSpec : addonManager.getRegistry().listAddons()) {
-	    for (ProtocolPluginSpecification pSpec : aSpec.getSalActions()) {
-		protos.add(pSpec.getUri());
+	    for (ProtocolPluginSpecification pSpec : aSpec.salActions) {
+		protos.add(pSpec.uri);
 	    }
 	}
 	return protos;
@@ -2308,7 +2308,7 @@ public class TinySAL implements SAL {
      */
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException, IncorrectParameterException, NoSuchSession {
-	if (protocol.isFinished()) {
+	if (protocol.isFinished) {
 	    LOG.debug("SAL Protocol is finished, destroying protocol instance.");
 	    try {
 		StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
@@ -2333,7 +2333,7 @@ public class TinySAL implements SAL {
 		throw new UnknownProtocolException("The protocol URI '" + protocolURI + "' is not available.");
 	    }
 	}
-	protocol.getInternalData().put("cardState", stateEntry);
+	protocol.internalData.put("cardState", stateEntry);
 
 	return protocol;
     }

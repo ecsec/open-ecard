@@ -93,10 +93,10 @@ public class ActivateAction implements AppPluginAction {
     public void init(Context ctx) {
 	tokenHandler = new TCTokenHandler(ctx);
 	this.ctx = ctx;
-	gui = ctx.getUserConsent();
+	gui = ctx.userConsent;
 	dispatcher = ctx.getDispatcher();
-	manager = ctx.getManager();
-	settingsAndDefaultView = ctx.getViewController();
+	manager = ctx.manager;
+	settingsAndDefaultView = ctx.viewController;
 	try {
 	    AddonSpecification addonSpecStatus = manager.getRegistry().search("Status");
 	    statusAction = manager.getAppPluginAction(addonSpecStatus, "getStatus");

@@ -111,7 +111,7 @@ public class PACEStep implements ProtocolStep<DIDAuthenticate, DIDAuthenticateRe
     public PACEStep(Context ctx) {
 	this.addonCtx = ctx;
 	this.dispatcher = ctx.getDispatcher();
-	this.gui = ctx.getUserConsent();
+	this.gui = ctx.userConsent;
 	this.eventDispatcher = ctx.getEventDispatcher();
     }
 

@@ -111,8 +111,8 @@ public class TCTokenHandler {
     public TCTokenHandler(Context ctx) {
 	this.dispatcher = ctx.getDispatcher();
 	this.evtDispatcher = ctx.getEventDispatcher();
-	this.gui = ctx.getUserConsent();
-	this.manager = ctx.getManager();
+	this.gui = ctx.userConsent;
+	this.manager = ctx.manager;
 	pin = LANG_PACE.translationForKey("pin");
 	puk = LANG_PACE.translationForKey("puk");
 
@@ -506,8 +506,8 @@ public class TCTokenHandler {
 	AddonRegistry registry = manager.getRegistry();
 	Set<AddonSpecification> addons = registry.listAddons();
 	for (AddonSpecification addon : addons) {
-	    for (ProtocolPluginSpecification proto : addon.getSalActions()) {
-		result.add(proto.getUri());
+	    for (ProtocolPluginSpecification proto : addon.salActions) {
+		result.add(proto.uri);
 	    }
 	}
 

@@ -51,7 +51,6 @@ class PaceCardHelper(
 		ctx,
 		conHandle,
 	) {
-	@Throws(WSHelper.WSException::class)
 	fun getPaceMarker(
 		pinType: String,
 		cardType: String,
@@ -62,7 +61,6 @@ class PaceCardHelper(
 			getPaceMarkerFromCif(pinType, cardType)
 		}
 
-	@Throws(WSHelper.WSException::class)
 	private fun getPaceMarkerFromSal(pinType: String): PACEMarkerType {
 		val dg = DIDGet()
 		dg.connectionHandle = conHandle
@@ -98,7 +96,6 @@ class PaceCardHelper(
 		throw IllegalArgumentException(msg)
 	}
 
-	@get:Throws(WSHelper.WSException::class)
 	val isNativePinEntry: Boolean
 		/**
 		 * Check if the selected card reader supports PACE.
@@ -134,7 +131,6 @@ class PaceCardHelper(
 			return false
 		}
 
-	@get:Throws(WSHelper.WSException::class)
 	val pinStatus: PacePinStatus
 		get() {
 			val input = InputAPDUInfoType()

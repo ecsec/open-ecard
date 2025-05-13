@@ -43,7 +43,6 @@ import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.binding.tctoken.ex.NonGuiException
 import org.openecard.binding.tctoken.ex.ResultMinor
 import org.openecard.binding.tctoken.ex.SecurityViolationException
-import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
 import org.openecard.common.ECardConstants.BINDING_HTTP
@@ -62,7 +61,6 @@ import org.openecard.common.interfaces.EventDispatcher
 import org.openecard.common.util.FuturePromise
 import org.openecard.common.util.HandlerUtils
 import org.openecard.common.util.JAXPSchemaValidator
-import org.openecard.common.util.Pair
 import org.openecard.common.util.Promise
 import org.openecard.gui.UserConsent
 import org.openecard.gui.message.DialogType
@@ -167,16 +165,17 @@ class TCTokenHandler(
 		checkResult<CardApplicationPathResponse>(appPathRes)
 
 		val appConnect = CardApplicationConnect()
-		val pathRes: MutableList<CardApplicationPathType?>
-		pathRes = appPathRes.getCardAppPathResultSet().getCardApplicationPathResult()
-		appConnect.setCardApplicationPath(pathRes.get(0))
-		val appConnectRes: CardApplicationConnectResponse?
-		appConnectRes = dispatcher.safeDeliver(appConnect) as CardApplicationConnectResponse
+		val pathRes: MutableList<CardApplicationPathType> =
+			appPathRes
+				.getCardAppPathResultSet()
+				.getCardApplicationPathResult()
+		appConnect.setCardApplicationPath(pathRes[0])
+		val appConnectRes = dispatcher.safeDeliver(appConnect) as CardApplicationConnectResponse
 		// Update ConnectionHandle. It now includes a SlotHandle.
 		connectionHandle = appConnectRes.getConnectionHandle()
 
 		// Check CardApplicationConnectResponse
-		checkResult<CardApplicationConnectResponse>(appConnectRes)
+		checkResult(appConnectRes)
 
 		return connectionHandle
 	}
@@ -349,30 +348,40 @@ class TCTokenHandler(
 			}
 
 			LOG.debug(innerException) { "Processing InnerException." }
-			if (innerException is WSHelper.WSException) {
-				val ex = innerException
-				errorMsg = createResponseFromWsEx(ex, response)
-			} else if (innerException is PAOSConnectionException) {
-				response.setResult(
-					makeResultError(
-						ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
-						w.getLocalizedMessage(),
-					),
-				)
-				response.setAdditionalResultMinor(ECardConstants.Minor.Disp.COMM_ERROR)
-			} else if (innerException is InterruptedException) {
-				response.resultCode = BindingResultCode.INTERRUPTED
-				response.setResult(makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg))
-				response.setAdditionalResultMinor(ECardConstants.Minor.App.SESS_TERMINATED)
-			} else if (innerException is DocumentValidatorException) {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.SCHEMA_VALIDATION_FAILED)
-				// it is ridiculous, that this should be a client error, but the test spec demands this
-				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
-				response.setAdditionalResultMinor(ECardConstants.Minor.SAL.Support.SCHEMA_VAILD_FAILED)
-			} else {
-				errorMsg = createMessageFromUnknownError(w)
-				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
-				response.setAdditionalResultMinor(ECardConstants.Minor.App.UNKNOWN_ERROR)
+			when (innerException) {
+				is WSHelper.WSException -> {
+					val ex = innerException
+					errorMsg = createResponseFromWsEx(ex, response)
+				}
+
+				is PAOSConnectionException -> {
+					response.setResult(
+						makeResultError(
+							ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
+							w.getLocalizedMessage(),
+						),
+					)
+					response.setAdditionalResultMinor(ECardConstants.Minor.Disp.COMM_ERROR)
+				}
+
+				is InterruptedException -> {
+					response.resultCode = BindingResultCode.INTERRUPTED
+					response.setResult(makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg))
+					response.setAdditionalResultMinor(ECardConstants.Minor.App.SESS_TERMINATED)
+				}
+
+				is DocumentValidatorException -> {
+					errorMsg = LANG_TR.translationForKey(ErrorTranslations.SCHEMA_VALIDATION_FAILED)
+					// it is ridiculous, that this should be a client error, but the test spec demands this
+					response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
+					response.setAdditionalResultMinor(ECardConstants.Minor.SAL.Support.SCHEMA_VAILD_FAILED)
+				}
+
+				else -> {
+					errorMsg = createMessageFromUnknownError(w)
+					response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
+					response.setAdditionalResultMinor(ECardConstants.Minor.App.UNKNOWN_ERROR)
+				}
 			}
 
 			val paosAdditionalMinor = w.additionalResultMinor
@@ -654,8 +663,8 @@ class TCTokenHandler(
 // 		throw new IOException(msg);
 // 	    }
 				// determine redirect
-				val resultPoints: List<Pair<URL, TlsServerCertificate>> = ctx.certs
-				val last = resultPoints.get(resultPoints.size - 1)
+				val resultPoints = ctx.certs
+				val last = resultPoints[resultPoints.size - 1]
 				endpoint = last.p1
 				dynCtx.put(TR03112Keys.IS_REFRESH_URL_VALID, true)
 				LOG.debug { "${"Setting redirect address to '{}'."} $endpoint" }

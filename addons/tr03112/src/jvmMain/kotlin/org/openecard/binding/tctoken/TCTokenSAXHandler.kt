@@ -84,9 +84,9 @@ class TCTokenSAXHandler : DefaultHandler() {
 				if (!value.startsWith("https://") && !value.startsWith("http://")) {
 					// protocol relative or completely missing scheme
 					if (value.startsWith("//")) {
-						value = "https:" + value
+						value = "https:$value"
 					} else {
-						value = "https://" + value
+						value = "https://$value"
 					}
 				}
 			}

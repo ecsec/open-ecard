@@ -42,10 +42,6 @@ class TrResourceContextLoader : ResourceContextLoader() {
 				dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE)
 			val cardType = cardTypeP.derefNonblocking()
 			// verify when the value is not set or when no nPA is requested
-			if (cardType != null && NPA_CARD_TYPE != cardType) {
-				return true
-			} else {
-				return false
-			}
+			return cardType != null && NPA_CARD_TYPE != cardType
 		}
 }

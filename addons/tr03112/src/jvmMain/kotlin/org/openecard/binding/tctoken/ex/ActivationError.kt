@@ -76,7 +76,7 @@ abstract class ActivationError : I18nException {
 		cause,
 		*params,
 	) {
-		this.bindingResult = result.setResultMessage(getLocalizedMessage())
+		this.bindingResult = result.setResultMessage(localizedMessage)
 	}
 
 	companion object {

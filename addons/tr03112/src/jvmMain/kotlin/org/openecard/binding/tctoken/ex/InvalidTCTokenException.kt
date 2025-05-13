@@ -32,33 +32,36 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 open class InvalidTCTokenException : FatalActivationError {
-    constructor(msg: String) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg)
+	constructor(msg: String) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg)
 
-    constructor(msg: String, ex: Throwable?) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg, ex)
+	constructor(msg: String, ex: Throwable?) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), msg, ex)
 
-    constructor(key: I18nKey?, vararg params: Any?) : super(
-        BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE),
-        key,
-        *params
-    )
+	constructor(key: I18nKey?, vararg params: Any?) : super(
+		BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE),
+		key,
+		*params,
+	)
 
-    constructor(
-        key: I18nKey?,
-        cause: Throwable?,
-        vararg params: Any?
-    ) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), key, cause, *params)
+	constructor(
+		key: I18nKey?,
+		cause: Throwable?,
+		vararg params: Any?,
+	) : super(BindingResult(BindingResultCode.RESOURCE_UNAVAILABLE), key, cause, *params)
 
-    protected constructor(code: BindingResultCode, msg: String) : super(BindingResult(code), msg)
+	protected constructor(code: BindingResultCode, msg: String) : super(BindingResult(code), msg)
 
-    protected constructor(code: BindingResultCode, msg: String, ex: Throwable?) : super(BindingResult(code), msg, ex)
+	protected constructor(code: BindingResultCode, msg: String, ex: Throwable?) : super(BindingResult(code), msg, ex)
 
-    protected constructor(code: BindingResultCode, key: I18nKey?, vararg params: Any?) : super(
-        BindingResult(code),
-        key,
-        *params
-    )
+	protected constructor(code: BindingResultCode, key: I18nKey?, vararg params: Any?) : super(
+		BindingResult(code),
+		key,
+		*params,
+	)
 
-    protected constructor(code: BindingResultCode, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
-        BindingResult(code), key, cause, *params
-    )
+	protected constructor(code: BindingResultCode, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+		BindingResult(code),
+		key,
+		cause,
+		*params,
+	)
 }

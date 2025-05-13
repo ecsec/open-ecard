@@ -59,14 +59,14 @@ class TCTokenParser {
 		try {
 			saxFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
 		} catch (ex: ParserConfigurationException) {
-			logger.warn(ex.message, ex)
+			logger.warn(ex) { "${ex.message}" }
 			// Android doesn't support the corresponding xml feature
 			// TODO: translate when exception changes
 			// throw new IllegalArgumentException(lang.getOriginalMessage(UNSUPPORTED_FEATURE), ex);
 		} catch (ex: SAXNotRecognizedException) {
-			logger.warn(ex.message, ex)
+			logger.warn(ex) { "${ex.message}" }
 		} catch (ex: SAXNotSupportedException) {
-			logger.warn(ex.message, ex)
+			logger.warn(ex) { "${ex.message}" }
 		}
 	}
 
@@ -90,8 +90,8 @@ class TCTokenParser {
 		try {
 			// Parse TCTokens
 			val saxParser = saxFactory.newSAXParser()
-			val reader = saxParser.getXMLReader()
-			reader.setContentHandler(saxHandler)
+			val reader = saxParser.xmlReader
+			reader.contentHandler = saxHandler
 			val stream = LimitedInputStream(inputStream)
 			reader.parse(InputSource(stream))
 

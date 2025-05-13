@@ -54,12 +54,11 @@ class HttpGetTask(
 	private val connectionHandle: ConnectionHandleType,
 	private val tokenRequest: TCTokenRequest,
 ) : Callable<StartPAOSResponse?> {
-	private val ctxHandle: ByteArray?
+	private val ctxHandle: ByteArray? = connectionHandle.getContextHandle()
 
 	private val credentialFac: BaseSmartCardCredentialFactory?
 
 	init {
-		this.ctxHandle = connectionHandle.getContextHandle()
 		this.credentialFac = makeSmartcardCredentialFactory()
 	}
 

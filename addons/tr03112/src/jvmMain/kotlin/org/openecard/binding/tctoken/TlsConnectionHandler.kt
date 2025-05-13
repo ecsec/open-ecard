@@ -75,15 +75,15 @@ class TlsConnectionHandler(
 
 			sessionId = token.getSessionIdentifier()
 			serverAddress = URL(token.getServerAddress())
-			val serverHost = serverAddress!!.getHost()
+			val serverHost = serverAddress!!.host
 
 			// extract connection parameters from endpoint
-			hostname = serverAddress!!.getHost()
-			port = serverAddress!!.getPort()
+			hostname = serverAddress!!.host
+			port = serverAddress!!.port
 			if (port == -1) {
-				port = serverAddress!!.getDefaultPort()
+				port = serverAddress!!.defaultPort
 			}
-			resource = serverAddress!!.getFile()
+			resource = serverAddress!!.file
 			resource = if (resource!!.isEmpty()) "/" else resource
 
 			val secProto = token.getPathSecurityProtocol()
@@ -158,10 +158,10 @@ class TlsConnectionHandler(
 		} else {
 			// if something fucks up the channel we may try session resumption
 			val proto = tokenRequest.tokenContext.tlsClientProto
-			if (proto!!.isClosed) {
-				return createNewTlsConnection(tlsVersion)
+			return if (proto!!.isClosed) {
+				createNewTlsConnection(tlsVersion)
 			} else {
-				return proto
+				proto
 			}
 		}
 	}

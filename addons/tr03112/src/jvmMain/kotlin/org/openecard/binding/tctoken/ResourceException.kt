@@ -25,6 +25,8 @@ import org.openecard.common.I18n
 import org.openecard.common.I18nException
 import org.openecard.common.I18nKey
 
+private val lang: I18n = I18n.getTranslation("tr03112")
+
 /**
  *
  * @author Tobias Wich
@@ -37,8 +39,4 @@ class ResourceException : I18nException {
 	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
 
 	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
-
-	companion object {
-		protected val lang: I18n = I18n.getTranslation("tr03112")
-	}
 }

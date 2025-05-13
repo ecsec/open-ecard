@@ -241,7 +241,7 @@ class TCTokenVerifier(
 					return true
 				}
 			} else if (value is ByteArray) {
-				if (value.size == 0) {
+				if (value.isEmpty()) {
 					return true
 				}
 			}
@@ -396,7 +396,6 @@ class TCTokenVerifier(
 				val refreshUrl: String? = resAddr.toString()
 
 				if (ex is UserCancellationException) {
-					val uex = ex
 					val refreshUrlAsUrl =
 						createUrlWithErrorParams(
 							refreshUrl,

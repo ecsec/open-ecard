@@ -31,19 +31,19 @@ import org.openecard.common.I18nKey
  * @author Tobias Wich
  */
 class InvalidRedirectUrlException : FatalActivationError {
-    constructor(msg: String) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), msg)
+	constructor(msg: String) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), msg)
 
-    constructor(msg: String, ex: Throwable?) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), msg, ex)
+	constructor(msg: String, ex: Throwable?) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), msg, ex)
 
-    constructor(key: I18nKey?, vararg params: Any?) : super(
-        BindingResult(BindingResultCode.WRONG_PARAMETER),
-        key,
-        *params
-    )
+	constructor(key: I18nKey?, vararg params: Any?) : super(
+		BindingResult(BindingResultCode.WRONG_PARAMETER),
+		key,
+		*params,
+	)
 
-    constructor(
-        key: I18nKey?,
-        cause: Throwable?,
-        vararg params: Any?
-    ) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), key, cause, *params)
+	constructor(
+		key: I18nKey?,
+		cause: Throwable?,
+		vararg params: Any?,
+	) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), key, cause, *params)
 }

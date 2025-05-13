@@ -231,17 +231,17 @@ class PACEStep(
 							try {
 								guiResult = exec.process()
 							} catch (ex: ThreadTerminateException) {
-								logger.debug("GUI executer has been terminated.")
+								logger.debug { "GUI executer has been terminated." }
 								guiResult = ResultStatus.INTERRUPTED
 							}
 
 							if (guiResult == ResultStatus.CANCEL || guiResult == ResultStatus.INTERRUPTED) {
-								logger.debug("EAC GUI returned with CANCEL or INTERRUPTED.")
+								logger.debug { "EAC GUI returned with CANCEL or INTERRUPTED." }
 								dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 								val paceErrorPromise = dynCtx2.getPromise(EACProtocol.Companion.PACE_EXCEPTION)
 								val paceError = paceErrorPromise.derefNonblocking()
 								if (!paceErrorPromise.isDelivered()) {
-									logger.debug("Setting PACE result to cancelled.")
+									logger.debug { "Setting PACE result to cancelled." }
 									paceErrorPromise.deliver(
 										createException(
 											makeResultError(
@@ -269,7 +269,7 @@ class PACEStep(
 									if (needsTermination && guiResult != ResultStatus.INTERRUPTED) {
 										val actThread = dynCtx2.get(TR03112Keys.ACTIVATION_THREAD) as Thread?
 										if (actThread != null) {
-											logger.debug("Interrupting activation thread.")
+											logger.debug { "Interrupting activation thread." }
 											actThread.interrupt()
 										}
 									}
@@ -288,9 +288,9 @@ class PACEStep(
 			if (pPaceError != null) {
 				if (logger.isDebugEnabled()) {
 					if (pPaceError is Throwable) {
-						logger.debug("Received error object from GUI.", pPaceError)
+						logger.debug(pPaceError) { "Received error object from GUI." }
 					} else {
-						logger.debug("Received error object from GUI: {}", pPaceError)
+						logger.debug { "Received error object from GUI: $pPaceError" }
 					}
 				}
 
@@ -309,7 +309,7 @@ class PACEStep(
 					return response
 				}
 			} else {
-				logger.debug("No error returned returned during PACE execution in GUI.")
+				logger.debug { "No error returned returned during PACE execution in GUI." }
 			}
 
 			// get challenge from card
@@ -354,28 +354,26 @@ class PACEStep(
 			response.setResult(makeResultOK())
 			response.setAuthenticationProtocolData(eac1Output.authDataType)
 		} catch (ex: CertificateException) {
-			logger.error(ex.message, ex)
+			logger.error(ex) { "${ex.message}" }
 			val msg = ex.message
 			response.setResult(makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (e: ECardException) {
-			logger.error(e.message, e)
+			logger.error(e) { "${e.message}" }
 			response.setResult(e.result)
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (ex: ElementParsingException) {
-			logger.error(ex.message, ex)
+			logger.error(ex) { "${ex.message}" }
 			response.setResult(makeResultError(ECardConstants.Minor.App.INCORRECT_PARM, ex.message))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (e: InterruptedException) {
-			logger.warn(e.message, e)
+			logger.warn(e) { "${e.message}" }
 			response.setResult(makeResultUnknownError(e.message))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 			val guiThread = dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD) as Thread?
-			if (guiThread != null) {
-				guiThread.interrupt()
-			}
+			guiThread?.interrupt()
 		} catch (e: Exception) {
-			logger.error(e.message, e)
+			logger.error(e) { "${e.message}" }
 			response.setResult(makeResultUnknownError(e.message))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		}
@@ -430,7 +428,7 @@ class PACEStep(
 				return r
 			}
 		} else {
-			logger.warn("Checks according to BSI TR03112 3.4.4 skipped.")
+			logger.warn { "Checks according to BSI TR03112 3.4.4 skipped." }
 		}
 
 		// all checks passed
@@ -447,11 +445,11 @@ class PACEStep(
 				val subjectURL = URL(certDescription.subjectURL)
 				return TR03112Utils.checkSameOriginPolicy(tcTokenURL, subjectURL)
 			} catch (e: MalformedURLException) {
-				logger.error("SubjectURL in CertificateDescription is not a well formed URL.")
+				logger.error { "SubjectURL in CertificateDescription is not a well formed URL." }
 				return false
 			}
 		} else {
-			logger.error("No TC Token URL set in Dynamic Context.")
+			logger.error { "No TC Token URL set in Dynamic Context." }
 			return false
 		}
 	}

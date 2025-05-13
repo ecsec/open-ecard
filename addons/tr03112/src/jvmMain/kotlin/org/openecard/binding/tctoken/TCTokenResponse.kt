@@ -100,7 +100,6 @@ class TCTokenResponse : BindingResult() {
 		/**
 		 * Sets the refresh address in the underlying TCToken.
 		 *
-		 * @param addr The new refresh address.
 		 */
 		set(addr) {
 			token!!.setRefreshAddress(addr)

@@ -129,7 +129,7 @@ class ListCertificates(
 							result.add(certInfo)
 						} catch (ex: UnsupportedAlgorithmException) {
 							// ignore this DID
-							logger.warn("Ignoring DID with unsupported algorithm ${algInfo?.algorithmIdentifier?.algorithm}).")
+							logger.warn { "Ignoring DID with unsupported algorithm ${algInfo?.algorithmIdentifier?.algorithm})." }
 						}
 					}
 				}
@@ -165,7 +165,7 @@ class ListCertificates(
 				when (val cause = ex.cause) {
 					is InterruptedException, is ThreadTerminateException -> {
 						val msg = "Certificate retrieval interrupted."
-						logger.debug(msg, ex)
+						logger.debug(ex) { msg }
 						throw ThreadTerminateException(msg)
 					}
 					else -> {

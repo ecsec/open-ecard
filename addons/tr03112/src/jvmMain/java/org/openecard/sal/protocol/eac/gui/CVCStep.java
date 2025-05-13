@@ -83,14 +83,14 @@ public class CVCStep extends Step {
 
 	// SubjectName
 	ToggleText subjectName = new ToggleText();
-	subjectName.setID("SubjectName");
+	subjectName.setId("SubjectName");
 	subjectName.setTitle(LANG.translationForKey(SUBJECT_NAME));
 	subjectName.setText(eacData.certificateDescription.getSubjectName());
 	getInputInfoUnits().add(subjectName);
 
 	// SubjectURL
 	ToggleText subjectURL = new ToggleText();
-	subjectURL.setID("SubjectURL");
+	subjectURL.setId("SubjectURL");
 	subjectURL.setTitle(LANG.translationForKey(SUBJECT_URL));
 	if (eacData.certificateDescription.getSubjectURL() != null) {
 	    subjectURL.setText(eacData.certificateDescription.getSubjectURL());
@@ -101,7 +101,7 @@ public class CVCStep extends Step {
 
 	// TermsOfUsage
 	ToggleText termsOfUsage = new ToggleText();
-	termsOfUsage.setID("TermsOfUsage");
+	termsOfUsage.setId("TermsOfUsage");
 	termsOfUsage.setTitle(LANG.translationForKey(TERMS_OF_USAGE));
 	Document doc = new Document();
 	doc.setMimeType(eacData.certificateDescription.getTermsOfUsageMimeType());
@@ -127,7 +127,7 @@ public class CVCStep extends Step {
 	sb.append(dateFormat.format(eacData.certificate.getExpirationDate().getTime()));
 
 	ToggleText validity = new ToggleText();
-	validity.setID("Validity");
+	validity.setId("Validity");
 	validity.setTitle(LANG.translationForKey(VALIDITY));
 	validity.setText(sb.toString());
 	validity.setCollapsed(true);
@@ -135,7 +135,7 @@ public class CVCStep extends Step {
 
 	// IssuerName
 	ToggleText issuerName = new ToggleText();
-	issuerName.setID("IssuerName");
+	issuerName.setId("IssuerName");
 	issuerName.setTitle(LANG.translationForKey(ISSUER_NAME));
 	issuerName.setText(eacData.certificateDescription.getIssuerName());
 	issuerName.setCollapsed(true);
@@ -143,7 +143,7 @@ public class CVCStep extends Step {
 
 	// IssuerURL
 	ToggleText issuerURL = new ToggleText();
-	issuerURL.setID("IssuerURL");
+	issuerURL.setId("IssuerURL");
 	issuerURL.setTitle(LANG.translationForKey(ISSUER_URL));
 	// issuer url is optional so perform a null check
 	if (eacData.certificateDescription.getIssuerURL() != null) {

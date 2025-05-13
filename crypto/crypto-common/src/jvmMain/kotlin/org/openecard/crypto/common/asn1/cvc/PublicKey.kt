@@ -68,7 +68,7 @@ abstract class PublicKey {
 		 * @throws Exception
 		 */
 		@Throws(Exception::class)
-		fun getInstance(key: ByteArray?): PublicKey = getInstance(TLV.fromBER(key))
+		fun getInstance(key: ByteArray): PublicKey = getInstance(TLV.fromBER(key))
 
 		/**
 		 * Creates a new public key.

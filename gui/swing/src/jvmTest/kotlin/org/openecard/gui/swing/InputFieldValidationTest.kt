@@ -47,26 +47,25 @@ class InputFieldValidationTest {
 		exec.process()
 	}
 
-	private fun createNavigator(waitAction: StepAction?): UserConsentNavigator {
+	private fun createNavigator(waitAction: StepAction): UserConsentNavigator {
 		// create step
 		val ucd = UserConsentDescription("consent title")
 
 		val s = Step("step title")
-		ucd.getSteps().add(s)
+		ucd.steps.add(s)
 		s.id = "step1"
 
-		s.setAction(waitAction)
+		s.action = waitAction
 		val desc1 = Text()
-		s.getInputInfoUnits().add(desc1)
-		desc1.setText(
+		s.inputInfoUnits.add(desc1)
+		desc1.text =
 			"This test shows a text input field to the user with a minimum length of 4 and a maximum " +
-				"length of 6 to test the input validation.",
-		)
+			"length of 6 to test the input validation."
 
 		val input = TextField("input1")
 		input.maxLength = 6
 		input.minLength = 4
-		s.getInputInfoUnits().add(input)
+		s.inputInfoUnits.add(input)
 
 		val sc = SwingUserConsent(SwingDialogWrapper())
 		return sc.obtainNavigator(ucd)

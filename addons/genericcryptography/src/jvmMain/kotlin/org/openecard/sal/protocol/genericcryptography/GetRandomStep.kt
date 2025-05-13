@@ -38,7 +38,7 @@ import org.openecard.common.interfaces.Dispatcher
  */
 class GetRandomStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<GetRandom?, GetRandomResponse?> {
+) : ProtocolStep<GetRandom, GetRandomResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.GetRandom
 
 	// TODO Implement me

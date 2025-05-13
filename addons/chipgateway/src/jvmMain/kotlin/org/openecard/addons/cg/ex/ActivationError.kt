@@ -43,15 +43,15 @@ abstract class ActivationError : I18nException {
 		bindingResult = result.setResultMessage(localizedMessage)
 	}
 
-	constructor(result: BindingResult, cause: Throwable?) : super(cause) {
+	constructor(result: BindingResult, cause: Throwable) : super(cause) {
 		bindingResult = result.setResultMessage(localizedMessage)
 	}
 
-	constructor(result: BindingResult, key: I18nKey?, vararg params: Any?) : super(LANG, key, *params) {
+	constructor(result: BindingResult, key: I18nKey, vararg params: Any?) : super(LANG, key, *params) {
 		bindingResult = result.setResultMessage(localizedMessage)
 	}
 
-	constructor(result: BindingResult, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+	constructor(result: BindingResult, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
 		LANG,
 		key,
 		cause,

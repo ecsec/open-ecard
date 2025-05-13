@@ -67,23 +67,23 @@ class VersionUpdateLoader internal constructor(private val updateUrl: String, pr
 
         @Throws(MalformedURLException::class)
         private fun getUpdateUrl(): String {
-            val url = OpenecardProperties.getProperty("release-info.location")
+            val url = OpenecardProperties.getProperty("release-info.location")!!
             return url
         }
 
         private fun getPkgType(): ArtifactType? {
-            return if (SysUtils.isWin() && SysUtils.is64bit()) {
+            return if (SysUtils.isWin && SysUtils.is64bit()) {
                 ArtifactType.EXE
-            } else if (SysUtils.isWin()) {
+            } else if (SysUtils.isWin) {
 				// win 32 is not supported anymore
                 null
-            } else if (SysUtils.isDebianOrDerivate()) {
+            } else if (SysUtils.isDebianOrDerivate) {
                 ArtifactType.DEB
-            } else if (SysUtils.isRedhatOrDerivate()) {
+            } else if (SysUtils.isRedhatOrDerivate) {
                 ArtifactType.RPM
-            } else if (SysUtils.isSuSEOrDerivate()) {
+            } else if (SysUtils.isSuSEOrDerivate) {
                 ArtifactType.RPM
-            } else if (SysUtils.isMacOSX()) {
+            } else if (SysUtils.isMacOSX) {
                 ArtifactType.DMG
             } else {
 				null

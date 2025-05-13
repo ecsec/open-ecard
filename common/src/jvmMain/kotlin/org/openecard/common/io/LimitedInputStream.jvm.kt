@@ -32,7 +32,7 @@ import java.io.InputStream
  * @author Moritz Horsch
  */
 class LimitedInputStream
-/**
+	/**
 	 * Creates a new limited input stream.
 	 *
 	 * @param inputStream Input stream

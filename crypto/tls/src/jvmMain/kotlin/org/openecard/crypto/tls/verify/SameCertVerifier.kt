@@ -41,7 +41,7 @@ class SameCertVerifier : CertificateVerifier {
 	@Throws(CertificateVerificationException::class)
 	override fun isValid(
 		serverCertificate: TlsServerCertificate,
-		hostOrIP: String,
+		hostOrIp: String,
 	) {
 		if (firstCert == null) {
 			firstCert = serverCertificate

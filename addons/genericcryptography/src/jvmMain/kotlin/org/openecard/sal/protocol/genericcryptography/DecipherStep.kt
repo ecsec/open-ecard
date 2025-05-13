@@ -53,12 +53,12 @@ private val logger = KotlinLogging.logger { }
  */
 class DecipherStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<Decipher?, DecipherResponse?> {
+) : ProtocolStep<Decipher, DecipherResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.Decipher
 
 	override fun perform(
-		request: Decipher?,
-		internalData: Map<String, Any>?,
+		request: Decipher,
+		internalData: Map<String, Any>,
 	): DecipherResponse? {
 		val response: DecipherResponse =
 			WSHelper.makeResponse<Class<DecipherResponse>, DecipherResponse>(
@@ -129,7 +129,7 @@ class DecipherStep(
 				val ciphertextblock = ByteUtils.copy(ciphertext, offset, blocksize)
 				apdu = PSODecipher(ByteUtils.concatenate(PADDING_INDICATOR_BYTE, ciphertextblock), blocksize.toByte())
 				val responseAPDU = apdu.transmit(dispatcher, slotHandle)
-				baos.addAll(responseAPDU.getData().asList())
+				baos.addAll(responseAPDU.data.asList())
 				offset += blocksize
 			}
 

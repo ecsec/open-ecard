@@ -35,14 +35,14 @@ class InvalidRedirectUrlException : FatalActivationError {
 
 	constructor(msg: String, ex: Throwable?) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), msg, ex)
 
-	constructor(key: I18nKey?, vararg params: Any?) : super(
+	constructor(key: I18nKey, vararg params: Any?) : super(
 		BindingResult(BindingResultCode.WRONG_PARAMETER),
 		key,
 		*params,
 	)
 
 	constructor(
-		key: I18nKey?,
+		key: I18nKey,
 		cause: Throwable?,
 		vararg params: Any?,
 	) : super(BindingResult(BindingResultCode.WRONG_PARAMETER), key, cause, *params)

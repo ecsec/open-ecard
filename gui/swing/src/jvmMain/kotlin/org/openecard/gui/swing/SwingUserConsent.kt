@@ -72,7 +72,7 @@ class SwingUserConsent(
 		}
 
 		val dialogType = parameters.dialogType
-		val steps = parameters.getSteps()
+		val steps = parameters.steps
 
 		// Set up panels
 		val stepPanel = JPanel(BorderLayout())

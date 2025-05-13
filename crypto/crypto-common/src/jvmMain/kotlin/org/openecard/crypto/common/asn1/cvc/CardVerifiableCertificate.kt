@@ -121,7 +121,7 @@ class CardVerifiableCertificate(
 			signature = signatureObject.value
 
 			// Certificate body elements
-			val bodyElements = bodyObject.getChild().asList()
+			val bodyElements = bodyObject.child!!.asList()
 
 			for (item in bodyElements) {
 				val itemTag = item.tagNumWithClass.toInt()

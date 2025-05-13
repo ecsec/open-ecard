@@ -58,7 +58,7 @@ object CardVerifiableCertificateVerifier {
 	) {
 		try {
 			val extentions = certificate.extensions
-			val extentionObject = TLV.fromBER(extentions)
+			val extentionObject = TLV.fromBER(extentions!!)
 			val list = extentionObject.asList()
 
 			for (item in list) {
@@ -73,7 +73,7 @@ object CardVerifiableCertificateVerifier {
 								certificate.getPublicKey().objectIdentifier,
 							)
 						val hash = md.digest(description.encoded)
-						if (!ByteUtils.compare(hash, hashObject.getValue())) {
+						if (!ByteUtils.compare(hash, hashObject.value)) {
 							throw CertificateException(
 								"The checksum of the certificate description cannot be verified!",
 							)

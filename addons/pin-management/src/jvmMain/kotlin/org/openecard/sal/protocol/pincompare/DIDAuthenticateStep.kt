@@ -37,7 +37,6 @@ import org.openecard.common.ECardException
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.makeResult
-import org.openecard.common.WSHelper.makeResultUnknownError
 import org.openecard.common.anytype.pin.PINCompareDIDAuthenticateInputType
 import org.openecard.common.anytype.pin.PINCompareMarkerType
 import org.openecard.common.apdu.common.CardResponseAPDU
@@ -64,12 +63,12 @@ private val logger = KotlinLogging.logger { }
  */
 class DIDAuthenticateStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<DIDAuthenticate?, DIDAuthenticateResponse?> {
+) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
 
 	override fun perform(
-		request: DIDAuthenticate?,
-		internalData: Map<String?, Any?>?,
+		request: DIDAuthenticate,
+		internalData: Map<String, Any>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
 			WSHelper.makeResponse(
@@ -78,12 +77,7 @@ class DIDAuthenticateStep(
 			)
 
 		val req =
-			request ?: run {
-				val msg = "request cannot be null"
-				logger.error { msg }
-				response.setResult(makeResultUnknownError(msg))
-				return response
-			}
+			request
 
 		var rawPIN: CharArray? = null
 		try {
@@ -112,11 +106,11 @@ class DIDAuthenticateStep(
 
 			val didStructure = cardStateEntry.getDIDStructure(didName, cardApplication)
 			val pinCompareMarker = PINCompareMarkerType(didStructure.didMarker)
-			val keyRef = pinCompareMarker.pinRef.keyRef[0]
+			val keyRef = pinCompareMarker.pINRef!!.keyRef[0]
 			val slotHandle = connectionHandle.slotHandle
-			val attributes = pinCompareMarker.passwordAttributes
-			rawPIN = pinCompareInput.pin
-			pinCompareInput.setPIN(null) // delete pin from memory of the structure
+			val attributes = pinCompareMarker.passwordAttributes!!
+			rawPIN = pinCompareInput.pIN
+			pinCompareInput.pIN = null // delete pin from memory of the structure
 			val template = byteArrayOf(0x00, 0x20, 0x00, keyRef)
 			var responseCode: ByteArray
 

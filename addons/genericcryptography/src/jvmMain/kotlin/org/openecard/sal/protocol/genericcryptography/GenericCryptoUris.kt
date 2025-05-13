@@ -45,15 +45,16 @@ object GenericCryptoUris {
 	 */
 	const val RSASSA_PSS_SHA256: String = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
 
+	@Suppress("ktlint:standard:property-naming")
 	/**
 	 * 1.3.36.3.4.2.
 	 * iso(1) identified-organization(3) teletrust(36) algorithm(3) signatureScheme(4) sigS-ISO9796-2(2)
 	 */
 	const val sigS_ISO9796_2: String = "urn:oid:1.3.36.3.4.2"
 
+	@Suppress("ktlint:standard:property-naming")
 	/**
 	 * 1.3.36.3.4.2.3.
 	 */
-	@JvmField
-	val sigS_ISO9796_2rnd: String = sigS_ISO9796_2 + ".3"
+	const val sigS_ISO9796_2rnd: String = sigS_ISO9796_2 + ".3"
 }

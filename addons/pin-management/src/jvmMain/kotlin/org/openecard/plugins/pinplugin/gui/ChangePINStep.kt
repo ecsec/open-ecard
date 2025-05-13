@@ -40,7 +40,7 @@ import org.openecard.gui.definition.Text
  * @author Dirk Petrautzki
  */
 class ChangePINStep(
-	id: String?,
+	id: String,
 	title: String?,
 	capturePin: Boolean,
 	retryCounter: Int,
@@ -66,9 +66,9 @@ class ChangePINStep(
 
 			if (!capturePin) {
 				isInstantReturn = true
-				i1.setText(lang.translationForKey(PINSTEP_NATIVE_DESCRIPTION))
+				i1.text = lang.translationForKey(PINSTEP_NATIVE_DESCRIPTION)
 			} else {
-				i1.setText(lang.translationForKey(PINSTEP_DESCRIPTION))
+				i1.text = lang.translationForKey(PINSTEP_DESCRIPTION)
 
 				inputInfoUnits.add(
 					PasswordField(OLD_PIN_FIELD).apply {

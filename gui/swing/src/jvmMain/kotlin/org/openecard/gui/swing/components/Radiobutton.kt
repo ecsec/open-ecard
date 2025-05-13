@@ -50,11 +50,11 @@ class Radiobutton(
 
 		// create buttons and add to label, also copy items to result
 		val bg = ButtonGroup()
-		buttons = ArrayList<JRadioButton>(radio.getBoxItems().size)
-		for (next in radio.getBoxItems()) {
+		buttons = ArrayList<JRadioButton>(radio.boxItems.size)
+		for (next in radio.boxItems) {
 			// copy box item
 			val copy = BoxItem()
-			result.getBoxItems().add(copy)
+			result.boxItems.add(copy)
 			copy.name = next.name
 			copy.text = next.text
 			copy.isDisabled = next.isDisabled
@@ -95,7 +95,7 @@ class Radiobutton(
 			// loop over checkboxes and set checked values in result
 			for (i in buttons.indices) {
 				val component = buttons.get(i)
-				result.getBoxItems()[i].isChecked = component.isSelected
+				result.boxItems[i].isChecked = component.isSelected
 			}
 			return result
 		}

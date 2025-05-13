@@ -248,7 +248,7 @@ class PINCompareProtocolTest {
 			PINCompareMarkerType(
 				result.didStructure.didMarker as PinCompareMarkerType,
 			)
-		Assert.assertEquals(ByteUtils.toHexString(pinCompareMarkerType.pinRef.keyRef), "02")
+		Assert.assertEquals(ByteUtils.toHexString(pinCompareMarkerType.pINRef!!.keyRef), "02")
 
 		// test with given correct scope
 		didGet =
@@ -264,7 +264,7 @@ class PINCompareProtocolTest {
 		Assert.assertEquals(result.didStructure.didMarker.javaClass, PinCompareMarkerType::class.java)
 
 		pinCompareMarkerType = PINCompareMarkerType(result.didStructure.didMarker as PinCompareMarkerType)
-		Assert.assertEquals(ByteUtils.toHexString(pinCompareMarkerType.pinRef.keyRef), "02")
+		Assert.assertEquals(ByteUtils.toHexString(pinCompareMarkerType.pINRef!!.keyRef), "02")
 
 		cardApplicationPath =
 			CardApplicationPath().apply {

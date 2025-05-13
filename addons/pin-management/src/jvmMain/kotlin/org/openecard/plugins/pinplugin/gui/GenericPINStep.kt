@@ -37,7 +37,7 @@ import org.openecard.plugins.pinplugin.RecognizedState
  * @author Tobias Wich
  */
 class GenericPINStep(
-	id: String?,
+	id: String,
 	title: String?,
 	private val cardCapturer: CardCapturer,
 ) : Step(id, title) {
@@ -229,7 +229,7 @@ class GenericPINStep(
 		val i1 = Text()
 		inputInfoUnits.add(i1)
 
-		i1.setText(lang.translationForKey(PUKSTEP_DESCRIPTION))
+		i1.text = lang.translationForKey(PUKSTEP_DESCRIPTION)
 		inputInfoUnits.add(
 			PasswordField(PUK_FIELD).apply {
 				maxLength = 10
@@ -347,17 +347,17 @@ class GenericPINStep(
 	}
 
 	private fun exportPinCorrect(isCorrect: Boolean) {
-		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)!!
 		ctx.put(GetCardsAndPINStatusAction.Companion.PIN_CORRECT, isCorrect)
 	}
 
 	private fun exportCanCorrect(isCorrect: Boolean) {
-		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)!!
 		ctx.put(GetCardsAndPINStatusAction.Companion.CAN_CORRECT, isCorrect)
 	}
 
 	private fun exportPukCorrect(isCorrect: Boolean) {
-		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)!!
 		ctx.put(GetCardsAndPINStatusAction.Companion.PUK_CORRECT, isCorrect)
 	}
 

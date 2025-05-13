@@ -38,7 +38,7 @@ import java.net.MalformedURLException
  */
 class UpdateDialog(
 	private val gui: UserConsent,
-	private val dlUrl: String?,
+	private val dlUrl: String,
 	private val updateRequired: Boolean,
 ) {
 	private val ucDesc = createDialog()

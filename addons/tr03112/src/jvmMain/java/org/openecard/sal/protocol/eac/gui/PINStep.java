@@ -137,7 +137,7 @@ public final class PINStep extends Step {
 	if (hasAttemptsCounter) {
 	    Text attemptCount = new Text();
 	    attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
-	    attemptCount.setID(PIN_ATTEMPTS_ID);
+	    attemptCount.setId(PIN_ATTEMPTS_ID);
 	    getInputInfoUnits().add(attemptCount);
 	}
 
@@ -159,7 +159,7 @@ public final class PINStep extends Step {
 	if (hasAttemptsCounter) {
 	    Text attemptCount = new Text();
 	    attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3));
-	    attemptCount.setID(PIN_ATTEMPTS_ID);
+	    attemptCount.setId(PIN_ATTEMPTS_ID);
 	    getInputInfoUnits().add(attemptCount);
 	}
     }
@@ -169,10 +169,10 @@ public final class PINStep extends Step {
 	boolean hasCanField = false;
 	boolean hasCanNotice = false;
 	for (InputInfoUnit inputInfoUnit : inputInfoUnits) {
-	    if (CAN_FIELD.equals(inputInfoUnit.getID())) {
+	    if (CAN_FIELD.equals(inputInfoUnit.getId())) {
 		hasCanField = true;
 	    }
-	    if (CAN_NOTICE_ID.equals(inputInfoUnit.getID())) {
+	    if (CAN_NOTICE_ID.equals(inputInfoUnit.getId())) {
 		hasCanNotice = true;
 	    }
 	}
@@ -186,7 +186,7 @@ public final class PINStep extends Step {
 	if (!hasCanNotice) {
 	    Text canNotice = new Text();
 	    canNotice.setText(LANG_EAC.translationForKey("eac_can_notice"));
-	    canNotice.setID(CAN_NOTICE_ID);
+	    canNotice.setId(CAN_NOTICE_ID);
 	    inputInfoUnits.add(canNotice);
 	}
     }
@@ -194,7 +194,7 @@ public final class PINStep extends Step {
     private void addNativeCANNotice() {
 	Text canNotice = new Text();
 	canNotice.setText(LANG_EAC.translationForKey("eac_can_notice_native"));
-	canNotice.setID(CAN_NOTICE_ID);
+	canNotice.setId(CAN_NOTICE_ID);
 	getInputInfoUnits().add(canNotice);
     }
 
@@ -214,7 +214,7 @@ public final class PINStep extends Step {
 
     private void updateAttemptsDisplay() {
 	for (InputInfoUnit unit : getInputInfoUnits()) {
-	    if (unit.getID().equals(PIN_ATTEMPTS_ID)) {
+	    if (unit.getId().equals(PIN_ATTEMPTS_ID)) {
 		int newValue;
 		switch (status.getState()) {
 		    case RC3:

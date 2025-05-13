@@ -50,6 +50,7 @@ import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
 import org.openecard.mobile.activation.CardLinkErrorCodes
+import org.openecard.recognition.RecognitionProperties.action
 import org.openecard.sal.protocol.eac.gui.ErrorStep
 
 private val logger = KotlinLogging.logger {}
@@ -72,7 +73,7 @@ class TanStep(
 	override val ws: WsPair,
 ) : TanStepAbstract(ws, TAN_ENTER_STEP_ID, TAN_ENTER_TITLE) {
 	init {
-		setAction(TanStepAction(this))
+		action = TanStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(TAN_ID).also {
@@ -87,7 +88,7 @@ class TanRetryStep(
 	override val ws: WsPair,
 ) : TanStepAbstract(ws, TAN_RETRY_STEP_ID, TAN_RETRY_TITLE) {
 	init {
-		setAction(TanStepAction(this))
+		action = TanStepAction(this)
 
 		inputInfoUnits.add(
 			TextField(TAN_ID).also {
@@ -102,7 +103,7 @@ class TanStepAction(
 	private val tanStep: TanStepAbstract,
 ) : StepAction(tanStep) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		val tan = (oldResults[stepID]!!.getResult(TAN_ID) as TextField).value.concatToString()
@@ -112,7 +113,7 @@ class TanStepAction(
 	}
 
 	private fun sendTan(tan: String): StepActionResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val correlationId = dynCtx.get(CardLinkKeys.CORRELATION_ID_TAN_PROCESS) as String
 		val cardSessionId = dynCtx.get(CardLinkKeys.CARD_SESSION_ID) as String
 

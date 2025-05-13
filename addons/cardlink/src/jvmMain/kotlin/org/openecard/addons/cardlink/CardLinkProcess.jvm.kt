@@ -84,7 +84,7 @@ class CardLinkProcess(
 	}
 
 	private fun internalProcessing(wsPair: WsPair): BindingResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val conHandle = openSession()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 
@@ -174,7 +174,7 @@ class CardLinkProcess(
 		cardHandle: ConnectionHandleType,
 		wsPair: WsPair,
 	) {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val wsListener = wsPair.listener
 
 		while (wsListener.isOpen()) {

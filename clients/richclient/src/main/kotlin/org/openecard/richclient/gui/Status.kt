@@ -409,7 +409,7 @@ class Status(
 		ifd: String,
 		ctx: ByteArray,
 	) {
-		cardContext[ifd] = ByteUtils.clone(ctx)
+		cardContext[ifd] = ByteUtils.clone(ctx)!!
 	}
 
 	private fun removeResponsibleContext(ifd: String) {

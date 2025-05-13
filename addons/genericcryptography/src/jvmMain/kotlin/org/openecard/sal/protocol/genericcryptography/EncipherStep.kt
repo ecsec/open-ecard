@@ -38,13 +38,13 @@ import org.openecard.common.interfaces.Dispatcher
  */
 class EncipherStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<Encipher?, EncipherResponse?> {
+) : ProtocolStep<Encipher, EncipherResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.Encipher
 
 	// TODO Implement me
 	override fun perform(
-		request: Encipher?,
-		internalData: Map<String, Any>?,
+		request: Encipher,
+		internalData: Map<String, Any>,
 	): EncipherResponse =
 		WSHelper.makeResponse<Class<EncipherResponse>, EncipherResponse>(
 			iso.std.iso_iec._24727.tech.schema.EncipherResponse::class.java,

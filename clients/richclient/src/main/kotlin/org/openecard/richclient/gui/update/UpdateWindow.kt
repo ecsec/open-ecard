@@ -180,7 +180,7 @@ class UpdateWindow(private val updateChecker: VersionUpdateChecker, private val 
             val vbox = VBox()
             val labelPage = Label(lang.translationForKey("manual_download"))
             vbox.children.add(labelPage)
-            val downloadPage: Hyperlink = generateHyperLink(OpenecardProperties.getProperty("release-page.location"))
+            val downloadPage: Hyperlink = generateHyperLink(OpenecardProperties.getProperty("release-page.location")!!)
             vbox.children.add(downloadPage)
 
             // add message, update table and manual download section to list and return it

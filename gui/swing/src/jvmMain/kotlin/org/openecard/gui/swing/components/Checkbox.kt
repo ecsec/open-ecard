@@ -57,7 +57,8 @@ class Checkbox(
 		panel.setBorder(EmptyBorder(10, 10, 10, 10))
 
 		// set group heading if it exists
-		if (checkbox.groupText != null && !checkbox.groupText.isEmpty()) {
+		val groupText = checkbox.groupText
+		if (groupText != null && !groupText.isEmpty()) {
 			val groupText = JLabel(checkbox.groupText)
 			groupText.setBorder(EmptyBorder(5, 0, 10, 0))
 			panel.add(groupText, BorderLayout.NORTH)
@@ -70,12 +71,12 @@ class Checkbox(
 		var alternate = 0
 
 		// create buttons, item copies and add to panel
-		boxButtons = ArrayList<JCheckBox>(checkbox.getBoxItems().size)
-		defaultCheckbox = checkbox.getBoxItems()
-		for (next in checkbox.getBoxItems()) {
+		boxButtons = ArrayList<JCheckBox>(checkbox.boxItems.size)
+		defaultCheckbox = checkbox.boxItems
+		for (next in checkbox.boxItems) {
 			// copy box item
 			val copy = BoxItem()
-			result.getBoxItems().add(copy)
+			result.boxItems.add(copy)
 			copy.name = next.name
 			copy.text = next.text
 			copy.isDisabled = next.isDisabled
@@ -128,7 +129,7 @@ class Checkbox(
 			// loop over checkboxes and set checked values in result
 			for (i in boxButtons.indices) {
 				val component = boxButtons[i]
-				this.result.getBoxItems()[i].isChecked = component.isSelected
+				this.result.boxItems[i].isChecked = component.isSelected
 			}
 			// prepare result
 			return result

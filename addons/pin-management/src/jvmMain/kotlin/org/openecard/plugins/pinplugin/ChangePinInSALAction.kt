@@ -62,7 +62,7 @@ class ChangePinInSALAction : AbstractPINAction() {
 
 			for (nextCard in connectedCards) {
 				// pick first card, find pin DID and call didupdate
-				var dn: String? = null
+				var dn: String
 				try {
 					dn = getPinDid(nextCard)
 				} catch (ex: WSHelper.WSException) {

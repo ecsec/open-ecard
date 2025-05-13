@@ -131,7 +131,7 @@ class PINStepAction(
 		val establishChannel =
 			EstablishChannel().apply {
 				slotHandle = conHandle.getSlotHandle()
-				authenticationProtocolData = paceInputMap.getResponse()
+				authenticationProtocolData = paceInputMap.response
 				authenticationProtocolData.protocol = ECardConstants.Protocol.PACE
 			}
 
@@ -189,7 +189,7 @@ class PINStepAction(
 			enteredWrong = false,
 			verifyFailed = false,
 		).apply {
-			setAction(CANStepAction(capturePin, conHandle, dispatcher, this, RecognizedState.PIN_SUSPENDED))
+			action = CANStepAction(capturePin, conHandle, dispatcher, this, RecognizedState.PIN_SUSPENDED)
 		}
 
 	/**
@@ -285,7 +285,7 @@ class PINStepAction(
 		enteredWrong,
 		verifyFailed,
 	).apply {
-		setAction(PINStepAction(capturePin, conHandle, dispatcher, this, retryCounter))
+		action = PINStepAction(capturePin, conHandle, dispatcher, this, retryCounter)
 	}
 
 	companion object {

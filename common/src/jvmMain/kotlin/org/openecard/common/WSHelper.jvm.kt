@@ -47,7 +47,7 @@ object WSHelper {
 					throw WSException(r)
 				} else {
 					val apdu = CardResponseAPDU.getTrailer(rApdus[rApdus.size - 1])
-					val msg = CardCommandStatus.getMessage(apdu)
+					val msg = CardCommandStatus.getMessage(apdu!!)
 					throw WSException(msg)
 				}
 			} else {

@@ -65,7 +65,7 @@ class CardLinkStep(
 		req: DIDAuthenticate,
 		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val ws = getWsPair(dynCtx)
 		val isPhoneRegistered = dynCtx.get(CardLinkKeys.PHONE_NUMBER_REGISTERED) as Boolean? ?: false
 		val uc = CardLinkUserConsent(ws, aCtx, isPhoneRegistered, req.connectionHandle)
@@ -183,7 +183,7 @@ class CardLinkStep(
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	private fun readIccsnFrom(gdoDs: ByteArray?): String? {
+	private fun readIccsnFrom(gdoDs: ByteArray): String? {
 		val tlvEfGdo = TLV.fromBER(gdoDs)
 		return if (tlvEfGdo.tagNumWithClass == 0x5A.toLong() && tlvEfGdo.valueLength == 0x0A) {
 			tlvEfGdo.value.toHexString()

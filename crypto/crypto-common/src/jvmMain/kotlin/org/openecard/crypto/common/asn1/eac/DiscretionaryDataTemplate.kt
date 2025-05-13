@@ -44,10 +44,10 @@ class DiscretionaryDataTemplate(
 	private val data: ByteArray
 
 	init {
-		val p = Parser(tlv.getChild())
+		val p = Parser(tlv.child)
 		if (p.match(Tag.OID_TAG)) {
 			try {
-				val oidStr = ObjectIdentifierUtils.toString(p.next(0).value)
+				val oidStr = ObjectIdentifierUtils.toString(p.next(0)!!.value)
 				objectIdentifier = ASN1ObjectIdentifier(oidStr)
 			} catch (ex: IllegalArgumentException) {
 				throw TLVException(ex)
@@ -56,12 +56,12 @@ class DiscretionaryDataTemplate(
 			throw TLVException("Object Identifier is missing in DiscretionaryDataTemplate.")
 		}
 		if (p.match(Tag(TagClass.APPLICATION, true, EACTags.DISCRETIONARY_DATA.toLong()))) {
-			data = p.next(0).value
+			data = p.next(0)!!.value
 		} else {
 			throw TLVException("Discretionary Data is missing in DiscretionaryDataTemplate.")
 		}
 	}
 
 	val discretionaryData: ByteArray
-		get() = ByteUtils.clone(data)
+		get() = ByteUtils.clone(data)!!
 }

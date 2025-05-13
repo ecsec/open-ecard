@@ -76,7 +76,7 @@ class DidInfo {
 
 	internal constructor(didInfos: DidInfos, application: ByteArray, didName: String, pin: CharArray?) {
 		this.didInfos = didInfos
-		this.application = ByteUtils.clone(application)
+		this.application = ByteUtils.clone(application)!!
 		this.didTarget = TargetNameType()
 		this.didTarget.setDIDName(didName)
 		if (pin != null) {
@@ -262,9 +262,9 @@ class DidInfo {
 			// add PIN
 			if (pin != null && pin.isNotEmpty()) {
 				val builder = PINCompareDIDAuthenticateInputType(data)
-				builder.setPIN(pin)
-				data = builder.getAuthDataType()
-				builder.setPIN(null)
+				builder.pIN = pin
+				data = builder.authDataType
+				builder.pIN = null
 			}
 
 			val req = DIDAuthenticate()
@@ -279,7 +279,7 @@ class DidInfo {
 			// check retry counter
 			val protoData = PINCompareDIDAuthenticateOutputType(res.getAuthenticationProtocolData())
 			val retryCounter = protoData.retryCounter
-			return retryCounter
+			return retryCounter!!
 		} catch (ex: ParserConfigurationException) {
 			val msg = "Unexpected protocol data received in PIN Compare output."
 			LOG.error(ex) { msg }

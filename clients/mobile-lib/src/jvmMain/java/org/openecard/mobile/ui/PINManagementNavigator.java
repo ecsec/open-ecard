@@ -268,7 +268,7 @@ public class PINManagementNavigator extends MobileNavigator {
 	}
 	if (!(curStep instanceof GenericPINStep)) {
 	    LOG.debug("nextINTswitch: return");
-	    if (GenericPINAction.ERROR_STEP_ID.equals(curStep.getID())) {
+	    if (GenericPINAction.ERROR_STEP_ID.equals(curStep.getId())) {
 		return new MobileResult(curStep, ResultStatus.CANCEL, Collections.EMPTY_LIST);
 	    } else {
 		return new MobileResult(curStep, ResultStatus.OK, Collections.EMPTY_LIST);

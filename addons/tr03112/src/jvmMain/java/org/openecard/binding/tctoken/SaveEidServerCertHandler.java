@@ -38,7 +38,7 @@ public class SaveEidServerCertHandler implements CertificateVerifier {
     boolean firstCert = true;
 
     @Override
-    public void isValid(TlsServerCertificate chain, String hostOrIP) throws CertificateVerificationException {
+    public void isValid(TlsServerCertificate chain, String hostOrIp) throws CertificateVerificationException {
 	if (firstCert) {
 	    firstCert = false;
 	    DynamicContext dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY);

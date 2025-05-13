@@ -449,8 +449,8 @@ class CardRecognitionImpl
 						LOG.debug { "Could not get exclusive card access. Trying again in $waitInSeconds seconds." }
 						if (i == 6 && env.gui != null) {
 							val dialog = env.gui!!.obtainMessageDialog()
-							val message: String? = LANG.translationForKey("message", name, ifdName)
-							val title: String? = LANG.translationForKey("error", ifdName)
+							val message = LANG.translationForKey("message", name, ifdName)
+							val title = LANG.translationForKey("error", ifdName)
 							dialog.showMessageDialog(message, title, DialogType.WARNING_MESSAGE)
 						}
 						Thread.sleep(1000 * waitInSeconds)

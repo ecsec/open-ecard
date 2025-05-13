@@ -37,7 +37,7 @@ class ExpirationVerifier : CertificateVerifier {
 	@Throws(CertificateVerificationException::class)
 	override fun isValid(
 		chain: TlsServerCertificate,
-		hostOrIP: String,
+		hostOrIp: String,
 	) {
 		try {
 			val now = Date()

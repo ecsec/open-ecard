@@ -30,7 +30,7 @@ import org.openecard.common.apdu.PerformSecurityOperation
  * @author Dirk Petrautzki
  */
 class PSODecipher(
-	message: ByteArray?,
+	message: ByteArray,
 	le: Byte,
 ) : PerformSecurityOperation(0x80.toByte(), 0x86.toByte()) {
 	/**
@@ -41,6 +41,6 @@ class PSODecipher(
 	 */
 	init {
 		setLE(le)
-		setData(message)
+		data = message
 	}
 }

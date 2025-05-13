@@ -32,7 +32,7 @@ import org.openecard.common.apdu.PerformSecurityOperation
  */
 class PSOHash(
 	p2: Byte,
-	data: ByteArray?,
+	data: ByteArray,
 ) : PerformSecurityOperation(0x90.toByte(), p2) {
 	/**
 	 * Creates a new PSO Hash APDU.
@@ -43,7 +43,7 @@ class PSOHash(
 	 * purpose.
 	 */
 	init {
-		setData(data)
+		this.data = data
 	}
 
 	companion object {

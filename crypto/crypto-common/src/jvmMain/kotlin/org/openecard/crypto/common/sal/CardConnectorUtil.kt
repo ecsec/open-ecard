@@ -53,7 +53,7 @@ class CardConnectorUtil(
 		callbacks.add(commonCallback)
 		eventHandler.add(commonCallback, TypeFilter())
 
-		if (SysUtils.isIOS()) {
+		if (SysUtils.isIOS) {
 			val cancelCallback = CancelOnCardRemovedFilter(foundCardHandle)
 			callbacks.add(cancelCallback)
 			eventHandler.add(cancelCallback, CardRemovalFilter())
@@ -69,7 +69,7 @@ class CardConnectorUtil(
 			}
 
 			val eventCardHandle = foundCardHandle.deref()
-			return HandlerUtils.copyPath(eventCardHandle)
+			return HandlerUtils.copyPath(eventCardHandle!!)
 		} finally {
 			for (callback in callbacks) {
 				eventHandler.del(callback)

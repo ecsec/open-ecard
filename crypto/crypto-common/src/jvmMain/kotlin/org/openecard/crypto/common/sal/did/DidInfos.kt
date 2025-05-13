@@ -146,7 +146,7 @@ class DidInfos(
 	fun getApplications(): List<ByteArray> {
 		val result = ArrayList<ByteArray>()
 		for (next in this._applications) {
-			result.add(ByteUtils.clone(next))
+			result.add(ByteUtils.clone(next)!!)
 		}
 		return result.toList()
 	}

@@ -36,15 +36,15 @@ abstract class RedirectionBaseError : ActivationError {
 
 	constructor(errorUrl: String?, msg: String, ex: Throwable?) : super(makeBindingResult(errorUrl), msg, ex)
 
-	constructor(errorUrl: String?, ex: Throwable?) : super(makeBindingResult(errorUrl), ex)
+	constructor(errorUrl: String?, ex: Throwable) : super(makeBindingResult(errorUrl), ex)
 
-	constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(
+	constructor(errorUrl: String?, key: I18nKey, vararg params: Any?) : super(
 		makeBindingResult(errorUrl),
 		key,
 		*params,
 	)
 
-	constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+	constructor(errorUrl: String?, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
 		makeBindingResult(
 			errorUrl,
 		),

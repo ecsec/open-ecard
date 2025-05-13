@@ -87,7 +87,7 @@ private val LOG = KotlinLogging.logger { }
  */
 class SignStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<Sign?, SignResponse?> {
+) : ProtocolStep<Sign, SignResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.Sign
 
 	override fun perform(
@@ -199,11 +199,11 @@ class SignStep(
 	@Throws(TLVException::class, IncorrectParameterException::class, APDUException::class, WSHelper.WSException::class)
 	private fun performSignature(
 		cryptoMarker: CryptoMarkerType,
-		keyReference: ByteArray?,
-		algorithmIdentifier: ByteArray?,
-		message: ByteArray?,
+		keyReference: ByteArray,
+		algorithmIdentifier: ByteArray,
+		message: ByteArray,
 		slotHandle: ByteArray?,
-		hashRef: ByteArray?,
+		hashRef: ByteArray,
 		hashInfo: HashGenerationInfoType?,
 	): SignResponse {
 		val response: SignResponse =
@@ -265,7 +265,7 @@ class SignStep(
 								value = hashRef
 							}
 						ManageSecurityEnvironment.Set(SET_COMPUTATION, ManageSecurityEnvironment.HT).apply {
-							setData(mseDataTLV.toBER())
+							data = mseDataTLV.toBER()
 						}
 					}
 					"PSO_HASH" -> {
@@ -299,7 +299,7 @@ class SignStep(
 					}
 				}
 
-			responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, mutableListOf<ByteArray?>())
+			responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, listOf())
 		}
 
 		var signedMessage = responseAPDU!!.data
@@ -307,7 +307,7 @@ class SignStep(
 		// check if further response data is available
 		while (responseAPDU!!.trailer[0] == 0x61.toByte()) {
 			val getResponseData = GetResponse()
-			responseAPDU = getResponseData.transmit(dispatcher, slotHandle, mutableListOf<ByteArray?>())
+			responseAPDU = getResponseData.transmit(dispatcher, slotHandle, listOf())
 			signedMessage =
 				org.openecard.bouncycastle.util.Arrays
 					.concatenate(signedMessage, responseAPDU.data)
@@ -363,7 +363,7 @@ class SignStep(
 				val cctt = next
 				val template = CardCommandTemplate(cctt)
 				cmdAPDU = template.evaluate(templateCTX)
-				responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, mutableListOf<ByteArray?>())
+				responseAPDU = cmdAPDU.transmit(dispatcher, slotHandle, listOf())
 			} else if (next is LegacySignatureGenerationType.APICommand) {
 				sendAPICommand(connectionHandle, next)
 			}
@@ -381,10 +381,10 @@ class SignStep(
 					0x00.toByte(),
 					responseAPDU.trailer[1],
 				)
-			responseAPDU = getResponseData.transmit(dispatcher, slotHandle, mutableListOf<ByteArray?>())
+			responseAPDU = getResponseData.transmit(dispatcher, slotHandle, listOf())
 			signedMessage =
 				org.openecard.bouncycastle.util.Arrays
-					.concatenate(signedMessage, responseAPDU.getData())
+					.concatenate(signedMessage, responseAPDU.data)
 		}
 
 		if (!org.openecard.bouncycastle.util.Arrays.areEqual(

@@ -30,7 +30,7 @@ import org.openecard.common.I18nKey
  * @author Hans-Martin Haase
  */
 enum class ErrorTranslations(
-	private val key: String,
+	override val key: String,
 ) : I18nKey {
 	INVALID_REFRESH_ADDR("error.invalid_refresh_addr"),
 	MALFORMED_URL("error.malformed_url"),
@@ -45,7 +45,4 @@ enum class ErrorTranslations(
 	VERSION_OUTDATED("error.version_outdated"),
 	UNKNOWN("error.unknown"),
 	SERVER_SENT_ERROR("error.server_sent_error"),
-	;
-
-	override fun getKey() = key
 }

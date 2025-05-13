@@ -128,7 +128,14 @@ class ChangePINDialog(
 			enteredWrong = false,
 			verifyFailed = false,
 		).apply {
-			setAction(PINStepAction(capturePin, conHandle, dispatcher, this, getRetryCounterFromState(state)))
+			action =
+				PINStepAction(
+					capturePin,
+					conHandle,
+					dispatcher,
+					this,
+					getRetryCounterFromState(state),
+				)
 		}
 
 	/**
@@ -145,7 +152,7 @@ class ChangePINDialog(
 			enteredWrong = false,
 			verifyFailed = false,
 		).apply {
-			setAction(CANStepAction(capturePin, conHandle, dispatcher, this, state))
+			action = CANStepAction(capturePin, conHandle, dispatcher, this, state)
 		}
 
 	/**

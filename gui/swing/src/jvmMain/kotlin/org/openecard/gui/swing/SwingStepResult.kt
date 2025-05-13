@@ -41,14 +41,15 @@ class SwingStepResult
 		private var status: ResultStatus? = null,
 	) : StepResult {
 		var syncPoint = Exchanger<Void>()
+
 		private var replacement: Step? = null
-		private var results: List<OutputInfoUnit?> = listOf()
+		private var results: List<OutputInfoUnit> = listOf()
 
 		fun setResultStatus(status: ResultStatus) {
 			this.status = status
 		}
 
-		fun setResult(results: List<OutputInfoUnit?>) {
+		fun setResult(results: List<OutputInfoUnit>) {
 			this.results = results
 		}
 
@@ -93,7 +94,7 @@ class SwingStepResult
 			}
 		}
 
-		override fun getResults(): List<OutputInfoUnit?> {
+		override fun getResults(): List<OutputInfoUnit> {
 			// wait until values are present
 			synchronize()
 			synchronized(this) {

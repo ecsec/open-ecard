@@ -36,5 +36,5 @@ class SwingFileFilterWrapper(
 ) : javax.swing.filechooser.FileFilter() {
 	override fun accept(f: File): Boolean = wrappedFilter.accept(f)
 
-	override fun getDescription(): String = wrappedFilter.getDescription()
+	override fun getDescription(): String = wrappedFilter.description
 }

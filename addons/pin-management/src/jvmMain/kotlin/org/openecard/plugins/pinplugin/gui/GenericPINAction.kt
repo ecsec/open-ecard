@@ -72,7 +72,7 @@ private val logger = KotlinLogging.logger { }
  * @author Tobias Wich
  */
 class GenericPINAction(
-	stepID: String?,
+	stepID: String,
 	private val dispatcher: Dispatcher,
 	private val gPINStep: GenericPINStep,
 	private val cardCapturer: CardCapturer,
@@ -83,9 +83,9 @@ class GenericPINAction(
 	private val cardView: CardStateView = cardCapturer.aquireView()
 
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
-	): StepActionResult? {
+	): StepActionResult {
 		if (result.isCancelled()) {
 			return StepActionResult(StepActionResultStatus.CANCEL)
 		}
@@ -484,9 +484,11 @@ class GenericPINAction(
 
 			// Here no exception is thrown so sent the ResetRetryCounter command
 			val resetRetryCounter = ResetRetryCounter(0x03.toByte())
-			val responses: MutableList<ByteArray?> = ArrayList<ByteArray?>()
-			responses.add(byteArrayOf(0x90.toByte(), 0x00.toByte()))
-			responses.add(byteArrayOf(0x69.toByte(), 0x84.toByte()))
+			val responses: MutableList<ByteArray> =
+				mutableListOf(
+					byteArrayOf(0x90.toByte(), 0x00.toByte()),
+					byteArrayOf(0x69.toByte(), 0x84.toByte()),
+				)
 
 			val resetCounterResponse =
 				resetRetryCounter.transmit(
@@ -645,7 +647,7 @@ class GenericPINAction(
 	}
 
 	private fun clearCorrectValues() {
-		DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY).apply {
+		DynamicContext.getInstance(GetCardsAndPINStatusAction.DYNCTX_INSTANCE_KEY)!!.apply {
 			remove(GetCardsAndPINStatusAction.PIN_CORRECT)
 			remove(GetCardsAndPINStatusAction.CAN_CORRECT)
 			remove(GetCardsAndPINStatusAction.PUK_CORRECT)

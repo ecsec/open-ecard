@@ -253,9 +253,13 @@ object FileUtils {
 	private fun getSubdirFileListing(
 		dir: File,
 		base: String,
-	): TreeMap<String, URL> {
-		val resultList = TreeMap<String, URL>()
-		for (next in dir.listFiles()) {
+	): MutableMap<String, URL> {
+		val resultList = mutableMapOf<String, URL>()
+		val files = dir.listFiles()
+		if (files.isNullOrEmpty()) {
+			return resultList
+		}
+		for (next in files) {
 			if (next.canRead() && next.isDirectory) {
 				resultList.putAll(getSubdirFileListing(next, base))
 			} else if (next.canRead() && next.isFile) {
@@ -295,7 +299,7 @@ object FileUtils {
 		val fileValue = toString(fileStream)
 		val files = fileValue.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
-		val result = TreeMap<String, URL>()
+		val result = mutableMapOf<String, URL>()
 		for (file in files) {
 			val fileUrl = resolveResourceAsURL(clazz, file)
 			if (fileUrl != null) {

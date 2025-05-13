@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- System tray-->
+	<string name="tray_title">%s</string>
+	<string name="tray_exit">Exit</string>
+	<string name="tray_card-status">Card Status</string>
+	<string name="tray_about">About</string>
+	<string name="tray_config">Configuration</string>
+	<string name="tray_support">Help</string>
+	<string name="tray_message_loading">%s is loading...</string>
+	<string name="tray_message_shutdown">%s is shutting down...</string>
+
+	<!-- Status window-->
+	<string name="status_nocard">No card inserted.</string>
+	<string name="status_noterminal">No terminal connected.</string>
+	<string name="status_unknowncard">Unknown Card inserted.</string>
+
+	<!-- Client -->
+	<string name="client_startup_failed_headline">The %s cannot be started.</string>
+	<string name="client_startup_failed_nocontext">Failed to establish the context. Maybe your smart card service is not
+		running.
+	</string>
+	<string name="client_startup_failed_portinuse">Another application is using required resources. This application may
+		run in another session of another user of your operating system. In that case please log out the other user
+		first in order to close the session and the application. Restart the %s afterwards.
+	</string>
+</resources>

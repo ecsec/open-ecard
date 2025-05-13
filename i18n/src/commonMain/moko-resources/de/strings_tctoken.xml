@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Insert card dialog-->
+	<string name="title">Karte benötigt - %s</string>
+	<string name="step_message_singletype">Bitte stellen Sie eine Karte von folgendem Typ bereit.</string>
+	<string name="step_message_multipletypes">Bitte stellen Sie eine Karte von einem der folgenden Typen bereit.
+	</string>
+	<string name="step_title">Karte bereitstellen</string>
+	<string name="cancel">Der Vorgang wurde durch den Benutzer abgebrochen.</string>
+
+	<!-- generic TCToken handler -->
+	<string name="invalid_redirect">Es wurde versucht auf eine ungültige Seite umzuleiten.</string>
+</resources>

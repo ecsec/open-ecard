@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Copied from Apache HTTP Server Project-->
+	<!-- See https://svn.apache.org/repos/asf/httpd/httpd/branches/2.4.x/docs/error/-->
+	<!-- Copyright 2012 The Apache Software Foundation -->
+	<string name="http_400">Your browser sent a request that this server could not understand.</string>
+	<string name="http_401">This server could not verify that you are authorized to access the URL.</string>
+	<string name="http_403">You don't have permission to access the requested directory.</string>
+	<string name="http_404">The requested URL was not found on this server.</string>
+	<string name="http_405">The method is not allowed for the requested URL.</string>
+	<string name="http_415">The server does not support the media type transmitted in the request.</string>
+	<string name="http_500">The server encountered an internal error and was unable to complete your request.</string>
+</resources>

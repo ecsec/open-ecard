@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- System tray-->
+	<string name="tray_title">%s</string>
+	<string name="tray_exit">Beenden</string>
+	<string name="tray_card-status">Kartenstatus</string>
+	<string name="tray_about">Über</string>
+	<string name="tray_config">Konfiguration</string>
+	<string name="tray_support">Hilfe</string>
+	<string name="tray_message_loading">%s wird gestartet...</string>
+	<string name="tray_message_shutdown">%s wird heruntergefahren...</string>
+
+	<!-- Status window-->
+	<string name="status_nocard">Keine Karte eingesteckt.</string>
+	<string name="status_noterminal">Kein Kartenleser angeschlossen.</string>
+	<string name="status_unknowncard">Unbekannte Karte eingesteckt.</string>
+
+	<!-- Client -->
+	<string name="client_startup_failed_headline">Die %s konnte nicht gestartet werden.</string>
+	<string name="client_startup_failed_nocontext">Der Anwendungskontext konnte nicht erstellt werden. Vielleicht ist
+		ihr Smartcard Dienst nicht gestartet.
+	</string>
+	<string name="client_startup_failed_portinuse">Eine andere Anwendung nutzt erforderliche Ressourcen. Diese Anwendung
+		wird möglicherweise in einer weiteren Session eines anderen Benutzers Ihres Betriebssystems ausgeführt. Loggen
+		Sie sich in diesem Fall bitte zuerst unter dem anderen Benutzer aus, um die Sitzung und die Anwendung zu
+		schließen. Starten Sie die %s anschließend neu.
+	</string>
+</resources>

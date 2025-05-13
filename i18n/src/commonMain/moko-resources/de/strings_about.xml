@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- About dialog -->
+	<string name="about_title">Über %s</string>
+	<string name="about_heading">%s</string>
+	<string name="about_version">Version: %s</string>
+	<string name="about_button_close">Schließen</string>
+	<string name="about_tab_about">Über</string>
+	<string name="about_tab_feedback">Probleme oder Wünsche berichten</string>
+	<string name="about_tab_license">Lizenz</string>
+	<string name="about_tab_support">Sich dem Open eCard Team anschließen</string>
+	<string name="about_html"><![CDATA[
+		<html>
+	    	<head>
+	    	    <title>Über</title>
+	    	    <style>
+	    	        body {
+	    	            font-family: sans-serif;
+	    	            font-size: small;
+	    	            margin-left: 8px;
+	    	            margin-right: 8px;
+	    	            text-align: justify;
+	    	        }
+	    	    </style>
+	    	</head>
+	    	<body>
+	    	    <p>Im Rahmen des <a href="http://openecard.org/">Open eCard Projektes</a> haben sich industrielle und
+	    	    akademische Experten mit dem Ziel zusammengeschlossen, eine quelloffene und plattformunabhängige Implementierung
+	    	    des eCard-API-Frameworks <a href="http://docs.ecsec.de/BSI-TR-03112">BSI-TR-03112</a> bereitzustellen, wodurch
+	    	    beliebige Anwendungen für Zwecke der Authentisierung und Signatur leicht auf beliebige Chipkarten zugreifen
+	    	    können.</p>
+	    	    <p>Ein erstes Projektergebnis ist die
+	    	    vorliegende <a href="http://subs.emis.de/LNI/Proceedings/Proceedings195/95.pdf">Open eCard App</a>.</p>
+	    	    <p>Besuchen Sie <a href="http://openecard.org/">http://openecard.org</a>, um weitere Informationen über dieses
+	    	    Projekt zu erhalten.</p>
+	    	</body>
+		</html>
+	]]></string>
+	<string name="about_feedback_html"><![CDATA[
+	<html>
+    	<head>
+    	    <title>Feedback</title>
+    	    <style>
+    	        body {
+    	            font-family: sans-serif;
+    	            font-size: small;
+    	            margin-left: 8px;
+    	            margin-right: 8px;
+    	            text-align: justify;
+    	        }
+    	    </style>
+    	</head>
+    	<body>
+    	    <p>Keine Software ist frei von Fehlern und Programme sind immer verbesserungsfähig. Das gilt auch für
+    	    die vorliegende Open eCard App.</p>
+    	    <p>Vor diesem Hintergrund nimmt das Open eCard Team gern entsprechende Fehlerberichte und Anregungen entgegen
+    	    und ist stets bemüht, sich zeitnah der gemeldeten Probleme und Verbesserungsvorschläge anzunehmen.</p>
+    	    <p>Das Open eCard Projekt betreibt hierfür
+    	    unter <a href="http://dev.openecard.org/">http://dev.openecard.org/</a> für
+			<a href="http://dev.openecard.org/account/register">registrierte Benutzer</a> ein System zum
+			Verfolgen von Problemen und Verbesserungsvorschlägen.</p>
+    	</body>
+	</html>
+	]]></string>
+	<string name="about_support_html"><![CDATA[
+		<html>
+    		<head>
+    		    <title>Mitmachen</title>
+    		    <style>
+    		        body {
+    		            font-family: sans-serif;
+    		            font-size: small;
+    		            margin-left: 8px;
+    		            margin-right: 8px;
+    		            text-align: justify;
+    		        }
+    		    </style>
+    		</head>
+    		<body>
+    		    <p>Das <a href="http://dev.openecard.org/projects/open-ecard">Open eCard Team</a> ist eine <b>offene
+    		    Gemeinschaft</b>, die alle interessierten Bürgerinnen und Bürger sowie entsprechende Institutionen und Verbände
+    		    zur Mitwirkung aufruft. Wer die Entwicklung
+    		    der <a href="http://subs.emis.de/LNI/Proceedings/Proceedings195/95.pdf">Open eCard App</a> unterstützen möchte,
+    		    kann sich dem Open eCard Team hier <a href="http://dev.openecard.org/account/register">anschließen</a>.</p>
+    		</body>
+		</html>
+	]]></string>
+</resources>

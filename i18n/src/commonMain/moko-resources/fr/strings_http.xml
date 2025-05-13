@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Copied from Apache HTTP Server Project-->
+	<!-- See https://svn.apache.org/repos/asf/httpd/httpd/branches/2.4.x/docs/error/-->
+	<!-- Copyright 2012 The Apache Software Foundation -->
+	<string name="http_400">Votre navigateur a envoyé une demande que ce serveur ne pouvait pas comprendre.</string>
+	<string name="http_401">Ce serveur n'a pas pu vérifier que vous êtes autorisé à accéder à l'URL.</string>
+	<string name="http_403">Vous n'êtes pas autorisé à accéder au répertoire demandé.</string>
+	<string name="http_404">L'URL demandée n'a pas été trouvé sur ce serveur.</string>
+	<string name="http_405">La méthode n'est pas autorisée pour l'URL demandée.</string>
+	<string name="http_415">Le serveur ne supporte pas le type de média transmis dans la demande.</string>
+	<string name="http_500">Le serveur a rencontré une erreur interne et n'a pas pu terminer votre demande.</string>
+</resources>

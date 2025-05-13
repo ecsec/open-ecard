@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Buttons -->
+	<string name="button_back">Zurück</string>
+	<string name="button_finish">Bestätigen</string>
+	<string name="button_next">Weiter</string>
+	<string name="button_cancel">Abbrechen</string>
+	<string name="button_ok">OK</string>
+	<string name="button_yes">Ja</string>
+	<string name="button_no">Nein</string>
+	<string name="button_open">Öffnen</string>
+	<string name="button_save">Speichern</string>
+	<string name="button_new">Neu</string>
+	<string name="file_name">Dateiname</string>
+	<string name="location">Aktuelles Verzeichnis</string>
+	<string name="no_read_access">Das Verzeichnis '%s' kann nicht geöffnet werden</string>
+</resources>

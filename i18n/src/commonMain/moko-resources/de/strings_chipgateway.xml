@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Update dialog-->
+	<string name="dialog_dl_title">Update Information</string>
+	<string name="dialog_dl_text_required">Bitte beachten Sie, dass Ihre derzeit installierte version der %s nicht mehr
+		aktuell ist und erneuert werden muss.
+	</string>
+	<string name="dialog_dl_text_optional">Bitte beachten Sie, dass ein Update für die %s vorliegt. Es wird empfohlen,
+		dass Sie die neue Version sobald es Ihnen möglich ist installieren.
+	</string>
+	<string name="dialog_dl_text_instructions">Um das Update durchzuführen klicken Sie auf den folgenden Link, laden die
+		neuen Software Pakete für Ihr Betriebssystem herunter und führen das Update durch starten der
+		Installationssoftware durch.
+	</string>
+
+	<!-- error dialog-->
+	<string name="error_dialog_title">ChipGateway Fehler</string>
+	<string name="error_dialog_submessage">Bitte versuchen Sie es später nocheinmal. Wenn das Problem\nweiterhin besteht
+		wenden Sie sich an den Helpdesk.
+	</string>
+
+	<!-- error messages -->
+	<string name="error_invalid_refresh_addr">Aktivieren mit ungültiger URL angefragt.</string>
+	<string name="error_malformed_url">Die URL '%s' ist keine gültige URL.</string>
+	<string name="error_no_https_url">Die URL '%s' ist keine HTTPS-URL.</string>
+	<string name="error_element_missing">Das Element '%s' ist leer oder fehlend in den Aktivierungs-Parametern.</string>
+	<string name="error_element_value_invalid">Das Element '%s' enthält keine der zulässigen Werte.</string>
+	<string name="error_connection_open_failed">Fehler beim Öffnen der Verbindung zum Server Chip-Gateway.</string>
+	<string name="error_invalid_http_status">Ungültiger HTTP-Statuscode (%d) vom ChipGateway-Server erhalten.</string>
+	<string name="error_invalid_chipgateway_msg">Fehler bei der Verarbeitung der ChipGateway-Nachricht.</string>
+	<string name="error_http_error">Fehler im HTTP-Protokoll.</string>
+	<string name="error_signature_invalid">Fehler beim Validieren der ChipGateway-Signatur.</string>
+	<string name="error_version_outdated">Die Version des installierten Clients ist zu alt.</string>
+	<string name="error_unknown">Unbekannter Fehler aufgetreten bei der Ausführung des ChipGateways.</string>
+	<string name="error_server_sent_error">Fehler empfangen vom ChipGateway-Server (%s).</string>
+	<string name="error_server_wrong_config">Ein interner ChipGateway Server-Fehler ist aufgetreten.</string>
+</resources>

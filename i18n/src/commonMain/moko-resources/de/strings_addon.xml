@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <!-- Add-on management dialog-->
+    <string name="addon_title">%s Plattform und Add-on Management</string>
+    <string name="addon_list_core">%s</string>
+    <string name="addon_list_addon">Add-ons</string>
+
+    <!-- Add-on panel-->
+    <string name="addon_panel_tab_function">Funktionen</string>
+    <string name="addon_panel_tab_settings">Einstellungen</string>
+    <string name="addon_panel_tab_about">Über</string>
+
+    <!-- General settings-->
+    <string name="addon_list_core_general">Allgemeine Einstellungen</string>
+    <string name="addon_list_core_general_notification_group_name">Benachrichtigungen</string>
+    <string name="addon_list_core_general_notification_omit_show_remove_card">Kein "Karte entfernen" Dialog</string>
+    <string name="addon_list_core_general_notification_omit_show_remove_card_desc">Zeige keinen Karte entfernen Dialog
+        nach Beendigung der Authentisierung an.
+    </string>
+    <string name="addon_list_core_general_legacy_group_name">Legacy Verhalten</string>
+    <string name="addon_list_core_general_legacy_tls1">TLS 1.0</string>
+    <string name="addon_list_core_general_legacy_tls1_desc">Die Verwendung von TLS Version 1.0 zulassen.</string>
+    <string name="addon_list_core_general_legacy_invalid_schema">Keine Schema-Validierung</string>
+    <string name="addon_list_core_general_legacy_invalid_schema_desc">Führe keine Schema-Validierung der eingehenden
+        Nachrichten gegen die eCard XML Schemata durch.
+    </string>
+    <string name="addon_list_core_general_legacy_case_insensitive_path">Ignoriere Großbuchstaben in URLs</string>
+    <string name="addon_list_core_general_legacy_case_insensitive_path_desc">Ignoriere Großschreibung beim Vergleich von
+        URL Pfaden entgegen den Regeln aus RFC 3986.
+    </string>
+
+    <!-- Connection settings-->
+    <string name="addon_list_core_connection">Verbindungseinstellungen</string>
+    <string name="addon_list_core_connection_proxy_group_name">Proxy</string>
+    <string name="addon_list_core_connection_proxy_scheme">Typ</string>
+    <string name="addon_list_core_connection_proxy_scheme_desc">Proxy-Typ oder keiner, wenn der Proxy aktiv sein soll.
+    </string>
+    <string name="addon_list_core_connection_proxy_host">Hostname</string>
+    <string name="addon_list_core_connection_proxy_host_desc">Hostname oder IP-Adresse des Proxy-Servers.</string>
+    <string name="addon_list_core_connection_proxy_port">Port</string>
+    <string name="addon_list_core_connection_proxy_port_desc">Port-Nummer des Proxy-Servers.</string>
+    <string name="addon_list_core_connection_proxy_vali">TLS validieren</string>
+    <string name="addon_list_core_connection_proxy_vali_desc">Validieren des Proxyserver-Zertifikats.</string>
+    <string name="addon_list_core_connection_proxy_user">Nutzername</string>
+    <string name="addon_list_core_connection_proxy_user_desc">Nutzername für HTTP Basic Authentication (RFC 2617).
+    </string>
+    <string name="addon_list_core_connection_proxy_pass">Passwort</string>
+    <string name="addon_list_core_connection_proxy_pass_desc">Passwort für HTTP Basic Authentication (RFC 2617).
+    </string>
+    <string name="addon_list_core_connection_proxy_excludes">Ausnahmen</string>
+    <string name="addon_list_core_connection_proxy_excludes_desc">Hosts und optionaler Port für den kein Proxy benutzt*
+        werden soll. * kann als Wildcard benutzt werden.
+    </string>
+
+    <!-- Logging settings-->
+    <string name="addon_list_core_logging">Protokollierungs-Einstellungen</string>
+    <string name="addon_core_logging_group_name">Protokollierung</string>
+    <string name="addon_core_logging_root">Basis Level</string>
+    <string name="addon_core_logging_root_desc">Basis Level benutzt, wenn kein spezifischer Wert angegeben ist.</string>
+    <string name="addon_core_logging_paos">PAOS</string>
+    <string name="addon_core_logging_paos_desc">Die Verbindung zwischen eCard-Client und eID-Server.</string>
+    <string name="addon_core_logging_eac">EAC</string>
+    <string name="addon_core_logging_eac_desc">Authentisierungsprotokoll zwischen Karte und eID-Server.</string>
+    <string name="addon_core_logging_pace">PACE</string>
+    <string name="addon_core_logging_pace_desc">Authentisierungsprotokoll zwischen Karte und eCard-Client.</string>
+    <string name="addon_core_logging_trchecks">TR-03112 Tests</string>
+    <string name="addon_core_logging_trchecks_desc">Tests für die Zertifikate und Server Adressen.</string>
+    <string name="addon_core_logging_tctoken">TCToken</string>
+    <string name="addon_core_logging_tctoken_desc">TCToken bezogene Operationen.</string>
+    <string name="addon_core_logging_event">Event Manager</string>
+    <string name="addon_core_logging_event_desc">Low level Kartenereignisse.</string>
+    <string name="addon_core_logging_httpbind">HTTP Binding</string>
+    <string name="addon_core_logging_httpbind_desc">HTTP-Schnittstelle unter http://localhost:24727.</string>
+    <string name="addon_core_logging_addon">Add-on Manager</string>
+    <string name="addon_core_logging_addon_desc">Add-on Manager verwandte Operationen.</string>
+    <string name="addon_core_logging_salstate">SAL-Status</string>
+    <string name="addon_core_logging_salstate_desc">Events, die den SAL-Status beeinflussen.</string>
+    <string name="addon_core_logging_middleware">PKCS\#11 Middleware</string>
+    <string name="addon_core_logging_middleware_desc">Middleware verwandte Operationen.</string>
+    <string name="addon_core_logging_middleware-event">Middleware Event-Manager</string>
+    <string name="addon_core_logging_middleware-event_desc">Niedrig-Level Events mit Karten.</string>
+    <string name="addon_core_logging_chipgateway">ChipGateway-Protokoll</string>
+    <string name="addon_core_logging_chipgateway_desc">ChipGateway-Protokoll verwandte Operationen.</string>
+
+    <!-- Middleware settings -->
+    <string name="addon_list_core_middleware">PKCS\#11</string>
+    <string name="addon_core_middleware_group_name">PKCS\#11 Middleware Auswahl</string>
+    <string name="addon_core_middleware_item_label">%s</string>
+    <string name="addon_core_middleware_item_desc">Aktiviere/ Deaktiviere diese Middleware.</string>
+    <string name="addon_core_middleware_item_desc_forced">Diese Middleware wird zwingend benötigt und kann nicht
+        deaktiviert werden.
+    </string>
+    <string name="addon_core_middleware_restart_msg">Sie müssen die App neu starten, damit die Änderungen wirksam
+        werden.
+    </string>
+</resources>

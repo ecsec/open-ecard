@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- About dialog -->
+	<string name="about_title">Sur %s</string>
+	<string name="about_heading">%s</string>
+	<string name="about_version">Version \: %s</string>
+	<string name="about_button_close">Fermer</string>
+	<string name="about_tab_about">Sur</string>
+	<string name="about_tab_feedback">Signaler des bugs ou des souhaits</string>
+	<string name="about_tab_license">License</string>
+	<string name="about_tab_support">Rejoignez l'équipe Open eCard</string>
+</resources>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Add-on management dialog-->
+	<string name="addon_title">%s Platform and Add-on Management</string>
+	<string name="addon_list_core">%s</string>
+	<string name="addon_list_addon">Add-ons</string>
+
+	<!-- Add-on panel-->
+	<string name="addon_panel_tab_function">Functions</string>
+	<string name="addon_panel_tab_settings">Settings</string>
+	<string name="addon_panel_tab_about">About</string>
+
+	<!-- General settings-->
+	<string name="addon_list_core_general">General Settings</string>
+	<string name="addon_list_core_general_notification_group_name">Notification</string>
+	<string name="addon_list_core_general_notification_omit_show_remove_card">No "Remove Card" Dialog</string>
+	<string name="addon_list_core_general_notification_omit_show_remove_card_desc">Do not show a remove card dialog
+		after finishing the authentication with the card.
+	</string>
+	<string name="addon_list_core_general_legacy_group_name">Legacy Behaviour</string>
+	<string name="addon_list_core_general_legacy_tls1">TLS 1.0</string>
+	<string name="addon_list_core_general_legacy_tls1_desc">Allow the use of TLS version 1.0.</string>
+	<string name="addon_list_core_general_legacy_invalid_schema">No Schema Validation</string>
+	<string name="addon_list_core_general_legacy_invalid_schema_desc">Don't validate incoming messages against the eCard
+		XML schema.
+	</string>
+	<string name="addon_list_core_general_legacy_case_insensitive_path">Case insensitive URLs</string>
+	<string name="addon_list_core_general_legacy_case_insensitive_path_desc">Match URL paths case insensitive instead of
+		case sensitive as specified in RFC 3986.
+	</string>
+
+	<!-- Connection settings-->
+	<string name="addon_list_core_connection">Connection Settings</string>
+	<string name="addon_list_core_connection_proxy_group_name">Proxy</string>
+	<string name="addon_list_core_connection_proxy_scheme">Type</string>
+	<string name="addon_list_core_connection_proxy_scheme_desc">Type of the proxy or none if proxy shall be disabled.
+	</string>
+	<string name="addon_list_core_connection_proxy_host">Hostname</string>
+	<string name="addon_list_core_connection_proxy_host_desc">Hostname or IP address of the proxy server.</string>
+	<string name="addon_list_core_connection_proxy_port">Port</string>
+	<string name="addon_list_core_connection_proxy_port_desc">Port number of the proxy server.</string>
+	<string name="addon_list_core_connection_proxy_vali">Validate TLS</string>
+	<string name="addon_list_core_connection_proxy_vali_desc">Validation of the certificate of the proxy server.
+	</string>
+	<string name="addon_list_core_connection_proxy_user">Username</string>
+	<string name="addon_list_core_connection_proxy_user_desc">Username for HTTP Basic Authentication (RFC 2617).
+	</string>
+	<string name="addon_list_core_connection_proxy_pass">Password</string>
+	<string name="addon_list_core_connection_proxy_pass_desc">Password for HTTP Basic Authentication (RFC 2617).
+	</string>
+	<string name="addon_list_core_connection_proxy_excludes">Exceptions</string>
+	<string name="addon_list_core_connection_proxy_excludes_desc">Hosts and optional port for which no proxy shall be
+		used. * can be used as wildcard.
+	</string>
+
+	<!-- Logging settings-->
+	<string name="addon_list_core_logging">Logging Settings</string>
+	<string name="addon_core_logging_group_name">Logging</string>
+	<string name="addon_core_logging_root">Base level</string>
+	<string name="addon_core_logging_root_desc">Base level used when no more specific value is given.</string>
+	<string name="addon_core_logging_paos">PAOS</string>
+	<string name="addon_core_logging_paos_desc">Connection between eCard-Client and eID-Server.</string>
+	<string name="addon_core_logging_eac">EAC</string>
+	<string name="addon_core_logging_eac_desc">Authentication protocol between card and eID-Server.</string>
+	<string name="addon_core_logging_pace">PACE</string>
+	<string name="addon_core_logging_pace_desc">Authentication protocol between card and eCard-Client.</string>
+	<string name="addon_core_logging_trchecks">TR-03112 checks</string>
+	<string name="addon_core_logging_trchecks_desc">Checks of the certificates and server addresses.</string>
+	<string name="addon_core_logging_tctoken">TCToken</string>
+	<string name="addon_core_logging_tctoken_desc">TCToken related operations.</string>
+	<string name="addon_core_logging_event">Event Manager</string>
+	<string name="addon_core_logging_event_desc">Low level events with cards.</string>
+	<string name="addon_core_logging_httpbind">HTTP Binding</string>
+	<string name="addon_core_logging_httpbind_desc">HTTP interface on http://localhost:24727.</string>
+	<string name="addon_core_logging_addon">Add-on Manager</string>
+	<string name="addon_core_logging_addon_desc">Add-on Manager related operations.</string>
+	<string name="addon_core_logging_salstate">SAL state</string>
+	<string name="addon_core_logging_salstate_desc">Events which affect the behaviour of the SAL's state.</string>
+	<string name="addon_core_logging_middleware">PKCS\#11 Middleware</string>
+	<string name="addon_core_logging_middleware_desc">Middleware related operations.</string>
+	<string name="addon_core_logging_middleware-event">Middleware Event Manager</string>
+	<string name="addon_core_logging_middleware-event_desc">Low level events with cards.</string>
+	<string name="addon_core_logging_chipgateway">ChipGateway protocol</string>
+	<string name="addon_core_logging_chipgateway_desc">ChipGateway protocol related operations.</string>
+
+	<!-- Middleware settings-->
+	<string name="addon_list_core_middleware">PKCS\#11</string>
+	<string name="addon_core_middleware_group_name">PKCS\#11 Middleware Selection</string>
+	<string name="addon_core_middleware_item_label">%s</string>
+	<string name="addon_core_middleware_item_desc">Enable/ Disable this middleware.</string>
+	<string name="addon_core_middleware_item_desc_forced">This middleware is required and cannot be disabled.</string>
+	<string name="addon_core_middleware_restart_msg">You have to restart the app for the changes to take effect.
+	</string>
+
+	<!-- Addon specific about page-->
+	<string name="addon_about_version">Version</string>
+	<string name="addon_about_license">License</string>
+	<string name="addon_about_license_type">License type</string>
+	<string name="addon_about_about">About</string>
+	<string name="addon_about_uninstall">Uninstall addon</string>
+
+	<!-- Addon specific settings page -->
+	<string name="addon_settings_general">General Settings</string>
+	<string name="addon_settings_settings">Settings</string>
+	<string name="addon_settings_browse">Browse</string>
+	<string name="addon_settings_file_select">Select a file!</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="open_pdf_in_external_viewer">Im Standard-PDF-Betrachter öffnen.</string>
+	<string name="pdf_creation_failed">Die Nutzungsbestimmungen sind im PDF-Format. Die PDF-Datei konnte nicht auf die
+		Festplatte geschrieben werden.
+	</string>
+	<string name="unsupported_mimetype">Inhalt vom Typ %s wird nicht von der Swing ToggleButton Implementierung
+		unterstützt.
+	</string>
+</resources>

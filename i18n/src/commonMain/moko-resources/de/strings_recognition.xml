@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Exclusive card access -->
+	<string name="error">Fehler bei der Kartenerkennung</string>
+	<string name="message">Die %s kann die Karte im Kartenleser '%s' nicht erkennen, da sie keinen exklusiven Zugriff
+		auf die Karte erhält.\nBitte stellen Sie sicher, dass keine andere Anwendung die Karte blockiert.
+	</string>
+</resources>

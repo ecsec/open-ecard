@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Exclusive card access -->
+	<string name="error">Erreur dans la reconnaissance de la carte</string>
+	<string name="message">Le %s n'est pas en mesure de reconnaître la carte dans le Terminal '%s' car il ne peut pas
+		obtenir un accès exclusif à la carte.\nVeuillez vérifier qu’aucune autre application ne bloque la carte.
+	</string>
+</resources>

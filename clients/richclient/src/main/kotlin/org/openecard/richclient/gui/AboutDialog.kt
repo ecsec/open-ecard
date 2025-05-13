@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -19,23 +19,22 @@
  * you and ecsec GmbH.
  *
  ***************************************************************************/
-package org.openecard.gui.about
+package org.openecard.richclient.gui
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.AppVersion
 import org.openecard.common.AppVersion.version
 import org.openecard.common.I18n
-import org.openecard.common.util.StringUtils
-import org.openecard.gui.graphics.GraphicsUtil.createImage
-import org.openecard.gui.graphics.OecLogo
 import org.openecard.gui.swing.common.SwingUtils
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
 import java.io.File
 import java.io.IOException
 import java.net.URI
@@ -69,79 +68,92 @@ class AboutDialog private constructor() : JFrame() {
 	private val tabIndices = mutableMapOf<String, Int>()
 	private var tabbedPane = JTabbedPane(JTabbedPane.TOP)
 
-	/**
-	 * Creates a new instance of this class.
-	 */
 	init {
 		setupUI()
 	}
 
 	private fun setupUI() {
-		val logo = createImage(OecLogo::class.java, 147, 147)
+		val logo = oecImage(OecIconType.COLORED, 147, 147)
 
 		setSize(730, 480)
 		// use null layout with absolute positioning
 		contentPane.setLayout(null)
 		contentPane.setBackground(Color.white)
 
-		val txtpnHeading = JTextPane()
-		txtpnHeading.setFont(Font(Font.SANS_SERIF, Font.BOLD, 20))
-		txtpnHeading.isEditable = false
-		txtpnHeading.text = LANG.translationForKey("about.heading", AppVersion.name)
-		txtpnHeading.setBounds(12, 12, 692, 30)
+		val txtpnHeading =
+			JTextPane().apply {
+				font = Font(Font.SANS_SERIF, Font.BOLD, 20)
+				isEditable = false
+				text = LANG.translationForKey("about.heading", AppVersion.name)
+				setBounds(12, 12, 692, 30)
+			}
 		contentPane.add(txtpnHeading)
 
-		val txtpnVersion = JTextPane()
-		txtpnVersion.setFont(Font(Font.SANS_SERIF, Font.PLAIN, 9))
-		txtpnVersion.isEditable = false
-		txtpnVersion.text = LANG.translationForKey("about.version", version)
-		txtpnVersion.setBounds(12, 54, 692, 18)
+		val txtpnVersion =
+			JTextPane().apply {
+				font = Font(Font.SANS_SERIF, Font.PLAIN, 9)
+				isEditable = false
+				text = LANG.translationForKey("about.version", version)
+				setBounds(12, 54, 692, 18)
+			}
 		contentPane.add(txtpnVersion)
 
-		val label = JLabel()
-		label.setHorizontalAlignment(SwingConstants.CENTER)
-		label.setIcon(ImageIcon(logo))
-		label.setBounds(12, 84, 155, 320)
+		val label =
+			JLabel().apply {
+				horizontalAlignment = SwingConstants.CENTER
+				icon = ImageIcon(logo)
+// 				add(t)
+				setBounds(12, 84, 155, 320)
+			}
 		contentPane.add(label)
 
 		tabbedPane.setBounds(185, 84, 529, 320)
-		tabbedPane.setBackground(Color.white)
-		var tabIdx = 0
-		tabbedPane.addTab(LANG.translationForKey("about.tab.about"), createTabContent(ABOUT_TAB))
-		tabIndices.put(ABOUT_TAB, tabIdx++)
-		tabbedPane.addTab(LANG.translationForKey("about.tab.feedback"), createTabContent(FEEDBACK_TAB))
-		tabIndices.put(FEEDBACK_TAB, tabIdx++)
-		tabbedPane.addTab(LANG.translationForKey("about.tab.support"), createTabContent(SUPPORT_TAB))
-		tabIndices.put(SUPPORT_TAB, tabIdx++)
-		tabbedPane.addTab(LANG.translationForKey("about.tab.license"), createTabContent(LICENSE_TAB))
-		tabIndices.put(LICENSE_TAB, tabIdx++)
+		tabbedPane.background = Color.white
+
+		listOf(
+			ABOUT_TAB to LANG.translationForKey("about.tab.about"),
+			FEEDBACK_TAB to LANG.translationForKey("about.tab.feedback"),
+			SUPPORT_TAB to LANG.translationForKey("about.tab.support"),
+			LICENSE_TAB to LANG.translationForKey("about.tab.license"),
+		).forEachIndexed { idx, it ->
+			tabbedPane.addTab(it.second, createTabContent(it.first))
+			tabIndices.put(it.first, idx)
+		}
+
 		contentPane.add(tabbedPane)
 
-		val btnClose: JButton = JButton(LANG.translationForKey("about.button.close"))
-		btnClose.setBounds(587, 416, 117, 25)
-		btnClose.addActionListener(
-			ActionListener { e: ActionEvent? ->
-				dispose()
-			},
-		)
+		val btnClose =
+			JButton(LANG.translationForKey("about.button.close")).apply {
+				setBounds(587, 416, 117, 25)
+				addActionListener(
+					ActionListener { e: ActionEvent? ->
+						dispose()
+					},
+				)
+			}
+
 		contentPane.add(btnClose)
 
 		iconImage = logo
-		setTitle(LANG.translationForKey("about.title", AppVersion.name))
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE)
-		setResizable(false)
+		title = LANG.translationForKey("about.title", AppVersion.name)
+		defaultCloseOperation = DISPOSE_ON_CLOSE
+		isResizable = false
 		setLocationRelativeTo(null)
 	}
 
 	private fun createTabContent(resourceName: String): JPanel {
-		val kit = HTMLEditorKit()
-		kit.isAutoFormSubmission = false // don't follow form link, use hyperlink handler instead
+		val kit =
+			HTMLEditorKit().apply {
+				isAutoFormSubmission = false // don't follow form link, use hyperlink handler instead
+			}
 		val doc = kit.createDefaultDocument() as HTMLDocument?
 
-		val editorPane = JEditorPane()
-		editorPane.isEditable = false
-		editorPane.setEditorKit(kit)
-		editorPane.setDocument(doc)
+		val editorPane =
+			JEditorPane().apply {
+				isEditable = false
+				editorKit = kit
+				document = doc
+			}
 
 		try {
 			val url: URL = LANG.translationForFile(resourceName, "html")
@@ -158,18 +170,18 @@ class AboutDialog private constructor() : JFrame() {
 
 		val scrollPane = JScrollPane(editorPane)
 
-		val panel = JPanel()
-		panel.setLayout(BorderLayout())
-		panel.add(scrollPane, BorderLayout.CENTER)
+		val panel =
+			JPanel().apply {
+				layout = BorderLayout()
+				add(scrollPane, BorderLayout.CENTER)
+			}
 
 		return panel
 	}
 
 	private fun openUrl(event: HyperlinkEvent) {
-		val type = event.eventType
-		if (type == HyperlinkEvent.EventType.ACTIVATED) {
-			val url = event.url
-			SwingUtils.openUrl(URI.create(url.toExternalForm()), true)
+		if (event.eventType == HyperlinkEvent.EventType.ACTIVATED) {
+			SwingUtils.openUrl(URI.create(event.url.toExternalForm()), true)
 		}
 	}
 
@@ -207,43 +219,37 @@ class AboutDialog private constructor() : JFrame() {
 		 */
 		@JvmStatic
 		@JvmOverloads
-		fun showDialog(selectedTab: String? = ABOUT_TAB) {
-			if (runningDialog == null) {
-				val dialog = AboutDialog()
-				dialog.addWindowListener(
-					object : WindowListener {
-						override fun windowOpened(e: WindowEvent?) {}
-
-						override fun windowClosing(e: WindowEvent?) {}
-
-						override fun windowClosed(e: WindowEvent?) {
-							runningDialog = null
+		fun showDialog(selectedTab: String = ABOUT_TAB) {
+			when (val dialog = runningDialog) {
+				null -> {
+					runningDialog =
+						AboutDialog().apply {
+							addWindowListener(
+								object : WindowAdapter() {
+									override fun windowClosed(e: WindowEvent?) {
+										runningDialog = null
+									}
+								},
+							)
+							isVisible = true
+							selectTab(selectedTab, this)
 						}
-
-						override fun windowIconified(e: WindowEvent?) {}
-
-						override fun windowDeiconified(e: WindowEvent?) {}
-
-						override fun windowActivated(e: WindowEvent?) {}
-
-						override fun windowDeactivated(e: WindowEvent?) {}
-					},
-				)
-				dialog.isVisible = true
-				runningDialog = dialog
-			} else {
-				runningDialog!!.toFront()
-			}
-
-			// select tab if it exists
-			val idx = runningDialog!!.tabIndices[StringUtils.nullToEmpty(selectedTab)]
-			if (idx != null) {
-				try {
-					runningDialog!!.tabbedPane.setSelectedIndex(idx)
-				} catch (ex: ArrayIndexOutOfBoundsException) {
-					LOG.error { "Invalid index selected." }
+				}
+				else -> {
+					dialog.toFront()
+					selectTab(selectedTab, dialog)
 				}
 			}
+		}
+
+		// select tab if it exists
+		private fun selectTab(
+			selectedTab: String,
+			dialog: AboutDialog,
+		) {
+			dialog.tabIndices[selectedTab]?.let {
+				dialog.tabbedPane.selectedIndex = it
+			} ?: run { LOG.error { "Invalid index selected." } }
 		}
 	}
 }

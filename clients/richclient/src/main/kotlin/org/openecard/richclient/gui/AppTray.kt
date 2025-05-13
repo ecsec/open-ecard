@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2012-2016 ecsec GmbH.
+ * Copyright (C) 2012-2025 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -31,16 +31,19 @@ import org.openecard.common.AppVersion.name
 import org.openecard.common.I18n
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
-import org.openecard.gui.about.AboutDialog
-import org.openecard.gui.graphics.*
 import org.openecard.richclient.RichClient
+import org.openecard.richclient.gui.graphics.OecIconType
+import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
-import java.awt.*
+import java.awt.Color
+import java.awt.Container
+import java.awt.Dimension
+import java.awt.Frame
+import java.awt.Image
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
@@ -48,10 +51,9 @@ import java.util.concurrent.TimeoutException
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
-import javax.swing.JSeparator
 import kotlin.system.exitProcess
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 private const val ICON_LOADER: String = "loader"
 private const val ICON_LOGO: String = "logo"
@@ -60,38 +62,36 @@ private const val ICON_LOGO: String = "logo"
  * This class creates a tray icon on systems that do have a system tray.
  * Otherwise a normal window will be shown.
  *
+ * @param client RichClient
+ *
  * @author Moritz Horsch
  * @author Johannes Schmölz
  * @author Tobias Wich
  */
-class AppTray
-	/**
-	 * Constructor of AppTray class.
-	 *
-	 * @param client RichClient
-	 */
-	(private val client: RichClient) {
+class AppTray(
+	private val client: RichClient,
+) {
+	private val lang: I18n = I18n.getTranslation("richclient")
 
-    private val lang: I18n = I18n.getTranslation("richclient")
-
-    private var tray: SystemTray? = null
-    var status: Status? = null
+	private var tray: SystemTray? = null
+	var status: Status? = null
 		private set
 	private var frame: InfoFrame? = null
 	private var infoPopupActive = false
 
-    /**
-     * Starts the setup process.
-     * A loading icon is displayed.
-     */
-    fun beginSetup() {
-		tray = SystemTray.get(lang.translationForKey("tray.title", name))?.let { tray ->
-			tray.setImage(tray.getTrayIconImage(ICON_LOADER))
-			tray.status = lang.translationForKey("tray.message.loading", name)
-			tray.setTooltip(lang.translationForKey("tray.title", name))
+	/**
+	 * Starts the setup process.
+	 * A loading icon is displayed.
+	 */
+	fun beginSetup() {
+		tray =
+			SystemTray.get(lang.translationForKey("tray.title", name))?.let { tray ->
+				tray.setImage(tray.getTrayIconImage(ICON_LOADER))
+				tray.status = lang.translationForKey("tray.message.loading", name)
+				tray.setTooltip(lang.translationForKey("tray.title", name))
 
-			tray
-		}
+				tray
+			}
 
 		// no tray, set up frame
 		if (tray == null) {
@@ -99,76 +99,99 @@ class AppTray
 		}
 	}
 
-    /**
-     * Finishes the setup process.
-     * The loading icon is replaced with the eCard logo.
-     *
-     * @param env
-     * @param manager
-     */
-    fun endSetup(env: Environment, manager: AddonManager) {
+	/**
+	 * Finishes the setup process.
+	 * The loading icon is replaced with the eCard logo.
+	 *
+	 * @param env
+	 * @param manager
+	 */
+	fun endSetup(
+		env: Environment,
+		manager: AddonManager,
+	) {
 		val statusObj = Status(this, env, manager, tray == null)
 		status = statusObj
 
 		tray?.let { tray ->
 			tray.setImage(tray.getTrayIconImage(ICON_LOGO))
 			tray.status = null
-			tray.menu.add(MenuItem("Card Status", object : ActionListener {
-				override fun actionPerformed(e: ActionEvent) {
-					if (!infoPopupActive) {
-						val frame = setupFrame(false)
-						frame.setStatusPane(statusObj)
-						frame.addWindowListener(object : WindowAdapter() {
-							override fun windowClosed(e: WindowEvent) {
-								infoPopupActive = false
+			tray.menu.add(
+				MenuItem(
+					"Card Status",
+					object : ActionListener {
+						override fun actionPerformed(e: ActionEvent) {
+							if (!infoPopupActive) {
+								val frame = setupFrame(false)
+								frame.setStatusPane(statusObj)
+								frame.addWindowListener(
+									object : WindowAdapter() {
+										override fun windowClosed(e: WindowEvent) {
+											infoPopupActive = false
+										}
+									},
+								)
+								infoPopupActive = true
 							}
-						})
-						infoPopupActive = true
-					}
-				}
-			}))
+						}
+					},
+				),
+			)
 			tray.menu.add(Separator())
-			tray.menu.add(MenuItem(lang.translationForKey("tray.about"), object : ActionListener {
-				override fun actionPerformed(e: ActionEvent) {
-					AboutDialog.showDialog()
-				}
-			}))
-			tray.menu.add(MenuItem(lang.translationForKey("tray.config"), object : ActionListener {
-				override fun actionPerformed(e: ActionEvent) {
-					ManagementDialog.Companion.showDialog(manager)
-				}
-			}))
+			tray.menu.add(
+				MenuItem(
+					lang.translationForKey("tray.about"),
+					object : ActionListener {
+						override fun actionPerformed(e: ActionEvent) {
+							AboutDialog.showDialog()
+						}
+					},
+				),
+			)
+			tray.menu.add(
+				MenuItem(
+					lang.translationForKey("tray.config"),
+					object : ActionListener {
+						override fun actionPerformed(e: ActionEvent) {
+							ManagementDialog.Companion.showDialog(manager)
+						}
+					},
+				),
+			)
 			tray.menu.add(Separator())
-			tray.menu.add(MenuItem(lang.translationForKey("tray.exit"), object : ActionListener {
-				override fun actionPerformed(e: ActionEvent) {
-					shutdown()
-				}
-			}))
-
-        }
+			tray.menu.add(
+				MenuItem(
+					lang.translationForKey("tray.exit"),
+					object : ActionListener {
+						override fun actionPerformed(e: ActionEvent) {
+							shutdown()
+						}
+					},
+				),
+			)
+		}
 
 		frame?.setStatusPane(statusObj)
-    }
+	}
 
-    /**
-     * Removes the tray icon from the tray and terminates the application.
-     */
-    fun shutdown() {
+	/**
+	 * Removes the tray icon from the tray and terminates the application.
+	 */
+	fun shutdown() {
 		tray?.shutdown()
 		tray = null
 		client.teardown()
 		exitProcess(0)
-    }
+	}
 
-
-	private fun setupFrame(standalone: Boolean): InfoFrame {
-		return InfoFrame(lang.translationForKey("tray.title", name)).also { frame ->
-			frame.iconImage = GraphicsUtil.createImage(OecLogo::class.java, 256, 256)
+	private fun setupFrame(standalone: Boolean): InfoFrame =
+		InfoFrame(lang.translationForKey("tray.title", name)).also { frame ->
+			frame.iconImage = oecImage(OecIconType.COLORED, 256, 256)
 
 			if (standalone) {
 				frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
-				val logo = ImageIcon(GraphicsUtil.createImage(OecLogo::class.java, 256, 256))
+				val logo = ImageIcon(oecImage(OecIconType.COLORED, 256, 256))
 				val label = JLabel(logo)
 				val c: Container = frame.contentPane
 				c.preferredSize = Dimension(logo.iconWidth, logo.iconHeight)
@@ -184,10 +207,7 @@ class AppTray
 				frame.isVisible = false
 			}
 		}
-	}
-
 }
-
 
 private fun InfoFrame.setStatusPane(statusObj: Status) {
 	this.isVisible = false
@@ -212,30 +232,38 @@ private fun SystemTray.getTrayIconImage(name: String): Image {
 	}
 }
 
-private fun getImageLinux(name: String, dim: Dimension): Image {
-	return if (name == ICON_LOADER) {
-		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
+private fun getImageLinux(
+	name: String,
+	dim: Dimension,
+): Image =
+	if (name == ICON_LOADER) {
+		oecImage(OecIconType.GRAY, dim.width, dim.height)
 	} else {
-		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
+		oecImage(OecIconType.COLORED, dim.width, dim.height)
 	}
+
+private fun getImageMacOSX(
+	name: String,
+	dim: Dimension,
+): Image {
+	val kind =
+		if (isMacMenuBarDarkMode()) {
+			OecIconType.WHITE
+		} else {
+			OecIconType.BLACK
+		}
+	return oecImage(kind, dim.width, dim.height)
 }
 
-private fun getImageMacOSX(name: String, dim: Dimension): Image {
-	val c = if (isMacMenuBarDarkMode()) {
-		OecLogoWhite::class.java
+private fun getImageDefault(
+	name: String,
+	dim: Dimension,
+): Image =
+	if (name == ICON_LOADER) {
+		oecImage(OecIconType.GRAY, dim.width, dim.height)
 	} else {
-		OecLogoBlack::class.java
+		oecImage(OecIconType.COLORED, dim.width, dim.height)
 	}
-	return GraphicsUtil.createImage(c, dim.width - 2, dim.height - 2, dim.width, dim.height, 1, 1)
-}
-
-private fun getImageDefault(name: String, dim: Dimension): Image {
-	return if (name == ICON_LOADER) {
-		GraphicsUtil.createImage(OecLogoLoading::class.java, dim.width, dim.height)
-	} else {
-		GraphicsUtil.createImage(OecLogo::class.java, dim.width, dim.height)
-	}
-}
 
 private fun isMacMenuBarDarkMode(): Boolean {
 	// code inspired by https://stackoverflow.com/questions/33477294/menubar-icon-for-dark-mode-on-os-x-in-java
@@ -243,15 +271,18 @@ private fun isMacMenuBarDarkMode(): Boolean {
 		FutureTask {
 			// check for exit status only. Once there are more modes than "dark" and "default", we might need to
 			// analyze string contents.
-			val proc: Process = Runtime.getRuntime()
-				.exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
+			val proc: Process =
+				Runtime
+					.getRuntime()
+					.exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
 			proc.waitFor()
 			proc.exitValue()
 		}
 	try {
-		val t = Thread {
-			f.run()
-		}
+		val t =
+			Thread {
+				f.run()
+			}
 		t.isDaemon = true
 		t.start()
 		val result: Int = f.get(100, TimeUnit.MILLISECONDS)

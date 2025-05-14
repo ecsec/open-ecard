@@ -119,7 +119,7 @@ open class InsertCardHelper(
 	}
 
 	fun disconnectIfMobile() {
-		if (SysUtils.isMobileDevice()) {
+		if (SysUtils.isMobileDevice) {
 			val disc = CardApplicationDisconnect()
 			disc.connectionHandle = conHandle
 			val discr = ctx.dispatcher.safeDeliver(disc) as CardApplicationDisconnectResponse

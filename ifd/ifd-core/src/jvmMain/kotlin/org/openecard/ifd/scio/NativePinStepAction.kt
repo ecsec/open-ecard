@@ -49,8 +49,8 @@ class NativePinStepAction(
 	var response: ByteArray? = null
 
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>?,
-		result: StepResult?,
+		oldResults: Map<String, ExecutionResults>,
+		result: StepResult,
 	): StepActionResult {
 		try {
 			response = nativePinVerify()

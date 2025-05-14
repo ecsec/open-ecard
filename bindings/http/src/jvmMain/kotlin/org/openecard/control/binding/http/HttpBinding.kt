@@ -86,10 +86,11 @@ class HttpBinding(
 				CacheControlHeaderResponseInterceptor(),
 			)
 
-		if (addonManager == null) {
+		val currentAddonManager = addonManager
+		if (currentAddonManager == null) {
 			throw HttpServiceError("Trying to use uninitialized HttpBinding instance.")
 		} else {
-			val handler = HttpAppPluginActionHandler(addonManager)
+			val handler = HttpAppPluginActionHandler(currentAddonManager)
 			service = HttpService(_port, handler, actualRequestInterceptor, actualResponseInterceptor)
 			service!!.start()
 		}

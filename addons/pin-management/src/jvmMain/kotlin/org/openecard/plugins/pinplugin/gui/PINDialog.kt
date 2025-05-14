@@ -57,16 +57,15 @@ class PINDialog(
 	private fun createUserConsentDescription(): UserConsentDescription {
 		val uc = UserConsentDescription("PIN Operation", "pin_change_dialog")
 		val gPINStep = GenericPINStep("GenericPINStepID", "GenericPINStep", this.cardCapturer)
-		gPINStep.setAction(
+		gPINStep.action =
 			GenericPINAction(
 				"PIN Management",
 				dispatcher,
 				gPINStep,
 				cardCapturer,
 				errorPromise,
-			),
-		)
-		uc.getSteps().add(gPINStep)
+			)
+		uc.steps.add(gPINStep)
 
 		return uc
 	}

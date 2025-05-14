@@ -38,8 +38,8 @@ class ProcessingStep : Step(STEP_ID, lang.translationForKey(TITLE)) {
 		isReversible = false
 
 		val desc = Text()
-		desc.setText(lang.translationForKey(DESCRIPTION, name))
-		getInputInfoUnits().add(desc)
+		desc.text = lang.translationForKey(DESCRIPTION, name)
+		inputInfoUnits.add(desc)
 	}
 
 	companion object {

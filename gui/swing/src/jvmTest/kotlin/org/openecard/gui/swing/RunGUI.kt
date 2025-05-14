@@ -37,6 +37,8 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.gui.results
+import org.openecard.gui.status
 import org.openecard.gui.swing.common.GUIDefaults.initialize
 import org.testng.annotations.BeforeTest
 import org.testng.annotations.Test
@@ -58,12 +60,12 @@ class RunGUI {
 	fun setUp() {
 		uc = UserConsentDescription("Identitätsnachweis")
 
-		uc.getSteps().add(identityCheckStep())
-		uc.getSteps().add(providerInfoStep())
+		uc.steps.add(identityCheckStep())
+		uc.steps.add(providerInfoStep())
 		val requestedDataStep = requestedDataStep()
-		uc.getSteps().add(requestedDataStep)
-		uc.getSteps().add(pinInputStep(requestedDataStep))
-		uc.getSteps().add(checkDataStep())
+		uc.steps.add(requestedDataStep)
+		uc.steps.add(pinInputStep(requestedDataStep))
+		uc.steps.add(checkDataStep())
 
 		initialize()
 	}
@@ -77,14 +79,14 @@ class RunGUI {
 	private fun identityCheckStep(): Step {
 		val identityCheckServerConnectionStep = Step("Start") // ("Identitätsnachweis wird gestartet");
 		val serverConnectionText = Text()
-		serverConnectionText.setText("Verbindung zum Server wird aufgebaut")
-		identityCheckServerConnectionStep.getInputInfoUnits().add(serverConnectionText)
+		serverConnectionText.text = "Verbindung zum Server wird aufgebaut"
+		identityCheckServerConnectionStep.inputInfoUnits.add(serverConnectionText)
 
 		val providerNameText1 = ToggleText()
 		providerNameText1.title = "Name"
-		providerNameText1.setText("Frauenhofer FOKUS\n\n")
+		providerNameText1.text = "Frauenhofer FOKUS\n\n"
 
-		// 	identityCheck_ServerConnection_Step.getInputInfoUnits().add(providerName_Text1);
+		// 	identityCheck_ServerConnection_Step.inputInfoUnits.add(providerName_Text1);
 		return identityCheckServerConnectionStep
 	}
 
@@ -93,64 +95,64 @@ class RunGUI {
 		val step = Step("Anbieter")
 
 		val decription = Text()
-		decription.setText("Zu dem Dienstanbieter und seiner Berechtigung liegen folgende Information vor.")
-		step.getInputInfoUnits().add(decription)
+		decription.text = "Zu dem Dienstanbieter und seiner Berechtigung liegen folgende Information vor."
+		step.inputInfoUnits.add(decription)
 
 		val name = ToggleText()
 		name.title = "Name"
-		name.setText("Fraunhofer FOKUS")
-		step.getInputInfoUnits().add(name)
+		name.text = "Fraunhofer FOKUS"
+		step.inputInfoUnits.add(name)
 
 		val url = ToggleText()
 		url.title = "Internetadresse"
-		url.setText("http://www.fraunhofer.de")
+		url.text = "http://www.fraunhofer.de"
 		// 	url.setCollapsed(true);
-		step.getInputInfoUnits().add(url)
+		step.inputInfoUnits.add(url)
 
 		val termsofUsage = ToggleText()
 		termsofUsage.title = "Nutzungsbestimmungen"
-		termsofUsage.setText(
+		termsofUsage.text =
 			(
 				"Anschrift:\nTest-Diensteanbieter\nTest-Strasse 1\n12345 Test-Ort\n\n" +
 					"E-Mail-Adresse:\ninfo@test-diensteanbieter.de\n\n" +
 					"Zweck des Auslesevorgangs:\nEntwicklung und Test von Software\n\n" +
 					"Zuständige Datenschutzbehörde:\nTest-Datenschutzbehörde\nTest-Strasse 1\n12345 Test-Ort"
-			),
-		)
+			)
+
 		termsofUsage.isCollapsed = true
-		step.getInputInfoUnits().add(termsofUsage)
+		step.inputInfoUnits.add(termsofUsage)
 
 		val termsofUsageHtml = ToggleText()
 		termsofUsageHtml.title = "Nutzungsbestimmungen (HTML)"
 		val usageTextHtml = RunGUI::class.java.getResourceAsStream("/description.html")!!.readAllBytes()
-		termsofUsageHtml.setDocument(Document("text/html", usageTextHtml))
-		termsofUsageHtml.setCollapsed(true)
-		step.getInputInfoUnits().add(termsofUsageHtml)
+		termsofUsageHtml.document = Document("text/html", usageTextHtml)
+		termsofUsageHtml.isCollapsed = true
+		step.inputInfoUnits.add(termsofUsageHtml)
 
 		val termsofUsagePdf = ToggleText()
 		termsofUsagePdf.title = "Nutzungsbestimmungen (PDF)"
 		val usageTextPdf = RunGUI::class.java.getResourceAsStream("/description.pdf")!!.readAllBytes()
 		termsofUsagePdf.document = Document("application/pdf", usageTextPdf)
 		termsofUsagePdf.isCollapsed = true
-		step.getInputInfoUnits().add(termsofUsagePdf)
+		step.inputInfoUnits.add(termsofUsagePdf)
 
 		val validation = ToggleText()
 		validation.title = "Gültigkeit"
-		validation.setText("Von 01.01.2012 bis zum 02.01.2012")
+		validation.text = "Von 01.01.2012 bis zum 02.01.2012"
 		validation.isCollapsed = true
-		step.getInputInfoUnits().add(validation)
+		step.inputInfoUnits.add(validation)
 
 		val subjectName = ToggleText()
 		subjectName.title = "Aussteller des Berechtigung"
-		subjectName.setText("D-Trust GmbH")
+		subjectName.text = "D-Trust GmbH"
 		subjectName.isCollapsed = true
-		step.getInputInfoUnits().add(subjectName)
+		step.inputInfoUnits.add(subjectName)
 
 		val subjectURL = ToggleText()
 		subjectURL.title = "Internetadresse des Ausstellers"
-		subjectURL.setText("http://www.dtrust.de")
+		subjectURL.text = "http://www.dtrust.de"
 		subjectURL.isCollapsed = true
-		step.getInputInfoUnits().add(subjectURL)
+		step.inputInfoUnits.add(subjectURL)
 
 		return step
 	}
@@ -158,16 +160,15 @@ class RunGUI {
 	@Throws(Exception::class)
 	private fun requestedDataStep(): Step {
 		val requestedDataStep1 = Step("Angefragte Daten")
-		requestedDataStep1.setAction(RequestedDataAction(requestedDataStep1))
+		requestedDataStep1.action = RequestedDataAction(requestedDataStep1)
 		val requestedDataDescription = Text()
-		requestedDataDescription.setText(
-			"Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:",
-		)
-		requestedDataStep1.getInputInfoUnits().add(requestedDataDescription)
+		requestedDataDescription.text =
+			"Der Anbieter \"Test-Diensteanbieter\"  fordert zum Zweck \"Entwicklung und Test von Software\" die folgenden Daten von Ihnen an:"
+		requestedDataStep1.inputInfoUnits.add(requestedDataDescription)
 
 		// 	Hyperlink dataPrivacyDescriptionLink = new Hyperlink();
 // 	dataPrivacyDescriptionLink.setHref("http://www.dataprivacy.eu");
-// 	pinInputStep.getInputInfoUnits().add(dataPrivacyDescriptionLink);
+// 	pinInputStep.inputInfoUnits.add(dataPrivacyDescriptionLink);
 		val dataToSendSelection = Checkbox("c1")
 		val vornameBoxItem = BoxItem()
 		vornameBoxItem.name = "vornameBoxItem"
@@ -204,7 +205,7 @@ class RunGUI {
 //        pseudonymBoxItem.setName("pseudonymBoxItem");
 //        pseudonymBoxItem.setChecked(false);
 //        pseudonymBoxItem.setDisabled(true);
-//        pseudonymBoxItem.setText("Ordens-oder Künstlername");
+//        pseudonymBoxItem.text = "Ordens-oder Künstlername";
 		val identiycardtypeBoxItem = BoxItem()
 		identiycardtypeBoxItem.name = "identiycardtypeBoxItem"
 		identiycardtypeBoxItem.isChecked = false
@@ -227,30 +228,29 @@ class RunGUI {
 
 		//
 //        Text sendAgreement_Text = new Text ();
-//        sendAgreement_Text.setText("Wenn Sie mit der Übermittlung der ausgewählten Daten einverstanden sind  , geben Sie bitte Ihre 6/stellige PIN ein.");
-//        ageverificationBoxItem.setText("Alterverifikation");
+//        sendAgreement_Text.text = "Wenn Sie mit der Übermittlung der ausgewählten Daten einverstanden sind  , geben Sie bitte Ihre 6/stellige PIN ein.";
+//        ageverificationBoxItem.text = "Alterverifikation";
 //        Passwordfield p1 = new Passwordfield();
 //        p1.setName("pass input1");
-//        p1.setText("PIN:");
-		dataToSendSelection.getBoxItems().add(vornameBoxItem)
-		dataToSendSelection.getBoxItems().add(nameBoxItem)
-		dataToSendSelection.getBoxItems().add(doctordegreeBoxItem)
-		// 	dataToSendSelection.getBoxItems().add(addressBoxItem);
-// 	dataToSendSelection.getBoxItems().add(birthdayBoxItem);
-// 	dataToSendSelection.getBoxItems().add(birthplaceBoxItem);
-// 	dataToSendSelection.getBoxItems().add(identiycardtypeBoxItem);
-// 	dataToSendSelection.getBoxItems().add(certificationcountryBoxItem);
-// 	dataToSendSelection.getBoxItems().add(habitationBoxItem);
-// 	dataToSendSelection.getBoxItems().add(ageverificationBoxItem);
-		requestedDataStep1.getInputInfoUnits().add(dataToSendSelection)
+//        p1.text = "PIN:";
+		dataToSendSelection.boxItems.add(vornameBoxItem)
+		dataToSendSelection.boxItems.add(nameBoxItem)
+		dataToSendSelection.boxItems.add(doctordegreeBoxItem)
+		// 	dataToSendSelection.boxItems.add(addressBoxItem);
+// 	dataToSendSelection.boxItems.add(birthdayBoxItem);
+// 	dataToSendSelection.boxItems.add(birthplaceBoxItem);
+// 	dataToSendSelection.boxItems.add(identiycardtypeBoxItem);
+// 	dataToSendSelection.boxItems.add(certificationcountryBoxItem);
+// 	dataToSendSelection.boxItems.add(habitationBoxItem);
+// 	dataToSendSelection.boxItems.add(ageverificationBoxItem);
+		requestedDataStep1.inputInfoUnits.add(dataToSendSelection)
 
 		val requestedDataDescription1 = ToggleText()
 		requestedDataDescription1.title = "Hinweis"
-		requestedDataDescription1.setText(
-			"Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen.",
-		)
+		requestedDataDescription1.text =
+			"Die markierten Elemente benötigt der Anbieter zur Durchführung seiner Dienstleistung. Optionale Daten können Sie hinzufügen."
 		requestedDataDescription1.isCollapsed = false
-		requestedDataStep1.getInputInfoUnits().add(requestedDataDescription1)
+		requestedDataStep1.inputInfoUnits.add(requestedDataDescription1)
 
 		return requestedDataStep1
 	}
@@ -258,53 +258,52 @@ class RunGUI {
 	private fun checkDataStep(): Step {
 		val dataTransactionStep = Step("Identitätsnachweis") // wird durchgeführt");
 		val requestedPINText = Text()
-		requestedPINText.setText("Eingegebene PIN")
+		requestedPINText.text = "Eingegebene PIN"
 		val pinCorrekt = BoxItem()
 		pinCorrekt.name = "pinCorrect"
 		pinCorrekt.isChecked = true
 		pinCorrekt.text = "OK"
-		dataTransactionStep.getInputInfoUnits().add(requestedPINText)
+		dataTransactionStep.inputInfoUnits.add(requestedPINText)
 
 		val cerificateText = Text()
-		cerificateText.setText("Berechtigungszertifikat")
+		cerificateText.text = "Berechtigungszertifikat"
 		val certificateCorrekt = BoxItem()
 		certificateCorrekt.name = "certificateCorrekt"
 		certificateCorrekt.isChecked = true
 		certificateCorrekt.text = "OK"
-		//        statusMessages_CheckBox.getBoxItems().add(certificateCorrekt);
-		dataTransactionStep.getInputInfoUnits().add(cerificateText)
+		//        statusMessages_CheckBox.boxItems.add(certificateCorrekt);
+		dataTransactionStep.inputInfoUnits.add(cerificateText)
 
 		val eCardText = Text()
-		eCardText.setText("Verwendete Karte")
+		eCardText.text = "Verwendete Karte"
 		val eCardCorrekt = BoxItem()
 		eCardCorrekt.name = "eCardCorrekt"
 		eCardCorrekt.isChecked = true
 		eCardCorrekt.text = "OK"
-		dataTransactionStep.getInputInfoUnits().add(eCardText)
+		dataTransactionStep.inputInfoUnits.add(eCardText)
 
-		//        statusMessages_CheckBox.getBoxItems().add(eCardCorrekt);
+		//        statusMessages_CheckBox.boxItems.add(eCardCorrekt);
 		val dataTransactionText = Text()
-		dataTransactionText.setText("Datenübermittlung wird geprüft")
+		dataTransactionText.text = "Datenübermittlung wird geprüft"
 		val dataTransactionCorrekt = BoxItem()
 		dataTransactionCorrekt.name = "dataTransactionCorrekt"
 		dataTransactionCorrekt.isChecked = true
 		dataTransactionCorrekt.text = "OK"
-		//        statusMessages_CheckBox.getBoxItems().add(dataTransactionCorrekt);
-		dataTransactionStep.getInputInfoUnits().add(dataTransactionText)
+		//        statusMessages_CheckBox.boxItems.add(dataTransactionCorrekt);
+		dataTransactionStep.inputInfoUnits.add(dataTransactionText)
 
-		//        dataTransaction_Step.getInputInfoUnits().add(statusMessages_CheckBox);
+		//        dataTransaction_Step.inputInfoUnits.add(statusMessages_CheckBox);
 		return dataTransactionStep
 	}
 
 	@Throws(Exception::class)
 	private fun pinInputStep(requestedDataStep: Step): Step {
 		val pinInputStep = Step("PIN-Eingabe")
-		pinInputStep.setAction(PinInputAction(pinInputStep, requestedDataStep))
+		pinInputStep.action = PinInputAction(pinInputStep, requestedDataStep)
 		val t = Text()
-		t.setText(
-			"Durch die Eingabe Ihrer PIN bestätigen Sie, dass folgende markierte Daten an den Anbieter übermittelt werden.",
-		)
-		pinInputStep.getInputInfoUnits().add(t)
+		t.text =
+			"Durch die Eingabe Ihrer PIN bestätigen Sie, dass folgende markierte Daten an den Anbieter übermittelt werden."
+		pinInputStep.inputInfoUnits.add(t)
 		val dataToSendSelection = Checkbox("c1")
 		val vornameBoxItem = BoxItem()
 		vornameBoxItem.name = "vornameBoxItem"
@@ -363,31 +362,29 @@ class RunGUI {
 		ageverificationBoxItem.text = "Altersverifikation"
 
 		val sendAgreementText = Text()
-		sendAgreementText.setText(
-			(
-				"Wenn Sie mit der Übermittlung der ausgewählten\n" +
-					"Daten einverstanden sind, geben Sie bitte\n" +
-					"Ihre 6-stellige PIN ein."
-			),
-		)
+		sendAgreementText.text =
+			"Wenn Sie mit der Übermittlung der ausgewählten\n" +
+			"Daten einverstanden sind, geben Sie bitte\n" +
+			"Ihre 6-stellige PIN ein."
+		
 		val p1 = PasswordField("pf1")
 		p1.description = "pass input1"
 		p1.description = "PIN:"
 		p1.maxLength = 6
 
-		dataToSendSelection.getBoxItems().add(vornameBoxItem)
-		dataToSendSelection.getBoxItems().add(nameBoxItem)
-		// 	dataToSendSelection.getBoxItems().add(doctordegreeBoxItem);
-// 	dataToSendSelection.getBoxItems().add(addressBoxItem);
-// 	dataToSendSelection.getBoxItems().add(birthdayBoxItem);
-// 	dataToSendSelection.getBoxItems().add(birthplaceBoxItem);
-// 	dataToSendSelection.getBoxItems().add(identiycardtypeBoxItem);
-// 	dataToSendSelection.getBoxItems().add(certificationcountryBoxItem);
-// 	dataToSendSelection.getBoxItems().add(habitationBoxItem);
-// 	dataToSendSelection.getBoxItems().add(ageverificationBoxItem);
-		pinInputStep.getInputInfoUnits().add(dataToSendSelection)
-		// 	pinInputStep.getInputInfoUnits().add(sendAgreement_Text);
-		pinInputStep.getInputInfoUnits().add(p1)
+		dataToSendSelection.boxItems.add(vornameBoxItem)
+		dataToSendSelection.boxItems.add(nameBoxItem)
+		// 	dataToSendSelection.boxItems.add(doctordegreeBoxItem);
+// 	dataToSendSelection.boxItems.add(addressBoxItem);
+// 	dataToSendSelection.boxItems.add(birthdayBoxItem);
+// 	dataToSendSelection.boxItems.add(birthplaceBoxItem);
+// 	dataToSendSelection.boxItems.add(identiycardtypeBoxItem);
+// 	dataToSendSelection.boxItems.add(certificationcountryBoxItem);
+// 	dataToSendSelection.boxItems.add(habitationBoxItem);
+// 	dataToSendSelection.boxItems.add(ageverificationBoxItem);
+		pinInputStep.inputInfoUnits.add(dataToSendSelection)
+		// 	pinInputStep.inputInfoUnits.add(sendAgreement_Text);
+		pinInputStep.inputInfoUnits.add(p1)
 
 		return pinInputStep
 	}
@@ -416,31 +413,31 @@ class RunGUI {
 			step,
 		) {
 		override fun perform(
-			oldResults: MutableMap<String?, ExecutionResults?>?,
+			oldResults: Map<String, ExecutionResults>,
 			result: StepResult,
 		): StepActionResult {
-			val d = result.getResults().toTypedArray()
+			val d = result.results.toTypedArray()
 			var cc: Checkbox? = null
 			for (i in d.indices) {
 				if (d[i] is Checkbox) {
 					cc = d[i] as Checkbox?
-					println(cc!!.getBoxItems())
+					println(cc!!.boxItems)
 				}
 			}
 
-			val l = cc!!.getBoxItems()
+			val l = cc!!.boxItems
 			for (b in l) {
 				println(b.name + " " + b.isChecked)
 			}
 
-			val data = step.getInputInfoUnits().toTypedArray()
-			// 		    Object[] data = uc.getSteps().get(uc.getSteps().indexOf("PIN-Eingabe"));
-			when (result.getStatus()) {
+			val data = step.inputInfoUnits.toTypedArray()
+			// 		    Object[] data = uc.steps.get(uc.steps.indexOf("PIN-Eingabe"));
+			when (result.status) {
 				ResultStatus.BACK -> // 			    for (int i = 0; i < data.length; i++) {
 // 				if (data[i] instanceof Checkbox) {
 // 				    Checkbox c = (Checkbox) data[i];
-// 				    c.getBoxItems().clear();
-// 				    c.getBoxItems().addAll(cc.getBoxItems());
+// 				    c.boxItems.clear();
+// 				    c.boxItems.addAll(cc.boxItems);
 // 				}
 // 			    }
 					return StepActionResult(StepActionResultStatus.BACK)
@@ -450,8 +447,8 @@ class RunGUI {
 					while (i < data.size) {
 						if (data[i] is Checkbox) {
 							val c = data[i] as Checkbox
-							c.getBoxItems().clear()
-							c.getBoxItems().addAll(cc.getBoxItems())
+							c.boxItems.clear()
+							c.boxItems.addAll(cc.boxItems)
 						}
 						i++
 					}
@@ -468,7 +465,7 @@ class RunGUI {
 		private val requestedData_Step1: Step,
 	) : StepAction(step) {
 		override fun perform(
-			oldResults: MutableMap<String?, ExecutionResults?>?,
+			oldResults: Map<String, ExecutionResults>,
 			result: StepResult,
 		): StepActionResult {
 // 		    Object[] d = null;
@@ -478,28 +475,28 @@ class RunGUI {
 // 			    d = e.getResults().toArray();
 // 			}
 // 		    }
-			val d = result.getResults().toTypedArray()
+			val d = result.results.toTypedArray()
 			var cc: Checkbox? = null
 			for (i in d.indices) {
 				if (d[i] is Checkbox) {
 					cc = d[i] as Checkbox?
-					println(cc!!.getBoxItems())
+					println(cc!!.boxItems)
 				}
 			}
-			val l = cc!!.getBoxItems()
+			val l = cc!!.boxItems
 			for (b in l) {
 				println(b.name + " " + b.isChecked)
 			}
-			// 		    Object[] data = requestedData_Step1.getInputInfoUnits().toArray();
-			val data = requestedData_Step1.getInputInfoUnits().toTypedArray()
-			when (result.getStatus()) {
+			// 		    Object[] data = requestedData_Step1.inputInfoUnits.toArray();
+			val data = requestedData_Step1.inputInfoUnits.toTypedArray()
+			when (result.status) {
 				ResultStatus.BACK -> {
 					var i = 0
 					while (i < data.size) {
 						if (data[i] is Checkbox) {
 							val c = data[i] as Checkbox
-							c.getBoxItems().clear()
-							c.getBoxItems().addAll(cc.getBoxItems())
+							c.boxItems.clear()
+							c.boxItems.addAll(cc.boxItems)
 						}
 						i++
 					}
@@ -509,8 +506,8 @@ class RunGUI {
 				ResultStatus.OK -> // 			    for (int i = 0; i < data.length; i++) {
 // 				if (data[i] instanceof Checkbox) {
 // 				    Checkbox c = (Checkbox) data[i];
-// 				    c.getBoxItems().clear();
-// 				    c.getBoxItems().addAll(cc.getBoxItems());
+// 				    c.boxItems.clear();
+// 				    c.boxItems.addAll(cc.boxItems);
 // 				}
 // 			    }
 					return StepActionResult(StepActionResultStatus.NEXT)

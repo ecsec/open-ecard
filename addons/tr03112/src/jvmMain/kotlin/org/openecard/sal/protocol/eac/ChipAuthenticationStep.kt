@@ -68,7 +68,7 @@ class ChipAuthenticationStep(
 
 		// EACProtocol.setEmptyResponseData(response);
 		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
 			val eacAdditionalInput = EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData())

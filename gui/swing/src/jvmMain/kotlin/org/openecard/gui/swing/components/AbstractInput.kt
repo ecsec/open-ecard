@@ -127,7 +127,7 @@ class AbstractInput private constructor(
 	override val value: OutputInfoUnit
 		get() {
 			val textValue = this.fieldValue
-			result.setValue(textValue)
+			result.value = textValue
 			textValue.fill(' ')
 			return result
 		}

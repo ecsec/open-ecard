@@ -105,7 +105,7 @@ class PUKStepAction(
 		val establishChannel =
 			EstablishChannel().apply {
 				slotHandle = givenSlotHandle
-				authenticationProtocolData = paceInputMap.getResponse()
+				authenticationProtocolData = paceInputMap.response
 				authenticationProtocolData.protocol = ECardConstants.Protocol.PACE
 			}
 

@@ -57,6 +57,7 @@ abstract class StepLayouter {
 		 * @param stepName Name of the step. This can be used to have a different layouter for disclaimer and pin entry step for example.
 		 * @return Layouter which can return panel and components list.
 		 */
+		@JvmStatic
 		fun create(
 			infoUnits: MutableList<InputInfoUnit>,
 			dialogType: String,

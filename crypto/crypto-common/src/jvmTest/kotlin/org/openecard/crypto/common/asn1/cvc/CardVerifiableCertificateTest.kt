@@ -70,9 +70,9 @@ class CardVerifiableCertificateTest {
 		Assert.assertEquals(chat, cvc.cHAT.toByteArray())
 		Assert.assertEquals(chr, cvc.cHR.toByteArray())
 		Assert.assertEquals(car, cvc.cAR.toByteArray())
-		Assert.assertEquals(publicKey, cvc.getPublicKey().tLVEncoded.getValue())
+		Assert.assertEquals(publicKey, cvc.getPublicKey().tLVEncoded.value)
 		Assert.assertEquals(cpi, cvc.cPI)
-		Assert.assertEquals(encodedBodyAndSignature, cvc.certificate.getValue())
+		Assert.assertEquals(encodedBodyAndSignature, cvc.certificate.value)
 		Assert.assertEquals(extension, cvc.extensions)
 
 		Assert.assertEquals(13, cvc.getEffectiveDate().get(GregorianCalendar.DAY_OF_MONTH))

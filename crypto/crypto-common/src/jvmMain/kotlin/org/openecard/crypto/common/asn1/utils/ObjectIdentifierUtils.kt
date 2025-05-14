@@ -69,7 +69,7 @@ object ObjectIdentifierUtils {
 			} catch (ex: TLVException) {
 				// read as plain value
 				obj = TLV()
-				obj.tagNum = 0x06
+				obj.setTagNum(0x06L)
 				obj.value = oid
 			}
 			return ASN1ObjectIdentifier.getInstance(obj.toBER()).id

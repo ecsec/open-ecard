@@ -101,7 +101,7 @@ public class InsertCardDialog {
 	    LOG.debug("Required card already available");
 	    return availableCards;
 	} else {
-	    Promise<ConnectionHandleType> promise = new Promise();
+	    Promise<ConnectionHandleType> promise = new Promise<ConnectionHandleType>();
 	    List<EventCallback> callbacks = new ArrayList<>(2);
 	    InsertCardStepAction insertCardAction = new InsertCardStepAction(STEP_ID,
 		    cardNameAndType.values(),

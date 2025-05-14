@@ -70,7 +70,7 @@ class GetCardsAndPINStatusAction : AbstractPINAction() {
 	@Throws(AppExtensionException::class)
 	override fun execute() {
 		// init dyn ctx
-		val ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(DYNCTX_INSTANCE_KEY)!!
 
 		var sessionHandle: ConnectionHandleType? = null
 
@@ -86,7 +86,7 @@ class GetCardsAndPINStatusAction : AbstractPINAction() {
 
 			val success = cardCapturer.updateCardState()
 
-			if (!success && !SysUtils.isMobileDevice()) {
+			if (!success && !SysUtils.isMobileDevice) {
 				// User cancelled card insertion.
 				logger.debug { "User cancelled card insertion" }
 				return
@@ -211,7 +211,7 @@ class GetCardsAndPINStatusAction : AbstractPINAction() {
 	): EventCallback? {
 		val disconnectEventSink: EventCallback?
 
-		if (!SysUtils.isMobileDevice()) {
+		if (!SysUtils.isMobileDevice) {
 			disconnectEventSink =
 				object : EventCallback {
 					override fun signalEvent(
@@ -273,7 +273,7 @@ class GetCardsAndPINStatusAction : AbstractPINAction() {
 			pinAction: AbstractPINAction,
 			salStateView: SalStateView,
 		): Pair<CardCapturer, AutoCloseable> {
-			val isMobileDevice = SysUtils.isMobileDevice()
+			val isMobileDevice = SysUtils.isMobileDevice
 			val cardCapturer =
 				CardCapturer(
 					sessionHandle,

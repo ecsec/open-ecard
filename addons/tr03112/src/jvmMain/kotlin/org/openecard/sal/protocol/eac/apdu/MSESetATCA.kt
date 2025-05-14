@@ -61,7 +61,7 @@ class MSESetATCA : ManageSecurityEnvironment {
 			caos.writeTLV(0x80.toByte(), oID)
 
 			if (keyID != null) {
-				caos.writeTLV(0x84.toByte(), ByteUtils.cutLeadingNullBytes(keyID))
+				caos.writeTLV(0x84.toByte(), ByteUtils.cutLeadingNullBytes(keyID)!!)
 			}
 
 			caos.flush()
@@ -74,6 +74,6 @@ class MSESetATCA : ManageSecurityEnvironment {
 			}
 		}
 
-		setData(caos.toByteArray())
+		data = caos.toByteArray()
 	}
 }

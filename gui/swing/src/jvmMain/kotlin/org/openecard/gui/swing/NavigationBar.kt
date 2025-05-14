@@ -47,7 +47,7 @@ import javax.swing.JRootPane
 class NavigationBar(
 	private val numSteps: Int,
 ) : JPanel() {
-	private val lang: I18n = I18n.getTranslation("gui")
+	private val lang: I18n = I18n.getTranslation("gui")!!
 
 	private var backButton = JButton(lang.translationForKey(GUIConstants.BUTTON_BACK))
 	private var nextButton = JButton(lang.translationForKey(GUIConstants.BUTTON_NEXT))

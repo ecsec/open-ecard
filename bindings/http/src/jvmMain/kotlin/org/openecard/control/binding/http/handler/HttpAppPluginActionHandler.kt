@@ -61,7 +61,7 @@ private const val METHOD_HDR: String = "X-OeC-Method"
  * @author Tobias Wich
  */
 class HttpAppPluginActionHandler(
-	addonManager: AddonManager?,
+	addonManager: AddonManager,
 ) : HttpControlHandler("*") {
 	private val selector = AddonSelector(addonManager)
 

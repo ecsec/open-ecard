@@ -75,7 +75,7 @@ public class ConfirmAttributeSelectionOperationImpl implements ConfirmAttributeS
 
     private Checkbox convert(Checkbox oldBox, List<SelectableItem> items) {
 	// create copy of the checkbox
-	Checkbox newBox = new Checkbox(oldBox.getID());
+	Checkbox newBox = new Checkbox(oldBox.getId());
 	newBox.copyContentFrom(oldBox);
 	Map<String, SelectableItem> itemsByName = new HashMap<>();
 	if (items != null) {

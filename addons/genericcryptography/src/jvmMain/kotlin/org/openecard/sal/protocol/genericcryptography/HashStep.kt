@@ -53,7 +53,7 @@ private val logger = KotlinLogging.logger { }
  */
 class HashStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<Hash?, HashResponse?> {
+) : ProtocolStep<Hash, HashResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.Hash
 
 	override fun perform(

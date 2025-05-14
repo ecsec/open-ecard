@@ -36,7 +36,7 @@ class CVCStepAction(
 	step: Step,
 ) : StepAction(step) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		if (result.isBack()) {

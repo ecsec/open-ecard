@@ -43,23 +43,23 @@ import java.util.concurrent.TimeoutException
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-private val LOG = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger { }
 
 class ProcessingStepAction(
 	step: Step,
 ) : StepAction(step) {
-	private val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+	private val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 	override fun perform(
-		oldResults: MutableMap<String?, ExecutionResults?>?,
-		result: StepResult?,
+		oldResults: Map<String, ExecutionResults>,
+		result: StepResult,
 	): StepActionResult {
 		val pAuthDone = ctx.getPromise(EACProtocol.AUTHENTICATION_DONE)
 		try {
 			pAuthDone.deref(120, TimeUnit.SECONDS)
 			return StepActionResult(StepActionResultStatus.NEXT)
 		} catch (ex: InterruptedException) {
-			LOG.error(ex) { "ProcessingStepAction interrupted by the user or an other thread." }
+			logger.error(ex) { "ProcessingStepAction interrupted by the user or an other thread." }
 			ctx.put(
 				EACProtocol.PACE_EXCEPTION,
 				createException(
@@ -71,7 +71,7 @@ class ProcessingStepAction(
 			)
 			return StepActionResult(StepActionResultStatus.CANCEL)
 		} catch (ex: TimeoutException) {
-			LOG.info(ex) { "Timeout while waiting for the authentication to finish." }
+			logger.info(ex) { "Timeout while waiting for the authentication to finish." }
 			ctx.put(
 				EACProtocol.PACE_EXCEPTION,
 				createException(

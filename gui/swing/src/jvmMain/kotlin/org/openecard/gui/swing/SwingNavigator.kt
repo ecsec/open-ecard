@@ -70,7 +70,7 @@ class SwingNavigator(
 
 	override fun hasNext(): Boolean = stepPointer < (stepFrames.size - 1)
 
-	override fun current(): StepResult? {
+	override fun current(): StepResult {
 		stepBar.disableLoaderImage()
 		selectIdx(stepPointer)
 		val frame = stepFrames[stepPointer]
@@ -81,7 +81,7 @@ class SwingNavigator(
 		return frame.getStepResult()
 	}
 
-	override fun next(): StepResult? {
+	override fun next(): StepResult {
 		stepBar.disableLoaderImage()
 		if (hasNext()) {
 			selectIdx(stepPointer + 1)

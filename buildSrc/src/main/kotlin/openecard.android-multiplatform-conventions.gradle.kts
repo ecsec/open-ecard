@@ -1,3 +1,4 @@
+// deprecated
 plugins {
 	id("openecard.kmp-conventions")
 	id("openecard.android-conventions")
@@ -5,15 +6,9 @@ plugins {
 }
 
 kotlin {
-	androidTarget {  }
+	androidTarget { }
 
-	jvm {  }
-}
-
-val testHeapSize: String by project
-tasks.withType<Test> {
-	maxHeapSize = testHeapSize
-	useTestNG()
+	jvm { }
 }
 
 // set encoding for legacy java tasks, remove once all java is migrated to kotlin

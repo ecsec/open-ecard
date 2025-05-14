@@ -64,7 +64,7 @@ class CHATStepAction(
 	step: Step,
 ) : StepAction(step) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		if (result.isOK()) {
@@ -88,7 +88,7 @@ class CHATStepAction(
 	}
 
 	private fun preparePinStep(): Step {
-		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		initContextVars(ctx)
 		val nextStep = buildPinStep(ctx)
@@ -110,7 +110,7 @@ class CHATStepAction(
 			val passwordType = parse(eacData.pinID)
 
 			val ph = PaceCardHelper(addonCtx, sessHandle)
-			if (!SysUtils.isMobileDevice()) {
+			if (!SysUtils.isMobileDevice) {
 				cardHandle =
 					ph.connectCardIfNeeded(
 						setOf(ECardConstants.NPA_CARD_TYPE),
@@ -148,11 +148,12 @@ class CHATStepAction(
 		val cbRead = executionResults.getResult(CHATStep.Companion.READ_CHAT_BOXES) as? Checkbox
 		if (cbRead != null) {
 			val selectedCHAT = eacData.selectedCHAT
-			for (item in cbRead.getBoxItems()) {
-				if (dataGroupsNames.contains(item.name)) {
-					selectedCHAT.setReadAccess(item.name, item.isChecked)
-				} else if (specialFunctionsNames.contains(item.name)) {
-					selectedCHAT.setSpecialFunction(item.name, item.isChecked)
+			for (item in cbRead.boxItems) {
+				val itemName = item.name!!
+				if (dataGroupsNames.contains(itemName)) {
+					selectedCHAT.setReadAccess(itemName, item.isChecked)
+				} else if (specialFunctionsNames.contains(itemName)) {
+					selectedCHAT.setSpecialFunction(itemName, item.isChecked)
 				}
 			}
 		}
@@ -161,9 +162,9 @@ class CHATStepAction(
 		val cbWrite = executionResults.getResult(CHATStep.Companion.WRITE_CHAT_BOXES) as? Checkbox
 		if (cbWrite != null) {
 			val selectedCHAT = eacData.selectedCHAT
-			for (item in cbWrite.getBoxItems()) {
+			for (item in cbWrite.boxItems) {
 				if (dataGroupsNames.contains(item.name)) {
-					selectedCHAT.setWriteAccess(item.name, item.isChecked)
+					selectedCHAT.setWriteAccess(item.name!!, item.isChecked)
 				}
 			}
 		}
@@ -213,7 +214,7 @@ class CHATStepAction(
 				} else {
 					PINStepAction(addonCtx, eacData, !nativePace, pinStep)
 				}
-			pinStep.setAction(pinAction)
+			pinStep.action = pinAction
 			return pinStep
 		}
 	}

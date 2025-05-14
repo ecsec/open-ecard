@@ -43,7 +43,7 @@ class BackgroundTaskTest {
 
 		val ucd = UserConsentDescription("Test background wait")
 		val s = Step("Wait Step")
-		s.getInputInfoUnits().add(Text("Please wait for the background task to complete ..."))
+		s.inputInfoUnits.add(Text("Please wait for the background task to complete ..."))
 		s.backgroundTask =
 			object : BackgroundTask {
 				@Throws(Exception::class)
@@ -52,12 +52,12 @@ class BackgroundTaskTest {
 					Thread.sleep(1000)
 					// then repeat ;-)
 					val replacement = Step("Replacement Step")
-					replacement.getInputInfoUnits().add(Text("Super cool it works."))
+					replacement.inputInfoUnits.add(Text("Super cool it works."))
 					replacement.isInstantReturn = true
 					return StepActionResult(StepActionResultStatus.REPEAT, replacement)
 				}
 			}
-		ucd.getSteps().add(s)
+		ucd.steps.add(s)
 
 		val e = ExecutionEngine(uc.obtainNavigator(ucd))
 		e.process()

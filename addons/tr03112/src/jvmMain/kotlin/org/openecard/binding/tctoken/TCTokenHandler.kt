@@ -78,7 +78,6 @@ import org.xml.sax.SAXException
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.TreeSet
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
@@ -429,27 +428,19 @@ class TCTokenHandler(
 		}
 	}
 
-	private val supportedDIDs: MutableList<String?>
+	private val supportedDIDs: List<String>
 		get() {
-			val result = TreeSet<String?>()
-
-			// check all sal protocols in the
-			val registry = manager.getRegistry()
-			val addons =
-				registry.listAddons()
-			for (addon in addons) {
-				for (proto in addon.getSalActions()) {
-					result.add(proto.getUri())
+			return manager.registry
+				.listAddons()
+				.flatMap { addon ->
+					addon.salActions.map { it.uri }
 				}
-			}
-
-			return ArrayList<String?>(result)
 		}
 
 	private fun showBackgroundMessage(
-		msg: String?,
+		msg: String,
 		title: String?,
-		dialogType: DialogType?,
+		dialogType: DialogType,
 	) {
 		Thread(
 			Runnable {
@@ -591,9 +582,9 @@ class TCTokenHandler(
 
 		private fun prepareForTask(
 			request: TCTokenRequest,
-			connectionHandle: ConnectionHandleType?,
+			connectionHandle: ConnectionHandleType,
 		) {
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val performChecks = request.isPerformTR03112Checks
 			if (!performChecks) {
 				LOG.warn { "Checks according to BSI TR03112 3.4.2, 3.4.4 (TCToken specific) and 3.4.5 are disabled." }
@@ -648,7 +639,7 @@ class TCTokenHandler(
 			try {
 				val endpointStr = response.refreshAddress
 				var endpoint = URL(endpointStr)
-				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 				// disable certificate checks according to BSI TR03112-7 in some situations
 				val redirectChecks = request.isPerformTR03112Checks

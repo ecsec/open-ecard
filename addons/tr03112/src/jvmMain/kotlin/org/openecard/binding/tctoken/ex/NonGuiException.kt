@@ -37,9 +37,9 @@ class NonGuiException : ActivationError {
 		cause,
 	)
 
-	constructor(result: BindingResult, key: I18nKey?, vararg params: Any?) : super(result, key, *params)
+	constructor(result: BindingResult, key: I18nKey, vararg params: Any?) : super(result, key, *params)
 
-	constructor(result: BindingResult, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+	constructor(result: BindingResult, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
 		result,
 		key,
 		cause,

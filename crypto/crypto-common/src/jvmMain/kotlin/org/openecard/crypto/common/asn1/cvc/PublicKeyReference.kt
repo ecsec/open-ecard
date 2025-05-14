@@ -67,9 +67,9 @@ class PublicKeyReference(
 	init {
 		val length = reference.size
 
-		countryCode = String(ByteUtils.copy(reference, 0, 2))
-		holderMnemonic = String(ByteUtils.copy(reference, 2, length - 7))
-		sequenceNumber = String(ByteUtils.copy(reference, length - 5, 5))
+		countryCode = String(ByteUtils.copy(reference, 0, 2)!!)
+		holderMnemonic = String(ByteUtils.copy(reference, 2, length - 7)!!)
+		sequenceNumber = String(ByteUtils.copy(reference, length - 5, 5)!!)
 	}
 
 	/**
@@ -100,7 +100,7 @@ class PublicKeyReference(
 	 *
 	 * @return Hex string
 	 */
-	fun toHexString(): String = ByteUtils.toHexString(reference, true)
+	fun toHexString(): String = ByteUtils.toHexString(reference, true)!!
 
 	override fun toString(): String = String(reference)
 }

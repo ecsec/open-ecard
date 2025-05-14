@@ -124,7 +124,7 @@ class PACEOutputType(
 					ByteUtils.toHexString(idpicc),
 				)
 			}
-			return authResponse.getResponse()
+			return authResponse.response
 		}
 
 	companion object {

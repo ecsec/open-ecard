@@ -59,15 +59,15 @@ class TerminalAuthenticationStep(
 
 	override fun perform(
 		didAuthenticate: DIDAuthenticate,
-		internalData: MutableMap<String, Any?>,
+		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
-			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
-				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-				org.openecard.common.WSHelper
+			WSHelper.makeResponse(
+				DIDAuthenticateResponse::class.java,
+				WSHelper
 					.makeResultOK(),
 			)
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
 
@@ -79,13 +79,11 @@ class TerminalAuthenticationStep(
 
 			// Build certificate chain
 			var certificateChain: CardVerifiableCertificateChain =
-				internalData.get(
-					EACConstants.IDATA_CERTIFICATES,
-				) as CardVerifiableCertificateChain
+				internalData[EACConstants.IDATA_CERTIFICATES] as CardVerifiableCertificateChain
 			certificateChain.addCertificates(eac2Input.certificates)
 
-			val currentCAR = internalData.get(EACConstants.IDATA_CURRENT_CAR) as ByteArray
-			val previousCAR = internalData.get(EACConstants.IDATA_PREVIOUS_CAR) as ByteArray?
+			val currentCAR = internalData[EACConstants.IDATA_CURRENT_CAR] as ByteArray
+			val previousCAR = internalData[EACConstants.IDATA_PREVIOUS_CAR] as ByteArray?
 			var tmpChain = certificateChain.getCertificateChainFromCAR(currentCAR)
 			// try again with previous car if it didn't work
 			if (tmpChain.certificates.isEmpty() && previousCAR != null) {
@@ -107,12 +105,20 @@ class TerminalAuthenticationStep(
 			val terminalCertificate = certificateChain.terminalCertificate
 			val key = eac2Input.ephemeralPublicKey
 			val signature = eac2Input.signature
-			internalData.put(EACConstants.IDATA_PK_PCD, key)
-			internalData.put(EACConstants.IDATA_SIGNATURE, signature)
-			internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate)
+			if (key != null) {
+				internalData.put(EACConstants.IDATA_PK_PCD, key)
+			} else {
+				internalData.remove(EACConstants.IDATA_PK_PCD)
+			}
+			if (terminalCertificate != null) {
+				internalData.put(EACConstants.IDATA_TERMINAL_CERTIFICATE, terminalCertificate)
+			} else {
+				internalData.remove(EACConstants.IDATA_TERMINAL_CERTIFICATE)
+			}
 
 			if (signature != null) {
 				LOG.trace { "Signature has been provided in EAC2InputType." }
+				internalData.put(EACConstants.IDATA_SIGNATURE, signature)
 
 				// perform TA and CA authentication
 				val ca = ChipAuthentication(dispatcher, slotHandle)
@@ -120,11 +126,11 @@ class TerminalAuthenticationStep(
 				eac2Output = auth.performAuth(eac2Output, internalData)
 
 				// no third step needed, notify GUI
-				val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 				ctx.put(EACProtocol.AUTHENTICATION_DONE, true)
 			} else {
 				LOG.trace { "Signature has not been provided in EAC2InputType." }
-
+				internalData.remove(EACConstants.IDATA_SIGNATURE)
 				// send challenge again
 				val rPICC = internalData[EACConstants.IDATA_CHALLENGE] as ByteArray
 				eac2Output.setChallenge(rPICC)

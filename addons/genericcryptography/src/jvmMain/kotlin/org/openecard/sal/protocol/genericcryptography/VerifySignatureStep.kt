@@ -58,12 +58,12 @@ private val LOG = KotlinLogging.logger { }
  */
 class VerifySignatureStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<VerifySignature?, VerifySignatureResponse?> {
+) : ProtocolStep<VerifySignature, VerifySignatureResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.VerifySignature
 
 	override fun perform(
-		request: VerifySignature?,
-		internalData: MutableMap<String?, Any?>,
+		request: VerifySignature,
+		internalData: Map<String, Any>,
 	): VerifySignatureResponse {
 		val response: VerifySignatureResponse =
 			WSHelper.makeResponse<Class<VerifySignatureResponse>, VerifySignatureResponse>(

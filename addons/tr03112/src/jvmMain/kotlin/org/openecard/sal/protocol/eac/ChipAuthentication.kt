@@ -88,7 +88,7 @@ class ChipAuthentication
 		 * @throws ProtocolException
 		 */
 		@Throws(ProtocolException::class)
-		fun generalAuthenticate(key: ByteArray): ByteArray? {
+		fun generalAuthenticate(key: ByteArray): ByteArray {
 			var key = key
 			try {
 				if (key[0] != 0x04.toByte()) {
@@ -97,7 +97,7 @@ class ChipAuthentication
 				val generalAuthenticate: CardCommandAPDU = GeneralAuthenticate(0x80.toByte(), key)
 				val response = generalAuthenticate.transmit(dispatcher, slotHandle)
 
-				return response.getData()
+				return response.data
 			} catch (e: APDUException) {
 				throw ProtocolException(e.result)
 			}
@@ -114,7 +114,7 @@ class ChipAuthentication
 			try {
 				val file = ShortUtils.toByteArray(EACConstants.EF_CARDSECURITY_FID)
 				val resp = CardUtils.selectFileWithOptions(dispatcher, slotHandle, file, null, FileControlParameters.FCP)
-				val efCardSecurityFCP = FCP(TLV.fromBER(resp.getData()))
+				val efCardSecurityFCP = FCP(TLV.fromBER(resp.data))
 				val efCardSecurity = CardUtils.readFile(efCardSecurityFCP, dispatcher, slotHandle, false)
 				return efCardSecurity
 			} catch (ex: APDUException) {

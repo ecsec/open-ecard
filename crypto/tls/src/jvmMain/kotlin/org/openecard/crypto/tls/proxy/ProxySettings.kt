@@ -105,7 +105,7 @@ class ProxySettings(
 	): Socket {
 		var p = getProxy(protocol, hostname, port)
 
-		if (SysUtils.isAndroid() && p.type() == Proxy.Type.HTTP) {
+		if (SysUtils.isAndroid && p.type() == Proxy.Type.HTTP) {
 			LOG.debug { "Replacing proxy implementation for Android system." }
 			val sa = p.address()
 			if (sa is InetSocketAddress) {
@@ -140,7 +140,7 @@ class ProxySettings(
 
 	companion object {
 		init {
-			if (!SysUtils.isAndroid() && !SysUtils.isIOS()) {
+			if (!SysUtils.isAndroid && !SysUtils.isIOS) {
 				val psl = ProxySettingsLoader()
 				psl.load()
 			}
@@ -153,7 +153,7 @@ class ProxySettings(
 		@JvmStatic
 		@Synchronized
 		fun load() {
-			if (!SysUtils.isAndroid()) {
+			if (!SysUtils.isAndroid) {
 				ProxySettingsLoader().load()
 			}
 		}

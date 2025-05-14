@@ -73,8 +73,8 @@ class PCSCPinVerify(
 
 		var template = cmdTemplate
 		if (pinTemplate.size > 0) {
-			template = ByteUtils.concatenate(cmdTemplate, pinTemplate.size.toByte())
-			template = ByteUtils.concatenate(template, pinTemplate)
+			template = ByteUtils.concatenate(cmdTemplate, pinTemplate.size.toByte())!!
+			template = ByteUtils.concatenate(template, pinTemplate)!!
 		}
 		setData(template)
 
@@ -145,7 +145,7 @@ class PCSCPinVerify(
 	private val bNumberMessage = 0x01.toByte()
 
 	/** Language for messages  */
-	private var wLangId = USBLangID.getCode(I18n.getLocale())
+	private var wLangId = USBLangID.getCode(I18n.locale)
 
 	/** Message index (should be 00).
 	 *

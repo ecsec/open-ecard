@@ -151,11 +151,11 @@ public final class EacNavigator extends MobileNavigator {
 
     private StepResult nextInt(Step curStep) {
 	// handle step display
-	if (CVCStep.STEP_ID.equals(curStep.getID())) {
+	if (CVCStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    // step over CVC step, its data is processed in the next step
 	    return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
-	} else if (CHATStep.STEP_ID.equals(curStep.getID())) {
+	} else if (CHATStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    Step cvcStep = steps.get(0);
 	    Step chatStep = steps.get(1);
@@ -175,7 +175,7 @@ public final class EacNavigator extends MobileNavigator {
 		    return new MobileResult(cvcStep, ResultStatus.INTERRUPTED, Collections.emptyList());
 		}
 	    });
-	} else if (PINStep.STEP_ID.equals(curStep.getID())) {
+	} else if (PINStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 	    Step pinStep = curStep;
 
@@ -217,7 +217,7 @@ public final class EacNavigator extends MobileNavigator {
 		return new MobileResult(pinStep, ResultStatus.OK, outInfo);
 	    });
 
-	} else if (ProcessingStep.STEP_ID.equals(curStep.getID())) {
+	} else if (ProcessingStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
@@ -225,7 +225,7 @@ public final class EacNavigator extends MobileNavigator {
 		interaction.onCardAuthenticationSuccessful();
 		return new MobileResult(curStep, ResultStatus.OK, Collections.emptyList());
 	    });
-	} else if (ErrorStep.STEP_ID.equals(curStep.getID())) {
+	} else if (ErrorStep.STEP_ID.equals(curStep.getId())) {
 	    idx++;
 
 	    return displayAndExecuteBackground(curStep, () -> {
@@ -310,7 +310,7 @@ public final class EacNavigator extends MobileNavigator {
     public void writeBackValues(List<InputInfoUnit> inInfo, List<OutputInfoUnit> outInfo) {
 	for (InputInfoUnit infoInUnit : inInfo) {
 	    for (OutputInfoUnit infoOutUnit : outInfo) {
-		if (infoInUnit.getID().equals(infoOutUnit.getID())) {
+		if (infoInUnit.getId().equals(infoOutUnit.getId())) {
 		    infoInUnit.copyContentFrom(infoOutUnit);
 		}
 	    }
@@ -332,13 +332,13 @@ public final class EacNavigator extends MobileNavigator {
 
 	ArrayList<OutputInfoUnit> result = new ArrayList<>();
 	for (InputInfoUnit nextIn : pinStep.getInputInfoUnits()) {
-	    if (pinValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_PIN_FIELD")) {
-		PasswordField pw = new PasswordField(nextIn.getID());
+	    if (pinValue != null && nextIn instanceof PasswordField && nextIn.getId().equals("PACE_PIN_FIELD")) {
+		PasswordField pw = new PasswordField(nextIn.getId());
 		pw.copyContentFrom(nextIn);
 		pw.setValue(pinValue.toCharArray());
 		result.add(pw);
-	    } else if (canValue != null && nextIn instanceof PasswordField && nextIn.getID().equals("PACE_CAN_FIELD")) {
-		PasswordField pw = new PasswordField(nextIn.getID());
+	    } else if (canValue != null && nextIn instanceof PasswordField && nextIn.getId().equals("PACE_CAN_FIELD")) {
+		PasswordField pw = new PasswordField(nextIn.getId());
 		pw.copyContentFrom(nextIn);
 		pw.setValue(canValue.toCharArray());
 		result.add(pw);
@@ -357,23 +357,23 @@ public final class EacNavigator extends MobileNavigator {
 	String issuerUrl = null;
 
 	for (InputInfoUnit next : cvcStep.getInputInfoUnits()) {
-	    if ("SubjectName".equals(next.getID()) && next instanceof ToggleText) {
+	    if ("SubjectName".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		subject = tt.getText();
-	    } else if ("SubjectURL".equals(next.getID()) && next instanceof ToggleText) {
+	    } else if ("SubjectURL".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		subjectUrl = tt.getText();
-	    } else if ("TermsOfUsage".equals(next.getID()) && next instanceof ToggleText) {
+	    } else if ("TermsOfUsage".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		Document d = tt.getDocument();
 		termsOfUsage = new TermsOfUsageImpl(d.getMimeType(), ByteBuffer.wrap(d.getValue()));
-	    } else if ("Validity".equals(next.getID()) && next instanceof ToggleText) {
+	    } else if ("Validity".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		validity = tt.getText();
-	    } else if ("IssuerName".equals(next.getID()) && next instanceof ToggleText) {
+	    } else if ("IssuerName".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		issuer = tt.getText();
-	    } else if ("IssuerURL".equals(next.getID()) && next instanceof ToggleText) {
+	    } else if ("IssuerURL".equals(next.getId()) && next instanceof ToggleText) {
 		ToggleText tt = (ToggleText) next;
 		issuerUrl = tt.getText();
 	    }
@@ -383,9 +383,9 @@ public final class EacNavigator extends MobileNavigator {
 	Checkbox writeBox = null;
 
 	for (InputInfoUnit next : chatStep.getInputInfoUnits()) {
-	    if (CHATStep.READ_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
+	    if (CHATStep.READ_CHAT_BOXES.equals(next.getId()) && next instanceof Checkbox) {
 		readBox = (Checkbox) next;
-	    } else if (CHATStep.WRITE_CHAT_BOXES.equals(next.getID()) && next instanceof Checkbox) {
+	    } else if (CHATStep.WRITE_CHAT_BOXES.equals(next.getId()) && next instanceof Checkbox) {
 		writeBox = (Checkbox) next;
 	    }
 	}

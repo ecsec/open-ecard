@@ -29,15 +29,18 @@ import org.openecard.common.apdu.PerformSecurityOperation
  *
  * @author Dirk Petrautzki
  */
-class PSODecipher(message: ByteArray?, le: Byte) : PerformSecurityOperation(0x80.toByte(), 0x86.toByte()) {
-    /**
-     * Creates a new PSO Decipher APDU.
-     *
-     * @param message Message to be deciphered
-     * @param le expected length of response
-     */
-    init {
-        setLE(le)
-        setData(message)
-    }
+class PSODecipher(
+	message: ByteArray,
+	le: Byte,
+) : PerformSecurityOperation(0x80.toByte(), 0x86.toByte()) {
+	/**
+	 * Creates a new PSO Decipher APDU.
+	 *
+	 * @param message Message to be deciphered
+	 * @param le expected length of response
+	 */
+	init {
+		setLE(le)
+		data = message
+	}
 }

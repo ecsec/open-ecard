@@ -45,7 +45,7 @@ import javax.swing.JLabel
 class Hyperlink(
 	link: Hyperlink,
 ) : StepComponent {
-	private val href: URL = link.href
+	private val href: URL = link.href!!
 	private val text: String = link.text ?: href.toString()
 	private val underlineText: String = "<html><u>$text</u></html>"
 	private val label: JLabel = JLabel(text)

@@ -60,6 +60,6 @@ class MSESetDST : ManageSecurityEnvironment {
 			}
 		}
 
-		setData(caos.toByteArray())
+		data = caos.toByteArray()
 	}
 }

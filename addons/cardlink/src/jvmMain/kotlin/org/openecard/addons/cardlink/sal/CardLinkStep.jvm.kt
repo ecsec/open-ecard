@@ -26,7 +26,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
-import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
@@ -49,8 +48,9 @@ import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
-import java.util.UUID
 import java.util.zip.GZIPInputStream
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -65,7 +65,7 @@ class CardLinkStep(
 		req: DIDAuthenticate,
 		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val ws = getWsPair(dynCtx)
 		val isPhoneRegistered = dynCtx.get(CardLinkKeys.PHONE_NUMBER_REGISTERED) as Boolean? ?: false
 		val uc = CardLinkUserConsent(ws, aCtx, isPhoneRegistered, req.connectionHandle)
@@ -165,12 +165,13 @@ class CardLinkStep(
 		)
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	private fun sendEgkData(
 		regEgk: RegisterEgk,
 		cardSessionId: String,
 		ws: WsPair,
 	) {
-		val correlationId = UUID.randomUUID().toString()
+		val correlationId = Uuid.random().toString()
 		val egkEnvelope =
 			GematikEnvelope(
 				regEgk,
@@ -182,7 +183,7 @@ class CardLinkStep(
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	private fun readIccsnFrom(gdoDs: ByteArray?): String? {
+	private fun readIccsnFrom(gdoDs: ByteArray): String? {
 		val tlvEfGdo = TLV.fromBER(gdoDs)
 		return if (tlvEfGdo.tagNumWithClass == 0x5A.toLong() && tlvEfGdo.valueLength == 0x0A) {
 			tlvEfGdo.value.toHexString()

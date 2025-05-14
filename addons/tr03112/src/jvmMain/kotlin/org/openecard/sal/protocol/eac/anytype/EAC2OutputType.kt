@@ -107,7 +107,7 @@ class EAC2OutputType(
 					ByteUtils.toHexString(nonce),
 				)
 			}
-			return authResponse.getResponse()
+			return authResponse.response
 		}
 
 	companion object {

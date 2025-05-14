@@ -74,7 +74,7 @@ class CANStepAction(
 	private var can: String? = null
 
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		if (result.isBack()) {
@@ -141,7 +141,7 @@ class CANStepAction(
 					verifyFailed = false,
 				)
 			val pinAction: StepAction = PINStepAction(capturePin, conHandle, dispatcher, replacementStep, retryCounter)
-			replacementStep.setAction(pinAction)
+			replacementStep.action = pinAction
 			return StepActionResult(StepActionResultStatus.NEXT, replacementStep)
 		} catch (ex: WSHelper.WSException) {
 			logger.info { "Wrong CAN entered, trying again" }
@@ -182,7 +182,7 @@ class CANStepAction(
 		enteredWrong,
 		verifyFailed,
 	).apply {
-		setAction(CANStepAction(capturePin, conHandle, dispatcher, this, state) as StepAction)
+		action = CANStepAction(capturePin, conHandle, dispatcher, this, state) as StepAction
 	}
 
 	companion object {

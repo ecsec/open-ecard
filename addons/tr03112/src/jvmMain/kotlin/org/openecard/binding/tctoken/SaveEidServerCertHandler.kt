@@ -35,11 +35,11 @@ class SaveEidServerCertHandler : CertificateVerifier {
 
 	override fun isValid(
 		chain: TlsServerCertificate,
-		hostOrIP: String,
+		hostOrIp: String,
 	) {
 		if (firstCert) {
 			firstCert = false
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			dynCtx.put(TR03112Keys.EIDSERVER_CERTIFICATE, chain)
 		}
 	}

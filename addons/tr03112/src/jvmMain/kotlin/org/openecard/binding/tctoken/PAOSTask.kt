@@ -50,8 +50,8 @@ private val LOG = KotlinLogging.logger { }
 
 class PAOSTask(
 	private val dispatcher: Dispatcher,
-	private val connectionHandle: ConnectionHandleType?,
-	private val supportedDIDs: MutableList<String?>,
+	private val connectionHandle: ConnectionHandleType,
+	private val supportedDIDs: List<String>,
 	private val tokenRequest: TCTokenRequest,
 	private val schemaValidator: Promise<DocumentSchemaValidator>,
 ) : Callable<StartPAOSResponse> {

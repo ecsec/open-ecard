@@ -23,21 +23,21 @@ class TrResourceContextLoader : ResourceContextLoader() {
 	override var cookieManager: CookieManager?
 		get() {
 			val dynCtx =
-				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val cManager =
 				dynCtx.get(TR03112Keys.COOKIE_MANAGER) as CookieManager?
 			return cManager
 		}
 		set(value) {
 			val dynCtx =
-				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			dynCtx.put(TR03112Keys.COOKIE_MANAGER, value)
 		}
 
 	override val isPKIXVerify: Boolean
 		get() {
 			val dynCtx =
-				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val cardTypeP =
 				dynCtx.getPromise(TR03112Keys.ACTIVATION_CARD_TYPE)
 			val cardType = cardTypeP.derefNonblocking()

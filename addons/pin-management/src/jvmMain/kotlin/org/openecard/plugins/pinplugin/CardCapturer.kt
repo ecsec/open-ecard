@@ -80,7 +80,7 @@ class CardCapturer internal constructor(
 				areDevicesPoweredDown ||
 				this.cardStateView.preparedDeviceSession() != deviceSessionCount
 			) {
-				val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)
+				val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)!!
 				var createdState = initialState(ctx)
 				val success: Boolean
 				if (createdState == null) {
@@ -235,7 +235,7 @@ class CardCapturer internal constructor(
 
 	fun notifyCardStateChange(pinState: RecognizedState) {
 		synchronized(cardViewLock) {
-			val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)
+			val ctx = DynamicContext.getInstance(GetCardsAndPINStatusAction.Companion.DYNCTX_INSTANCE_KEY)!!
 			ctx.put(GetCardsAndPINStatusAction.Companion.PIN_STATUS, pinState)
 
 			val newView: CardStateView =

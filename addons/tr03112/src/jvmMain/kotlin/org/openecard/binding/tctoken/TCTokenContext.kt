@@ -99,7 +99,7 @@ class TCTokenContext private constructor(
 				throw AuthServerException(token.getComErrorAddressWithParams(minor), ErrorTranslations.ESERVICE_ERROR)
 			}
 
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val resultPoints: List<Pair<URL, TlsServerCertificate>> = base.certs
 			// probably just for tests
 			if (resultPoints.isNotEmpty()) {

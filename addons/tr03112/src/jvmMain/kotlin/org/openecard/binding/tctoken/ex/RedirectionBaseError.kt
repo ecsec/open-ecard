@@ -26,6 +26,11 @@ import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
 import org.openecard.common.I18nKey
 
+private fun makeBindingResult(errorUrl: String?): BindingResult {
+	val result = BindingResult(BindingResultCode.REDIRECT)
+	return result.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl)
+}
+
 /**
  * Exception indicating that a redirect of the caller will be performed.
  *
@@ -36,15 +41,15 @@ abstract class RedirectionBaseError : ActivationError {
 
 	constructor(errorUrl: String?, msg: String, ex: Throwable?) : super(makeBindingResult(errorUrl), msg, ex)
 
-	constructor(errorUrl: String?, ex: Throwable?) : super(makeBindingResult(errorUrl), ex)
+	constructor(errorUrl: String?, ex: Throwable) : super(makeBindingResult(errorUrl), ex)
 
-	constructor(errorUrl: String?, key: I18nKey?, vararg params: Any?) : super(
+	constructor(errorUrl: String?, key: I18nKey, vararg params: Any?) : super(
 		makeBindingResult(errorUrl),
 		key,
 		*params,
 	)
 
-	constructor(errorUrl: String?, key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(
+	constructor(errorUrl: String?, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
 		makeBindingResult(
 			errorUrl,
 		),
@@ -52,11 +57,4 @@ abstract class RedirectionBaseError : ActivationError {
 		cause,
 		*params,
 	)
-
-	companion object {
-		private fun makeBindingResult(errorUrl: String?): BindingResult {
-			val result = BindingResult(BindingResultCode.REDIRECT)
-			return result.addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, errorUrl)
-		}
-	}
 }

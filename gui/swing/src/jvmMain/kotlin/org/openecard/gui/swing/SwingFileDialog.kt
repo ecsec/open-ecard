@@ -52,19 +52,19 @@ class SwingFileDialog : FileDialog {
 		this.dialog.preferredSize = Dimension(800, 490)
 	}
 
-	override fun setTitle(title: String?) {
+	override fun setTitle(title: String) {
 		dialog.setDialogTitle(title)
 	}
 
-	override fun setCurrentDirectory(currentDir: File?) {
+	override fun setCurrentDirectory(currentDir: File) {
 		dialog.setCurrentDirectory(currentDir)
 	}
 
-	override fun setSelectedFiles(files: MutableList<File?>) {
+	override fun setSelectedFiles(files: List<File>) {
 		dialog.setSelectedFiles(files.toTypedArray())
 	}
 
-	override fun setSelectedFiles(vararg files: File?) {
+	override fun setSelectedFiles(vararg files: File) {
 		dialog.setSelectedFiles(files)
 	}
 

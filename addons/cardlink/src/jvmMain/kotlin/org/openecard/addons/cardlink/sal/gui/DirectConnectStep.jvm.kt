@@ -65,7 +65,7 @@ class DirectConnectStep(
 	title: String = STEP_TITLE,
 ) : StepWithConnection(stepId, title, sessHandle) {
 	init {
-		setAction(DirectConnectStepAction(this))
+		action = DirectConnectStepAction(this)
 	}
 }
 
@@ -73,10 +73,10 @@ class DirectConnectStepAction(
 	private val directConnectStep: DirectConnectStep,
 ) : StepAction(directConnectStep) {
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
 			val requiredCardTypes = setOf("http://ws.gematik.de/egk/1.0.0")

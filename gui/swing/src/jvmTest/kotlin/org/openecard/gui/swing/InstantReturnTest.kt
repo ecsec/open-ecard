@@ -62,22 +62,22 @@ class InstantReturnTest {
 		Assert.assertTrue(diff <= VARIANCE, msg)
 	}
 
-	private fun createNavigator(waitAction: StepAction?): UserConsentNavigator {
+	private fun createNavigator(waitAction: StepAction): UserConsentNavigator {
 		// create step
 		val ucd = UserConsentDescription("consent title")
 
 		val s = Step("step title")
-		ucd.getSteps().add(s)
+		ucd.steps.add(s)
 		s.id = "step1"
 		s.isInstantReturn = true
-		s.setAction(waitAction)
+		s.action = waitAction
 
 		val desc1 = Text()
-		s.getInputInfoUnits().add(desc1)
-		desc1.setText("This test opens a step with instantreturn set. An action waits for two seconds.")
+		s.inputInfoUnits.add(desc1)
+		desc1.text = "This test opens a step with instantreturn set. An action waits for two seconds."
 		val desc2 = Text()
-		s.getInputInfoUnits().add(desc2)
-		desc2.setText("If the window is closed after these two seconds, the test is successful.")
+		s.inputInfoUnits.add(desc2)
+		desc2.text = "If the window is closed after these two seconds, the test is successful."
 
 		val sc = SwingUserConsent(SwingDialogWrapper())
 		return sc.obtainNavigator(ucd)

@@ -102,13 +102,13 @@ class UnblockPINDialog(
 	private fun createPUKStep(): Step {
 		val pukStep = Step("insert-card", lang.translationForKey(PUKSTEP_TITLE))
 		val i1 = Text()
-		pukStep.getInputInfoUnits().add(i1)
+		pukStep.inputInfoUnits.add(i1)
 
 		if (!capturePin) {
 			pukStep.isInstantReturn = true
-			i1.setText(lang.translationForKey(PUKSTEP_NATIVE_DESCRIPTION))
+			i1.text = lang.translationForKey(PUKSTEP_NATIVE_DESCRIPTION)
 		} else {
-			i1.setText(lang.translationForKey(PUKSTEP_DESCRIPTION))
+			i1.text = lang.translationForKey(PUKSTEP_DESCRIPTION)
 			pukStep.inputInfoUnits.add(
 				PasswordField(PUK_FIELD).apply {
 					description = lang.translationForKey(PUKSTEP_PUK)
@@ -116,7 +116,7 @@ class UnblockPINDialog(
 			)
 		}
 
-		pukStep.setAction(PUKStepAction(capturePin, conHandle.getSlotHandle(), dispatcher, pukStep))
+		pukStep.action = PUKStepAction(capturePin, conHandle.getSlotHandle(), dispatcher, pukStep)
 		return pukStep
 	}
 

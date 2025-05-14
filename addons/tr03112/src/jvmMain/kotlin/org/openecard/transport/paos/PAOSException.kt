@@ -41,7 +41,7 @@ class PAOSException : I18nException {
 	 *
 	 * @param cause The exception causing the error.
 	 */
-	constructor(cause: Throwable?) : super(cause)
+	constructor(cause: Throwable) : super(cause)
 
 	/**
 	 * Creates an instance and initializes the exception with a message and a cause.
@@ -57,7 +57,7 @@ class PAOSException : I18nException {
 	 * @param key Translation key.
 	 * @param params Parameters adding values into the translation.
 	 */
-	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
 
 	/**
 	 * Creates an instance and initializes the exception with a localized message.
@@ -66,5 +66,5 @@ class PAOSException : I18nException {
 	 * @param cause The exception causing the error.
 	 * @param params Parameters adding values into the translation.
 	 */
-	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
+	constructor(key: I18nKey, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 }

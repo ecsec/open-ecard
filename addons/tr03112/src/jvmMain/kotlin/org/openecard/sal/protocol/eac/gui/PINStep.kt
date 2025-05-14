@@ -74,11 +74,11 @@ class PINStep(
 		val transactionInfo = eacData.transactionInfo
 		if (transactionInfo != null) {
 			val transactionInfoField = Text()
-			transactionInfoField.setText(LANG_EAC.translationForKey(TRANSACTION_INFO, transactionInfo))
-			getInputInfoUnits().add(transactionInfoField)
+			transactionInfoField.text = LANG_EAC.translationForKey(TRANSACTION_INFO, transactionInfo)
+			inputInfoUnits.add(transactionInfoField)
 		}
 
-		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		this._status = ctx.get(EACProtocol.Companion.PIN_STATUS) as PinState
 
 		// create step elements
@@ -108,54 +108,54 @@ class PINStep(
 	private fun addSoftwareElements() {
 		isResetOnLoad = true
 		val description = Text()
-		description.setText(LANG_PACE.translationForKey(DESCRIPTION, pinType))
-		getInputInfoUnits().add(description)
+		description.text = LANG_PACE.translationForKey(DESCRIPTION, pinType)
+		inputInfoUnits.add(description)
 
 		val pinInputField = PasswordField(PIN_FIELD)
 		pinInputField.description = pinType
 		pinInputField.minLength = paceMarker.getMinLength()
 		pinInputField.maxLength = paceMarker.getMaxLength()
-		getInputInfoUnits().add(pinInputField)
+		inputInfoUnits.add(pinInputField)
 
 		if (hasAttemptsCounter) {
 			val attemptCount = Text()
-			attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3))
-			attemptCount.setID(PIN_ATTEMPTS_ID)
-			getInputInfoUnits().add(attemptCount)
+			attemptCount.text = LANG_PACE.translationForKey("step_pin_retrycount", 3)
+			attemptCount.id = PIN_ATTEMPTS_ID
+			inputInfoUnits.add(attemptCount)
 		}
 
 		val notice = Text()
-		notice.setText(LANG_EAC.translationForKey(NOTICE, pinType))
-		getInputInfoUnits().add(notice)
+		notice.text = LANG_EAC.translationForKey(NOTICE, pinType)
+		inputInfoUnits.add(notice)
 	}
 
 	private fun addTerminalElements() {
 		isInstantReturn = true
 		val description = Text()
-		description.setText(LANG_PACE.translationForKey(DESCRIPTION_NATIVE, pinType))
-		getInputInfoUnits().add(description)
+		description.text = LANG_PACE.translationForKey(DESCRIPTION_NATIVE, pinType)
+		inputInfoUnits.add(description)
 
 		val notice = Text()
-		notice.setText(LANG_EAC.translationForKey(NOTICE, pinType))
-		getInputInfoUnits().add(notice)
+		notice.text = LANG_EAC.translationForKey(NOTICE, pinType)
+		inputInfoUnits.add(notice)
 
 		if (hasAttemptsCounter) {
 			val attemptCount = Text()
-			attemptCount.setText(LANG_PACE.translationForKey("step_pin_retrycount", 3))
-			attemptCount.setID(PIN_ATTEMPTS_ID)
-			getInputInfoUnits().add(attemptCount)
+			attemptCount.text = LANG_PACE.translationForKey("step_pin_retrycount", 3)
+			attemptCount.id = PIN_ATTEMPTS_ID
+			inputInfoUnits.add(attemptCount)
 		}
 	}
 
 	private fun addCANEntry() {
-		val inputInfoUnits = getInputInfoUnits()
+		val inputInfoUnits = inputInfoUnits
 		var hasCanField = false
 		var hasCanNotice = false
 		for (inputInfoUnit in inputInfoUnits) {
-			if (CAN_FIELD == inputInfoUnit.getID()) {
+			if (CAN_FIELD == inputInfoUnit.id) {
 				hasCanField = true
 			}
-			if (CAN_NOTICE_ID == inputInfoUnit.getID()) {
+			if (CAN_NOTICE_ID == inputInfoUnit.id) {
 				hasCanNotice = true
 			}
 		}
@@ -168,7 +168,7 @@ class PINStep(
 		}
 		if (!hasCanNotice) {
 			val canNotice = Text()
-			canNotice.setText(LANG_EAC.translationForKey("eac_can_notice"))
+			canNotice.text = LANG_EAC.translationForKey("eac_can_notice")
 			canNotice.id = CAN_NOTICE_ID
 			inputInfoUnits.add(canNotice)
 		}
@@ -176,9 +176,9 @@ class PINStep(
 
 	private fun addNativeCANNotice() {
 		val canNotice = Text()
-		canNotice.setText(LANG_EAC.translationForKey("eac_can_notice_native"))
+		canNotice.text = LANG_EAC.translationForKey("eac_can_notice_native")
 		canNotice.id = CAN_NOTICE_ID
-		getInputInfoUnits().add(canNotice)
+		inputInfoUnits.add(canNotice)
 	}
 
 	private fun updateCanData() {
@@ -196,8 +196,8 @@ class PINStep(
 	}
 
 	private fun updateAttemptsDisplay() {
-		for (unit in getInputInfoUnits()) {
-			if (unit.getID() == PIN_ATTEMPTS_ID) {
+		for (unit in inputInfoUnits) {
+			if (unit.id == PIN_ATTEMPTS_ID) {
 				val newValue: Int =
 					when (_status.getState()) {
 						PacePinStatus.RC3 -> 3
@@ -207,7 +207,7 @@ class PINStep(
 					}
 
 				val text = unit as Text
-				text.setText(LANG_PACE.translationForKey("step_pin_retrycount", newValue))
+				text.text = LANG_PACE.translationForKey("step_pin_retrycount", newValue)
 			}
 		}
 	}

@@ -74,9 +74,9 @@ class CAKey(
 	fun decodePublicKey(data: ByteArray): ByteArray {
 		val keyBytes =
 			if (data[0] == 0x7C.toByte()) {
-				TLV.fromBER(data).getChild().value!!
+				TLV.fromBER(data).child!!.value
 			} else if (data[0].toInt() != 4) {
-				ByteUtils.concatenate(0x04.toByte(), data)!!
+				ByteUtils.concatenate(0x04.toByte(), data)
 			} else {
 				data
 			}

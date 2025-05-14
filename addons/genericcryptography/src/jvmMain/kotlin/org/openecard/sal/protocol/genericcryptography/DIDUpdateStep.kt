@@ -39,7 +39,7 @@ import org.openecard.common.interfaces.Dispatcher
  */
 class DIDUpdateStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<DIDUpdate?, DIDUpdateResponse?> {
+) : ProtocolStep<DIDUpdate, DIDUpdateResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.DIDUpdate
 
 	// TODO Implement me

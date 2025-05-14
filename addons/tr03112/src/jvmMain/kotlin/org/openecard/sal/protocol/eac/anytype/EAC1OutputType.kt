@@ -151,7 +151,7 @@ class EAC1OutputType(
 				ByteUtils.toHexString(challenge),
 			)
 
-			return authResponse.getResponse()
+			return authResponse.response
 		}
 
 	companion object {

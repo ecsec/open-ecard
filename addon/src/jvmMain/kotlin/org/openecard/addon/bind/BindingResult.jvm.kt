@@ -38,7 +38,7 @@ open class BindingResult(
 	var resultMessage: String? = null
 		private set
 	private val parameters: MutableMap<String, String?> = mutableMapOf()
-	private val auxData: MutableMap<String, String?> = mutableMapOf()
+	private val auxData: MutableMap<String, String> = mutableMapOf()
 
 	val attachments: List<Attachment> = mutableListOf()
 
@@ -59,14 +59,16 @@ open class BindingResult(
 
 	fun removeParameter(key: String): String? = parameters.remove(key)
 
-	val auxResultData: Map<String, String?>
+	val auxResultData: MutableMap<String, String>
 		get() = this.auxData
 
 	fun addAuxResultData(
 		key: String,
 		value: String?,
 	): BindingResult {
-		auxData[key] = value
+		value?.let {
+			auxData[key] = it
+		}
 		return this
 	}
 

@@ -51,7 +51,7 @@ class DataSetInfo internal constructor(
 	application: ByteArray,
 	datasetName: String,
 ) {
-	private val application: ByteArray = ByteUtils.clone(application)
+	private val application: ByteArray = ByteUtils.clone(application)!!
 	private val datasetNameTarget: TargetNameType = TargetNameType().also { it.setDataSetName(datasetName) }
 
 	private var cachedData: ByteArray? = null
@@ -195,7 +195,7 @@ class DataSetInfo internal constructor(
 		}
 
 		// copy to be safe from cache manipulation
-		return ByteUtils.clone(cachedData)
+		return ByteUtils.clone(cachedData)!!
 	}
 
 	@Throws(WSHelper.WSException::class)

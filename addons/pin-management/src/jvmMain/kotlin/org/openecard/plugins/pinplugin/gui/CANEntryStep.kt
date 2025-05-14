@@ -41,7 +41,7 @@ import org.openecard.plugins.pinplugin.RecognizedState
  * @author Dirk Petrautzki
  */
 class CANEntryStep(
-	id: String?,
+	id: String,
 	title: String?,
 	capturePin: Boolean,
 	state: RecognizedState,
@@ -60,9 +60,9 @@ class CANEntryStep(
 		// add description and input fields depending on terminal type
 		if (!capturePin) {
 			isInstantReturn = true
-			i2.setText(lang.translationForKey(CANSTEP_NATIVE_DESCRIPTION))
+			i2.text = lang.translationForKey(CANSTEP_NATIVE_DESCRIPTION)
 		} else {
-			i2.setText(lang.translationForKey(CANSTEP_DESCRIPTION))
+			i2.text = lang.translationForKey(CANSTEP_DESCRIPTION)
 			val canField = PasswordField(CAN_FIELD)
 			canField.description = lang.translationForKey(CANSTEP_CAN)
 			inputInfoUnits.add(canField)
@@ -76,14 +76,14 @@ class CANEntryStep(
 		if (enteredWrong) {
 			// add note for mistyped CAN
 			val retryText = Text()
-			retryText.setText(lang.translationForKey(WRONG_CAN))
+			retryText.text = lang.translationForKey(WRONG_CAN)
 			inputInfoUnits.add(retryText)
 		}
 
 		if (verifyFailed) {
 			// add note for incorrect input
 			val incorrectInput = Text()
-			incorrectInput.setText(lang.translationForKey(INCORRECT_INPUT))
+			incorrectInput.text = lang.translationForKey(INCORRECT_INPUT)
 			inputInfoUnits.add(incorrectInput)
 		}
 	}

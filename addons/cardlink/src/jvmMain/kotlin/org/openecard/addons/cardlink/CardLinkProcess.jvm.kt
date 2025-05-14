@@ -64,8 +64,9 @@ import org.openecard.common.util.HandlerUtils
 import org.openecard.mobile.activation.CardLinkErrorCodes
 import org.openecard.mobile.activation.Websocket
 import org.openecard.mobile.activation.WebsocketListener
-import java.util.UUID
 import kotlin.time.Duration
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val logger = KotlinLogging.logger {}
 
@@ -83,7 +84,7 @@ class CardLinkProcess(
 	}
 
 	private fun internalProcessing(wsPair: WsPair): BindingResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val conHandle = openSession()
 		dynCtx.put(TR03112Keys.SESSION_CON_HANDLE, HandlerUtils.copyHandle(conHandle))
 
@@ -173,7 +174,7 @@ class CardLinkProcess(
 		cardHandle: ConnectionHandleType,
 		wsPair: WsPair,
 	) {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val wsListener = wsPair.listener
 
 		while (wsListener.isOpen()) {
@@ -272,6 +273,7 @@ class CardLinkProcess(
 		return response.outputAPDU[0]
 	}
 
+	@OptIn(ExperimentalUuidApi::class)
 	private fun waitForSessionInformation(
 		dynCtx: DynamicContext,
 		wsPair: WsPair,
@@ -295,7 +297,7 @@ class CardLinkProcess(
 				}
 			} else {
 				// we generate our own cardSessionId
-				val cardSessionId = UUID.randomUUID().toString()
+				val cardSessionId = Uuid.random().toString()
 				dynCtx.put(CardLinkKeys.CARD_SESSION_ID, cardSessionId)
 				dynCtx.put(CardLinkKeys.PHONE_NUMBER_REGISTERED, false)
 				logger.debug { "Received no or a malformed SessionInformation message. Using $cardSessionId as cardSessionId." }

@@ -68,9 +68,9 @@ object SwingUtils {
 			}
 			if (!browserOpened) {
 				val openTool: String?
-				if (SysUtils.isUnix()) {
+				if (SysUtils.isUnix) {
 					openTool = "xdg-open"
-				} else if (SysUtils.isWin()) {
+				} else if (SysUtils.isWin) {
 					openTool = "start"
 				} else {
 					openTool = "open"

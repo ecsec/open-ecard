@@ -44,7 +44,7 @@ class CardLinkUserConsent(
 				add(TanStep(ws))
 			}
 			// on mobile we definitely have NFC so we will need a CAN
-			if (SysUtils.isMobileDevice()) {
+			if (SysUtils.isMobileDevice) {
 				add(EnterCanStep(ws, addonCtx, sessionHandle))
 				// desktop might have a contact based reader allowing to connect without can
 				// if direct connect fails, EnterCanStep will be added by DirectConnectStep

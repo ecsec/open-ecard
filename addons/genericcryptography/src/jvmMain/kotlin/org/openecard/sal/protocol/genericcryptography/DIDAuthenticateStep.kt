@@ -38,13 +38,13 @@ import org.openecard.common.interfaces.Dispatcher
  */
 class DIDAuthenticateStep(
 	private val dispatcher: Dispatcher,
-) : ProtocolStep<DIDAuthenticate?, DIDAuthenticateResponse?> {
+) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
 
 	// TODO Implement me
 	override fun perform(
-		request: DIDAuthenticate?,
-		internalData: Map<String, Any>?,
+		request: DIDAuthenticate,
+		internalData: Map<String, Any>,
 	): DIDAuthenticateResponse =
 		WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
 			iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,

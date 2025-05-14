@@ -122,12 +122,12 @@ class SwingMessageDialog : MessageDialog {
 
 	override fun showInputDialog(
 		msg: String,
-		title: String,
+		title: String?,
 	): MessageDialogResult = showInputDialog(msg, title, "")
 
 	override fun showInputDialog(
 		msg: String,
-		title: String,
+		title: String?,
 		initialValue: String?,
 	): MessageDialogResult = showInputDialog(msg, title, DialogType.QUESTION_MESSAGE, initialValue)
 
@@ -163,7 +163,7 @@ class SwingMessageDialog : MessageDialog {
 		msgType: DialogType,
 		iconData: ByteArray?,
 		initialSelectedIndex: Int,
-		vararg options: String?,
+		vararg options: String,
 	): MessageDialogResult {
 		var msg = msg
 		var initialSelectedIndex = initialSelectedIndex
@@ -207,7 +207,7 @@ class SwingMessageDialog : MessageDialog {
 		optionType: OptionType,
 		msgType: DialogType,
 		iconData: ByteArray?,
-		vararg options: String?,
+		vararg options: String,
 	): MessageDialogResult {
 		var msg = msg
 		msg = formatMessage(msg)

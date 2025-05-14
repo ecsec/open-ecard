@@ -88,8 +88,8 @@ class ToggleText(
 	 * @param toggleText
 	 */
 	constructor(toggleText: ToggleText) : this(
-		toggleText.title,
-		toggleText.document,
+		toggleText.title!!,
+		toggleText.document!!,
 		toggleText.isCollapsed,
 	)
 

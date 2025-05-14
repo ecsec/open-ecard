@@ -40,7 +40,7 @@ class PSOComputeDigitalSignature(
 	 * @param le expected length of the response
 	 */
 	init {
-		setData(message)
+		data = message
 		setLE(le)
 	}
 }

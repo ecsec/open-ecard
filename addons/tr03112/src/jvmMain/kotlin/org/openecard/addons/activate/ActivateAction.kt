@@ -82,13 +82,13 @@ class ActivateAction : AppPluginAction {
 	private var dispatcher: Dispatcher? = null
 	private var ctx: Context? = null
 
-	override fun init(ctx: Context) {
-		tokenHandler = TCTokenHandler(ctx)
-		this.ctx = ctx
-		gui = ctx.userConsent
-		dispatcher = ctx.dispatcher
-		manager = ctx.manager
-		settingsAndDefaultView = ctx.viewController
+	override fun init(aCtx: Context) {
+		tokenHandler = TCTokenHandler(aCtx)
+		this.ctx = aCtx
+		gui = aCtx.userConsent
+		dispatcher = aCtx.dispatcher
+		manager = aCtx.manager
+		settingsAndDefaultView = aCtx.viewController
 		try {
 			val addonSpecStatus = manager!!.registry.search("Status")
 			statusAction = manager!!.getAppPluginAction(addonSpecStatus, "getStatus")
@@ -115,7 +115,7 @@ class ActivateAction : AppPluginAction {
 		attachments: List<Attachment>?,
 		extraParams: Map<String, Any>?,
 	): BindingResult {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
 			return checkRequestParameters(body, parameters ?: mapOf(), headers, attachments)
@@ -167,9 +167,9 @@ class ActivateAction : AppPluginAction {
 	 * @param dialogType Type of the dialog.
 	 */
 	private fun showBackgroundMessage(
-		msg: String?,
-		title: String?,
-		dialogType: DialogType?,
+		msg: String,
+		title: String,
+		dialogType: DialogType,
 	) {
 		Thread(
 			object : Runnable {
@@ -483,7 +483,7 @@ class ActivateAction : AppPluginAction {
 	 */
 	private fun processTcToken(params: Map<String, String>): BindingResult {
 		var response: BindingResult
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		dynCtx.put(TR03112Keys.COOKIE_MANAGER, CookieManager())
 
 		try {

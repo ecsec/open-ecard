@@ -66,26 +66,26 @@ class CVCStep(
 	@Suppress("SimpleDateFormat")
 	private fun addElements() {
 		val description = Text()
-		description.setText(LANG.translationForKey(DESCRIPTION))
-		getInputInfoUnits().add(description)
+		description.text = LANG.translationForKey(DESCRIPTION)
+		inputInfoUnits.add(description)
 
 		// SubjectName
 		val subjectName = ToggleText()
 		subjectName.id = "SubjectName"
 		subjectName.title = LANG.translationForKey(SUBJECT_NAME)
-		subjectName.setText(eacData.certificateDescription.subjectName)
-		getInputInfoUnits().add(subjectName)
+		subjectName.text = eacData.certificateDescription.subjectName!!
+		inputInfoUnits.add(subjectName)
 
 		// SubjectURL
 		val subjectURL = ToggleText()
 		subjectURL.id = "SubjectURL"
 		subjectURL.title = LANG.translationForKey(SUBJECT_URL)
 		if (eacData.certificateDescription.subjectURL != null) {
-			subjectURL.setText(eacData.certificateDescription.subjectURL)
+			subjectURL.text = eacData.certificateDescription.subjectURL!!
 		} else {
-			subjectURL.setText("")
+			subjectURL.text = ""
 		}
-		getInputInfoUnits().add(subjectURL)
+		inputInfoUnits.add(subjectURL)
 
 		// TermsOfUsage
 		val termsOfUsage = ToggleText()
@@ -96,7 +96,7 @@ class CVCStep(
 		doc.value = eacData.certificateDescription.getTermsOfUsageBytes()
 		termsOfUsage.document = doc
 		termsOfUsage.isCollapsed = true
-		getInputInfoUnits().add(termsOfUsage)
+		inputInfoUnits.add(termsOfUsage)
 
 		// Validity
 		val dateFormat: DateFormat =
@@ -117,17 +117,17 @@ class CVCStep(
 		val validity = ToggleText()
 		validity.id = "Validity"
 		validity.title = LANG.translationForKey(VALIDITY)
-		validity.setText(sb.toString())
+		validity.text = sb.toString()
 		validity.isCollapsed = true
-		getInputInfoUnits().add(validity)
+		inputInfoUnits.add(validity)
 
 		// IssuerName
 		val issuerName = ToggleText()
 		issuerName.id = "IssuerName"
 		issuerName.title = LANG.translationForKey(ISSUER_NAME)
-		issuerName.setText(eacData.certificateDescription.issuerName)
+		issuerName.text = eacData.certificateDescription.issuerName!!
 		issuerName.isCollapsed = true
-		getInputInfoUnits().add(issuerName)
+		inputInfoUnits.add(issuerName)
 
 		// IssuerURL
 		val issuerURL = ToggleText()
@@ -135,12 +135,12 @@ class CVCStep(
 		issuerURL.title = LANG.translationForKey(ISSUER_URL)
 		// issuer url is optional so perform a null check
 		if (eacData.certificateDescription.issuerURL != null) {
-			issuerURL.setText(eacData.certificateDescription.issuerURL)
+			issuerURL.text = eacData.certificateDescription.issuerURL!!
 		} else {
-			issuerURL.setText("")
+			issuerURL.text = ""
 		}
 		issuerURL.isCollapsed = true
-		getInputInfoUnits().add(issuerURL)
+		inputInfoUnits.add(issuerURL)
 	}
 
 	companion object {

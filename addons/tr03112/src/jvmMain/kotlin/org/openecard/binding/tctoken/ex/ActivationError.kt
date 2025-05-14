@@ -52,14 +52,14 @@ abstract class ActivationError : I18nException {
 
 	constructor(
 		result: BindingResult,
-		cause: Throwable?,
+		cause: Throwable,
 	) : super(cause) {
 		this.bindingResult = result.setResultMessage(localizedMessage)
 	}
 
 	constructor(
 		result: BindingResult,
-		key: I18nKey?,
+		key: I18nKey,
 		vararg params: Any?,
 	) : super(lang, key, *params) {
 		this.bindingResult = result.setResultMessage(localizedMessage)
@@ -67,7 +67,7 @@ abstract class ActivationError : I18nException {
 
 	constructor(
 		result: BindingResult,
-		key: I18nKey?,
+		key: I18nKey,
 		cause: Throwable?,
 		vararg params: Any?,
 	) : super(

@@ -74,6 +74,6 @@ class MSESetATTA : ManageSecurityEnvironment {
 			}
 		}
 
-		setData(caos.toByteArray())
+		data = caos.toByteArray()
 	}
 }

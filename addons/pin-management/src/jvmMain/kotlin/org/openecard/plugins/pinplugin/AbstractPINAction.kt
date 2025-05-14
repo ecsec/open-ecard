@@ -169,7 +169,7 @@ abstract class AbstractPINAction : AppExtensionAction {
 		checkResult<CardApplicationPathResponse>(cardApplicationPathResponse)
 
 		if (cardApplicationPathResponse.cardAppPathResultSet.cardApplicationPathResult.isEmpty()) {
-			logger.error("CardApplicationPath failed.")
+			logger.error { "CardApplicationPath failed." }
 			val result = makeResultError(ECardConstants.Minor.IFD.CANCELLATION_BY_USER, "Card was removed.")
 			val ex = createException(result)
 			throw ex

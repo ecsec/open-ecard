@@ -102,9 +102,9 @@ class ECPublicKey(
 	 * @throws Exception
 	 */
 	init {
-		val bodyElements = key.getChild().asList()
+		val bodyElements = key.child!!.asList()
 
-		val it: MutableIterator<TLV> = bodyElements.iterator()
+		val it = bodyElements.iterator()
 		while (it.hasNext()) {
 			val item = it.next()
 			val itemTag = item.tagNumWithClass.toInt()

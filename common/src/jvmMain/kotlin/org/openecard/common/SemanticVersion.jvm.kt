@@ -36,7 +36,7 @@ class SemanticVersion(
 	 * If available, the build ID is appended with a dash as seperator.
 	 * @return AppVersion string or the string UNKNOWN if version is invalid or unavailable.
 	 */
-	val versionString: String
+	val versionString: String = cleanVersionString(ver)
 
 	/**
 	 * Major version.
@@ -63,7 +63,6 @@ class SemanticVersion(
 	val buildId: String?
 
 	init {
-		this.versionString = cleanVersionString(ver)
 		val groups = splitVersion(versionString)
 		this.major = groups[0]!!.toInt()
 		this.minor = groups[1]!!.toInt()

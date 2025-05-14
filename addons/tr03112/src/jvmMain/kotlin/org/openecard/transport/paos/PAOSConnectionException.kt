@@ -52,5 +52,5 @@ class PAOSConnectionException : I18nException {
 	 * @param key Translation key.
 	 * @param params Parameters adding values into the translation.
 	 */
-	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
 }

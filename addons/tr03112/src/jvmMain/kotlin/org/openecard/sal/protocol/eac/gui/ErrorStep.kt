@@ -48,27 +48,26 @@ class ErrorStep(
 	init {
 		id = STEP_ID
 
-		ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		// TODO: remove instantreturn to actually display an error
 		// setInstantReturn(true);
 		isReversible = false
 		val pinBlockedNote = Text(errorText)
-		getInputInfoUnits().add(pinBlockedNote)
+		inputInfoUnits.add(pinBlockedNote)
 
-		setAction(
-			object : StepAction(getID()) {
+		action =
+			object : StepAction(id) {
 				override fun perform(
-					oldResults: MutableMap<String, ExecutionResults>,
-					result: StepResult?,
+					oldResults: Map<String, ExecutionResults>,
+					result: StepResult,
 				): StepActionResult {
 					if (paceException != null) {
 						ctx.put(EACProtocol.Companion.PACE_EXCEPTION, paceException)
 					}
 					return StepActionResult(StepActionResultStatus.CANCEL)
 				}
-			},
-		)
+			}
 	}
 
 	companion object {

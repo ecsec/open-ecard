@@ -30,7 +30,7 @@ import org.openecard.common.apdu.PerformSecurityOperation
  * @author Moritz Horsch
  */
 class PSOVerifyCertificate(
-	certificate: ByteArray?,
+	certificate: ByteArray,
 ) : PerformSecurityOperation() {
 	/**
 	 * Creates a new PSO:VerifyCertificate APDU.
@@ -39,6 +39,6 @@ class PSOVerifyCertificate(
 	 */
 	init {
 		p2 = 0xBE.toByte()
-		setData(certificate)
+		data = certificate
 	}
 }

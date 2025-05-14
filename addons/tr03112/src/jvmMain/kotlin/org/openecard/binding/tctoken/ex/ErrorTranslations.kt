@@ -30,7 +30,7 @@ import org.openecard.common.I18nKey
  * @author Hans-Martin Haase
  */
 enum class ErrorTranslations(
-	private val key: String,
+	override val key: String,
 ) : I18nKey {
 	ACTIVATION_INVALID_REFRESH_ADDRESS("activation.action.invalid_refresh_address"),
 	CARD_INSERTION_ABORT("missing.activation.parameter.exception.card.insertion.canceled"),
@@ -96,7 +96,4 @@ enum class ErrorTranslations(
 	UNSUPPORTED_FEATURE("illegal.argument.exception.unsupported_parser_feature"),
 	WRONG_SERVER_RESULT("connection.error.invalid_status_code"),
 	SCHEMA_VALIDATION_FAILED("paos.exception.msg_invalid_schema"),
-	;
-
-	override fun getKey(): String = key
 }

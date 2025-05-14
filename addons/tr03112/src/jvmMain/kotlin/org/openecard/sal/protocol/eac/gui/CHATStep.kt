@@ -57,8 +57,8 @@ class CHATStep(
 	private fun addElements() {
 		val description = Text()
 		val descriptionText: String = LANG.translationForKey(DESCRIPTION, eacData.certificateDescription.subjectName)
-		description.setText(descriptionText)
-		getInputInfoUnits().add(description)
+		description.text = descriptionText
+		inputInfoUnits.add(description)
 
 		// process read access and special functions
 		val readAccessCheckBox = Checkbox(READ_CHAT_BOXES)
@@ -76,10 +76,10 @@ class CHATStep(
 			if (TR03119RightsFilter.isTr03119ConformReadRight(dataGroup)) {
 				if (requiredReadAccess[dataGroup] == true) {
 					displayReadAccessCheckBox = true
-					readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, checked = true, disabled = true))
+					readAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, checked = true, disabled = true))
 				} else if (optionalReadAccess[dataGroup] == true) {
 					displayReadAccessCheckBox = true
-					readAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, checked = true, disabled = false))
+					readAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, checked = true, disabled = false))
 				}
 			} else {
 				eacData.selectedCHAT.setReadAccess(dataGroup, false)
@@ -113,10 +113,24 @@ class CHATStep(
 			if (TR03119RightsFilter.isTr03119ConformSpecialFunction(specialFunction)) {
 				if (requiredSpecialFunctions[specialFunction] == true) {
 					displayReadAccessCheckBox = true
-					readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, true, *textData))
+					readAccessCheckBox.boxItems.add(
+						makeBoxItem(
+							specialFunction,
+							true,
+							disabled = true,
+							textData = textData,
+						),
+					)
 				} else if (optionalSpecialFunctions[specialFunction] == true) {
 					displayReadAccessCheckBox = true
-					readAccessCheckBox.getBoxItems().add(makeBoxItem(specialFunction, true, false, *textData))
+					readAccessCheckBox.boxItems.add(
+						makeBoxItem(
+							specialFunction,
+							true,
+							disabled = false,
+							textData = textData,
+						),
+					)
 				}
 			} else {
 				eacData.selectedCHAT.setSpecialFunctions(specialFunction, false)
@@ -124,7 +138,7 @@ class CHATStep(
 		}
 
 		if (displayReadAccessCheckBox) {
-			getInputInfoUnits().add(readAccessCheckBox)
+			inputInfoUnits.add(readAccessCheckBox)
 		}
 
 		// process write access
@@ -139,10 +153,10 @@ class CHATStep(
 			if (TR03119RightsFilter.isTr03119ConformWriteRight(dataGroup)) {
 				if (requiredWriteAccess[dataGroup] == true) {
 					displayWriteAccessCheckBox = true
-					writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, true))
+					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, true, true))
 				} else if (optionalWriteAccess[dataGroup] == true) {
 					displayWriteAccessCheckBox = true
-					writeAccessCheckBox.getBoxItems().add(makeBoxItem(dataGroup, true, false))
+					writeAccessCheckBox.boxItems.add(makeBoxItem(dataGroup, true, false))
 				}
 			} else {
 				eacData.selectedCHAT.setWriteAccess(dataGroup, false)
@@ -150,14 +164,14 @@ class CHATStep(
 		}
 
 		if (displayWriteAccessCheckBox) {
-			getInputInfoUnits().add(writeAccessCheckBox)
+			inputInfoUnits.add(writeAccessCheckBox)
 		}
 
 		val requestedDataDescription = ToggleText()
 		requestedDataDescription.title = LANG.translationForKey(NOTE)
-		requestedDataDescription.setText(LANG.translationForKey(NOTE_CONTENT))
+		requestedDataDescription.text = LANG.translationForKey(NOTE_CONTENT)
 		requestedDataDescription.isCollapsed = false
-		getInputInfoUnits().add(requestedDataDescription)
+		inputInfoUnits.add(requestedDataDescription)
 	}
 
 	private fun makeBoxItem(

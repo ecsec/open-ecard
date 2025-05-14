@@ -58,7 +58,7 @@ class RedirectCertificateValidator(
 	 * @param redirectChecks True if the TR-03112 checks must be performed.
 	 */
 	init {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		descPromise = dynCtx.getPromise(TR03112Keys.ESERVICE_CERTIFICATE_DESC)
 		this.redirectChecks = redirectChecks
 	}
@@ -74,7 +74,7 @@ class RedirectCertificateValidator(
 				certDescExists = desc != null
 
 				val host =
-					url.getProtocol() + "://" + url.getHost() + (if (url.getPort() == -1) "" else (":" + url.getPort()))
+					url.protocol + "://" + url.host + (if (url.port == -1) "" else (":" + url.port))
 				// check points certificate (but just in case we have a certificate description)
 				if (certDescExists && !TR03112Utils.isInCommCertificates(cert, desc!!.getCommCertificates(), host)) {
 					LOG.error {
@@ -85,12 +85,12 @@ class RedirectCertificateValidator(
 				}
 
 				// check if we match the SOP
-				val sopUrl: URL?
+				val sopUrl: URL
 				if (certDescExists && desc!!.subjectURL != null && !desc.subjectURL!!.isEmpty()) {
 					sopUrl = URL(desc.subjectURL)
 				} else {
-					val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-					sopUrl = dynCtx.get(TR03112Keys.TCTOKEN_URL) as URL?
+					val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
+					sopUrl = dynCtx.get(TR03112Keys.TCTOKEN_URL) as URL
 				}
 				// determine the URL that has to be SOP checked (TR-03124 Determine refreshURL)
 				// on th efirst invocation this is the current URL, on the following invocations this is the last used
@@ -99,7 +99,7 @@ class RedirectCertificateValidator(
 				}
 
 				// check SOP for last URL and update the URL
-				val sop = TR03112Utils.checkSameOriginPolicy(lastURL, sopUrl)
+				val sop = TR03112Utils.checkSameOriginPolicy(lastURL!!, sopUrl)
 				lastURL = url
 				return if (!sop) {
 					// there is more to come

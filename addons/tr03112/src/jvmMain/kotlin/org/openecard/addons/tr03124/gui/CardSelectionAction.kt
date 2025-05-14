@@ -58,17 +58,17 @@ class CardSelectionAction(
 			val out = results.getResult("credentialSelectionBox")
 			val rBox = out as Radiobox
 
-			for (item in rBox.getBoxItems()) {
-				if (item.isChecked()) {
-					this.resultCardTypetName = item.getName()
+			for (item in rBox.boxItems) {
+				if (item.isChecked) {
+					this.resultCardTypetName = item.name
 					break
 				}
 			}
 
-			if (resultCardTypetName != null) {
-				return StepActionResult(StepActionResultStatus.NEXT)
+			return if (resultCardTypetName != null) {
+				StepActionResult(StepActionResultStatus.NEXT)
 			} else {
-				return StepActionResult(StepActionResultStatus.REPEAT)
+				StepActionResult(StepActionResultStatus.REPEAT)
 			}
 		} else {
 			// user has added or removed a card

@@ -345,9 +345,9 @@ class TCTokenVerifier(
 	 * @throws URISyntaxException Thrown if the given `refreshAddress` is not a valid URL.
 	 */
 	private fun createUrlWithErrorParams(
-		refreshAddress: String?,
+		refreshAddress: String,
 		minor: String,
-		minorMessage: String?,
+		minorMessage: String,
 	): URI =
 		UrlBuilder
 			.fromUrl(refreshAddress)
@@ -393,14 +393,14 @@ class TCTokenVerifier(
 				val resultPoints: List<Pair<URL, TlsServerCertificate>> = newResCtx.certs
 				val last = resultPoints.last()
 				val resAddr: URL = last.p1
-				val refreshUrl: String? = resAddr.toString()
+				val refreshUrl = resAddr.toString()
 
 				if (ex is UserCancellationException) {
 					val refreshUrlAsUrl =
 						createUrlWithErrorParams(
 							refreshUrl,
 							ResultMinor.CANCELLATION_BY_USER,
-							ex.message,
+							ex.message!!,
 						)
 					throw UserCancellationException(refreshUrlAsUrl.toString(), ex)
 				}
@@ -409,7 +409,7 @@ class TCTokenVerifier(
 					createUrlWithErrorParams(
 						refreshUrl,
 						ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
-						ex.message,
+						ex.message!!,
 					)
 				throw InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex)
 			} catch (ex1: IOException) {
@@ -438,7 +438,7 @@ class TCTokenVerifier(
 	}
 
 	private fun checkUserCancellation() {
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val ex = dynCtx.get(TR03112Keys.CARD_SELECTION_CANCELLATION) as UserCancellationException?
 		if (ex != null) {
 			determineRefreshAddress(ex)

@@ -317,6 +317,7 @@ class PAOS(
 	 * @throws PAOSException In case there were errors in the transport layer.
 	 * @throws PAOSConnectionException
 	 */
+	@Throws(PAOSConnectionException::class, PAOSException::class)
 	fun sendStartPAOS(message: StartPAOS): StartPAOSResponse {
 		var msg: Any? = message
 		var conn: StreamHttpClientConnection? = null
@@ -327,7 +328,7 @@ class PAOS(
 		var lastResponse: ResponseBaseType? = null
 		var firstOecMinorError: String? = null
 		var fakeSlotHandle: ByteArray? = null
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		var internalSessionIdentifier: String? = null
 		val connectionHandles = message.getConnectionHandle()
 		if (connectionHandles != null) {
@@ -468,7 +469,7 @@ class PAOS(
 							val responseObj = synthesizeObj(ByteArrayInputStream(entityData), ex)
 							if (responseObj != null) {
 								msg = responseObj
-								if (!validationError.isDelivered()) {
+								if (!validationError.isDelivered) {
 									validationError.deliver(ex)
 								}
 							} else {

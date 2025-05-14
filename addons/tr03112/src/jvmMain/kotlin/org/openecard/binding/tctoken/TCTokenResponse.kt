@@ -89,7 +89,7 @@ class TCTokenResponse : BindingResult() {
 			this.token = token
 		}
 
-	var refreshAddress: String?
+	var refreshAddress: String
 		/**
 		 * Returns the refresh address.
 		 *
@@ -113,7 +113,7 @@ class TCTokenResponse : BindingResult() {
 	 */
 	fun finishResponse() {
 		try {
-			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val ub = UrlBuilder.fromUrl(this.refreshAddress)
 			if (ECardConstants.Major.OK == result!!.getResultMajor()) {
 				resultCode = BindingResultCode.REDIRECT

@@ -45,7 +45,7 @@ abstract class AbstractPasswordStepAction(
 ) : StepAction(
 		step,
 	) {
-	protected val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+	protected val ctx: DynamicContext = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 	protected fun performPACEWithPIN(
 		oldResults: Map<String, ExecutionResults>,
@@ -62,7 +62,7 @@ abstract class AbstractPasswordStepAction(
 		val paceInputMap: AuthDataResponse<*> = paceAuthMap.createResponse<DIDAuthenticationDataType?>(protoData)
 
 		if (capturePin) {
-			val executionResults: ExecutionResults = oldResults.get(getStepID())!!
+			val executionResults: ExecutionResults = oldResults[stepID]!!
 			val p = executionResults.getResult(PINStep.PIN_FIELD) as? PasswordField
 			if (p == null) {
 				throw PinOrCanEmptyException("The PIN field is missing")
@@ -70,7 +70,7 @@ abstract class AbstractPasswordStepAction(
 			val pinIn = p.value
 			// let the user enter the pin again, when there is none entered
 			// TODO: check pin length and possibly allowed charset with CardInfo file
-			if (pinIn.size == 0) {
+			if (pinIn.isEmpty()) {
 				throw PinOrCanEmptyException("PIN must not be empty")
 			} else {
 				// NOTE: saving pin as string prevents later removal of the value from memory !!!
@@ -106,7 +106,7 @@ abstract class AbstractPasswordStepAction(
 
 		val paceInputMap: AuthDataResponse<*> = tmp.createResponse<DIDAuthenticationDataType?>(paceInput)
 		if (capturePin) {
-			val executionResults: ExecutionResults = oldResults.get(getStepID())!!
+			val executionResults: ExecutionResults = oldResults[stepID]!!
 			val canField = executionResults.getResult(PINStep.Companion.CAN_FIELD) as? PasswordField
 			if (canField == null) {
 				throw CanLengthInvalidException("The CAN field is missing")
@@ -137,7 +137,7 @@ abstract class AbstractPasswordStepAction(
 		// EstablishChannel
 		val establishChannel = EstablishChannel()
 		establishChannel.setSlotHandle(conHandle.getSlotHandle())
-		establishChannel.setAuthenticationProtocolData(paceInputMap.getResponse())
+		establishChannel.setAuthenticationProtocolData(paceInputMap.response)
 		establishChannel.getAuthenticationProtocolData().setProtocol(ECardConstants.Protocol.PACE)
 		return establishChannel
 	}

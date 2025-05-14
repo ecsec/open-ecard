@@ -55,7 +55,7 @@ class CANStepAction(
 	private val langPin: I18n = I18n.getTranslation("pinplugin")
 
 	override fun perform(
-		oldResults: MutableMap<String, ExecutionResults>,
+		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
 	): StepActionResult {
 		try {

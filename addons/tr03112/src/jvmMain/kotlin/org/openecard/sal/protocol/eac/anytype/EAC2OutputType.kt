@@ -87,7 +87,7 @@ class EAC2OutputType(
 		 */
 		get() {
 			val authResponse: AuthDataResponse<*> =
-				authMap.createResponse<EAC2OutputType?>(EAC2OutputType())
+				authMap.createResponse(EAC2OutputType())
 			if (challenge != null) {
 				authResponse.addElement(
 					CHALLENGE,
@@ -107,7 +107,7 @@ class EAC2OutputType(
 					ByteUtils.toHexString(nonce),
 				)
 			}
-			return authResponse.getResponse()
+			return authResponse.response
 		}
 
 	companion object {

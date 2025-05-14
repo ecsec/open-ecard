@@ -117,7 +117,7 @@ class EAC1OutputType(
 		 */
 		get() {
 			val authResponse: AuthDataResponse<EAC1OutputType> =
-				authMap.createResponse<EAC1OutputType>(EAC1OutputType())
+				authMap.createResponse(EAC1OutputType())
 			if (retryCounter != null) {
 				authResponse.addElement(
 					RETRY_COUNTER,
@@ -151,7 +151,7 @@ class EAC1OutputType(
 				ByteUtils.toHexString(challenge),
 			)
 
-			return authResponse.getResponse()
+			return authResponse.response
 		}
 
 	companion object {

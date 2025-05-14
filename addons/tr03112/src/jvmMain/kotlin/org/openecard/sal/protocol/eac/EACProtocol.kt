@@ -42,15 +42,15 @@ import javax.annotation.Nonnull
  */
 class EACProtocol : SALProtocolBaseImpl() {
 	@Throws(ActionInitializationException::class)
-	override fun init(ctx: Context) {
-		addOrderStep(PACEStep(ctx))
-		addOrderStep(TerminalAuthenticationStep(ctx))
-		addOrderStep(ChipAuthenticationStep(ctx))
+	override fun init(aCtx: Context) {
+		addOrderStep(PACEStep(aCtx))
+		addOrderStep(TerminalAuthenticationStep(aCtx))
+		addOrderStep(ChipAuthenticationStep(aCtx))
 	}
 
 	override fun destroy(force: Boolean) {
 		LOG.debug("Destroying EAC protocol instance.")
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 		val guiThread = dynCtx.get(TR03112Keys.OPEN_USER_CONSENT_THREAD) as Thread?
 		if (guiThread != null) {
 			// wait for gui to finish
@@ -80,9 +80,9 @@ class EACProtocol : SALProtocolBaseImpl() {
 		LOG.debug("Checking if EAC protocol is finished.")
 		var finished = super.isFinished()
 		if (!finished) {
-			val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+			val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 			val p: Promise<*> = ctx.getPromise(AUTHENTICATION_DONE)
-			if (p.isDelivered()) {
+			if (p.isDelivered) {
 				LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
 				finished = true
 				try {

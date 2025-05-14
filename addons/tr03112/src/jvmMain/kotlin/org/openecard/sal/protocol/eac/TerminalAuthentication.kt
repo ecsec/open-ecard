@@ -52,6 +52,7 @@ class TerminalAuthentication(
 	 * @param certificateChain Certificate chain
 	 * @throws ProtocolException
 	 */
+	@Throws(ProtocolException::class)
 	fun verifyCertificates(certificateChain: CardVerifiableCertificateChain) {
 		try {
 			for (cvc in certificateChain.certificates) {
@@ -78,6 +79,7 @@ class TerminalAuthentication(
 	 * @param aad Authenticated Auxiliary Data (AAD)
 	 * @throws ProtocolException
 	 */
+	@Throws(ProtocolException::class)
 	fun mseSetAT(
 		oID: ByteArray,
 		chr: ByteArray?,
@@ -100,6 +102,7 @@ class TerminalAuthentication(
 	 * @param terminalSignature Terminal signature
 	 * @throws ProtocolException
 	 */
+	@Throws(ProtocolException::class)
 	fun externalAuthentication(terminalSignature: ByteArray?) {
 		try {
 			val externalAuthentication: CardCommandAPDU = ExternalAuthentication(terminalSignature)
@@ -109,7 +112,7 @@ class TerminalAuthentication(
 		}
 	}
 
-	val challenge: ByteArray?
+	val challenge: ByteArray
 		/**
 		 * Gets a challenge from the PICC.
 		 * Sends a Get Challenge APDU. (Protocol step 3)
@@ -118,6 +121,7 @@ class TerminalAuthentication(
 		 * @return Challenge
 		 * @throws ProtocolException
 		 */
+		@Throws(ProtocolException::class)
 		get() {
 			try {
 				val getChallenge: CardCommandAPDU =
@@ -125,7 +129,7 @@ class TerminalAuthentication(
 				val response =
 					getChallenge.transmit(dispatcher, slotHandle)
 
-				return response.getData()
+				return response.data
 			} catch (e: APDUException) {
 				throw ProtocolException(e.result)
 			}

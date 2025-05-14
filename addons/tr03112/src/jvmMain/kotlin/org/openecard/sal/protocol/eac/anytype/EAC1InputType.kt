@@ -107,8 +107,8 @@ class EAC1InputType(
 
 		certificates = ArrayList<CardVerifiableCertificate>()
 		for (element in baseType.getAny()) {
-			if (element.getLocalName() == CERTIFICATE) {
-				val value = StringUtils.toByteArray(element.getTextContent())
+			if (element.localName == CERTIFICATE) {
+				val value = StringUtils.toByteArray(element.textContent)
 				val cvc = CardVerifiableCertificate(value)
 				certificates.add(cvc)
 			}
@@ -121,11 +121,12 @@ class EAC1InputType(
 		var optionalCHATtmp: ByteArray? = authMap.getContentAsBytes(OPTIONAL_CHAT)
 		// HACK: this is only done because some eID Server vendors send raw CHAT values
 		// if not present use empty CHAT, so everything can be deselected
-		if (requiredCHATtmp == null) {
-			requiredCHATtmp = CHAT().toByteArray()
-		} else {
-			requiredCHATtmp = fixChatValue(requiredCHATtmp)
-		}
+		requiredCHATtmp =
+			if (requiredCHATtmp == null) {
+				CHAT().toByteArray()
+			} else {
+				fixChatValue(requiredCHATtmp)
+			}
 		// if not present, use terminal CHAT as optional
 		if (optionalCHATtmp == null) {
 			val certChain = CardVerifiableCertificateChain(certificates)
@@ -162,7 +163,7 @@ class EAC1InputType(
 	private fun parseCertificateDescriptionElement(baseType: DIDAuthenticationDataType) {
 		var counter = 0
 		for (element in baseType.getAny()) {
-			if (element.getLocalName() == CERTIFICATE_DESCRIPTION) {
+			if (element.localName == CERTIFICATE_DESCRIPTION) {
 				counter++
 				if (counter > 1) {
 					throw ElementParsingException(ErrorTranslations.INVALID_CERT)

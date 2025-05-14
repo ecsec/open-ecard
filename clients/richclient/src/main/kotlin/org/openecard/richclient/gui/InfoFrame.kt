@@ -30,27 +30,31 @@ import javax.swing.JFrame
  *
  * @author Tobias Wich
  */
-class InfoFrame(title: String?) : JFrame(title), StatusContainer {
-    private var isShown = false
+class InfoFrame(
+	title: String?,
+) : JFrame(title),
+	StatusContainer {
+	private var isShown = false
 
-    override fun updateContent(c: Container) {
-        pack()
-    }
+	override fun updateContent(status: Container) {
+		pack()
+	}
 
-    override fun setVisible(b: Boolean) {
-        if (isShown) {
-            state = if (b) {
-                NORMAL
-            } else {
-                ICONIFIED
-            }
-        } else {
-            super.setVisible(b)
+	override fun setVisible(b: Boolean) {
+		if (isShown) {
+			state =
+				if (b) {
+					NORMAL
+				} else {
+					ICONIFIED
+				}
+		} else {
+			super.setVisible(b)
 
-            // set after first setVisable(true) call
-            if (b) {
-                isShown = true
-            }
-        }
-    }
+			// set after first setVisable(true) call
+			if (b) {
+				isShown = true
+			}
+		}
+	}
 }

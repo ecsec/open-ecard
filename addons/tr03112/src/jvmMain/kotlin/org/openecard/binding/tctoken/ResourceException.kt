@@ -36,7 +36,7 @@ class ResourceException : I18nException {
 
 	constructor(message: String, cause: Throwable?) : super(message, cause)
 
-	constructor(key: I18nKey?, vararg params: Any?) : super(lang, key, *params)
+	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
 
-	constructor(key: I18nKey?, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
+	constructor(key: I18nKey, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 }

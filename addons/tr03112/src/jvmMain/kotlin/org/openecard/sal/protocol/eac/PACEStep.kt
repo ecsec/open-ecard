@@ -111,13 +111,13 @@ class PACEStep(
 		internalData: MutableMap<String, Any?>,
 	): DIDAuthenticateResponse {
 		// get context to save values in
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		val didAuthenticate = request
 		val response: DIDAuthenticateResponse =
-			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
-				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-				org.openecard.common.WSHelper
+			WSHelper.makeResponse(
+				DIDAuthenticateResponse::class.java,
+				WSHelper
 					.makeResultOK(),
 			)
 
@@ -200,31 +200,31 @@ class PACEStep(
 
 			// define GUI depending on the PIN status
 			val uc = UserConsentDescription(LANG.translationForKey(TITLE))
-			uc.setDialogType("EAC")
+			uc.dialogType = "EAC"
 
 			// create GUI and init executor
 			val cvcStep = CVCStep(eacData)
 			val cvcStepAction = CVCStepAction(cvcStep)
-			cvcStep.setAction(cvcStepAction)
-			uc.getSteps().add(cvcStep)
+			cvcStep.action = cvcStepAction
+			uc.steps.add(cvcStep)
 
 			val chatStep = CHATStep(eacData)
 			val chatAction = CHATStepAction(addonCtx, eacData, chatStep)
-			chatStep.setAction(chatAction)
-			uc.getSteps().add(chatStep)
+			chatStep.action = chatAction
+			uc.steps.add(chatStep)
 
-			uc.getSteps().add(PINStep.createDummy(pinID))
+			uc.steps.add(PINStep.createDummy(pinID))
 			val procStep = ProcessingStep()
 			val procStepAction = ProcessingStepAction(procStep)
-			procStep.setAction(procStepAction)
-			uc.getSteps().add(procStep)
+			procStep.action = procStepAction
+			uc.steps.add(procStep)
 
 			val guiThread =
 				Thread(
 					Runnable {
 						// get context here because it is thread local
-						val dynCtx2 = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
-						if (!uc.getSteps().isEmpty()) {
+						val dynCtx2 = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
+						if (uc.steps.isNotEmpty()) {
 							val navigator = gui.obtainNavigator(uc)
 							val exec = ExecutionEngine(navigator)
 							var guiResult: ResultStatus?
@@ -240,7 +240,7 @@ class PACEStep(
 								dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 								val paceErrorPromise = dynCtx2.getPromise(EACProtocol.Companion.PACE_EXCEPTION)
 								val paceError = paceErrorPromise.derefNonblocking()
-								if (!paceErrorPromise.isDelivered()) {
+								if (!paceErrorPromise.isDelivered) {
 									logger.debug { "Setting PACE result to cancelled." }
 									paceErrorPromise.deliver(
 										createException(
@@ -327,8 +327,8 @@ class PACEStep(
 			val paceOutputMap = AuthDataMap(data)
 
 			// int retryCounter = Integer.valueOf(paceOutputMap.getContentAsString(PACEOutputType.RETRY_COUNTER));
-			val efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS)
-			val currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR)
+			val efCardAccess = paceOutputMap.getContentAsBytes(PACEOutputType.EF_CARD_ACCESS)!!
+			val currentCAR = paceOutputMap.getContentAsBytes(PACEOutputType.CURRENT_CAR)!!
 			val previousCAR = paceOutputMap.getContentAsBytes(PACEOutputType.PREVIOUS_CAR)
 			val idpicc = paceOutputMap.getContentAsBytes(PACEOutputType.ID_PICC)
 
@@ -359,7 +359,7 @@ class PACEStep(
 			response.setResult(makeResultError(ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED, msg))
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (e: ECardException) {
-			logger.error(e) { "${e.message}" }
+			logger.error(e) { e.message }
 			response.setResult(e.result)
 			dynCtx.put(EACProtocol.Companion.AUTHENTICATION_DONE, false)
 		} catch (ex: ElementParsingException) {

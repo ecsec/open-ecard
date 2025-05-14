@@ -65,18 +65,18 @@ class CardSelectionStep(
 	 */
 	private fun addElements() {
 		val description = Text()
-		description.setText(lang.translationForKey("card.selection.message"))
+		description.text = lang.translationForKey("card.selection.message")
 		val radioBox = Radiobox("credentialSelectionBox")
 		radioBox.groupText = "Available Credentials"
 		for (cardName in avCardWithName.keys) {
 			val item = BoxItem()
 			item.name = avCardWithName[cardName]!!.getRecognitionInfo().getCardType()
 			item.text = cardName
-			radioBox.getBoxItems().add(item)
+			radioBox.boxItems.add(item)
 		}
 
-		getInputInfoUnits().add(description)
-		getInputInfoUnits().add(radioBox)
+		inputInfoUnits.add(description)
+		inputInfoUnits.add(radioBox)
 	}
 
 	/**
@@ -98,7 +98,7 @@ class CardSelectionStep(
 			}
 		}
 
-		getInputInfoUnits().clear()
+		inputInfoUnits.clear()
 		addElements()
 	}
 

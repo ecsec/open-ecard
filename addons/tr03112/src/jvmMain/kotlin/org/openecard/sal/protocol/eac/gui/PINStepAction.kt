@@ -71,7 +71,7 @@ class PINStepAction(
 
 	override fun perform(
 		oldResults: Map<String, ExecutionResults>,
-		result: StepResult?,
+		result: StepResult,
 	): StepActionResult {
 		val pinState: PinState = ctx.get(EACProtocol.Companion.PIN_STATUS) as PinState
 		var conHandle = this.ctx.get(TR03112Keys.CONNECTION_HANDLE) as ConnectionHandleType
@@ -83,7 +83,7 @@ class PINStepAction(
 
 			pinState.update(currentState)
 		} catch (ex: WSHelper.WSException) {
-			if (SysUtils.isMobileDevice() &&
+			if (SysUtils.isMobileDevice &&
 				minorIsOneOf<WSHelper.WSException>(
 					ex,
 					ECardConstants.Minor.IFD.Terminal.PREPARE_DEVICES_ERROR,
@@ -229,10 +229,10 @@ class PINStepAction(
 				),
 			)
 		} catch (ex: InterruptedException) {
-			logger.warn("PIN step action interrupted.", ex)
+			logger.warn(ex) { "PIN step action interrupted." }
 			return StepActionResult(StepActionResultStatus.CANCEL)
 		} catch (ex: PinOrCanEmptyException) {
-			logger.warn("PIN was empty", ex)
+			logger.warn(ex) { "PIN was empty" }
 			return StepActionResult(StepActionResultStatus.REPEAT)
 		}
 	}

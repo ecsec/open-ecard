@@ -94,7 +94,7 @@ class TlsConnectionHandler(
 					(tlsClient as ClientCertDefaultTlsClient).setEnforceSameSession(true)
 				}
 				// save the info that we have a same channel situation
-				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+				val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 				dynCtx.put(TR03112Keys.SAME_CHANNEL, Boolean.TRUE)
 			} else {
 				// kill open channel in tctoken request, it is not needed anymore

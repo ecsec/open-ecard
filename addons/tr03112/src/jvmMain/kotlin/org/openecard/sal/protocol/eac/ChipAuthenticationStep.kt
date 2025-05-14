@@ -60,15 +60,15 @@ class ChipAuthenticationStep(
 		internalData: MutableMap<String, Any?>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
-			WSHelper.makeResponse<Class<DIDAuthenticateResponse>, DIDAuthenticateResponse>(
-				iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse::class.java,
-				org.openecard.common.WSHelper
+			WSHelper.makeResponse(
+				DIDAuthenticateResponse::class.java,
+				WSHelper
 					.makeResultOK(),
 			)
 
 		// EACProtocol.setEmptyResponseData(response);
 		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
-		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)
+		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
 			val eacAdditionalInput = EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData())

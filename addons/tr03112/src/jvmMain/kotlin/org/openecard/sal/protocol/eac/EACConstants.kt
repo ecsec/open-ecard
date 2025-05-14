@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,26 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+ */
+package org.openecard.sal.protocol.eac
 
 /**
- * Frame class with the necessary interface for status element updates.
+ * Defines constants for the EAC protocol.
  *
- * @author Tobias Wich
+ * @author Moritz Horsch
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
+object EACConstants {
+	// EF.CardSecurity file identifier
+	val EF_CARDSECURITY_FID: Short = 0x011D.toShort()
 
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
-	}
+	// Internal data
+	const val IDATA_CERTIFICATES: String = "Certificates"
+	const val IDATA_AUTHENTICATED_AUXILIARY_DATA: String = "AuthenticatedAuxiliaryData"
+	const val IDATA_PK_PCD: String = "PKPCD"
+	const val IDATA_SECURITY_INFOS: String = "SecurityInfos"
+	const val IDATA_CURRENT_CAR: String = "CurrentCAR"
+	const val IDATA_PREVIOUS_CAR: String = "PreviousCAR"
+	const val IDATA_CHALLENGE: String = "Challenge"
+	const val IDATA_SIGNATURE: String = "Signature"
+	const val IDATA_TERMINAL_CERTIFICATE: String = "TerminalCertificate"
 }

@@ -22,6 +22,7 @@
 
 package org.openecard.addons.cardlink.ws
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -208,6 +209,7 @@ val module =
 		}
 	}
 
+@OptIn(ExperimentalSerializationApi::class)
 val cardLinkJsonFormatter =
 	Json {
 		serializersModule = module

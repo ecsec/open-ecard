@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014-2017 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,29 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.binding.tctoken
 
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+import org.openecard.bouncycastle.tls.TlsServerCertificate
+import org.openecard.common.DynamicContext
+import org.openecard.crypto.tls.CertificateVerifier
 
 /**
- * Frame class with the necessary interface for status element updates.
+ * Verifier saving the certificate in the dynamic context.
  *
  * @author Tobias Wich
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
+class SaveEidServerCertHandler : CertificateVerifier {
+	var firstCert: Boolean = true
 
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
+	override fun isValid(
+		chain: TlsServerCertificate,
+		hostOrIp: String,
+	) {
+		if (firstCert) {
+			firstCert = false
+			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
+			dynCtx.put(TR03112Keys.EIDSERVER_CERTIFICATE, chain)
 		}
 	}
 }

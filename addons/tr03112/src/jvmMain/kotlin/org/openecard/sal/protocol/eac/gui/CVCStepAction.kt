@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014-2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,32 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.sal.protocol.eac.gui
 
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+import org.openecard.gui.StepResult
+import org.openecard.gui.definition.Step
+import org.openecard.gui.executor.ExecutionResults
+import org.openecard.gui.executor.StepAction
+import org.openecard.gui.executor.StepActionResult
+import org.openecard.gui.executor.StepActionResultStatus
 
 /**
- * Frame class with the necessary interface for status element updates.
  *
  * @author Tobias Wich
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
-
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
+class CVCStepAction(
+	step: Step,
+) : StepAction(step) {
+	override fun perform(
+		oldResults: Map<String, ExecutionResults>,
+		result: StepResult,
+	): StepActionResult {
+		if (result.isBack()) {
+			// no going back to the initialization step
+			return StepActionResult(StepActionResultStatus.REPEAT)
 		}
+
+		return StepActionResult(StepActionResultStatus.NEXT)
 	}
 }

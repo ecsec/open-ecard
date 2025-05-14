@@ -35,84 +35,86 @@ import javax.swing.JDialog
  *
  * @author Johannes Schmölz
  */
-class InfoPopup @JvmOverloads constructor(c: Container, private val point: Point? = null) : JDialog(),
-    StatusContainer {
-    /**
-     * Constructor of InfoPopup class.
-     *
-     * @param c Container which will be set as ContentPane
-     * @param point position
-     */
-    /**
-     * Constructor of InfoPopup class.
-     *
-     * @param c Container which will be set as ContentPane
-     */
-    init {
-        setupUI(c)
-    }
-
-    /**
-     * Updates the content of the InfoPopup by setting a new ContentPane.
-     *
-     * @param c Container which will be set as ContentPane
-     */
-    override fun updateContent(c: Container) {
-        contentPane = c
-        pack()
-		repaint()
-		point?.let {
-			location = calculatePosition(c, point)
+class InfoPopup
+	/**
+	 * Constructor of InfoPopup class.
+	 *
+	 * @param c Container which will be set as ContentPane
+	 */
+	@JvmOverloads
+	constructor(
+		c: Container,
+		private val point: Point? = null,
+	) : JDialog(),
+		StatusContainer {
+		init {
+			setupUI(c)
 		}
-    }
 
-    private fun calculatePosition(c: Container, p: Point): Point {
-        val gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val scrnSize = gEnv.defaultScreenDevice.defaultConfiguration.bounds
-        val winSize = gEnv.maximumWindowBounds
-        val popupSize = c.preferredSize
-        val x: Int
-        val y: Int
+		/**
+		 * Updates the content of the InfoPopup by setting a new ContentPane.
+		 *
+		 * @param status Container which will be set as ContentPane
+		 */
+		override fun updateContent(status: Container) {
+			contentPane = status
+			pack()
+			repaint()
+			point?.let {
+				location = calculatePosition(status, point)
+			}
+		}
 
-        if (winSize.x > 5) { // taskbar left
-            x = winSize.x + DISTANCE_TO_TASKBAR
-            y = if (p.y > (winSize.height / 2)) p.y - popupSize.height else p.y
-        } else if (winSize.y > 5) { // taskbar top
-            x = if (p.x > (winSize.width / 2)) p.x - popupSize.width else p.x
-            y = winSize.y + DISTANCE_TO_TASKBAR
-        } else if (scrnSize.width > winSize.width) { // taskbar right
-            x = winSize.width - popupSize.width - DISTANCE_TO_TASKBAR
-            y = if (p.y > (winSize.height / 2)) p.y - popupSize.height else p.y
-        } else { // taskbar bottom
-            x = if (p.x > (winSize.width / 2)) p.x - popupSize.width else p.x
-            y = winSize.height - popupSize.height - DISTANCE_TO_TASKBAR
-        }
+		private fun calculatePosition(
+			c: Container,
+			p: Point,
+		): Point {
+			val gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment()
+			val scrnSize = gEnv.defaultScreenDevice.defaultConfiguration.bounds
+			val winSize = gEnv.maximumWindowBounds
+			val popupSize = c.preferredSize
+			val x: Int
+			val y: Int
 
-        return Point(x, y)
-    }
+			if (winSize.x > 5) { // taskbar left
+				x = winSize.x + DISTANCE_TO_TASKBAR
+				y = if (p.y > (winSize.height / 2)) p.y - popupSize.height else p.y
+			} else if (winSize.y > 5) { // taskbar top
+				x = if (p.x > (winSize.width / 2)) p.x - popupSize.width else p.x
+				y = winSize.y + DISTANCE_TO_TASKBAR
+			} else if (scrnSize.width > winSize.width) { // taskbar right
+				x = winSize.width - popupSize.width - DISTANCE_TO_TASKBAR
+				y = if (p.y > (winSize.height / 2)) p.y - popupSize.height else p.y
+			} else { // taskbar bottom
+				x = if (p.x > (winSize.width / 2)) p.x - popupSize.width else p.x
+				y = winSize.height - popupSize.height - DISTANCE_TO_TASKBAR
+			}
 
-    private fun setupUI(c: Container) {
-        isAlwaysOnTop = true
-        isUndecorated = true
-        contentPane = c
-        pack()
+			return Point(x, y)
+		}
 
-		point?.let {
-            location = calculatePosition(c, point)
-        }
+		private fun setupUI(c: Container) {
+			isAlwaysOnTop = true
+			isUndecorated = true
+			contentPane = c
+			pack()
 
-        addWindowFocusListener(object : WindowAdapter() {
-            override fun windowLostFocus(e: WindowEvent) {
-                //dispose()
-            }
-        })
+			point?.let {
+				location = calculatePosition(c, point)
+			}
 
-        isVisible = true
-    }
+			addWindowFocusListener(
+				object : WindowAdapter() {
+					override fun windowLostFocus(e: WindowEvent) {
+						// dispose()
+					}
+				},
+			)
 
-    companion object {
-        private const val serialVersionUID = 1L
+			isVisible = true
+		}
 
-        private const val DISTANCE_TO_TASKBAR = 2 // in px
-    }
-}
+		companion object {
+			private const val DISTANCE_TO_TASKBAR = 2 // in px
+		}
+	}

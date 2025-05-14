@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,32 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.binding.tctoken.ex
 
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+import org.openecard.addon.bind.BindingResult
+import org.openecard.common.I18nKey
 
 /**
- * Frame class with the necessary interface for status element updates.
+ * Specialization of an ActivationError which does not permit the user to continue after returning to the Browser.
  *
  * @author Tobias Wich
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
+abstract class FatalActivationError : ActivationError {
+	constructor(result: BindingResult, message: String) : super(result, message)
 
-	override fun updateContent(status: Container) {
-		pack()
-	}
+	constructor(result: BindingResult, message: String, cause: Throwable?) : super(
+		result,
+		message,
+		cause,
+	)
 
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
+	constructor(result: BindingResult, key: I18nKey, vararg params: Any?) : super(result, key, *params)
 
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
-	}
+	constructor(result: BindingResult, key: I18nKey, cause: Throwable?, vararg params: Any?) : super(
+		result,
+		key,
+		cause,
+		*params,
+	)
 }

@@ -18,43 +18,15 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+ */
+package org.openecard.binding.tctoken.ex
 
 /**
- * Frame class with the necessary interface for status element updates.
  *
- * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
+class UserCancellationException : RedirectionBaseError {
+	constructor(errorUrl: String?, msg: String) : super(errorUrl, msg)
 
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
-	}
+	constructor(errorUrl: String?, cause: Throwable) : super(errorUrl, cause)
 }

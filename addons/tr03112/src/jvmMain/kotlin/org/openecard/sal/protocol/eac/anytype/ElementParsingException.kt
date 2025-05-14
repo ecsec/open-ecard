@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2014 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,30 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.sal.protocol.eac.anytype
 
-package org.openecard.richclient.gui
+import org.openecard.common.I18n
+import org.openecard.common.I18nException
+import org.openecard.common.I18nKey
 
-import java.awt.Container
-import javax.swing.JFrame
+private val lang: I18n = I18n.getTranslation("tr03112")
 
 /**
- * Frame class with the necessary interface for status element updates.
  *
- * @author Tobias Wich
+ * @author Hans-Martin Haase
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
+class ElementParsingException : I18nException {
+	constructor(
+		message: String,
+	) : super(message)
 
-	override fun updateContent(status: Container) {
-		pack()
-	}
+	constructor(
+		message: String,
+		cause: Throwable?,
+	) : super(message, cause)
 
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
+	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
 
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
-	}
+	constructor(key: I18nKey, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
 }

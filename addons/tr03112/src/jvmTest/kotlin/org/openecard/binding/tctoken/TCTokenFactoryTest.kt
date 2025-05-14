@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2012-2013 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,23 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.binding.tctoken
 
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+import org.openecard.binding.tctoken.ex.InvalidAddressException
+import org.openecard.common.util.FileUtils.resolveResourceAsURL
+import org.testng.annotations.Test
 
 /**
- * Frame class with the necessary interface for status element updates.
  *
- * @author Tobias Wich
+ * @author Moritz Horsch
+ * @author Johannes Schmölz
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
-
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
+class TCTokenFactoryTest {
+	@Test(expectedExceptions = [InvalidAddressException::class])
+	fun testGenerateTCToken_TCTokenType() {
+		val tcTokenURL = resolveResourceAsURL(TCTokenFactoryTest::class.java, "TCToken.xml")
+		// should fail, since a non-https-URL is used
+		TCTokenContext.generateTCToken(tcTokenURL!!)
 	}
 }

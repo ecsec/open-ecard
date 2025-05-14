@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 ecsec GmbH.
+ * Copyright (C) 2012 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -18,43 +18,27 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
+ */
+package org.openecard.sal.protocol.eac.apdu
 
-package org.openecard.richclient.gui
-
-import java.awt.Container
-import javax.swing.JFrame
+import org.openecard.common.apdu.PerformSecurityOperation
 
 /**
- * Frame class with the necessary interface for status element updates.
+ * Implements a PSO:VerifyCertificate APDU for Terminal Authentication.
+ * See BSI-TR-03110, version 2.10, part 3, section B.11.5.
  *
- * @author Tobias Wich
+ * @author Moritz Horsch
  */
-class InfoFrame(
-	title: String?,
-) : JFrame(title),
-	StatusContainer {
-	private var isShown = false
-
-	override fun updateContent(status: Container) {
-		pack()
-	}
-
-	override fun setVisible(b: Boolean) {
-		if (isShown) {
-			state =
-				if (b) {
-					NORMAL
-				} else {
-					ICONIFIED
-				}
-		} else {
-			super.setVisible(b)
-
-			// set after first setVisable(true) call
-			if (b) {
-				isShown = true
-			}
-		}
+class PSOVerifyCertificate(
+	certificate: ByteArray,
+) : PerformSecurityOperation() {
+	/**
+	 * Creates a new PSO:VerifyCertificate APDU.
+	 *
+	 * @param certificate Certificate
+	 */
+	init {
+		p2 = 0xBE.toByte()
+		data = certificate
 	}
 }

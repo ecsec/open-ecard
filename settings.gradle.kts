@@ -46,12 +46,12 @@ include("addons:status")
 include("addons:tr03112")
 include("addons:cardlink")
 include("clients:richclient")
-include("clients:mobile-lib")
-include("clients:ios-common")
-include("clients:ios-lib")
-include("clients:android-common")
-include("clients:android-lib")
-include("clients:desktop-lib")
+// include("clients:mobile-lib")
+// include("clients:ios-common")
+// include("clients:ios-lib")
+// include("clients:android-common")
+// include("clients:android-lib")
+// include("clients:desktop-lib")
 
 dependencyResolutionManagement {
 

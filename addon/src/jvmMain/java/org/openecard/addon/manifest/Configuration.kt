@@ -43,5 +43,5 @@ class Configuration {
 		XmlElement(name = "ScalarListEntry", type = ScalarListEntry::class),
 	)
 	@XmlElementWrapper(name = "Entries")
-	val entries: MutableList<ConfigurationEntry?> = ArrayList<ConfigurationEntry?>()
+	val entries: MutableList<ConfigurationEntry> = ArrayList()
 }

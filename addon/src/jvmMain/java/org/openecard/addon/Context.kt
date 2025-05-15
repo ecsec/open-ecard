@@ -43,7 +43,7 @@ class Context(
 	 *
 	 * @return The [AddonManager] of this context.
 	 */
-	@JvmField val manager: AddonManager?,
+	@JvmField val manager: AddonManager,
 	private val env: Environment,
 	spec: AddonSpecification,
 	/**
@@ -51,8 +51,8 @@ class Context(
 	 *
 	 * @return The [ViewController] of this Context.
 	 */
-	@JvmField val viewController: ViewController?,
-	@JvmField val salStateView: SalStateView?,
+	@JvmField val viewController: ViewController,
+	@JvmField val salStateView: SalStateView,
 ) {
 	/**
 	 * Get the AddonProperties of this Context.
@@ -66,7 +66,7 @@ class Context(
 	 *
 	 * @return The ID of the Context object.
 	 */
-	val id: String? = spec.getId()
+	val id: String = spec.getId()
 
 	/**
 	 * Get the UserConsent of this Context.
@@ -114,22 +114,22 @@ class Context(
 		this.eventHandler = eventHandler
 	}
 
-	val dispatcher: Dispatcher?
+	val dispatcher: Dispatcher
 		/**
 		 * Get the Dispatcher of this Context.
 		 *
 		 * @return The [Dispatcher] of this Context.
 		 */
-		get() = env.dispatcher
+		get() = env.dispatcher!!
 
-	val ifdCtx: MutableList<ByteArray?>
+	val ifdCtx: MutableList<ByteArray>
 		get() = env.ifdCtx.toMutableList()
 
-	val eventDispatcher: EventDispatcher?
+	val eventDispatcher: EventDispatcher
 		/**
 		 * Get the EventManager of this Context.
 		 *
 		 * @return The [org.openecard.common.event.EventDispatcherImpl] of this Context.
 		 */
-		get() = env.eventDispatcher
+		get() = env.eventDispatcher!!
 }

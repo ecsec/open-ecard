@@ -159,7 +159,7 @@ class ChipGateway(
 	init {
 		try {
 			tlsHandler = handler
-			gui = addonCtx.userConsent
+			gui = addonCtx.userConsent!!
 			dispatcher = addonCtx.dispatcher
 			sessionId = token.sessionIdentifier
 

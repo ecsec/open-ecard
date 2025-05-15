@@ -114,7 +114,7 @@ class TCTokenHandler(
 	private val puk: String = LANG_PACE.translationForKey("puk")
 	private val evtDispatcher: EventDispatcher = ctx.eventDispatcher
 	private val dispatcher: Dispatcher = ctx.dispatcher
-	private val gui: UserConsent = ctx.userConsent
+	private val gui: UserConsent = ctx.userConsent!!
 	private val manager: AddonManager = ctx.manager
 	private val schemaValidator: Promise<DocumentSchemaValidator> =
 		FuturePromise<DocumentSchemaValidator>(
@@ -430,10 +430,11 @@ class TCTokenHandler(
 
 	private val supportedDIDs: List<String>
 		get() {
-			return manager.registry
+			return manager
+				.getRegistry()
 				.listAddons()
 				.flatMap { addon ->
-					addon.salActions.map { it.uri }
+					addon.salActions.map { it.uri!! }
 				}
 		}
 

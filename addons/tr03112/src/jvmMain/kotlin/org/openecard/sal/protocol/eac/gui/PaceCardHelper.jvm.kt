@@ -77,7 +77,7 @@ class PaceCardHelper(
 		pinType: String,
 		cardType: String,
 	): PACEMarkerType {
-		val cif = ctx.recognition.getCardInfo(cardType)
+		val cif = ctx.recognition?.getCardInfo(cardType)
 		if (cif != null) {
 			for (app in cif.applicationCapabilities.cardApplication) {
 				for (did in app.didInfo) {

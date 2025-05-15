@@ -55,7 +55,8 @@ class TerminalAuthenticationStep(
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	private val dispatcher: Dispatcher = ctx.dispatcher
 
-	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDAuthenticate
 
 	override fun perform(
 		didAuthenticate: DIDAuthenticate,

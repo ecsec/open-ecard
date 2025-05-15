@@ -40,11 +40,12 @@ import org.openecard.common.interfaces.Dispatcher
 class DIDUpdateStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<DIDUpdate, DIDUpdateResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.DIDUpdate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDUpdate
 
 	override fun perform(
 		request: DIDUpdate,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): DIDUpdateResponse =
 		WSHelper.makeResponse(
 			DIDUpdateResponse::class.java,

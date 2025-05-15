@@ -2308,7 +2308,7 @@ public class TinySAL implements SAL {
      */
     private void removeFinishedProtocol(ConnectionHandleType handle, String protocolURI, SALProtocol protocol)
 	    throws UnknownConnectionHandleException, IncorrectParameterException, NoSuchSession {
-	if (protocol.isFinished) {
+	if (protocol.isFinished()) {
 	    LOG.debug("SAL Protocol is finished, destroying protocol instance.");
 	    try {
 		StateEntry stateEntry = SALUtils.getStateBySession(handle, salStates);
@@ -2333,7 +2333,7 @@ public class TinySAL implements SAL {
 		throw new UnknownProtocolException("The protocol URI '" + protocolURI + "' is not available.");
 	    }
 	}
-	protocol.internalData.put("cardState", stateEntry);
+	protocol.getInternalData().put("cardState", stateEntry);
 
 	return protocol;
     }

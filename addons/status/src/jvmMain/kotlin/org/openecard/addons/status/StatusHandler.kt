@@ -33,7 +33,6 @@ import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.schema.Status
 import org.openecard.ws.schema.StatusType
 import java.math.BigInteger
-import javax.annotation.Nonnull
 
 /**
  * Handles the status request.
@@ -44,16 +43,17 @@ import javax.annotation.Nonnull
 class StatusHandler(
 	ctx: Context,
 ) {
-	private val eventHandler: EventHandler = ctx.eventHandler
+	private val eventHandler: EventHandler = ctx.eventHandler!!
 	private val rec = ctx.recognition
 	private val salStateView = ctx.salStateView
 
 	private val protocols =
-		ctx.manager.registry
+		ctx.manager
+			.getRegistry()
 			.listAddons()
 			.flatMap {
 				it.salActions.map { proto ->
-					proto.uri
+					proto.uri!!
 				}
 			}
 
@@ -87,7 +87,7 @@ class StatusHandler(
 			},
 		)
 		// supported cards
-		val cifs: MutableList<CardInfoType> = rec.cardInfos.toMutableList()
+		val cifs: MutableList<CardInfoType> = rec?.cardInfos!!.toMutableList()
 		status.supportedCards.addAll(
 			getSupportedCards(protocols, cifs),
 		)
@@ -125,7 +125,6 @@ class StatusHandler(
 		get() = this.salStateView.listCardHandles()
 
 	companion object {
-		@Nonnull
 		private fun getSupportedCards(
 			protocols: List<String>,
 			cifs: List<CardInfoType>,

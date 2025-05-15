@@ -37,6 +37,6 @@ interface ProtocolStep<Request : RequestType, Response : ResponseType> {
 
 	fun perform(
 		req: Request,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): Response?
 }

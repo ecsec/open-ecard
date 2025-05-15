@@ -30,10 +30,14 @@ import org.openecard.addon.manifest.AppExtensionSpecification
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
-import java.awt.event.ActionListener
-import javax.swing.*
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.SwingWorker
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  * Entry for the [ActionPanel] representing one action.
@@ -42,68 +46,71 @@ private val LOG = KotlinLogging.logger {  }
  * @author Tobias Wich
  */
 class ActionEntryPanel(
-    addonSpec: AddonSpecification,
+	addonSpec: AddonSpecification,
 	actionSpec: AppExtensionSpecification,
-    manager: AddonManager
+	manager: AddonManager,
 ) : JPanel() {
-    protected val actionBtn: JButton
-    protected val manager: AddonManager
+	protected val actionBtn: JButton
+	protected val manager: AddonManager
 
-    /**
-     * Creates an entry without the actual action added.
-     *
-     * @param addonSpec Id of the addon this action belongs to.
-     * @param actionSpec ActionDescription for which this ActionEntryPanel is constructed.
-     * @param manager
-     */
-    init {
-        setLayout(BoxLayout(this, BoxLayout.X_AXIS))
+	/**
+	 * Creates an entry without the actual action added.
+	 *
+	 * @param addonSpec Id of the addon this action belongs to.
+	 * @param actionSpec ActionDescription for which this ActionEntryPanel is constructed.
+	 * @param manager
+	 */
+	init {
+		setLayout(BoxLayout(this, BoxLayout.X_AXIS))
 
-        val name: String = actionSpec.getLocalizedName(LANGUAGE_CODE)
-        val description: String = actionSpec.getLocalizedDescription(LANGUAGE_CODE)
+		val name: String = actionSpec.getLocalizedName(LANGUAGE_CODE)
+		val description: String = actionSpec.getLocalizedDescription(LANGUAGE_CODE)
 
-        actionBtn = JButton(name)
-        add(actionBtn)
+		actionBtn = JButton(name)
+		add(actionBtn)
 
-        val rigidArea: Component = Box.createRigidArea(Dimension(15, 0))
-        add(rigidArea)
+		val rigidArea: Component = Box.createRigidArea(Dimension(15, 0))
+		add(rigidArea)
 
-        val desc: JLabel = JLabel(description)
-        desc.setFont(desc.getFont().deriveFont(Font.PLAIN))
-        add(desc)
+		val desc = JLabel(description)
+		desc.setFont(desc.getFont().deriveFont(Font.PLAIN))
+		add(desc)
 
-        this.manager = manager
-        addAction(addonSpec, actionSpec)
-    }
+		this.manager = manager
+		addAction(addonSpec, actionSpec)
+	}
 
-    /**
-     * Adds an action to the entry.
-     *
-     * @param actionSpec Action to perform when the button is pressed.
-     */
-    private fun addAction(addonSpec: AddonSpecification, actionSpec: AppExtensionSpecification) {
-        actionBtn.addActionListener(ActionListener {
-            object : SwingWorker<Unit, Void?>() {
-                override fun doInBackground(): Unit {
-                    val action: AppExtensionAction = manager.getAppExtensionAction(addonSpec, actionSpec.id)
-                    actionBtn.setEnabled(false)
-                    try {
-                        action.execute()
-                    } catch (t: Throwable) {
-                        // this catch is here just in case anything uncaught is thrown during execute
+	/**
+	 * Adds an action to the entry.
+	 *
+	 * @param actionSpec Action to perform when the button is pressed.
+	 */
+	private fun addAction(
+		addonSpec: AddonSpecification,
+		actionSpec: AppExtensionSpecification,
+	) {
+		actionBtn.addActionListener {
+			object : SwingWorker<Unit, Void?>() {
+				override fun doInBackground() {
+					val action: AppExtensionAction = manager.getAppExtensionAction(addonSpec, actionSpec.id!!)!!
+					actionBtn.setEnabled(false)
+					try {
+						action.execute()
+					} catch (t: Throwable) {
+						// this catch is here just in case anything uncaught is thrown during execute
 						LOG.error(t) { "Execution ended with an error." }
-                        throw t
-                    } finally {
-                        manager.returnAppExtensionAction(action)
-                        actionBtn.setEnabled(true)
-                    }
-                }
-            }.execute()
-        })
-    }
+						throw t
+					} finally {
+						manager.returnAppExtensionAction(action)
+						actionBtn.setEnabled(true)
+					}
+				}
+			}.execute()
+		}
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-        private val LANGUAGE_CODE: String = System.getProperty("user.language")
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+		private val LANGUAGE_CODE: String = System.getProperty("user.language")
+	}
 }

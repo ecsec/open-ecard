@@ -39,12 +39,13 @@ import org.openecard.common.interfaces.Dispatcher
 class VerifyCertificateStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<VerifyCertificate, VerifyCertificateResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.VerifyCertificate
+	override val functionType: FunctionType
+		get() = FunctionType.VerifyCertificate
 
 	// TODO Implement me
 	override fun perform(
 		request: VerifyCertificate,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): VerifyCertificateResponse =
 		WSHelper.makeResponse<Class<VerifyCertificateResponse>, VerifyCertificateResponse>(
 			iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse::class.java,

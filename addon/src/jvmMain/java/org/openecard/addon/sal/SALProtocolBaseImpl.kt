@@ -49,7 +49,6 @@ import iso.std.iso_iec._24727.tech.schema.VerifyCertificate
 import iso.std.iso_iec._24727.tech.schema.VerifyCertificateResponse
 import iso.std.iso_iec._24727.tech.schema.VerifySignature
 import iso.std.iso_iec._24727.tech.schema.VerifySignatureResponse
-import org.openecard.bouncycastle.asn1.x500.style.RFC4519Style.c
 import org.openecard.common.ECardConstants
 import org.openecard.common.WSHelper.makeResponse
 import org.openecard.common.WSHelper.makeResultError
@@ -64,24 +63,10 @@ import kotlin.jvm.java
  * @author Tobias Wich
  */
 abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
-	/** Object map to transport protocol specific parameters. Used when executing ProtocolStep.  */
-	final override val internalData: MutableMap<String, Any>
-		get() {
-			return internalData
-		}
-// 		get() = internalData
+	override val isFinished: Boolean
+		get() = !hasNextStep()
 
-// 	fun getInternalData(): MutableMap<String, Any> = internalData
-
-	override var isFinished: Boolean
-		get() {
-			return isFinished
-		}
-		set(value) {
-			value != hasNextStep()
-		}
-
-// 	fun isFinished(): Boolean = !hasNextStep()
+	override val internalData: MutableMap<String, Any> = mutableMapOf()
 
 	/** List of ProtocolSteps, which are per default executed in order.  */
 	protected val steps: ArrayList<ProtocolStep<*, *>?> = ArrayList<ProtocolStep<*, *>?>()
@@ -244,7 +229,7 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 		responseClass: Class<out ResponseType>,
 		step: ProtocolStep<Req, *>?,
 		request: Req,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): ResponseType? {
 		// return not implemented result first
 		if (step == null) {

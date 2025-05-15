@@ -57,16 +57,16 @@ private val LOG = KotlinLogging.logger { }
 
 class AddonManager(
 	env: Environment,
-	view: ViewController?,
+	view: ViewController,
 	registry: CombiningRegistry?,
-	salStateView: SalStateView?,
+	salStateView: SalStateView,
 ) {
 	private val registry: CombiningRegistry?
 	private val protectedRegistry: AddonRegistry
 	private val env: Environment
 	private val eventHandler: EventHandler
-	private val viewController: ViewController?
-	private val salStateView: SalStateView?
+	private val viewController: ViewController
+	private val salStateView: SalStateView
 
 	// TODO: rework cache to have borrow and return semantic
 	private val cache = Cache()
@@ -101,7 +101,7 @@ class AddonManager(
 		).start()
 	}
 
-	constructor(env: Environment, view: ViewController?, salStateView: SalStateView?) : this(
+	constructor(env: Environment, view: ViewController, salStateView: SalStateView) : this(
 		env,
 		view,
 		null,

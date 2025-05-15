@@ -26,6 +26,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticate
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticateResponse
+import kotlinx.serialization.encodeToString
 import org.openecard.addon.Context
 import org.openecard.addon.sal.FunctionType
 import org.openecard.addon.sal.ProtocolStep
@@ -59,7 +60,8 @@ class CardLinkStep(
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	val gui = aCtx.userConsent
 
-	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDAuthenticate
 
 	override fun perform(
 		req: DIDAuthenticate,
@@ -70,7 +72,7 @@ class CardLinkStep(
 		val isPhoneRegistered = dynCtx.get(CardLinkKeys.PHONE_NUMBER_REGISTERED) as Boolean? ?: false
 		val uc = CardLinkUserConsent(ws, aCtx, isPhoneRegistered, req.connectionHandle)
 
-		val navigator: UserConsentNavigator = gui.obtainNavigator(uc)
+		val navigator: UserConsentNavigator = gui!!.obtainNavigator(uc)
 		val exec = ExecutionEngine(navigator)
 		try {
 			val guiResult = exec.process()

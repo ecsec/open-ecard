@@ -101,14 +101,15 @@ class PACEStep(
 	private val addonCtx: Context,
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	private val dispatcher: Dispatcher = addonCtx.dispatcher
-	private val gui: UserConsent = addonCtx.userConsent
+	private val gui: UserConsent = addonCtx.userConsent!!
 	private val eventDispatcher: EventDispatcher = addonCtx.eventDispatcher
 
-	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDAuthenticate
 
 	override fun perform(
 		request: DIDAuthenticate,
-		internalData: MutableMap<String, Any?>,
+		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
 		// get context to save values in
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
@@ -339,7 +340,7 @@ class PACEStep(
 			internalData.put(EACConstants.IDATA_AUTHENTICATED_AUXILIARY_DATA, aad)
 			internalData.put(EACConstants.IDATA_CERTIFICATES, certChain)
 			internalData.put(EACConstants.IDATA_CURRENT_CAR, currentCAR)
-			internalData.put(EACConstants.IDATA_PREVIOUS_CAR, previousCAR)
+			internalData.put(EACConstants.IDATA_PREVIOUS_CAR, previousCAR!!)
 			internalData.put(EACConstants.IDATA_CHALLENGE, challenge)
 
 			// Create response

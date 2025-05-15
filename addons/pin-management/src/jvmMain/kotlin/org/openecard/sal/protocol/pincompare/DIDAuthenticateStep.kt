@@ -64,11 +64,12 @@ private val logger = KotlinLogging.logger { }
 class DIDAuthenticateStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDAuthenticate
 
 	override fun perform(
 		request: DIDAuthenticate,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
 			WSHelper.makeResponse(

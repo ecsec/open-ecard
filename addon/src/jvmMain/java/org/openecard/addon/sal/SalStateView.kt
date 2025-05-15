@@ -16,7 +16,7 @@ import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
  * @author Neil Crossley
  */
 interface SalStateView {
-	fun listCardHandles(): MutableList<ConnectionHandleType?>?
+	fun listCardHandles(): MutableList<ConnectionHandleType>
 
 	fun hasConnectedCard(handle: ConnectionHandleType?): Boolean
 

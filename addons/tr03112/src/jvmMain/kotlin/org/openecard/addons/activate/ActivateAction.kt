@@ -90,10 +90,10 @@ class ActivateAction : AppPluginAction {
 		manager = aCtx.manager
 		settingsAndDefaultView = aCtx.viewController
 		try {
-			val addonSpecStatus = manager!!.registry.search("Status")
-			statusAction = manager!!.getAppPluginAction(addonSpecStatus, "getStatus")
-			val addonSpecPinMngmt = manager!!.registry.search("PIN-Plugin")
-			pinManAction = manager!!.getAppExtensionAction(addonSpecPinMngmt, "GetCardsAndPINStatusAction")
+			val addonSpecStatus = manager!!.getRegistry().search("Status")
+			statusAction = manager!!.getAppPluginAction(addonSpecStatus!!, "getStatus")
+			val addonSpecPinMngmt = manager!!.getRegistry().search("PIN-Plugin")
+			pinManAction = manager!!.getAppExtensionAction(addonSpecPinMngmt!!, "GetCardsAndPINStatusAction")
 		} catch (ex: AddonNotFoundException) {
 			// this should never happen because the status and pin plugin are always available
 			val msg = "Failed to get Status or PIN Plugin."
@@ -104,8 +104,8 @@ class ActivateAction : AppPluginAction {
 
 	override fun destroy(force: Boolean) {
 		tokenHandler = null
-		manager!!.returnAppPluginAction(statusAction)
-		manager!!.returnAppExtensionAction(pinManAction)
+		manager?.returnAppPluginAction(statusAction!!)
+		manager?.returnAppExtensionAction(pinManAction!!)
 	}
 
 	override fun execute(

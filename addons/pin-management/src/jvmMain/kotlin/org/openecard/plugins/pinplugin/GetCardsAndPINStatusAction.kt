@@ -248,8 +248,8 @@ class GetCardsAndPINStatusAction : AbstractPINAction() {
 	@Throws(ActionInitializationException::class)
 	override fun init(aCtx: Context) {
 		dispatcher = aCtx.dispatcher
-		this.gui = aCtx.userConsent
-		this.recognition = aCtx.recognition
+		this.gui = aCtx.userConsent!!
+		this.recognition = aCtx.recognition!!
 		this.evDispatcher = aCtx.eventDispatcher
 		this.salStateView = aCtx.salStateView
 	}

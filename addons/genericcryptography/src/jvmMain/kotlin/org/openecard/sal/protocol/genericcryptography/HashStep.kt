@@ -54,11 +54,12 @@ private val logger = KotlinLogging.logger { }
 class HashStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<Hash, HashResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.Hash
+	override val functionType: FunctionType
+		get() = FunctionType.Hash
 
 	override fun perform(
-		request: Hash?,
-		internalData: Map<String, Any>,
+		request: Hash,
+		internalData: MutableMap<String, Any>,
 	): HashResponse {
 		val response: HashResponse =
 			WSHelper.makeResponse<Class<HashResponse>, HashResponse>(

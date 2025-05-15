@@ -265,8 +265,8 @@ public class TinySAL implements SAL {
     public Set<String> supportedProtocols() {
 	TreeSet<String> protos = new TreeSet<>();
 	for (AddonSpecification aSpec : addonManager.getRegistry().listAddons()) {
-	    for (ProtocolPluginSpecification pSpec : aSpec.getSalActions()) {
-		protos.add(pSpec.getUri());
+	    for (ProtocolPluginSpecification pSpec : aSpec.salActions) {
+		protos.add(pSpec.uri);
 	    }
 	}
 	return protos;

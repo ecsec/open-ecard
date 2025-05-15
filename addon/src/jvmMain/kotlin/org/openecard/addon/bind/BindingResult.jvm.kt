@@ -84,7 +84,7 @@ open class BindingResult(
 		w.write(resultCode.name)
 		w.write(", ")
 		w.write(if (resultMessage == null) "" else "'")
-		w.write(resultMessage)
+		w.write(resultMessage!!)
 		w.write(if (resultMessage == null) "" else "'")
 		w.write(">\n")
 		// Parameter

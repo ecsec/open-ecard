@@ -53,11 +53,12 @@ class ChipAuthenticationStep(
 ) : ProtocolStep<DIDAuthenticate, DIDAuthenticateResponse> {
 	private val dispatcher: Dispatcher = ctx.dispatcher
 
-	override fun getFunctionType(): FunctionType = FunctionType.DIDAuthenticate
+	override val functionType: FunctionType
+		get() = FunctionType.DIDAuthenticate
 
 	override fun perform(
-		didAuthenticate: DIDAuthenticate,
-		internalData: MutableMap<String, Any?>,
+		req: DIDAuthenticate,
+		internalData: MutableMap<String, Any>,
 	): DIDAuthenticateResponse {
 		val response: DIDAuthenticateResponse =
 			WSHelper.makeResponse(
@@ -67,11 +68,11 @@ class ChipAuthenticationStep(
 			)
 
 		// EACProtocol.setEmptyResponseData(response);
-		val slotHandle = didAuthenticate.getConnectionHandle().getSlotHandle()
+		val slotHandle = req.getConnectionHandle().getSlotHandle()
 		val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
 
 		try {
-			val eacAdditionalInput = EACAdditionalInputType(didAuthenticate.getAuthenticationProtocolData())
+			val eacAdditionalInput = EACAdditionalInputType(req.getAuthenticationProtocolData())
 			var eac2Output = eacAdditionalInput.outputType
 
 			val ta = TerminalAuthentication(dispatcher, slotHandle)
@@ -79,7 +80,11 @@ class ChipAuthenticationStep(
 
 			// save signature, it is needed in the authentication step
 			val signature = eacAdditionalInput.signature
-			internalData.put(EACConstants.IDATA_SIGNATURE, signature)
+			if (signature != null) {
+				internalData.put(EACConstants.IDATA_SIGNATURE, signature)
+			} else {
+				internalData.remove(EACConstants.IDATA_SIGNATURE)
+			}
 
 			// perform TA and CA authentication
 			val auth = AuthenticationHelper(ta, ca)

@@ -88,11 +88,12 @@ private val LOG = KotlinLogging.logger { }
 class SignStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<Sign, SignResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.Sign
+	override val functionType: FunctionType
+		get() = FunctionType.Sign
 
 	override fun perform(
-		sign: Sign?,
-		internalData: Map<String, Any>,
+		sign: Sign,
+		internalData: MutableMap<String, Any>,
 	): SignResponse {
 		var response: SignResponse =
 			WSHelper.makeResponse<Class<SignResponse>, SignResponse>(

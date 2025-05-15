@@ -100,8 +100,8 @@ class ChangePinInSALAction : AbstractPINAction() {
 	@Throws(ActionInitializationException::class)
 	override fun init(aCtx: Context) {
 		dispatcher = aCtx.dispatcher
-		gui = aCtx.userConsent
-		recognition = aCtx.recognition
+		gui = aCtx.userConsent!!
+		recognition = aCtx.recognition!!
 		evDispatcher = aCtx.eventDispatcher
 		salStateView = aCtx.salStateView
 	}

@@ -54,11 +54,12 @@ private val logger = KotlinLogging.logger { }
 class DecipherStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<Decipher, DecipherResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.Decipher
+	override val functionType: FunctionType
+		get() = FunctionType.Decipher
 
 	override fun perform(
 		request: Decipher,
-		internalData: Map<String, Any>,
+		internalData: MutableMap<String, Any>,
 	): DecipherResponse? {
 		val response: DecipherResponse =
 			WSHelper.makeResponse<Class<DecipherResponse>, DecipherResponse>(

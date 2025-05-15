@@ -39,12 +39,13 @@ import org.openecard.common.interfaces.Dispatcher
 class GetRandomStep(
 	private val dispatcher: Dispatcher,
 ) : ProtocolStep<GetRandom, GetRandomResponse> {
-	override fun getFunctionType(): FunctionType = FunctionType.GetRandom
+	override val functionType: FunctionType
+		get() = FunctionType.GetRandom
 
 	// TODO Implement me
 	override fun perform(
-		request: GetRandom?,
-		internalData: Map<String, Any>?,
+		request: GetRandom,
+		internalData: MutableMap<String, Any>,
 	): GetRandomResponse =
 		WSHelper.makeResponse<Class<GetRandomResponse>, GetRandomResponse>(
 			iso.std.iso_iec._24727.tech.schema.GetRandomResponse::class.java,

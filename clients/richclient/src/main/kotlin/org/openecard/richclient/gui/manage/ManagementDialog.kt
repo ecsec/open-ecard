@@ -115,13 +115,13 @@ class ManagementDialog(
 		addonPanel = JPanel(BorderLayout(), true)
 		contentPane.add(addonPanel, BorderLayout.CENTER)
 
-		val selectionWrapper: JPanel = JPanel(BorderLayout())
+		val selectionWrapper = JPanel(BorderLayout())
 		contentPane.add(selectionWrapper, BorderLayout.WEST)
 		selectionPanel = JPanel()
 		selectionWrapper.add(selectionPanel, BorderLayout.NORTH)
 		selectionWrapper.add(Box.createHorizontalGlue(), BorderLayout.CENTER)
 
-		val selectionLayout: GridBagLayout = GridBagLayout()
+		val selectionLayout = GridBagLayout()
 		selectionLayout.rowHeights = intArrayOf(0, 0, 0, 0)
 		selectionLayout.columnWeights = doubleArrayOf(1.0)
 		selectionLayout.rowWeights = doubleArrayOf(0.0, 0.0, 0.0, 1.0)
@@ -165,7 +165,7 @@ class ManagementDialog(
 	private fun createCoreList() {
 		val label = JLabel(lang.translationForKey("addon.list.core", AppVersion.name))
 		label.setFont(label.font.deriveFont(Font.BOLD))
-		val labelConstraints: GridBagConstraints = GridBagConstraints()
+		val labelConstraints = GridBagConstraints()
 		labelConstraints.insets = Insets(5, 0, 5, 10)
 		labelConstraints.anchor = GridBagConstraints.NORTH
 		labelConstraints.gridx = 0
@@ -175,14 +175,14 @@ class ManagementDialog(
 		coreList = JList()
 		coreList.setFont(coreList.font.deriveFont(Font.PLAIN))
 		coreList.selectionMode = ListSelectionModel.SINGLE_SELECTION
-		val coreListConstraints: GridBagConstraints = GridBagConstraints()
+		val coreListConstraints = GridBagConstraints()
 		coreListConstraints.fill = GridBagConstraints.HORIZONTAL
 		coreListConstraints.insets = Insets(0, 5, 5, 10)
 		coreListConstraints.anchor = GridBagConstraints.NORTH
 		coreListConstraints.gridx = 0
 		coreListConstraints.gridy = 2
 
-		val model: AddonSelectionModel = AddonSelectionModel(this, addonPanel)
+		val model = AddonSelectionModel(this, addonPanel)
 		coreList.setModel(model)
 		coreList.addListSelectionListener(model)
 		addWindowListener(model) // save current addon settings when closed
@@ -214,9 +214,9 @@ class ManagementDialog(
 	}
 
 	private fun createAddonList() {
-		val label: JLabel = JLabel(lang.translationForKey("addon.list.addon"))
+		val label = JLabel(lang.translationForKey("addon.list.addon"))
 		label.setFont(label.font.deriveFont(Font.BOLD))
-		val labelConstraints: GridBagConstraints = GridBagConstraints()
+		val labelConstraints = GridBagConstraints()
 		labelConstraints.insets = Insets(5, 0, 5, 10)
 		labelConstraints.anchor = GridBagConstraints.NORTH
 		labelConstraints.gridx = 0
@@ -228,14 +228,14 @@ class ManagementDialog(
 		addonList = JList()
 		addonList.setFont(addonList.font.deriveFont(Font.PLAIN))
 		addonList.selectionMode = ListSelectionModel.SINGLE_SELECTION
-		val addonListConstraints: GridBagConstraints = GridBagConstraints()
+		val addonListConstraints = GridBagConstraints()
 		addonListConstraints.fill = GridBagConstraints.HORIZONTAL
 		addonListConstraints.insets = Insets(0, 5, 5, 10)
 		addonListConstraints.anchor = GridBagConstraints.NORTH
 		addonListConstraints.gridx = 0
 		addonListConstraints.gridy = 4
 
-		val model: AddonSelectionModel = AddonSelectionModel(this, addonPanel)
+		val model = AddonSelectionModel(this, addonPanel)
 		addonList.setModel(model)
 		addonList.addListSelectionListener(model)
 		addWindowListener(model) // save current addon settings when closed
@@ -289,14 +289,14 @@ class ManagementDialog(
 	) {
 		val description: String = desc.getLocalizedDescription(LANGUAGE_CODE)
 		val name = desc.getLocalizedName(LANGUAGE_CODE)
-		var logo: Image? = null
+		var logo: Image?
 
 		if (coreAddon) {
-			logo = loadLogo(null, desc.logo)
+			logo = loadLogo(null, desc.getLogo())
 		} else {
 			try {
-				val loader: ClassLoader = manager.registry.downloadAddon(desc)
-				logo = loadLogo(loader, "META-INF/" + desc.logo)
+				val loader: ClassLoader = manager.getRegistry().downloadAddon(desc)!!
+				logo = loadLogo(loader, "META-INF/" + desc.getLogo())
 			} catch (ex: AddonException) {
 				LOG.error { "Failed to load logo from Add-on bundle." }
 				logo = null
@@ -315,14 +315,14 @@ class ManagementDialog(
 		// declaration
 		var settingsPanel: DefaultSettingsPanel? = null
 		val settingsGroups: ArrayList<DefaultSettingsGroup> = ArrayList()
-		val addonProps: AddonProperties = AddonProperties(desc)
+		val addonProps = AddonProperties(desc)
 		val settings: Settings = SettingsFactory.getInstance(addonProps)
-		if (desc.configDescription != null && desc.configDescription.entries.isNotEmpty()) {
-			val group: DefaultSettingsGroup =
+		if (desc.configDescription != null && desc.configDescription!!.entries.isNotEmpty()) {
+			val group =
 				DefaultSettingsGroup(
 					lang.translationForKey("addon.settings.general"),
 					settings,
-					desc.configDescription.entries,
+					desc.configDescription!!.entries,
 				)
 			settingsGroups.add(group)
 		}
@@ -331,16 +331,16 @@ class ManagementDialog(
 		// AppExtensionActions
 		if (desc.applicationActions.isNotEmpty()) {
 			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
-				if (appExtSpec.configDescription != null && appExtSpec.configDescription.entries.isNotEmpty()
+				if (appExtSpec.configDescription != null && appExtSpec.configDescription!!.entries.isNotEmpty()
 				) {
-					val group: DefaultSettingsGroup =
+					val group =
 						DefaultSettingsGroup(
 							(
 								appExtSpec.getLocalizedName(LANGUAGE_CODE) +
 									" " + lang.translationForKey("addon.settings.settings")
 							),
 							settings,
-							appExtSpec.configDescription.entries,
+							appExtSpec.configDescription!!.entries,
 						)
 					settingsGroups.add(group)
 				}
@@ -350,14 +350,14 @@ class ManagementDialog(
 		// Binding actions
 		if (desc.bindingActions.isNotEmpty()) {
 			for (appPluginSpec: AppPluginSpecification in desc.bindingActions) {
-				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription.entries.isNotEmpty()
+				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription!!.entries.isNotEmpty()
 				) {
-					val group: DefaultSettingsGroup =
+					val group =
 						DefaultSettingsGroup(
 							appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
 								" " + lang.translationForKey("addon.settings.settings"),
 							settings,
-							appPluginSpec.configDescription.entries,
+							appPluginSpec.configDescription!!.entries,
 						)
 					settingsGroups.add(group)
 				}
@@ -367,14 +367,14 @@ class ManagementDialog(
 		// IFD Actions
 		if (desc.ifdActions.isNotEmpty()) {
 			for (protPluginSpec: ProtocolPluginSpecification in desc.ifdActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription.entries.isNotEmpty()
+				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()
 				) {
-					val group: DefaultSettingsGroup =
+					val group =
 						DefaultSettingsGroup(
 							protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
 								" " + lang.translationForKey("addon.settings.settings"),
 							settings,
-							protPluginSpec.configDescription.entries,
+							protPluginSpec.configDescription!!.entries,
 						)
 					settingsGroups.add(group)
 				}
@@ -384,9 +384,9 @@ class ManagementDialog(
 		// SAL Actions
 		if (desc.salActions.isNotEmpty()) {
 			for (protPluginSpec: ProtocolPluginSpecification in desc.salActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription.entries.isNotEmpty()
+				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()
 				) {
-					val group: DefaultSettingsGroup =
+					val group =
 						DefaultSettingsGroup(
 							(
 								protPluginSpec.getLocalizedName(
@@ -395,7 +395,7 @@ class ManagementDialog(
 									" " + lang.translationForKey("addon.settings.settings")
 							),
 							settings,
-							protPluginSpec.configDescription.entries,
+							protPluginSpec.configDescription!!.entries,
 						)
 					settingsGroups.add(group)
 				}
@@ -411,7 +411,7 @@ class ManagementDialog(
 		if (desc.applicationActions.isNotEmpty()) {
 			actionPanel = ActionPanel()
 			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
-				val entry: ActionEntryPanel = ActionEntryPanel(desc, appExtSpec, manager)
+				val entry = ActionEntryPanel(desc, appExtSpec, manager)
 				actionPanel.addActionEntry(entry)
 			}
 		}
@@ -450,7 +450,7 @@ class ManagementDialog(
 			val rd = runningDialog
 			if (rd == null) {
 				LOG.debug { "Creating ManagementDialog." }
-				val dialog: ManagementDialog = ManagementDialog(manager)
+				val dialog = ManagementDialog(manager)
 				dialog.addWindowListener(
 					object : WindowListener {
 						override fun windowOpened(e: WindowEvent) {}

@@ -109,9 +109,9 @@ class HttpAppPluginActionHandler(
 			// and add some special values to the header section
 			headers.setHeader(METHOD_HDR, httpRequest.requestLine.method)
 
-			val bindingResult = action.execute(body, queries, headers, null, null)
+			val bindingResult = action?.execute(body, queries, headers, null, null)
 
-			val response = createHTTPResponseFromBindingResult(bindingResult)
+			val response = createHTTPResponseFromBindingResult(bindingResult!!)
 			response.params = httpRequest.params
 			logger.debug { "HTTP response: $response" }
 			Http11Response.copyHttpResponse(response, httpResponse)

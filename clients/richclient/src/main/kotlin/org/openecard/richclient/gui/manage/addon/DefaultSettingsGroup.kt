@@ -24,13 +24,20 @@ package org.openecard.richclient.gui.manage.addon
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonPropertiesException
-import org.openecard.addon.manifest.*
+import org.openecard.addon.manifest.ConfigurationEntry
+import org.openecard.addon.manifest.EnumEntry
+import org.openecard.addon.manifest.EnumListEntry
+import org.openecard.addon.manifest.FileEntry
+import org.openecard.addon.manifest.FileListEntry
+import org.openecard.addon.manifest.ScalarEntry
+import org.openecard.addon.manifest.ScalarEntryType
+import org.openecard.addon.manifest.ScalarListEntry
+import org.openecard.addon.manifest.ScalarListEntryType
 import org.openecard.richclient.gui.manage.Settings
 import org.openecard.richclient.gui.manage.SettingsGroup
 import java.io.IOException
-import kotlin.math.log
 
-private val logger = KotlinLogging.logger {  }
+private val logger = KotlinLogging.logger { }
 
 /**
  * SettingsGroup that can be used as default.
@@ -39,65 +46,75 @@ private val logger = KotlinLogging.logger {  }
  * @author Dirk Petrautzki
  * @author Hans-Martin Haase
  */
-class DefaultSettingsGroup(title: String?, settings: Settings, configEntries: List<ConfigurationEntry>) :
-    SettingsGroup(title, settings) {
-    init {
-        for (entry: ConfigurationEntry in configEntries) {
-            val name: String = entry.getLocalizedName(LANGUAGE_CODE)
-            val description: String = entry.getLocalizedDescription(LANGUAGE_CODE)
+class DefaultSettingsGroup(
+	title: String?,
+	settings: Settings,
+	configEntries: List<ConfigurationEntry>,
+) : SettingsGroup(title, settings) {
+	init {
+		for (entry: ConfigurationEntry in configEntries) {
+			val name: String = entry.getLocalizedName(LANGUAGE_CODE)
+			val description: String = entry.getLocalizedDescription(LANGUAGE_CODE)
 
-            // match entry types with class, else the type hierarchy is implicit in the if an that is a bad thing
-            if (ScalarEntry::class.java == entry.javaClass) {
-                val scalarEntry: ScalarEntry = entry as ScalarEntry
-                if (scalarEntry.type == ScalarEntryType.STRING.name) {
-                    addInputItem(name, description, entry.key)
-                } else if (scalarEntry.type == ScalarEntryType.BOOLEAN.name) {
-                    addBoolItem(name, description, entry.key)
-                } else if (scalarEntry.type == ScalarEntryType.BIGDECIMAL.name) {
-                    addScalarEntryTypNumber(name, description, scalarEntry.key, scalarEntry.type)
-                } else if (scalarEntry.type == ScalarEntryType.BIGINTEGER.name) {
-                    addScalarEntryTypNumber(name, description, scalarEntry.key, scalarEntry.type)
-                } else {
-					error { "Untreated ScalarEntry type: ${scalarEntry.type}" }
-                }
-            } else if (ScalarListEntry::class.java == entry.javaClass) {
-                addScalarListItem(
-                    name, description, entry.key,
-                    ScalarListEntryType.valueOf((entry as ScalarListEntry).type)
-                )
-            } else if (EnumEntry::class.java == entry.javaClass) {
-                val enumEntry: EnumEntry = entry as EnumEntry
-                val values = enumEntry.values
-                addSelectionItem(name, description, enumEntry.key, *values.toTypedArray())
-            } else if (EnumListEntry::class.java == entry.javaClass) {
-                val enumEntry: EnumListEntry = entry as EnumListEntry
-                val values = enumEntry.values
-                addMultiSelectionItem(name, description, entry.key, values)
-            } else if (FileEntry::class.java == entry.javaClass) {
-                val fEntry: FileEntry = entry as FileEntry
-                addFileEntry(name, description, entry.key, fEntry.fileType, fEntry.isRequiredBeforeAction)
-            } else if (FileListEntry::class.java == entry.javaClass) {
-                val fEntry: FileListEntry = entry as FileListEntry
-                addFileListEntry(
-                    name,
-                    description,
-                    entry.key,
-                    fEntry.fileType,
-                    fEntry.isRequiredBeforeAction
-                )
-            } else {
+			// match entry types with class, else the type hierarchy is implicit in the if an that is a bad thing
+			if (ScalarEntry::class.java == entry.javaClass) {
+				val scalarEntry: ScalarEntry = entry as ScalarEntry
+				when (scalarEntry.getType()) {
+					ScalarEntryType.STRING.name -> {
+						addInputItem(name, description, entry.key!!)
+					}
+					ScalarEntryType.BOOLEAN.name -> {
+						addBoolItem(name, description, entry.key!!)
+					}
+					ScalarEntryType.BIGDECIMAL.name -> {
+						addScalarEntryTypNumber(name, description, scalarEntry.key!!, scalarEntry.getType())
+					}
+					ScalarEntryType.BIGINTEGER.name -> {
+						addScalarEntryTypNumber(name, description, scalarEntry.key!!, scalarEntry.getType())
+					}
+					else -> {
+						error { "Untreated ScalarEntry type: ${scalarEntry.getType()}" }
+					}
+				}
+			} else if (ScalarListEntry::class.java == entry.javaClass) {
+				addScalarListItem(
+					name,
+					description,
+					entry.key!!,
+					ScalarListEntryType.valueOf((entry as ScalarListEntry).getType()),
+				)
+			} else if (EnumEntry::class.java == entry.javaClass) {
+				val enumEntry: EnumEntry = entry as EnumEntry
+				val values = enumEntry.values
+				addSelectionItem(name, description, enumEntry.key!!, *values.toTypedArray())
+			} else if (EnumListEntry::class.java == entry.javaClass) {
+				val enumEntry: EnumListEntry = entry as EnumListEntry
+				val values = enumEntry.values
+				addMultiSelectionItem(name, description, entry.key!!, values)
+			} else if (FileEntry::class.java == entry.javaClass) {
+				val fEntry: FileEntry = entry as FileEntry
+				addFileEntry(name, description, entry.key!!, fEntry.fileType!!, fEntry.isRequiredBeforeAction!!)
+			} else if (FileListEntry::class.java == entry.javaClass) {
+				val fEntry: FileListEntry = entry as FileListEntry
+				addFileListEntry(
+					name,
+					description,
+					entry.key!!,
+					fEntry.fileType!!,
+					fEntry.isRequiredBeforeAction!!,
+				)
+			} else {
 				logger.error { "Untreated entry type: ${entry.javaClass.getName()}" }
-            }
-        }
-    }
+			}
+		}
+	}
 
-    @Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
-    override fun saveProperties() {
-        super.saveProperties()
-    }
+	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
+	override fun saveProperties() {
+		super.saveProperties()
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-        private val LANGUAGE_CODE: String = System.getProperty("user.language")
-    }
+	companion object {
+		private val LANGUAGE_CODE: String = System.getProperty("user.language")
+	}
 }

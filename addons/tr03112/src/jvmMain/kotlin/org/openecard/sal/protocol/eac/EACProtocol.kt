@@ -76,30 +76,31 @@ class EACProtocol : SALProtocolBaseImpl() {
 		}
 	}
 
-	override fun isFinished(): Boolean {
-		LOG.debug("Checking if EAC protocol is finished.")
-		var finished = super.isFinished()
-		if (!finished) {
-			val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
-			val p: Promise<*> = ctx.getPromise(AUTHENTICATION_DONE)
-			if (p.isDelivered) {
-				LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
-				finished = true
-				try {
-					val failed = !(p.deref() as Boolean)
-					if (failed) {
-						LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.")
-					} else {
-						LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
+	override val isFinished: Boolean
+		get() {
+			LOG.debug("Checking if EAC protocol is finished.")
+			var finished = super.isFinished
+			if (!finished) {
+				val ctx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!
+				val p: Promise<*> = ctx.getPromise(AUTHENTICATION_DONE)
+				if (p.isDelivered) {
+					LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
+					finished = true
+					try {
+						val failed = !(p.deref() as Boolean)
+						if (failed) {
+							LOG.debug("EAC AUTHENTICATION_FAILED promise is delivered.")
+						} else {
+							LOG.debug("EAC AUTHENTICATION_DONE promise is delivered.")
+						}
+					} catch (ex: InterruptedException) {
+						// error would mean don't use the value, so this is ok to ignore
 					}
-				} catch (ex: InterruptedException) {
-					// error would mean don't use the value, so this is ok to ignore
 				}
 			}
+			LOG.debug("EAC authentication finished={}.", finished)
+			return finished
 		}
-		LOG.debug("EAC authentication finished={}.", finished)
-		return finished
-	}
 
 	companion object {
 		private val LOG: Logger = LoggerFactory.getLogger(EACProtocol::class.java)

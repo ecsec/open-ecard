@@ -37,9 +37,8 @@ import org.w3c.dom.DOMException
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.SAXException
+import sun.awt.FontConfiguration.loadProperties
 import java.awt.Desktop
-import java.awt.GridBagConstraints
-import java.awt.Insets
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -48,13 +47,9 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.Locale
 import java.util.Properties
 import javax.swing.JComboBox
-import javax.swing.JComponent
-import javax.swing.JEditorPane
 import javax.swing.event.HyperlinkEvent
-import javax.swing.event.HyperlinkListener
 import javax.xml.transform.TransformerException
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
@@ -146,21 +141,25 @@ class LogSettingsGroup :
 		)
 
 		// add support text
-		try {
-			val panel: JComponent = createSupportPanel()
 
-			val constraints: GridBagConstraints = GridBagConstraints()
-			constraints.insets = Insets(5, 10, 0, 5)
-			constraints.fill = GridBagConstraints.NONE
-			constraints.gridheight = GridBagConstraints.RELATIVE
-			constraints.gridwidth = GridBagConstraints.RELATIVE
-			constraints.gridx = 0
-			constraints.gridy = itemIdx++
-			constraints.anchor = GridBagConstraints.WEST
-			container.add(panel, constraints)
-		} catch (ex: IOException) {
-			// no support panel text available
-		}
+		// the file debug.html was missing in old i18n
+		// deactivate 4 now
+
+		// try {
+		// 	val panel: JComponent = createSupportPanel()
+
+		// 	val constraints: GridBagConstraints = GridBagConstraints()
+		// 	constraints.insets = Insets(5, 10, 0, 5)
+		// 	constraints.fill = GridBagConstraints.NONE
+		// 	constraints.gridheight = GridBagConstraints.RELATIVE
+		// 	constraints.gridwidth = GridBagConstraints.RELATIVE
+		// 	constraints.gridx = 0
+		// 	constraints.gridy = itemIdx++
+		// 	constraints.anchor = GridBagConstraints.WEST
+		// 	container.add(panel, constraints)
+		// } catch (ex: IOException) {
+		// 	/ / no support panel text available
+		// }
 	}
 
 	private fun addLogLevelBox(
@@ -258,21 +257,22 @@ class LogSettingsGroup :
 		}
 	}
 
+	/*
+	 * the file debug.html was missing in old i18n
+	 * deactivate 4 now
 	@Throws(IOException::class)
 	private fun createSupportPanel(): JComponent =
 		JEditorPane().apply {
 			isEditable = false
 			contentType = "text/html"
-			text =
-				org.openecard.i18n.helper
-					.getFileResource("debug", Locale.getDefault().language)
-					?.readText() ?: "File resource not found"
+			text = //debug html
 			addHyperlinkListener(
 				HyperlinkListener { e ->
 					openUrl(e)
 				},
 			)
 		}
+	 */
 
 	private fun openUrl(event: HyperlinkEvent) {
 		val type: HyperlinkEvent.EventType = event.eventType

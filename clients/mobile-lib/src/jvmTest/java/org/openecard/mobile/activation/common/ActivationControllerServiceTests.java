@@ -2,9 +2,9 @@
  * Copyright (C) 2019 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
- *
+
  * This file is part of the Open eCard App.
- *
+
  * GNU General Public License Usage
  * This file may be used under the terms of the GNU General Public
  * License version 3.0 as published by the Free Software Foundation
@@ -12,7 +12,7 @@
  * this file. Please review the following information to ensure the
  * GNU General Public License version 3.0 requirements will be met:
  * http://www.gnu.org/copyleft/gpl.html.
- *
+
  * Other Usage
  * Alternatively, this file may be used in accordance with the terms
  * and conditions contained in a signed written agreement between
@@ -32,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoSession;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
@@ -119,7 +118,7 @@ public class ActivationControllerServiceTests {
 
     @Test
     void sutCanCompleteActivation() throws InterruptedException, TimeoutException {
-	Promise<ActivationResult> outcome = new Promise();
+	Promise<ActivationResult> outcome = new Promise<>();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverCompletion(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
@@ -136,7 +135,7 @@ public class ActivationControllerServiceTests {
 
     @Test
     void sutNotifiesWhenStarted() throws InterruptedException, TimeoutException {
-	Promise<Void> outcome = new Promise();
+	Promise<Void> outcome = new Promise<>();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
 	ActivationControllerService sut = this.withMinimumAddons("eID-Client").withSuccessActivation().createSut();
 
@@ -151,7 +150,7 @@ public class ActivationControllerServiceTests {
 
     @Test
     void sutDoesNotNotifyStartedWhenCancelled() throws InterruptedException, TimeoutException {
-	Promise<Void> outcome = new Promise();
+	Promise<Void> outcome = new Promise<>();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
 	ActivationControllerService sut = this
 		.withSlowEacStack()
@@ -170,7 +169,7 @@ public class ActivationControllerServiceTests {
 
     @Test
     void sutDoesNotNotifyStartedAfterDelayedCancel() throws InterruptedException, TimeoutException {
-	Promise<Void> outcome = new Promise();
+	Promise<Void> outcome = new Promise<>();
 	ControllerCallback mockControllerCallback = PromiseDeliveringFactory.controllerCallback.deliverStarted(outcome);
 	ActivationControllerService sut = this
 		.withSlowEacStack()
@@ -210,9 +209,7 @@ public class ActivationControllerServiceTests {
 	sut.cancelAuthentication(mockControllerCallback);
 
 	verify(mockControllerCallback, times(1)).onStarted();
-	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> {
-	    return r.getResultCode() == ActivationResultCode.INTERRUPTED;
-	}));
+	verify(mockControllerCallback).onAuthenticationCompletion(argThat(r -> r.getResultCode() == ActivationResultCode.INTERRUPTED));
 	verify(mockControllerCallback, times(1)).onAuthenticationCompletion(any());
     }
 
@@ -346,10 +343,10 @@ public class ActivationControllerServiceTests {
     public ActivationControllerServiceTests withMinimumAddons(String addonName) {
 	AddonSpecification mockAddon = mock(AddonSpecification.class);
 	when(mockAddon.getVersion()).thenReturn("1.1.1");
-	Set<AddonSpecification> addons = new HashSet<AddonSpecification>() {
-	    {
-		add(mockAddon);
-	    }
+	Set<AddonSpecification> addons = new HashSet<>() {
+		{
+			add(mockAddon);
+		}
 	};
 	return this.withMockContext()
 		.withMockAddonManager()
@@ -389,28 +386,22 @@ public class ActivationControllerServiceTests {
 	return this;
     }
 
-    private <T> OngoingStubbing<T> withValue(OngoingStubbing<T> stubbing, T value) {
+    private <T> void withValue(OngoingStubbing<T> stubbing, T value) {
 	if (this.hasSlowEacStack) {
-	    return stubbing.thenAnswer(new Answer<T>() {
-		@Override
-		public T answer(InvocationOnMock arg0) throws Throwable {
-		    Thread.sleep(SLEEP_WAIT);
-		    return value;
-		}
-	    });
+		stubbing.thenAnswer((Answer<T>) arg0 -> {
+			Thread.sleep(SLEEP_WAIT);
+			return value;
+		});
 	} else {
-	    return stubbing.thenReturn(value);
+		stubbing.thenReturn(value);
 	}
     }
 
     private ActivationControllerServiceTests withActivation(BindingResult result, int sleepDelay) {
-	when(this.mockPluginAction.execute(any(), any(), any(), any(), any())).thenAnswer(new Answer<BindingResult>() {
-	    @Override
-	    public BindingResult answer(InvocationOnMock arg0) throws Throwable {
-		Thread.sleep(sleepDelay);
+	when(this.mockPluginAction.execute(any(), any(), any(), any(), any())).thenAnswer((Answer<BindingResult>) arg0 -> {
+	Thread.sleep(sleepDelay);
 
-		return result;
-	    }
+	return result;
 	});
 	return this;
     }

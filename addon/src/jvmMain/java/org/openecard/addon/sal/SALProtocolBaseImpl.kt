@@ -156,9 +156,9 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 		return perform(HashResponse::class.java, s, param, internalData) as HashResponse?
 	}
 
-	override fun sign(param: Sign): SignResponse? {
+	override fun sign(aParam: Sign): SignResponse? {
 		val s = next<Sign>(FunctionType.Sign)
-		return perform(SignResponse::class.java, s, param, internalData) as SignResponse?
+		return perform(SignResponse::class.java, s, aParam, internalData) as SignResponse?
 	}
 
 	override fun verifySignature(param: VerifySignature): VerifySignatureResponse? {
@@ -181,9 +181,9 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 		) as VerifyCertificateResponse?
 	}
 
-	override fun didCreate(param: DIDCreate): DIDCreateResponse? {
+	override fun didCreate(aParam: DIDCreate): DIDCreateResponse? {
 		val s = next<DIDCreate>(FunctionType.DIDCreate)
-		return perform(DIDCreateResponse::class.java, s, param, internalData) as DIDCreateResponse?
+		return perform(DIDCreateResponse::class.java, s, aParam, internalData) as DIDCreateResponse?
 	}
 
 	override fun didUpdate(param: DIDUpdate): DIDUpdateResponse? {

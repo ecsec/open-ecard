@@ -31,6 +31,6 @@ import jakarta.xml.bind.annotation.XmlRootElement
  */
 @XmlRootElement
 class ResourceNameType {
-    @XmlElement(name = "value")
-    val value: MutableList<String?> = ArrayList<String?>()
+	@XmlElement(name = "value")
+	val value: MutableList<String?> = mutableListOf()
 }

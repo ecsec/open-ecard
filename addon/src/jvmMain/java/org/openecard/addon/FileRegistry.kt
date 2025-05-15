@@ -188,7 +188,7 @@ class FileRegistry(
 		val matchingAddons: MutableSet<AddonSpecification> = mutableSetOf()
 		for (desc in this.addons.values) {
 			for (s in desc.localizedName) {
-				if (s?.value == name) {
+				if (s.value == name) {
 					matchingAddons.add(desc)
 				}
 			}
@@ -226,8 +226,7 @@ class FileRegistry(
 		try {
 			val url: Array<URL> =
 				arrayOf(
-					Companion.files
-						.get(aId)!!
+					Companion.files[aId]!!
 						.toURI()
 						.toURL(),
 				)
@@ -300,7 +299,7 @@ class FileRegistry(
 	 * @param fileName Name of the add-ons jar file.
 	 * @return The [AddonSpecification] of add-on with the name `fileName`.
 	 */
-	fun getAddonSpecByFileName(fileName: String?): AddonSpecification? = this.addons.get(fileName)
+	fun getAddonSpecByFileName(fileName: String?): AddonSpecification? = this.addons[fileName]
 
 	/**
 	 * Uninstall an add-on.
@@ -311,7 +310,7 @@ class FileRegistry(
 	 * @param addonSpec The [AddonSpecification] of the add-on to uninstall.
 	 */
 	fun uninstallAddon(addonSpec: AddonSpecification) {
-		val addonJar: File = Companion.files.get(addonSpec.getId())!!
+		val addonJar: File = Companion.files[addonSpec.getId()]!!
 		addonJar.delete()
 	}
 

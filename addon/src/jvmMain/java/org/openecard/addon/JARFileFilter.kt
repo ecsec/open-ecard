@@ -34,9 +34,6 @@ internal class JARFileFilter : FileFilter {
 	override fun accept(pathname: File): Boolean {
 		var name = pathname.getName()
 		name = name.lowercase(Locale.getDefault())
-		if (name.endsWith(".jar")) {
-			return true
-		}
-		return false
+		return name.endsWith(".jar")
 	}
 }

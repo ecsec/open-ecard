@@ -21,10 +21,9 @@
  */
 package org.openecard.addon
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.manifest.AddonSpecification
 import org.openecard.common.util.FileUtils.addonsConfDir
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -39,6 +38,9 @@ import java.util.Properties
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
+
+private val logger = KotlinLogging.logger { }
+
 class AddonProperties(
 	/**
 	 * The specification of the addon.
@@ -71,13 +73,13 @@ class AddonProperties(
 			// create a pointer to the configuration file. The file is created on the first time store is called.
 			configFile = File(addonsConfDir, "$id/$id$FILE_EXTENSION")
 		} catch (ex: IOException) {
-			logger.error("Couldn't create file object to the config directory.", ex)
+			logger.error(ex) { "Couldn't create file object to the config directory." }
 		} catch (ex: SecurityException) {
 			val msg = (
 				"SecurityException seems like you do not have enough permissions to create a file object for " +
 					"the config directory."
 			)
-			logger.error(msg, ex)
+			logger.error(ex) { msg }
 		}
 	}
 
@@ -94,18 +96,16 @@ class AddonProperties(
 	fun loadProperties() {
 		if (configFile!!.exists()) {
 			try {
-				props.load(FileInputStream(configFile))
+				props.load(FileInputStream(configFile!!))
 			} catch (ex: IOException) {
-				logger.error("Failed to load properties for the addon with the ID " + id + ".", ex)
-				throw AddonPropertiesException("Failed to load properties for the addon with the ID " + id + ".", ex)
+				logger.error(ex) { "Failed to load properties for the addon with the ID $id." }
+				throw AddonPropertiesException("Failed to load properties for the addon with the ID $id.", ex)
 			}
 		} else {
-			logger.warn(
-				(
-					"Can't load the properties of the addon with the ID " + id + ". The file containing the " +
-						"properties does not exist."
-				),
-			)
+			logger.warn {
+				"Can't load the properties of the addon with the ID " + id + ". The file containing the " +
+					"properties does not exist."
+			}
 		}
 	}
 
@@ -127,24 +127,24 @@ class AddonProperties(
 			val addonDir = File(addonsConfDir, id)
 			if (!addonDir.exists()) {
 				if (!addonDir.mkdirs()) {
-					logger.error(id)
+					logger.error { id }
 				}
 			}
-			val out: OutputStream = FileOutputStream(configFile, false)
+			val out: OutputStream = FileOutputStream(configFile!!, false)
 			props.store(out, "Configuration file of the " + id + "addon.")
 		} catch (ex: FileNotFoundException) {
 			val msg = (
 				"Failed to save the properties for the addon with the ID " + id + ". The file was not found." +
 					"The settings aren't stored."
 			)
-			logger.error(msg, ex)
+			logger.error(ex) { msg }
 			throw AddonPropertiesException(msg, ex)
 		} catch (ex: IOException) {
 			val msg = (
 				"Failed to save the properties for the addon with the ID " + id + ". The settings aren't " +
 					"stored."
 			)
-			logger.error(msg, ex)
+			logger.error(ex) { msg }
 			throw AddonPropertiesException(msg, ex)
 		}
 	}
@@ -179,9 +179,9 @@ class AddonProperties(
 			val confDir = File(addonsConfDir, id)
 			removeDirectory(confDir)
 		} catch (ex: IOException) {
-			logger.error("Failed to get the Addon configuration directory.", ex)
+			logger.error(ex) { "Failed to get the Addon configuration directory." }
 		} catch (ex: SecurityException) {
-			logger.error("Failed to access the Addon configuration directory.", ex)
+			logger.error(ex) { "Failed to access the Addon configuration directory." }
 		}
 		configFile!!.delete()
 	}
@@ -207,10 +207,6 @@ class AddonProperties(
 	companion object {
 		/**
 		 * Logger for logging errors and other necessary things.
-		 */
-		private val logger: Logger = LoggerFactory.getLogger(AddonProperties::class.java)
-
-		/**
 		 * File extension used for files if the saveProperties and loadProperties method is used.
 		 */
 		private const val FILE_EXTENSION = ".conf"

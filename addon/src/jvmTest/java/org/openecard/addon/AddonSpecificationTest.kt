@@ -30,102 +30,102 @@ import org.testng.annotations.Test
  * @author Hans-Martin Haase
  */
 class AddonSpecificationTest {
-    @Test
-    fun testCompareToAllEquals() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
-        val spec2 = AddonSpecification()
-        spec2.setId("ABC")
-        spec2.setVersion("1.0.0")
+	@Test
+	fun testCompareToAllEquals() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
+		val spec2 = AddonSpecification()
+		spec2.setId("ABC")
+		spec2.setVersion("1.0.0")
 
-        Assert.assertEquals(spec1.compareTo(spec2), 0)
-    }
+		Assert.assertEquals(spec1.compareTo(spec2), 0)
+	}
 
-    @Test
-    fun testCompareToVersionEquals() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABD")
-        spec1.setVersion("1.0.0")
-        val spec2 = AddonSpecification()
-        spec2.setId("ABC")
-        spec2.setVersion("1.0.0")
+	@Test
+	fun testCompareToVersionEquals() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABD")
+		spec1.setVersion("1.0.0")
+		val spec2 = AddonSpecification()
+		spec2.setId("ABC")
+		spec2.setVersion("1.0.0")
 
-        Assert.assertEquals(spec1.compareTo(spec2), 1)
-    }
+		Assert.assertEquals(spec1.compareTo(spec2), 1)
+	}
 
-    @Test
-    fun testCompareToIdEquals() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.2")
-        val spec2 = AddonSpecification()
-        spec2.setId("ABC")
-        spec2.setVersion("1.0.5")
+	@Test
+	fun testCompareToIdEquals() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.2")
+		val spec2 = AddonSpecification()
+		spec2.setId("ABC")
+		spec2.setVersion("1.0.5")
 
-        Assert.assertEquals(spec1.compareTo(spec2), -1)
-    }
+		Assert.assertEquals(spec1.compareTo(spec2), -1)
+	}
 
-    @Test
-    fun testCompareToAllDifferent() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
-        val spec2 = AddonSpecification()
-        spec2.setId("ZBD")
-        spec2.setVersion("1.0.8")
-        val spec3 = AddonSpecification()
-        spec3.setId("ABE")
-        spec3.setVersion("1.0.25")
+	@Test
+	fun testCompareToAllDifferent() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
+		val spec2 = AddonSpecification()
+		spec2.setId("ZBD")
+		spec2.setVersion("1.0.8")
+		val spec3 = AddonSpecification()
+		spec3.setId("ABE")
+		spec3.setVersion("1.0.25")
 
-        Assert.assertEquals(spec1.compareTo(spec3), -1)
-        Assert.assertEquals(spec1.compareTo(spec2), -1)
-        Assert.assertEquals(spec2.compareTo(spec3), 1)
-    }
+		Assert.assertEquals(spec1.compareTo(spec3), -1)
+		Assert.assertEquals(spec1.compareTo(spec2), -1)
+		Assert.assertEquals(spec2.compareTo(spec3), 1)
+	}
 
-    @Test
-    fun testHashCode() {
-        val versionHash = "1.0.0".hashCode()
-        val idHash = "ABC".hashCode()
-        val res = versionHash + idHash
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
+	@Test
+	fun testHashCode() {
+		val versionHash = "1.0.0".hashCode()
+		val idHash = "ABC".hashCode()
+		val res = versionHash + idHash
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
 
-        Assert.assertEquals(spec1.hashCode(), res)
-    }
+		Assert.assertEquals(spec1.hashCode(), res)
+	}
 
-    @Test
-    fun testEqualsDifferentObjects() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
+	@Test
+	fun testEqualsDifferentObjects() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
 
-        val strBuilder = StringBuilder()
-        Assert.assertFalse(spec1.equals(strBuilder))
-    }
+		val strBuilder = StringBuilder()
+		Assert.assertFalse(spec1.equals(strBuilder))
+	}
 
-    @Test
-    fun testEqualsSameObjectType() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
-        val spec2 = AddonSpecification()
-        spec2.setId("ABC")
-        spec2.setVersion("1.0.0")
+	@Test
+	fun testEqualsSameObjectType() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
+		val spec2 = AddonSpecification()
+		spec2.setId("ABC")
+		spec2.setVersion("1.0.0")
 
-        Assert.assertTrue(spec1.equals(spec2))
-    }
+		Assert.assertTrue(spec1 == spec2)
+	}
 
-    @Test
-    fun testEqualsSameObjectTypeDiffAttributes() {
-        val spec1 = AddonSpecification()
-        spec1.setId("ABC")
-        spec1.setVersion("1.0.0")
-        val spec2 = AddonSpecification()
-        spec2.setId("ABk")
-        spec2.setVersion("1.0.5")
+	@Test
+	fun testEqualsSameObjectTypeDiffAttributes() {
+		val spec1 = AddonSpecification()
+		spec1.setId("ABC")
+		spec1.setVersion("1.0.0")
+		val spec2 = AddonSpecification()
+		spec2.setId("ABk")
+		spec2.setVersion("1.0.5")
 
-        Assert.assertFalse(spec1.equals(spec2))
-    }
+		Assert.assertFalse(spec1 == spec2)
+	}
 }

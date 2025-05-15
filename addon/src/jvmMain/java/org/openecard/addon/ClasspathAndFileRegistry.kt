@@ -77,10 +77,10 @@ class ClasspathAndFileRegistry(
 	@Throws(AddonException::class)
 	override fun downloadAddon(addonSpec: AddonSpecification): ClassLoader? {
 		val desc = classpathRegistry.search(addonSpec.getId())
-		if (desc != null) {
-			return classpathRegistry.downloadAddon(addonSpec)
+		return if (desc != null) {
+			classpathRegistry.downloadAddon(addonSpec)
 		} else {
-			return fileRegistry.downloadAddon(addonSpec)
+			fileRegistry.downloadAddon(addonSpec)
 		}
 	}
 

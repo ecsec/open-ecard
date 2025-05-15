@@ -63,7 +63,7 @@ class HighestVersionSelector : SelectionStrategy {
 			o1: AddonSpecification?,
 			o2: AddonSpecification?,
 		): Int {
-			var result = 0
+			var result: Int
 
 			if (o1 == null && o2 == null) {
 				throw NullPointerException("Can't compare two NULL elements.")
@@ -73,20 +73,21 @@ class HighestVersionSelector : SelectionStrategy {
 				return 1
 			} else {
 				// try to get a semantic version
-				val semVer1: SemanticVersion = SemanticVersion(o1!!.getVersion())
-				val semVer2: SemanticVersion = SemanticVersion(o2!!.getVersion())
+				val semVer1 = SemanticVersion(o1!!.getVersion())
+				val semVer2 = SemanticVersion(o2!!.getVersion())
 
-				if (semVer1.isSemanticVersion && semVer2.isSemanticVersion) {
-					result = compareSemanticVersions(semVer1, semVer2)
-				} else {
-					if (semVer1.isSemanticVersion) {
-						result = 1
-					} else if (semVer2.isSemanticVersion) {
-						result = -1
+				result =
+					if (semVer1.isSemanticVersion && semVer2.isSemanticVersion) {
+						compareSemanticVersions(semVer1, semVer2)
 					} else {
-						result = o1.getVersion().compareTo(o2.getVersion())
+						if (semVer1.isSemanticVersion) {
+							1
+						} else if (semVer2.isSemanticVersion) {
+							-1
+						} else {
+							o1.getVersion().compareTo(o2.getVersion())
+						}
 					}
-				}
 			}
 
 			return result
@@ -144,13 +145,14 @@ class HighestVersionSelector : SelectionStrategy {
 		): Int {
 			var result = -2
 
-			if (value1 == value2) {
-				result = 0
-			} else if (value1 > value2) {
-				result = 1
-			} else {
-				result = -1
-			}
+			result =
+				if (value1 == value2) {
+					0
+				} else if (value1 > value2) {
+					1
+				} else {
+					-1
+				}
 
 			return result
 		}

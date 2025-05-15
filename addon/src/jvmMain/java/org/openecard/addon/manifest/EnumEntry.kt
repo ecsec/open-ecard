@@ -35,5 +35,5 @@ import jakarta.xml.bind.annotation.XmlType
 open class EnumEntry : ConfigurationEntry() {
 	@JvmField
 	@XmlElement(name = "Value", required = true)
-	val values: List<String> = listOf()
+	val values: MutableList<String> = mutableListOf()
 }

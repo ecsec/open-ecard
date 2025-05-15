@@ -31,29 +31,32 @@ import java.io.IOException
  * @author Hans-Martin Haase
  */
 interface Settings {
-    /**
-     * Set a property with the property name `key` and the value `value`.
-     *
-     * @param key The key name of the property to set.
-     * @param value The value of the property to set.
-     */
-    fun setProperty(key: String?, value: String?)
+	/**
+	 * Set a property with the property name `key` and the value `value`.
+	 *
+	 * @param key The key name of the property to set.
+	 * @param value The value of the property to set.
+	 */
+	fun setProperty(
+		key: String?,
+		value: String?,
+	)
 
-    /**
-     * Get a property by a key.
-     *
-     * @param key The key to look for in the properties.
-     * @return The value of the property which corresponds to the `key`.
-     */
-    fun getProperty(key: String?): String?
+	/**
+	 * Get a property by a key.
+	 *
+	 * @param key The key to look for in the properties.
+	 * @return The value of the property which corresponds to the `key`.
+	 */
+	fun getProperty(key: String?): String?
 
-    /**
-     * Save the currently set properties to a file.
-     *
-     * @throws AddonPropertiesException Thrown in case an exception occurred in the saveProperties() function of a
-     * wrapped AddonProeprties object.
-     * @throws IOException Thrown in case of an error while writing the openecard.properties file.
-     */
-    @Throws(AddonPropertiesException::class, IOException::class)
-    fun store()
+	/**
+	 * Save the currently set properties to a file.
+	 *
+	 * @throws AddonPropertiesException Thrown in case an exception occurred in the saveProperties() function of a
+	 * wrapped AddonProeprties object.
+	 * @throws IOException Thrown in case of an error while writing the openecard.properties file.
+	 */
+	@Throws(AddonPropertiesException::class, IOException::class)
+	fun store()
 }

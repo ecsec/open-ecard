@@ -53,7 +53,7 @@ class HighestVersionSelectorTest {
 
 		val hvs = HighestVersionSelector()
 		val resSpec = hvs.select(set)
-		Assert.assertEquals(resSpec!!.getVersion(), spec2.getVersion())
+		Assert.assertEquals(resSpec.getVersion(), spec2.getVersion())
 	}
 
 	/**
@@ -78,7 +78,7 @@ class HighestVersionSelectorTest {
 
 		val hvs = HighestVersionSelector()
 		val resSpec = hvs.select(set1)
-		Assert.assertEquals(resSpec!!.getVersion(), spec3.getVersion())
+		Assert.assertEquals(resSpec.getVersion(), spec3.getVersion())
 
 		val spec4 = AddonSpecification()
 		spec4.setVersion("1.0.0-beta")
@@ -89,7 +89,7 @@ class HighestVersionSelectorTest {
 		set2.add(spec1)
 
 		val resSpec2 = hvs.select(set2)
-		Assert.assertEquals(resSpec2!!.getVersion(), spec4.getVersion())
+		Assert.assertEquals(resSpec2.getVersion(), spec4.getVersion())
 	}
 
 	/**
@@ -114,7 +114,7 @@ class HighestVersionSelectorTest {
 
 		val hvs = HighestVersionSelector()
 		val resSpec = hvs.select(set1)
-		Assert.assertEquals(resSpec!!.getVersion(), spec3.getVersion())
+		Assert.assertEquals(resSpec.getVersion(), spec3.getVersion())
 	}
 
 	/**
@@ -139,6 +139,6 @@ class HighestVersionSelectorTest {
 
 		val hvs = HighestVersionSelector()
 		val resSpec = hvs.select(set1)
-		Assert.assertEquals(resSpec!!.getVersion(), spec2.getVersion())
+		Assert.assertEquals(resSpec.getVersion(), spec2.getVersion())
 	}
 }

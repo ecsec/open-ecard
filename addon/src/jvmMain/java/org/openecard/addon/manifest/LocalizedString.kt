@@ -21,7 +21,11 @@
  */
 package org.openecard.addon.manifest
 
-import jakarta.xml.bind.annotation.*
+import jakarta.xml.bind.annotation.XmlAccessType
+import jakarta.xml.bind.annotation.XmlAccessorType
+import jakarta.xml.bind.annotation.XmlAttribute
+import jakarta.xml.bind.annotation.XmlRootElement
+import jakarta.xml.bind.annotation.XmlValue
 
 /**
  *
@@ -30,9 +34,9 @@ import jakarta.xml.bind.annotation.*
 @XmlRootElement(name = "LocalizedString")
 @XmlAccessorType(XmlAccessType.FIELD)
 class LocalizedString {
-    @XmlAttribute(namespace = "http://www.w3.org/XML/1998/namespace", required = true)
-    var lang: String? = null
+	@XmlAttribute(namespace = "http://www.w3.org/XML/1998/namespace", required = true)
+	var lang: String? = null
 
-    @XmlValue
-    var value: String? = null
+	@XmlValue
+	var value: String? = null
 }

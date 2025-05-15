@@ -41,10 +41,9 @@ private val logger = KotlinLogging.logger { }
  * @author Hans-Martin Haase
  */
 class ManifestExtractor {
-	private val marshaller: WSMarshaller
+	private val marshaller: WSMarshaller = createInstance()
 
 	init {
-		marshaller = createInstance()
 		marshaller.removeAllTypeClasses()
 		marshaller.addXmlTypeClass(AddonSpecification::class.java)
 	}

@@ -36,7 +36,7 @@ import jakarta.xml.bind.annotation.XmlRootElement
 class AttachmentType {
 	@JvmField
 	@XmlElement(name = "MIMEType")
-	val mimeType: ArrayList<String?> = ArrayList<String?>()
+	val mimeType: MutableList<String?> = mutableListOf()
 
 	@JvmField
 	@XmlElement(name = "Name")

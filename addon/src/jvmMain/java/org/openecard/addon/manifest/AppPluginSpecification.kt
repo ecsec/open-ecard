@@ -67,7 +67,7 @@ class AppPluginSpecification {
 
 	@JvmField
 	@XmlElement(name = "Parameter")
-	val parameters: MutableList<ParameterType?> = ArrayList<ParameterType?>()
+	val parameters: MutableList<ParameterType?> = mutableListOf()
 
 	@JvmField
 	@XmlElement(name = "ResourceName")
@@ -79,7 +79,7 @@ class AppPluginSpecification {
 
 	@JvmField
 	@XmlElement(name = "Attachment")
-	val attachments: MutableList<AttachmentType?> = ArrayList<AttachmentType?>()
+	val attachments: MutableList<AttachmentType?> = mutableListOf()
 
 	fun getLocalizedName(languageCode: String): String =
 		LocalizedStringExtractor.getLocalizedString(localizedName, languageCode)

@@ -94,7 +94,7 @@ class AddonManager(
 		this.salStateView = salStateView
 
 		Thread(
-			Runnable {
+			{
 				loadLoadOnStartAddons()
 			},
 			"Init-Addons",
@@ -116,7 +116,7 @@ class AddonManager(
 	private fun loadLoadOnStartAddons() {
 		// load plugins which have an loadOnStartup = true
 		val specs = protectedRegistry.listAddons()
-		for (addonSpec in specs!!) {
+		for (addonSpec in specs) {
 			loadLoadOnStartupActions(addonSpec)
 		}
 	}
@@ -425,9 +425,7 @@ class AddonManager(
 	fun uninstallAddon(addonSpec: AddonSpecification) {
 		// unloading is done by the PluginDirectoryAlterationListener
 		val fileRegistry: FileRegistry? = registry!!.fileRegistry
-		if (fileRegistry != null) {
-			fileRegistry.uninstallAddon(addonSpec)
-		}
+		fileRegistry?.uninstallAddon(addonSpec)
 	}
 
 	companion object {

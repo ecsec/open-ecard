@@ -135,7 +135,7 @@ class ClasspathRegistry : AddonRegistry {
 		val matchingAddons: MutableSet<AddonSpecification> = mutableSetOf()
 		for (desc in this.addons) {
 			for (s in desc.localizedName) {
-				if (s?.value == name) {
+				if (s.value == name) {
 					matchingAddons.add(desc)
 				}
 			}

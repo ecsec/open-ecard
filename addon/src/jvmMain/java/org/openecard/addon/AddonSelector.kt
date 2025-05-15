@@ -36,18 +36,14 @@ class AddonSelector(
 	private val manager: AddonManager,
 ) {
 	// TODO: implement caching
-	private val ifdCache: MutableMap<String?, AddonSpecification?>
-	private val salCache: MutableMap<String?, AddonSpecification?>
-	private val extensionCache: MutableMap<String?, AddonSpecification?>
-	private val pluginCache: MutableMap<String?, AddonSpecification?>
+	private val ifdCache: MutableMap<String?, AddonSpecification?> = mutableMapOf()
+	private val salCache: MutableMap<String?, AddonSpecification?> = mutableMapOf()
+	private val extensionCache: MutableMap<String?, AddonSpecification?> = mutableMapOf()
+	private val pluginCache: MutableMap<String?, AddonSpecification?> = mutableMapOf()
 
 	private var strategy: SelectionStrategy? = null
 
 	init {
-		ifdCache = HashMap<String?, AddonSpecification?>()
-		salCache = HashMap<String?, AddonSpecification?>()
-		extensionCache = HashMap<String?, AddonSpecification?>()
-		pluginCache = HashMap<String?, AddonSpecification?>()
 
 		setStrategy(HighestVersionSelector())
 	}
@@ -74,7 +70,7 @@ class AddonSelector(
 	fun getSALProtocol(uri: String): SALProtocol? {
 		val addons = manager.getRegistry().searchSALProtocol(uri)
 		if (addons!!.isEmpty()) {
-			throw AddonNotFoundException("No Add-on for SAL protocol '" + uri + "' found.")
+			throw AddonNotFoundException("No Add-on for SAL protocol '$uri' found.")
 		}
 		val addon = strategy!!.select(addons)
 		return manager.getSALProtocol(addon!!, uri)
@@ -91,7 +87,7 @@ class AddonSelector(
 	fun getAppExtensionAction(actionId: String): AppExtensionAction? {
 		val addons = manager.getRegistry().searchByActionId(actionId)
 		if (addons!!.isEmpty()) {
-			throw AddonNotFoundException("No Add-on for action ID '" + actionId + "' found.")
+			throw AddonNotFoundException("No Add-on for action ID '$actionId' found.")
 		}
 		val addon = strategy!!.select(addons)
 		return manager.getAppExtensionAction(addon!!, actionId)

@@ -38,16 +38,8 @@ import java.util.concurrent.TimeUnit
  * @author Tobias Wich
  */
 class EventHandler : EventCallback {
-	private val eventQueues: MutableMap<String?, LinkedBlockingQueue<StatusChange?>?>
-	private val timers: MutableMap<String?, ReschedulableTimer?>
-
-	/**
-	 * Create a new EventHandler.
-	 */
-	init {
-		eventQueues = HashMap<String?, LinkedBlockingQueue<StatusChange?>?>()
-		timers = HashMap<String?, ReschedulableTimer?>()
-	}
+	private val eventQueues: MutableMap<String?, LinkedBlockingQueue<StatusChange?>?> = mutableMapOf()
+	private val timers: MutableMap<String?, ReschedulableTimer?> = mutableMapOf()
 
 	/**
 	 *
@@ -57,16 +49,16 @@ class EventHandler : EventCallback {
 	 */
 	fun next(session: String?): StatusChange? {
 		// String session = statusChangeRequest.getSessionIdentifier();
-		var handle: StatusChange? = null
-		val queue = eventQueues.get(session)
+		var handle: StatusChange?
+		val queue = eventQueues[session]
 		if (queue == null) {
 			LOG.error("No queue found for session {}", session)
 			return null
 		}
 		do {
 			try {
-				timers.get(session)!!.reschedule(deleteDelay.toLong())
-				handle = eventQueues.get(session)!!.poll(30, TimeUnit.SECONDS)
+				timers[session]!!.reschedule(deleteDelay.toLong())
+				handle = eventQueues[session]!!.poll(30, TimeUnit.SECONDS)
 				LOG.debug("WaitForChange event pulled from event queue.")
 			} catch (ex: InterruptedException) {
 				return null
@@ -99,13 +91,13 @@ class EventHandler : EventCallback {
 	 * @param sessionIdentifier session identifier
 	 */
 	fun addQueue(sessionIdentifier: String?) {
-		if (eventQueues.get(sessionIdentifier) == null) {
+		if (eventQueues[sessionIdentifier] == null) {
 			eventQueues.put(sessionIdentifier, LinkedBlockingQueue<StatusChange?>())
 			val timer = ReschedulableTimer()
 			timer.schedule(this.DeleteTask(sessionIdentifier), deleteDelay.toLong())
 			timers.put(sessionIdentifier, timer)
 		} else {
-			timers.get(sessionIdentifier)!!.reschedule(deleteDelay.toLong())
+			timers[sessionIdentifier]!!.reschedule(deleteDelay.toLong())
 		}
 	}
 

@@ -115,7 +115,6 @@ class DefaultSettingsGroup(
 	}
 
 	companion object {
-		private const val serialVersionUID: Long = 1L
 		private val LANGUAGE_CODE: String = System.getProperty("user.language")
 	}
 }

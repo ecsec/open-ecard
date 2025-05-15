@@ -112,7 +112,7 @@ class Cache {
 		id: String,
 		protocolOrAction: T,
 	) {
-		var protocols = addonSpecAndId.get(spec)
+		var protocols = addonSpecAndId[spec]
 		if (protocols == null) {
 			protocols = mutableMapOf()
 		}
@@ -210,12 +210,12 @@ class Cache {
 		spec: AddonSpecification?,
 		id: String?,
 	): T? {
-		val protocols: MutableMap<String, in LifecycleTrait>? = addonSpecAndId.get(spec)
+		val protocols: MutableMap<String, in LifecycleTrait>? = addonSpecAndId[spec]
 		if (protocols == null) {
 			return null
 		}
 
-		return protocols.get(id) as T?
+		return protocols[id] as T?
 	}
 
 	/**
@@ -226,12 +226,8 @@ class Cache {
 	 * [AddonSpecification] exists an empty collection is returned.
 	 */
 	fun getAllAddonData(spec: AddonSpecification): List<LifecycleTrait>? {
-		val data: Map<String, LifecycleTrait>? = addonSpecAndId.get(spec)
-		if (data != null) {
-			return data.values.toList()
-		} else {
-			return emptyList()
-		}
+		val data: Map<String, LifecycleTrait>? = addonSpecAndId[spec]
+		return data?.values?.toList() ?: emptyList()
 	}
 
 	/**
@@ -244,7 +240,7 @@ class Cache {
 		spec: AddonSpecification?,
 		id: String?,
 	) {
-		val protocols: MutableMap<String, out LifecycleTrait> = addonSpecAndId.get(spec)!!
+		val protocols: MutableMap<String, out LifecycleTrait> = addonSpecAndId[spec]!!
 		protocols.remove(id)
 	}
 

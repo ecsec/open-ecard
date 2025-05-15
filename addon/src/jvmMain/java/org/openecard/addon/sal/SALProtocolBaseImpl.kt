@@ -69,7 +69,7 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 	override val internalData: MutableMap<String, Any> = mutableMapOf()
 
 	/** List of ProtocolSteps, which are per default executed in order.  */
-	protected val steps: ArrayList<ProtocolStep<*, *>?> = ArrayList<ProtocolStep<*, *>?>()
+	protected val steps: MutableList<ProtocolStep<*, *>?> = mutableListOf()
 	protected val statelessSteps: MutableMap<FunctionType, ProtocolStep<*, *>?> =
 		EnumMap<FunctionType, ProtocolStep<*, *>?>(FunctionType::class.java)
 
@@ -78,22 +78,21 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 
 	private fun hasNextStep(): Boolean = steps.size > curStep
 
-	private fun hasNextProcessStep(functionName: FunctionType?): Boolean {
+	private fun hasNextProcessStep(functionName: FunctionType?): Boolean =
 		if (hasNextStep()) {
-			return steps.get(curStep)!!.functionType == functionName
+			steps[curStep]!!.functionType == functionName
 		} else {
-			return false
+			false
 		}
-	}
 
 	private fun hasStatelessStep(functionName: FunctionType?): Boolean = statelessSteps.containsKey(functionName)
 
-	override fun hasNextStep(functionName: FunctionType?): Boolean {
-		if (hasStatelessStep(functionName)) {
+	override fun hasNextStep(aFunction: FunctionType?): Boolean {
+		if (hasStatelessStep(aFunction)) {
 			return true
 		}
 		// check for a step in the process order
-		return hasNextProcessStep(functionName)
+		return hasNextProcessStep(aFunction)
 	}
 
 	protected fun addOrderStep(step: ProtocolStep<*, *>): ProtocolStep<*, *> {
@@ -117,18 +116,18 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 	private fun <Req : RequestType> next(functionName: FunctionType): ProtocolStep<Req, *>? {
 		// process order step takes precedence over stateless steps
 		if (hasNextProcessStep(functionName)) {
-			val step = steps.get(curStep)
+			val step = steps[curStep]
 			curStep++
 			return step as ProtocolStep<Req, *>?
 		} else {
-			return statelessSteps.get(functionName) as ProtocolStep<Req, *>? // returns null if nothing found
+			return statelessSteps[functionName] as ProtocolStep<Req, *>? // returns null if nothing found
 		}
 	}
 
-	override fun cardApplicationStartSession(param: CardApplicationStartSession): CardApplicationStartSessionResponse? {
+	override fun cardApplicationStartSession(aParam: CardApplicationStartSession): CardApplicationStartSessionResponse? {
 		val s = next<CardApplicationStartSession>(FunctionType.CardApplicationStartSession)
 		val c = CardApplicationStartSessionResponse::class.java
-		return perform(c, s, param, internalData) as CardApplicationStartSessionResponse?
+		return perform(c, s, aParam, internalData) as CardApplicationStartSessionResponse?
 	}
 
 	override fun cardApplicationEndSession(param: CardApplicationEndSession): CardApplicationEndSessionResponse? {
@@ -213,7 +212,7 @@ abstract class SALProtocolBaseImpl protected constructor() : SALProtocol {
 	 */
 	override fun needsSM(): Boolean = false
 
-	override fun applySM(commandAPDU: ByteArray?): ByteArray? = commandAPDU
+	override fun applySM(aCommandAPDU: ByteArray?): ByteArray? = aCommandAPDU
 
 	override fun removeSM(responseAPDU: ByteArray?): ByteArray? = responseAPDU
 

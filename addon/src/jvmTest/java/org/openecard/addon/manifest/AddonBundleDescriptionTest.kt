@@ -83,64 +83,66 @@ class AddonBundleDescriptionTest {
 	@Test
 	fun testBaseConfiguration() {
 		for (entry in addonBundleDescription!!.configDescription!!.entries) {
-			if (entry is FileEntry) {
-				val fEntry = entry
-				Assert.assertEquals(fEntry.fileType, "pem")
-				Assert.assertEquals(fEntry.isRequiredBeforeAction, true as Boolean?)
-				Assert.assertEquals(fEntry.getLocalizedName("EN"), "Certificate file")
-				Assert.assertEquals(
-					fEntry.getLocalizedDescription("EN"),
-					"Enter the path to the certificate in pem format.",
-				)
-				Assert.assertEquals(fEntry.key, "Blub")
-			} else if (entry is EnumEntry) {
-				val eEntry = entry
-				Assert.assertEquals(eEntry.key, "Testkey")
-				Assert.assertEquals(eEntry.values.get(0), "foo")
-				Assert.assertEquals(eEntry.values.get(1), "bar")
-				Assert.assertEquals(eEntry.values.size, 2)
-			} else if (entry is ScalarEntry) {
-				val sEntry = entry
-				Assert.assertEquals(sEntry.key, "ScalarKey")
-				Assert.assertEquals(sEntry.getType(), "BIGINTEGER")
+			when (entry) {
+				is FileEntry -> {
+					val fEntry = entry
+					Assert.assertEquals(fEntry.fileType, "pem")
+					Assert.assertEquals(fEntry.isRequiredBeforeAction, true as Boolean?)
+					Assert.assertEquals(fEntry.getLocalizedName("EN"), "Certificate file")
+					Assert.assertEquals(
+						fEntry.getLocalizedDescription("EN"),
+						"Enter the path to the certificate in pem format.",
+					)
+					Assert.assertEquals(fEntry.key, "Blub")
+				}
+
+				is EnumEntry -> {
+					val eEntry = entry
+					Assert.assertEquals(eEntry.key, "Testkey")
+					Assert.assertEquals(eEntry.values[0], "foo")
+					Assert.assertEquals(eEntry.values[1], "bar")
+					Assert.assertEquals(eEntry.values.size, 2)
+				}
+
+				is ScalarEntry -> {
+					val sEntry = entry
+					Assert.assertEquals(sEntry.key, "ScalarKey")
+					Assert.assertEquals(sEntry.getType(), "BIGINTEGER")
+				}
 			}
 		}
 	}
 
 	@Test
 	fun testBindingAction() {
-		val appPluginSpec = addonBundleDescription!!.bindingActions.get(0)
+		val appPluginSpec = addonBundleDescription!!.bindingActions[0]
 		Assert.assertEquals(appPluginSpec.className, "de.test.class")
 		Assert.assertEquals(appPluginSpec.resourceName, "test-Client")
 		Assert.assertTrue(appPluginSpec.isLoadOnStartup!!)
-		Assert.assertEquals(appPluginSpec.parameters.get(0)!!.name, "Test parameter")
-		Assert.assertEquals(appPluginSpec.parameters.get(0)!!.value, "Test value")
-		Assert.assertEquals(appPluginSpec.parameters.get(1)!!.name, "Test parameter 2")
-		Assert.assertEquals(appPluginSpec.parameters.get(1)!!.value, "Test Value2")
+		Assert.assertEquals(appPluginSpec.parameters[0]!!.name, "Test parameter")
+		Assert.assertEquals(appPluginSpec.parameters[0]!!.value, "Test value")
+		Assert.assertEquals(appPluginSpec.parameters[1]!!.name, "Test parameter 2")
+		Assert.assertEquals(appPluginSpec.parameters[1]!!.value, "Test Value2")
 		Assert.assertEquals(appPluginSpec.body!!.mimeType, "application/ogg")
 		Assert.assertEquals(appPluginSpec.body!!.node, "<html><body>test</body></html>")
 		Assert.assertEquals(appPluginSpec.attachments.size, 2)
 		Assert.assertEquals(
-			appPluginSpec.attachments
-				.get(0)!!
-				.mimeType
-				.get(0),
+			appPluginSpec.attachments[0]!!
+				.mimeType[0],
 			"application/pdf",
 		)
-		Assert.assertEquals(appPluginSpec.attachments.get(0)!!.name, "Documentation")
+		Assert.assertEquals(appPluginSpec.attachments[0]!!.name, "Documentation")
 		Assert.assertEquals(
-			appPluginSpec.attachments
-				.get(1)!!
-				.mimeType
-				.get(0),
+			appPluginSpec.attachments[1]!!
+				.mimeType[0],
 			"text/plain",
 		)
-		Assert.assertEquals(appPluginSpec.attachments.get(1)!!.name, "plaintext")
+		Assert.assertEquals(appPluginSpec.attachments[1]!!.name, "plaintext")
 	}
 
 	@Test
 	fun testApplicationAction() {
-		val appExtSpec = addonBundleDescription!!.applicationActions.get(0)
+		val appExtSpec = addonBundleDescription!!.applicationActions[0]
 		Assert.assertEquals(appExtSpec.className, "de.test.class")
 		Assert.assertFalse(appExtSpec.isLoadOnStartup!!)
 		Assert.assertEquals(appExtSpec.id, "123")
@@ -148,7 +150,7 @@ class AddonBundleDescriptionTest {
 
 	@Test
 	fun testIFDAction() {
-		val protPlugSpec = addonBundleDescription!!.ifdActions.get(0)
+		val protPlugSpec = addonBundleDescription!!.ifdActions[0]
 		Assert.assertEquals(protPlugSpec.className, "de.test.class")
 		Assert.assertEquals(protPlugSpec.uri, "http://www.test.de")
 		Assert.assertFalse(protPlugSpec.isLoadOnStartup!!)
@@ -156,7 +158,7 @@ class AddonBundleDescriptionTest {
 
 	@Test
 	fun testSALAction() {
-		val protPlugSpec = addonBundleDescription!!.salActions.get(0)
+		val protPlugSpec = addonBundleDescription!!.salActions[0]
 		Assert.assertEquals(protPlugSpec.className, "de.test.class")
 		Assert.assertEquals(protPlugSpec.uri, "http://www.test.de")
 		Assert.assertFalse(protPlugSpec.isLoadOnStartup!!)

@@ -21,50 +21,56 @@
  */
 package org.openecard.addon
 
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 
 /**
  * Extends Timer to make it reschedulable.
  * @author Dirk Petrautzki
  */
 internal class ReschedulableTimer : Timer() {
-    private var task: Runnable? = null
-    private var timerTask: TimerTask? = null
+	private var task: Runnable? = null
+	private var timerTask: TimerTask? = null
 
-    /**
-     * Schedules the specified task for execution after the specified delay.
-     * @param runnable the task to execute after the delay
-     * @param delay execution delay in milliseconds
-     */
-    fun schedule(runnable: Runnable?, delay: Long) {
-        task = runnable
+	/**
+	 * Schedules the specified task for execution after the specified delay.
+	 * @param runnable the task to execute after the delay
+	 * @param delay execution delay in milliseconds
+	 */
+	fun schedule(
+		runnable: Runnable?,
+		delay: Long,
+	) {
+		task = runnable
 
-        timerTask = object : TimerTask() {
-            override fun run() {
-                if (task != null) {
-                    task!!.run()
-                }
-            }
-        }
+		timerTask =
+			object : TimerTask() {
+				override fun run() {
+					if (task != null) {
+						task!!.run()
+					}
+				}
+			}
 
-        super.schedule(timerTask, delay)
-    }
+		super.schedule(timerTask, delay)
+	}
 
-    /**
-     * Reschedule the timer with a new delay.
-     * @param delay reschedule delay in milliseconds
-     */
-    fun reschedule(delay: Long) {
-        timerTask!!.cancel()
+	/**
+	 * Reschedule the timer with a new delay.
+	 * @param delay reschedule delay in milliseconds
+	 */
+	fun reschedule(delay: Long) {
+		timerTask!!.cancel()
 
-        timerTask = object : TimerTask() {
-            override fun run() {
-                if (task != null) {
-                    task!!.run()
-                }
-            }
-        }
+		timerTask =
+			object : TimerTask() {
+				override fun run() {
+					if (task != null) {
+						task!!.run()
+					}
+				}
+			}
 
-        super.schedule(timerTask, delay)
-    }
+		super.schedule(timerTask, delay)
+	}
 }

@@ -58,18 +58,18 @@ class ClasspathAndFileRegistry(
 		return searchByName
 	}
 
-	override fun searchIFDProtocol(uri: String): MutableSet<AddonSpecification>? {
-		var matchingAddons = classpathRegistry.searchIFDProtocol(uri)
+	override fun searchIFDProtocol(protocolUri: String): MutableSet<AddonSpecification>? {
+		var matchingAddons = classpathRegistry.searchIFDProtocol(protocolUri)
 		if (matchingAddons.isEmpty()) {
-			matchingAddons = fileRegistry.searchIFDProtocol(uri)!!
+			matchingAddons = fileRegistry.searchIFDProtocol(protocolUri)!!
 		}
 		return matchingAddons
 	}
 
-	override fun searchSALProtocol(uri: String): MutableSet<AddonSpecification>? {
-		var matchingAddons = classpathRegistry.searchSALProtocol(uri)
+	override fun searchSALProtocol(protocolUri: String): MutableSet<AddonSpecification>? {
+		var matchingAddons = classpathRegistry.searchSALProtocol(protocolUri)
 		if (matchingAddons.isEmpty()) {
-			matchingAddons = fileRegistry.searchSALProtocol(uri)!!
+			matchingAddons = fileRegistry.searchSALProtocol(protocolUri)!!
 		}
 		return matchingAddons
 	}

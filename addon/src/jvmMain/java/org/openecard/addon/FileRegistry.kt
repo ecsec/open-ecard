@@ -196,10 +196,10 @@ class FileRegistry(
 		return matchingAddons
 	}
 
-	override fun searchIFDProtocol(uri: String): MutableSet<AddonSpecification>? {
+	override fun searchIFDProtocol(protocolUri: String): MutableSet<AddonSpecification>? {
 		val matchingAddons: MutableSet<AddonSpecification> = mutableSetOf()
 		for (desc in this.addons.values) {
-			val protocolDesc: ProtocolPluginSpecification? = desc.searchIFDActionByURI(uri)
+			val protocolDesc: ProtocolPluginSpecification? = desc.searchIFDActionByURI(protocolUri)
 			if (protocolDesc != null) {
 				matchingAddons.add(desc)
 			}
@@ -207,10 +207,10 @@ class FileRegistry(
 		return matchingAddons
 	}
 
-	override fun searchSALProtocol(uri: String): MutableSet<AddonSpecification>? {
+	override fun searchSALProtocol(protocolUri: String): MutableSet<AddonSpecification>? {
 		val matchingAddons: MutableSet<AddonSpecification> = mutableSetOf()
 		for (desc in this.addons.values) {
-			val protocolDesc: ProtocolPluginSpecification? = desc.searchSALActionByURI(uri)
+			val protocolDesc: ProtocolPluginSpecification? = desc.searchSALActionByURI(protocolUri)
 			if (protocolDesc != null) {
 				matchingAddons.add(desc)
 			}

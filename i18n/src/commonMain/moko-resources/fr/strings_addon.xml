@@ -11,15 +11,15 @@
 	<string name="addon_panel_tab_about">Sur</string>
 
 	<!-- General settings-->
-	<string name="# addon.list.core.general">General Settings</string>
-	<string name="# addon.list.core.general.notification.group_name">Notification</string>
-	<string name="# addon.list.core.general.notification.omit_show_remove_card">No "Remove Card" Dialog</string>
-	<string name="# addon.list.core.general.notification.omit_show_remove_card.desc">Do not show a remove card dialog
+	<string name="addon.list.core.general">General Settings</string>
+	<string name="addon.list.core.general.notification.group_name">Notification</string>
+	<string name="addon.list.core.general.notification.omit_show_remove_card">No "Remove Card" Dialog</string>
+	<string name="addon.list.core.general.notification.omit_show_remove_card.desc">Do not show a remove card dialog
 		after finishing the authentication with the card.
 	</string>
-	<string name="# addon.list.core.general.legacy.group_name">Legacy Behaviour</string>
-	<string name="# addon.list.core.general.legacy.tls1">TLS 1.0</string>
-	<string name="# addon.list.core.general.legacy.tls1.desc">Allow the use of TLS version 1.0.</string>
+	<string name="addon.list.core.general.legacy.group_name">Legacy Behaviour</string>
+	<string name="addon.list.core.general.legacy.tls1">TLS 1.0</string>
+	<string name="addon.list.core.general.legacy.tls1.desc">Allow the use of TLS version 1.0.</string>
 	<string name="addon_list_core_general_legacy_invalid_schema">Pas de validation de schéma</string>
 	<string name="addon_list_core_general_legacy_invalid_schema_desc">Ne validez pas les messages entrants par rapport
 		au schéma XML d'eCard.
@@ -61,18 +61,18 @@
 	<string name="addon_core_logging_root">Niveau de base</string>
 	<string name="addon_core_logging_root_desc">Niveau de base utilisé quand aucune valeur plus précise est donnée.
 	</string>
-	<string name="# addon.core.logging.paos">PAOS</string>
-	<string name="# addon.core.logging.paos.desc">Connection between eCard-Client and eID-Server.</string>
-	<string name="# addon.core.logging.eac">EAC</string>
-	<string name="# addon.core.logging.eac.desc">Authentication protocol between card and eID-Server.</string>
-	<string name="# addon.core.logging.pace">PACE</string>
-	<string name="# addon.core.logging.pace.desc">Authentication protocol between card and eCard-Client.</string>
-	<string name="# addon.core.logging.trchecks">TR-03112 checks</string>
-	<string name="# addon.core.logging.trchecks.desc">Checks of the certificates and server addresses.</string>
-	<string name="# addon.core.logging.tctoken">TCToken</string>
-	<string name="# addon.core.logging.tctoken.desc">TCToken related operations.</string>
-	<string name="# addon.core.logging.event">Event Manager</string>
-	<string name="# addon.core.logging.event.desc">Low level events with cards.</string>
+	<string name="addon.core.logging.paos">PAOS</string>
+	<string name="addon.core.logging.paos.desc">Connection between eCard-Client and eID-Server.</string>
+	<string name="addon.core.logging.eac">EAC</string>
+	<string name="addon.core.logging.eac.desc">Authentication protocol between card and eID-Server.</string>
+	<string name="addon.core.logging.pace">PACE</string>
+	<string name="addon.core.logging.pace.desc">Authentication protocol between card and eCard-Client.</string>
+	<string name="addon.core.logging.trchecks">TR-03112 checks</string>
+	<string name="addon.core.logging.trchecks.desc">Checks of the certificates and server addresses.</string>
+	<string name="addon.core.logging.tctoken">TCToken</string>
+	<string name="addon.core.logging.tctoken.desc">TCToken related operations.</string>
+	<string name="addon.core.logging.event">Event Manager</string>
+	<string name="addon.core.logging.event.desc">Low level events with cards.</string>
 	<string name="addon_core_logging_httpbind">HTTP Binding</string>
 	<string name="addon_core_logging_httpbind_desc">Interface HTTP sur http\://localhost\:24727.</string>
 	<string name="addon_core_logging_addon">Add-on Manager</string>
@@ -98,15 +98,15 @@
 	</string>
 
 	<!-- Addon specific about page-->
-	<string name="# addon.about.version">Version</string>
-	<string name="# addon.about.license">License</string>
-	<string name="# addon.about.license.type">License type</string>
-	<string name="# addon.about.about">About</string>
-	<string name="# addon.about.uninstall">Uninstall addon</string>
+	<string name="addon.about.version">Version</string>
+	<string name="addon.about.license">License</string>
+	<string name="addon.about.license.type">License type</string>
+	<string name="addon.about.about">About</string>
+	<string name="addon.about.uninstall">Uninstall addon</string>
 
 	<!-- Addon specific settings page -->
-	<string name="# addon.settings.general">General Settings</string>
-	<string name="# addon.settings.settings">Settings</string>
-	<string name="# addon.settings.browse">Browse</string>
-	<string name="# addon.settings.file.select">Select a file!</string>
+	<string name="addon.settings.general">General Settings</string>
+	<string name="addon.settings.settings">Settings</string>
+	<string name="addon.settings.browse">Browse</string>
+	<string name="addon.settings.file.select">Select a file!</string>
 </resources>

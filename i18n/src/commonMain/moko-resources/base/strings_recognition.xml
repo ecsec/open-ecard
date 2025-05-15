@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
 	<!-- Exclusive card access -->
-	<string name="error">Error in card recognition</string>
-	<string name="message">The %s is not able to recognise the card in Terminal '%s' because it cannot get exclusive
+	<string name="recognition_error">Error in card recognition</string>
+	<string name="recognition_message">The %s is not able to recognise the card in Terminal '%s' because it cannot get exclusive
 		access to the card.\nPlease make sure no other Application is blocking the card.
 	</string>
 </resources>

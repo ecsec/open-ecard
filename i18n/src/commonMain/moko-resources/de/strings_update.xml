@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-	<string name="new_version_msg">Eine neue Version ist für die %s (%s) verfügbar:</string>
-	<string name="new_versions_msg">Die folgenden Updates sind für die %s (%s) verfügbar:</string>
-	<string name="tooltip_msg">%s Update</string>
-	<string name="version">Version</string>
+	<string name="update_new_version_msg">Eine neue Version ist für die %s (%s) verfügbar:</string>
+	<string name="update_new_versions_msg">Die folgenden Updates sind für die %s (%s) verfügbar:</string>
+	<string name="update_tooltip_msg">%s Update</string>
+	<string name="update_version">Version</string>
 	<string name="update_type">Update Typ</string>
-	<string name="direct_download">Direkter Download</string>
-	<string name="manual_download">Sie können eine neue Version auch manuell hier herunterladen:</string>
-	<string name="version_not_maintained">Die aktuelle Version %s wird nicht mehr gewartet. Bitte aktualisieren Sie auf
+	<string name="update_direct_download">Direkter Download</string>
+	<string name="update_manual_download">Sie können eine neue Version auch manuell hier herunterladen:</string>
+	<string name="update_version_not_maintained">Die aktuelle Version %s wird nicht mehr gewartet. Bitte aktualisieren Sie auf
 		eine neue Version:
 	</string>
 </resources>

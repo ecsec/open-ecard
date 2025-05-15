@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
     <!-- PIN IDs-->
-    <string name="pin">PIN</string>
-    <string name="mrz">MRZ</string>
-    <string name="puk">PUK</string>
-    <string name="can">CAN</string>
+    <string name="pace_pin">PIN</string>
+    <string name="pace_mrz">MRZ</string>
+    <string name="pace_puk">PUK</string>
+    <string name="pace_can">CAN</string>
 
     <!-- GUI -->
-    <string name="step_pin_userconsent">User Authentication</string>
-    <string name="step_pace_step_description">PACE authentication with the password.</string>
-    <string name="step_pin_retrycount">Remaining attempts: %d</string>
-    <string name="step_pace_userconsent">PACE User Authentication</string>
-    <string name="step_pace_title">Enter the %s</string>
-    <string name="step_pace_description">Please enter the %s to perform the authentication.</string>
-    <string name="step_pace_native_description">Please enter the %s at your card terminal to perform the
+    <string name="pace_step_pin_userconsent">User Authentication</string>
+    <string name="pace_step_pace_step_description">PACE authentication with the password.</string>
+    <string name="pace_step_pin_retrycount">Remaining attempts: %d</string>
+    <string name="pace_step_pace_userconsent">PACE User Authentication</string>
+    <string name="pace_step_pace_title">Enter the %s</string>
+    <string name="pace_step_pace_description">Please enter the %s to perform the authentication.</string>
+    <string name="pace_step_pace_native_description">Please enter the %s at your card terminal to perform the
         authentication.
     </string>
-    <string name="step_error_pin_blocked">You had 3 failed attempts to enter the %s. The %s is now blocked and you need
+    <string name="pace_step_error_pin_blocked">You had 3 failed attempts to enter the %s. The %s is now blocked and you need
         to enter the %s for unblocking.\nUse the PIN Management to unblock the %s.
     </string>
-    <string name="step_error_title_blocked">%s is blocked</string>
-<string name="step_error_pin_deactivated">Your card is not activated. Please go to your responsible registration office and activate the card.</string>
-<string name="step_error_title_deactivated">Card is not activated</string>
+    <string name="pace_step_error_title_blocked">%s is blocked</string>
+<string name="pace_step_error_pin_deactivated">Your card is not activated. Please go to your responsible registration office and activate the card.</string>
+<string name="pace_step_error_title_deactivated">Card is not activated</string>
 </resources>

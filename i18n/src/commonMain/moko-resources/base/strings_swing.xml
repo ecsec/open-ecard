@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-	<string name="open_pdf_in_external_viewer">Open in default PDF viewer.</string>
-	<string name="pdf_creation_failed">The terms of usage are in PDF format. The application failed to write the PDF on
+	<string name="swing_open_pdf_in_external_viewer">Open in default PDF viewer.</string>
+	<string name="swing_pdf_creation_failed">The terms of usage are in PDF format. The application failed to write the PDF on
 		the hard disk.
 	</string>
-	<string name="unsupported_mimetype">Content of type %s is not supported by the Swing ToggleButton implementation.
+	<string name="swing_unsupported_mimetype">Content of type %s is not supported by the Swing ToggleButton implementation.
 	</string>
 </resources>

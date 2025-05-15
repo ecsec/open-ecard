@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
 	<!-- Update dialog-->
-	<string name="dialog_dl_title">Information de mise à jour</string>
-	<string name="dialog_dl_text_required">Veuillez noter que votre version actuellement installée de %s est dépassée et
+	<string name="chipgateway_dialog_dl_title">Information de mise à jour</string>
+	<string name="chipgateway_dialog_dl_text_required">Veuillez noter que votre version actuellement installée de %s est dépassée et
 		doit être renouvelée.
 	</string>
-	<string name="dialog_dl_text_optional">Veuillez noter qu'il y a une mise à jour de %s disponible. Il est recommandé
+	<string name="chipgateway_dialog_dl_text_optional">Veuillez noter qu'il y a une mise à jour de %s disponible. Il est recommandé
 		d'installer la nouvelle version à votre meilleure convenance.
 	</string>
-	<string name="dialog_dl_text_instructions">A cet effet, vous devriez cliquer sur le lien ci-dessous, télécharger le
+	<string name="chipgateway_dialog_dl_text_instructions">A cet effet, vous devriez cliquer sur le lien ci-dessous, télécharger le
 		nouveau logiciel approprié pour votre plate-forme et effectuer la mise à jour en lançant le logiciel
 		d'installation.
 	</string>
 
 	<!-- error dialog-->
-	<string name="error_dialog_title">Erreur du ChipGateway</string>
-	<string name="error_dialog_submessage">Veuillez réessayer plus tard. Si le problème persiste,\ncontacter le Helpdesk
+	<string name="chipgateway_error_dialog_title">Erreur du ChipGateway</string>
+	<string name="chipgateway_error_dialog_submessage">Veuillez réessayer plus tard. Si le problème persiste,\ncontacter le Helpdesk
 		s'il vous plaît.
 	</string>
 
 	<!-- error messages -->
-	<string name="error_invalid_refresh_addr">Activer appelé avec un rafraîchissement URL invalide.</string>
-	<string name="error_malformed_url">L'URL dans '%s' n'est pas une URL valide.</string>
-	<string name="error_no_https_url">L'URL dans '%s' n'est pas une URL https.</string>
-	<string name="error_element_missing">L'élément '%s' est vide ou manquant dans les paramètres d'activation.</string>
-	<string name="error_element_value_invalid">L'élément '%s' ne contient aucune des valeurs admissibles.</string>
-	<string name="error_connection_open_failed">Impossible d'ouvrir la connexion au serveur ChipGateway.</string>
-	<string name="error_invalid_http_status">Invalid code d'état HTTP (%d) reçu du serveur ChipGateway.</string>
-	<string name="error_invalid_chipgateway_msg">Message d'erreur du ChipGateway.</string>
-	<string name="error_http_error">Erreur dans le protocole HTTP.</string>
-	<string name="error_signature_invalid">Echec de la validation de signature du ChipGateway.</string>
-	<string name="error_version_outdated">La version client installée est trop ancien.</string>
-	<string name="error_unknown">Une erreur inconnue est survenue lors de l'exécution du ChipGateway.</string>
-	<string name="error_server_sent_error">Erreur reçue du serveur ChipGateway (%s).</string>
-	<string name="error_server_wrong_config">Une erreur interne du serveur ChipGateway est survenue.</string>
+	<string name="chipgateway_error_invalid_refresh_addr">Activer appelé avec un rafraîchissement URL invalide.</string>
+	<string name="chipgateway_error_malformed_url">L'URL dans '%s' n'est pas une URL valide.</string>
+	<string name="chipgateway_error_no_https_url">L'URL dans '%s' n'est pas une URL https.</string>
+	<string name="chipgateway_error_element_missing">L'élément '%s' est vide ou manquant dans les paramètres d'activation.</string>
+	<string name="chipgateway_error_element_value_invalid">L'élément '%s' ne contient aucune des valeurs admissibles.</string>
+	<string name="chipgateway_error_connection_open_failed">Impossible d'ouvrir la connexion au serveur ChipGateway.</string>
+	<string name="chipgateway_error_invalid_http_status">Invalid code d'état HTTP (%d) reçu du serveur ChipGateway.</string>
+	<string name="chipgateway_error_invalid_chipgateway_msg">Message d'erreur du ChipGateway.</string>
+	<string name="chipgateway_error_http_error">Erreur dans le protocole HTTP.</string>
+	<string name="chipgateway_error_signature_invalid">Echec de la validation de signature du ChipGateway.</string>
+	<string name="chipgateway_error_version_outdated">La version client installée est trop ancien.</string>
+	<string name="chipgateway_error_unknown">Une erreur inconnue est survenue lors de l'exécution du ChipGateway.</string>
+	<string name="chipgateway_error_server_sent_error">Erreur reçue du serveur ChipGateway (%s).</string>
+	<string name="chipgateway_error_server_wrong_config">Une erreur interne du serveur ChipGateway est survenue.</string>
 </resources>

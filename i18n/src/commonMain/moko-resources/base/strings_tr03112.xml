@@ -1,130 +1,130 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
 	<!-- Dialog headings-->
-	<string name="error">Error</string>
-	<string name="int_error">Internal Error</string>
-	<string name="finish">Information</string>
-	<string name="card_selection_heading_uc">Select a credential - %s</string>
-	<string name="card_selection_heading_step">Select a credential</string>
+	<string name="tr03112_error">Error</string>
+	<string name="tr03112_int_error">Internal Error</string>
+	<string name="tr03112_finish">Information</string>
+	<string name="tr03112_card_selection_heading_uc">Select a credential - %s</string>
+	<string name="tr03112_card_selection_heading_step">Select a credential</string>
 
 	<!-- Dialog messages-->
-	<string name="remove_card_msg">For security reasons it is advised to remove the chip card from the terminal.
+	<string name="tr03112_remove_card_msg">For security reasons it is advised to remove the chip card from the terminal.
 	</string>
-	<string name="err_header">The authentication failed!</string>
-	<string name="err_msg_indicator">The following error was returned by the system:</string>
-	<string name="card_selection_message">The service provider allows you to use several credential and you have
+	<string name="tr03112_err_header">The authentication failed!</string>
+	<string name="tr03112_err_msg_indicator">The following error was returned by the system:</string>
+	<string name="tr03112_card_selection_message">The service provider allows you to use several credential and you have
 		currently more than one valid credential available. Please select the credential to use in the selection box
 		below.
 	</string>
 
 	<!-- Specifically handled errors -->
-	<string name="activation_action_invalid_refresh_address">The determination of a valid "refreshURL" failed.</string>
-	<string name="auth_server_exception">eService indicated an error.</string>
-	<string name="authentication_failed">An error occurred during the authentication process.</string>
-	<string name="certificate_error">A certificate error occurred.</string>
-	<string name="certificate_description_check_error">There is a mismatch between the communication certificates and
+	<string name="tr03112_activation_action_invalid_refresh_address">The determination of a valid "refreshURL" failed.</string>
+	<string name="tr03112_auth_server_exception">eService indicated an error.</string>
+	<string name="tr03112_authentication_failed">An error occurred during the authentication process.</string>
+	<string name="tr03112_certificate_error">A certificate error occurred.</string>
+	<string name="tr03112_certificate_description_check_error">There is a mismatch between the communication certificates and
 		the certificate description.
 	</string>
-	<string name="connection_error_invalid_status_code">Result returned from server is not OK (%d).</string>
-	<string name="connection_error_unknown_sec_protocol">Unknown security protocol %s requested.</string>
-	<string name="dispatcher_exception_dispatched_method_exception">The dispatched method threw an exception.</string>
-	<string name="dispatcher_exception_failed_jaxb_object_marshaling">Failed to marshal JAXB object.</string>
-	<string name="element_parsing_exception_invalid_cert_number">Invalid number of CertificateDescription elements in
+	<string name="tr03112_connection_error_invalid_status_code">Result returned from server is not OK (%d).</string>
+	<string name="tr03112_connection_error_unknown_sec_protocol">Unknown security protocol %s requested.</string>
+	<string name="tr03112_dispatcher_exception_dispatched_method_exception">The dispatched method threw an exception.</string>
+	<string name="tr03112_dispatcher_exception_failed_jaxb_object_marshaling">Failed to marshal JAXB object.</string>
+	<string name="tr03112_element_parsing_exception_invalid_cert_number">Invalid number of CertificateDescription elements in
 		EAC1InpputType.
 	</string>
-	<string name="element_parsing_exception_invalid_signature_number">Invalid number of Signature elements in
+	<string name="tr03112_element_parsing_exception_invalid_signature_number">Invalid number of Signature elements in
 		EACAdditionalType.
 	</string>
-	<string name="error_internal">An internal error occurred.</string>
-	<string name="error_internal_tls">An error occurred while establishing the TLS connection.</string>
-	<string name="illegal_argument_exception_invalid_url">The TCToken contains an invalid URL which should have been
+	<string name="tr03112_error_internal">An internal error occurred.</string>
+	<string name="tr03112_error_internal_tls">An error occurred while establishing the TLS connection.</string>
+	<string name="tr03112_illegal_argument_exception_invalid_url">The TCToken contains an invalid URL which should have been
 		detected before.
 	</string>
-	<string name="illegal_argument_exception_unsupported_parser_feature">Unsupported XML parser feature requested.
+	<string name="tr03112_illegal_argument_exception_unsupported_parser_feature">Unsupported XML parser feature requested.
 	</string>
-	<string name="illegal_state_exception_invalid_refresh_address_in_tctoken">Refresh address in TCToken is invalid.
+	<string name="tr03112_illegal_state_exception_invalid_refresh_address_in_tctoken">Refresh address in TCToken is invalid.
 		This indicates an error in the TCToken verification.
 	</string>
-	<string name="illegal_state_exception_utf8_not_supported">UTF-8 encoding is not supported. This should never be the
+	<string name="tr03112_illegal_state_exception_utf8_not_supported">UTF-8 encoding is not supported. This should never be the
 		case.
 	</string>
-	<string name="invalid_address_exception_no_https">Specified URL is not a https-URL.</string>
-	<string name="invalid_result_status_exception">Received a result code %d '%s' from server.</string>
-	<string name="invalid_tctoken_element_eservice">This happened probably on the side of the eService because the
+	<string name="tr03112_invalid_address_exception_no_https">Specified URL is not a https-URL.</string>
+	<string name="tr03112_invalid_result_status_exception">Received a result code %d '%s' from server.</string>
+	<string name="tr03112_invalid_tctoken_element_eservice">This happened probably on the side of the eService because the
 		TCToken does not contain required information.
 	</string>
-	<string name="invalid_tctoken_element_invalid_element">Invalid %s in TCToken.</string>
-	<string name="invalid_tctoken_element_invalid_refresh_address">Invalid RefreshAddress.</string>
-	<string name="invalid_tctoken_element_invalid_refresh_address_nosop">The RefreshAddress is not conform to the same
+	<string name="tr03112_invalid_tctoken_element_invalid_element">Invalid %s in TCToken.</string>
+	<string name="tr03112_invalid_tctoken_element_invalid_refresh_address">Invalid RefreshAddress.</string>
+	<string name="tr03112_invalid_tctoken_element_invalid_refresh_address_nosop">The RefreshAddress is not conform to the same
 		origin policy.
 	</string>
-	<string name="invalid_tctoken_element_missing_element">Element %s is required.</string>
-	<string name="invalid_tctoken_element_no_refresh_address">No refreshAddress available.</string>
-	<string name="invalid_tctoken_element_no_server_address">No ServerAddress given in the TCToken.</string>
-	<string name="invalid_tctoken_exception_malformed_tctoken">TCToken is malformed and could not be parsed.</string>
-	<string name="invalid_tctoken_exception_no_tctoken">No TCToken found in the given data.</string>
-	<string name="invalid_tctoken_url_exception_invalid_tctoken_url">The tcTokenURL parameter contains an invalid URL:
+	<string name="tr03112_invalid_tctoken_element_missing_element">Element %s is required.</string>
+	<string name="tr03112_invalid_tctoken_element_no_refresh_address">No refreshAddress available.</string>
+	<string name="tr03112_invalid_tctoken_element_no_server_address">No ServerAddress given in the TCToken.</string>
+	<string name="tr03112_invalid_tctoken_exception_malformed_tctoken">TCToken is malformed and could not be parsed.</string>
+	<string name="tr03112_invalid_tctoken_exception_no_tctoken">No TCToken found in the given data.</string>
+	<string name="tr03112_invalid_tctoken_url_exception_invalid_tctoken_url">The tcTokenURL parameter contains an invalid URL:
 		%s
 	</string>
-	<string name="invalid_tctoken_url_exception_malformed_url">Malformed %s URL</string>
-	<string name="invalid_tctoken_url_exception_no_https_url">%s is not a https URL.</string>
-	<string name="invalid_redirect_url_exception_no_url">Error redirect URL is not an URL.</string>
-	<string name="invalid_redirect_url_exception_no_url_available">No redirect address available for an error
+	<string name="tr03112_invalid_tctoken_url_exception_malformed_url">Malformed %s URL</string>
+	<string name="tr03112_invalid_tctoken_url_exception_no_https_url">%s is not a https URL.</string>
+	<string name="tr03112_invalid_redirect_url_exception_no_url">Error redirect URL is not an URL.</string>
+	<string name="tr03112_invalid_redirect_url_exception_no_url_available">No redirect address available for an error
 		redirect.
 	</string>
-	<string name="invalid_redirect_url_exception_refresh_address_determination_failed">Failed to determine a valid
+	<string name="tr03112_invalid_redirect_url_exception_refresh_address_determination_failed">Failed to determine a valid
 		"refreshURL".
 	</string>
-	<string name="io_exception_failed_proxy_initialization">Failed to initialize proxy.</string>
-	<string name="io_exception_invalid_http_message">Invalid HTTP message received.</string>
-	<string name="message_validation_failed">The validation of the content of the received message failed.</string>
-	<string name="message_validation_not_possible">The validation of a received message was not possible.</string>
-	<string name="missing_activation_parameter_exception_card_insertion_canceled">The insertion of a requested card was
+	<string name="tr03112_io_exception_failed_proxy_initialization">Failed to initialize proxy.</string>
+	<string name="tr03112_io_exception_invalid_http_message">Invalid HTTP message received.</string>
+	<string name="tr03112_message_validation_failed">The validation of the content of the received message failed.</string>
+	<string name="tr03112_message_validation_not_possible">The validation of a received message was not possible.</string>
+	<string name="tr03112_missing_activation_parameter_exception_card_insertion_canceled">The insertion of a requested card was
 		canceled.
 	</string>
-	<string name="missing_activation_parameter_exception_card_selection_canceled">You have canceled the selection of a
+	<string name="tr03112_missing_activation_parameter_exception_card_selection_canceled">You have canceled the selection of a
 		card.
 	</string>
-	<string name="missing_activation_parameter_exception_no_activation_parameters">A parameter containing the activation
+	<string name="tr03112_missing_activation_parameter_exception_no_activation_parameters">A parameter containing the activation
 		information is missing.
 	</string>
-	<string name="missing_activation_parameter_exception_no_suitable_parameters">No suitable set of parameters given in
+	<string name="tr03112_missing_activation_parameter_exception_no_suitable_parameters">No suitable set of parameters given in
 		the request.
 	</string>
-	<string name="missing_activation_parameter_exception_no_valid_tctoken_available">No valid TCToken available in
+	<string name="tr03112_missing_activation_parameter_exception_no_valid_tctoken_available">No valid TCToken available in
 		request.
 	</string>
-	<string name="pace_step_pace_authentication_failed">Failure in PACE authentication.</string>
-	<string name="paos_connection_exception">Failed to establish a connection to the eID-Server.</string>
-	<string name="paos_exception_conncetion_closed">PAOS connection closed and reestablishment is forbidden.</string>
-	<string name="paos_exception_failed_delivery">Failed to deliver or receive PAOS HTTP message.</string>
-	<string name="paos_exception_invalid_http_status_code">Invalid http status code %d received from the PAOS
+	<string name="tr03112_pace_step_pace_authentication_failed">Failure in PACE authentication.</string>
+	<string name="tr03112_paos_connection_exception">Failed to establish a connection to the eID-Server.</string>
+	<string name="tr03112_paos_exception_conncetion_closed">PAOS connection closed and reestablishment is forbidden.</string>
+	<string name="tr03112_paos_exception_failed_delivery">Failed to deliver or receive PAOS HTTP message.</string>
+	<string name="tr03112_paos_exception_invalid_http_status_code">Invalid http status code %d received from the PAOS
 		endpoint.
 	</string>
-	<string name="paos_exception_message_id_mismatch">MessageID from result doesn't match.</string>
-	<string name="paos_exception_no_message_id">No MessageID in PAOS header.</string>
-	<string name="paos_exception_no_response_from_server">The target server failed to respond.</string>
-	<string name="paos_exception_soap_message_creation_failed">Failed to create SOAP message instance from given JAXB
+	<string name="tr03112_paos_exception_message_id_mismatch">MessageID from result doesn't match.</string>
+	<string name="tr03112_paos_exception_no_message_id">No MessageID in PAOS header.</string>
+	<string name="tr03112_paos_exception_no_response_from_server">The target server failed to respond.</string>
+	<string name="tr03112_paos_exception_soap_message_creation_failed">Failed to create SOAP message instance from given JAXB
 		message.
 	</string>
-	<string name="paos_exception_unknown_ecard_exception">An unknown exception occurred while communicating with the
+	<string name="tr03112_paos_exception_unknown_ecard_exception">An unknown exception occurred while communicating with the
 		smart card.
 	</string>
-	<string name="paos_exception_interrupted">The PAOS process has been cancelled.</string>
-	<string name="paos_exception_msg_invalid_schema">The schema validation of a PAOS message failed.</string>
-	<string name="protocol_exception_fcp_parsing_failed">Failed to parse FCP.</string>
-	<string name="redirect_cert_validator_invalid_redirect">An attempt was made to redirect to an invalid page.</string>
-	<string name="redirect_cert_validator_malformed_subject_url">Failed to convert SubjectURL to URL class.</string>
-	<string name="resource_exception_max_redirects_exceeded">Maximum number of redirects exceeded.</string>
-	<string name="resource_exception_no_location_header">Resource could not be retrieved. Missing Location header in
+	<string name="tr03112_paos_exception_interrupted">The PAOS process has been cancelled.</string>
+	<string name="tr03112_paos_exception_msg_invalid_schema">The schema validation of a PAOS message failed.</string>
+	<string name="tr03112_protocol_exception_fcp_parsing_failed">Failed to parse FCP.</string>
+	<string name="tr03112_redirect_cert_validator_invalid_redirect">An attempt was made to redirect to an invalid page.</string>
+	<string name="tr03112_redirect_cert_validator_malformed_subject_url">Failed to convert SubjectURL to URL class.</string>
+	<string name="tr03112_resource_exception_max_redirects_exceeded">Maximum number of redirects exceeded.</string>
+	<string name="tr03112_resource_exception_no_location_header">Resource could not be retrieved. Missing Location header in
 		HTTP response.
 	</string>
-	<string name="runtime_exception_unsupported_binding">Unsupported binding in TCToken.</string>
-	<string name="security_violation_exception_no_sop_tls2">The same origin policy is violated for the second channel
+	<string name="tr03112_runtime_exception_unsupported_binding">Unsupported binding in TCToken.</string>
+	<string name="tr03112_security_violation_exception_no_sop_tls2">The same origin policy is violated for the second channel
 		(TLS-2).
 	</string>
-	<string name="tctoken_retrieval_exception">Failed to retrieve the TCToken.</string>
-	<string name="unknown_connection_handle">Unknown connection handle in the DIDAuthenticate message.</string>
-	<string name="unhandled_inner_exception">An unknown error occurred. The original error message is:</string>
-	<string name="ws_exception_card_connect_failed">Failed to connect to card.</string>
+	<string name="tr03112_tctoken_retrieval_exception">Failed to retrieve the TCToken.</string>
+	<string name="tr03112_unknown_connection_handle">Unknown connection handle in the DIDAuthenticate message.</string>
+	<string name="tr03112_unhandled_inner_exception">An unknown error occurred. The original error message is:</string>
+	<string name="tr03112_ws_exception_card_connect_failed">Failed to connect to card.</string>
 </resources>

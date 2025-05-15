@@ -3,134 +3,134 @@
 	<!-- PIN Management Plugin-->
 
 	<!-- plugin itself-->
-	<string name="name">PIN Management</string>
-	<string name="description">With this plug-in you can change or unblock your PIN.</string>
+	<string name="pinplugin_name">PIN Management</string>
+	<string name="pinplugin_description">With this plug-in you can change or unblock your PIN.</string>
 
 	<!-- change pin action-->
-	<string name="action_changepin_name">Change PIN</string>
-	<string name="action_changepin_description">With this action you can change your PIN.</string>
-	<string name="action_changepin_userconsent_title">Change PIN - %s</string>
+	<string name="pinplugin_action_changepin_name">Change PIN</string>
+	<string name="pinplugin_action_changepin_description">With this action you can change your PIN.</string>
+	<string name="pinplugin_action_changepin_userconsent_title">Change PIN - %s</string>
 
-	<string name="action_changepin_userconsent_pinstep_title">PIN entry</string>
-	<string name="action_changepin_userconsent_pinstep_context_specific">Signature-PIN entry</string>
-	<string name="action_changepin_userconsent_pinstep_description">This step allows you to change the %s of your card.
+	<string name="pinplugin_action_changepin_userconsent_pinstep_title">PIN entry</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_context_specific">Signature-PIN entry</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description">This step allows you to change the %s of your card.
 		Please enter the requested data into the corresponding fields. Note: This operation is also necessary if you
 		want to change the transport PIN into a regular one.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_description_after_can">The CAN was successfully verified. Now
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description_after_can">The CAN was successfully verified. Now
 		your last attempt to change the %s is enabled, so please enter the requested data into the corresponding fields.
 		Note: This operation is also necessary if you want to change the transport PIN into a regular one.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_native_description">Please enter old and new PIN at your card
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_description">Please enter old and new PIN at your card
 		terminal.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_native_start_description">Here you are able to change your PIN.
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description">Here you are able to change your PIN.
 		Press "Confirm" to change the PIN and enter the old and new PIN at your card terminal. Note: This operation is
 		also necessary if you want to change the transport PIN into a regular one.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_native_start_description_after_can">The CAN was successfully
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description_after_can">The CAN was successfully
 		verified. Now your last attempt to change the PIN is enabled. Press "Confirm" to change the PIN and enter the
 		old and new PIN at your card terminal. Note: This operation is also necessary if you want to change the
 		transport PIN into a regular one.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_oldpin">Current PIN</string>
-	<string name="action_changepin_userconsent_pinstep_newpin">New PIN</string>
-	<string name="action_changepin_userconsent_pinstep_newpinrepeat">New PIN again</string>
-	<string name="action_changepin_userconsent_pinstep_unblocking_required">Your PIN is unfortunately blocked. Please
+	<string name="pinplugin_action_changepin_userconsent_pinstep_oldpin">Current PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpin">New PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpinrepeat">New PIN again</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_unblocking_required">Your PIN is unfortunately blocked. Please
 		unblock your PIN.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_wrong_entry">Your entry does not meet the requirements regarding
+	<string name="pinplugin_action_changepin_userconsent_pinstep_wrong_entry">Your entry does not meet the requirements regarding
 		%s length and allowed characters.
 	</string>
-	<string name="action_changepin_userconsent_pinstep_remaining_attempts">(Number of remaining attempts: %d)</string>
-	<string name="action_changepin_userconsent_pinstep_incorrect_input">The %s you entered was unfortunately not
+	<string name="pinplugin_action_changepin_userconsent_pinstep_remaining_attempts">(Number of remaining attempts: %d)</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_incorrect_input">The %s you entered was unfortunately not
 		correct. Please try again.
 	</string>
 
-	<string name="action_changepin_userconsent_canstep_title">CAN entry</string>
-	<string name="action_changepin_userconsent_canstep_notice">You have entered the PIN two times wrong. To unlock the
+	<string name="pinplugin_action_changepin_userconsent_canstep_title">CAN entry</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_notice">You have entered the PIN two times wrong. To unlock the
 		third and final attempt you need to enter the card access number. You will find the access number right on the
 		front of your ID card.
 	</string>
-	<string name="action_changepin_userconsent_canstep_description">Please insert the card access number of your
+	<string name="pinplugin_action_changepin_userconsent_canstep_description">Please insert the card access number of your
 		identity card.
 	</string>
-	<string name="action_changepin_userconsent_canstep_native_description">Please insert the card access number of your
+	<string name="pinplugin_action_changepin_userconsent_canstep_native_description">Please insert the card access number of your
 		identity card at your card terminal.
 	</string>
-	<string name="action_changepin_userconsent_canstep_can">card access number</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_can">card access number</string>
 
-	<string name="action_changepin_userconsent_successstep_title">Confirmation</string>
-	<string name="action_changepin_userconsent_successstep_description">Your PIN has been changed successfully.</string>
+	<string name="pinplugin_action_changepin_userconsent_successstep_title">Confirmation</string>
+	<string name="pinplugin_action_changepin_userconsent_successstep_description">Your PIN has been changed successfully.</string>
 
-	<string name="action_changepin_userconsent_errorstep_title">Error</string>
-	<string name="action_changepin_userconsent_errorstep_unknown">Your PIN is in an unknown state and therefore can not
+	<string name="pinplugin_action_changepin_userconsent_errorstep_title">Error</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_unknown">Your PIN is in an unknown state and therefore can not
 		be changed.
 	</string>
-	<string name="action_changepin_userconsent_errorstep_blocked">Your PIN is blocked. Please unblock your PIN.</string>
-	<string name="action_changepin_userconsent_errorstep_deactivated">Your PIN is disabled and therefore can not be
+	<string name="pinplugin_action_changepin_userconsent_errorstep_blocked">Your PIN is blocked. Please unblock your PIN.</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_deactivated">Your PIN is disabled and therefore can not be
 		changed.
 	</string>
-	<string name="action_changepin_userconsent_errorstep_puk_blocked">Your PUK is blocked, you need to visit your
+	<string name="pinplugin_action_changepin_userconsent_errorstep_puk_blocked">Your PUK is blocked, you need to visit your
 		registration office to get a new eID-Card.
 	</string>
 
-	<string name="action_changepin_userconsent_canstepaction_wrong_can">You entered a wrong CAN. Please try again.
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_wrong_can">You entered a wrong CAN. Please try again.
 	</string>
-	<string name="action_changepin_userconsent_canstepaction_incorrect_input">Your entry does not meet the requirements
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_incorrect_input">Your entry does not meet the requirements
 		regarding CAN length and allowed characters.
 	</string>
-	<string name="action_changepin_userconsent_canstepaction_nativ_start_description">Your PIN has been suspended
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_nativ_start_description">Your PIN has been suspended
 		because of two failed attempts to enter the PIN. If you want to resume the PIN press "Confirm" and enter your
 		CAN at your card terminal.
 	</string>
 
 	<!--unblock pin action-->
-	<string name="action_unblockpin_name">Unblock PIN</string>
-	<string name="action_unblockpin_description">With this action you can unblock your PIN.</string>
-	<string name="action_unblockpin_userconsent_title">Unblock PIN - %s</string>
+	<string name="pinplugin_action_unblockpin_name">Unblock PIN</string>
+	<string name="pinplugin_action_unblockpin_description">With this action you can unblock your PIN.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_title">Unblock PIN - %s</string>
 
-	<string name="action_unblockpin_userconsent_pukstep_title">PUK entry</string>
-	<string name="action_unblockpin_userconsent_pukstep_description">Please enter the PUK.</string>
-	<string name="action_unblockpin_userconsent_pukstep_native_description">Please enter the PUK at your card
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_title">PUK entry</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_description">Please enter the PUK.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_native_description">Please enter the PUK at your card
 		terminal.
 	</string>
-	<string name="action_unblockpin_userconsent_pukstep_nativ_start_description">Your PIN is blocked and needs to be
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_nativ_start_description">Your PIN is blocked and needs to be
 		unblocked with your personal unblocking key (PUK). Press "Confirm" to unblock your PIN and enter the PUK at your
 		card terminal.
 	</string>
-	<string name="action_unblockpin_userconsent_pukstep_puk">PUK</string>
-	<string name="action_unblockpin_userconsent_pukstep_puk_success">PIN successfully unblocked.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk">PUK</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk_success">PIN successfully unblocked.</string>
 
-	<string name="action_unblockpin_userconsent_successstep_title">Confirmation</string>
-	<string name="action_unblockpin_userconsent_successstep_description">Your PIN has been unblocked successfully.
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_title">Confirmation</string>
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_description">Your PIN has been unblocked successfully.
 	</string>
 
-	<string name="action_unblockpin_userconsent_errorstep_title">Error</string>
-	<string name="action_unblockpin_userconsent_errorstep_description">Your PIN cannot be unblocked because it is
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_title">Error</string>
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_description">Your PIN cannot be unblocked because it is
 		currently not blocked.
 	</string>
 
 
 	<!-- PIN entry -->
-	<string name="action_pinentry_userconsent_pinstep_enter_pin">Please enter your PIN.</string>
-	<string name="action_pinentry_userconsent_pinstep_final_try_note">Note that this is your final try. If you fail to
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin">Please enter your PIN.</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_final_try_note">Note that this is your final try. If you fail to
 		enter the PIN correctly, you must unblock it in the PIN Management.
 	</string>
-	<string name="action_pinentry_userconsent_pinstep_enter_pin_term">Please enter your PIN at the terminal.</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term">Please enter your PIN at the terminal.</string>
 
 
-	<string name="action_error_card_removed">The card was removed or reset so the operation was canceled.</string>
-	<string name="action_error_internal">An internal error occurred so the operation was canceled.</string>
-	<string name="action_error_missing_password_match">The new PIN and the verification input of the new PIN do not
+	<string name="pinplugin_action_error_card_removed">The card was removed or reset so the operation was canceled.</string>
+	<string name="pinplugin_action_error_internal">An internal error occurred so the operation was canceled.</string>
+	<string name="pinplugin_action_error_missing_password_match">The new PIN and the verification input of the new PIN do not
 		match.
 	</string>
-	<string name="action_error_unknown">An unknown error occurred. The operation was canceled.</string>
-	<string name="action_error_timeout">The card terminal sent a time.</string>
-	<string name="action_error_title">Error</string>
-	<string name="action_error_user_cancellation">The process was aborted by the user or the card was removed from the
+	<string name="pinplugin_action_error_unknown">An unknown error occurred. The operation was canceled.</string>
+	<string name="pinplugin_action_error_timeout">The card terminal sent a time.</string>
+	<string name="pinplugin_action_error_title">Error</string>
+	<string name="pinplugin_action_error_user_cancellation">The process was aborted by the user or the card was removed from the
 		terminal.
 	</string>
 
-	<string name="action_success_title">Success</string>
+	<string name="pinplugin_action_success_title">Success</string>
 </resources>

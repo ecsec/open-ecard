@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
 	<!-- Buttons -->
-	<string name="button_back">Précédent</string>
-	<string name="button_finish">Confirmer</string>
-	<string name="button_next">Suivant</string>
-	<string name="button_cancel">Annuler</string>
-	<string name="button_ok">Ok</string>
-	<string name="button_yes">Oui</string>
-	<string name="button_no">Non</string>
-	<string name="button_open">Ouvrir</string>
-	<string name="button_save">Enregistrer</string>
-	<string name="button_new">Nouveau</string>
-	<string name="file_name">Nom du fichier</string>
-	<string name="location">Localisation actuelle</string>
-	<string name="no_read_access">Le dossier '%s' ne peut pas être ouvert.</string>
+	<string name="gui_button_back">Précédent</string>
+	<string name="gui_button_finish">Confirmer</string>
+	<string name="gui_button_next">Suivant</string>
+	<string name="gui_button_cancel">Annuler</string>
+	<string name="gui_button_ok">Ok</string>
+	<string name="gui_button_yes">Oui</string>
+	<string name="gui_button_no">Non</string>
+	<string name="gui_button_open">Ouvrir</string>
+	<string name="gui_button_save">Enregistrer</string>
+	<string name="gui_button_new">Nouveau</string>
+	<string name="gui_file_name">Nom du fichier</string>
+	<string name="gui_location">Localisation actuelle</string>
+	<string name="gui_no_read_access">Le dossier '%s' ne peut pas être ouvert.</string>
 </resources>

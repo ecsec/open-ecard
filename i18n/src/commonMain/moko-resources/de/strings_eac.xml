@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
 	<!-- CHAT data groups-->
-	<string name="dg22">Email Adresse</string>
-	<string name="dg21">Telefonnummer</string>
-	<string name="dg20">Nebenbestimmungen II</string>
-	<string name="dg19">Nebenbestimmungen</string>
-	<string name="dg18">Gemeindeschlüssel</string>
-	<string name="dg17">Anschrift</string>
-	<string name="dg16">RFU</string>
-	<string name="dg15">Ausstelldatum</string>
-	<string name="dg14">Unterschrift</string>
-	<string name="dg13">Geburtsname</string>
-	<string name="dg12">Optionale Daten</string>
-	<string name="dg11">Geschlecht</string>
-	<string name="dg10">Staatsangehörigkeit</string>
-	<string name="dg09">Geburtsort</string>
-	<string name="dg08">Geburtsdatum</string>
-	<string name="dg07">Doktorgrad</string>
-	<string name="dg06">Ordens-/Künstlername</string>
-	<string name="dg05">Familienname</string>
-	<string name="dg04">Vorname(n)</string>
-	<string name="dg03">Gültig bis</string>
-	<string name="dg02">Ausstellender Staat</string>
-	<string name="dg01">Dokumentenart</string>
+	<string name="eac_dg22">Email Adresse</string>
+	<string name="eac_dg21">Telefonnummer</string>
+	<string name="eac_dg20">Nebenbestimmungen II</string>
+	<string name="eac_dg19">Nebenbestimmungen</string>
+	<string name="eac_dg18">Gemeindeschlüssel</string>
+	<string name="eac_dg17">Anschrift</string>
+	<string name="eac_dg16">RFU</string>
+	<string name="eac_dg15">Ausstelldatum</string>
+	<string name="eac_dg14">Unterschrift</string>
+	<string name="eac_dg13">Geburtsname</string>
+	<string name="eac_dg12">Optionale Daten</string>
+	<string name="eac_dg11">Geschlecht</string>
+	<string name="eac_dg10">Staatsangehörigkeit</string>
+	<string name="eac_dg09">Geburtsort</string>
+	<string name="eac_dg08">Geburtsdatum</string>
+	<string name="eac_dg07">Doktorgrad</string>
+	<string name="eac_dg06">Ordens-/Künstlername</string>
+	<string name="eac_dg05">Familienname</string>
+	<string name="eac_dg04">Vorname(n)</string>
+	<string name="eac_dg03">Gültig bis</string>
+	<string name="eac_dg02">Ausstellender Staat</string>
+	<string name="eac_dg01">Dokumentenart</string>
 
 	<!-- CHAT special functions-->
-	<string name="install_qualified_certificate">Signatur-Zertifikat installieren</string>
-	<string name="install_certificate">nicht-qualifiziertes Signatur-Zertifikat installieren</string>
-	<string name="pin_management">PIN-Management</string>
-	<string name="can_allowed">Vor-Ort Auslesen</string>
-	<string name="privileged_terminal">Privilegiertes Terminal</string>
-	<string name="restricted_identification">Pseudonym</string>
-	<string name="community_id_verification">Wohnortbestätigung</string>
-	<string name="age_verification">Altersbestätigung (≥ %d)</string>
+	<string name="eac_install_qualified_certificate">Signatur-Zertifikat installieren</string>
+	<string name="eac_install_certificate">nicht-qualifiziertes Signatur-Zertifikat installieren</string>
+	<string name="eac_pin_management">PIN-Management</string>
+	<string name="eac_can_allowed">Vor-Ort Auslesen</string>
+	<string name="eac_privileged_terminal">Privilegiertes Terminal</string>
+	<string name="eac_restricted_identification">Pseudonym</string>
+	<string name="eac_community_id_verification">Wohnortbestätigung</string>
+	<string name="eac_age_verification">Altersbestätigung (≥ %d)</string>
 
 	<!-- CVC elements-->
-	<string name="cvc_subject_name">Name</string>
-	<string name="cvc_subject_url">Internetadresse</string>
-	<string name="cvc_termsofusage">Nutzungsbestimmungen</string>
-	<string name="cvc_validity">Gültigkeit</string>
-	<string name="cvc_validity_format">dd_MM_yyyy</string>
-	<string name="cvc_validity_from">Vom</string>
-	<string name="cvc_validity_to">bis zum</string>
-	<string name="cvc_issuer_name">Aussteller der Berechtigung</string>
-	<string name="cvc_issuer_url">Internetadresse des Ausstellers</string>
+	<string name="eac_cvc_subject_name">Name</string>
+	<string name="eac_cvc_subject_url">Internetadresse</string>
+	<string name="eac_cvc_termsofusage">Nutzungsbestimmungen</string>
+	<string name="eac_cvc_validity">Gültigkeit</string>
+	<string name="eac_cvc_validity_format">dd_MM_yyyy</string>
+	<string name="eac_cvc_validity_from">Vom</string>
+	<string name="eac_cvc_validity_to">bis zum</string>
+	<string name="eac_cvc_issuer_name">Aussteller der Berechtigung</string>
+	<string name="eac_cvc_issuer_url">Internetadresse des Ausstellers</string>
 
-	<string name="transaction_info">Bitte überprüfen Sie den Registrierungskontrollwert:
+	<string name="eac_transaction_info">Bitte überprüfen Sie den Registrierungskontrollwert:
 		<br/>
 		<tt>%s</tt>
 		<br/>
@@ -56,23 +56,23 @@
 	<string name="eac_user_consent_title">Identitätsnachweis</string>
 
 	<!-- Steps-->
-	<string name="step_chat_title">Angefragte Daten</string>
-	<string name="step_chat_step_description">Anzeige der angefragten Daten.</string>
-	<string name="step_chat_description">Der Anbieter %s fordert folgende Daten von Ihnen an:</string>
-	<string name="step_chat_note">Hinweis</string>
-	<string name="step_chat_note_content">Die grau hinterlegten Elemente benötigt der Anbieter zur Durchführung seiner
+	<string name="eac_step_chat_title">Angefragte Daten</string>
+	<string name="eac_step_chat_step_description">Anzeige der angefragten Daten.</string>
+	<string name="eac_step_chat_description">Der Anbieter %s fordert folgende Daten von Ihnen an:</string>
+	<string name="eac_step_chat_note">Hinweis</string>
+	<string name="eac_step_chat_note_content">Die grau hinterlegten Elemente benötigt der Anbieter zur Durchführung seiner
 		Dienstleistung. Optionale Daten können Sie nach Belieben an- bzw. abwählen.
 	</string>
-	<string name="step_chat_read_access_description">Zugriff auf:</string>
-	<string name="step_chat_write_access_description">Schreibzugriff auf:</string>
+	<string name="eac_step_chat_read_access_description">Zugriff auf:</string>
+	<string name="eac_step_chat_write_access_description">Schreibzugriff auf:</string>
 
-	<string name="step_cvc_title">Anbieter</string>
-	<string name="step_cvc_step_description">Anzeige der Informationen über den Diensteanbieter.</string>
-	<string name="step_cvc_description">Über den Diensteanbieter und seine Berechtigung liegen folgende Informationen vor. Bitte überprüfen Sie, dass Name und Internetadresse mit dem gewünschten Diensteanbieter übereinstimmen.</string>
+	<string name="eac_step_cvc_title">Anbieter</string>
+	<string name="eac_step_cvc_step_description">Anzeige der Informationen über den Diensteanbieter.</string>
+	<string name="eac_step_cvc_description">Über den Diensteanbieter und seine Berechtigung liegen folgende Informationen vor. Bitte überprüfen Sie, dass Name und Internetadresse mit dem gewünschten Diensteanbieter übereinstimmen.</string>
 
-<string name="step_processing_title">Bearbeitung</string>
-<string name="step_processing_step_description">Durchführen der eID Authentisierung.</string>
-<string name="step_processing_description">Bitte warten Sie bis die %s die eID Authentisierung abgeschlossen hat.</string>
+<string name="eac_step_processing_title">Bearbeitung</string>
+<string name="eac_step_processing_step_description">Durchführen der eID Authentisierung.</string>
+<string name="eac_step_processing_description">Bitte warten Sie bis die %s die eID Authentisierung abgeschlossen hat.</string>
 
 <!-- PIN step stuff is located in PACE translation file -->
 

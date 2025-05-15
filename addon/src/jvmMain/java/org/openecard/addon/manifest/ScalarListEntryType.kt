@@ -31,7 +31,7 @@ import jakarta.xml.bind.annotation.XmlType
 @XmlType(name = "ScalarListEntryType")
 @XmlEnum
 enum class ScalarListEntryType {
-    STRING,
-    BIGINTEGER,
-    BIGDECIMAL
+	STRING,
+	BIGINTEGER,
+	BIGDECIMAL,
 }

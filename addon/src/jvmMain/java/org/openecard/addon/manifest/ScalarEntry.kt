@@ -33,14 +33,12 @@ import jakarta.xml.bind.annotation.XmlType
 @XmlRootElement(name = "ScalarEntry")
 @XmlType(propOrder = ["key", "type", "localizedName", "localizedDescription"])
 class ScalarEntry : ConfigurationEntry() {
-    @XmlElement(name = "Type", required = true)
-    private var type: ScalarEntryType? = null
+	@XmlElement(name = "Type", required = true)
+	private var type: ScalarEntryType? = null
 
-    fun getType(): String {
-        return type!!.name
-    }
+	fun getType(): String = type!!.name
 
-    fun setType(type: String?) {
-        this.type = ScalarEntryType.valueOf(type!!)
-    }
+	fun setType(type: String?) {
+		this.type = ScalarEntryType.valueOf(type!!)
+	}
 }

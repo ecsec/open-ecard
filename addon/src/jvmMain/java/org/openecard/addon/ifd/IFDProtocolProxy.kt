@@ -32,28 +32,25 @@ import org.openecard.addon.Context
  * @author Tobias Wich
  * @author Dirk Petrautzki
  */
-class IFDProtocolProxy(protocolClass: String, classLoader: ClassLoader) :
-    AbstractFactory<IFDProtocol>(protocolClass, classLoader), IFDProtocol {
-    private var c: IFDProtocol? = null
+class IFDProtocolProxy(
+	protocolClass: String,
+	classLoader: ClassLoader,
+) : AbstractFactory<IFDProtocol>(protocolClass, classLoader),
+	IFDProtocol {
+	private var c: IFDProtocol? = null
 
-    override fun establish(req: EstablishChannel?): EstablishChannelResponse? {
-        return c!!.establish(req)
-    }
+	override fun establish(req: EstablishChannel?): EstablishChannelResponse? = c!!.establish(req)
 
-    override fun applySM(commandAPDU: ByteArray?): ByteArray? {
-        return c!!.applySM(commandAPDU)
-    }
+	override fun applySM(commandAPDU: ByteArray?): ByteArray? = c!!.applySM(commandAPDU)
 
-    override fun removeSM(responseAPDU: ByteArray?): ByteArray? {
-        return c!!.removeSM(responseAPDU)
-    }
+	override fun removeSM(responseAPDU: ByteArray?): ByteArray? = c!!.removeSM(responseAPDU)
 
-    @Throws(ActionInitializationException::class)
-    override fun init(aCtx: Context) {
-        c = loadInstance(aCtx, IFDProtocol::class.java)
-    }
+	@Throws(ActionInitializationException::class)
+	override fun init(aCtx: Context) {
+		c = loadInstance(aCtx, IFDProtocol::class.java)
+	}
 
-    override fun destroy(force: Boolean) {
-        c!!.destroy(force)
-    }
+	override fun destroy(force: Boolean) {
+		c!!.destroy(force)
+	}
 }

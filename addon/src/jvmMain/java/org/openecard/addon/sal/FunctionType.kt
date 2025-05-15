@@ -21,24 +21,23 @@
  */
 package org.openecard.addon.sal
 
-
 /**
  * Enum with all functions that are protocol specific.
  *
  * @author Tobias Wich
  */
 enum class FunctionType {
-    CardApplicationStartSession,
-    CardApplicationEndSession,
-    Encipher,
-    Decipher,
-    GetRandom,
-    Hash,
-    Sign,
-    VerifySignature,
-    VerifyCertificate,
-    DIDCreate,
-    DIDUpdate,
-    DIDDelete,
-    DIDAuthenticate
+	CardApplicationStartSession,
+	CardApplicationEndSession,
+	Encipher,
+	Decipher,
+	GetRandom,
+	Hash,
+	Sign,
+	VerifySignature,
+	VerifyCertificate,
+	DIDCreate,
+	DIDUpdate,
+	DIDDelete,
+	DIDAuthenticate,
 }

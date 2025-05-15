@@ -45,14 +45,10 @@ class AddonFileSystemMonitor(
 	private val fileRegistry: FileRegistry,
 	private val manager: AddonManager,
 ) {
-	private val addonDir: Path
+	private val addonDir: Path = addonsDir.toPath()
 
 	private var ws: WatchService? = null
 	private var t: Thread? = null
-
-	init {
-		addonDir = addonsDir.toPath()
-	}
 
 	/**
 	 * Starts watching the addon directory.
@@ -70,7 +66,7 @@ class AddonFileSystemMonitor(
 			val fs = FileSystems.getDefault()
 			ws = fs.newWatchService()
 			addonDir.register(
-				ws,
+				ws!!,
 				StandardWatchEventKinds.ENTRY_CREATE,
 				StandardWatchEventKinds.ENTRY_DELETE,
 				StandardWatchEventKinds.ENTRY_MODIFY,
@@ -98,7 +94,7 @@ class AddonFileSystemMonitor(
 				ws!!.close()
 				t!!.join(1000)
 				// check if thread is still alive
-				if (t!!.isAlive()) {
+				if (t!!.isAlive) {
 					t!!.interrupt()
 				}
 			} catch (ex: IOException) {
@@ -126,12 +122,16 @@ class AddonFileSystemMonitor(
 							// an action when this is not the case
 							val evtName = evt.kind().name()
 							logger.debug { "${"Hit file watcher event {}."} $evtName" }
-							if (StandardWatchEventKinds.ENTRY_CREATE.name() == evtName) {
-								addAddon(p)
-							} else if (StandardWatchEventKinds.ENTRY_DELETE.name() == evtName) {
-								removeAddon(p)
-							} else if (StandardWatchEventKinds.ENTRY_MODIFY.name() == evtName) {
-								replaceAddon(p)
+							when (evtName) {
+								StandardWatchEventKinds.ENTRY_CREATE.name() -> {
+									addAddon(p)
+								}
+								StandardWatchEventKinds.ENTRY_DELETE.name() -> {
+									removeAddon(p)
+								}
+								StandardWatchEventKinds.ENTRY_MODIFY.name() -> {
+									replaceAddon(p)
+								}
 							}
 						}
 					}
@@ -150,7 +150,7 @@ class AddonFileSystemMonitor(
 	}
 
 	private fun addAddon(file: Path) {
-		logger.info { "${"Trying to register addon {}."} ${file.getFileName()}" }
+		logger.info { "${"Trying to register addon {}."} ${file.fileName}" }
 		val fName = file.toFile().getName()
 		try {
 			val spec = extractSpec(file)
@@ -167,7 +167,7 @@ class AddonFileSystemMonitor(
 	}
 
 	private fun removeAddon(file: Path) {
-		logger.info { "${"Trying to remove addon {}."} ${file.getFileName()}" }
+		logger.info { "${"Trying to remove addon {}."} ${file.fileName}" }
 		// check if we are dealing with a registered jar file
 		val spec = getCurrentSpec(file)
 		if (spec != null) {
@@ -208,9 +208,13 @@ class AddonFileSystemMonitor(
 				// check that there is not already a registered instance
 				// TODO: this is in general a problem, because it may replace the addon on next start
 				for (desc in plugins) {
-					if (desc?.getId() == spec.getId()) {
-						val msg = String.format("The addon with id %s is already registered.", desc?.getId())
-						logger.debug("Addon '{}' is already registered by another bundle.", file.toFile().getName())
+					if (desc.getId() == spec.getId()) {
+						val msg = String.format("The addon with id %s is already registered.", desc.getId())
+						logger.debug {
+							"${"Addon '{}' is already registered by another bundle."} ${
+								file.toFile().getName()
+							}"
+						}
 						throw MultipleAddonRegistration(msg, spec)
 					}
 				}

@@ -30,8 +30,9 @@ import org.openecard.addon.LifecycleTrait
  * @author Tobias Wich
  */
 interface IFDProtocol : LifecycleTrait {
-    fun establish(req: EstablishChannel?): EstablishChannelResponse?
+	fun establish(req: EstablishChannel?): EstablishChannelResponse?
 
-    fun applySM(commandAPDU: ByteArray?): ByteArray?
-    fun removeSM(responseAPDU: ByteArray?): ByteArray?
+	fun applySM(commandAPDU: ByteArray?): ByteArray?
+
+	fun removeSM(responseAPDU: ByteArray?): ByteArray?
 }

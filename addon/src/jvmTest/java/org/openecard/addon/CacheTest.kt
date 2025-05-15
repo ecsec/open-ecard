@@ -35,161 +35,161 @@ import org.testng.annotations.Test
  * @author Hans-Martin Haase
  */
 class CacheTest {
-    /**
-     * Cache object which manages the data to cache.
-     */
-    var cache: Cache = Cache()
+	/**
+	 * Cache object which manages the data to cache.
+	 */
+	var cache: Cache = Cache()
 
-    var dummyClassName: String = "dummyClass"
+	var dummyClassName: String = "dummyClass"
 
-    @Test
-    fun addSALProtocol() {
-        val proxy = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val initialHash = proxy.hashCode()
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addSALProtocol(spec, id, proxy)
-        // now get it back from the cache
-        val proto = cache.getSALProtocol(spec, id)
-        Assert.assertEquals(proto.hashCode(), initialHash)
-    }
+	@Test
+	fun addSALProtocol() {
+		val proxy = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val initialHash = proxy.hashCode()
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addSALProtocol(spec, id, proxy)
+		// now get it back from the cache
+		val proto = cache.getSALProtocol(spec, id)
+		Assert.assertEquals(proto.hashCode(), initialHash)
+	}
 
-    @Test
-    fun addIFDProtocol() {
-        val proxy = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val initialHash = proxy.hashCode()
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addIFDProtocol(spec, id, proxy)
-        // now get it back from the cache
-        val proto = cache.getIFDProtocol(spec, id)
-        Assert.assertEquals(proto.hashCode(), initialHash)
-    }
+	@Test
+	fun addIFDProtocol() {
+		val proxy = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val initialHash = proxy.hashCode()
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addIFDProtocol(spec, id, proxy)
+		// now get it back from the cache
+		val proto = cache.getIFDProtocol(spec, id)
+		Assert.assertEquals(proto.hashCode(), initialHash)
+	}
 
-    @Test
-    fun addAppExtAction() {
-        val proxy = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
-        val initialHash = proxy.hashCode()
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppExtensionAction(spec, id, proxy)
-        // now get it back from the cache
-        val proto = cache.getAppExtensionAction(spec, id)
-        Assert.assertEquals(proto.hashCode(), initialHash)
-    }
+	@Test
+	fun addAppExtAction() {
+		val proxy = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
+		val initialHash = proxy.hashCode()
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppExtensionAction(spec, id, proxy)
+		// now get it back from the cache
+		val proto = cache.getAppExtensionAction(spec, id)
+		Assert.assertEquals(proto.hashCode(), initialHash)
+	}
 
-    @Test
-    fun addAppPluginAction() {
-        val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
-        val initialHash = proxy.hashCode()
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppPluginAction(spec, id, proxy)
-        // now get it back from the cache
-        val proto = cache.getAppPluginAction(spec, id)
-        Assert.assertEquals(proto.hashCode(), initialHash)
-    }
+	@Test
+	fun addAppPluginAction() {
+		val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
+		val initialHash = proxy.hashCode()
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppPluginAction(spec, id, proxy)
+		// now get it back from the cache
+		val proto = cache.getAppPluginAction(spec, id)
+		Assert.assertEquals(proto.hashCode(), initialHash)
+	}
 
-    @Test
-    fun addWithFilledCache() {
-        val proxy4 = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val spec4 = AddonSpecification()
-        val id4 = "test4"
-        spec4.setId(id4)
-        spec4.setVersion("1.0.0")
-        cache.addSALProtocol(spec4, id4, proxy4)
-        val proxy3 = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val spec2 = AddonSpecification()
-        val id1 = "test1"
-        spec2.setId(id1)
-        spec2.setVersion("1.0.0")
-        cache.addIFDProtocol(spec2, id1, proxy3)
-        val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
-        val spec1 = AddonSpecification()
-        val id0 = "test2"
-        spec1.setId(id0)
-        spec1.setVersion("1.0.0")
-        cache.addAppPluginAction(spec1, id0, proxy)
-        val proxy2 = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
-        val initialHash = proxy2.hashCode()
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppExtensionAction(spec, id, proxy2)
-        // now get it back from the cache
-        val proto = cache.getAppExtensionAction(spec, id)
-        Assert.assertEquals(proto.hashCode(), initialHash)
-    }
+	@Test
+	fun addWithFilledCache() {
+		val proxy4 = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val spec4 = AddonSpecification()
+		val id4 = "test4"
+		spec4.setId(id4)
+		spec4.setVersion("1.0.0")
+		cache.addSALProtocol(spec4, id4, proxy4)
+		val proxy3 = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val spec2 = AddonSpecification()
+		val id1 = "test1"
+		spec2.setId(id1)
+		spec2.setVersion("1.0.0")
+		cache.addIFDProtocol(spec2, id1, proxy3)
+		val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
+		val spec1 = AddonSpecification()
+		val id0 = "test2"
+		spec1.setId(id0)
+		spec1.setVersion("1.0.0")
+		cache.addAppPluginAction(spec1, id0, proxy)
+		val proxy2 = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
+		val initialHash = proxy2.hashCode()
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppExtensionAction(spec, id, proxy2)
+		// now get it back from the cache
+		val proto = cache.getAppExtensionAction(spec, id)
+		Assert.assertEquals(proto.hashCode(), initialHash)
+	}
 
-    @Test
-    fun removeSingle() {
-        val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppPluginAction(spec, id, proxy)
-        // now get it back from the cache
-        cache.removeCacheEntry(spec, id)
-        val action = cache.getAppPluginAction(spec, id)
-        Assert.assertNull(action)
-    }
+	@Test
+	fun removeSingle() {
+		val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppPluginAction(spec, id, proxy)
+		// now get it back from the cache
+		cache.removeCacheEntry(spec, id)
+		val action = cache.getAppPluginAction(spec, id)
+		Assert.assertNull(action)
+	}
 
-    @Test
-    fun removeMulti() {
-        val proxy4 = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val spec4 = AddonSpecification()
-        val id4 = "test4"
-        spec4.setId(id4)
-        spec4.setVersion("1.0.0")
-        cache.addSALProtocol(spec4, id4, proxy4)
-        val proxy3 = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
-        val spec2 = AddonSpecification()
-        val id1 = "test1"
-        spec2.setId(id1)
-        spec2.setVersion("1.0.0")
-        cache.addIFDProtocol(spec2, id1, proxy3)
-        val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
-        val spec1 = AddonSpecification()
-        val id0 = "test2"
-        spec1.setId(id0)
-        spec1.setVersion("1.0.0")
-        cache.addAppPluginAction(spec1, id0, proxy)
-        val proxy2 = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppExtensionAction(spec, id, proxy2)
-        cache.removeCacheEntry(spec, id)
-        cache.removeCacheEntry(spec1, id0)
+	@Test
+	fun removeMulti() {
+		val proxy4 = SALProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val spec4 = AddonSpecification()
+		val id4 = "test4"
+		spec4.setId(id4)
+		spec4.setVersion("1.0.0")
+		cache.addSALProtocol(spec4, id4, proxy4)
+		val proxy3 = IFDProtocolProxy(dummyClassName, javaClass.getClassLoader())
+		val spec2 = AddonSpecification()
+		val id1 = "test1"
+		spec2.setId(id1)
+		spec2.setVersion("1.0.0")
+		cache.addIFDProtocol(spec2, id1, proxy3)
+		val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
+		val spec1 = AddonSpecification()
+		val id0 = "test2"
+		spec1.setId(id0)
+		spec1.setVersion("1.0.0")
+		cache.addAppPluginAction(spec1, id0, proxy)
+		val proxy2 = AppExtensionActionProxy(dummyClassName, javaClass.getClassLoader())
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppExtensionAction(spec, id, proxy2)
+		cache.removeCacheEntry(spec, id)
+		cache.removeCacheEntry(spec1, id0)
 
-        // now get it back from the cache
-        val proto = cache.getAppExtensionAction(spec, id)
-        val action = cache.getAppPluginAction(spec1, id0)
-        Assert.assertNull(proto)
-        Assert.assertNull(action)
-    }
+		// now get it back from the cache
+		val proto = cache.getAppExtensionAction(spec, id)
+		val action = cache.getAppPluginAction(spec1, id0)
+		Assert.assertNull(proto)
+		Assert.assertNull(action)
+	}
 
-    @Test
-    fun wrongGetOperation() {
-        val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
-        val spec = AddonSpecification()
-        val id = "test"
-        spec.setId(id)
-        spec.setVersion("1.0.0")
-        cache.addAppPluginAction(spec, id, proxy)
-        // now get it back from the cache
-        val proto = cache.getAppExtensionAction(spec, id)
-        Assert.assertNull(proto)
-    }
+	@Test
+	fun wrongGetOperation() {
+		val proxy = AppPluginActionProxy(dummyClassName, javaClass.getClassLoader())
+		val spec = AddonSpecification()
+		val id = "test"
+		spec.setId(id)
+		spec.setVersion("1.0.0")
+		cache.addAppPluginAction(spec, id, proxy)
+		// now get it back from the cache
+		val proto = cache.getAppExtensionAction(spec, id)
+		Assert.assertNull(proto)
+	}
 }

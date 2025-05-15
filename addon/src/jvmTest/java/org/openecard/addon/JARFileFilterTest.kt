@@ -31,17 +31,17 @@ import java.io.File
  * @author Dirk Petrautzki
  */
 class JARFileFilterTest {
-    /**
-     * Test if the filter accepts files with jar ending and rejects other files.
-     */
-    @Test
-    fun test() {
-        val filter = JARFileFilter()
-        val a = File("a.jar")
-        val b = File("b.JAR")
-        val c = File("c.exe")
-        Assert.assertTrue(filter.accept(a))
-        Assert.assertTrue(filter.accept(b))
-        Assert.assertFalse(filter.accept(c))
-    }
+	/**
+	 * Test if the filter accepts files with jar ending and rejects other files.
+	 */
+	@Test
+	fun test() {
+		val filter = JARFileFilter()
+		val a = File("a.jar")
+		val b = File("b.JAR")
+		val c = File("c.exe")
+		Assert.assertTrue(filter.accept(a))
+		Assert.assertTrue(filter.accept(b))
+		Assert.assertFalse(filter.accept(c))
+	}
 }

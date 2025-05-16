@@ -1,35 +1,42 @@
 package org.openecard.sc.pcsc
 
-import org.openecard.sc.iface.PaceCapability
-import org.openecard.sc.iface.PaceEstablishChannelRequest
-import org.openecard.sc.iface.PaceEstablishChannelResponse
-import org.openecard.sc.iface.PaceFeature
+import org.openecard.sc.iface.feature.GetReaderCapabilitiesResponse
+import org.openecard.sc.iface.feature.PaceCapability
+import org.openecard.sc.iface.feature.PaceDestroyChannelRequest
+import org.openecard.sc.iface.feature.PaceDestroyChannelResponse
+import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
+import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
+import org.openecard.sc.iface.feature.PaceFeature
+import org.openecard.sc.iface.feature.PaceGetReaderCapabilitiesRequest
 
 class PcscPaceFeature(
 	private val terminalConnection: PcscTerminalConnection,
 	private val executePaceCtrlCode: Int,
 ) : PaceFeature {
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun getPaceCapabilities(): Set<PaceCapability> =
 		mapScioError {
-			TODO("Not yet implemented")
+			val commandData = PaceGetReaderCapabilitiesRequest.bytes
+			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
+			val resp = GetReaderCapabilitiesResponse.fromPaceResponse(response.toUByteArray())
+			resp.capabilities
 		}
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
 		mapScioError {
-			TODO("Not yet implemented")
+			val commandData = req.bytes
+			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
+			val resp = PaceEstablishChannelResponse.fromPaceResponse(response.toUByteArray())
+			resp
 		}
 
-	override fun establishChannel(
-		pinId: UByte,
-		chat: ByteArray,
-		pin: ByteArray,
-	): PaceEstablishChannelResponse =
-		mapScioError {
-			TODO("Not yet implemented")
-		}
-
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun destroyChannel() =
 		mapScioError {
-			TODO("Not yet implemented")
+			val commandData = PaceDestroyChannelRequest.bytes
+			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
+			PaceDestroyChannelResponse.fromPaceResponse(response.toUByteArray())
+			Unit
 		}
 }

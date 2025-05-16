@@ -1,5 +1,7 @@
 package org.openecard.sc.iface
 
+import org.openecard.sc.iface.feature.Feature
+
 interface TerminalConnection {
 	val terminal: Terminal
 

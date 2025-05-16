@@ -12,8 +12,15 @@ plugins {
 
 rootProject.name = "openecard-app"
 
+include("utils:common")
+include("utils:serialization")
+include("utils:test")
+
 include("smartcard:base")
 include("smartcard:pcsc-scio")
+
+include("sal:base")
+include("sal:smartcard")
 
 include("releases")
 include("wsdef:wsdef-common")

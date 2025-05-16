@@ -1,7 +1,7 @@
 package org.openecard.sc.iface
 
-import org.openecard.sc.utils.toUByte
-import org.openecard.sc.utils.toUShort
+import org.openecard.utils.common.toUByte
+import org.openecard.utils.common.toUShort
 
 /**
  * Class representing an APDU.

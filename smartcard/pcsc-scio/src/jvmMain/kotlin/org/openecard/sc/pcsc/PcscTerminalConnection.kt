@@ -2,10 +2,10 @@ package org.openecard.sc.pcsc
 
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardDisposition
-import org.openecard.sc.iface.Feature
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.TerminalConnection
+import org.openecard.sc.iface.feature.Feature
 
 class PcscTerminalConnection(
 	override val terminal: PcscTerminal,

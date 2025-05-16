@@ -1,7 +1,7 @@
 package org.openecard.sc.pcsc
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.sc.iface.Feature
+import org.openecard.sc.iface.feature.Feature
 import java.nio.ByteBuffer
 
 private val log = KotlinLogging.logger { }

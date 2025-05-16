@@ -9,7 +9,6 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
-			implementation(libs.kotlin.coroutines.core)
 			api(project(":smartcard:base"))
 		}
 

@@ -1,6 +1,5 @@
 package org.openecard.sc.pcsc.testutils
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,7 +13,6 @@ import org.openecard.sc.pcsc.PcscTerminalFactory
 @ExtendWith(WhenPcscStackExtension::class)
 annotation class WhenPcscStack
 
-@Disabled
 class WhenPcscStackExtension : ExecutionCondition {
 	override fun evaluateExecutionCondition(p0: ExtensionContext): ConditionEvaluationResult {
 		try {

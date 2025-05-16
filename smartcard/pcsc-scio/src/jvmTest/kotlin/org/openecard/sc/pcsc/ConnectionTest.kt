@@ -25,7 +25,9 @@ class ConnectionTest {
 	@Test
 	fun `get terminal features`() {
 		PcscTerminalFactory.instance.load().withContext { ctx ->
-			val terminal = ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") } ?: Assumptions.abort()
+			val terminal =
+				ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") }
+					?: Assumptions.abort { "Necessary terminal not available" }
 			val con = terminal.connectTerminalOnly()
 			val features = con.getFeatures()
 			assertTrue { features.isEmpty() }
@@ -36,7 +38,9 @@ class ConnectionTest {
 	@Test
 	fun `wait for card`() {
 		PcscTerminalFactory.instance.load().withContext { ctx ->
-			val terminal = ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") } ?: Assumptions.abort()
+			val terminal =
+				ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") }
+					?: Assumptions.abort { "Necessary terminal not available" }
 			println("Waiting for card insert ...")
 			terminal.waitForCardPresent(5000.toDuration(DurationUnit.MILLISECONDS))
 		}

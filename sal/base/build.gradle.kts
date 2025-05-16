@@ -1,4 +1,4 @@
-description = "Smartcard interfaces"
+description = "SAL interfaces"
 
 plugins {
 	id("openecard.kmp-lib-conventions")
@@ -9,9 +9,8 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
-			implementation(project(":utils:common"))
-			api(project(":utils:serialization"))
-			api(libs.kotlin.coroutines.core)
+			// implementation(libs.kotlin.logging)
+			implementation(libs.kotlin.coroutines.core)
 		}
 
 		commonTest.dependencies {

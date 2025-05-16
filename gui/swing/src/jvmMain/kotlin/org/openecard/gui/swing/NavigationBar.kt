@@ -21,9 +21,9 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import org.openecard.common.I18n
 import org.openecard.gui.definition.Step
 import org.openecard.gui.swing.common.GUIConstants
+import org.openecard.i18n.I18N
 import java.awt.event.ActionListener
 import javax.swing.GroupLayout
 import javax.swing.JButton
@@ -47,11 +47,18 @@ import javax.swing.JRootPane
 class NavigationBar(
 	private val numSteps: Int,
 ) : JPanel() {
-	private val lang: I18n = I18n.getTranslation("gui")!!
-
-	private var backButton = JButton(lang.translationForKey(GUIConstants.BUTTON_BACK))
-	private var nextButton = JButton(lang.translationForKey(GUIConstants.BUTTON_NEXT))
-	private var cancelButton = JButton(lang.translationForKey(GUIConstants.BUTTON_CANCEL))
+	private var backButton =
+		JButton(
+			I18N.strings.gui_button_back.localized(),
+		)
+	private var nextButton =
+		JButton(
+			I18N.strings.gui_button_next.localized(),
+		)
+	private var cancelButton =
+		JButton(
+			I18N.strings.gui_button_cancel.localized(),
+		)
 
 	/**
 	 * Create and initialize the navigation panel for the given number of steps.
@@ -86,7 +93,9 @@ class NavigationBar(
 		nextButton.actionCommand = GUIConstants.BUTTON_NEXT
 		// if there is only one step set next button to finished
 		if (numSteps == 1) {
-			nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_FINISH))
+			nextButton.setText(
+				I18N.strings.gui_button_finish.localized(),
+			)
 		}
 
 		cancelButton.actionCommand = GUIConstants.BUTTON_CANCEL
@@ -148,9 +157,13 @@ class NavigationBar(
 
 		// Change the forward button on the last step to "finished"
 		if (nextIdx == (numSteps - 1)) {
-			nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_FINISH))
+			nextButton.setText(
+				I18N.strings.gui_button_finish.localized(),
+			)
 		} else {
-			nextButton.setText(lang.translationForKey(GUIConstants.BUTTON_NEXT))
+			nextButton.setText(
+				I18N.strings.gui_button_next.localized(),
+			)
 		}
 	}
 

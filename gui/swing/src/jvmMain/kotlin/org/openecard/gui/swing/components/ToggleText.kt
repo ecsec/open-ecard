@@ -21,16 +21,17 @@
  ***************************************************************************/
 package org.openecard.gui.swing.components
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.activation.MimeType
 import jakarta.activation.MimeTypeParseException
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.openecard.common.I18n
 import org.openecard.common.util.FileUtils.homeConfigDir
 import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.OutputInfoUnit
 import org.openecard.gui.definition.ToggleText
 import org.openecard.gui.swing.common.GUIDefaults
+import org.openecard.i18n.I18N
 import java.awt.Color
 import java.awt.Component
 import java.awt.Desktop
@@ -148,7 +149,11 @@ class ToggleText(
 				LOG.warn {
 					"Unsupported usage of content of type $mimeType in ${org.openecard.gui.swing.components.ToggleText::class.java}"
 				}
-				createJTextArea(LANG.translationForKey("unsupported.mimetype", mimeType))
+				createJTextArea(
+					I18N.strings.swing_unsupported_mimetype
+						.format(mimeType as Any)
+						.localized(),
+				)
 			}
 		}
 	}
@@ -293,7 +298,11 @@ class ToggleText(
 	private fun createStartPdfViewButton(pdfFile: String): JPanel {
 		val contentPane = JPanel()
 		// TODO translate
-		val pdfButton = JButton(LANG.translationForKey("open.pdf.in.external.viewer"))
+
+		val pdfButton =
+			JButton(
+				I18N.strings.swing_open_pdf_in_external_viewer.localized(),
+			)
 		pdfButton.addActionListener(
 			ActionListener { e ->
 				if (e.getSource() === pdfButton) {
@@ -338,8 +347,6 @@ class ToggleText(
 		}
 	}
 }
-
-private val LANG: I18n = I18n.getTranslation("swing")
 
 private const val TOGGLETEXT = "ToggleText"
 private val TOGGLETEXT_FOREGROUND = "$TOGGLETEXT.foreground"

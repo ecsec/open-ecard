@@ -21,6 +21,8 @@
  */
 package org.openecard.binding.tctoken
 
+import dev.icerock.moko.resources.format
+import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse
 import org.apache.http.impl.DefaultConnectionReuseStrategy
@@ -28,7 +30,6 @@ import org.apache.http.message.BasicHttpEntityEnclosingRequest
 import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestExecutor
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.common.WSHelper
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.interfaces.EventDispatcher
@@ -37,12 +38,13 @@ import org.openecard.crypto.tls.auth.BaseSmartCardCredentialFactory
 import org.openecard.crypto.tls.auth.PreselectedSmartCardCredentialFactory
 import org.openecard.crypto.tls.auth.SearchingSmartCardCredentialFactory
 import org.openecard.httpcore.HttpRequestHelper.setDefaultHeader
-import org.openecard.httpcore.HttpUtils.dumpHttpRequest
-import org.openecard.httpcore.HttpUtils.dumpHttpResponse
+import org.openecard.httpcore.KHttpUtils.dumpHttpRequest
+import org.openecard.httpcore.KHttpUtils.dumpHttpResponse
 import org.openecard.httpcore.StreamHttpClientConnection
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.openecard.i18n.I18N
 import java.util.concurrent.Callable
+
+private val logger = KotlinLogging.logger { }
 
 /**
  *
@@ -123,8 +125,8 @@ class HttpGetTask(
 		val handler = tlsHandler.createTlsConnection()
 
 		// set up connection to endpoint
-		val `in` = handler.getInputStream()
-		val out = handler.getOutputStream()
+		val `in` = handler.inputStream
+		val out = handler.outputStream
 		val conn =
 			StreamHttpClientConnection(`in`, out)
 
@@ -143,18 +145,18 @@ class HttpGetTask(
 		req.setHeader("Accept", "text/html, */*;q=0.8")
 		req.setHeader("Accept-Charset", "utf-8, *;q=0.8")
 		dumpHttpRequest(
-			LOG,
+			logger,
 			req,
 		)
 
 		// send request and receive response
 		val response = httpexecutor.execute(req, conn, ctx)
-		val statusCode = response.getStatusLine().getStatusCode()
+		val statusCode = response.statusLine.statusCode
 		conn.receiveResponseEntity(response)
-		val entity = response.getEntity()
-		val entityData = toByteArray(entity.getContent())
+		val entity = response.entity
+		val entityData = toByteArray(entity.content)
 		dumpHttpResponse(
-			LOG,
+			logger,
 			response,
 			entityData,
 		)
@@ -162,13 +164,10 @@ class HttpGetTask(
 
 		if (statusCode < 200 || statusCode > 299) {
 			throw ConnectionError(
-				ErrorTranslations.WRONG_SERVER_RESULT,
-				statusCode,
+				I18N.strings.tr03112_connection_error_invalid_status_code
+					.format(statusCode)
+					.localized(),
 			)
 		}
-	}
-
-	companion object {
-		private val LOG: Logger = LoggerFactory.getLogger(HttpGetTask::class.java)
 	}
 }

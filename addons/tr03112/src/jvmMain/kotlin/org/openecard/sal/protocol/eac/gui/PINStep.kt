@@ -21,29 +21,22 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import dev.icerock.moko.resources.format
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
-import org.openecard.common.I18n
 import org.openecard.common.ifd.PacePinStatus
 import org.openecard.gui.definition.PasswordField
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 import org.openecard.ifd.protocol.pace.common.PasswordID
 import org.openecard.ifd.protocol.pace.common.PasswordID.Companion.parse
 import org.openecard.sal.protocol.eac.EACData
 import org.openecard.sal.protocol.eac.EACProtocol
 import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
 
-private val LANG_EAC: I18n = I18n.getTranslation("eac")
-private val LANG_PACE: I18n = I18n.getTranslation("pace")
-
 // GUI translation constants
-private const val TITLE = "step_pace_title"
-private const val STEP_DESCRIPTION = "step_pace_step_description"
-private const val DESCRIPTION = "step_pace_description"
-private const val DESCRIPTION_NATIVE = "step_pace_native_description"
-private const val NOTICE = "eac_forward_notice"
-private const val TRANSACTION_INFO = "transaction_info"
+
 private const val CAN_NOTICE_ID = "PACE_CAN_NOTICE"
 private const val PIN_ATTEMPTS_ID = "PACE_PIN_ATTEMPTS"
 
@@ -59,22 +52,39 @@ class PINStep(
 	private val capturePin: Boolean,
 	private val paceMarker: PACEMarkerType,
 ) : Step(STEP_ID, "Dummy-Title") {
-	private val pinType = LANG_PACE.translationForKey(parse(eacData.pinID)!!.name)
+	private val pinType =
+		when (parse(eacData.pinID)) {
+			PasswordID.MRZ -> I18N.strings.pace_mrz.localized()
+			PasswordID.CAN -> I18N.strings.pace_can.localized()
+			PasswordID.PIN -> I18N.strings.pace_pin.localized()
+			PasswordID.PUK -> I18N.strings.pace_puk.localized()
+			null -> "no translation found"
+		}
+
 	private val hasAttemptsCounter: Boolean = eacData.pinID != PasswordID.CAN.byte
 
 	private var _status: PinState
 	private val hasCanEntry = false
 
 	init {
-		title = LANG_PACE.translationForKey(TITLE, pinType)
-		description = LANG_PACE.translationForKey(STEP_DESCRIPTION)
+		title =
+			I18N.strings.pace_step_pace_title
+				.format(pinType)
+				.localized()
+		description =
+			I18N.strings.pace_step_pace_description
+				.format(pinType)
+				.localized()
 		isReversible = false
 
 		// TransactionInfo
 		val transactionInfo = eacData.transactionInfo
 		if (transactionInfo != null) {
 			val transactionInfoField = Text()
-			transactionInfoField.text = LANG_EAC.translationForKey(TRANSACTION_INFO, transactionInfo)
+			transactionInfoField.text =
+				I18N.strings.eac_transaction_info
+					.format(transactionInfo)
+					.localized()
 			inputInfoUnits.add(transactionInfoField)
 		}
 
@@ -108,7 +118,10 @@ class PINStep(
 	private fun addSoftwareElements() {
 		isResetOnLoad = true
 		val description = Text()
-		description.text = LANG_PACE.translationForKey(DESCRIPTION, pinType)
+		description.text =
+			I18N.strings.pace_step_pace_description
+				.format(pinType)
+				.localized()
 		inputInfoUnits.add(description)
 
 		val pinInputField = PasswordField(PIN_FIELD)
@@ -119,29 +132,44 @@ class PINStep(
 
 		if (hasAttemptsCounter) {
 			val attemptCount = Text()
-			attemptCount.text = LANG_PACE.translationForKey("step_pin_retrycount", 3)
+			attemptCount.text =
+				I18N.strings.pace_step_pin_retrycount
+					.format(3)
+					.localized()
 			attemptCount.id = PIN_ATTEMPTS_ID
 			inputInfoUnits.add(attemptCount)
 		}
 
 		val notice = Text()
-		notice.text = LANG_EAC.translationForKey(NOTICE, pinType)
+		notice.text =
+			I18N.strings.eac_forward_notice
+				.format(pinType)
+				.localized()
 		inputInfoUnits.add(notice)
 	}
 
 	private fun addTerminalElements() {
 		isInstantReturn = true
 		val description = Text()
-		description.text = LANG_PACE.translationForKey(DESCRIPTION_NATIVE, pinType)
+		description.text =
+			I18N.strings.pace_step_pace_native_description
+				.format(pinType)
+				.localized()
 		inputInfoUnits.add(description)
 
 		val notice = Text()
-		notice.text = LANG_EAC.translationForKey(NOTICE, pinType)
+		notice.text =
+			I18N.strings.eac_forward_notice
+				.format(pinType)
+				.localized()
 		inputInfoUnits.add(notice)
 
 		if (hasAttemptsCounter) {
 			val attemptCount = Text()
-			attemptCount.text = LANG_PACE.translationForKey("step_pin_retrycount", 3)
+			attemptCount.text =
+				I18N.strings.pace_step_pin_retrycount
+					.format(3)
+					.localized()
 			attemptCount.id = PIN_ATTEMPTS_ID
 			inputInfoUnits.add(attemptCount)
 		}
@@ -161,14 +189,14 @@ class PINStep(
 		}
 		if (!hasCanField) {
 			val canField = PasswordField(CAN_FIELD)
-			canField.description = LANG_PACE.translationForKey("can")
+			canField.description = I18N.strings.pace_can.localized()
 			canField.maxLength = 6
 			canField.minLength = 6
 			inputInfoUnits.add(canField)
 		}
 		if (!hasCanNotice) {
 			val canNotice = Text()
-			canNotice.text = LANG_EAC.translationForKey("eac_can_notice")
+			canNotice.text = I18N.strings.eac_can_notice.localized()
 			canNotice.id = CAN_NOTICE_ID
 			inputInfoUnits.add(canNotice)
 		}
@@ -176,7 +204,7 @@ class PINStep(
 
 	private fun addNativeCANNotice() {
 		val canNotice = Text()
-		canNotice.text = LANG_EAC.translationForKey("eac_can_notice_native")
+		canNotice.text = I18N.strings.eac_can_notice_native.localized()
 		canNotice.id = CAN_NOTICE_ID
 		inputInfoUnits.add(canNotice)
 	}
@@ -207,7 +235,10 @@ class PINStep(
 					}
 
 				val text = unit as Text
-				text.text = LANG_PACE.translationForKey("step_pin_retrycount", newValue)
+				text.text =
+					I18N.strings.pace_step_pin_retrycount
+						.format(newValue)
+						.localized()
 			}
 		}
 	}
@@ -222,9 +253,23 @@ class PINStep(
 
 		fun createDummy(pinId: Byte): Step {
 			val s = Step(STEP_ID)
-			val pinType: String? = LANG_PACE.translationForKey(parse(pinId)!!.name)
-			s.title = LANG_PACE.translationForKey(TITLE, pinType)
-			s.description = LANG_PACE.translationForKey(STEP_DESCRIPTION)
+			val pinType =
+				when (parse(pinId)) {
+					PasswordID.MRZ -> I18N.strings.pace_mrz.localized()
+					PasswordID.CAN -> I18N.strings.pace_can.localized()
+					PasswordID.PIN -> I18N.strings.pace_pin.localized()
+					PasswordID.PUK -> I18N.strings.pace_puk.localized()
+					null -> ""
+				}
+
+			s.title =
+				I18N.strings.pace_step_pace_title
+					.format(pinType)
+					.localized()
+			s.description =
+				I18N.strings.pace_step_pace_description
+					.format(pinType)
+					.localized()
 			return s
 		}
 	}

@@ -21,15 +21,16 @@
  ***************************************************************************/
 package org.openecard.plugins.pinplugin.gui
 
+import dev.icerock.moko.resources.format
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.i18n.I18N
 import org.openecard.plugins.pinplugin.RecognizedState
 
 /**
@@ -53,10 +54,12 @@ class ChangePINDialog(
 	private val state: RecognizedState,
 	private val capturePin: Boolean,
 ) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	private fun createUserConsentDescription() =
-		UserConsentDescription(lang.translationForKey(TITLE, name)).apply {
+		UserConsentDescription(
+			I18N.strings.pinplugin_action_changepin_userconsent_title
+				.format(name)
+				.localized(),
+		).apply {
 			steps.addAll(createSteps())
 		}
 
@@ -88,10 +91,15 @@ class ChangePINDialog(
 	 * @return Step showing success message
 	 */
 	private fun createSuccessStep() =
-		Step("success", lang.translationForKey(SUCCESSSTEP_TITLE)).apply {
+		Step(
+			"success",
+			I18N.strings.pinplugin_action_changepin_userconsent_successstep_title.localized(),
+		).apply {
 			isReversible = false
 			inputInfoUnits.add(
-				Text(lang.translationForKey(SUCCESSSTEP_DESCRIPTION)),
+				Text(
+					I18N.strings.pinplugin_action_changepin_userconsent_successstep_description.localized(),
+				),
 			)
 		}
 
@@ -101,14 +109,23 @@ class ChangePINDialog(
 	 * @return Step with error description
 	 */
 	private fun createErrorStep() =
-		Step("error", lang.translationForKey(ERRORSTEP_TITLE)).apply {
+		Step(
+			"error",
+			I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized(),
+		).apply {
 			isReversible = false
 			inputInfoUnits.add(
 				Text(
 					when (state) {
-						RecognizedState.PIN_BLOCKED -> lang.translationForKey(ERRORSTEP_BLOCKED)
-						RecognizedState.PIN_DEACTIVATED -> lang.translationForKey(ERRORSTEP_DEACTIVATED)
-						else -> lang.translationForKey(ERRORSTEP_UNKNOWN)
+						RecognizedState.PIN_BLOCKED ->
+							I18N.strings
+								.pinplugin_action_changepin_userconsent_errorstep_blocked
+								.localized()
+						RecognizedState.PIN_DEACTIVATED ->
+							I18N.strings
+								.pinplugin_action_changepin_userconsent_errorstep_deactivated
+								.localized()
+						else -> I18N.strings.pinplugin_action_changepin_userconsent_errorstep_unknown.localized()
 					},
 				),
 			)
@@ -122,7 +139,7 @@ class ChangePINDialog(
 	private fun createChangePINStep() =
 		ChangePINStep(
 			"pin-entry",
-			title = lang.translationForKey(PINSTEP_TITLE),
+			title = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
 			capturePin,
 			retryCounter = getRetryCounterFromState(state),
 			enteredWrong = false,
@@ -146,7 +163,7 @@ class ChangePINDialog(
 	private fun createCANStep() =
 		CANEntryStep(
 			"can-entry",
-			title = lang.translationForKey(CANSTEP_TITLE),
+			title = I18N.strings.pinplugin_action_changepin_userconsent_canstep_title.localized(),
 			capturePin,
 			state,
 			enteredWrong = false,
@@ -177,17 +194,4 @@ class ChangePINDialog(
 			RecognizedState.PIN_SUSPENDED -> 1
 			else -> 0
 		}
-
-	companion object {
-		// translation constants
-		private const val ERRORSTEP_UNKNOWN = "action.changepin.userconsent.errorstep.unknown"
-		private const val ERRORSTEP_DEACTIVATED = "action.changepin.userconsent.errorstep.deactivated"
-		private const val ERRORSTEP_BLOCKED = "action.changepin.userconsent.errorstep.blocked"
-		private const val SUCCESSSTEP_DESCRIPTION = "action.changepin.userconsent.successstep.description"
-		private const val CANSTEP_TITLE = "action.changepin.userconsent.canstep.title"
-		private const val PINSTEP_TITLE = "action.changepin.userconsent.pinstep.title"
-		private const val ERRORSTEP_TITLE = "action.changepin.userconsent.errorstep.title"
-		private const val SUCCESSSTEP_TITLE = "action.changepin.userconsent.successstep.title"
-		private const val TITLE = "action.changepin.userconsent.title"
-	}
 }

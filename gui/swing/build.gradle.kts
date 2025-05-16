@@ -19,6 +19,7 @@ kotlin {
 		val jvmMain by getting {
 			dependencies {
 				api(project(":common"))
+				api(project(":i18n"))
 				api(libs.pdfbox)
 			}
 		}

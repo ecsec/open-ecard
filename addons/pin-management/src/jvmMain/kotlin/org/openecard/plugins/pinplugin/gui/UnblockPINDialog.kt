@@ -21,9 +21,9 @@
  ***************************************************************************/
 package org.openecard.plugins.pinplugin.gui
 
+import dev.icerock.moko.resources.format
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.common.AppVersion
-import org.openecard.common.I18n
 import org.openecard.common.interfaces.Dispatcher
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.PasswordField
@@ -31,6 +31,7 @@ import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.i18n.I18N
 import org.openecard.plugins.pinplugin.RecognizedState
 
 /**
@@ -53,10 +54,12 @@ class UnblockPINDialog(
 	private val state: RecognizedState,
 	private val capturePin: Boolean,
 ) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	private fun createUserConsentDescription() =
-		UserConsentDescription(lang.translationForKey(TITLE, AppVersion.name)).apply {
+		UserConsentDescription(
+			I18N.strings.pinplugin_action_unblockpin_userconsent_title
+				.format(AppVersion.name)
+				.localized(),
+		).apply {
 			steps.addAll(createSteps())
 		}
 
@@ -78,8 +81,15 @@ class UnblockPINDialog(
 	 * @return Step showing success message
 	 */
 	private fun createSuccessStep() =
-		Step("success", lang.translationForKey(SUCCESSSTEP_TITLE)).apply {
-			inputInfoUnits.add(Text(lang.translationForKey(SUCCESSSTEP_DESCRIPTION)))
+		Step(
+			"success",
+			I18N.strings.pinplugin_action_unblockpin_userconsent_successstep_title.localized(),
+		).apply {
+			inputInfoUnits.add(
+				Text(
+					I18N.strings.pinplugin_action_unblockpin_userconsent_successstep_description.localized(),
+				),
+			)
 		}
 
 	/**
@@ -88,9 +98,14 @@ class UnblockPINDialog(
 	 * @return Step with error description
 	 */
 	private fun createErrorStep() =
-		Step("insert-card", lang.translationForKey(ERRORSTEP_TITLE)).apply {
+		Step(
+			"insert-card",
+			I18N.strings.pinplugin_action_unblockpin_userconsent_errorstep_title.localized(),
+		).apply {
 			inputInfoUnits.add(
-				Text(lang.translationForKey(ERRORSTEP_DESCRIPTION)),
+				Text(
+					I18N.strings.pinplugin_action_unblockpin_userconsent_errorstep_description.localized(),
+				),
 			)
 		}
 
@@ -100,18 +115,22 @@ class UnblockPINDialog(
 	 * @return Step for PUK entry
 	 */
 	private fun createPUKStep(): Step {
-		val pukStep = Step("insert-card", lang.translationForKey(PUKSTEP_TITLE))
+		val pukStep =
+			Step(
+				"insert-card",
+				I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_title.localized(),
+			)
 		val i1 = Text()
 		pukStep.inputInfoUnits.add(i1)
 
 		if (!capturePin) {
 			pukStep.isInstantReturn = true
-			i1.text = lang.translationForKey(PUKSTEP_NATIVE_DESCRIPTION)
+			i1.text = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_native_description.localized()
 		} else {
-			i1.text = lang.translationForKey(PUKSTEP_DESCRIPTION)
+			i1.text = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_description.localized()
 			pukStep.inputInfoUnits.add(
 				PasswordField(PUK_FIELD).apply {
-					description = lang.translationForKey(PUKSTEP_PUK)
+					description = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_puk.localized()
 				},
 			)
 		}
@@ -130,16 +149,6 @@ class UnblockPINDialog(
 	}
 
 	companion object {
-		private const val TITLE = "action.unblockpin.userconsent.title"
-		private const val PUKSTEP_DESCRIPTION = "action.unblockpin.userconsent.pukstep.description"
-		private const val PUKSTEP_NATIVE_DESCRIPTION = "action.unblockpin.userconsent.pukstep.native_description"
-		private const val PUKSTEP_TITLE = "action.unblockpin.userconsent.pukstep.title"
-		private const val PUKSTEP_PUK = "action.unblockpin.userconsent.pukstep.puk"
-		private const val ERRORSTEP_TITLE = "action.unblockpin.userconsent.errorstep.title"
-		private const val ERRORSTEP_DESCRIPTION = "action.unblockpin.userconsent.errorstep.description"
-		private const val SUCCESSSTEP_TITLE = "action.unblockpin.userconsent.successstep.title"
-		private const val SUCCESSSTEP_DESCRIPTION = "action.unblockpin.userconsent.successstep.description"
-
 		// GUI element IDs
 		const val PUK_FIELD: String = "PUK_FIELD"
 	}

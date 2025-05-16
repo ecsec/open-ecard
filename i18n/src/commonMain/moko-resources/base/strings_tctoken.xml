@@ -10,4 +10,5 @@
 
 	<!-- generic TCToken handler -->
 	<string name="tctoken_invalid_redirect">An attempt was made to redirect to an invalid page.</string>
+	<string name="tctoken_invalid_wrong_parameter">Wrong parameter was provided.</string>
 </resources>

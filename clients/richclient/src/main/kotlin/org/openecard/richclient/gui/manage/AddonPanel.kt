@@ -24,7 +24,7 @@ package org.openecard.richclient.gui.manage
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonPropertiesException
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.AlphaComposite
@@ -60,8 +60,6 @@ private val logger = KotlinLogging.logger { }
  * @author Tobias Wich
  */
 open class AddonPanel : JPanel {
-	private val lang: I18n = I18n.getTranslation("addon")
-
 	private var logo: Image?
 	private var settingsPanel: SettingsPanel? = null
 
@@ -100,14 +98,14 @@ open class AddonPanel : JPanel {
 			actionScrollPane.setMinimumSize(dim)
 			actionScrollPane.setPreferredSize(dim)
 			actionScrollPane.setBorder(EMPTY_BORDER)
-			tabbedPane.addTab(lang.translationForKey("addon.panel.tab.function"), null, actionScrollPane, null)
+			tabbedPane.addTab(I18N.strings.addon_panel_tab_function.localized(), null, actionScrollPane, null)
 		}
 		if (settingsPanel != null) {
 			this.settingsPanel = settingsPanel
-			tabbedPane.addTab(lang.translationForKey("addon.panel.tab.settings"), null, settingsPanel, null)
+			tabbedPane.addTab(I18N.strings.addon_panel_tab_settings.localized(), null, settingsPanel, null)
 		}
 		if (aboutPanel != null) {
-			tabbedPane.addTab(lang.translationForKey("addon.panel.tab.about"), null, aboutPanel, null)
+			tabbedPane.addTab(I18N.strings.addon_panel_tab_about.localized(), null, aboutPanel, null)
 		}
 
 		createHeader(name, description)

@@ -22,20 +22,18 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.common.I18n
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.AddonPanel
 import java.awt.Image
 import java.io.IOException
 import javax.swing.ImageIcon
 
 object AddonPanelBuilder {
-	private val lang: I18n = I18n.getTranslation("addon")
-
 	fun createConnectionSettingsAddon() =
 		AddonPanel(
 			ConnectionsSettingsPanel(),
-			lang.translationForKey("addon.list.core.connection"),
+			I18N.strings.addon_list_core_connection.localized(),
 			null,
 			loadImage("images/network-wired.png"),
 		)
@@ -43,7 +41,7 @@ object AddonPanelBuilder {
 	fun createGeneralSettingsAddon() =
 		AddonPanel(
 			GeneralSettingsPanel(),
-			lang.translationForKey("addon.list.core.general"),
+			I18N.strings.addon_list_core_general.localized(),
 			null,
 			loadImage("images/general.png"),
 		)
@@ -51,7 +49,7 @@ object AddonPanelBuilder {
 	fun createLogSettingsAddon() =
 		AddonPanel(
 			LogSettingsPanel(),
-			lang.translationForKey("addon.list.core.logging"),
+			I18N.strings.addon_list_core_logging.localized(),
 			null,
 			loadImage("images/logging.png"),
 		)
@@ -59,7 +57,7 @@ object AddonPanelBuilder {
 	fun createMiddlewareSelectionAddon() =
 		AddonPanel(
 			MiddlewareSelectionPanel(),
-			lang.translationForKey("addon.list.core.middleware"),
+			I18N.strings.addon_list_core_middleware.localized(),
 			null,
 			null,
 		)

@@ -22,6 +22,7 @@
 
 package org.openecard.recognition
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.BeginTransaction
 import iso.std.iso_iec._24727.tech.schema.BeginTransactionResponse
@@ -42,10 +43,10 @@ import iso.std.iso_iec._24727.tech.schema.RecognitionTree
 import iso.std.iso_iec._24727.tech.schema.ResponseAPDUType
 import iso.std.iso_iec._24727.tech.schema.Transmit
 import iso.std.iso_iec._24727.tech.schema.TransmitResponse
+import jdk.internal.joptsimple.internal.Messages.message
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.AppVersion.name
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.minorIsOneOf
@@ -60,6 +61,7 @@ import org.openecard.common.util.FileUtils.readLinesFromConfig
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.common.util.IntegerUtils
 import org.openecard.gui.message.DialogType
+import org.openecard.i18n.I18N
 import org.openecard.recognition.RecognitionProperties.action
 import org.openecard.recognition.staticrepo.LocalCifRepo
 import org.openecard.recognition.statictree.LocalFileTree
@@ -449,8 +451,14 @@ class CardRecognitionImpl
 						LOG.debug { "Could not get exclusive card access. Trying again in $waitInSeconds seconds." }
 						if (i == 6 && env.gui != null) {
 							val dialog = env.gui!!.obtainMessageDialog()
-							val message = LANG.translationForKey("message", name, ifdName)
-							val title = LANG.translationForKey("error", ifdName)
+							val message =
+								I18N.strings.recognition_message
+									.format(name, ifdName)
+									.localized()
+							val title =
+								I18N.strings.recognition_error
+									.format(ifdName)
+									.localized()
 							dialog.showMessageDialog(message, title, DialogType.WARNING_MESSAGE)
 						}
 						Thread.sleep(1000 * waitInSeconds)
@@ -653,7 +661,6 @@ class CardRecognitionImpl
 		}
 	}
 
-private val LANG: I18n = I18n.getTranslation("recognition")
 private const val IMAGE_PROPERTIES = "/card-images/card-images.properties"
 
 /**

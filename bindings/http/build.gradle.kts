@@ -28,6 +28,7 @@ kotlin {
 				// 	api(libs.bc.tls)
 				// 	api(libs.httpcore)
 				api(project(":addon"))
+				api(project(":i18n"))
 
 				implementation(libs.annotations)
 			}

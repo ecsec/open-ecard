@@ -22,6 +22,7 @@
 
 package org.openecard.addons.status
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.Context
 import org.openecard.addon.bind.AppPluginAction
@@ -30,6 +31,7 @@ import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
 import org.openecard.addon.bind.Headers
 import org.openecard.addon.bind.RequestBody
+import org.openecard.i18n.I18N
 
 private val logger = KotlinLogging.logger { }
 
@@ -59,15 +61,27 @@ class StatusAction : AppPluginAction {
 	): BindingResult =
 		when (val hdl = statusHandler) {
 			null -> {
-				logger.error { "Error in StatusAction addon: statusHandler not initialized" }
-				BindingResult(BindingResultCode.INTERNAL_ERROR)
+				val msg = "Error in StatusAction addon: statusHandler not initialized"
+				logger.error { msg }
+				BindingResult(
+					BindingResultCode.INTERNAL_ERROR,
+					I18N.strings.addon_error_internal
+						.format(msg)
+						.localized(),
+				)
 			}
 			else -> {
 				try {
 					hdl.handleRequest(statusRequest(parameters))
 				} catch (e: Exception) {
-					logger.error(e) { "Error in StatusAction addon" }
-					BindingResult(BindingResultCode.INTERNAL_ERROR)
+					val msg = "Error in StatusAction addon"
+					logger.error(e) { msg }
+					BindingResult(
+						BindingResultCode.INTERNAL_ERROR,
+						I18N.strings.addon_error_internal
+							.format(msg)
+							.localized(),
+					)
 				}
 			}
 		}

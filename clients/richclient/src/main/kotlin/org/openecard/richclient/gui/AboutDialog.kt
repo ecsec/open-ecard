@@ -22,10 +22,10 @@
 package org.openecard.richclient.gui
 
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.AppVersion
 import org.openecard.common.AppVersion.version
-import org.openecard.common.I18n
 import org.openecard.gui.swing.common.SwingUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
@@ -82,7 +82,10 @@ class AboutDialog private constructor() : JFrame() {
 			JTextPane().apply {
 				font = Font(Font.SANS_SERIF, Font.BOLD, 20)
 				isEditable = false
-				text = LANG.translationForKey("about.heading", AppVersion.name)
+				text =
+					I18N.strings.about_heading
+						.format(AppVersion.name)
+						.localized()
 				setBounds(12, 12, 692, 30)
 			}
 		contentPane.add(txtpnHeading)
@@ -91,7 +94,10 @@ class AboutDialog private constructor() : JFrame() {
 			JTextPane().apply {
 				font = Font(Font.SANS_SERIF, Font.PLAIN, 9)
 				isEditable = false
-				text = LANG.translationForKey("about.version", version)
+				text =
+					I18N.strings.about_version
+						.format(version)
+						.localized()
 				setBounds(12, 54, 692, 18)
 			}
 		contentPane.add(txtpnVersion)
@@ -121,7 +127,9 @@ class AboutDialog private constructor() : JFrame() {
 		contentPane.add(tabbedPane)
 
 		val btnClose =
-			JButton(LANG.translationForKey("about.button.close")).apply {
+			JButton(
+				I18N.strings.about_button_close.localized(),
+			).apply {
 				setBounds(587, 416, 117, 25)
 				addActionListener(
 					ActionListener { e: ActionEvent? ->
@@ -133,7 +141,10 @@ class AboutDialog private constructor() : JFrame() {
 		contentPane.add(btnClose)
 
 		iconImage = logo
-		title = LANG.translationForKey("about.title", AppVersion.name)
+		title =
+			I18N.strings.about_title
+				.format(AppVersion.name)
+				.localized()
 		defaultCloseOperation = DISPOSE_ON_CLOSE
 		isResizable = false
 		setLocationRelativeTo(null)
@@ -171,7 +182,6 @@ class AboutDialog private constructor() : JFrame() {
 
 	companion object {
 		private const val serialVersionUID = 1L
-		private val LANG: I18n = I18n.getTranslation("about")
 
 		const val ABOUT_TAB: String = "about"
 		const val FEEDBACK_TAB: String = "feedback"

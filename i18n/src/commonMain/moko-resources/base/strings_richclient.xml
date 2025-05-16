@@ -3,7 +3,7 @@
 	<!-- System tray-->
 	<string name="richclient_tray_title">%s</string>
 	<string name="richclient_tray_exit">Exit</string>
-	<string name="richclient_tray_card-status">Card Status</string>
+	<string name="richclient_tray_card_status">Card Status</string>
 	<string name="richclient_tray_about">About</string>
 	<string name="richclient_tray_config">Configuration</string>
 	<string name="richclient_tray_support">Help</string>

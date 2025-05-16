@@ -21,10 +21,10 @@
  */
 package org.openecard.binding.tctoken
 
+import dev.icerock.moko.resources.format
 import generated.TCTokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.ex.AuthServerException
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidAddressException
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement
@@ -38,6 +38,7 @@ import org.openecard.common.ECardConstants.BINDING_PAOS
 import org.openecard.common.ECardConstants.PATH_SEC_PROTO_TLS_PSK
 import org.openecard.common.util.Pair
 import org.openecard.common.util.TR03112Utils
+import org.openecard.i18n.I18N
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -197,7 +198,9 @@ class TCTokenRequest {
 
 		private fun extractTCTokenContextInt(activationTokenUrl: String?): Pair<TCTokenContext, URL> {
 			if (activationTokenUrl == null) {
-				throw MissingActivationParameterException(ErrorTranslations.NO_TOKEN)
+				throw MissingActivationParameterException(
+					I18N.strings.tr03112_missing_activation_parameter_exception_no_valid_tctoken_available.localized(),
+				)
 			}
 
 			val tokenUrl: URL
@@ -205,7 +208,12 @@ class TCTokenRequest {
 				tokenUrl = URL(activationTokenUrl)
 			} catch (ex: MalformedURLException) {
 				// TODO: check if the error type is correct, was WRONG_PARAMETER before
-				throw InvalidTCTokenUrlException(ErrorTranslations.INVALID_TCTOKEN_URL, ex, activationTokenUrl)
+				throw InvalidTCTokenUrlException(
+					I18N.strings.tr03112_invalid_tctoken_url_exception_invalid_tctoken_url
+						.format(activationTokenUrl)
+						.localized(),
+					ex,
+				)
 			}
 			val tokenCtx: TCTokenContext = TCTokenContext.generateTCToken(tokenUrl)
 			return Pair(tokenCtx, tokenUrl)

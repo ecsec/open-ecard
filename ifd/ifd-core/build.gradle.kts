@@ -19,6 +19,7 @@ kotlin {
 		val jvmMain by getting {
 			dependencies {
 				api(project(":ifd:ifd-common"))
+				api(project(":i18n"))
 			}
 		}
 		val jvmTest by getting {

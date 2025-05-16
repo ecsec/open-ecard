@@ -22,12 +22,12 @@
 package org.openecard.addons.tr03124.gui
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
-import org.openecard.common.I18n
 import org.openecard.common.interfaces.CardRecognition
 import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Radiobox
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 
 /**
  * Step implementation which represents a card selection dialog in case the are multiple valid cards available.
@@ -40,7 +40,6 @@ class CardSelectionStep(
 	rec: CardRecognition,
 ) : Step(ID, title) {
 	private val avCardWithName = mutableMapOf<String, ConnectionHandleType>()
-	private val lang: I18n = I18n.getTranslation("tr03112")
 	private val rec: CardRecognition
 
 	/**
@@ -65,7 +64,7 @@ class CardSelectionStep(
 	 */
 	private fun addElements() {
 		val description = Text()
-		description.text = lang.translationForKey("card.selection.message")
+		description.text = I18N.strings.tr03112_card_selection_message.localized()
 		val radioBox = Radiobox("credentialSelectionBox")
 		radioBox.groupText = "Available Credentials"
 		for (cardName in avCardWithName.keys) {

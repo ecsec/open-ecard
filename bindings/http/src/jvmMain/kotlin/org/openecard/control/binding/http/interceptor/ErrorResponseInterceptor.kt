@@ -28,12 +28,12 @@ import org.apache.http.HttpResponseInterceptor
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.protocol.HttpContext
-import org.openecard.common.I18n
 import org.openecard.common.util.HTMLUtils
 import org.openecard.control.binding.http.common.DocumentRoot
 import org.openecard.control.binding.http.common.HTTPTemplate
 import org.openecard.control.binding.http.common.HeaderTypes
 import org.openecard.control.binding.http.common.MimeType
+import org.openecard.i18n.I18N
 import java.io.ByteArrayOutputStream
 
 private val logger = KotlinLogging.logger {}
@@ -89,7 +89,19 @@ class ErrorResponseInterceptor(
 					template.setProperty("%%%MESSAGE%%%", content)
 				}
 			} else {
-				template.setProperty("%%%MESSAGE%%%", lang.translationForKey("http.$statusCode"))
+				template.setProperty(
+					"%%%MESSAGE%%%",
+					when (statusCode) {
+						400 -> I18N.strings.http_400.localized()
+						401 -> I18N.strings.http_401.localized()
+						403 -> I18N.strings.http_403.localized()
+						404 -> I18N.strings.http_404.localized()
+						405 -> I18N.strings.http_405.localized()
+						415 -> I18N.strings.http_415.localized()
+						500 -> I18N.strings.http_500.localized()
+						else -> "no message"
+					},
+				)
 			}
 
 			template.setProperty("%%%TITLE%%%", "Error")
@@ -115,8 +127,6 @@ class ErrorResponseInterceptor(
 	}
 
 	companion object {
-		private val lang: I18n = I18n.getTranslation("http")
-
 		private fun generateErrorCodes(): List<Int> {
 			val result = mutableListOf<Int>()
 			for (i in 400..417) {

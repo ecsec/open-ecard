@@ -22,9 +22,11 @@
 
 package org.openecard.addons.status
 
+import dev.icerock.moko.resources.format
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
 import org.openecard.addon.bind.ResponseBody
+import org.openecard.i18n.I18N
 import org.openecard.ws.marshal.WSMarshaller
 import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
@@ -40,44 +42,40 @@ import javax.xml.transform.TransformerException
 class StatusResponseBodyFactory {
 	private val m: WSMarshaller = createInstance()
 
-	fun createStatusResponse(status: Status): BindingResult {
-		val result = BindingResult()
-		try {
-			val body = ResponseBody()
-			val value = m.doc2str(m.marshal(status))
-			body.setValue(value, "text/xml")
-			result.body = body
-			result.resultCode = BindingResultCode.OK
-		} catch (ex: WSMarshallerException) {
-			result.resultCode = BindingResultCode.INTERNAL_ERROR
-			result.setResultMessage("Failed to marshal Status message.\n  " + ex.message)
-		} catch (ex: TransformerException) {
-			result.resultCode = BindingResultCode.INTERNAL_ERROR
-			result.setResultMessage("Failed to marshal Status message.\n  " + ex.message)
-		}
-		return result
-	}
+	fun createStatusResponse(status: Status): BindingResult = createBindingResult(status)
 
-	fun createWaitForChangeResponse(status: StatusChange?): BindingResult {
-		val result = BindingResult()
-		if (status == null) {
-			result.resultCode = BindingResultCode.RESOURCE_UNAVAILABLE
-			result.setResultMessage("The requested session does not exist.")
-		} else {
-			try {
-				val body = ResponseBody()
-				val value = m.doc2str(m.marshal(status))
-				body.setValue(value, "text/xml")
-				result.body = body
-				result.resultCode = BindingResultCode.OK
-			} catch (ex: WSMarshallerException) {
-				result.resultCode = BindingResultCode.INTERNAL_ERROR
-				result.setResultMessage("Failed to marshal StatusChange message.\n  " + ex.message)
-			} catch (ex: TransformerException) {
-				result.resultCode = BindingResultCode.INTERNAL_ERROR
-				result.setResultMessage("Failed to marshal StatusChange message.\n  " + ex.message)
+	fun createWaitForChangeResponse(status: StatusChange?): BindingResult =
+		status?.let {
+			createBindingResult(it)
+		} ?: BindingResult(
+			BindingResultCode.RESOURCE_UNAVAILABLE,
+			"The requested session does not exist.",
+		)
+
+	private fun createBindingResult(toBeMarshalled: Any): BindingResult =
+		try {
+			BindingResult.OK.apply {
+				body =
+					ResponseBody().apply {
+						setValue(
+							m.doc2str(m.marshal(toBeMarshalled)),
+							"text/xml",
+						)
+					}
+			}
+		} catch (ex: Exception) {
+			when (ex) {
+				is WSMarshallerException, is TransformerException -> {
+					BindingResult(
+						BindingResultCode.INTERNAL_ERROR,
+						I18N.strings.addon_error_internal
+							.format("Failed to marshal Status message.\n ${ex.message}")
+							.localized(),
+					)
+				}
+				else -> {
+					throw ex
+				}
 			}
 		}
-		return result
-	}
 }

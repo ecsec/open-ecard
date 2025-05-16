@@ -21,6 +21,7 @@
  */
 package org.openecard.transport.paos
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ChannelHandleType
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
@@ -41,7 +42,6 @@ import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestExecutor
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.binding.tctoken.TlsConnectionHandler
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
 import org.openecard.common.WSHelper
@@ -59,6 +59,7 @@ import org.openecard.httpcore.HttpRequestHelper.setDefaultHeader
 import org.openecard.httpcore.KHttpUtils.dumpHttpRequest
 import org.openecard.httpcore.KHttpUtils.dumpHttpResponse
 import org.openecard.httpcore.StreamHttpClientConnection
+import org.openecard.i18n.I18N
 import org.openecard.sal.protocol.eac.transport.paos.MessageIdGenerator
 import org.openecard.ws.marshal.MarshallingTypeException
 import org.openecard.ws.marshal.WSMarshaller
@@ -120,7 +121,7 @@ class PAOS(
 			this.m = createInstance()
 		} catch (ex: WSMarshallerException) {
 			logger.error(ex) { "${ex.message}" }
-			throw PAOSException(ex)
+			throw PAOSException(cause = ex)
 		}
 	}
 
@@ -179,15 +180,15 @@ class PAOS(
 		try {
 			val id = getMessageID(msg)
 			if (id == null) {
-				throw PAOSException(ErrorTranslations.NO_MESSAGE_ID)
+				throw PAOSException(msg = I18N.strings.tr03112_paos_exception_no_message_id.localized())
 			}
 			if (!idGenerator.setRemoteID(id)) {
 				// IDs don't match throw exception
-				throw PAOSException(ErrorTranslations.MESSAGE_ID_MISSMATCH)
+				throw PAOSException(msg = I18N.strings.tr03112_paos_exception_message_id_mismatch.localized())
 			}
 		} catch (e: SOAPException) {
 			logger.error(e) { "${e.message}" }
-			throw PAOSException(e.message, e)
+			throw PAOSException(msg = e.message, cause = e)
 		}
 	}
 
@@ -228,9 +229,9 @@ class PAOS(
 					val newDoc = m.str2doc(docStr)
 					body = newDoc.documentElement
 				} catch (ex: SAXException) {
-					throw PAOSException("Failed to copy document.", ex)
+					throw PAOSException(msg = "Failed to copy document.", cause = ex)
 				} catch (ex: TransformerException) {
-					throw PAOSException("Failed to copy document.", ex)
+					throw PAOSException(msg = "Failed to copy document.", cause = ex)
 				}
 			}
 
@@ -240,19 +241,28 @@ class PAOS(
 			return m.unmarshal(body)
 		} catch (ex: MarshallingTypeException) {
 			logger.error(ex) { "${ex.message}" }
-			throw PAOSException(ex.message, ex)
+			throw PAOSException(msg = ex.message, cause = ex)
 		} catch (ex: WSMarshallerException) {
 			val msg = "Failed to read/process message from PAOS server."
 			logger.error(ex) { msg }
-			throw PAOSException(ErrorTranslations.MARSHALLING_ERROR, ex)
+			throw PAOSException(
+				msg = I18N.strings.tr03112_dispatcher_exception_failed_jaxb_object_marshaling.localized(),
+				cause = ex,
+			)
 		} catch (ex: IOException) {
 			val msg = "Failed to read/process message from PAOS server."
 			logger.error(ex) { msg }
-			throw PAOSException(ErrorTranslations.SOAP_MESSAGE_FAILURE, ex)
+			throw PAOSException(
+				msg = I18N.strings.tr03112_paos_exception_soap_message_creation_failed.localized(),
+				cause = ex,
+			)
 		} catch (ex: SAXException) {
 			val msg = "Failed to read/process message from PAOS server."
 			logger.error(ex) { msg }
-			throw PAOSException(ErrorTranslations.SOAP_MESSAGE_FAILURE, ex)
+			throw PAOSException(
+				msg = I18N.strings.tr03112_paos_exception_soap_message_creation_failed.localized(),
+				cause = ex,
+			)
 		}
 	}
 
@@ -489,24 +499,27 @@ class PAOS(
 					} else {
 						val errMsg = "Error in the link to the PAOS server."
 						logger.error { errMsg }
-						throw PAOSException(ErrorTranslations.DELIVERY_FAILED, ex)
+						throw PAOSException(msg = I18N.strings.tr03112_paos_exception_failed_delivery.localized(), cause = ex)
 					}
 				}
 			}
 		} catch (ex: HttpException) {
-			throw PAOSException(ErrorTranslations.DELIVERY_FAILED, ex)
+			throw PAOSException(msg = I18N.strings.tr03112_paos_exception_failed_delivery.localized(), cause = ex)
 		} catch (ex: SOAPException) {
-			throw PAOSException(ErrorTranslations.SOAP_MESSAGE_FAILURE, ex)
+			throw PAOSException(msg = I18N.strings.tr03112_paos_exception_soap_message_creation_failed.localized(), cause = ex)
 		} catch (ex: DocumentValidatorException) {
-			throw PAOSException(ErrorTranslations.SCHEMA_VALIDATION_FAILED, ex)
+			throw PAOSException(msg = I18N.strings.tr03112_paos_exception_msg_invalid_schema.localized(), cause = ex)
 		} catch (ex: MarshallingTypeException) {
-			throw PAOSDispatcherException(ErrorTranslations.MARSHALLING_ERROR, ex)
+			throw PAOSDispatcherException(
+				I18N.strings.tr03112_dispatcher_exception_failed_jaxb_object_marshaling.localized(),
+				ex,
+			)
 		} catch (ex: InvocationTargetException) {
-			throw PAOSDispatcherException(ErrorTranslations.DISPATCHER_ERROR, ex)
+			throw PAOSDispatcherException(I18N.strings.tr03112_dispatcher_exception_dispatched_method_exception.localized(), ex)
 		} catch (ex: TransformerException) {
 			throw DispatcherException(ex.message, ex)
 		} catch (ex: WSHelper.WSException) {
-			val newEx = PAOSException(ex)
+			val newEx = PAOSException(cause = ex)
 			if (firstOecMinorError != null) {
 				newEx.additionalResultMinor = firstOecMinorError
 			}
@@ -540,13 +553,13 @@ class PAOS(
 		try {
 			logger.debug { "Opening connection to PAOS server." }
 			val handler = tlsHandler.createTlsConnection()
-			conn = StreamHttpClientConnection(handler.getInputStream(), handler.getOutputStream())
+			conn = StreamHttpClientConnection(handler.inputStream, handler.outputStream)
 			logger.debug { "Connection to PAOS server established." }
 			return conn
 		} catch (ex: IOException) {
-			throw PAOSConnectionException(ex)
+			throw PAOSConnectionException(cause = ex)
 		} catch (ex: URISyntaxException) {
-			throw PAOSConnectionException(ex)
+			throw PAOSConnectionException(cause = ex)
 		}
 	}
 
@@ -561,7 +574,12 @@ class PAOS(
 		// Check the result code. According to the PAOS Spec section 9.4 the server has to send 202
 		// All tested test servers return 200 so accept both but generate a warning message in case of 200
 		if (statusCode != 200 && statusCode != 202) {
-			throw PAOSConnectionException(ErrorTranslations.INVALID_HTTP_STATUS, statusCode)
+			throw PAOSConnectionException(
+				msg =
+					I18N.strings.tr03112_paos_exception_invalid_http_status_code
+						.format(statusCode)
+						.localized(),
+			)
 		} else if (statusCode == 200) {
 			val msg2 = (
 				"The PAOS endpoint sent the http status code 200 which does not conform to the " +

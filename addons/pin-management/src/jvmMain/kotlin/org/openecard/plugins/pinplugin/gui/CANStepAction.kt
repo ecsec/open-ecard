@@ -27,7 +27,6 @@ import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
 import iso.std.iso_iec._24727.tech.schema.EstablishChannel
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.anytype.AuthDataMap
@@ -41,6 +40,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.plugins.pinplugin.RecognizedState
 import javax.xml.parsers.ParserConfigurationException
 
@@ -69,8 +69,6 @@ class CANStepAction(
 	step: Step,
 	private val state: RecognizedState,
 ) : StepAction(step) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	private var can: String? = null
 
 	override fun perform(
@@ -129,7 +127,8 @@ class CANStepAction(
 			checkResult<EstablishChannelResponse>(ecr)
 
 			// pace was successfully performed, so get to the next step
-			val title: String? = lang.translationForKey(PINSTEP_TITLE)
+			val title: String =
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized()
 			val retryCounter = 1
 			val replacementStep: Step =
 				ChangePINStep(
@@ -176,7 +175,7 @@ class CANStepAction(
 		verifyFailed: Boolean,
 	) = CANEntryStep(
 		"can-entry",
-		lang.translationForKey(CANSTEP_TITLE),
+		I18N.strings.pinplugin_action_changepin_userconsent_canstep_title.localized(),
 		capturePin,
 		state,
 		enteredWrong,
@@ -186,10 +185,6 @@ class CANStepAction(
 	}
 
 	companion object {
-		// translation constants
-		private const val CANSTEP_TITLE = "action.changepin.userconsent.canstep.title"
-		private const val PINSTEP_TITLE = "action.changepin.userconsent.pinstep.title"
-
 		private const val PIN_ID_CAN = "2"
 	}
 }

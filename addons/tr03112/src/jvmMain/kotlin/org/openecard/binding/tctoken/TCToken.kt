@@ -23,9 +23,9 @@ package org.openecard.binding.tctoken
 
 import generated.TCTokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.common.util.UrlBuilder
+import org.openecard.i18n.I18N
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -71,7 +71,9 @@ class TCToken : TCTokenType() {
 		} catch (ex: URISyntaxException) {
 			// should not happen, but here it is anyways
 			logger.error(ex) { "Construction of redirect URL failed." }
-			throw InvalidRedirectUrlException(ErrorTranslations.NO_URL)
+			throw InvalidRedirectUrlException(
+				I18N.strings.tr03112_invalid_redirect_url_exception_no_url.localized(),
+			)
 		}
 	}
 
@@ -83,11 +85,15 @@ class TCToken : TCTokenType() {
 					return url
 				} catch (_: URISyntaxException) {
 					logger.error { "No valid CommunicationErrorAddress provided." }
-					throw InvalidRedirectUrlException(ErrorTranslations.NO_URL)
+					throw InvalidRedirectUrlException(
+						I18N.strings.tr03112_invalid_redirect_url_exception_no_url.localized(),
+					)
 				}
 			} else {
 				logger.error { "No CommunicationErrorAddress to perform a redirect provided." }
-				throw InvalidRedirectUrlException(ErrorTranslations.NO_REDIRECT_AVAILABLE)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_no_url_available.localized(),
+				)
 			}
 		}
 	}

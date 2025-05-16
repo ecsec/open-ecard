@@ -18,27 +18,21 @@
  * and conditions contained in a signed written agreement between
  * you and ecsec GmbH.
  *
- ***************************************************************************/
-
-package org.openecard.ifd.protocol.pace.gui;
-
-import java.util.HashMap;
-
+ */
+package org.openecard.ifd.protocol.pace.gui
 
 /**
  * Provides a container to store data for the GUI and user interaction.
  *
  * @author Moritz Horsch
  */
-public class GUIContentMap {
-
-    public enum ELEMENT {
-
-	PIN,
-	PIN_ID;
+class GUIContentMap {
+    enum class ELEMENT {
+        PIN,
+        PIN_ID
     }
 
-    private HashMap<String, Object> map = new HashMap<String, Object>();
+    private val map = HashMap<String?, Any?>()
 
 
     /**
@@ -47,8 +41,8 @@ public class GUIContentMap {
      * @param id ID
      * @param value Value
      */
-    public void add(ELEMENT id, Object value) {
-	add(id.name(), value);
+    fun add(id: ELEMENT, value: Any?) {
+        add(id.name, value)
     }
 
     /**
@@ -57,8 +51,8 @@ public class GUIContentMap {
      * @param id ID
      * @param value Value
      */
-    public void add(String id, Object value) {
-	map.put(id, value);
+    fun add(id: String?, value: Any?) {
+        map.put(id, value)
     }
 
     /**
@@ -67,8 +61,8 @@ public class GUIContentMap {
      * @param id ID
      * @return Value
      */
-    public Object get(ELEMENT id) {
-	return get(id.name());
+    fun get(id: ELEMENT): Any? {
+        return get(id.name)
     }
 
     /**
@@ -77,8 +71,7 @@ public class GUIContentMap {
      * @param id ID
      * @return Value
      */
-    public Object get(String id) {
-	return map.get(id);
+    fun get(id: String?): Any? {
+        return map.get(id)
     }
-
 }

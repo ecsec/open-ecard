@@ -39,12 +39,10 @@ import org.openecard.binding.tctoken.TCTokenHandler
 import org.openecard.binding.tctoken.TCTokenResponse
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.binding.tctoken.ex.ActivationError
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.FatalActivationError
 import org.openecard.binding.tctoken.ex.NonGuiException
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.OpenecardProperties
 import org.openecard.common.ThreadTerminateException
 import org.openecard.common.WSHelper
@@ -54,6 +52,7 @@ import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.ViewController
 import org.openecard.gui.message.DialogType
 import org.openecard.httpcore.cookies.CookieManager
+import org.openecard.i18n.I18N
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -71,8 +70,6 @@ private val logger = KotlinLogging.logger { }
  * @author Hans-Martin Haase
  */
 class ActivateAction : AppPluginAction {
-	private val lang: I18n = I18n.getTranslation("tr03112")
-
 	private var tokenHandler: TCTokenHandler? = null
 	private var statusAction: AppPluginAction? = null
 	private var pinManAction: AppExtensionAction? = null
@@ -153,8 +150,8 @@ class ActivateAction : AppPluginAction {
 	private fun showFinishMessage(response: TCTokenResponse) {
 		// show the finish message just if we have a major ok
 		if (ECardConstants.Major.OK == response.getResult().getResultMajor() && this.isShowRemoveCard) {
-			val title = lang.translationForKey(ErrorTranslations.FINISH_TITLE)
-			val msg = lang.translationForKey(ErrorTranslations.REMOVE_CARD)
+			val title = I18N.strings.tr03112_finish.localized()
+			val msg = I18N.strings.tr03112_remove_card_msg.localized()
 			showBackgroundMessage(msg, title, DialogType.INFORMATION_MESSAGE)
 		}
 	}
@@ -187,10 +184,14 @@ class ActivateAction : AppPluginAction {
 	 * @param errMsg Error message to display.
 	 */
 	private fun showErrorMessage(errMsg: String?) {
-		val title = lang.translationForKey(ErrorTranslations.ERROR_TITLE)
-		val baseHeader = lang.translationForKey(ErrorTranslations.ERROR_HEADER)
-		val exceptionPart = lang.translationForKey(ErrorTranslations.ERROR_MSG_IND)
-		val removeCard = lang.translationForKey(ErrorTranslations.REMOVE_CARD)
+		val title =
+			I18N.strings.tr03112_error.localized()
+		val baseHeader =
+			I18N.strings.tr03112_err_header.localized()
+		val exceptionPart =
+			I18N.strings.tr03112_err_msg_indicator.localized()
+		val removeCard =
+			I18N.strings.tr03112_remove_card_msg.localized()
 		val msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard)
 		showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE)
 	}
@@ -238,19 +239,29 @@ class ActivateAction : AppPluginAction {
 
 		// only continue, when there are known parameters in the request
 		if (emptyParms || !(tokenUrl || status || showUI)) {
-			response = BindingResult(BindingResultCode.MISSING_PARAMETER)
-			response.setResultMessage(lang.translationForKey(ErrorTranslations.NO_ACTIVATION_PARAMETERS))
+			response =
+				BindingResult(
+					BindingResultCode.MISSING_PARAMETER,
+					I18N.strings.tr03112_missing_activation_parameter_exception_no_activation_parameters.localized(),
+				)
 			setMinorResult(response, ECardConstants.Minor.App.INCORRECT_PARM)
-			showErrorMessage(lang.translationForKey(ErrorTranslations.NO_ACTIVATION_PARAMETERS))
+			showErrorMessage(
+				I18N.strings.tr03112_missing_activation_parameter_exception_no_activation_parameters.localized(),
+			)
 			return response
 		}
 
 		// check illegal parameter combination
 		if ((tokenUrl && showUI) || (tokenUrl && status) || (showUI && status)) {
-			response = BindingResult(BindingResultCode.WRONG_PARAMETER)
-			response.setResultMessage(lang.translationForKey(ErrorTranslations.NO_PARAMS))
+			response =
+				BindingResult(
+					BindingResultCode.WRONG_PARAMETER,
+					I18N.strings.tr03112_missing_activation_parameter_exception_no_suitable_parameters.localized(),
+				)
 			setMinorResult(response, ECardConstants.Minor.App.INCORRECT_PARM)
-			showErrorMessage(lang.translationForKey(ErrorTranslations.NO_PARAMS))
+			showErrorMessage(
+				I18N.strings.tr03112_missing_activation_parameter_exception_no_suitable_parameters.localized(),
+			)
 			return response
 		}
 
@@ -300,14 +311,15 @@ class ActivateAction : AppPluginAction {
 				SEMAPHORE.release()
 			}
 		} else {
-			response = BindingResult(BindingResultCode.RESOURCE_LOCKED)
-			response.setResultMessage("An authentication process is already running.")
-			return response
+			return BindingResult(
+				BindingResultCode.RESOURCE_LOCKED,
+				"An authentication process is already running.",
+			)
 		}
-
-		response = BindingResult(BindingResultCode.INTERNAL_ERROR)
-		response.setResultMessage("Failed to handle request parameters correctly.")
-		return response
+		return BindingResult(
+			BindingResultCode.RESOURCE_LOCKED,
+			"Failed to handle request parameters correctly.",
+		)
 	}
 
 	/**
@@ -496,9 +508,11 @@ class ActivateAction : AppPluginAction {
 					// error already displayed to the user so do not repeat it here
 				} else {
 					if (ex.message == "Invalid HTTP message received.") {
-						showErrorMessage(lang.translationForKey(ErrorTranslations.ACTIVATION_INVALID_REFRESH_ADDRESS))
+						showErrorMessage(
+							I18N.strings.tr03112_activation_action_invalid_refresh_address.localized(),
+						)
 					} else {
-						showErrorMessage(ex.getLocalizedMessage())
+						showErrorMessage(ex.message)
 					}
 				}
 				logger.error { ex.message }

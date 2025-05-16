@@ -22,15 +22,14 @@
 package org.openecard.binding.tctoken
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
-import org.openecard.common.I18n
 import org.openecard.common.util.Promise
 import org.openecard.common.util.TR03112Utils
 import org.openecard.crypto.common.asn1.cvc.CertificateDescription
 import org.openecard.httpcore.CertificateValidator
 import org.openecard.httpcore.ValidationError
+import org.openecard.i18n.I18N
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -81,7 +80,9 @@ class RedirectCertificateValidator(
 						"The retrieved server certificate is NOT contained in the CommCertificates of " +
 							"the CertificateDescription extension of the eService certificate."
 					}
-					throw ValidationError(LANG, ErrorTranslations.INVALID_REDIRECT)
+					throw ValidationError(
+						I18N.strings.tr03112_redirect_cert_validator_invalid_redirect.localized(),
+					)
 				}
 
 				// check if we match the SOP
@@ -114,11 +115,10 @@ class RedirectCertificateValidator(
 				return CertificateValidator.VerifierResult.FINISH
 			}
 		} catch (ex: MalformedURLException) {
-			throw ValidationError(LANG, ErrorTranslations.REDIRECT_MALFORMED_URL, ex)
+			throw ValidationError(
+				I18N.strings.tr03112_redirect_cert_validator_malformed_subject_url.localized(),
+				ex,
+			)
 		}
-	}
-
-	companion object {
-		private val LANG: I18n = I18n.getTranslation("tr03112")
 	}
 }

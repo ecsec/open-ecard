@@ -20,6 +20,7 @@ kotlin {
 			dependencies {
 				api(project(":sal:sal-common"))
 				api(project(":cifs"))
+				api(project(":i18n"))
 
 				implementation(libs.annotations)
 			}

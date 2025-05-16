@@ -106,30 +106,34 @@ class ActivateCGAction : AppPluginAction {
 					// wait for other task to complete
 					it.join()
 				} else {
-					logger.info { "Another ChipGateway Protocol instance is already running, return status=busy." }
-					response = BindingResult(BindingResultCode.REDIRECT)
-					response.auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, token.finalizeBusyAddress())
-					return response
+					val msg = "Another ChipGateway Protocol instance is already running, return status=busy."
+					logger.info { msg }
+					return BindingResult(BindingResultCode.REDIRECT, msg).apply {
+						auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, token.finalizeBusyAddress())
+					}
 				}
 			}
 
 			// perform ChipGateway Protocol in background thread, so that we can return directly
-			currentTaskThread = Thread(cgAction)
-			currentTaskThread!!.setDaemon(true)
-			currentTaskThread!!.setName("ChipGateway-Activation-" + THREAD_NUM.getAndIncrement())
-			currentTaskThread!!.start()
+			currentTaskThread =
+				Thread(cgAction).apply {
+					isDaemon = true
+					name = "ChipGateway-Activation-${THREAD_NUM.getAndIncrement()}"
+					start()
+				}
 
 			// create redirect
-			response = BindingResult(BindingResultCode.REDIRECT)
-			response.auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, token.finalizeOkAddress())
+			response =
+				BindingResult(BindingResultCode.REDIRECT).apply {
+					auxResultData.put(AuxDataKeys.REDIRECT_LOCATION, token.finalizeOkAddress())
+				}
 		} catch (ex: WrongMethodException) {
 			logger.warn { ex.message }
-			response = BindingResult(BindingResultCode.WRONG_PARAMETER)
-			response.setResultMessage(ex.message)
+			response = BindingResult(BindingResultCode.WRONG_PARAMETER, ex.message)
 		} catch (ex: NoMethodException) {
-			logger.error(ex) { "No method given in headers, maybe wrong binging." }
-			response = BindingResult(BindingResultCode.INTERNAL_ERROR)
-			response.setResultMessage(ex.message)
+			val msg = "No method given in headers, maybe wrong binging."
+			logger.error(ex) { msg }
+			response = BindingResult(BindingResultCode.INTERNAL_ERROR, msg)
 		} catch (ex: InvalidRedirectUrlException) {
 			logger.error(ex) { "Failed to create TCToken." }
 			response = ex.bindingResult
@@ -137,9 +141,9 @@ class ActivateCGAction : AppPluginAction {
 			logger.error(ex) { "Failed to create TCToken." }
 			response = ex.bindingResult
 		} catch (ex: InterruptedException) {
-			logger.info { "ChipGateway activation interrupted." }
-			response = BindingResult(BindingResultCode.INTERNAL_ERROR)
-			response.setResultMessage(ex.message)
+			val msg = "ChipGateway activation interrupted."
+			logger.info { msg }
+			response = BindingResult(BindingResultCode.INTERNAL_ERROR, msg)
 		} finally {
 			if (aquired) {
 				MUTEX.release()

@@ -22,26 +22,27 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 
 /**
  * Custom settings group for general settings.
  *
  * @author Tobias Wich
  */
-class GeneralSettingsNotificationGroup : OpenecardPropertiesSettingsGroup(lang.translationForKey(GROUP)) {
-    init {
-        addBoolItem(
-            lang.translationForKey(REMOVE_CARD), lang.translationForKey(REMOVE_CARD_DESC),
-            "notification.omit_show_remove_card"
-        )
-    }
+class GeneralSettingsNotificationGroup : OpenecardPropertiesSettingsGroup(GROUP) {
+	init {
+		addBoolItem(
+			REMOVE_CARD,
+			REMOVE_CARD_DESC,
+			"notification.omit_show_remove_card",
+		)
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-        private val lang: I18n = I18n.getTranslation("addon")
-        private const val GROUP: String = "addon.list.core.general.notification.group_name"
-        private const val REMOVE_CARD: String = "addon.list.core.general.notification.omit_show_remove_card"
-        private const val REMOVE_CARD_DESC: String = "addon.list.core.general.notification.omit_show_remove_card.desc"
-    }
+	companion object {
+		private val GROUP = I18N.strings.addon_list_core_general_notification_group_name.localized()
+		private val REMOVE_CARD = I18N.strings.addon_list_core_general_notification_omit_show_remove_card.localized()
+		private val REMOVE_CARD_DESC =
+			I18N.strings.addon_list_core_general_notification_omit_show_remove_card_desc
+				.localized()
+	}
 }

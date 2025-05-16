@@ -24,8 +24,8 @@ package org.openecard.richclient.gui.manage.core
 
 import org.openecard.addon.AddonPropertiesException
 import org.openecard.addon.manifest.ScalarListEntryType
-import org.openecard.common.I18n
 import org.openecard.crypto.tls.proxy.ProxySettings
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.components.ScalarListItem
 import java.awt.event.ItemEvent
 import java.awt.event.ItemListener
@@ -41,101 +41,112 @@ import javax.swing.JTextField
  * @author Tobias Wich
  * @author Hans-Martin Haase
  */
-class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(lang.translationForKey(GROUP)) {
-    private val selection: JComboBox<*>
-    private val host: JTextField?
-    private val port: JTextField?
-    private val vali: JCheckBox
-    private val user: JTextField?
-    private val pass: JTextField
-    private val excl: ScalarListItem
+class ConnectionSettingsGroup : OpenecardPropertiesSettingsGroup(GROUP) {
+	private val selection: JComboBox<*>
+	private val host: JTextField?
+	private val port: JTextField?
+	private val vali: JCheckBox
+	private val user: JTextField?
+	private val pass: JTextField
+	private val excl: ScalarListItem
 
+	init {
+		selection =
+			addSelectionItem(
+				SCHEME,
+				SCHEME_DESC,
+				"proxy.scheme",
+				"System Proxy",
+				"SOCKS",
+				"HTTP",
+				"HTTPS",
+				"No Proxy",
+			)
+		host = addInputItem(HOST, HOST_DESC, "proxy.host")
+		port = addInputItem(PORT, PORT_DESC, "proxy.port")
+		vali = addBoolItem(VALI, VALI_DESC, "proxy.validate_tls")
+		user = addInputItem(USER, USER_DESC, "proxy.user")
+		pass = addInputItem(PASS, PASS_DESC, "proxy.pass", true)
+		excl =
+			addScalarListItem(
+				EXCL,
+				EXCL_DESC,
+				"proxy.excludes",
+				ScalarListEntryType.STRING,
+			)
 
-    init {
-        selection = addSelectionItem(
-            lang.translationForKey(SCHEME), lang.translationForKey(SCHEME_DESC),
-            "proxy.scheme", "System Proxy", "SOCKS", "HTTP", "HTTPS", "No Proxy"
-        )
-        host = addInputItem(lang.translationForKey(HOST), lang.translationForKey(HOST_DESC), "proxy.host")
-        port = addInputItem(lang.translationForKey(PORT), lang.translationForKey(PORT_DESC), "proxy.port")
-        vali = addBoolItem(lang.translationForKey(VALI), lang.translationForKey(VALI_DESC), "proxy.validate_tls")
-        user = addInputItem(lang.translationForKey(USER), lang.translationForKey(USER_DESC), "proxy.user")
-        pass = addInputItem(lang.translationForKey(PASS), lang.translationForKey(PASS_DESC), "proxy.pass", true)
-        excl = addScalarListItem(
-            lang.translationForKey(EXCL), lang.translationForKey(EXCL_DESC), "proxy.excludes",
-            ScalarListEntryType.STRING
-        )
+		// register event and trigger initial setup
+		val manager: ItemManager = ItemManager()
+		val selectedItem: Any? = selection.getSelectedItem()
+		val trigger: ItemEvent = ItemEvent(selection, ItemEvent.ITEM_FIRST, selectedItem, ItemEvent.SELECTED)
+		manager.itemStateChanged(trigger)
+		selection.addItemListener(manager)
+	}
 
-        // register event and trigger initial setup
-        val manager: ItemManager = ItemManager()
-        val selectedItem: Any? = selection.getSelectedItem()
-        val trigger: ItemEvent = ItemEvent(selection, ItemEvent.ITEM_FIRST, selectedItem, ItemEvent.SELECTED)
-        manager.itemStateChanged(trigger)
-        selection.addItemListener(manager)
-    }
+	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
+	override fun saveProperties() {
+		super.saveProperties()
+		// reload proxy settings
+		ProxySettings.load()
+	}
 
-    @Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
-    override fun saveProperties() {
-        super.saveProperties()
-        // reload proxy settings
-        ProxySettings.load()
-    }
+	private inner class ItemManager : ItemListener {
+		override fun itemStateChanged(e: ItemEvent) {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				val `val`: Any = e.getItem()
+				when (`val`) {
+					"SOCKS" -> {
+						setEnabledComponent(host!!, true)
+						setEnabledComponent(port!!, true)
+						setEnabledComponent(vali, false)
+						setEnabledComponent(user!!, false)
+						setEnabledComponent(pass, false)
+						setEnabledComponent(excl, true)
+					}
+					"HTTP" -> {
+						setEnabledComponent(host!!, true)
+						setEnabledComponent(port!!, true)
+						setEnabledComponent(vali, false)
+						setEnabledComponent(user!!, true)
+						setEnabledComponent(pass, true)
+						setEnabledComponent(excl, true)
+					}
+					"HTTPS" -> {
+						setEnabledComponent(host!!, true)
+						setEnabledComponent(port!!, true)
+						setEnabledComponent(vali, true)
+						setEnabledComponent(user!!, true)
+						setEnabledComponent(pass, true)
+						setEnabledComponent(excl, true)
+					}
+					else -> {
+						setEnabledComponent(host!!, false)
+						setEnabledComponent(port!!, false)
+						setEnabledComponent(vali, false)
+						setEnabledComponent(user!!, false)
+						setEnabledComponent(pass, false)
+						setEnabledComponent(excl, false)
+					}
+				}
+			}
+		}
+	}
 
-
-    private inner class ItemManager : ItemListener {
-        override fun itemStateChanged(e: ItemEvent) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                val `val`: Any = e.getItem()
-                if ("SOCKS" == `val`) {
-                    setEnabledComponent(host!!, true)
-                    setEnabledComponent(port!!, true)
-                    setEnabledComponent(vali, false)
-                    setEnabledComponent(user!!, false)
-                    setEnabledComponent(pass, false)
-                    setEnabledComponent(excl, true)
-                } else if ("HTTP" == `val`) {
-                    setEnabledComponent(host!!, true)
-                    setEnabledComponent(port!!, true)
-                    setEnabledComponent(vali, false)
-                    setEnabledComponent(user!!, true)
-                    setEnabledComponent(pass, true)
-                    setEnabledComponent(excl, true)
-                } else if ("HTTPS" == `val`) {
-                    setEnabledComponent(host!!, true)
-                    setEnabledComponent(port!!, true)
-                    setEnabledComponent(vali, true)
-                    setEnabledComponent(user!!, true)
-                    setEnabledComponent(pass, true)
-                    setEnabledComponent(excl, true)
-                } else {
-                    setEnabledComponent(host!!, false)
-                    setEnabledComponent(port!!, false)
-                    setEnabledComponent(vali, false)
-                    setEnabledComponent(user!!, false)
-                    setEnabledComponent(pass, false)
-                    setEnabledComponent(excl, false)
-                }
-            }
-        }
-    }
-
-    companion object {
-        private const val serialVersionUID: Long = 1L
-        private val lang: I18n = I18n.getTranslation("addon")
-        private const val GROUP: String = "addon.list.core.connection.proxy.group_name"
-        private const val SCHEME: String = "addon.list.core.connection.proxy.scheme"
-        private const val SCHEME_DESC: String = "addon.list.core.connection.proxy.scheme.desc"
-        private const val HOST: String = "addon.list.core.connection.proxy.host"
-        private const val HOST_DESC: String = "addon.list.core.connection.proxy.host.desc"
-        private const val PORT: String = "addon.list.core.connection.proxy.port"
-        private const val PORT_DESC: String = "addon.list.core.connection.proxy.port.desc"
-        private const val VALI: String = "addon.list.core.connection.proxy.vali"
-        private const val VALI_DESC: String = "addon.list.core.connection.proxy.vali.desc"
-        private const val USER: String = "addon.list.core.connection.proxy.user"
-        private const val USER_DESC: String = "addon.list.core.connection.proxy.user.desc"
-        private const val PASS: String = "addon.list.core.connection.proxy.pass"
-        private const val PASS_DESC: String = "addon.list.core.connection.proxy.pass.desc"
-        private const val EXCL: String = "addon.list.core.connection.proxy.excludes"
-        private const val EXCL_DESC: String = "addon.list.core.connection.proxy.excludes.desc"
-    }
+	companion object {
+		private val GROUP = I18N.strings.addon_list_core_connection_proxy_group_name.localized()
+		private val SCHEME = I18N.strings.addon_list_core_connection_proxy_scheme.localized()
+		private val SCHEME_DESC = I18N.strings.addon_list_core_connection_proxy_scheme_desc.localized()
+		private val HOST = I18N.strings.addon_list_core_connection_proxy_host.localized()
+		private val HOST_DESC = I18N.strings.addon_list_core_connection_proxy_host_desc.localized()
+		private val PORT = I18N.strings.addon_list_core_connection_proxy_port.localized()
+		private val PORT_DESC = I18N.strings.addon_list_core_connection_proxy_port_desc.localized()
+		private val VALI = I18N.strings.addon_list_core_connection_proxy_vali.localized()
+		private val VALI_DESC = I18N.strings.addon_list_core_connection_proxy_vali_desc.localized()
+		private val USER = I18N.strings.addon_list_core_connection_proxy_user.localized()
+		private val USER_DESC = I18N.strings.addon_list_core_connection_proxy_user_desc.localized()
+		private val PASS = I18N.strings.addon_list_core_connection_proxy_pass.localized()
+		private val PASS_DESC = I18N.strings.addon_list_core_connection_proxy_pass_desc.localized()
+		private val EXCL = I18N.strings.addon_list_core_connection_proxy_excludes.localized()
+		private val EXCL_DESC = I18N.strings.addon_list_core_connection_proxy_excludes_desc.localized()
+	}
 }

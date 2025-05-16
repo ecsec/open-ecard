@@ -21,11 +21,11 @@
  ***************************************************************************/
 package org.openecard.addons.cg.activate
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.Context
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addons.cg.ex.ChipGatewayUnknownError
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.FatalActivationError
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
@@ -35,6 +35,7 @@ import org.openecard.addons.cg.impl.ChipGatewayResponse
 import org.openecard.addons.cg.impl.ChipGatewayTask
 import org.openecard.addons.cg.tctoken.TCToken
 import org.openecard.common.ThreadTerminateException
+import org.openecard.i18n.I18N
 import org.openecard.ws.chipgateway.TerminateType
 import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
@@ -92,7 +93,11 @@ class TCTokenHandler(
 			}
 
 			else -> // unknown binding
-				throw InvalidTCTokenElement(ErrorTranslations.ELEMENT_VALUE_INVALID, "Binding")
+				throw InvalidTCTokenElement(
+					I18N.strings.chipgateway_error_element_value_invalid
+						.format("Binding")
+						.localized(),
+				)
 		}
 
 		return response
@@ -155,7 +160,7 @@ class TCTokenHandler(
 				else -> {
 					throw ChipGatewayUnknownError(
 						token.finalizeErrorAddress(ResultMinor.CLIENT_ERROR),
-						ErrorTranslations.UNKNOWN,
+						I18N.strings.chipgateway_error_unknown.localized(),
 						ex,
 					)
 				}

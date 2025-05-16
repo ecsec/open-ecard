@@ -21,36 +21,38 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import dev.icerock.moko.resources.format
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 
 /**
  * Step with instructing the user to wait for the authentication to finish.
  *
  * @author Tobias Wich
  */
-class ProcessingStep : Step(STEP_ID, lang.translationForKey(TITLE)) {
+class ProcessingStep :
+	Step(
+		STEP_ID,
+		I18N.strings.eac_step_processing_title.localized(),
+	) {
 	init {
-		description = lang.translationForKey(STEP_DESCRIPTION)
+		description = I18N.strings.eac_step_processing_step_description.localized()
+
 		isInstantReturn = true
 		isReversible = false
 
 		val desc = Text()
-		desc.text = lang.translationForKey(DESCRIPTION, name)
+		desc.text =
+			I18N.strings.eac_step_processing_description
+				.format(name)
+				.localized()
 		inputInfoUnits.add(desc)
 	}
 
 	companion object {
-		private val lang: I18n = I18n.getTranslation("eac")
-
 		// step id
 		const val STEP_ID: String = "PROTOCOL_GUI_STEP_PROCESSING"
-
-		// GUI translation constants
-		private const val TITLE = "step_processing_title"
-		private const val STEP_DESCRIPTION = "step_processing_step_description"
-		private const val DESCRIPTION = "step_processing_description"
 	}
 }

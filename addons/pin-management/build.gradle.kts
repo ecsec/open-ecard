@@ -19,6 +19,7 @@ kotlin {
 		val jvmMain by getting {
 			dependencies {
 				api(project(":addon"))
+				api(project(":i18n"))
 				api(project(":ifd:ifd-core"))
 				api(project(":sal:sal-common"))
 

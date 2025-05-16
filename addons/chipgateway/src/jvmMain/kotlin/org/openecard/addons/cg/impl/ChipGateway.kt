@@ -24,6 +24,7 @@ package org.openecard.addons.cg.impl
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.CardApplicationDisconnect
 import org.apache.http.HttpException
@@ -45,7 +46,6 @@ import org.openecard.addons.cg.activate.TlsConnectionHandler
 import org.openecard.addons.cg.ex.AuthServerException
 import org.openecard.addons.cg.ex.ChipGatewayDataError
 import org.openecard.addons.cg.ex.ConnectionError
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
 import org.openecard.addons.cg.ex.ParameterInvalid
@@ -59,7 +59,6 @@ import org.openecard.common.AppVersion.major
 import org.openecard.common.AppVersion.minor
 import org.openecard.common.AppVersion.patch
 import org.openecard.common.AppVersion.version
-import org.openecard.common.I18n
 import org.openecard.common.SecurityConditionUnsatisfiable
 import org.openecard.common.SemanticVersion
 import org.openecard.common.ThreadTerminateException
@@ -79,6 +78,7 @@ import org.openecard.httpcore.HttpRequestHelper.setDefaultHeader
 import org.openecard.httpcore.KHttpUtils.dumpHttpRequest
 import org.openecard.httpcore.KHttpUtils.dumpHttpResponse
 import org.openecard.httpcore.StreamHttpClientConnection
+import org.openecard.i18n.I18N
 import org.openecard.ws.chipgateway.CommandType
 import org.openecard.ws.chipgateway.GetCommandType
 import org.openecard.ws.chipgateway.HelloRequestType
@@ -187,7 +187,12 @@ class ChipGateway(
 			}
 			pinKey = webKey
 		} catch (ex: URISyntaxException) {
-			throw InvalidTCTokenElement(ErrorTranslations.MALFORMED_URL, ex, "ServerAddress")
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_malformed_url
+					.format("ServerAddress")
+					.localized(),
+				ex,
+			)
 		}
 	}
 
@@ -198,18 +203,18 @@ class ChipGateway(
 			val handler = tlsHandler.createTlsConnection()
 			conn = StreamHttpClientConnection(handler.inputStream, handler.outputStream)
 			LOG.debug { "Connection to ChipGateway server established." }
-		} catch (ex: IOException) {
-			throw ConnectionError(
-				token.finalizeErrorAddress(ResultMinor.COMMUNICATION_ERROR),
-				ErrorTranslations.CONNECTION_OPEN_FAILED,
-				ex,
-			)
-		} catch (ex: URISyntaxException) {
-			throw ConnectionError(
-				token.finalizeErrorAddress(ResultMinor.COMMUNICATION_ERROR),
-				ErrorTranslations.CONNECTION_OPEN_FAILED,
-				ex,
-			)
+		} catch (ex: Exception) {
+			when (ex) {
+				is IOException, is URISyntaxException -> {
+					throw ConnectionError(
+						token.finalizeErrorAddress(ResultMinor.COMMUNICATION_ERROR),
+						I18N.strings.chipgateway_error_connection_open_failed.localized(),
+						ex,
+					)
+				} else -> {
+					throw ex
+				}
+			}
 		}
 	}
 
@@ -225,8 +230,9 @@ class ChipGateway(
 		if (statusCode != 200) {
 			throw ConnectionError(
 				token.finalizeErrorAddress(ResultMinor.SERVER_ERROR),
-				ErrorTranslations.INVALID_HTTP_STATUS,
-				statusCode,
+				I18N.strings.chipgateway_error_invalid_http_status
+					.format(statusCode)
+					.localized(),
 			)
 		}
 	}
@@ -427,14 +433,14 @@ class ChipGateway(
 			} else {
 				throw ConnectionError(
 					token.finalizeErrorAddress(ResultMinor.COMMUNICATION_ERROR),
-					ErrorTranslations.CONNECTION_OPEN_FAILED,
+					I18N.strings.chipgateway_error_connection_open_failed.localized(),
 					ex,
 				)
 			}
 		} catch (ex: HttpException) {
 			throw ConnectionError(
 				token.finalizeErrorAddress(ResultMinor.SERVER_ERROR),
-				ErrorTranslations.HTTP_ERROR,
+				I18N.strings.chipgateway_error_http_error.localized(),
 				ex,
 			)
 		}
@@ -453,7 +459,7 @@ class ChipGateway(
 			LOG.warn { errorMsg }
 			throw ChipGatewayDataError(
 				token.finalizeErrorAddress(ResultMinor.SERVER_ERROR),
-				ErrorTranslations.INVALID_CHIPGATEWAY_MSG,
+				I18N.strings.chipgateway_error_invalid_chipgateway_msg.localized(),
 				ex,
 			)
 		}
@@ -527,7 +533,7 @@ class ChipGateway(
 					} else {
 						throw ChipGatewayDataError(
 							token.finalizeErrorAddress(ResultMinor.SERVER_ERROR),
-							ErrorTranslations.INVALID_CHIPGATEWAY_MSG,
+							I18N.strings.chipgateway_error_invalid_chipgateway_msg.localized(),
 						)
 					}
 			}
@@ -537,7 +543,7 @@ class ChipGateway(
 		} catch (ex: JsonProcessingException) {
 			throw ChipGatewayDataError(
 				token.finalizeErrorAddress(ResultMinor.CLIENT_ERROR),
-				ErrorTranslations.INVALID_CHIPGATEWAY_MSG,
+				I18N.strings.chipgateway_error_invalid_chipgateway_msg.localized(),
 				ex,
 			)
 		} finally {
@@ -611,7 +617,7 @@ class ChipGateway(
 				// stop protocol
 				throw VersionTooOld(
 					token.finalizeErrorAddress(ResultMinor.CLIENT_ERROR),
-					ErrorTranslations.VERSION_OUTDATED,
+					I18N.strings.chipgateway_error_version_outdated.localized(),
 				)
 			}
 
@@ -1002,7 +1008,7 @@ class ChipGateway(
 		} catch (ex: SignatureInvalid) {
 			throw AuthServerException(
 				token.finalizeErrorAddress(ResultMinor.COMMUNICATION_ERROR),
-				ErrorTranslations.SIGNATURE_INVALID,
+				I18N.strings.chipgateway_error_signature_invalid.localized(),
 				ex,
 			)
 		}
@@ -1015,8 +1021,8 @@ class ChipGateway(
 	}
 
 	private fun showErrorMessage(msg: String) {
-		val title: String? = LANG.translationForKey("error.dialog.title")
-		val subMsg: String? = LANG.translationForKey("error.dialog.submessage")
+		val title = I18N.strings.chipgateway_error_dialog_title.localized()
+		val subMsg = I18N.strings.chipgateway_error_dialog_submessage.localized()
 		val fullMsg = String.format("%s%n%n%s", msg, subMsg)
 		gui.obtainMessageDialog().showMessageDialog(fullMsg, title, DialogType.ERROR_MESSAGE)
 	}
@@ -1038,7 +1044,7 @@ class ChipGateway(
 			try {
 				val uri = URI(dlUrl)
 				if (!"https".equals(uri.scheme, ignoreCase = true)) {
-					showErrorMessage(LANG.translationForKey("error.server_wrong_config"))
+					showErrorMessage(I18N.strings.chipgateway_error_server_wrong_config.localized())
 					throw MalformedURLException("Download URL is not an https URL.")
 				}
 				val dlHost = uri.host
@@ -1048,7 +1054,7 @@ class ChipGateway(
 					val msg = String.format("Update host name (%s) does not match allowed domain names.", dlHost)
 					LOG.error { msg }
 
-					showErrorMessage(LANG.translationForKey("error.server_wrong_config"))
+					showErrorMessage(I18N.strings.chipgateway_error_server_wrong_config.localized())
 					throw MalformedURLException(String.format("Download URL host (%s) is not in whitelist.", dlHost))
 				}
 
@@ -1144,7 +1150,6 @@ class ChipGateway(
 			(
 				60 * 60 * 1000 // 60 min
 			).toLong()
-		private val LANG: I18n = I18n.getTranslation("chipgateway")
 		private val TASK_THREAD_NUM = AtomicInteger(1)
 		private val HTTP_THREAD_NUM = AtomicInteger(1)
 		private const val LOG_HTTP_MESSAGES = true

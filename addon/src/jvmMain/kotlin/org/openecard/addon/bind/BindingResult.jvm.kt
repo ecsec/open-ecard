@@ -32,11 +32,10 @@ import java.io.StringWriter
  * @author Dirk Petrautzki
  */
 open class BindingResult(
-	var resultCode: BindingResultCode = BindingResultCode.OK,
+	var resultCode: BindingResultCode,
+	var resultMessage: String? = null,
+	var body: ResponseBody? = null,
 ) {
-	var body: ResponseBody? = null
-	var resultMessage: String? = null
-		private set
 	private val parameters: MutableMap<String, String?> = mutableMapOf()
 	private val auxData: MutableMap<String, String> = mutableMapOf()
 
@@ -69,11 +68,6 @@ open class BindingResult(
 		value?.let {
 			auxData[key] = it
 		}
-		return this
-	}
-
-	fun setResultMessage(resultMessage: String?): BindingResult {
-		this.resultMessage = resultMessage
 		return this
 	}
 
@@ -132,4 +126,6 @@ open class BindingResult(
 			w.append(prefix).append("}\n")
 		}
 	}
+
+	object OK : BindingResult(BindingResultCode.OK)
 }

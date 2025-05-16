@@ -21,8 +21,8 @@
  ***************************************************************************/
 package org.openecard.addons.cg.activate
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
 import org.openecard.addons.cg.impl.ChipGatewayProperties
 import org.openecard.addons.cg.tctoken.TCToken
@@ -38,6 +38,7 @@ import org.openecard.crypto.tls.ClientCertTlsClient
 import org.openecard.crypto.tls.auth.DynamicAuthentication
 import org.openecard.crypto.tls.proxy.ProxySettings.Companion.default
 import org.openecard.crypto.tls.verify.SameCertVerifier
+import org.openecard.i18n.I18N
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URI
@@ -100,7 +101,11 @@ class TlsConnectionHandler(
 					}
 				}
 
-				else -> throw InvalidTCTokenElement(ErrorTranslations.ELEMENT_VALUE_INVALID, "PathSecurity-Protocol")
+				else -> throw InvalidTCTokenElement(
+					I18N.strings.chipgateway_error_element_value_invalid
+						.format("PathSecurity-Protocol")
+						.localized(),
+				)
 			}
 
 			// make sure nobody changes the server when the connection gets reestablished
@@ -109,7 +114,11 @@ class TlsConnectionHandler(
 			// set the authentication class in the tls client
 			tlsClient.authentication = tlsAuth
 		} catch (ex: MalformedURLException) {
-			throw InvalidTCTokenElement(ErrorTranslations.MALFORMED_URL, "ServerAddress")
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_malformed_url
+					.format("ServerAddress")
+					.localized(),
+			)
 		}
 	}
 

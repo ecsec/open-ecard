@@ -22,13 +22,13 @@
 package org.openecard.sal.protocol.eac.anytype
 
 import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationDataType
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.common.anytype.AuthDataMap
 import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.StringUtils
 import org.openecard.crypto.common.asn1.cvc.CHAT
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificate
 import org.openecard.crypto.common.asn1.cvc.CardVerifiableCertificateChain
+import org.openecard.i18n.I18N
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -166,13 +166,17 @@ class EAC1InputType(
 			if (element.localName == CERTIFICATE_DESCRIPTION) {
 				counter++
 				if (counter > 1) {
-					throw ElementParsingException(ErrorTranslations.INVALID_CERT)
+					throw ElementParsingException(
+						message = I18N.strings.tr03112_element_parsing_exception_invalid_cert_number.localized(),
+					)
 				}
 			}
 		}
 
 		if (counter == 0) {
-			throw ElementParsingException(ErrorTranslations.INVALID_CERT)
+			throw ElementParsingException(
+				message = I18N.strings.tr03112_element_parsing_exception_invalid_cert_number.localized(),
+			)
 		}
 	}
 

@@ -5,6 +5,8 @@
     <string name="addon_list_core">%s</string>
     <string name="addon_list_addon">Add-ons</string>
 
+	<string name="addon_error_internal">Interner Fehler: %s</string>
+
     <!-- Add-on panel-->
     <string name="addon_panel_tab_function">Funktionen</string>
     <string name="addon_panel_tab_settings">Einstellungen</string>

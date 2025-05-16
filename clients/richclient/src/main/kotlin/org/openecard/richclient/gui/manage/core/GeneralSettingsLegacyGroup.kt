@@ -22,33 +22,31 @@
 
 package org.openecard.richclient.gui.manage.core
 
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 
 /**
  * Custom settings group for general settings.
  *
  * @author Tobias Wich
  */
-class GeneralSettingsLegacyGroup : OpenecardPropertiesSettingsGroup(LANG.translationForKey(GROUP)) {
-    init {
-        addBoolItem(LANG.translationForKey(TLS1), LANG.translationForKey(TLS1_DESC), "legacy.tls1")
-        addBoolItem(LANG.translationForKey(NS), LANG.translationForKey(NS_DESC), "legacy.invalid_schema")
-        addBoolItem(
-            LANG.translationForKey(PATH_CASE),
-            LANG.translationForKey(PATH_CASE_DESC),
-            "legacy.case_insensitive_path"
-        )
-    }
+class GeneralSettingsLegacyGroup : OpenecardPropertiesSettingsGroup(GROUP) {
+	init {
+		addBoolItem(TLS1, TLS1_DESC, "legacy.tls1")
+		addBoolItem(NS, NS_DESC, "legacy.invalid_schema")
+		addBoolItem(
+			PATH_CASE,
+			PATH_CASE_DESC,
+			"legacy.case_insensitive_path",
+		)
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-        private val LANG: I18n = I18n.getTranslation("addon")
-        private const val GROUP: String = "addon.list.core.general.legacy.group_name"
-        private const val TLS1: String = "addon.list.core.general.legacy.tls1"
-        private const val TLS1_DESC: String = "addon.list.core.general.legacy.tls1.desc"
-        private const val NS: String = "addon.list.core.general.legacy.invalid_schema"
-        private const val NS_DESC: String = "addon.list.core.general.legacy.invalid_schema.desc"
-        private const val PATH_CASE: String = "addon.list.core.general.legacy.case_insensitive_path"
-        private const val PATH_CASE_DESC: String = "addon.list.core.general.legacy.case_insensitive_path.desc"
-    }
+	companion object {
+		private val GROUP = I18N.strings.addon_list_core_general_legacy_group_name.localized()
+		private val TLS1 = I18N.strings.addon_list_core_general_legacy_tls1.localized()
+		private val TLS1_DESC = I18N.strings.addon_list_core_general_legacy_tls1_desc.localized()
+		private val NS = I18N.strings.addon_list_core_general_legacy_invalid_schema.localized()
+		private val NS_DESC = I18N.strings.addon_list_core_general_legacy_invalid_schema_desc.localized()
+		private val PATH_CASE = I18N.strings.addon_list_core_general_legacy_case_insensitive_path.localized()
+		private val PATH_CASE_DESC = I18N.strings.addon_list_core_general_legacy_case_insensitive_path_desc.localized()
+	}
 }

@@ -9,7 +9,7 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
-			api(project(":smartcard:base"))
+			api(project(":smartcard:sc-base"))
 		}
 
 		jvmMain.dependencies {

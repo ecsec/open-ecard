@@ -52,3 +52,46 @@ enum class PasswordType {
 	UTF_8,
 	HALF_NIBBLE_BCD,
 }
+
+class PinError(
+	val error: PinErrorType,
+	val pinStatus: PinStatus? = null,
+	msg: String? = null,
+	cause: Throwable? = null,
+) : Exception(
+		msg ?: "Error in PIN verification/modification.",
+		cause,
+	)
+
+class PinStatus(
+	val numRetries: Int,
+)
+
+enum class PinErrorType(
+	val code: UShort,
+	val mask: UShort = 0xFFFFu,
+) {
+	PIN_WRONG_NO_INFO(0x6300u),
+	PIN_WRONG(0x63C0u, 0xFFF0u),
+	REFERENCE_DATA_NOT_FOUND(0x6A88u),
+	// TODO: add more codes
+	;
+
+	fun matchesCode(code: UShort): Boolean = this.code == (code and this.mask)
+
+	companion object {
+		fun findForCode(code: UShort): PinErrorType? = entries.find { it.matchesCode(code) }
+	}
+}
+
+fun UShort.toPinError(): PinError? {
+	val errorType = PinErrorType.findForCode(this)
+	return errorType?.let {
+		val status =
+			when (errorType) {
+				PinErrorType.PIN_WRONG -> PinStatus((this and 0xFu).toInt())
+				else -> null
+			}
+		PinError(errorType, status)
+	}
+}

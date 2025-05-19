@@ -10,7 +10,8 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			// implementation(libs.kotlin.logging)
-			implementation(libs.kotlin.coroutines.core)
+			api(project(":sal:sal-base"))
+			api(project(":smartcard:sc-base"))
 		}
 
 		commonTest.dependencies {

@@ -21,6 +21,7 @@ interface CardChannel {
 		CommError::class,
 		ResetCard::class,
 		RemovedCard::class,
+		SecureMessagingException::class,
 	)
 	fun transmit(apdu: UByteArray): UByteArray
 
@@ -60,5 +61,6 @@ interface CardChannel {
 	CommError::class,
 	ResetCard::class,
 	RemovedCard::class,
+	SecureMessagingException::class,
 )
 fun CardChannel.transmit(apdu: CommandApdu): ResponseApdu = transmit(apdu.toBytes).toResponseApdu()

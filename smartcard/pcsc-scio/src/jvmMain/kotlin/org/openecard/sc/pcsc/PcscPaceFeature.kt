@@ -23,8 +23,9 @@ class PcscPaceFeature(
 		}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
+	override suspend fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
 		mapScioError {
+			// TODO: make cancellable
 			val commandData = req.bytes
 			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
 			val resp = PaceEstablishChannelResponse.fromPaceResponse(response.toUByteArray())

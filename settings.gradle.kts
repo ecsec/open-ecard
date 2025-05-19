@@ -16,11 +16,11 @@ include("utils:common")
 include("utils:serialization")
 include("utils:test")
 
-include("smartcard:base")
+include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
 
-include("sal:base")
-include("sal:smartcard")
+include("sal:sal-base")
+include("sal:smartcard-sal")
 
 include("releases")
 include("wsdef:wsdef-common")

@@ -1,5 +1,15 @@
 package org.openecard.sc.iface.feature
 
+import org.openecard.sc.iface.CommError
+import org.openecard.sc.iface.InsufficientBuffer
+import org.openecard.sc.iface.InvalidHandle
+import org.openecard.sc.iface.InvalidParameter
+import org.openecard.sc.iface.InvalidValue
+import org.openecard.sc.iface.NoService
+import org.openecard.sc.iface.NotTransacted
+import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.RemovedCard
+import org.openecard.sc.iface.ResetCard
 import org.openecard.sc.iface.feature.PaceCapability.Companion.toPaceCapabilities
 import org.openecard.utils.common.BitSet
 import org.openecard.utils.common.bitSetOf
@@ -9,16 +19,54 @@ import org.openecard.utils.common.toUInt
 import org.openecard.utils.common.toUShort
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
+import kotlin.coroutines.cancellation.CancellationException
 
 interface PaceFeature : Feature {
-	@Throws(PaceError::class)
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		NoService::class,
+		NotTransacted::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		ResetCard::class,
+		RemovedCard::class,
+		PaceError::class,
+	)
 	fun getPaceCapabilities(): Set<PaceCapability>
 
-	@Throws(PaceError::class)
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		NoService::class,
+		NotTransacted::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		ResetCard::class,
+		RemovedCard::class,
+		PaceError::class,
+		CancellationException::class,
+	)
+	suspend fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse
 
-	@Throws(PaceError::class)
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		NoService::class,
+		NotTransacted::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		ResetCard::class,
+		RemovedCard::class,
+		PaceError::class,
+	)
 	fun destroyChannel()
 }
 
@@ -183,7 +231,7 @@ data class PaceEstablishChannelRequest(
 	 * delivered by the host to the IFD in the following elements.
 	 * A suitable command filter should be employed by the IFD to refuse delivery of secret PINs by the host.
 	 */
-	val pin: PrintableUByteArray?,
+	val pin: String?,
 ) {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	val bytes: UByteArray by lazy {
@@ -194,7 +242,7 @@ data class PaceEstablishChannelRequest(
 					add(chat.size.toUByte())
 					addAll(chat)
 				}
-				(pin?.v ?: ubyteArrayOf()).let { pin ->
+				(pin?.encodeToByteArray()?.toUByteArray() ?: ubyteArrayOf()).let { pin ->
 					add(pin.size.toUByte())
 					addAll(pin)
 				}
@@ -206,7 +254,7 @@ data class PaceEstablishChannelRequest(
 }
 
 data class PaceEstablishChannelResponse(
-	val status: UShort,
+	val mseStatus: UShort,
 	val efCardAccess: PrintableUByteArray,
 	val carCurr: PrintableUByteArray?,
 	val carPrev: PrintableUByteArray?,

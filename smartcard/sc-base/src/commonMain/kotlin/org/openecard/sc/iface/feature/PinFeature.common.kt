@@ -1,5 +1,15 @@
 package org.openecard.sc.iface.feature
 
+import org.openecard.sc.iface.CommError
+import org.openecard.sc.iface.InsufficientBuffer
+import org.openecard.sc.iface.InvalidHandle
+import org.openecard.sc.iface.InvalidParameter
+import org.openecard.sc.iface.InvalidValue
+import org.openecard.sc.iface.NoService
+import org.openecard.sc.iface.NotTransacted
+import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.RemovedCard
+import org.openecard.sc.iface.ResetCard
 import org.openecard.sc.iface.ResponseApdu
 import org.openecard.sc.utils.UsbLang
 import org.openecard.sc.utils.UsbLangId
@@ -8,10 +18,34 @@ import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
 interface ModifyPinFeature : Feature {
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		NoService::class,
+		NotTransacted::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		ResetCard::class,
+		RemovedCard::class,
+	)
 	fun modifyPin(request: PinModify): ResponseApdu
 }
 
 interface VerifyPinFeature : Feature {
+	@Throws(
+		InsufficientBuffer::class,
+		InvalidHandle::class,
+		InvalidParameter::class,
+		InvalidValue::class,
+		NoService::class,
+		NotTransacted::class,
+		ReaderUnavailable::class,
+		CommError::class,
+		ResetCard::class,
+		RemovedCard::class,
+	)
 	fun verifyPin(request: PinVerify): ResponseApdu
 }
 

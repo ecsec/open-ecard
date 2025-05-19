@@ -10,15 +10,16 @@ kotlin {
 	sourceSets {
 		commonMain.dependencies {
 			// implementation(libs.kotlin.logging)
-			implementation(libs.kotlin.coroutines.core)
+			api(libs.kotlin.coroutines.core)
+			api(project(":smartcard:sc-base"))
 		}
 
 		commonTest.dependencies {
-			implementation(libs.bundles.test.basics.kotlin)
+// 			implementation(libs.bundles.test.basics.kotlin)
 		}
 
 		jvmTest.dependencies {
-			implementation(libs.junit.params)
+// 			implementation(libs.junit.params)
 		}
 	}
 }

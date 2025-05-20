@@ -90,7 +90,7 @@ class GenericPINStep(
 			}
 
 			RecognizedState.PIN_SUSPENDED -> {
-				title = I18N.strings.pinplugin_action_changepin_userconsent_title.localized()
+				title = I18N.strings.pinplugin_action_changepin_userconsent_canstep_title.localized()
 				retryCounterPIN = 1
 				if (capturePin()) {
 					createCANGui()

@@ -20,8 +20,6 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.gui.graphics
-
 import org.apache.batik.transcoder.TranscoderInput
 import org.apache.batik.transcoder.TranscoderOutput
 import org.apache.batik.transcoder.image.ImageTranscoder

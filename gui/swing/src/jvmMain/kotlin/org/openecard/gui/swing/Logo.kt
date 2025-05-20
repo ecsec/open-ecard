@@ -21,10 +21,8 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import org.openecard.common.util.FileUtils.resolveResourceAsURL
+import oecImage
 import java.awt.Dimension
-import java.awt.Image
-import java.awt.Toolkit
 import javax.swing.BoxLayout
 import javax.swing.ImageIcon
 import javax.swing.JLabel
@@ -40,6 +38,12 @@ import javax.swing.border.EmptyBorder
  * @author Moritz Horsch
  * @author Dirk Petrautzki
  */
+
+fun loadLogoIcon(): ImageIcon =
+	ImageIcon().apply {
+		setImage(oecImage(60, 60))
+	}
+
 class Logo : JPanel() {
 	/**
 	 * Load logo from classpath and instantiate panel.
@@ -65,23 +69,5 @@ class Logo : JPanel() {
 
 		// add a space of 10 at the bottom
 		setBorder(EmptyBorder(0, 0, 10, 0))
-	}
-
-	companion object {
-		private const val serialVersionUID = 1L
-
-		fun loadLogoIcon(): ImageIcon {
-			val logo = ImageIcon()
-			val url = resolveResourceAsURL(Logo::class.java, "openecard_logo.png")
-
-			if (url != null) {
-				val toolkit = Toolkit.getDefaultToolkit()
-				var image = toolkit.getImage(url)
-				image = image.getScaledInstance(60, 60, Image.SCALE_SMOOTH)
-				logo.setImage(image)
-			}
-
-			return logo
-		}
 	}
 }

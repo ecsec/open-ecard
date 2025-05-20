@@ -31,11 +31,11 @@ import org.openecard.gui.definition.Radiobox
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.TextField
 import org.openecard.gui.definition.ToggleText
-import org.openecard.gui.swing.Logo
 import org.openecard.gui.swing.ScrollPanel
 import org.openecard.gui.swing.components.AbstractInput
 import org.openecard.gui.swing.components.Radiobutton
 import org.openecard.gui.swing.components.StepComponent
+import org.openecard.gui.swing.loadLogoIcon
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.BorderFactory
@@ -66,7 +66,7 @@ class PinEntryStepLayouter(
 
 		// Add a panel containing step title and separator
 		val pageStart = JPanel(BorderLayout())
-		val logo = Logo.Companion.loadLogoIcon()
+		val logo = loadLogoIcon()
 		val title = JLabel("<html><h3>$stepName</h3></html>")
 		title.setIcon(logo)
 		title.setIconTextGap(20)

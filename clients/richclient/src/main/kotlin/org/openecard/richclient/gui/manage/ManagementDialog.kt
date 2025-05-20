@@ -22,6 +22,7 @@
 
 package org.openecard.richclient.gui.manage
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonException
 import org.openecard.addon.AddonManager
@@ -32,9 +33,9 @@ import org.openecard.addon.manifest.AppExtensionSpecification
 import org.openecard.addon.manifest.AppPluginSpecification
 import org.openecard.addon.manifest.ProtocolPluginSpecification
 import org.openecard.common.AppVersion
-import org.openecard.common.I18n
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
 import org.openecard.common.util.FileUtils.toByteArray
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.addon.DefaultSettingsGroup
@@ -78,7 +79,6 @@ private val LOG = KotlinLogging.logger {}
 class ManagementDialog(
 	manager: AddonManager,
 ) : JFrame() {
-	private val lang: I18n = I18n.getTranslation("addon")
 	private val manager: AddonManager
 	private val cpReg: AddonRegistry
 	private val fileReg: AddonRegistry
@@ -103,7 +103,11 @@ class ManagementDialog(
 
 		val logo: Image = oecImage(OecIconType.COLORED, 147, 147)
 		iconImage = logo
-		setTitle(lang.translationForKey("addon.title", AppVersion.name))
+		setTitle(
+			I18N.strings.addon_title
+				.format(AppVersion.name)
+				.localized(),
+		)
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE)
 		minimumSize = Dimension(640, 420)
 		setSize(780, 480)
@@ -163,7 +167,12 @@ class ManagementDialog(
 	}
 
 	private fun createCoreList() {
-		val label = JLabel(lang.translationForKey("addon.list.core", AppVersion.name))
+		val label =
+			JLabel(
+				I18N.strings.addon_list_core
+					.format(AppVersion.name)
+					.localized(),
+			)
 		label.setFont(label.font.deriveFont(Font.BOLD))
 		val labelConstraints = GridBagConstraints()
 		labelConstraints.insets = Insets(5, 0, 5, 10)
@@ -187,20 +196,21 @@ class ManagementDialog(
 		coreList.addListSelectionListener(model)
 		addWindowListener(model) // save current addon settings when closed
 		// add addon panels
+
 		model.addElement(
-			lang.translationForKey("addon.list.core.general"),
+			I18N.strings.addon_list_core_general.localized(),
 			createGeneralSettingsAddon(),
 		)
 		model.addElement(
-			lang.translationForKey("addon.list.core.connection"),
+			I18N.strings.addon_list_core_connection.localized(),
 			createConnectionSettingsAddon(),
 		)
 		model.addElement(
-			lang.translationForKey("addon.list.core.logging"),
+			I18N.strings.addon_list_core_logging.localized(),
 			createLogSettingsAddon(),
 		)
 		model.addElement(
-			lang.translationForKey("addon.list.core.middleware"),
+			I18N.strings.addon_list_core_middleware.localized(),
 			createMiddlewareSelectionAddon(),
 		)
 
@@ -214,7 +224,7 @@ class ManagementDialog(
 	}
 
 	private fun createAddonList() {
-		val label = JLabel(lang.translationForKey("addon.list.addon"))
+		val label = JLabel(I18N.strings.addon_list_addon.localized())
 		label.setFont(label.font.deriveFont(Font.BOLD))
 		val labelConstraints = GridBagConstraints()
 		labelConstraints.insets = Insets(5, 0, 5, 10)
@@ -320,7 +330,7 @@ class ManagementDialog(
 		if (desc.configDescription != null && desc.configDescription!!.entries.isNotEmpty()) {
 			val group =
 				DefaultSettingsGroup(
-					lang.translationForKey("addon.settings.general"),
+					I18N.strings.addon_settings_general.localized(),
 					settings,
 					desc.configDescription!!.entries,
 				)
@@ -335,10 +345,8 @@ class ManagementDialog(
 				) {
 					val group =
 						DefaultSettingsGroup(
-							(
-								appExtSpec.getLocalizedName(LANGUAGE_CODE) +
-									" " + lang.translationForKey("addon.settings.settings")
-							),
+							appExtSpec.getLocalizedName(LANGUAGE_CODE) +
+								" " + I18N.strings.addon_settings_settings.localized(),
 							settings,
 							appExtSpec.configDescription!!.entries,
 						)
@@ -355,7 +363,7 @@ class ManagementDialog(
 					val group =
 						DefaultSettingsGroup(
 							appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
-								" " + lang.translationForKey("addon.settings.settings"),
+								" " + I18N.strings.addon_settings_settings.localized(),
 							settings,
 							appPluginSpec.configDescription!!.entries,
 						)
@@ -372,7 +380,7 @@ class ManagementDialog(
 					val group =
 						DefaultSettingsGroup(
 							protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
-								" " + lang.translationForKey("addon.settings.settings"),
+								" " + I18N.strings.addon_settings_settings.localized(),
 							settings,
 							protPluginSpec.configDescription!!.entries,
 						)
@@ -388,12 +396,9 @@ class ManagementDialog(
 				) {
 					val group =
 						DefaultSettingsGroup(
-							(
-								protPluginSpec.getLocalizedName(
-									LANGUAGE_CODE,
-								) +
-									" " + lang.translationForKey("addon.settings.settings")
-							),
+							protPluginSpec.getLocalizedName(
+								LANGUAGE_CODE,
+							) + " " + I18N.strings.addon_settings_settings.localized(),
 							settings,
 							protPluginSpec.configDescription!!.entries,
 						)

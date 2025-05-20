@@ -27,6 +27,7 @@ import com.sun.jna.Platform
 import com.sun.jna.platform.win32.Advapi32Util
 import com.sun.jna.platform.win32.Win32Exception
 import com.sun.jna.platform.win32.WinReg
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.EstablishContext
@@ -57,6 +58,7 @@ import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.httpcore.HttpRequestHelper
 import org.openecard.httpcore.KHttpUtils
 import org.openecard.httpcore.StreamHttpClientConnection
+import org.openecard.i18n.I18N
 import org.openecard.ifd.protocol.pace.PACEProtocolFactory
 import org.openecard.ifd.scio.IFD
 import org.openecard.management.TinyManagement
@@ -117,7 +119,10 @@ class RichClient {
 	fun setup() {
 		GUIDefaults.initialize()
 
-		val title = LANG.translationForKey("client.startup.failed.headline", name)
+		val title =
+			I18N.strings.richclient_client_startup_failed_headline
+				.format(name)
+				.localized()
 		var message: String? = null
 		// Set up GUI
 		val gui = SwingUserConsent(SwingDialogWrapper())
@@ -231,7 +236,10 @@ class RichClient {
 					ft.get()
 				}
 			} catch (e: BindException) {
-				message = LANG.translationForKey("client.startup.failed.portinuse", name)
+				message =
+					I18N.strings.richclient_client_startup_failed_portinuse
+						.format(name)
+						.localized()
 				throw e
 			}
 
@@ -255,7 +263,7 @@ class RichClient {
 				contextHandle = establishContextResponse.contextHandle
 				mainSal.setIfdCtx(contextHandle)
 			} catch (ex: WSHelper.WSException) {
-				message = LANG.translationForKey("client.startup.failed.nocontext")
+				message = I18N.strings.richclient_client_startup_failed_nocontext.localized()
 				throw ex
 			}
 
@@ -423,7 +431,6 @@ class RichClient {
 
 	companion object {
 		private val LOG: KLogger
-		private val LANG: I18n
 
 		init {
 			try {
@@ -449,7 +456,6 @@ class RichClient {
 				}
 			}
 			LOG = KotlinLogging.logger { }
-			LANG = I18n.getTranslation("richclient")
 		}
 
 		@JvmStatic

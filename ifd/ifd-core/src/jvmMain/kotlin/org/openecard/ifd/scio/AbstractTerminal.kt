@@ -34,7 +34,6 @@ import iso.std.iso_iec._24727.tech.schema.VerifyUser
 import iso.std.iso_iec._24727.tech.schema.VerifyUserResponse
 import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.makeResultError
 import org.openecard.common.WSHelper.makeResultOK
@@ -52,6 +51,7 @@ import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
 import org.openecard.gui.executor.StepAction
+import org.openecard.i18n.I18N
 import org.openecard.ifd.scio.wrapper.ChannelManager
 import org.openecard.ifd.scio.wrapper.SingleThreadChannel
 import org.openecard.ifd.scio.wrapper.TerminalInfo
@@ -170,7 +170,7 @@ internal class AbstractTerminal(
 				// create custom pinAction to submit pin to terminal
 				val pinAction = NativePinStepAction("enter-pin", pinInput, channel, terminalInfo, template)
 				// display message instructing user what to do
-				val uc = pinUserConsent("action.changepin.userconsent.pinstep.title", pinAction)
+				val uc = pinUserConsent(pinAction)
 				val ucr = gui!!.obtainNavigator(uc)
 				val exec = ExecutionEngine(ucr)
 				// run gui
@@ -214,7 +214,7 @@ internal class AbstractTerminal(
 				// get pin, encode and send
 				val minLength = pinInput.getPasswordAttributes().getMinLength().toInt()
 				val maxLength = pinInput.getPasswordAttributes().getMaxLength().toInt()
-				val uc = pinUserConsent("action.changepin.userconsent.pinstep.title", minLength, maxLength)
+				val uc = pinUserConsent(minLength, maxLength)
 				val ucr = gui!!.obtainNavigator(uc)
 				val exec = ExecutionEngine(ucr)
 				val status = exec.process()
@@ -452,23 +452,29 @@ internal class AbstractTerminal(
 	}
 
 	private fun pinUserConsent(
-		title: String,
 		minLength: Int,
 		maxLength: Int,
 	): UserConsentDescription {
-		val uc = UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog")
+		// title always "action.changepin.userconsent.pinstep.title
+		val uc =
+			UserConsentDescription(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+				"pin_entry_dialog",
+			)
 		// create step
 		val s =
 			Step(
 				"enter-pin",
-				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
 			)
 		uc.steps.add(s)
 		// add text instructing user
 		// add text instructing user
 		val i1 = Text()
 		s.inputInfoUnits.add(i1)
-		i1.text = (LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin"))
+		i1.text = (
+			I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin.localized()
+		)
 
 		val i2 = PasswordField("pin")
 		s.inputInfoUnits.add(i2)
@@ -479,16 +485,17 @@ internal class AbstractTerminal(
 		return uc
 	}
 
-	private fun pinUserConsent(
-		title: String,
-		action: StepAction,
-	): UserConsentDescription {
-		val uc = UserConsentDescription(LANG.translationForKey(title), "pin_entry_dialog")
+	private fun pinUserConsent(action: StepAction): UserConsentDescription {
+		val uc =
+			UserConsentDescription(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
+				"pin_entry_dialog",
+			)
 		// create step
 		val s =
 			Step(
 				"enter-pin",
-				LANG.translationForKey("action.changepin.userconsent.pinstep.title"),
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
 			)
 		s.action = action
 		uc.steps.add(s)
@@ -496,13 +503,10 @@ internal class AbstractTerminal(
 		// add text instructing user
 		val i1 = Text()
 		s.inputInfoUnits.add(i1)
-		i1.text = LANG.translationForKey("action.pinentry.userconsent.pinstep.enter_pin_term")
-
+		i1.text = I18N.strings.pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term.localized()
 		return uc
 	}
 }
-
-private val LANG: I18n = I18n.getTranslation("pinplugin")
 
 private fun getMessagesOrDefaults(messages: AltVUMessagesType?): AltVUMessagesType {
 	val allMsgs = AltVUMessagesType()

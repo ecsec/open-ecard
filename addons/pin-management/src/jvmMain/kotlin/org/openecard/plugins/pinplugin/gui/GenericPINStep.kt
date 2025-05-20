@@ -21,11 +21,12 @@
  ***************************************************************************/
 package org.openecard.plugins.pinplugin.gui
 
+import dev.icerock.moko.resources.format
 import org.openecard.common.DynamicContext
-import org.openecard.common.I18n
 import org.openecard.gui.definition.PasswordField
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 import org.openecard.plugins.pinplugin.CardCapturer
 import org.openecard.plugins.pinplugin.CardStateView
 import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction
@@ -41,8 +42,6 @@ class GenericPINStep(
 	title: String?,
 	private val cardCapturer: CardCapturer,
 ) : Step(id, title) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	// indicators set by the action
 	private var wrongPINFormat = false
 	private var failedPINVerify = false
@@ -71,7 +70,7 @@ class GenericPINStep(
 		when (capturedState.pinState) {
 			RecognizedState.PIN_ACTIVATED_RC3 -> generateGuiPinActivatedRc3()
 			RecognizedState.PIN_ACTIVATED_RC2 -> {
-				title = lang.translationForKey(CHANGE_PIN_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized()
 				retryCounterPIN = 2
 				if (capturePin()) {
 					createPINChangeGui()
@@ -81,7 +80,7 @@ class GenericPINStep(
 			}
 
 			RecognizedState.PIN_BLOCKED -> {
-				title = lang.translationForKey(PUKSTEP_TITLE)
+				title = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_title.localized()
 				retryCounterPIN = 0
 				if (capturePin()) {
 					createPUKGui()
@@ -91,7 +90,7 @@ class GenericPINStep(
 			}
 
 			RecognizedState.PIN_SUSPENDED -> {
-				title = lang.translationForKey(CANSTEP_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_canstep_title.localized()
 				retryCounterPIN = 1
 				if (capturePin()) {
 					createCANGui()
@@ -101,7 +100,7 @@ class GenericPINStep(
 			}
 
 			RecognizedState.PIN_RESUMED -> {
-				title = lang.translationForKey(CHANGE_PIN_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized()
 				retryCounterPIN = 1
 				canSuccess = true
 				if (capturePin()) {
@@ -112,19 +111,19 @@ class GenericPINStep(
 			}
 
 			RecognizedState.PIN_DEACTIVATED -> {
-				title = lang.translationForKey(ERROR_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized()
 				retryCounterPIN = -1
 				createErrorGui()
 			}
 
 			RecognizedState.UNKNOWN -> {
-				title = lang.translationForKey(ERROR_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized()
 				retryCounterPIN = -2
 				createErrorGui()
 			}
 
 			RecognizedState.PUK_BLOCKED -> {
-				title = lang.translationForKey(ERROR_TITLE)
+				title = I18N.strings.pinplugin_action_changepin_userconsent_errorstep_title.localized()
 				createErrorGui()
 				retryCounterPUK = 0
 			}
@@ -132,7 +131,7 @@ class GenericPINStep(
 	}
 
 	fun generateGuiPinActivatedRc3() {
-		title = lang.translationForKey(CHANGE_PIN_TITLE)
+		title = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized()
 		retryCounterPIN = 3
 		if (capturePin()) {
 			createPINChangeGui()
@@ -151,9 +150,9 @@ class GenericPINStep(
 		inputInfoUnits.add(
 			Text(
 				if (canSuccess) {
-					lang.translationForKey(PINSTEP_NATIV_CHANGE_DESCRIPTION_AFTER_CAN)
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_description_after_can.localized()
 				} else {
-					lang.translationForKey(PINSTEP_NATIV_CHANGE_DESCRIPTION)
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_native_start_description.localized()
 				},
 			),
 		)
@@ -169,15 +168,23 @@ class GenericPINStep(
 		inputInfoUnits.add(
 			Text(
 				if (canSuccess) {
-					lang.translationForKey(PINSTEP_DESCRIPTION_AFTER_CAN, "PIN")
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_description_after_can
+						.format("PIN")
+						.localized()
 				} else {
-					lang.translationForKey(PINSTEP_DESCRIPTION, "PIN")
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_description
+						.format("PIN")
+						.localized()
 				},
 			),
 		)
 
 		inputInfoUnits.add(Text(" "))
-		inputInfoUnits.add(Text(lang.translationForKey(PINSTEP_OLDPIN)))
+		inputInfoUnits.add(
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_oldpin.localized(),
+			),
+		)
 		inputInfoUnits.add(
 			PasswordField(OLD_PIN_FIELD).apply {
 				minLength = 5
@@ -185,7 +192,11 @@ class GenericPINStep(
 			},
 		)
 
-		inputInfoUnits.add(Text(lang.translationForKey(PINSTEP_NEWPIN)))
+		inputInfoUnits.add(
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_newpin.localized(),
+			),
+		)
 		inputInfoUnits.add(
 			PasswordField(NEW_PIN_FIELD).apply {
 				minLength = 6
@@ -193,7 +204,11 @@ class GenericPINStep(
 			},
 		)
 
-		inputInfoUnits.add(Text(lang.translationForKey(PINSTEP_NEWPINREPEAT)))
+		inputInfoUnits.add(
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_newpinrepeat.localized(),
+			),
+		)
 		inputInfoUnits.add(
 			PasswordField(NEW_PIN_REPEAT_FIELD).apply {
 				minLength = 6
@@ -203,7 +218,13 @@ class GenericPINStep(
 
 		if (wrongPINFormat) {
 			// add note for mistyped PIN
-			inputInfoUnits.add(Text(lang.translationForKey(WRONG_ENTRY, "PIN")))
+			inputInfoUnits.add(
+				Text(
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_wrong_entry
+						.format("PIN")
+						.localized(),
+				),
+			)
 		}
 
 		if (failedPINVerify) {
@@ -215,7 +236,11 @@ class GenericPINStep(
 	}
 
 	private fun createPUKGuiNative() {
-		inputInfoUnits.add(Text(lang.translationForKey(PUKSTEP_START_NATIV_DESCRIPTION)))
+		inputInfoUnits.add(
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_native_start_description.localized(),
+			),
+		)
 		// show the puk try counter
 		// 	Text pukTryCounter = new Text();
 		// 	pukTryCounter.setText(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPUK));
@@ -229,12 +254,12 @@ class GenericPINStep(
 		val i1 = Text()
 		inputInfoUnits.add(i1)
 
-		i1.text = lang.translationForKey(PUKSTEP_DESCRIPTION)
+		i1.text = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_description.localized()
 		inputInfoUnits.add(
 			PasswordField(PUK_FIELD).apply {
 				maxLength = 10
 				minLength = 10
-				description = lang.translationForKey(PUKSTEP_PUK)
+				description = I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_puk.localized()
 			},
 		)
 
@@ -246,7 +271,9 @@ class GenericPINStep(
 			// add note for mistyped PUK
 			inputInfoUnits.add(
 				Text(
-					lang.translationForKey(WRONG_ENTRY, "PUK"),
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_wrong_entry
+						.format("PUK")
+						.localized(),
 				),
 			)
 		}
@@ -258,7 +285,11 @@ class GenericPINStep(
 	}
 
 	private fun createCANGuiNative() {
-		inputInfoUnits.add(Text(lang.translationForKey(CANSTEP_START_NATIV_DESCRIPTION)))
+		inputInfoUnits.add(
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_native_start_description.localized(),
+			),
+		)
 		if (failedCANVerify) {
 			addVerifyFailed("CAN")
 		}
@@ -267,11 +298,13 @@ class GenericPINStep(
 	private fun createCANGui() {
 		inputInfoUnits.add(
 			Text(
-				lang.translationForKey(CANSTEP_NOTICE),
+				I18N.strings.pinplugin_action_changepin_userconsent_canstep_notice.localized(),
 			),
 		)
 		inputInfoUnits.add(
-			Text(lang.translationForKey(CANSTEP_DESCRIPTION)),
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_canstep_description.localized(),
+			),
 		)
 
 		// add description and input fields depending on terminal type
@@ -279,7 +312,7 @@ class GenericPINStep(
 			PasswordField(CAN_FIELD).apply {
 				minLength = 6
 				maxLength = 6
-				description = lang.translationForKey(CANSTEP_CAN)
+				description = I18N.strings.pinplugin_action_changepin_userconsent_canstep_can.localized()
 			},
 		)
 
@@ -287,7 +320,7 @@ class GenericPINStep(
 			// add note for mistyped CAN
 			inputInfoUnits.add(
 				Text(
-					lang.translationForKey(WRONG_CAN),
+					I18N.strings.pinplugin_action_changepin_userconsent_canstepaction_wrong_can.localized(),
 				),
 			)
 		}
@@ -303,9 +336,18 @@ class GenericPINStep(
 		isReversible = false
 		inputInfoUnits.add(
 			when (capturedState.pinState) {
-				RecognizedState.PIN_DEACTIVATED -> Text(lang.translationForKey(ERRORSTEP_DEACTIVATED))
-				RecognizedState.PUK_BLOCKED -> Text(lang.translationForKey(ERRORSTEP_PUK_BLOCKED))
-				RecognizedState.UNKNOWN -> Text(lang.translationForKey(ERRORSTEP_UNKNOWN))
+				RecognizedState.PIN_DEACTIVATED ->
+					Text(
+						I18N.strings.pinplugin_action_changepin_userconsent_errorstep_deactivated.localized(),
+					)
+				RecognizedState.PUK_BLOCKED ->
+					Text(
+						I18N.strings.pinplugin_action_changepin_userconsent_errorstep_puk_blocked.localized(),
+					)
+				RecognizedState.UNKNOWN ->
+					Text(
+						I18N.strings.pinplugin_action_changepin_userconsent_errorstep_unknown.localized(),
+					)
 
 				RecognizedState.PIN_ACTIVATED_RC3,
 				RecognizedState.PIN_ACTIVATED_RC2,
@@ -369,53 +411,25 @@ class GenericPINStep(
 
 	private fun addRemainingAttempts() {
 		inputInfoUnits.add(
-			Text(lang.translationForKey(REMAINING_ATTEMPTS, retryCounterPIN)),
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_remaining_attempts
+					.format(retryCounterPIN)
+					.localized(),
+			),
 		)
 	}
 
 	private fun addVerifyFailed(did: String?) {
 		inputInfoUnits.add(
-			Text(lang.translationForKey(INCORRECT_INPUT, did)),
+			Text(
+				I18N.strings.pinplugin_action_changepin_userconsent_pinstep_incorrect_input
+					.format(did as Any)
+					.localized(),
+			),
 		)
 	}
 
 	companion object {
-		// translation constants PIN Change
-		private const val CHANGE_PIN_TITLE = "action.changepin.userconsent.pinstep.title"
-		private const val PINSTEP_NEWPINREPEAT = "action.changepin.userconsent.pinstep.newpinrepeat"
-		private const val PINSTEP_NEWPIN = "action.changepin.userconsent.pinstep.newpin"
-		private const val PINSTEP_OLDPIN = "action.changepin.userconsent.pinstep.oldpin"
-		private const val PINSTEP_DESCRIPTION = "action.changepin.userconsent.pinstep.description"
-		private const val PINSTEP_DESCRIPTION_AFTER_CAN = "action.changepin.userconsent.pinstep.description_after_can"
-		private const val REMAINING_ATTEMPTS = "action.changepin.userconsent.pinstep.remaining_attempts"
-		private const val WRONG_ENTRY = "action.changepin.userconsent.pinstep.wrong_entry"
-		private const val INCORRECT_INPUT = "action.changepin.userconsent.pinstep.incorrect_input"
-		private const val PINSTEP_NATIV_CHANGE_DESCRIPTION =
-			"action.changepin.userconsent.pinstep.native_start_description"
-		private const val PINSTEP_NATIV_CHANGE_DESCRIPTION_AFTER_CAN =
-			"action.changepin.userconsent.pinstep.native_start_description_after_can"
-
-		// translation constants PUK entring
-		private const val PUKSTEP_DESCRIPTION = "action.unblockpin.userconsent.pukstep.description"
-		private const val PUKSTEP_TITLE = "action.unblockpin.userconsent.pukstep.title"
-		private const val PUKSTEP_PUK = "action.unblockpin.userconsent.pukstep.puk"
-		private const val PUKSTEP_START_NATIV_DESCRIPTION =
-			"action.unblockpin.userconsent.pukstep.nativ_start_description"
-
-		// translation constants CAN entering
-		private const val CANSTEP_TITLE = "action.changepin.userconsent.canstep.title"
-		private const val CANSTEP_NOTICE = "action.changepin.userconsent.canstep.notice"
-		private const val CANSTEP_CAN = "action.changepin.userconsent.canstep.can"
-		private const val CANSTEP_DESCRIPTION = "action.changepin.userconsent.canstep.description"
-		private const val WRONG_CAN = "action.changepin.userconsent.canstepaction.wrong_can"
-		private const val CANSTEP_START_NATIV_DESCRIPTION =
-			"action.changepin.userconsent.canstepaction.nativ_start_description"
-
-		private const val ERROR_TITLE = "action.changepin.userconsent.errorstep.title"
-		private const val ERRORSTEP_DEACTIVATED = "action.changepin.userconsent.errorstep.deactivated"
-		private const val ERRORSTEP_PUK_BLOCKED = "action.changepin.userconsent.errorstep.puk_blocked"
-		private const val ERRORSTEP_UNKNOWN = "action.changepin.userconsent.errorstep.unknown"
-
 		// protected GUI element IDs
 		const val OLD_PIN_FIELD: String = "OLD_PIN_FIELD"
 		const val NEW_PIN_FIELD: String = "NEW_PIN_FIELD"

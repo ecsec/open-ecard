@@ -22,6 +22,7 @@
 
 package org.openecard.richclient.gui
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import javafx.application.Platform
@@ -30,12 +31,12 @@ import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
 import org.openecard.common.event.EventObject
 import org.openecard.common.event.EventType
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.interfaces.EventCallback
 import org.openecard.common.util.ByteUtils
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
 import org.openecard.richclient.updater.VersionUpdateChecker
@@ -64,8 +65,6 @@ class Status(
 	private val manager: AddonManager,
 	private val withControls: Boolean,
 ) : EventCallback {
-	private val lang: I18n = I18n.getTranslation("richclient")
-
 	private val infoMap: MutableMap<String, JPanel?> = ConcurrentSkipListMap()
 	private val cardContext: MutableMap<String, ByteArray> = ConcurrentSkipListMap()
 	private val cardIcons = HashMap<String, ImageIcon>()
@@ -127,7 +126,10 @@ class Status(
 		infoView!!.add(Box.createRigidArea(Dimension(0, 5)))
 		infoView!!.add(noTerminal)
 
-		val label = JLabel(" " + lang.translationForKey("tray.title", name) + " ")
+		val label =
+			JLabel(
+				" ${I18N.strings.richclient_tray_title.format(name).localized()} ",
+			)
 		label.font = Font(Font.SANS_SERIF, Font.BOLD, 16)
 		label.horizontalAlignment = SwingConstants.CENTER
 
@@ -141,7 +143,10 @@ class Status(
 		btnPanel.layout = FlowLayout(FlowLayout.RIGHT)
 		btnPanel.background = Color.white
 
-		val btnExit = JButton(lang.translationForKey("tray.exit"))
+		val btnExit =
+			JButton(
+				I18N.strings.richclient_tray_exit.localized(),
+			)
 		btnExit.addActionListener {
 			LOG.debug { "Shutdown button pressed." }
 			try {
@@ -152,7 +157,10 @@ class Status(
 			}
 		}
 
-		val btnAbout = JButton(lang.translationForKey("tray.about"))
+		val btnAbout =
+			JButton(
+				I18N.strings.richclient_tray_about.localized(),
+			)
 		btnAbout.addActionListener {
 			LOG.debug { "About button pressed." }
 			try {
@@ -163,7 +171,10 @@ class Status(
 			}
 		}
 
-		val btnSettings = JButton(lang.translationForKey("tray.config"))
+		val btnSettings =
+			JButton(
+				I18N.strings.richclient_tray_config.localized(),
+			)
 		btnSettings.addActionListener {
 			LOG.debug { "Settings button pressed." }
 			try {
@@ -271,16 +282,16 @@ class Status(
 			return if (cardType != null) {
 				resolveCardType(cardType)
 			} else {
-				lang.translationForKey("status.nocard")
+				I18N.strings.richclient_status_nocard.localized()
 			}
 		} else {
-			return lang.translationForKey("status.nocard")
+			return I18N.strings.richclient_status_nocard.localized()
 		}
 	}
 
 	private fun resolveCardType(cardType: String): String {
 		if (cardType == "http://bsi.bund.de/cif/unknown") {
-			return lang.translationForKey("status.unknowncard")
+			return I18N.strings.richclient_status_unknowncard.localized()
 		} else {
 			// read CardTypeName from CardInfo file
 			var cardTypeName = cardType
@@ -328,7 +339,7 @@ class Status(
 			// no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
 			// see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
 			label.icon = getCardIcon("http://openecard.org/cif/no-terminal")
-			label.text = "<html><i>" + lang.translationForKey("status.noterminal") + "</i></html>"
+			label.text = "<html><i>" + I18N.strings.richclient_status_noterminal.localized() + "</i></html>"
 		}
 
 		label.iconTextGap = 10

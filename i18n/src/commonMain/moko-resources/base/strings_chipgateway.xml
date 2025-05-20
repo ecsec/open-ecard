@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Update dialog-->
+	<string name="chipgateway_dialog_dl_title">Update Information</string>
+	<string name="chipgateway_dialog_dl_text_required">Please note, that your currently installed version of the %s is outdated and
+		needs to be renewed.
+	</string>
+	<string name="chipgateway_dialog_dl_text_optional">Please note, that there is an update of the %s available. It is recommended
+		that you install the new version at your earliest convenience.
+	</string>
+	<string name="chipgateway_dialog_dl_text_instructions">For this purpose, you should visit the link below, download the new
+		software package suitable for your platform and perform the update by launching the installation software.
+	</string>
+
+	<!-- error dialog-->
+	<string name="chipgateway_error_dialog_title">ChipGateway Error</string>
+	<string name="chipgateway_error_dialog_submessage">Please try again later. If the problem\npersists please contact the
+		Helpdesk.
+	</string>
+
+	<!-- error messages -->
+	<string name="chipgateway_error_invalid_refresh_addr">Activate called with an invalid refresh URL.</string>
+	<string name="chipgateway_error_malformed_url">The URL in '%s' is not a valid URL.</string>
+	<string name="chipgateway_error_no_https_url">The URL in '%s' is not a https URL.</string>
+	<string name="chipgateway_error_element_missing">The element '%s' is empty or missing in the activation parameters.</string>
+	<string name="chipgateway_error_element_value_invalid">The element '%s' contains none of the admissible values.</string>
+	<string name="chipgateway_error_connection_open_failed">Failed to open connection to ChipGateway server.</string>
+	<string name="chipgateway_error_invalid_http_status">Invalid HTTP status code (%d) received from ChipGateway server.</string>
+	<string name="chipgateway_error_invalid_chipgateway_msg">Error processing ChipGateway message.</string>
+	<string name="chipgateway_error_http_error">Error in HTTP protocol.</string>
+	<string name="chipgateway_error_signature_invalid">Failed to validate ChipGateway signature.</string>
+	<string name="chipgateway_error_version_outdated">The version of the installed client is too old.</string>
+	<string name="chipgateway_error_unknown">Unkown error occured during ChipGateway execution.</string>
+	<string name="chipgateway_error_server_sent_error">Error received from ChipGateway server (%s).</string>
+	<string name="chipgateway_error_server_wrong_config">An internal ChipGateway server error has occurred.</string>
+</resources>

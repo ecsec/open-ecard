@@ -21,20 +21,22 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.common.I18n
 import org.openecard.crypto.common.asn1.cvc.CHAT
+import org.openecard.crypto.common.asn1.cvc.stringResource
 import org.openecard.gui.definition.BoxItem
 import org.openecard.gui.definition.Checkbox
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.ToggleText
+import org.openecard.i18n.I18N
 import org.openecard.sal.protocol.eac.EACData
 import java.util.Calendar
+import java.util.Locale
 
 private val logger = KotlinLogging.logger { }
-
-private val LANG: I18n = I18n.getTranslation("eac")
 
 /**
  * CHAT GUI step for EAC.
@@ -46,26 +48,34 @@ private val LANG: I18n = I18n.getTranslation("eac")
  */
 class CHATStep(
 	private val eacData: EACData,
-) : Step(STEP_ID, LANG.translationForKey(TITLE)) {
+) : Step(
+		STEP_ID,
+		I18N.strings.eac_step_chat_title.localized(),
+	) {
 	init {
-		description = LANG.translationForKey(STEP_DESCRIPTION)
-
+		description = I18N.strings.eac_step_chat_step_description.localized()
 		// create step elements
 		addElements()
 	}
 
 	private fun addElements() {
 		val description = Text()
-		val descriptionText: String = LANG.translationForKey(DESCRIPTION, eacData.certificateDescription.subjectName)
+		val descriptionText =
+			I18N.strings.eac_step_chat_description.localized(
+				Locale.getDefault(),
+				eacData.certificateDescription.subjectName as Any,
+			)
+		
 		description.text = descriptionText
 		inputInfoUnits.add(description)
 
 		// process read access and special functions
 		val readAccessCheckBox = Checkbox(READ_CHAT_BOXES)
 		var displayReadAccessCheckBox = false
-		readAccessCheckBox.groupText = LANG.translationForKey(READ_ACCESS_DESC)
+		readAccessCheckBox.groupText = I18N.strings.eac_step_chat_read_access_description.localized()
 		val requiredReadAccess: Map<CHAT.DataGroup, Boolean> = eacData.requiredCHAT.getReadAccess()
 		val optionalReadAccess: Map<CHAT.DataGroup, Boolean> = eacData.optionalCHAT.getReadAccess()
+
 		val requiredSpecialFunctions: Map<CHAT.SpecialFunction, Boolean> =
 			eacData.requiredCHAT.getSpecialFunctions()
 		val optionalSpecialFunctions: Map<CHAT.SpecialFunction, Boolean?> =
@@ -144,7 +154,7 @@ class CHATStep(
 		// process write access
 		val writeAccessCheckBox = Checkbox(WRITE_CHAT_BOXES)
 		var displayWriteAccessCheckBox = false
-		writeAccessCheckBox.groupText = LANG.translationForKey(WRITE_ACCESS_DESC)
+		writeAccessCheckBox.groupText = I18N.strings.eac_step_chat_write_access_description.localized()
 		val requiredWriteAccess: Map<CHAT.DataGroup, Boolean?> = eacData.requiredCHAT.getWriteAccess()
 		val optionalWriteAccess: Map<CHAT.DataGroup, Boolean?> = eacData.optionalCHAT.getWriteAccess()
 
@@ -167,54 +177,59 @@ class CHATStep(
 			inputInfoUnits.add(writeAccessCheckBox)
 		}
 
-		val requestedDataDescription = ToggleText()
-		requestedDataDescription.title = LANG.translationForKey(NOTE)
-		requestedDataDescription.text = LANG.translationForKey(NOTE_CONTENT)
-		requestedDataDescription.isCollapsed = false
+		val requestedDataDescription =
+			ToggleText().apply {
+				title = I18N.strings.eac_step_chat_note.localized()
+				text = I18N.strings.eac_step_chat_note_content.localized()
+				isCollapsed = false
+			}
 		inputInfoUnits.add(requestedDataDescription)
 	}
 
 	private fun makeBoxItem(
-		value: Enum<*>,
+		value: StringResource,
 		checked: Boolean,
 		disabled: Boolean,
 		vararg textData: Any?,
-	): BoxItem {
-		val item = BoxItem()
+	): BoxItem =
+		BoxItem().apply {
+			name = value.localized()
+			isChecked = checked
+			isDisabled = disabled
+			this.text = value.format(textData).localized()
+		}
 
-		item.name = value.name
-		item.isChecked = checked
-		item.isDisabled = disabled
-		item.text = LANG.translationForKey(value.name, *textData)
+	private fun makeBoxItem(
+		value: CHAT.SpecialFunction,
+		checked: Boolean,
+		disabled: Boolean,
+		vararg textData: Any?,
+	) = makeBoxItem(value.stringResource(), checked, disabled, textData)
 
-		return item
-	}
+	private fun makeBoxItem(
+		value: CHAT.DataGroup,
+		checked: Boolean,
+		disabled: Boolean,
+		vararg textData: Any?,
+	) = makeBoxItem(value.stringResource(), checked, disabled, textData)
 
 	companion object {
 		// step id
 		const val STEP_ID: String = "PROTOCOL_EAC_GUI_STEP_CHAT"
 
-		// GUI translation constants
-		const val TITLE: String = "step_chat_title"
-		const val STEP_DESCRIPTION: String = "step_chat_step_description"
-		const val DESCRIPTION: String = "step_chat_description"
-		const val NOTE: String = "step_chat_note"
-		const val NOTE_CONTENT: String = "step_chat_note_content"
-		const val READ_ACCESS_DESC: String = "step_chat_read_access_description"
-		const val WRITE_ACCESS_DESC: String = "step_chat_write_access_description"
-
 		// GUI element IDs
 		const val READ_CHAT_BOXES: String = "ReadCHATCheckBoxes"
 		const val WRITE_CHAT_BOXES: String = "WriteCHATCheckBoxes"
 
-		private fun getYearDifference(c: Calendar): Int {
-			val now = Calendar.getInstance()
-			now.add(Calendar.DAY_OF_MONTH, -1 * c.get(Calendar.DAY_OF_MONTH))
-			now.add(Calendar.DAY_OF_MONTH, 1)
-			now.add(Calendar.MONTH, -1 * c.get(Calendar.MONTH))
-			now.add(Calendar.MONTH, 1)
-			now.add(Calendar.YEAR, -1 * c.get(Calendar.YEAR))
-			return now.get(Calendar.YEAR)
-		}
+		private fun getYearDifference(c: Calendar): Int =
+			Calendar
+				.getInstance()
+				.apply {
+					add(Calendar.DAY_OF_MONTH, -1 * c.get(Calendar.DAY_OF_MONTH))
+					add(Calendar.DAY_OF_MONTH, 1)
+					add(Calendar.MONTH, -1 * c.get(Calendar.MONTH))
+					add(Calendar.MONTH, 1)
+					add(Calendar.YEAR, -1 * c.get(Calendar.YEAR))
+				}.get(Calendar.YEAR)
 	}
 }

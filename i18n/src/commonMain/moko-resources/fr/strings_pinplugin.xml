@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- PIN Management Plugin-->
+
+	<!-- plugin itself-->
+	<string name="pinplugin_name">PIN Management</string>
+	<string name="pinplugin_description">Avec ce plug-in, vous pouvez modifier ou débloquer votre code PIN.</string>
+
+	<!-- change pin action-->
+	<string name="pinplugin_action_changepin_name">Changer PIN</string>
+	<string name="pinplugin_action_changepin_description">Avec cette action, vous pouvez changer votre code PIN.</string>
+	<string name="pinplugin_action_changepin_userconsent_title">Changer PIN - %s</string>
+
+	<string name="pinplugin_action_changepin_userconsent_pinstep_title">Saisie PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_context_specific">Saisie signature PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description">Cette étape vous permet de changer le %s de votre
+		carte. Veuillez saisir les données demandées dans les champs correspondants. Remarque: Cette opération est
+		également nécessaire si vous voulez changer le code PIN de transport dans un code habituel.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description_after_can">La CAN a été vérifiée avec succès.
+		Maintenant, votre dernière tentative pour changer le %s est activée, saisissez alors les données demandées dans
+		les champs correspondants. Remarque: Cette opération est également nécessaire si vous voulez changer le code PIN
+		de transport dans un code habituel.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_description">Veuillez saisir l'ancien et le nouveau PIN
+		sur votre terminal de carte.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description">Vous pouvez changer votre PIN ici.
+		Appuyez sur "Confirmer" pour changer le code PIN et saisissez l'ancien et le nouveau PIN sur votre terminal de
+		carte. Remarque: Cette opération est également nécessaire si vous voulez changer le PIN de transport dans un PIN
+		habituel.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description_after_can">Le CAN a été vérifié avec
+		succès. Maintenant, votre dernière tentative de changer le PIN est activée. Appuyez sur "Confirmer" pour changer
+		le code PIN et saisissez l'ancien et le nouveau PIN sur votre terminal de carte. Remarque: Cette opération est
+		également nécessaire si vous voulez changer le PIN de transport dans un PIN habituel.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_oldpin">PIN actuel</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpin">Nouveau PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpinrepeat">Nouveau code PIN à nouveau</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_unblocking_required">Votre PIN est malheureusement bloqué.
+		Veuillez débloquer le code PIN.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_wrong_entry">Votre saisie ne correnspends pas aux exigences %s en
+		ce qui concerne la longueur et les caractères autorisés.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_remaining_attempts">(Nombre de tentatives restantes: %d)</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_incorrect_input">Le %s que vous avez saisi n’est malheureusement
+		pas correct. Veuillez réessayer.
+	</string>
+
+	<string name="pinplugin_action_changepin_userconsent_canstep_title">Saisie CAN</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_notice">Vous avez saisie deux fois un mauvais PIN. Pour
+		déverrouiller la troisième et dernière tentative, vous devez saisir le numéro d'accès de la carte. Vous
+		trouverez le numéro d'accès sur le devant de votre carte d'identité.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_description">Veuillez insérer le numéro d'accès de carte de votre
+		carte d'identité.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_native_description">Veuillez insérer le numéro d'accès de carte
+		de votre carte d'identité sur votre terminal de carte.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_can">Numéro d'accès de carte</string>
+
+	<string name="pinplugin_action_changepin_userconsent_successstep_title">Confirmation</string>
+	<string name="pinplugin_action_changepin_userconsent_successstep_description">Votre code PIN a été modifié avec succès.
+	</string>
+
+	<string name="pinplugin_action_changepin_userconsent_errorstep_title">Erreur</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_unknown">Votre PIN est dans un état inconnu et ne peut donc pas
+		être modifié.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_blocked">Votre PIN est bloqué. Veuillez utiliser l'option de
+		déblocage pour débloquer votre PIN.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_deactivated">Votre PIN est désactivé et ne peut donc pas être
+		modifié.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_puk_blocked">Votre code PUK est bloqué, vous devez vous rendre
+		à votre d'enregistrement pour obtenir une nouvelle carte d'identité.
+	</string>
+
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_wrong_can">Vous avez saisi un mauvais CAN. Veuillez
+		réessayer.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_incorrect_input">Votre saisie ne correspond pas aux
+		exigences relatives à la longueur du CAN et des caractères autorisés.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_nativ_start_description">Votre PIN a été suspendu en raison
+		de deux tentatives échouées pour saisir le code PIN. Si vous souhaitez reprendre le PIN, appuyez sur "Confirmer"
+		et saisisse votre CAN sur le terminal de carte.
+	</string>
+
+	<!--unblock pin action-->
+	<string name="pinplugin_action_unblockpin_name">Débloquer PIN</string>
+	<string name="pinplugin_action_unblockpin_description">Avec cette action, vous pouvez débloquer votre code PIN.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_title">Débloquer PIN - %s</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_title">Saisie PUK</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_description">Veuillez saisir le code PUK.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_native_description">Veuillez saisir le code PUK sur votre
+		terminal de carte.
+	</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_nativ_start_description">Votre PIN est bloqué et doit être
+		débloqué avec votre clé de déblocage personnelle (PUK). Appuyez sur "Confirmer" pour débloquer votre code PIN et
+		saisissez le code PUK sur votre terminal de carte.
+	</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk">PUK</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk_success">PIN débloqué avec succès.</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_title">Confirmation</string>
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_description">Votre PIN a été débloqué avec succès.</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_title">Erreur</string>
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_description">Votre code PIN ne peut pas être débloqué car il
+		n'est pas bloqué actuellement.
+	</string>
+
+
+	<!-- PIN entry -->
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin">Veuillez saisir votre PIN.</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_final_try_note">Notez que ceci est votre dernier essai. Si vous ne
+		parvenez pas à entrer le code PIN correctement, vous devez débloquer dans la PIN Management.
+	</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term">Veuillez saisir le code PUK sur votre terminal de
+		carte.
+	</string>
+
+
+	<string name="pinplugin_action_error_card_removed">La carte a été retirée ou remise à zéro et l'opération a été annulée.
+	</string>
+	<string name="pinplugin_action_error_internal">Une erreur interne est survenue et l'opération a été annulée.</string>
+	<string name="pinplugin_action_error_missing_password_match">Le nouveau code PIN et le contenu de vérification du nouveau PIN
+		ne correspondent pas.
+	</string>
+	<string name="pinplugin_action_error_unknown">Une erreur inconnue est survenue. L'opération a été annulée.</string>
+	<string name="pinplugin_action_error_timeout">Le terminal de carte a envoyé le temps.</string>
+	<string name="pinplugin_action_error_title">Erreur</string>
+	<string name="pinplugin_action_error_user_cancellation">Le processus a été interrompu par l'utilisateur ou la carte a été
+		retirée du terminal.
+	</string>
+
+	<string name="pinplugin_action_success_title">Succès</string>
+</resources>

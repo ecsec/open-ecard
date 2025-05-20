@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- CHAT data groups-->
+	<string name="eac_dg22">Email Address</string>
+	<string name="eac_dg21">Phone Number</string>
+	<string name="eac_dg20">Auxiliary Conditions II</string>
+	<string name="eac_dg19">Auxiliary Conditions</string>
+	<string name="eac_dg18">Community ID</string>
+	<string name="eac_dg17">Address</string>
+	<string name="eac_dg16">RFU</string>
+	<string name="eac_dg15">Date of issuance</string>
+	<string name="eac_dg14">Written Signature</string>
+	<string name="eac_dg13">Birth name</string>
+	<string name="eac_dg12">Optional Data</string>
+	<string name="eac_dg11">Sex</string>
+	<string name="eac_dg10">Nationality</string>
+	<string name="eac_dg09">Place of birth</string>
+	<string name="eac_dg08">Date of birth</string>
+	<string name="eac_dg07">Doctoral degree</string>
+	<string name="eac_dg06">Religious/artistic name</string>
+	<string name="eac_dg05">Family name</string>
+	<string name="eac_dg04">Given name(s)</string>
+	<string name="eac_dg03">Valid until</string>
+	<string name="eac_dg02">Issuing country</string>
+	<string name="eac_dg01">Document type</string>
+
+	<!-- CHAT special functions-->
+	<string name="eac_install_qualified_certificate">Install signature certificate</string>
+	<string name="eac_install_certificate">Install non-qualified signature certificate</string>
+	<string name="eac_pin_management">PIN Management</string>
+	<string name="eac_can_allowed">On-Site Verification</string>
+	<string name="eac_privileged_terminal">Privileged Terminal</string>
+	<string name="eac_restricted_identification">Restricted Identification</string>
+	<string name="eac_community_id_verification">Address verification</string>
+	<string name="eac_age_verification">Age verification (≥ %d)</string>
+
+	<!-- CVC elements-->
+	<string name="eac_cvc_subject_name">Subject</string>
+	<string name="eac_cvc_subject_url">Subject URL</string>
+	<string name="eac_cvc_termsofusage">Terms of usage</string>
+	<string name="eac_cvc_validity">Validity</string>
+	<string name="eac_cvc_validity_format">yyyy-MM-dd</string>
+	<string name="eac_cvc_validity_from">from</string>
+	<string name="eac_cvc_validity_to">to</string>
+	<string name="eac_cvc_issuer_name">Issuer</string>
+	<string name="eac_cvc_issuer_url">Issuer URL</string>
+
+	<string name="eac_transaction_info">Please check the transaction information:
+		<br/>
+		<tt>%s</tt>
+		<br/>
+		<br/>
+	</string>
+
+	<!-- GUI-->
+	<string name="eac_user_consent_title">Identification</string>
+
+	<!-- Steps-->
+	<string name="eac_step_chat_title">Requested information</string>
+	<string name="eac_step_chat_step_description">Display of requested data.</string>
+	<string name="eac_step_chat_description">The service provider requests the following information:</string>
+	<string name="eac_step_chat_note">Note</string>
+	<string name="eac_step_chat_note_content">Required information is indicated by gray elements and not selectable.
+		Optional information can be selected/unselected.
+	</string>
+	<string name="eac_step_chat_read_access_description">Access to:</string>
+	<string name="eac_step_chat_write_access_description">Write access to:</string>
+
+	<string name="eac_step_cvc_title">Service Provider</string>
+	<string name="eac_step_cvc_step_description">Display of information about the service provider.</string>
+	<string name="eac_step_cvc_description">The following information is available about the service provider:</string>
+
+	<string name="eac_step_processing_title">Processing</string>
+	<string name="eac_step_processing_step_description">Processing eID authentication.</string>
+	<string name="eac_step_processing_description">Please wait while the %s processes the eID authentication.</string>
+
+	<!-- PIN step stuff is located in PACE translation file -->
+
+	<string name="eac_forward_notice">Please note that by entering your %s, you acknowledge that the selected data will
+		be transmitted to the service provider.
+	</string>
+	<string name="eac_can_notice">The PIN has been suspended because of two failed attempts. You also have to enter the
+		CAN next to the PIN to authenticate.
+	</string>
+	<string name="eac_can_notice_native">The PIN has been suspended because of two failed attempts. Now you have to
+		enter the CAN before entering the PIN.
+	</string>
+</resources>

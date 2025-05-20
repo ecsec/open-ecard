@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Buttons -->
+	<string name="gui_button_back">Back</string>
+	<string name="gui_button_finish">Confirm</string>
+	<string name="gui_button_next">Next</string>
+	<string name="gui_button_cancel">Cancel</string>
+	<string name="gui_button_ok">OK</string>
+	<string name="gui_button_yes">Yes</string>
+	<string name="gui_button_no">No</string>
+	<string name="gui_button_open">Open</string>
+	<string name="gui_button_save">Save</string>
+	<string name="gui_button_new">New</string>
+	<string name="gui_file_name">File name</string>
+	<string name="gui_location">Current location</string>
+	<string name="gui_no_read_access">The folder '%s' can not be opened.</string>
+</resources>

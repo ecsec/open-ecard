@@ -21,13 +21,13 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.createException
@@ -38,22 +38,14 @@ import org.openecard.gui.StepResult
 import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.sal.protocol.eac.EACData
 import org.openecard.sal.protocol.eac.EACProtocol
 
 private val logger = KotlinLogging.logger { }
 
-private val lang: I18n = I18n.getTranslation("pace")
-private val langPin: I18n = I18n.getTranslation("pinplugin")
-
-private val pin: String = lang.translationForKey("pin")
-private val puk: String = lang.translationForKey("puk")
-
-// Translation constants
-private const val ERROR_CARD_REMOVED = "action.error.card.removed"
-private const val ERROR_INTERNAL = "action.error.internal"
-private const val ERROR_TITLE = "action.error.title"
-private const val ERROR_UNKNOWN = "action.error.unknown"
+private val pin: String = I18N.strings.pace_pin.localized()
+private val puk: String = I18N.strings.pace_puk.localized()
 
 /**
  * StepAction for capturing the user PIN on the EAC GUI.
@@ -98,8 +90,8 @@ class PINStepAction(
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
 				ErrorStep(
-					langPin.translationForKey(ERROR_TITLE),
-					langPin.translationForKey(ERROR_UNKNOWN),
+					I18N.strings.pinplugin_action_error_title.localized(),
+					I18N.strings.pinplugin_action_error_unknown.localized(),
 					ex,
 				),
 			)
@@ -140,8 +132,8 @@ class PINStepAction(
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
 						ErrorStep(
-							lang.translationForKey(ERROR_TITLE),
-							langPin.translationForKey(ERROR_CARD_REMOVED),
+							I18N.strings.pinplugin_action_error_title.localized(),
+							I18N.strings.pinplugin_action_error_card_removed.localized(),
 							ex,
 						),
 					)
@@ -184,8 +176,12 @@ class PINStepAction(
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
 						ErrorStep(
-							lang.translationForKey("step_error_title_blocked", pin),
-							lang.translationForKey("step_error_pin_blocked", pin, pin, puk, pin),
+							I18N.strings.pace_step_error_title_blocked
+								.format(pin)
+								.localized(),
+							I18N.strings.pace_step_error_pin_blocked
+								.format(pin, pin, puk, pin)
+								.localized(),
 							createException(establishChannelResponse.getResult()),
 						),
 					)
@@ -211,8 +207,8 @@ class PINStepAction(
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
 					ErrorStep(
-						lang.translationForKey(ERROR_TITLE),
-						langPin.translationForKey(ERROR_CARD_REMOVED),
+						I18N.strings.pinplugin_action_error_title.localized(),
+						I18N.strings.pinplugin_action_error_card_removed.localized(),
 						ex,
 					),
 				)
@@ -223,8 +219,8 @@ class PINStepAction(
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
 				ErrorStep(
-					langPin.translationForKey(ERROR_TITLE),
-					langPin.translationForKey(ERROR_UNKNOWN),
+					I18N.strings.pinplugin_action_error_title.localized(),
+					I18N.strings.pinplugin_action_error_unknown.localized(),
 					ex,
 				),
 			)

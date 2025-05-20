@@ -21,8 +21,8 @@
  */
 package org.openecard.binding.tctoken
 
+import dev.icerock.moko.resources.format
 import generated.TCTokenType
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.bouncycastle.tls.BasicTlsPSKIdentity
 import org.openecard.bouncycastle.tls.ProtocolVersion
 import org.openecard.bouncycastle.tls.TlsClient
@@ -42,6 +42,7 @@ import org.openecard.crypto.tls.auth.DynamicAuthentication
 import org.openecard.crypto.tls.proxy.ProxySettings.Companion.default
 import org.openecard.crypto.tls.verify.JavaSecVerifier
 import org.openecard.crypto.tls.verify.SameCertVerifier
+import org.openecard.i18n.I18N
 import java.lang.Boolean
 import java.net.MalformedURLException
 import java.net.URL
@@ -121,7 +122,11 @@ class TlsConnectionHandler(
 						}
 					}
 
-					else -> throw ConnectionError(ErrorTranslations.UNKNOWN_SEC_PROTOCOL, secProto)
+					else -> throw ConnectionError(
+						I18N.strings.tr03112_connection_error_unknown_sec_protocol
+							.format(secProto)
+							.localized(),
+					)
 				}
 
 				// make sure nobody changes the server when the connection gets reestablished
@@ -133,7 +138,11 @@ class TlsConnectionHandler(
 				tlsClient!!.setAuthentication(tlsAuth)
 			}
 		} catch (ex: MalformedURLException) {
-			throw ConnectionError(ErrorTranslations.MALFORMED_URL, ex, "ServerAddress")
+			throw ConnectionError(
+				I18N.strings.tr03112_invalid_tctoken_url_exception_malformed_url
+					.format("ServerAddress")
+					.localized(),
+			)
 		}
 	}
 

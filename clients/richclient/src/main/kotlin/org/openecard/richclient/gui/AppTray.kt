@@ -22,15 +22,16 @@
 
 package org.openecard.richclient.gui
 
+import dev.icerock.moko.resources.format
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonManager
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
+import org.openecard.i18n.I18N
 import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
@@ -71,8 +72,6 @@ private const val ICON_LOGO: String = "logo"
 class AppTray(
 	private val client: RichClient,
 ) {
-	private val lang: I18n = I18n.getTranslation("richclient")
-
 	private var tray: SystemTray? = null
 	var status: Status? = null
 		private set
@@ -85,13 +84,25 @@ class AppTray(
 	 */
 	fun beginSetup() {
 		tray =
-			SystemTray.get(lang.translationForKey("tray.title", name))?.let { tray ->
-				tray.setImage(tray.getTrayIconImage(ICON_LOADER))
-				tray.status = lang.translationForKey("tray.message.loading", name)
-				tray.setTooltip(lang.translationForKey("tray.title", name))
+			SystemTray
+				.get(
+					I18N.strings.richclient_tray_title
+						.format(name)
+						.localized(),
+				)?.let { tray ->
+					tray.setImage(tray.getTrayIconImage(ICON_LOADER))
+					tray.status =
+						I18N.strings.richclient_tray_message_loading
+							.format(name)
+							.localized()
+					tray.setTooltip(
+						I18N.strings.richclient_tray_title
+							.format(name)
+							.localized(),
+					)
 
-				tray
-			}
+					tray
+				}
 
 		// no tray, set up frame
 		if (tray == null) {
@@ -118,7 +129,7 @@ class AppTray(
 			tray.status = null
 			tray.menu.add(
 				MenuItem(
-					"Card Status",
+					I18N.strings.richclient_tray_card_status.localized(),
 					object : ActionListener {
 						override fun actionPerformed(e: ActionEvent) {
 							if (!infoPopupActive) {
@@ -140,7 +151,7 @@ class AppTray(
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
-					lang.translationForKey("tray.about"),
+					I18N.strings.richclient_tray_about.localized(),
 					object : ActionListener {
 						override fun actionPerformed(e: ActionEvent) {
 							AboutDialog.showDialog()
@@ -150,7 +161,7 @@ class AppTray(
 			)
 			tray.menu.add(
 				MenuItem(
-					lang.translationForKey("tray.config"),
+					I18N.strings.richclient_tray_config.localized(),
 					object : ActionListener {
 						override fun actionPerformed(e: ActionEvent) {
 							ManagementDialog.Companion.showDialog(manager)
@@ -161,7 +172,7 @@ class AppTray(
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
-					lang.translationForKey("tray.exit"),
+					I18N.strings.richclient_tray_exit.localized(),
 					object : ActionListener {
 						override fun actionPerformed(e: ActionEvent) {
 							shutdown()
@@ -185,7 +196,11 @@ class AppTray(
 	}
 
 	private fun setupFrame(standalone: Boolean): InfoFrame =
-		InfoFrame(lang.translationForKey("tray.title", name)).also { frame ->
+		InfoFrame(
+			I18N.strings.richclient_tray_title
+				.format(name)
+				.localized(),
+		).also { frame ->
 			frame.iconImage = oecImage(OecIconType.COLORED, 256, 256)
 
 			if (standalone) {

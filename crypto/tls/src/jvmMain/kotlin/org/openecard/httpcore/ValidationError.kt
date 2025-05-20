@@ -21,19 +21,11 @@
  ***************************************************************************/
 package org.openecard.httpcore
 
-import org.openecard.common.I18n
-import org.openecard.common.I18nException
-import org.openecard.common.I18nKey
-
 /**
  *
  * @author Tobias Wich
  */
-class ValidationError : I18nException {
-	@JvmOverloads
-	constructor(message: String?, cause: Throwable? = null) : super(message, cause)
-
-	constructor(lang: I18n, key: I18nKey, vararg params: Any) : super(lang, key, *params)
-
-	constructor(lang: I18n, key: I18nKey, cause: Throwable, vararg params: Any) : super(lang, key, cause, *params)
-}
+class ValidationError(
+	message: String?,
+	cause: Throwable? = null,
+) : Exception(message, cause)

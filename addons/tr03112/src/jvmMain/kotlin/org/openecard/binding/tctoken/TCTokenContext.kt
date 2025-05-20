@@ -23,7 +23,6 @@ package org.openecard.binding.tctoken
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.binding.tctoken.ex.AuthServerException
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidAddressException
 import org.openecard.binding.tctoken.ex.InvalidTCTokenException
 import org.openecard.binding.tctoken.ex.ResultMinor
@@ -37,6 +36,7 @@ import org.openecard.httpcore.InvalidProxyException
 import org.openecard.httpcore.InvalidRedirectChain
 import org.openecard.httpcore.ResourceContext
 import org.openecard.httpcore.ValidationError
+import org.openecard.i18n.I18N
 import java.io.IOException
 import java.net.URL
 
@@ -58,18 +58,28 @@ class TCTokenContext private constructor(
 			try {
 				val ctx = TrResourceContextLoader().getStream(tcTokenURL)
 				return generateTCToken(ctx!!.data!!, ctx)
-			} catch (ex: InsecureUrlException) {
-				throw InvalidAddressException(ErrorTranslations.INVALID_ADDRESS)
-			} catch (ex: InvalidRedirectChain) {
-				throw InvalidAddressException(ErrorTranslations.INVALID_REFRESH_ADDRESS_NOSOP)
-			} catch (ex: IOException) {
-				throw TCTokenRetrievalException(ErrorTranslations.RETRIEVAL_FAILED, ex)
-			} catch (ex: HttpResourceException) {
-				throw TCTokenRetrievalException(ErrorTranslations.RETRIEVAL_FAILED, ex)
-			} catch (ex: InvalidProxyException) {
-				throw TCTokenRetrievalException(ErrorTranslations.RETRIEVAL_FAILED, ex)
-			} catch (ex: ValidationError) {
-				throw TCTokenRetrievalException(ErrorTranslations.RETRIEVAL_FAILED, ex)
+			} catch (ex: Exception) {
+				when (ex) {
+					is InvalidRedirectChain -> {
+						throw InvalidAddressException(I18N.strings.tr03112_invalid_tctoken_element_invalid_refresh_address.localized())
+					}
+					is InsecureUrlException -> {
+						throw InvalidAddressException(I18N.strings.tr03112_invalid_address_exception_no_https.localized())
+					}
+					is ValidationError,
+					is InvalidProxyException,
+					is HttpResourceException,
+					is IOException,
+					-> {
+						throw TCTokenRetrievalException(
+							I18N.strings.tr03112_tctoken_retrieval_exception.localized(),
+							ex,
+						)
+					}
+					else -> {
+						throw ex
+					}
+				}
 			}
 		}
 
@@ -88,7 +98,9 @@ class TCTokenContext private constructor(
 			val tokens = parser.parse(data)
 
 			if (tokens.isEmpty()) {
-				throw InvalidTCTokenException(ErrorTranslations.NO_TCTOKEN_IN_DATA)
+				throw InvalidTCTokenException(
+					I18N.strings.tr03112_invalid_tctoken_exception_no_tctoken.localized(),
+				)
 			}
 
 			// Verify the TCToken
@@ -96,7 +108,10 @@ class TCTokenContext private constructor(
 			val ver = TCTokenVerifier(token, base)
 			if (ver.isErrorToken) {
 				val minor = ResultMinor.CLIENT_ERROR
-				throw AuthServerException(token.getComErrorAddressWithParams(minor), ErrorTranslations.ESERVICE_ERROR)
+				throw AuthServerException(
+					token.getComErrorAddressWithParams(minor),
+					I18N.strings.tr03112_auth_server_exception.localized(),
+				)
 			}
 
 			val dynCtx = DynamicContext.getInstance(TR03112Keys.INSTANCE_KEY)!!

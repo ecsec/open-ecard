@@ -28,6 +28,7 @@ import org.openecard.common.tlv.TagClass
 import org.openecard.common.util.ByteUtils
 import org.openecard.crypto.common.asn1.eac.oid.CVCertificatesObjectIdentifier
 import org.openecard.crypto.common.asn1.utils.ObjectIdentifierUtils
+import org.openecard.i18n.I18N
 import java.util.EnumMap
 import java.util.TreeMap
 
@@ -638,3 +639,41 @@ class CHAT {
 		}
 	}
 }
+
+fun CHAT.DataGroup.stringResource() =
+	when (this) {
+		CHAT.DataGroup.DG01 -> I18N.strings.eac_dg01
+		CHAT.DataGroup.DG02 -> I18N.strings.eac_dg02
+		CHAT.DataGroup.DG03 -> I18N.strings.eac_dg03
+		CHAT.DataGroup.DG04 -> I18N.strings.eac_dg04
+		CHAT.DataGroup.DG05 -> I18N.strings.eac_dg05
+		CHAT.DataGroup.DG06 -> I18N.strings.eac_dg06
+		CHAT.DataGroup.DG07 -> I18N.strings.eac_dg07
+		CHAT.DataGroup.DG08 -> I18N.strings.eac_dg08
+		CHAT.DataGroup.DG09 -> I18N.strings.eac_dg09
+		CHAT.DataGroup.DG10 -> I18N.strings.eac_dg10
+		CHAT.DataGroup.DG11 -> I18N.strings.eac_dg11
+		CHAT.DataGroup.DG12 -> I18N.strings.eac_dg12
+		CHAT.DataGroup.DG13 -> I18N.strings.eac_dg13
+		CHAT.DataGroup.DG14 -> I18N.strings.eac_dg14
+		CHAT.DataGroup.DG15 -> I18N.strings.eac_dg15
+		CHAT.DataGroup.DG16 -> I18N.strings.eac_dg16
+		CHAT.DataGroup.DG17 -> I18N.strings.eac_dg17
+		CHAT.DataGroup.DG18 -> I18N.strings.eac_dg18
+		CHAT.DataGroup.DG19 -> I18N.strings.eac_dg19
+		CHAT.DataGroup.DG20 -> I18N.strings.eac_dg20
+		CHAT.DataGroup.DG21 -> I18N.strings.eac_dg21
+		CHAT.DataGroup.DG22 -> I18N.strings.eac_dg22
+	}
+
+fun CHAT.SpecialFunction.stringResource() =
+	when (this) {
+		CHAT.SpecialFunction.INSTALL_QUALIFIED_CERTIFICATE -> I18N.strings.eac_install_qualified_certificate
+		CHAT.SpecialFunction.INSTALL_CERTIFICATE -> I18N.strings.eac_install_certificate
+		CHAT.SpecialFunction.PIN_MANAGEMENT -> I18N.strings.eac_pin_management
+		CHAT.SpecialFunction.CAN_ALLOWED -> I18N.strings.eac_can_allowed
+		CHAT.SpecialFunction.PRIVILEGED_TERMINAL -> I18N.strings.eac_privileged_terminal
+		CHAT.SpecialFunction.RESTRICTED_IDENTIFICATION -> I18N.strings.eac_restricted_identification
+		CHAT.SpecialFunction.COMMUNITY_ID_VERIFICATION -> I18N.strings.eac_community_id_verification
+		CHAT.SpecialFunction.AGE_VERIFICATION -> I18N.strings.eac_age_verification
+	}

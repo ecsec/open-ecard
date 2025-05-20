@@ -21,9 +21,9 @@
  ***************************************************************************/
 package org.openecard.richclient.gui.components
 
-import org.openecard.common.I18n
 import org.openecard.gui.swing.common.GUIDefaults
-import org.openecard.richclient.gui.manage.*
+import org.openecard.i18n.I18N
+import org.openecard.richclient.gui.manage.Settings
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -31,7 +31,11 @@ import java.awt.Insets
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.File
-import javax.swing.*
+import javax.swing.Icon
+import javax.swing.JButton
+import javax.swing.JPanel
+import javax.swing.JTextField
+import javax.swing.SwingConstants
 import javax.swing.border.EmptyBorder
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -41,329 +45,312 @@ import javax.swing.event.DocumentListener
  *
  * @author Hans-Martin Haase
  */
-class FileListEntryItem(fileType: String, property: String?, properties: Settings) :
-    JPanel() {
-    /**
-     * I18n object which is necessary to retrieve translations.
-     */
-    private val lang: I18n = I18n.getTranslation("addon")
+class FileListEntryItem(
+	fileType: String,
+	property: String?,
+	properties: Settings,
+) : JPanel() {
+	/**
+	 * I18n object which is necessary to retrieve translations.
+	 * A list which contains all text entries .
+	 */
+	private val entries: ArrayList<String> = ArrayList()
 
-    /**
-     * A list which contains all text entries .
-     */
-    private val entries: ArrayList<String> = ArrayList()
+	/**
+	 * A list of JButtons.
+	 * The order of the buttons corresponds to the order in the `entries` list.
+	 */
+	private val entryPlusBox: ArrayList<JButton> = ArrayList()
 
-    /**
-     * A list of JButtons.
-     * The order of the buttons corresponds to the order in the `entries` list.
-     */
-    private val entryPlusBox: ArrayList<JButton> = ArrayList()
+	/**
+	 * A list of JTextFields.
+	 * The order of text fields corresponds to the order in the `entries` list.
+	 */
+	private val textEntries: ArrayList<JTextField> = ArrayList()
 
-    /**
-     * A list of JTextFields.
-     * The order of text fields corresponds to the order in the `entries` list.
-     */
-    private val textEntries: ArrayList<JTextField> = ArrayList()
+	/**
+	 * A semicolon separated list of accepted file types.
+	 */
+	private val fileType: String
 
-    /**
-     * A semicolon separated list of accepted file types.
-     */
-    private val fileType: String
+	/**
+	 * The name of the property which relates to this configuration entry.
+	 */
+	private val property: String?
 
-    /**
-     * The name of the property which relates to this configuration entry.
-     */
-    private val property: String?
+	/**
+	 * A Settings object which is used to retrieve and set the current value of the configuration entry.
+	 */
+	private val properties: Settings
 
-    /**
-     * A Settings object which is used to retrieve and set the current value of the configuration entry.
-     */
-    private val properties: Settings
+	/**
+	 * The current Y coordinate in the used GridBagLayout.
+	 */
+	private var currentYCoordinate: Int = 0
 
+	/**
+	 * Creates a new FileListEntryItem object.
+	 *
+	 * @param fileType A semicolon separated list of accepted file types.
+	 * @param property The name of the property which relates to this configuration entry.
+	 * @param properties A Settings object which is used to retrieve and set the current value of the configuration entry.
+	 */
+	init {
+		setLayout(GridBagLayout())
+		this.fileType = fileType
+		this.properties = properties
+		this.property = property
+		val props: String? = properties.getProperty(property)
+		if (props != null && props != "") {
+			for (entry: String in props.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+				entries.add(entry)
+				addRow(entry)
+			}
+		} else {
+			addEmptyEntry()
+		}
+	}
 
-    /**
-     * The current Y coordinate in the used GridBagLayout.
-     */
-    private var currentYCoordinate: Int = 0
+	/**
+	 * Adds an new empty entry to the list of entries.
+	 */
+	private fun addEmptyEntry() {
+		addRow(null)
+	}
 
-    /**
-     * Creates a new FileListEntryItem object.
-     *
-     * @param fileType A semicolon separated list of accepted file types.
-     * @param property The name of the property which relates to this configuration entry.
-     * @param properties A Settings object which is used to retrieve and set the current value of the configuration entry.
-     */
-    init {
-        setLayout(GridBagLayout())
-        this.fileType = fileType
-        this.properties = properties
-        this.property = property
-        val props: String? = properties.getProperty(property)
-        if (props != null && props != "") {
-            for (entry: String in props.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-                entries.add(entry)
-                addRow(entry)
-            }
-        } else {
-            addEmptyEntry()
-        }
-    }
+	/**
+	 * Rebuilds the complete list of entries.
+	 *
+	 * This method have to be called if the remove button was pressed. The GridBagLayout is not able to remove rows in
+	 * a dynamic way only dynamic adding of rows is possible. So we have to clear the whole panel and rebuild the list
+	 * of entries.
+	 */
+	private fun rebuild() {
+		removeAll()
+		textEntries.clear()
+		entryPlusBox.clear()
+		if (!entries.isEmpty()) {
+			for (entry: String in entries) {
+				addRow(entry)
+			}
+		} else {
+			addEmptyEntry()
+		}
+		revalidate()
+		repaint()
+	}
 
-    /**
-     * Adds an new empty entry to the list of entries.
-     */
-    private fun addEmptyEntry() {
-        addRow(null)
-    }
+	/**
+	 * Adds an additional row to the layout.
+	 *
+	 * The added row contains an TextField with the given `entry`. If `entry` is NULL an empty TextField is
+	 * add which is used to add a completely new list entry.
+	 *
+	 * @param entry The entry to add to the list.
+	 */
+	private fun addRow(entry: String?) {
+		val textField: JTextField =
+			object : JTextField() {
+				// the following is necessary because most path are longer than the field and GridBagLayout does not care
+				// about MaximumSize. The following seems good for the default size of the configuration window but is does
+				// not scale good if the size of the window becomes bigger.
+				override fun getPreferredSize(): Dimension {
+					val dim: Dimension = super.getPreferredSize()
+					dim.width = 100
+					return dim
+				}
+			}
+		textField.setText(entry)
+		textField.setToolTipText(textField.getText())
+		textField.getDocument().addDocumentListener(DocumentChangeListener(textField))
+		textEntries.add(textField)
 
-    /**
-     * Rebuilds the complete list of entries.
-     *
-     * This method have to be called if the remove button was pressed. The GridBagLayout is not able to remove rows in
-     * a dynamic way only dynamic adding of rows is possible. So we have to clear the whole panel and rebuild the list
-     * of entries.
-     */
-    private fun rebuild() {
-        removeAll()
-        textEntries.clear()
-        entryPlusBox.clear()
-        if (!entries.isEmpty()) {
-            for (entry: String in entries) {
-                addRow(entry)
-            }
-        } else {
-            addEmptyEntry()
-        }
-        revalidate()
-        repaint()
-    }
+		val browseButton: JButton =
+			JButton(
+				I18N.strings.addon_settings_browse.localized(),
+			)
+		browseButton.addActionListener(OpenFileBrowserListener(fileType, textField))
 
-    /**
-     * Adds an additional row to the layout.
-     *
-     * The added row contains an TextField with the given `entry`. If `entry` is NULL an empty TextField is
-     * add which is used to add a completely new list entry.
-     *
-     * @param entry The entry to add to the list.
-     */
-    private fun addRow(entry: String?) {
-        val textField: JTextField = object : JTextField() {
-            // the following is necessary because most path are longer than the field and GridBagLayout does not care
-            // about MaximumSize. The following seems good for the default size of the configuration window but is does
-            // not scale good if the size of the window becomes bigger.
-            override fun getPreferredSize(): Dimension {
-                val dim: Dimension = super.getPreferredSize()
-                dim.width = 100
-                return dim
-            }
-        }
-        textField.setText(entry)
-        textField.setToolTipText(textField.getText())
-        textField.getDocument().addDocumentListener(DocumentChangeListener(textField))
-        textEntries.add(textField)
+		// hide plus button of the previous line
+		if (!entryPlusBox.isEmpty()) {
+			val prevPlus: JButton = entryPlusBox.get(entryPlusBox.size - 1)
+			prevPlus.setVisible(false)
+		}
 
-        val browseButton: JButton = JButton(lang.translationForKey("addon.settings.browse"))
-        browseButton.addActionListener(OpenFileBrowserListener(fileType, textField))
+		val plus: JButton = JButton()
+		plus.setIcon(closedIndicator)
+		plus.addActionListener(AddActionListener(plus))
+		plus.setOpaque(true)
+		plus.setFocusPainted(false)
+		plus.setBorder(EmptyBorder(Insets(0, 0, 0, 0)))
+		plus.setHorizontalAlignment(SwingConstants.LEFT)
+		plus.setMargin(Insets(0, 0, 0, 0))
+		plus.setBounds(0, 0, 0, 0)
+		plus.setContentAreaFilled(false)
+		plus.setHorizontalTextPosition(SwingConstants.TRAILING)
+		entryPlusBox.add(plus)
 
-        // hide plus button of the previous line
-        if (!entryPlusBox.isEmpty()) {
-            val prevPlus: JButton = entryPlusBox.get(entryPlusBox.size - 1)
-            prevPlus.setVisible(false)
-        }
+		val minus: JButton = JButton()
+		minus.setIcon(openedIndicator)
+		minus.addActionListener(RemoveActionListener(minus))
+		// necessary to determine which entry to remove from the list.
+		minus.setName(entry)
+		minus.setOpaque(true)
+		minus.setFocusPainted(false)
+		minus.setBorder(EmptyBorder(Insets(0, 0, 0, 0)))
+		minus.setHorizontalAlignment(SwingConstants.LEFT)
+		minus.setMargin(Insets(0, 0, 0, 0))
+		minus.setBounds(0, 0, 0, 0)
+		minus.setContentAreaFilled(false)
+		minus.setHorizontalTextPosition(SwingConstants.TRAILING)
 
-        val plus: JButton = JButton()
-        plus.setIcon(closedIndicator)
-        plus.addActionListener(AddActionListener(plus))
-        plus.setOpaque(true)
-        plus.setFocusPainted(false)
-        plus.setBorder(EmptyBorder(Insets(0, 0, 0, 0)))
-        plus.setHorizontalAlignment(SwingConstants.LEFT)
-        plus.setMargin(Insets(0, 0, 0, 0))
-        plus.setBounds(0, 0, 0, 0)
-        plus.setContentAreaFilled(false)
-        plus.setHorizontalTextPosition(SwingConstants.TRAILING)
-        entryPlusBox.add(plus)
+		val textConstraint: GridBagConstraints = GridBagConstraints()
+		textConstraint.anchor = GridBagConstraints.WEST
+		textConstraint.fill = GridBagConstraints.HORIZONTAL
+		textConstraint.gridx = 0
+		textConstraint.gridy = currentYCoordinate
+		textConstraint.weightx = 4.0
 
-        val minus: JButton = JButton()
-        minus.setIcon(openedIndicator)
-        minus.addActionListener(RemoveActionListener(minus))
-        // necessary to determine which entry to remove from the list.
-        minus.setName(entry)
-        minus.setOpaque(true)
-        minus.setFocusPainted(false)
-        minus.setBorder(EmptyBorder(Insets(0, 0, 0, 0)))
-        minus.setHorizontalAlignment(SwingConstants.LEFT)
-        minus.setMargin(Insets(0, 0, 0, 0))
-        minus.setBounds(0, 0, 0, 0)
-        minus.setContentAreaFilled(false)
-        minus.setHorizontalTextPosition(SwingConstants.TRAILING)
+		val plusConstraint: GridBagConstraints = GridBagConstraints()
+		plusConstraint.anchor = GridBagConstraints.WEST
+		plusConstraint.fill = GridBagConstraints.NONE
+		plusConstraint.gridx = 3
+		plusConstraint.gridy = currentYCoordinate
+		plusConstraint.gridwidth = GridBagConstraints.REMAINDER
+		plusConstraint.insets = Insets(0, 5, 0, 5)
 
-        val textConstraint: GridBagConstraints = GridBagConstraints()
-        textConstraint.anchor = GridBagConstraints.WEST
-        textConstraint.fill = GridBagConstraints.HORIZONTAL
-        textConstraint.gridx = 0
-        textConstraint.gridy = currentYCoordinate
-        textConstraint.weightx = 4.0
+		val minusConstraint: GridBagConstraints = GridBagConstraints()
+		minusConstraint.anchor = GridBagConstraints.WEST
+		minusConstraint.fill = GridBagConstraints.NONE
+		minusConstraint.gridx = 2
+		minusConstraint.gridy = currentYCoordinate
+		minusConstraint.insets = Insets(0, 5, 0, 5)
 
-        val plusConstraint: GridBagConstraints = GridBagConstraints()
-        plusConstraint.anchor = GridBagConstraints.WEST
-        plusConstraint.fill = GridBagConstraints.NONE
-        plusConstraint.gridx = 3
-        plusConstraint.gridy = currentYCoordinate
-        plusConstraint.gridwidth = GridBagConstraints.REMAINDER
-        plusConstraint.insets = Insets(0, 5, 0, 5)
+		val browseConstrain: GridBagConstraints = GridBagConstraints()
+		browseConstrain.anchor = GridBagConstraints.WEST
+		browseConstrain.fill = GridBagConstraints.NONE
+		browseConstrain.gridx = 1
+		browseConstrain.gridy = currentYCoordinate
+		browseConstrain.insets = Insets(5, 5, 0, 5)
 
-        val minusConstraint: GridBagConstraints = GridBagConstraints()
-        minusConstraint.anchor = GridBagConstraints.WEST
-        minusConstraint.fill = GridBagConstraints.NONE
-        minusConstraint.gridx = 2
-        minusConstraint.gridy = currentYCoordinate
-        minusConstraint.insets = Insets(0, 5, 0, 5)
+		add(textField, textConstraint)
+		add(browseButton, browseConstrain)
+		add(plus, plusConstraint)
+		add(minus, minusConstraint)
+		currentYCoordinate++
+	}
 
-        val browseConstrain: GridBagConstraints = GridBagConstraints()
-        browseConstrain.anchor = GridBagConstraints.WEST
-        browseConstrain.fill = GridBagConstraints.NONE
-        browseConstrain.gridx = 1
-        browseConstrain.gridy = currentYCoordinate
-        browseConstrain.insets = Insets(5, 5, 0, 5)
+	/**
+	 * An ActionListener implementation which triggers the addition of a new empty list entry.
+	 * @param addButton The button which is associated with this listener.
+	 */
+	private inner class AddActionListener(
+		private val button: JButton,
+	) : ActionListener {
+		/**
+		 * Make the clicked plus button invisible an invoke the creation of a new empty entry.
+		 *
+		 * @param e
+		 */
+		override fun actionPerformed(e: ActionEvent) {
+			if (textEntries.get(textEntries.size - 1).getText() != "") {
+				button.setVisible(false)
+				addEmptyEntry()
+			}
+		}
+	}
 
-        add(textField, textConstraint)
-        add(browseButton, browseConstrain)
-        add(plus, plusConstraint)
-        add(minus, minusConstraint)
-        currentYCoordinate++
-    }
-
-    /**
-     * An ActionListener implementation which triggers the addition of a new empty list entry.
-     */
-    private inner class AddActionListener
-    /**
-     * Creates a new AddActionListener object.
-     *
-     * @param addButton The button which is associated with this listener.
-     */(
-        /**
-         * The button which is associated with this listener.
-         */
-        private val button: JButton
-    ) : ActionListener {
-        /**
-         * Make the clicked plus button invisible an invoke the creation of a new empty entry.
-         *
-         * @param e
-         */
-        override fun actionPerformed(e: ActionEvent) {
-            if (textEntries.get(textEntries.size - 1).getText() != "") {
-                button.setVisible(false)
-                addEmptyEntry()
-            }
-        }
-    }
-
-    /**
-     * An ActionListener implementation which triggers the removal of a entry in the list.
-     */
-    private inner class RemoveActionListener
-    /**
-     * Creates a new RemoveActionListener object.
-     *
-     * @param button The button which is associated with this Listener.
-     */(
-        /**
-         * The button which is associated with this Listener.
-         */
-        private val button: JButton
-    ) : ActionListener {
-        /**
-         * Triggers the removal of the selected entry.
-         *
-         * @param e
-         */
-        override fun actionPerformed(e: ActionEvent) {
-            val name: String = button.getName()
-            val indexOfEntry: Int = entries.indexOf(name)
-            if (indexOfEntry >= 0) {
-                entryPlusBox.removeAt(indexOfEntry)
-                val field: JTextField = textEntries[indexOfEntry]
+	/**
+	 * An ActionListener implementation which triggers the removal of a entry in the list.
+	 * @param button The button which is associated with this Listener.
+	 */
+	private inner class RemoveActionListener(
+		private val button: JButton,
+	) : ActionListener {
+		override fun actionPerformed(e: ActionEvent) {
+			val name: String = button.getName()
+			val indexOfEntry: Int = entries.indexOf(name)
+			if (indexOfEntry >= 0) {
+				entryPlusBox.removeAt(indexOfEntry)
+				val field: JTextField = textEntries[indexOfEntry]
 				field.text = ""
-                textEntries.removeAt(indexOfEntry)
-                entries.remove(name)
-            }
-            rebuild()
-        }
-    }
+				textEntries.removeAt(indexOfEntry)
+				entries.remove(name)
+			}
+			rebuild()
+		}
+	}
 
-    /**
-     * Implements a DocumentListener which checks the correctness of the entered content.
-     */
-    private inner class DocumentChangeListener(
-        /**
-         * The TextField which is associated with this Listener.
-         */
-        private val textField: JTextField
-    ) : DocumentListener {
-        private var currentText: String
+	/**
+	 * Implements a DocumentListener which checks the correctness of the entered content.
+	 */
+	private inner class DocumentChangeListener(
+		/**
+		 * The TextField which is associated with this Listener.
+		 */
+		private val textField: JTextField,
+	) : DocumentListener {
+		private var currentText: String
 
-        init {
-            currentText = textField.getText()
-        }
+		init {
+			currentText = textField.getText()
+		}
 
-        override fun insertUpdate(e: DocumentEvent) {
-            concatContentsAndSetProperty()
-            val entryIndex: Int = entries.indexOf(currentText)
-            // update existing entry
-            if (entryIndex >= 0) {
-                entryPlusBox.get(entryIndex).setName(textField.getText())
-                entries.set(entryIndex, textField.getText())
-            } else {
-                entries.add(textField.getText())
-            }
-            currentText = textField.getText()
-        }
+		override fun insertUpdate(e: DocumentEvent) {
+			concatContentsAndSetProperty()
+			val entryIndex: Int = entries.indexOf(currentText)
+			// update existing entry
+			if (entryIndex >= 0) {
+				entryPlusBox.get(entryIndex).setName(textField.getText())
+				entries.set(entryIndex, textField.getText())
+			} else {
+				entries.add(textField.getText())
+			}
+			currentText = textField.getText()
+		}
 
-        override fun removeUpdate(e: DocumentEvent) {
-            concatContentsAndSetProperty()
-        }
+		override fun removeUpdate(e: DocumentEvent) {
+			concatContentsAndSetProperty()
+		}
 
-        /**
-         * Not implemented in this implementation so an changed update event is ignored.
-         *
-         * @param e
-         */
-        override fun changedUpdate(e: DocumentEvent) {
-            // ignore
-        }
+		/**
+		 * Not implemented in this implementation so an changed update event is ignored.
+		 *
+		 * @param e
+		 */
+		override fun changedUpdate(e: DocumentEvent) {
+			// ignore
+		}
 
-        /**
-         * Concatenates the content of all filled text fields.
-         *
-         * The different contents a separated by a semicolon and the resulting string is set as the new value of the
-         * `property` property.
-         */
-        fun concatContentsAndSetProperty() {
-            val sb: StringBuilder = StringBuilder()
-            for (text: JTextField in textEntries) {
-                val file: File = File(text.getText())
-                if (file.exists() && file.isFile()) {
-                    sb.append(text.getText())
-                    sb.append(";")
-                }
-            }
+		/**
+		 * Concatenates the content of all filled text fields.
+		 *
+		 * The different contents a separated by a semicolon and the resulting string is set as the new value of the
+		 * `property` property.
+		 */
+		fun concatContentsAndSetProperty() {
+			val sb: StringBuilder = StringBuilder()
+			for (text: JTextField in textEntries) {
+				val file: File = File(text.getText())
+				if (file.exists() && file.isFile()) {
+					sb.append(text.getText())
+					sb.append(";")
+				}
+			}
 
-            properties.setProperty(property, sb.toString())
-        }
-    }
+			properties.setProperty(property, sb.toString())
+		}
+	}
 
-    companion object {
-        /**
-         * Icon for the minus button which indicates the removal of an entry.
-         */
-        private val openedIndicator: Icon = GUIDefaults.getImage("ToggleText.selectedIcon")!!
+	companion object {
+		/**
+		 * Icon for the minus button which indicates the removal of an entry.
+		 */
+		private val openedIndicator: Icon = GUIDefaults.getImage("ToggleText.selectedIcon")!!
 
-        /**
-         * Icon for the plus button which indicates the addition of a new empty row.
-         */
-        private val closedIndicator: Icon = GUIDefaults.getImage("ToggleText.icon")!!
-    }
+		/**
+		 * Icon for the plus button which indicates the addition of a new empty row.
+		 */
+		private val closedIndicator: Icon = GUIDefaults.getImage("ToggleText.icon")!!
+	}
 }

@@ -31,7 +31,6 @@ import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.makeResultError
@@ -53,6 +52,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.ifd.scio.IFDException
 import org.openecard.ifd.scio.reader.PCSCFeatures
 import org.openecard.ifd.scio.reader.PCSCPinModify
@@ -78,8 +78,6 @@ class GenericPINAction(
 	private val cardCapturer: CardCapturer,
 	private val errorPromise: Promise<Throwable?>,
 ) : StepAction(gPINStep) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	private val cardView: CardStateView = cardCapturer.aquireView()
 
 	override fun perform(
@@ -307,28 +305,28 @@ class GenericPINAction(
 			// PIN modified successfully, proceed with next step
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateSuccessStep(lang.translationForKey(CHANGE_SUCCESS)),
+				generateSuccessStep(I18N.strings.pinplugin_action_changepin_userconsent_successstep_description.localized()),
 			)
 		} catch (ex: APDUException) {
 			logger.error(ex) { "An internal error occurred while trying to change the PIN" }
 			storeTerminationError(ex)
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: IFDException) {
 			logger.error(ex) { "An internal error occurred while trying to change the PIN" }
 			storeTerminationError(ex)
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: ParserConfigurationException) {
 			logger.error(ex) { "An internal error occurred while trying to change the PIN" }
 			storeTerminationError(ex)
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: UnsupportedEncodingException) {
 			logger.warn(ex) { "The encoding of the PIN is wrong." }
@@ -342,14 +340,14 @@ class GenericPINAction(
 					logger.error(ex) { "User canceled the authentication manually or removed the card." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_user_cancellation.localized()),
 					)
 				}
 				ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE -> {
 					logger.error(ex) { "The SlotHandle was invalid so probably the user removed the card or an reset occurred." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_card_removed.localized()),
 					)
 				}
 				// for users which forgot to type in something
@@ -357,7 +355,7 @@ class GenericPINAction(
 					logger.error(ex) { "The terminal timed out no password was entered." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_timeout.localized()),
 					)
 				}
 
@@ -366,7 +364,7 @@ class GenericPINAction(
 					logger.error(ex) { "The verification of the new PIN failed." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_NON_MATCHING_PASSWORDS)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_missing_password_match.localized()),
 					)
 				}
 				else -> {
@@ -374,7 +372,7 @@ class GenericPINAction(
 					logger.error(ex) { "An unknown error occurred while trying to change the PIN." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_unknown.localized()),
 					)
 				}
 			}
@@ -417,7 +415,7 @@ class GenericPINAction(
 			logger.error(ex) { "An internal error occurred while trying to resume the PIN." }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: WSHelper.WSException) {
 			this.storeTerminationError(ex)
@@ -427,7 +425,7 @@ class GenericPINAction(
 					logger.error(ex) { "User canceled the authentication manually or removed the card." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_user_cancellation.localized()),
 					)
 				}
 
@@ -436,7 +434,7 @@ class GenericPINAction(
 					logger.error { "The SlotHandle was invalid so probably the user removed the card or an reset occurred." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_card_removed.localized()),
 					)
 				}
 
@@ -445,7 +443,7 @@ class GenericPINAction(
 					logger.error(ex) { "The terminal timed out no password was entered." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_timeout.localized()),
 					)
 				}
 
@@ -453,7 +451,7 @@ class GenericPINAction(
 					logger.error(ex) { "An unknown error occurred while trying to verify the CAN." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_unknown.localized()),
 					)
 				}
 			}
@@ -505,7 +503,7 @@ class GenericPINAction(
 				gPINStep.setFailedPUKVerify(wrongFormat = false, failedVerify = false)
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
-					generateSuccessStep(lang.translationForKey(PUK_SUCCESS)),
+					generateSuccessStep(I18N.strings.pinplugin_action_unblockpin_userconsent_pukstep_puk_success.localized()),
 				)
 			} else {
 				gPINStep.updateState(RecognizedState.UNKNOWN)
@@ -517,14 +515,14 @@ class GenericPINAction(
 			logger.error(ex) { "An internal error occurred while trying to unblock the PIN." }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: ParserConfigurationException) {
 			storeTerminationError(ex)
 			logger.error(ex) { "An internal error occurred while trying to unblock the PIN." }
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
-				generateErrorStep(lang.translationForKey(ERROR_INTERNAL)),
+				generateErrorStep(I18N.strings.pinplugin_action_error_internal.localized()),
 			)
 		} catch (ex: WSHelper.WSException) {
 			this.storeTerminationError(ex)
@@ -534,7 +532,7 @@ class GenericPINAction(
 					logger.error(ex) { "User canceled the authentication manually or removed the card." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_USER_CANCELLATION_OR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_user_cancellation.localized()),
 					)
 				}
 
@@ -543,7 +541,7 @@ class GenericPINAction(
 					logger.error(ex) { "The terminal timed out no password was entered." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_TIMEOUT)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_timeout.localized()),
 					)
 				}
 
@@ -552,7 +550,7 @@ class GenericPINAction(
 					logger.error(ex) { "The SlotHandle was invalid so probably the user removed the card or an reset occurred." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_CARD_REMOVED)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_card_removed.localized()),
 					)
 				}
 
@@ -561,7 +559,7 @@ class GenericPINAction(
 					logger.error(ex) { "An unknown error occurred while trying to verify the PUK." }
 					return StepActionResult(
 						StepActionResultStatus.REPEAT,
-						generateErrorStep(lang.translationForKey(ERROR_UNKNOWN)),
+						generateErrorStep(I18N.strings.pinplugin_action_error_unknown.localized()),
 					)
 				}
 			}
@@ -599,7 +597,10 @@ class GenericPINAction(
 		ResetRetryCounter(newPIN, 0x03.toByte()).transmit(dispatcher, cardView.handle.slotHandle)
 
 	private fun generateSuccessStep(successMessage: String) =
-		Step("success", lang.translationForKey(SUCCESS_TITLE)).apply {
+		Step(
+			"success",
+			I18N.strings.pinplugin_action_success_title.localized(),
+		).apply {
 			isReversible = false
 			inputInfoUnits.add(
 				Text(successMessage),
@@ -607,7 +608,10 @@ class GenericPINAction(
 		}
 
 	private fun generateErrorStep(errorMessage: String) =
-		Step(ERROR_STEP_ID, lang.translationForKey(ERROR_TITLE)).apply {
+		Step(
+			ERROR_STEP_ID,
+			I18N.strings.pinplugin_action_error_title.localized(),
+		).apply {
 			isReversible = false
 			inputInfoUnits.add(
 				Text(errorMessage),
@@ -660,18 +664,6 @@ class GenericPINAction(
 		private const val PIN_ID_PIN = "3"
 		private const val PIN_ID_PUK = "4"
 		private const val ISO_8859_1 = "ISO-8859-1"
-
-		// Translation constants
-		private const val PUK_SUCCESS = "action.unblockpin.userconsent.pukstep.puk_success"
-		private const val CHANGE_SUCCESS = "action.changepin.userconsent.successstep.description"
-		private const val ERROR_CARD_REMOVED = "action.error.card.removed"
-		private const val ERROR_INTERNAL = "action.error.internal"
-		private const val ERROR_NON_MATCHING_PASSWORDS = "action.error.missing_password_match"
-		private const val ERROR_TIMEOUT = "action.error.timeout"
-		private const val ERROR_TITLE = "action.error.title"
-		private const val ERROR_USER_CANCELLATION_OR_CARD_REMOVED = "action.error.user_cancellation"
-		private const val SUCCESS_TITLE = "action.success.title"
-		private const val ERROR_UNKNOWN = "action.error.unknown"
 
 		private fun create(
 			needsPadding: Boolean,

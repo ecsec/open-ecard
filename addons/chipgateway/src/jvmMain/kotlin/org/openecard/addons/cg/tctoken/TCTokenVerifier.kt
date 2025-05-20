@@ -21,12 +21,13 @@
  ***************************************************************************/
 package org.openecard.addons.cg.tctoken
 
+import dev.icerock.moko.resources.format
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.lang.JoseException
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
 import org.openecard.common.ECardConstants.PATH_SEC_PROTO_MTLS
+import org.openecard.i18n.I18N
 import java.net.MalformedURLException
 import java.net.URI
 import java.net.URL
@@ -106,7 +107,11 @@ class TCTokenVerifier(
 		vararg reference: String?,
 	) {
 		if (!reference.contains(value)) {
-			throw InvalidTCTokenElement(ErrorTranslations.ELEMENT_VALUE_INVALID, name)
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_element_value_invalid
+					.format(name ?: "(unknown)")
+					.localized(),
+			)
 		}
 	}
 
@@ -124,7 +129,11 @@ class TCTokenVerifier(
 		value: Any?,
 	) {
 		if (checkEmpty(value)) {
-			throw InvalidTCTokenElement(ErrorTranslations.ELEMENT_MISSING, name)
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_element_missing
+					.format(name ?: "(unknown)")
+					.localized(),
+			)
 		}
 	}
 
@@ -136,7 +145,11 @@ class TCTokenVerifier(
 		try {
 			return URI(value).toURL()
 		} catch (e: MalformedURLException) {
-			throw InvalidTCTokenElement(ErrorTranslations.MALFORMED_URL, name)
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_malformed_url
+					.format(name ?: "(unknown)")
+					.localized(),
+			)
 		}
 	}
 
@@ -149,7 +162,11 @@ class TCTokenVerifier(
 		if ("https" == url.protocol) {
 			return url
 		}
-		throw InvalidTCTokenElement(ErrorTranslations.NO_HTTPS_URL, name)
+		throw InvalidTCTokenElement(
+			I18N.strings.chipgateway_error_no_https_url
+				.format(name ?: "(unknown)")
+				.localized(),
+		)
 	}
 
 	@Throws(InvalidRedirectUrlException::class)
@@ -159,9 +176,15 @@ class TCTokenVerifier(
 			if ("https" == url.protocol) {
 				return url
 			}
-			throw InvalidRedirectUrlException(ErrorTranslations.INVALID_REFRESH_ADDR)
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_invalid_refresh_addr
+					.localized(),
+			)
 		} catch (ex: MalformedURLException) {
-			throw InvalidRedirectUrlException(ErrorTranslations.INVALID_REFRESH_ADDR)
+			throw InvalidTCTokenElement(
+				I18N.strings.chipgateway_error_invalid_refresh_addr
+					.localized(),
+			)
 		}
 	}
 }

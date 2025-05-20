@@ -24,7 +24,7 @@ package org.openecard.richclient.gui.manage
 
 import org.openecard.addon.AddonManager
 import org.openecard.addon.manifest.AddonSpecification
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
@@ -43,7 +43,6 @@ class AboutPanel(
 	manager: AddonManager,
 	dialog: ManagementDialog,
 ) : JPanel() {
-	private val lang: I18n = I18n.getTranslation("addon")
 	private val addonSpec: AddonSpecification
 	private val manager: AddonManager
 	private val layout: GridBagLayout = GridBagLayout()
@@ -59,8 +58,8 @@ class AboutPanel(
 		val basePane: JPanel = JPanel(GridBagLayout())
 		basePane.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2))
 		basePane.setLayout(GridLayout(2, 1))
-		val versionLabel: JLabel = JLabel(lang.translationForKey("addon.about.version") + ":")
-		val licenseLabel: JLabel = JLabel(lang.translationForKey("addon.about.license.type") + ":")
+		val versionLabel: JLabel = JLabel(I18N.strings.about_version.localized() + ":")
+		val licenseLabel: JLabel = JLabel(I18N.strings.addon_about_license_type.localized() + ":")
 
 		val lc: GridBagConstraints = GridBagConstraints()
 		lc.anchor = GridBagConstraints.WEST
@@ -125,10 +124,10 @@ class AboutPanel(
 		buttonPane.setBorder(BorderFactory.createEmptyBorder())
 
 		if (license != "" && about != "") {
-			val aButton: JRadioButton = JRadioButton(lang.translationForKey("addon.about.about"))
+			val aButton: JRadioButton = JRadioButton(I18N.strings.addon_about_about.localized())
 			aButton.addItemListener(action)
 			aButton.setSelected(true)
-			val lButton: JRadioButton = JRadioButton(lang.translationForKey("addon.about.license"))
+			val lButton: JRadioButton = JRadioButton(I18N.strings.addon_about_license.localized())
 
 			val btnGrp: ButtonGroup = ButtonGroup()
 			btnGrp.add(aButton)
@@ -137,11 +136,11 @@ class AboutPanel(
 			buttonPane.add(aButton)
 			buttonPane.add(lButton)
 		} else if (license != "" && about == "") {
-			val licenseLabel2: JLabel = JLabel(lang.translationForKey("addon.about.license"))
+			val licenseLabel2: JLabel = JLabel(I18N.strings.addon_about_license.localized())
 			buttonPane.add(licenseLabel2)
 			display!!.setText(license)
 		} else if (license == "" && about != "") {
-			val aboutLabel: JLabel = JLabel(lang.translationForKey("addon.about.about"))
+			val aboutLabel: JLabel = JLabel(I18N.strings.addon_about_about.localized())
 			buttonPane.add(aboutLabel)
 		}
 
@@ -194,7 +193,7 @@ class AboutPanel(
 	private fun setupFooter(coreAddon: Boolean) {
 		if (!coreAddon) {
 			val panel: JPanel = JPanel(FlowLayout(FlowLayout.LEADING))
-			val uninstallButton: JButton = JButton(lang.translationForKey("addon.about.uninstall"))
+			val uninstallButton: JButton = JButton(I18N.strings.addon_about_uninstall.localized())
 			uninstallButton.addActionListener(
 				object : ActionListener {
 					override fun actionPerformed(e: ActionEvent) {

@@ -51,9 +51,9 @@ dependencies {
 	implementation(project(":addons:pin-management"))
 	implementation(project(":addons:status"))
 	implementation(project(":addons:tr03112"))
+	implementation(project(":i18n"))
 
 	// basic runtime deps
-	implementation(project(":i18n"))
 	implementation(project(":cifs"))
 	implementation(project(":wsdef:jaxb-marshaller"))
 

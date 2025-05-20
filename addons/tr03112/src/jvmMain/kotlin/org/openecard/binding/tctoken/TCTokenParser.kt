@@ -22,10 +22,9 @@
 package org.openecard.binding.tctoken
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidTCTokenException
-import org.openecard.common.I18n
 import org.openecard.common.io.LimitedInputStream
+import org.openecard.i18n.I18N
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXNotRecognizedException
@@ -45,7 +44,6 @@ private val logger = KotlinLogging.logger { }
  * @author Tobias Wich
  */
 class TCTokenParser {
-	private val lang: I18n? = I18n.getTranslation("tr03112")
 	private val saxFactory: SAXParserFactory = SAXParserFactory.newInstance()
 	private val saxHandler: TCTokenSAXHandler = TCTokenSAXHandler()
 
@@ -99,15 +97,22 @@ class TCTokenParser {
 			val tokens = saxHandler.tCTokens
 
 			return tokens
-		} catch (ex: ParserConfigurationException) {
-			logger.error(ex) { "${ex.message}" }
-			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
-		} catch (ex: SAXException) {
-			logger.error(ex) { "${ex.message}" }
-			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
-		} catch (ex: IOException) {
-			logger.error(ex) { "${ex.message}" }
-			throw InvalidTCTokenException(ErrorTranslations.MALFORMED_TOKEN, ex)
+		} catch (ex: Exception) {
+			when (ex) {
+				is ParserConfigurationException,
+				is SAXException,
+				is IOException,
+				-> {
+					logger.error(ex) { "${ex.message}" }
+					throw InvalidTCTokenException(
+						I18N.strings.tr03112_invalid_tctoken_exception_malformed_tctoken.localized(),
+						ex,
+					)
+				}
+				else -> {
+					throw ex
+				}
+			}
 		}
 	}
 }

@@ -21,22 +21,13 @@
  */
 package org.openecard.binding.tctoken
 
-import org.openecard.common.I18n
-import org.openecard.common.I18nException
-import org.openecard.common.I18nKey
-
-private val lang: I18n = I18n.getTranslation("tr03112")
+import java.lang.Exception
 
 /**
  *
  * @author Tobias Wich
  */
-class ConnectionError : I18nException {
-	constructor(msg: String) : super(lang, msg)
-
-	constructor(msg: String, ex: Throwable?) : super(lang, msg, ex)
-
-	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
-
-	constructor(key: I18nKey, cause: Throwable?, vararg params: Any?) : super(lang, key, cause, *params)
-}
+class ConnectionError(
+	msg: String,
+	ex: Throwable? = null,
+) : Exception(msg, ex)

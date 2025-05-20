@@ -22,8 +22,9 @@
 
 package org.openecard.richclient.gui.update
 
+import dev.icerock.moko.resources.format
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
 
@@ -32,25 +33,30 @@ import org.openecard.richclient.updater.VersionUpdateChecker
  * @author Sebastian Schuberth
  */
 class UpdateMessageCreator {
-    private val lang: I18n = I18n.getTranslation("update")
-
-    fun getMessage(updateChecker: VersionUpdateChecker): String? {
+	fun getMessage(updateChecker: VersionUpdateChecker): String? {
 		updateChecker.getUpdateInfo()?.let {
 			val (data, advice) = it
-			val updateStr = when (advice) {
-				UpdateAdvice.UNMAINTAINED -> return lang.translationForKey("version_not_maintained", updateChecker.installedVersion, data.version.toString() + " (major update)")
-				UpdateAdvice.MAINTAINED_UPDATE -> data.version.toString() + " (minor update)"
-				UpdateAdvice.UPDATE -> data.version.toString() + " (minor update)"
-				UpdateAdvice.SECURITY_UPDATE -> data.version.toString() + " (security update)"
-				else -> null
-			}
+			val updateStr =
+				when (advice) {
+					UpdateAdvice.UNMAINTAINED ->
+						return I18N.strings.update_version_not_maintained
+							.format(
+								updateChecker.installedVersion,
+								data.version.toString() + " (major update)",
+							).localized()
+					UpdateAdvice.MAINTAINED_UPDATE -> data.version.toString() + " (minor update)"
+					UpdateAdvice.UPDATE -> data.version.toString() + " (minor update)"
+					UpdateAdvice.SECURITY_UPDATE -> data.version.toString() + " (security update)"
+					else -> null
+				}
 
 			if (updateStr != null) {
-				val msg = lang.translationForKey("new_version_msg", name, updateStr)
-				return msg
+				return I18N.strings.update_new_version_msg
+					.format(name, updateStr)
+					.localized()
 			}
 		}
 
 		return null
-    }
+	}
 }

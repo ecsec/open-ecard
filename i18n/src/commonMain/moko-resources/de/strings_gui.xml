@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Buttons -->
+	<string name="gui_button_back">Zurück</string>
+	<string name="gui_button_finish">Bestätigen</string>
+	<string name="gui_button_next">Weiter</string>
+	<string name="gui_button_cancel">Abbrechen</string>
+	<string name="gui_button_ok">OK</string>
+	<string name="gui_button_yes">Ja</string>
+	<string name="gui_button_no">Nein</string>
+	<string name="gui_button_open">Öffnen</string>
+	<string name="gui_button_save">Speichern</string>
+	<string name="gui_button_new">Neu</string>
+	<string name="gui_file_name">Dateiname</string>
+	<string name="gui_location">Aktuelles Verzeichnis</string>
+	<string name="gui_no_read_access">Das Verzeichnis '%s' kann nicht geöffnet werden</string>
+</resources>

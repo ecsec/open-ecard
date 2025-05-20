@@ -21,9 +21,9 @@
  ***************************************************************************/
 package org.openecard.richclient.gui.components
 
-import org.openecard.common.I18n
+import org.openecard.i18n.I18N
 import java.io.File
-import java.util.*
+import java.util.Arrays
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileFilter
 
@@ -31,53 +31,57 @@ import javax.swing.filechooser.FileFilter
  *
  * @author Hans-Martin Haase
  */
-class FileChooserItem internal constructor(fileTypes: String) : JFileChooser(File(System.getProperty("user.home"))) {
-    private val lang: I18n = I18n.getTranslation("addon")
+class FileChooserItem internal constructor(
+	fileTypes: String,
+) : JFileChooser(File(System.getProperty("user.home"))) {
+	init {
+		// set open ecard logo in the title bar
+		setDialogTitle(
+			I18N.strings.addon_settings_file_select.localized(),
+		)
+		setFileFilter(GenericFileTypeFilter(fileTypes))
+		setDialogType(OPEN_DIALOG)
+		setFileSelectionMode(FILES_AND_DIRECTORIES)
+	}
 
-    init {
-        // set open ecard logo in the title bar
-        setDialogTitle(lang.translationForKey("addon.settings.file.select"))
-        setFileFilter(GenericFileTypeFilter(fileTypes))
-        setDialogType(OPEN_DIALOG)
-        setFileSelectionMode(FILES_AND_DIRECTORIES)
-    }
+	private inner class GenericFileTypeFilter(
+		fileTypes: String,
+	) : FileFilter() {
+		private val fileTypes: List<String>
 
-    private inner class GenericFileTypeFilter(fileTypes: String) : FileFilter() {
-        private val fileTypes: List<String>
+		init {
+			val types: Array<String> = fileTypes.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+			this.fileTypes = ArrayList(Arrays.asList(*types))
+		}
 
-        init {
-            val types: Array<String> = fileTypes.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            this.fileTypes = ArrayList(Arrays.asList(*types))
-        }
+		override fun accept(file: File): Boolean {
+			if (file.isDirectory()) {
+				return true
+			}
 
-        override fun accept(file: File): Boolean {
-            if (file.isDirectory()) {
-                return true
-            }
+			val startPosSuffix: Int = file.getName().lastIndexOf(".")
+			if (startPosSuffix > -1) {
+				for (elem: String? in fileTypes) {
+					var suffix: String = file.getName().substring(startPosSuffix)
+					suffix = suffix.replace(".", "")
 
-            val startPosSuffix: Int = file.getName().lastIndexOf(".")
-            if (startPosSuffix > -1) {
-                for (elem: String? in fileTypes) {
-                    var suffix: String = file.getName().substring(startPosSuffix)
-                    suffix = suffix.replace(".", "")
+					if (suffix.equals(elem, ignoreCase = true)) {
+						return true
+					}
+				}
+			}
+			return false
+		}
 
-                    if (suffix.equals(elem, ignoreCase = true)) {
-                        return true
-                    }
-                }
-            }
-            return false
-        }
+		override fun getDescription(): String {
+			val msg: StringBuilder = StringBuilder()
+			for (type: String? in fileTypes) {
+				msg.append(".")
+				msg.append(type)
+				msg.append(", ")
+			}
 
-        override fun getDescription(): String {
-            val msg: StringBuilder = StringBuilder()
-            for (type: String? in fileTypes) {
-                msg.append(".")
-                msg.append(type)
-                msg.append(", ")
-            }
-
-            return msg.toString()
-        }
-    }
+			return msg.toString()
+		}
+	}
 }

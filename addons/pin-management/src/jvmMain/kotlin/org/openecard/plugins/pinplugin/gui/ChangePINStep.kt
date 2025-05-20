@@ -21,10 +21,11 @@
  **************************************************************************/
 package org.openecard.plugins.pinplugin.gui
 
-import org.openecard.common.I18n
+import dev.icerock.moko.resources.format
 import org.openecard.gui.definition.PasswordField
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 
 /**
  * The Step for changing the PIN.
@@ -47,8 +48,6 @@ class ChangePINStep(
 	enteredWrong: Boolean,
 	verifyFailed: Boolean,
 ) : Step(id, title) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	init {
 		isReversible = false
 
@@ -56,7 +55,7 @@ class ChangePINStep(
 			// show unblocking required message and return
 			inputInfoUnits.add(
 				Text(
-					lang.translationForKey(UNBLOCKING_REQUIRED),
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_unblocking_required.localized(),
 				),
 			)
 		} else {
@@ -66,24 +65,25 @@ class ChangePINStep(
 
 			if (!capturePin) {
 				isInstantReturn = true
-				i1.text = lang.translationForKey(PINSTEP_NATIVE_DESCRIPTION)
+				i1.text = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_native_description.localized()
 			} else {
-				i1.text = lang.translationForKey(PINSTEP_DESCRIPTION)
+				i1.text =
+					I18N.strings.pinplugin_action_changepin_userconsent_pinstep_description.localized()
 
 				inputInfoUnits.add(
 					PasswordField(OLD_PIN_FIELD).apply {
-						description = lang.translationForKey(PINSTEP_OLDPIN)
+						description = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_oldpin.localized()
 					},
 				)
 
 				inputInfoUnits.add(
 					PasswordField(NEW_PIN_FIELD).apply {
-						description = lang.translationForKey(PINSTEP_NEWPIN)
+						description = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_newpin.localized()
 					},
 				)
 				inputInfoUnits.add(
 					PasswordField(NEW_PIN_REPEAT_FIELD).apply {
-						description = lang.translationForKey(PINSTEP_NEWPINREPEAT)
+						description = I18N.strings.pinplugin_action_changepin_userconsent_pinstep_newpinrepeat.localized()
 					},
 				)
 			}
@@ -92,7 +92,7 @@ class ChangePINStep(
 				// add note for mistyped PIN
 				inputInfoUnits.add(
 					Text(
-						lang.translationForKey(WRONG_ENTRY),
+						I18N.strings.pinplugin_action_changepin_userconsent_pinstep_wrong_entry.localized(),
 					),
 				)
 			}
@@ -101,7 +101,7 @@ class ChangePINStep(
 				// add note for incorrect input
 				inputInfoUnits.add(
 					Text(
-						lang.translationForKey(INCORRECT_INPUT),
+						I18N.strings.pinplugin_action_changepin_userconsent_pinstep_incorrect_input.localized(),
 					),
 				)
 			}
@@ -110,7 +110,9 @@ class ChangePINStep(
 				// display the remaining attempts
 				inputInfoUnits.add(
 					Text(
-						lang.translationForKey(REMAINING_ATTEMPTS, retryCounter),
+						I18N.strings.pinplugin_action_changepin_userconsent_pinstep_remaining_attempts
+							.format(retryCounter)
+							.localized(),
 					),
 				)
 			}
@@ -118,17 +120,6 @@ class ChangePINStep(
 	}
 
 	companion object {
-		// translation constants
-		private const val PINSTEP_NEWPINREPEAT = "action.changepin.userconsent.pinstep.newpinrepeat"
-		private const val PINSTEP_NEWPIN = "action.changepin.userconsent.pinstep.newpin"
-		private const val PINSTEP_OLDPIN = "action.changepin.userconsent.pinstep.oldpin"
-		private const val PINSTEP_DESCRIPTION = "action.changepin.userconsent.pinstep.description"
-		private const val PINSTEP_NATIVE_DESCRIPTION = "action.changepin.userconsent.pinstep.native_description"
-		private const val UNBLOCKING_REQUIRED = "action.changepin.userconsent.pinstep.unblocking_required"
-		private const val REMAINING_ATTEMPTS = "action.changepin.userconsent.pinstep.remaining_attempts"
-		private const val WRONG_ENTRY = "action.changepin.userconsent.pinstep.wrong_entry"
-		private const val INCORRECT_INPUT = "action.changepin.userconsent.pinstep.incorrect_input"
-
 		// GUI element IDs
 		const val OLD_PIN_FIELD: String = "OLD_PIN_FIELD"
 		const val NEW_PIN_FIELD: String = "NEW_PIN_FIELD"

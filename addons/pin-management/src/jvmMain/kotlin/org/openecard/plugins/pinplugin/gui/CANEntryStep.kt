@@ -21,10 +21,10 @@
  ***************************************************************************/
 package org.openecard.plugins.pinplugin.gui
 
-import org.openecard.common.I18n
 import org.openecard.gui.definition.PasswordField
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
+import org.openecard.i18n.I18N
 import org.openecard.plugins.pinplugin.RecognizedState
 
 /**
@@ -48,9 +48,10 @@ class CANEntryStep(
 	enteredWrong: Boolean,
 	verifyFailed: Boolean,
 ) : Step(id, title) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
-	val i1 = Text(lang.translationForKey(CANSTEP_NOTICE))
+	val i1 =
+		Text(
+			I18N.strings.pinplugin_action_changepin_userconsent_canstep_notice.localized(),
+		)
 	val i2 = Text()
 
 	init {
@@ -60,11 +61,11 @@ class CANEntryStep(
 		// add description and input fields depending on terminal type
 		if (!capturePin) {
 			isInstantReturn = true
-			i2.text = lang.translationForKey(CANSTEP_NATIVE_DESCRIPTION)
+			i2.text = I18N.strings.pinplugin_action_changepin_userconsent_canstep_native_description.localized()
 		} else {
-			i2.text = lang.translationForKey(CANSTEP_DESCRIPTION)
+			i2.text = I18N.strings.pinplugin_action_changepin_userconsent_canstep_description.localized()
 			val canField = PasswordField(CAN_FIELD)
-			canField.description = lang.translationForKey(CANSTEP_CAN)
+			canField.description = I18N.strings.pinplugin_action_changepin_userconsent_canstep_can.localized()
 			inputInfoUnits.add(canField)
 		}
 
@@ -76,27 +77,21 @@ class CANEntryStep(
 		if (enteredWrong) {
 			// add note for mistyped CAN
 			val retryText = Text()
-			retryText.text = lang.translationForKey(WRONG_CAN)
+			retryText.text =
+				I18N.strings.pinplugin_action_changepin_userconsent_canstepaction_wrong_can.localized()
 			inputInfoUnits.add(retryText)
 		}
 
 		if (verifyFailed) {
 			// add note for incorrect input
 			val incorrectInput = Text()
-			incorrectInput.text = lang.translationForKey(INCORRECT_INPUT)
+			incorrectInput.text =
+				I18N.strings.pinplugin_action_changepin_userconsent_canstepaction_incorrect_input.localized()
 			inputInfoUnits.add(incorrectInput)
 		}
 	}
 
 	companion object {
-		// translation constants
-		private const val CANSTEP_NOTICE = "action.changepin.userconsent.canstep.notice"
-		private const val CANSTEP_CAN = "action.changepin.userconsent.canstep.can"
-		private const val CANSTEP_DESCRIPTION = "action.changepin.userconsent.canstep.description"
-		private const val CANSTEP_NATIVE_DESCRIPTION = "action.changepin.userconsent.canstep.native_description"
-		private const val WRONG_CAN = "action.changepin.userconsent.canstepaction.wrong_can"
-		private const val INCORRECT_INPUT = "action.changepin.userconsent.canstepaction.incorrect_input"
-
 		// GUI element id's
 		const val CAN_FIELD: String = "CAN_FIELD"
 	}

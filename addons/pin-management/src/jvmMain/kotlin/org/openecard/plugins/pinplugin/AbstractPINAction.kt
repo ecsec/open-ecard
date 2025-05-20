@@ -35,7 +35,6 @@ import iso.std.iso_iec._24727.tech.schema.TransmitResponse
 import org.openecard.addon.bind.AppExtensionAction
 import org.openecard.addon.sal.SalStateView
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.WSHelper.createException
@@ -59,7 +58,6 @@ private val logger = KotlinLogging.logger { }
  */
 abstract class AbstractPINAction : AppExtensionAction {
 	// translation and logger
-	protected val lang: I18n? = I18n.getTranslation("pinplugin")
 	protected lateinit var dispatcher: Dispatcher
 	protected lateinit var gui: UserConsent
 	protected lateinit var recognition: CardRecognition

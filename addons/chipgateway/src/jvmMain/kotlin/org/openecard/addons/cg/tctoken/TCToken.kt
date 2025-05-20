@@ -23,11 +23,11 @@ package org.openecard.addons.cg.tctoken
 
 import generated.TCTokenType
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
 import org.openecard.addons.cg.ex.ResultMinor
 import org.openecard.common.util.UrlBuilder
+import org.openecard.i18n.I18N
 import java.net.URISyntaxException
 
 private val LOG = KotlinLogging.logger { }
@@ -56,7 +56,9 @@ class TCToken : TCTokenType() {
 			LOG.error {
 				"Failed to modify RefreshAddress from resultMinor, this should not happen due to previously executed checks."
 			}
-			throw InvalidRedirectUrlException(ErrorTranslations.INVALID_REFRESH_ADDR)
+			throw InvalidRedirectUrlException(
+				I18N.strings.chipgateway_error_invalid_refresh_addr.localized(),
+			)
 		}
 
 	@Throws(InvalidRedirectUrlException::class)
@@ -70,7 +72,9 @@ class TCToken : TCTokenType() {
 				.toString()
 		} catch (ex: URISyntaxException) {
 			LOG.error { "Failed to modify RefreshAddress from code, this should not happen due to previously executed checks." }
-			throw InvalidRedirectUrlException(ErrorTranslations.INVALID_REFRESH_ADDR)
+			throw InvalidRedirectUrlException(
+				I18N.strings.chipgateway_error_invalid_refresh_addr.localized(),
+			)
 		}
 
 	@Throws(InvalidRedirectUrlException::class)

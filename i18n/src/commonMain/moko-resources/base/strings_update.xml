@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="update_new_version_msg">A new version of the %s (%s) is available:</string>
+	<string name="update_new_versions_msg">The following updates are available for the %s (%s):</string>
+	<string name="update_tooltip_msg">%s Update</string>
+	<string name="update_version">Version</string>
+	<string name="update_version_minor">Bugfix</string>
+	<string name="update_version_security">Security</string>
+	<string name="update_version_major">Major</string>
+	<string name="update_type">Update Type</string>
+	<string name="update_direct_download">Direct download</string>
+	<string name="update_manual_download">Alternatively, you can manually download a new version here:</string>
+	<string name="update_version_not_maintained">The current version %s is not maintained anymore. Please upgrade to a new
+		version:
+	</string>
+</resources>

@@ -21,11 +21,13 @@
  ***************************************************************************/
 package org.openecard.richclient.gui
 
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.common.AppVersion
 import org.openecard.common.AppVersion.version
-import org.openecard.common.I18n
 import org.openecard.gui.swing.common.SwingUtils
+import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import java.awt.BorderLayout
@@ -36,9 +38,7 @@ import java.awt.event.ActionListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
-import java.io.IOException
 import java.net.URI
-import java.net.URL
 import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JEditorPane
@@ -51,8 +51,6 @@ import javax.swing.JTextPane
 import javax.swing.SwingConstants
 import javax.swing.event.HyperlinkEvent
 import javax.swing.event.HyperlinkListener
-import javax.swing.text.html.HTMLDocument
-import javax.swing.text.html.HTMLEditorKit
 
 private val LOG = KotlinLogging.logger { }
 
@@ -84,7 +82,10 @@ class AboutDialog private constructor() : JFrame() {
 			JTextPane().apply {
 				font = Font(Font.SANS_SERIF, Font.BOLD, 20)
 				isEditable = false
-				text = LANG.translationForKey("about.heading", AppVersion.name)
+				text =
+					I18N.strings.about_heading
+						.format(AppVersion.name)
+						.localized()
 				setBounds(12, 12, 692, 30)
 			}
 		contentPane.add(txtpnHeading)
@@ -93,7 +94,10 @@ class AboutDialog private constructor() : JFrame() {
 			JTextPane().apply {
 				font = Font(Font.SANS_SERIF, Font.PLAIN, 9)
 				isEditable = false
-				text = LANG.translationForKey("about.version", version)
+				text =
+					I18N.strings.about_version
+						.format(version)
+						.localized()
 				setBounds(12, 54, 692, 18)
 			}
 		contentPane.add(txtpnVersion)
@@ -111,19 +115,21 @@ class AboutDialog private constructor() : JFrame() {
 		tabbedPane.background = Color.white
 
 		listOf(
-			ABOUT_TAB to LANG.translationForKey("about.tab.about"),
-			FEEDBACK_TAB to LANG.translationForKey("about.tab.feedback"),
-			SUPPORT_TAB to LANG.translationForKey("about.tab.support"),
-			LICENSE_TAB to LANG.translationForKey("about.tab.license"),
+			Triple(ABOUT_TAB, I18N.strings.about_tab_about, I18N.strings.about_html),
+			Triple(FEEDBACK_TAB, I18N.strings.about_tab_feedback, I18N.strings.about_feedback_html),
+			Triple(LICENSE_TAB, I18N.strings.about_tab_support, I18N.strings.about_support_html),
+			Triple(SUPPORT_TAB, I18N.strings.about_tab_license, I18N.strings.about_license_html),
 		).forEachIndexed { idx, it ->
-			tabbedPane.addTab(it.second, createTabContent(it.first))
+			tabbedPane.addTab(it.second.localized(), createTabContent(it.third))
 			tabIndices.put(it.first, idx)
 		}
 
 		contentPane.add(tabbedPane)
 
 		val btnClose =
-			JButton(LANG.translationForKey("about.button.close")).apply {
+			JButton(
+				I18N.strings.about_button_close.localized(),
+			).apply {
 				setBounds(587, 416, 117, 25)
 				addActionListener(
 					ActionListener { e: ActionEvent? ->
@@ -135,38 +141,27 @@ class AboutDialog private constructor() : JFrame() {
 		contentPane.add(btnClose)
 
 		iconImage = logo
-		title = LANG.translationForKey("about.title", AppVersion.name)
+		title =
+			I18N.strings.about_title
+				.format(AppVersion.name)
+				.localized()
 		defaultCloseOperation = DISPOSE_ON_CLOSE
 		isResizable = false
 		setLocationRelativeTo(null)
 	}
 
-	private fun createTabContent(resourceName: String): JPanel {
-		val kit =
-			HTMLEditorKit().apply {
-				isAutoFormSubmission = false // don't follow form link, use hyperlink handler instead
-			}
-		val doc = kit.createDefaultDocument() as HTMLDocument?
-
+	private fun createTabContent(textResource: StringResource): JPanel {
 		val editorPane =
 			JEditorPane().apply {
 				isEditable = false
-				editorKit = kit
-				document = doc
+				contentType = "text/html"
+				text = textResource.localized()
+				addHyperlinkListener(
+					HyperlinkListener { e ->
+						openUrl(e)
+					},
+				)
 			}
-
-		try {
-			val url: URL = LANG.translationForFile(resourceName, "html")
-			editorPane.setPage(url)
-		} catch (ex: IOException) {
-			editorPane.text = "Page not found."
-		}
-
-		editorPane.addHyperlinkListener(
-			HyperlinkListener { e ->
-				openUrl(e)
-			},
-		)
 
 		val scrollPane = JScrollPane(editorPane)
 
@@ -187,7 +182,6 @@ class AboutDialog private constructor() : JFrame() {
 
 	companion object {
 		private const val serialVersionUID = 1L
-		private val LANG: I18n = I18n.getTranslation("about")
 
 		const val ABOUT_TAB: String = "about"
 		const val FEEDBACK_TAB: String = "feedback"

@@ -22,13 +22,15 @@
 
 package org.openecard.ifd.protocol.pace;
 
-import org.openecard.common.I18n;
 import org.openecard.gui.UserConsent;
 import org.openecard.gui.UserConsentNavigator;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
+import org.openecard.i18n.I18N;
 import org.openecard.ifd.protocol.pace.gui.GUIContentMap;
 import org.openecard.ifd.protocol.pace.gui.PINStep;
+
+import java.util.Locale;
 
 
 /**
@@ -41,7 +43,6 @@ public class PACEUserConsent {
     // GUI translation constants
     private static final String USER_CONSENT = "step_pace_userconsent";
 
-    private final I18n lang = I18n.getTranslation("pace");
     private UserConsent gui;
 
     /**
@@ -59,11 +60,14 @@ public class PACEUserConsent {
      * @param content GUI content
      */
     public void show(GUIContentMap content) {
-	final UserConsentDescription uc = new UserConsentDescription(lang.translationForKey(USER_CONSENT));
+	final UserConsentDescription uc = new UserConsentDescription(
+		I18N.strings.INSTANCE.getPace_step_pace_userconsent().localized(Locale.getDefault())
+	);
+
 
 	final PINStep pinStep = new PINStep(content);
 
-	uc.getSteps().add(pinStep.getStep());
+	uc.getSteps().add(pinStep.step);
 
 	UserConsentNavigator navigator = gui.obtainNavigator(uc);
 	ExecutionEngine exec = new ExecutionEngine(navigator);

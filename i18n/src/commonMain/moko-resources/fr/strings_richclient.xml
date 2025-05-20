@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- System tray-->
+	<string name="richclient_tray_title">%s</string>
+	<string name="richclient_tray_exit">Sortie</string>
+	<string name="richclient_tray_card-status">Statut des cartes</string>
+	<string name="richclient_tray_about">Sur</string>
+	<string name="richclient_tray_config">Configuration</string>
+	<string name="richclient_tray_support">Aide</string>
+	<string name="richclient_tray_message_loading">%s est en cours de chargement...</string>
+	<string name="richclient_tray_message_shutdown">%s est en train de fermer...</string>
+
+	<!-- Status window-->
+	<string name="richclient_status_nocard">Pas de carte insérée.</string>
+	<string name="richclient_status_noterminal">Aucun terminal connecté.</string>
+	<string name="richclient_status_unknowncard">Carte inconnue inséré.</string>
+
+	<!-- Client -->
+	<string name="richclient_client_startup_failed_headline">Le %s ne peut pas être démarrée.</string>
+	<string name="richclient_client_startup_failed_nocontext">Impossible d'établir le contexte. Peut-être votre service de carte à
+		puce ne fonctionne pas.
+	</string>
+	<string name="richclient_client_startup_failed_portinuse">Une autre application utilise les ressources requises. Cette
+		application peut s'exécuter dans une autre session d'un autre utilisateur de votre système d'exploitation. Dans
+		ce cas, déconnectez d'abord l'autre utilisateur afin de fermer la session et l'application. Redémarrez le %s par
+		la suite.
+	</string>
+</resources>

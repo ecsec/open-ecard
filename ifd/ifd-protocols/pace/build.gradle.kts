@@ -20,6 +20,7 @@ kotlin {
 			dependencies {
 				api(project(":crypto:crypto-common"))
 				api(project(":ifd:ifd-common"))
+				api(project(":i18n"))
 			}
 		}
 		val jvmTest by getting {

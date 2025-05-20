@@ -71,9 +71,7 @@ class WaitForChangeAction : AppPluginAction {
 					val status = hdl.next(statusRequest.sessionIdentifier)
 					StatusResponseBodyFactory().createWaitForChangeResponse(status)
 				} catch (e: StatusException) {
-					BindingResult(BindingResultCode.WRONG_PARAMETER).apply {
-						setResultMessage(e.message)
-					}
+					BindingResult(BindingResultCode.WRONG_PARAMETER, e.message)
 				} catch (e: Exception) {
 					logger.error(e) { "Error in WaitForChangeAction" }
 					BindingResult(BindingResultCode.INTERNAL_ERROR)

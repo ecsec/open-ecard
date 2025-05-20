@@ -21,32 +21,14 @@
  */
 package org.openecard.transport.paos
 
-import org.openecard.common.I18n
-import org.openecard.common.I18nKey
 import org.openecard.common.interfaces.DispatcherException
-
-private val lang: I18n = I18n.getTranslation("tr03112")
 
 /**
  * Localized DispatcherException.
  *
  * @author Tobias Wich
  */
-class PAOSDispatcherException : DispatcherException {
-	/**
-	 * Creates an instance and initializes the exception with a localized message.
-	 *
-	 * @param key Translation key.
-	 * @param params Parameters adding values into the translation.
-	 */
-	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, params)
-
-	/**
-	 * Creates an instance and initializes the exception with a localized message.
-	 *
-	 * @param key Translation key.
-	 * @param cause The exception causing the error.
-	 * @param params Parameters adding values into the translation.
-	 */
-	constructor(key: I18nKey, cause: Throwable, vararg params: Any?) : super(lang, key, cause, params)
-}
+class PAOSDispatcherException(
+	message: String? = null,
+	cause: Throwable? = null,
+) : DispatcherException(message, cause)

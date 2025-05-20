@@ -21,15 +21,16 @@
  ***************************************************************************/
 package org.openecard.addons.cg.impl
 
+import dev.icerock.moko.resources.format
 import jdk.internal.org.jline.utils.Colors.s
 import org.openecard.common.AppVersion.name
-import org.openecard.common.I18n
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.Hyperlink
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.i18n.I18N
 import java.net.MalformedURLException
 
 /**
@@ -45,23 +46,41 @@ class UpdateDialog(
 
 	@Throws(MalformedURLException::class)
 	private fun createDialog(): UserConsentDescription {
-		val uc = UserConsentDescription(LANG.translationForKey(TITLE), "update_dialog")
+		val uc =
+			UserConsentDescription(
+				I18N.strings.chipgateway_dialog_dl_title.localized(),
+				"update_dialog",
+			)
 
 		val t =
 			if (updateRequired) {
-				Text(LANG.translationForKey(TEXT_REQUIRED, name))
+				Text(
+					I18N.strings.chipgateway_dialog_dl_text_required
+						.format(name)
+						.localized(),
+				)
 			} else {
-				Text(LANG.translationForKey(TEXT_OPTIONAL, name))
+				Text(
+					I18N.strings.chipgateway_dialog_dl_text_optional
+						.format(name)
+						.localized(),
+				)
 			}
 		val link = Hyperlink().apply { setHref(dlUrl) }
 
 		val s =
-			Step(LANG.translationForKey(TITLE)).apply {
+			Step(
+				I18N.strings.chipgateway_dialog_dl_title.localized(),
+			).apply {
 				inputInfoUnits.add(t)
-				inputInfoUnits.add(Text(LANG.translationForKey(TEXT_INSTRUCTIONS)))
+				inputInfoUnits.add(
+					Text(
+						I18N.strings.chipgateway_dialog_dl_text_instructions.localized(),
+					),
+				)
 				inputInfoUnits.add(link)
 			}
-		
+
 		uc.steps.add(s)
 		return uc
 	}
@@ -70,14 +89,5 @@ class UpdateDialog(
 		val nav = gui.obtainNavigator(ucDesc)
 		val ee = ExecutionEngine(nav)
 		ee.process()
-	}
-
-	companion object {
-		private val LANG: I18n = I18n.getTranslation("chipgateway")
-
-		private const val TITLE = "dialog.dl.title"
-		private const val TEXT_REQUIRED = "dialog.dl.text_required"
-		private const val TEXT_OPTIONAL = "dialog.dl.text_optional"
-		private const val TEXT_INSTRUCTIONS = "dialog.dl.text_instructions"
 	}
 }

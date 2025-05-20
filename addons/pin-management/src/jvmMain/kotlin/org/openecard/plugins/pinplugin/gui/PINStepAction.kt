@@ -30,7 +30,6 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.anytype.AuthDataMap
@@ -48,6 +47,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.ifd.scio.IFDException
 import org.openecard.ifd.scio.reader.PCSCFeatures
 import org.openecard.ifd.scio.reader.PCSCPinModify
@@ -81,8 +81,6 @@ class PINStepAction(
 	step: Step,
 	private var retryCounter: Int,
 ) : StepAction(step) {
-	private val lang: I18n = I18n.getTranslation("pinplugin")
-
 	private var oldPIN: String? = null
 	private var newPIN: ByteArray? = null
 	private var newPINRepeat: ByteArray? = null
@@ -183,7 +181,7 @@ class PINStepAction(
 	private fun createCANReplacementStep() =
 		CANEntryStep(
 			id = "can-entry",
-			title = lang.translationForKey(CANSTEP_TITLE),
+			I18N.strings.pinplugin_action_changepin_userconsent_canstep_title.localized(),
 			capturePin,
 			state = RecognizedState.PIN_SUSPENDED,
 			enteredWrong = false,
@@ -279,7 +277,7 @@ class PINStepAction(
 		verifyFailed: Boolean,
 	) = ChangePINStep(
 		id = "pin-entry",
-		title = lang.translationForKey(PINSTEP_TITLE),
+		I18N.strings.pinplugin_action_changepin_userconsent_pinstep_title.localized(),
 		capturePin,
 		retryCounter,
 		enteredWrong,

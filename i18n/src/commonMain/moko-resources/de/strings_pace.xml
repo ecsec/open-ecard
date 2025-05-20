@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- PIN IDs-->
+	<string name="pace_pin">PIN</string>
+	<string name="pace_mrz">MRZ</string>
+	<string name="pace_puk">PUK</string>
+	<string name="pace_can">CAN</string>
+
+	<!-- GUI -->
+	<string name="pace_step_pin_userconsent">Benutzerauthentisierung</string>
+	<string name="pace_step_pace_step_description">PACE Authentisierung mit Passwort.</string>
+	<string name="pace_step_pin_retrycount">Verbleibende Versuche: %d</string>
+	<string name="pace_step_pace_userconsent">PACE Benutzerauthentisierung</string>
+	<string name="pace_step_pace_title">%s-Eingabe</string>
+	<string name="pace_step_pace_description">Zur Durchführung der Authentisierung geben Sie bitte Ihre %s ein.</string>
+	<string name="pace_step_pace_native_description">Zur Durchführung der Authentisierung geben Sie bitte Ihre %s an ihrem
+		Kartenterminal ein.
+	</string>
+	<string name="pace_step_error_pin_blocked">Sie haben die %s 3 mal falsch eingegeben. Die %s ist nun gesperrt und muss mit
+		der %s entsperrt werden.\nBenutzen Sie zum Entsperren der %s bitte die PIN-Verwaltung.
+	</string>
+	<string name="pace_step_error_title_blocked">Die %s ist gesperrt.</string>
+	<string name="pace_step_error_pin_deactivated">Ihr Ausweis ist nicht aktiviert. Bitte aktivieren Sie Ihren Ausweis im
+		zuständigen Meldeamt.
+	</string>
+	<string name="pace_step_error_title_deactivated">Ausweis ist nicht aktiviert</string>
+</resources>

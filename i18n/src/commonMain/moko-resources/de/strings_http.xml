@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Copied from Apache HTTP Server Project-->
+	<!-- See https://svn.apache.org/repos/asf/httpd/httpd/branches/2.4.x/docs/error/-->
+	<!-- Copyright 2012 The Apache Software Foundation -->
+	<string name="http_400">Ihr Browser hat eine ungültige Anfrage gesendet, die vom Server nicht beantwortet werden
+		kann.
+	</string>
+	<string name="http_401">Der Server konnte nicht verifizieren, ob Sie autorisiert sind, auf die URL zuzugreifen.
+	</string>
+	<string name="http_403">Der Zugriff auf das angeforderte Verzeichnis ist nicht möglich.</string>
+	<string name="http_404">Die angeforderte URL konnte auf dem Server nicht gefunden werden.</string>
+	<string name="http_405">Die Methode ist für die angeforderte URL nicht erlaubt.</string>
+	<string name="http_415">Das bei der Anfrage übermittelte Format (Media Type) wird vom Server nicht unterstützt.
+	</string>
+	<string name="http_500">Die Anfrage kann nicht beantwortet werden, da im Server ein interner Fehler aufgetreten
+		ist.
+	</string>
+</resources>

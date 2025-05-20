@@ -34,7 +34,6 @@ import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
 import org.openecard.common.ECardException
-import org.openecard.common.I18n
 import org.openecard.common.ThreadTerminateException
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.createException
@@ -59,6 +58,7 @@ import org.openecard.gui.ResultStatus
 import org.openecard.gui.UserConsent
 import org.openecard.gui.definition.UserConsentDescription
 import org.openecard.gui.executor.ExecutionEngine
+import org.openecard.i18n.I18N
 import org.openecard.ifd.protocol.pace.common.PasswordID
 import org.openecard.sal.protocol.eac.anytype.EAC1InputType
 import org.openecard.sal.protocol.eac.anytype.ElementParsingException
@@ -81,12 +81,6 @@ import kotlin.Throwable
 import kotlin.toString
 
 private val logger = KotlinLogging.logger { }
-
-private val LANG: I18n = I18n.getTranslation("eac")
-private val LANG_PACE: I18n = I18n.getTranslation("pace")
-
-// GUI translation constants
-private const val TITLE = "eac_user_consent_title"
 
 /**
  * Implements PACE protocol step according to BSI TR-03112-7.
@@ -200,7 +194,10 @@ class PACEStep(
 			dynCtx.put(EACProtocol.Companion.EAC_DATA, eacData)
 
 			// define GUI depending on the PIN status
-			val uc = UserConsentDescription(LANG.translationForKey(TITLE))
+			val uc =
+				UserConsentDescription(
+					I18N.strings.eac_user_consent_title.localized(),
+				)
 			uc.dialogType = "EAC"
 
 			// create GUI and init executor

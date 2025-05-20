@@ -21,13 +21,13 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
+import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import org.openecard.addon.Context
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.createException
 import org.openecard.common.WSHelper.makeResultError
@@ -41,6 +41,7 @@ import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepAction
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.ifd.protocol.pace.common.PasswordID
 import org.openecard.ifd.protocol.pace.common.PasswordID.Companion.parse
 import org.openecard.sal.protocol.eac.EACData
@@ -49,9 +50,9 @@ import org.openecard.sal.protocol.eac.anytype.PACEMarkerType
 
 private val logger = KotlinLogging.logger { }
 
-private val LANG: I18n = I18n.getTranslation("pace")!!
-private val PIN: String? = LANG.translationForKey("pin")
-private val PUK: String? = LANG.translationForKey("puk")
+// private val LANG: I18n = I18n.getTranslation("pace")!!
+private val PIN: String? = I18N.strings.pace_pin.localized()
+private val PUK: String? = I18N.strings.pace_puk.localized()
 
 /**
  * StepAction for evaluation of CHAT value items on the EAC GUI.
@@ -196,14 +197,18 @@ class CHATStepAction(
 
 		if (status.isBlocked) {
 			return ErrorStep(
-				LANG.translationForKey("step_error_title_blocked", PIN),
-				LANG.translationForKey("step_error_pin_blocked", PIN, PIN, PUK, PIN),
+				I18N.strings.pace_step_error_title_blocked
+					.format(PIN as Any)
+					.localized(),
+				I18N.strings.pace_step_error_pin_blocked
+					.format(PIN, PIN, PUK as Any, PIN)
+					.localized(),
 				createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_BLOCKED, "Password blocked.")),
 			)
 		} else if (status.isDeactivated) {
 			return ErrorStep(
-				LANG.translationForKey("step_error_title_deactivated"),
-				LANG.translationForKey("step_error_pin_deactivated"),
+				I18N.strings.pace_step_error_title_deactivated.localized(),
+				I18N.strings.pace_step_error_pin_deactivated.localized(),
 				createException(makeResultError(ECardConstants.Minor.IFD.PASSWORD_SUSPENDED, "Card deactivated.")),
 			)
 		} else {

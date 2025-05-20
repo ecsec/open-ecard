@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+
+	<!-- PIN Management Plugin-->
+
+	<!-- plugin itself-->
+	<string name="pinplugin_name">PIN-Verwaltung</string>
+	<string name="pinplugin_description">Mit diesem Plug-in können Sie ihre PIN ändern oder entsperren.</string>
+
+	<!-- change pin action-->
+	<string name="pinplugin_action_changepin_name">PIN ändern</string>
+	<string name="pinplugin_action_changepin_description">Mit dieser Aktion können Sie Ihre PIN ändern.</string>
+	<string name="pinplugin_action_changepin_userconsent_title">PIN ändern - %s</string>
+
+	<string name="pinplugin_action_changepin_userconsent_pinstep_title">PIN Eingabe</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_context_specific">Signatur-PIN Eingabe</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description">Hier können Sie ihre %s ändern. Bitte geben Sie
+		nachfolgend die nötigen Daten ein. Bemerkung: Diese Operation muss auch durchgeführt werden, wenn Sie die
+		Transport-PIN ersetzen wollen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_description_after_can">Die Zugangsnummer wurde erfolgreich
+		verifiziert. Ihr letzter Versuch zum Ändern der PIN ist nun freigeschalten, geben Sie nun folgend die benötigten
+		Daten ein. Bemerkung: Diese Operation muss auch durchgeführt werden, wenn Sie die Transport-PIN ersetzen wollen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_description">Bitte geben Sie die alte und neue PIN an
+		Ihrem Kartenterminal ein.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description">Hier können Sie ihre PIN ändern.
+		Drücken Sie "Bestätigen" um den PIN zu ändern und geben dann die alte und neue PIN an ihrem Kartenterminal ein.
+		Bemerkung: Diese Operation muss auch durchgeführt werden, wenn Sie die Transport-PIN ersetzen wollen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_native_start_description_after_can">Die Zugangsnummer wurde
+		erfolgreich verifiziert. Ihr letzter Versuch zum Ändern der PIN ist nun aktiviert. Drücken Sie "Bestätigen" und
+		geben dann den alten und neuen PIN an Ihrem Kartenterminal ein. Bemerkung: Diese Operation muss auch
+		durchgeführt werden, wenn Sie die Transport-PIN ersetzen wollen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_oldpin">Bisherige PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpin">Neue PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_newpinrepeat">Erneut neue PIN</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_unblocking_required">Ihre PIN ist leider gesperrt. Bitte nutzen
+		Sie die Aktion zum Entsperren der PIN.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_wrong_entry">Ihre Eingabe entspricht nicht den Vorgaben bezüglich
+		%s Länge und erlaubten Zeichen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_remaining_attempts">(Anzahl verbleibender Versuche: %s)</string>
+	<string name="pinplugin_action_changepin_userconsent_pinstep_incorrect_input">Die von Ihnen eingegebene %s war leider falsch.
+		Bitte versuchen Sie es noch einmal.
+	</string>
+
+	<string name="pinplugin_action_changepin_userconsent_canstep_title">CAN-Eingabe</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_notice">Sie haben die PIN zweimal nicht korrekt eingegeben. Um
+		den dritten und letzten Versuch freizuschalten, ist die Eingabe der Zugangsnummer erforderlich. Sie finden die
+		Zugangsnummer rechts auf der Vorderseite Ihres Personalausweises.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_description">Bitte geben Sie die Zugangsnummer Ihres Ausweises
+		ein.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_native_description">Bitte geben Sie die Zugangsnummer Ihres
+		Ausweises an Ihrem Kartenterminal ein.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstep_can">Zugangsnummer</string>
+
+	<string name="pinplugin_action_changepin_userconsent_successstep_title">Bestätigung</string>
+	<string name="pinplugin_action_changepin_userconsent_successstep_description">Ihre PIN wurde erfolgreich geändert.</string>
+
+	<string name="pinplugin_action_changepin_userconsent_errorstep_title">Fehler</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_unknown">Ihre PIN befindet sich in einem unbekannten Zustand
+		und kann deshalb nicht geändert werden.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_blocked">Ihre PIN ist gesperrt. Bitte nutzen Sie die
+		Entsperren-Funktion, um Ihre PIN wieder ändern zu können.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_deactivated">Ihre PIN ist deaktiviert und kann deshalb nicht
+		geändert werden.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_errorstep_puk_blocked">Ihr PUK ist gesperrt, Sie müssen ihre
+		Ausweisbehörde aufsuchen, um sich einen neuen Ausweis austellen zu lassen.
+	</string>
+
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_wrong_can">Sie haben eine falsche Zugangsnummer eingegeben,
+		bitte versuchen Sie es noch einmal.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_incorrect_input">Ihre Eingabe entspricht nicht den Vorgaben
+		bezüglich CAN-Länge und erlaubten Zeichen.
+	</string>
+	<string name="pinplugin_action_changepin_userconsent_canstepaction_nativ_start_description">Ihre PIN wurde auf Grund zweier
+		Falscheingaben deaktiviert. Falls Sie sie für den letzten Versuch wieder aktivieren möchten, drücken Sie
+		"Bestätigen" und geben Ihre CAN am Kartenterminal ein.
+	</string>
+
+	<!--unblock pin action-->
+	<string name="pinplugin_action_unblockpin_name">PIN entsperren</string>
+	<string name="pinplugin_action_unblockpin_description">Mit dieser Aktion können Sie Ihre PIN entsperren.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_title">PIN entsperren - %s</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_title">PUK-Eingabe</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_description">Bitte geben Sie die PUK ein.</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_native_description">Bitte geben Sie die PUK an Ihrem
+		Kartenterminal ein.
+	</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_nativ_start_description">Ihr PIN ist gesperrt und muss mit Ihrem
+		Personal Unblocking Key (PUK) entsperrt werden. Drücken Sie "Bestätigen", um die PIN zu entsperren und geben die
+		PUK an Ihrem Kartenterminal ein.
+	</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk">PUK</string>
+	<string name="pinplugin_action_unblockpin_userconsent_pukstep_puk_success">Die PIN wurde erfolgreich entsperrt.</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_title">Bestätigung</string>
+	<string name="pinplugin_action_unblockpin_userconsent_successstep_description">Ihre PIN wurde erfolgreich entsperrt.</string>
+
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_title">Fehler</string>
+	<string name="pinplugin_action_unblockpin_userconsent_errorstep_description">Ihre PIN kann nicht entsperrt werden, da sie
+		momentan nicht gesperrt ist.
+	</string>
+
+
+	<!-- PIN entry -->
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin">Bitte geben Sie Ihre PIN ein.</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_final_try_note">Achtung, dies ist Ihr letzter Versuch. Geben Sie
+		die PIN falsch ein, so müssen Sie sie erst im PIN Management entsperren.
+	</string>
+	<string name="pinplugin_action_pinentry_userconsent_pinstep_enter_pin_term">Bitte geben Sie Ihre PIN in ihrem Kartenterminal
+		ein.
+	</string>
+
+
+	<string name="pinplugin_action_error_card_removed">Die Karte wurde entfernt oder es gab einen Verbindungsabbruch, deshalb
+		wurde die Aktion abgebrochen.
+	</string>
+	<string name="pinplugin_action_error_internal">Ein interner Fehler ist augetreten, die Aktion wurde abgebrochen.</string>
+	<string name="pinplugin_action_error_missing_password_match">Die neue PIN und die Bestätigungseingabe der neuen PIN stimmen
+		nicht überein.
+	</string>
+	<string name="pinplugin_action_error_unknown">Ein unbekannter Fehler ist aufgetreten, deshalb wurde die Operation
+		abgebrochen.
+	</string>
+	<string name="pinplugin_action_error_timeout">Das Kartenterminal hat eine Zeitüberschreitung gemeldet.</string>
+	<string name="pinplugin_action_error_title">Fehler</string>
+	<string name="pinplugin_action_error_user_cancellation">Der Prozess wurde vom Benutzer abgebrochen oder die Karte wurde aus
+		dem Terminal entfernt.
+	</string>
+
+	<string name="pinplugin_action_success_title">Erfolg</string>
+</resources>

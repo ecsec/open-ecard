@@ -22,6 +22,7 @@ kotlin {
 				// 	api(libs.jaxb.ws.api)
 				// 	api(libs.slf4j.api)
 				api(project(":addon"))
+				api(project(":i18n"))
 				// 	api(project(":wsdef:wsdef-common"))
 				// 	api(project(":wsdef:wsdef-client"))
 				// 	implementation(project(":i18n"))

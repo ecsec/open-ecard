@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Insert card dialog-->
+	<string name="tctoken_title">Karte benötigt - %s</string>
+	<string name="tctoken_step_message_singletype">Bitte stellen Sie eine Karte von folgendem Typ bereit.</string>
+	<string name="tctoken_step_message_multipletypes">Bitte stellen Sie eine Karte von einem der folgenden Typen bereit.
+	</string>
+	<string name="tctoken_step_title">Karte bereitstellen</string>
+	<string name="tctoken_cancel">Der Vorgang wurde durch den Benutzer abgebrochen.</string>
+
+	<!-- generic TCToken handler -->
+	<string name="tctoken_invalid_redirect">Es wurde versucht auf eine ungültige Seite umzuleiten.</string>
+	<string name="tctoken_invalid_wrong_parameter">Ein falscher Parameter wurde übergeben.</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+
+	<!-- Insert card dialog -->
+	<string name="tctoken_title">Card required - %s</string>
+	<string name="tctoken_step_message_singletype">Please provide a card of the following type.</string>
+	<string name="tctoken_step_message_multipletypes">Please provide a card of one of the following types.</string>
+	<string name="tctoken_step_title">Provide a card</string>
+	<string name="tctoken_cancel">The process was aborted by the user.</string>
+
+	<!-- generic TCToken handler -->
+	<string name="tctoken_invalid_redirect">An attempt was made to redirect to an invalid page.</string>
+	<string name="tctoken_invalid_wrong_parameter">Wrong parameter was provided.</string>
+</resources>

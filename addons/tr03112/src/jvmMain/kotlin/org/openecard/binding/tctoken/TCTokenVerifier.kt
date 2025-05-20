@@ -21,8 +21,8 @@
  */
 package org.openecard.binding.tctoken
 
+import dev.icerock.moko.resources.format
 import org.openecard.binding.tctoken.ex.ActivationError
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.binding.tctoken.ex.InvalidTCTokenElement
 import org.openecard.binding.tctoken.ex.InvalidTCTokenUrlException
@@ -44,6 +44,7 @@ import org.openecard.httpcore.InvalidProxyException
 import org.openecard.httpcore.InvalidUrlException
 import org.openecard.httpcore.ResourceContext
 import org.openecard.httpcore.ValidationError
+import org.openecard.i18n.I18N
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URI
@@ -213,7 +214,15 @@ class TCTokenVerifier(
 			if (token.isInvalidPSK) {
 				val minor = ResultMinor.COMMUNICATION_ERROR
 				val errorUrl = token.getComErrorAddressWithParams(minor)
-				determineRefreshAddress(InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_ELEMENT, "PSK"))
+				determineRefreshAddress(
+					InvalidTCTokenElement(
+						errorUrl,
+						I18N.strings.tr03112_invalid_tctoken_element_invalid_element
+							.format(
+								"PSK",
+							).localized(),
+					),
+				)
 			}
 			try {
 				assertRequired("PathSecurityParameters", psp)
@@ -272,7 +281,12 @@ class TCTokenVerifier(
 
 		val minor = ResultMinor.COMMUNICATION_ERROR
 		val errorUrl = token.getComErrorAddressWithParams(minor)
-		throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_ELEMENT, name as Any?)
+		throw InvalidTCTokenElement(
+			errorUrl,
+			I18N.strings.tr03112_invalid_tctoken_element_invalid_element
+				.format(name)
+				.localized(),
+		)
 	}
 
 	/**
@@ -290,7 +304,13 @@ class TCTokenVerifier(
 		if (checkEmpty(value)) {
 			val minor = ResultMinor.COMMUNICATION_ERROR
 			val errorUrl = token.getComErrorAddressWithParams(minor)
-			throw InvalidTCTokenElement(errorUrl, ErrorTranslations.MISSING_ELEMENT, name)
+
+			throw InvalidTCTokenElement(
+				errorUrl,
+				I18N.strings.tr03112_invalid_tctoken_element_missing_element
+					.format(name)
+					.localized(),
+			)
 		}
 	}
 
@@ -301,7 +321,11 @@ class TCTokenVerifier(
 		try {
 			return URL(value)
 		} catch (e: MalformedURLException) {
-			throw InvalidTCTokenUrlException(ErrorTranslations.MALFORMED_URL, name)
+			throw InvalidTCTokenUrlException(
+				I18N.strings.tr03112_invalid_tctoken_url_exception_malformed_url
+					.format(name)
+					.localized(),
+			)
 		}
 	}
 
@@ -310,8 +334,12 @@ class TCTokenVerifier(
 		value: String,
 	): URL {
 		val url = assertURL(name, value)
-		if ("https" != url.getProtocol()) {
-			throw InvalidTCTokenUrlException(ErrorTranslations.NO_HTTPS_URL, name)
+		if ("https" != url.protocol) {
+			throw InvalidTCTokenUrlException(
+				I18N.strings.tr03112_invalid_tctoken_url_exception_no_https_url
+					.format(name)
+					.localized(),
+			)
 		} else {
 			return url
 		}
@@ -330,7 +358,11 @@ class TCTokenVerifier(
 			if (!TR03112Utils.checkSameOriginPolicy(paosUrl, next.p1)) {
 				val minor = ResultMinor.COMMUNICATION_ERROR
 				val errorUrl = token.getComErrorAddressWithParams(minor)
-				throw SecurityViolationException(errorUrl, ErrorTranslations.FAILED_SOP)
+
+				throw SecurityViolationException(
+					errorUrl,
+					I18N.strings.tr03112_security_violation_exception_no_sop_tls2.localized(),
+				)
 			}
 		}
 	}
@@ -372,7 +404,11 @@ class TCTokenVerifier(
 			token.getPathSecurityProtocol().isEmpty()
 		) {
 			val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-			throw InvalidTCTokenElement(errorUrl, ErrorTranslations.ESERVICE_FAIL)
+			throw InvalidTCTokenElement(
+				errorUrl,
+				I18N.strings.tr03112_invalid_tctoken_element_eservice
+					.localized(),
+			)
 		}
 	}
 
@@ -411,29 +447,37 @@ class TCTokenVerifier(
 						ResultMinor.TRUSTED_CHANNEL_ESTABLISHMENT_FAILED,
 						ex.message!!,
 					)
-				throw InvalidTCTokenElement(refreshUrlAsUrl.toString(), ex)
-			} catch (ex1: IOException) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
-			} catch (ex1: HttpResourceException) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
-			} catch (ex1: InvalidUrlException) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
-			} catch (ex1: InvalidProxyException) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
-			} catch (ex1: ValidationError) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
-			} catch (ex1: URISyntaxException) {
-				val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-				throw InvalidTCTokenElement(errorUrl, ErrorTranslations.INVALID_REFRESH_ADDRESS, ex1)
+				throw InvalidTCTokenElement(
+					refreshUrlAsUrl.toString(),
+					ex = ex,
+				)
+			} catch (ex1: Exception) {
+				when (ex1) {
+					is IOException,
+					is HttpResourceException,
+					is InvalidUrlException,
+					is InvalidProxyException,
+					is ValidationError,
+					is URISyntaxException,
+					-> {
+						val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
+						throw InvalidTCTokenElement(
+							errorUrl,
+							I18N.strings.tr03112_invalid_tctoken_element_invalid_refresh_address.localized(),
+							ex1,
+						)
+					}
+					else -> {
+						throw ex1
+					}
+				}
 			}
 		} else {
 			val errorUrl = token.getComErrorAddressWithParams(ResultMinor.COMMUNICATION_ERROR)
-			throw InvalidTCTokenElement(errorUrl, ErrorTranslations.NO_REFRESH_ADDRESS)
+			throw InvalidTCTokenElement(
+				errorUrl,
+				I18N.strings.tr03112_invalid_tctoken_element_invalid_refresh_address.localized(),
+			)
 		}
 	}
 

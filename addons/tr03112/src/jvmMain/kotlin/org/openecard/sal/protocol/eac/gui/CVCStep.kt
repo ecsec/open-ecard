@@ -21,30 +21,14 @@
  */
 package org.openecard.sal.protocol.eac.gui
 
-import org.openecard.common.I18n
 import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.Step
 import org.openecard.gui.definition.Text
 import org.openecard.gui.definition.ToggleText
+import org.openecard.i18n.I18N
 import org.openecard.sal.protocol.eac.EACData
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-
-private val LANG: I18n = I18n.getTranslation("eac")
-
-// GUI translation constants
-private const val TITLE = "step_cvc_title"
-private const val STEP_DESCRIPTION = "step_cvc_step_description"
-private const val DESCRIPTION = "step_cvc_description"
-private const val SUBJECT_NAME = "cvc_subject_name"
-private const val SUBJECT_URL = "cvc_subject_url"
-private const val TERMS_OF_USAGE = "cvc_termsofusage"
-private const val VALIDITY = "cvc_validity"
-private const val VALIDITY_FORMAT = "cvc_validity_format"
-private const val VALIDITY_FROM = "cvc_validity_from"
-private const val VALIDITY_TO = "cvc_validity_to"
-private const val ISSUER_NAME = "cvc_issuer_name"
-private const val ISSUER_URL = "cvc_issuer_url"
 
 /**
  * CVC GUI step for EAC.
@@ -55,9 +39,9 @@ private const val ISSUER_URL = "cvc_issuer_url"
  */
 class CVCStep(
 	private val eacData: EACData,
-) : Step(STEP_ID, LANG.translationForKey(TITLE)) {
+) : Step(STEP_ID, I18N.strings.eac_step_cvc_title.localized()) {
 	init {
-		description = LANG.translationForKey(STEP_DESCRIPTION)
+		description = I18N.strings.eac_step_cvc_description.localized()
 
 		// create step elements
 		addElements()
@@ -66,20 +50,20 @@ class CVCStep(
 	@Suppress("SimpleDateFormat")
 	private fun addElements() {
 		val description = Text()
-		description.text = LANG.translationForKey(DESCRIPTION)
+		description.text = I18N.strings.eac_step_cvc_description.localized()
 		inputInfoUnits.add(description)
 
 		// SubjectName
 		val subjectName = ToggleText()
 		subjectName.id = "SubjectName"
-		subjectName.title = LANG.translationForKey(SUBJECT_NAME)
+		subjectName.title = I18N.strings.eac_cvc_subject_name.localized()
 		subjectName.text = eacData.certificateDescription.subjectName!!
 		inputInfoUnits.add(subjectName)
 
 		// SubjectURL
 		val subjectURL = ToggleText()
 		subjectURL.id = "SubjectURL"
-		subjectURL.title = LANG.translationForKey(SUBJECT_URL)
+		subjectURL.title = I18N.strings.eac_cvc_subject_url.localized()
 		if (eacData.certificateDescription.subjectURL != null) {
 			subjectURL.text = eacData.certificateDescription.subjectURL!!
 		} else {
@@ -90,7 +74,7 @@ class CVCStep(
 		// TermsOfUsage
 		val termsOfUsage = ToggleText()
 		termsOfUsage.id = "TermsOfUsage"
-		termsOfUsage.title = LANG.translationForKey(TERMS_OF_USAGE)
+		termsOfUsage.title = I18N.strings.eac_cvc_termsofusage.localized()
 		val doc = Document()
 		doc.mimeType = eacData.certificateDescription.getTermsOfUsageMimeType()
 		doc.value = eacData.certificateDescription.getTermsOfUsageBytes()
@@ -101,22 +85,24 @@ class CVCStep(
 		// Validity
 		val dateFormat: DateFormat =
 			try {
-				SimpleDateFormat(LANG.translationForKey(VALIDITY_FORMAT))
+				SimpleDateFormat(
+					I18N.strings.eac_cvc_validity_format.localized(),
+				)
 			} catch (_: IllegalArgumentException) {
 				SimpleDateFormat()
 			}
 		val sb = StringBuilder(150)
-		sb.append(LANG.translationForKey(VALIDITY_FROM))
+		sb.append(I18N.strings.eac_cvc_validity_from.localized())
 		sb.append(" ")
 		sb.append(dateFormat.format(eacData.certificate.getEffectiveDate().getTime()))
 		sb.append(" ")
-		sb.append(LANG.translationForKey(VALIDITY_TO))
+		sb.append(I18N.strings.eac_cvc_validity_to.localized())
 		sb.append(" ")
 		sb.append(dateFormat.format(eacData.certificate.getExpirationDate().getTime()))
 
 		val validity = ToggleText()
 		validity.id = "Validity"
-		validity.title = LANG.translationForKey(VALIDITY)
+		validity.title = I18N.strings.eac_cvc_validity.localized()
 		validity.text = sb.toString()
 		validity.isCollapsed = true
 		inputInfoUnits.add(validity)
@@ -124,7 +110,7 @@ class CVCStep(
 		// IssuerName
 		val issuerName = ToggleText()
 		issuerName.id = "IssuerName"
-		issuerName.title = LANG.translationForKey(ISSUER_NAME)
+		issuerName.title = I18N.strings.eac_cvc_issuer_name.localized()
 		issuerName.text = eacData.certificateDescription.issuerName!!
 		issuerName.isCollapsed = true
 		inputInfoUnits.add(issuerName)
@@ -132,7 +118,7 @@ class CVCStep(
 		// IssuerURL
 		val issuerURL = ToggleText()
 		issuerURL.id = "IssuerURL"
-		issuerURL.title = LANG.translationForKey(ISSUER_URL)
+		issuerURL.title = I18N.strings.eac_cvc_issuer_url.localized()
 		// issuer url is optional so perform a null check
 		if (eacData.certificateDescription.issuerURL != null) {
 			issuerURL.text = eacData.certificateDescription.issuerURL!!

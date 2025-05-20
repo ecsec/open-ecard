@@ -38,7 +38,6 @@ import org.openecard.addon.Context
 import org.openecard.addon.bind.AuxDataKeys
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.binding.tctoken.ex.NonGuiException
 import org.openecard.binding.tctoken.ex.ResultMinor
@@ -47,7 +46,6 @@ import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
 import org.openecard.common.ECardConstants.BINDING_HTTP
 import org.openecard.common.ECardConstants.BINDING_PAOS
-import org.openecard.common.I18n
 import org.openecard.common.OpenecardProperties
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
@@ -68,6 +66,7 @@ import org.openecard.httpcore.HttpResourceException
 import org.openecard.httpcore.InvalidProxyException
 import org.openecard.httpcore.InvalidUrlException
 import org.openecard.httpcore.ValidationError
+import org.openecard.i18n.I18N
 import org.openecard.transport.paos.PAOSConnectionException
 import org.openecard.transport.paos.PAOSException
 import org.openecard.ws.marshal.WSMarshallerException
@@ -110,8 +109,8 @@ private val LOG = KotlinLogging.logger { }
 class TCTokenHandler(
 	ctx: Context,
 ) {
-	private val pin: String = LANG_PACE.translationForKey("pin")
-	private val puk: String = LANG_PACE.translationForKey("puk")
+	private val pin: String = I18N.strings.pace_pin.localized()
+	private val puk: String = I18N.strings.pace_puk.localized()
 	private val evtDispatcher: EventDispatcher = ctx.eventDispatcher
 	private val dispatcher: Dispatcher = ctx.dispatcher
 	private val gui: UserConsent = ctx.userConsent!!
@@ -239,7 +238,7 @@ class TCTokenHandler(
 			LOG.error(ex) { msg }
 
 			if (ECardConstants.Minor.IFD.CANCELLATION_BY_USER == ex.resultMinor) {
-				throw PAOSException(ex)
+				throw PAOSException(cause = ex)
 			}
 
 			throw DispatcherException(msg, ex)
@@ -331,19 +330,15 @@ class TCTokenHandler(
 			when (errorMsg) {
 				"The target server failed to respond" ->
 					errorMsg =
-						LANG_TR.translationForKey(
-							ErrorTranslations.NO_RESPONSE_FROM_SERVER,
-						)
+						I18N.strings.tr03112_paos_exception_no_response_from_server.localized()
 
 				ECardConstants.Minor.App.INT_ERROR + " ==> Unknown eCard exception occurred." ->
 					errorMsg =
-						LANG_TR.translationForKey(
-							ErrorTranslations.UNKNOWN_ECARD_ERROR,
-						)
+						I18N.strings.tr03112_paos_exception_unknown_ecard_exception.localized()
 
 				"Internal TLS error, this could be an attack" ->
 					errorMsg =
-						LANG_TR.translationForKey(ErrorTranslations.INTERNAL_TLS_ERROR)
+						I18N.strings.tr03112_error_internal_tls.localized()
 			}
 
 			LOG.debug(innerException) { "Processing InnerException." }
@@ -370,7 +365,7 @@ class TCTokenHandler(
 				}
 
 				is DocumentValidatorException -> {
-					errorMsg = LANG_TR.translationForKey(ErrorTranslations.SCHEMA_VALIDATION_FAILED)
+					errorMsg = I18N.strings.tr03112_paos_exception_msg_invalid_schema.localized()
 					// it is ridiculous, that this should be a client error, but the test spec demands this
 					response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, w.message))
 					response.setAdditionalResultMinor(ECardConstants.Minor.SAL.Support.SCHEMA_VAILD_FAILED)
@@ -452,10 +447,10 @@ class TCTokenHandler(
 	}
 
 	private fun showErrorMessage(errMsg: String?) {
-		val title: String? = LANG_TR.translationForKey(ErrorTranslations.ERROR_TITLE)
-		val baseHeader: String? = LANG_TR.translationForKey(ErrorTranslations.ERROR_HEADER)
-		val exceptionPart: String? = LANG_TR.translationForKey(ErrorTranslations.ERROR_MSG_IND)
-		val removeCard: String? = LANG_TR.translationForKey(ErrorTranslations.REMOVE_CARD)
+		val title = I18N.strings.tr03112_error.localized()
+		val baseHeader = I18N.strings.tr03112_err_header.localized()
+		val exceptionPart = I18N.strings.tr03112_err_msg_indicator.localized()
+		val removeCard = I18N.strings.tr03112_remove_card_msg.localized()
 		val msg = String.format("%s\n\n%s\n%s\n\n%s", baseHeader, exceptionPart, errMsg, removeCard)
 		showBackgroundMessage(msg, title, DialogType.ERROR_MESSAGE)
 	}
@@ -472,62 +467,62 @@ class TCTokenHandler(
 			ECardConstants.Minor.SAL.CANCELLATION_BY_USER,
 			ECardConstants.Minor.IFD.CANCELLATION_BY_USER,
 			-> {
-				errorMsg = LANG_TOKEN.translationForKey("cancel")
+				errorMsg = I18N.strings.tctoken_cancel.localized()
 				response.setResult(makeResultError(ResultMinor.CANCELLATION_BY_USER, errorMsg))
 			}
 
 			ECardConstants.Minor.SAL.EAC.DOC_VALID_FAILED -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.CERT_ERROR)
+				errorMsg = I18N.strings.tr03112_certificate_error.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.App.INCORRECT_PARM -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.MESSAGE_CONTENT_INVALID)
+				errorMsg = I18N.strings.tr03112_message_validation_failed.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.App.INT_ERROR -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.INTERNAL_ERROR)
+				errorMsg = I18N.strings.tr03112_error_internal.localized()
 				response.setResult(makeResultError(ResultMinor.SERVER_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.SAL.PREREQUISITES_NOT_SATISFIED -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.CERT_DESCRIPTION_CHECK_FAILED)
+				errorMsg = I18N.strings.tr03112_certificate_description_check_error.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.App.UNKNOWN_ERROR -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.ERROR_WHILE_AUTHENTICATION)
+				errorMsg = I18N.strings.tr03112_authentication_failed.localized()
 				response.setResult(makeResultError(ResultMinor.SERVER_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.SAL.UNKNOWN_HANDLE -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.UNKNOWN_CONNECTION_HANDLE)
+				errorMsg = I18N.strings.tr03112_unknown_connection_handle.localized()
 				response.setResult(makeResultError(ResultMinor.SERVER_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.IFD.INVALID_SLOT_HANDLE -> {
-				errorMsg = LANG_PIN.translationForKey(ERROR_CARD_REMOVED)
+				errorMsg = I18N.strings.pinplugin_action_error_card_removed.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.IFD.PASSWORD_BLOCKED -> {
-				errorMsg = LANG_PACE.translationForKey("step_error_pin_blocked", pin, pin, puk, pin)
+				errorMsg = I18N.strings.pace_step_error_pin_blocked.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.IFD.PASSWORD_DEACTIVATED -> {
-				errorMsg = LANG_PACE.translationForKey("step_error_pin_deactivated")
+				errorMsg = I18N.strings.pace_step_error_pin_deactivated.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			ECardConstants.Minor.IFD.UNKNOWN_ERROR -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.ERROR_WHILE_AUTHENTICATION)
+				errorMsg = I18N.strings.tr03112_authentication_failed.localized()
 				response.setResult(makeResultError(ResultMinor.CLIENT_ERROR, errorMsg))
 			}
 
 			else -> {
-				errorMsg = LANG_TR.translationForKey(ErrorTranslations.ERROR_WHILE_AUTHENTICATION)
+				errorMsg = I18N.strings.tr03112_authentication_failed.localized()
 				response.setResult(makeResultError(ResultMinor.SERVER_ERROR, errorMsg))
 			}
 		}
@@ -543,23 +538,10 @@ class TCTokenHandler(
 	 * @param w An PAOSException containing a not handled inner exception.
 	 * @return A sting containing an error message.
 	 */
-	private fun createMessageFromUnknownError(w: PAOSException): String {
-		var errorMsg = "\n"
-		errorMsg += LANG_TR.translationForKey(ErrorTranslations.UNHANDLED_INNER_EXCEPTION)
-		errorMsg += "\n"
-		errorMsg += w.message
-		return errorMsg
-	}
+	private fun createMessageFromUnknownError(w: PAOSException) =
+		"\n${I18N.strings.tr03112_unhandled_inner_exception.localized()}\n${w.message}"
 
 	companion object {
-		private val LANG_TR: I18n = I18n.getTranslation("tr03112")
-		private val LANG_TOKEN: I18n = I18n.getTranslation("tctoken")
-		private val LANG_PIN: I18n = I18n.getTranslation("pinplugin")
-		private val LANG_PACE: I18n = I18n.getTranslation("pace")
-
-		// Translation constants
-		private const val ERROR_CARD_REMOVED = "action.error.card.removed"
-
 		fun disconnectHandle(
 			dispatcher: Dispatcher,
 			connectionHandle: ConnectionHandleType?,
@@ -603,7 +585,7 @@ class TCTokenHandler(
 			} catch (ex: InterruptedException) {
 				LOG.info { "Waiting for PAOS Task to finish has been interrupted. Cancelling authentication." }
 				task.cancel(true)
-				throw PAOSException(ex)
+				throw PAOSException(cause = ex)
 			} catch (ex: ExecutionException) {
 				LOG.warn(ex) { "The result of PAOS Task could not be retieved." }
 				// perform conversion of ExecutionException from the Future to the really expected exceptions
@@ -615,7 +597,7 @@ class TCTokenHandler(
 						throw ex.cause as DispatcherException
 					}
 					else -> {
-						throw PAOSException(ex)
+						throw PAOSException(cause = ex)
 					}
 				}
 			}
@@ -663,7 +645,10 @@ class TCTokenHandler(
 				response.refreshAddress = endpoint.toString()
 				return response
 			} catch (ex: MalformedURLException) {
-				throw IllegalStateException(LANG_TR.translationForKey(ErrorTranslations.REFRESH_URL_ERROR), ex)
+				throw IllegalStateException(
+					I18N.strings.tr03112_illegal_state_exception_invalid_refresh_address_in_tctoken.localized(),
+					ex,
+				)
 			} catch (ex: HttpResourceException) {
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
@@ -671,11 +656,14 @@ class TCTokenHandler(
 				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
-						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
+						I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
 						ex,
 					)
 				}
-				throw InvalidRedirectUrlException(ErrorTranslations.REFRESH_DETERMINATION_FAILED, ex)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
+					ex,
+				)
 			} catch (ex: InvalidUrlException) {
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
@@ -683,11 +671,14 @@ class TCTokenHandler(
 				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
-						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
+						I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
 						ex,
 					)
 				}
-				throw InvalidRedirectUrlException(ErrorTranslations.REFRESH_DETERMINATION_FAILED, ex)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
+					ex,
+				)
 			} catch (ex: InvalidProxyException) {
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
@@ -695,11 +686,14 @@ class TCTokenHandler(
 				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
-						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
+						I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
 						ex,
 					)
 				}
-				throw InvalidRedirectUrlException(ErrorTranslations.REFRESH_DETERMINATION_FAILED, ex)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
+					ex,
+				)
 			} catch (ex: ValidationError) {
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
@@ -707,11 +701,14 @@ class TCTokenHandler(
 				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
-						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
+						I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
 						ex,
 					)
 				}
-				throw InvalidRedirectUrlException(ErrorTranslations.REFRESH_DETERMINATION_FAILED, ex)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
+					ex,
+				)
 			} catch (ex: IOException) {
 				val code = ECardConstants.Minor.App.COMMUNICATION_ERROR
 				val communicationErrorAddress = response.tCToken.getComErrorAddressWithParams(code)
@@ -719,11 +716,14 @@ class TCTokenHandler(
 				if (communicationErrorAddress.isNotEmpty()) {
 					throw SecurityViolationException(
 						communicationErrorAddress,
-						ErrorTranslations.REFRESH_DETERMINATION_FAILED,
+						I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
 						ex,
 					)
 				}
-				throw InvalidRedirectUrlException(ErrorTranslations.REFRESH_DETERMINATION_FAILED, ex)
+				throw InvalidRedirectUrlException(
+					I18N.strings.tr03112_invalid_redirect_url_exception_refresh_address_determination_failed.localized(),
+					ex,
+				)
 			}
 		}
 	}

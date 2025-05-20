@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<!-- Android-->
+
+	<string name="android_main_info">Verbindung zum Server wird aufgebaut und Identitätsnachweis wird
+		durchgeführt.\n\nSie werden anschließend auf die Seite des Diensteanbieters weitergeleitet.
+	</string>
+	<string name="android_dialogs_quit">Beenden</string>
+	<string name="android_dialogs_restart">Neustarten</string>
+	<string name="android_dialogs_terminal_selection">Dies ist der erste Start seit der (Neu-)Installation der %s. Bitte
+		wählen Sie die Schnittstelle zur Kommunikation mit Chipkarten.
+	</string>
+	<string name="android_error_ext_apdu">Bei der Übertragung des Berechtigungszertifikats ist ein Fehler
+		aufgetreten.\n\nDas Senden einer Kommunikationseinheit (APDU) mit der Länge %s Byte über die NFC-Schnittstelle
+		ist fehlgeschlagen, da Ihr Smartphone nur das Senden von bis zu %s Byte langen Kommunikationseinheiten (APDUs)
+		unterstützt.
+	</string>
+	<string name="android_error_ext_apdu_more">Mehr Info</string>
+	<string name="android_error_unexpected">Ein unerwarteter Fehler ist aufgetreten.</string>
+	<string name="android_error_nfc_error">Ihr Smartphone unterstützt kein NFC oder es wurde in den Einstellungen
+		deaktiviert. Bitte aktivieren Sie NFC in den Einstellungen und starten Sie die App erneut.
+	</string>
+	<string name="android_cardinfo_type">Kartentyp:</string>
+	<string name="android_cardinfo_request_card">Bitte stellen Sie eine Karte bereit.</string>
+	<string name="android_cardinfo_request_terminal">Bitte schließen Sie einen Kartenleser an.</string>
+	<string name="android_cardinfo_cardname">Keine Karte erkannt</string>
+	<string name="android_cardinfo_terminal">Kartenleser:</string>
+	<string name="android_notification_card_recognized">Karte gefunden: %s</string>
+	<string name="android_notification_card_removed">Eine Karte wurde entfernt</string>
+	<string name="android_notification_terminal_added">Neuer Kartenleser: %s</string>
+	<string name="android_notification_terminal_removed">Kartenleser entfernt: %s</string>
+
+	<!-- About Activity-->
+	<string name="about_tab_join">Mitmachen</string>
+	<string name="about_tab_demo">Demo</string>
+	<string name="about_tab_card">Karte</string>
+
+	<!-- settings-->
+	<string name="android_settings">Einstellungen</string>
+	<string name="android_settings_restart">Die App muss aufgrund der gemachten Änderung neu gestartet werden.</string>
+	<string name="android_settings_comm_interface">Kommunikationsschnittstelle</string>
+	<string name="android_settings_plugins">Plugins</string>
+	<string name="android_settings_logging">Logging</string>
+
+	<!-- logging-->
+	<string name="android_logging_logcat">Logcat</string>
+	<string name="android_logging_sdcard">SD-Karte</string>
+
+	<!-- Error codes-->
+	<string name="android_error">Fehler</string>
+
+	<!-- Dialog me_ssages-->
+	<string name="android_recognition_error">Die Kartenerkennung konnte nicht initialisiert werden.</string>
+	<string name="android_ifd_context_error">Interface Device (IFD) Kontext konnte nicht erzeugt werden.</string>
+
+	<!-- Settings _dialog -->
+	<string name="android_settings_title">%s - Einstellungen</string>
+	<string name="android_settings_plugins">Plug-ins</string>
+	<string name="android_settings_plugins_description">Beschreibung</string>
+	<string name="android_settings_plugins_information">Informationen</string>
+	<string name="android_settings_plugins_version">Version:</string>
+	<string name="android_settings_plugins_activate">aktivieren</string>
+	<string name="android_settings_plugins_deactivate">deaktivieren</string>
+	<string name="android_settings_plugins_activated">aktiviert</string>
+	<string name="android_settings_plugins_deactivated">deaktiviert</string>
+	<string name="android_settings_plugins_current_status">Aktueller Status:</string>
+	<string name="android_settings_plugins_actions">Aktionen</string>
+	<string name="android_settings_plugins_noactions">Dieses Plugin stellt keine Aktionen bereit oder ist gerade deaktiviert.
+	</string>
+	<string name="android_settings_plugins_actions_start">Aktion ausführen</string>
+	<string name="android_settings_plugins_settings">Einstellungen</string>
+	<string name="android_settings_button_close">Schließen</string>
+	<string name="android_settings_plugins_settings_nosettings">Dieses Plugin hat keine konfigurierbaren Einstellungen.</string>
+</resources>

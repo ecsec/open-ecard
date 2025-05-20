@@ -23,7 +23,6 @@ package org.openecard.ifd.scio.reader
 
 import iso.std.iso_iec._24727.tech.schema.PasswordAttributesType
 import iso.std.iso_iec._24727.tech.schema.PasswordTypeType
-import org.openecard.common.I18n
 import org.openecard.common.USBLangID
 import org.openecard.common.util.ByteUtils
 import org.openecard.common.util.IntegerUtils
@@ -145,7 +144,7 @@ class PCSCPinVerify(
 	private val bNumberMessage = 0x01.toByte()
 
 	/** Language for messages  */
-	private var wLangId = USBLangID.getCode(I18n.locale)
+	private var wLangId = USBLangID.getCode(Locale.getDefault())
 
 	/** Message index (should be 00).
 	 *

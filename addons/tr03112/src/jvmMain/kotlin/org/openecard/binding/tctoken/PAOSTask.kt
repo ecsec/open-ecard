@@ -25,7 +25,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import iso.std.iso_iec._24727.tech.schema.StartPAOS
 import iso.std.iso_iec._24727.tech.schema.StartPAOSResponse
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.common.AppVersion.major
 import org.openecard.common.AppVersion.minor
 import org.openecard.common.AppVersion.name
@@ -35,6 +34,7 @@ import org.openecard.common.interfaces.Dispatcher
 import org.openecard.common.interfaces.DocumentSchemaValidator
 import org.openecard.common.util.HandlerUtils
 import org.openecard.common.util.Promise
+import org.openecard.i18n.I18N
 import org.openecard.transport.paos.PAOS
 import org.openecard.transport.paos.PAOSException
 import java.math.BigInteger
@@ -64,8 +64,9 @@ class PAOSTask(
 			try {
 				v = schemaValidator.deref()!!
 			} catch (ex: InterruptedException) {
-				// TODO: add i18n
-				throw PAOSException(ErrorTranslations.PAOS_INTERRUPTED)
+				throw PAOSException(
+					msg = I18N.strings.tr03112_paos_exception_interrupted.localized(),
+				)
 			}
 
 			// Set up PAOS connection

@@ -32,7 +32,7 @@ import org.openecard.addons.cg.tctoken.TCToken
  *
  * @author Tobias Wich
  */
-class ChipGatewayResponse : BindingResult() {
+class ChipGatewayResponse : BindingResult(BindingResultCode.OK) {
 	private var token: TCToken? = null
 
 	fun setToken(token: TCToken) {

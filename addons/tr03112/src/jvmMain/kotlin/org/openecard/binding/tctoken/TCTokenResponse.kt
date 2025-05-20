@@ -25,13 +25,12 @@ import oasis.names.tc.dss._1_0.core.schema.Result
 import org.openecard.addon.bind.AuxDataKeys
 import org.openecard.addon.bind.BindingResult
 import org.openecard.addon.bind.BindingResultCode
-import org.openecard.binding.tctoken.ex.ErrorTranslations
 import org.openecard.binding.tctoken.ex.InvalidRedirectUrlException
 import org.openecard.common.DynamicContext
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper.makeResultOK
 import org.openecard.common.util.UrlBuilder
+import org.openecard.i18n.I18N
 import java.net.URISyntaxException
 import java.util.concurrent.Future
 
@@ -42,7 +41,7 @@ import java.util.concurrent.Future
  * @author Hans-Martin Haase
  * @author Tobias Wich
  */
-class TCTokenResponse : BindingResult() {
+class TCTokenResponse : BindingResult(BindingResultCode.OK) {
 	private var result: Result? = null
 	private var token: TCToken? = null
 	var bindingTask: Future<*>? = null
@@ -139,18 +138,17 @@ class TCTokenResponse : BindingResult() {
 
 				addAuxResultData(AuxDataKeys.REDIRECT_LOCATION, refreshURL)
 
-				if (result!!.getResultMessage().getValue() != null) {
-					setResultMessage(result!!.getResultMessage().getValue())
+				result?.resultMessage?.value.let {
+					resultMessage = it
 				}
 			}
 		} catch (ex: URISyntaxException) {
 			// this is a code failure as the URLs are verified upfront
 			// TODO: translate when exception changes
-			throw IllegalArgumentException(LANG.getOriginalMessage(ErrorTranslations.INVALID_URL), ex)
+			throw IllegalArgumentException(
+				I18N.strings.tr03112_illegal_argument_exception_invalid_url.localized(),
+				ex,
+			)
 		}
-	}
-
-	companion object {
-		private val LANG: I18n = I18n.getTranslation("tr03112")
 	}
 }

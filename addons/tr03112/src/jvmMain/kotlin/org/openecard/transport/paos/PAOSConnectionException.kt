@@ -21,36 +21,12 @@
  */
 package org.openecard.transport.paos
 
-import org.openecard.binding.tctoken.ex.ErrorTranslations
-import org.openecard.common.I18n
-import org.openecard.common.I18nException
-import org.openecard.common.I18nKey
-
-private val lang: I18n = I18n.getTranslation("tr03112")
-
 /**
  * Localized ConnectionException.
  *
  * @author Hans-Martin Haase
  */
-class PAOSConnectionException : I18nException {
-	/**
-	 * Creates an instance and initialize the exception with an static localized message.
-	 */
-	constructor() : super(lang, ErrorTranslations.PAOS_CONNECTION_EXCEPTION)
-
-	/**
-	 * Creates an instance and initialize the exception with an previous exception and a static localized exception.
-	 *
-	 * @param cause The exception causing the error.
-	 */
-	constructor(cause: Throwable?) : super(lang, ErrorTranslations.PAOS_CONNECTION_EXCEPTION, cause)
-
-	/**
-	 * Creates an instance and initializes the exception with a localized message.
-	 *
-	 * @param key Translation key.
-	 * @param params Parameters adding values into the translation.
-	 */
-	constructor(key: I18nKey, vararg params: Any?) : super(lang, key, *params)
-}
+class PAOSConnectionException(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : Exception(msg, cause)

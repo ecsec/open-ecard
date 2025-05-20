@@ -24,14 +24,10 @@ package org.openecard.common.sal.util;
 
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType.RecognitionInfo;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
+
 import org.openecard.addon.sal.SalStateView;
-import org.openecard.common.AppVersion;
-import org.openecard.common.I18n;
 import org.openecard.common.event.EventType;
 import org.openecard.common.interfaces.EventCallback;
 import org.openecard.common.interfaces.EventDispatcher;
@@ -47,8 +43,10 @@ import org.openecard.gui.definition.Text;
 import org.openecard.gui.definition.UserConsentDescription;
 import org.openecard.gui.executor.ExecutionEngine;
 import org.openecard.gui.executor.StepAction;
+import org.openecard.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 /**
@@ -63,8 +61,6 @@ public class InsertCardDialog {
     private static final Logger LOG = LoggerFactory.getLogger(InsertCardDialog.class);
 
     private static final String STEP_ID = "insert-card";
-
-    private final I18n lang = I18n.getTranslation("tctoken");
 
     private final UserConsent gui;
     private final Map<String, String> cardNameAndType;
@@ -167,19 +163,26 @@ public class InsertCardDialog {
      * @return A {@link UserConsentDescription} which may be executed by the {@link ExecutionEngine}.
      */
     private UserConsentDescription createInsertCardUserConsent(StepAction insertCardAction) {
-	UserConsentDescription uc = new UserConsentDescription(lang.translationForKey("title", AppVersion.getName()), "insert_card_dialog");
+	UserConsentDescription uc = new UserConsentDescription(
+		I18N.strings.INSTANCE.getTctoken_title().localized(Locale.getDefault()),
+		"insert_card_dialog");
 
 	// create step
-	Step s = new Step(STEP_ID, lang.translationForKey("step.title"));
+	Step s = new Step(STEP_ID, I18N.strings.INSTANCE.getTctoken_step_title().localized(Locale.getDefault()) );
+
 	s.setInstantReturn(true);
 	s.setAction(insertCardAction);
 
 	// create and add text instructing user
 	Text i1 = new Text();
 	if (cardNameAndType.size() == 1) {
-	    i1.setText(lang.translationForKey("step.message.singletype"));
+	    i1.setText(
+			I18N.strings.INSTANCE.getTctoken_step_message_singletype().localized(Locale.getDefault())
+		);
 	} else {
-	    i1.setText(lang.translationForKey("step.message.multipletypes"));
+	    i1.setText(
+			I18N.strings.INSTANCE.getTctoken_step_message_multipletypes().localized(Locale.getDefault())
+		);
 	}
 
 	s.getInputInfoUnits().add(i1);
@@ -192,6 +195,5 @@ public class InsertCardDialog {
 	uc.getSteps().add(s);
 
 	return uc;
-    }
-
+	}
 }

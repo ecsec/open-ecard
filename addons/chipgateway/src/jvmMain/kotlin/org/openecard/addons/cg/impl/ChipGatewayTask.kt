@@ -21,18 +21,19 @@
  ***************************************************************************/
 package org.openecard.addons.cg.impl
 
+import dev.icerock.moko.resources.format
 import org.openecard.addon.Context
 import org.openecard.addons.cg.activate.TlsConnectionHandler
 import org.openecard.addons.cg.ex.AuthServerException
 import org.openecard.addons.cg.ex.ChipGatewayDataError
 import org.openecard.addons.cg.ex.ChipGatewayUnknownError
 import org.openecard.addons.cg.ex.ConnectionError
-import org.openecard.addons.cg.ex.ErrorTranslations
 import org.openecard.addons.cg.ex.InvalidRedirectUrlException
 import org.openecard.addons.cg.ex.InvalidTCTokenElement
 import org.openecard.addons.cg.ex.ResultMinor
 import org.openecard.addons.cg.ex.VersionTooOld
 import org.openecard.addons.cg.tctoken.TCToken
+import org.openecard.i18n.I18N
 import org.openecard.ws.chipgateway.TerminateType
 import java.util.concurrent.Callable
 
@@ -62,8 +63,9 @@ class ChipGatewayTask(
 		if (ChipGatewayStatusCodes.isError(result.result)) {
 			throw ChipGatewayUnknownError(
 				token.finalizeErrorAddress(ResultMinor.SERVER_ERROR),
-				ErrorTranslations.SERVER_SENT_ERROR,
-				result.result,
+				I18N.strings.chipgateway_error_server_sent_error
+					.format(result.result)
+					.localized(),
 			)
 		}
 

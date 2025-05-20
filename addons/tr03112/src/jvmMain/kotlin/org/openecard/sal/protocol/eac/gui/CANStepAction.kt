@@ -27,13 +27,13 @@ import iso.std.iso_iec._24727.tech.schema.EstablishChannelResponse
 import org.openecard.addon.Context
 import org.openecard.binding.tctoken.TR03112Keys
 import org.openecard.common.ECardConstants
-import org.openecard.common.I18n
 import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.gui.StepResult
 import org.openecard.gui.executor.ExecutionResults
 import org.openecard.gui.executor.StepActionResult
 import org.openecard.gui.executor.StepActionResultStatus
+import org.openecard.i18n.I18N
 import org.openecard.sal.protocol.eac.EACData
 import org.openecard.sal.protocol.eac.EACProtocol
 
@@ -51,9 +51,6 @@ class CANStepAction(
 	capturePin: Boolean,
 	step: PINStep,
 ) : AbstractPasswordStepAction(addonCtx, eacData, capturePin, step) {
-	private val lang: I18n = I18n.getTranslation("pace")
-	private val langPin: I18n = I18n.getTranslation("pinplugin")
-
 	override fun perform(
 		oldResults: Map<String, ExecutionResults>,
 		result: StepResult,
@@ -96,8 +93,8 @@ class CANStepAction(
 				return StepActionResult(
 					StepActionResultStatus.REPEAT,
 					ErrorStep(
-						lang.translationForKey(ERROR_TITLE),
-						langPin.translationForKey(ERROR_CARD_REMOVED),
+						I18N.strings.pinplugin_action_error_title.localized(),
+						I18N.strings.pinplugin_action_error_card_removed.localized(),
 						ex,
 					),
 				)
@@ -108,8 +105,8 @@ class CANStepAction(
 			return StepActionResult(
 				StepActionResultStatus.REPEAT,
 				ErrorStep(
-					langPin.translationForKey(ERROR_TITLE),
-					langPin.translationForKey(ERROR_UNKNOWN),
+					I18N.strings.pinplugin_action_error_title.localized(),
+					I18N.strings.pinplugin_action_error_unknown.localized(),
 					ex,
 				),
 			)
@@ -120,12 +117,5 @@ class CANStepAction(
 			logger.warn(ex) { "CAN was empty" }
 			return StepActionResult(StepActionResultStatus.REPEAT)
 		}
-	}
-
-	companion object {
-		// Translation constants
-		private const val ERROR_CARD_REMOVED = "action.error.card.removed"
-		private const val ERROR_TITLE = "action.error.title"
-		private const val ERROR_UNKNOWN = "action.error.unknown"
 	}
 }

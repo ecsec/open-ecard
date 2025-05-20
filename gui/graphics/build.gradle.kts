@@ -18,7 +18,9 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
+				api(project(":common"))
 				api(libs.slf4j.api)
+				api(libs.apache.batik)
 			}
 		}
 		val jvmTest by getting {

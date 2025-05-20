@@ -21,7 +21,7 @@
  ***************************************************************************/
 package org.openecard.gui.swing
 
-import org.openecard.common.util.FileUtils.resolveResourceAsStream
+import oecImage
 import org.openecard.gui.UserConsent
 import org.openecard.gui.message.DialogType
 import org.openecard.gui.message.MessageDialogResult
@@ -56,14 +56,9 @@ class RunMessageBox {
 	@get:Throws(IOException::class)
 	private val logoBytes: ByteArray
 		get() {
-			val `is` =
-				resolveResourceAsStream(
-					RunMessageBox::class.java,
-					"openecard_logo.png",
-				)
-			val originalImage = ImageIO.read(`is`)
+
 			val baos = ByteArrayOutputStream()
-			ImageIO.write(originalImage, "png", baos)
+			ImageIO.write(oecImage(60, 60), "png", baos)
 			val imageInByte = baos.toByteArray()
 			return imageInByte
 		}

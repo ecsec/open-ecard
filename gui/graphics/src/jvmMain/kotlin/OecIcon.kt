@@ -20,57 +20,17 @@
  *
  ***************************************************************************/
 
-package org.openecard.richclient.gui.graphics
-
-import SvgTranscoder
 import org.openecard.common.util.FileUtils.resolveResourceAsStream
-import toBufferedImage
-import java.awt.Image
-import java.awt.Toolkit
 import java.awt.image.BufferedImage
-import java.awt.image.FilteredImageSource
-import javax.swing.GrayFilter
-
-enum class OecIconType(
-	val path: String,
-	val grayVal: Int = 0,
-) {
-	COLORED("images/oec_logo_bg-white.svg"),
-	BLACK("images/oec_logo_black_bg-transparent.svg", 0),
-	GRAY("images/oec_logo_black_bg-transparent.svg", 75),
-	WHITE("images/oec_logo_black_bg-transparent.svg", 100),
-}
-
-fun grayscale(
-	img: Image,
-	grayVal: Int,
-): BufferedImage {
-	val gf = GrayFilter(true, grayVal)
-	val producer = FilteredImageSource(img.source, gf)
-	val img = Toolkit.getDefaultToolkit().createImage(producer)
-	return img.toBufferedImage()
-}
+import kotlin.jvm.java
 
 fun oecImage(
-	kind: OecIconType,
 	width: Int,
 	height: Int,
 ): BufferedImage {
 	val input =
-		resolveResourceAsStream(kind.javaClass, kind.path)
+		resolveResourceAsStream(object {}::class.java, "openecard_logo.svg")
 			?: throw(IllegalStateException("Image could not be loaded"))
 	return SvgTranscoder(input, width, height)
-		.apply {
-			when (kind) {
-				OecIconType.WHITE,
-				OecIconType.BLACK,
-				OecIconType.GRAY,
-				-> {
-					filters.add { img ->
-						grayscale(img, kind.grayVal)
-					}
-				}
-				else -> {}
-			}
-		}.getBufferedImage() ?: throw(IllegalStateException("Image could not be loaded"))
+		.getBufferedImage() ?: throw(IllegalStateException("Image could not be loaded"))
 }

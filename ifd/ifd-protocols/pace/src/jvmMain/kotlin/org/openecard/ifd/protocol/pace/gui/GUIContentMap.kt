@@ -27,51 +27,52 @@ package org.openecard.ifd.protocol.pace.gui
  * @author Moritz Horsch
  */
 class GUIContentMap {
-    enum class ELEMENT {
-        PIN,
-        PIN_ID
-    }
+	enum class ELEMENT {
+		PIN,
+		PIN_ID,
+	}
 
-    private val map = HashMap<String?, Any?>()
+	private val map = HashMap<String?, Any?>()
 
+	/**
+	 * Adds a new value to the GUI content map.
+	 *
+	 * @param id ID
+	 * @param value Value
+	 */
+	fun add(
+		id: ELEMENT,
+		value: Any?,
+	) {
+		add(id.name, value)
+	}
 
-    /**
-     * Adds a new value to the GUI content map.
-     *
-     * @param id ID
-     * @param value Value
-     */
-    fun add(id: ELEMENT, value: Any?) {
-        add(id.name, value)
-    }
+	/**
+	 * Adds a new value to the GUI content map.
+	 *
+	 * @param id ID
+	 * @param value Value
+	 */
+	fun add(
+		id: String?,
+		value: Any?,
+	) {
+		map.put(id, value)
+	}
 
-    /**
-     * Adds a new value to the GUI content map.
-     *
-     * @param id ID
-     * @param value Value
-     */
-    fun add(id: String?, value: Any?) {
-        map.put(id, value)
-    }
+	/**
+	 * Returns the corresponding value.
+	 *
+	 * @param id ID
+	 * @return Value
+	 */
+	fun get(id: ELEMENT): Any? = get(id.name)
 
-    /**
-     * Returns the corresponding value.
-     *
-     * @param id ID
-     * @return Value
-     */
-    fun get(id: ELEMENT): Any? {
-        return get(id.name)
-    }
-
-    /**
-     * Returns the corresponding value.
-     *
-     * @param id ID
-     * @return Value
-     */
-    fun get(id: String?): Any? {
-        return map.get(id)
-    }
+	/**
+	 * Returns the corresponding value.
+	 *
+	 * @param id ID
+	 * @return Value
+	 */
+	fun get(id: String?): Any? = map.get(id)
 }

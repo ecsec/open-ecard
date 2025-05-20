@@ -65,7 +65,7 @@ class CardCommandTemplate(
 			apdu.data = data
 		}
 		if (length != null) {
-			apdu.le = length.toInt()
+			apdu.setLE(length.toInt())
 		}
 
 		return apdu

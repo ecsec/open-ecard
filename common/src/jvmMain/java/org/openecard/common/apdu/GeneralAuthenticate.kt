@@ -46,7 +46,7 @@ class GeneralAuthenticate : CardCommandAPDU {
 	) {
 		setLC(0x02.toByte())
 		data = byteArrayOf(0x7C.toByte(), x00)
-		le = x00.toInt()
+		setLE(x00)
 	}
 
 	/**
@@ -62,7 +62,7 @@ class GeneralAuthenticate : CardCommandAPDU {
 		x00,
 	) {
 		this.data = data!!
-		le = x00.toInt()
+		setLE(x00)
 	}
 
 	/**
@@ -99,8 +99,7 @@ class GeneralAuthenticate : CardCommandAPDU {
 		} catch (ex: Exception) {
 			logger.error(ex) { "${ex.message}" }
 		}
-
-		le = x00.toInt()
+		setLE(x00)
 	}
 
 	companion object {

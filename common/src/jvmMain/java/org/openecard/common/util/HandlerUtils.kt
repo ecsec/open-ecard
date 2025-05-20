@@ -139,7 +139,7 @@ class HandlerUtils {
 					ByteArray::class,
 				)
 			if (ctxHandle != null) {
-				LOG.debug { "${"Found ContextHandle in object of type {}."} ${obj.javaClass.simpleName}" }
+				LOG.debug { "Found ContextHandle in object of type {${obj.javaClass.simpleName}}" }
 				val ifdName = getMember(obj, "getIFDName", String::class)
 				val sessionId =
 					getMember(
@@ -163,7 +163,7 @@ class HandlerUtils {
 					ByteArray::class,
 				)
 			if (slotHandle != null) {
-				LOG.debug { "${"Found SlotHandle in object of type {}."} ${obj.javaClass.simpleName}" }
+				LOG.debug { "Found SlotHandle in object of type {${obj.javaClass.simpleName}" }
 				return HandlerBuilder.Companion
 					.create()
 					.setSlotHandle(slotHandle)

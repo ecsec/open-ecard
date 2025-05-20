@@ -47,7 +47,7 @@ open class Select(
 	 */
 	fun setFCI() {
 		p2 = FCI
-		le = xFF.toInt()
+		setLE(xFF)
 	}
 
 	/**
@@ -55,7 +55,7 @@ open class Select(
 	 */
 	fun setFCP() {
 		p2 = FCP
-		le = xFF.toInt()
+		setLE(xFF)
 	}
 
 	/**
@@ -63,7 +63,7 @@ open class Select(
 	 */
 	fun setFMD() {
 		p2 = FMD
-		le = xFF.toInt()
+		setLE(xFF)
 	}
 
 	/**

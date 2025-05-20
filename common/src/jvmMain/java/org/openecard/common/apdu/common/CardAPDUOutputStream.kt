@@ -80,7 +80,7 @@ class CardAPDUOutputStream : ByteArrayOutputStream {
 		} else if (length > 0xFF) {
 			write(0x82.toByte().toInt())
 		}
-		write(toByteArray())
+		write(length)
 		write(value)
 	}
 }

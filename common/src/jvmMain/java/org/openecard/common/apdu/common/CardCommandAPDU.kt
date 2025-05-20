@@ -57,14 +57,22 @@ open class CardCommandAPDU : CardAPDU {
 	 *
 	 * @return Length expected (LE) field
 	 */
-	var le: Int = -1
+	var le: Int
+		set(v) = setLE(v)
+		get() = _le
+
+	private var _le: Int = -1
 
 	/**
 	 * Returns the length command (LC) field.
 	 *
 	 * @return Length command (LC) field
 	 */
-	var lc: Int = -1
+	var lc: Int
+		set(v) = setLC(v)
+		get() = _lc
+
+	private var _lc: Int = -1
 
 	/**
 	 * Creates a new command APDU.
@@ -128,7 +136,7 @@ open class CardCommandAPDU : CardAPDU {
 	 * @param le Length expected field
 	 */
 	constructor(cla: Byte, ins: Byte, p1: Byte, p2: Byte, le: Int) : this(cla, ins, p1, p2) {
-		this.le = le
+		_le = le
 	}
 
 	/**
@@ -309,7 +317,7 @@ open class CardCommandAPDU : CardAPDU {
 	 */
 	protected fun setLC(lc: Int) {
 		require(!(lc < 1 || lc > 65536)) { "Length should be from '1' to '65535'." }
-		this.lc = lc
+		_lc = lc
 	}
 
 	/**
@@ -349,15 +357,15 @@ open class CardCommandAPDU : CardAPDU {
 			val length = bais.available()
 
 			// Cleanup
-			lc = -1
-			le = -1
+			_lc = -1
+			_le = -1
 			protectedData = ByteArray(0)
 
 			if (length == 0) {
 				// Case 1. : |CLA|INS|P1|P2|
 			} else if (length == 1) {
 				// Case 2 |CLA|INS|P1|P2|LE|
-				le = (bais.read() and 0xFF)
+				_le = (bais.read() and 0xFF)
 			} else if (length < 65536) {
 				val tmp = bais.read()
 
@@ -365,24 +373,24 @@ open class CardCommandAPDU : CardAPDU {
 					// Case 2.1, 3.1, 4.1, 4.3
 					if (bais.available() < 3) {
 						// Case 2.1 |CLA|INS|P1|P2|EXTLE|
-						le = parseExtLeNumber(bais)
+						_le = parseExtLeNumber(bais)
 					} else {
 						// Case 3.1, 4.1, 4.3
-						lc = ((bais.read() and 0xFF) shl 8) or (bais.read() and 0xFF)
+						_lc = ((bais.read() and 0xFF) shl 8) or (bais.read() and 0xFF)
 
 						protectedData = ByteArray(lc)
 						bais.read(protectedData)
 
 						if (bais.available() == 1) {
 							// Case 4.1 |CLA|INS|P1|P2|EXTLC|DATA|LE|
-							le = (bais.read() and 0xFF)
+							_le = (bais.read() and 0xFF)
 						} else if (bais.available() == 2) {
 							// Case 4.3 |CLA|INS|P1|P2|EXTLC|DATA|EXTLE|
-							le = parseExtLeNumber(bais)
+							_le = parseExtLeNumber(bais)
 						} else if (bais.available() == 3) {
 							if (bais.read() == 0) {
 								// Case 4.3 |CLA|INS|P1|P2|EXTLC|DATA|EXTLE|
-								le = parseExtLeNumber(bais)
+								_le = parseExtLeNumber(bais)
 							} else {
 								throw IllegalArgumentException("Malformed APDU.")
 							}
@@ -392,7 +400,7 @@ open class CardCommandAPDU : CardAPDU {
 					}
 				} else if (tmp > 0) {
 					// Case 3, 4, 4.2
-					lc = (tmp and 0xFF)
+					_lc = (tmp and 0xFF)
 					protectedData = ByteArray(lc)
 					bais.read(protectedData)
 
@@ -402,7 +410,7 @@ open class CardCommandAPDU : CardAPDU {
 					} else if (bais.available() == 3) {
 						// Case 4.2 |CLA|INS|P1|P2|LC|DATA|EXTLE|
 						bais.read() // throw away first byte
-						le = parseExtLeNumber(bais)
+						_le = parseExtLeNumber(bais)
 					} else {
 						require(!(bais.available() == 2 || bais.available() > 3)) { "Malformed APDU." }
 					}
@@ -450,7 +458,7 @@ open class CardCommandAPDU : CardAPDU {
 	 */
 	fun setLE(le: Int) {
 		require(!(le < 0 || le > 65536)) { "Length should be from '1' to '65535'." }
-		this.le = le
+		_le = le
 	}
 
 	/**

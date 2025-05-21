@@ -2,7 +2,7 @@ package org.openecard.utils.common
 
 class BitSet internal constructor(
 	private val bytes: MutableList<UByte>,
-	private val bitSize: Long,
+	val bitSize: Long,
 ) : Iterable<Boolean> {
 	@Throws(IndexOutOfBoundsException::class)
 	operator fun get(index: Int): Boolean = get(index.toLong())
@@ -15,7 +15,7 @@ class BitSet internal constructor(
 		val bitIdx = index.mod(8)
 
 		val b = bytes[byteIdx]
-		return (b.toInt() and bitIdx) == 1
+		return ((b.toInt() shr bitIdx) and 0x01) == 1
 	}
 
 	@Throws(IndexOutOfBoundsException::class)
@@ -35,8 +35,12 @@ class BitSet internal constructor(
 		val bitIdx = index.mod(8)
 
 		var b = bytes[byteIdx]
-		b = b xor bitIdx.toUByte()
-		bytes[byteIdx] = b
+		val isBitSet = ((b.toInt() shr bitIdx) and 0x01) == 1
+		if (isBitSet != bit) {
+			val mask = (1 shl bitIdx).toUByte()
+			b = b xor mask
+			bytes[byteIdx] = b
+		}
 	}
 
 	override fun iterator(): Iterator<Boolean> =

@@ -1,5 +1,7 @@
 package org.openecard.utils.common
 
+fun Boolean.toInt(): Int = if (this) 1 else 0
+
 @OptIn(ExperimentalUnsignedTypes::class)
 fun UByteArray.toUByte(offset: Int): UByte {
 	val b = this[offset]
@@ -31,6 +33,16 @@ fun UByteArray.toULong(offset: Int): ULong {
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.enlargeToLong(): UByteArray =
+	if (size < Long.SIZE_BYTES) {
+		val result = UByteArray(Long.SIZE_BYTES)
+		this.copyInto(result, destinationOffset = result.size - this.size)
+		result
+	} else {
+		this
+	}
+
+@OptIn(ExperimentalUnsignedTypes::class)
 fun UByte.toUByteArray(): UByteArray = ubyteArrayOf(this)
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -52,4 +64,51 @@ fun ULong.toUByteArray(bigEndian: Boolean = true): UByteArray {
 	val v1 = this.toUInt().toUByteArray()
 	val v2 = this.shr(32).toUInt().toUByteArray()
 	return (v2 + v1).reversedIf { !bigEndian }
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun ULong.toSparseUByteArray(
+	numBits: Int = 8,
+	bigEndian: Boolean = true,
+): UByteArray {
+	require(!(numBits < 1 || numBits > 8)) { "numBits must be between 1 and 8, but was $numBits." }
+	val value = this
+
+	val numBytesInBuffer = 64 / numBits
+	val restBits = 64 - (numBytesInBuffer * numBits)
+	val buffer = mutableListOf<UByte>()
+
+	var firstAdded = false
+	for (i in numBytesInBuffer - (if (restBits > 0) 0 else 1) downTo 0) {
+		val b: UByte
+		// first chunk might have an uneven number of bits
+		if (i == numBytesInBuffer) {
+			val mask = numBitsToMask(restBits)
+			b = ((value shr (((i - 1) * numBits) + restBits)).toByte().toInt() and mask.toInt()).toUByte()
+		} else {
+			val mask = numBitsToMask(numBits)
+			b = ((value shr (i * numBits)) and mask.toULong()).toUByte()
+		}
+
+		if (!firstAdded && b.toUInt() == 0u) {
+			continue
+		}
+		firstAdded = true
+		buffer.add(b)
+	}
+
+	if (buffer.isEmpty()) {
+		// return at least one byte
+		return ubyteArrayOf(0u)
+	}
+
+	return buffer.toUByteArray().reversedIf { !bigEndian }
+}
+
+private fun numBitsToMask(numBits: Int): UByte {
+	var result: UInt = 0u
+	for (i in 0..<numBits) {
+		result = ((result shl 1) or 1u)
+	}
+	return result.toUByte()
 }

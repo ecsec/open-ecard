@@ -6,6 +6,7 @@ import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.CommandApdu
 import org.openecard.sc.iface.isNormalProcessed
+import org.openecard.sc.iface.toAtr
 import org.openecard.sc.iface.transmit
 import javax.smartcardio.ATR
 
@@ -41,7 +42,8 @@ class PcscCard(
 		}
 }
 
-internal fun ATR.toAtr(): Atr = Atr(this.bytes)
+@OptIn(ExperimentalUnsignedTypes::class)
+internal fun ATR.toAtr(): Atr = this.bytes.toUByteArray().toAtr()
 
 internal fun String.toCardProtocol(isContactless: Boolean): CardProtocol =
 	if (isContactless) {

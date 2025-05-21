@@ -9,6 +9,7 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
+			implementation(libs.kotlin.logging)
 			api(project(":utils:common"))
 			api(project(":utils:serialization"))
 			api(libs.kotlin.coroutines.core)

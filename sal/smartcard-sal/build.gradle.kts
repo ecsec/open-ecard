@@ -9,7 +9,7 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
-			// implementation(libs.kotlin.logging)
+			implementation(libs.kotlin.logging)
 			api(project(":sal:sal-base"))
 			api(project(":smartcard:sc-base"))
 		}

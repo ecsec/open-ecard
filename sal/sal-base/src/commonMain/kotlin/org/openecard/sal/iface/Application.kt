@@ -9,7 +9,7 @@ interface Application {
 	val datasets: List<Dataset>
 	val dids: List<Did>
 
-	val missingAuthentications: MissingAuthentications
+	val missingSelectAuthentications: MissingAuthentications
 
 	val isConnected: Boolean
 

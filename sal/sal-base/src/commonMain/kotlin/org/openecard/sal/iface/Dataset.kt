@@ -4,7 +4,8 @@ interface Dataset {
 	val name: String
 	val application: Application
 
-	val missingAuthentications: MissingAuthentications
+	val missingReadAuthentications: MissingAuthentications
+	val missingWriteAuthentications: MissingAuthentications
 
 	// TODO: support Records and other file things
 

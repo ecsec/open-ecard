@@ -7,7 +7,8 @@ interface DeviceConnection {
 	val connectionId: String
 	val session: SalSession
 
-	val applications: Application
+	val initialApplication: Application
+	val applications: List<Application>
 	val authenticatedDids: List<AuthenticationDid>
 
 	@Throws(

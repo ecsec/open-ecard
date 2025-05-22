@@ -2,6 +2,7 @@ package org.openecard.sal.iface.dids
 
 import org.openecard.sal.iface.Application
 import org.openecard.sal.iface.DeviceUnavailable
+import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.NoService
 import org.openecard.sal.iface.NotInitialized
 import org.openecard.sal.iface.RemovedDevice
@@ -15,7 +16,9 @@ sealed interface Did {
 	val isLocal: Boolean
 }
 
-sealed interface AuthenticationDid : Did
+sealed interface AuthenticationDid : Did {
+	val missingAuthAuthentications: MissingAuthentications
+}
 
 sealed interface SecureChannelDid : Did {
 	/**
@@ -42,3 +45,9 @@ enum class PinRequestReason {
 	PIN_TOO_SHORT,
 	// TODO: add more possible error causes
 }
+
+fun List<Did>.pinDids(): List<PinDid> = filterIsInstance<PinDid>()
+
+fun List<Did>.paceDids(): List<PaceDid> = filterIsInstance<PaceDid>()
+
+fun List<Did>.signDids(): List<SignDid> = filterIsInstance<SignDid>()

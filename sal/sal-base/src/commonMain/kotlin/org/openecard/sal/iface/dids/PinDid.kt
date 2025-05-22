@@ -3,6 +3,7 @@ package org.openecard.sal.iface.dids
 import org.openecard.sal.iface.Cancelled
 import org.openecard.sal.iface.DeviceUnavailable
 import org.openecard.sal.iface.MissingAuthentication
+import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.NoService
 import org.openecard.sal.iface.NotInitialized
 import org.openecard.sal.iface.RemovedDevice
@@ -15,6 +16,8 @@ import org.openecard.sc.iface.feature.PinStatus
 import kotlin.coroutines.cancellation.CancellationException
 
 interface PinDid : AuthenticationDid {
+	val missingModifyAuthentications: MissingAuthentications
+
 	@Throws(
 		NotInitialized::class,
 		NoService::class,

@@ -4,7 +4,6 @@ import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 import java.util.Scanner
 import java.util.stream.Stream
-import kotlin.streams.toList
 
 data class SampleAtr(
 	val atr: PrintableUByteArray,

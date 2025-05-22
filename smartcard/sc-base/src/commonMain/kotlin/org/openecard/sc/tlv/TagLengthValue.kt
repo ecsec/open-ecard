@@ -24,6 +24,7 @@ package org.openecard.sc.tlv
 
 import org.openecard.utils.common.toSparseUByteArray
 import org.openecard.utils.common.toUByteArray
+import org.openecard.utils.common.toUShort
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -62,22 +63,30 @@ data class TagLengthValue
 				addAll(value.v)
 			}.toUByteArray()
 
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun toCompact(): UByteArray =
+			buildList {
+				add(tag.toCompact(valueLength))
+				addAll(value.v)
+			}.toUByteArray()
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun toSimple(): UByteArray =
+			buildList {
+				add(tag.toSimple())
+				if (valueLength >= 0xFF) {
+					add(0xFFu)
+					addAll(valueLength.toUShort().toUByteArray())
+				} else {
+					add(valueLength.toUByte())
+				}
+				addAll(value.v)
+			}.toUByteArray()
+
 		companion object {
 			@Throws(TlvException::class)
 			@OptIn(ExperimentalUnsignedTypes::class)
-			fun fromBer(
-				data: UByteArray,
-				compactTlv: Boolean = false,
-			): ParsedTagLengthValue {
-				if (compactTlv) {
-					val num = data[0].toUInt() shr 4
-					val len = (data[0] and 0x0Fu).toInt()
-					val tag = Tag.fromBer(ubyteArrayOf((0x40u or num).toUByte()))
-					val tlv = TagLengthValue(tag.tag, data.sliceArray(1 until 1 + len).toPrintable())
-					val rest = data.sliceArray(1 + len until data.size)
-					return ParsedTagLengthValue(tlv, 1 + len, rest.toPrintable())
-				}
-
+			fun fromBer(data: UByteArray): ParsedTagLengthValue {
 				var (tag, numOctets) = Tag.fromBer(data)
 
 				// get length
@@ -153,6 +162,32 @@ data class TagLengthValue
 				// we have all values, build Tag object and return
 				val result = TagLengthValue(tag, dataField.toPrintable())
 				return ParsedTagLengthValue(result, numOctets, rest.toPrintable())
+			}
+
+			@Throws(TlvException::class)
+			@OptIn(ExperimentalUnsignedTypes::class)
+			fun fromCompact(data: UByteArray): ParsedTagLengthValue {
+				val num = data[0].toUInt() shr 4
+				val len = (data[0] and 0x0Fu).toInt()
+				val tag = Tag.fromBer(ubyteArrayOf((0x40u or num).toUByte()))
+				val tlv = TagLengthValue(tag.tag, data.sliceArray(1 until 1 + len).toPrintable())
+				val rest = data.sliceArray(1 + len until data.size)
+				return ParsedTagLengthValue(tlv, 1 + len, rest.toPrintable())
+			}
+
+			@OptIn(ExperimentalUnsignedTypes::class)
+			fun fromSimple(data: UByteArray): ParsedTagLengthValue {
+				val tag = Tag.fromSimple(data)
+				val l1 = data[1]
+				val (len, offset) =
+					if (l1 == 0xFFu.toUByte()) {
+						data.toUShort(2).toInt() to 4
+					} else {
+						l1.toInt() to 2
+					}
+				val tlv = TagLengthValue(tag.tag, data.sliceArray(offset until offset + len).toPrintable())
+				val rest = data.sliceArray(offset + len until data.size)
+				return ParsedTagLengthValue(tlv, offset + len, rest.toPrintable())
 			}
 		}
 	}

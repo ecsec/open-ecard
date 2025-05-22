@@ -1,5 +1,6 @@
-package org.openecard.sc.iface
+package org.openecard.sc.apdu
 
+import org.openecard.utils.common.cast
 import org.openecard.utils.common.toUByte
 import org.openecard.utils.common.toUShort
 
@@ -26,10 +27,13 @@ class CommandApdu
 		val p2: UByte,
 		val data: UByteArray = ubyteArrayOf(),
 		val le: UShort? = 0u,
-		forceExtendedLength: Boolean = false,
+		val forceExtendedLength: Boolean = false,
 	) {
 		@OptIn(ExperimentalUnsignedTypes::class)
 		val lc: UShort = data.size.toUShort()
+
+		val classByte: ClassByte by lazy { ClassByte.parse(cla) }
+		val classByteInterIndustry: InterIndustryClassByte? by lazy { classByte.cast() }
 
 		@OptIn(ExperimentalUnsignedTypes::class)
 		val toBytes: UByteArray by lazy {
@@ -106,7 +110,7 @@ fun UByteArray.toCommandApdu(): CommandApdu {
 				isExtended = true
 				val lc = body.toUShort(1).toInt()
 				data = body.sliceArray(3 until 3 + lc)
-				
+
 				val leField = body.sliceArray(3 + lc until body.size)
 				le =
 					if (leField.isEmpty()) {
@@ -142,32 +146,3 @@ fun UByteArray.toCommandApdu(): CommandApdu {
 
 	return CommandApdu(cla, ins, p1, p2, data, le, isExtended)
 }
-
-class ResponseApdu
-	@OptIn(ExperimentalUnsignedTypes::class)
-	constructor(
-		val data: UByteArray,
-		val sw1: UByte,
-		val sw2: UByte,
-	) {
-		@OptIn(ExperimentalUnsignedTypes::class)
-		val toBytes: UByteArray by lazy {
-			data + ubyteArrayOf(sw1, sw2)
-		}
-		val sw: UShort
-			get() = (sw1.toUInt().shl(8) or sw2.toUInt()).toUShort()
-	}
-
-@OptIn(ExperimentalUnsignedTypes::class)
-fun ByteArray.toResponseApdu(): ResponseApdu = toUByteArray().toResponseApdu()
-
-@OptIn(ExperimentalUnsignedTypes::class)
-fun UByteArray.toResponseApdu(): ResponseApdu {
-	require(size >= 2)
-	val sw = takeLast(2)
-	val data = sliceArray(0 until size - 2)
-	return ResponseApdu(data.toUByteArray(), sw1 = sw[0].toUByte(), sw2 = sw[1].toUByte())
-}
-
-val ResponseApdu.isNormalProcessed: Boolean
-	get() = sw.toUInt() == 0x9000u

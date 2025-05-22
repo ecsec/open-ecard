@@ -26,8 +26,9 @@ class AtrTest {
 		}
 		"3B 8A 80 01 80 31 B8 73 84 01 E0 82 90 00 06".replace(" ", "").hexToUByteArray().toAtr().let { atr ->
 			assertEquals(0x3Bu, atr.ts)
-			assertEquals(2, atr.historicalBytes?.dataObjects?.size)
 			val hb = assertNotNull(atr.historicalBytes)
+			assertEquals(3, hb.dataObjects.size)
+			assertEquals(0x9000u, hb.sw)
 			assertNotNull(hb.cardServiceData)
 			assertNotNull(hb.cardCapabilities)
 		}

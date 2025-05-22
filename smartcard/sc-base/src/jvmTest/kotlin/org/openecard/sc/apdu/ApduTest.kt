@@ -1,4 +1,4 @@
-package org.openecard.sc.iface
+package org.openecard.sc.apdu
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor
@@ -239,7 +239,7 @@ class ApduTest {
 	fun `read and write command apdu -CLA-INS-P1-P2-LC-DATA-LE-`(args: ArgumentsAccessor) {
 		val lcInput = args.getInteger(0).toUByte()
 		val leInput = args.getInteger(1).toUByte()
-		
+
 		UByteArray(lcInput.toInt()) { 0.toUByte() }.let { data ->
 			val dataStr = data.toHexString()
 			val lc = data.size.toUByte().toHexString()

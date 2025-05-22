@@ -1,7 +1,7 @@
 package org.openecard.sc.iface
 
 import org.openecard.sc.tlv.TlvPrimitive
-import org.openecard.sc.tlv.toTlv
+import org.openecard.sc.tlv.toTlvCompact
 import org.openecard.utils.common.toUShort
 
 class HistoricalBytes
@@ -48,7 +48,7 @@ fun UByteArray.toHistoricalBytes(): HistoricalBytes? {
 			val sw = status.toUShort(1)
 			val dataObjects =
 				if (this.size - idx > 3) {
-					val (tlv) = this.sliceArray(idx until size - 3).toTlv(compactTlv = true)
+					val (tlv) = this.sliceArray(idx until size - 3).toTlvCompact()
 					tlv.asList().filterIsInstance<TlvPrimitive>()
 				} else {
 					listOf()
@@ -68,7 +68,7 @@ fun UByteArray.toHistoricalBytes(): HistoricalBytes? {
 		}
 
 		0x80 -> {
-			val (tlv) = this.sliceArray(idx until size).toTlv(compactTlv = true)
+			val (tlv) = this.sliceArray(idx until size).toTlvCompact()
 			val dataObjects = tlv.asList().filterIsInstance<TlvPrimitive>()
 			val statusObject = dataObjects.last()
 			checkNotNull(statusObject)

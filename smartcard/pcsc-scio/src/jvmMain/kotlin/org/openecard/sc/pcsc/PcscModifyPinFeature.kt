@@ -1,9 +1,9 @@
 package org.openecard.sc.pcsc
 
-import org.openecard.sc.iface.ResponseApdu
+import org.openecard.sc.apdu.ResponseApdu
+import org.openecard.sc.apdu.toResponseApdu
 import org.openecard.sc.iface.feature.ModifyPinFeature
 import org.openecard.sc.iface.feature.PinModify
-import org.openecard.sc.iface.toResponseApdu
 
 class PcscModifyPinFeature(
 	private val terminalConnection: PcscTerminalConnection,

@@ -1,9 +1,9 @@
 package org.openecard.sc.pcsc
 
-import org.openecard.sc.iface.ResponseApdu
+import org.openecard.sc.apdu.ResponseApdu
+import org.openecard.sc.apdu.toResponseApdu
 import org.openecard.sc.iface.feature.PinVerify
 import org.openecard.sc.iface.feature.VerifyPinFeature
-import org.openecard.sc.iface.toResponseApdu
 
 class PcscVerifyPinFeature(
 	private val terminalConnection: PcscTerminalConnection,

@@ -1,5 +1,6 @@
 package org.openecard.sc.iface.feature
 
+import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.InsufficientBuffer
 import org.openecard.sc.iface.InvalidHandle
@@ -10,7 +11,6 @@ import org.openecard.sc.iface.NotTransacted
 import org.openecard.sc.iface.ReaderUnavailable
 import org.openecard.sc.iface.RemovedCard
 import org.openecard.sc.iface.ResetCard
-import org.openecard.sc.iface.ResponseApdu
 import org.openecard.sc.utils.UsbLang
 import org.openecard.sc.utils.UsbLangId
 import org.openecard.utils.common.toUByteArray

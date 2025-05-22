@@ -1,11 +1,11 @@
 package org.openecard.sc.pcsc
 
+import org.openecard.sc.apdu.CommandApdu
+import org.openecard.sc.apdu.isNormalProcessed
 import org.openecard.sc.iface.Atr
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
-import org.openecard.sc.iface.CommandApdu
-import org.openecard.sc.iface.isNormalProcessed
 import org.openecard.sc.iface.toAtr
 import org.openecard.sc.iface.transmit
 import javax.smartcardio.ATR

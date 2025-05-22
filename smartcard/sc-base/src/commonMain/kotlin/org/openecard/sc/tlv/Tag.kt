@@ -64,6 +64,10 @@ data class Tag(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun toBer(): UByteArray = tagNumWithClass.toSparseUByteArray()
 
+	fun toCompact(valueLen: Int): UByte = ((tagNum.toInt() shl 4) or (valueLen and 0xF)).toUByte()
+
+	fun toSimple(): UByte = tagNum.toUByte()
+
 	@OptIn(ExperimentalStdlibApi::class)
 	override fun toString(): String {
 		val numClass = tagNumWithClass.toSparseUByteArray().toHexString()
@@ -143,6 +147,11 @@ data class Tag(
 			val resultTag = Tag(tagClass, primitive, tagNum)
 
 			return ParsedTag(resultTag, numOctets)
+		}
+
+		internal fun fromSimple(data: UByteArray): ParsedTag {
+			val num = data[0]
+			return ParsedTag(Tag(TagClass.APPLICATION, true, num.toULong()), 1)
 		}
 
 		fun forTagNumWithClass(tagNumWithClass: ULong): Tag {

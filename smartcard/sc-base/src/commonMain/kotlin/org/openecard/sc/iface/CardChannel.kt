@@ -1,5 +1,9 @@
 package org.openecard.sc.iface
 
+import org.openecard.sc.apdu.CommandApdu
+import org.openecard.sc.apdu.ResponseApdu
+import org.openecard.sc.apdu.toResponseApdu
+
 interface CardChannel {
 	val card: Card
 	val channelNumber: Int

@@ -73,6 +73,40 @@ sealed interface Tlv {
 				sibling?.let { addAll(it.toBer(withSuccessors)) }
 			}
 		}.toUByteArray()
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun toCompact(withSuccessors: Boolean = false): UByteArray =
+		buildList {
+			when (this@Tlv) {
+				is TlvPrimitive -> {
+					addAll(tagLengthValue.toCompact())
+				}
+				else -> throw IllegalArgumentException(
+					"The given TLV structure contains constructed objects which can not be serialized as compact TLV.",
+				)
+			}
+
+			if (withSuccessors) {
+				sibling?.let { addAll(it.toCompact(withSuccessors)) }
+			}
+		}.toUByteArray()
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun toSimple(withSuccessors: Boolean = false): UByteArray =
+		buildList {
+			when (this@Tlv) {
+				is TlvPrimitive -> {
+					addAll(tagLengthValue.toSimple())
+				}
+				else -> throw IllegalArgumentException(
+					"The given TLV structure contains constructed objects which can not be serialized as simple TLV.",
+				)
+			}
+
+			if (withSuccessors) {
+				sibling?.let { addAll(it.toSimple(withSuccessors)) }
+			}
+		}.toUByteArray()
 }
 
 data class TlvPrimitive
@@ -161,13 +195,13 @@ class TlvConstructedBuilder internal constructor(
 
 @OptIn(ExperimentalUnsignedTypes::class)
 @Throws(TlvException::class)
-fun UByteArray.toTlv(compactTlv: Boolean = false): ParsedTlv {
+fun UByteArray.toTlvBer(): ParsedTlv {
 	var rest = this
 	val result = mutableListOf<Tlv>()
 
 	try {
 		while (rest.isNotEmpty()) {
-			val (tlvInternal, numOctets, remaining) = TagLengthValue.fromBer(rest, compactTlv = true)
+			val (tlvInternal, numOctets, remaining) = TagLengthValue.fromBer(rest)
 			val tlv =
 				if (tlvInternal.tag.primitive) {
 					TlvPrimitive(tlvInternal)
@@ -175,6 +209,56 @@ fun UByteArray.toTlv(compactTlv: Boolean = false): ParsedTlv {
 					val child = parseChild(tlvInternal.value.v)
 					TlvConstructed(tlvInternal.tag, child)
 				}
+			result.add(tlv)
+
+			rest = remaining.v
+		}
+	} catch (ex: TlvException) {
+		// end of TLV data reached
+	}
+
+	val root =
+		result.reduceRightOrNull { next, previous ->
+			next.setSibling(previous)
+		} ?: throw TlvException("No TLV data found in provided data.")
+	return ParsedTlv(root, rest.toPrintable())
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+@Throws(TlvException::class)
+fun UByteArray.toTlvCompact(): ParsedTlv {
+	var rest = this
+	val result = mutableListOf<Tlv>()
+
+	try {
+		while (rest.isNotEmpty()) {
+			val (tlvInternal, numOctets, remaining) = TagLengthValue.fromCompact(rest)
+			val tlv = TlvPrimitive(tlvInternal)
+			result.add(tlv)
+
+			rest = remaining.v
+		}
+	} catch (ex: TlvException) {
+		// end of TLV data reached
+	}
+
+	val root =
+		result.reduceRightOrNull { next, previous ->
+			next.setSibling(previous)
+		} ?: throw TlvException("No TLV data found in provided data.")
+	return ParsedTlv(root, rest.toPrintable())
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+@Throws(TlvException::class)
+fun UByteArray.toTlvSimple(): ParsedTlv {
+	var rest = this
+	val result = mutableListOf<Tlv>()
+
+	try {
+		while (rest.isNotEmpty()) {
+			val (tlvInternal, numOctets, remaining) = TagLengthValue.fromSimple(rest)
+			val tlv = TlvPrimitive(tlvInternal)
 			result.add(tlv)
 
 			rest = remaining.v

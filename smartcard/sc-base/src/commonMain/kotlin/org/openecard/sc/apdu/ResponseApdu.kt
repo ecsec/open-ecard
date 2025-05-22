@@ -1,0 +1,30 @@
+package org.openecard.sc.apdu
+
+class ResponseApdu
+	@OptIn(ExperimentalUnsignedTypes::class)
+	constructor(
+		val data: UByteArray,
+		val sw1: UByte,
+		val sw2: UByte,
+	) {
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val toBytes: UByteArray by lazy {
+			data + ubyteArrayOf(sw1, sw2)
+		}
+		val sw: UShort
+			get() = (sw1.toUInt().shl(8) or sw2.toUInt()).toUShort()
+	}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun ByteArray.toResponseApdu(): ResponseApdu = toUByteArray().toResponseApdu()
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.toResponseApdu(): ResponseApdu {
+	require(size >= 2)
+	val sw = takeLast(2)
+	val data = sliceArray(0 until size - 2)
+	return ResponseApdu(data.toUByteArray(), sw1 = sw[0].toUByte(), sw2 = sw[1].toUByte())
+}
+
+val ResponseApdu.isNormalProcessed: Boolean
+	get() = sw.toUInt() == 0x9000u

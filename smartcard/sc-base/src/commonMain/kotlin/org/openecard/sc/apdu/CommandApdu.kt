@@ -3,6 +3,8 @@ package org.openecard.sc.apdu
 import org.openecard.utils.common.cast
 import org.openecard.utils.common.toUByte
 import org.openecard.utils.common.toUShort
+import org.openecard.utils.serialization.PrintableUByteArray
+import org.openecard.utils.serialization.toPrintable
 
 /**
  * Class representing an APDU.
@@ -18,19 +20,19 @@ import org.openecard.utils.common.toUShort
  * Case 4.1: |CLA|INS|P1|P2|EXTLC|DATA|EXTLE|
  * ```
  */
-class CommandApdu
+data class CommandApdu
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
 		val cla: UByte,
 		val ins: UByte,
 		val p1: UByte,
 		val p2: UByte,
-		val data: UByteArray = ubyteArrayOf(),
+		val data: PrintableUByteArray = ubyteArrayOf().toPrintable(),
 		val le: UShort? = 0u,
 		val forceExtendedLength: Boolean = false,
 	) {
 		@OptIn(ExperimentalUnsignedTypes::class)
-		val lc: UShort = data.size.toUShort()
+		val lc: UShort = data.v.size.toUShort()
 
 		val classByte: ClassByte by lazy { ClassByte.parse(cla) }
 		val classByteInterIndustry: InterIndustryClassByte? by lazy { classByte.cast() }
@@ -67,7 +69,7 @@ class CommandApdu
 				} ?: ubyteArrayOf()
 
 			// assemble apdu
-			header + lcField + data + leField
+			header + lcField + data.v + leField
 		}
 	}
 
@@ -144,5 +146,5 @@ fun UByteArray.toCommandApdu(): CommandApdu {
 		}
 	}
 
-	return CommandApdu(cla, ins, p1, p2, data, le, isExtended)
+	return CommandApdu(cla, ins, p1, p2, data.toPrintable(), le, isExtended)
 }

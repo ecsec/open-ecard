@@ -32,3 +32,15 @@ fun UByteArray.toNibbles(bigEndian: Boolean = true): UByteArray =
 @Throws(IllegalArgumentException::class)
 @OptIn(ExperimentalUnsignedTypes::class)
 fun UByteArray.toDigitsString(): String = map { it.toInt().digitToChar() }.toCharArray().concatToString()
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun List<UByteArray>.mergeToArray(): UByteArray {
+	val len = this.fold(0, { acc, next -> acc + next.size })
+	val result = UByteArray(len)
+	var offset = 0
+	forEach {
+		it.copyInto(result, destinationOffset = offset)
+		offset += it.size
+	}
+	return result
+}

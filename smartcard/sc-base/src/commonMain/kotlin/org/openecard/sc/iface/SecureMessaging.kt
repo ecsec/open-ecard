@@ -1,13 +1,16 @@
 package org.openecard.sc.iface
 
+import org.openecard.sc.apdu.CommandApdu
+import org.openecard.sc.apdu.ResponseApdu
+
 interface SecureMessaging {
 	@Throws(SecureMessagingException::class)
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun processRequest(requestApdu: UByteArray): UByteArray
+	fun processRequest(requestApdu: CommandApdu): CommandApdu
 
 	@Throws(SecureMessagingException::class)
 	@OptIn(ExperimentalUnsignedTypes::class)
-	fun processResponse(responseApdu: UByteArray): UByteArray
+	fun processResponse(responseApdu: ResponseApdu): ResponseApdu
 }
 
 class SecureMessagingException(

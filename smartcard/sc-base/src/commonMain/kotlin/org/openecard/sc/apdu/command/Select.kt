@@ -1,6 +1,7 @@
 package org.openecard.sc.apdu.command
 
 import org.openecard.sc.apdu.CommandApdu
+import org.openecard.utils.serialization.toPrintable
 
 class Select
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -10,16 +11,16 @@ class Select
 		val fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 		val fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 		val extendedLength: Boolean = false,
-	) {
+	) : IsoCommandApdu {
 		@OptIn(ExperimentalUnsignedTypes::class)
-		val apdu: CommandApdu by lazy {
+		override val apdu: CommandApdu by lazy {
 			val le: UShort? =
 				if (fileControlInfo == FileControlInformation.NONE) {
 					0u
 				} else {
 					null
 				}
-			CommandApdu(0x00u, 0xA4u, p1, p2, data ?: ubyteArrayOf(), le, forceExtendedLength = extendedLength)
+			CommandApdu(0x00u, 0xA4u, p1, p2, (data ?: ubyteArrayOf()).toPrintable(), le, forceExtendedLength = extendedLength)
 		}
 	
 		val p2: UByte by lazy { ((fileControlInfo.code.toUInt() shl 2) or fileOccurrence.code.toUInt()).toUByte() }

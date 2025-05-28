@@ -142,6 +142,9 @@ data class StatusWordResult(
 	val type: StatusWord,
 	val parameter: UByte?,
 ) {
+	val sw1: UByte by lazy { (sw.toUInt() shr 8).toUByte() }
+	val sw2: UByte by lazy { sw.toUByte() }
+
 	val isNormal by lazy { isNormal(sw) }
 	val isWarning by lazy { isWarning(sw) }
 	val isExecutionError by lazy { isExecutionError(sw) }
@@ -152,7 +155,7 @@ fun UShort.toStatusWord(): StatusWordResult {
 	val status = StatusWord.forSw(this)
 	val param =
 		status.parameterMask?.let {
-			if (it < 0x0Fu) {
+			if (it <= 0x0Fu) {
 				(it and this).toUByte()
 			} else {
 				null

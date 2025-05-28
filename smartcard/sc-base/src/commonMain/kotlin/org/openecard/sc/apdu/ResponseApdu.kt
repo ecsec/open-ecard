@@ -11,8 +11,8 @@ class ResponseApdu
 		val toBytes: UByteArray by lazy {
 			data + ubyteArrayOf(sw1, sw2)
 		}
-		val sw: UShort
-			get() = (sw1.toUInt().shl(8) or sw2.toUInt()).toUShort()
+		val sw: UShort by lazy { (sw1.toUInt().shl(8) or sw2.toUInt()).toUShort() }
+		val status: StatusWordResult by lazy { sw.toStatusWord() }
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)

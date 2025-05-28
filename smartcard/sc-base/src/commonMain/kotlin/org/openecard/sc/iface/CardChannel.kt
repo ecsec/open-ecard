@@ -2,7 +2,6 @@ package org.openecard.sc.iface
 
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
-import org.openecard.sc.apdu.toResponseApdu
 
 interface CardChannel {
 	val card: Card
@@ -11,6 +10,8 @@ interface CardChannel {
 		get() = channelNumber == 0
 	val isLogicalChannel: Boolean
 		get() = !isBasicChannel
+
+	var capabilities: CardCapabilities?
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Throws(
@@ -27,7 +28,7 @@ interface CardChannel {
 		RemovedCard::class,
 		SecureMessagingException::class,
 	)
-	fun transmit(apdu: UByteArray): UByteArray
+	fun transmit(apdu: CommandApdu): ResponseApdu
 
 	@Throws(
 		InsufficientBuffer::class,
@@ -51,20 +52,3 @@ interface CardChannel {
 
 	fun cleanSecureMessaging()
 }
-
-@OptIn(ExperimentalUnsignedTypes::class)
-@Throws(
-	InsufficientBuffer::class,
-	InvalidHandle::class,
-	InvalidParameter::class,
-	InvalidValue::class,
-	NoService::class,
-	NotTransacted::class,
-	ProtoMismatch::class,
-	ReaderUnavailable::class,
-	CommError::class,
-	ResetCard::class,
-	RemovedCard::class,
-	SecureMessagingException::class,
-)
-fun CardChannel.transmit(apdu: CommandApdu): ResponseApdu = transmit(apdu.toBytes).toResponseApdu()

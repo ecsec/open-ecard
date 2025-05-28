@@ -3,6 +3,7 @@ package org.openecard.sc.apdu
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor
 import org.junit.jupiter.params.provider.CsvSource
+import org.openecard.utils.serialization.toPrintable
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -26,7 +27,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(1).toUByteArray(),
+				data = ByteArray(1).toUByteArray().toPrintable(),
 				le = null,
 			)
 		assertContentEquals("000102030100".hexToUByteArray(), data1NoLe.toBytes)
@@ -37,7 +38,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(0xFF).toUByteArray(),
+				data = ByteArray(0xFF).toUByteArray().toPrintable(),
 				le = null,
 			)
 		assertEquals(5 + 0xFF, dataFFNoLe.toBytes.size)
@@ -50,7 +51,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(0xFF).toUByteArray(),
+				data = ByteArray(0xFF).toUByteArray().toPrintable(),
 				le = null,
 				forceExtendedLength = true,
 			)
@@ -64,7 +65,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(1).toUByteArray(),
+				data = ByteArray(1).toUByteArray().toPrintable(),
 				le = 0u,
 			)
 		assertEquals(6 + 1, data1Le0.toBytes.size)
@@ -124,7 +125,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(0x100).toUByteArray(),
+				data = ByteArray(0x100).toUByteArray().toPrintable(),
 				le = null,
 			)
 		assertEquals(7 + 0x100, data100NoLe.toBytes.size)
@@ -137,7 +138,7 @@ class ApduTest {
 				0x01.toUByte(),
 				0x02.toUByte(),
 				0x03.toUByte(),
-				data = ByteArray(0xFF).toUByteArray(),
+				data = ByteArray(0xFF).toUByteArray().toPrintable(),
 				le = 0u,
 				forceExtendedLength = true,
 			)

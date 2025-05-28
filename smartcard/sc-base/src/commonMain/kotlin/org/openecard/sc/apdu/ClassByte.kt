@@ -1,7 +1,5 @@
 package org.openecard.sc.apdu
 
-import org.openecard.utils.common.toInt
-
 sealed interface ClassByte {
 	val byte: UByte
 

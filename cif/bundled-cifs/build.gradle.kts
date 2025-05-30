@@ -1,4 +1,4 @@
-description = "Card info file definition builder"
+description = "Bundled CIFs"
 
 plugins {
 	id("openecard.kmp-lib-conventions")
@@ -9,10 +9,8 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
-			implementation(libs.kotlin.logging)
-			api(project(":utils:serialization"))
-			api(project(":cif:cif-definition"))
-			api(project(":cif:cif-dsl-api"))
+			api(project(":cif:cif-definition-builder"))
+			implementation(project(":utils:common"))
 		}
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)

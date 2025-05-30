@@ -1,7 +1,9 @@
-package org.openecard.cif.dsl.api
+package org.openecard.cif.dsl.api.recognition
 
-import org.openecard.cif.definition.cardcall.DataMaskDefinition
-import org.openecard.cif.definition.cardcall.MatchRule
+import org.openecard.cif.definition.recognition.DataMaskDefinition
+import org.openecard.cif.definition.recognition.MatchRule
+import org.openecard.cif.dsl.api.CifMarker
+import org.openecard.cif.dsl.api.CifScope
 
 interface ApduCardCallScope {
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -11,26 +13,6 @@ interface ApduCardCallScope {
 	 * Define an additional response. Can be called multiple times.
 	 */
 	fun response(content: @CifMarker ApduResponseScope.() -> Unit)
-}
-
-object Api {
-	interface ApiCall
-
-	interface ApiResponse
-}
-
-interface ApiCardCallScope {
-	fun call(content: @CifMarker () -> Api.ApiCall)
-
-	fun responses(content: @CifMarker ApiResponsesScope.() -> Unit)
-}
-
-interface ApiCallScope
-
-interface ApiResponseScope
-
-interface ApiResponsesScope {
-	fun response(content: @CifMarker CifScope.() -> Api.ApiResponse)
 }
 
 interface ApduResponseScope : CifScope {
@@ -49,10 +31,9 @@ interface ApduResponseScope : CifScope {
 
 	fun body(content: @CifMarker MatchingDataScope.() -> Unit)
 
-	/**
-	 * Optional
-	 */
-	fun conclusion(content: @CifMarker ConclusionScope.() -> Unit)
+	fun recognizedCardType(name: String)
+
+	fun call(content: @CifMarker ApduCardCallScope.() -> Unit)
 }
 
 interface ResponseDataMaskScope : CifScope {
@@ -64,12 +45,6 @@ interface ResponseDataMaskScope : CifScope {
 	): DataMaskDefinition.DataObject
 }
 
-interface ApduResponsesScope : CifScope {
-	fun response(content: @CifMarker ApduResponseScope.() -> Unit)
-}
-
-interface TrailerScope : CifScope
-
 interface MatchingDataScope : CifScope {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	var value: UByteArray
@@ -79,12 +54,4 @@ interface MatchingDataScope : CifScope {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	var mask: UByteArray?
 	var rule: MatchRule?
-}
-
-interface ConclusionScope : CifScope {
-	fun inState(name: String)
-
-	fun recognizedCardType(name: String)
-
-	fun call(content: @CifMarker ApduCardCallScope.() -> Unit)
 }

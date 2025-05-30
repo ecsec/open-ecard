@@ -1,17 +1,17 @@
 package org.openecard.cif.dsl.builder.recognition
 
-import org.openecard.cif.definition.cardcall.ApduCallDefinition
-import org.openecard.cif.definition.cardcall.ConclusionDefinition
-import org.openecard.cif.definition.cardcall.DataMaskDefinition
-import org.openecard.cif.definition.cardcall.MatchRule
-import org.openecard.cif.definition.cardcall.ResponseApduDefinition
-import org.openecard.cif.dsl.api.ApduCardCallScope
-import org.openecard.cif.dsl.api.ApduResponseScope
+import org.openecard.cif.definition.recognition.ApduCallDefinition
+import org.openecard.cif.definition.recognition.ConclusionDefinition
+import org.openecard.cif.definition.recognition.DataMaskDefinition
+import org.openecard.cif.definition.recognition.MatchRule
+import org.openecard.cif.definition.recognition.RecognitionTree
+import org.openecard.cif.definition.recognition.ResponseApduDefinition
 import org.openecard.cif.dsl.api.CifMarker
-import org.openecard.cif.dsl.api.ConclusionScope
-import org.openecard.cif.dsl.api.MatchingDataScope
-import org.openecard.cif.dsl.api.RecognitionScope
-import org.openecard.cif.dsl.api.ResponseDataMaskScope
+import org.openecard.cif.dsl.api.recognition.ApduCardCallScope
+import org.openecard.cif.dsl.api.recognition.ApduResponseScope
+import org.openecard.cif.dsl.api.recognition.MatchingDataScope
+import org.openecard.cif.dsl.api.recognition.RecognitionScope
+import org.openecard.cif.dsl.api.recognition.ResponseDataMaskScope
 import org.openecard.utils.serialization.toPrintable
 
 interface Builder<T> {
@@ -28,7 +28,7 @@ class RecognitionTreeBuilder(
 		calls.add(builder.build())
 	}
 
-	override fun build(): List<ApduCallDefinition> = calls.toList()
+	override fun build(): RecognitionTree = calls.toList()
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -62,12 +62,7 @@ class ApduResponseBuilder :
 	var body: DataMaskDefinition? = null
 	var conclusion: ConclusionDefinition? = null
 
-	private var _trailer: UShort? = null
-	override var trailer: UShort
-		get() = _trailer!!
-		set(value) {
-			_trailer = value
-		}
+	override var trailer: UShort = 0x9000u
 
 	override fun body(
 		tag: UByte,
@@ -84,17 +79,21 @@ class ApduResponseBuilder :
 		body = builder.build()
 	}
 
-	override fun conclusion(content: @CifMarker (ConclusionScope.() -> Unit)) {
-		val builder = ConclusionScopeBuilder()
+	override fun recognizedCardType(name: String) {
+		conclusion = ConclusionDefinition.RecognizedCardType(name)
+	}
+
+	override fun call(content: @CifMarker (ApduCardCallScope.() -> Unit)) {
+		val builder = ApduCardCallScopeBuilder()
 		content.invoke(builder)
-		conclusion = builder.build()
+		conclusion = ConclusionDefinition.Call(builder.build())
 	}
 
 	override fun build(): ResponseApduDefinition =
 		ResponseApduDefinition(
 			body = body,
 			trailer = trailer,
-			conclusion = conclusion,
+			conclusion = conclusion!!,
 		)
 }
 
@@ -150,8 +149,8 @@ class MatchingDataBuilder :
 		set(value) {
 			_value = value
 		}
-	override var offset: UByte? = null
-	override var length: UByte? = null
+	override var offset: UInt = 0u
+	override var length: UInt? = null
 	override var mask: UByteArray? = null
 	override var rule: MatchRule? = null
 
@@ -163,26 +162,4 @@ class MatchingDataBuilder :
 			mask = mask?.toPrintable(),
 			rule = rule ?: MatchRule.Equals,
 		)
-}
-
-class ConclusionScopeBuilder :
-	ConclusionScope,
-	Builder<ConclusionDefinition> {
-	var conclusion: ConclusionDefinition? = null
-
-	override fun inState(name: String) {
-		conclusion = ConclusionDefinition.NamedState(name)
-	}
-
-	override fun recognizedCardType(name: String) {
-		conclusion = ConclusionDefinition.RecognizedCardType(name)
-	}
-
-	override fun call(content: @CifMarker (ApduCardCallScope.() -> Unit)) {
-		val builder = ApduCardCallScopeBuilder()
-		content.invoke(builder)
-		conclusion = ConclusionDefinition.Call(builder.build())
-	}
-
-	override fun build(): ConclusionDefinition = conclusion!!
 }

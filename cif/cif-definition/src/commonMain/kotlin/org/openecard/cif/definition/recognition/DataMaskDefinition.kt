@@ -1,4 +1,4 @@
-package org.openecard.cif.definition.cardcall
+package org.openecard.cif.definition.recognition
 
 import org.openecard.utils.serialization.PrintableUByteArray
 

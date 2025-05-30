@@ -1,30 +1,25 @@
 description = "DSL API for Card Info Files"
 
 plugins {
-	id("openecard.lib-multiplatform-conventions")
+	id("openecard.kmp-lib-conventions")
+	id("openecard.kmp-jvm-conventions")
+	id("openecard.kmp-ios-conventions")
 }
 
 kotlin {
 	sourceSets {
-		val commonMain by getting {
-			dependencies {
-				implementation(libs.kotlin.logging)
-				api(project(":utils:serialization"))
-				api(project(":cif:cif-definition"))
-			}
+		commonMain.dependencies {
+			implementation(libs.kotlin.logging)
+			api(project(":utils:serialization"))
+			api(project(":cif:cif-definition"))
 		}
-		val commonTest by getting {
-			dependencies {
-				implementation(libs.bundles.test.basics.kotlin)
-				implementation(project(":utils:common"))
-			}
+		commonTest.dependencies {
+			implementation(libs.bundles.test.basics.kotlin)
+			implementation(project(":utils:common"))
 		}
-		val jvmMain by getting {
-			dependencies {}
+		jvmMain.dependencies {
 		}
-		val jvmTest by getting {
-			dependencies {
-			}
+		jvmTest.dependencies {
 		}
 	}
 }

@@ -14,7 +14,6 @@ kotlin {
 		}
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
-			implementation(project(":utils:common"))
 		}
 		jvmMain.dependencies {
 		}

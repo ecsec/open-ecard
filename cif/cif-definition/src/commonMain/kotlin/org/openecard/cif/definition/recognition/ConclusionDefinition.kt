@@ -6,6 +6,6 @@ sealed interface ConclusionDefinition {
 	) : ConclusionDefinition
 
 	data class Call(
-		val call: CardCallDefinition,
+		val call: ApduCallDefinition,
 	) : ConclusionDefinition
 }

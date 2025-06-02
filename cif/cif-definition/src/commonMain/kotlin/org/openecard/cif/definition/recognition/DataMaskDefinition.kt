@@ -12,7 +12,7 @@ sealed class DataMaskDefinition {
 	) : DataMaskDefinition()
 
 	data class DataObject(
-		val tag: UByte,
+		val tag: ULong,
 		val match: DataMaskDefinition,
 	) : DataMaskDefinition()
 }

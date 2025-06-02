@@ -44,3 +44,56 @@ fun List<UByteArray>.mergeToArray(): UByteArray {
 	}
 	return result
 }
+
+/**
+ * Checks if the reference data can be found in the array.
+ * It applies the given mask before comparing the values.
+ * If offset is null, the reference is searched for in any possible position.
+ * If offset is defined, the reference data must be found at the exact position.
+ */
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.maskedContains(
+	referenceData: UByteArray,
+	mask: UByteArray? = null,
+	offset: Int? = null,
+): Boolean {
+	if (referenceData.size > size) {
+		throw IndexOutOfBoundsException("Reference data is bigger than data to search in.")
+	}
+
+	// loop over window between offset and end of data
+	val start = (offset ?: 0)
+	val end =
+		if (offset == null) {
+			size - referenceData.size
+		} else {
+			start
+		}
+	for (i in start until end + 1) {
+		val nextSlice = this.sliceArray(i until i + referenceData.size)
+		val matches =
+			if (mask == null) {
+				nextSlice.contentEquals(referenceData)
+			} else {
+				val m1 = nextSlice.mask(mask)
+				val m2 = referenceData.mask(mask)
+				m1.contentEquals(m2)
+			}
+
+		if (matches) {
+			return true
+		}
+	}
+
+	return false
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.mask(mask: UByteArray): UByteArray {
+	require(size == mask.size) { "Mask does not have the same size as the array to mask." }
+	val result = copyOf()
+	for (i in 0 until size) {
+		result[i] = result[i] and mask[i]
+	}
+	return result
+}

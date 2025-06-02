@@ -25,7 +25,7 @@ interface ApduResponseScope : CifScope {
 	 * Optional
 	 */
 	fun body(
-		tag: UByte,
+		tag: ULong,
 		content: @CifMarker ResponseDataMaskScope.() -> Unit,
 	)
 
@@ -40,7 +40,7 @@ interface ResponseDataMaskScope : CifScope {
 	fun matchBytes(content: @CifMarker MatchingDataScope.() -> Unit): DataMaskDefinition
 
 	fun matchData(
-		tag: UByte,
+		tag: ULong,
 		content: @CifMarker ResponseDataMaskScope.() -> DataMaskDefinition,
 	): DataMaskDefinition.DataObject
 }

@@ -1,6 +1,6 @@
 package org.openecard.sal.sc.recognition
 
-import org.openecard.sc.iface.TerminalConnection
+import org.openecard.sc.iface.CardChannel
 
 class SettableCardRecognition : CardRecognition {
 	// TODO: use cardInfo
@@ -17,8 +17,8 @@ class SettableCardRecognition : CardRecognition {
 		recognizedCards.remove(terminal)
 	}
 
-	override fun recognizeCard(connection: TerminalConnection) {
-		recognizedCards[connection.terminal.name]
-		TODO("return result")
+	override fun recognizeCard(channel: CardChannel): String? {
+		recognizedCards[channel.card.terminalConnection.terminal.name]
+		TODO("Not yet implemented")
 	}
 }

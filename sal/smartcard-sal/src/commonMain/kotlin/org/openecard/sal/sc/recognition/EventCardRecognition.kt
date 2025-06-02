@@ -3,7 +3,7 @@ package org.openecard.sal.sc.recognition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.openecard.sc.iface.TerminalConnection
+import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.Terminals
 
 class EventCardRecognition(
@@ -18,8 +18,8 @@ class EventCardRecognition(
 			TODO("implement")
 		}
 
-	override fun recognizeCard(connection: TerminalConnection) {
-		recognizedCards[connection.terminal.name]
-		TODO("return result")
+	override fun recognizeCard(channel: CardChannel): String? {
+		recognizedCards[channel.card.terminalConnection.terminal.name]
+		TODO("Not yet implemented")
 	}
 }

@@ -32,6 +32,9 @@ sealed interface Tlv {
 	val asConstructed: TlvConstructed? get() = this as? TlvConstructed
 	val asPrimitive: TlvPrimitive? get() = this as? TlvPrimitive
 
+	@OptIn(ExperimentalUnsignedTypes::class)
+	val contentAsBytesBer: UByteArray
+
 	/**
 	 * Copy the node and set sibling to the given value.
 	 */
@@ -120,6 +123,9 @@ data class TlvPrimitive
 		@OptIn(ExperimentalUnsignedTypes::class)
 		val value: UByteArray = tagLengthValue.value.v
 
+		@OptIn(ExperimentalUnsignedTypes::class)
+		override val contentAsBytesBer: UByteArray = value
+
 		init {
 			require(tag.primitive) { "Building TLV primitive value with a constructed tag value." }
 		}
@@ -141,6 +147,11 @@ data class TlvConstructed(
 ) : Tlv {
 	init {
 		require(!tag.primitive) { "Building TLV constructed value with a primitive tag value." }
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override val contentAsBytesBer: UByteArray by lazy {
+		child?.toBer(withSuccessors = true) ?: ubyteArrayOf()
 	}
 
 	override fun setSibling(newSibling: Tlv?): Tlv = this.copy(sibling = newSibling)

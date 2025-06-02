@@ -65,7 +65,7 @@ class ApduResponseBuilder :
 	override var trailer: UShort = 0x9000u
 
 	override fun body(
-		tag: UByte,
+		tag: ULong,
 		content: @CifMarker (ResponseDataMaskScope.() -> Unit),
 	) {
 		val builder = ResponseDataMaskBuilder(tag)
@@ -98,7 +98,7 @@ class ApduResponseBuilder :
 }
 
 class ResponseDataMaskBuilder(
-	var tag: UByte,
+	var tag: ULong,
 ) : ResponseDataMaskScope,
 	Builder<DataMaskDefinition.DataObject> {
 	var match: DataMaskDefinition? = null
@@ -118,7 +118,7 @@ class ResponseDataMaskBuilder(
 	}
 
 	override fun matchData(
-		tag: UByte,
+		tag: ULong,
 		content: @CifMarker (ResponseDataMaskScope.() -> DataMaskDefinition),
 	): DataMaskDefinition.DataObject {
 		val builder = ResponseDataMaskBuilder(tag)
@@ -154,12 +154,25 @@ class MatchingDataBuilder :
 	override var mask: UByteArray? = null
 	override var rule: MatchRule? = null
 
-	override fun build(): DataMaskDefinition.MatchingData =
-		DataMaskDefinition.MatchingData(
-			matchingValue = _value!!.toPrintable(),
+	override fun build(): DataMaskDefinition.MatchingData {
+		val (v, r) =
+			if (length != null && _value == null && rule == null) {
+				// we only want to match the length, not the content
+				ubyteArrayOf() to MatchRule.Contains
+			} else {
+				value to rule
+			}
+
+		return DataMaskDefinition.MatchingData(
+			matchingValue = v.toPrintable(),
 			offset = offset,
 			length = length,
-			mask = mask?.toPrintable(),
-			rule = rule ?: MatchRule.Equals,
+			mask =
+				mask?.let {
+					check(it.size == value.size) { "Mask has a different size than the comparison value" }
+					it.toPrintable()
+				},
+			rule = r ?: MatchRule.Equals,
 		)
+	}
 }

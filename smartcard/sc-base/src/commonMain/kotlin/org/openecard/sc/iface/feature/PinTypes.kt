@@ -2,18 +2,66 @@ package org.openecard.sc.iface.feature
 
 // TODO: check what makes sense here and remove unnecessary elements
 enum class PasswordFlags {
+	/**
+	 * meaning that a user-given password shall not be converted to all-uppercase before presented to the card
+	 */
 	CASE_SENSITIVE,
+
+	/**
+	 * meaning that the password is local to the application to which it belongs
+	 */
 	LOCAL,
+
+	/**
+	 * meaning that it is not possible to change the password
+	 */
 	CHANGE_DISABLED,
+
+	/**
+	 * meaning that it is not possible to unblock the password
+	 */
 	UNBLOCK_DISABLED,
-	INITIALIZED,
+
+	/**
+	 * meaning that, depending on the length of the given password and the stored length, the password may need to be
+	 * padded before being presented to the card
+	 */
 	NEEDS_PADDING,
+
+	/**
+	 * is an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used for unblocking
+	 * purposes, i.e. to reset the retry counter of the related authentication object to its initial value
+	 */
 	UNBLOCKING_PASSWORD,
+
+	/**
+	 * is a soPassword , meaning that the password is a Security Officer (administrator) password
+	 */
 	SO_PASSWORD,
+
+	/**
+	 * is disable-allowed , meaning that the password might be disabled
+	 */
 	DISABLE_ALLOWED,
+
+	/**
+	 * shall be presented to the card with secure messaging (integrity-protected)
+	 */
 	INTEGRITY_PROTECTED,
+
+	/**
+	 * shall be presented to the card encrypted (confidentiality-protected)
+	 */
 	CONFIDENTIALITY_PROTECTED,
+
+	/**
+	 * can be changed by just presenting new reference data to the card or if both old and new reference data needs to
+	 * be presented. If the bit is set, both old and new reference data shall be presented;
+	 * otherwise only new reference data needs to be presented (exchangeRefData)
+	 */
 	EXCHANGE_REF_DATA,
+
+	// TODO: Clarify what these mean and if they are necessary, as they are missing in 7816
 	RESET_RETRY_COUNTER_1,
 	RESET_RETRY_COUNTER_2,
 }

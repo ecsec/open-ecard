@@ -6,7 +6,7 @@ ktlint-plugin = "12.2.+"
 kx-co = "1.10.+"
 kx-serde = "1.8.+"
 kt-logging = "7.0.+"
-kx-datetime = "0.6.1"
+kx-datetime = "0.6.2"
 compose = "1.7.0"
 
 ktor = "3.1.+"

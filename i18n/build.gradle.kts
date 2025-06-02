@@ -1,10 +1,9 @@
-description = "i18n"
-
-dependencies {
-}
+description = "i18n resources"
 
 plugins {
-	id("openecard.lib-multiplatform-conventions")
+	id("openecard.kmp-lib-conventions")
+	id("openecard.kmp-jvm-conventions")
+	id("openecard.kmp-ios-conventions")
 	id("openecard.moko-conventions")
 }
 
@@ -12,7 +11,6 @@ kotlin {
 	sourceSets {
 		val commonMain by getting {
 			dependencies {
-				implementation(libs.kotlin.logging)
 				api(libs.moko.resources)
 			}
 		}
@@ -29,6 +27,7 @@ kotlin {
 		}
 	}
 }
+
 multiplatformResources {
 	resourcesPackage.set("org.openecard.i18n") // required
 	resourcesClassName.set("I18N") // optional, default MR

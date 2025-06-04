@@ -6,6 +6,14 @@ enum class CardProtocol {
 	T1,
 	T15,
 	TCL,
+	;
+
+	val isContact: Boolean get() {
+		return this in setOf(T0, T1, T15)
+	}
+	val isContactLess: Boolean get() {
+		return this in setOf(TCL)
+	}
 }
 
 enum class PreferredCardProtocol {

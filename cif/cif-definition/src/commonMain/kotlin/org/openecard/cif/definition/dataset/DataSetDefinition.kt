@@ -9,7 +9,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 data class DataSetDefinition(
 	val path: PrintableUByteArray,
 	val shortEf: UByte?,
-	val name: String?,
+	val name: String,
 	/**
 	 * Description and other information of this application.
 	 */

@@ -8,6 +8,7 @@ data class PaceDidDefinition(
 	override val name: String,
 	override val scope: DidScope,
 	val authAcl: AclDefinition,
+	val modifyAcl: AclDefinition,
 	val parameters: PaceDidParameters,
 ) : DidDefinition
 

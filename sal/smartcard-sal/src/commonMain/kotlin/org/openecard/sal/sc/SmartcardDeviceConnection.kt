@@ -1,32 +1,47 @@
 package org.openecard.sal.sc
 
+import org.openecard.cif.definition.CardInfoDefinition
 import org.openecard.sal.iface.DeviceConnection
 import org.openecard.sal.iface.dids.AuthenticationDid
+import org.openecard.sal.sc.acl.hasSolution
+import org.openecard.sal.sc.acl.selectForProtocol
+import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardDisposition
+import org.openecard.utils.common.returnIf
 
 class SmartcardDeviceConnection(
 	override val connectionId: String,
 	override val session: SmartcardSalSession,
-	val cardType: String,
-	// TODO: use real cif type
-	val cif: Any,
+	val card: Card,
+	val cif: CardInfoDefinition,
 ) : DeviceConnection {
-	override val initialApplication: SmartcardApplication
-		get() = TODO("Not yet implemented")
+	val cardType: String = cif.metadata.id
 
-	override val applications: List<SmartcardApplication> get() {
-		TODO()
-	}
+	private val _authenticatedDids: MutableList<SmartcardDid<*>> = mutableListOf()
 
 	override val authenticatedDids: List<AuthenticationDid> get() {
-		TODO()
+		return _authenticatedDids.filterIsInstance<AuthenticationDid>()
+	}
+
+	override val initialApplication: SmartcardApplication
+		get() = applications.first()
+
+	override val applications: List<SmartcardApplication> by lazy {
+		cif.applications
+			.mapNotNull { app ->
+				app.selectAcl
+					.selectForProtocol(card.protocol)
+					.returnIf {
+						it.hasSolution()
+					}?.let { SmartcardApplication(this, app, it) }
+			}
 	}
 
 	override fun close(disposition: CardDisposition) {
 		TODO("Not yet implemented")
 	}
 
-	internal fun setDidFulfilled(did: SmartcardDid) {
+	internal fun setDidFulfilled(did: SmartcardDid<*>) {
 		TODO("Not yet implemented")
 	}
 }

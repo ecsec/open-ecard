@@ -1,11 +1,17 @@
 package org.openecard.sal.sc
 
+import org.openecard.cif.definition.acl.BoolTreeLeaf
+import org.openecard.cif.definition.acl.BoolTreeOr
+import org.openecard.cif.definition.dataset.DataSetDefinition
 import org.openecard.sal.iface.Dataset
 import org.openecard.sal.iface.MissingAuthentications
 
 class SmartcardDataset(
 	override val name: String,
 	override val application: SmartcardApplication,
+	val ds: DataSetDefinition,
+	val readAcl: BoolTreeOr<BoolTreeLeaf>,
+	val writeAcl: BoolTreeOr<BoolTreeLeaf>,
 ) : Dataset {
 	override val missingReadAuthentications: MissingAuthentications
 		get() = TODO("Not yet implemented")

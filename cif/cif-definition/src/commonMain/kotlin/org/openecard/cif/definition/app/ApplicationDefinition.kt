@@ -6,7 +6,6 @@ import org.openecard.cif.definition.dataset.DataSetDefinition
 import org.openecard.cif.definition.did.DidDefinition
 import org.openecard.utils.serialization.PrintableUByteArray
 
-// TODO: think about how to solve the translation (name) and if it is necessary at all
 @Serializable
 class ApplicationDefinition(
 	/**
@@ -17,7 +16,7 @@ class ApplicationDefinition(
 	/**
 	 * Human-readable name of the application.
 	 */
-	val name: String?,
+	val name: String,
 	/**
 	 * Description and other information of this application.
 	 */

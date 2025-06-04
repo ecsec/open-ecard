@@ -1,5 +1,7 @@
 package org.openecard.sal.sc.dids
 
+import org.openecard.cif.definition.acl.CifAclOr
+import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PinCallback
 import org.openecard.sal.iface.dids.PinDid
@@ -8,10 +10,11 @@ import org.openecard.sal.sc.SmartcardDid
 import org.openecard.sc.iface.feature.PinStatus
 
 class SmartcardPinDid(
-	name: String,
 	application: SmartcardApplication,
-	isLocal: Boolean,
-) : SmartcardDid(name, isLocal, application),
+	didDef: PinDidDefinition,
+	val authAcl: CifAclOr,
+	val modifyAcl: CifAclOr,
+) : SmartcardDid<PinDidDefinition>(didDef, application),
 	PinDid {
 	override val missingAuthAuthentications: MissingAuthentications
 		get() = missingAuthentications("auth")

@@ -20,7 +20,6 @@ class SmartcardSalSession internal constructor(
 
 	override fun devices(): List<String> = sal.terminals.list().map { it.name }
 
-	@Throws(DeviceUnsupported::class)
 	override fun connect(
 		terminalName: String,
 		isExclusive: Boolean,

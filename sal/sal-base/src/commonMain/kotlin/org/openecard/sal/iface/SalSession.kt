@@ -34,6 +34,7 @@ interface SalSession {
 		RemovedDevice::class,
 		Timeout::class,
 		Cancelled::class,
+		DeviceUnsupported::class,
 	)
 	fun connect(
 		terminalName: String,

@@ -30,6 +30,11 @@ class RemovedDevice(
 	cause: Throwable? = null,
 ) : SalException(msg ?: "The device has been removed, so further communication is not possible.", cause)
 
+class DeviceUnsupported(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SalException(msg ?: "The requested device is not supported by the SAL.", cause)
+
 class Timeout(
 	msg: String? = null,
 	cause: Throwable? = null,

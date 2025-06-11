@@ -11,8 +11,6 @@ import org.openecard.utils.common.mergeToArray
 private val log = KotlinLogging.logger { }
 
 abstract class AbstractCardChannel : CardChannel {
-	override var capabilities: CardCapabilities? = null
-
 	private val smHandler: MutableList<SecureMessaging> = mutableListOf()
 
 	override fun pushSecureMessaging(sm: SecureMessaging) {
@@ -59,8 +57,8 @@ abstract class AbstractCardChannel : CardChannel {
 	}
 
 	protected fun doChaining(apdu: CommandApdu): Boolean {
-		val hasExtLen = capabilities?.commandCoding?.supportsExtendedLength ?: false
-		val hasChaining = capabilities?.commandCoding?.supportsCommandChaining ?: false
+		val hasExtLen = card.capabilities?.commandCoding?.supportsExtendedLength ?: false
+		val hasChaining = card.capabilities?.commandCoding?.supportsCommandChaining ?: false
 		return apdu.lc > 0xFFu && !hasExtLen && hasChaining
 	}
 

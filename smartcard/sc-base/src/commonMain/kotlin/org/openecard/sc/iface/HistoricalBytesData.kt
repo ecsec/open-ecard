@@ -244,10 +244,18 @@ class CardCapabilities
 			val ffValidAsTlvFirstByte: Boolean by lazy { functionTables[12] }
 
 			@OptIn(ExperimentalUnsignedTypes::class)
-			val dataUnitsQuartet: Int by lazy {
+			val dataUnitsQuartets: Int by lazy {
 				val rawValue = cardCapabilitiesDo.value[1].toInt() and 0xF
 				// calculate 2^rawValue
 				1 shl rawValue
+			}
+			val dataUnitsBytes: Int by lazy {
+				if (dataUnitsQuartets.mod(2) == 0) {
+					dataUnitsQuartets / 2
+				} else {
+					// round up, as e.g. 3 quartets need 2 bytes space
+					(dataUnitsQuartets + 1) / 2
+				}
 			}
 		}
 

@@ -19,7 +19,15 @@ abstract class SmartcardDid<D : DidDefinition>(
 		application.device.setDidFulfilled(this)
 	}
 
-	protected fun sendEvent() {
-		TODO("Not yet implemented")
+	protected fun setDidUnfulfilled() {
+		application.device.setDidUnfulfilled(this)
 	}
+
+	override fun equals(other: Any?): Boolean =
+		when (other) {
+			is SmartcardDid<*> -> other.name == this.name
+			else -> false
+		}
+
+	override fun hashCode(): Int = name.hashCode()
 }

@@ -8,11 +8,16 @@ import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.sal.iface.Application
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.Did
+import org.openecard.sal.iface.dids.SecureChannelDid
 import org.openecard.sal.sc.acl.hasSolution
 import org.openecard.sal.sc.acl.selectForProtocol
 import org.openecard.sal.sc.dids.SmartcardPaceDid
 import org.openecard.sal.sc.dids.SmartcardPinDid
 import org.openecard.sal.sc.dids.SmartcardSignDid
+import org.openecard.sc.apdu.command.Select
+import org.openecard.sc.apdu.command.transmit
+import org.openecard.sc.iface.CardChannel
+import org.openecard.utils.common.hex
 
 class SmartcardApplication(
 	override val device: SmartcardDeviceConnection,
@@ -20,10 +25,13 @@ class SmartcardApplication(
 	val selectAcl: CifAclOr,
 ) : Application {
 	override val name: String = appDef.name
+
+	internal val channel: CardChannel = device.channel
+
 	override val datasets: List<SmartcardDataset> by lazy {
 		appDef.dataSets.mapNotNull { ds ->
-			val readAcl = ds.readAcl.selectForProtocol(device.card.protocol)
-			val writeAcl = ds.writeAcl.selectForProtocol(device.card.protocol)
+			val readAcl = ds.readAcl.selectForProtocol(device.channel.card.protocol)
+			val writeAcl = ds.writeAcl.selectForProtocol(device.channel.card.protocol)
 			if (readAcl.hasSolution() || writeAcl.hasSolution()) {
 				SmartcardDataset(ds.name, this, ds, readAcl, writeAcl)
 			} else {
@@ -36,8 +44,8 @@ class SmartcardApplication(
 		appDef.dids.mapNotNull { did ->
 			when (did) {
 				is PinDidDefinition -> {
-					val authAcl = did.authAcl.selectForProtocol(device.card.protocol)
-					val modifyAcl = did.modifyAcl.selectForProtocol(device.card.protocol)
+					val authAcl = did.authAcl.selectForProtocol(device.channel.card.protocol)
+					val modifyAcl = did.modifyAcl.selectForProtocol(device.channel.card.protocol)
 					if (authAcl.hasSolution() || modifyAcl.hasSolution()) {
 						SmartcardPinDid(this, did, authAcl, modifyAcl)
 					} else {
@@ -46,8 +54,8 @@ class SmartcardApplication(
 				}
 
 				is PaceDidDefinition -> {
-					val authAcl = did.authAcl.selectForProtocol(device.card.protocol)
-					val modifyAcl = did.modifyAcl.selectForProtocol(device.card.protocol)
+					val authAcl = did.authAcl.selectForProtocol(device.channel.card.protocol)
+					val modifyAcl = did.modifyAcl.selectForProtocol(device.channel.card.protocol)
 					if (authAcl.hasSolution() || modifyAcl.hasSolution()) {
 						SmartcardPaceDid(this, did, authAcl, modifyAcl)
 					} else {
@@ -59,7 +67,7 @@ class SmartcardApplication(
 						is GenericCryptoDidDefinition.DecryptionDidDefinition -> TODO("No Implemented yet")
 						is GenericCryptoDidDefinition.EncryptionDidDefinition -> TODO("No Implemented yet")
 						is GenericCryptoDidDefinition.SignatureDidDefinition -> {
-							val signAcl = did.signAcl.selectForProtocol(device.card.protocol)
+							val signAcl = did.signAcl.selectForProtocol(device.channel.card.protocol)
 							if (signAcl.hasSolution()) {
 								SmartcardSignDid(this, did, signAcl)
 							} else {
@@ -76,9 +84,32 @@ class SmartcardApplication(
 		get() = TODO("Not yet implemented")
 
 	override val isConnected: Boolean
-		get() = TODO("Not yet implemented")
+		get() = device.cardState.app == this
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun connect() {
-		TODO("Not yet implemented")
+		// remove secure channel before switching the application
+		val unauthDids = device.cardState.authenticatedDids.filter { it.isLocal && it.application != this }
+		unauthDids.forEach {
+			when (it) {
+				is SecureChannelDid -> {
+					// not sure if we should do some error handling here
+					it.closeChannel()
+				}
+			}
+		}
+
+		val selectApdu =
+			if (appDef.aid.v.contentEquals(hex("3F00"))) {
+				Select.selectMf()
+			} else {
+				Select.selectDfName(appDef.aid.v)
+			}
+		// TODO: selection by path see ISO 7816-4 Sec. 8.2 and 8.3
+
+		selectApdu.transmit(channel)
+
+		// update state
+		device.setSelectedApplication(this)
 	}
 }

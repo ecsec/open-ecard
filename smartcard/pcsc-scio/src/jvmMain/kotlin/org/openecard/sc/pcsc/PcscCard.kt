@@ -4,6 +4,7 @@ import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.isNormalProcessed
 import org.openecard.sc.iface.Atr
 import org.openecard.sc.iface.Card
+import org.openecard.sc.iface.CardCapabilities
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.toAtr
@@ -13,12 +14,12 @@ class PcscCard(
 	override val terminalConnection: PcscTerminalConnection,
 	internal val scioCard: javax.smartcardio.Card,
 ) : Card {
-	override val atr: Atr by lazy {
-		scioCard.atr.toAtr()
-	}
+	override val atr: Atr = scioCard.atr.toAtr()
 	override val protocol: CardProtocol by lazy {
 		scioCard.protocol.toCardProtocol(isContactless)
 	}
+
+	override var capabilities: CardCapabilities? = atr.historicalBytes?.cardCapabilities
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val isContactless: Boolean by lazy {

@@ -28,3 +28,35 @@ fun UByteArray.toResponseApdu(): ResponseApdu {
 
 val ResponseApdu.isNormalProcessed: Boolean
 	get() = sw.toUInt() == 0x9000u
+
+fun ResponseApdu.matchStatus(vararg codes: StatusWord): Boolean = status.type in codes
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun ResponseApdu.matchStatus(vararg codes: UShort): Boolean = status.sw in codes
+
+fun ResponseApdu.checkStatus(vararg codes: StatusWord): ResponseApdu {
+	if (!matchStatus(*codes)) {
+		throw ApduProcessingError(status, status.type.description)
+	} else {
+		return this
+	}
+}
+
+fun ResponseApdu.checkOk() {
+	checkStatus(StatusWord.OK)
+}
+
+fun ResponseApdu.checkNoError() {
+	if (!(status.isNormal || status.isWarning)) {
+		throw ApduProcessingError(status, status.type.description)
+	}
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun ResponseApdu.checkStatus(vararg codes: UShort): ResponseApdu {
+	if (!matchStatus(*codes)) {
+		throw ApduProcessingError(status, status.type.description)
+	} else {
+		return this
+	}
+}

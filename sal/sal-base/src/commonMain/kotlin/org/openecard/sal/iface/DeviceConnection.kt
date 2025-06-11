@@ -8,7 +8,6 @@ DeviceConnection {
 	val connectionId: String
 	val session: SalSession
 
-	val initialApplication: Application
 	val applications: List<Application>
 	val authenticatedDids: List<AuthenticationDid>
 

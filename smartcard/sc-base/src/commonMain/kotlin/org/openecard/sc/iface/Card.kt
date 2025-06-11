@@ -7,6 +7,12 @@ interface Card {
 	val isContactless: Boolean
 	val basicChannel: CardChannel
 
+	/**
+	 * Card Capabilities object.
+	 * Implementations can use the ones from the `ATR`, or it can be set explicitly after reading `EF.ATR`.
+	 */
+	var capabilities: CardCapabilities?
+
 	@Throws(
 		InsufficientBuffer::class,
 		InvalidHandle::class,

@@ -28,7 +28,7 @@ data class CommandApdu
 		val p1: UByte,
 		val p2: UByte,
 		val data: PrintableUByteArray = ubyteArrayOf().toPrintable(),
-		val le: UShort? = 0u,
+		val le: UShort? = null,
 		val forceExtendedLength: Boolean = false,
 	) {
 		@OptIn(ExperimentalUnsignedTypes::class)

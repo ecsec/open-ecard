@@ -11,8 +11,6 @@ interface CardChannel {
 	val isLogicalChannel: Boolean
 		get() = !isBasicChannel
 
-	var capabilities: CardCapabilities?
-
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Throws(
 		InsufficientBuffer::class,

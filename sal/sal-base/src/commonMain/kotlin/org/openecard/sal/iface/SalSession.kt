@@ -36,7 +36,7 @@ interface SalSession {
 		Cancelled::class,
 	)
 	fun connect(
-		terminal: String,
+		terminalName: String,
 		isExclusive: Boolean = false,
 	): DeviceConnection
 }

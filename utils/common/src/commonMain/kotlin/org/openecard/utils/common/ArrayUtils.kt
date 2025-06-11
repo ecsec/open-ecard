@@ -97,3 +97,17 @@ fun UByteArray.mask(mask: UByteArray): UByteArray {
 	}
 	return result
 }
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.removeLeadingZeros(): UByteArray {
+	if (this[size - 1] == 0u.toUByte()) {
+		val data = this.dropWhile { it == 0u.toUByte() }
+		return if (data.isEmpty()) {
+			ubyteArrayOf(0u)
+		} else {
+			data.toUByteArray()
+		}
+	} else {
+		return this
+	}
+}

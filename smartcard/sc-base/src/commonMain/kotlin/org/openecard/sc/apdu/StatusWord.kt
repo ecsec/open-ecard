@@ -92,7 +92,7 @@ enum class StatusWord(
 	SM_DO_INCORRECT(0x6988u, "Incorrect secure messaging data objects"),
 
 	WRONG_COMMAND_PARAMS_IN_DATA_FIELD(0x6A80u, "Incorrect parameters in the command data field"),
-	FUNTION_UNSUPPORTED(0x6A81u, "Function not supported"),
+	FUNCTION_UNSUPPORTED(0x6A81u, "Function not supported"),
 	FILE_OR_APP_NOT_FOUND(0x6A82u, "File or application not found"),
 	RECORD_NOT_FOUND(0x6A83u, "Record not found"),
 	NO_SPACE_IN_FILE(0x6A84u, "Not enough memory space in the file"),

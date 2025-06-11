@@ -1,13 +1,15 @@
 package org.openecard.sc.apdu.command
 
-import org.openecard.sc.iface.CardCapabilities
+import org.openecard.sc.apdu.checkOk
 import org.openecard.sc.iface.CardChannel
 
-fun Select.transmit(
-	channel: CardChannel,
-	cardCapabilities: CardCapabilities,
-): FileInfo? {
-	TODO("Implement")
+fun Select.transmit(channel: CardChannel): FileInfo? {
+	// val capabilities = channel.capabilities
+	val response = channel.transmit(this.apdu)
+	response.checkOk()
+
+	// TODO("Implement file info retrieval")
+	return null
 }
 
 // ISO 7816-4, Sec.5.3.1.1

@@ -202,6 +202,10 @@ class TlvConstructedBuilder internal constructor(
 		val child = TlvPrimitive(tag, data.toPrintable())
 		children.add(child)
 	}
+
+	fun generic(child: Tlv) {
+		children.add(child)
+	}
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)

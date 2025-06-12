@@ -1,5 +1,6 @@
 package org.openecard.sc.iface
 
+import org.openecard.sc.iface.info.ApplicationIdentifier
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvCompact
 import org.openecard.utils.common.toUShort
@@ -7,22 +8,27 @@ import org.openecard.utils.common.toUShort
 class HistoricalBytes
 	@OptIn(ExperimentalUnsignedTypes::class)
 	internal constructor(
-		val bytes: UByteArray,
+		internal val bytes: UByteArray,
 		/**
 		 * If the category indicator byte is set to '00', '10' or '8X', then Table 83 summarizes the format of the
 		 * historical bytes. Any other value indicates a proprietary format.
 		 */
-		val categoryIndicator: UByte,
+		internal val categoryIndicator: UByte,
 		val dirReference: UByteArray? = null,
-		val dataObjects: List<TlvPrimitive> = listOf(),
-		val cardLifecycleStatus: UByte = 0x00u,
+		internal val dataObjects: List<TlvPrimitive> = listOf(),
+		internal val cardLifecycleStatus: UByte = 0x00u,
 		val sw: UShort = 0x000u,
 	) {
 		val lifeCycleStatus by lazy { LifeCycleStatus.fromStatusByte(cardLifecycleStatus) }
 
 		val countryIndicator by lazy { CountryIndicator.fromDataObjects(dataObjects) }
 		val issuerIndicator by lazy { IssuerIndicator.fromDataObjects(dataObjects) }
-		val applicationIdentifier by lazy { ApplicationIdentifier.fromDataObjects(dataObjects) }
+
+		/**
+		 * If present in the historical bytes or in the initial data string (see 8.1.2), an AID denotes an implicitly
+		 * selected application (see 8.2.2.1).
+		 */
+		val implicitApplication by lazy { ApplicationIdentifier.fromDataObjects(dataObjects).firstOrNull() }
 		val cardServiceData by lazy { CardServiceData.fromDataObjects(dataObjects) }
 		val initialAccessData by lazy { InitialAccessData.fromDataObjects(dataObjects) }
 		val cardIssuersData by lazy { CardIssuersData.fromDataObjects(dataObjects) }

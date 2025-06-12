@@ -1,5 +1,6 @@
 package org.openecard.sc.apdu.command
 
+import org.openecard.sc.iface.info.StandardTags
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.utils.serialization.toPrintable

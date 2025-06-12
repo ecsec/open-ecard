@@ -3,6 +3,7 @@ package org.openecard.sc.iface
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.utils.common.BitSet
 import org.openecard.utils.common.bitSetOf
+import org.openecard.utils.common.doIf
 import org.openecard.utils.common.toDigitsString
 import org.openecard.utils.common.toInt
 import org.openecard.utils.common.toNibbles
@@ -19,9 +20,8 @@ enum class LifeCycleStatus {
 
 	companion object {
 		@OptIn(ExperimentalUnsignedTypes::class)
-		fun fromStatusByte(statusByte: UByte): LifeCycleStatus {
-			val bits = bitSetOf(statusByte)
-			return if (statusByte == 0.toUByte()) {
+		fun fromStatusByte(statusByte: UByte): LifeCycleStatus =
+			if (statusByte == 0.toUByte()) {
 				UNSPECIFIED
 			} else if (statusByte.toUInt() == 0b1u) {
 				CREATION
@@ -36,7 +36,6 @@ enum class LifeCycleStatus {
 			} else {
 				PROPRIETARY
 			}
-		}
 	}
 }
 
@@ -101,26 +100,6 @@ class IssuerIndicator(
 		}
 	}
 }
-
-/**
- * Application Identifier according to ISO-7816-4, Sec.8.1.1.2.2.
- */
-class ApplicationIdentifier
-	@OptIn(ExperimentalUnsignedTypes::class)
-	constructor(
-		private val appIdDo: TlvPrimitive,
-		val appId: UByteArray,
-	) {
-		companion object {
-			@OptIn(ExperimentalUnsignedTypes::class)
-			fun fromDataObjects(dos: List<TlvPrimitive>): ApplicationIdentifier? {
-				val appIdTlv = dos.findCompactTlv(0xFu)
-				return appIdTlv?.let {
-					ApplicationIdentifier(it, it.value)
-				}
-			}
-		}
-	}
 
 /**
  * Card Service Data according to ISO-7816-4, Sec.8.1.1.2.3.
@@ -218,34 +197,46 @@ class CardCapabilities
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
 		private val cardCapabilitiesDo: TlvPrimitive,
-		private val functionTables: BitSet,
+		private val functionTableBytes: UByteArray,
 	) {
-		val selectionMethods: SelectionMethods = SelectionMethods()
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val selectionMethods: SelectionMethods = SelectionMethods(functionTableBytes[0])
 
-		inner class SelectionMethods internal constructor() {
-			val selectDfByFullName: Boolean by lazy { functionTables[7] }
-			val selectDfByPartialName: Boolean by lazy { functionTables[6] }
-			val selectDfByPath: Boolean by lazy { functionTables[5] }
-			val selectDfByFileId: Boolean by lazy { functionTables[4] }
-			val selectDfImplicit: Boolean by lazy { functionTables[3] }
-			val supportsShortEf: Boolean by lazy { functionTables[2] }
-			val supportsRecordNumber: Boolean by lazy { functionTables[1] }
-			val supportsRecordIdentifier: Boolean by lazy { functionTables[0] }
+		class SelectionMethods(
+			val byte: UByte,
+		) {
+			@OptIn(ExperimentalUnsignedTypes::class)
+			private val functionTable = bitSetOf(byte)
+			
+			val selectDfByFullName: Boolean by lazy { functionTable[7] }
+			val selectDfByPartialName: Boolean by lazy { functionTable[6] }
+			val selectDfByPath: Boolean by lazy { functionTable[5] }
+			val selectDfByFileId: Boolean by lazy { functionTable[4] }
+			val selectDfImplicit: Boolean by lazy { functionTable[3] }
+			val supportsShortEf: Boolean by lazy { functionTable[2] }
+			val supportsRecordNumber: Boolean by lazy { functionTable[1] }
+			val supportsRecordIdentifier: Boolean by lazy { functionTable[0] }
 		}
 
-		val dataCoding: DataCoding? = if (functionTables.bitSize >= 16) DataCoding() else null
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val dataCoding: DataCoding? = doIf(functionTableBytes.size >= 2) { DataCoding(functionTableBytes[1]) }
 
-		inner class DataCoding internal constructor() {
-			val tlvEfs: Boolean by lazy { functionTables[15] }
-			val writeOneTime: Boolean by lazy { !functionTables[14] && !functionTables[13] }
-			val writeProprietary: Boolean by lazy { !functionTables[14] && functionTables[13] }
-			val writeOr: Boolean by lazy { functionTables[14] && !functionTables[13] }
-			val writeAnd: Boolean by lazy { functionTables[14] && functionTables[13] }
-			val ffValidAsTlvFirstByte: Boolean by lazy { functionTables[12] }
+		class DataCoding(
+			val byte: UByte,
+		) {
+			@OptIn(ExperimentalUnsignedTypes::class)
+			private val functionTable = bitSetOf(byte)
+
+			val tlvEfs: Boolean by lazy { functionTable[7] }
+			val writeOneTime: Boolean by lazy { !functionTable[6] && !functionTable[5] }
+			val writeProprietary: Boolean by lazy { !functionTable[6] && functionTable[5] }
+			val writeOr: Boolean by lazy { functionTable[6] && !functionTable[5] }
+			val writeAnd: Boolean by lazy { functionTable[6] && functionTable[5] }
+			val ffValidAsTlvFirstByte: Boolean by lazy { functionTable[4] }
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			val dataUnitsQuartets: Int by lazy {
-				val rawValue = cardCapabilitiesDo.value[1].toInt() and 0xF
+				val rawValue = byte.toInt() and 0xF
 				// calculate 2^rawValue
 				1 shl rawValue
 			}
@@ -259,18 +250,35 @@ class CardCapabilities
 			}
 		}
 
-		val commandCoding: CommandCoding? = if (functionTables.bitSize >= 24) CommandCoding() else null
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val commandCoding: CommandCoding? = doIf(functionTableBytes.size >= 3) { CommandCoding(functionTableBytes[2]) }
 
-		inner class CommandCoding internal constructor() {
-			val supportsCommandChaining: Boolean by lazy { functionTables[23] }
-			val supportsExtendedLength: Boolean by lazy { functionTables[22] }
-			val assignLogicalChannelByCard: Boolean by lazy { functionTables[21] }
-			val assignLogicalChannelByTerminal: Boolean by lazy { functionTables[20] }
-			val supportsLogicalChannels: Boolean by lazy { !functionTables[21] && !functionTables[20] }
+		class CommandCoding(
+			val byte: UByte,
+		) {
+			@OptIn(ExperimentalUnsignedTypes::class)
+			private val functionTable = bitSetOf(byte)
+
+			val supportsCommandChaining: Boolean by lazy { functionTable[7] }
+			val supportsExtendedLength: Boolean by lazy { functionTable[6] }
+			val logicalChannel: LogicalChannelAssignment by lazy {
+				val byCard = functionTable[4]
+				val byInterface = functionTable[3]
+				if (byCard && byInterface) {
+					LogicalChannelAssignment.ASSIGN_BY_BOTH
+				} else if (byCard) {
+					LogicalChannelAssignment.ASSIGN_BY_CARD
+				} else if (byInterface) {
+					LogicalChannelAssignment.ASSIGN_BY_INTERFACE
+				} else {
+					LogicalChannelAssignment.NO_LOGICAL_CHANNELS
+				}
+			}
+			val supportsLogicalChannels: Boolean by lazy { logicalChannel != LogicalChannelAssignment.NO_LOGICAL_CHANNELS }
 			val maximumLogicalChannels: Int by lazy {
-				val y = functionTables[19]
-				val z = functionTables[18]
-				val t = functionTables[17]
+				val y = functionTable[2]
+				val z = functionTable[1]
+				val t = functionTable[0]
 				if (!supportsLogicalChannels) {
 					0
 				} else if (y && z && t) {
@@ -282,12 +290,19 @@ class CardCapabilities
 			}
 		}
 
+		enum class LogicalChannelAssignment {
+			ASSIGN_BY_BOTH,
+			ASSIGN_BY_CARD,
+			ASSIGN_BY_INTERFACE,
+			NO_LOGICAL_CHANNELS,
+		}
+
 		companion object {
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun fromDataObjects(dos: List<TlvPrimitive>): CardCapabilities? {
 				val tlv = dos.findCompactTlv(0x7u)
 				return tlv?.let {
-					CardCapabilities(it, bitSetOf(*it.value))
+					CardCapabilities(it, it.value)
 				}
 			}
 		}

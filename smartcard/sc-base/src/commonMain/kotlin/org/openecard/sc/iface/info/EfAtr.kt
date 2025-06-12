@@ -11,4 +11,8 @@ class EfAtr(
 	val historicalBytes: HistoricalBytes? by lazy {
 		dos.find { it.tag.tagNumWithClass == 0x5F52uL }?.contentAsBytesBer?.toHistoricalBytes()
 	}
+
+	val applications by lazy {
+		dos.mapNotNull { ApplicationTemplate.fromDataObject(it) }
+	}
 }

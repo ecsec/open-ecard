@@ -58,6 +58,8 @@ sealed interface Tlv {
 
 	fun findNextTags(num: ULong): List<Tlv> = asList().filter { it.tag.tagNumWithClass == num }
 
+	fun findNextTags(tag: Tag): List<Tlv> = asList().filter { it.tag == tag }
+
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun toBer(withSuccessors: Boolean = false): UByteArray =
 		buildList {
@@ -159,6 +161,10 @@ data class TlvConstructed(
 	fun hasChild(): Boolean = child != null
 
 	fun findChildTags(num: ULong): List<Tlv> = child?.findNextTags(num) ?: listOf()
+
+	fun findChildTags(tag: Tag): List<Tlv> = child?.findNextTags(tag) ?: listOf()
+
+	fun childList(): List<Tlv> = child?.asList() ?: listOf()
 }
 
 fun buildTlv(

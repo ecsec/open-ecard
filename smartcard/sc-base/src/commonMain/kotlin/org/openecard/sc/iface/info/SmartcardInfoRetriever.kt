@@ -8,7 +8,6 @@ import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.iface.Atr
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.tlv.toTlvBer
-import org.openecard.utils.common.hex
 
 private val log = KotlinLogging.logger { }
 
@@ -23,7 +22,7 @@ class SmartcardInfoRetriever(
 	private fun readEfAtrTransparent() {
 		if (efAtr == null) {
 			try {
-				Select.selectEfIdentifier(hex("2F01")).transmit(channel)
+				Select.selectEfIdentifier(0x2F01u).transmit(channel)
 				val efAtrData = ReadBinary.readCurrentEf().transmit(channel)
 				val efAtrTlv = efAtrData.toTlvBer()
 				this.efAtr = EfAtr(efAtrTlv.tlv.asList())
@@ -33,9 +32,17 @@ class SmartcardInfoRetriever(
 		}
 	}
 
+	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun readEfAtrRecord() {
 		if (efAtr == null) {
-			// TODO: Implement
+			try {
+				Select.selectEfIdentifier(0x2F01u).transmit(channel)
+				val efAtrData = ReadRecord.readAllRecords().transmit(channel)
+				val efAtrTlv = efAtrData.toTlvBer()
+				this.efAtr = EfAtr(efAtrTlv.tlv.asList())
+			} catch (ex: Exception) {
+				log.info(ex) { "Failed to read EF.ATR as record file" }
+			}
 		}
 	}
 
@@ -50,7 +57,7 @@ class SmartcardInfoRetriever(
 	private fun readEfDirTransparent() {
 		if (efDir == null) {
 			try {
-				Select.selectEfIdentifier(hex("2F00")).transmit(channel)
+				Select.selectEfIdentifier(0x2F00u).transmit(channel)
 				val efDirData = ReadBinary.readCurrentEf().transmit(channel)
 				val efDirTlv = efDirData.toTlvBer()
 				this.efDir = EfDir(efDirTlv.tlv.asList())
@@ -64,7 +71,7 @@ class SmartcardInfoRetriever(
 	private fun readEfDirRecord() {
 		if (efDir == null) {
 			try {
-				Select.selectEfIdentifier(hex("2F00")).transmit(channel)
+				Select.selectEfIdentifier(0x2F00u).transmit(channel)
 				val efDirData = ReadRecord.readAllRecords().transmit(channel)
 				val efDirTlv = efDirData.toTlvBer()
 				this.efDir = EfDir(efDirTlv.tlv.asList())
@@ -112,7 +119,7 @@ class SmartcardInfoRetriever(
 
 		if (withEfDir) {
 			// read ef.dir based on historical bytes
-			hb?.cardServiceData ?: efAtr?.historicalBytes?.cardServiceData?.also { csd ->
+			(hb?.cardServiceData ?: efAtr?.historicalBytes?.cardServiceData)?.also { csd ->
 				if (csd.hasEfDir && csd.efDirAtrReadBinary) {
 					readEfDirTransparent()
 				} else if (csd.hasEfDir && csd.efDirAtrReadRecord) {

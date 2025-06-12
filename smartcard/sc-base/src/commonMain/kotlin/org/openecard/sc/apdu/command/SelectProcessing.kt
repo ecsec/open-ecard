@@ -2,14 +2,19 @@ package org.openecard.sc.apdu.command
 
 import org.openecard.sc.apdu.checkOk
 import org.openecard.sc.iface.CardChannel
+import org.openecard.sc.iface.info.FileInfo
 
+@OptIn(ExperimentalUnsignedTypes::class)
 fun Select.transmit(channel: CardChannel): FileInfo? {
 	// val capabilities = channel.capabilities
 	val response = channel.transmit(this.apdu)
 	response.checkOk()
 
-	// TODO("Implement file info retrieval")
-	return null
+	return if (this.fileControlInfo != FileControlInformation.NONE) {
+		FileInfo.fromSelectResponseData(response.data)
+	} else {
+		null
+	}
 }
 
 // ISO 7816-4, Sec.5.3.1.1

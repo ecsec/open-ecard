@@ -1,6 +1,8 @@
 package org.openecard.sc.apdu.command
 
 import org.openecard.sc.apdu.CommandApdu
+import org.openecard.utils.common.toUByteArray
+import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
 /**
@@ -29,11 +31,11 @@ import org.openecard.utils.serialization.toPrintable
  *
  * Note that short EF names can not be used with in a select APDU.
  */
-class Select
+data class Select
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
 		val p1: UByte,
-		val data: UByteArray?,
+		val data: PrintableUByteArray?,
 		val fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 		val fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 		val extendedLength: Boolean = false,
@@ -51,7 +53,7 @@ class Select
 						0u
 					}
 				}
-			CommandApdu(0x00u, 0xA4u, p1, p2, (data ?: ubyteArrayOf()).toPrintable(), le, forceExtendedLength = extendedLength)
+			CommandApdu(0x00u, 0xA4u, p1, p2, (data ?: ubyteArrayOf().toPrintable()), le, forceExtendedLength = extendedLength)
 		}
 	
 		val p2: UByte by lazy { ((fileControlInfo.code.toUInt() shl 2) or fileOccurrence.code.toUInt()).toUByte() }
@@ -65,7 +67,7 @@ class Select
 			): Select =
 				Select(
 					0x00u,
-					if (withName) ubyteArrayOf(0x3Fu, 0x00u) else null,
+					if (withName) ubyteArrayOf(0x3Fu, 0x00u).toPrintable() else null,
 					SelectFileOccurrence.FIRST,
 					fileControlInfo,
 					forceNoLe = forceNoLe,
@@ -77,7 +79,7 @@ class Select
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x00u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x00u, data?.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectChildDfIdentifier(
@@ -85,15 +87,15 @@ class Select
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x01u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x01u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectEfIdentifier(
-				data: UByteArray,
+				data: UShort,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x02u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x02u, data.toUByteArray().toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectParentDf(
@@ -108,7 +110,7 @@ class Select
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x04u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x04u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			/**
 			 * Convenience function which is identical to [selectDfName].
@@ -127,7 +129,7 @@ class Select
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x08u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x08u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectPathRelative(
@@ -135,7 +137,7 @@ class Select
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x09u, data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x09u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 		}
 	}
 

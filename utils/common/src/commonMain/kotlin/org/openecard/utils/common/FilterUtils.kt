@@ -8,3 +8,13 @@ fun <T> T.returnIf(block: (T) -> Boolean): T? =
 	}
 
 fun <T> T.nullIf(block: (T) -> Boolean): T? = returnIf { !block(it) }
+
+fun <T> doIf(
+	condition: Boolean,
+	block: () -> T,
+): T? =
+	if (condition) {
+		block()
+	} else {
+		null
+	}

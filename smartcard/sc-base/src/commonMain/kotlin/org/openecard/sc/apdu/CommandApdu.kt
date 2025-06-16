@@ -38,12 +38,13 @@ data class CommandApdu
 		val classByteInterIndustry: InterIndustryClassByte? by lazy { classByte.cast() }
 
 		@OptIn(ExperimentalUnsignedTypes::class)
+		val header: UByteArray by lazy { ubyteArrayOf(cla, ins, p1, p2) }
+
+		@OptIn(ExperimentalUnsignedTypes::class)
 		val toBytes: UByteArray by lazy {
 			val isLcExtended = lc > 0xFFu
 			val isLeExtended = le?.let { it > 0xFFu } == true
 			val isExtended = forceExtendedLength || isLcExtended || isLeExtended
-
-			val header = ubyteArrayOf(cla, ins, p1, p2)
 
 			val lcField =
 				if (lc > 0u) {

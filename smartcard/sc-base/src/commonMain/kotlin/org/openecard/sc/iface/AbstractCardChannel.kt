@@ -11,24 +11,23 @@ import org.openecard.utils.common.mergeToArray
 private val log = KotlinLogging.logger { }
 
 abstract class AbstractCardChannel : CardChannel {
-	private val smHandler: MutableList<SecureMessaging> = mutableListOf()
+	private var smHandler: SecureMessaging? = null
 
-	override fun pushSecureMessaging(sm: SecureMessaging) {
-		smHandler.add(sm)
+	override fun setSecureMessaging(sm: SecureMessaging) {
+		if (smHandler != null) {
+			throw IllegalStateException("Secure Messaging is already active in this channel")
+		}
+		smHandler = sm
 	}
 
-	override fun popSecureMessaging() {
-		smHandler.removeLastOrNull()
-	}
-
-	override fun cleanSecureMessaging() {
-		smHandler.clear()
+	override fun removeSecureMessaging() {
+		smHandler = null
 	}
 
 	protected abstract fun transmitRaw(apdu: CommandApdu): ResponseApdu
 
 	override fun transmit(apdu: CommandApdu): ResponseApdu {
-		val command = smHandler.foldRight(apdu) { sm, apdu -> sm.processRequest(apdu) }
+		val command = smHandler?.processRequest(apdu) ?: apdu
 
 		val responseSm =
 			if (doChaining(command)) {
@@ -52,7 +51,7 @@ abstract class AbstractCardChannel : CardChannel {
 		// check if the result indicates the need for GET RESPONSE
 		val responseSmAggregated = handleGetResponse(responseSm)
 
-		val response = smHandler.fold(responseSmAggregated) { res, sm -> sm.processResponse(res) }
+		val response = smHandler?.processResponse(responseSmAggregated) ?: responseSmAggregated
 		return response
 	}
 

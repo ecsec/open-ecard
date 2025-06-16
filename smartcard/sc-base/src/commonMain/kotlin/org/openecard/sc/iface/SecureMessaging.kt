@@ -2,6 +2,7 @@ package org.openecard.sc.iface
 
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
+import org.openecard.sc.iface.SecureMessagingException
 
 interface SecureMessaging {
 	@Throws(SecureMessagingException::class)
@@ -12,8 +13,3 @@ interface SecureMessaging {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun processResponse(responseApdu: ResponseApdu): ResponseApdu
 }
-
-class SecureMessagingException(
-	msg: String? = null,
-	cause: Throwable? = null,
-) : Exception(msg ?: "There was an error while executing secure messaging.", cause)

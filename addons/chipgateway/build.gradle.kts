@@ -21,7 +21,7 @@ kotlin {
 				api(project(":addon"))
 				api(project(":i18n"))
 				api(project(":crypto:tls"))
-				api(libs.bc.pkix)
+				api(libs.bc.oec.pkix)
 				api(libs.jackson.jaxb)
 				api(libs.jose4j)
 

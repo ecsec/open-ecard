@@ -11,6 +11,8 @@ compose = "1.7.0"
 
 ktor = "3.1.+"
 kover = "0.9.1"
+kotlin-crypto = "0.4.0-bp1"
+bouncycastle = "1.81"
 
 moko = "0.24.5"
 
@@ -103,12 +105,21 @@ jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "3.
 
 jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
-#			bc-prov", "org.bouncycastle:bcprov-jdk15on:1.62")
-#			bc-pkix", "org.bouncycastle:bcpkix-jdk15on:1.62")
-#			bc-tls", "org.bouncycastle:bctls-jdk15on:1.62")
-bc-prov = { group = "org.openecard", name = "bcprov-jdk15on", version = "1.62" }
-bc-pkix = { group = "org.openecard", name = "bcpkix-jdk15on", version = "1.62" }
-bc-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62" }
+kotlin-crypto-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "kotlin-crypto" }
+kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "kotlin-crypto" }
+kotlin-crypto-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "kotlin-crypto" }
+kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt", version.ref = "kotlin-crypto" }
+kotlin-crypto-webcrypto = { module = "dev.whyoleg.cryptography:cryptography-provider-webcrypto", version.ref = "kotlin-crypto" }
+
+bc-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bc-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+bc-tls = { module = "org.bouncycastle:bctls-jdk18on", version.ref = "bouncycastle" }
+bc-prov-debug = { module = "org.bouncycastle:bcprov-debug-jdk18on", version.ref = "bouncycastle" }
+bc-pkix-debug = { module = "org.bouncycastle:bcpkix-debug-jdk18on", version.ref = "bouncycastle" }
+bc-tls-debug = { module = "org.bouncycastle:bctls-debug-jdk18on", version.ref = "bouncycastle" }
+bc-oec-prov = { group = "org.openecard", name = "bcprov-jdk15on", version = "1.62" }
+bc-oec-pkix = { group = "org.openecard", name = "bcpkix-jdk15on", version = "1.62" }
+bc-oec-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62" }
 
 httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "4.4.16" }
 # https://github.com/akuhtz/proxy-vole

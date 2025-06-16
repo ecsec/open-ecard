@@ -2,6 +2,7 @@ package org.openecard.sc.iface
 
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
+import org.openecard.sc.iface.SecureMessagingException
 
 interface CardChannel {
 	val card: Card
@@ -44,9 +45,7 @@ interface CardChannel {
 	)
 	fun close()
 
-	fun pushSecureMessaging(sm: SecureMessaging)
+	fun setSecureMessaging(sm: SecureMessaging)
 
-	fun popSecureMessaging()
-
-	fun cleanSecureMessaging()
+	fun removeSecureMessaging()
 }

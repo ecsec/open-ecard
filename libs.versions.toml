@@ -12,6 +12,7 @@ compose = "1.7.0"
 ktor = "3.1.+"
 kover = "0.9.1"
 kotlin-crypto = "0.4.0-bp1"
+kotlin-bignum = "0.3.10"
 bouncycastle = "1.81"
 
 moko = "0.24.5"
@@ -110,6 +111,8 @@ kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-j
 kotlin-crypto-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "kotlin-crypto" }
 kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt", version.ref = "kotlin-crypto" }
 kotlin-crypto-webcrypto = { module = "dev.whyoleg.cryptography:cryptography-provider-webcrypto", version.ref = "kotlin-crypto" }
+
+kotlin-bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "kotlin-bignum" }
 
 bc-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bc-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }

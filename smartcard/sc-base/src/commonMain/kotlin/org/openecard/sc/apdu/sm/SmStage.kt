@@ -1,11 +1,12 @@
 package org.openecard.sc.apdu.sm
 
+import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.tlv.Tlv
 
 interface CommandStage {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun processCommand(
-		smHeader: UByteArray,
+		smApdu: CommandApdu,
 		dos: List<Tlv>,
 	): List<Tlv>
 }

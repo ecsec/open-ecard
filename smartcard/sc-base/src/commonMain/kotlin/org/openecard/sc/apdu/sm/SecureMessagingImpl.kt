@@ -3,6 +3,7 @@ package org.openecard.sc.apdu.sm
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.apdu.SecureMessagingIndication
+import org.openecard.sc.apdu.checkOk
 import org.openecard.sc.iface.InvalidSwData
 import org.openecard.sc.iface.NoSwData
 import org.openecard.sc.iface.SecureMessaging
@@ -39,7 +40,7 @@ class SecureMessagingImpl(
 		val protectedDos =
 			commandStages.fold(
 				initialDos,
-			) { last, stage -> stage.processCommand(smRequestTemplate.header, last) }
+			) { last, stage -> stage.processCommand(smRequestTemplate, last) }
 		val protectedData = protectedDos.map { it.toBer() }.mergeToArray()
 
 		// update data field
@@ -88,6 +89,9 @@ class SecureMessagingImpl(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun processResponse(responseApdu: ResponseApdu): ResponseApdu {
+		// sm response must be 9000
+		responseApdu.checkOk()
+
 		val protectedDos =
 			responseApdu.data
 				.toTlvBer()

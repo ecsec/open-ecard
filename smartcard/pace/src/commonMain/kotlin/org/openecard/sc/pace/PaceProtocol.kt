@@ -7,14 +7,16 @@ import org.openecard.sc.iface.CardChannel
 class PaceProtocol {
 	fun execute(channel: CardChannel) {
 		TODO("Add PACE magic")
+		val encKey = byteArrayOf()
+		val macKey = byteArrayOf()
 
 		// prepare secure messaging object
-		val encStage = EncryptionStage()
-		val macStage = CmacStage()
+		val encStage = EncryptionStage(encKey)
+		val macStage = CmacStage(macKey)
 		val sm =
 			SecureMessagingImpl(
-				listOf(encStage, macStage),
-				listOf(macStage, encStage),
+				commandStages = listOf(encStage, macStage),
+				responseStages = listOf(macStage, encStage),
 				smType = SecureMessagingIndication.SM_W_HEADER,
 				protectedData = true,
 				protectedLe = true,

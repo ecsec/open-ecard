@@ -112,3 +112,16 @@ private fun numBitsToMask(numBits: Int): UByte {
 	}
 	return result.toUByte()
 }
+
+val UByte.isOdd: Boolean get() {
+	return this.mod(2u) == 1u
+}
+val UShort.isOdd: Boolean get() {
+	return this.mod(2u) == 1u
+}
+val UInt.isOdd: Boolean get() {
+	return this.mod(2u) == 1u
+}
+val ULong.isOdd: Boolean get() {
+	return this.mod(2u) == 1u
+}

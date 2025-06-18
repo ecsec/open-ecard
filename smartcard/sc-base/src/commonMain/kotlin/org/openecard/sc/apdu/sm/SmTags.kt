@@ -46,7 +46,7 @@ object SmBasicTags {
 	/**
 	 * Security environment identifier (SEID byte)
 	 */
-	val securityEnvironmen = SmTagBoth(0x94u)
+	val securityEnvironment = SmTagBoth(0x94u)
 
 	/**
 	 * One or two bytes encoding Ne in the unsecured command-response pair (possibly empty)

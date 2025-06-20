@@ -6,15 +6,21 @@ import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlin.jvm.JvmInline
 
 @Serializable(with = PrintableByteArraySerializer::class)
-@JvmInline
-value class PrintableByteArray(
+class PrintableByteArray(
 	val v: ByteArray,
 ) {
 	@OptIn(ExperimentalStdlibApi::class)
 	override fun toString(): String = v.toHexString()
+
+	override fun equals(other: Any?): Boolean =
+		when (other) {
+			is PrintableByteArray -> this.v.contentEquals(other.v)
+			else -> false
+		}
+
+	override fun hashCode(): Int = v.contentHashCode()
 }
 
 fun ByteArray.toPrintable() = PrintableByteArray(this)
@@ -34,13 +40,20 @@ object PrintableByteArraySerializer : KSerializer<PrintableByteArray> {
 }
 
 @Serializable(with = PrintableUByteArraySerializer::class)
-@JvmInline
 @OptIn(ExperimentalUnsignedTypes::class, ExperimentalStdlibApi::class)
-value class PrintableUByteArray
+class PrintableUByteArray
 	constructor(
 		val v: UByteArray,
 	) {
 		override fun toString(): String = v.toHexString()
+
+		override fun equals(other: Any?): Boolean =
+			when (other) {
+				is PrintableUByteArray -> this.v.contentEquals(other.v)
+				else -> false
+			}
+
+		override fun hashCode(): Int = v.contentHashCode()
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)

@@ -5,6 +5,16 @@ sealed class SecureMessagingException(
 	cause: Throwable? = null,
 ) : Exception(msg ?: "There was an error while executing secure messaging", cause)
 
+class SecureMessagingUnsupported(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SecureMessagingException(msg ?: "Secure messaging is unsupported", cause)
+
+class InvalidApduStatus(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SecureMessagingException(msg ?: "Secure messaging response APDU does not contain a valid status", cause)
+
 class NoSwData(
 	msg: String? = null,
 	cause: Throwable? = null,
@@ -29,6 +39,11 @@ class CryptographicChecksumWrong(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SecureMessagingException(msg ?: "Cryptographic checksum does not match calculated value", cause)
+
+class MissingSmDo(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SecureMessagingException(msg ?: "Secure messaging DO is missing", cause)
 
 class InvalidSmDo(
 	msg: String? = null,

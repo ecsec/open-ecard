@@ -51,8 +51,14 @@ abstract class AbstractCardChannel : CardChannel {
 		// check if the result indicates the need for GET RESPONSE
 		val responseSmAggregated = handleGetResponse(responseSm)
 
-		val response = smHandler?.processResponse(responseSmAggregated) ?: responseSmAggregated
-		return response
+		return runCatching {
+			val response = smHandler?.processResponse(responseSmAggregated) ?: responseSmAggregated
+			response
+		}.onFailure {
+			// delete sm in case it is not working
+			log.error(it) { "Secure Messaging failed." }
+			smHandler = null
+		}.getOrThrow()
 	}
 
 	protected fun doChaining(apdu: CommandApdu): Boolean {

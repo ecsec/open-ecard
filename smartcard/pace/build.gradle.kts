@@ -17,7 +17,7 @@ kotlin {
 			// https://github.com/whyoleg/cryptography-kotlin/pull/57#discussion_r2098682916
 			// https://github.com/whyoleg/cryptography-kotlin/pull/60
 			implementation(libs.kotlin.crypto.core)
-			implementation(libs.kotlin.bignum)
+			implementation(libs.kotlin.crypto.asn1.core)
 		}
 
 		jvmMain.dependencies {

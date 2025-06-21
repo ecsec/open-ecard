@@ -3,9 +3,17 @@ package org.openecard.sc.pace
 import org.openecard.sc.apdu.SecureMessagingIndication
 import org.openecard.sc.apdu.sm.SecureMessagingImpl
 import org.openecard.sc.iface.CardChannel
+import org.openecard.sc.pace.asn1.EfCardAccess
 
 class PaceProtocol {
-	fun execute(channel: CardChannel) {
+	fun readEfCardAccess(): EfCardAccess {
+		TODO("Implement")
+	}
+
+	fun execute(
+		channel: CardChannel,
+		efca: EfCardAccess,
+	) {
 		TODO("Add PACE magic")
 		val encKey = byteArrayOf()
 		val macKey = byteArrayOf()

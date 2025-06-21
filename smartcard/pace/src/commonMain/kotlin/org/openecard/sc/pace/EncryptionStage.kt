@@ -1,6 +1,5 @@
 package org.openecard.sc.pace
 
-import com.ionspin.kotlin.bignum.integer.toBigInteger
 import dev.whyoleg.cryptography.DelicateCryptographyApi
 import dev.whyoleg.cryptography.algorithms.AES
 import org.openecard.sc.apdu.CommandApdu
@@ -26,7 +25,7 @@ class EncryptionStage(
 	ResponseStage {
 	override val isOptional = false
 
-	private var ssc = 0.toBigInteger()
+	private var ssc = 0L
 	val encKey by lazy {
 		crypto.get(AES.CBC).keyDecoder().decodeFromByteArrayBlocking(AES.Key.Format.RAW, encKeyBytes)
 	}

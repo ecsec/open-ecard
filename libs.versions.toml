@@ -107,6 +107,8 @@ jaxb-impl = { group = "org.glassfish.jaxb", name = "jaxb-runtime", version = "3.
 jackson-jaxb = { group = "com.fasterxml.jackson.module", name = "jackson-module-jakarta-xmlbind-annotations", version = "2.16.+" }
 
 kotlin-crypto-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "kotlin-crypto" }
+kotlin-crypto-asn1-core = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1", version.ref = "kotlin-crypto" }
+kotlin-crypto-asn1-modules = { module = "dev.whyoleg.cryptography:cryptography-serialization-asn1-modules", version.ref = "kotlin-crypto" }
 kotlin-crypto-jvm = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "kotlin-crypto" }
 kotlin-crypto-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "kotlin-crypto" }
 kotlin-crypto-openssl = { module = "dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt", version.ref = "kotlin-crypto" }

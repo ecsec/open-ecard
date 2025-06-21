@@ -3,10 +3,16 @@ package org.openecard.sc.apdu.sm
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.apdu.SecureMessagingIndication
-import org.openecard.sc.apdu.checkOk
+import org.openecard.sc.apdu.StatusWord
+import org.openecard.sc.apdu.isNormalProcessed
+import org.openecard.sc.apdu.matchStatus
+import org.openecard.sc.iface.InvalidApduStatus
+import org.openecard.sc.iface.InvalidSmDo
 import org.openecard.sc.iface.InvalidSwData
+import org.openecard.sc.iface.MissingSmDo
 import org.openecard.sc.iface.NoSwData
 import org.openecard.sc.iface.SecureMessaging
+import org.openecard.sc.iface.SecureMessagingUnsupported
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvBer
@@ -89,8 +95,11 @@ class SecureMessagingImpl(
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun processResponse(responseApdu: ResponseApdu): ResponseApdu {
+		if (responseApdu.matchStatus(StatusWord.SM_DO_MISSING)) throw MissingSmDo()
+		if (responseApdu.matchStatus(StatusWord.SM_DO_INCORRECT)) throw InvalidSmDo()
+		if (responseApdu.matchStatus(StatusWord.SECURE_MESSAGING_UNSUPPORTED)) throw SecureMessagingUnsupported()
 		// sm response must be 9000
-		responseApdu.checkOk()
+		if (!responseApdu.isNormalProcessed) throw InvalidApduStatus()
 
 		val protectedDos =
 			responseApdu.data

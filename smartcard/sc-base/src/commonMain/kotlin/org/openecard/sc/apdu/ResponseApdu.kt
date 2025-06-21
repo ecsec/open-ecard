@@ -34,6 +34,7 @@ fun ResponseApdu.matchStatus(vararg codes: StatusWord): Boolean = status.type in
 @OptIn(ExperimentalUnsignedTypes::class)
 fun ResponseApdu.matchStatus(vararg codes: UShort): Boolean = status.sw in codes
 
+@Throws(ApduProcessingError::class)
 fun ResponseApdu.checkStatus(vararg codes: StatusWord): ResponseApdu {
 	if (!matchStatus(*codes)) {
 		throw ApduProcessingError(status, status.type.description)
@@ -42,16 +43,19 @@ fun ResponseApdu.checkStatus(vararg codes: StatusWord): ResponseApdu {
 	}
 }
 
+@Throws(ApduProcessingError::class)
 fun ResponseApdu.checkOk() {
 	checkStatus(StatusWord.OK)
 }
 
+@Throws(ApduProcessingError::class)
 fun ResponseApdu.checkNoError() {
 	if (!(status.isNormal || status.isWarning)) {
 		throw ApduProcessingError(status, status.type.description)
 	}
 }
 
+@Throws(ApduProcessingError::class)
 @OptIn(ExperimentalUnsignedTypes::class)
 fun ResponseApdu.checkStatus(vararg codes: UShort): ResponseApdu {
 	if (!matchStatus(*codes)) {

@@ -1,6 +1,5 @@
 package org.openecard.sc.pace
 
-import com.ionspin.kotlin.bignum.integer.toBigInteger
 import dev.whyoleg.cryptography.algorithms.AES
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.SecureMessagingIndication
@@ -23,7 +22,7 @@ class CmacStage(
 	ResponseStage {
 	override val isOptional = false
 
-	private var ssc = 0.toBigInteger()
+	private var ssc = 0L
 	val macKey by lazy {
 		crypto.get(AES.CMAC).keyDecoder().decodeFromByteArrayBlocking(AES.Key.Format.RAW, macKeyBytes)
 	}

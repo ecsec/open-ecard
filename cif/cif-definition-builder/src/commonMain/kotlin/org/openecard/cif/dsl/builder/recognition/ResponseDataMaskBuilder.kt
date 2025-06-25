@@ -12,9 +12,7 @@ class ResponseDataMaskBuilder(
 	Builder<DataMaskDefinition.DataObject> {
 	var match: DataMaskDefinition? = null
 		set(value) {
-			if (built != null) {
-				throw IllegalStateException("Cannot update the builder after it builds!")
-			}
+			check(built == null) { "Cannot update the builder after it builds!" }
 			field = value
 		}
 	var built: DataMaskDefinition.DataObject? = null
@@ -41,7 +39,7 @@ class ResponseDataMaskBuilder(
 			built =
 				DataMaskDefinition.DataObject(
 					tag = tag,
-					match = match!!,
+					match = requireNotNull(match),
 				)
 		}
 		return built!!

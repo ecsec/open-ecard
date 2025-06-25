@@ -15,7 +15,7 @@ class DataSetBuilder :
 	Builder<DataSetDefinition> {
 	private var _path: PrintableUByteArray? = null
 	override var path: PrintableUByteArray
-		get() = _path!!
+		get() = requireNotNull(_path)
 		set(value) {
 			_path = value
 		}
@@ -34,16 +34,11 @@ class DataSetBuilder :
 		}
 	private var _name: String? = null
 	override var name: String
-		get() = _name!!
+		get() = requireNotNull(_name)
 		set(value) {
 			_name = value
 		}
-	private var _description: String? = null
-	override var description: String
-		get() = _description!!
-		set(value) {
-			_description = value
-		}
+	override var description: String? = null
 	private var readAcl: AclDefinition? = null
 	private var writeAcl: AclDefinition? = null
 

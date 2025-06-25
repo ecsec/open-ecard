@@ -5,7 +5,7 @@ import org.openecard.cif.definition.acl.BoolTreeLeaf
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.acl.PaceAclQualifier
 
-@AslTreeMarker
+@AclTreeMarker
 object AndOrScope {
 	val Always: AndOrScopeResult.LeafResult
 		get() = AndOrScopeResult.LeafResult.Always
@@ -14,7 +14,7 @@ object AndOrScope {
 
 	fun paceQualifier(hex: String): PaceAclQualifier = AclBoolTreeBuilder.paceQualifier(hex)
 
-	@AslTreeMarker
+	@AclTreeMarker
 	fun didState(
 		name: String,
 		active: Boolean,
@@ -28,7 +28,7 @@ object AndOrScope {
 			),
 		)
 
-	@AslTreeMarker
+	@AclTreeMarker
 	fun or(
 		first: AndOrScopeResult.LeafResult,
 		second: AndOrScopeResult.LeafResult,
@@ -41,13 +41,13 @@ object AndOrScope {
 		)
 	}
 
-	@AslTreeMarker
+	@AclTreeMarker
 	fun activeDidState(
 		name: String,
 		qualifier: AclQualifier? = null,
 	): AndOrScopeResult.LeafResult = didState(name = name, active = true, qualifier = qualifier)
 
-	@AslTreeMarker
+	@AclTreeMarker
 	fun inActiveDidState(
 		name: String,
 		qualifier: AclQualifier? = null,

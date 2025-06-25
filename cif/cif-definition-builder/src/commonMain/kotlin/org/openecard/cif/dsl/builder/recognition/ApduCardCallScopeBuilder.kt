@@ -15,7 +15,7 @@ class ApduCardCallScopeBuilder(
 	Builder<ApduCallDefinition> {
 	private var _command: UByteArray? = null
 	override var command: UByteArray
-		get() = _command!!
+		get() = requireNotNull(_command)
 		set(value) {
 			_command = value
 		}
@@ -28,7 +28,7 @@ class ApduCardCallScopeBuilder(
 
 	override fun build(): ApduCallDefinition =
 		ApduCallDefinition(
-			_command!!.toPrintable(),
+			requireNotNull(_command?.toPrintable()),
 			responses,
 		)
 }

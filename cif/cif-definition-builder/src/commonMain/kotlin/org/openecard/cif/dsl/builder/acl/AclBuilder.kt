@@ -5,7 +5,7 @@ import org.openecard.cif.definition.acl.AclDefinition
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder
 import org.openecard.cif.dsl.api.acl.AclScope
-import org.openecard.cif.dsl.api.acl.AslTreeMarker
+import org.openecard.cif.dsl.api.acl.AclTreeMarker
 import org.openecard.cif.dsl.builder.Builder
 
 class AclBuilder(
@@ -14,7 +14,7 @@ class AclBuilder(
 	Builder<AclDefinition> {
 	override fun acl(
 		protocol: CardProtocol,
-		content: @AslTreeMarker (AclBoolTreeBuilder.() -> CifAclOr),
+		content: @AclTreeMarker (AclBoolTreeBuilder.() -> CifAclOr),
 	) {
 		definitions[protocol] = content(AclBoolTreeBuilder)
 	}

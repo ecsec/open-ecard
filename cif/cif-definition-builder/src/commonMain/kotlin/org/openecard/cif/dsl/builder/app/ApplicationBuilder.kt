@@ -22,13 +22,13 @@ class ApplicationBuilder :
 	Builder<ApplicationDefinition> {
 	private var _aid: PrintableUByteArray? = null
 	override var aid: PrintableUByteArray
-		get() = _aid!!
+		get() = requireNotNull(_aid)
 		set(value) {
 			_aid = value
 		}
 	private var _name: String? = null
 	override var name: String
-		get() = _name!!
+		get() = requireNotNull(_name)
 		set(value) {
 			_name = value
 		}

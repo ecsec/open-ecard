@@ -7,6 +7,6 @@ import org.openecard.cif.dsl.api.CifScope
 interface AclScope : CifScope {
 	fun acl(
 		protocol: CardProtocol,
-		content: @AslTreeMarker AclBoolTreeBuilder.() -> CifAclOr,
+		content: @AclTreeMarker AclBoolTreeBuilder.() -> CifAclOr,
 	)
 }

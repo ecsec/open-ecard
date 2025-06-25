@@ -9,4 +9,4 @@ package org.openecard.cif.dsl.api.acl
 	],
 )
 @DslMarker
-annotation class AslTreeMarker
+annotation class AclTreeMarker

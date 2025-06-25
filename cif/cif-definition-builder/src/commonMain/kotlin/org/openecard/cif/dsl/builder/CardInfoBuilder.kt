@@ -1,6 +1,7 @@
 package org.openecard.cif.dsl.builder
 
 import org.openecard.cif.definition.CardInfoDefinition
+import org.openecard.cif.definition.CifVerifier
 import org.openecard.cif.definition.app.ApplicationDefinition
 import org.openecard.cif.definition.meta.CardInfoMetadata
 import org.openecard.cif.dsl.api.CardInfoMetadataScope
@@ -28,9 +29,16 @@ class CardInfoBuilder :
 		applications = builder.build().map { it.build() }.toList()
 	}
 
-	override fun build(): CardInfoDefinition =
-		CardInfoDefinition(
-			metadata = metadataDefinition,
-			applications = applications ?: listOf(),
-		)
+	override fun build(): CardInfoDefinition {
+		val cif =
+			CardInfoDefinition(
+				metadata = metadataDefinition,
+				applications = applications ?: listOf(),
+			)
+
+		// TODO: perform sanity checks such as existence of DIDs and Datasets
+		CifVerifier(cif).verify()
+
+		return cif
+	}
 }

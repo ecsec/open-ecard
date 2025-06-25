@@ -10,7 +10,7 @@ import org.openecard.cif.definition.acl.NeverTree
 import org.openecard.cif.definition.acl.PaceAclQualifier
 import org.openecard.utils.serialization.toPrintable
 
-@AslTreeMarker
+@AclTreeMarker
 object AclBoolTreeBuilder {
 	val Never = NeverTree
 
@@ -19,7 +19,7 @@ object AclBoolTreeBuilder {
 	@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
 	fun paceQualifier(hex: String): PaceAclQualifier = PaceAclQualifier(hex.hexToUByteArray().toPrintable())
 
-	@AslTreeMarker
+	@AclTreeMarker
 	fun didState(
 		name: String,
 		active: Boolean,
@@ -44,20 +44,18 @@ object AclBoolTreeBuilder {
 		qualifier: AclQualifier? = null,
 	) = didState(name = name, active = true, qualifier = qualifier)
 
-	fun inActiveDidState(
+	fun inactiveDidState(
 		name: String,
 		qualifier: AclQualifier? = null,
 	) = didState(name = name, active = false, qualifier = qualifier)
 
 	fun and(
-		@AslTreeMarker first: (AndOrScope.() -> AndOrScopeResult),
-		@AslTreeMarker second: (AndOrScope.() -> AndOrScopeResult),
-		@AslTreeMarker vararg content: (AndOrScope.() -> AndOrScopeResult),
+		@AclTreeMarker first: (AndOrScope.() -> AndOrScopeResult),
+		@AclTreeMarker vararg content: (AndOrScope.() -> AndOrScopeResult),
 	): CifAclOr {
 		val candidates =
 			mutableListOf(
 				first(AndOrScope),
-				second(AndOrScope),
 			)
 		candidates.addAll(content.map { it(AndOrScope) })
 		val leaves = mutableListOf<BoolTreeLeaf>()
@@ -86,14 +84,12 @@ object AclBoolTreeBuilder {
 	}
 
 	fun or(
-		@AslTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
-		@AslTreeMarker second: (OrAndScope.() -> OrAndScopeResult),
-		@AslTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
+		@AclTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
+		@AclTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
 	): CifAclOr {
 		val candidates =
 			mutableListOf(
 				first(OrAndScope),
-				second(OrAndScope),
 			)
 		candidates.addAll(content.map { it(OrAndScope) })
 		val results = mutableListOf<BoolTreeAnd<BoolTreeLeaf>>()
@@ -109,8 +105,7 @@ object AclBoolTreeBuilder {
 	}
 
 	fun anyOf(
-		@AslTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
-		@AslTreeMarker second: (OrAndScope.() -> OrAndScopeResult),
-		@AslTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
-	): CifAclOr = or(first, second, *content)
+		@AclTreeMarker first: (OrAndScope.() -> OrAndScopeResult),
+		@AclTreeMarker vararg content: (OrAndScope.() -> OrAndScopeResult),
+	): CifAclOr = or(first, *content)
 }

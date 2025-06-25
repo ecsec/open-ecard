@@ -9,7 +9,7 @@ interface DataSetScope : CifScope {
 	var path: PrintableUByteArray
 	var shortEf: UByte?
 	var name: String
-	var description: String
+	var description: String?
 
 	fun readAcl(content: @CifMarker AclScope.() -> Unit)
 

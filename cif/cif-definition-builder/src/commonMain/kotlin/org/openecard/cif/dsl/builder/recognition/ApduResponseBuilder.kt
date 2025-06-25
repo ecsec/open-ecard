@@ -47,6 +47,6 @@ class ApduResponseBuilder :
 		ResponseApduDefinition(
 			body = body,
 			trailer = trailer,
-			conclusion = conclusion!!,
+			conclusion = requireNotNull(conclusion),
 		)
 }

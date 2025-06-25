@@ -10,13 +10,13 @@ class CardInfoMetadataBuilder :
 	Builder<CardInfoMetadata> {
 	private var _id: String? = null
 	override var id: String
-		get() = _id!!
+		get() = requireNotNull(_id)
 		set(value) {
 			_id = value
 		}
 	private var _name: String? = null
 	override var name: String
-		get() = _name!!
+		get() = requireNotNull(_name)
 		set(value) {
 			_name = value
 		}

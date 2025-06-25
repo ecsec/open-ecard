@@ -12,7 +12,7 @@ class MatchingDataBuilder :
 	Builder<DataMaskDefinition.MatchingData> {
 	private var _value: UByteArray? = null
 	override var value: UByteArray
-		get() = _value!!
+		get() = requireNotNull(_value)
 		set(value) {
 			_value = value
 		}

@@ -4,20 +4,20 @@ import org.openecard.cif.definition.acl.AclQualifier
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder
+import org.openecard.cif.dsl.api.acl.AclTreeMarker
 import org.openecard.cif.dsl.api.acl.AndOrScope
 import org.openecard.cif.dsl.api.acl.AndOrScopeResult
-import org.openecard.cif.dsl.api.acl.AslTreeMarker
 import org.openecard.cif.dsl.api.acl.OrAndScope
 import org.openecard.cif.dsl.api.acl.OrAndScopeResult
 
-@AslTreeMarker
+@AclTreeMarker
 sealed interface DidStateScope {
 	var name: String
 	var active: Boolean
 	var stateQualifier: AclQualifier?
 }
 
-@AslTreeMarker
+@AclTreeMarker
 class DidStateScopeBuilder : DidStateScope {
 	private var _name: String? = null
 	override var name: String
@@ -42,7 +42,7 @@ class DidStateScopeBuilder : DidStateScope {
 }
 
 fun AclBoolTreeBuilder.didState(
-	@AslTreeMarker content: DidStateScope.() -> Unit,
+	@AclTreeMarker content: DidStateScope.() -> Unit,
 ): CifAclOr {
 	val builder = DidStateScopeBuilder()
 	content(builder)
@@ -51,7 +51,7 @@ fun AclBoolTreeBuilder.didState(
 }
 
 fun AndOrScope.didState(
-	@AslTreeMarker content: DidStateScope.() -> Unit,
+	@AclTreeMarker content: DidStateScope.() -> Unit,
 ): AndOrScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	content(builder)
@@ -60,7 +60,7 @@ fun AndOrScope.didState(
 }
 
 fun AndOrScope.activeDidState(
-	@AslTreeMarker content: DidStateScope.() -> Unit,
+	@AclTreeMarker content: DidStateScope.() -> Unit,
 ): AndOrScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	builder.active = true
@@ -70,7 +70,7 @@ fun AndOrScope.activeDidState(
 }
 
 fun OrAndScope.didState(
-	@AslTreeMarker content: DidStateScope.() -> Unit,
+	@AclTreeMarker content: DidStateScope.() -> Unit,
 ): OrAndScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	content(builder)
@@ -79,7 +79,7 @@ fun OrAndScope.didState(
 }
 
 fun OrAndScope.activeDidState(
-	@AslTreeMarker content: DidStateScope.() -> Unit,
+	@AclTreeMarker content: DidStateScope.() -> Unit,
 ): OrAndScopeResult.LeafResult {
 	val builder = DidStateScopeBuilder()
 	builder.active = true

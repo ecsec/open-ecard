@@ -10,13 +10,13 @@ class DidBuilder :
 	Builder<DidDefinition> {
 	private var _name: String? = null
 	override var name: String
-		get() = _name!!
+		get() = requireNotNull(_name)
 		set(value) {
 			_name = value
 		}
 	private var _scope: DidScope? = null
 	override var scope: DidScope
-		get() = _scope!!
+		get() = requireNotNull(_scope)
 		set(value) {
 			_scope = value
 		}

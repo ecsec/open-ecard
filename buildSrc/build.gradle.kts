@@ -31,7 +31,7 @@ dependencies {
 
 	implementation(libs.plugins.androidKmpLibrary)
 	implementation(libs.plugins.androidLibrary)
-	implementation(libs.robovm.gradlePlugin)
+// 	implementation(libs.robovm.gradlePlugin)
 
 	implementation(libs.jose4j)
 	implementation(libs.semver)

@@ -16,16 +16,17 @@ bouncycastle = "1.81"
 
 moko = "0.24.5"
 
-agp = "8.7.+"
+agp = "8.12.+"
 androidx-activityCompose = "1.9.+"
 androidx-appcompat = "1.6.+"
 androidx-constraintlayout = "2.1.+"
 androidx-core-ktx = "1.13.+"
+androidx-test-ktx = "1.7.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
-androidx-test-junit = "1.1.+"
+androidx-test-junit = "1.1.5"
+androidx-test-runner = "1.5.2"
 
-robovm = "2.3.21"
 roboface = "1.4.0"
 jfx = "22.0.2"
 systray = "4.5"
@@ -64,7 +65,9 @@ kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializat
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
+androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidx-test-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
@@ -148,9 +151,6 @@ pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
 
-robovm-gradlePlugin = { group = "com.mobidevelop.robovm", name = "robovm-gradle-plugin", version.ref = "robovm" }
-robovm-rt = { group = "com.mobidevelop.robovm", name = "robovm-rt", version.ref = "robovm" }
-robovm-cocoa = { group = "com.mobidevelop.robovm", name = "robovm-cocoatouch", version.ref = "robovm" }
 roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version.ref = "roboface" }
 roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version.ref = "roboface" }
 roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version.ref = "roboface" }

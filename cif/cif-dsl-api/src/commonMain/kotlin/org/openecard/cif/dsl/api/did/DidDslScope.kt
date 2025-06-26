@@ -23,5 +23,11 @@ interface DidDslScope : CifScope {
 		fun parameters(content: @CifMarker (PaceDidParametersScope.() -> Unit))
 	}
 
-	interface Pin : DidDslScope
+	interface Pin : DidDslScope {
+		fun authAcl(content: @CifMarker (AclScope.() -> Unit))
+
+		fun modifyAcl(content: @CifMarker (AclScope.() -> Unit))
+
+		fun parameters(content: @CifMarker (PinDidParametersScope.() -> Unit))
+	}
 }

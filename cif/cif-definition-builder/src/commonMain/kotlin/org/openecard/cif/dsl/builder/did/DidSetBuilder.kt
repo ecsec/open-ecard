@@ -16,5 +16,11 @@ class DidSetBuilder(
 		dids.add(builder.build())
 	}
 
+	override fun pin(content: @CifMarker (DidDslScope.Pin.() -> Unit)) {
+		val builder = PinDidBuilder()
+		content(builder)
+		dids.add(builder.build())
+	}
+
 	override fun build(): Set<DidDefinition> = dids
 }

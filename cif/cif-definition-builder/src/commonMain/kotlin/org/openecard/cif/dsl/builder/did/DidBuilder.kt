@@ -5,9 +5,9 @@ import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.dsl.api.did.DidDslScope
 import org.openecard.cif.dsl.builder.Builder
 
-class DidBuilder :
+abstract class DidBuilder<T : DidDefinition> :
 	DidDslScope,
-	Builder<DidDefinition> {
+	Builder<T> {
 	private var _name: String? = null
 	override var name: String
 		get() = requireNotNull(_name)
@@ -20,8 +20,4 @@ class DidBuilder :
 		set(value) {
 			_scope = value
 		}
-
-	override fun build(): DidDefinition {
-		TODO("Support the various subclasses of DidDefinition")
-	}
 }

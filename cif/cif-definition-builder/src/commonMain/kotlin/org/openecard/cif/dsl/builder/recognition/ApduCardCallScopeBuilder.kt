@@ -28,7 +28,7 @@ class ApduCardCallScopeBuilder(
 
 	override fun build(): ApduCallDefinition =
 		ApduCallDefinition(
-			requireNotNull(_command?.toPrintable()),
+			requireNotNull(_command).toPrintable(),
 			responses,
 		)
 }

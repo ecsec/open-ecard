@@ -5,7 +5,7 @@ import org.openecard.cif.dsl.api.CifScope
 import org.openecard.cif.dsl.api.CifSetScope
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.dataset.DataSetScope
-import org.openecard.cif.dsl.api.did.DidDslScope
+import org.openecard.cif.dsl.api.did.DidSetScope
 import org.openecard.utils.serialization.PrintableUByteArray
 
 interface ApplicationScope : CifScope {
@@ -27,7 +27,7 @@ interface ApplicationScope : CifScope {
 
 	fun selectAcl(content: @CifMarker AclScope.() -> Unit)
 
-	fun dids(content: @CifMarker CifSetScope<DidDslScope>.() -> Unit)
+	fun dids(content: @CifMarker DidSetScope.() -> Unit)
 
 	fun dataSets(content: @CifMarker CifSetScope<DataSetScope>.() -> Unit)
 }

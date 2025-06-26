@@ -9,12 +9,12 @@ import org.openecard.cif.dsl.api.CifSetScope
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.api.dataset.DataSetScope
-import org.openecard.cif.dsl.api.did.DidDslScope
+import org.openecard.cif.dsl.api.did.DidSetScope
 import org.openecard.cif.dsl.builder.Builder
 import org.openecard.cif.dsl.builder.CifSetBuilder
 import org.openecard.cif.dsl.builder.acl.AclBuilder
 import org.openecard.cif.dsl.builder.dataset.DataSetBuilder
-import org.openecard.cif.dsl.builder.did.DidBuilder
+import org.openecard.cif.dsl.builder.did.DidSetBuilder
 import org.openecard.utils.serialization.PrintableUByteArray
 
 class ApplicationBuilder :
@@ -43,10 +43,10 @@ class ApplicationBuilder :
 		this.selectAcl = builder.build()
 	}
 
-	override fun dids(content: @CifMarker (CifSetScope<DidDslScope>.() -> Unit)) {
-		val builder = CifSetBuilder<DidDslScope, DidBuilder>(builder = { DidBuilder() })
+	override fun dids(content: @CifMarker (DidSetScope.() -> Unit)) {
+		val builder = DidSetBuilder()
 		content(builder)
-		dids = builder.build().map { it.build() }.toSet()
+		dids = builder.build()
 	}
 
 	override fun dataSets(content: @CifMarker (CifSetScope<DataSetScope>.() -> Unit)) {

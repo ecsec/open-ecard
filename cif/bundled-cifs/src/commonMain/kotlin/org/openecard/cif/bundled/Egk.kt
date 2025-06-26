@@ -185,9 +185,15 @@ val EgkCif by lazy {
 
 			// TODO: add DIDs
 			dids {
-				add {
+				pace {
 					name = "AUT_PACE"
 					scope = DidScope.GLOBAL
+					modifyAcl {
+					}
+					authAcl {
+					}
+					parameters {
+					}
 				}
 			}
 		}

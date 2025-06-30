@@ -13,10 +13,10 @@ class StandardInfoBuilder :
 	override var hashGenInfo: HashGenerationInfoType? = null
 	override var cardAlgRef: PrintableUByteArray? = null
 	override var hashAlgRef: PrintableUByteArray? = null
-	var infoTypes: Set<SignatureGenerationInfoType> = setOf()
+	var infoTypes: List<SignatureGenerationInfoType> = listOf()
 
 	override fun info(vararg info: SignatureGenerationInfoType) {
-		infoTypes = info.toSet()
+		infoTypes = info.toList()
 	}
 
 	override fun build(): SignatureGenerationInfo.StandardInfo =

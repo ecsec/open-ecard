@@ -17,7 +17,7 @@ data class SignatureDidParameters(
 
 sealed interface SignatureGenerationInfo {
 	data class StandardInfo(
-		val info: List<SignatureGenerationInfoType>,
+		val info: Set<SignatureGenerationInfoType>,
 		val hashGenInfo: HashGenerationInfoType?,
 		/**
 		 * MAY contain the card-specific cryptographic mechanism reference according to [ISO7816-4] (Table 33) and hence the

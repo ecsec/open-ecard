@@ -9,12 +9,6 @@ interface DidDslScope : CifScope {
 	var name: String
 	var scope: DidScope
 
-	interface Decryption : DidDslScope
-
-	interface Encryption : DidDslScope
-
-	interface Signature : DidDslScope
-
 	interface Pace : DidDslScope {
 		fun authAcl(content: @CifMarker (AclScope.() -> Unit))
 
@@ -29,5 +23,9 @@ interface DidDslScope : CifScope {
 		fun modifyAcl(content: @CifMarker (AclScope.() -> Unit))
 
 		fun parameters(content: @CifMarker (PinDidParametersScope.() -> Unit))
+	}
+
+	interface GenericCrypto<T : GenericCryptoDidParametersScope> : DidDslScope {
+		fun parameters(content: @CifMarker T.() -> Unit)
 	}
 }

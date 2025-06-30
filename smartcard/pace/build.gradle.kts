@@ -18,6 +18,7 @@ kotlin {
 			// https://github.com/whyoleg/cryptography-kotlin/pull/60
 			implementation(libs.kotlin.crypto.core)
 			implementation(libs.kotlin.crypto.asn1.core)
+			implementation(libs.kotlin.crypto.asn1.modules)
 		}
 
 		jvmMain.dependencies {

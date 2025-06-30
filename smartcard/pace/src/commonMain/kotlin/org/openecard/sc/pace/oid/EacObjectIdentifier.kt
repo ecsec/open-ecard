@@ -78,6 +78,12 @@ object EacObjectIdentifier {
 	const val ID_PT: String = "$BSI_DE.2.2.8"
 
 	/**
+	 * Pseudonymous Signatures
+	 * id-PS OBJECT IDENTIFIER ::= { bsi-de protocols(2) smartcards(2) 11 }
+	 */
+	const val ID_PS: String = "$BSI_DE.2.2.11"
+
+	/**
 	 * Authenticated Auxiliary Data. BSI-TR-03110 section A.6.5.1.
 	 * id-AuxiliaryData OBJECT IDENTIFIER ::= {bsi-de applications(3) mrtd(1) 4}
 	 */

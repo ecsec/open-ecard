@@ -24,7 +24,7 @@ class EfCardAccessTest {
 		assertEquals(1, secInfos.size)
 		assertEquals(id_PACE_ECDH_GM_AES_CBC_CMAC_128, efca.paceInfo.protocol.value)
 		assertEquals(2, efca.paceInfo.version)
-		assertEquals(13, efca.paceInfo.parameterId)
+		assertEquals(13, efca.paceInfo.domainParameterId)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -35,6 +35,6 @@ class EfCardAccessTest {
 		assertEquals(6, secInfos.size)
 		assertEquals(id_PACE_ECDH_GM_AES_CBC_CMAC_128, efca.paceInfo.protocol.value)
 		assertEquals(2, efca.paceInfo.version)
-		assertEquals(13, efca.paceInfo.parameterId)
+		assertEquals(13, efca.paceInfo.domainParameterId)
 	}
 }

@@ -13,10 +13,10 @@ kotlin {
 			api(project(":utils:serialization"))
 			api(project(":cif:cif-definition"))
 			api(project(":cif:cif-dsl-api"))
+			implementation(project(":utils:common"))
 		}
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
-			implementation(project(":utils:common"))
 		}
 		jvmMain.dependencies {
 		}

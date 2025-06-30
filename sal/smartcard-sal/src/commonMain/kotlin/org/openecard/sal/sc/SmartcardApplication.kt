@@ -62,7 +62,7 @@ class SmartcardApplication(
 						null
 					}
 				}
-				is GenericCryptoDidDefinition -> {
+				is GenericCryptoDidDefinition<*> -> {
 					when (did) {
 						is GenericCryptoDidDefinition.DecryptionDidDefinition -> TODO("No Implemented yet")
 						is GenericCryptoDidDefinition.EncryptionDidDefinition -> TODO("No Implemented yet")

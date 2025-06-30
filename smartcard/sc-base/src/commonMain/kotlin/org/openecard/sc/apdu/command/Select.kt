@@ -75,27 +75,27 @@ data class Select
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectAnyIdentifier(
-				data: UByteArray?,
+				identifier: UByteArray?,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x00u, data?.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x00u, identifier?.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectChildDfIdentifier(
-				data: UByteArray,
+				identifier: UByteArray,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x01u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x01u, identifier.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectEfIdentifier(
-				data: UShort,
+				identifier: UShort,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x02u, data.toUByteArray().toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x02u, identifier.toUByteArray().toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectParentDf(
@@ -106,38 +106,38 @@ data class Select
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectDfName(
-				data: UByteArray,
+				dfName: UByteArray,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x04u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x04u, dfName.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			/**
 			 * Convenience function which is identical to [selectDfName].
 			 */
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectApplicationId(
-				data: UByteArray,
+				aid: UByteArray,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = selectDfName(data, fileOccurrence, fileControlInfo, extendedLength)
+			): Select = selectDfName(aid, fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectPathAbsolute(
-				data: UByteArray,
+				path: UByteArray,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x08u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x08u, path.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun selectPathRelative(
-				data: UByteArray,
+				path: UByteArray,
 				fileOccurrence: SelectFileOccurrence = SelectFileOccurrence.FIRST,
 				fileControlInfo: FileControlInformation = FileControlInformation.NONE,
 				extendedLength: Boolean = false,
-			): Select = Select(0x09u, data.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
+			): Select = Select(0x09u, path.toPrintable(), fileOccurrence, fileControlInfo, extendedLength)
 		}
 	}
 

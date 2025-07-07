@@ -16,7 +16,7 @@ kotlin {
 			// these are still missing in kotlin-crypto, but the author said he wants to make a release in mid June
 			// https://github.com/whyoleg/cryptography-kotlin/pull/57#discussion_r2098682916
 			// https://github.com/whyoleg/cryptography-kotlin/pull/60
-			implementation(libs.kotlin.crypto.core)
+// 			implementation(libs.kotlin.crypto.core)
 			implementation(libs.kotlin.crypto.asn1.core)
 			implementation(libs.kotlin.crypto.asn1.modules)
 		}

@@ -1,5 +1,9 @@
 package org.openecard.sc.iface.feature
 
+import org.openecard.sc.apdu.ApduProcessingError
+import org.openecard.sc.apdu.StatusWordResult
+import org.openecard.sc.apdu.command.SecurityCommandFailure
+import org.openecard.sc.apdu.toStatusWord
 import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.InsufficientBuffer
 import org.openecard.sc.iface.InvalidHandle
@@ -72,7 +76,11 @@ interface PaceFeature : Feature {
 
 class PaceError(
 	val error: PaceResultCode,
-	val swCode: UShort?,
+	val swCode: StatusWordResult?,
+	val securityError: SecurityCommandFailure? =
+		swCode?.let {
+			SecurityCommandFailure(ApduProcessingError(it, "PACE execution error"))
+		},
 ) : Exception(error.description)
 
 enum class PaceResultCode(
@@ -134,7 +142,7 @@ fun UInt.toPaceError(): PaceError? =
 	PaceResultCode.findForCode(this)?.let { errorCode ->
 		when (errorCode) {
 			PaceResultCode.NO_ERROR -> null
-			else -> PaceError(errorCode, errorCode.getSwCode(this))
+			else -> PaceError(errorCode, errorCode.getSwCode(this)?.toStatusWord())
 		}
 	} ?: throw IllegalStateException("PACE execution returned an unknown error code 0x${this.toHexString()}")
 
@@ -254,7 +262,7 @@ data class PaceEstablishChannelRequest(
 }
 
 data class PaceEstablishChannelResponse(
-	val mseStatus: UShort,
+	val mseStatus: StatusWordResult,
 	val efCardAccess: PrintableUByteArray,
 	val carCurr: PrintableUByteArray?,
 	val carPrev: PrintableUByteArray?,
@@ -301,7 +309,7 @@ data class PaceEstablishChannelResponse(
 				}
 
 			return PaceEstablishChannelResponse(
-				status,
+				status.toStatusWord(),
 				efCa.toPrintable(),
 				carCurr?.toPrintable(),
 				carPrev?.toPrintable(),

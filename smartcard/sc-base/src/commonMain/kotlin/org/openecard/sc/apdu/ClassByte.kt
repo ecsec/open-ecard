@@ -81,6 +81,10 @@ class InterIndustryClassByte(
 
 	fun setSecureMessaging(sm: SecureMessagingIndication): InterIndustryClassByte =
 		InterIndustryClassByte(channelNumber, sm, commandChaining)
+
+	companion object {
+		val Default = InterIndustryClassByte(0, SecureMessagingIndication.NO_SM, commandChaining = false)
+	}
 }
 
 class ProprietaryClassByte(

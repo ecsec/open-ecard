@@ -50,6 +50,9 @@ class BitSet internal constructor(
 				yield(get(i))
 			}
 		}.iterator()
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun toUByteArray(): UByteArray = bytes.toUByteArray()
 }
 
 /**

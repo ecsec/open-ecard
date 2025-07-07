@@ -22,9 +22,19 @@ class EfCardAccessTest {
 		val efca = efCaEgk.toEfCardAccess()
 		val secInfos = efca.secInfos
 		assertEquals(1, secInfos.size)
-		assertEquals(id_PACE_ECDH_GM_AES_CBC_CMAC_128, efca.paceInfo.protocol.value)
-		assertEquals(2, efca.paceInfo.version)
-		assertEquals(13, efca.paceInfo.domainParameterId)
+		val paceInfo = efca.paceInfo.firstOrNull()?.info
+		assertEquals(
+			id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+			paceInfo?.protocol?.value,
+		)
+		assertEquals(
+			2,
+			paceInfo?.version,
+		)
+		assertEquals(
+			13u,
+			paceInfo?.parameterId,
+		)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -33,8 +43,18 @@ class EfCardAccessTest {
 		val efca = efCaNpa.toEfCardAccess()
 		val secInfos = efca.secInfos
 		assertEquals(6, secInfos.size)
-		assertEquals(id_PACE_ECDH_GM_AES_CBC_CMAC_128, efca.paceInfo.protocol.value)
-		assertEquals(2, efca.paceInfo.version)
-		assertEquals(13, efca.paceInfo.domainParameterId)
+		val paceInfo = efca.paceInfo.firstOrNull()?.info
+		assertEquals(
+			id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+			paceInfo?.protocol?.value,
+		)
+		assertEquals(
+			2,
+			paceInfo?.version,
+		)
+		assertEquals(
+			13u,
+			paceInfo?.parameterId,
+		)
 	}
 }

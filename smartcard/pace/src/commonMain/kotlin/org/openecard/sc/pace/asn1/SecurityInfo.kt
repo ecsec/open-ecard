@@ -1,9 +1,6 @@
 package org.openecard.sc.pace.asn1
 
-import dev.whyoleg.cryptography.serialization.asn1.Der
-import dev.whyoleg.cryptography.serialization.asn1.ObjectIdentifier
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.decodeFromByteArray
 import org.openecard.sc.pace.asn1.ChipAuthenticationDomainParameterInfo.Companion.toChipAuthenticationDomainParameterInfo
 import org.openecard.sc.pace.asn1.ChipAuthenticationInfo.Companion.toChipAuthenticationInfo
 import org.openecard.sc.pace.asn1.ChipAuthenticationPublicKeyInfo.Companion.toChipAuthenticationPublicKeyInfo
@@ -11,7 +8,9 @@ import org.openecard.sc.pace.asn1.PaceDomainParameterInfo.Companion.toPaceDomain
 import org.openecard.sc.pace.asn1.PaceInfo.Companion.toPaceInfo
 import org.openecard.sc.pace.asn1.PsPublicKeyInfo.Companion.toPsPublicKeyInfo
 import org.openecard.sc.pace.asn1.PsaInfo.Companion.toPsaInfo
+import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.toObjectIdentifier
 
 private val log = KotlinLogging.logger { }
 
@@ -36,7 +35,7 @@ sealed class SecurityInfo(
 					require(childTags.size >= 2 && childTags.size <= 3)
 
 					// read protocol object identifier
-					val protocol: ObjectIdentifier = Der.decodeFromByteArray(childTags[0].toBer().toByteArray())
+					val protocol: ObjectIdentifier = childTags[0].toObjectIdentifier()
 
 					if (PaceInfo.isResponsible(protocol)) {
 						childTags.toPaceInfo(protocol)

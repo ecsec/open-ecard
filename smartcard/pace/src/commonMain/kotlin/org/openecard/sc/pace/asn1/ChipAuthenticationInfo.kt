@@ -2,13 +2,13 @@ package org.openecard.sc.pace.asn1
 
 import dev.whyoleg.cryptography.bigint.decodeToBigInt
 import dev.whyoleg.cryptography.serialization.asn1.Der
-import dev.whyoleg.cryptography.serialization.asn1.ObjectIdentifier
 import dev.whyoleg.cryptography.serialization.asn1.modules.SubjectPublicKeyInfo
 import kotlinx.serialization.decodeFromByteArray
 import org.openecard.sc.pace.asn1.AlgorithmIdentifier.Companion.toAlgorithmIdentifier
 import org.openecard.sc.pace.oid.CaObjectIdentifier
 import org.openecard.sc.pace.oid.PkObjectIdentifier
 import org.openecard.sc.pace.oid.PsaObjectIdentifier
+import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.TagClass
 import org.openecard.sc.tlv.Tlv

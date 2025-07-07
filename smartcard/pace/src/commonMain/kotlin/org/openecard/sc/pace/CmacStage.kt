@@ -1,6 +1,5 @@
 package org.openecard.sc.pace
 
-import dev.whyoleg.cryptography.algorithms.AES
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.SecureMessagingIndication
 import org.openecard.sc.apdu.sm.CommandStage
@@ -10,6 +9,7 @@ import org.openecard.sc.apdu.sm.onlyAuthTags
 import org.openecard.sc.apdu.sm.pad
 import org.openecard.sc.iface.CryptographicChecksumMissing
 import org.openecard.sc.iface.CryptographicChecksumWrong
+import org.openecard.sc.pace.crypto.cmacKey
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.utils.common.mergeToArray
@@ -24,7 +24,7 @@ class CmacStage(
 
 	private var ssc = 0L
 	val macKey by lazy {
-		crypto.get(AES.CMAC).keyDecoder().decodeFromByteArrayBlocking(AES.Key.Format.RAW, macKeyBytes)
+		cmacKey(macKeyBytes)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -84,8 +84,9 @@ class CmacStage(
 		val sscInit = ssc.toSequenceCounter(blockSize)
 		val data = (listOf(sscInit) + paddedDataItems).mergeToArray()
 
-		val gen = macKey.signatureGenerator()
-		val mac = gen.generateSignatureBlocking(data.toByteArray())
+		val gen = macKey.signer()
+		gen.update(data.toByteArray())
+		val mac = gen.sign()
 		return mac.toUByteArray()
 	}
 }

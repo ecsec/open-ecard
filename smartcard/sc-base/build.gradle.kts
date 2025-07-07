@@ -17,6 +17,7 @@ kotlin {
 
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
+			implementation(libs.kotlin.crypto.asn1.core)
 		}
 
 		jvmTest.dependencies {

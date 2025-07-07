@@ -1,5 +1,21 @@
 package org.openecard.sc.pace.asn1
 
+import org.openecard.sc.apdu.ApduProcessingError
+import org.openecard.sc.apdu.command.ReadBinary
+import org.openecard.sc.apdu.command.Select
+import org.openecard.sc.apdu.command.transmit
+import org.openecard.sc.iface.CardChannel
+import org.openecard.sc.iface.CommError
+import org.openecard.sc.iface.InsufficientBuffer
+import org.openecard.sc.iface.InvalidHandle
+import org.openecard.sc.iface.InvalidParameter
+import org.openecard.sc.iface.InvalidValue
+import org.openecard.sc.iface.NoService
+import org.openecard.sc.iface.NotTransacted
+import org.openecard.sc.iface.ProtoMismatch
+import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.RemovedCard
+import org.openecard.sc.iface.ResetCard
 import org.openecard.sc.pace.asn1.SecurityInfo.Companion.toSecurityInfo
 import org.openecard.sc.tlv.toTlvBer
 
@@ -10,10 +26,23 @@ class EfCardAccess
 		val efCaData: UByteArray,
 	) {
 		val paceInfo by lazy {
-			secInfos.filterIsInstance<PaceInfo>().first()
+			paceGroups.values.map { PaceInfos(it) }
 		}
-		val paceDomainParameterInfo by lazy {
-			secInfos.filterIsInstance<PaceDomainParameterInfo>().firstOrNull()
+
+		private val paceGroups by lazy {
+			secInfos.filterIsInstance<PaceParameterIdentifiable>().groupBy { it.parameterId }
+		}
+
+		class PaceInfos(
+			paceGroup: List<PaceParameterIdentifiable>,
+		) {
+			val info = paceGroup.filterIsInstance<PaceInfo>().first()
+			val params = paceGroup.filterIsInstance<PaceDomainParameterInfo>().firstOrNull()
+
+			fun supports(
+				protocols: Set<String>,
+				domainParams: Set<UInt>,
+			): Boolean = info.protocol.value in protocols && params?.parameterId in domainParams
 		}
 
 		private val chipAuthGroups by lazy {
@@ -34,14 +63,15 @@ class EfCardAccess
 			caGroup: List<CaKeyIdentifiable>,
 		) {
 			val chipAuthenticationInfo = caGroup.filterIsInstance<ChipAuthenticationInfo>().first()
-			val chipAuthenticationPublicKeyInfo = caGroup.filterIsInstance<ChipAuthenticationPublicKeyInfo>().firstOrNull()
+			// val chipAuthenticationPublicKeyInfo = caGroup.filterIsInstance<ChipAuthenticationPublicKeyInfo>().firstOrNull()
 		}
 
 		class ChipAuthenticationV2(
 			caGroup: List<CaKeyIdentifiable>,
 		) {
 			val chipAuthenticationInfo = caGroup.filterIsInstance<ChipAuthenticationInfo>().first()
-			val chipAuthenticationPublicKeyInfo = caGroup.filterIsInstance<ChipAuthenticationPublicKeyInfo>().firstOrNull()
+
+			// val chipAuthenticationPublicKeyInfo = caGroup.filterIsInstance<ChipAuthenticationPublicKeyInfo>().firstOrNull()
 			val chipAuthenticationDomainParameterInfo = caGroup.filterIsInstance<ChipAuthenticationDomainParameterInfo>().first()
 		}
 
@@ -51,10 +81,14 @@ class EfCardAccess
 			val chipAuthenticationInfo = caGroup.filterIsInstance<ChipAuthenticationInfo>().first()
 			val chipAuthenticationDomainParameterInfo = caGroup.filterIsInstance<ChipAuthenticationDomainParameterInfo>().first()
 			val psaInfo = caGroup.filterIsInstance<PsaInfo>().first()
-			val psPublicKeyInfo = caGroup.filterIsInstance<PsPublicKeyInfo>().first()
+			// val psPublicKeyInfo = caGroup.filterIsInstance<PsPublicKeyInfo>().firstOrNull()
 		}
 
 		companion object {
+			@OptIn(ExperimentalUnsignedTypes::class)
+			val efCardAccessFileId: UShort = 0x011Cu
+			val efCardAccessShortFileId: UByte = 0x1Cu
+
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun UByteArray.toEfCardAccess(): EfCardAccess {
 				val tlv = this.toTlvBer().tlv
@@ -74,5 +108,41 @@ class EfCardAccess
 
 			private fun List<CaKeyIdentifiable>.isCaV3(): Boolean =
 				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 3 }
+
+			@Throws(
+				ApduProcessingError::class,
+				InsufficientBuffer::class,
+				InvalidHandle::class,
+				InvalidParameter::class,
+				InvalidValue::class,
+				NoService::class,
+				NotTransacted::class,
+				ProtoMismatch::class,
+				ReaderUnavailable::class,
+				CommError::class,
+				ResetCard::class,
+				RemovedCard::class,
+			)
+			@OptIn(ExperimentalUnsignedTypes::class)
+			fun readEfCardAccess(
+				channel: CardChannel,
+				forceShortEf: Boolean = false,
+				efCaFileId: UShort = EfCardAccess.efCardAccessFileId,
+				efCaShortFileId: UByte = EfCardAccess.efCardAccessShortFileId,
+			): EfCardAccess {
+				val useShortEf =
+					forceShortEf ||
+						channel.card.capabilities
+							?.selectionMethods
+							?.supportsShortEf ?: false
+				val efCaData =
+					if (useShortEf) {
+						ReadBinary.readShortEf(efCaShortFileId).transmit(channel)
+					} else {
+						Select.selectEfIdentifier(efCaFileId).transmit(channel)
+						ReadBinary.readCurrentEf().transmit(channel)
+					}
+				return efCaData.toEfCardAccess()
+			}
 		}
 	}

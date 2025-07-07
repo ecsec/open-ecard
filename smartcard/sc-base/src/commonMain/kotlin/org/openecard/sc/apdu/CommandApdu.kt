@@ -72,6 +72,12 @@ data class CommandApdu
 			// assemble apdu
 			header + lcField + data.v + leField
 		}
+
+		fun setChaining(chainingActive: Boolean = true): CommandApdu {
+			val c = checkNotNull(classByteInterIndustry)
+			c.setCommandChaining(chainingActive)
+			return this.copy(cla = c.byte)
+		}
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)

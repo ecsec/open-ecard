@@ -1,5 +1,7 @@
 package org.openecard.sc.apdu
 
+import org.openecard.utils.serialization.toPrintable
+
 class ResponseApdu
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
@@ -13,6 +15,9 @@ class ResponseApdu
 		}
 		val sw: UShort by lazy { (sw1.toUInt().shl(8) or sw2.toUInt()).toUShort() }
 		val status: StatusWordResult by lazy { sw.toStatusWord() }
+
+		@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
+		override fun toString(): String = "ResponseApdu(status=$status, data=${data.toPrintable()})"
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)

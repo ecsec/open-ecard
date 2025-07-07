@@ -18,7 +18,7 @@ data class Mse(
 	SecurityCommandApdu {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override val apdu: CommandApdu by lazy {
-		val p1 = flags.code and command.code
+		val p1 = flags.code or command.code
 		CommandApdu(cla.byte, 0x22u, p1, p2, (data ?: ubyteArrayOf().toPrintable()))
 	}
 

@@ -4,6 +4,7 @@ import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.apdu.StatusWord
 import org.openecard.sc.apdu.StatusWordResult
+import org.openecard.sc.apdu.checkOk
 import org.openecard.sc.iface.CardChannel
 
 interface SecurityCommandApdu : IsoCommandApdu
@@ -70,6 +71,7 @@ class SecurityCommandFailure(
 fun SecurityCommandApdu.transmit(channel: CardChannel): SecurityCommandResult {
 	try {
 		val resp = channel.transmit(this.apdu)
+		resp.checkOk()
 		return SecurityCommandSuccess(resp)
 	} catch (ex: ApduProcessingError) {
 		return SecurityCommandFailure(ex)

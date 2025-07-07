@@ -149,6 +149,12 @@ data class StatusWordResult(
 	val isWarning by lazy { isWarning(sw) }
 	val isExecutionError by lazy { isExecutionError(sw) }
 	val isCheckingError by lazy { isCheckingError(sw) }
+
+	@OptIn(ExperimentalStdlibApi::class)
+	override fun toString(): String {
+		val param = if (parameter != null) ", parameter=${parameter.toHexString()}" else ""
+		return "Status(sw=${sw.toHexString()}, type=$type$param)"
+	}
 }
 
 fun UShort.toStatusWord(): StatusWordResult {

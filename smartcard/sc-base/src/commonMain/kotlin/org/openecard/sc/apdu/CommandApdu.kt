@@ -78,6 +78,10 @@ data class CommandApdu
 			c.setCommandChaining(chainingActive)
 			return this.copy(cla = c.byte)
 		}
+
+		@OptIn(ExperimentalStdlibApi::class)
+		override fun toString(): String =
+			"CommandApdu(cla=${cla.toHexString()}, ins=${ins.toHexString()}, p1=${p1.toHexString()}, p2=${p2.toHexString()}, data=$data, le=$le, forceExtendedLength=$forceExtendedLength)"
 	}
 
 @OptIn(ExperimentalUnsignedTypes::class)

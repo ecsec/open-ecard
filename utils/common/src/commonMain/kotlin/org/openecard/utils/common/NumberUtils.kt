@@ -28,14 +28,23 @@ fun UByteArray.toUInt(offset: Int): UInt {
 fun UByteArray.toULong(offset: Int): ULong {
 	val b1 = this.toUInt(offset)
 	val b2 = this.toUInt(offset + 4)
-	val u = b1.toULong().shl(8) or b2.toULong()
+	val u = b1.toULong().shl(32) or b2.toULong()
 	return u
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun UByteArray.enlargeToLong(): UByteArray =
-	if (size < Long.SIZE_BYTES) {
-		val result = UByteArray(Long.SIZE_BYTES)
+fun UByteArray.enlargeToShort(): UByteArray = enlargeToNBytes(Short.SIZE_BYTES)
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.enlargeToInt(): UByteArray = enlargeToNBytes(Int.SIZE_BYTES)
+
+@OptIn(ExperimentalUnsignedTypes::class)
+fun UByteArray.enlargeToLong(): UByteArray = enlargeToNBytes(Long.SIZE_BYTES)
+
+@OptIn(ExperimentalUnsignedTypes::class)
+private fun UByteArray.enlargeToNBytes(n: Int): UByteArray =
+	if (size < n) {
+		val result = UByteArray(n)
 		this.copyInto(result, destinationOffset = result.size - this.size)
 		result
 	} else {

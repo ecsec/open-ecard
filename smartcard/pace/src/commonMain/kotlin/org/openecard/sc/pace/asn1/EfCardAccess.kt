@@ -42,7 +42,7 @@ class EfCardAccess
 			fun supports(
 				protocols: Set<String>,
 				domainParams: Set<UInt>,
-			): Boolean = info.protocol.value in protocols && params?.parameterId in domainParams
+			): Boolean = info.protocol.value in protocols && (params == null || params.parameterId in domainParams)
 		}
 
 		private val chipAuthGroups by lazy {

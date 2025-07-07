@@ -3,6 +3,7 @@ package org.openecard.sc.pace.asn1
 import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.iface.feature.PaceResultCode
+import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.findTlv
 import org.openecard.sc.tlv.toTlvBer
 
@@ -34,8 +35,17 @@ object GeneralAuthenticateResponse {
 		)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun ResponseApdu.toDynamicAuthenticationData(): List<Tlv> {
+		val tlv = this.data.toTlvBer().tlv
+		if (tlv.tag != GeneralAuthenticateResponseTags.dynamicAuthenticationData) {
+			throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)
+		}
+		return checkNotNull(tlv.asConstructed).childList()
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
 	fun ResponseApdu.toEncryptedNonce(): EncryptedNonce =
-		this.data.toTlvBer().tlv.asList().let { dos ->
+		this.toDynamicAuthenticationData().let { dos ->
 			val encryptedNonce =
 				dos.findTlv(GeneralAuthenticateResponseTags.encryptedNonce)?.contentAsBytesBer
 					?: throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)
@@ -44,7 +54,7 @@ object GeneralAuthenticateResponse {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun ResponseApdu.toMapNonce(): MapNonce =
-		this.data.toTlvBer().tlv.asList().let { dos ->
+		this.toDynamicAuthenticationData().let { dos ->
 			val mappingData =
 				dos.findTlv(GeneralAuthenticateResponseTags.mappingData)?.contentAsBytesBer
 					?: throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)
@@ -53,7 +63,7 @@ object GeneralAuthenticateResponse {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun ResponseApdu.toKeyAgreement(): KeyAgreement =
-		this.data.toTlvBer().tlv.asList().let { dos ->
+		this.toDynamicAuthenticationData().let { dos ->
 			val ephemeralPubKey =
 				dos.findTlv(GeneralAuthenticateResponseTags.ephemeralPublicKey)?.contentAsBytesBer
 					?: throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)
@@ -62,7 +72,7 @@ object GeneralAuthenticateResponse {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun ResponseApdu.toAuthenticationToken(): AuthenticationToken =
-		this.data.toTlvBer().tlv.asList().let { dos ->
+		this.toDynamicAuthenticationData().let { dos ->
 			val at =
 				dos.findTlv(GeneralAuthenticateResponseTags.authenticationToken)?.contentAsBytesBer
 					?: throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)

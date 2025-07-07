@@ -7,7 +7,6 @@ import org.openecard.sc.iface.feature.PaceResultCode
 import org.openecard.sc.pace.asn1.EfCardAccess
 import org.openecard.sc.pace.asn1.GeneralAuthenticateResponse
 import org.openecard.sc.pace.crypto.BcDomainParameterResolver.resolveDomainParameters
-import org.openecard.sc.pace.crypto.whyoleg.crypto
 import org.openecard.utils.common.removeLeadingZeros
 import java.nio.charset.StandardCharsets
 
@@ -97,10 +96,10 @@ internal class JvmPaceCryptoSuite(
 		val encKey = kdf.deriveEnc(sharedSecret)
 
 		@OptIn(ExperimentalUnsignedTypes::class)
-		val tokenPcd = AuthenticationToken.generate(paceInfos.info, macKey, pcdKey.publicKey.encoded.toByteArray())
+		val tokenPcd = AuthenticationToken.generate(paceInfos.info, macKey, iccKey.encoded.toByteArray())
 
 		@OptIn(ExperimentalUnsignedTypes::class)
-		val tokenIcc = AuthenticationToken.generate(paceInfos.info, macKey, iccKey.encoded.toByteArray())
+		val tokenIcc = AuthenticationToken.generate(paceInfos.info, macKey, pcdKey.publicKey.encoded.toByteArray())
 
 		@OptIn(ExperimentalUnsignedTypes::class)
 		override fun getAuthenticationTokenPcd(): UByteArray = tokenPcd.tokenValue

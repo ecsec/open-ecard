@@ -81,7 +81,7 @@ class PaceError(
 		swCode?.let {
 			SecurityCommandFailure(ApduProcessingError(it, "PACE execution error"))
 		},
-) : Exception(error.description)
+) : Exception("${error.description}${if (swCode != null) ": $swCode" else ""}")
 
 enum class PaceResultCode(
 	val code: UInt,

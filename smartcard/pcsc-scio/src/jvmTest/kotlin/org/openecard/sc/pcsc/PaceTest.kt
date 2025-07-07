@@ -1,8 +1,11 @@
 package org.openecard.sc.pcsc
 
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions
 import org.openecard.sc.iface.feature.PaceCapability
+import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PaceFeature
+import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.iface.withContext
 import org.openecard.sc.pcsc.testutils.WhenPcscStack
 import kotlin.test.Test
@@ -24,6 +27,9 @@ class PaceTest {
 				setOf(PaceCapability.GENERIC_PACE, PaceCapability.GERMAN_EID, PaceCapability.DESTROY_CHANNEL),
 				capabilities,
 			)
+
+			val paceRequest = PaceEstablishChannelRequest(PacePinId.CAN, null, null)
+			val paceResp = runBlocking { paceFeature.establishChannel(paceRequest) }
 		}
 	}
 }

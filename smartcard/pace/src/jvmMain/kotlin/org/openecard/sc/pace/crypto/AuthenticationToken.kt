@@ -24,10 +24,10 @@ class AuthenticationToken
 			fun generate(
 				paceInfo: PaceInfo,
 				keyMac: ByteArray,
-				key: ByteArray,
+				pubKey: ByteArray,
 			): AuthenticationToken {
-				val macData = getMacObject(paceInfo, key)
-				val signer = cmacKey(key).signer()
+				val macData = getMacObject(paceInfo, pubKey)
+				val signer = cmacKey(keyMac).signer()
 				signer.update(macData)
 				val mac = signer.sign()
 				return AuthenticationToken(mac.sliceArray(0 until 8).toUByteArray())

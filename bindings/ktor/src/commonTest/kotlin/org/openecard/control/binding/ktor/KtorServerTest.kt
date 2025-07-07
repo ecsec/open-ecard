@@ -16,6 +16,14 @@ import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+fun assertStartsWith(
+	expected: String,
+	actual: String,
+	message: String? = null,
+) {
+	assertEquals(expected, actual.take(expected.length), message)
+}
+
 @Serializable
 data class SomeError(
 	val type: String,
@@ -54,6 +62,7 @@ class KtorServerTest {
 			val response = client.get("/example-error")
 			assertEquals(HttpStatusCode.BadRequest, response.status)
 			assertEquals(ContentType.Text.Html.withCharset(Charsets.UTF_8), response.contentType())
+			assertStartsWith("<!DOCTYPE html>", response.bodyAsText())
 		}
 
 	@Test
@@ -73,7 +82,8 @@ class KtorServerTest {
 
 			val response = client.get("/example-error")
 			assertEquals(HttpStatusCode.BadRequest, response.status)
-			assertEquals(ContentType.Text.Plain.withCharset(Charsets.UTF_8), response.contentType())
+			assertEquals(ContentType.Text.Html.withCharset(Charsets.UTF_8), response.contentType())
+			assertStartsWith("<!DOCTYPE html>", response.bodyAsText())
 		}
 
 	@Test
@@ -85,14 +95,13 @@ class KtorServerTest {
 			}
 			routing {
 				get("/example-error") {
-					call.respond(SomeError(type = "Magic", message = "Delicious"))
-					call.response.status(HttpStatusCode.BadRequest)
+					call.respond(HttpStatusCode.BadRequest, SomeError(type = "Magic", message = "Delicious"))
 				}
 			}
 
 			val response = client.get("/example-error")
 			assertEquals(HttpStatusCode.BadRequest, response.status)
-			assertEquals("Customer stored correctly", response.bodyAsText())
-			assertEquals(ContentType.Text.Plain.withCharset(Charsets.UTF_8), response.contentType())
+			assertStartsWith("<!DOCTYPE html>", response.bodyAsText())
+			assertEquals(ContentType.Text.Html.withCharset(Charsets.UTF_8), response.contentType())
 		}
 }

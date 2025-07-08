@@ -138,13 +138,15 @@ enum class PaceResultCode(
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun UInt.toPaceError(): PaceError? =
-	PaceResultCode.findForCode(this)?.let { errorCode ->
-		when (errorCode) {
-			PaceResultCode.NO_ERROR -> null
-			else -> PaceError(errorCode, errorCode.getSwCode(this)?.toStatusWord())
-		}
-	} ?: throw IllegalStateException("PACE execution returned an unknown error code 0x${this.toHexString()}")
+fun UInt.toPaceError(): PaceError? {
+	val errorCode =
+		PaceResultCode.findForCode(this)
+			?: throw IllegalStateException("PACE execution returned an unknown error code 0x${this.toHexString()}")
+	return when (errorCode) {
+		PaceResultCode.NO_ERROR -> null
+		else -> PaceError(errorCode, errorCode.getSwCode(this)?.toStatusWord())
+	}
+}
 
 @OptIn(ExperimentalUnsignedTypes::class)
 @Throws(PaceError::class)

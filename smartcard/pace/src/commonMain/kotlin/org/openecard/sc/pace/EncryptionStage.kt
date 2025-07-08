@@ -97,19 +97,20 @@ class EncryptionStage(
 				PaddingContentIndicator.NoPadding -> data
 				else -> throw UnsupportedPadding("Unsupported padding indicator byte (${paddingIndicator.byte.toHexString()})")
 			}
-		val tbeData = paddingIndicator.byte.toUByteArray() + paddedData
-		return encKey.cipher(false).encryptWithIv(iv, tbeData.toByteArray()).toUByteArray()
+		val encData = encKey.cipher(false).encryptWithIv(iv, paddedData.toByteArray()).toUByteArray()
+		val resultData = paddingIndicator.byte.toUByteArray() + encData
+		return resultData
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class, DelicateCryptographyApi::class, ExperimentalStdlibApi::class)
 	private fun decryptData(encData: UByteArray): UByteArray {
 		val iv = getIv()
-		val decData = encKey.cipher(false).decryptWithIv(iv, encData.toByteArray())
-		val pi = PaddingContentIndicator.fromIndicatorByte(decData[0].toUByte())
-		val decDataNoPi = decData.sliceArray(1 until decData.size).toUByteArray()
+		val pi = PaddingContentIndicator.fromIndicatorByte(encData[0])
+		val encDataNoPi = encData.sliceArray(1 until encData.size).toUByteArray()
+		val decData = encKey.cipher(false).decryptWithIv(iv, encDataNoPi.toByteArray()).toUByteArray()
 		return when (pi) {
-			PaddingContentIndicator.NoIndication, PaddingContentIndicator.CbcPadding -> decDataNoPi.unpad()
-			PaddingContentIndicator.NoPadding -> decDataNoPi
+			PaddingContentIndicator.NoIndication, PaddingContentIndicator.CbcPadding -> decData.unpad()
+			PaddingContentIndicator.NoPadding -> decData
 			else -> throw UnsupportedPadding("Unsupported padding indicator byte (${pi.byte.toHexString()})")
 		}
 	}

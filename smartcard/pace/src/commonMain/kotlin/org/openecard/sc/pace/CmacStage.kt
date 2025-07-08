@@ -35,17 +35,23 @@ class CmacStage(
 		// increment counter for next iteration
 		ssc++
 
-		val dataItems =
+		// padding must be applied for a chain of sequential protected tags
+		val paddedDataItems =
 			buildList<UByteArray> {
 				if (smApdu.classByteInterIndustry?.sm == SecureMessagingIndication.SM_W_HEADER) {
-					add(smApdu.header)
+					add(smApdu.header.pad(blockSize))
 				}
 
 				// add all tags
-				dos.onlyAuthTags().forEach { add(it.contentAsBytesBer) }
+				add(
+					dos
+						.onlyAuthTags()
+						.map { it.toBer() }
+						.mergeToArray()
+						.pad(blockSize),
+				)
 			}
 
-		val paddedDataItems = dataItems.map { it.pad(blockSize) }
 		val mac = calculateMac(paddedDataItems)
 		val macDo = TlvPrimitive(SmBasicTags.mac.tag, mac.toPrintable())
 
@@ -68,9 +74,9 @@ class CmacStage(
 			}
 		} else {
 			// check mac
-			val authData = dos.onlyAuthTags().map { it.contentAsBytesBer }.mergeToArray()
-			val paddedAuthData = authData.pad(blockSize)
-			val calcMac = calculateMac(listOf(paddedAuthData))
+			val authData = dos.onlyAuthTags().map { it.toBer() }
+			val paddedDataItems = listOf(authData.mergeToArray().pad(blockSize))
+			val calcMac = calculateMac(paddedDataItems)
 			if (!calcMac.contentEquals(sentMac)) {
 				throw CryptographicChecksumWrong("Calculated MAC does not match received MAC")
 			} else {
@@ -82,11 +88,12 @@ class CmacStage(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun calculateMac(paddedDataItems: List<UByteArray>): UByteArray {
 		val sscInit = ssc.toSequenceCounter(blockSize)
-		val data = (listOf(sscInit) + paddedDataItems).mergeToArray()
 
 		val gen = macKey.signer()
-		gen.update(data.toByteArray())
+		gen.update(sscInit.toByteArray())
+		paddedDataItems.forEach { gen.update(it.toByteArray()) }
+
 		val mac = gen.sign()
-		return mac.toUByteArray()
+		return mac.toUByteArray().sliceArray(0 until 8)
 	}
 }

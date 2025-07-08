@@ -6,7 +6,7 @@ class Kdf(
 	private val digestAlg =
 		when (keyLength) {
 			16 -> Digest.Algorithms.SHA1
-			32 -> Digest.Algorithms.SHA256
+			24, 32 -> Digest.Algorithms.SHA256
 			else -> throw IllegalArgumentException("Invalid key length ($keyLength) specified")
 		}
 

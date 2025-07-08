@@ -116,6 +116,6 @@ class SecureMessagingImpl(
 			throw InvalidSwData()
 		}
 
-		return ResponseApdu(data, swData[1], swData[0])
+		return ResponseApdu(data, swData[0], swData[1])
 	}
 }

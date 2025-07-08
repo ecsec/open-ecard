@@ -5,8 +5,8 @@ import org.openecard.sc.apdu.SecureMessagingIndication
 import org.openecard.sc.apdu.sm.CommandStage
 import org.openecard.sc.apdu.sm.ResponseStage
 import org.openecard.sc.apdu.sm.SmBasicTags
-import org.openecard.sc.apdu.sm.onlyAuthTags
 import org.openecard.sc.apdu.sm.pad
+import org.openecard.sc.apdu.sm.segmentAuthTags
 import org.openecard.sc.iface.CryptographicChecksumMissing
 import org.openecard.sc.iface.CryptographicChecksumWrong
 import org.openecard.sc.pace.crypto.cmacKey
@@ -39,17 +39,14 @@ class CmacStage(
 		val paddedDataItems =
 			buildList<UByteArray> {
 				if (smApdu.classByteInterIndustry?.sm == SecureMessagingIndication.SM_W_HEADER) {
-					add(smApdu.header.pad(blockSize))
+					add(smApdu.header)
 				}
 
 				// add all tags
-				add(
-					dos
-						.onlyAuthTags()
-						.map { it.toBer() }
-						.mergeToArray()
-						.pad(blockSize),
-				)
+				dos.segmentAuthTags().forEach { seq ->
+					val dataObjs = seq.map { it.toBer() }
+					add(dataObjs.mergeToArray())
+				}
 			}
 
 		val mac = calculateMac(paddedDataItems)
@@ -74,9 +71,12 @@ class CmacStage(
 			}
 		} else {
 			// check mac
-			val authData = dos.onlyAuthTags().map { it.toBer() }
-			val paddedDataItems = listOf(authData.mergeToArray().pad(blockSize))
-			val calcMac = calculateMac(paddedDataItems)
+			val authData =
+				dos.segmentAuthTags().map { seq ->
+					val dataObjs = seq.map { it.toBer() }
+					dataObjs.mergeToArray()
+				}
+			val calcMac = calculateMac(authData)
 			if (!calcMac.contentEquals(sentMac)) {
 				throw CryptographicChecksumWrong("Calculated MAC does not match received MAC")
 			} else {
@@ -86,11 +86,12 @@ class CmacStage(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	private fun calculateMac(paddedDataItems: List<UByteArray>): UByteArray {
+	private fun calculateMac(dataItems: List<UByteArray>): UByteArray {
 		val sscInit = ssc.toSequenceCounter(blockSize)
 
 		val gen = macKey.signer()
 		gen.update(sscInit.toByteArray())
+		val paddedDataItems = dataItems.map { it.pad(blockSize) }
 		paddedDataItems.forEach { gen.update(it.toByteArray()) }
 
 		val mac = gen.sign()

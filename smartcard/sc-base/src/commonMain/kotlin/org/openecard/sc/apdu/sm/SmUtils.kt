@@ -44,7 +44,35 @@ val PADDING_BYTE = 0x80u.toUByte()
 
 fun List<Tlv>.onlyAuthTags(): List<Tlv> =
 	filter {
-		val cls = it.tag.tagNumWithClass
-		// odd or not in range 80-BF
-		(cls.mod(2u) == 1u) || (cls < 0x80u && cls > 0xBFu)
+		it.isAuthTag()
 	}
+
+fun List<Tlv>.segmentAuthTags(): List<List<Tlv>> {
+	val input = this
+	return buildList {
+		// collect all consecutive auth tags in a sublist
+		var buf = mutableListOf<Tlv>()
+		input.forEach {
+			if (it.isAuthTag()) {
+				buf.add(it)
+			} else {
+				if (buf.isNotEmpty()) {
+					// copy elements to the list
+					add(buf)
+					buf = mutableListOf()
+				}
+			}
+		}
+
+		// there may be more elements after the iteration
+		if (buf.isNotEmpty()) {
+			add(buf)
+		}
+	}
+}
+
+fun Tlv.isAuthTag(): Boolean {
+	val cls = this.tag.tagNumWithClass
+	// odd or not in range 80-BF
+	return (cls.mod(2u) == 1u) || (cls < 0x80u && cls > 0xBFu)
+}

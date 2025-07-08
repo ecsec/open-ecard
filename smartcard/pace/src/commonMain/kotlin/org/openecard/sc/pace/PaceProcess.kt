@@ -32,6 +32,7 @@ class PaceProcess
 		private val pinId: PacePinId,
 		private val password: String,
 		private val chat: UByteArray?,
+		private val certDesc: UByteArray?,
 	) {
 		class ProcessResult
 			@OptIn(ExperimentalUnsignedTypes::class)
@@ -75,7 +76,7 @@ class PaceProcess
 		 */
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun mseSetAt(): StatusWordResult {
-			val mse = paceMseSetAt(paceInfos, pinId, chat)
+			val mse = paceMseSetAt(paceInfos, pinId, chat, certDesc)
 			val secResp = mse.transmit(channel)
 			return when (secResp) {
 				is SecurityCommandSuccess -> {

@@ -247,9 +247,17 @@ data class PaceEstablishChannelRequest(
 	 * A suitable command filter should be employed by the IFD to refuse delivery of secret PINs by the host.
 	 */
 	val pin: String?,
+	/**
+	 * Certificate Extensions
+	 *
+	 * This data object is REQUIRED for PACE if Terminal Authentication version 2 shall be used after PACE and the
+	 * ICC supports Authorization Extensions.
+	 * In this case, it MUST encapsulate a sequence of Authorization Extensions.
+	 */
+	val certDesc: PrintableUByteArray?,
 ) {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	val bytes: UByteArray by lazy {
+	fun bytes(capabilities: Set<PaceCapability>): UByteArray {
 		val establishChannelData =
 			buildList<UByte> {
 				add(pinId.code)
@@ -261,10 +269,17 @@ data class PaceEstablishChannelRequest(
 					add(pin.size.toUByte())
 					addAll(pin)
 				}
+				// only add when the terminal is German_EID or QES capable, thus doing TA
+				if (capabilities.any { it in setOf(PaceCapability.GERMAN_EID, PaceCapability.QES) }) {
+					(certDesc?.v ?: ubyteArrayOf()).let { certDesc ->
+						addAll(certDesc.size.toUShort().toUByteArray(false))
+						addAll(certDesc)
+					}
+				}
 			}.toUByteArray()
 		val estChanLen = establishChannelData.size.toUShort().toUByteArray(false)
 
-		PaceFunction.ESTABLISH_CHANNEL.code.toUByteArray() + estChanLen + establishChannelData
+		return PaceFunction.ESTABLISH_CHANNEL.code.toUByteArray() + estChanLen + establishChannelData
 	}
 }
 

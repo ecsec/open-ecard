@@ -30,7 +30,7 @@ class PaceProtocolTest {
 			val channel = checkNotNull(con.card).basicChannel
 
 			val paceProtocol = PaceProtocol()
-			val response = paceProtocol.execute(channel, PacePinId.CAN, egkCan, null)
+			val response = paceProtocol.execute(channel, PacePinId.CAN, egkCan, null, null)
 
 			// read a protected file (EF.C.CA.CS.E256) to see if secure messaging is working
 			Select.selectApplicationId(hex("A000000167455349474E")).transmit(channel)

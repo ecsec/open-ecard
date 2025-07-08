@@ -16,6 +16,7 @@ fun paceMseSetAt(
 	paceInfos: EfCardAccess.PaceInfos,
 	pinId: PacePinId,
 	chat: UByteArray?,
+	certDesc: UByteArray?,
 ): Mse {
 	val dos =
 		buildList {
@@ -25,6 +26,9 @@ fun paceMseSetAt(
 				?.toTlv(MseTags.sessionKeyComputationReference)
 				?.let { add(it) }
 			chat?.toTlvBer()?.tlv?.let { add(it) }
+			certDesc?.let {
+				add(TlvPrimitive(MseTags.certExtensions, certDesc.toPrintable()))
+			}
 		}
 
 	val flags =

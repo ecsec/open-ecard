@@ -46,6 +46,7 @@ class PaceProtocol {
 		 * execution of Terminal Authentication Version 2 as defined in [TR-03110].
 		 */
 		chat: UByteArray?,
+		certDesc: UByteArray?,
 	): PaceEstablishChannelResponse {
 		val efca =
 			runCatching { EfCardAccess.readEfCardAccess(channel) }
@@ -60,7 +61,7 @@ class PaceProtocol {
 					it.supports(SUPPORTED_PACE_PROTOCOLS, SUPPORTED_PACE_DOMAIN_PARAMS)
 			}
 
-		val paceProcess = PaceProcess(paceInfos, channel, pinId, pin, chat)
+		val paceProcess = PaceProcess(paceInfos, channel, pinId, pin, chat, certDesc)
 		val paceResult = paceProcess.execute()
 
 		val encKey = paceResult.encKey

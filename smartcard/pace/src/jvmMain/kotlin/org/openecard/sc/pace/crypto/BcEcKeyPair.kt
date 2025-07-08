@@ -69,16 +69,23 @@ class BcEcKeyPair(
 			iccKey: BcEcKeyPair.BcEcKeyPublic,
 			nonce: ByteArray,
 		): ECDomainParameters {
-			// TODO: I think the first part is ECDH, so we should use an actual ECDH implementation
 			val curParams = key.parameters
-			val pkMapPICC = curParams.curve.decodePoint(iccKey.encoded.toByteArray())
+			val curG = curParams.g
+			val q = iccKey.key.q
 			val d = key.d
 			val s: BigInteger = BigInteger(1, nonce)
 
-			val h = pkMapPICC.multiply(curParams.h.multiply(d))
-			val newG = curParams.g.multiply(s).add(h)
+			val h = q.multiply(curParams.h.multiply(d))
 
-			// TODO: check if it is safe to set seed. the old code didn't set it
+			// When calculating ecdh with ECDHBasicAgreement, we also get h, however only the x coordinate of it.
+			// For the calculation of the new G, we need an ECPoint and I don't know how to get it.
+			//
+			// val ecdh = ECDHBasicAgreement()
+			// ecdh.init(key)
+			// val hX = ecdh.calculateAgreement(iccKey.key)
+
+			val newG = curG.multiply(s).add(h)
+
 			// the seed is null for brainpool, but not secp
 			return ECDomainParameters(curParams.curve, newG, curParams.n, curParams.h, curParams.seed)
 		}

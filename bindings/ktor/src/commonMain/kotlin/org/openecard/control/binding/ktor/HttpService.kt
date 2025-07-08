@@ -45,7 +45,7 @@ fun extractContent(content: OutgoingContent): String? =
 			content.bytes().toString()
 		}
 		else -> {
-			logger.warn { "XXX unhandled outgoing content: ${content.javaClass}" }
+			logger.warn { "Unhandled outgoing of outgoing type: ${content.javaClass}" }
 			null
 		}
 	}
@@ -181,7 +181,6 @@ fun Application.configureServer(
 				),
 			)
 			call.response.headers.append(HttpHeaders.ContentType, htmlUtf8ContentType.toString())
-			content.status?.let { call.response.status(it) }
 		}
 	}
 

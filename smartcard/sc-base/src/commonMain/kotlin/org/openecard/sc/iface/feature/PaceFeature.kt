@@ -151,7 +151,7 @@ fun UInt.toPaceError(): PaceError? {
 @OptIn(ExperimentalUnsignedTypes::class)
 @Throws(PaceError::class)
 private fun UByteArray.getDataFromPaceResponse(): UByteArray {
-	val errorCode = this.toUInt(0)
+	val errorCode = this.toUInt(0, false)
 	errorCode.toPaceError()?.let { throw it }
 
 	val len = this.toUShort(4, false)
@@ -262,7 +262,7 @@ data class PaceEstablishChannelRequest(
 					addAll(pin)
 				}
 			}.toUByteArray()
-		val estChanLen = establishChannelData.size.toUShort().toUByteArray()
+		val estChanLen = establishChannelData.size.toUShort().toUByteArray(false)
 
 		PaceFunction.ESTABLISH_CHANNEL.code.toUByteArray() + estChanLen + establishChannelData
 	}
@@ -282,7 +282,7 @@ data class PaceEstablishChannelResponse(
 			val data = response.getDataFromPaceResponse()
 			var offset = 0
 
-			val status = data.toUShort(offset)
+			val status = data.toUShort(offset, false)
 			offset += 2
 
 			val efCaLen = data.toUShort(offset, false).toInt()
@@ -308,9 +308,10 @@ data class PaceEstablishChannelResponse(
 			offset += 1 + carPrevLen
 
 			val idIccLen = data.toUShort(offset, false).toInt()
+			offset += 2
 			val idIcc =
 				if (idIccLen > 0) {
-					data.sliceArray((offset + 2) until (offset + 2 + idIccLen))
+					data.sliceArray(offset until (offset + idIccLen))
 				} else {
 					null
 				}
@@ -331,7 +332,7 @@ object PaceDestroyChannelRequest {
 	val bytes: UByteArray by lazy {
 		buildList<UByte> {
 			add(PaceFunction.DESTROY_CHANNEL.code)
-			addAll(0x0u.toUShort().toUByteArray())
+			addAll(0x0u.toUShort().toUByteArray(false))
 		}.toUByteArray()
 	}
 }

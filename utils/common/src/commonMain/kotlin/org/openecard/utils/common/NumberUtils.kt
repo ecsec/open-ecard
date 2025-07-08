@@ -9,26 +9,47 @@ fun UByteArray.toUByte(offset: Int): UByte {
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun UByteArray.toUShort(offset: Int): UShort {
-	val b1 = this[offset]
-	val b2 = this[offset + 1]
+fun UByteArray.toUShort(
+	offset: Int,
+	bigEndian: Boolean = true,
+): UShort {
+	val lowerOffset = if (bigEndian) offset else offset + 1
+	val higherOffset = if (bigEndian) offset + 1 else offset
+	val b1 = this[lowerOffset]
+	val b2 = this[higherOffset]
 	val u = b1.toUInt().shl(8) or b2.toUInt()
 	return u.toUShort()
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun UByteArray.toUInt(offset: Int): UInt {
-	val b1 = this.toUShort(offset)
-	val b2 = this.toUShort(offset + 2)
-	val u = b1.toUInt().shl(16) or b2.toUInt()
+fun UByteArray.toUInt(
+	offset: Int,
+	bigEndian: Boolean = true,
+): UInt {
+	val b1 = this.toUShort(offset, bigEndian)
+	val b2 = this.toUShort(offset + 2, bigEndian)
+	val u =
+		if (bigEndian) {
+			b1.toUInt().shl(16) or b2.toUInt()
+		} else {
+			b2.toUInt().shl(16) or b1.toUInt()
+		}
 	return u
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
-fun UByteArray.toULong(offset: Int): ULong {
-	val b1 = this.toUInt(offset)
-	val b2 = this.toUInt(offset + 4)
-	val u = b1.toULong().shl(32) or b2.toULong()
+fun UByteArray.toULong(
+	offset: Int,
+	bigEndian: Boolean = true,
+): ULong {
+	val b1 = this.toUInt(offset, bigEndian)
+	val b2 = this.toUInt(offset + 4, bigEndian)
+	val u =
+		if (bigEndian) {
+			b1.toULong().shl(32) or b2.toULong()
+		} else {
+			b2.toULong().shl(32) or b1.toULong()
+		}
 	return u
 }
 

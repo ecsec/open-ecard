@@ -154,7 +154,7 @@ private fun UByteArray.getDataFromPaceResponse(): UByteArray {
 	val errorCode = this.toUInt(0)
 	errorCode.toPaceError()?.let { throw it }
 
-	val len = this.toUShort(4)
+	val len = this.toUShort(4, false)
 	val data = this.sliceArray(6 until 6 + len.toInt())
 	return data
 }
@@ -169,18 +169,19 @@ enum class PaceFunction(
 
 enum class PaceCapability(
 	val code: UByte,
+	val bitPos: Int,
 ) {
-	QES(0x10u),
-	GERMAN_EID(0x20u),
-	GENERIC_PACE(0x40u),
-	DESTROY_CHANNEL(0x80u),
+	QES(0x10u, 4),
+	GERMAN_EID(0x20u, 5),
+	GENERIC_PACE(0x40u, 6),
+	DESTROY_CHANNEL(0x80u, 7),
 	;
 
 	companion object {
 		fun BitSet.toPaceCapabilities(): Set<PaceCapability> {
 			val result = mutableSetOf<PaceCapability>()
 			PaceCapability.entries.forEach {
-				if (this[it.code.toInt()]) {
+				if (this[it.bitPos]) {
 					result.add(it)
 				}
 			}
@@ -217,13 +218,17 @@ data class GetReaderCapabilitiesResponse(
 		fun fromPaceResponse(response: UByteArray): GetReaderCapabilitiesResponse {
 			val data = response.getDataFromPaceResponse()
 
-			val bitsLen = data.toUByte(0).toInt()
-			val bitsData = data.sliceArray(1 until (1 + bitsLen))
+			val capsBits =
+				if (data.size > 1) {
+					// first field is length
+					val bitsLen = data.toUByte(0).toInt()
+					val bitsData = data.sliceArray(1 until (1 + bitsLen))
+					bitSetOf(*bitsData)
+				} else {
+					bitSetOf(*data)
+				}
 
-			val capsBits = bitSetOf(*bitsData)
-			val caps =
-				capsBits
-					.toPaceCapabilities()
+			val caps = capsBits.toPaceCapabilities()
 			return GetReaderCapabilitiesResponse(caps)
 		}
 	}
@@ -280,7 +285,7 @@ data class PaceEstablishChannelResponse(
 			val status = data.toUShort(offset)
 			offset += 2
 
-			val efCaLen = data.toUShort(offset).toInt()
+			val efCaLen = data.toUShort(offset, false).toInt()
 			val efCa = data.sliceArray((offset + 2) until (offset + 2 + efCaLen))
 			offset += 2 + efCaLen
 
@@ -302,7 +307,7 @@ data class PaceEstablishChannelResponse(
 				}
 			offset += 1 + carPrevLen
 
-			val idIccLen = data.toUShort(offset).toInt()
+			val idIccLen = data.toUShort(offset, false).toInt()
 			val idIcc =
 				if (idIccLen > 0) {
 					data.sliceArray((offset + 2) until (offset + 2 + idIccLen))

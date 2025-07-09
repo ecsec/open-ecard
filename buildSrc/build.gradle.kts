@@ -35,6 +35,7 @@ dependencies {
 	implementation(libs.jose4j)
 	implementation(libs.semver)
 	implementation(libs.jgit)
+	implementation(libs.kotlinPoet)
 }
 
 fun DependencyHandlerScope.implementation(pluginProv: Provider<PluginDependency>) {

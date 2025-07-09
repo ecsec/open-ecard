@@ -37,6 +37,7 @@ semver = "2.0.0"
 jwtkt = "1.1.0"
 
 jgit = "7.1.0.202411261347-r"
+kotlinPoet = "2.2.0"
 
 junit = "5.12.+"
 wiremock = "3.13.+"
@@ -88,6 +89,7 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 
 # utilities
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
+kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "kotlinPoet" }
 
 # testing
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }

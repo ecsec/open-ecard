@@ -29,6 +29,8 @@ include("cif:cif-definition")
 include("cif:bundled-cifs")
 
 include("releases")
+include("build-info")
+
 include("wsdef:wsdef-common")
 include("wsdef:wsdef-client")
 include("wsdef:jaxb-marshaller")

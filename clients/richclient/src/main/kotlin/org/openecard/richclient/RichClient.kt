@@ -42,10 +42,12 @@ import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpRequestExecutor
 import org.openecard.addon.AddonManager
-import org.openecard.common.*
-import org.openecard.common.AppVersion.buildId
+import org.openecard.build.BuildInfo
 import org.openecard.common.AppVersion.name
-import org.openecard.common.AppVersion.version
+import org.openecard.common.ClientEnv
+import org.openecard.common.ECardConstants
+import org.openecard.common.OpenecardProperties
+import org.openecard.common.WSHelper
 import org.openecard.common.WSHelper.checkResult
 import org.openecard.common.event.EventDispatcherImpl
 import org.openecard.common.event.EventType
@@ -76,7 +78,8 @@ import java.net.Socket
 import java.net.URI
 import java.net.URL
 import java.nio.charset.UnsupportedCharsetException
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.FutureTask
 import kotlin.system.exitProcess
 
@@ -300,7 +303,7 @@ class RichClient {
 		private val tray: AppTray,
 	) : TimerTask() {
 		override fun run() {
-			if (buildId != null) {
+			if (!BuildInfo.version.isStable) {
 				// snapshot versions don't need updates
 				LOG.info { "Skipping update check for developer build." }
 				return
@@ -460,7 +463,7 @@ class RichClient {
 
 		@JvmStatic
 		fun main(args: Array<String>) {
-			LOG.info { "Starting $name $version ..." }
+			LOG.info { "Starting $name ${BuildInfo.version} ..." }
 
 			LOG.debug {
 				"Running on ${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}."

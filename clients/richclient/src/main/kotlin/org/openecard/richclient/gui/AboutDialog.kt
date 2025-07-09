@@ -24,8 +24,8 @@ package org.openecard.richclient.gui
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.openecard.build.BuildInfo
 import org.openecard.common.AppVersion
-import org.openecard.common.AppVersion.version
 import org.openecard.gui.swing.common.SwingUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.graphics.OecIconType
@@ -96,7 +96,7 @@ class AboutDialog private constructor() : JFrame() {
 				isEditable = false
 				text =
 					I18N.strings.about_version
-						.format(version)
+						.format(BuildInfo.version)
 						.localized()
 				setBounds(12, 54, 692, 18)
 			}

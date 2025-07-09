@@ -21,7 +21,6 @@ kotlin {
 				implementation(libs.ktor.serde.xml)
 				implementation(libs.kotlin.logging)
 
-				api(project(":common"))
 				api(project(":i18n"))
 			}
 		}

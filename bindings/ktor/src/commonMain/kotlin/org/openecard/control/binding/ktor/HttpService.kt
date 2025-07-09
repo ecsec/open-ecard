@@ -24,7 +24,6 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
-import org.openecard.common.AppVersion
 import org.openecard.i18n.I18N
 import kotlin.jvm.java
 
@@ -66,33 +65,14 @@ private fun generateErrorCodes(): List<HttpStatusCode> {
 	return result.map { HttpStatusCode.fromValue(it) }
 }
 
+class ServerHeaderPluginConfig {
+	lateinit var header: String
+}
+
 val ServerHeader =
-	createApplicationPlugin("ServerHeader") {
+	createApplicationPlugin<ServerHeaderPluginConfig>("ServerHeader", { ServerHeaderPluginConfig() }) {
 
-		/**
-		 * Creates the value of the `Server` header according to BSI-TR-03124-1 v1.2 section 2.2.2.1.
-		 */
-		val builder = StringBuilder()
-
-		builder.append(AppVersion.name)
-		builder.append("/")
-		builder.append(AppVersion.version)
-
-		builder.append(" (")
-		var firstSpec = true
-		for (version in AppVersion.specVersions) {
-			if (!firstSpec) {
-				builder.append(" ")
-			} else {
-				firstSpec = false
-			}
-			builder.append(AppVersion.specName)
-			builder.append("/")
-			builder.append(version)
-		}
-		builder.append(")")
-
-		val headerValue = builder.toString()
+		val headerValue = pluginConfig.header
 
 		onCall { call ->
 			call.response.headers.append("Server", headerValue)
@@ -125,9 +105,14 @@ fun Application.configureServer(
 	port: Int,
 	host: String,
 	corsOrigins: Set<String>,
+	serverHeader: String? = null,
 	configuration: Routing.() -> Unit,
 ) {
-	install(ServerHeader)
+	if (serverHeader != null) {
+		install(ServerHeader) {
+			header = serverHeader
+		}
+	}
 	install(SecurityHeader)
 	install(CacheControlHeader)
 	install(CORS) {

@@ -1,7 +1,9 @@
-description = "ktor"
+description = "localhost HTTP Binding"
 
 plugins {
-	id("openecard.lib-multiplatform-conventions")
+	id("openecard.kmp-lib-conventions")
+	id("openecard.kmp-jvm-conventions")
+	// id("openecard.kmp-ios-conventions")
 }
 
 kotlin {
@@ -31,8 +33,6 @@ kotlin {
 		}
 		val jvmMain by getting {
 			dependencies {
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

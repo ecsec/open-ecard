@@ -207,7 +207,7 @@ class HttpService {
 	companion object {
 		fun create(
 			port: Int = 24727,
-			host: String = "0.0.0.0",
+			host: String = "localhost",
 			wait: Boolean = true,
 			corsOrigins: Set<String> = setOf("service.skidentity.de"),
 			configuration: Routing.() -> Unit,

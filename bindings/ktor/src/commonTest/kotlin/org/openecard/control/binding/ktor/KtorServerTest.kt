@@ -32,7 +32,7 @@ data class SomeError(
 
 fun Application.configureSut(
 	port: Int = 24727,
-	host: String = "0.0.0.0",
+	host: String = "localhost",
 	corsOrigins: Set<String> = setOf("service.skidentity.de"),
 	configuration: Routing.() -> Unit = {},
 ) {

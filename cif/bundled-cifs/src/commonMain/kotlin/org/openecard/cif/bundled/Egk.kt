@@ -10,7 +10,6 @@ import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
 import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder.activeDidState
 import org.openecard.cif.dsl.api.acl.AclScope
-import org.openecard.cif.dsl.api.acl.extension.activeDidState
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
 
@@ -246,7 +245,7 @@ val EgkCif by lazy {
 				}
 
 				pin {
-					name = "PIN.home"
+					name = "MRPIN.home"
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
@@ -457,20 +456,35 @@ val EgkCif by lazy {
 				add {
 					name = "EF.Einwilligung"
 					description =
-						"This file contains information about the consents for voluntary applications"
+						"This file contains information about the consents for voluntary applications."
 					path = +"D005"
 					shortEf = 0x05u
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
 							activeDidState("MRPIN.home")
+// 							PWD(MRPIN.home)
+// 							OR   [PWD(PacePinId.PIN.CH)  AND   flagTI.25]
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
+							and(
+								{
+									activeDidState("AUT_PACE")
+									activeDidState("MRPIN.home")
+								},
+							)
+// 							AUT_PACE
+// 							AND   { PWD(MRPIN.home)
+// 								OR     [PWD(PacePinId.PIN.CH)   AND   flagTI.25] }
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Any) {
 							Never
+// 							CONTACT:
+// 							PWD(PIN.CH)   AND   flagTI.27
+// 							CONTACTLESS:
+// 							AUT_PACE
+// 							AND   [PWD(PIN.CH)   AND   flagTI.27]
 						}
 					}
 				}
@@ -484,18 +498,29 @@ val EgkCif by lazy {
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
 							activeDidState("MRPIN.home")
-							// or(
-							// 	{ activeDidState("PIN.CH") },
-							// 	 { activeDidState("AUT_VSD") },
-							// )
+// 							PWD(MRPIN.home)
+// 							OR    [PWD(PIN.CH)   AND  flagTI.29]
+// 							OR    flagTI.30
+// 							OR    {AUT_VSD}
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
+							and(
+								{
+									activeDidState("MRPIN.home")
+									activeDidState("AUT_PACE")
+								},
+							)
+// 							( AUT_PACE
+// 								AND   { PWD(MRPIN.home)
+// 								OR     [PWD(PacePinId.PIN.CH) AND flagTI.29]
+// 								OR     flagTI.30 })
+// 							OR      AUT_VSD
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Any) {
-							activeDidState("AUT_VSD")
+							Never
+							// AUT_VSD
 						}
 					}
 				}
@@ -509,27 +534,19 @@ val EgkCif by lazy {
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
 							activeDidState("MRPIN.home")
-// 							or(
-// 								{
-// 									activeDidState(
-// 										"PIN.CH",
-// 									)
-// 									and(
-// 										activeDidState(
-// 											"flagTI.33",
-// 										),
-// 									)
-// 								},
-// 							)
+// 							PWD(MRPIN.home)
+// 							OR   [PWD(PIN.CH)   AND   flagTI.33]
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
 							and(
-								{ activeDidState("MRPIN.home") },
+								{
+									activeDidState("AUT_PACE")
+									activeDidState("MRPIN.home")
+								},
 							)
-// 							 or(
-// 							 	{ activeDidState("PIN.CH") },
-// 							 )
+// 							AUT_PACE
+// 							AND   { PWD(MRPIN.home)
+// 								OR   [ PWD(PIN.CH)   AND   flagTI.33] }
 						}
 					}
 					writeAcl {
@@ -551,14 +568,13 @@ val EgkCif by lazy {
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
 							activeDidState("AUT_PACE")
-// 							 or(
-// 							 	{ activeDidState("AUT_VSD") },
-// 							 )
+// 							OR AUT_VSD
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Any) {
-							activeDidState("AUT_VSD")
+							Never
+// 							 AUT_VSD
 						}
 					}
 				}
@@ -597,23 +613,17 @@ val EgkCif by lazy {
 						"This file contains information about the status of the data in EF.PD, EF.VD and EF.GVD."
 					path = +"D00C"
 					shortEf = 0x0Cu
+
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-// 							or(
-// 								{ activeDidState("AUT_VSD") },
-// 							)
-						}
+						defaultReadAcl()
+// 						CONTACTLESS:
+// 							AUT_PACE
+// 							OR     AUT_VSD
 					}
 					writeAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("AUT_VSD")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_VSD")
+						acl(CardProtocol.Any) {
+							Never
+// 							 AUT_VSD
 						}
 					}
 				}
@@ -625,22 +635,15 @@ val EgkCif by lazy {
 					path = +"D002"
 					shortEf = 0x02u
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-// 							or(
-// 								{ activeDidState("AUT_VSD") },
-// 							)
-						}
+						defaultReadAcl()
+// 							CONTACTLESS:
+// 							AUT_PACE
+// 							OR    AUT_VSD
 					}
 					writeAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("AUT_VSD")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_VSD")
+						acl(CardProtocol.Any) {
+							Never
+// 							 AUT_VSD
 						}
 					}
 				}
@@ -660,7 +663,7 @@ val EgkCif by lazy {
 // 								{
 // 									and(
 // 										activeDidState("PIN_CH"),
-// 										activeDidState(""),
+// 										activeDidState("flagTI.24"),
 // 									)
 // 								},
 							)
@@ -678,7 +681,7 @@ val EgkCif by lazy {
 // 									and(
 // 										activeDidState("AUT_PACE"),
 // 										activeDidState("PIN_CH"),
-// 										activeDidState("flagTI.28"),
+// 										activeDidState("flagTI.24"),
 // 									)
 // 								},
 							)
@@ -693,7 +696,7 @@ val EgkCif by lazy {
 // 								{
 // 									and(
 // 										activeDidState("PIN_CH"),
-// 										activeDidState(""),
+// 										activeDidState("flagTI.28"),
 // 									)
 // 								},
 							)
@@ -726,8 +729,9 @@ val EgkCif by lazy {
 					shortEf = 0x10u
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{ activeDidState("flagTI.18") },
+							Never
+// 							or(
+// 								{ activeDidState("flagTI.18") },
 // 								{
 // 									and(
 // 										activeDidState("MRPIN.NFD_READ"),
@@ -741,17 +745,18 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("flagTI.18"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("flagTI.18"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -767,18 +772,19 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("flagTI.15"),
-										activeDidState("MRPIN.NFD"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("flagTI.15"),
+// 										activeDidState("MRPIN.NFD"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
@@ -786,17 +792,18 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.NFD"),
-										activeDidState("flagTI.15"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.NFD"),
+// 										activeDidState("flagTI.15"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -805,7 +812,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -818,10 +825,11 @@ val EgkCif by lazy {
 					shortEf = 0x0Eu
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									activeDidState("flagTI.18")
-								},
+							Never
+// 							or(
+// 								{
+// 									activeDidState("flagTI.18")
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("MRPIN.NFD_READ"),
@@ -835,16 +843,17 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("flagTI.18"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("flagTI.18"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -860,18 +869,19 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.NFD"),
-										activeDidState("flagTI.15"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.NFD"),
+// 										activeDidState("flagTI.15"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 									activeDidState("PIN.CH"),
@@ -879,18 +889,19 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.NFD"),
-										activeDidState("flagTI.15"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.NFD"),
+// 										activeDidState("flagTI.15"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -899,7 +910,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -914,14 +925,14 @@ val EgkCif by lazy {
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
-								{
-									and(
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.33"),
-									)
-								},
+								{ activeDidState("MRPIN.home") },
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
 // 								{ activeDidState("flagTI.23") },
-// 								{ activeDidState("MRPIN.home") },
 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -929,20 +940,20 @@ val EgkCif by lazy {
 								{
 									and(
 										activeDidState("AUT_PACE"),
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.33"),
+										activeDidState("MRPIN.home"),
 									)
 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("flagTI.23"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
 // 									)
 // 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
+// 										activeDidState("flagTI.23"),
 // 									)
 // 								},
 							)
@@ -950,31 +961,33 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.DPE"),
-										activeDidState("flagTI.20"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.DPE"),
+// 										activeDidState("flagTI.20"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.DPE"),
-										activeDidState("flagTI.20"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.DPE"),
+// 										activeDidState("flagTI.20"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -982,7 +995,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -996,14 +1009,14 @@ val EgkCif by lazy {
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
-								{
-									and(
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.33"),
-									)
-								},
-								{ activeDidState("flagTI.23") },
 								{ activeDidState("MRPIN.home") },
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 								{ activeDidState("flagTI.23") },
 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -1011,20 +1024,20 @@ val EgkCif by lazy {
 								{
 									and(
 										activeDidState("AUT_PACE"),
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.33"),
+										activeDidState("MRPIN.home"),
 									)
 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("flagTI.23")
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
 // 									)
 // 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home")
+// 										activeDidState("flagTI.23"),
 // 									)
 // 								},
 							)
@@ -1032,31 +1045,33 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.DPE"),
-										activeDidState("flagTI.20"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.DPE"),
+// 										activeDidState("flagTI.20"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.DPE"),
-										activeDidState("flagTI.20"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.DPE"),
+// 										activeDidState("flagTI.20"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1064,7 +1079,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1079,7 +1094,7 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1099,7 +1114,7 @@ val EgkCif by lazy {
 							or(
 								{
 									activeDidState("AUT_PACE")
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1122,7 +1137,7 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1143,7 +1158,7 @@ val EgkCif by lazy {
 							or(
 								{
 									activeDidState("AUT_PACE")
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1174,7 +1189,7 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1194,7 +1209,7 @@ val EgkCif by lazy {
 							or(
 								{
 									activeDidState("AUT_PACE")
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1217,7 +1232,7 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1238,7 +1253,7 @@ val EgkCif by lazy {
 							or(
 								{
 									activeDidState("AUT_PACE")
-									activeDidState("PIN.home")
+									activeDidState("MRPIN.home")
 								},
 // 								{
 // 									and(
@@ -1269,8 +1284,11 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("flagTI.42")
+									activeDidState("MRPIN.home")
 								},
+// 								{
+// 									activeDidState("flagTI.42")
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("MRPIN.OSE"),
@@ -1282,9 +1300,6 @@ val EgkCif by lazy {
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
-// 								},
-// 								{
-// 									activeDidState("MRPIN.home")
 // 								},
 							)
 						}
@@ -1293,9 +1308,15 @@ val EgkCif by lazy {
 								{
 									and(
 										activeDidState("AUT_PACE"),
-										activeDidState("flagTI.42"),
+										activeDidState("MRPIN.home"),
 									)
 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("flagTI.42"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1308,12 +1329,6 @@ val EgkCif by lazy {
 // 										activeDidState("AUT_PACE"),
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
 // 									)
 // 								},
 							)
@@ -1321,31 +1336,33 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.OSE"),
-										activeDidState("flagTI.43"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.OSE"),
+// 										activeDidState("flagTI.43"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.OSE"),
-										activeDidState("flagTI.43"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.OSE"),
+// 										activeDidState("flagTI.43"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1353,7 +1370,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1369,8 +1386,11 @@ val EgkCif by lazy {
 						acl(CardProtocol.Grouped.CONTACT) {
 							or(
 								{
-									activeDidState("flagTI.42")
+									activeDidState("MRPIN.home")
 								},
+// 								{
+// 									activeDidState("flagTI.42")
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("MRPIN.OSE"),
@@ -1383,9 +1403,6 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -1393,20 +1410,20 @@ val EgkCif by lazy {
 								{
 									and(
 										activeDidState("AUT_PACE"),
-										activeDidState("flagTI.42"),
+										activeDidState("MRPIN.home"),
 									)
 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
+// 										activeDidState("flagTI.42"),
 // 									)
 // 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
 // 									)
 // 								},
 							)
@@ -1414,31 +1431,33 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.OSE"),
-										activeDidState("flagTI.43"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.OSE"),
+// 										activeDidState("flagTI.43"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.OSE"),
-										activeDidState("flagTI.43"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.OSE"),
+// 										activeDidState("flagTI.43"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1446,7 +1465,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1459,13 +1478,14 @@ val EgkCif by lazy {
 					shortEf = 0x05u
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRIN.AMTS"),
-										activeDidState("flagTI.46"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRIN.AMTS"),
+// 										activeDidState("flagTI.46"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.AMTS_REP"),
@@ -1479,17 +1499,18 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.46"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.46"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1505,43 +1526,45 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
-								{
-									and(
-										activeDidState("MRPIN.AMTS_REP"),
-										activeDidState("flagTI.47"),
-									)
-								},
-								{
-									and(
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.47"),
-										activeDidState("flagTI.33"),
-									)
-								},
-							)
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.AMTS_REP"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.47"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1557,7 +1580,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1630,13 +1653,14 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.CH"),
@@ -1644,18 +1668,19 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1664,7 +1689,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1677,13 +1702,14 @@ val EgkCif by lazy {
 					shortEf = 0x07u
 					readAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRIN.AMTS"),
-										activeDidState("flagTI.46"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRIN.AMTS"),
+// 										activeDidState("flagTI.46"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("PIN.AMTS_REP"),
@@ -1697,17 +1723,18 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.46"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.46"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1723,43 +1750,45 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 					writeAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							or(
-								{
-									and(
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
-								{
-									and(
-										activeDidState("MRPIN.AMTS_REP"),
-										activeDidState("flagTI.47"),
-									)
-								},
-								{
-									and(
-										activeDidState("PIN.CH"),
-										activeDidState("flagTI.47"),
-										activeDidState("flagTI.33"),
-									)
-								},
-							)
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.AMTS_REP"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.47"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 							)
 						}
 
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							or(
-								{
-									and(
-										activeDidState("AUT_PACE"),
-										activeDidState("MRPIN.AMTS"),
-										activeDidState("flagTI.47"),
-									)
-								},
+							Never
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.AMTS"),
+// 										activeDidState("flagTI.47"),
+// 									)
+// 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
@@ -1775,7 +1804,7 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
-							)
+// 							)
 						}
 					}
 				}
@@ -1796,14 +1825,11 @@ val EgkCif by lazy {
 				}
 				acl(CardProtocol.Grouped.CONTACTLESS) {
 					activeDidState("AUT_PACE")
-					// or(
-					// 	 { activeDidState("AUT_CMS") },
-					// )
 				}
 			}
 			val defaultWriteAcl: (AclScope.() -> Unit) = {
 				acl(CardProtocol.Any) {
-					activeDidState("AUT_CMS")
+					Never
 				}
 			}
 
@@ -1820,6 +1846,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+// 						 AUT_CMS
 					}
 				}
 
@@ -1882,6 +1909,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+// 						AUT_CMS
 					}
 				}
 				add {
@@ -1892,17 +1920,10 @@ val EgkCif by lazy {
 					shortEf = 0x02u
 
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-						}
+						defaultReadAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						defaultWriteAcl()
 					}
 				}
 				add {
@@ -1964,6 +1985,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+// 						AUT_CMS
 					}
 				}
 				add {
@@ -1975,10 +1997,13 @@ val EgkCif by lazy {
 
 					readAcl {
 						defaultReadAcl()
+// 						CONTACTLESS:
+// 						OR AUT_CMS
 					}
 
 					writeAcl {
 						defaultWriteAcl()
+// 						AUT_CMS
 					}
 				}
 				add {
@@ -2041,6 +2066,7 @@ val EgkCif by lazy {
 
 					writeAcl {
 						defaultWriteAcl()
+// 						AUT_CMS
 					}
 				}
 				add {
@@ -2051,17 +2077,10 @@ val EgkCif by lazy {
 					shortEf = 0x05u
 
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-						}
+						defaultReadAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						defaultWriteAcl()
 					}
 				}
 				add {
@@ -2123,6 +2142,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+// 						AUT_CMS
 					}
 				}
 			}
@@ -2546,6 +2566,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+						// manufacturer-specific
 					}
 				}
 
@@ -2561,6 +2582,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						defaultWriteAcl()
+						// manufacturer-specific
 					}
 				}
 			}
@@ -2592,7 +2614,7 @@ val EgkCif by lazy {
 					}
 
 					authAcl {
-						defaultWriteAcl()
+						defaultAuthAcl()
 					}
 
 					parameters {

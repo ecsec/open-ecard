@@ -1,6 +1,5 @@
 package org.openecard.control.binding.ktor
 
-import freemarker.cache.ClassTemplateLoader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
@@ -14,18 +13,15 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.freemarker.FreeMarker
-import io.ktor.server.freemarker.FreeMarkerContent
+import io.ktor.server.html.respondHtmlTemplate
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
 import org.openecard.i18n.I18N
-import kotlin.jvm.java
 
 private val logger = KotlinLogging.logger { }
 
@@ -149,22 +145,11 @@ fun Application.configureServer(
 						else -> "no message"
 					}
 			}
-			call.respond(
-				statusCode,
-				FreeMarkerContent(
-					template = "error.ftl",
-					model =
-						mapOf(
-							"error" to
-								TemplateError(
-									title = "Error",
-									headline = statusCode.description,
-									message = message,
-								),
-						),
-					contentType = htmlUtf8ContentType,
-				),
-			)
+			call.respondHtmlTemplate(ErrorTemplate(), statusCode) {
+				errorTitle { +"Error" }
+				headline { +statusCode.description }
+				message { +message }
+			}
 			call.response.headers.append(HttpHeaders.ContentType, htmlUtf8ContentType.toString())
 		}
 	}
@@ -172,9 +157,6 @@ fun Application.configureServer(
 	install(ContentNegotiation) {
 		json()
 		xml()
-	}
-	install(FreeMarker) {
-		templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
 	}
 	routing {
 		staticResources("/", "www") {

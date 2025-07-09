@@ -15,7 +15,7 @@ kotlin {
 				implementation(libs.ktor.server.netty)
 				implementation(libs.ktor.server.cors)
 				implementation(libs.ktor.server.content.negotiation)
-				implementation(libs.ktor.server.freemarker)
+				implementation(libs.ktor.server.html.builder)
 				implementation(libs.ktor.server.status.pages)
 				implementation(libs.ktor.serde.json)
 				implementation(libs.ktor.serde.xml)

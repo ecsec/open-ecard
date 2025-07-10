@@ -12,10 +12,10 @@ import io.ktor.serialization.kotlinx.xml.xml
 import io.ktor.server.application.Application
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
+import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.html.respondHtmlTemplate
 import io.ktor.server.http.content.staticResources
-import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -175,7 +175,7 @@ class HttpService {
 			configuration: Routing.() -> Unit,
 		) {
 			embeddedServer(
-				Netty,
+				CIO,
 				port = port, // This is the port on which Ktor is listening
 				host = host,
 			) {

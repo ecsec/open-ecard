@@ -9,4 +9,10 @@ data class PaceAclQualifier(
 	 * Contains the chat that needs to be authorized.
 	 */
 	val chat: PrintableUByteArray,
-) : AclQualifier
+) : AclQualifier {
+	override fun matches(other: AclQualifier): Boolean =
+		when (other) {
+			is PaceAclQualifier -> this.chat == other.chat
+			else -> false
+		}
+}

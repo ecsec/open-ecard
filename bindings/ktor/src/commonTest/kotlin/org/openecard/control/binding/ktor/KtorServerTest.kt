@@ -40,6 +40,7 @@ fun Application.configureSut(
 	configureServer(
 		port = port,
 		host = host,
+		serverAgent = serverHeader,
 		corsOrigins = corsOrigins,
 	) {
 		configuration()

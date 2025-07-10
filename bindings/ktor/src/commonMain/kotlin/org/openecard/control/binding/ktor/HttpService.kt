@@ -101,12 +101,12 @@ fun Application.configureServer(
 	port: Int,
 	host: String,
 	corsOrigins: Set<String>,
-	serverHeader: String? = null,
+	serverAgent: String?,
 	configuration: Routing.() -> Unit,
 ) {
-	if (serverHeader != null) {
+	if (serverAgent != null) {
 		install(ServerHeader) {
-			header = serverHeader
+			header = serverAgent
 		}
 	}
 	install(SecurityHeader)
@@ -176,6 +176,7 @@ class HttpService {
 			port: Int = 24727,
 			host: String = "localhost",
 			wait: Boolean = true,
+			serverAgent: UserAgent? = null,
 			corsOrigins: Set<String> = setOf("service.skidentity.de"),
 			configuration: Routing.() -> Unit,
 		) {
@@ -188,6 +189,7 @@ class HttpService {
 					port = port,
 					host = host,
 					corsOrigins = corsOrigins,
+					serverAgent = serverAgent?.toHeaderValue(),
 					configuration = configuration,
 				)
 			}.start(wait = wait)

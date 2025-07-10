@@ -1,5 +1,6 @@
 package org.openecard.cif.definition
 
+import org.openecard.cif.definition.acl.BoolTreeLeaf
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.app.ApplicationDefinition
@@ -15,7 +16,40 @@ class CifVerifier(
 ) {
 	@Throws(IllegalArgumentException::class)
 	fun verify() {
-		// check ACLs
+		// check app uniqueness
+		if (cif.applications.distinctBy { it.name }.size != cif.applications.size) {
+			throw IllegalArgumentException("Duplicate application names found")
+		}
+		if (cif.applications.distinctBy { it.aid }.size != cif.applications.size) {
+			throw IllegalArgumentException("Duplicate application AIDs found")
+		}
+
+		// check DID uniqueness
+		val allDids = cif.applications.flatMap { it.dids }
+		if (allDids.distinctBy { it.name }.size != allDids.size) {
+			throw IllegalArgumentException("Duplicate DID names found in CIF")
+		}
+
+		// check dataset uniqueness
+		val allDatasets = cif.applications.flatMap { it.dataSets }
+		if (allDatasets.distinctBy { it.name }.size != allDatasets.size) {
+			throw IllegalArgumentException("Duplicate dataset names found in CIF")
+		}
+
+		cif.applications.forEach { a ->
+			if (a.dataSets.distinctBy { it.path }.size != a.dataSets.size) {
+				throw IllegalArgumentException("Duplicate dataset paths found in application '${a.name}'")
+			}
+			if (a.dataSets
+					.filter { it.shortEf != null }
+					.distinctBy { it.shortEf }
+					.size != a.dataSets.size
+			) {
+				throw IllegalArgumentException("Duplicate dataset Short-EFs found in application '${a.name}'")
+			}
+		}
+
+		// check ACLs and reference existence
 		cif.applications.forEach { app ->
 			checkAppAcl(app)
 			app.dataSets.forEach { ds ->
@@ -23,6 +57,15 @@ class CifVerifier(
 			}
 			app.dids.forEach { did ->
 				checkDidAcl(app, did)
+
+				when (did) {
+					is GenericCryptoDidDefinition<*> -> {
+						did.parameters.certificates.forEach { certDs ->
+							checkDatasetExists(app, certDs)
+						}
+					}
+					else -> {}
+				}
 			}
 		}
 	}
@@ -85,6 +128,21 @@ class CifVerifier(
 				}
 			}
 		}
+
+		// check if there are false combined with references
+		acls.forEach { acl ->
+			acl.value.or.forEach { or ->
+				val and = or.and
+				val hasFalse = and.contains(BoolTreeLeaf.False)
+				val hasTrue = and.contains(BoolTreeLeaf.True)
+				val hasRefs = and.any { it is DidStateReference }
+				if (hasFalse && (hasTrue || hasRefs)) {
+					throw IllegalArgumentException(
+						"ACL in '$name' ($type) in app '${app.name}' combines false with true and/or DID references",
+					)
+				}
+			}
+		}
 	}
 
 	private fun checkDidExists(
@@ -108,5 +166,17 @@ class CifVerifier(
 
 		// nothing found
 		throw IllegalArgumentException("DID '$name' not found in any application")
+	}
+
+	private fun checkDatasetExists(
+		localApp: ApplicationDefinition,
+		name: String,
+	) {
+		if (localApp.dataSets.any { it.name == name }) {
+			return
+		}
+
+		// nothing found
+		throw IllegalArgumentException("Dataset '$name' not found")
 	}
 }

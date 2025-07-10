@@ -25,12 +25,6 @@ import org.openecard.i18n.I18N
 
 private val logger = KotlinLogging.logger { }
 
-data class TemplateError(
-	val title: String,
-	val headline: String,
-	val message: String,
-)
-
 fun extractContent(content: OutgoingContent): String? =
 	when (content) {
 		is OutgoingContent.ContentWrapper -> {

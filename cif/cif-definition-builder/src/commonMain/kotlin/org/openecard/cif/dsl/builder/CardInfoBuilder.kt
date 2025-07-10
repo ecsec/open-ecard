@@ -15,7 +15,7 @@ class CardInfoBuilder :
 	CardInfoScope,
 	Builder<CardInfoDefinition> {
 	private lateinit var metadataDefinition: CardInfoMetadata
-	private var applications: List<ApplicationDefinition>? = null
+	private var applications: Set<ApplicationDefinition>? = null
 
 	override fun metadata(content: @CifMarker (CardInfoMetadataScope.() -> Unit)) {
 		val builder = CardInfoMetadataBuilder()
@@ -26,14 +26,14 @@ class CardInfoBuilder :
 	override fun applications(content: @CifMarker (CifSetScope<ApplicationScope>.() -> Unit)) {
 		val builder = CifSetBuilder<ApplicationScope, ApplicationBuilder>(builder = { ApplicationBuilder() })
 		content(builder)
-		applications = builder.build().map { it.build() }.toList()
+		applications = builder.build().map { it.build() }.toSet()
 	}
 
 	override fun build(): CardInfoDefinition {
 		val cif =
 			CardInfoDefinition(
 				metadata = metadataDefinition,
-				applications = applications ?: listOf(),
+				applications = applications ?: setOf(),
 			)
 
 		// TODO: perform sanity checks such as existence of DIDs and Datasets

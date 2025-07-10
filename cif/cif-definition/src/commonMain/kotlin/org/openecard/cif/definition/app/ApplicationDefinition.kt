@@ -7,7 +7,7 @@ import org.openecard.cif.definition.did.DidDefinition
 import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
-class ApplicationDefinition(
+data class ApplicationDefinition(
 	/**
 	 * Application identifier.
 	 * Might be a root based path as well (see ISO 7816-4 for more details).

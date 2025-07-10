@@ -9,5 +9,5 @@ class CardInfoDefinition(
 	val metadata: CardInfoMetadata,
 	// TODO: CardIdentification
 	// TODO: CardCapabilities
-	val applications: List<ApplicationDefinition>,
+	val applications: Set<ApplicationDefinition>,
 )

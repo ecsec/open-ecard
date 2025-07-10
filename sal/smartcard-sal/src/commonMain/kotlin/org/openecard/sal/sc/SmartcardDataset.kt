@@ -5,6 +5,7 @@ import org.openecard.cif.definition.acl.BoolTreeOr
 import org.openecard.cif.definition.dataset.DataSetDefinition
 import org.openecard.sal.iface.Dataset
 import org.openecard.sal.iface.MissingAuthentications
+import org.openecard.sal.sc.acl.missingAuthentications
 
 class SmartcardDataset(
 	override val name: String,
@@ -14,9 +15,9 @@ class SmartcardDataset(
 	val writeAcl: BoolTreeOr<BoolTreeLeaf>,
 ) : Dataset {
 	override val missingReadAuthentications: MissingAuthentications
-		get() = TODO("Not yet implemented")
+		get() = readAcl.missingAuthentications(application.device)
 	override val missingWriteAuthentications: MissingAuthentications
-		get() = TODO("Not yet implemented")
+		get() = writeAcl.missingAuthentications(application.device)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun read(): UByteArray {

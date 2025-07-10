@@ -64,3 +64,8 @@ class SecureMessagingException(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SalException(msg ?: "Error in secure messaging processing.", cause)
+
+class AclUnfulfillable(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SalException(msg ?: "Acl can not be fulfilled.", cause)

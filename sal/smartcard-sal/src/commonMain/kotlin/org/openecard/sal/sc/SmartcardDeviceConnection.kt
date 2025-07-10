@@ -3,8 +3,9 @@ package org.openecard.sal.sc
 import org.openecard.cif.definition.CardInfoDefinition
 import org.openecard.sal.iface.DeviceConnection
 import org.openecard.sal.iface.dids.AuthenticationDid
-import org.openecard.sal.sc.acl.hasSolution
-import org.openecard.sal.sc.acl.selectForProtocol
+import org.openecard.sal.iface.hasSolution
+import org.openecard.sal.iface.selectForProtocol
+import org.openecard.sal.sc.dids.SmartcardDid
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.utils.common.returnIf
@@ -36,12 +37,18 @@ class SmartcardDeviceConnection(
 			}
 	}
 
+	internal val allAuthDids: List<AuthenticationDid> get() {
+		return applications.flatMap { it.dids.filterIsInstance<AuthenticationDid>() }
+	}
+
+	internal fun findAuthDid(name: String): AuthenticationDid? = allAuthDids.find { it.name == name }
+
 	override fun close(disposition: CardDisposition) {
 		channel.card.terminalConnection.disconnect(disposition)
 	}
 
 	internal fun setSelectedApplication(application: SmartcardApplication) {
-		// remove all local dids and destroy secure channels if needed
+		// remove all local dids
 		val unauthDids = _cardState.authenticatedDids.filter { it.isLocal && it.application != application }
 		val remainingDids = _cardState.authenticatedDids - unauthDids
 

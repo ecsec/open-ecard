@@ -9,8 +9,11 @@ import org.openecard.sal.iface.Application
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.Did
 import org.openecard.sal.iface.dids.SecureChannelDid
-import org.openecard.sal.sc.acl.hasSolution
-import org.openecard.sal.sc.acl.selectForProtocol
+import org.openecard.sal.iface.hasSolution
+import org.openecard.sal.iface.selectForProtocol
+import org.openecard.sal.sc.acl.missingAuthentications
+import org.openecard.sal.sc.dids.SmartcardDecryptDid
+import org.openecard.sal.sc.dids.SmartcardEncryptDid
 import org.openecard.sal.sc.dids.SmartcardPaceDid
 import org.openecard.sal.sc.dids.SmartcardPinDid
 import org.openecard.sal.sc.dids.SmartcardSignDid
@@ -64,8 +67,22 @@ class SmartcardApplication(
 				}
 				is GenericCryptoDidDefinition<*> -> {
 					when (did) {
-						is GenericCryptoDidDefinition.DecryptionDidDefinition -> TODO("No Implemented yet")
-						is GenericCryptoDidDefinition.EncryptionDidDefinition -> TODO("No Implemented yet")
+						is GenericCryptoDidDefinition.DecryptionDidDefinition -> {
+							val decryptAcl = did.decipherAcl.selectForProtocol(device.channel.card.protocol)
+							if (decryptAcl.hasSolution()) {
+								SmartcardDecryptDid(this, did, decryptAcl)
+							} else {
+								null
+							}
+						}
+						is GenericCryptoDidDefinition.EncryptionDidDefinition -> {
+							val decryptAcl = did.encipherAcl.selectForProtocol(device.channel.card.protocol)
+							if (decryptAcl.hasSolution()) {
+								SmartcardEncryptDid(this, did, decryptAcl)
+							} else {
+								null
+							}
+						}
 						is GenericCryptoDidDefinition.SignatureDidDefinition -> {
 							val signAcl = did.signAcl.selectForProtocol(device.channel.card.protocol)
 							if (signAcl.hasSolution()) {
@@ -81,7 +98,7 @@ class SmartcardApplication(
 	}
 
 	override val missingSelectAuthentications: MissingAuthentications
-		get() = TODO("Not yet implemented")
+		get() = selectAcl.missingAuthentications(device)
 
 	override val isConnected: Boolean
 		get() = device.cardState.app == this
@@ -90,13 +107,9 @@ class SmartcardApplication(
 	override fun connect() {
 		// remove secure channel before switching the application
 		val unauthDids = device.cardState.authenticatedDids.filter { it.isLocal && it.application != this }
-		unauthDids.forEach {
-			when (it) {
-				is SecureChannelDid -> {
-					// not sure if we should do some error handling here
-					it.closeChannel()
-				}
-			}
+		unauthDids.filterIsInstance<SecureChannelDid>().forEach {
+			// TODO: not sure if we should do some error handling here
+			it.closeChannel()
 		}
 
 		val selectApdu =

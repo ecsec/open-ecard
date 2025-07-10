@@ -6,7 +6,6 @@ import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PinCallback
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.SmartcardApplication
-import org.openecard.sal.sc.SmartcardDid
 import org.openecard.sc.iface.feature.PinStatus
 
 class SmartcardPinDid(
@@ -14,12 +13,12 @@ class SmartcardPinDid(
 	didDef: PinDidDefinition,
 	val authAcl: CifAclOr,
 	val modifyAcl: CifAclOr,
-) : SmartcardDid<PinDidDefinition>(didDef, application),
+) : SmartcardDid.BaseSmartcardDid<PinDidDefinition>(didDef, application),
 	PinDid {
 	override val missingAuthAuthentications: MissingAuthentications
-		get() = missingAuthentications("auth")
+		get() = missingAuthentications(authAcl)
 	override val missingModifyAuthentications: MissingAuthentications
-		get() = missingAuthentications("modify")
+		get() = missingAuthentications(modifyAcl)
 
 	override fun capturePinInHardware(): Boolean {
 		TODO("Not yet implemented")

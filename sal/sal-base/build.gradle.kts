@@ -12,6 +12,7 @@ kotlin {
 			// implementation(libs.kotlin.logging)
 			api(libs.kotlin.coroutines.core)
 			api(project(":smartcard:sc-base"))
+			api(project(":cif:cif-definition"))
 		}
 
 		commonTest.dependencies {

@@ -1,5 +1,6 @@
 package org.openecard.cif.definition
 
+import org.openecard.cif.definition.acl.BoolTreeLeaf
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.app.ApplicationDefinition
@@ -114,7 +115,28 @@ class CifVerifier(
 	) {
 		require(acls.isNotEmpty()) { "No ACLs provided in $type $name" }
 
-		// TODO: check for covered protocol combinations
+		// check that there are no Always true branches, when there are DID references
+		acls.forEach { acl ->
+			var hasAlways = false
+			var hasRefs = false
+			acl.value.or.forEach { ors ->
+				hasRefs = hasRefs or ors.and.any { it is DidStateReference }
+				hasAlways = hasAlways or (
+					// true if only true contained in the list
+					ors.and.fold(null as Boolean?) { last, term ->
+						when (term) {
+							BoolTreeLeaf.True -> last ?: true
+							is DidStateReference -> false
+						}
+					} ?: false
+				)
+			}
+			if (hasAlways && hasRefs) {
+				throw IllegalArgumentException(
+					"Always true used in combination with DID references in DID '$name' ($type) in application '${app.name}'",
+				)
+			}
+		}
 
 		// check references
 		acls.forEach { acl ->

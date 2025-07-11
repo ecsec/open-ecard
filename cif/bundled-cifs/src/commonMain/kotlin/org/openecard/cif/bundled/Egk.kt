@@ -210,11 +210,16 @@ val EgkCif by lazy {
 				pace {
 					name = "AUT_PACE"
 					scope = DidScope.GLOBAL
-					modifyAcl { // DIDUpdate
+					modifyAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
 					}
+
 					authAcl {
-						// DIDAuthenticate
-						activeDidState("AUT_PACE")
+						acl(CardProtocol.Any) {
+							Always
+						}
 					}
 					parameters {
 						passwordRef = PacePinId.CAN
@@ -222,6 +227,7 @@ val EgkCif by lazy {
 						maxLength = 8
 					}
 				}
+
 				pin {
 					name = "PIN.CH"
 					scope = DidScope.GLOBAL
@@ -397,12 +403,12 @@ val EgkCif by lazy {
 
 					modifyAcl {
 						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN_CH")
+							activeDidState("PIN.CH")
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
 							and(
 								{ activeDidState("AUT_PACE") },
-								{ activeDidState("PIN_CH") },
+								{ activeDidState("PIN.CH") },
 							)
 						}
 					}
@@ -412,10 +418,33 @@ val EgkCif by lazy {
 
 					parameters {
 						passwordRef = 0x0Du
+						pwdType = PasswordType.ISO_9564_1
 						minLength = 6
 						maxLength = 8
 					}
 				}
+
+// 				pin {
+// 					name = "SK.CAN"
+// 					scope = DidScope.GLOBAL
+// 					modifyAcl {
+// 						acl(CardProtocol.Any) {
+// 							Never
+// 						}
+// 					}
+// 					authAcl {
+// 						acl(CardProtocol.Any) {
+// 							Always
+// 						}
+// 					}
+// 					parameters {
+// 						passwordRef = 0x02u
+// 						pwdType = PasswordType.ISO_9564_1
+// 						minLength = 6
+// 						maxLength = 8
+// 					}
+// 				}
+
 				// RSAAuthMarker:
 				// name: PrK.eGK.AUT_rsaRoleAuthentication
 				// name: PrK.eGK.AUT_rsaSessionkey4SM
@@ -424,6 +453,21 @@ val EgkCif by lazy {
 				// name: SK.VDS
 				// name: SK.VSDCMS
 			}
+
+// 			elcRoleAuthentication, elcSessionkey4SM, elcAsynchronAdmin:
+// 			PrK.eGK.AUT_CVC.E256
+
+// 			Prüfung von CVC-Zertifikaten:
+// 			PuK.RCA.CS.E256
+
+// 			asymmetrische VSD/CMS-Authentisierung:
+// 			PuK.RCA.ADMINCMS.CS.E256
+
+// 			aesSessionkey4SM:
+// 			SK.CMS.AES128
+// 			SK.CMS.AES256
+// 			SK.VSD.AES128
+// 			SK.VSD.AES256
 		}
 
 		add {
@@ -662,7 +706,7 @@ val EgkCif by lazy {
 								},
 // 								{
 // 									and(
-// 										activeDidState("PIN_CH"),
+// 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.24"),
 // 									)
 // 								},
@@ -673,14 +717,14 @@ val EgkCif by lazy {
 							or(
 								{
 									and(
-										activeDidState("AUTH_PACE"),
-										activeDidState("MRPIN_HOME"),
+										activeDidState("AUT_PACE"),
+										activeDidState("MRPIN.home"),
 									)
 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN_CH"),
+// 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.24"),
 // 									)
 // 								},
@@ -695,7 +739,7 @@ val EgkCif by lazy {
 								},
 // 								{
 // 									and(
-// 										activeDidState("PIN_CH"),
+// 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.28"),
 // 									)
 // 								},
@@ -705,14 +749,14 @@ val EgkCif by lazy {
 							or(
 								{
 									and(
-										activeDidState("AUTH_PACE"),
-										activeDidState("MRPIN_HOME"),
+										activeDidState("AUT_PACE"),
+										activeDidState("MRPIN.home"),
 									)
 								},
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN_CH"),
+// 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.28"),
 // 									)
 // 								},
@@ -720,7 +764,18 @@ val EgkCif by lazy {
 						}
 					}
 				}
+			}
+		}
 
+		add {
+			name = "DF.NFD"
+			aid = +"D27600014407"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
+			dataSets {
 				add {
 					name = "EF.NFD"
 					description =
@@ -914,7 +969,18 @@ val EgkCif by lazy {
 						}
 					}
 				}
+			}
+		}
 
+		add {
+			name = "DF.DPE"
+			aid = +"D27600014408"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
+			dataSets {
 				add {
 					name = "EF.DPE"
 					description =
@@ -1083,7 +1149,19 @@ val EgkCif by lazy {
 						}
 					}
 				}
+			}
+		}
 
+		add {
+			name = "DF.GDD"
+			aid = +"D2760001440A"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
+
+			dataSets {
 				add {
 					name = "EF.EinwilligungGDD"
 					description =
@@ -1273,6 +1351,19 @@ val EgkCif by lazy {
 						}
 					}
 				}
+			}
+		}
+
+		add {
+			name = "DF.OSE"
+			aid = +"D2760001440B"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
+
+			dataSets {
 
 				add {
 					name = "EF.OSE"
@@ -1469,7 +1560,19 @@ val EgkCif by lazy {
 						}
 					}
 				}
+			}
+		}
 
+		add {
+			name = "DF.AMTS"
+			aid = +"D2760001440C"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
+
+			dataSets {
 				add {
 					name = "EF.AMTS"
 					description =
@@ -2337,6 +2440,12 @@ val EgkCif by lazy {
 					name = "PrK.CH.ENC_rsaDecipherOaep"
 					scope = DidScope.LOCAL
 
+					encipherAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
+					}
+
 					parameters {
 
 						key {
@@ -2353,6 +2462,12 @@ val EgkCif by lazy {
 				encrypt {
 					name = "PrK.CH.ENC_rsaDecipherPKCS1_V1_5"
 					scope = DidScope.LOCAL
+
+					encipherAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
+					}
 
 					parameters {
 
@@ -2371,6 +2486,12 @@ val EgkCif by lazy {
 					name = "PrK.CH.ENCV_rsaDecipherOaep"
 					scope = DidScope.LOCAL
 
+					encipherAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
+					}
+
 					parameters {
 
 						key {
@@ -2387,6 +2508,12 @@ val EgkCif by lazy {
 				encrypt {
 					name = "PrK.CH.ENCV_rsaDecipherPKCS1_V1_5"
 					scope = DidScope.LOCAL
+
+					encipherAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
+					}
 
 					parameters {
 
@@ -2618,6 +2745,7 @@ val EgkCif by lazy {
 
 					parameters {
 						passwordRef = 0x01u
+						pwdType = PasswordType.ISO_9564_1
 						minLength = 6
 						maxLength = 8
 					}
@@ -2647,7 +2775,17 @@ val EgkCif by lazy {
 							keyRef = 0x04u
 							keySize = 2048
 						}
+
 						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						sigGen {
+							standard {
+								cardAlgRef = +"05"
+								info(
+									SignatureGenerationInfoType.MSE_KEY_DS,
+									SignatureGenerationInfoType.PSO_CDS,
+								)
+							}
+						}
 					}
 				}
 
@@ -2677,6 +2815,8 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
+						signatureAlgorithm = "SHA256withECDSAandMGF1"
+
 						sigGen {
 							standard {
 								cardAlgRef = +"00"
@@ -2686,7 +2826,6 @@ val EgkCif by lazy {
 								)
 							}
 						}
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
 					}
 				}
 			}

@@ -233,11 +233,16 @@ val HbaCif by lazy {
 				pace {
 					name = "AUT_PACE"
 					scope = DidScope.GLOBAL
-					modifyAcl { // DIDUpdate
+					modifyAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
 					}
+
 					authAcl {
-						// DIDAuthenticate
-						activeDidState("AUT_PACE")
+						acl(CardProtocol.Any) {
+							Always
+						}
 					}
 					parameters {
 						passwordRef = PacePinId.CAN
@@ -245,6 +250,7 @@ val HbaCif by lazy {
 						maxLength = 8
 					}
 				}
+
 				pin {
 					name = "PIN.CH"
 					scope = DidScope.GLOBAL
@@ -282,8 +288,12 @@ val HbaCif by lazy {
 // 					}
 // 					parameters {
 // 						passwordRef = 0x02u
+// 						pwdType = PasswordType.ISO_9564_1
+// 						minLength = 6
+// 						maxLength = 8
 // 					}
 // 				}
+
 // 				elcRoleAuthentication:
 // 				PrK.HPC.AUTR_CVC.E256
 // 				elcSessionkey4SM, elcAsynchronAdmin:
@@ -291,6 +301,7 @@ val HbaCif by lazy {
 
 // 				Prüfung von CVC-Zertifikaten:
 // 				PuK.RCA.CS.E256
+
 // 				asymmetrische CMS-Authentisierung:
 // 				PuK.RCA.ADMINCMS.CS.E256
 
@@ -305,6 +316,11 @@ val HbaCif by lazy {
 		add {
 			name = "DF.HPA"
 			aid = +"D27600014602"
+			selectAcl {
+				acl(CardProtocol.Any) {
+					Always
+				}
+			}
 
 			dataSets {
 				add {
@@ -363,6 +379,23 @@ val HbaCif by lazy {
 			val defaultWriteAcl: (AclScope.() -> Unit) = {
 				acl(CardProtocol.Any) {
 					Never
+				}
+			}
+
+			val defaultModifyAcl: (AclScope.() -> Unit) = {
+				acl(CardProtocol.Grouped.CONTACT) {
+					Always
+				}
+				acl(CardProtocol.Grouped.CONTACTLESS) {
+					activeDidState("AUT_PACE")
+				}
+			}
+			val defaultAuthAcl: (AclScope.() -> Unit) = {
+				acl(CardProtocol.Grouped.CONTACT) {
+					Always
+				}
+				acl(CardProtocol.Grouped.CONTACTLESS) {
+					activeDidState("AUT_PACE")
 				}
 			}
 
@@ -427,8 +460,17 @@ val HbaCif by lazy {
 					name = "PIN.QES"
 					scope = DidScope.GLOBAL
 
+					modifyAcl {
+						defaultAuthAcl()
+					}
+
+					authAcl {
+						defaultAuthAcl()
+					}
+
 					parameters {
 						passwordRef = 0x01u
+						pwdType = PasswordType.ISO_9564_1
 						minLength = 6
 						maxLength = 8
 					}
@@ -705,6 +747,12 @@ val HbaCif by lazy {
 					name = "PrK.HP.ENC_rsaDecipherOaep"
 					scope = DidScope.LOCAL
 
+					encipherAcl {
+						acl(CardProtocol.Any) {
+							Never
+						}
+					}
+
 					parameters {
 
 						key {
@@ -864,7 +912,7 @@ val HbaCif by lazy {
 
 			dataSets {
 				add {
-					name = "EF.CIA.CIAInfo"
+					name = "DF.CIA.QES/EF.CIA.CIAInfo"
 					path = +"5032"
 					shortEf = 0x12u
 					readAcl {
@@ -875,7 +923,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.OD"
+					name = "DF.CIA.QES/EF.OD"
 					path = +"5031"
 					shortEf = 0x11u
 					readAcl {
@@ -886,7 +934,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.AOD"
+					name = "DF.CIA.QES/EF.AOD"
 					path = +"5034"
 					shortEf = 0x14u
 					readAcl {
@@ -897,7 +945,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.PrKD"
+					name = "DF.CIA.QES/EF.PrKD"
 					path = +"5035"
 					shortEf = 0x15u
 					readAcl {
@@ -908,7 +956,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.CD"
+					name = "DF.CIA.QES/EF.CD"
 					path = +"5038"
 					shortEf = 0x16u
 					readAcl {
@@ -945,7 +993,7 @@ val HbaCif by lazy {
 
 			dataSets {
 				add {
-					name = "EF.CIA.CIAInfo"
+					name = "DF.CIA.ESIGN/EF.CIA.CIAInfo"
 					path = +"5032"
 					shortEf = 0x12u
 					readAcl {
@@ -956,7 +1004,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.OD"
+					name = "DF.CIA.ESIGN/EF.OD"
 					path = +"5031"
 					shortEf = 0x11u
 					readAcl {
@@ -967,7 +1015,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.AOD"
+					name = "DF.CIA.ESIGN/EF.AOD"
 					path = +"5034"
 					shortEf = 0x14u
 					readAcl {
@@ -978,7 +1026,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.PrKD"
+					name = "DF.CIA.ESIGN/EF.PrKD"
 					path = +"5035"
 					shortEf = 0x15u
 					readAcl {
@@ -989,7 +1037,7 @@ val HbaCif by lazy {
 					}
 				}
 				add {
-					name = "EF.CD"
+					name = "DF.CIA.ESIGN/EF.CD"
 					path = +"5038"
 					shortEf = 0x16u
 					readAcl {
@@ -1093,6 +1141,7 @@ val HbaCif by lazy {
 					}
 					parameters {
 						passwordRef = 0x01u
+						pwdType = PasswordType.ISO_9564_1
 						minLength = 5
 						maxLength = 8
 					}
@@ -1109,6 +1158,7 @@ val HbaCif by lazy {
 					}
 					parameters {
 						passwordRef = 0x03u
+						pwdType = PasswordType.ISO_9564_1
 						minLength = 6
 						maxLength = 8
 					}

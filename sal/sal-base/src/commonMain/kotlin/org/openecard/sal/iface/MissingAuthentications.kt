@@ -1,6 +1,5 @@
 package org.openecard.sal.iface
 
-import org.openecard.cif.definition.acl.BoolTreeAnd
 import org.openecard.cif.definition.acl.BoolTreeOr
 import org.openecard.cif.definition.acl.DidStateReference
 
@@ -16,26 +15,22 @@ sealed interface MissingAuthentications {
 	val isSolved: Boolean
 
 	class MissingDidAuthentications(
-		val decisions: BoolTreeOr<AclDidResolution>,
+		internal val decisions: BoolTreeOr<AclDidResolution>,
 	) : MissingAuthentications {
-		fun removeUnsupported(availableDids: List<DidStateReference>): MissingAuthentications {
+		val options = decisions.or.map { it.and }
+
+		fun removeUnsupported(availableDids: List<DidStateReference>): MissingAuthentications =
+			removeUnsupported { term -> availableDids.any { did -> term.requiredState == did } }
+
+		fun removeUnsupported(predicate: (AclDidResolution) -> Boolean): MissingAuthentications {
 			val orReduced =
 				BoolTreeOr<AclDidResolution>(
 					decisions.or.mapNotNull { ands ->
-						val andReduced =
-							ands.and.mapNotNull { term ->
-								if (!availableDids.any { term.requiredState == it }) {
-									// the caller can solve this DID, so keep it
-									term
-								} else {
-									// unsolvable for the caller
-									null
-								}
-							}
-						if (andReduced.isEmpty()) {
-							null
+						val allDidsSupported = ands.and.all { term -> predicate(term) }
+						if (allDidsSupported) {
+							ands
 						} else {
-							BoolTreeAnd(andReduced)
+							null
 						}
 					},
 				)

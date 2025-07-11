@@ -8,8 +8,8 @@ import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
-import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder.activeDidState
 import org.openecard.cif.dsl.api.acl.AclScope
+import org.openecard.cif.dsl.api.did.PinDidParametersScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
 
@@ -27,10 +27,53 @@ val EgkCif by lazy {
 		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
 	}
 
+	val neverAcl: (AclScope.() -> Unit) = {
+		acl(CardProtocol.Any) {
+			Never
+		}
+	}
+	val paceProtectedAcl: (AclScope.() -> Unit) = {
+		acl(CardProtocol.Grouped.CONTACT) {
+			Always
+		}
+		acl(CardProtocol.Grouped.CONTACTLESS) {
+			or(
+				{ activeDidState("AUT_PACE") },
+			)
+		}
+	}
+	val paceCmsProtectedAcl: (AclScope.() -> Unit) = {
+		acl(CardProtocol.Grouped.CONTACT) {
+			Always
+		}
+		acl(CardProtocol.Grouped.CONTACTLESS) {
+			or(
+				{ activeDidState("AUT_PACE") },
+				// { activeDidState("AUT_CMS") },
+			)
+		}
+	}
+	val cmsProtectedAcl: (AclScope.() -> Unit) = {
+		acl(CardProtocol.Any) {
+			Never
+			// { activeDidState("AUT_CMS") },
+		}
+	}
+
+	val basePinParams: (PinDidParametersScope.() -> Unit) = {
+		pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
+		pwdType = PasswordType.ISO_9564_1
+		minLength = 6
+		maxLength = 8
+		storedLength = 8
+		padChar = 0xFFu
+	}
+
 	b.applications {
 		add {
 			name = "MF"
 			aid = +"D2760001448000"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
@@ -38,40 +81,6 @@ val EgkCif by lazy {
 			}
 
 			// add datasets
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-					// or(
-					// 	{ activeDidState("AUT_PACE") },
-					// 	 { activeDidState("AUT_CMS") },
-					// )
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					// activeDidState("AUT_CMS")
-					Never
-				}
-			}
-			val defaultModifyAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultAuthAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
 
 			dataSets {
 				add {
@@ -120,10 +129,10 @@ val EgkCif by lazy {
 					path = +"2F07"
 					shortEf = 0x07u
 					readAcl {
-						defaultReadAcl()
+						paceCmsProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsProtectedAcl()
 					}
 				}
 
@@ -136,10 +145,10 @@ val EgkCif by lazy {
 					path = +"2F06"
 					shortEf = 0x06u
 					readAcl {
-						defaultReadAcl()
+						paceCmsProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsProtectedAcl()
 					}
 				}
 
@@ -151,10 +160,10 @@ val EgkCif by lazy {
 					path = +"2F00"
 					shortEf = 0x1Eu
 					readAcl {
-						defaultReadAcl()
+						paceCmsProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsProtectedAcl()
 					}
 				}
 
@@ -166,12 +175,7 @@ val EgkCif by lazy {
 					path = +"2F02"
 					shortEf = 0x02u
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-						}
+						paceProtectedAcl()
 					}
 					writeAcl {
 						acl(CardProtocol.Any) {
@@ -196,12 +200,8 @@ val EgkCif by lazy {
 							Always
 						}
 					}
-
 					writeAcl {
-						acl(CardProtocol.Any) {
-							// activeDidState("AUT_CMS")
-							Never
-						}
+						cmsProtectedAcl()
 					}
 				}
 			}
@@ -215,7 +215,6 @@ val EgkCif by lazy {
 							Never
 						}
 					}
-
 					authAcl {
 						acl(CardProtocol.Any) {
 							Always
@@ -224,7 +223,7 @@ val EgkCif by lazy {
 					parameters {
 						passwordRef = PacePinId.CAN
 						minLength = 6
-						maxLength = 8
+						maxLength = 6
 					}
 				}
 
@@ -232,21 +231,14 @@ val EgkCif by lazy {
 					name = "PIN.CH"
 					scope = DidScope.GLOBAL
 					modifyAcl {
-						// didUpdate
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						// DIDAuthenticate
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x01u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 
@@ -255,20 +247,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x02u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -276,20 +263,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
+						basePinParams()
 						passwordRef = 0x03u
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -297,20 +279,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x04u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -318,20 +295,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x05u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -339,20 +311,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x07u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -360,20 +327,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x09u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -381,20 +343,15 @@ val EgkCif by lazy {
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x0Cu
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 				pin {
@@ -413,10 +370,11 @@ val EgkCif by lazy {
 						}
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
+						// TODO: is this really different than the other PINs?
 						passwordRef = 0x0Du
 						pwdType = PasswordType.ISO_9564_1
 						minLength = 6
@@ -473,6 +431,7 @@ val EgkCif by lazy {
 		add {
 			name = "DF.HCA"
 			aid = +"D27600000102"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
@@ -480,22 +439,7 @@ val EgkCif by lazy {
 			}
 
 			// add datasets
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
+
 			dataSets {
 				add {
 					name = "EF.Einwilligung"
@@ -630,10 +574,10 @@ val EgkCif by lazy {
 					path = +"D01C"
 					shortEf = 0x1Cu
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						paceProtectedAcl()
 					}
 				}
 
@@ -644,10 +588,10 @@ val EgkCif by lazy {
 					path = +"DA0A"
 					shortEf = 0x0Au
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						paceProtectedAcl()
 					}
 				}
 
@@ -659,7 +603,7 @@ val EgkCif by lazy {
 					shortEf = 0x0Cu
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 // 						CONTACTLESS:
 // 							AUT_PACE
 // 							OR     AUT_VSD
@@ -679,7 +623,7 @@ val EgkCif by lazy {
 					path = +"D002"
 					shortEf = 0x02u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 // 							CONTACTLESS:
 // 							AUT_PACE
 // 							OR    AUT_VSD
@@ -770,16 +714,17 @@ val EgkCif by lazy {
 		add {
 			name = "DF.NFD"
 			aid = +"D27600014407"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
 				}
 			}
+
 			dataSets {
 				add {
 					name = "EF.NFD"
-					description =
-						"This file contains an emergency data record."
+					description = "This file contains an emergency data record."
 					path = +"D010"
 					shortEf = 0x10u
 					readAcl {
@@ -874,8 +819,7 @@ val EgkCif by lazy {
 
 				add {
 					name = "EF.StatusNFD"
-					description =
-						"This file contains information about the status of the emergency data record."
+					description = "This file contains information about the status of the emergency data record."
 					path = +"D00E"
 					shortEf = 0x0Eu
 					readAcl {
@@ -975,16 +919,17 @@ val EgkCif by lazy {
 		add {
 			name = "DF.DPE"
 			aid = +"D27600014408"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
 				}
 			}
+
 			dataSets {
 				add {
 					name = "EF.DPE"
-					description =
-						"This file contains the data record with the personal declarations of the insured person."
+					description = "This file contains the data record with the personal declarations of the insured person."
 					path = +"D01B"
 					shortEf = 0x1Bu
 
@@ -1057,7 +1002,7 @@ val EgkCif by lazy {
 // 								{
 // 									and(
 // 										activeDidState("AUT_PACE"),
-// 									activeDidState("PIN.CH"),
+// 										activeDidState("PIN.CH"),
 // 										activeDidState("flagTI.33"),
 // 									)
 // 								},
@@ -1068,8 +1013,7 @@ val EgkCif by lazy {
 
 				add {
 					name = "EF.StatusDPE"
-					description =
-						"This file contains information on the status of the data record with the personal declarations."
+					description = "This file contains information on the status of the data record with the personal declarations."
 					path = +"D018"
 					shortEf = 0x18u
 					readAcl {
@@ -1357,6 +1301,7 @@ val EgkCif by lazy {
 		add {
 			name = "DF.OSE"
 			aid = +"D2760001440B"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
@@ -1364,7 +1309,6 @@ val EgkCif by lazy {
 			}
 
 			dataSets {
-
 				add {
 					name = "EF.OSE"
 					description =
@@ -1917,22 +1861,10 @@ val EgkCif by lazy {
 		add {
 			name = "DF.ESIGN"
 			aid = +"A000000167455349474E"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
-				}
-			}
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
 				}
 			}
 
@@ -1945,10 +1877,10 @@ val EgkCif by lazy {
 					shortEf = 0x01u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						 AUT_CMS
 					}
 				}
@@ -2011,7 +1943,7 @@ val EgkCif by lazy {
 						}
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						AUT_CMS
 					}
 				}
@@ -2023,10 +1955,10 @@ val EgkCif by lazy {
 					shortEf = 0x02u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -2087,7 +2019,7 @@ val EgkCif by lazy {
 						}
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						AUT_CMS
 					}
 				}
@@ -2099,13 +2031,13 @@ val EgkCif by lazy {
 					shortEf = 0x04u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 // 						CONTACTLESS:
 // 						OR AUT_CMS
 					}
 
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						AUT_CMS
 					}
 				}
@@ -2168,7 +2100,7 @@ val EgkCif by lazy {
 					}
 
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						AUT_CMS
 					}
 				}
@@ -2180,10 +2112,10 @@ val EgkCif by lazy {
 					shortEf = 0x05u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -2244,14 +2176,13 @@ val EgkCif by lazy {
 						}
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 // 						AUT_CMS
 					}
 				}
 			}
 
 			dids {
-
 				signature {
 					name = "PrK.CH.AUT.R2048_signPKCS1_V1_5"
 					scope = DidScope.GLOBAL
@@ -2298,7 +2229,7 @@ val EgkCif by lazy {
 
 						certificates("EF.C.CH.AUT.R2048")
 
-						signatureAlgorithm = "SHA256withRSAandMGF1"
+						signatureAlgorithm = "SHA256withRSA"
 
 						sigGen {
 							standard {
@@ -2311,6 +2242,7 @@ val EgkCif by lazy {
 						}
 					}
 				}
+
 				signature {
 					name = "PrK.CH.AUT.R2048_signPSS"
 					scope = DidScope.GLOBAL
@@ -2350,14 +2282,13 @@ val EgkCif by lazy {
 					}
 
 					parameters {
-
 						key {
 							keyRef = 0x02u
 							keySize = 2048
 						}
 
 						certificates("EF.C.CH.AUT.R2048")
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 						sigGen {
 							standard {
 								cardAlgRef = +"05"
@@ -2369,6 +2300,7 @@ val EgkCif by lazy {
 						}
 					}
 				}
+
 				signature {
 					name = "PrK.CH.AUTN.R2048_signPSS"
 					scope = DidScope.GLOBAL
@@ -2422,7 +2354,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 						certificates("EF.C.CH.AUTN.R2048")
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 
 						sigGen {
 							standard {
@@ -2453,7 +2385,8 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
-						encryptionAlgorithm = "OAEPWithSHA-256AndMGF1Padding"
+						// TODO: have these parameters been checked?
+						encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
 						certificates("EF.C.CH.ENC.R2048")
 						cardAlgRef = +"85"
 					}
@@ -2476,7 +2409,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
-						encryptionAlgorithm = "RSAWithSHA-256AndMGF1Padding"
+						encryptionAlgorithm = "RSA/NONE/PKCS1Padding"
 						certificates("EF.C.CH.ENC.R2048")
 						cardAlgRef = +"81" // rsaDecipherOaep 1000 01012 = '85' ?
 					}
@@ -2499,7 +2432,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
-						encryptionAlgorithm = "OAEPWithSHA-256AndMGF1Padding"
+						encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
 						certificates("EF.C.CH.ENCV.R2048")
 						cardAlgRef = +"85"
 					}
@@ -2522,7 +2455,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
-						encryptionAlgorithm = "RSAWithSHA-256AndMGF1Padding"
+						encryptionAlgorithm = "RSA/NONE/PKCS1Padding"
 						certificates("EF.C.CH.ENCV.R2048")
 						cardAlgRef = +"81"
 					}
@@ -2573,7 +2506,7 @@ val EgkCif by lazy {
 
 						certificates("EF.C.CH.AUT.E256")
 
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 
 						sigGen {
 							standard {
@@ -2640,7 +2573,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 						certificates("EF.C.CH.AUTN.E256")
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 
 						sigGen {
 							standard {
@@ -2660,22 +2593,10 @@ val EgkCif by lazy {
 			name = "DF.QES"
 			aid = +"D27600006601"
 			description = "Optional QES application"
+
 			selectAcl {
 				acl(CardProtocol.Any) {
 					Always
-				}
-			}
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
 				}
 			}
 
@@ -2688,10 +2609,10 @@ val EgkCif by lazy {
 					shortEf = 0x10u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 						// manufacturer-specific
 					}
 				}
@@ -2704,43 +2625,25 @@ val EgkCif by lazy {
 					shortEf = 0x06u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 						// manufacturer-specific
 					}
 				}
 			}
 
 			dids {
-				val defaultModifyAcl: (AclScope.() -> Unit) = {
-					acl(CardProtocol.Grouped.CONTACT) {
-						Always
-					}
-					acl(CardProtocol.Grouped.CONTACTLESS) {
-						activeDidState("AUT_PACE")
-					}
-				}
-				val defaultAuthAcl: (AclScope.() -> Unit) = {
-					acl(CardProtocol.Grouped.CONTACT) {
-						Always
-					}
-					acl(CardProtocol.Grouped.CONTACTLESS) {
-						activeDidState("AUT_PACE")
-					}
-				}
-
 				pin {
 					name = "PIN.QES"
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
-
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
@@ -2750,6 +2653,7 @@ val EgkCif by lazy {
 						maxLength = 8
 					}
 				}
+
 				signature {
 					name = "PrK.CH.QES.R2048"
 					scope = DidScope.GLOBAL
@@ -2770,13 +2674,12 @@ val EgkCif by lazy {
 					}
 
 					parameters {
-
 						key {
 							keyRef = 0x04u
 							keySize = 2048
 						}
 
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 						sigGen {
 							standard {
 								cardAlgRef = +"05"
@@ -2815,7 +2718,7 @@ val EgkCif by lazy {
 							keySize = 2048
 						}
 
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 
 						sigGen {
 							standard {

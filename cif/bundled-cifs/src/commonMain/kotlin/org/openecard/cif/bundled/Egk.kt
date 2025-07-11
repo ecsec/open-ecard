@@ -88,7 +88,7 @@ val EgkCif by lazy {
 					}
 					writeAcl {
 						acl(CardProtocol.Any) {
-							Never
+							Always
 						}
 					}
 				}
@@ -2420,7 +2420,6 @@ val EgkCif by lazy {
 							)
 						}
 						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
 							or(
 								{
 									and(
@@ -2692,7 +2691,6 @@ val EgkCif by lazy {
 				}
 			}
 		}
-
-		b.build()
 	}
+	b.build()
 }

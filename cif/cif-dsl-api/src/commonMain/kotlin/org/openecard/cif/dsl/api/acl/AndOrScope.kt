@@ -9,8 +9,6 @@ import org.openecard.cif.definition.acl.PaceAclQualifier
 object AndOrScope {
 	val Always: AndOrScopeResult.LeafResult
 		get() = AndOrScopeResult.LeafResult.Always
-	val Never: AndOrScopeResult.LeafResult
-		get() = AndOrScopeResult.LeafResult.Never
 
 	fun paceQualifier(hex: String): PaceAclQualifier = AclBoolTreeBuilder.paceQualifier(hex)
 
@@ -60,7 +58,6 @@ interface AndOrScopeResult {
 	) : AndOrScopeResult {
 		companion object {
 			val Always = LeafResult(BoolTreeLeaf.True)
-			val Never = LeafResult(BoolTreeLeaf.False)
 		}
 	}
 

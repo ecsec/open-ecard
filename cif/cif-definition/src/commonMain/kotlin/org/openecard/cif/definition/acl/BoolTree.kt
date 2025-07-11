@@ -13,7 +13,5 @@ data class BoolTreeAnd<T>(
 )
 
 sealed interface BoolTreeLeaf {
-	object False : BoolTreeLeaf
-
 	object True : BoolTreeLeaf
 }

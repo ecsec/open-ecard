@@ -112,7 +112,6 @@ class AclTreeTest {
 			}
 			acl(CardProtocol.Technical.T0) {
 				and(
-					{ Never },
 					{ didState("ABC.FD", true) },
 					{ didState("CBA.FD", false, paceQualifier("abcd1234")) },
 				)

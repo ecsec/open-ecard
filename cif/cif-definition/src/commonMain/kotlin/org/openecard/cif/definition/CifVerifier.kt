@@ -1,6 +1,5 @@
 package org.openecard.cif.definition
 
-import org.openecard.cif.definition.acl.BoolTreeLeaf
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.app.ApplicationDefinition
@@ -125,21 +124,6 @@ class CifVerifier(
 						is DidStateReference -> checkDidExists(app, entry.name)
 						else -> null
 					}
-				}
-			}
-		}
-
-		// check if there are false combined with references
-		acls.forEach { acl ->
-			acl.value.or.forEach { or ->
-				val and = or.and
-				val hasFalse = and.contains(BoolTreeLeaf.False)
-				val hasTrue = and.contains(BoolTreeLeaf.True)
-				val hasRefs = and.any { it is DidStateReference }
-				if (hasFalse && (hasTrue || hasRefs)) {
-					throw IllegalArgumentException(
-						"ACL in '$name' ($type) in app '${app.name}' combines false with true and/or DID references",
-					)
 				}
 			}
 		}

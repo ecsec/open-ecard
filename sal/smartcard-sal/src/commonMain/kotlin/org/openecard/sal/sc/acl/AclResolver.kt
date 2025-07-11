@@ -34,24 +34,20 @@ fun CifAclOr.missingAuthentications(dev: SmartcardDeviceConnection): MissingAuth
 			val mapped: BoolTreeOr<AclDidResolution> =
 				BoolTreeOr(
 					reduced.or.mapNotNull { ands ->
-						if (ands.and.any { it is BoolTreeLeaf.False }) {
-							null
-						} else {
-							val andBranch =
-								ands.and.mapNotNull { term ->
-									when (term) {
-										BoolTreeLeaf.True -> null
-										is DidStateReference -> {
-											val did =
-												dev.findAuthDid(term.name)
-													?: throw IllegalStateException("DID referenced in ACL is not available")
-											AclDidResolution(did, term)
-										}
-										else -> throw IllegalStateException("False detected where there should be none")
+						val andBranch =
+							ands.and.mapNotNull { term ->
+								when (term) {
+									BoolTreeLeaf.True -> null
+									is DidStateReference -> {
+										val did =
+											dev.findAuthDid(term.name)
+												?: throw IllegalStateException("DID referenced in ACL is not available")
+										AclDidResolution(did, term)
 									}
 								}
-							andBranch.returnIf { it.isNotEmpty() }?.let { BoolTreeAnd(it) }
-						}
+							}
+						// remove this branch if there are no entries in it
+						andBranch.returnIf { it.isNotEmpty() }?.let { BoolTreeAnd(it) }
 					},
 				)
 

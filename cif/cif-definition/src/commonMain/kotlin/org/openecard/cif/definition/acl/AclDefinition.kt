@@ -15,5 +15,5 @@ data class AclDefinition(
 	val acls: Map<CardProtocol, CifAclOr>,
 )
 
-val NeverTree = CifAclOr(listOf(BoolTreeAnd(listOf(BoolTreeLeaf.False))))
+val NeverTree = CifAclOr(listOf())
 val AlwaysTree = CifAclOr(listOf(BoolTreeAnd(listOf(BoolTreeLeaf.True))))

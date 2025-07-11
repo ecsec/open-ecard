@@ -35,10 +35,9 @@ fun AclDefinition.selectForProtocol(protocol: CardProtocol): BoolTreeOr<BoolTree
 fun CifAclOr.hasSolution(): Boolean =
 	this.or.any { ands ->
 		val and = ands.and
-		val hasFalse = and.contains(BoolTreeLeaf.False)
 		val hasTrue = and.contains(BoolTreeLeaf.True)
 		val hasReference = and.any { it is DidStateReference }
-		!hasFalse && (hasTrue || hasReference)
+		hasTrue || hasReference
 	}
 
 fun CifAclOr.isTrue(): Boolean =
@@ -50,10 +49,10 @@ fun CifAclOr.isTrue(): Boolean =
 
 fun CifAclOr.removeUnsupportedDids(supportedDids: List<String>): CifAclOr =
 	BoolTreeOr(
-		this.or.map { ands ->
+		this.or.mapNotNull { ands ->
 			if (ands.and.filterIsInstance<DidStateReference>().any { it.name !in supportedDids }) {
 				// remove this branch
-				BoolTreeAnd(listOf(BoolTreeLeaf.False))
+				null
 			} else {
 				ands
 			}
@@ -84,9 +83,7 @@ fun CifAclOr.reduceWithAuthenticatedDids(solvedDids: Set<DidStateReference>): Ci
  * Simplify boolean AND sequence as far as possible.
  */
 fun List<BoolTreeLeaf>.simplify(): List<BoolTreeLeaf> =
-	if (this.contains(BoolTreeLeaf.False)) {
-		listOf(BoolTreeLeaf.False)
-	} else if (this.any { it is DidStateReference }) {
+	if (this.any { it is DidStateReference }) {
 		this.filter { it == BoolTreeLeaf.True }
 	} else {
 		this

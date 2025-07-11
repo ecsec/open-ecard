@@ -35,9 +35,10 @@ fun AclDefinition.selectForProtocol(protocol: CardProtocol): BoolTreeOr<BoolTree
 fun CifAclOr.hasSolution(): Boolean =
 	this.or.any { ands ->
 		val and = ands.and
+		val hasFalse = and.contains(BoolTreeLeaf.False)
 		val hasTrue = and.contains(BoolTreeLeaf.True)
 		val hasReference = and.any { it is DidStateReference }
-		hasTrue || hasReference
+		!hasFalse && (hasTrue || hasReference)
 	}
 
 fun CifAclOr.isTrue(): Boolean =

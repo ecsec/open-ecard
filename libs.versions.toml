@@ -41,6 +41,7 @@ kotlinPoet = "2.2.0"
 
 junit = "5.12.+"
 wiremock = "3.13.+"
+mokkery = "2.8.0"
 
 
 apache-batik="1.19"
@@ -193,6 +194,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }
 
+mokkery = { id = "dev.mokkery", version.ref = "mokkery"}
 
 # adds job for generating reports about dependency versions
 versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }

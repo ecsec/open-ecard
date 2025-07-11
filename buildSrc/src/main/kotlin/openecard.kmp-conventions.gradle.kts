@@ -1,6 +1,7 @@
 plugins {
 	kotlin("multiplatform")
 	id("org.jlleitschuh.gradle.ktlint")
+	id("dev.mokkery")
 }
 
 val javaToolchain: String by project

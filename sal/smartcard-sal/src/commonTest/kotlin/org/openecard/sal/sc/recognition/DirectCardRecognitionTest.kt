@@ -1,8 +1,9 @@
 package org.openecard.sal.sc.recognition
 
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturnConsecutively
-import org.mockito.kotlin.mock
+import dev.mokkery.answering.sequentiallyReturns
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import org.openecard.cif.definition.recognition.RecognitionTree
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.sc.apdu.toResponseApdu
@@ -18,7 +19,7 @@ class DirectCardRecognitionTest {
 	fun `detect old est eid`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("9000"),
 					).map { it.toResponseApdu() }
@@ -34,7 +35,7 @@ class DirectCardRecognitionTest {
 	fun `detect est eid 3-5-8`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("6A82"),
 						hex("9000"),
@@ -52,7 +53,7 @@ class DirectCardRecognitionTest {
 	fun `detect est eid 3-5-0-1`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("6A82"),
 						hex("9000"),
@@ -70,7 +71,7 @@ class DirectCardRecognitionTest {
 	fun `detect est eid 3-5-0-2`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("6A82"),
 						hex("9000"),
@@ -88,7 +89,7 @@ class DirectCardRecognitionTest {
 	fun `detect hpcqsig`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("6A82"),
 						hex("9000"),
@@ -106,7 +107,7 @@ class DirectCardRecognitionTest {
 	fun `detect no card`() {
 		val channel: CardChannel =
 			mock {
-				on { transmit(any()) } doReturnConsecutively (
+				every { transmit(any()) } sequentiallyReturns (
 					listOf(
 						hex("6A82"),
 						hex("9000"),

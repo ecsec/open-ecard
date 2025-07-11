@@ -1,6 +1,7 @@
 package org.openecard.cif.bundled
 
 import org.junit.jupiter.api.Disabled
+import org.openecard.cif.definition.CifVerifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -9,6 +10,7 @@ class EgkTest {
 	@Test
 	fun `test eGK CIF`() {
 		val cif = EgkCif
+		CifVerifier(cif).verify()
 
 		assertEquals(4, cif.applications.size)
 

@@ -1,7 +1,6 @@
 package org.openecard.cif.dsl.builder
 
 import org.openecard.cif.definition.CardInfoDefinition
-import org.openecard.cif.definition.CifVerifier
 import org.openecard.cif.definition.app.ApplicationDefinition
 import org.openecard.cif.definition.meta.CardInfoMetadata
 import org.openecard.cif.dsl.api.CardInfoMetadataScope
@@ -35,9 +34,6 @@ class CardInfoBuilder :
 				metadata = metadataDefinition,
 				applications = applications ?: setOf(),
 			)
-
-		// TODO: perform sanity checks such as existence of DIDs and Datasets
-		CifVerifier(cif).verify()
 
 		return cif
 	}

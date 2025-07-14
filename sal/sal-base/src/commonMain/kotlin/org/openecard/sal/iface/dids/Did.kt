@@ -36,16 +36,6 @@ sealed interface SecureChannelDid : Did {
 	fun closeChannel()
 }
 
-typealias PinCallback = suspend (PinRequestReason) -> PinRequestResult
-
-enum class PinRequestReason {
-	INITIAL,
-	WRONG_PIN,
-	PIN_TOO_LONG,
-	PIN_TOO_SHORT,
-	// TODO: add more possible error causes
-}
-
 fun List<Did>.pinDids(): List<PinDid> = filterIsInstance<PinDid>()
 
 fun List<Did>.paceDids(): List<PaceDid> = filterIsInstance<PaceDid>()

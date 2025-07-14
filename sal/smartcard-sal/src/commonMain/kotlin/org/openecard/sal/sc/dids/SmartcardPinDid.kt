@@ -3,7 +3,6 @@ package org.openecard.sal.sc.dids
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.sal.iface.MissingAuthentications
-import org.openecard.sal.iface.dids.PinCallback
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.SmartcardApplication
 import org.openecard.sc.iface.feature.PinStatus
@@ -28,7 +27,7 @@ class SmartcardPinDid(
 		TODO("Not yet implemented")
 	}
 
-	override suspend fun verify(pinCallback: PinCallback) {
+	override fun verify(password: String) {
 		TODO("Not yet implemented")
 	}
 
@@ -36,9 +35,9 @@ class SmartcardPinDid(
 		TODO("Not yet implemented")
 	}
 
-	override suspend fun modify(
-		oldPinCallback: PinCallback,
-		newPinCallback: PinCallback,
+	override fun modify(
+		oldPassword: String,
+		newPassword: String,
 	) {
 		TODO("Not yet implemented")
 	}

@@ -101,7 +101,7 @@ enum class PasswordType {
 	HALF_NIBBLE_BCD,
 }
 
-class PinError(
+class PinCommandError(
 	val error: PinErrorType,
 	val pinStatus: PinStatus? = null,
 	msg: String? = null,
@@ -132,7 +132,7 @@ enum class PinErrorType(
 	}
 }
 
-fun UShort.toPinError(): PinError? {
+fun UShort.toPinError(): PinCommandError? {
 	val errorType = PinErrorType.findForCode(this)
 	return errorType?.let {
 		val status =
@@ -140,6 +140,6 @@ fun UShort.toPinError(): PinError? {
 				PinErrorType.PIN_WRONG -> PinStatus((this and 0xFu).toInt())
 				else -> null
 			}
-		PinError(errorType, status)
+		PinCommandError(errorType, status)
 	}
 }

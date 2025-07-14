@@ -57,10 +57,11 @@ class SmartcardApplication(
 				}
 
 				is PaceDidDefinition -> {
+					val factory = device.session.sal.paceFactory
 					val authAcl = did.authAcl.selectForProtocol(device.channel.card.protocol)
 					val modifyAcl = did.modifyAcl.selectForProtocol(device.channel.card.protocol)
-					if (authAcl.hasSolution() || modifyAcl.hasSolution()) {
-						SmartcardPaceDid(this, did, authAcl, modifyAcl)
+					if (factory != null && (authAcl.hasSolution() || modifyAcl.hasSolution())) {
+						SmartcardPaceDid(this, did, authAcl, modifyAcl, factory)
 					} else {
 						null
 					}

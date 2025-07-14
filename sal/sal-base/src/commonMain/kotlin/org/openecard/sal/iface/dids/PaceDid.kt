@@ -5,6 +5,7 @@ import org.openecard.sal.iface.DeviceUnavailable
 import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.NoService
 import org.openecard.sal.iface.NotInitialized
+import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.SharingViolation
 import org.openecard.sal.iface.Timeout
@@ -44,11 +45,13 @@ interface PaceDid :
 		MissingAuthentication::class,
 		PaceError::class,
 		CancellationException::class,
+		PasswordError::class,
 	)
 	@OptIn(ExperimentalUnsignedTypes::class)
-	suspend fun establishChannel(
-		pinCallback: PinCallback,
+	fun establishChannel(
+		password: String,
 		chat: UByteArray?,
+		certDesc: UByteArray?,
 	): PaceEstablishChannelResponse
 
 	@Throws(
@@ -65,7 +68,10 @@ interface PaceDid :
 		CancellationException::class,
 	)
 	@OptIn(ExperimentalUnsignedTypes::class)
-	suspend fun establishChannel(chat: UByteArray?): PaceEstablishChannelResponse
+	suspend fun establishChannel(
+		chat: UByteArray?,
+		certDesc: UByteArray?,
+	): PaceEstablishChannelResponse
 }
 
 sealed interface PinRequestResult

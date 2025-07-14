@@ -237,16 +237,16 @@ data class GetReaderCapabilitiesResponse(
 data class PaceEstablishChannelRequest(
 	val pinId: PacePinId,
 	/**
-	 * The following elements are only present if the execution of PACE is to be followed by an
-	 * execution of Terminal Authentication Version 2 as defined in [TR-03110].
-	 */
-	val chat: PrintableUByteArray?,
-	/**
 	 * If the PIN to be used is not secret (e.g. printed on the card/stored in the host), it may be
 	 * delivered by the host to the IFD in the following elements.
 	 * A suitable command filter should be employed by the IFD to refuse delivery of secret PINs by the host.
 	 */
 	val pin: String?,
+	/**
+	 * The following elements are only present if the execution of PACE is to be followed by an
+	 * execution of Terminal Authentication Version 2 as defined in [TR-03110].
+	 */
+	val chat: PrintableUByteArray?,
 	/**
 	 * Certificate Extensions
 	 *

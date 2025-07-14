@@ -19,5 +19,9 @@ kotlin {
 			implementation(libs.bundles.test.basics.kotlin)
 			implementation(project(":cif:cif-definition-builder"))
 		}
+
+		jvmTest.dependencies {
+			implementation(project(":smartcard:pace"))
+		}
 	}
 }

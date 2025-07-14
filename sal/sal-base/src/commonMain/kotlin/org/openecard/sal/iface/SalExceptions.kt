@@ -69,3 +69,17 @@ class AclUnfulfillable(
 	msg: String? = null,
 	cause: Throwable? = null,
 ) : SalException(msg ?: "Acl can not be fulfilled.", cause)
+
+class PasswordError(
+	type: PasswordErrorType,
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SalException(msg ?: type.msg, cause) {
+	enum class PasswordErrorType(
+		val msg: String,
+	) {
+		TOO_LONG("Provided password is too long"),
+		TOO_SHORT("Provided password is too short"),
+		INVALID_CHARACTERS("Provided password contains characters which are not allowed in this password"),
+	}
+}

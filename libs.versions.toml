@@ -55,6 +55,7 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-
 
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kx-co" }
 
 kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-serde" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
@@ -169,7 +170,7 @@ semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 
 [bundles]
-test-basics-kotlin = ["kotlin-test", "mockito", "mockito-kotlin", "logback-classic"]
+test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test", "mockito", "mockito-kotlin", "logback-classic"]
 
 
 [plugins]

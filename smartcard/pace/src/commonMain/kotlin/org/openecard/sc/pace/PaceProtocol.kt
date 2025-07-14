@@ -4,50 +4,21 @@ import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.SecureMessagingIndication
 import org.openecard.sc.apdu.sm.SecureMessagingImpl
 import org.openecard.sc.iface.CardChannel
-import org.openecard.sc.iface.CommError
-import org.openecard.sc.iface.InsufficientBuffer
-import org.openecard.sc.iface.InvalidHandle
-import org.openecard.sc.iface.InvalidParameter
-import org.openecard.sc.iface.InvalidValue
-import org.openecard.sc.iface.NoService
-import org.openecard.sc.iface.NotTransacted
-import org.openecard.sc.iface.ReaderUnavailable
-import org.openecard.sc.iface.RemovedCard
-import org.openecard.sc.iface.ResetCard
+import org.openecard.sc.iface.feature.PaceCapability
 import org.openecard.sc.iface.feature.PaceError
+import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
-import org.openecard.sc.iface.feature.PacePinId
+import org.openecard.sc.iface.feature.PaceFeature
 import org.openecard.sc.iface.feature.PaceResultCode
 import org.openecard.sc.pace.asn1.EfCardAccess
 import org.openecard.sc.pace.oid.PaceObjectIdentifier
 import org.openecard.utils.serialization.toPrintable
 
-class PaceProtocol {
+class PaceProtocol(
+	private val channel: CardChannel,
+) : PaceFeature {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	@Throws(
-		InsufficientBuffer::class,
-		InvalidHandle::class,
-		InvalidParameter::class,
-		InvalidValue::class,
-		NoService::class,
-		NotTransacted::class,
-		ReaderUnavailable::class,
-		CommError::class,
-		ResetCard::class,
-		RemovedCard::class,
-		PaceError::class,
-	)
-	fun execute(
-		channel: CardChannel,
-		pinId: PacePinId,
-		pin: String,
-		/**
-		 * The following elements are only present if the execution of PACE is to be followed by an
-		 * execution of Terminal Authentication Version 2 as defined in [TR-03110].
-		 */
-		chat: UByteArray?,
-		certDesc: UByteArray?,
-	): PaceEstablishChannelResponse {
+	override suspend fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse {
 		val efca =
 			runCatching { EfCardAccess.readEfCardAccess(channel) }
 				.onFailure {
@@ -61,7 +32,7 @@ class PaceProtocol {
 					it.supports(SUPPORTED_PACE_PROTOCOLS, SUPPORTED_PACE_DOMAIN_PARAMS)
 			}
 
-		val paceProcess = PaceProcess(paceInfos, channel, pinId, pin, chat, certDesc)
+		val paceProcess = PaceProcess(paceInfos, channel, req.pinId, requireNotNull(req.pin), req.chat?.v, req.certDesc?.v)
 		val paceResult = paceProcess.execute()
 
 		val encKey = paceResult.encKey
@@ -89,6 +60,13 @@ class PaceProtocol {
 			paceResult.previousCar?.toPrintable(),
 			paceResult.idIcc?.toPrintable(),
 		)
+	}
+
+	override fun getPaceCapabilities(): Set<PaceCapability> =
+		setOf(PaceCapability.GENERIC_PACE, PaceCapability.GERMAN_EID, PaceCapability.QES, PaceCapability.DESTROY_CHANNEL)
+
+	override fun destroyChannel() {
+		channel.removeSecureMessaging()
 	}
 }
 

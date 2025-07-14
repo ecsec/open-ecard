@@ -1,9 +1,11 @@
 package org.openecard.sc.pace
 
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions
 import org.openecard.sc.apdu.command.ReadBinary
 import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.apdu.command.transmit
+import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.testutils.WhenPcscStack
@@ -29,8 +31,9 @@ class PaceProtocolTest {
 			val con = terminal.connect()
 			val channel = checkNotNull(con.card).basicChannel
 
-			val paceProtocol = PaceProtocol()
-			val response = paceProtocol.execute(channel, PacePinId.CAN, egkCan, null, null)
+			val paceProtocol = PaceProtocol(channel)
+			val req = PaceEstablishChannelRequest(PacePinId.CAN, egkCan, null, null)
+			val response = runBlocking { paceProtocol.establishChannel(req) }
 
 			// read a protected file (EF.C.CA.CS.E256) to see if secure messaging is working
 			Select.selectApplicationId(hex("A000000167455349474E")).transmit(channel)

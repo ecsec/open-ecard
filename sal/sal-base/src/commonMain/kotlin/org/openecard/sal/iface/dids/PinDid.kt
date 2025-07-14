@@ -6,12 +6,13 @@ import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.NoService
 import org.openecard.sal.iface.NotInitialized
+import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.SecureMessagingException
 import org.openecard.sal.iface.SharingViolation
 import org.openecard.sal.iface.Timeout
 import org.openecard.sal.iface.UnsupportedFeature
-import org.openecard.sc.iface.feature.PinError
+import org.openecard.sc.iface.feature.PinCommandError
 import org.openecard.sc.iface.feature.PinStatus
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -41,7 +42,7 @@ interface PinDid : AuthenticationDid {
 		Cancelled::class,
 		MissingAuthentication::class,
 		SecureMessagingException::class,
-		PinError::class,
+		PinCommandError::class,
 	)
 	fun pinStatus(): PinStatus
 
@@ -57,9 +58,10 @@ interface PinDid : AuthenticationDid {
 		MissingAuthentication::class,
 		SecureMessagingException::class,
 		CancellationException::class,
-		PinError::class,
+		PinCommandError::class,
+		PasswordError::class,
 	)
-	suspend fun verify(pinCallback: PinCallback)
+	fun verify(password: String)
 
 	@Throws(
 		NotInitialized::class,
@@ -73,7 +75,7 @@ interface PinDid : AuthenticationDid {
 		MissingAuthentication::class,
 		SecureMessagingException::class,
 		CancellationException::class,
-		PinError::class,
+		PinCommandError::class,
 	)
 	suspend fun verify()
 
@@ -89,11 +91,11 @@ interface PinDid : AuthenticationDid {
 		MissingAuthentication::class,
 		SecureMessagingException::class,
 		CancellationException::class,
-		PinError::class,
+		PinCommandError::class,
 	)
-	suspend fun modify(
-		oldPinCallback: PinCallback,
-		newPinCallback: PinCallback,
+	fun modify(
+		oldPassword: String,
+		newPassword: String,
 	)
 
 	@Throws(
@@ -108,7 +110,7 @@ interface PinDid : AuthenticationDid {
 		MissingAuthentication::class,
 		SecureMessagingException::class,
 		CancellationException::class,
-		PinError::class,
+		PinCommandError::class,
 	)
 	suspend fun modify()
 }

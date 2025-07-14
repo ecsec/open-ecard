@@ -1,20 +1,35 @@
 package org.openecard.sal.sc.dids
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.runBlocking
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.did.PaceDidDefinition
 import org.openecard.sal.iface.MissingAuthentications
+import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.dids.PaceDid
-import org.openecard.sal.iface.dids.PinCallback
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sc.iface.CardChannel
+import org.openecard.sc.iface.feature
+import org.openecard.sc.iface.feature.PaceCapability
+import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
+import org.openecard.sc.iface.feature.PaceFeature
+import org.openecard.sc.iface.feature.PaceFeatureFactory
 import org.openecard.sc.iface.feature.PacePinId
+import org.openecard.utils.common.throwIf
+import org.openecard.utils.serialization.toPrintable
+
+private val log = KotlinLogging.logger {}
 
 class SmartcardPaceDid(
 	application: SmartcardApplication,
 	didDef: PaceDidDefinition,
 	val authAcl: CifAclOr,
 	val modifyAcl: CifAclOr,
+	private val factory: PaceFeatureFactory,
 ) : SmartcardDid.BaseSmartcardDid<PaceDidDefinition>(didDef, application),
 	PaceDid {
 	override val pinType: PacePinId = did.parameters.passwordRef.toSalType()
@@ -22,28 +37,59 @@ class SmartcardPaceDid(
 	override val missingAuthAuthentications: MissingAuthentications
 		get() = missingAuthentications(authAcl)
 
+	private val channel: CardChannel
+		get() = application.channel
+
+	private val hardwarePace: PaceFeature? by lazy {
+		runCatching {
+			channel.card.terminalConnection.feature<PaceFeature>()
+		}.onFailure {
+			log.error(it) { "Failed to request reader features" }
+		}.getOrNull()
+	}
+	private val paceFeature by lazy {
+		hardwarePace ?: factory.create(channel)
+	}
+
 	// TODO: implement and add state qualifier
 	override fun toStateReference(): DidStateReference = super.toStateReference()
 
-	override fun capturePinInHardware(): Boolean {
-		TODO("Not yet implemented")
+	override fun capturePinInHardware(): Boolean = hardwarePace != null
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun establishChannel(
+		password: String,
+		chat: UByteArray?,
+		certDesc: UByteArray?,
+	): PaceEstablishChannelResponse {
+		val req = PaceEstablishChannelRequest(pinType, checkPassword(password), chat?.toPrintable(), certDesc?.toPrintable())
+		return runBlocking(Dispatchers.IO) {
+			paceFeature.establishChannel(req)
+		}
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun establishChannel(
-		pinCallback: PinCallback,
 		chat: UByteArray?,
+		certDesc: UByteArray?,
 	): PaceEstablishChannelResponse {
-		TODO("Not yet implemented")
+		val req = PaceEstablishChannelRequest(pinType, null, chat?.toPrintable(), certDesc?.toPrintable())
+		return paceFeature.establishChannel(req)
 	}
 
-	@OptIn(ExperimentalUnsignedTypes::class)
-	override suspend fun establishChannel(chat: UByteArray?): PaceEstablishChannelResponse {
-		TODO("Not yet implemented")
+	private fun checkPassword(pass: String): String {
+		val minLen = did.parameters.minLength
+		val maxLen = did.parameters.maxLength
+		throwIf(pass.length < minLen) { PasswordError(PasswordError.PasswordErrorType.TOO_SHORT) }
+		throwIf(maxLen != null && pass.length > maxLen) { PasswordError(PasswordError.PasswordErrorType.TOO_LONG) }
+
+		return pass
 	}
 
 	override fun closeChannel() {
-		TODO("Not yet implemented")
+		if (paceFeature.canCloseChannel()) {
+			paceFeature.destroyChannel()
+		}
 	}
 }
 
@@ -54,3 +100,5 @@ internal fun org.openecard.cif.definition.did.PacePinId.toSalType() =
 		org.openecard.cif.definition.did.PacePinId.PIN -> PacePinId.PIN
 		org.openecard.cif.definition.did.PacePinId.PUK -> PacePinId.PUK
 	}
+
+private fun PaceFeature.canCloseChannel(): Boolean = PaceCapability.DESTROY_CHANNEL in getPaceCapabilities()

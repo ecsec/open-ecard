@@ -2,13 +2,13 @@ package org.openecard.cif.dsl.builder.dataset
 
 import org.openecard.cif.definition.acl.AclDefinition
 import org.openecard.cif.definition.dataset.DataSetDefinition
+import org.openecard.cif.definition.dataset.DatasetType
 import org.openecard.cif.dsl.api.CifMarker
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.dataset.DataSetScope
 import org.openecard.cif.dsl.builder.Builder
 import org.openecard.cif.dsl.builder.acl.AclBuilder
 import org.openecard.utils.serialization.PrintableUByteArray
-import kotlin.coroutines.EmptyCoroutineContext.get
 
 class DataSetBuilder :
 	DataSetScope,
@@ -38,6 +38,7 @@ class DataSetBuilder :
 		set(value) {
 			_name = value
 		}
+	override var type: DatasetType? = null
 	override var description: String? = null
 	private var readAcl: AclDefinition? = null
 	private var writeAcl: AclDefinition? = null
@@ -59,6 +60,7 @@ class DataSetBuilder :
 			name = name,
 			path = path,
 			shortEf = shortEf,
+			type = type,
 			description = description,
 			readAcl = readAcl ?: AclDefinition(mapOf()),
 			writeAcl = writeAcl ?: AclDefinition(mapOf()),

@@ -55,6 +55,12 @@ class SmartcardDeviceConnection(
 		_cardState = _cardState.copy(app = application, dataSet = null, authenticatedDids = remainingDids)
 	}
 
+	internal fun setSelectedDataset(dataset: SmartcardDataset?) {
+		_cardState = _cardState.copy(dataSet = dataset)
+	}
+
+	internal fun isSelectedDataset(dataset: SmartcardDataset): Boolean = _cardState.dataSet?.name == dataset.name
+
 	internal fun setDidFulfilled(did: SmartcardDid<*>) {
 		_cardState = _cardState.copy(authenticatedDids = _cardState.authenticatedDids + did)
 	}

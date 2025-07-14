@@ -1,11 +1,27 @@
 package org.openecard.sal.sc
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.definition.acl.BoolTreeLeaf
 import org.openecard.cif.definition.acl.BoolTreeOr
 import org.openecard.cif.definition.dataset.DataSetDefinition
+import org.openecard.cif.definition.dataset.DatasetType
 import org.openecard.sal.iface.Dataset
+import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.sc.acl.missingAuthentications
+import org.openecard.sc.apdu.command.FileControlInformation
+import org.openecard.sc.apdu.command.ReadBinary
+import org.openecard.sc.apdu.command.ReadRecord
+import org.openecard.sc.apdu.command.Select
+import org.openecard.sc.apdu.command.transmit
+import org.openecard.sc.iface.CardChannel
+import org.openecard.sc.iface.info.EfStructure
+import org.openecard.sc.iface.info.Fcp
+import org.openecard.sc.iface.info.FileInfo
+import org.openecard.utils.common.throwIf
+import org.openecard.utils.common.toUShort
+
+private val log = KotlinLogging.logger { }
 
 class SmartcardDataset(
 	override val name: String,
@@ -19,13 +35,128 @@ class SmartcardDataset(
 	override val missingWriteAuthentications: MissingAuthentications
 		get() = writeAcl.missingAuthentications(application.device)
 
+	private var type: DatasetType? = ds.type
+	private var efStructure: EfStructure? = null
+	private var fileInfo: FileInfo? = null
+
+	private val channel: CardChannel
+		get() = application.channel
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun select() {
+		// only select when needed
+		if ((!application.device.isSelectedDataset(this) && ds.shortEf == null) || fileInfo == null) {
+			val select =
+				if (ds.path.v.size == 2) {
+					Select.selectEfIdentifier(ds.path.v.toUShort(0))
+				}	else {
+					Select.selectPathRelative(ds.path.v)
+				}
+
+			if (fileInfo == null) {
+				try {
+					log.debug { "Selecting file ${ds.name} with FCP" }
+					val selectFcp = select.copy(fileControlInfo = FileControlInformation.FCP)
+					application.device.setSelectedDataset(this)
+					val fi = checkNotNull(selectFcp.transmit(channel))
+					// determine type
+					updateType(fi)
+					fileInfo = fi
+					return
+				} catch (ex: Exception) {
+					log.warn(ex) { "Failed to select file with FCP" }
+					fileInfo = FileInfo.Unknown(UByteArray(0))
+				}
+			}
+
+			select.transmit(channel)
+			application.device.setSelectedDataset(this)
+		}
+	}
+
+	private fun updateType(fileInfo: FileInfo) {
+		when (fileInfo) {
+			is Fcp -> {
+				val struct = fileInfo.fileDescriptor?.fdByte?.efStructure
+				efStructure = struct
+				when (struct) {
+					EfStructure.TRANSPARENT,
+					-> type = DatasetType.TRANSPARENT
+					EfStructure.LINEAR_FIXED_ANY,
+					EfStructure.LINEAR_FIXED_TLV,
+					EfStructure.LINEAR_VARIABLE_ANY,
+					EfStructure.LINEAR_VARIABLE_TLV,
+					-> type = DatasetType.RECORD
+					EfStructure.CYCLIC_FIXED_ANY,
+					EfStructure.CYCLIC_FIXED_TLV,
+					-> type = DatasetType.RING
+					EfStructure.TLV_BER, EfStructure.TLV_SIMPLE,
+					-> type = DatasetType.DATA_OBJECT
+					else -> {}
+				}
+			}
+			else -> {}
+		}
+	}
+
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun read(): UByteArray {
-		TODO("Not yet implemented")
+		throwIf(!missingReadAuthentications.isSolved) { MissingAuthentication("Read ACL is not satisfied") }
+		select()
+
+		return when (type) {
+			DatasetType.TRANSPARENT -> readTransparent()
+			DatasetType.RECORD -> readRecords()
+			DatasetType.RING -> TODO("Implement")
+			DatasetType.DATA_OBJECT -> TODO("Implement")
+			null -> readTrying()
+		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun readTrying(): UByteArray =
+		runCatching {
+			readTransparent()
+		}.recover {
+			readRecords()
+		}.getOrThrow()
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun readTransparent(): UByteArray {
+		val extLen =
+			channel.card.capabilities
+				?.commandCoding
+				?.supportsExtendedLength ?: false
+		val shortEf = ds.shortEf
+		val apdu =
+			if (shortEf != null && application.device.isSelectedDataset(this)) {
+				ReadBinary.readShortEf(shortEf, forceExtendedLength = extLen)
+			} else {
+				ReadBinary.readCurrentEf(forceExtendedLength = extLen)
+			}
+		return apdu.transmit(channel)
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun readRecords(): UByteArray {
+		val extLen =
+			channel.card.capabilities
+				?.commandCoding
+				?.supportsExtendedLength ?: false
+		val shortEf = ds.shortEf
+		val apdu =
+			if (shortEf != null && application.device.isSelectedDataset(this)) {
+				ReadRecord.readAllRecords(shortEf, forceExtendedLength = extLen)
+			} else {
+				ReadRecord.readAllRecords(forceExtendedLength = extLen)
+			}
+		return apdu.transmit(channel)
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun write(): UByteArray {
+		throwIf(!missingWriteAuthentications.isSolved) { MissingAuthentication("Write ACL is not satisfied") }
+		select()
 		TODO("Not yet implemented")
 	}
 }

@@ -9,6 +9,11 @@ import org.openecard.utils.serialization.PrintableUByteArray
 data class DataSetDefinition(
 	val path: PrintableUByteArray,
 	val shortEf: UByte?,
+	/**
+	 * Dataset type, if known.
+	 * If this value is not set, the SAL will detect the correct type by itself.
+	 */
+	val type: DatasetType?,
 	val name: String,
 	/**
 	 * Description and other information of this application.

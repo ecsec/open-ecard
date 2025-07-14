@@ -18,3 +18,21 @@ fun <T> doIf(
 	} else {
 		null
 	}
+
+fun <E : Exception> throwIf(
+	condition: Boolean,
+	block: () -> E,
+) {
+	if (condition) {
+		throw block()
+	}
+}
+
+fun <T, E : Exception> throwIfNull(
+	obj: T,
+	block: () -> E,
+) {
+	if (obj == null) {
+		throw block()
+	}
+}

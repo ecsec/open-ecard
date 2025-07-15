@@ -2,6 +2,7 @@ package org.openecard.sc.pace.crypto
 
 import org.bouncycastle.crypto.params.ECDomainParameters
 import org.bouncycastle.jce.ECNamedCurveTable
+import org.openecard.sc.pace.asn1.StandardizedDomainParameters
 
 object BcDomainParameterResolver {
 	fun StandardizedDomainParameters.resolveDomainParameters(): ECDomainParameters {

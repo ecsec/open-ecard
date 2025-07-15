@@ -1,4 +1,4 @@
-package org.openecard.sc.pace.crypto
+package org.openecard.sc.pace.asn1
 
 sealed interface StandardizedDomainParameters {
 	enum class Curve : StandardizedDomainParameters {

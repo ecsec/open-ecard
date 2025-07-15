@@ -3,8 +3,8 @@ package org.openecard.sc.pace.crypto.whyoleg
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.EC
 import dev.whyoleg.cryptography.algorithms.ECDH
+import org.openecard.sc.pace.asn1.StandardizedDomainParameters
 import org.openecard.sc.pace.crypto.KeyAgreement
-import org.openecard.sc.pace.crypto.StandardizedDomainParameters
 
 fun CryptographyProvider.ecdhAgreement(curve: StandardizedDomainParameters.Curve): KeyAgreement {
 	val curve = curve.toKotlinCrypto()

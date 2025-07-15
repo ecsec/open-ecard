@@ -1,7 +1,7 @@
 package org.openecard.sc.pace.crypto.whyoleg
 
 import dev.whyoleg.cryptography.algorithms.EC
-import org.openecard.sc.pace.crypto.StandardizedDomainParameters
+import org.openecard.sc.pace.asn1.StandardizedDomainParameters
 
 fun StandardizedDomainParameters.Curve.toKotlinCrypto(): EC.Curve =
 	when (this) {

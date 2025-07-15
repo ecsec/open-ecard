@@ -55,7 +55,6 @@ object PaceObjectIdentifier {
 	/**
 	 * id-PACE-ECDH-GM OBJECT IDENTIFIER ::= {id-PACE 2}
 	 */
-	@JvmField
 	val id_PACE_ECDH_GM: String = EacObjectIdentifier.ID_PACE + ".2"
 
 	/**
@@ -66,19 +65,16 @@ object PaceObjectIdentifier {
 	/**
 	 * id-PACE-ECDH-GM-AES-CBC-CMAC-128 OBJECT IDENTIFIER ::= {id-PACE-ECDH-GM 2}
 	 */
-	@JvmField
 	val id_PACE_ECDH_GM_AES_CBC_CMAC_128: String = id_PACE_ECDH_GM + ".2"
 
 	/**
 	 * id-PACE-ECDH-GM-AES-CBC-CMAC-192 OBJECT IDENTIFIER ::= {id-PACE-ECDH-GM 3}
 	 */
-	@JvmField
 	val id_PACE_ECDH_GM_AES_CBC_CMAC_192: String = id_PACE_ECDH_GM + ".3"
 
 	/**
 	 * id-PACE-ECDH-GM-AES-CBC-CMAC-256 OBJECT IDENTIFIER ::= {id-PACE-ECDH-GM 4}
 	 */
-	@JvmField
 	val id_PACE_ECDH_GM_AES_CBC_CMAC_256: String = id_PACE_ECDH_GM + ".4"
 
 	/**

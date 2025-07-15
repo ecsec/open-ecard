@@ -2,7 +2,6 @@ package org.openecard.sc.pace.asn1
 
 import dev.whyoleg.cryptography.serialization.asn1.Der
 import kotlinx.serialization.decodeFromByteArray
-import org.openecard.sc.pace.crypto.StandardizedDomainParameters
 import org.openecard.sc.pace.oid.PaceObjectIdentifier
 import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tlv

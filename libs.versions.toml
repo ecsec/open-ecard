@@ -11,7 +11,7 @@ compose = "1.7.0"
 
 ktor = "3.1.+"
 kover = "0.9.1"
-kotlin-crypto = "0.4.0-bp1"
+kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 bouncycastle = "1.81"
 

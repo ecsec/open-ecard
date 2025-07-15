@@ -1,9 +1,8 @@
 package org.openecard.sc.pace.asn1
 
-import dev.whyoleg.cryptography.serialization.asn1.Der
-import dev.whyoleg.cryptography.serialization.asn1.ObjectIdentifier
-import kotlinx.serialization.decodeFromByteArray
+import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.toObjectIdentifier
 
 sealed class AlgorithmIdentifier(
 	val algorithm: ObjectIdentifier,
@@ -18,7 +17,7 @@ sealed class AlgorithmIdentifier(
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun Tlv.toAlgorithmIdentifier(): AlgorithmIdentifier {
 			val childTags = requireNotNull(this.asConstructed?.child).asList()
-			val algorithm: ObjectIdentifier = Der.decodeFromByteArray(childTags[0].toBer().toByteArray())
+			val algorithm: ObjectIdentifier = childTags[0].toObjectIdentifier()
 			val parameters = childTags.getOrNull(1)
 
 			// TODO: distinguish between types

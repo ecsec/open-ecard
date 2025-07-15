@@ -1,6 +1,7 @@
 package org.openecard.sc.pace.asn1
 
 import dev.whyoleg.cryptography.bigint.decodeToBigInt
+import dev.whyoleg.cryptography.bigint.toUInt
 import dev.whyoleg.cryptography.serialization.asn1.Der
 import dev.whyoleg.cryptography.serialization.asn1.modules.SubjectPublicKeyInfo
 import kotlinx.serialization.decodeFromByteArray
@@ -12,15 +13,16 @@ import org.openecard.sc.tlv.ObjectIdentifier
 import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.TagClass
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.toUInt
 
 interface CaKeyIdentifiable {
-	val keyId: Int?
+	val keyId: UInt?
 }
 
 class ChipAuthenticationInfo(
 	protocol: ObjectIdentifier,
-	val version: Int,
-	override val keyId: Int?,
+	val version: UInt,
+	override val keyId: UInt?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
 	companion object {
@@ -40,8 +42,8 @@ class ChipAuthenticationInfo(
 
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toChipAuthenticationInfo(protocol: ObjectIdentifier): ChipAuthenticationInfo {
-			val version: Int = Der.decodeFromByteArray(this[1].toBer().toByteArray())
-			val keyId: Int? = this.getOrNull(2)?. let { Der.decodeFromByteArray(it.toBer().toByteArray()) }
+			val version = this[1].toUInt()
+			val keyId = this.getOrNull(2)?.toUInt()
 			return ChipAuthenticationInfo(protocol, version, keyId)
 		}
 	}
@@ -50,7 +52,7 @@ class ChipAuthenticationInfo(
 class ChipAuthenticationPublicKeyInfo(
 	protocol: ObjectIdentifier,
 	val chipAuthenticationPublicKey: SubjectPublicKeyInfo,
-	override val keyId: Int?,
+	override val keyId: UInt?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
 	companion object {
@@ -65,7 +67,7 @@ class ChipAuthenticationPublicKeyInfo(
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun List<Tlv>.toChipAuthenticationPublicKeyInfo(protocol: ObjectIdentifier): ChipAuthenticationPublicKeyInfo {
 			val chipAuthenticationPublicKey: SubjectPublicKeyInfo = Der.decodeFromByteArray(this[1].toBer().toByteArray())
-			val keyId: Int? = this.getOrNull(2)?. let { Der.decodeFromByteArray(it.toBer().toByteArray()) }
+			val keyId = this.getOrNull(2)?.toUInt()
 			return ChipAuthenticationPublicKeyInfo(protocol, chipAuthenticationPublicKey, keyId)
 		}
 	}
@@ -74,7 +76,7 @@ class ChipAuthenticationPublicKeyInfo(
 class ChipAuthenticationDomainParameterInfo(
 	protocol: ObjectIdentifier,
 	val domainParameter: AlgorithmIdentifier,
-	override val keyId: Int?,
+	override val keyId: UInt?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
 	companion object {
@@ -91,7 +93,7 @@ class ChipAuthenticationDomainParameterInfo(
 			protocol: ObjectIdentifier,
 		): ChipAuthenticationDomainParameterInfo {
 			val domainParameter = this[1].toAlgorithmIdentifier()
-			val keyId: Int? = this.getOrNull(2)?. let { Der.decodeFromByteArray(it.toBer().toByteArray()) }
+			val keyId = this.getOrNull(2)?.toUInt()
 			return ChipAuthenticationDomainParameterInfo(protocol, domainParameter, keyId)
 		}
 	}
@@ -100,7 +102,7 @@ class ChipAuthenticationDomainParameterInfo(
 class PsaInfo(
 	protocol: ObjectIdentifier,
 	val requiredData: RequiredData,
-	override val keyId: Int?,
+	override val keyId: UInt?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
 	class RequiredData(
@@ -130,7 +132,7 @@ class PsaInfo(
 			// TODO: parse requiredData correctly
 
 			val requiredData = this[1].toRequiredData()
-			val keyId: Int? = this.getOrNull(2)?. let { Der.decodeFromByteArray(it.toBer().toByteArray()) }
+			val keyId = this.getOrNull(2)?.toUInt()
 			return PsaInfo(protocol, requiredData, keyId)
 		}
 
@@ -166,13 +168,13 @@ class PsPublicKeyInfo(
 	val optionalData: PsPkOptionalData?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
-	override val keyId: Int? by lazy {
+	override val keyId: UInt? by lazy {
 		optionalData?.keyId
 	}
 
 	class PsPkOptionalData(
-		val psParameterId: Int?,
-		val keyId: Int?,
+		val psParameterId: UInt?,
+		val keyId: UInt?,
 	)
 
 	companion object {
@@ -203,7 +205,7 @@ class PsPublicKeyInfo(
 								it.contentAsBytesBer
 									.toByteArray()
 									.decodeToBigInt()
-									.toInt()
+									.toUInt()
 							}.firstOrNull()
 					val keyId =
 						data
@@ -212,7 +214,7 @@ class PsPublicKeyInfo(
 								it.contentAsBytesBer
 									.toByteArray()
 									.decodeToBigInt()
-									.toInt()
+									.toUInt()
 							}.firstOrNull()
 					PsPkOptionalData(paramId, keyId)
 				}

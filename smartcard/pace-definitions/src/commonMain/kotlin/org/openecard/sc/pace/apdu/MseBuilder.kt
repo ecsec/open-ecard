@@ -1,4 +1,4 @@
-package org.openecard.sc.pace
+package org.openecard.sc.pace.apdu
 
 import org.openecard.sc.apdu.command.Mse
 import org.openecard.sc.iface.feature.PacePinId

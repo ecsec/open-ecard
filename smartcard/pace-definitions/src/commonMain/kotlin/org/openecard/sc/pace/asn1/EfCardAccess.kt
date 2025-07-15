@@ -101,13 +101,13 @@ class EfCardAccess
 			}
 
 			private fun List<CaKeyIdentifiable>.isCaV1(): Boolean =
-				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 1 }
+				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 1u }
 
 			private fun List<CaKeyIdentifiable>.isCaV2(): Boolean =
-				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 2 }
+				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 2u }
 
 			private fun List<CaKeyIdentifiable>.isCaV3(): Boolean =
-				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 3 }
+				this.filterIsInstance<ChipAuthenticationInfo>().any { it.version == 3u }
 
 			@Throws(
 				ApduProcessingError::class,

@@ -10,6 +10,7 @@ import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.iface.feature.PaceResultCode
+import org.openecard.sc.pace.apdu.paceMseSetAt
 import org.openecard.sc.pace.asn1.EfCardAccess
 import org.openecard.sc.pace.asn1.GeneralAuthenticateCommandTags
 import org.openecard.sc.pace.asn1.GeneralAuthenticateResponse.toAuthenticationToken

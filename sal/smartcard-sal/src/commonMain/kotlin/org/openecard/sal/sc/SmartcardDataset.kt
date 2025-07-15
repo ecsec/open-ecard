@@ -116,10 +116,20 @@ class SmartcardDataset(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun readTrying(): UByteArray =
 		runCatching {
-			readTransparent()
+			readTransparent().also {
+				setFileTypeForced(DatasetType.TRANSPARENT)
+			}
 		}.recover {
-			readRecords()
+			readRecords().also {
+				setFileTypeForced(DatasetType.RECORD)
+			}
 		}.getOrThrow()
+
+	private fun setFileTypeForced(type: DatasetType) {
+		if (this.type == null) {
+			this.type = type
+		}
+	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun readTransparent(): UByteArray {

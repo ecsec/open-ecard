@@ -68,6 +68,10 @@ dependencies {
 	testImplementation(libs.bundles.test.basics.kotlin)
 }
 
+tasks.withType<AbstractTestTask>().configureEach {
+	failOnNoDiscoveredTests = false
+}
+
 val setAppName = "Open-eCard-App"
 val setAppVendor = "ecsec GmbH"
 val setAppLicenseFile: String = projectDir.resolve("../../LICENSE.GPL").path

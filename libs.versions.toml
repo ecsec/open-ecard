@@ -1,8 +1,8 @@
 [versions]
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 ktlint = "1.6.0"
 ktlint-githubreporter = "2.0.1"
-ktlint-plugin = "12.2.+"
+ktlint-plugin = "13.0.+"
 kx-co = "1.10.+"
 kx-serde = "1.8.+"
 kt-logging = "7.0.+"
@@ -10,7 +10,6 @@ kx-datetime = "0.6.2"
 compose = "1.7.0"
 
 ktor = "3.1.+"
-kover = "0.9.1"
 kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 bouncycastle = "1.81"
@@ -41,7 +40,8 @@ kotlinPoet = "2.2.0"
 
 junit = "5.12.+"
 wiremock = "3.13.+"
-mokkery = "2.8.0"
+mokkery = "2.9.0"
+kover = "0.9.1"
 
 
 apache-batik="1.19"

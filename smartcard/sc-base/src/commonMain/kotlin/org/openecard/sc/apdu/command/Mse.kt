@@ -3,6 +3,7 @@ package org.openecard.sc.apdu.command
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.InterIndustryClassByte
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.utils.common.bitSetOf
 import org.openecard.utils.common.mergeToArray
 import org.openecard.utils.serialization.PrintableUByteArray
@@ -65,6 +66,16 @@ data class Mse(
 		 * Control reference template for confidentiality (CT)
 		 */
 		CT(0xB8u),
+
+		/**
+		 * MSE key derivation followed by external authenticate
+		 */
+		CRT_EXTERNAL_AUTHENTICATE(0xA4u),
+
+		/**
+		 * MSE key derivation followed by verify cryptographics checksum
+		 */
+		CRT_VERIFY_CRYPTO_CHECKSUM(0xB4u),
 	}
 
 	data class P1Flags(
@@ -128,5 +139,43 @@ data class Mse(
 			tag: Tag,
 			data: List<Tlv>,
 		): Mse = mseSet(flags, tag, data.map { it.toBer() }.mergeToArray())
+
+		/**
+		 * Key derivation followed by external authenticate according to ISO 7816-4, Sec. 7.5.11
+		 */
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun deriveKeyExternalAuthenticate(
+			flags: P1Flags,
+			keyDerivationData: UByteArray,
+			additionalData: List<Tlv> = listOf(),
+		): Mse {
+			val mainDo =
+				TlvPrimitive(
+					org.openecard.sc.tlv.Tag
+						.forTagNumWithClass(0x94u),
+					keyDerivationData.toPrintable(),
+				)
+			val dos = listOf(mainDo) + additionalData
+			return mseSet(flags, Tag.CRT_EXTERNAL_AUTHENTICATE, dos.map { it.toBer() }.mergeToArray())
+		}
+
+		/**
+		 * Key derivation followed by verify cryptographic checksum according to ISO 7816-4, Sec. 7.5.11
+		 */
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun deriveKeyVerifyCryptoChecksum(
+			flags: P1Flags,
+			keyDerivationData: UByteArray,
+			additionalData: List<Tlv> = listOf(),
+		): Mse {
+			val mainDo =
+				TlvPrimitive(
+					org.openecard.sc.tlv.Tag
+						.forTagNumWithClass(0x94u),
+					keyDerivationData.toPrintable(),
+				)
+			val dos = listOf(mainDo) + additionalData
+			return mseSet(flags, Tag.CRT_VERIFY_CRYPTO_CHECKSUM, dos.map { it.toBer() }.mergeToArray())
+		}
 	}
 }

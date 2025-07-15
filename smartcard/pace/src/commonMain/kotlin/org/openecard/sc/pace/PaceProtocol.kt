@@ -50,7 +50,8 @@ class PaceProtocol(
 				protectedLe = true,
 				protectedHeader = false,
 			)
-		// set secure messaging in channel
+		// remove old and set secure messaging in channel
+		channel.removeSecureMessaging()
 		channel.setSecureMessaging(sm)
 
 		return PaceEstablishChannelResponse(

@@ -12,7 +12,7 @@ kotlin {
 			implementation(libs.kotlin.logging)
 			api(project(":utils:common"))
 			api(project(":smartcard:sc-base"))
-			api(project(":smartcard:pace-definitions"))
+			api(project(":smartcard:eac-definitions"))
 // 			implementation(libs.kotlin.crypto.core)
 			implementation(libs.kotlin.crypto.asn1.core)
 			implementation(libs.kotlin.crypto.asn1.modules)

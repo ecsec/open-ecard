@@ -1,4 +1,4 @@
-description = "PACE Definitions"
+description = "EAC Definitions"
 
 plugins {
 	id("openecard.kmp-lib-conventions")

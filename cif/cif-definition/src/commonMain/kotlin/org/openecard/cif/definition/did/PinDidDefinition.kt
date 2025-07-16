@@ -53,9 +53,17 @@ enum class PasswordFlags {
 	 */
 	NEEDS_PADDING,
 
+	// 	/*
+	// 	 * is an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used for unblocking
+	// 	 * purposes, i.e. to reset the retry counter of the related authentication object to its initial value
+	// 	 */
+	// UNBLOCKING_PASSWORD,
+	// this is the iso definition, but we use a different one as we don't create PUK DIDs, but rather say a DID may be
+	// used together with a PUK
+
 	/**
-	 * is an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used for unblocking
-	 * purposes, i.e. to reset the retry counter of the related authentication object to its initial value
+	 * has an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used with unblocking
+	 * commands, i.e. to reset the retry counter of the related authentication object to its initial value
 	 */
 	UNBLOCKING_PASSWORD,
 

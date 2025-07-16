@@ -11,6 +11,4 @@ interface DidSetScope : CifScope {
 	fun signature(content: @CifMarker SignatureDidScope.() -> Unit)
 
 	fun encrypt(content: @CifMarker EncryptionDidScope.() -> Unit)
-
-	fun decrypt(content: @CifMarker DecryptionDidScope.() -> Unit)
 }

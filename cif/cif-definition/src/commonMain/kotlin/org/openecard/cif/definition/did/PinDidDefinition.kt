@@ -98,9 +98,9 @@ enum class PasswordFlags {
 	MODIFY_WITH_RESET_RETRY_COUNTER,
 
 	/**
-	 * Password modify needs the old password, in order to change it
+	 * Password modify does not need the old password, in order to change it
 	 */
-	MODIFY_NEEDS_OLD_PASSWORD,
+	MODIFY_DOES_NOT_NEED_OLD_PASSWORD,
 
 	/**
 	 * Password reset works without reference data

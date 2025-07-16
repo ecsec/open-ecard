@@ -117,7 +117,7 @@ class SmartcardPinDid(
 		val encPinOld = oldPassword?.let { PinUtils.encodePin(it, passwordAttributes) }
 
 		val req =
-			if (PasswordFlags.MODIFY_NEEDS_OLD_PASSWORD in did.parameters.pwdFlags) {
+			if (PasswordFlags.MODIFY_DOES_NOT_NEED_OLD_PASSWORD !in did.parameters.pwdFlags) {
 				requireNotNull(encPinOld) { "Old password is required for modify command" }
 				ChangeReferenceData.changeOldToNew(encPinOld, encPinNew, passwordRef, globalRef)
 			} else {

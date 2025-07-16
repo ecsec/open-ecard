@@ -29,7 +29,7 @@ interface PinDid : AuthenticationDid {
 		Timeout::class,
 		Cancelled::class,
 	)
-	fun capturePinInHardware(): Boolean
+	fun capturePasswordInHardware(): Boolean
 
 	@Throws(
 		NotInitialized::class,
@@ -44,7 +44,7 @@ interface PinDid : AuthenticationDid {
 		SecureMessagingException::class,
 		PinCommandError::class,
 	)
-	fun pinStatus(): PinStatus
+	fun passwordStatus(): PinStatus
 
 	@Throws(
 		NotInitialized::class,

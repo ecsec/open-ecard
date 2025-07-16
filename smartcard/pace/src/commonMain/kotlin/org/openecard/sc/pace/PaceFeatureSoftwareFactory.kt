@@ -5,5 +5,9 @@ import org.openecard.sc.iface.feature.PaceFeature
 import org.openecard.sc.iface.feature.PaceFeatureFactory
 
 class PaceFeatureSoftwareFactory : PaceFeatureFactory {
-	override fun create(channel: CardChannel): PaceFeature = PaceProtocol(channel)
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun create(
+		channel: CardChannel,
+		efCardAccess: UByteArray?,
+	): PaceFeature = PaceProtocol(channel)
 }

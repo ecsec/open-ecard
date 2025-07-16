@@ -19,11 +19,11 @@ class SmartcardPinDid(
 	override val missingModifyAuthentications: MissingAuthentications
 		get() = missingAuthentications(modifyAcl)
 
-	override fun capturePinInHardware(): Boolean {
+	override fun capturePasswordInHardware(): Boolean {
 		TODO("Not yet implemented")
 	}
 
-	override fun pinStatus(): PinStatus {
+	override fun passwordStatus(): PinStatus {
 		TODO("Not yet implemented")
 	}
 

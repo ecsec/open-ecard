@@ -13,6 +13,7 @@ kotlin {
 			api(project(":sal:sal-base"))
 			api(project(":smartcard:sc-base"))
 			api(project(":cif:cif-definition"))
+			implementation(project(":smartcard:eac-definitions"))
 		}
 
 		commonTest.dependencies {

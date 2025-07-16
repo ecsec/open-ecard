@@ -10,6 +10,7 @@ import org.openecard.sal.iface.RemovedDevice
 import org.openecard.sal.iface.SharingViolation
 import org.openecard.sal.iface.Timeout
 import org.openecard.sal.iface.UnsupportedFeature
+import org.openecard.sc.apdu.command.SecurityCommandResult
 import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
 import org.openecard.sc.iface.feature.PacePinId
@@ -31,7 +32,21 @@ interface PaceDid :
 		Cancelled::class,
 		PaceError::class,
 	)
-	fun capturePinInHardware(): Boolean
+	fun capturePasswordInHardware(): Boolean
+
+	@Throws(
+		NotInitialized::class,
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		UnsupportedFeature::class,
+		RemovedDevice::class,
+		Timeout::class,
+		Cancelled::class,
+		MissingAuthentication::class,
+		PaceError::class,
+	)
+	fun passwordStatus(): SecurityCommandResult
 
 	@Throws(
 		NotInitialized::class,

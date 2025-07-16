@@ -17,6 +17,7 @@ import org.openecard.sc.iface.ReaderUnavailable
 import org.openecard.sc.iface.RemovedCard
 import org.openecard.sc.iface.ResetCard
 import org.openecard.sc.pace.asn1.SecurityInfo.Companion.toSecurityInfo
+import org.openecard.sc.pace.oid.PaceObjectIdentifier
 import org.openecard.sc.tlv.toTlvBer
 
 class EfCardAccess
@@ -144,5 +145,31 @@ class EfCardAccess
 					}
 				return efCaData.toEfCardAccess()
 			}
+
+			/**
+			 * Pace Protocols supported by Open eCard
+			 */
+			val SUPPORTED_PACE_PROTOCOLS =
+				setOf(
+					PaceObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128,
+					PaceObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_192,
+					PaceObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_256,
+				)
+
+			/**
+			 * Pace Domain Parameters supported by Open eCard
+			 */
+			val SUPPORTED_PACE_DOMAIN_PARAMS =
+				setOf(
+					10u, // NIST P-224 (secp224r1)
+					11u, // BrainpoolP224r1
+					12u, // NIST P-256 (secp256r1)
+					13u, // BrainpoolP256r1
+					14u, // BrainpoolP320r1
+					15u, // NIST P-384 (secp384r1)
+					16u, // BrainpoolP384r1
+					17u, // BrainpoolP512r1
+					18u, // NIST P-521 (secp521r1)
+				)
 		}
 	}

@@ -11,14 +11,23 @@ import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sc.apdu.ApduProcessingError
+import org.openecard.sc.apdu.command.SecurityCommandResult
+import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.feature
 import org.openecard.sc.iface.feature.PaceCapability
+import org.openecard.sc.iface.feature.PaceError
 import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
 import org.openecard.sc.iface.feature.PaceFeature
 import org.openecard.sc.iface.feature.PaceFeatureFactory
 import org.openecard.sc.iface.feature.PacePinId
+import org.openecard.sc.iface.feature.PaceResultCode
+import org.openecard.sc.pace.apdu.paceMseSetAt
+import org.openecard.sc.pace.asn1.EfCardAccess
+import org.openecard.sc.pace.asn1.EfCardAccess.Companion.SUPPORTED_PACE_DOMAIN_PARAMS
+import org.openecard.sc.pace.asn1.EfCardAccess.Companion.SUPPORTED_PACE_PROTOCOLS
 import org.openecard.utils.common.throwIf
 import org.openecard.utils.serialization.toPrintable
 
@@ -47,14 +56,37 @@ class SmartcardPaceDid(
 			log.error(it) { "Failed to request reader features" }
 		}.getOrNull()
 	}
+
+	private val efCardAccess by lazy {
+		runCatching { EfCardAccess.readEfCardAccess(channel) }
+			.onFailure {
+				if (it is ApduProcessingError) {
+					throw PaceError(PaceResultCode.READ_EFCA_ERROR, it.status)
+				}
+			}.getOrThrow()
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
 	private val paceFeature by lazy {
-		hardwarePace ?: factory.create(channel)
+		hardwarePace ?: factory.create(channel, efCardAccess.efCaData)
 	}
 
 	// TODO: implement and add state qualifier
 	override fun toStateReference(): DidStateReference = super.toStateReference()
 
-	override fun capturePinInHardware(): Boolean = hardwarePace != null
+	override fun capturePasswordInHardware(): Boolean = hardwarePace != null
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun passwordStatus(): SecurityCommandResult {
+		val paceInfos =
+			efCardAccess.paceInfo.first {
+				it.info.isStandardizedParameter &&
+					it.supports(SUPPORTED_PACE_PROTOCOLS, SUPPORTED_PACE_DOMAIN_PARAMS)
+			}
+		val command = paceMseSetAt(paceInfos, pinType, null, null)
+		val commandResult = command.transmit(channel)
+		return commandResult
+	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun establishChannel(

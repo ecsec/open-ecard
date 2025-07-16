@@ -3,11 +3,10 @@ package org.openecard.cif.bundled
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
-import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder.Never
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
 
-object GematikAcls {
+object GematikBuildingBlocks {
 	internal fun AclScope.alwaysAcl() {
 		acl(CardProtocol.Any) {
 			Always

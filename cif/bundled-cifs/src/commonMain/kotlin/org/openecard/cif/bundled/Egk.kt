@@ -1,15 +1,15 @@
 package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
-import org.openecard.cif.bundled.GematikAcls.alwaysAcl
-import org.openecard.cif.bundled.GematikAcls.basePinParams
-import org.openecard.cif.bundled.GematikAcls.cmsProtectedAcl
-import org.openecard.cif.bundled.GematikAcls.mrPinHomePaceProtectedAcl
-import org.openecard.cif.bundled.GematikAcls.neverAcl
-import org.openecard.cif.bundled.GematikAcls.paceCmsProtectedAcl
-import org.openecard.cif.bundled.GematikAcls.paceProtectedAcl
-import org.openecard.cif.bundled.GematikAcls.pinChPaceProtectedAcl
-import org.openecard.cif.bundled.GematikAcls.pinProtectedPaceAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
+import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.mrPinHomePaceProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
@@ -19,49 +19,59 @@ import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
 
-private fun ApplicationScope.appMf() {
-	name = "MF"
-	aid = +"D2760001448000"
-}
+@OptIn(ExperimentalUnsignedTypes::class)
+val EgkCif by lazy {
+	val b = CardInfoBuilder()
 
-private fun ApplicationScope.appDFHCA() {
-	name = "DF.HCA"
-	aid = +"D27600000102"
-}
+	b.metadata {
+		id = "http://ws.gematik.de/egk/1.0.0"
+		version = "1.0.0"
+		status = CardInfoStatus.DEVELOPMENT
+		name = "German Electronic eHealth Card"
+		cardIssuer = "Gesellschaft für Telematikanwendungen der Gesundheitskarte mbH"
+		creationDate = Instant.parse("2025-06-25T00:00:00Z")
+		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
+	}
 
-private fun ApplicationScope.appDFNFD() {
-	name = "DF.NFD"
-	aid = +"D27600014407"
-}
+	b.applications {
 
-private fun ApplicationScope.appDFDPE() {
-	name = "DF.DPE"
-	aid = +"D27600014408"
-}
+		add {
+			appMf()
+		}
 
-private fun ApplicationScope.appDFGDD() {
-	name = "DF.GDD"
-	aid = +"D2760001440A"
-}
+		add {
+			appDFHCA()
+		}
 
-private fun ApplicationScope.appDFOSE() {
-	name = "DF.OSE"
-	aid = +"D2760001440B"
-}
+		add {
+			appDFNFD()
+		}
 
-private fun ApplicationScope.appDFAMTS() {
-	name = "DF.AMTS"
-	aid = +"D2760001440C"
-}
+		add {
+			appDFDPE()
+		}
 
-private fun ApplicationScope.appDFESIGN() {
-	name = "DF.ESIGN"
-	aid = +"A000000167455349474E"
-}
+		add {
+			appDFGDD()
+		}
 
-private fun ApplicationScope.appDFQES() {
-	name = "DF.QES"
-	aid = +"D27600006601"
+		add {
+			appDFOSE()
+		}
+
+		add {
+			appDFAMTS()
+		}
+
+		add {
+			appDFESIGN()
+		}
+
+		add {
+			appDFQES()
+		}
+	}
+	b.build()
 }
 
 private val autPace = "AUT_PACE"
@@ -85,305 +95,286 @@ private val pinQes = "PIN.QES"
 private val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
 private val prk_ch_qes_e256 = "PrK.CH.QES.E256"
 
-// private fun CifSetScope<ApplicationScope>.addMF() {
-// 	add {}
-// }
+private fun ApplicationScope.appMf() {
+	name = "MF"
+	aid = +"D2760001448000"
 
-@OptIn(ExperimentalUnsignedTypes::class)
-val EgkCif by lazy {
-	val b = CardInfoBuilder()
-
-	b.metadata {
-		id = "http://ws.gematik.de/egk/1.0.0"
-		version = "1.0.0"
-		status = CardInfoStatus.DEVELOPMENT
-		name = "German Electronic eHealth Card"
-		cardIssuer = "Gesellschaft für Telematikanwendungen der Gesundheitskarte mbH"
-		creationDate = Instant.parse("2025-06-25T00:00:00Z")
-		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
+	selectAcl {
+		alwaysAcl()
 	}
 
-	b.applications {
-
+	dataSets {
 		add {
-			appMf()
-
-			selectAcl {
+			name = "EF.ATR"
+			description =
+				"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
+				"It is also used to version variable elements of a map."
+			path = +"2F01"
+			shortEf = 0x1Du
+			readAcl {
 				alwaysAcl()
 			}
+			writeAcl {
+				alwaysAcl()
+			}
+		}
 
-			dataSets {
-				add {
-					name = "EF.ATR"
-					description =
-						"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
-						"It is also used to version variable elements of a map."
-					path = +"2F01"
-					shortEf = 0x1Du
-					readAcl {
-						alwaysAcl()
-					}
-					writeAcl {
-						alwaysAcl()
-					}
-				}
+		add {
+			name = "EF.CardAccess"
+			description =
+				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
+			path = +"011C"
+			shortEf = 0x1Cu
+			readAcl {
+				alwaysAcl()
+			}
+			writeAcl {
+				neverAcl()
+			}
+		}
 
-				add {
-					name = "EF.CardAccess"
-					description =
-						"EF.CardAccess is required for the PACE protocol when using the contactless interface."
-					path = +"011C"
-					shortEf = 0x1Cu
-					readAcl {
-						alwaysAcl()
-					}
-					writeAcl {
-						neverAcl()
-					}
-				}
+		add {
+			name = "EF.C.CA.CS.E256"
+			description =
+				"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
+				"the public key PuK.CA.CS.E256 of a CA. This certificate can be checked by means of the " +
+				"public key PuK.RCA.CS.E256."
+			path = +"2F07"
+			shortEf = 0x07u
+			readAcl {
+				paceCmsProtectedAcl()
+			}
+			writeAcl {
+				cmsProtectedAcl()
+			}
+		}
 
-				add {
-					name = "EF.C.CA.CS.E256"
-					description =
-						"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
-						"the public key PuK.CA.CS.E256 of a CA. This certificate can be checked by means of the " +
-						"public key PuK.RCA.CS.E256."
-					path = +"2F07"
-					shortEf = 0x07u
-					readAcl {
-						paceCmsProtectedAcl()
-					}
-					writeAcl {
-						cmsProtectedAcl()
-					}
-				}
+		add {
+			name = "EF.C.eGK.AUT_CVC.E256"
+			description =
+				"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
+				"the public key PuK.eGK.AUT-CVC.E256 to PrK.eGK.AUT-CVC.E256. This certificate can be " +
+				"checked by means of the public key from EF.C.CA.CS.E256."
+			path = +"2F06"
+			shortEf = 0x06u
+			readAcl {
+				paceCmsProtectedAcl()
+			}
+			writeAcl {
+				cmsProtectedAcl()
+			}
+		}
 
-				add {
-					name = "EF.C.eGK.AUT_CVC.E256"
-					description =
-						"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
-						"the public key PuK.eGK.AUT-CVC.E256 to PrK.eGK.AUT-CVC.E256. This certificate can be " +
-						"checked by means of the public key from EF.C.CA.CS.E256."
-					path = +"2F06"
-					shortEf = 0x06u
-					readAcl {
-						paceCmsProtectedAcl()
-					}
-					writeAcl {
-						cmsProtectedAcl()
-					}
-				}
+		add {
+			name = "EF.DIR"
+			description =
+				"The EF.DIR file contains a list of application templates according to ISO7816-4. This list " +
+				"is adjusted when the application structure changes by deleting or creating applications."
+			path = +"2F00"
+			shortEf = 0x1Eu
+			readAcl {
+				paceCmsProtectedAcl()
+			}
+			writeAcl {
+				cmsProtectedAcl()
+			}
+		}
 
-				add {
-					name = "EF.DIR"
-					description =
-						"The EF.DIR file contains a list of application templates according to ISO7816-4. This list " +
-						"is adjusted when the application structure changes by deleting or creating applications."
-					path = +"2F00"
-					shortEf = 0x1Eu
-					readAcl {
-						paceCmsProtectedAcl()
-					}
-					writeAcl {
-						cmsProtectedAcl()
-					}
-				}
+		add {
+			name = "EF.GDO"
+			description =
+				"The ICCSN data object, which contains the identification number of the card, is stored in " +
+				"EF.GDO. The identification number is based on [Resolution190]."
+			path = +"2F02"
+			shortEf = 0x02u
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+			}
+		}
 
-				add {
-					name = "EF.GDO"
-					description =
-						"The ICCSN data object, which contains the identification number of the card, is stored in " +
-						"EF.GDO. The identification number is based on [Resolution190]."
-					path = +"2F02"
-					shortEf = 0x02u
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-					}
-				}
+		add {
+			name = "EF.Version2"
+			description =
+				"""
+				The file EF.Version2 contains the version numbers as well as product identifiers for variable elements of the card:
+				- Version of the product type of the active object system (incl. cards)
+				- Manufacturer-specific product identification of object system implementation
+				- Versions of the filling rules for different files of this object system
+				""".trimIndent()
+			path = +"2F11"
+			shortEf = 0x11u
+			readAcl {
+				alwaysAcl()
+			}
+			writeAcl {
+				cmsProtectedAcl()
+			}
+		}
+	}
 
-				add {
-					name = "EF.Version2"
-					description =
-						"""
-						The file EF.Version2 contains the version numbers as well as product identifiers for variable elements of the card:
-						- Version of the product type of the active object system (incl. cards)
-						- Manufacturer-specific product identification of object system implementation
-						- Versions of the filling rules for different files of this object system
-						""".trimIndent()
-					path = +"2F11"
-					shortEf = 0x11u
-					readAcl {
-						alwaysAcl()
-					}
-					writeAcl {
-						cmsProtectedAcl()
-					}
-				}
+	dids {
+		pace {
+			name = autPace
+			scope = DidScope.GLOBAL
+			modifyAcl {
+				neverAcl()
+			}
+			authAcl {
+				alwaysAcl()
+			}
+			parameters {
+				passwordRef = PacePinId.CAN
+				minLength = 6
+				maxLength = 6
+			}
+		}
+
+		pin {
+			name = pinCh
+			scope = DidScope.GLOBAL
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
+			parameters {
+				basePinParams()
+				passwordRef = 0x01u
+			}
+		}
+
+		pin {
+			name = mrPinHome
+			scope = DidScope.GLOBAL
+
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
 			}
 
-			dids {
-				pace {
-					name = autPace
-					scope = DidScope.GLOBAL
-					modifyAcl {
-						neverAcl()
-					}
-					authAcl {
-						alwaysAcl()
-					}
-					parameters {
-						passwordRef = PacePinId.CAN
-						minLength = 6
-						maxLength = 6
-					}
-				}
+			parameters {
+				basePinParams()
+				passwordRef = 0x02u
+			}
+		}
+		pin {
+			name = mrPinNfd
+			scope = DidScope.GLOBAL
 
-				pin {
-					name = pinCh
-					scope = DidScope.GLOBAL
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
-					parameters {
-						basePinParams()
-						passwordRef = 0x01u
-					}
-				}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-				pin {
-					name = mrPinHome
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x03u
+			}
+		}
+		pin {
+			name = mrPinDpe
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x02u
-					}
-				}
-				pin {
-					name = mrPinNfd
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x04u
+			}
+		}
+		pin {
+			name = mrPinGdd
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x03u
-					}
-				}
-				pin {
-					name = mrPinDpe
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x05u
+			}
+		}
+		pin {
+			name = mrPinNfdRead
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x04u
-					}
-				}
-				pin {
-					name = mrPinGdd
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x07u
+			}
+		}
+		pin {
+			name = mrPinOse
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x05u
-					}
-				}
-				pin {
-					name = mrPinNfdRead
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x09u
+			}
+		}
+		pin {
+			name = mrPinAmts
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x07u
-					}
-				}
-				pin {
-					name = mrPinOse
-					scope = DidScope.GLOBAL
+			parameters {
+				basePinParams()
+				passwordRef = 0x0Cu
+			}
+		}
+		pin {
+			name = mrPinAmtsRep
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			modifyAcl {
+				pinChPaceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x09u
-					}
-				}
-				pin {
-					name = mrPinAmts
-					scope = DidScope.GLOBAL
-
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
-
-					parameters {
-						basePinParams()
-						passwordRef = 0x0Cu
-					}
-				}
-				pin {
-					name = mrPinAmtsRep
-					scope = DidScope.GLOBAL
-
-					modifyAcl {
-						pinChPaceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
-
-					parameters {
-						basePinParams()
-						passwordRef = 0x0Du
-					}
-				}
+			parameters {
+				basePinParams()
+				passwordRef = 0x0Du
+			}
+		}
 
 // 				pin {
 // 					name = "SK.CAN"
@@ -406,14 +397,14 @@ val EgkCif by lazy {
 // 					}
 // 				}
 
-				// RSAAuthMarker:
-				// name: PrK.eGK.AUT_rsaRoleAuthentication
-				// name: PrK.eGK.AUT_rsaSessionkey4SM
-				// MutualAuthMarker:
-				// name: SK.CMS
-				// name: SK.VDS
-				// name: SK.VSDCMS
-			}
+		// RSAAuthMarker:
+		// name: PrK.eGK.AUT_rsaRoleAuthentication
+		// name: PrK.eGK.AUT_rsaSessionkey4SM
+		// MutualAuthMarker:
+		// name: SK.CMS
+		// name: SK.VDS
+		// name: SK.VSDCMS
+	}
 
 // 			elcRoleAuthentication, elcSessionkey4SM, elcAsynchronAdmin:
 // 			PrK.eGK.AUT_CVC.E256
@@ -429,25 +420,27 @@ val EgkCif by lazy {
 // 			SK.CMS.AES256
 // 			SK.VSD.AES128
 // 			SK.VSD.AES256
-		}
+}
 
+private fun ApplicationScope.appDFHCA() {
+	name = "DF.HCA"
+	aid = +"D27600000102"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	// add datasets
+
+	dataSets {
 		add {
-			appDFHCA()
-			selectAcl {
-				alwaysAcl()
-			}
-
-			// add datasets
-
-			dataSets {
-				add {
-					name = "EF.Einwilligung"
-					description =
-						"This file contains information about the consents for voluntary applications."
-					path = +"D005"
-					shortEf = 0x05u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			name = "EF.Einwilligung"
+			description =
+				"This file contains information about the consents for voluntary applications."
+			path = +"D005"
+			shortEf = 0x05u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 
 // 						    CONTACT:
 // 							PWD(MRPIN.home)
@@ -456,25 +449,25 @@ val EgkCif by lazy {
 // 							AUT_PACE
 // 							AND   { PWD(MRPIN.home)
 // 								OR     [PWD(PIN.CH)   AND   flagTI.25] }
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 							CONTACT:
 // 							PWD(PIN.CH)   AND   flagTI.27
 // 							CONTACTLESS:
 // 							AUT_PACE
 // 							AND   [PWD(PIN.CH)   AND   flagTI.27]
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.GVD"
-					description =
-						"This file contains the protected insured person data. The details are described in Tab_eGK_ObjSys_035."
-					path = +"D003"
-					shortEf = 0x03u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+		add {
+			name = "EF.GVD"
+			description =
+				"This file contains the protected insured person data. The details are described in Tab_eGK_ObjSys_035."
+			path = +"D003"
+			shortEf = 0x03u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 
 // 							CONTACT:
 // 							PWD(MRPIN.home)
@@ -488,21 +481,21 @@ val EgkCif by lazy {
 // 								OR     [PWD(PacePinId.PIN.CH) AND flagTI.29]
 // 								OR     flagTI.30 })
 // 							OR      AUT_VSD
-					}
-					writeAcl {
-						neverAcl()
-						// AUT_VSD
-					}
-				}
+			}
+			writeAcl {
+				neverAcl()
+				// AUT_VSD
+			}
+		}
 
-				add {
-					name = "EF.Logging"
-					description =
-						"This file contains logging information about access to the eHC."
-					path = +"D006"
-					shortEf = 0x06u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+		add {
+			name = "EF.Logging"
+			description =
+				"This file contains logging information about access to the eHC."
+			path = +"D006"
+			shortEf = 0x06u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							PWD(MRPIN.home)
 // 							OR   [PWD(PIN.CH)   AND   flagTI.33]
@@ -511,138 +504,140 @@ val EgkCif by lazy {
 // 							AUT_PACE
 // 							AND   { PWD(MRPIN.home)
 // 								OR   [ PWD(PIN.CH)   AND   flagTI.33] }
-					}
-					writeAcl {
-						neverAcl()
-					}
-				}
-
-				add {
-					name = "EF.PD"
-					description =
-						"This file contains the cardholder's personal data."
-					path = +"D001"
-					shortEf = 0x01u
-					readAcl {
-						paceProtectedAcl()
-// 							CONTACTLESS:
-// 							OR AUT_VSD
-					}
-					writeAcl {
-						neverAcl()
-// 							 AUT_VSD
-					}
-				}
-
-				add {
-					name = "EF.Prüfungsnachweis"
-					description =
-						"This file stores a certificate that was created as part of an online check."
-					path = +"D01C"
-					shortEf = 0x1Cu
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						paceProtectedAcl()
-					}
-				}
-
-				add {
-					name = "EF.Standalone"
-					description =
-						"This file contains the information from EF.GVD and EF.DPE in encrypted form."
-					path = +"DA0A"
-					shortEf = 0x0Au
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						paceProtectedAcl()
-					}
-				}
-
-				add {
-					name = "EF.StatusVD"
-					description =
-						"This file contains information about the status of the data in EF.PD, EF.VD and EF.GVD."
-					path = +"D00C"
-					shortEf = 0x0Cu
-
-					readAcl {
-						paceProtectedAcl()
-// 						CONTACTLESS:
-// 							AUT_PACE
-// 							OR     AUT_VSD
-					}
-					writeAcl {
-						neverAcl()
-// 							 AUT_VSD
-					}
-				}
-
-				add {
-					name = "EF.VD"
-					description =
-						"This file contains the insured person data."
-					path = +"D002"
-					shortEf = 0x02u
-					readAcl {
-						paceProtectedAcl()
-// 							CONTACTLESS:
-// 							AUT_PACE
-// 							OR    AUT_VSD
-					}
-					writeAcl {
-						neverAcl()
-// 							 AUT_VSD
-					}
-				}
-
-				add {
-					name = "EF.Verweis"
-					description =
-						"This file contains information about the storage locations of the data of the voluntary applications that are not stored on the eHC."
-					path = +"D009"
-					shortEf = 0x09u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							PWD(MRPIN.home)
-// 							OR   [PWD(PIN.CH)   AND   flagTI.28]
-// 						CONTACTLESS:
-// 						AUT_PACE
-// 						AND   { PWD(MRPIN.home)
-// 							OR     [ PWD(PIN.CH)   AND   flagTI.28 ] }
-					}
-					writeAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							PWD(MRPIN.home)
-// 							OR   [PWD(PIN.CH)   AND   flagTI.28]
-// 						CONTACTLESS:
-// 						AUT_PACE
-// 						AND   { PWD(MRPIN.home)
-// 							OR     [ PWD(PIN.CH)   AND   flagTI.28 ] }
-					}
-				}
+			}
+			writeAcl {
+				neverAcl()
 			}
 		}
 
 		add {
-			appDFNFD()
-			selectAcl {
-				alwaysAcl()
+			name = "EF.PD"
+			description =
+				"This file contains the cardholder's personal data."
+			path = +"D001"
+			shortEf = 0x01u
+			readAcl {
+				paceProtectedAcl()
+// 							CONTACTLESS:
+// 							OR AUT_VSD
 			}
+			writeAcl {
+				neverAcl()
+// 							 AUT_VSD
+			}
+		}
 
-			dataSets {
-				add {
-					name = "EF.NFD"
-					description = "This file contains an emergency data record."
-					path = +"D010"
-					shortEf = 0x10u
-					readAcl {
-						neverAcl()
+		add {
+			name = "EF.Prüfungsnachweis"
+			description =
+				"This file stores a certificate that was created as part of an online check."
+			path = +"D01C"
+			shortEf = 0x1Cu
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				paceProtectedAcl()
+			}
+		}
+
+		add {
+			name = "EF.Standalone"
+			description =
+				"This file contains the information from EF.GVD and EF.DPE in encrypted form."
+			path = +"DA0A"
+			shortEf = 0x0Au
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				paceProtectedAcl()
+			}
+		}
+
+		add {
+			name = "EF.StatusVD"
+			description =
+				"This file contains information about the status of the data in EF.PD, EF.VD and EF.GVD."
+			path = +"D00C"
+			shortEf = 0x0Cu
+
+			readAcl {
+				paceProtectedAcl()
+// 						CONTACTLESS:
+// 							AUT_PACE
+// 							OR     AUT_VSD
+			}
+			writeAcl {
+				neverAcl()
+// 							 AUT_VSD
+			}
+		}
+
+		add {
+			name = "EF.VD"
+			description =
+				"This file contains the insured person data."
+			path = +"D002"
+			shortEf = 0x02u
+			readAcl {
+				paceProtectedAcl()
+// 							CONTACTLESS:
+// 							AUT_PACE
+// 							OR    AUT_VSD
+			}
+			writeAcl {
+				neverAcl()
+// 							 AUT_VSD
+			}
+		}
+
+		add {
+			name = "EF.Verweis"
+			description =
+				"This file contains information about the storage locations of the data of the voluntary applications that are not stored on the eHC."
+			path = +"D009"
+			shortEf = 0x09u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							PWD(MRPIN.home)
+// 							OR   [PWD(PIN.CH)   AND   flagTI.28]
+// 						CONTACTLESS:
+// 						AUT_PACE
+// 						AND   { PWD(MRPIN.home)
+// 							OR     [ PWD(PIN.CH)   AND   flagTI.28 ] }
+			}
+			writeAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							PWD(MRPIN.home)
+// 							OR   [PWD(PIN.CH)   AND   flagTI.28]
+// 						CONTACTLESS:
+// 						AUT_PACE
+// 						AND   { PWD(MRPIN.home)
+// 							OR     [ PWD(PIN.CH)   AND   flagTI.28 ] }
+			}
+		}
+	}
+}
+
+private fun ApplicationScope.appDFNFD() {
+	name = "DF.NFD"
+	aid = +"D27600014407"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	dataSets {
+		add {
+			name = "EF.NFD"
+			description = "This file contains an emergency data record."
+			path = +"D010"
+			shortEf = 0x10u
+			readAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{ activeDidState("flagTI.18") },
@@ -685,9 +680,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -723,16 +718,16 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.StatusNFD"
-					description = "This file contains information about the status of the emergency data record."
-					path = +"D00E"
-					shortEf = 0x0Eu
-					readAcl {
-						neverAcl()
+		add {
+			name = "EF.StatusNFD"
+			description = "This file contains information about the status of the emergency data record."
+			path = +"D00E"
+			shortEf = 0x0Eu
+			readAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -752,7 +747,7 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
+			}
 // 						CONTACTLESS:
 // 							or(
 // 								{
@@ -778,8 +773,8 @@ val EgkCif by lazy {
 // 								},
 // 							)
 
-					writeAcl {
-						neverAcl()
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -815,27 +810,29 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
 			}
 		}
+	}
+}
 
+private fun ApplicationScope.appDFDPE() {
+	name = "DF.DPE"
+	aid = +"D27600014408"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	dataSets {
 		add {
-			appDFDPE()
-			selectAcl {
-				alwaysAcl()
-			}
+			name = "EF.DPE"
+			description =
+				"This file contains the data record with the personal declarations of the insured person."
+			path = +"D01B"
+			shortEf = 0x1Bu
 
-			dataSets {
-				add {
-					name = "EF.DPE"
-					description =
-						"This file contains the data record with the personal declarations of the insured person."
-					path = +"D01B"
-					shortEf = 0x1Bu
-
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							or(
 // 								{ activeDidState("MRPIN.home") },
@@ -868,9 +865,9 @@ val EgkCif by lazy {
 // 										activeDidState("flagTI.23"),
 // 									)
 // 								},
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -904,17 +901,17 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.StatusDPE"
-					description =
-						"This file contains information on the status of the data record with the personal declarations."
-					path = +"D018"
-					shortEf = 0x18u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+		add {
+			name = "EF.StatusDPE"
+			description =
+				"This file contains information on the status of the data record with the personal declarations."
+			path = +"D018"
+			shortEf = 0x18u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							or(
 // 								{ activeDidState("MRPIN.home") },
@@ -947,9 +944,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 					CONTACT:
 // 							or(
 // 								{
@@ -983,28 +980,167 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
+	}
+}
+
+private fun ApplicationScope.appDFGDD() {
+	name = "DF.GDD"
+	aid = +"D2760001440A"
+
+	selectAcl {
+		acl(CardProtocol.Any) {
+			Always
+		}
+	}
+
+	dataSets {
+		add {
+			name = "EF.EinwilligungGDD"
+			description =
+				"This file contains information about the consents to voluntary applications of health data services."
+			path = +"D013"
+			shortEf = 0x13u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
+// 					CONTACT:
+// 						or(
+// 							{
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
+
+// 					CONTACTLESS:
+// 						or(
+// 							{
+// 								activeDidState("AUT_PACE")
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
+			}
+			writeAcl {
+				mrPinHomePaceProtectedAcl()
+// 					CONTACT:
+// 						or(
+// 							{
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
+
+// 					CONTACTLESS:
+// 						or(
+// 							{
+// 								activeDidState("AUT_PACE")
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
 			}
 		}
 
 		add {
-			appDFGDD()
-			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
+			name = "EF.VerweiseGDD"
+			description =
+				"This file contains information on the storage locations of the data of the voluntary health data services applications that are not stored on the eHC."
+			path = +"D01A"
+			shortEf = 0x1Au
+			readAcl {
+				mrPinHomePaceProtectedAcl()
+// 					CONTACT:
+// 						or(
+// 							{
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
+
+// 					CONTACTLESS:
+// 						or(
+// 							{
+// 								activeDidState("AUT_PACE")
+// 								activeDidState("MRPIN.home")
+// 							},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.GDD"),
+// 										activeDidState("flagTI.40"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.33"),
+// 									)
+// 								},
+// 						)
 			}
-
-			dataSets {
-				add {
-					name = "EF.EinwilligungGDD"
-					description =
-						"This file contains information about the consents to voluntary applications of health data services."
-					path = +"D013"
-					shortEf = 0x13u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			writeAcl {
+				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
 // 						or(
 // 							{
@@ -1045,165 +1181,30 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
-					writeAcl {
-						mrPinHomePaceProtectedAcl()
-// 					CONTACT:
-// 						or(
-// 							{
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-
-// 					CONTACTLESS:
-// 						or(
-// 							{
-// 								activeDidState("AUT_PACE")
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-					}
-				}
-
-				add {
-					name = "EF.VerweiseGDD"
-					description =
-						"This file contains information on the storage locations of the data of the voluntary health data services applications that are not stored on the eHC."
-					path = +"D01A"
-					shortEf = 0x1Au
-					readAcl {
-						mrPinHomePaceProtectedAcl()
-// 					CONTACT:
-// 						or(
-// 							{
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-
-// 					CONTACTLESS:
-// 						or(
-// 							{
-// 								activeDidState("AUT_PACE")
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-					}
-					writeAcl {
-						mrPinHomePaceProtectedAcl()
-// 					CONTACT:
-// 						or(
-// 							{
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-
-// 					CONTACTLESS:
-// 						or(
-// 							{
-// 								activeDidState("AUT_PACE")
-// 								activeDidState("MRPIN.home")
-// 							},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.GDD"),
-// 										activeDidState("flagTI.40"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.33"),
-// 									)
-// 								},
-// 						)
-					}
-				}
 			}
 		}
+	}
+}
 
+private fun ApplicationScope.appDFOSE() {
+	name = "DF.OSE"
+	aid = +"D2760001440B"
+
+	selectAcl {
+		acl(CardProtocol.Any) {
+			Always
+		}
+	}
+
+	dataSets {
 		add {
-			appDFOSE()
-			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-
-			dataSets {
-				add {
-					name = "EF.OSE"
-					description =
-						"This file contains a data record for the organ donation declaration."
-					path = +"E001"
-					shortEf = 0x01u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			name = "EF.OSE"
+			description =
+				"This file contains a data record for the organ donation declaration."
+			path = +"E001"
+			shortEf = 0x01u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
 // 						or(
 // 							{
@@ -1255,9 +1256,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 					CONTACT:
 // 							or(
 // 								{
@@ -1291,18 +1292,18 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.StatusOSE"
-					description =
-						"This file contains information on the status of the organ donation declaration."
-					path = +"E002"
-					shortEf = 0x02u
+		add {
+			name = "EF.StatusOSE"
+			description =
+				"This file contains information on the status of the organ donation declaration."
+			path = +"E002"
+			shortEf = 0x02u
 
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
 // 						or(
 // 							{
@@ -1347,9 +1348,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 					CONTACT:
 // 							or(
 // 								{
@@ -1383,26 +1384,28 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
 			}
 		}
+	}
+}
 
+private fun ApplicationScope.appDFAMTS() {
+	name = "DF.AMTS"
+	aid = +"D2760001440C"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	dataSets {
 		add {
-			appDFAMTS()
-			selectAcl {
-				alwaysAcl()
-			}
-
-			dataSets {
-				add {
-					name = "EF.AMTS"
-					description =
-						"This file contains a data set for AMTS data management."
-					path = +"E005"
-					shortEf = 0x05u
-					readAcl {
-						neverAcl()
+			name = "EF.AMTS"
+			description =
+				"This file contains a data set for AMTS data management."
+			path = +"E005"
+			shortEf = 0x05u
+			readAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1451,9 +1454,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1502,17 +1505,17 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.VerweiseAMTS"
-					description =
-						"This file contains information on the storage locations of data from the voluntary AMTS data management application that is not stored on the eHC."
-					path = +"E006"
-					shortEf = 0x06u
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+		add {
+			name = "EF.VerweiseAMTS"
+			description =
+				"This file contains information on the storage locations of data from the voluntary AMTS data management application that is not stored on the eHC."
+			path = +"E006"
+			shortEf = 0x06u
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1570,9 +1573,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1608,17 +1611,17 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
 
-				add {
-					name = "EF.StatusAMTS"
-					description =
-						"This file contains information on the status of the AMTS Data Management application."
-					path = +"E007"
-					shortEf = 0x07u
-					readAcl {
-						neverAcl()
+		add {
+			name = "EF.StatusAMTS"
+			description =
+				"This file contains information on the status of the AMTS Data Management application."
+			path = +"E007"
+			shortEf = 0x07u
+			readAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1667,9 +1670,9 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1718,43 +1721,45 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-				}
+			}
+		}
+	}
+}
+
+private fun ApplicationScope.appDFESIGN() {
+	name = "DF.ESIGN"
+	aid = +"A000000167455349474E"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	dataSets {
+		add {
+			name = "EF.C.CH.AUT.R2048"
+			description =
+				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUT.R2048 to PrK.CH.AUT.R2048."
+			path = +"C500"
+			shortEf = 0x01u
+
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+// 						 AUT_CMS
 			}
 		}
 
 		add {
-			appDFESIGN()
-			selectAcl {
-				alwaysAcl()
-			}
+			name = "EF.C.CH.AUTN.R2048"
+			description =
+				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUTN.R2048 to PrK.CH.AUTN.R2048."
+			path = +"C509"
+			shortEf = 0x09u
 
-			dataSets {
-				add {
-					name = "EF.C.CH.AUT.R2048"
-					description =
-						"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUT.R2048 to PrK.CH.AUT.R2048."
-					path = +"C500"
-					shortEf = 0x01u
-
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-// 						 AUT_CMS
-					}
-				}
-
-				add {
-					name = "EF.C.CH.AUTN.R2048"
-					description =
-						"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUTN.R2048 to PrK.CH.AUTN.R2048."
-					path = +"C509"
-					shortEf = 0x09u
-
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1802,35 +1807,35 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						AUT_CMS
-					}
-				}
-				add {
-					name = " EF.C.CH.ENC.R2048"
-					description =
-						"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENC.R2048 to PrK.CH.ENC.R2048."
-					path = +"C200"
-					shortEf = 0x02u
+			}
+		}
+		add {
+			name = " EF.C.CH.ENC.R2048"
+			description =
+				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENC.R2048 to PrK.CH.ENC.R2048."
+			path = +"C200"
+			shortEf = 0x02u
 
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-					}
-				}
-				add {
-					name = " EF.C.CH.ENCV.R2048"
-					description =
-						"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENCV.R2048 to PrK.CH.ENCV.R2048."
-					path = +"C50A"
-					shortEf = 0x0Au
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+			}
+		}
+		add {
+			name = " EF.C.CH.ENCV.R2048"
+			description =
+				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENCV.R2048 to PrK.CH.ENCV.R2048."
+			path = +"C50A"
+			shortEf = 0x0Au
 
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
 // 							or(
 // 								{
@@ -1878,39 +1883,39 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 							)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						AUT_CMS
-					}
-				}
-				add {
-					name = "EF.C.CH.AUT.E256"
-					description =
-						"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
-					path = +"C504"
-					shortEf = 0x04u
+			}
+		}
+		add {
+			name = "EF.C.CH.AUT.E256"
+			description =
+				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
+			path = +"C504"
+			shortEf = 0x04u
 
-					readAcl {
-						paceProtectedAcl()
+			readAcl {
+				paceProtectedAcl()
 // 						CONTACTLESS:
 // 						OR AUT_CMS
-					}
+			}
 
-					writeAcl {
-						neverAcl()
+			writeAcl {
+				neverAcl()
 // 						AUT_CMS
-					}
-				}
-				add {
-					name = "EF.C.CH.AUTN.E256"
-					description =
-						"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
-					path = +"C50B"
-					shortEf = 0x0Bu
+			}
+		}
+		add {
+			name = "EF.C.CH.AUTN.E256"
+			description =
+				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
+			path = +"C50B"
+			shortEf = 0x0Bu
 
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
 // 						or(
 // 							{
@@ -1958,36 +1963,36 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
+			}
 
-					writeAcl {
-						neverAcl()
+			writeAcl {
+				neverAcl()
 // 						AUT_CMS
-					}
-				}
-				add {
-					name = "EF.C.CH.ENC.E256"
-					description =
-						"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENC.E256 to PrK.CH.ENC.E256."
-					path = +"C205"
-					shortEf = 0x05u
+			}
+		}
+		add {
+			name = "EF.C.CH.ENC.E256"
+			description =
+				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENC.E256 to PrK.CH.ENC.E256."
+			path = +"C205"
+			shortEf = 0x05u
 
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-					}
-				}
-				add {
-					name = "EF.C.CH.ENCV.E256"
-					description =
-						"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENCV.E256 to PrK.CH.ENCV.E256."
-					path = +"C50C"
-					shortEf = 0x0Cu
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+			}
+		}
+		add {
+			name = "EF.C.CH.ENCV.E256"
+			description =
+				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENCV.E256 to PrK.CH.ENCV.E256."
+			path = +"C50C"
+			shortEf = 0x0Cu
 
-					readAcl {
-						mrPinHomePaceProtectedAcl()
+			readAcl {
+				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
 // 						or(
 // 							{
@@ -2035,483 +2040,479 @@ val EgkCif by lazy {
 // 									)
 // 								},
 // 						)
-					}
-					writeAcl {
-						neverAcl()
+			}
+			writeAcl {
+				neverAcl()
 // 						AUT_CMS
-					}
-				}
+			}
+		}
+	}
+
+	dids {
+		signature {
+			name = prk_ch_aut_r2048_signPKCS1_V1_5
+			scope = DidScope.GLOBAL
+
+			signAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							or(
+// 								{
+// 									activeDidState("MRPIN.home")
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
+
+// 						CONTACTLESS:
+
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.home"),
+// 									)
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("AUT_PACE"),
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
 			}
 
-			dids {
-				signature {
-					name = prk_ch_aut_r2048_signPKCS1_V1_5
-					scope = DidScope.GLOBAL
-
-					signAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							or(
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
-
-// 						CONTACTLESS:
-
-// 							or(
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
-// 									)
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("AUT_PACE"),
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
-					}
-
-					parameters {
-						key {
-							keyRef = 0x02u
-							keySize = 2048
-						}
-
-						certificates("EF.C.CH.AUT.R2048")
-
-						signatureAlgorithm = "SHA256withRSA"
-
-						sigGen {
-							standard {
-								cardAlgRef = +"02"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
-					}
+			parameters {
+				key {
+					keyRef = 0x02u
+					keySize = 2048
 				}
 
-				signature {
-					name = prk_ch_aut_r2048_signPSS
-					scope = DidScope.GLOBAL
+				certificates("EF.C.CH.AUT.R2048")
 
-					signAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							or(
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
+				signatureAlgorithm = "SHA256withRSA"
 
-// 						CONTACTLESS:
-// 							or(
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
-// 									)
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("AUT_PACE"),
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
-					}
-
-					parameters {
-						key {
-							keyRef = 0x02u
-							keySize = 2048
-						}
-
-						certificates("EF.C.CH.AUT.R2048")
-						signatureAlgorithm = "SHA256withRSAandMGF1"
-						sigGen {
-							standard {
-								cardAlgRef = +"05"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
-					}
-				}
-
-				signature {
-					name = prk_ch_autn_r2048_signPSS
-					scope = DidScope.GLOBAL
-
-					signAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							or(
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.8")
-// 								)
-// 							},
-// 								{
-// 									activeDidState("flagTI.9")
-// 								},
-// 							)
-
-// 						CONTACTLESS:
-// 							or(
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.8"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("flagTI.9"),
-// 									)
-// 								},
-// 							)
-					}
-
-					parameters {
-						key {
-							keyRef = 0x06u
-							keySize = 2048
-						}
-						certificates("EF.C.CH.AUTN.R2048")
-						signatureAlgorithm = "SHA256withRSAandMGF1"
-
-						sigGen {
-							standard {
-								cardAlgRef = +"05"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
-					}
-				}
-
-				encrypt {
-					name = prk_ch_enc_r2048
-					scope = DidScope.LOCAL
-
-					encipherAcl {
-						neverAcl()
-					}
-
-					parameters {
-
-						key {
-							keyRef = 0x03u
-							keySize = 2048
-						}
-
-						encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
-						certificates("EF.C.CH.ENC.R2048")
-						cardAlgRef = +"85"
-					}
-				}
-
-				encrypt {
-					name = prk_ch_encv_r2048
-					scope = DidScope.LOCAL
-
-					encipherAcl {
-						neverAcl()
-					}
-
-					parameters {
-
-						key {
-							keyRef = 0x07u
-							keySize = 2048
-						}
-
-						encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
-						certificates("EF.C.CH.ENCV.R2048")
-						cardAlgRef = +"85"
-					}
-				}
-
-				signature {
-					name = prk_ch_aut_e256
-					scope = DidScope.GLOBAL
-
-					signAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							or(
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
-// 						CONTACTLESS:
-// 							or(
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
-// 									)
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("AUT_PACE"),
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.12")
-// 								)
-// 							}
-// 							)
-					}
-
-					parameters {
-						key {
-							keyRef = 0x04u
-							keySize = 2048
-						}
-
-						certificates("EF.C.CH.AUT.E256")
-
-						signatureAlgorithm = "SHA256withECDSA"
-
-						sigGen {
-							standard {
-								cardAlgRef = +"00"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
-					}
-				}
-
-				signature {
-					name = prk_ch_autn_e256
-					scope = DidScope.GLOBAL
-
-					signAcl {
-						mrPinHomePaceProtectedAcl()
-// 						CONTACT:
-// 							or(
-// 								{
-// 									activeDidState("MRPIN.home")
-// 								},
-// 							{
-// 								and(
-// 									activeDidState("PIN.CH"),
-// 									activeDidState("flagTI.8")
-// 								)
-// 							},
-// 								{
-// 									activeDidState("flagTI.9")
-// 								},
-// 							)
-
-// 						CONTACTLESS:
-// 							or(
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("MRPIN.home"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("PIN.CH"),
-// 										activeDidState("flagTI.8"),
-// 									)
-// 								},
-// 								{
-// 									and(
-// 										activeDidState("AUT_PACE"),
-// 										activeDidState("flagTI.9"),
-// 									)
-// 								},
-// 							)
-					}
-
-					parameters {
-						key {
-							keyRef = 0x0Bu
-							keySize = 2048
-						}
-						certificates("EF.C.CH.AUTN.E256")
-						signatureAlgorithm = "SHA256withECDSA"
-
-						sigGen {
-							standard {
-								cardAlgRef = +"00"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
+				sigGen {
+					standard {
+						cardAlgRef = +"02"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
 					}
 				}
 			}
 		}
 
-		add {
-			appDFQES()
-			description = "Optional QES application"
+		signature {
+			name = prk_ch_aut_r2048_signPSS
+			scope = DidScope.GLOBAL
 
-			selectAcl {
-				alwaysAcl()
+			signAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							or(
+// 								{
+// 									activeDidState("MRPIN.home")
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
+
+// 						CONTACTLESS:
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.home"),
+// 									)
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("AUT_PACE"),
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
 			}
 
-			dataSets {
-				add {
-					name = "EF.C.CH.QES.R2048"
-					description =
-						"This file contains a certificate for cryptography with RSA with the public key PuK.CH.QES.R2048 to PrK.CH.QES.R2048."
-					path = +"C000"
-					shortEf = 0x10u
-
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-						// manufacturer-specific
-					}
+			parameters {
+				key {
+					keyRef = 0x02u
+					keySize = 2048
 				}
 
-				add {
-					name = "EF.C.CH.QES.E256"
-					description =
-						"This file contains a certificate for cryptography with elliptic curves with the public key PuK.CH.QES.E256 to PrK.CH.QES.E256."
-					path = +"C006"
-					shortEf = 0x06u
-
-					readAcl {
-						paceProtectedAcl()
-					}
-					writeAcl {
-						neverAcl()
-						// manufacturer-specific
+				certificates("EF.C.CH.AUT.R2048")
+				signatureAlgorithm = "SHA256withRSAandMGF1"
+				sigGen {
+					standard {
+						cardAlgRef = +"05"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
 					}
 				}
 			}
+		}
 
-			dids {
-				pin {
-					name = pinQes
-					scope = DidScope.GLOBAL
+		signature {
+			name = prk_ch_autn_r2048_signPSS
+			scope = DidScope.GLOBAL
 
-					modifyAcl {
-						paceProtectedAcl()
-					}
-					authAcl {
-						paceProtectedAcl()
-					}
+			signAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							or(
+// 								{
+// 									activeDidState("MRPIN.home")
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.8")
+// 								)
+// 							},
+// 								{
+// 									activeDidState("flagTI.9")
+// 								},
+// 							)
 
-					parameters {
-						basePinParams()
-						passwordRef = 0x01u
+// 						CONTACTLESS:
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.home"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.8"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("flagTI.9"),
+// 									)
+// 								},
+// 							)
+			}
+
+			parameters {
+				key {
+					keyRef = 0x06u
+					keySize = 2048
+				}
+				certificates("EF.C.CH.AUTN.R2048")
+				signatureAlgorithm = "SHA256withRSAandMGF1"
+
+				sigGen {
+					standard {
+						cardAlgRef = +"05"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
 					}
 				}
+			}
+		}
 
-				signature {
-					name = prk_ch_qes_r2048
-					scope = DidScope.GLOBAL
+		encrypt {
+			name = prk_ch_enc_r2048
+			scope = DidScope.LOCAL
 
-					signAcl {
-						pinProtectedPaceAcl("PIN.QES")
-					}
+			encipherAcl {
+				neverAcl()
+			}
 
-					parameters {
-						key {
-							keyRef = 0x04u
-							keySize = 2048
-						}
-
-						signatureAlgorithm = "SHA256withRSAandMGF1"
-						sigGen {
-							standard {
-								cardAlgRef = +"05"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
-					}
+			parameters {
+				key {
+					keyRef = 0x03u
+					keySize = 2048
 				}
 
-				signature {
-					name = prk_ch_qes_e256
-					scope = DidScope.GLOBAL
+				encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
+				certificates("EF.C.CH.ENC.R2048")
+				cardAlgRef = +"85"
+			}
+		}
 
-					signAcl {
-						pinProtectedPaceAcl("PIN.QES")
+		encrypt {
+			name = prk_ch_encv_r2048
+			scope = DidScope.LOCAL
+
+			encipherAcl {
+				neverAcl()
+			}
+
+			parameters {
+				key {
+					keyRef = 0x07u
+					keySize = 2048
+				}
+
+				encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
+				certificates("EF.C.CH.ENCV.R2048")
+				cardAlgRef = +"85"
+			}
+		}
+
+		signature {
+			name = prk_ch_aut_e256
+			scope = DidScope.GLOBAL
+
+			signAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							or(
+// 								{
+// 									activeDidState("MRPIN.home")
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
+// 						CONTACTLESS:
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.home"),
+// 									)
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("AUT_PACE"),
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.12")
+// 								)
+// 							}
+// 							)
+			}
+
+			parameters {
+				key {
+					keyRef = 0x04u
+					keySize = 2048
+				}
+
+				certificates("EF.C.CH.AUT.E256")
+
+				signatureAlgorithm = "SHA256withECDSA"
+
+				sigGen {
+					standard {
+						cardAlgRef = +"00"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
 					}
+				}
+			}
+		}
 
-					parameters {
+		signature {
+			name = prk_ch_autn_e256
+			scope = DidScope.GLOBAL
 
-						key {
-							keyRef = 0x06u
-							keySize = 2048
-						}
+			signAcl {
+				mrPinHomePaceProtectedAcl()
+// 						CONTACT:
+// 							or(
+// 								{
+// 									activeDidState("MRPIN.home")
+// 								},
+// 							{
+// 								and(
+// 									activeDidState("PIN.CH"),
+// 									activeDidState("flagTI.8")
+// 								)
+// 							},
+// 								{
+// 									activeDidState("flagTI.9")
+// 								},
+// 							)
 
-						signatureAlgorithm = "SHA256withECDSA"
+// 						CONTACTLESS:
+// 							or(
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("MRPIN.home"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("PIN.CH"),
+// 										activeDidState("flagTI.8"),
+// 									)
+// 								},
+// 								{
+// 									and(
+// 										activeDidState("AUT_PACE"),
+// 										activeDidState("flagTI.9"),
+// 									)
+// 								},
+// 							)
+			}
 
-						sigGen {
-							standard {
-								cardAlgRef = +"00"
-								info(
-									SignatureGenerationInfoType.MSE_KEY_DS,
-									SignatureGenerationInfoType.PSO_CDS,
-								)
-							}
-						}
+			parameters {
+				key {
+					keyRef = 0x0Bu
+					keySize = 2048
+				}
+				certificates("EF.C.CH.AUTN.E256")
+				signatureAlgorithm = "SHA256withECDSA"
+
+				sigGen {
+					standard {
+						cardAlgRef = +"00"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
 					}
 				}
 			}
 		}
 	}
-	b.build()
+}
+
+private fun ApplicationScope.appDFQES() {
+	name = "DF.QES"
+	aid = +"D27600006601"
+
+	description = "Optional QES application"
+
+	selectAcl {
+		alwaysAcl()
+	}
+
+	dataSets {
+		add {
+			name = "EF.C.CH.QES.R2048"
+			description =
+				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.QES.R2048 to PrK.CH.QES.R2048."
+			path = +"C000"
+			shortEf = 0x10u
+
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+				// manufacturer-specific
+			}
+		}
+
+		add {
+			name = "EF.C.CH.QES.E256"
+			description =
+				"This file contains a certificate for cryptography with elliptic curves with the public key PuK.CH.QES.E256 to PrK.CH.QES.E256."
+			path = +"C006"
+			shortEf = 0x06u
+
+			readAcl {
+				paceProtectedAcl()
+			}
+			writeAcl {
+				neverAcl()
+				// manufacturer-specific
+			}
+		}
+	}
+
+	dids {
+		pin {
+			name = pinQes
+			scope = DidScope.GLOBAL
+
+			modifyAcl {
+				paceProtectedAcl()
+			}
+			authAcl {
+				paceProtectedAcl()
+			}
+
+			parameters {
+				basePinParams()
+				passwordRef = 0x01u
+			}
+		}
+
+		signature {
+			name = prk_ch_qes_r2048
+			scope = DidScope.GLOBAL
+
+			signAcl {
+				pinProtectedPaceAcl("PIN.QES")
+			}
+
+			parameters {
+				key {
+					keyRef = 0x04u
+					keySize = 2048
+				}
+
+				signatureAlgorithm = "SHA256withRSAandMGF1"
+				sigGen {
+					standard {
+						cardAlgRef = +"05"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
+					}
+				}
+			}
+		}
+
+		signature {
+			name = prk_ch_qes_e256
+			scope = DidScope.GLOBAL
+
+			signAcl {
+				pinProtectedPaceAcl("PIN.QES")
+			}
+
+			parameters {
+				key {
+					keyRef = 0x06u
+					keySize = 2048
+				}
+
+				signatureAlgorithm = "SHA256withECDSA"
+
+				sigGen {
+					standard {
+						cardAlgRef = +"00"
+						info(
+							SignatureGenerationInfoType.MSE_KEY_DS,
+							SignatureGenerationInfoType.PSO_CDS,
+						)
+					}
+				}
+			}
+		}
+	}
 }

@@ -1,7 +1,6 @@
 package org.openecard.cif.bundled
 
 import org.openecard.cif.definition.CardProtocol
-import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
@@ -113,7 +112,7 @@ object GematikBuildingBlocks {
 	}
 
 	internal fun PinDidParametersScope.basePinParams() {
-		pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
+		pwdFlags = setOf()
 		pwdType = PasswordType.ISO_9564_1
 		minLength = 6
 		maxLength = 8

@@ -13,7 +13,6 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
-import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
@@ -898,9 +897,11 @@ private fun ApplicationScope.appDFAUTO() {
 			parameters {
 				passwordRef = 0x01u
 				pwdType = PasswordType.ISO_9564_1
-				pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
+				pwdFlags = setOf()
 				minLength = 5
 				maxLength = 8
+				storedLength = 8
+				padChar = 0xFFu
 			}
 		}
 

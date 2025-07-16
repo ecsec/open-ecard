@@ -52,7 +52,6 @@ class PcscTerminalConnection(
 		}
 
 	private val featureSet by lazy {
-
 		val info = FeatureInfo(this)
 		info.featureMap.toFeatures(this)
 	}

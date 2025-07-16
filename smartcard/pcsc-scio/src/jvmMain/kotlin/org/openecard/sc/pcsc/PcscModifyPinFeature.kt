@@ -10,8 +10,9 @@ class PcscModifyPinFeature(
 	private val modifyPinDirectCtrlCode: Int,
 ) : ModifyPinFeature {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun modifyPin(request: PinModify): ResponseApdu =
+	override suspend fun modifyPin(request: PinModify): ResponseApdu =
 		mapScioError {
+			// TODO: make cancellable
 			val commandData = request.bytes
 			val response = terminalConnection.controlCommand(modifyPinDirectCtrlCode, commandData.toByteArray())
 			response.toResponseApdu()

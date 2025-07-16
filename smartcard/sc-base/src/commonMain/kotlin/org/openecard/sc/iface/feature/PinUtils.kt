@@ -1,5 +1,7 @@
 package org.openecard.sc.iface.feature
 
+import org.openecard.utils.common.throwIf
+
 /**
  * Implements convenience methods for dealing with PINs.
  *
@@ -73,62 +75,61 @@ object PinUtils {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun createPinMask(attributes: PasswordAttributes): UByteArray? {
-		// extract attributes
-		val pwdType = attributes.pwdType
-		val storedLen = attributes.storedLength
-
 		// only proceed if we need to pad
-		return attributes.padChar?.let {
-			var padChar = it
-			if (storedLen <= 0) {
-				throw IllegalArgumentException("PIN mask can only be created when storage size is known.")
-			}
+		if (needsPadding(attributes)) {
+			// extract attributes
+			val pwdType = attributes.pwdType
+			val storedLen = requireNotNull(attributes.storedLength) { "PIN mask can only be created when storage size is known" }
+			var padChar = requireNotNull(attributes.padChar) { "PIN mask can only be created when pad char is defined" }
 
 			// they are all the same except half nibble which
 			if (PasswordType.HALF_NIBBLE_BCD == pwdType) {
 				padChar = (padChar.toUInt() or 0xF0u).toUByte()
 			}
 
-			val mask = UByteArray(storedLen) { padChar }
+			val mask = UByteArray(storedLen.toInt()) { padChar }
 
 			// iso needs a sligth correction
 			if (PasswordType.ISO_9564_1 == pwdType) {
 				mask[0] = 0x20u
 			}
 
-			mask
+			return mask
+		} else {
+			return null
 		}
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	fun encodeTextPin(
 		rawPin: String,
-		minLen: Int,
-		storedLen: Int,
-		maxLen: Int,
+		minLen: UInt,
+		storedLen: UInt?,
+		maxLen: UInt?,
 		padChar: UByte?,
 	): UByteArray {
 		val needsPadding = padChar != null
 		// perform some basic checks
-		if (needsPadding && storedLen <= 0) {
-			throw IllegalArgumentException("Padding is required, but no stored length is given.")
+		if (needsPadding) {
+			requireNotNull(storedLen)
+			throwIf(storedLen <= 0u) { IllegalArgumentException("Padding is required, but no stored length is given") }
 		}
-		if (rawPin.length < minLen) {
-			throw IllegalArgumentException("Entered PIN is too short, enter at least $minLen characters.")
+		if (rawPin.length.toUInt() < minLen) {
+			throw IllegalArgumentException("Entered PIN is too short, enter at least $minLen characters")
 		}
-		if (maxLen > 0 && rawPin.length > maxLen) {
-			throw IllegalArgumentException("Entered PIN is too long, enter at most $maxLen characters.")
+		if (maxLen != null && maxLen > 0u && rawPin.length.toUInt() > maxLen) {
+			throw IllegalArgumentException("Entered PIN is too long, enter at most $maxLen characters")
 		}
 
 		var pinBytes = rawPin.encodeToByteArray().toUByteArray()
-		if (pinBytes.size > storedLen) {
+		if (storedLen != null && pinBytes.size.toUInt() > storedLen) {
 			pinBytes.fill(0u)
-			throw IllegalArgumentException("Storage size for PIN exceeded, only $storedLen bytes are allowed.")
+			throw IllegalArgumentException("Storage size for PIN exceeded, only $storedLen bytes are allowed")
 		}
 
 		// if the pin is too short, append the necessary padding bytes
-		if (needsPadding && pinBytes.size < storedLen) {
-			val missingBytes = storedLen - pinBytes.size
+		if (needsPadding && pinBytes.size.toUInt() < checkNotNull(storedLen)) {
+			val missingBytes = storedLen.toInt() - pinBytes.size
 			val filler = UByteArray(missingBytes)
 			filler.fill(padChar)
 			val pinBytesTmp = pinBytes + filler
@@ -144,14 +145,12 @@ object PinUtils {
 	fun encodeBcdPin(
 		pwdType: PasswordType,
 		rawPin: CharArray,
-		minLen: Int,
-		storedLen: Int,
-		maxLen: Int,
+		minLen: UInt,
+		storedLen: UInt?,
+		maxLen: UInt?,
 		padChar: UByte?,
-	): UByteArray {
-		val needsPadding = padChar != null
-
-		return buildList<UByte> {
+	): UByteArray =
+		buildList {
 			val pinSize = rawPin.size
 
 			if (PasswordType.ISO_9564_1 == pwdType) {
@@ -162,18 +161,18 @@ object PinUtils {
 			if (PasswordType.HALF_NIBBLE_BCD == pwdType) {
 				for (i in 0..<pinSize) {
 					val nextChar = rawPin[i]
-					val digit = (0xF0 or getByte(nextChar).toInt()).toUByte()
+					val digit = (0xF0 or nextChar.digitToInt()).toUByte()
 					add(digit)
 				}
 			} else if (PasswordType.BCD == pwdType || PasswordType.ISO_9564_1 == pwdType) {
 				var i = 0
 				while (i < pinSize) {
 					require(padChar != null)
-					val b1 = (getByte(rawPin[i]).toInt() shl 4).toByte()
+					val b1 = (rawPin[i].digitToInt() shl 4).toByte()
 					var b2 = (padChar.toInt() and 0x0F).toByte() // lower nibble set to pad byte
 					// one char left, replace pad nibble with it
 					if (i + 1 < pinSize) {
-						b2 = (getByte(rawPin[i + 1]).toInt() and 0x0F).toByte()
+						b2 = (rawPin[i + 1].digitToInt() and 0x0F).toByte()
 					}
 					val b = (b1.toInt() or b2.toInt()).toUByte()
 					add(b)
@@ -182,28 +181,25 @@ object PinUtils {
 			}
 
 			// add padding bytes if needed
-			if (needsPadding && size < storedLen) {
-				val missingBytes = storedLen - size
-				val filler = UByteArray(missingBytes) { padChar }
-				addAll(filler)
+			val needsPadding = padChar != null
+			if (needsPadding) {
+				requireNotNull(storedLen) { "Stored length is missing for a PIN which needs padding" }
+				if (size < storedLen.toInt()) {
+					val missingBytes = storedLen.toInt() - size
+					val filler = UByteArray(missingBytes) { padChar }
+					addAll(filler)
+				} else if (size > storedLen.toInt()) {
+					throw IllegalArgumentException("Size of PIN is bigger than stored length")
+				}
 			}
 		}.toUByteArray()
-	}
-
-	private fun getByte(c: Char): Byte {
-		if (c >= '0' && c <= '9') {
-			return (c.code - '0'.code).toByte()
-		} else {
-			throw IllegalArgumentException("Entered PIN contains invalid characters.")
-		}
-	}
 
 	private fun needsPadding(attributes: PasswordAttributes): Boolean {
 		val pwdType = attributes.pwdType
 		if (PasswordType.ISO_9564_1 == pwdType) {
 			return true
 		} else {
-			val needsPadding = attributes.pwdFlags.contains(PasswordFlags.NEEDS_PADDING)
+			val needsPadding = attributes.padChar != null
 			return needsPadding
 		}
 	}

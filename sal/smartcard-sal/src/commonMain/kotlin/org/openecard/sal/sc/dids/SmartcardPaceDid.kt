@@ -50,11 +50,7 @@ class SmartcardPaceDid(
 		get() = application.channel
 
 	private val hardwarePace: PaceFeature? by lazy {
-		runCatching {
-			channel.card.terminalConnection.feature<PaceFeature>()
-		}.onFailure {
-			log.error(it) { "Failed to request reader features" }
-		}.getOrNull()
+		channel.card.terminalConnection.feature<PaceFeature>()
 	}
 
 	private val efCardAccess by lazy {

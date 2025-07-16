@@ -16,6 +16,7 @@ import org.openecard.sc.utils.UsbLangId
 import org.openecard.utils.common.toUByteArray
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
+import kotlin.coroutines.cancellation.CancellationException
 
 interface ModifyPinFeature : Feature {
 	@Throws(
@@ -29,8 +30,9 @@ interface ModifyPinFeature : Feature {
 		CommError::class,
 		ResetCard::class,
 		RemovedCard::class,
+		CancellationException::class,
 	)
-	fun modifyPin(request: PinModify): ResponseApdu
+	suspend fun modifyPin(request: PinModify): ResponseApdu
 }
 
 interface VerifyPinFeature : Feature {
@@ -45,8 +47,9 @@ interface VerifyPinFeature : Feature {
 		CommError::class,
 		ResetCard::class,
 		RemovedCard::class,
+		CancellationException::class,
 	)
-	fun verifyPin(request: PinVerify): ResponseApdu
+	suspend fun verifyPin(request: PinVerify): ResponseApdu
 }
 
 data class PinVerify(
@@ -135,7 +138,7 @@ data class PinVerify(
 				pinBlockString = pwAttr.toPinBlockString(),
 				pinLengthFormat = pwAttr.toPinLengthFormat(),
 				pinMinSize = pwAttr.minLength.toUByte(),
-				pinMaxSize = pwAttr.maxLength.toUByte(),
+				pinMaxSize = pwAttr.maxLength?.toUByte() ?: UByte.MAX_VALUE,
 				langIndex = lang.code,
 				entryValidationCondition = validationCondition.code,
 			)
@@ -236,7 +239,7 @@ data class PinModify(
 				pinBlockString = pwAttr.toPinBlockString(),
 				pinLengthFormat = pwAttr.toPinLengthFormat(),
 				pinMinSize = pwAttr.minLength.toUByte(),
-				pinMaxSize = pwAttr.maxLength.toUByte(),
+				pinMaxSize = pwAttr.maxLength?.toUByte() ?: UByte.MAX_VALUE,
 				langIndex = lang.code,
 				entryValidationCondition = validationCondition.code,
 			)
@@ -282,8 +285,9 @@ private fun PasswordAttributes.toFormatString(): UByte {
 
 private fun PasswordAttributes.toPinBlockString(): UByte {
 	val bmPinManagement = if (isIsoPin) 4 else 0 // number of bits of the length field
-	val pinSize = if (isIsoPin) storedLength - 1 else storedLength
-	return ((bmPinManagement shl 4) or pinSize).toUByte()
+	val correctedStoredLength = storedLength ?: 0u
+	val pinSize = if (isIsoPin) correctedStoredLength - 1u else correctedStoredLength
+	return ((bmPinManagement shl 4) or pinSize.toInt()).toUByte()
 }
 
 private fun PasswordAttributes.toPinLengthFormat(): UByte {

@@ -37,6 +37,16 @@ data class ChangeReferenceData(
 			)
 
 		@OptIn(ExperimentalUnsignedTypes::class)
+		fun changeOldToNewTemplate(
+			dummyPassword: UByteArray,
+			securityReference: UByte,
+			globalReference: Boolean = true,
+		): UByteArray {
+			val command = changeOldToNew(dummyPassword, dummyPassword, securityReference, globalReference)
+			return command.apdu.toBytes
+		}
+
+		@OptIn(ExperimentalUnsignedTypes::class)
 		fun changeToNew(
 			newData: UByteArray,
 			securityReference: UByte,
@@ -47,5 +57,15 @@ data class ChangeReferenceData(
 				SecurityCommandP2.forQualifier(securityReference, globalReference),
 				newData.toPrintable(),
 			)
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun changeToNewTemplate(
+			dummyPassword: UByteArray,
+			securityReference: UByte,
+			globalReference: Boolean = true,
+		): UByteArray {
+			val command = changeToNew(dummyPassword, securityReference, globalReference)
+			return command.apdu.toBytes
+		}
 	}
 }

@@ -92,6 +92,12 @@ internal class FeatureInfo(
 internal fun Map<ControlCodeType, Int>.toFeatures(terminalConnection: PcscTerminalConnection): Set<Feature> {
 	val result = mutableSetOf<Feature>()
 
+	// abort
+	get(ControlCodeType.ABORT)?.let {
+		// TODO: create abort feature and make it available in the other features
+		// result.add(PcscAbortFeature(terminalConnection, it))
+	}
+
 	// verifyPin
 	get(ControlCodeType.VERIFY_PIN_DIRECT)?.let {
 		result.add(PcscVerifyPinFeature(terminalConnection, it))

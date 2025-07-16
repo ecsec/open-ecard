@@ -29,10 +29,12 @@ fun <E : Exception> throwIf(
 }
 
 fun <T, E : Exception> throwIfNull(
-	obj: T,
+	obj: T?,
 	block: () -> E,
-) {
+): T {
 	if (obj == null) {
 		throw block()
+	} else {
+		return obj
 	}
 }

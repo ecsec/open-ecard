@@ -22,6 +22,8 @@ interface DidDslScope : CifScope {
 
 		fun modifyAcl(content: @CifMarker (AclScope.() -> Unit))
 
+		fun resetAcl(content: @CifMarker (AclScope.() -> Unit))
+
 		fun parameters(content: @CifMarker (PinDidParametersScope.() -> Unit))
 	}
 

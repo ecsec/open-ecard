@@ -1,6 +1,7 @@
 package org.openecard.cif.dsl.builder.did
 
 import org.openecard.cif.definition.acl.AclDefinition
+import org.openecard.cif.definition.acl.NeverAcl
 import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.cif.definition.did.PinDidParameters
 import org.openecard.cif.dsl.api.CifMarker
@@ -14,8 +15,9 @@ class PinDidBuilder :
 	DidBuilder<PinDidDefinition>(),
 	DidDslScope.Pin,
 	Builder<PinDidDefinition> {
-	var authAcl: AclDefinition? = null
-	var modifyAcl: AclDefinition? = null
+	var authAcl: AclDefinition = NeverAcl
+	var modifyAcl: AclDefinition = NeverAcl
+	var resetAcl: AclDefinition = NeverAcl
 	var parameters: PinDidParameters? = null
 
 	override fun authAcl(content: @CifMarker (AclScope.() -> Unit)) {
@@ -30,6 +32,12 @@ class PinDidBuilder :
 		this.modifyAcl = builder.build()
 	}
 
+	override fun resetAcl(content: @CifMarker (AclScope.() -> Unit)) {
+		val builder = AclBuilder()
+		content(builder)
+		this.resetAcl = builder.build()
+	}
+
 	override fun parameters(content: @CifMarker (PinDidParametersScope.() -> Unit)) {
 		val builder = PinDidParametersBuilder()
 		content(builder)
@@ -40,8 +48,9 @@ class PinDidBuilder :
 		PinDidDefinition(
 			name = name,
 			scope = scope,
-			authAcl = requireNotNull(authAcl),
-			modifyAcl = requireNotNull(modifyAcl),
+			authAcl = authAcl,
+			modifyAcl = modifyAcl,
+			resetAcl = resetAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

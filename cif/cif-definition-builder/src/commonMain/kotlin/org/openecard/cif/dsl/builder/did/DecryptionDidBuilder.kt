@@ -1,6 +1,7 @@
 package org.openecard.cif.dsl.builder.did
 
 import org.openecard.cif.definition.acl.AclDefinition
+import org.openecard.cif.definition.acl.NeverAcl
 import org.openecard.cif.definition.did.EncryptionDidParameters
 import org.openecard.cif.definition.did.GenericCryptoDidDefinition
 import org.openecard.cif.dsl.api.CifMarker
@@ -15,7 +16,7 @@ class DecryptionDidBuilder :
 	DidBuilder<GenericCryptoDidDefinition.DecryptionDidDefinition>(),
 	DecryptionDidScope,
 	Builder<GenericCryptoDidDefinition.DecryptionDidDefinition> {
-	var decipherAcl: AclDefinition? = null
+	var decipherAcl: AclDefinition = NeverAcl
 	var parameters: EncryptionDidParameters? = null
 
 	override fun decipherAcl(content: @CifMarker (AclScope.() -> Unit)) {
@@ -34,7 +35,7 @@ class DecryptionDidBuilder :
 		GenericCryptoDidDefinition.DecryptionDidDefinition(
 			name = name,
 			scope = scope,
-			decipherAcl = requireNotNull(decipherAcl),
+			decipherAcl = decipherAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

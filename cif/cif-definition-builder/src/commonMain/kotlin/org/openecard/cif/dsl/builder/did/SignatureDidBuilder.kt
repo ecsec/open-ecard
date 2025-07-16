@@ -1,6 +1,7 @@
 package org.openecard.cif.dsl.builder.did
 
 import org.openecard.cif.definition.acl.AclDefinition
+import org.openecard.cif.definition.acl.NeverAcl
 import org.openecard.cif.definition.did.GenericCryptoDidDefinition
 import org.openecard.cif.definition.did.SignatureDidParameters
 import org.openecard.cif.dsl.api.CifMarker
@@ -14,7 +15,7 @@ class SignatureDidBuilder :
 	DidBuilder<GenericCryptoDidDefinition.SignatureDidDefinition>(),
 	SignatureDidScope,
 	Builder<GenericCryptoDidDefinition.SignatureDidDefinition> {
-	var signAcl: AclDefinition? = null
+	var signAcl: AclDefinition = NeverAcl
 	var parameters: SignatureDidParameters? = null
 
 	override fun signAcl(content: @CifMarker (AclScope.() -> Unit)) {
@@ -33,7 +34,7 @@ class SignatureDidBuilder :
 		GenericCryptoDidDefinition.SignatureDidDefinition(
 			name = name,
 			scope = scope,
-			signAcl = requireNotNull(signAcl),
+			signAcl = signAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

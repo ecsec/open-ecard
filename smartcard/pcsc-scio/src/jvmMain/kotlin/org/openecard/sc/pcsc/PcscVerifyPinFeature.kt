@@ -10,8 +10,9 @@ class PcscVerifyPinFeature(
 	private val verifyPinDirectCode: Int,
 ) : VerifyPinFeature {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun verifyPin(request: PinVerify): ResponseApdu =
+	override suspend fun verifyPin(request: PinVerify): ResponseApdu =
 		mapScioError {
+			// TODO: make cancellable
 			val commandData = request.bytes
 			val response = terminalConnection.controlCommand(verifyPinDirectCode, commandData.toByteArray())
 			response.toResponseApdu()

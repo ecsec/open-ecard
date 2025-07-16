@@ -14,10 +14,17 @@ import org.openecard.sal.iface.Timeout
 import org.openecard.sal.iface.UnsupportedFeature
 import org.openecard.sc.iface.feature.PinCommandError
 import org.openecard.sc.iface.feature.PinStatus
+import org.openecard.sc.utils.UsbLang
+import org.openecard.sc.utils.UsbLangId
 import kotlin.coroutines.cancellation.CancellationException
 
 interface PinDid : AuthenticationDid {
 	val missingModifyAuthentications: MissingAuthentications
+
+	val supportsResetWithoutData: Boolean
+	val supportsResetWithPassword: Boolean
+	val supportsResetWithUnblocking: Boolean
+	val supportsResetWithUnblockingAndPassword: Boolean
 
 	@Throws(
 		NotInitialized::class,
@@ -29,7 +36,21 @@ interface PinDid : AuthenticationDid {
 		Timeout::class,
 		Cancelled::class,
 	)
-	fun capturePasswordInHardware(): Boolean
+	fun verifyPasswordInHardware(): Boolean
+
+	@Throws(
+		NotInitialized::class,
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		RemovedDevice::class,
+		UnsupportedFeature::class,
+		Timeout::class,
+		Cancelled::class,
+	)
+	fun modifyPasswordInHardware(): Boolean
+
+	fun needsOldPasswordForChange(): Boolean
 
 	@Throws(
 		NotInitialized::class,
@@ -77,7 +98,7 @@ interface PinDid : AuthenticationDid {
 		CancellationException::class,
 		PinCommandError::class,
 	)
-	suspend fun verify()
+	suspend fun verify(lang: UsbLangId = DEFAULT_LANGUAGE)
 
 	@Throws(
 		NotInitialized::class,
@@ -94,8 +115,8 @@ interface PinDid : AuthenticationDid {
 		PinCommandError::class,
 	)
 	fun modify(
-		oldPassword: String,
 		newPassword: String,
+		oldPassword: String?,
 	)
 
 	@Throws(
@@ -112,5 +133,44 @@ interface PinDid : AuthenticationDid {
 		CancellationException::class,
 		PinCommandError::class,
 	)
-	suspend fun modify()
+	suspend fun modify(lang: UsbLangId = DEFAULT_LANGUAGE)
+
+	@Throws(
+		NotInitialized::class,
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		UnsupportedFeature::class,
+		RemovedDevice::class,
+		Timeout::class,
+		Cancelled::class,
+		MissingAuthentication::class,
+		SecureMessagingException::class,
+		CancellationException::class,
+		PinCommandError::class,
+	)
+	fun resetPassword(
+		unblockingCode: String?,
+		newPassword: String?,
+	)
+
+	@Throws(
+		NotInitialized::class,
+		NoService::class,
+		DeviceUnavailable::class,
+		SharingViolation::class,
+		UnsupportedFeature::class,
+		RemovedDevice::class,
+		Timeout::class,
+		Cancelled::class,
+		MissingAuthentication::class,
+		SecureMessagingException::class,
+		CancellationException::class,
+		PinCommandError::class,
+	)
+	fun resetPassword(lang: UsbLangId = DEFAULT_LANGUAGE)
+
+	companion object {
+		val DEFAULT_LANGUAGE = UsbLangId(UsbLang.ENGLISH_UNITED_STATES.code)
+	}
 }

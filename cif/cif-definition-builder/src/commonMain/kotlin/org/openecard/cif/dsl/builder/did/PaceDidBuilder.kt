@@ -1,6 +1,7 @@
 package org.openecard.cif.dsl.builder.did
 
 import org.openecard.cif.definition.acl.AclDefinition
+import org.openecard.cif.definition.acl.NeverAcl
 import org.openecard.cif.definition.did.PaceDidDefinition
 import org.openecard.cif.definition.did.PaceDidParameters
 import org.openecard.cif.dsl.api.CifMarker
@@ -14,8 +15,8 @@ class PaceDidBuilder :
 	DidBuilder<PaceDidDefinition>(),
 	DidDslScope.Pace,
 	Builder<PaceDidDefinition> {
-	var authAcl: AclDefinition? = null
-	var modifyAcl: AclDefinition? = null
+	var authAcl: AclDefinition = NeverAcl
+	var modifyAcl: AclDefinition = NeverAcl
 	var parameters: PaceDidParameters? = null
 
 	override fun authAcl(content: @CifMarker (AclScope.() -> Unit)) {
@@ -40,8 +41,8 @@ class PaceDidBuilder :
 		PaceDidDefinition(
 			name = name,
 			scope = scope,
-			authAcl = requireNotNull(authAcl),
-			modifyAcl = requireNotNull(modifyAcl),
+			authAcl = authAcl,
+			modifyAcl = modifyAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

@@ -48,14 +48,14 @@ data class Verify(
 	companion object {
 		fun verifyStatus(
 			securityReference: UByte,
-			globalReference: Boolean = true,
+			globalReference: Boolean,
 		) = Verify(VerifyIns.PLAIN, SecurityCommandP2.forQualifier(securityReference, globalReference), null)
 
 		@OptIn(ExperimentalUnsignedTypes::class)
 		fun verifyPlain(
 			verificationData: UByteArray,
 			securityReference: UByte,
-			globalReference: Boolean = true,
+			globalReference: Boolean,
 		) = Verify(
 			VerifyIns.PLAIN,
 			SecurityCommandP2.forQualifier(securityReference, globalReference),
@@ -63,10 +63,25 @@ data class Verify(
 		)
 
 		@OptIn(ExperimentalUnsignedTypes::class)
+		fun verifyPlainTemplate(
+			dummyPassword: UByteArray,
+			securityReference: UByte,
+			globalReference: Boolean,
+		): UByteArray {
+			val command =
+				Verify(
+					VerifyIns.PLAIN,
+					SecurityCommandP2.forQualifier(securityReference, globalReference),
+					dummyPassword.toPrintable(),
+				)
+			return command.apdu.toBytes
+		}
+
+		@OptIn(ExperimentalUnsignedTypes::class)
 		fun verifyBiometric(
 			verificationDataObject: Tlv,
 			securityReference: UByte,
-			globalReference: Boolean = true,
+			globalReference: Boolean,
 			extendedHeaders: UByteArray? = null,
 		): Verify {
 			val data =

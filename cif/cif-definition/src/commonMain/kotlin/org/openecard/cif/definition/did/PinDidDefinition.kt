@@ -9,19 +9,38 @@ class PinDidDefinition(
 	override val scope: DidScope,
 	val authAcl: AclDefinition,
 	val modifyAcl: AclDefinition,
+	val resetAcl: AclDefinition,
 	val parameters: PinDidParameters,
 ) : DidDefinition
 
 @Serializable
 data class PinDidParameters(
 	val pwdFlags: Set<PasswordFlags>,
-	val pwdType: PasswordType,
+	override val pwdType: PasswordType,
 	val passwordRef: UByte,
-	val minLength: Int,
-	val maxLength: Int?,
-	val storedLength: Int?,
-	val padChar: UByte?,
-)
+	override val minLength: UInt,
+	override val maxLength: UInt?,
+	override val storedLength: UInt?,
+	override val padChar: UByte?,
+	val unblockingParameters: UnblockingParameters?,
+) : PasswordEncodingDefinition
+
+@Serializable
+data class UnblockingParameters(
+	override val pwdType: PasswordType,
+	override val minLength: UInt,
+	override val maxLength: UInt?,
+	override val storedLength: UInt?,
+	override val padChar: UByte?,
+) : PasswordEncodingDefinition
+
+interface PasswordEncodingDefinition {
+	val pwdType: PasswordType
+	val minLength: UInt
+	val maxLength: UInt?
+	val storedLength: UInt?
+	val padChar: UByte?
+}
 
 enum class PasswordType {
 	BCD,
@@ -47,12 +66,6 @@ enum class PasswordFlags {
 	 */
 	UNBLOCK_DISABLED,
 
-	/**
-	 * meaning that, depending on the length of the given password and the stored length, the password may need to be
-	 * padded before being presented to the card
-	 */
-	NEEDS_PADDING,
-
 	// 	/*
 	// 	 * is an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used for unblocking
 	// 	 * purposes, i.e. to reset the retry counter of the related authentication object to its initial value
@@ -60,12 +73,6 @@ enum class PasswordFlags {
 	// UNBLOCKING_PASSWORD,
 	// this is the iso definition, but we use a different one as we don't create PUK DIDs, but rather say a DID may be
 	// used together with a PUK
-
-	/**
-	 * has an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used with unblocking
-	 * commands, i.e. to reset the retry counter of the related authentication object to its initial value
-	 */
-	UNBLOCKING_PASSWORD,
 
 	/**
 	 * is a soPassword , meaning that the password is a Security Officer (administrator) password
@@ -84,4 +91,34 @@ enum class PasswordFlags {
 	 * otherwise only new reference data needs to be presented (exchangeRefData)
 	 */
 	EXCHANGE_REF_DATA,
+
+	/**
+	 * Modify password works with `RESET RETRY COUNTER` instead of `CHANGE REFERENCE DATA`
+	 */
+	MODIFY_WITH_RESET_RETRY_COUNTER,
+
+	/**
+	 * Password modify needs the old password, in order to change it
+	 */
+	MODIFY_NEEDS_OLD_PASSWORD,
+
+	/**
+	 * Password reset works without reference data
+	 */
+	RESET_RETRY_COUNTER_WITHOUT_DATA,
+
+	/**
+	 * Password reset works with unblocking and reference data
+	 */
+	RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+
+	/**
+	 * Password reset works with reference data
+	 */
+	RESET_RETRY_COUNTER_WITH_PASSWORD,
+
+	/**
+	 * Password reset works with unblocking data
+	 */
+	RESET_RETRY_COUNTER_WITH_UNBLOCK,
 }

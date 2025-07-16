@@ -3,7 +3,10 @@ package org.openecard.cif.dsl.builder.did
 import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.PinDidParameters
+import org.openecard.cif.definition.did.UnblockingParameters
+import org.openecard.cif.dsl.api.CifMarker
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
+import org.openecard.cif.dsl.api.did.PinDidPasswordEncodingScope
 import org.openecard.cif.dsl.builder.Builder
 
 class PinDidParametersBuilder :
@@ -37,14 +40,23 @@ class PinDidParametersBuilder :
 		pwdFlags = flags.toSet()
 	}
 
+	override var unblockingPassword: UnblockingParameters? = null
+
+	override fun unblockingPassword(content: @CifMarker (PinDidPasswordEncodingScope.() -> Unit)) {
+		val builder = PinDidUnblockingParametersBuilder()
+		content(builder)
+		unblockingPassword = builder.build()
+	}
+
 	override fun build(): PinDidParameters =
 		PinDidParameters(
 			pwdFlags = pwdFlags,
 			pwdType = pwdType,
 			passwordRef = passwordRef,
-			minLength = minLength,
-			maxLength = maxLength,
-			storedLength = storedLength,
+			minLength = minLength.toUInt(),
+			maxLength = maxLength?.toUInt(),
+			storedLength = storedLength?.toUInt(),
 			padChar = padChar,
+			unblockingParameters = unblockingPassword,
 		)
 }

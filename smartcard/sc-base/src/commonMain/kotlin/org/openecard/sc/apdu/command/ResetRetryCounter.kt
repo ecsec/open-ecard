@@ -63,6 +63,16 @@ class ResetRetryCounter(
 			)
 
 		@OptIn(ExperimentalUnsignedTypes::class)
+		fun resetWithNewDataTemplate(
+			dummyPassword: UByteArray,
+			securityReference: UByte,
+			globalReference: Boolean = true,
+		): UByteArray {
+			val command = resetWithNewData(dummyPassword, securityReference, globalReference)
+			return command.apdu.toBytes
+		}
+
+		@OptIn(ExperimentalUnsignedTypes::class)
 		fun resetNoData(
 			securityReference: UByte,
 			globalReference: Boolean = true,

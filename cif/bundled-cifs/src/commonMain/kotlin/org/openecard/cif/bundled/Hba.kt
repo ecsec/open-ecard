@@ -1,19 +1,78 @@
 package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
-import org.openecard.cif.definition.CardProtocol
+import org.openecard.cif.bundled.GematikAcls.alwaysAcl
+import org.openecard.cif.bundled.GematikAcls.basePinParams
+import org.openecard.cif.bundled.GematikAcls.cmsCupProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.cmsProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.neverAcl
+import org.openecard.cif.bundled.GematikAcls.paceCmsCupProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.paceCmsProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.paceProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.pinChPaceProtectedAcl
+import org.openecard.cif.bundled.GematikAcls.pinProtectedPaceAcl
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
-import org.openecard.cif.dsl.api.acl.AclBoolTreeBuilder.activeDidState
-import org.openecard.cif.dsl.api.acl.AclScope
+import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
 
-@OptIn(ExperimentalUnsignedTypes::class)
+private fun ApplicationScope.appMf() {
+	name = "MF"
+	aid = +"D2760001448000"
+}
+
+private fun ApplicationScope.appDFHPA() {
+	name = "DF.HPA"
+	aid = +"D27600014602"
+}
+
+private fun ApplicationScope.appDFQES() {
+	name = "DF.QES"
+	aid = +"D27600006601"
+	description = "Optional QES application"
+}
+
+private fun ApplicationScope.appDFESIGN() {
+	name = "DF.ESIGN"
+	aid = +"A000000167455349474E"
+}
+
+private fun ApplicationScope.appDFCIAQES() {
+	name = "DF.CIA.QES"
+	aid = +"E828BD080FD27600006601"
+}
+
+private fun ApplicationScope.appDFCIAESIGN() {
+	name = "DF.CIA.ESIGN"
+	aid = +"E828BD080FA000000167455349474E"
+}
+
+private fun ApplicationScope.appDFAUTO() {
+	name = "DF.AUTO"
+	aid = +"D27600014603"
+}
+
+private val autPace = "AUT_PACE"
+private val pinCh = "PIN.CH"
+private val pinQes = "PIN.QES"
+private val prk_hp_qes_r2048 = "PrK.HP.QES.R2048"
+private val prk_hp_qes_e256 = "PrK.HP.QES.E256"
+private val prk_hp_aut_r2048_signPKCS1_V1_5 = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
+private val prk_hp_aut_r2048_signPSS = "PrK.HP.AUT.R2048_signPSS"
+private val prk_hp_enc_r2048 = "PrK.HP.ENC.R2048"
+private val prk_hp_aut_e256 = "PrK.HP.AUT.E256"
+private val prk_hp_sig_r2048 = "PrK.HP.SIG.R2048"
+private val prk_hp_sig_e256 = "PrK.HP.SIG.E256"
+private val pinAuto = "PIN.AUTO"
+private val pinSo = "PIN.SO"
+private val prk_hp_auto_r3072_signPKCS1_V1_5 = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
+private val prk_hp_auto_r3072_signPSS = "PrK.HP.AUTO.R3072_signPSS"
+
 val HbaCif by lazy {
 	val b = CardInfoBuilder()
 
@@ -30,48 +89,9 @@ val HbaCif by lazy {
 	b.applications {
 
 		add {
-			name = "MF"
-			aid = +"D2760001448000"
+			appMf()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-
-			// add datasets
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-					// or(
-					// 	{ activeDidState("AUT_PACE") },
-					// 	 { activeDidState("AUT_CMS") },
-					// )
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
-					// activeDidState("AUT_CMS")
-				}
-			}
-			val defaultModifyAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultAuthAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -83,14 +103,10 @@ val HbaCif by lazy {
 					path = +"2F01"
 					shortEf = 0x1Du
 					readAcl {
-						acl(CardProtocol.Any) {
-							Always
-						}
+						alwaysAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Any) {
-							Always
-						}
+						alwaysAcl()
 					}
 				}
 
@@ -101,14 +117,10 @@ val HbaCif by lazy {
 					path = +"011C"
 					shortEf = 0x1Cu
 					readAcl {
-						acl(CardProtocol.Any) {
-							Always
-						}
+						alwaysAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						neverAcl()
 					}
 				}
 
@@ -120,10 +132,10 @@ val HbaCif by lazy {
 					path = +"2F00"
 					shortEf = 0x1Eu
 					readAcl {
-						defaultReadAcl()
+						paceCmsProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsProtectedAcl()
 					}
 				}
 
@@ -135,17 +147,10 @@ val HbaCif by lazy {
 					path = +"2F02"
 					shortEf = 0x02u
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							activeDidState("AUT_PACE")
-						}
+						paceProtectedAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						neverAcl()
 					}
 				}
 
@@ -161,16 +166,11 @@ val HbaCif by lazy {
 					path = +"2F11"
 					shortEf = 0x11u
 					readAcl {
-						acl(CardProtocol.Any) {
-							Always
-						}
+						alwaysAcl()
 					}
 
 					writeAcl {
-						acl(CardProtocol.Any) {
-							// activeDidState("AUT_CMS")
-							Never
-						}
+						cmsProtectedAcl()
 					}
 				}
 
@@ -183,12 +183,10 @@ val HbaCif by lazy {
 					path = +"2F07"
 					shortEf = 0x07u
 					readAcl {
-						defaultReadAcl()
-// 						AUT_CMS   OR   AUT_CUP   OR   AUT_PACE
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
-// 						AUT_CMS   OR   AUT_CUP
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -201,12 +199,10 @@ val HbaCif by lazy {
 					path = +"2F06"
 					shortEf = 0x06u
 					readAcl {
-						defaultReadAcl()
-// 						AUT_CMS  OR AUT_CUP OR AUT_PACE
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
-// 						AUT_CMS OR AUT_CUP
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -219,30 +215,24 @@ val HbaCif by lazy {
 					path = +"2F09"
 					shortEf = 0x09u
 					readAcl {
-						defaultReadAcl()
-// 						AUT_CMS  OR AUT_CUP OR AUT_PACE
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
-// 						AUT_CMS OR AUT_CUP
+						cmsCupProtectedAcl()
 					}
 				}
 			}
 
 			dids {
 				pace {
-					name = "AUT_PACE"
+					name = autPace
 					scope = DidScope.GLOBAL
 					modifyAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						neverAcl()
 					}
 
 					authAcl {
-						acl(CardProtocol.Any) {
-							Always
-						}
+						alwaysAcl()
 					}
 					parameters {
 						passwordRef = PacePinId.CAN
@@ -252,24 +242,17 @@ val HbaCif by lazy {
 				}
 
 				pin {
-					name = "PIN.CH"
+					name = pinCh
 					scope = DidScope.GLOBAL
 					modifyAcl {
-						// didUpdate
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						// DIDAuthenticate
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 					parameters {
-						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
-						pwdType = PasswordType.ISO_9564_1
+						basePinParams()
 						passwordRef = 0x01u
-						minLength = 6
-						maxLength = 8
-						storedLength = 8
-						padChar = 0xFFu
 					}
 				}
 
@@ -314,12 +297,9 @@ val HbaCif by lazy {
 		}
 
 		add {
-			name = "DF.HPA"
-			aid = +"D27600014602"
+			appDFHPA()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -332,71 +312,19 @@ val HbaCif by lazy {
 					path = +"D001"
 					shortEf = 0x01u
 					readAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							Always
-						}
-
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("AUT_PACE")
-						}
+						paceProtectedAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-
-						acl(CardProtocol.Grouped.CONTACT) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinProtectedPaceAcl(pinCh)
 					}
 				}
 			}
 		}
 
 		add {
-			name = "DF.QES"
-			aid = +"D27600006601"
-			description = "Optional QES application"
-
+			appDFQES()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
-				}
-			}
-
-			val defaultModifyAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultAuthAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -410,10 +338,10 @@ val HbaCif by lazy {
 					shortEf = 0x10u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 						// manufacturer-specific
 					}
 				}
@@ -428,10 +356,10 @@ val HbaCif by lazy {
 					shortEf = 0x06u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 						// manufacturer-specific
 					}
 				}
@@ -445,10 +373,10 @@ val HbaCif by lazy {
 					shortEf = 0x05u
 
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 						// manufacturer-specific
 					}
 				}
@@ -457,15 +385,15 @@ val HbaCif by lazy {
 			dids {
 
 				pin {
-					name = "PIN.QES"
+					name = pinQes
 					scope = DidScope.GLOBAL
 
 					modifyAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 
 					parameters {
@@ -476,22 +404,11 @@ val HbaCif by lazy {
 					}
 				}
 				signature {
-					name = "PrK.HP.QES.R2048"
+					name = prk_hp_qes_r2048
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.QES")
-						}
-
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.QES")
-								},
-							)
-						}
+						pinProtectedPaceAcl("PIN.QES")
 					}
 
 					parameters {
@@ -505,27 +422,16 @@ val HbaCif by lazy {
 								cardAlgRef = +"05"
 							}
 						}
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 					}
 				}
 
 				signature {
-					name = "PrK.HP.QES.E256"
+					name = prk_hp_qes_e256
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.QES")
-						}
-
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.QES")
-								},
-							)
-						}
+						pinProtectedPaceAcl("PIN.QES")
 					}
 
 					parameters {
@@ -540,34 +446,16 @@ val HbaCif by lazy {
 								cardAlgRef = +"00"
 							}
 						}
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 					}
 				}
 			}
 		}
 
 		add {
-			name = "DF.ESIGN"
-			aid = +"A000000167455349474E"
+			appDFESIGN()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-// 					AUT_CMS OR AUT_CUP OR AUT_PACE
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
-// 						AUT_CMS OR AUT_CUP
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -579,10 +467,10 @@ val HbaCif by lazy {
 					shortEf = 0x01u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -594,10 +482,10 @@ val HbaCif by lazy {
 					shortEf = 0x02u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -609,11 +497,11 @@ val HbaCif by lazy {
 					shortEf = 0x06u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -625,10 +513,10 @@ val HbaCif by lazy {
 					shortEf = 0x05u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -640,10 +528,10 @@ val HbaCif by lazy {
 					shortEf = 0x10u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 
@@ -655,10 +543,10 @@ val HbaCif by lazy {
 					shortEf = 0x07u
 
 					readAcl {
-						defaultReadAcl()
+						paceCmsCupProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						cmsCupProtectedAcl()
 					}
 				}
 			}
@@ -666,21 +554,11 @@ val HbaCif by lazy {
 			dids {
 
 				signature {
-					name = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
+					name = prk_hp_aut_r2048_signPKCS1_V1_5
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinChPaceProtectedAcl()
 					}
 
 					parameters {
@@ -691,7 +569,7 @@ val HbaCif by lazy {
 
 						certificates("EF.C.HP.AUT.R2048")
 
-						signatureAlgorithm = "SHA256withRSAandMGF1"
+						signatureAlgorithm = "SHA256withRSA"
 
 						sigGen {
 							standard {
@@ -705,21 +583,11 @@ val HbaCif by lazy {
 					}
 				}
 				signature {
-					name = "PrK.HP.AUT.R2048_signPSS"
+					name = prk_hp_aut_r2048_signPSS
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinChPaceProtectedAcl()
 					}
 
 					parameters {
@@ -730,7 +598,7 @@ val HbaCif by lazy {
 						}
 
 						certificates("EF.C.HP.AUT.R2048")
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 						sigGen {
 							standard {
 								cardAlgRef = +"05"
@@ -744,13 +612,11 @@ val HbaCif by lazy {
 				}
 
 				encrypt {
-					name = "PrK.HP.ENC_rsaDecipherOaep"
+					name = prk_hp_enc_r2048
 					scope = DidScope.LOCAL
 
 					encipherAcl {
-						acl(CardProtocol.Any) {
-							Never
-						}
+						neverAcl()
 					}
 
 					parameters {
@@ -760,28 +626,18 @@ val HbaCif by lazy {
 							keySize = 2048
 						}
 
-						encryptionAlgorithm = "OAEPWithSHA-256AndMGF1Padding"
+						encryptionAlgorithm = "RSA/NONE/OAEPWithSHA256AndMGF1Padding"
 						certificates("EF.C.HP.ENC.R2048")
 						cardAlgRef = +"85"
 					}
 				}
 
 				signature {
-					name = "PrK.HP.AUT.E256"
+					name = prk_hp_aut_e256
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinChPaceProtectedAcl()
 					}
 
 					parameters {
@@ -792,7 +648,7 @@ val HbaCif by lazy {
 
 						certificates("EF.C.HP.AUT.E256")
 
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 
 						sigGen {
 							standard {
@@ -807,21 +663,11 @@ val HbaCif by lazy {
 				}
 
 				signature {
-					name = "PrK.HP.SIG.R2048"
+					name = prk_hp_sig_r2048
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinChPaceProtectedAcl()
 					}
 
 					parameters {
@@ -832,7 +678,7 @@ val HbaCif by lazy {
 						}
 
 						certificates("EF.C.HP.SIG.R2048")
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 						sigGen {
 							standard {
 								cardAlgRef = +"05"
@@ -846,21 +692,11 @@ val HbaCif by lazy {
 				}
 
 				signature {
-					name = "PrK.HP.SIG.E256"
+					name = prk_hp_sig_e256
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.CH")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.CH")
-								},
-							)
-						}
+						pinChPaceProtectedAcl()
 					}
 
 					parameters {
@@ -871,7 +707,7 @@ val HbaCif by lazy {
 
 						certificates("EF.C.HP.SIG.E256")
 
-						signatureAlgorithm = "SHA256withECDSAandMGF1"
+						signatureAlgorithm = "SHA256withECDSA"
 
 						sigGen {
 							standard {
@@ -888,26 +724,9 @@ val HbaCif by lazy {
 		}
 
 		add {
-			name = "DF.CIA.QES"
-			aid = +"E828BD080FD27600006601"
+			appDFCIAQES()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -916,10 +735,10 @@ val HbaCif by lazy {
 					path = +"5032"
 					shortEf = 0x12u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -927,10 +746,10 @@ val HbaCif by lazy {
 					path = +"5031"
 					shortEf = 0x11u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -938,10 +757,10 @@ val HbaCif by lazy {
 					path = +"5034"
 					shortEf = 0x14u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -949,10 +768,10 @@ val HbaCif by lazy {
 					path = +"5035"
 					shortEf = 0x15u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -960,35 +779,18 @@ val HbaCif by lazy {
 					path = +"5038"
 					shortEf = 0x16u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 			}
 		}
 		add {
-			name = "DF.CIA.ESIGN"
-			aid = +"E828BD080FA000000167455349474E"
+			appDFCIAESIGN()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultWriteAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Any) {
-					Never
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -997,10 +799,10 @@ val HbaCif by lazy {
 					path = +"5032"
 					shortEf = 0x12u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -1008,10 +810,10 @@ val HbaCif by lazy {
 					path = +"5031"
 					shortEf = 0x11u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -1019,10 +821,10 @@ val HbaCif by lazy {
 					path = +"5034"
 					shortEf = 0x14u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -1030,10 +832,10 @@ val HbaCif by lazy {
 					path = +"5035"
 					shortEf = 0x15u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 				add {
@@ -1041,47 +843,18 @@ val HbaCif by lazy {
 					path = +"5038"
 					shortEf = 0x16u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						defaultWriteAcl()
+						neverAcl()
 					}
 				}
 			}
 		}
 		add {
-			name = "DF.AUTO"
-			aid = +"D27600014603"
+			appDFAUTO()
 			selectAcl {
-				acl(CardProtocol.Any) {
-					Always
-				}
-			}
-
-			val defaultReadAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-
-			val defaultModifyAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
-			}
-			val defaultAuthAcl: (AclScope.() -> Unit) = {
-				acl(CardProtocol.Grouped.CONTACT) {
-					Always
-				}
-				acl(CardProtocol.Grouped.CONTACTLESS) {
-					activeDidState("AUT_PACE")
-				}
+				alwaysAcl()
 			}
 
 			dataSets {
@@ -1090,20 +863,10 @@ val HbaCif by lazy {
 					path = +"E001"
 					shortEf = 0x01u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.SO")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.SO")
-								},
-							)
-						}
+						pinProtectedPaceAcl(pinSo)
 					}
 				}
 
@@ -1112,74 +875,53 @@ val HbaCif by lazy {
 					path = +"E002"
 					shortEf = 0x02u
 					readAcl {
-						defaultReadAcl()
+						paceProtectedAcl()
 					}
 					writeAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.SO")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.SO")
-								},
-							)
-						}
+						pinProtectedPaceAcl(pinSo)
 					}
 				}
 			}
 			dids {
 				pin {
-					name = "PIN.AUTO"
+					name = pinAuto
 					scope = DidScope.GLOBAL
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 					parameters {
 						passwordRef = 0x01u
 						pwdType = PasswordType.ISO_9564_1
+						pwdFlags = setOf(PasswordFlags.NEEDS_PADDING)
 						minLength = 5
 						maxLength = 8
 					}
 				}
 
 				pin {
-					name = "PIN.SO"
+					name = pinSo
 					scope = DidScope.GLOBAL
 					modifyAcl {
-						defaultModifyAcl()
+						paceProtectedAcl()
 					}
 					authAcl {
-						defaultAuthAcl()
+						paceProtectedAcl()
 					}
 					parameters {
 						passwordRef = 0x03u
-						pwdType = PasswordType.ISO_9564_1
-						minLength = 6
-						maxLength = 8
+						basePinParams()
 					}
 				}
 
 				signature {
-					name = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
+					name = prk_hp_auto_r3072_signPKCS1_V1_5
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.AUTO")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.AUTO")
-								},
-							)
-						}
+						pinProtectedPaceAcl(pinAuto)
 					}
 
 					parameters {
@@ -1188,7 +930,7 @@ val HbaCif by lazy {
 							keySize = 3072
 						}
 
-						signatureAlgorithm = "SHA256withRSAandMGF1"
+						signatureAlgorithm = "SHA256withRSA"
 
 						sigGen {
 							standard {
@@ -1198,21 +940,11 @@ val HbaCif by lazy {
 					}
 				}
 				signature {
-					name = "PrK.HP.AUTO.R3072_signPSS"
+					name = prk_hp_auto_r3072_signPSS
 					scope = DidScope.GLOBAL
 
 					signAcl {
-						acl(CardProtocol.Grouped.CONTACT) {
-							activeDidState("PIN.AUTO")
-						}
-						acl(CardProtocol.Grouped.CONTACTLESS) {
-							and(
-								{
-									activeDidState("AUT_PACE")
-									activeDidState("PIN.AUTO")
-								},
-							)
-						}
+						pinProtectedPaceAcl(pinAuto)
 					}
 
 					parameters {
@@ -1222,7 +954,7 @@ val HbaCif by lazy {
 							keySize = 3072
 						}
 
-						signatureAlgorithm = "SHA256withRSASSA-PSSandMGF1"
+						signatureAlgorithm = "SHA256withRSAandMGF1"
 						sigGen {
 							standard {
 								cardAlgRef = +"05"

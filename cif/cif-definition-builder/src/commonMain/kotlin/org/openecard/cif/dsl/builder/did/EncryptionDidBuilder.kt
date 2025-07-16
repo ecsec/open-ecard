@@ -17,12 +17,19 @@ class EncryptionDidBuilder :
 	EncryptionDidScope,
 	Builder<GenericCryptoDidDefinition.EncryptionDidDefinition> {
 	var encipherAcl: AclDefinition = NeverAcl
+	var decipherAcl: AclDefinition = NeverAcl
 	var parameters: EncryptionDidParameters? = null
 
 	override fun encipherAcl(content: @CifMarker (AclScope.() -> Unit)) {
 		val builder = AclBuilder()
 		content(builder)
 		encipherAcl = builder.build()
+	}
+
+	override fun decipherAcl(content: @CifMarker (AclScope.() -> Unit)) {
+		val builder = AclBuilder()
+		content(builder)
+		decipherAcl = builder.build()
 	}
 
 	override fun parameters(content: @CifMarker (EncryptionDidParametersScope.() -> Unit)) {
@@ -36,6 +43,7 @@ class EncryptionDidBuilder :
 			name = name,
 			scope = scope,
 			encipherAcl = encipherAcl,
+			decipherAcl = decipherAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

@@ -12,7 +12,6 @@ import org.openecard.sal.iface.dids.SecureChannelDid
 import org.openecard.sal.iface.hasSolution
 import org.openecard.sal.iface.selectForProtocol
 import org.openecard.sal.sc.acl.missingAuthentications
-import org.openecard.sal.sc.dids.SmartcardDecryptDid
 import org.openecard.sal.sc.dids.SmartcardEncryptDid
 import org.openecard.sal.sc.dids.SmartcardPaceDid
 import org.openecard.sal.sc.dids.SmartcardPinDid
@@ -68,18 +67,11 @@ class SmartcardApplication(
 				}
 				is GenericCryptoDidDefinition<*> -> {
 					when (did) {
-						is GenericCryptoDidDefinition.DecryptionDidDefinition -> {
-							val decryptAcl = did.decipherAcl.selectForProtocol(device.channel.card.protocol)
-							if (decryptAcl.hasSolution()) {
-								SmartcardDecryptDid(this, did, decryptAcl)
-							} else {
-								null
-							}
-						}
 						is GenericCryptoDidDefinition.EncryptionDidDefinition -> {
-							val decryptAcl = did.encipherAcl.selectForProtocol(device.channel.card.protocol)
-							if (decryptAcl.hasSolution()) {
-								SmartcardEncryptDid(this, did, decryptAcl)
+							val encryptAcl = did.encipherAcl.selectForProtocol(device.channel.card.protocol)
+							val decryptAcl = did.decipherAcl.selectForProtocol(device.channel.card.protocol)
+							if (encryptAcl.hasSolution() || decryptAcl.hasSolution()) {
+								SmartcardEncryptDid(this, did, encryptAcl, decryptAcl)
 							} else {
 								null
 							}

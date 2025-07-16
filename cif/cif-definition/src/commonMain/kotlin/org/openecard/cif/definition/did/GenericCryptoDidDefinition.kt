@@ -17,12 +17,6 @@ sealed interface GenericCryptoDidDefinition<T : GenericCryptoDidParameters> : Di
 		override val name: String,
 		override val scope: DidScope,
 		val encipherAcl: AclDefinition,
-		override val parameters: EncryptionDidParameters,
-	) : GenericCryptoDidDefinition<EncryptionDidParameters>
-
-	class DecryptionDidDefinition(
-		override val name: String,
-		override val scope: DidScope,
 		val decipherAcl: AclDefinition,
 		override val parameters: EncryptionDidParameters,
 	) : GenericCryptoDidDefinition<EncryptionDidParameters>

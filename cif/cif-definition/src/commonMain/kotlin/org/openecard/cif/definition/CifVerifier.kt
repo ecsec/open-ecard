@@ -87,11 +87,9 @@ class CifVerifier(
 		did: DidDefinition,
 	) {
 		when (did) {
-			is GenericCryptoDidDefinition.DecryptionDidDefinition -> {
-				checkAcl(app, "Did.decipher", did.name, did.decipherAcl.acls)
-			}
 			is GenericCryptoDidDefinition.EncryptionDidDefinition -> {
 				checkAcl(app, "Did.encipher", did.name, did.encipherAcl.acls)
+				checkAcl(app, "Did.decipher", did.name, did.decipherAcl.acls)
 			}
 			is GenericCryptoDidDefinition.SignatureDidDefinition -> {
 				checkAcl(app, "Did.sign", did.name, did.signAcl.acls)

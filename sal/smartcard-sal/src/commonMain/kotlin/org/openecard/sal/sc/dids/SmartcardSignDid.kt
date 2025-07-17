@@ -5,6 +5,7 @@ import org.openecard.cif.definition.did.GenericCryptoDidDefinition
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.SignDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.mapSmartcardError
 
 class SmartcardSignDid(
 	application: SmartcardApplication,
@@ -15,7 +16,8 @@ class SmartcardSignDid(
 	override val missingSignAuthentications: MissingAuthentications
 		get() = missingAuthentications(signAcl)
 
-	override fun sign(data: ByteArray): ByteArray {
-		TODO("Not yet implemented")
-	}
+	override fun sign(data: ByteArray): ByteArray =
+		mapSmartcardError {
+			TODO("Not yet implemented")
+		}
 }

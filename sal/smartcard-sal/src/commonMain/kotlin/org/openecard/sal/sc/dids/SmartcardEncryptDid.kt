@@ -6,6 +6,7 @@ import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.DecryptDid
 import org.openecard.sal.iface.dids.EncryptDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.mapSmartcardError
 
 class SmartcardEncryptDid(
 	application: SmartcardApplication,
@@ -21,11 +22,13 @@ class SmartcardEncryptDid(
 	override val missingDecryptAuthentications: MissingAuthentications
 		get() = missingAuthentications(decipherAcl)
 
-	override fun encrypt(data: ByteArray): ByteArray {
-		TODO("Not yet implemented")
-	}
+	override fun encrypt(data: ByteArray): ByteArray =
+		mapSmartcardError {
+			TODO("Not yet implemented")
+		}
 
-	override fun decrypt(data: ByteArray): ByteArray {
-		TODO("Not yet implemented")
-	}
+	override fun decrypt(data: ByteArray): ByteArray =
+		mapSmartcardError {
+			TODO("Not yet implemented")
+		}
 }

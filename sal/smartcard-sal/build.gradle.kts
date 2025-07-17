@@ -22,7 +22,9 @@ kotlin {
 		}
 
 		jvmTest.dependencies {
+			implementation(project(":smartcard:pcsc-scio"))
 			implementation(project(":smartcard:pace"))
+			implementation(project(":cif:bundled-cifs"))
 		}
 	}
 }

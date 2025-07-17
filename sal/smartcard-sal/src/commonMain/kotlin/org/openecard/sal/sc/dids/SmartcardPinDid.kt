@@ -9,6 +9,7 @@ import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.mapSmartcardError
 import org.openecard.sc.apdu.command.ChangeReferenceData
 import org.openecard.sc.apdu.command.ResetRetryCounter
 import org.openecard.sc.apdu.command.SecurityCommandFailure
@@ -80,33 +81,41 @@ class SmartcardPinDid(
 	}
 
 	private val hardwareVerify: VerifyPinFeature? by lazy {
-		channel.card.terminalConnection.feature<VerifyPinFeature>()
+		mapSmartcardError {
+			channel.card.terminalConnection.feature<VerifyPinFeature>()
+		}
 	}
 
 	override fun verifyPasswordInHardware(): Boolean = hardwareVerify != null
 
 	private val hardwareModify: ModifyPinFeature? by lazy {
-		channel.card.terminalConnection.feature<ModifyPinFeature>()
+		mapSmartcardError {
+			channel.card.terminalConnection.feature<ModifyPinFeature>()
+		}
 	}
 
 	override fun modifyPasswordInHardware(): Boolean = hardwareModify != null
 
-	override fun passwordStatus(): PinStatus {
-		val resp = Verify.verifyStatus(passwordRef, globalRef).transmit(channel)
-		return resp.toPinStatusOrThrow()
-	}
-
-	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun verify(password: String) {
-		val encPin = PinUtils.encodePin(password, passwordAttributes)
-		val resp = Verify.verifyPlain(encPin, passwordRef, globalRef).transmit(channel)
-		if (resp is SecurityCommandFailure) {
-			throw PinCommandError(resp, "Failed to verify password ${did.name}")
+	override fun passwordStatus(): PinStatus =
+		mapSmartcardError {
+			val resp = Verify.verifyStatus(passwordRef, globalRef).transmit(channel)
+			resp.toPinStatusOrThrow()
 		}
-	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override suspend fun verify(lang: UsbLangId) {
+	override fun verify(password: String) =
+		mapSmartcardError {
+			val encPin = PinUtils.encodePin(password, passwordAttributes)
+			val resp = Verify.verifyPlain(encPin, passwordRef, globalRef).transmit(channel)
+			if (resp is SecurityCommandFailure) {
+				throw PinCommandError(resp, "Failed to verify password ${did.name}")
+			}
+			setDidFulfilled()
+		}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override suspend fun verify(lang: UsbLangId) =
+		mapSmartcardError {
 // 		val feat = checkNotNull(hardwareVerify) { "Verify for hardware readers called without having support in the reader" }
 //
 // 		val dummyPin =
@@ -118,14 +127,14 @@ class SmartcardPinDid(
 //
 // 		feat.verifyPin(req)
 
-		TODO("Not yet implemented")
-	}
+			TODO("Not yet implemented")
+		}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun modify(
 		newPassword: String,
 		oldPassword: String?,
-	) {
+	) = mapSmartcardError {
 		val encPinNew = PinUtils.encodePin(newPassword, passwordAttributes)
 		val encPinOld = oldPassword?.let { PinUtils.encodePin(it, passwordAttributes) }
 
@@ -146,7 +155,7 @@ class SmartcardPinDid(
 	override suspend fun modify(
 		modifyMode: PinDid.ModifyMode,
 		lang: UsbLangId,
-	) {
+	) = mapSmartcardError {
 // 		val dummyPin =
 // 			throwIfNull(PinUtils.createPinMask(passwordAttributes)) {
 // 				UnsupportedFeature("Unpadded passwords are not supported with hardware readers")
@@ -183,7 +192,7 @@ class SmartcardPinDid(
 	override fun resetPassword(
 		unblockingCode: String?,
 		newPassword: String?,
-	) {
+	) = mapSmartcardError {
 		val encPinNew = newPassword?.let { PinUtils.encodePin(it, passwordAttributes) }
 
 		val req =
@@ -210,7 +219,7 @@ class SmartcardPinDid(
 	override fun resetPassword(
 		resetMode: PinDid.ResetMode,
 		lang: UsbLangId,
-	) {
+	) = mapSmartcardError {
 		TODO("Not yet implemented")
 	}
 }

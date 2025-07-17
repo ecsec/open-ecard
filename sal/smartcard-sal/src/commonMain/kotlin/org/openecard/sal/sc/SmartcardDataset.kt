@@ -100,18 +100,19 @@ class SmartcardDataset(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun read(): UByteArray {
-		throwIf(!missingReadAuthentications.isSolved) { MissingAuthentication("Read ACL is not satisfied") }
-		select()
+	override fun read(): UByteArray =
+		mapSmartcardError {
+			throwIf(!missingReadAuthentications.isSolved) { MissingAuthentication("Read ACL is not satisfied") }
+			select()
 
-		return when (type) {
-			DatasetType.TRANSPARENT -> readTransparent()
-			DatasetType.RECORD -> readRecords()
-			DatasetType.RING -> TODO("Implement")
-			DatasetType.DATA_OBJECT -> TODO("Implement")
-			null -> readTrying()
+			when (type) {
+				DatasetType.TRANSPARENT -> readTransparent()
+				DatasetType.RECORD -> readRecords()
+				DatasetType.RING -> TODO("Implement")
+				DatasetType.DATA_OBJECT -> TODO("Implement")
+				null -> readTrying()
+			}
 		}
-	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	private fun readTrying(): UByteArray =
@@ -139,7 +140,8 @@ class SmartcardDataset(
 				?.supportsExtendedLength ?: false
 		val shortEf = ds.shortEf
 		val apdu =
-			if (shortEf != null && application.device.isSelectedDataset(this)) {
+			// only use short ef if the file is not already selected
+			if (shortEf != null && !application.device.isSelectedDataset(this)) {
 				ReadBinary.readShortEf(shortEf, forceExtendedLength = extLen)
 			} else {
 				ReadBinary.readCurrentEf(forceExtendedLength = extLen)
@@ -164,9 +166,10 @@ class SmartcardDataset(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun write(): UByteArray {
-		throwIf(!missingWriteAuthentications.isSolved) { MissingAuthentication("Write ACL is not satisfied") }
-		select()
-		TODO("Not yet implemented")
-	}
+	override fun write(): UByteArray =
+		mapSmartcardError {
+			throwIf(!missingWriteAuthentications.isSolved) { MissingAuthentication("Write ACL is not satisfied") }
+			select()
+			TODO("Not yet implemented")
+		}
 }

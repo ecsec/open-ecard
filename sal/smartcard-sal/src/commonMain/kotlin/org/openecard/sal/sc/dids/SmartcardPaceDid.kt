@@ -11,6 +11,8 @@ import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.SmartcardApplication
+import org.openecard.sal.sc.mapSmartcardError
+import org.openecard.sal.sc.mapSmartcardErrorSuspending
 import org.openecard.sc.apdu.ApduProcessingError
 import org.openecard.sc.apdu.command.SecurityCommandResult
 import org.openecard.sc.apdu.command.transmit
@@ -69,40 +71,47 @@ class SmartcardPaceDid(
 	// TODO: implement and add state qualifier
 	override fun toStateReference(): DidStateReference = super.toStateReference()
 
-	override fun capturePasswordInHardware(): Boolean = hardwarePace != null
+	override fun capturePasswordInHardware(): Boolean = mapSmartcardError { hardwarePace != null }
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun passwordStatus(): SecurityCommandResult {
-		val paceInfos =
-			efCardAccess.paceInfo.first {
-				it.info.isStandardizedParameter &&
-					it.supports(SUPPORTED_PACE_PROTOCOLS, SUPPORTED_PACE_DOMAIN_PARAMS)
-			}
-		val command = paceMseSetAt(paceInfos, pinType, null, null)
-		val commandResult = command.transmit(channel)
-		return commandResult
-	}
+	override fun passwordStatus(): SecurityCommandResult =
+		mapSmartcardError {
+			val paceInfos =
+				efCardAccess.paceInfo.first {
+					it.info.isStandardizedParameter &&
+						it.supports(SUPPORTED_PACE_PROTOCOLS, SUPPORTED_PACE_DOMAIN_PARAMS)
+				}
+			val command = paceMseSetAt(paceInfos, pinType, null, null)
+			val commandResult = command.transmit(channel)
+			commandResult
+		}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun establishChannel(
 		password: String,
 		chat: UByteArray?,
 		certDesc: UByteArray?,
-	): PaceEstablishChannelResponse {
-		val req = PaceEstablishChannelRequest(pinType, checkPassword(password), chat?.toPrintable(), certDesc?.toPrintable())
-		return runBlocking(Dispatchers.IO) {
-			paceFeature.establishChannel(req)
+	): PaceEstablishChannelResponse =
+		mapSmartcardError {
+			val req = PaceEstablishChannelRequest(pinType, checkPassword(password), chat?.toPrintable(), certDesc?.toPrintable())
+			runBlocking(Dispatchers.IO) {
+				val resp = paceFeature.establishChannel(req)
+				setDidFulfilled()
+				resp
+			}
 		}
-	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun establishChannel(
 		chat: UByteArray?,
 		certDesc: UByteArray?,
-	): PaceEstablishChannelResponse {
-		val req = PaceEstablishChannelRequest(pinType, null, chat?.toPrintable(), certDesc?.toPrintable())
-		return paceFeature.establishChannel(req)
-	}
+	): PaceEstablishChannelResponse =
+		mapSmartcardErrorSuspending {
+			val req = PaceEstablishChannelRequest(pinType, null, chat?.toPrintable(), certDesc?.toPrintable())
+			val resp = paceFeature.establishChannel(req)
+			setDidFulfilled()
+			resp
+		}
 
 	private fun checkPassword(pass: String): String {
 		val minLen = did.parameters.minLength
@@ -113,11 +122,13 @@ class SmartcardPaceDid(
 		return pass
 	}
 
-	override fun closeChannel() {
-		if (paceFeature.canCloseChannel()) {
-			paceFeature.destroyChannel()
+	override fun closeChannel() =
+		mapSmartcardError {
+			if (paceFeature.canCloseChannel()) {
+				paceFeature.destroyChannel()
+			}
+			setDidUnfulfilled()
 		}
-	}
 }
 
 internal fun org.openecard.cif.definition.did.PacePinId.toSalType() =

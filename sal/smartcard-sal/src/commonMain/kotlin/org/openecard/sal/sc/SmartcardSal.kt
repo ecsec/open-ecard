@@ -11,9 +11,9 @@ import kotlin.random.Random
 class SmartcardSal(
 	internal val terminals: Terminals,
 	internal val cifs: Set<CardInfoDefinition>,
-	internal val random: Random = Random.Default,
 	val cardRecognition: CardRecognition,
 	internal val paceFactory: PaceFeatureFactory? = null,
+	internal val random: Random = Random.Default,
 ) : Sal {
 	override fun startSession(sessionId: String?): SmartcardSalSession {
 		val session = sessionId ?: random.generateSessionId()

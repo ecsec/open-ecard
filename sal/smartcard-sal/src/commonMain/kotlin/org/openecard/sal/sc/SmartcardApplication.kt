@@ -1,5 +1,6 @@
 package org.openecard.sal.sc
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.app.ApplicationDefinition
 import org.openecard.cif.definition.did.GenericCryptoDidDefinition
@@ -20,6 +21,8 @@ import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.iface.CardChannel
 import org.openecard.utils.common.hex
+
+private val log = KotlinLogging.logger { }
 
 class SmartcardApplication(
 	override val device: SmartcardDeviceConnection,
@@ -97,25 +100,27 @@ class SmartcardApplication(
 		get() = device.cardState.app == this
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun connect() {
-		// remove secure channel before switching the application
-		val unauthDids = device.cardState.authenticatedDids.filter { it.isLocal && it.application != this }
-		unauthDids.filterIsInstance<SecureChannelDid>().forEach {
-			// TODO: not sure if we should do some error handling here
-			it.closeChannel()
-		}
-
-		val selectApdu =
-			if (appDef.aid.v.contentEquals(hex("3F00"))) {
-				Select.selectMf()
-			} else {
-				Select.selectDfName(appDef.aid.v)
+	override fun connect() =
+		mapSmartcardError {
+			// remove secure channel before switching the application
+			val unauthDids = device.cardState.authenticatedDids.filter { it.isLocal && it.application != this }
+			unauthDids.filterIsInstance<SecureChannelDid>().forEach { did ->
+				runCatching {
+					did.closeChannel()
+				}.onFailure { log.warn(it) { "Error while closing secure channel of DID=${did.name}" } }
 			}
-		// TODO: selection by path see ISO 7816-4 Sec. 8.2 and 8.3
 
-		selectApdu.transmit(channel)
+			val selectApdu =
+				if (appDef.aid.v.contentEquals(hex("3F00"))) {
+					Select.selectMf()
+				} else {
+					Select.selectDfName(appDef.aid.v)
+				}
+			// TODO: selection by path see ISO 7816-4 Sec. 8.2 and 8.3
 
-		// update state
-		device.setSelectedApplication(this)
-	}
+			selectApdu.transmit(channel)
+
+			// update state
+			device.setSelectedApplication(this)
+		}
 }

@@ -14,15 +14,17 @@ sealed interface MissingAuthentications {
 
 	val isSolved: Boolean
 
+	fun removeUnsupported(predicate: (AclDidResolution) -> Boolean): MissingAuthentications
+
+	fun removeUnsupported(availableDids: List<DidStateReference>): MissingAuthentications =
+		removeUnsupported { term -> availableDids.any { did -> term.requiredState == did } }
+
 	class MissingDidAuthentications(
 		internal val decisions: BoolTreeOr<AclDidResolution>,
 	) : MissingAuthentications {
 		val options = decisions.or.map { it.and }
 
-		fun removeUnsupported(availableDids: List<DidStateReference>): MissingAuthentications =
-			removeUnsupported { term -> availableDids.any { did -> term.requiredState == did } }
-
-		fun removeUnsupported(predicate: (AclDidResolution) -> Boolean): MissingAuthentications {
+		override fun removeUnsupported(predicate: (AclDidResolution) -> Boolean): MissingAuthentications {
 			val orReduced =
 				BoolTreeOr<AclDidResolution>(
 					decisions.or.mapNotNull { ands ->
@@ -48,5 +50,7 @@ sealed interface MissingAuthentications {
 
 	object Unsolveable : MissingAuthentications {
 		override val isSolved: Boolean = false
+
+		override fun removeUnsupported(predicate: (AclDidResolution) -> Boolean): MissingAuthentications = this
 	}
 }

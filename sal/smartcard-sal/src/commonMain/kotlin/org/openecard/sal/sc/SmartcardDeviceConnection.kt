@@ -43,9 +43,10 @@ class SmartcardDeviceConnection(
 
 	internal fun findAuthDid(name: String): AuthenticationDid? = allAuthDids.find { it.name == name }
 
-	override fun close(disposition: CardDisposition) {
-		channel.card.terminalConnection.disconnect(disposition)
-	}
+	override fun close(disposition: CardDisposition) =
+		mapSmartcardError {
+			channel.card.terminalConnection.disconnect(disposition)
+		}
 
 	internal fun setSelectedApplication(application: SmartcardApplication) {
 		// remove all local dids

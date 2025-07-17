@@ -46,14 +46,19 @@ class SmartcardPinDid(
 	private val unblockingAttributes: PasswordAttributes? =
 		did.parameters.unblockingParameters?.toSmartcardPasswordAttributes()
 
+	override val supportedModifyModes: Set<PinDid.ModifyMode> by lazy {
+		did.parameters.pwdFlags.toModifyModes()
+	}
 	override val supportsModifyWithOldPassword: Boolean by lazy {
 		PasswordFlags.MODIFY_WITH_OLD_PASSWORD in did.parameters.pwdFlags
 	}
-
 	override val supportsModifyWithoutOldPassword: Boolean by lazy {
 		PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD in did.parameters.pwdFlags
 	}
 
+	override val supportedResetModes: Set<PinDid.ResetMode> by lazy {
+		did.parameters.pwdFlags.toResetModes()
+	}
 	override val supportsResetWithoutData: Boolean by lazy {
 		PasswordFlags.RESET_RETRY_COUNTER_WITHOUT_DATA in
 			did.parameters.pwdFlags
@@ -135,7 +140,10 @@ class SmartcardPinDid(
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override suspend fun modify(lang: UsbLangId) {
+	override suspend fun modify(
+		modifyMode: PinDid.ModifyMode,
+		lang: UsbLangId,
+	) {
 // 		val dummyPin =
 // 			throwIfNull(PinUtils.createPinMask(passwordAttributes)) {
 // 				UnsupportedFeature("Unpadded passwords are not supported with hardware readers")
@@ -196,7 +204,10 @@ class SmartcardPinDid(
 		}
 	}
 
-	override fun resetPassword(lang: UsbLangId) {
+	override fun resetPassword(
+		resetMode: PinDid.ResetMode,
+		lang: UsbLangId,
+	) {
 		TODO("Not yet implemented")
 	}
 }
@@ -218,3 +229,23 @@ internal fun PasswordType.toSmartcardPasswordType(): org.openecard.sc.iface.feat
 		PasswordType.UTF_8 -> org.openecard.sc.iface.feature.PasswordType.UTF_8
 		PasswordType.HALF_NIBBLE_BCD -> org.openecard.sc.iface.feature.PasswordType.HALF_NIBBLE_BCD
 	}
+
+internal fun PasswordFlags.toModifyMode(): PinDid.ModifyMode? =
+	when (this) {
+		PasswordFlags.MODIFY_WITH_OLD_PASSWORD -> PinDid.ModifyMode.WITH_OLD_PASSWORD
+		PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD -> PinDid.ModifyMode.WITHOUT_OLD_PASSWORD
+		else -> null
+	}
+
+internal fun Set<PasswordFlags>.toModifyModes(): Set<PinDid.ModifyMode> = mapNotNull { it.toModifyMode() }.toSet()
+
+internal fun PasswordFlags.toResetMode(): PinDid.ResetMode? =
+	when (this) {
+		PasswordFlags.RESET_RETRY_COUNTER_WITHOUT_DATA -> PinDid.ResetMode.WITHOUT_DATA
+		PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD -> PinDid.ResetMode.WITH_UNBLOCK_AND_PASSWORD
+		PasswordFlags.RESET_RETRY_COUNTER_WITH_PASSWORD -> PinDid.ResetMode.WITH_PASSWORD
+		PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK -> PinDid.ResetMode.WITH_UNBLOCK
+		else -> null
+	}
+
+internal fun Set<PasswordFlags>.toResetModes(): Set<PinDid.ResetMode> = mapNotNull { it.toResetMode() }.toSet()

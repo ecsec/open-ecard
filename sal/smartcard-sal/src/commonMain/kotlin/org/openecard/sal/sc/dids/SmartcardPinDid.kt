@@ -46,6 +46,14 @@ class SmartcardPinDid(
 	private val unblockingAttributes: PasswordAttributes? =
 		did.parameters.unblockingParameters?.toSmartcardPasswordAttributes()
 
+	override val supportsModifyWithOldPassword: Boolean by lazy {
+		PasswordFlags.MODIFY_WITH_OLD_PASSWORD in did.parameters.pwdFlags
+	}
+
+	override val supportsModifyWithoutOldPassword: Boolean by lazy {
+		PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD in did.parameters.pwdFlags
+	}
+
 	override val supportsResetWithoutData: Boolean by lazy {
 		PasswordFlags.RESET_RETRY_COUNTER_WITHOUT_DATA in
 			did.parameters.pwdFlags
@@ -75,9 +83,6 @@ class SmartcardPinDid(
 
 	override fun modifyPasswordInHardware(): Boolean = hardwareModify != null
 
-	override fun needsOldPasswordForChange(): Boolean =
-		PasswordFlags.MODIFY_DOES_NOT_NEED_OLD_PASSWORD !in did.parameters.pwdFlags
-
 	override fun passwordStatus(): PinStatus {
 		val resp = Verify.verifyStatus(passwordRef, globalRef).transmit(channel)
 		return resp.toPinStatusOrThrow()
@@ -103,7 +108,6 @@ class SmartcardPinDid(
 // 		val cmdTemplate = Verify.verifyPlainTemplate(dummyPin, passwordRef, globalRef)
 // 		val req = PinVerify.fromParams(passwordAttributes, cmdTemplate, lang = lang)
 //
-// 		// TODO: make feature call cancellable
 // 		feat.verifyPin(req)
 
 		TODO("Not yet implemented")

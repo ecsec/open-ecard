@@ -75,9 +75,14 @@ enum class PasswordFlags {
 	DISABLE_ALLOWED,
 
 	/**
-	 * Password modify does not need the old password, in order to change it (P1=01)
+	 * Password modify works with the old password, in order to change it (P1=00)
 	 */
-	MODIFY_DOES_NOT_NEED_OLD_PASSWORD,
+	MODIFY_WITH_OLD_PASSWORD,
+
+	/**
+	 * Password modify works without the old password, in order to change it (P1=01)
+	 */
+	MODIFY_WITHOUT_OLD_PASSWORD,
 
 	/**
 	 * Password reset works without reference data (P1=03)

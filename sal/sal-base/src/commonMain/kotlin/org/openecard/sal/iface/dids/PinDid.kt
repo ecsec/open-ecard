@@ -21,6 +21,9 @@ import kotlin.coroutines.cancellation.CancellationException
 interface PinDid : AuthenticationDid {
 	val missingModifyAuthentications: MissingAuthentications
 
+	val supportsModifyWithoutOldPassword: Boolean
+	val supportsModifyWithOldPassword: Boolean
+
 	val supportsResetWithoutData: Boolean
 	val supportsResetWithPassword: Boolean
 	val supportsResetWithUnblocking: Boolean
@@ -49,8 +52,6 @@ interface PinDid : AuthenticationDid {
 		Cancelled::class,
 	)
 	fun modifyPasswordInHardware(): Boolean
-
-	fun needsOldPasswordForChange(): Boolean
 
 	@Throws(
 		NotInitialized::class,

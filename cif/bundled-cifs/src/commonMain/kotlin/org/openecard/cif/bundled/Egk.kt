@@ -1,6 +1,26 @@
 package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
+import org.openecard.cif.bundled.EgkCifDefinitions.autPace
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmts
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmtsRep
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinDpe
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinGdd
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHome
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfd
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfdRead
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinOse
+import org.openecard.cif.bundled.EgkCifDefinitions.pinCh
+import org.openecard.cif.bundled.EgkCifDefinitions.pinQes
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_r2048_signPKCS1_V1_5
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_r2048_signPSS
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_autn_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_autn_r2048_signPSS
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_enc_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_encv_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_r2048
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
@@ -34,39 +54,30 @@ val EgkCif by lazy {
 	}
 
 	b.applications {
-
 		add {
 			appMf()
 		}
-
 		add {
 			appDFHCA()
 		}
-
 		add {
 			appDFNFD()
 		}
-
 		add {
 			appDFDPE()
 		}
-
 		add {
 			appDFGDD()
 		}
-
 		add {
 			appDFOSE()
 		}
-
 		add {
 			appDFAMTS()
 		}
-
 		add {
 			appDFESIGN()
 		}
-
 		add {
 			appDFQES()
 		}
@@ -74,29 +85,41 @@ val EgkCif by lazy {
 	b.build()
 }
 
-private val autPace = "AUT_PACE"
-private val pinCh = "PIN.CH"
-private val mrPinHome = "MRPIN.home"
-private val mrPinNfd = "MRPIN.NFD"
-private val mrPinDpe = "MRPIN.DPE"
-private val mrPinGdd = "MRPIN.GDD"
-private val mrPinNfdRead = "MRPIN.NFD_READ"
-private val mrPinOse = "MRPIN.OSE"
-private val mrPinAmts = "MRPIN.AMTS"
-private val mrPinAmtsRep = "MRPIN.AMTS_REP"
-private val prk_ch_aut_r2048_signPKCS1_V1_5 = "PrK.CH.AUT.R2048_signPKCS1_V1_5"
-private val prk_ch_aut_r2048_signPSS = "PrK.CH.AUT.R2048_signPSS"
-private val prk_ch_autn_r2048_signPSS = "PrK.CH.AUTN.R2048_signPSS"
-private val prk_ch_enc_r2048 = "PrK.CH.ENC.R2048"
-private val prk_ch_encv_r2048 = "PrK.CH.ENCV.R2048"
-private val prk_ch_aut_e256 = "PrK.CH.AUT.E256"
-private val prk_ch_autn_e256 = "PrK.CH.AUTN.E256"
-private val pinQes = "PIN.QES"
-private val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
-private val prk_ch_qes_e256 = "PrK.CH.QES.E256"
+object EgkCifDefinitions {
+	val appMf = "MF"
+	val appDFHCA = "DF.HCA"
+	val appDFNFD = "DF.NFD"
+	val appDFDPE = "DF.DPE"
+	val appDFGDD = "DF.GDD"
+	val appDFOSE = "DF.OSE"
+	val appDFAMTS = "DF.AMTS"
+	val appDFESIGN = "DF.ESIGN"
+	val appDFQES = "DF.QES"
+
+	val autPace = "AUT_PACE"
+	val pinCh = "PIN.CH"
+	val mrPinHome = "MRPIN.home"
+	val mrPinNfd = "MRPIN.NFD"
+	val mrPinDpe = "MRPIN.DPE"
+	val mrPinGdd = "MRPIN.GDD"
+	val mrPinNfdRead = "MRPIN.NFD_READ"
+	val mrPinOse = "MRPIN.OSE"
+	val mrPinAmts = "MRPIN.AMTS"
+	val mrPinAmtsRep = "MRPIN.AMTS_REP"
+	val prk_ch_aut_r2048_signPKCS1_V1_5 = "PrK.CH.AUT.R2048_signPKCS1_V1_5"
+	val prk_ch_aut_r2048_signPSS = "PrK.CH.AUT.R2048_signPSS"
+	val prk_ch_autn_r2048_signPSS = "PrK.CH.AUTN.R2048_signPSS"
+	val prk_ch_enc_r2048 = "PrK.CH.ENC.R2048"
+	val prk_ch_encv_r2048 = "PrK.CH.ENCV.R2048"
+	val prk_ch_aut_e256 = "PrK.CH.AUT.E256"
+	val prk_ch_autn_e256 = "PrK.CH.AUTN.E256"
+	val pinQes = "PIN.QES"
+	val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
+	val prk_ch_qes_e256 = "PrK.CH.QES.E256"
+}
 
 private fun ApplicationScope.appMf() {
-	name = "MF"
+	name = EgkCifDefinitions.appMf
 	aid = +"D2760001448000"
 
 	selectAcl {
@@ -423,7 +446,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appDFHCA() {
-	name = "DF.HCA"
+	name = EgkCifDefinitions.appDFHCA
 	aid = +"D27600000102"
 
 	selectAcl {
@@ -623,7 +646,7 @@ private fun ApplicationScope.appDFHCA() {
 }
 
 private fun ApplicationScope.appDFNFD() {
-	name = "DF.NFD"
+	name = EgkCifDefinitions.appDFNFD
 	aid = +"D27600014407"
 
 	selectAcl {
@@ -816,7 +839,7 @@ private fun ApplicationScope.appDFNFD() {
 }
 
 private fun ApplicationScope.appDFDPE() {
-	name = "DF.DPE"
+	name = EgkCifDefinitions.appDFDPE
 	aid = +"D27600014408"
 
 	selectAcl {
@@ -986,7 +1009,7 @@ private fun ApplicationScope.appDFDPE() {
 }
 
 private fun ApplicationScope.appDFGDD() {
-	name = "DF.GDD"
+	name = EgkCifDefinitions.appDFGDD
 	aid = +"D2760001440A"
 
 	selectAcl {
@@ -1187,7 +1210,7 @@ private fun ApplicationScope.appDFGDD() {
 }
 
 private fun ApplicationScope.appDFOSE() {
-	name = "DF.OSE"
+	name = EgkCifDefinitions.appDFOSE
 	aid = +"D2760001440B"
 
 	selectAcl {
@@ -1390,7 +1413,7 @@ private fun ApplicationScope.appDFOSE() {
 }
 
 private fun ApplicationScope.appDFAMTS() {
-	name = "DF.AMTS"
+	name = EgkCifDefinitions.appDFAMTS
 	aid = +"D2760001440C"
 
 	selectAcl {
@@ -1727,7 +1750,7 @@ private fun ApplicationScope.appDFAMTS() {
 }
 
 private fun ApplicationScope.appDFESIGN() {
-	name = "DF.ESIGN"
+	name = EgkCifDefinitions.appDFESIGN
 	aid = +"A000000167455349474E"
 
 	selectAcl {
@@ -2399,7 +2422,7 @@ private fun ApplicationScope.appDFESIGN() {
 }
 
 private fun ApplicationScope.appDFQES() {
-	name = "DF.QES"
+	name = EgkCifDefinitions.appDFQES
 	aid = +"D27600006601"
 
 	description = "Optional QES application"

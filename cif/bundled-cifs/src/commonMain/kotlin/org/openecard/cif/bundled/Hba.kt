@@ -11,6 +11,21 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
+import org.openecard.cif.bundled.HbaDefinitions.autPace
+import org.openecard.cif.bundled.HbaDefinitions.pinAuto
+import org.openecard.cif.bundled.HbaDefinitions.pinCh
+import org.openecard.cif.bundled.HbaDefinitions.pinQes
+import org.openecard.cif.bundled.HbaDefinitions.pinSo
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_e256
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_r2048_signPKCS1_V1_5
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_r2048_signPSS
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_auto_r3072_signPKCS1_V1_5
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_auto_r3072_signPSS
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_enc_r2048
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_e256
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_r2048
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_e256
+import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_r2048
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordType
@@ -34,23 +49,18 @@ val HbaCif by lazy {
 	}
 
 	b.applications {
-
 		add {
 			appMf()
 		}
-
 		add {
 			appDFHPA()
 		}
-
 		add {
 			appDFQES()
 		}
-
 		add {
 			appDFESIGN()
 		}
-
 		add {
 			appDFCIAQES()
 		}
@@ -64,24 +74,34 @@ val HbaCif by lazy {
 	b.build()
 }
 
-private val autPace = "AUT_PACE"
-private val pinCh = "PIN.CH"
-private val pinQes = "PIN.QES"
-private val prk_hp_qes_r2048 = "PrK.HP.QES.R2048"
-private val prk_hp_qes_e256 = "PrK.HP.QES.E256"
-private val prk_hp_aut_r2048_signPKCS1_V1_5 = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
-private val prk_hp_aut_r2048_signPSS = "PrK.HP.AUT.R2048_signPSS"
-private val prk_hp_enc_r2048 = "PrK.HP.ENC.R2048"
-private val prk_hp_aut_e256 = "PrK.HP.AUT.E256"
-private val prk_hp_sig_r2048 = "PrK.HP.SIG.R2048"
-private val prk_hp_sig_e256 = "PrK.HP.SIG.E256"
-private val pinAuto = "PIN.AUTO"
-private val pinSo = "PIN.SO"
-private val prk_hp_auto_r3072_signPKCS1_V1_5 = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
-private val prk_hp_auto_r3072_signPSS = "PrK.HP.AUTO.R3072_signPSS"
+object HbaDefinitions {
+	val appMf = "MF"
+	val appDFHPA = "DF.HPA"
+	val appDFAUTO = "DF.AUTO"
+	val appDFCIAESIGN = "DF.CIA.ESIGN"
+	val appDFESIGN = "DF.ESIGN"
+	val appDFCIAQES = "DF.CIA.QES"
+	val appDFQES = "DF.QES"
+
+	val autPace = "AUT_PACE"
+	val pinCh = "PIN.CH"
+	val pinQes = "PIN.QES"
+	val prk_hp_qes_r2048 = "PrK.HP.QES.R2048"
+	val prk_hp_qes_e256 = "PrK.HP.QES.E256"
+	val prk_hp_aut_r2048_signPKCS1_V1_5 = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
+	val prk_hp_aut_r2048_signPSS = "PrK.HP.AUT.R2048_signPSS"
+	val prk_hp_enc_r2048 = "PrK.HP.ENC.R2048"
+	val prk_hp_aut_e256 = "PrK.HP.AUT.E256"
+	val prk_hp_sig_r2048 = "PrK.HP.SIG.R2048"
+	val prk_hp_sig_e256 = "PrK.HP.SIG.E256"
+	val pinAuto = "PIN.AUTO"
+	val pinSo = "PIN.SO"
+	val prk_hp_auto_r3072_signPKCS1_V1_5 = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
+	val prk_hp_auto_r3072_signPSS = "PrK.HP.AUTO.R3072_signPSS"
+}
 
 private fun ApplicationScope.appMf() {
-	name = "MF"
+	name = HbaDefinitions.appMf
 	aid = +"D2760001448000"
 
 	selectAcl {
@@ -291,7 +311,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appDFHPA() {
-	name = "DF.HPA"
+	name = HbaDefinitions.appDFHPA
 	aid = +"D27600014602"
 
 	selectAcl {
@@ -318,7 +338,7 @@ private fun ApplicationScope.appDFHPA() {
 }
 
 private fun ApplicationScope.appDFQES() {
-	name = "DF.QES"
+	name = HbaDefinitions.appDFQES
 	aid = +"D27600006601"
 	description = "Optional QES application"
 
@@ -449,7 +469,7 @@ private fun ApplicationScope.appDFQES() {
 }
 
 private fun ApplicationScope.appDFESIGN() {
-	name = "DF.ESIGN"
+	name = HbaDefinitions.appDFESIGN
 	aid = +"A000000167455349474E"
 
 	selectAcl {
@@ -718,7 +738,7 @@ private fun ApplicationScope.appDFESIGN() {
 }
 
 private fun ApplicationScope.appDFCIAQES() {
-	name = "DF.CIA.QES"
+	name = HbaDefinitions.appDFCIAQES
 	aid = +"E828BD080FD27600006601"
 
 	selectAcl {
@@ -785,7 +805,7 @@ private fun ApplicationScope.appDFCIAQES() {
 }
 
 private fun ApplicationScope.appDFCIAESIGN() {
-	name = "DF.CIA.ESIGN"
+	name = HbaDefinitions.appDFCIAESIGN
 	aid = +"E828BD080FA000000167455349474E"
 
 	selectAcl {
@@ -852,7 +872,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 }
 
 private fun ApplicationScope.appDFAUTO() {
-	name = "DF.AUTO"
+	name = HbaDefinitions.appDFAUTO
 	aid = +"D27600014603"
 
 	selectAcl {

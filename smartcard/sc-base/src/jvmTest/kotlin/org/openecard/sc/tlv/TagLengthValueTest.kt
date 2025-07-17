@@ -21,6 +21,7 @@
  */
 package org.openecard.sc.tlv
 
+import org.openecard.utils.common.hex
 import org.openecard.utils.common.toUByteArray
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -219,6 +220,24 @@ class TagLengthValueTest {
 		val (t, rawLength) = TagLengthValue.fromBer(input)
 		val result = t.toBer()
 
+		assertContentEquals(input, result)
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `test BER TLV no data`() {
+		val input = hex("A000")
+		val tlv = input.toTlvBer().tlv
+		val result = tlv.toBer()
+		assertContentEquals(input, result)
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `test BER TLV 1 byte length data`() {
+		val input = hex("8001FF")
+		val tlv = input.toTlvBer().tlv
+		val result = tlv.toBer()
 		assertContentEquals(input, result)
 	}
 

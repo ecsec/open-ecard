@@ -75,7 +75,8 @@ class SmartcardPinDid(
 
 	override fun modifyPasswordInHardware(): Boolean = hardwareModify != null
 
-	override fun needsOldPasswordForChange(): Boolean = PasswordFlags.EXCHANGE_REF_DATA in did.parameters.pwdFlags
+	override fun needsOldPasswordForChange(): Boolean =
+		PasswordFlags.MODIFY_DOES_NOT_NEED_OLD_PASSWORD !in did.parameters.pwdFlags
 
 	override fun passwordStatus(): PinStatus {
 		val resp = Verify.verifyStatus(passwordRef, globalRef).transmit(channel)
@@ -120,11 +121,7 @@ class SmartcardPinDid(
 			if (encPinOld != null) {
 				ChangeReferenceData.changeOldToNew(encPinOld, encPinNew, passwordRef, globalRef)
 			} else {
-				if (PasswordFlags.MODIFY_WITH_RESET_RETRY_COUNTER in did.parameters.pwdFlags) {
-					ResetRetryCounter.resetWithNewData(encPinNew, passwordRef, globalRef)
-				} else {
-					ChangeReferenceData.changeToNew(encPinNew, passwordRef, globalRef)
-				}
+				ChangeReferenceData.changeToNew(encPinNew, passwordRef, globalRef)
 			}
 
 		val resp = req.transmit(channel)

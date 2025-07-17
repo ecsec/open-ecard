@@ -56,16 +56,6 @@ enum class PasswordFlags {
 	 */
 	CASE_SENSITIVE,
 
-	/**
-	 * meaning that it is not possible to change the password
-	 */
-	CHANGE_DISABLED,
-
-	/**
-	 * meaning that it is not possible to unblock the password
-	 */
-	UNBLOCK_DISABLED,
-
 	// 	/*
 	// 	 * is an unblockingPassword (ISO/IEC 7816-4 resetting code), meaning that this password may be used for unblocking
 	// 	 * purposes, i.e. to reset the retry counter of the related authentication object to its initial value
@@ -85,40 +75,27 @@ enum class PasswordFlags {
 	DISABLE_ALLOWED,
 
 	/**
-	 * can be changed by just presenting new reference data to the card or if both old and new reference data needs to
-	 * be presented.
-	 * If the bit is set, both old and new reference data shall be presented;
-	 * otherwise only new reference data needs to be presented (exchangeRefData)
-	 */
-	EXCHANGE_REF_DATA,
-
-	/**
-	 * Modify password works with `RESET RETRY COUNTER` instead of `CHANGE REFERENCE DATA`
-	 */
-	MODIFY_WITH_RESET_RETRY_COUNTER,
-
-	/**
-	 * Password modify does not need the old password, in order to change it
+	 * Password modify does not need the old password, in order to change it (P1=01)
 	 */
 	MODIFY_DOES_NOT_NEED_OLD_PASSWORD,
 
 	/**
-	 * Password reset works without reference data
+	 * Password reset works without reference data (P1=03)
 	 */
 	RESET_RETRY_COUNTER_WITHOUT_DATA,
 
 	/**
-	 * Password reset works with unblocking and reference data
+	 * Password reset works with unblocking and reference data (P1=00)
 	 */
 	RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
 
 	/**
-	 * Password reset works with reference data
+	 * Password reset works with reference data (P1=02)
 	 */
 	RESET_RETRY_COUNTER_WITH_PASSWORD,
 
 	/**
-	 * Password reset works with unblocking data
+	 * Password reset works with unblocking data (P1=01)
 	 */
 	RESET_RETRY_COUNTER_WITH_UNBLOCK,
 }

@@ -12,8 +12,6 @@ interface DidDslScope : CifScope {
 	interface Pace : DidDslScope {
 		fun authAcl(content: @CifMarker (AclScope.() -> Unit))
 
-		fun modifyAcl(content: @CifMarker (AclScope.() -> Unit))
-
 		fun parameters(content: @CifMarker (PaceDidParametersScope.() -> Unit))
 	}
 

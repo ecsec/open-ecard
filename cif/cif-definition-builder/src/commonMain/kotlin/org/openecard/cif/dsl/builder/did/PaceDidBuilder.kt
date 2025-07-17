@@ -25,12 +25,6 @@ class PaceDidBuilder :
 		this.authAcl = builder.build()
 	}
 
-	override fun modifyAcl(content: @CifMarker (AclScope.() -> Unit)) {
-		val builder = AclBuilder()
-		content(builder)
-		this.modifyAcl = builder.build()
-	}
-
 	override fun parameters(content: @CifMarker (PaceDidParametersScope.() -> Unit)) {
 		val builder = PaceDidParametersBuilder()
 		content(builder)
@@ -42,7 +36,6 @@ class PaceDidBuilder :
 			name = name,
 			scope = scope,
 			authAcl = authAcl,
-			modifyAcl = modifyAcl,
 			parameters = requireNotNull(parameters),
 		)
 }

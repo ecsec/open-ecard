@@ -242,9 +242,6 @@ private fun ApplicationScope.appMf() {
 		pace {
 			name = autPace
 			scope = DidScope.GLOBAL
-			modifyAcl {
-				neverAcl()
-			}
 			authAcl {
 				alwaysAcl()
 			}

@@ -30,12 +30,15 @@ class SmartcardPinDid(
 	didDef: PinDidDefinition,
 	val authAcl: CifAclOr,
 	val modifyAcl: CifAclOr,
+	val resetAcl: CifAclOr,
 ) : SmartcardDid.BaseSmartcardDid<PinDidDefinition>(didDef, application),
 	PinDid {
 	override val missingAuthAuthentications: MissingAuthentications
 		get() = missingAuthentications(authAcl)
 	override val missingModifyAuthentications: MissingAuthentications
 		get() = missingAuthentications(modifyAcl)
+	override val missingResetAuthentications: MissingAuthentications
+		get() = missingAuthentications(resetAcl)
 
 	private val channel: CardChannel
 		get() = application.channel

@@ -96,11 +96,11 @@ class CifVerifier(
 			}
 			is PaceDidDefinition -> {
 				checkAcl(app, "Did.auth", did.name, did.authAcl.acls)
-				checkAcl(app, "Did.modify", did.name, did.modifyAcl.acls)
 			}
 			is PinDidDefinition -> {
 				checkAcl(app, "Did.auth", did.name, did.authAcl.acls)
 				checkAcl(app, "Did.modify", did.name, did.modifyAcl.acls)
+				checkAcl(app, "Did.reset", did.name, did.resetAcl.acls)
 			}
 		}
 	}

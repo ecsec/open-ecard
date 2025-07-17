@@ -37,7 +37,6 @@ class SmartcardPaceDid(
 	application: SmartcardApplication,
 	didDef: PaceDidDefinition,
 	val authAcl: CifAclOr,
-	val modifyAcl: CifAclOr,
 	private val factory: PaceFeatureFactory,
 ) : SmartcardDid.BaseSmartcardDid<PaceDidDefinition>(didDef, application),
 	PaceDid {

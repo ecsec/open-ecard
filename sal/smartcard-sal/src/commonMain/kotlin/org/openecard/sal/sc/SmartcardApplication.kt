@@ -48,8 +48,9 @@ class SmartcardApplication(
 				is PinDidDefinition -> {
 					val authAcl = did.authAcl.selectForProtocol(device.channel.card.protocol)
 					val modifyAcl = did.modifyAcl.selectForProtocol(device.channel.card.protocol)
-					if (authAcl.hasSolution() || modifyAcl.hasSolution()) {
-						SmartcardPinDid(this, did, authAcl, modifyAcl)
+					val resetAcl = did.resetAcl.selectForProtocol(device.channel.card.protocol)
+					if (authAcl.hasSolution() || modifyAcl.hasSolution() || resetAcl.hasSolution()) {
+						SmartcardPinDid(this, did, authAcl, modifyAcl, resetAcl)
 					} else {
 						null
 					}
@@ -58,9 +59,8 @@ class SmartcardApplication(
 				is PaceDidDefinition -> {
 					val factory = device.session.sal.paceFactory
 					val authAcl = did.authAcl.selectForProtocol(device.channel.card.protocol)
-					val modifyAcl = did.modifyAcl.selectForProtocol(device.channel.card.protocol)
-					if (factory != null && (authAcl.hasSolution() || modifyAcl.hasSolution())) {
-						SmartcardPaceDid(this, did, authAcl, modifyAcl, factory)
+					if (factory != null && (authAcl.hasSolution())) {
+						SmartcardPaceDid(this, did, authAcl, factory)
 					} else {
 						null
 					}

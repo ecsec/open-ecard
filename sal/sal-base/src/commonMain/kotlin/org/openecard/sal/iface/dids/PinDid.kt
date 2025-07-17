@@ -20,6 +20,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 interface PinDid : AuthenticationDid {
 	val missingModifyAuthentications: MissingAuthentications
+	val missingResetAuthentications: MissingAuthentications
 
 	val supportedModifyModes: Set<ModifyMode>
 	val supportsModifyWithoutOldPassword: Boolean

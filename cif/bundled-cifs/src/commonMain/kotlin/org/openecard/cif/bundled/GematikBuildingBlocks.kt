@@ -6,6 +6,9 @@ import org.openecard.cif.dsl.api.did.PinDidParametersScope
 import org.openecard.cif.dsl.api.did.isoPin
 
 object GematikBuildingBlocks {
+	val autPace = "AUT_PACE"
+	val pinCh = "PIN.CH"
+
 	internal fun AclScope.alwaysAcl() {
 		acl(CardProtocol.Any) {
 			Always
@@ -23,7 +26,7 @@ object GematikBuildingBlocks {
 			Always
 		}
 		acl(CardProtocol.Grouped.CONTACTLESS) {
-			activeDidState("AUT_PACE")
+			activeDidState(autPace)
 		}
 	}
 
@@ -33,7 +36,7 @@ object GematikBuildingBlocks {
 		}
 		acl(CardProtocol.Grouped.CONTACTLESS) {
 			or(
-				{ activeDidState("AUT_PACE") },
+				{ activeDidState(autPace) },
 				// { activeDidState("AUT_CMS") },
 			)
 		}
@@ -54,21 +57,7 @@ object GematikBuildingBlocks {
 			and(
 				{
 					activeDidState(pin)
-					activeDidState("AUT_PACE")
-				},
-			)
-		}
-	}
-
-	internal fun AclScope.mrPinHomePaceProtectedAcl() {
-		acl(CardProtocol.Grouped.CONTACT) {
-			activeDidState("MRPIN.home")
-		}
-		acl(CardProtocol.Grouped.CONTACTLESS) {
-			and(
-				{
-					activeDidState("MRPIN.home")
-					activeDidState("AUT_PACE")
+					activeDidState(autPace)
 				},
 			)
 		}
@@ -76,13 +65,13 @@ object GematikBuildingBlocks {
 
 	internal fun AclScope.pinChPaceProtectedAcl() {
 		acl(CardProtocol.Grouped.CONTACT) {
-			activeDidState("PIN.CH")
+			activeDidState(pinCh)
 		}
 		acl(CardProtocol.Grouped.CONTACTLESS) {
 			and(
 				{
-					activeDidState("PIN.CH")
-					activeDidState("AUT_PACE")
+					activeDidState(pinCh)
+					activeDidState(autPace)
 				},
 			)
 		}
@@ -94,7 +83,7 @@ object GematikBuildingBlocks {
 		}
 		acl(CardProtocol.Grouped.CONTACTLESS) {
 			or(
-				{ activeDidState("AUT_PACE") },
+				{ activeDidState(autPace) },
 				// { activeDidState("AUT_CMS") },
 				// { activeDidState("AUT_CUP") },
 			)

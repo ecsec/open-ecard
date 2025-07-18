@@ -1,12 +1,14 @@
 package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
-import org.openecard.cif.bundled.EgkCifDefinitions.autPace
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmts
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmtsRep
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinDpe
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinGdd
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHome
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfd
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfdRead
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinOse
@@ -24,7 +26,6 @@ import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_r2048
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
@@ -36,6 +37,7 @@ import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
+import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
@@ -45,7 +47,7 @@ val EgkCif by lazy {
 	val b = CardInfoBuilder()
 
 	b.metadata {
-		id = "http://ws.gematik.de/egk/1.0.0"
+		id = EgkCifDefinitions.cardType
 		version = "1.0.0"
 		status = CardInfoStatus.DEVELOPMENT
 		name = "German Electronic eHealth Card"
@@ -117,8 +119,26 @@ val EgkCif by lazy {
 }
 
 object EgkCifDefinitions {
-	val appMf = "MF"
-	val appDFHCA = "DF.HCA"
+	val cardType = "http://ws.gematik.de/egk/1.0.0"
+
+	object Apps {
+		object Mf {
+			val name = "MF"
+
+			object Datasets {
+				val efAtr = "EF.ATR"
+			}
+
+			object Dids {
+				val autPace = GematikBuildingBlocks.autPace
+			}
+		}
+
+		object Hca {
+			val name = "DF.HCA"
+		}
+	}
+
 	val appDFNFD = "DF.NFD"
 	val appDFDPE = "DF.DPE"
 	val appDFGDD = "DF.GDD"
@@ -127,8 +147,7 @@ object EgkCifDefinitions {
 	val appDFESIGN = "DF.ESIGN"
 	val appDFQES = "DF.QES"
 
-	val autPace = "AUT_PACE"
-	val pinCh = "PIN.CH"
+	val pinCh = GematikBuildingBlocks.pinCh
 	val mrPinHome = "MRPIN.home"
 	val mrPinNfd = "MRPIN.NFD"
 	val mrPinDpe = "MRPIN.DPE"
@@ -147,10 +166,24 @@ object EgkCifDefinitions {
 	val pinQes = "PIN.QES"
 	val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
 	val prk_ch_qes_e256 = "PrK.CH.QES.E256"
+
+	internal fun AclScope.mrPinHomePaceProtectedAcl() {
+		acl(CardProtocol.Grouped.CONTACT) {
+			activeDidState(mrPinHome)
+		}
+		acl(CardProtocol.Grouped.CONTACTLESS) {
+			and(
+				{
+					activeDidState(mrPinHome)
+					activeDidState(Mf.Dids.autPace)
+				},
+			)
+		}
+	}
 }
 
 private fun ApplicationScope.appMf() {
-	name = EgkCifDefinitions.appMf
+	name = Mf.name
 	aid = +"D2760001448000"
 
 	selectAcl {
@@ -159,7 +192,7 @@ private fun ApplicationScope.appMf() {
 
 	dataSets {
 		add {
-			name = "EF.ATR"
+			name = Mf.Datasets.efAtr
 			description =
 				"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
 				"It is also used to version variable elements of a map."
@@ -271,7 +304,7 @@ private fun ApplicationScope.appMf() {
 
 	dids {
 		pace {
-			name = autPace
+			name = Mf.Dids.autPace
 			scope = DidScope.GLOBAL
 			authAcl {
 				alwaysAcl()
@@ -474,7 +507,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appDFHCA() {
-	name = EgkCifDefinitions.appDFHCA
+	name = Hca.name
 	aid = +"D27600000102"
 
 	selectAcl {
@@ -2516,7 +2549,7 @@ private fun ApplicationScope.appDFQES() {
 			scope = DidScope.GLOBAL
 
 			signAcl {
-				pinProtectedPaceAcl("PIN.QES")
+				pinProtectedPaceAcl(pinQes)
 			}
 
 			parameters {
@@ -2543,7 +2576,7 @@ private fun ApplicationScope.appDFQES() {
 			scope = DidScope.GLOBAL
 
 			signAcl {
-				pinProtectedPaceAcl("PIN.QES")
+				pinProtectedPaceAcl(pinQes)
 			}
 
 			parameters {

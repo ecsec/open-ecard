@@ -24,7 +24,6 @@ import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_r2048
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.gematikCardCapabilities
 import org.openecard.cif.bundled.GematikBuildingBlocks.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
@@ -32,6 +31,7 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
 import org.openecard.cif.definition.CardProtocol
+import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
@@ -55,7 +55,33 @@ val EgkCif by lazy {
 	}
 
 	b.capabilities {
-		gematikCardCapabilities()
+		selectionMethods {
+			selectDfByFullName = true
+			selectDfByPartialName = false
+			selectDfByPath = false
+			selectDfByFileId = true
+			selectDfImplicit = false
+			supportsShortEf = true
+			supportsRecordNumber = true
+			supportsRecordIdentifier = false
+		}
+
+		dataCoding {
+			tlvEfs = false
+			writeOneTime = false
+			writeProprietary = true
+			writeOr = false
+			writeAnd = false
+			ffValidAsTlvFirstByte = false
+			dataUnitsQuartets = 2
+		}
+
+		commandCoding {
+			supportsCommandChaining = true
+			supportsExtendedLength = true
+			logicalChannel = CommandCodingDefinitions.LogicalChannelAssignment.NO_LOGICAL_CHANNELS
+			maximumLogicalChannels = 0
+		}
 	}
 
 	b.applications {

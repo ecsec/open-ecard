@@ -5,7 +5,6 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsCupProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.gematikCardCapabilities
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsCupProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
@@ -27,6 +26,7 @@ import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_e256
 import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_r2048
 import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_e256
 import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_r2048
+import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordType
@@ -50,7 +50,33 @@ val HbaCif by lazy {
 	}
 
 	b.capabilities {
-		gematikCardCapabilities()
+		selectionMethods {
+			selectDfByFullName = true
+			selectDfByPartialName = false
+			selectDfByPath = false
+			selectDfByFileId = true
+			selectDfImplicit = false
+			supportsShortEf = true
+			supportsRecordNumber = true
+			supportsRecordIdentifier = false
+		}
+
+		dataCoding {
+			tlvEfs = false
+			writeOneTime = false
+			writeProprietary = true
+			writeOr = false
+			writeAnd = false
+			ffValidAsTlvFirstByte = false
+			dataUnitsQuartets = 2
+		}
+
+		commandCoding {
+			supportsCommandChaining = true
+			supportsExtendedLength = true
+			logicalChannel = CommandCodingDefinitions.LogicalChannelAssignment.ASSIGN_BY_CARD
+			maximumLogicalChannels = 3
+		}
 	}
 
 	b.applications {

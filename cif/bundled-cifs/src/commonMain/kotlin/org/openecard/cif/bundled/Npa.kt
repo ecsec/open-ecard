@@ -162,12 +162,6 @@ private fun ApplicationScope.appMf() {
 				alwaysAcl()
 			}
 
-			modifyAcl {
-				acl(CardProtocol.Any) {
-					activeDidState("PIN")
-				}
-			}
-
 			parameters {
 				passwordRef = PacePinId.PIN
 				minLength = 5
@@ -183,10 +177,6 @@ private fun ApplicationScope.appMf() {
 				alwaysAcl()
 			}
 
-			modifyAcl {
-				neverAcl()
-			}
-
 			parameters {
 				passwordRef = PacePinId.CAN
 				minLength = 6
@@ -200,10 +190,6 @@ private fun ApplicationScope.appMf() {
 
 			authAcl {
 				alwaysAcl()
-			}
-
-			modifyAcl {
-				neverAcl()
 			}
 
 			parameters {

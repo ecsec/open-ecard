@@ -7,6 +7,7 @@ import org.openecard.cif.definition.did.GenericCryptoDidDefinition
 import org.openecard.cif.definition.did.PaceDidDefinition
 import org.openecard.cif.definition.did.PinDidDefinition
 import org.openecard.sal.iface.Application
+import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.Did
 import org.openecard.sal.iface.dids.SecureChannelDid
@@ -21,6 +22,7 @@ import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.iface.CardChannel
 import org.openecard.utils.common.hex
+import org.openecard.utils.common.throwIf
 
 private val log = KotlinLogging.logger { }
 
@@ -102,6 +104,8 @@ class SmartcardApplication(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun connect() =
 		mapSmartcardError {
+			throwIf(!missingSelectAuthentications.isSolved) { MissingAuthentication("Select ACL is not satisfied") }
+
 			// remove secure channel before switching the application
 			val unauthDids = device.cardState.authenticatedDids.filter { it.isLocal && it.application != this }
 			unauthDids.filterIsInstance<SecureChannelDid>().forEach { did ->

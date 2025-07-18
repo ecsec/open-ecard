@@ -6,6 +6,7 @@ import org.openecard.cif.definition.did.PasswordEncodingDefinition
 import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.PinDidDefinition
+import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.SmartcardApplication
@@ -25,6 +26,7 @@ import org.openecard.sc.iface.feature.PinUtils
 import org.openecard.sc.iface.feature.VerifyPinFeature
 import org.openecard.sc.iface.feature.toPinStatusOrThrow
 import org.openecard.sc.utils.UsbLangId
+import org.openecard.utils.common.throwIf
 
 class SmartcardPinDid(
 	application: SmartcardApplication,
@@ -105,6 +107,8 @@ class SmartcardPinDid(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun verify(password: String) =
 		mapSmartcardError {
+			throwIf(!missingAuthAuthentications.isSolved) { MissingAuthentication("Authenticate ACL is not satisfied") }
+
 			val encPin = PinUtils.encodePin(password, passwordAttributes)
 			val resp = Verify.verifyPlain(encPin, passwordRef, globalRef).transmit(channel)
 			if (resp is SecurityCommandFailure) {
@@ -116,6 +120,8 @@ class SmartcardPinDid(
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun verify(lang: UsbLangId) =
 		mapSmartcardError {
+			throwIf(!missingAuthAuthentications.isSolved) { MissingAuthentication("Authenticate ACL is not satisfied") }
+
 // 		val feat = checkNotNull(hardwareVerify) { "Verify for hardware readers called without having support in the reader" }
 //
 // 		val dummyPin =
@@ -135,6 +141,8 @@ class SmartcardPinDid(
 		newPassword: String,
 		oldPassword: String?,
 	) = mapSmartcardError {
+		throwIf(!missingModifyAuthentications.isSolved) { MissingAuthentication("Modify ACL is not satisfied") }
+
 		val encPinNew = PinUtils.encodePin(newPassword, passwordAttributes)
 		val encPinOld = oldPassword?.let { PinUtils.encodePin(it, passwordAttributes) }
 
@@ -156,6 +164,8 @@ class SmartcardPinDid(
 		modifyMode: PinDid.ModifyMode,
 		lang: UsbLangId,
 	) = mapSmartcardError {
+		throwIf(!missingModifyAuthentications.isSolved) { MissingAuthentication("Modify ACL is not satisfied") }
+
 // 		val dummyPin =
 // 			throwIfNull(PinUtils.createPinMask(passwordAttributes)) {
 // 				UnsupportedFeature("Unpadded passwords are not supported with hardware readers")
@@ -193,6 +203,8 @@ class SmartcardPinDid(
 		unblockingCode: String?,
 		newPassword: String?,
 	) = mapSmartcardError {
+		throwIf(!missingResetAuthentications.isSolved) { MissingAuthentication("Reset ACL is not satisfied") }
+
 		val encPinNew = newPassword?.let { PinUtils.encodePin(it, passwordAttributes) }
 
 		val req =
@@ -220,6 +232,8 @@ class SmartcardPinDid(
 		resetMode: PinDid.ResetMode,
 		lang: UsbLangId,
 	) = mapSmartcardError {
+		throwIf(!missingResetAuthentications.isSolved) { MissingAuthentication("Reset ACL is not satisfied") }
+
 		TODO("Not yet implemented")
 	}
 }

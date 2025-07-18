@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.openecard.cif.definition.acl.CifAclOr
 import org.openecard.cif.definition.acl.DidStateReference
 import org.openecard.cif.definition.did.PaceDidDefinition
+import org.openecard.sal.iface.MissingAuthentication
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.PasswordError
 import org.openecard.sal.iface.dids.PaceDid
@@ -93,6 +94,8 @@ class SmartcardPaceDid(
 		certDesc: UByteArray?,
 	): PaceEstablishChannelResponse =
 		mapSmartcardError {
+			throwIf(!missingAuthAuthentications.isSolved) { MissingAuthentication("Authenticate ACL is not satisfied") }
+
 			val req = PaceEstablishChannelRequest(pinType, checkPassword(password), chat?.toPrintable(), certDesc?.toPrintable())
 			runBlocking(Dispatchers.IO) {
 				val resp = paceFeature.establishChannel(req)
@@ -107,6 +110,8 @@ class SmartcardPaceDid(
 		certDesc: UByteArray?,
 	): PaceEstablishChannelResponse =
 		mapSmartcardErrorSuspending {
+			throwIf(!missingAuthAuthentications.isSolved) { MissingAuthentication("Authenticate ACL is not satisfied") }
+
 			val req = PaceEstablishChannelRequest(pinType, null, chat?.toPrintable(), certDesc?.toPrintable())
 			val resp = paceFeature.establishChannel(req)
 			setDidFulfilled()

@@ -20,9 +20,9 @@ class PcscCardChannel internal constructor(
 	@OptIn(ExperimentalUnsignedTypes::class, ExperimentalStdlibApi::class)
 	override fun transmitRaw(apdu: CommandApdu): ResponseApdu =
 		mapScioError {
-			log.debug { "Sending APDU: $apdu" }
+			log.debug { "Sending APDU to PCSC: $apdu" }
 			val response = channel.transmit(CommandAPDU(apdu.toBytes.toByteArray()))
-			log.debug { "Received APDU: ${response.bytes.toResponseApdu()}" }
+			log.debug { "Received APDU to PCSC: ${response.bytes.toResponseApdu()}" }
 			response.bytes.toResponseApdu()
 		}
 

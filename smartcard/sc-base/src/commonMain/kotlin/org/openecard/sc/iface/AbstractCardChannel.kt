@@ -27,7 +27,11 @@ abstract class AbstractCardChannel : CardChannel {
 	protected abstract fun transmitRaw(apdu: CommandApdu): ResponseApdu
 
 	override fun transmit(apdu: CommandApdu): ResponseApdu {
+		log.debug { "Sending APDU: $apdu" }
 		val command = smHandler?.processRequest(apdu) ?: apdu
+		if (smHandler != null) {
+			log.debug { "Sending SM APDU: $command" }
+		}
 
 		val responseSm =
 			if (doChaining(command)) {
@@ -52,7 +56,11 @@ abstract class AbstractCardChannel : CardChannel {
 		val responseSmAggregated = handleGetResponse(responseSm)
 
 		return runCatching {
+			if (smHandler != null) {
+				log.debug { "Received SM APDU: $responseSmAggregated" }
+			}
 			val response = smHandler?.processResponse(responseSmAggregated) ?: responseSmAggregated
+			log.debug { "Received APDU: $response" }
 			response
 		}.onFailure {
 			// delete sm in case it is not working

@@ -1,13 +1,14 @@
 package org.openecard.sc.iface.info
 
-import org.openecard.sc.iface.CardCapabilities
+import org.openecard.sc.iface.CardCapabilitiesParsed
+import org.openecard.sc.iface.DataCoding
 import org.openecard.utils.common.bitSetOf
 import org.openecard.utils.common.doIf
 import org.openecard.utils.common.toUShort
 
 class FileDescriptor(
 	val fdByte: FileDescriptorByte,
-	val codingByte: CardCapabilities.DataCoding?,
+	val codingByte: DataCoding?,
 	val maxRecordSize1: UShort?,
 	val numRecords1: UShort?,
 ) {
@@ -17,7 +18,7 @@ class FileDescriptor(
 			val fdByteValue = data[0]
 			if ((fdByteValue.toUInt() and 0x80u) == 0u) {
 				val fdByte = FileDescriptorByte(fdByteValue)
-				val codingByte = doIf(data.size == 2) { CardCapabilities.DataCoding(data[1]) }
+				val codingByte = doIf(data.size == 2) { CardCapabilitiesParsed.DataCodingParsed(data[1]) }
 				val maxRecordSize =
 					if (data.size == 3) {
 						data[2].toUShort()

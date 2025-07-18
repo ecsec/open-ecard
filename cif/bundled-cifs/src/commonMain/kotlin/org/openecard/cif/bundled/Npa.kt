@@ -2,13 +2,13 @@ package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.canPinTaKeyProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.canTaKeyCaKeyCiProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.datasetDG
-import org.openecard.cif.bundled.GematikBuildingBlocks.isoPinStandards
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.pinCanTaKeyCaKeyCiProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.pinTaKeyCaKeyCiProtectedAcl
+import org.openecard.cif.bundled.NpaDefinitions.Mf
+import org.openecard.cif.bundled.NpaDefinitions.canPinTaKeyProtectedAcl
+import org.openecard.cif.bundled.NpaDefinitions.canTaKeyCaKeyCiProtectedAcl
+import org.openecard.cif.bundled.NpaDefinitions.datasetDG
+import org.openecard.cif.bundled.NpaDefinitions.pinCanTaKeyCaKeyCiProtectedAcl
+import org.openecard.cif.bundled.NpaDefinitions.pinTaKeyCaKeyCiProtectedAcl
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.acl.PaceAclQualifier
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
@@ -18,9 +18,12 @@ import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
+import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.application.ApplicationScope
+import org.openecard.cif.dsl.api.dataset.DataSetScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @OptIn(ExperimentalUnsignedTypes::class)
 val NpaCif by lazy {
@@ -80,6 +83,201 @@ val NpaCif by lazy {
 		}
 	}
 	b.build()
+}
+
+object NpaDefinitions {
+	internal fun AclScope.paceAuth(paceDidName: String) {
+		acl(CardProtocol.Any) {
+			activeDidState(paceDidName)
+		}
+	}
+
+	internal fun AclScope.pinTaKeyCaKeyCiProtectedAcl(
+		pin: String,
+		taKey: PrintableUByteArray,
+	) {
+		neverAcl()
+// 		acl(CardProtocol.Any) {
+// 			or(
+// 				{
+// 					and(
+// 						activeDidState(pin),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(taKey),
+// 						),
+// 						activeDidState("CAKey"),
+// 					)
+// 				},
+// 				{
+// 					and(
+// 						activeDidState(pin),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(taKey),
+// 						),
+// 						activeDidState("CAKey-ci"),
+// 					)
+// 				},
+// 			)
+// 		}
+	}
+
+	internal fun AclScope.pinCanTaKeyCaKeyCiProtectedAcl() {
+		neverAcl()
+// 		acl(CardProtocol.Any) {
+// 			or(
+// 				{
+// 					and(
+// 						activeDidState("CAN"),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey"),
+// 					)
+// 				},
+// 				{
+// 					and(
+// 						activeDidState("CAN"),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey-ci"),
+// 					)
+// 				},
+// 				{
+// 					and(
+// 						activeDidState("PIN"),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey"),
+// 					)
+// 				},
+// 				{
+// 					and(
+// 						activeDidState("PIN"),
+// 						activeDidState(
+// 							"TAKey",
+// 		PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey-ci"),
+// 					)
+// 				},
+// 			)
+// 		}
+	}
+
+	internal fun AclScope.canTaKeyCaKeyCiProtectedAcl() {
+		neverAcl()
+// 		acl(CardProtocol.Any) {
+// 			or(
+// 				{
+// 					and(
+// 						activeDidState("CAN"),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey"),
+// 						activeDidState("eSign-PIN"),
+// 					)
+// 				},
+// 				{
+// 					and(
+// 						activeDidState("CAN"),
+// 						activeDidState(
+// 							"TAKey",
+// 							PaceAclQualifier(+"7F4C12060904007F000703010203530102"),
+// 						),
+// 						activeDidState("CAKey-ci"),
+// 						activeDidState("eSign-PIN"),
+// 					)
+// 				},
+// 			)
+// 		}
+	}
+
+	internal fun AclScope.canPinTaKeyProtectedAcl(
+		taKey1: PaceAclQualifier?,
+		taKey2: PaceAclQualifier?,
+	) {
+		neverAcl()
+// 				acl(CardProtocol.Any) {
+// 					or(
+// 						{
+// 							and(
+// 								activeDidState("CAN"),
+// 								activeDidState(
+// 									"TAKey",
+// 									taKey1,
+// 								),
+// 							)
+// 						},
+// 						{
+// 							and(
+// 								activeDidState("PIN"),
+// 								activeDidState(
+// 									"TAKey",
+// 									taKey2,
+// 								),
+// 							)
+// 						},
+// 					)
+// 				}
+	}
+
+	internal fun DataSetScope.datasetDG(
+		name: String,
+		path: PrintableUByteArray,
+		taKey2: PrintableUByteArray,
+	) {
+		this.name = name
+		this.path = path
+
+		readAcl {
+			neverAcl()
+// 			acl(CardProtocol.Any) {
+// 				or(
+// 					{
+// 						and(
+// 							activeDidState("PIN"),
+// 							activeDidState(
+// 								"TAKey",
+// 								PaceAclQualifier(+"7F4C12060904007F00070301020253050000000010"),
+// 							),
+// 							activeDidState(
+// 								"TAKey",
+// 								PaceAclQualifier(taKey2),
+// 							),
+// 							activeDidState("CAKey"),
+// 						)
+// 					},
+// 					{
+// 						and(
+// 							activeDidState("CAN"),
+// 							activeDidState(
+// 								"TAKey",
+// 								PaceAclQualifier(+"7F4C12060904007F00070301020253050000000010"),
+// 							),
+// 							activeDidState(
+// 								"TAKey",
+// 								PaceAclQualifier(taKey2),
+// 							),
+// 							activeDidState("CAKey"),
+// 						)
+// 					},
+// 				)
+// 			}
+		}
+
+		writeAcl {
+			neverAcl()
+		}
+	}
 }
 
 private fun ApplicationScope.appMf() {

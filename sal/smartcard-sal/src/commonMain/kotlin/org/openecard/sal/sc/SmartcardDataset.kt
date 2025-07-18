@@ -157,10 +157,11 @@ class SmartcardDataset(
 				?.supportsExtendedLength ?: false
 		val shortEf = ds.shortEf
 		val apdu =
-			if (shortEf != null && application.device.isSelectedDataset(this)) {
-				ReadRecord.readAllRecords(shortEf, forceExtendedLength = extLen)
+			// only use short ef if the file is not already selected
+			if (shortEf != null && !application.device.isSelectedDataset(this)) {
+				ReadRecord.readAllRecordsIndividual(shortEf, forceExtendedLength = extLen)
 			} else {
-				ReadRecord.readAllRecords(forceExtendedLength = extLen)
+				ReadRecord.readAllRecordsIndividual(forceExtendedLength = extLen)
 			}
 		return apdu.transmit(channel)
 	}

@@ -75,6 +75,11 @@ class EgkPaceTest {
 			val certData = certDs.read()
 			val certs = CertificateFactory.getInstance("X.509").generateCertificates(certData.toByteArray().inputStream())
 			assertTrue { certs.isNotEmpty() }
+
+			mf.connect()
+			val efDirDs = assertNotNull(mf.datasets.find { it.name == "EF.DIR" })
+			val efDirData = efDirDs.read()
+			assertTrue { efDirData.isNotEmpty() }
 		}
 	}
 }

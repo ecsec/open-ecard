@@ -109,14 +109,35 @@ class ReadRecord(
 			le: UShort = 0u,
 			forceExtendedLength: Boolean = false,
 			proprietaryDataObject: Boolean = false,
-		) = ReadRecord(
-			recordIdOrNum = 1u,
+		) = readRecordForNumberToEnd(
+			recordNum = 1u,
 			shortEf = shortEf,
-			mode = ReadRecordModeForNumber.READ_FROM_P1_TO_END,
 			le = le,
 			forceExtendedLength = forceExtendedLength,
 			proprietaryDataObject = proprietaryDataObject,
 		)
+
+		fun readAllRecordsIndividual(
+			/**
+			 * Specify the number of records in the file, if known
+			 */
+			numRecords: UByte? = null,
+			shortEf: UByte = 0u,
+			le: UShort = 0u,
+			forceExtendedLength: Boolean = false,
+			proprietaryDataObject: Boolean = false,
+		): Sequence<ReadRecord> {
+			val recordNumbers = 1 until (numRecords?.toInt() ?: 0xFF)
+			return recordNumbers.asSequence().map {
+				readRecordForNumber(
+					it.toUByte(),
+					shortEf = shortEf,
+					le = le,
+					forceExtendedLength = forceExtendedLength,
+					proprietaryDataObject = proprietaryDataObject,
+				)
+			}
+		}
 	}
 }
 

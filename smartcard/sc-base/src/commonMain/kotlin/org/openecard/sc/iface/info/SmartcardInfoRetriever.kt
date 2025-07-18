@@ -37,7 +37,7 @@ class SmartcardInfoRetriever(
 		if (efAtr == null) {
 			try {
 				Select.selectEfIdentifier(0x2F01u).transmit(channel)
-				val efAtrData = ReadRecord.readAllRecords().transmit(channel)
+				val efAtrData = ReadRecord.readAllRecordsIndividual().transmit(channel)
 				val efAtrTlv = efAtrData.toTlvBer()
 				this.efAtr = EfAtr(efAtrTlv.tlv.asList())
 			} catch (ex: Exception) {
@@ -72,7 +72,7 @@ class SmartcardInfoRetriever(
 		if (efDir == null) {
 			try {
 				Select.selectEfIdentifier(0x2F00u).transmit(channel)
-				val efDirData = ReadRecord.readAllRecords().transmit(channel)
+				val efDirData = ReadRecord.readAllRecordsIndividual().transmit(channel)
 				val efDirTlv = efDirData.toTlvBer()
 				this.efDir = EfDir(efDirTlv.tlv.asList())
 			} catch (ex: Exception) {

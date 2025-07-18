@@ -86,9 +86,16 @@ val NpaCif by lazy {
 }
 
 object NpaDefinitions {
-	internal fun AclScope.paceAuth(paceDidName: String) {
-		acl(CardProtocol.Any) {
-			activeDidState(paceDidName)
+	object Mf {
+		val name = "MF"
+
+		object Datasets
+
+		object Dids {
+			val pin = "PIN"
+			val pacePin = "PACE_PIN"
+			val paceCan = "PACE_CAN"
+			val pacePuk = "PACE_PUK"
 		}
 	}
 
@@ -281,7 +288,7 @@ object NpaDefinitions {
 }
 
 private fun ApplicationScope.appMf() {
-	name = "MF"
+	name = Mf.name
 	aid = +"3F00"
 	selectAcl {
 		acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -358,7 +365,7 @@ private fun ApplicationScope.appMf() {
 	}
 	dids {
 		pin {
-			name = "PIN"
+			name = Mf.Dids.pin
 			scope = DidScope.GLOBAL
 
 			authAcl {
@@ -367,7 +374,7 @@ private fun ApplicationScope.appMf() {
 
 			resetAcl {
 				acl(CardProtocol.Any) {
-					activeDidState("PIN")
+					activeDidState(Mf.Dids.pin)
 				}
 			}
 
@@ -384,7 +391,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		pace {
-			name = "PACE_PIN"
+			name = Mf.Dids.pacePin
 			scope = DidScope.GLOBAL
 
 			authAcl {
@@ -399,7 +406,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		pace {
-			name = "CAN"
+			name = Mf.Dids.paceCan
 			scope = DidScope.GLOBAL
 
 			authAcl {
@@ -414,7 +421,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		pace {
-			name = "PUK"
+			name = Mf.Dids.pacePuk
 			scope = DidScope.GLOBAL
 
 			authAcl {

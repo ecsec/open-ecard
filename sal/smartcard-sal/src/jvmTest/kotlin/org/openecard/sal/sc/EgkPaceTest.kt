@@ -2,6 +2,7 @@ package org.openecard.sal.sc
 
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.junit.jupiter.api.fail
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
@@ -15,15 +16,22 @@ import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import java.security.cert.CertificateFactory
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@EnabledIfEnvironmentVariable(named = "EGK_PACE_CAN", matches = ".*")
 @WhenPcscStack
 class EgkPaceTest {
-	val egkCan = "change for execution"
+	lateinit var egkCan: String
+
+	@BeforeTest
+	fun loadCan() {
+		egkCan = System.getenv("EGK_PACE_CAN")
+	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test

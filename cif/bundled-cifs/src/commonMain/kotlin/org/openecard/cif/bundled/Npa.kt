@@ -11,6 +11,7 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.pinCanTaKeyCaKeyCiProtect
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinTaKeyCaKeyCiProtectedAcl
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.acl.PaceAclQualifier
+import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordFlags
@@ -33,6 +34,36 @@ val NpaCif by lazy {
 		cardIssuer = "Federal Office for Information Security"
 		creationDate = Instant.parse("2025-06-25T00:00:00Z")
 		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
+	}
+
+	b.capabilities {
+		selectionMethods {
+			selectDfByFullName = true
+			selectDfByPartialName = false
+			selectDfByPath = false
+			selectDfByFileId = false
+			selectDfImplicit = false
+			supportsShortEf = true
+			supportsRecordNumber = false
+			supportsRecordIdentifier = false
+		}
+
+		dataCoding {
+			tlvEfs = false
+			writeOneTime = true
+			writeProprietary = false
+			writeOr = false
+			writeAnd = false
+			ffValidAsTlvFirstByte = false
+			dataUnitsQuartets = 2
+		}
+
+		commandCoding {
+			supportsCommandChaining = true
+			supportsExtendedLength = true
+			logicalChannel = CommandCodingDefinitions.LogicalChannelAssignment.NO_LOGICAL_CHANNELS
+			maximumLogicalChannels = 0
+		}
 	}
 
 	b.applications {

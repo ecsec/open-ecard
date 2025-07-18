@@ -1,11 +1,44 @@
 package org.openecard.cif.bundled
 
 import org.openecard.cif.definition.CardProtocol
+import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.dsl.api.acl.AclScope
+import org.openecard.cif.dsl.api.capabilities.CardCapabilitiesScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
 
 object GematikBuildingBlocks {
+	// TODO: these are from an eGK, check if the HBA uses the same capabilities
+	internal fun CardCapabilitiesScope.gematikCardCapabilities() {
+		selectionMethods {
+			selectDfByFullName = true
+			selectDfByPartialName = false
+			selectDfByPath = false
+			selectDfByFileId = true
+			selectDfImplicit = false
+			supportsShortEf = true
+			supportsRecordNumber = true
+			supportsRecordIdentifier = false
+		}
+
+		dataCoding {
+			tlvEfs = false
+			writeOneTime = false
+			writeProprietary = true
+			writeOr = false
+			writeAnd = false
+			ffValidAsTlvFirstByte = false
+			dataUnitsQuartets = 2
+		}
+
+		commandCoding {
+			supportsCommandChaining = true
+			supportsExtendedLength = true
+			logicalChannel = CommandCodingDefinitions.LogicalChannelAssignment.NO_LOGICAL_CHANNELS
+			maximumLogicalChannels = 0
+		}
+	}
+
 	internal fun AclScope.alwaysAcl() {
 		acl(CardProtocol.Any) {
 			Always

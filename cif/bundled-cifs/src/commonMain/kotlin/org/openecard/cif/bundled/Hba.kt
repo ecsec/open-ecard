@@ -5,6 +5,7 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsCupProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.gematikCardCapabilities
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsCupProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
@@ -43,9 +44,13 @@ val HbaCif by lazy {
 		version = "1.0.0"
 		status = CardInfoStatus.DEVELOPMENT
 		name = "HPC-G2"
-		cardIssuer = "Bundesaerztekammer"
+		cardIssuer = "Bundesärztekammer"
 		creationDate = Instant.parse("2025-06-25T00:00:00Z")
 		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
+	}
+
+	b.capabilities {
+		gematikCardCapabilities()
 	}
 
 	b.applications {

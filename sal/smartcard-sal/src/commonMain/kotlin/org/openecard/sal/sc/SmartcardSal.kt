@@ -14,6 +14,7 @@ class SmartcardSal(
 	val cardRecognition: CardRecognition,
 	internal val paceFactory: PaceFeatureFactory? = null,
 	internal val readSmartcardInfo: Boolean = true,
+	internal val preferStaticCardCapabilities: Boolean = true,
 	internal val random: Random = Random.Default,
 ) : Sal {
 	override fun startSession(sessionId: String?): SmartcardSalSession {

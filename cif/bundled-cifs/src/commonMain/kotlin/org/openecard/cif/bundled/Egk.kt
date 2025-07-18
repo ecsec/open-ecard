@@ -24,6 +24,7 @@ import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_r2048
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
+import org.openecard.cif.bundled.GematikBuildingBlocks.gematikCardCapabilities
 import org.openecard.cif.bundled.GematikBuildingBlocks.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
@@ -51,6 +52,10 @@ val EgkCif by lazy {
 		cardIssuer = "Gesellschaft für Telematikanwendungen der Gesundheitskarte mbH"
 		creationDate = Instant.parse("2025-06-25T00:00:00Z")
 		modificationDate = Instant.parse("2025-06-25T00:00:00Z")
+	}
+
+	b.capabilities {
+		gematikCardCapabilities()
 	}
 
 	b.applications {

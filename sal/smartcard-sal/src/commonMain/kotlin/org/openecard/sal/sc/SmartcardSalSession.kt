@@ -10,6 +10,7 @@ import org.openecard.utils.common.generateSessionId
 class SmartcardSalSession internal constructor(
 	override val sal: SmartcardSal,
 	override val sessionId: String,
+	private val readSmartcardInfo: Boolean,
 ) : SalSession {
 	override fun initializeStack() =
 		mapSmartcardError {
@@ -39,8 +40,10 @@ class SmartcardSalSession internal constructor(
 				val channel = card.basicChannel
 
 				// read card information and update channel
-				val scInfo = SmartcardInfoRetriever(channel).retrieve(withSelectMf = false, withEfDir = false)
-				card.capabilities = scInfo.capabilities
+				if (readSmartcardInfo) {
+					val scInfo = SmartcardInfoRetriever(channel).retrieve(withSelectMf = false, withEfDir = false)
+					card.capabilities = scInfo.capabilities
+				}
 
 				val cardType =
 					sal.cardRecognition.recognizeCard(channel)

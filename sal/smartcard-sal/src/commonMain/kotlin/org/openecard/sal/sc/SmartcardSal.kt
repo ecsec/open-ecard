@@ -13,10 +13,11 @@ class SmartcardSal(
 	internal val cifs: Set<CardInfoDefinition>,
 	val cardRecognition: CardRecognition,
 	internal val paceFactory: PaceFeatureFactory? = null,
+	internal val readSmartcardInfo: Boolean = true,
 	internal val random: Random = Random.Default,
 ) : Sal {
 	override fun startSession(sessionId: String?): SmartcardSalSession {
 		val session = sessionId ?: random.generateSessionId()
-		return SmartcardSalSession(this, session)
+		return SmartcardSalSession(this, session, readSmartcardInfo)
 	}
 }

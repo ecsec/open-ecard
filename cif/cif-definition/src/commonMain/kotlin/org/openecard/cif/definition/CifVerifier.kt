@@ -40,11 +40,8 @@ class CifVerifier(
 			if (a.dataSets.distinctBy { it.path }.size != a.dataSets.size) {
 				throw IllegalArgumentException("Duplicate dataset paths found in application '${a.name}'")
 			}
-			if (a.dataSets
-					.filter { it.shortEf != null }
-					.distinctBy { it.shortEf }
-					.size != a.dataSets.count { it.shortEf != null }
-			) {
+			val shortEfDs = a.dataSets.filter { it.shortEf != null }
+			if (shortEfDs.distinctBy { it.shortEf }.size != shortEfDs.size) {
 				throw IllegalArgumentException("Duplicate dataset Short-EFs found in application '${a.name}'")
 			}
 		}

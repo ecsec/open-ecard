@@ -117,12 +117,5 @@ object GematikBuildingBlocks {
 		}
 	}
 
-
-	internal fun PinDidParametersScope.isoPinStandards() {
-		minLength = 6
-		maxLength = 8
-		storedLength = 8
-		padChar = 0xFFu
-	}
 	internal fun PinDidParametersScope.basePinParams() = isoPin(6, 8)
 }

@@ -369,7 +369,12 @@ private fun ApplicationScope.appMf() {
 			scope = DidScope.GLOBAL
 
 			authAcl {
-				alwaysAcl()
+				acl(CardProtocol.Any) {
+					or(
+						{ activeDidState(Mf.Dids.pacePin) },
+						{ activeDidState(Mf.Dids.pacePuk) },
+					)
+				}
 			}
 
 			resetAcl {
@@ -384,9 +389,11 @@ private fun ApplicationScope.appMf() {
 				pwdFlags =
 					setOf(
 						PasswordFlags.RESET_RETRY_COUNTER_WITH_PASSWORD,
-						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+						PasswordFlags.RESET_RETRY_COUNTER_WITHOUT_DATA,
 					)
-				isoPinStandards()
+				minLength = 6
+				maxLength = 6
+				storedLength = 6
 			}
 		}
 

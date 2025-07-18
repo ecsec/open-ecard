@@ -40,11 +40,8 @@ class CifVerifier(
 			if (a.dataSets.distinctBy { it.path }.size != a.dataSets.size) {
 				throw IllegalArgumentException("Duplicate dataset paths found in application '${a.name}'")
 			}
-			if (a.dataSets
-					.filter { it.shortEf != null }
-					.distinctBy { it.shortEf }
-					.size != a.dataSets.size
-			) {
+			val shortEfDs = a.dataSets.filter { it.shortEf != null }
+			if (shortEfDs.distinctBy { it.shortEf }.size != shortEfDs.size) {
 				throw IllegalArgumentException("Duplicate dataset Short-EFs found in application '${a.name}'")
 			}
 		}
@@ -64,6 +61,7 @@ class CifVerifier(
 							checkDatasetExists(app, certDs)
 						}
 					}
+
 					else -> {}
 				}
 			}
@@ -91,12 +89,15 @@ class CifVerifier(
 				checkAcl(app, "Did.encipher", did.name, did.encipherAcl.acls)
 				checkAcl(app, "Did.decipher", did.name, did.decipherAcl.acls)
 			}
+
 			is GenericCryptoDidDefinition.SignatureDidDefinition -> {
 				checkAcl(app, "Did.sign", did.name, did.signAcl.acls)
 			}
+
 			is PaceDidDefinition -> {
 				checkAcl(app, "Did.auth", did.name, did.authAcl.acls)
 			}
+
 			is PinDidDefinition -> {
 				checkAcl(app, "Did.auth", did.name, did.authAcl.acls)
 				checkAcl(app, "Did.modify", did.name, did.modifyAcl.acls)
@@ -163,6 +164,7 @@ class CifVerifier(
 						} else {
 							throw IllegalArgumentException("Local DID '$name' in app '${a.name}' referenced from app '${localApp.name}'")
 						}
+
 					DidScope.GLOBAL -> return
 				}
 			}

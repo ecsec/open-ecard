@@ -1,9 +1,9 @@
 package org.openecard.cif.bundled
 
 import org.openecard.cif.definition.CardProtocol
-import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
+import org.openecard.cif.dsl.api.did.isoPin
 
 object GematikBuildingBlocks {
 	internal fun AclScope.alwaysAcl() {
@@ -111,12 +111,11 @@ object GematikBuildingBlocks {
 		}
 	}
 
-	internal fun PinDidParametersScope.basePinParams() {
-		pwdFlags = setOf()
-		pwdType = PasswordType.ISO_9564_1
-		minLength = 6
-		maxLength = 8
-		storedLength = 8
-		padChar = 0xFFu
+	internal fun AclScope.pinProtectedAcl() {
+		acl(CardProtocol.Any) {
+			activeDidState("PIN")
+		}
 	}
+
+	internal fun PinDidParametersScope.basePinParams() = isoPin(6, 8)
 }

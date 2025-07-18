@@ -4,9 +4,7 @@ import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.ResponseApdu
 import org.openecard.sc.apdu.SecureMessagingIndication
 import org.openecard.sc.apdu.StatusWord
-import org.openecard.sc.apdu.isNormalProcessed
 import org.openecard.sc.apdu.matchStatus
-import org.openecard.sc.iface.InvalidApduStatus
 import org.openecard.sc.iface.InvalidSmDo
 import org.openecard.sc.iface.InvalidSwData
 import org.openecard.sc.iface.MissingSmDo
@@ -16,6 +14,7 @@ import org.openecard.sc.iface.SecureMessagingUnsupported
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvBer
+import org.openecard.utils.common.hex
 import org.openecard.utils.common.mergeToArray
 import org.openecard.utils.common.toUByteArray
 import org.openecard.utils.serialization.toPrintable
@@ -27,6 +26,7 @@ class SecureMessagingImpl(
 	val protectedData: Boolean,
 	val protectedLe: Boolean,
 	val protectedHeader: Boolean,
+	val requireSwDo: Boolean,
 ) : SecureMessaging {
 	init {
 		require(commandStages.isNotEmpty())
@@ -98,8 +98,6 @@ class SecureMessagingImpl(
 		if (responseApdu.matchStatus(StatusWord.SM_DO_MISSING)) throw MissingSmDo()
 		if (responseApdu.matchStatus(StatusWord.SM_DO_INCORRECT)) throw InvalidSmDo()
 		if (responseApdu.matchStatus(StatusWord.SECURE_MESSAGING_UNSUPPORTED)) throw SecureMessagingUnsupported()
-		// sm response must be 9000
-		if (!responseApdu.isNormalProcessed) throw InvalidApduStatus()
 
 		val protectedDos =
 			responseApdu.data
@@ -110,9 +108,13 @@ class SecureMessagingImpl(
 
 		// reconstruct response APDU
 		val data = unprotectedDos.find { it.tag in SmBasicTags.plain.tags }?.contentAsBytesBer ?: ubyteArrayOf()
-		val swData =
-			unprotectedDos.find { it.tag == SmBasicTags.sw.tag }?.contentAsBytesBer ?: throw NoSwData()
-		if (swData.size != 2) {
+		var swData =
+			unprotectedDos.find { it.tag == SmBasicTags.sw.tag }?.contentAsBytesBer
+				?: if (requireSwDo) throw NoSwData() else responseApdu.sw.toUByteArray()
+		if (swData.isEmpty()) {
+			// the emtpy sw field means 9000
+			swData = hex("9000")
+		} else if (swData.size != 2) {
 			throw InvalidSwData()
 		}
 

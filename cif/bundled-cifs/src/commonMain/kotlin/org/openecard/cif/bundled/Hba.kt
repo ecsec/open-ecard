@@ -11,21 +11,58 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
-import org.openecard.cif.bundled.HbaDefinitions.autPace
-import org.openecard.cif.bundled.HbaDefinitions.pinAuto
-import org.openecard.cif.bundled.HbaDefinitions.pinCh
-import org.openecard.cif.bundled.HbaDefinitions.pinQes
-import org.openecard.cif.bundled.HbaDefinitions.pinSo
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_e256
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_r2048_signPKCS1_V1_5
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_aut_r2048_signPSS
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_auto_r3072_signPKCS1_V1_5
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_auto_r3072_signPSS
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_enc_r2048
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_e256
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_qes_r2048
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_e256
-import org.openecard.cif.bundled.HbaDefinitions.prk_hp_sig_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Datasets.ef_c_hp_auto1_r3072
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Datasets.ef_c_hp_auto2_r3072
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Dids.pinAuto
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Dids.pinSo
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Dids.prk_hp_auto_r3072_signPKCS1_V1_5
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Auto.Dids.prk_hp_auto_r3072_signPSS
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign.Datasets.cia_esign_efAod
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign.Datasets.cia_esign_efCd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign.Datasets.cia_esign_efOd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign.Datasets.cia_esign_efPrkd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaEsign.Datasets.cia_esign_ef_cia_ciaInfo
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes.Datasets.cia_qes_efAod
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes.Datasets.cia_qes_efCd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes.Datasets.cia_qes_efOd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes.Datasets.cia_qes_efPrkd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.CiaQes.Datasets.cia_qes_ef_cia_ciaInfo
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_aut_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_aut_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_enc_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_enc_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_sig_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Datasets.ef_c_hp_sig_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_aut_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_aut_r2048_signPKCS1_V1_5
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_aut_r2048_signPSS
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_enc_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_sig_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.ESign.Dids.prk_hp_sig_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Hpa
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Hpa.Datasets.efHpd
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.efAtr
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.efCardAccess
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.efDir
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.efGdo
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.efVersion2
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.ef_c_ca_cs_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.ef_c_hpc_autd_suk_cvc_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Datasets.ef_c_hpc_autr_cvc_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Dids.autPace
+import org.openecard.cif.bundled.HbaDefinitions.Apps.MF.Dids.pinCh
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Datasets.efSsec
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Datasets.ef_c_hp_qes_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Datasets.ef_c_hp_qes_r2048
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.pinQes
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.prk_hp_qes_e256
+import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.prk_hp_qes_r2048
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
@@ -106,33 +143,117 @@ val HbaCif by lazy {
 }
 
 object HbaDefinitions {
-	val appMf = "MF"
-	val appDFHPA = "DF.HPA"
-	val appDFAUTO = "DF.AUTO"
-	val appDFCIAESIGN = "DF.CIA.ESIGN"
-	val appDFESIGN = "DF.ESIGN"
-	val appDFCIAQES = "DF.CIA.QES"
-	val appDFQES = "DF.QES"
+	object Apps {
+		object MF {
+			val name = "MF"
 
-	val autPace = "AUT_PACE"
-	val pinCh = "PIN.CH"
-	val pinQes = "PIN.QES"
-	val prk_hp_qes_r2048 = "PrK.HP.QES.R2048"
-	val prk_hp_qes_e256 = "PrK.HP.QES.E256"
-	val prk_hp_aut_r2048_signPKCS1_V1_5 = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
-	val prk_hp_aut_r2048_signPSS = "PrK.HP.AUT.R2048_signPSS"
-	val prk_hp_enc_r2048 = "PrK.HP.ENC.R2048"
-	val prk_hp_aut_e256 = "PrK.HP.AUT.E256"
-	val prk_hp_sig_r2048 = "PrK.HP.SIG.R2048"
-	val prk_hp_sig_e256 = "PrK.HP.SIG.E256"
-	val pinAuto = "PIN.AUTO"
-	val pinSo = "PIN.SO"
-	val prk_hp_auto_r3072_signPKCS1_V1_5 = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
-	val prk_hp_auto_r3072_signPSS = "PrK.HP.AUTO.R3072_signPSS"
+			object Datasets {
+				val efAtr = "EF.ATR"
+				val efCardAccess = "EF.CardAccess"
+				val efDir = "EF.DIR"
+				val efGdo = "EF.GDO"
+				val efVersion2 = "EF.Version2"
+				val ef_c_ca_cs_e256 = "EF.C.CA.CS.E256"
+				val ef_c_hpc_autr_cvc_e256 = "EF.C.HPC.AUTR_CVC.E256"
+				val ef_c_hpc_autd_suk_cvc_e256 = "EF.C.HPC.AUTD_SUK_CVC.E256"
+			}
+
+			object Dids {
+				val autPace = GematikBuildingBlocks.autPace
+				val pinCh = GematikBuildingBlocks.pinCh
+			}
+		}
+
+		object Hpa {
+			val name = "DF.HPA"
+
+			object Datasets {
+				val efHpd = "EF.HPD"
+			}
+		}
+
+		object Qes {
+			val name = "DF.QES"
+
+			object Datasets {
+				val ef_c_hp_qes_r2048 = "EF.C.HP.QES.R2048"
+				val ef_c_hp_qes_e256 = "EF.C.HP.QES.E256"
+				val efSsec = "EF.SSEC"
+			}
+
+			object Dids {
+				val pinQes = "PIN.QES"
+				val prk_hp_qes_r2048 = "PrK.HP.QES.R2048"
+				val prk_hp_qes_e256 = "PrK.HP.QES.E256"
+			}
+		}
+
+		object ESign {
+			val name = "DF.ESIGN"
+
+			object Datasets {
+				val ef_c_hp_aut_r2048 = "EF.C.HP.AUT.R2048"
+				val ef_c_hp_enc_r2048 = "EF.C.HP.ENC.R2048"
+				val ef_c_hp_aut_e256 = "EF.C.HP.AUT.E256"
+				val ef_c_hp_enc_e256 = "EF.C.HP.ENC.E256"
+				val ef_c_hp_sig_r2048 = "EF.C.HP.SIG.R2048"
+				val ef_c_hp_sig_e256 = "EF.C.HP.SIG.E256"
+			}
+
+			object Dids {
+				val prk_hp_aut_r2048_signPKCS1_V1_5 = "PrK.HP.AUT.R2048_signPKCS1_V1_5"
+				val prk_hp_aut_r2048_signPSS = "PrK.HP.AUT.R2048_signPSS"
+				val prk_hp_enc_r2048 = "PrK.HP.ENC.R2048"
+				val prk_hp_aut_e256 = "PrK.HP.AUT.E256"
+				val prk_hp_sig_r2048 = "PrK.HP.SIG.R2048"
+				val prk_hp_sig_e256 = "PrK.HP.SIG.E256"
+			}
+		}
+
+		object CiaQes {
+			val name = "DF.CIA.QES"
+
+			object Datasets {
+				val cia_qes_ef_cia_ciaInfo = "DF.CIA.QES/EF.CIA.CIAInfo"
+				val cia_qes_efOd = "DF.CIA.QES/EF.OD"
+				val cia_qes_efAod = "DF.CIA.QES/EF.AOD"
+				val cia_qes_efPrkd = "DF.CIA.QES/EF.PrKD"
+				val cia_qes_efCd = "DF.CIA.QES/EF.CD"
+			}
+		}
+
+		object CiaEsign {
+			val name = "DF.CIA.ESIGN"
+
+			object Datasets {
+				val cia_esign_ef_cia_ciaInfo = "DF.CIA.ESIGN/EF.CIA.CIAInfo"
+				val cia_esign_efOd = "DF.CIA.ESIGN/EF.OD"
+				val cia_esign_efAod = "DF.CIA.ESIGN/EF.AOD"
+				val cia_esign_efPrkd = "DF.CIA.ESIGN/EF.PrKD"
+				val cia_esign_efCd = "DF.CIA.ESIGN/EF.CD"
+			}
+		}
+
+		object Auto {
+			val name = "DF.AUTO"
+
+			object Datasets {
+				val ef_c_hp_auto1_r3072 = "EF.C.HP.AUTO1.R3072"
+				val ef_c_hp_auto2_r3072 = "EF.C.HP.AUTO2.R3072"
+			}
+
+			object Dids {
+				val pinAuto = "PIN.AUTO"
+				val pinSo = "PIN.SO"
+				val prk_hp_auto_r3072_signPKCS1_V1_5 = "PrK.HP.AUTO.R3072_signPKCS1_V1_5"
+				val prk_hp_auto_r3072_signPSS = "PrK.HP.AUTO.R3072_signPSS"
+			}
+		}
+	}
 }
 
 private fun ApplicationScope.appMf() {
-	name = HbaDefinitions.appMf
+	name = MF.name
 	aid = +"D2760001448000"
 
 	selectAcl {
@@ -141,7 +262,7 @@ private fun ApplicationScope.appMf() {
 
 	dataSets {
 		add {
-			name = "EF.ATR"
+			name = efAtr
 			description =
 				"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
 				"It is also used to version variable elements of a map."
@@ -156,7 +277,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.CardAccess"
+			name = efCardAccess
 			description =
 				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
 			path = +"011C"
@@ -170,7 +291,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.DIR"
+			name = efDir
 			description =
 				"The EF.DIR file contains a list of application templates according to ISO7816-4. This list " +
 				"is adjusted when the application structure changes by deleting or creating applications."
@@ -185,7 +306,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.GDO"
+			name = efGdo
 			description =
 				"The ICCSN data object, which contains the identification number of the card, is stored in " +
 				"EF.GDO. The identification number is based on [Resolution190]."
@@ -200,7 +321,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.Version2"
+			name = efVersion2
 			description =
 				"""
 				The file EF.Version2 contains the version numbers as well as product identifiers for variable elements of the card:
@@ -220,7 +341,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.C.CA.CS.E256"
+			name = ef_c_ca_cs_e256
 			description =
 				"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
 				"the public key PuK.CA.CS.E256 of a CA. This certificate can be checked by means of the " +
@@ -236,7 +357,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.C.HPC.AUTR_CVC.E256"
+			name = ef_c_hpc_autr_cvc_e256
 			description =
 				"EF.C.HPC.AUTR_CVC.E256 contains the CV certificate of the HBA for cryptography with elliptic curves " +
 				"for role-based C2C authentication between HBA and eGK and for the authorization of the SMC-B. " +
@@ -252,7 +373,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.C.HPC.AUTD_SUK_CVC.E256"
+			name = ef_c_hpc_autd_suk_cvc_e256
 			description =
 				"EF.C.HPC.AUTD_SUK_CVC.E256 contains the CV certificate of the HBA for cryptography with elliptic curves for " +
 				"function-based C2C authentication between HBA/gSMC-KT and HBA/gSMC-K with the HBA as a signature card " +
@@ -338,7 +459,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appDFHPA() {
-	name = HbaDefinitions.appDFHPA
+	name = Hpa.name
 	aid = +"D27600014602"
 
 	selectAcl {
@@ -347,7 +468,7 @@ private fun ApplicationScope.appDFHPA() {
 
 	dataSets {
 		add {
-			name = "EF.HPD"
+			name = efHpd
 			description =
 				"The transparent EF.HPD file is intended for storing data relating to the respective healthcare professional, " +
 				"e.g. confirmation of participation in further training measures. The file can always be read, but an update " +
@@ -365,7 +486,7 @@ private fun ApplicationScope.appDFHPA() {
 }
 
 private fun ApplicationScope.appDFQES() {
-	name = HbaDefinitions.appDFQES
+	name = Qes.name
 	aid = +"D27600006601"
 	description = "Optional QES application"
 
@@ -375,7 +496,7 @@ private fun ApplicationScope.appDFQES() {
 
 	dataSets {
 		add {
-			name = "EF.C.HP.QES.R2048"
+			name = ef_c_hp_qes_r2048
 			description =
 				"The transparent file EF.C.HP.QES.R2048 contains the X.509 certificate for cryptography with RSA with the " +
 				"public key of the healthcare professional PuK.HP.QES.R2048 for the qualified electronic signature in " +
@@ -393,7 +514,7 @@ private fun ApplicationScope.appDFQES() {
 		}
 
 		add {
-			name = "EF.C.HP.QES.E256"
+			name = ef_c_hp_qes_e256
 			description =
 				"The transparent file EF.C.HP.QES.E256 contains the X.509 certificate for cryptography with elliptic curves " +
 				"with the public key of the healthcare professional PuK.HP.QES.E256 for the qualified electronic signature " +
@@ -411,7 +532,7 @@ private fun ApplicationScope.appDFQES() {
 		}
 
 		add {
-			name = "EF.SSEC"
+			name = efSsec
 			description =
 				"The transparent EF.SSEC file shows the maximum SSEC values that have been defined for a specific application " +
 				"environment of the HBA in accordance with the evaluation and confirmation of the HBA as a secure signature creation device."
@@ -496,7 +617,7 @@ private fun ApplicationScope.appDFQES() {
 }
 
 private fun ApplicationScope.appDFESIGN() {
-	name = HbaDefinitions.appDFESIGN
+	name = ESign.name
 	aid = +"A000000167455349474E"
 
 	selectAcl {
@@ -505,7 +626,7 @@ private fun ApplicationScope.appDFESIGN() {
 
 	dataSets {
 		add {
-			name = "EF.C.HP.AUT.R2048"
+			name = ef_c_hp_aut_r2048
 			description =
 				"The file EF.C.HP.AUT.R2048 contains a certificate for cryptography with RSA with the public key PuK.HP.AUT.R2048."
 			path = +"C500"
@@ -520,7 +641,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.HP.ENC.R2048"
+			name = ef_c_hp_enc_r2048
 			description =
 				"The file EF.C.HP.ENC.R2048 contains a certificate for cryptography with RSA with the public key PuK.HP.ENC.R2048."
 			path = +"C200"
@@ -535,7 +656,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.HP.AUT.E256"
+			name = ef_c_hp_aut_e256
 			description =
 				"The file EF.C.HP.AUT.E256 contains a certificate for cryptography with elliptic curves with the public key PuK.HP.AUT.E256."
 			path = +"C506"
@@ -551,7 +672,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.HP.ENC.E256"
+			name = ef_c_hp_enc_e256
 			description =
 				"The file EF.C.HP.ENC.E256 contains a certificate for cryptography with elliptic curves with the public key PuK.HP.ENC.E256."
 			path = +"C205"
@@ -566,7 +687,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.HP.SIG.R2048"
+			name = ef_c_hp_sig_r2048
 			description =
 				"This EF contains the certificate for the key PrK.HP.SIG.R2048."
 			path = +"C000"
@@ -581,7 +702,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.HP.SIG.E256"
+			name = ef_c_hp_sig_e256
 			description =
 				"This EF contains the certificate for the key PrK.HP.SIG.E256."
 			path = +"C007"
@@ -765,7 +886,7 @@ private fun ApplicationScope.appDFESIGN() {
 }
 
 private fun ApplicationScope.appDFCIAQES() {
-	name = HbaDefinitions.appDFCIAQES
+	name = CiaQes.name
 	aid = +"E828BD080FD27600006601"
 
 	selectAcl {
@@ -774,7 +895,7 @@ private fun ApplicationScope.appDFCIAQES() {
 
 	dataSets {
 		add {
-			name = "DF.CIA.QES/EF.CIA.CIAInfo"
+			name = cia_qes_ef_cia_ciaInfo
 			path = +"5032"
 			shortEf = 0x12u
 			readAcl {
@@ -785,7 +906,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			}
 		}
 		add {
-			name = "DF.CIA.QES/EF.OD"
+			name = cia_qes_efOd
 			path = +"5031"
 			shortEf = 0x11u
 			readAcl {
@@ -796,7 +917,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			}
 		}
 		add {
-			name = "DF.CIA.QES/EF.AOD"
+			name = cia_qes_efAod
 			path = +"5034"
 			shortEf = 0x14u
 			readAcl {
@@ -807,7 +928,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			}
 		}
 		add {
-			name = "DF.CIA.QES/EF.PrKD"
+			name = cia_qes_efPrkd
 			path = +"5035"
 			shortEf = 0x15u
 			readAcl {
@@ -818,7 +939,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			}
 		}
 		add {
-			name = "DF.CIA.QES/EF.CD"
+			name = cia_qes_efCd
 			path = +"5038"
 			shortEf = 0x16u
 			readAcl {
@@ -832,7 +953,7 @@ private fun ApplicationScope.appDFCIAQES() {
 }
 
 private fun ApplicationScope.appDFCIAESIGN() {
-	name = HbaDefinitions.appDFCIAESIGN
+	name = CiaEsign.name
 	aid = +"E828BD080FA000000167455349474E"
 
 	selectAcl {
@@ -841,7 +962,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 
 	dataSets {
 		add {
-			name = "DF.CIA.ESIGN/EF.CIA.CIAInfo"
+			name = cia_esign_ef_cia_ciaInfo
 			path = +"5032"
 			shortEf = 0x12u
 			readAcl {
@@ -852,7 +973,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			}
 		}
 		add {
-			name = "DF.CIA.ESIGN/EF.OD"
+			name = cia_esign_efOd
 			path = +"5031"
 			shortEf = 0x11u
 			readAcl {
@@ -863,7 +984,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			}
 		}
 		add {
-			name = "DF.CIA.ESIGN/EF.AOD"
+			name = cia_esign_efAod
 			path = +"5034"
 			shortEf = 0x14u
 			readAcl {
@@ -874,7 +995,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			}
 		}
 		add {
-			name = "DF.CIA.ESIGN/EF.PrKD"
+			name = cia_esign_efPrkd
 			path = +"5035"
 			shortEf = 0x15u
 			readAcl {
@@ -885,7 +1006,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			}
 		}
 		add {
-			name = "DF.CIA.ESIGN/EF.CD"
+			name = cia_esign_efCd
 			path = +"5038"
 			shortEf = 0x16u
 			readAcl {
@@ -899,7 +1020,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 }
 
 private fun ApplicationScope.appDFAUTO() {
-	name = HbaDefinitions.appDFAUTO
+	name = Auto.name
 	aid = +"D27600014603"
 
 	selectAcl {
@@ -908,7 +1029,7 @@ private fun ApplicationScope.appDFAUTO() {
 
 	dataSets {
 		add {
-			name = "EF.C.HP.AUTO1.R3072"
+			name = ef_c_hp_auto1_r3072
 			path = +"E001"
 			shortEf = 0x01u
 			readAcl {
@@ -920,7 +1041,7 @@ private fun ApplicationScope.appDFAUTO() {
 		}
 
 		add {
-			name = "EF.C.HP.AUTO2.R3072"
+			name = ef_c_hp_auto2_r3072
 			path = +"E002"
 			shortEf = 0x02u
 			readAcl {

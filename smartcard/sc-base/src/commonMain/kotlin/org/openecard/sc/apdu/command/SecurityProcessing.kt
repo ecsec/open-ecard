@@ -59,7 +59,8 @@ class SecurityCommandFailure(
 	}
 
 	val verificationFailed by lazy {
-		resultType == SecurityCommandResultType.VERIFICATION_FAILED
+		resultType == SecurityCommandResultType.VERIFICATION_FAILED ||
+			resultType == SecurityCommandResultType.COUNTER
 	}
 
 	val authDeactivated by lazy {

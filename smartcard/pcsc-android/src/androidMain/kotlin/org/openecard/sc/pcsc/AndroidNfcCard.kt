@@ -3,12 +3,13 @@ package org.openecard.sc.pcsc
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.apdu.CommandApdu
 import org.openecard.sc.apdu.toResponseApdu
+import org.openecard.sc.iface.AbstractCardChannel
 import org.openecard.sc.iface.Atr
 import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardCapabilities
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
-import org.openecard.sc.iface.SecureMessaging
+import org.openecard.sc.iface.RemovedCard
 import org.openecard.sc.iface.toAtr
 import kotlin.UByteArray
 
@@ -69,27 +70,22 @@ class AndroidNfcCard(
 	}
 }
 
-class AndroidCardChannel(
+class AndroidCardChannel internal constructor(
 	override val card: AndroidNfcCard,
-) : CardChannel {
-	override val channelNumber = 1
-
+	override val channelNumber: Int = 0,
+) : AbstractCardChannel() {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun transmit(apdu: CommandApdu) =
-		card.tag
-			?.transceive(
-				apdu.toBytes.toByteArray(),
-			)?.toResponseApdu() ?: throw Exception()
+	override fun transmitRaw(apdu: CommandApdu) =
+		when (val tag = card.tag) {
+			null -> throw RemovedCard()
+			else ->
+				mapScioError {
+					tag.transceive(apdu.toBytes.toByteArray()).toResponseApdu()
+				}
+		}
 
+	// only relevant for logic channels
 	override fun close() {
-		TODO("Not yet implemented")
-	}
-
-	override fun setSecureMessaging(sm: SecureMessaging) {
-		TODO("Not yet implemented")
-	}
-
-	override fun removeSecureMessaging() {
 		TODO("Not yet implemented")
 	}
 }

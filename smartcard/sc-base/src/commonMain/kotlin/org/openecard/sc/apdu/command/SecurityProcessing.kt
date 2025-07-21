@@ -70,6 +70,9 @@ class SecurityCommandFailure(
 		if (retries == 0) {
 			true
 		} else if (resultType == SecurityCommandResultType.AUTH_BLOCKED) {
+			true
+		} else {
+			false
 		}
 	}
 

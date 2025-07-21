@@ -5,7 +5,6 @@ import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
 import org.openecard.cif.dsl.api.did.PinDidPasswordEncodingScope
 import org.openecard.cif.dsl.api.did.isoPin
-import org.openecard.cif.dsl.api.did.isoPuk
 
 object GematikBuildingBlocks {
 	val autPace = "AUT_PACE"
@@ -110,5 +109,5 @@ object GematikBuildingBlocks {
 
 	internal fun PinDidParametersScope.basePinParams() = isoPin(6, 8)
 
-	internal fun PinDidPasswordEncodingScope.basePukParams() = isoPuk(6, 8)
+	internal fun PinDidPasswordEncodingScope.basePukParams() = isoPin(8, 8)
 }

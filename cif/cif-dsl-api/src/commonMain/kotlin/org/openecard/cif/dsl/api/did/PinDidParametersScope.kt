@@ -18,7 +18,7 @@ interface PinDidParametersScope :
 	fun unblockingPassword(content: @CifMarker PinDidPasswordEncodingScope.() -> Unit)
 }
 
-fun PinDidParametersScope.isoPin(
+fun PinDidPasswordEncodingScope.isoPin(
 	minLength: Int,
 	maxLength: Int,
 ) {

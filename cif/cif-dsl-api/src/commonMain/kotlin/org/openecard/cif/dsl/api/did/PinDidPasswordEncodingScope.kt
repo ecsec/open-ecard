@@ -10,14 +10,3 @@ interface PinDidPasswordEncodingScope : CifScope {
 	var storedLength: Int?
 	var padChar: UByte?
 }
-
-fun PinDidPasswordEncodingScope.isoPuk(
-	minLength: Int,
-	maxLength: Int,
-) {
-	pwdType = PasswordType.ISO_9564_1
-	this.minLength = minLength
-	this.maxLength = maxLength
-	storedLength = 8
-	padChar = 0xFFu
-}

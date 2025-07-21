@@ -13,7 +13,6 @@ import org.openecard.sal.sc.testutils.WhenPcscStack
 import org.openecard.sc.apdu.command.SecurityCommandFailure
 import org.openecard.sc.apdu.command.SecurityCommandSuccess
 import org.openecard.sc.iface.feature.PaceError
-import org.openecard.sc.iface.feature.PaceResultCode
 import org.openecard.sc.iface.withContext
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
@@ -215,7 +214,7 @@ class NpaPinOperationsTest {
 			return null
 		} catch (ex: PaceError) {
 			val secErr = ex.securityError
-			if (secErr != null && ex.error == PaceResultCode.MSE_SET_AT_ERROR) {
+			if (secErr != null) {
 				return secErr
 			} else {
 				throw ex

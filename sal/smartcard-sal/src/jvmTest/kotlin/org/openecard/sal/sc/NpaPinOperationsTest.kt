@@ -157,6 +157,7 @@ class NpaPinOperationsTest {
 				}
 			}
 
+			paceCan.closeChannel()
 			assertNull(pacePuk.enterPassword(npaPuk))
 			pin.resetPassword(null, null)
 

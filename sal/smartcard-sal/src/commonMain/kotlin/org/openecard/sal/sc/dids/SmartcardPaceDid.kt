@@ -99,6 +99,7 @@ class SmartcardPaceDid(
 			val req = PaceEstablishChannelRequest(pinType, checkPassword(password), chat?.toPrintable(), certDesc?.toPrintable())
 			runBlocking(Dispatchers.IO) {
 				val resp = paceFeature.establishChannel(req)
+				unsetAuthOfOtherPaceDids()
 				setDidFulfilled()
 				resp
 			}
@@ -114,6 +115,7 @@ class SmartcardPaceDid(
 
 			val req = PaceEstablishChannelRequest(pinType, null, chat?.toPrintable(), certDesc?.toPrintable())
 			val resp = paceFeature.establishChannel(req)
+			unsetAuthOfOtherPaceDids()
 			setDidFulfilled()
 			resp
 		}
@@ -134,6 +136,12 @@ class SmartcardPaceDid(
 			}
 			setDidUnfulfilled()
 		}
+
+	private fun unsetAuthOfOtherPaceDids() {
+		application.device.authenticatedDids.filterIsInstance<SmartcardPaceDid>().forEach { did ->
+			did.setDidUnfulfilled()
+		}
+	}
 }
 
 internal fun org.openecard.cif.definition.did.PacePinId.toSalType() =

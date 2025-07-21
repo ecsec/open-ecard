@@ -172,6 +172,43 @@ class NpaPinOperationsTest {
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `change password`() {
+		PcscTerminalFactory.instance.load().withContext { ctx ->
+			val terminal =
+				ctx.list().find { it.name.startsWith("REINER SCT cyberJack RFID basis") }
+					?: Assumptions.abort { "Necessary terminal not available" }
+			Assumptions.assumeTrue(terminal.isCardPresent()) { "Terminal does not contain a card" }
+
+			val recognition = DirectCardRecognition(CompleteTree.calls)
+			val paceFactory = PaceFeatureSoftwareFactory()
+			val sal = SmartcardSal(ctx, setOf(NpaCif), recognition, paceFactory)
+
+			val session = sal.startSession()
+			val con = session.connect(terminal.name)
+			Assumptions.assumeTrue(NpaCif.metadata.id == con.cardType) { "Recognized card is not an nPA" }
+			val mf = assertNotNull(con.applications.find { it.name == Mf.name })
+			mf.connect()
+
+			val pacePin = assertNotNull(mf.dids.filterIsInstance<PaceDid>().find { it.name == Mf.Dids.pacePin })
+			val pin = assertNotNull(mf.dids.filterIsInstance<PinDid>().find { it.name == Mf.Dids.pin })
+
+			val pinStatus = pacePin.passwordStatus()
+			when (pinStatus) {
+				is SecurityCommandFailure -> {
+					fail { "PIN must be in RC3 state to continue" }
+				}
+				is SecurityCommandSuccess -> {
+					assertNull(pacePin.enterPassword(npaPin))
+				}
+			}
+
+			pin.resetPassword(null, "654321")
+			pin.resetPassword(null, npaPin)
+		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
 	fun PaceDid.enterPassword(pin: String): SecurityCommandFailure? {
 		try {
 			establishChannel(pin, null, null)

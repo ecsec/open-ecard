@@ -131,6 +131,10 @@ class EfCardAccess
 				efCaFileId: UShort = EfCardAccess.efCardAccessFileId,
 				efCaShortFileId: UByte = EfCardAccess.efCardAccessShortFileId,
 			): EfCardAccess {
+				val extLen =
+					channel.card.capabilities
+						?.commandCoding
+						?.supportsExtendedLength ?: false
 				val useShortEf =
 					forceShortEf ||
 						channel.card.capabilities
@@ -138,10 +142,10 @@ class EfCardAccess
 							?.supportsShortEf ?: false
 				val efCaData =
 					if (useShortEf) {
-						ReadBinary.readShortEf(efCaShortFileId).transmit(channel)
+						ReadBinary.readShortEf(efCaShortFileId, forceExtendedLength = extLen).transmit(channel)
 					} else {
 						Select.selectEfIdentifier(efCaFileId).transmit(channel)
-						ReadBinary.readCurrentEf().transmit(channel)
+						ReadBinary.readCurrentEf(forceExtendedLength = extLen).transmit(channel)
 					}
 				return efCaData.toEfCardAccess()
 			}

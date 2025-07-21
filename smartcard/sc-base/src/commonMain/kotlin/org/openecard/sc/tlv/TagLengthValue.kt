@@ -88,6 +88,9 @@ data class TagLengthValue
 			@OptIn(ExperimentalUnsignedTypes::class)
 			fun fromBer(data: UByteArray): ParsedTagLengthValue {
 				var (tag, numOctets) = Tag.fromBer(data)
+				if (data.size < numOctets + 1) {
+					throw TlvException("Not enough bytes in input to read TLV length.")
+				}
 
 				// get length
 				var dataLength = 0

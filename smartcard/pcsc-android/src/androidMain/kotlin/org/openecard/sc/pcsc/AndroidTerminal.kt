@@ -40,18 +40,20 @@ class AndroidTerminal(
 	override fun isCardPresent() = getState() == TerminalStateType.PRESENT
 
 	override fun getState() =
-		when (tag) {
+		when (val localTag = tag) {
 			is IsoDep -> {
 				try {
 					/*
-					if connected we tag is PRESENT
-					if not, we attempt to connect and disconnect to provoke exception if tag is gone
+					if connected we return tag is PRESENT
+					if not, we try to connect and disconnect to provoke exception if tag is gone
 					if it is not thrown tag is still there
+					if tag isConnected it might be lost without beeing detected yet, which will lead to errors
+					for the caller which connected, which has to handle it
 					 */
-					val isConnected = tag?.isConnected
+					val isConnected = localTag.isConnected
 					if (isConnected == false) {
-						tag?.connect()
-						tag?.close()
+						localTag.connect()
+						localTag.close()
 					}
 					TerminalStateType.PRESENT
 				} catch (e: SecurityException) {

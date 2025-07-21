@@ -1,30 +1,75 @@
 package org.openecard.cif.bundled
 
 import kotlinx.datetime.Instant
-import org.openecard.cif.bundled.EgkCifDefinitions.autPace
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmts
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinAmtsRep
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinDpe
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinGdd
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHome
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfd
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinNfdRead
-import org.openecard.cif.bundled.EgkCifDefinitions.mrPinOse
-import org.openecard.cif.bundled.EgkCifDefinitions.pinCh
-import org.openecard.cif.bundled.EgkCifDefinitions.pinQes
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_e256
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_r2048_signPKCS1_V1_5
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_aut_r2048_signPSS
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_autn_e256
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_autn_r2048_signPSS
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_enc_r2048
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_encv_r2048
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_e256
-import org.openecard.cif.bundled.EgkCifDefinitions.prk_ch_qes_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts.Datasets.efAmts
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts.Datasets.efStatusAmts
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts.Datasets.efVerweiseAmts
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Dpe
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Dpe.Datasets.efDpe
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Dpe.Datasets.efStatusDpe
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_aut_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_aut_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_autn_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_autn_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_enc_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_enc_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_encv_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Datasets.ef_c_ch_encv_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_aut_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_aut_r2048_signPKCS1_V1_5
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_aut_r2048_signPSS
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_autn_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_autn_r2048_signPSS
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_enc_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.ESign.Dids.prk_ch_encv_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Gdd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Gdd.Datasets.efEinwilligungGdd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Gdd.Datasets.efVerweiseGdd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efEinwilligung
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efGvd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efLogging
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efPd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efPruefungsnachweis
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efStandalone
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efStatusVd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efVd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Hca.Datasets.efVerweis
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.efAtr
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.efCardAccess
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.efDir
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.efGdo
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.efVersion2
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.ef_c_ca_cs_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Datasets.ef_c_eGK_aut_cvc_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinAmts
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinAmtsRep
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinDpe
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinGdd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinHome
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinNfd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinNfdRead
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.mrPinOse
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Mf.Dids.pinCh
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Nfd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Nfd.Datasets.efNfd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Nfd.Datasets.efStatusNfd
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Ose
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Ose.Datasets.efOse
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Ose.Datasets.efStatusOse
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Datasets.ef_c_ch_qes_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Datasets.ef_c_ch_qes_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Dids.pinQes
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Dids.prk_ch_qes_e256
+import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Dids.prk_ch_qes_r2048
+import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
-import org.openecard.cif.bundled.GematikBuildingBlocks.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceProtectedAcl
@@ -34,8 +79,10 @@ import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
+import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
+import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
@@ -45,7 +92,7 @@ val EgkCif by lazy {
 	val b = CardInfoBuilder()
 
 	b.metadata {
-		id = "http://ws.gematik.de/egk/1.0.0"
+		id = EgkCifDefinitions.cardType
 		version = "1.0.0"
 		status = CardInfoStatus.DEVELOPMENT
 		name = "German Electronic eHealth Card"
@@ -117,40 +164,156 @@ val EgkCif by lazy {
 }
 
 object EgkCifDefinitions {
-	val appMf = "MF"
-	val appDFHCA = "DF.HCA"
-	val appDFNFD = "DF.NFD"
-	val appDFDPE = "DF.DPE"
-	val appDFGDD = "DF.GDD"
-	val appDFOSE = "DF.OSE"
-	val appDFAMTS = "DF.AMTS"
-	val appDFESIGN = "DF.ESIGN"
-	val appDFQES = "DF.QES"
+	val cardType = "http://ws.gematik.de/egk/1.0.0"
 
-	val autPace = "AUT_PACE"
-	val pinCh = "PIN.CH"
-	val mrPinHome = "MRPIN.home"
-	val mrPinNfd = "MRPIN.NFD"
-	val mrPinDpe = "MRPIN.DPE"
-	val mrPinGdd = "MRPIN.GDD"
-	val mrPinNfdRead = "MRPIN.NFD_READ"
-	val mrPinOse = "MRPIN.OSE"
-	val mrPinAmts = "MRPIN.AMTS"
-	val mrPinAmtsRep = "MRPIN.AMTS_REP"
-	val prk_ch_aut_r2048_signPKCS1_V1_5 = "PrK.CH.AUT.R2048_signPKCS1_V1_5"
-	val prk_ch_aut_r2048_signPSS = "PrK.CH.AUT.R2048_signPSS"
-	val prk_ch_autn_r2048_signPSS = "PrK.CH.AUTN.R2048_signPSS"
-	val prk_ch_enc_r2048 = "PrK.CH.ENC.R2048"
-	val prk_ch_encv_r2048 = "PrK.CH.ENCV.R2048"
-	val prk_ch_aut_e256 = "PrK.CH.AUT.E256"
-	val prk_ch_autn_e256 = "PrK.CH.AUTN.E256"
-	val pinQes = "PIN.QES"
-	val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
-	val prk_ch_qes_e256 = "PrK.CH.QES.E256"
+	object Apps {
+		object Mf {
+			val name = "MF"
+
+			object Datasets {
+				val efAtr = "EF.ATR"
+				val efCardAccess = "EF.CardAccess"
+				val ef_c_ca_cs_e256 = "EF.C.CA.CS.E256"
+				val ef_c_eGK_aut_cvc_e256 = "EF.C.eGK.AUT_CVC.E256"
+				val efDir = "EF.DIR"
+				val efGdo = "EF.GDO"
+				val efVersion2 = "EF.Version2"
+			}
+
+			object Dids {
+				val autPace = GematikBuildingBlocks.autPace
+				val pinCh = GematikBuildingBlocks.pinCh
+				val mrPinHome = "MRPIN.home"
+				val mrPinNfd = "MRPIN.NFD"
+				val mrPinDpe = "MRPIN.DPE"
+				val mrPinGdd = "MRPIN.GDD"
+				val mrPinNfdRead = "MRPIN.NFD_READ"
+				val mrPinOse = "MRPIN.OSE"
+				val mrPinAmts = "MRPIN.AMTS"
+				val mrPinAmtsRep = "MRPIN.AMTS_REP"
+			}
+		}
+
+		object Hca {
+			val name = "DF.HCA"
+
+			object Datasets {
+				val efEinwilligung = "EF.Einwilligung"
+				val efGvd = "EF.GVD"
+				val efLogging = "EF.Logging"
+				val efPd = "EF.PD"
+				val efPruefungsnachweis = "EF.Prüfungsnachweis"
+				val efStandalone = "EF.Standalone"
+				val efStatusVd = "EF.StatusVD"
+				val efVd = "EF.VD"
+				val efVerweis = "EF.Verweis"
+			}
+		}
+
+		object Nfd {
+			val name = "DF_NFD"
+
+			object Datasets {
+				val efNfd = "EF.NFD"
+				val efStatusNfd = "EF.StatusNFD"
+			}
+		}
+
+		object Dpe {
+			val name = "DF.DPE"
+
+			object Datasets {
+				val efDpe = "EF.DPE"
+				val efStatusDpe = "EF.StatusDPE"
+			}
+		}
+
+		object Gdd {
+			val name = "DF.GDD"
+
+			object Datasets {
+				val efEinwilligungGdd = "EF.EinwilligungGDD"
+				val efVerweiseGdd = "EF.VerweiseGDD"
+			}
+		}
+
+		object Ose {
+			val name = "DF.OSE"
+
+			object Datasets {
+				val efOse = "EF.OSE"
+				val efStatusOse = "EF.StatusOSE"
+			}
+		}
+
+		object Amts {
+			val name = "DF.AMTS"
+
+			object Datasets {
+				val efAmts = "EF.AMTS"
+				val efVerweiseAmts = "EF.VerweiseAMTS"
+				val efStatusAmts = "EF.StatusAMTS"
+			}
+		}
+
+		object ESign {
+			val name = "DF.ESIGN"
+
+			object Datasets {
+				val ef_c_ch_aut_r2048 = "EF.C.CH.AUT.R2048"
+				val ef_c_ch_autn_r2048 = "EF.C.CH.AUTN.R2048"
+				val ef_c_ch_enc_r2048 = "EF.C.CH.ENC.R2048"
+				val ef_c_ch_encv_r2048 = "EF.C.CH.ENCV.R2048"
+				val ef_c_ch_aut_e256 = "EF.C.CH.AUT.E256"
+				val ef_c_ch_autn_e256 = "EF.C.CH.AUTN.E256"
+				val ef_c_ch_enc_e256 = "EF.C.CH.ENC.E256"
+				val ef_c_ch_encv_e256 = "EF.C.CH.ENCV.E256"
+			}
+
+			object Dids {
+				val prk_ch_aut_r2048_signPKCS1_V1_5 = "PrK.CH.AUT.R2048_signPKCS1_V1_5"
+				val prk_ch_aut_r2048_signPSS = "PrK.CH.AUT.R2048_signPSS"
+				val prk_ch_autn_r2048_signPSS = "PrK.CH.AUTN.R2048_signPSS"
+				val prk_ch_enc_r2048 = "PrK.CH.ENC.R2048"
+				val prk_ch_encv_r2048 = "PrK.CH.ENCV.R2048"
+				val prk_ch_aut_e256 = "PrK.CH.AUT.E256"
+				val prk_ch_autn_e256 = "PrK.CH.AUTN.E256"
+			}
+		}
+
+		object Qes {
+			val name = "DF.QES"
+
+			object Datasets {
+				val ef_c_ch_qes_r2048 = "EF.C.CH.QES.R2048"
+				val ef_c_ch_qes_e256 = "EF.C.CH.QES.E256"
+			}
+
+			object Dids {
+				val pinQes = "PIN.QES"
+				val prk_ch_qes_r2048 = "PrK.CH.QES.R2048"
+				val prk_ch_qes_e256 = "PrK.CH.QES.E256"
+			}
+		}
+	}
+
+	internal fun AclScope.mrPinHomePaceProtectedAcl() {
+		acl(CardProtocol.Grouped.CONTACT) {
+			activeDidState(mrPinHome)
+		}
+		acl(CardProtocol.Grouped.CONTACTLESS) {
+			and(
+				{
+					activeDidState(mrPinHome)
+					activeDidState(Mf.Dids.autPace)
+				},
+			)
+		}
+	}
 }
 
 private fun ApplicationScope.appMf() {
-	name = EgkCifDefinitions.appMf
+	name = Mf.name
 	aid = +"D2760001448000"
 
 	selectAcl {
@@ -159,7 +322,7 @@ private fun ApplicationScope.appMf() {
 
 	dataSets {
 		add {
-			name = "EF.ATR"
+			name = efAtr
 			description =
 				"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
 				"It is also used to version variable elements of a map."
@@ -174,7 +337,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.CardAccess"
+			name = efCardAccess
 			description =
 				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
 			path = +"011C"
@@ -188,7 +351,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.C.CA.CS.E256"
+			name = ef_c_ca_cs_e256
 			description =
 				"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
 				"the public key PuK.CA.CS.E256 of a CA. This certificate can be checked by means of the " +
@@ -204,7 +367,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.C.eGK.AUT_CVC.E256"
+			name = ef_c_eGK_aut_cvc_e256
 			description =
 				"This file contains a CV certificate for cryptography with elliptical curves, which contains " +
 				"the public key PuK.eGK.AUT-CVC.E256 to PrK.eGK.AUT-CVC.E256. This certificate can be " +
@@ -220,7 +383,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.DIR"
+			name = efDir
 			description =
 				"The EF.DIR file contains a list of application templates according to ISO7816-4. This list " +
 				"is adjusted when the application structure changes by deleting or creating applications."
@@ -235,7 +398,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.GDO"
+			name = efGdo
 			description =
 				"The ICCSN data object, which contains the identification number of the card, is stored in " +
 				"EF.GDO. The identification number is based on [Resolution190]."
@@ -250,7 +413,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.Version2"
+			name = efVersion2
 			description =
 				"""
 				The file EF.Version2 contains the version numbers as well as product identifiers for variable elements of the card:
@@ -271,7 +434,7 @@ private fun ApplicationScope.appMf() {
 
 	dids {
 		pace {
-			name = autPace
+			name = Mf.Dids.autPace
 			scope = DidScope.GLOBAL
 			authAcl {
 				alwaysAcl()
@@ -292,9 +455,19 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
+
 			parameters {
 				basePinParams()
 				passwordRef = 0x01u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
 			}
 		}
 
@@ -474,7 +647,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appDFHCA() {
-	name = EgkCifDefinitions.appDFHCA
+	name = Hca.name
 	aid = +"D27600000102"
 
 	selectAcl {
@@ -485,7 +658,7 @@ private fun ApplicationScope.appDFHCA() {
 
 	dataSets {
 		add {
-			name = "EF.Einwilligung"
+			name = efEinwilligung
 			description =
 				"This file contains information about the consents for voluntary applications."
 			path = +"D005"
@@ -512,7 +685,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.GVD"
+			name = efGvd
 			description =
 				"This file contains the protected insured person data. The details are described in Tab_eGK_ObjSys_035."
 			path = +"D003"
@@ -540,7 +713,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.Logging"
+			name = efLogging
 			description =
 				"This file contains logging information about access to the eHC."
 			path = +"D006"
@@ -562,7 +735,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.PD"
+			name = efPd
 			description =
 				"This file contains the cardholder's personal data."
 			path = +"D001"
@@ -579,7 +752,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.Prüfungsnachweis"
+			name = efPruefungsnachweis
 			description =
 				"This file stores a certificate that was created as part of an online check."
 			path = +"D01C"
@@ -593,7 +766,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.Standalone"
+			name = efStandalone
 			description =
 				"This file contains the information from EF.GVD and EF.DPE in encrypted form."
 			path = +"DA0A"
@@ -607,7 +780,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.StatusVD"
+			name = efStatusVd
 			description =
 				"This file contains information about the status of the data in EF.PD, EF.VD and EF.GVD."
 			path = +"D00C"
@@ -626,7 +799,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.VD"
+			name = efVd
 			description =
 				"This file contains the insured person data."
 			path = +"D002"
@@ -644,7 +817,7 @@ private fun ApplicationScope.appDFHCA() {
 		}
 
 		add {
-			name = "EF.Verweis"
+			name = efVerweis
 			description =
 				"This file contains information about the storage locations of the data of the voluntary applications that are not stored on the eHC."
 			path = +"D009"
@@ -674,7 +847,7 @@ private fun ApplicationScope.appDFHCA() {
 }
 
 private fun ApplicationScope.appDFNFD() {
-	name = EgkCifDefinitions.appDFNFD
+	name = Nfd.name
 	aid = +"D27600014407"
 
 	selectAcl {
@@ -683,7 +856,7 @@ private fun ApplicationScope.appDFNFD() {
 
 	dataSets {
 		add {
-			name = "EF.NFD"
+			name = efNfd
 			description = "This file contains an emergency data record."
 			path = +"D010"
 			shortEf = 0x10u
@@ -773,7 +946,7 @@ private fun ApplicationScope.appDFNFD() {
 		}
 
 		add {
-			name = "EF.StatusNFD"
+			name = efStatusNfd
 			description = "This file contains information about the status of the emergency data record."
 			path = +"D00E"
 			shortEf = 0x0Eu
@@ -867,7 +1040,7 @@ private fun ApplicationScope.appDFNFD() {
 }
 
 private fun ApplicationScope.appDFDPE() {
-	name = EgkCifDefinitions.appDFDPE
+	name = Dpe.name
 	aid = +"D27600014408"
 
 	selectAcl {
@@ -876,7 +1049,7 @@ private fun ApplicationScope.appDFDPE() {
 
 	dataSets {
 		add {
-			name = "EF.DPE"
+			name = efDpe
 			description =
 				"This file contains the data record with the personal declarations of the insured person."
 			path = +"D01B"
@@ -956,7 +1129,7 @@ private fun ApplicationScope.appDFDPE() {
 		}
 
 		add {
-			name = "EF.StatusDPE"
+			name = efStatusDpe
 			description =
 				"This file contains information on the status of the data record with the personal declarations."
 			path = +"D018"
@@ -1037,7 +1210,7 @@ private fun ApplicationScope.appDFDPE() {
 }
 
 private fun ApplicationScope.appDFGDD() {
-	name = EgkCifDefinitions.appDFGDD
+	name = Gdd.name
 	aid = +"D2760001440A"
 
 	selectAcl {
@@ -1048,7 +1221,7 @@ private fun ApplicationScope.appDFGDD() {
 
 	dataSets {
 		add {
-			name = "EF.EinwilligungGDD"
+			name = efEinwilligungGdd
 			description =
 				"This file contains information about the consents to voluntary applications of health data services."
 			path = +"D013"
@@ -1142,7 +1315,7 @@ private fun ApplicationScope.appDFGDD() {
 		}
 
 		add {
-			name = "EF.VerweiseGDD"
+			name = efVerweiseGdd
 			description =
 				"This file contains information on the storage locations of the data of the voluntary health data services applications that are not stored on the eHC."
 			path = +"D01A"
@@ -1238,7 +1411,7 @@ private fun ApplicationScope.appDFGDD() {
 }
 
 private fun ApplicationScope.appDFOSE() {
-	name = EgkCifDefinitions.appDFOSE
+	name = Ose.name
 	aid = +"D2760001440B"
 
 	selectAcl {
@@ -1249,7 +1422,7 @@ private fun ApplicationScope.appDFOSE() {
 
 	dataSets {
 		add {
-			name = "EF.OSE"
+			name = efOse
 			description =
 				"This file contains a data record for the organ donation declaration."
 			path = +"E001"
@@ -1347,7 +1520,7 @@ private fun ApplicationScope.appDFOSE() {
 		}
 
 		add {
-			name = "EF.StatusOSE"
+			name = efStatusOse
 			description =
 				"This file contains information on the status of the organ donation declaration."
 			path = +"E002"
@@ -1441,7 +1614,7 @@ private fun ApplicationScope.appDFOSE() {
 }
 
 private fun ApplicationScope.appDFAMTS() {
-	name = EgkCifDefinitions.appDFAMTS
+	name = Amts.name
 	aid = +"D2760001440C"
 
 	selectAcl {
@@ -1450,7 +1623,7 @@ private fun ApplicationScope.appDFAMTS() {
 
 	dataSets {
 		add {
-			name = "EF.AMTS"
+			name = efAmts
 			description =
 				"This file contains a data set for AMTS data management."
 			path = +"E005"
@@ -1560,7 +1733,7 @@ private fun ApplicationScope.appDFAMTS() {
 		}
 
 		add {
-			name = "EF.VerweiseAMTS"
+			name = efVerweiseAmts
 			description =
 				"This file contains information on the storage locations of data from the voluntary AMTS data management application that is not stored on the eHC."
 			path = +"E006"
@@ -1666,7 +1839,7 @@ private fun ApplicationScope.appDFAMTS() {
 		}
 
 		add {
-			name = "EF.StatusAMTS"
+			name = efStatusAmts
 			description =
 				"This file contains information on the status of the AMTS Data Management application."
 			path = +"E007"
@@ -1778,7 +1951,7 @@ private fun ApplicationScope.appDFAMTS() {
 }
 
 private fun ApplicationScope.appDFESIGN() {
-	name = EgkCifDefinitions.appDFESIGN
+	name = ESign.name
 	aid = +"A000000167455349474E"
 
 	selectAcl {
@@ -1787,7 +1960,7 @@ private fun ApplicationScope.appDFESIGN() {
 
 	dataSets {
 		add {
-			name = "EF.C.CH.AUT.R2048"
+			name = ef_c_ch_aut_r2048
 			description =
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUT.R2048 to PrK.CH.AUT.R2048."
 			path = +"C500"
@@ -1803,7 +1976,7 @@ private fun ApplicationScope.appDFESIGN() {
 		}
 
 		add {
-			name = "EF.C.CH.AUTN.R2048"
+			name = ef_c_ch_autn_r2048
 			description =
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUTN.R2048 to PrK.CH.AUTN.R2048."
 			path = +"C509"
@@ -1865,7 +2038,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = " EF.C.CH.ENC.R2048"
+			name = ef_c_ch_enc_r2048
 			description =
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENC.R2048 to PrK.CH.ENC.R2048."
 			path = +"C200"
@@ -1879,7 +2052,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = " EF.C.CH.ENCV.R2048"
+			name = ef_c_ch_encv_r2048
 			description =
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENCV.R2048 to PrK.CH.ENCV.R2048."
 			path = +"C50A"
@@ -1941,7 +2114,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = "EF.C.CH.AUT.E256"
+			name = ef_c_ch_aut_e256
 			description =
 				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
 			path = +"C504"
@@ -1959,7 +2132,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = "EF.C.CH.AUTN.E256"
+			name = ef_c_ch_autn_e256
 			description =
 				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
 			path = +"C50B"
@@ -2022,7 +2195,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = "EF.C.CH.ENC.E256"
+			name = ef_c_ch_enc_e256
 			description =
 				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENC.E256 to PrK.CH.ENC.E256."
 			path = +"C205"
@@ -2036,7 +2209,7 @@ private fun ApplicationScope.appDFESIGN() {
 			}
 		}
 		add {
-			name = "EF.C.CH.ENCV.E256"
+			name = ef_c_ch_encv_e256
 			description =
 				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENCV.E256 to PrK.CH.ENCV.E256."
 			path = +"C50C"
@@ -2450,7 +2623,7 @@ private fun ApplicationScope.appDFESIGN() {
 }
 
 private fun ApplicationScope.appDFQES() {
-	name = EgkCifDefinitions.appDFQES
+	name = Qes.name
 	aid = +"D27600006601"
 
 	description = "Optional QES application"
@@ -2461,7 +2634,7 @@ private fun ApplicationScope.appDFQES() {
 
 	dataSets {
 		add {
-			name = "EF.C.CH.QES.R2048"
+			name = ef_c_ch_qes_r2048
 			description =
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.QES.R2048 to PrK.CH.QES.R2048."
 			path = +"C000"
@@ -2477,7 +2650,7 @@ private fun ApplicationScope.appDFQES() {
 		}
 
 		add {
-			name = "EF.C.CH.QES.E256"
+			name = ef_c_ch_qes_e256
 			description =
 				"This file contains a certificate for cryptography with elliptic curves with the public key PuK.CH.QES.E256 to PrK.CH.QES.E256."
 			path = +"C006"
@@ -2516,7 +2689,7 @@ private fun ApplicationScope.appDFQES() {
 			scope = DidScope.GLOBAL
 
 			signAcl {
-				pinProtectedPaceAcl("PIN.QES")
+				pinProtectedPaceAcl(pinQes)
 			}
 
 			parameters {
@@ -2543,7 +2716,7 @@ private fun ApplicationScope.appDFQES() {
 			scope = DidScope.GLOBAL
 
 			signAcl {
-				pinProtectedPaceAcl("PIN.QES")
+				pinProtectedPaceAcl(pinQes)
 			}
 
 			parameters {

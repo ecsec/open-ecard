@@ -3,7 +3,9 @@ package org.openecard.cif.bundled
 import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
-import org.openecard.cif.bundled.NpaDefinitions.Mf
+import org.openecard.cif.bundled.NpaDefinitions.Apps.EId
+import org.openecard.cif.bundled.NpaDefinitions.Apps.ESign
+import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf
 import org.openecard.cif.bundled.NpaDefinitions.canPinTaKeyProtectedAcl
 import org.openecard.cif.bundled.NpaDefinitions.canTaKeyCaKeyCiProtectedAcl
 import org.openecard.cif.bundled.NpaDefinitions.datasetDG
@@ -86,16 +88,57 @@ val NpaCif by lazy {
 }
 
 object NpaDefinitions {
-	object Mf {
-		val name = "MF"
+	object Apps {
+		object Mf {
+			val name = "MF"
 
-		object Datasets
+			object Datasets {
+				val efDir = "EF.DIR"
+				val efAtr = "EF.ATR"
+				val efCardAccess = "EF.CardAccess"
+				val efCardSecurity = "EF.CardSecurity"
+				val efChipSecurity = "EF.ChipSecurity"
+			}
 
-		object Dids {
-			val pin = "PIN"
-			val pacePin = "PACE_PIN"
-			val paceCan = "PACE_CAN"
-			val pacePuk = "PACE_PUK"
+			object Dids {
+				val pin = "PIN"
+				val pacePin = "PACE_PIN"
+				val paceCan = "PACE_CAN"
+				val pacePuk = "PACE_PUK"
+			}
+		}
+
+		object EId {
+			val name = "eID"
+
+			object Datasets {
+				val DG1 = "DG1"
+				val DG2 = "DG2"
+				val DG3 = "DG3"
+				val DG4 = "DG4"
+				val DG5 = "DG5"
+				val DG6 = "DG6"
+				val DG7 = "DG7"
+				val DG8 = "DG8"
+				val DG9 = "DG9"
+				val DG10 = "DG10"
+				val DG11 = "DG11"
+				val DG17 = "DG17"
+			}
+		}
+
+		object ESign {
+			val name = "eSign"
+
+			object Datasets {
+				val ef_c_zda_qes = "EF.C.ZDA.QES"
+				val ef_c_icc_qes = "EF.C.ICC.QES"
+			}
+
+			object Dids {
+				val prk_icc_qes = "PrK.ICC.QES"
+				val esignPin = "eSign_PIN"
+			}
 		}
 	}
 
@@ -298,7 +341,7 @@ private fun ApplicationScope.appMf() {
 
 	dataSets {
 		add {
-			name = "EF.DIR"
+			name = Mf.Datasets.efDir
 			description =
 				"The EF.DIR file contains a list of application templates according to ISO7816-4. This list " +
 				"is adjusted when the application structure changes by deleting or creating applications."
@@ -312,7 +355,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.ATR"
+			name = Mf.Datasets.efAtr
 			description =
 				"The transparent file EF.ATR contains information about the maximum size of the APDU. " +
 				"It is also used to version variable elements of a map."
@@ -326,7 +369,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.CardAccess"
+			name = Mf.Datasets.efCardAccess
 			description =
 				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
 			path = +"011C"
@@ -339,7 +382,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.CardSecurity"
+			name = Mf.Datasets.efCardSecurity
 			path = +"011D"
 			readAcl {
 				canPinTaKeyProtectedAcl(null, null)
@@ -350,7 +393,7 @@ private fun ApplicationScope.appMf() {
 		}
 
 		add {
-			name = "EF.ChipSecurity"
+			name = Mf.Datasets.efChipSecurity
 			path = +"011B"
 			readAcl {
 				canPinTaKeyProtectedAcl(
@@ -451,7 +494,7 @@ private fun ApplicationScope.appMf() {
 }
 
 private fun ApplicationScope.appeId() {
-	name = "eID"
+	name = EId.name
 	aid = +"E80704007F00070302"
 	selectAcl {
 		acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -481,7 +524,7 @@ private fun ApplicationScope.appeId() {
 	dataSets {
 		add {
 			datasetDG(
-				name = "DG1",
+				name = EId.Datasets.DG1,
 				path = +"0101",
 				+"7F4C12060904007F00070301020253050000000100",
 			)
@@ -489,7 +532,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG2",
+				name = EId.Datasets.DG2,
 				path = +"0102",
 				+"7F4C12060904007F00070301020253050000000200",
 			)
@@ -497,7 +540,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG3",
+				name = EId.Datasets.DG3,
 				path = +"0103",
 				+"7F4C12060904007F00070301020253050000004000",
 			)
@@ -505,7 +548,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG4",
+				name = EId.Datasets.DG4,
 				path = +"0104",
 				+"7F4C12060904007F00070301020253050000000800",
 			)
@@ -513,7 +556,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG5",
+				name = EId.Datasets.DG5,
 				path = +"0105",
 				+"7F4C12060904007F00070301020253050000001000",
 			)
@@ -521,7 +564,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG6",
+				name = EId.Datasets.DG6,
 				path = +"0106",
 				+"7F4C12060904007F00070301020253050000002000",
 			)
@@ -529,7 +572,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG7",
+				name = EId.Datasets.DG7,
 				path = +"0107",
 				+"7F4C12060904007F00070301020253050000004000",
 			)
@@ -537,7 +580,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG8",
+				name = EId.Datasets.DG8,
 				path = +"0108",
 				+"7F4C12060904007F00070301020253050000008000",
 			)
@@ -545,7 +588,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG9",
+				name = EId.Datasets.DG9,
 				path = +"0109",
 				+"7F4C12060904007F00070301020253050000010000",
 			)
@@ -553,7 +596,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG10",
+				name = EId.Datasets.DG10,
 				path = +"010A",
 				+"7F4C12060904007F00070301020253050000020000",
 			)
@@ -561,7 +604,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG11",
+				name = EId.Datasets.DG11,
 				path = +"010B",
 				+"7F4C12060904007F00070301020253050000040000",
 			)
@@ -569,7 +612,7 @@ private fun ApplicationScope.appeId() {
 
 		add {
 			datasetDG(
-				name = "DG17",
+				name = EId.Datasets.DG17,
 				path = +"0111",
 				+"7F4C12060904007F00070301020253050001000000",
 			)
@@ -613,7 +656,7 @@ private fun ApplicationScope.appeId() {
 }
 
 private fun ApplicationScope.appeSign() {
-	name = "eSign"
+	name = ESign.name
 	aid = +"A000000167455349474E"
 	selectAcl {
 		acl(CardProtocol.Grouped.CONTACTLESS) {
@@ -709,33 +752,33 @@ private fun ApplicationScope.appeSign() {
 
 	dataSets {
 		add {
-			name = "EF.C.ZDA.QES"
+			name = ESign.Datasets.ef_c_zda_qes
 			path = +"C000"
 			readAcl {
 				pinCanTaKeyCaKeyCiProtectedAcl()
 			}
 
 			writeAcl {
-				pinTaKeyCaKeyCiProtectedAcl("PIN", +"7F4C12060904007F00070301020253050000000080")
+				pinTaKeyCaKeyCiProtectedAcl(Mf.Dids.pin, +"7F4C12060904007F00070301020253050000000080")
 			}
 		}
 
 		add {
-			name = "EF.C.ICC.QES"
+			name = ESign.Datasets.ef_c_icc_qes
 			path = +"C001"
 			readAcl {
 				pinCanTaKeyCaKeyCiProtectedAcl()
 			}
 
 			writeAcl {
-				pinTaKeyCaKeyCiProtectedAcl("PIN", +"7F4C12060904007F00070301020253050000000080")
+				pinTaKeyCaKeyCiProtectedAcl(Mf.Dids.pin, +"7F4C12060904007F00070301020253050000000080")
 			}
 		}
 	}
 
 	dids {
 		signature {
-			name = "PrK.ICC.QES"
+			name = ESign.Dids.prk_icc_qes
 			scope = DidScope.LOCAL
 
 			signAcl {
@@ -762,11 +805,11 @@ private fun ApplicationScope.appeSign() {
 		}
 
 		pin {
-			name = "eSign-PIN"
+			name = ESign.Dids.esignPin
 			scope = DidScope.GLOBAL
 
 			authAcl {
-				pinTaKeyCaKeyCiProtectedAcl("eSign-PIN", +"7F4C12060904007F000703010203530102")
+				pinTaKeyCaKeyCiProtectedAcl(ESign.Dids.esignPin, +"7F4C12060904007F000703010203530102")
 			}
 
 			resetAcl {

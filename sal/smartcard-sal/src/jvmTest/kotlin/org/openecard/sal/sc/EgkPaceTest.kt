@@ -49,8 +49,8 @@ class EgkPaceTest {
 			val session = sal.startSession()
 			val con = session.connect(terminal.name)
 			Assumptions.assumeTrue(EgkCif.metadata.id == con.cardType) { "Recognized card is not an eGK" }
-			val mf = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.appMf })
-			val app = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.appDFESIGN })
+			val mf = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.Mf.name })
+			val app = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.ESign.name })
 			mf.connect()
 
 			val certDs = assertNotNull(app.datasets.find { it.name == "EF.C.CH.AUT.E256" })
@@ -60,7 +60,7 @@ class EgkPaceTest {
 				certDs.missingReadAuthentications
 					.removeUnsupported(
 						listOf(
-							DidStateReference.forName(EgkCifDefinitions.autPace),
+							DidStateReference.forName(EgkCifDefinitions.Apps.Mf.Dids.autPace),
 						),
 					)
 			when (missing) {

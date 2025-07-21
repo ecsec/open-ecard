@@ -139,7 +139,7 @@ object CompleteTree {
 											}
 										}
 									}
-									recognizedCardType("http://ws.gematik.de/egk/1.0.0")
+									recognizedCardType(EgkCifDefinitions.cardType)
 								}
 							}
 						}

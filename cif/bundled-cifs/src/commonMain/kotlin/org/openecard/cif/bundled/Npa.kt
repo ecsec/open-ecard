@@ -3,9 +3,9 @@ package org.openecard.cif.bundled
 import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
-import org.openecard.cif.bundled.NpaDefinitions.EId
-import org.openecard.cif.bundled.NpaDefinitions.ESign
-import org.openecard.cif.bundled.NpaDefinitions.Mf
+import org.openecard.cif.bundled.NpaDefinitions.Apps.EId
+import org.openecard.cif.bundled.NpaDefinitions.Apps.ESign
+import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf
 import org.openecard.cif.bundled.NpaDefinitions.canPinTaKeyProtectedAcl
 import org.openecard.cif.bundled.NpaDefinitions.canTaKeyCaKeyCiProtectedAcl
 import org.openecard.cif.bundled.NpaDefinitions.datasetDG
@@ -88,55 +88,57 @@ val NpaCif by lazy {
 }
 
 object NpaDefinitions {
-	object Mf {
-		val name = "MF"
+	object Apps {
+		object Mf {
+			val name = "MF"
 
-		object Datasets {
-			val efDir = "EF.DIR"
-			val efAtr = "EF.ATR"
-			val efCardAccess = "EF.CardAccess"
-			val efCardSecurity = "EF.CardSecurity"
-			val efChipSecurity = "EF.ChipSecurity"
+			object Datasets {
+				val efDir = "EF.DIR"
+				val efAtr = "EF.ATR"
+				val efCardAccess = "EF.CardAccess"
+				val efCardSecurity = "EF.CardSecurity"
+				val efChipSecurity = "EF.ChipSecurity"
+			}
+
+			object Dids {
+				val pin = "PIN"
+				val pacePin = "PACE_PIN"
+				val paceCan = "PACE_CAN"
+				val pacePuk = "PACE_PUK"
+			}
 		}
 
-		object Dids {
-			val pin = "PIN"
-			val pacePin = "PACE_PIN"
-			val paceCan = "PACE_CAN"
-			val pacePuk = "PACE_PUK"
-		}
-	}
+		object EId {
+			val name = "eID"
 
-	object EId {
-		val name = "eID"
-
-		object Datasets {
-			val DG1 = "DG1"
-			val DG2 = "DG2"
-			val DG3 = "DG3"
-			val DG4 = "DG4"
-			val DG5 = "DG5"
-			val DG6 = "DG6"
-			val DG7 = "DG7"
-			val DG8 = "DG8"
-			val DG9 = "DG9"
-			val DG10 = "DG10"
-			val DG11 = "DG11"
-			val DG17 = "DG17"
-		}
-	}
-
-	object ESign {
-		val name = "eSign"
-
-		object Datasets {
-			val ef_c_zda_qes = "EF.C.ZDA.QES"
-			val ef_c_icc_qes = "EF.C.ICC.QES"
+			object Datasets {
+				val DG1 = "DG1"
+				val DG2 = "DG2"
+				val DG3 = "DG3"
+				val DG4 = "DG4"
+				val DG5 = "DG5"
+				val DG6 = "DG6"
+				val DG7 = "DG7"
+				val DG8 = "DG8"
+				val DG9 = "DG9"
+				val DG10 = "DG10"
+				val DG11 = "DG11"
+				val DG17 = "DG17"
+			}
 		}
 
-		object Dids {
-			val prk_icc_qes = "PrK.ICC.QES"
-			val esignPin = "eSign_PIN"
+		object ESign {
+			val name = "eSign"
+
+			object Datasets {
+				val ef_c_zda_qes = "EF.C.ZDA.QES"
+				val ef_c_icc_qes = "EF.C.ICC.QES"
+			}
+
+			object Dids {
+				val prk_icc_qes = "PrK.ICC.QES"
+				val esignPin = "eSign_PIN"
+			}
 		}
 	}
 

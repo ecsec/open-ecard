@@ -196,8 +196,8 @@ object FileUtils {
 	 * List directory contents for a resource folder.
 	 * This is basically a brute-force implementation. Works for regular files and also JARs.
 	 *
-	 * Taken from [
- * http://www.uofr.net/~greg/java/get-resource-listing.html](http://www.uofr.net/~greg/java/get-resource-listing.html) and modified for our needs.
+	 * Taken from [http://www.uofr.net/~greg/java/get-resource-listing.html](http://www.uofr.net/~greg/java/get-resource-listing.html)
+	 * and modified for our needs.
 	 *
 	 * @param clazz Any java class that lives in the same place as the resources you want.
 	 * @param path Should end with "/", but not start with one.

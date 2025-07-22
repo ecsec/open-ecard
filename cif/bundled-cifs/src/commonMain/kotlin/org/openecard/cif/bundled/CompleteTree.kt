@@ -1,9 +1,6 @@
 package org.openecard.cif.bundled
 
-import org.openecard.cif.definition.recognition.ApduCallDefinition
-import org.openecard.cif.definition.recognition.ConclusionDefinition
 import org.openecard.cif.definition.recognition.RecognitionTree
-import org.openecard.cif.definition.recognition.ResponseApduDefinition
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.utils.common.hex
 
@@ -366,52 +363,5 @@ object CompleteTree {
 			}
 		}
 		b.build()
-	}
-}
-
-fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
-	val cleanedTree = mutableListOf<ApduCallDefinition>()
-
-	for (call in this) {
-		val prunedCall = pruneCall(call, supportedCardTypes)
-		if (prunedCall != null) {
-			cleanedTree.add(prunedCall)
-		}
-	}
-	return cleanedTree
-}
-
-private fun pruneCall(
-	call: ApduCallDefinition,
-	supportedCardTypes: Set<String>,
-): ApduCallDefinition? {
-	val validResponses = mutableListOf<ResponseApduDefinition>()
-
-	for (response in call.responses) {
-		val newConclusion =
-			when (val conclusion = response.conclusion) {
-				is ConclusionDefinition.RecognizedCardType -> {
-					if (conclusion.name in supportedCardTypes) {
-						conclusion
-					} else {
-						null
-					}
-				}
-
-				is ConclusionDefinition.Call -> {
-					val prunedCall = pruneCall(conclusion.call, supportedCardTypes)
-					prunedCall?.let { ConclusionDefinition.Call(it) }
-				}
-			}
-
-		if (newConclusion != null) {
-			validResponses.add(response.copy(conclusion = newConclusion))
-		}
-	}
-
-	return if (validResponses.isNotEmpty()) {
-		call.copy(responses = validResponses.toSet())
-	} else {
-		null
 	}
 }

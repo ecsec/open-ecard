@@ -1,5 +1,6 @@
 package org.openecard.cif.bundled
 
+import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.utils.common.hex
 import kotlin.test.Test

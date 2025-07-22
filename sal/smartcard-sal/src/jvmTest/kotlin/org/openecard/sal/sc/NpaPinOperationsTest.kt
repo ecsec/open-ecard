@@ -160,6 +160,7 @@ class NpaPinOperationsTest {
 			paceCan.closeChannel()
 			assertNull(pacePuk.enterPassword(npaPuk))
 			pin.resetPassword(null, null)
+			pacePuk.closeChannel()
 
 			val pinStatus2 = pacePin.passwordStatus()
 			when (pinStatus2) {

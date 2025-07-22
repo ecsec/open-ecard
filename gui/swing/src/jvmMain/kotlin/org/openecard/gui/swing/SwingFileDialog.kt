@@ -43,7 +43,7 @@ class SwingFileDialog : FileDialog {
 		object : JFileChooser() {
 			override fun createDialog(parent: Component?): JDialog {
 				val dialog = super.createDialog(parent)
-				dialog.setIconImage(GUIDefaults.getImage("Frame.icon", 45, 45)!!.getImage())
+				dialog.setIconImage(GUIDefaults.getOecImage(45, 45).getImage())
 				return dialog
 			}
 		}

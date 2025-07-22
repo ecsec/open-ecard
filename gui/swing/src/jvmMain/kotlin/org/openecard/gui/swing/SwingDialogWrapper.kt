@@ -41,7 +41,7 @@ class SwingDialogWrapper {
 			setTitle(title)
 			setSize(690, 500)
 			setLocationRelativeTo(null)
-			iconImage = GUIDefaults.getImage("Frame.icon", 45, 45)!!.getImage()
+			iconImage = GUIDefaults.getOecImage(45, 45).getImage()
 			isVisible = false
 			setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE)
 		}

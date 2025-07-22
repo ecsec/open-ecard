@@ -79,7 +79,7 @@ val HbaCif by lazy {
 	val b = CardInfoBuilder()
 
 	b.metadata {
-		id = "http://www.baek.de/cif/HPC-G2"
+		id = HbaDefinitions.cardType
 		version = "1.0.0"
 		status = CardInfoStatus.DEVELOPMENT
 		name = "HPC-G2"
@@ -145,6 +145,8 @@ val HbaCif by lazy {
 }
 
 object HbaDefinitions {
+	val cardType = "http://www.baek.de/cif/HPC-G2"
+
 	object Apps {
 		object MF {
 			val name = "MF"

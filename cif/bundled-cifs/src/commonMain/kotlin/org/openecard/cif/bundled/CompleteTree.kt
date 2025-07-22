@@ -1,6 +1,9 @@
 package org.openecard.cif.bundled
 
+import org.openecard.cif.definition.recognition.ApduCallDefinition
+import org.openecard.cif.definition.recognition.ConclusionDefinition
 import org.openecard.cif.definition.recognition.RecognitionTree
+import org.openecard.cif.definition.recognition.ResponseApduDefinition
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.utils.common.hex
 
@@ -189,7 +192,7 @@ object CompleteTree {
 													"01610B4F09E80704007F00070302610C4F0AA000000167455349474E",
 											)
 									}
-									recognizedCardType("http://bsi.bund.de/cif/npa.xml")
+									recognizedCardType(NpaDefinitions.cardType)
 								}
 								response {
 									trailer = 0x6282u
@@ -271,7 +274,8 @@ object CompleteTree {
 											body {
 												offset = 0x1Bu
 												length = 0x1Eu
-												value = hex("442D545255535420436172642056332E30207374616E6461726420326765")
+												value =
+													hex("442D545255535420436172642056332E30207374616E6461726420326765")
 											}
 											recognizedCardType("http://www.ihk.de/cif")
 										}
@@ -357,11 +361,57 @@ object CompleteTree {
 						length = 0x06u
 						value = hex("D27600014601")
 					}
-					recognizedCardType("http://www.baek.de/cif/HPC-G2")
+					recognizedCardType(HbaDefinitions.cardType)
 				}
 			}
 		}
-
 		b.build()
+	}
+}
+
+fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
+	val cleanedTree = mutableListOf<ApduCallDefinition>()
+
+	for (call in this) {
+		val prunedCall = pruneCall(call, supportedCardTypes)
+		if (prunedCall != null) {
+			cleanedTree.add(prunedCall)
+		}
+	}
+	return cleanedTree
+}
+
+private fun pruneCall(
+	call: ApduCallDefinition,
+	supportedCardTypes: Set<String>,
+): ApduCallDefinition? {
+	val validResponses = mutableListOf<ResponseApduDefinition>()
+
+	for (response in call.responses) {
+		val newConclusion =
+			when (val conclusion = response.conclusion) {
+				is ConclusionDefinition.RecognizedCardType -> {
+					if (conclusion.name in supportedCardTypes) {
+						conclusion
+					} else {
+						null
+					}
+				}
+
+				is ConclusionDefinition.Call -> {
+					val prunedCall = pruneCall(conclusion.call, supportedCardTypes)
+					prunedCall?.let { ConclusionDefinition.Call(it) }
+				}
+			}
+
+		if (newConclusion != null) {
+			validResponses.add(response.copy(conclusion = newConclusion))
+		}
+	}
+
+	return if (validResponses.isNotEmpty()) {
+		call.copy(responses = validResponses.toSet())
+	} else {
+		null
 	}
 }

@@ -57,7 +57,9 @@ class AndroidTerminal(
 					}
 					TerminalStateType.PRESENT
 				} catch (e: SecurityException) {
-					tag = null
+					if (localTag == tag) {
+						tag = null
+					}
 					TerminalStateType.ABSENT
 				}
 			}

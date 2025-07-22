@@ -3,6 +3,7 @@ package org.openecard.sc.pcsc
 import android.nfc.tech.IsoDep
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.PreferredCardProtocol
+import org.openecard.sc.iface.RemovedCard
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.SharingViolation
 import org.openecard.sc.iface.TerminalConnection
@@ -18,26 +19,25 @@ class AndroidTerminalConnection(
 	override val card = AndroidNfcCard(this)
 
 	override val isCardConnected
-		get() =
-			try {
-				tag?.isConnected == true
-			} catch (e: SecurityException) {
-				terminal.tag = null
-				false
-			}
+		get() = tag?.isConnected == true
 
 	override fun disconnect(disposition: CardDisposition) {
 		tag?.close()
 	}
 
 	fun connectTag() {
-		if (!isCardConnected) {
-			mapScioError {
-				tag?.timeout = 5.seconds.inWholeMilliseconds.toInt()
-				tag?.connect()
+		when (val localTag = tag) {
+			null -> throw RemovedCard()
+			else -> {
+				if (localTag.isConnected) {
+					throw SharingViolation()
+				} else {
+					mapScioError {
+						localTag.timeout = 5.seconds.inWholeMilliseconds.toInt()
+						localTag.connect()
+					}
+				}
 			}
-		} else {
-			throw SharingViolation()
 		}
 	}
 

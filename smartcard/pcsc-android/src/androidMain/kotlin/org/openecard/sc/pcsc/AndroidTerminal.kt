@@ -25,17 +25,16 @@ class AndroidTerminal(
 	val androidActivity: Activity,
 	val nfcAdapter: NfcAdapter?,
 ) : Terminal {
-	private var deferredConnection: CompletableDeferred<AndroidTerminalConnection>? = null
+	private var deferredConnection: CompletableDeferred<Nothing?>? = null
 	var tag: IsoDep? = null
 
 	@SuppressLint("NewApi")
 	fun setNFCTag(tag: IsoDep) {
 		this.tag = tag
 
+		// TODO: Do we have to handle this here or somewhere else
 		// nfcAdapter?.disableForegroundDispatch(androidActivity)
-		deferredConnection?.complete(
-			AndroidTerminalConnection(this),
-		)
+		deferredConnection?.complete(null)
 	}
 
 	override fun isCardPresent() = getState() == TerminalStateType.PRESENT
@@ -77,7 +76,7 @@ class AndroidTerminal(
 		} else {
 			runBlocking(Dispatchers.IO) {
 				waitForCardPresent()
-				(deferredConnection?.await() as AndroidTerminalConnection).apply { connectTag() }
+				connectTerminalOnly().apply { connectTag() }
 			}
 		}
 

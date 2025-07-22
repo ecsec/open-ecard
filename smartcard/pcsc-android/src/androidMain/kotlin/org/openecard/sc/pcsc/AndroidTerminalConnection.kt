@@ -50,11 +50,7 @@ class AndroidTerminalConnection(
 
 	override fun getFeatures() = emptySet<Feature>()
 
-	override fun beginTransaction() {
-		TODO("Not yet implemented")
-	}
+	override fun beginTransaction() = Unit
 
-	override fun endTransaction() {
-		TODO("Not yet implemented")
-	}
+	override fun endTransaction() = Unit
 }

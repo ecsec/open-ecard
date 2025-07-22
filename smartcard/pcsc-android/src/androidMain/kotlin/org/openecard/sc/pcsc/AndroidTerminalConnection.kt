@@ -16,13 +16,14 @@ class AndroidTerminalConnection(
 	val tag: IsoDep?
 		get() = terminal.tag
 
-	override val card = AndroidNfcCard(this)
+	override var card: AndroidNfcCard? = null
 
 	override val isCardConnected
 		get() = tag?.isConnected == true
 
 	override fun disconnect(disposition: CardDisposition) {
 		tag?.close()
+		card = null
 	}
 
 	fun connectTag() {
@@ -35,6 +36,7 @@ class AndroidTerminalConnection(
 					mapScioError {
 						localTag.timeout = 5.seconds.inWholeMilliseconds.toInt()
 						localTag.connect()
+						card = AndroidNfcCard(this)
 					}
 				}
 			}

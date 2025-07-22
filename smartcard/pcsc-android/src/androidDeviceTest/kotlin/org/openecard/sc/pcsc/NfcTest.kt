@@ -89,7 +89,7 @@ class NfcTest {
 									?.androidTerminal
 									?.connect()
 							assertTrue(connection?.isCardConnected == true, "Card not connected")
-							assertNotNull(connection.card.atr) { "Atr could not be read" }
+							assertNotNull(connection.card?.atr) { "Atr could not be read" }
 						}
 				}
 
@@ -210,14 +210,17 @@ class NfcTest {
 
 							val connection = androidTerminal?.connect()
 							assertTrue(connection?.isCardConnected == true)
-							assert(
-								connection.card.atr.bytes
-									.isNotEmpty(),
-							) { "Atr could not be read in connection" }
-							assertEquals(true, connection.card.tag?.isConnected)
+							assertTrue(
+								connection.card
+									?.atr
+									?.bytes
+									?.isNotEmpty() == true,
+								"Atr could not be read in connection",
+							)
+							assertEquals(true, connection.card?.tag?.isConnected)
 
-							val resp = connection.card.basicChannel.transmit(Select.selectMf().apdu)
-							assertEquals(StatusWord.OK, resp.status.type)
+							val resp = connection.card?.basicChannel?.transmit(Select.selectMf().apdu)
+							assertEquals(StatusWord.OK, resp?.status?.type)
 						}
 				}
 				j?.join()
@@ -251,15 +254,51 @@ class NfcTest {
 							val connection = androidTerminal?.connect()
 							assertTrue(connection?.isCardConnected == true)
 
-							val histBytes = connection.card.tag?.historicalBytes
+							val histBytes = connection.card?.tag?.historicalBytes
 							assertTrue { histBytes?.isNotEmpty() == true }
 
 							println("HISTBYTES: ${histBytes?.toHexString()}")
 
 							assertNotNull(
-								connection.card.atr.historicalBytes,
+								connection.card?.atr?.historicalBytes,
 								"Historcial Bytes in Atr must not be null",
 							)
+						}
+				}
+				j?.join()
+			}
+		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun testWaitForCardPresent() {
+		runBlocking {
+			var j: Job? = null
+			launchActivity<TestActivity>().use {
+				it.onActivity { activity ->
+					assert(activity.factory?.nfcAvailable == true) {
+						"NFC not available"
+					}
+					assert(activity.factory?.nfcEnabled == true) {
+						"NFC not enabled"
+					}
+
+					activity.msg("Put card at device")
+					j =
+						CoroutineScope(Dispatchers.IO).launch {
+							val terminals =
+								activity.factory
+									?.load()
+
+							val androidTerminal = terminals?.androidTerminal
+
+							val connection = androidTerminal?.connectTerminalOnly()
+							androidTerminal?.waitForCardPresent()
+
+							androidTerminal?.connect()
+
+							assertTrue(connection?.isCardConnected == true, "Card should be connected after waitForCard")
 						}
 				}
 				j?.join()

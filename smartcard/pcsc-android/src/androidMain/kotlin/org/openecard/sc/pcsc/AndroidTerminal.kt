@@ -56,7 +56,7 @@ class AndroidTerminal(
 						localTag.close()
 					}
 					TerminalStateType.PRESENT
-				} catch (e: SecurityException) {
+				} catch (e: Exception) {
 					if (localTag == tag) {
 						tag = null
 					}
@@ -73,24 +73,24 @@ class AndroidTerminal(
 		shareMode: ShareMode,
 	): AndroidTerminalConnection =
 		if (isCardPresent()) {
-			connectTerminalOnly()
+			connectTerminalOnly().apply { connectTag() }
 		} else {
 			runBlocking(Dispatchers.IO) {
-				val activityIntent: Intent =
-					Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-				val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
-				val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
-
-				deferredConnection = CompletableDeferred()
-
-				nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
-				deferredConnection?.await()!!.apply { connectTag() }
+				waitForCardPresent()
+				(deferredConnection?.await() as AndroidTerminalConnection).apply { connectTag() }
 			}
 		}
 
 	override suspend fun waitForCardPresent() {
-		// dispatch einachslaten - höchstwahrscheinlich hier auch - dann aber managed
-		TODO("Not yet implemented")
+		val activityIntent: Intent =
+			Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+		val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
+		val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
+
+		deferredConnection = CompletableDeferred()
+
+		nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
+		deferredConnection?.await()
 	}
 
 	override suspend fun waitForCardAbsent() {

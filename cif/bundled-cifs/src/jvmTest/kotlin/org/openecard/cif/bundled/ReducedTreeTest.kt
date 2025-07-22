@@ -1,91 +1,109 @@
 package org.openecard.cif.bundled
 
-import org.openecard.cif.definition.recognition.ConclusionDefinition
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.utils.common.hex
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.assertContentEquals
+import kotlin.test.assertNotNull
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class ReducedTreeTest {
 	@Test
-	fun `reduce tree to supported cards`() {
-		val supportedCardTypes =
-			setOf(
-				EgkCifDefinitions.cardType,
-				HbaDefinitions.cardType,
-				NpaDefinitions.cardType,
-			)
+	fun `load complete tree`() {
+		assertNotNull(CompleteTree.calls)
+	}
 
-		val tree =
-			RecognitionTreeBuilder()
-				.apply {
+	@Test
+	fun `reduce tree to supported cards`() {
+		assertContentEquals(
+			testTree,
+			testTree.removeUnsupported(setOf(EgkCifDefinitions.cardType, NpaDefinitions.cardType, "UnsupportedCard")),
+		)
+		assertContentEquals(
+			listOf(),
+			testTree.removeUnsupported(setOf("Another Card")),
+		)
+		assertContentEquals(
+			listOf(),
+			testTree.removeUnsupported(setOf()),
+		)
+		assertContentEquals(
+			npaEgKTree,
+			testTree.removeUnsupported(setOf(EgkCifDefinitions.cardType, NpaDefinitions.cardType, "Another Card")),
+		)
+		assertContentEquals(
+			npaTree,
+			testTree.removeUnsupported(setOf(NpaDefinitions.cardType, "Another Card")),
+		)
+	}
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+private val testTree =
+	RecognitionTreeBuilder()
+		.apply {
+			call {
+				command = hex("00B00000FF")
+				response {
+					recognizedCardType(EgkCifDefinitions.cardType)
+				}
+			}
+
+			call {
+				command = hex("00B20304FF")
+				response {
+					recognizedCardType("UnsupportedCard")
+				}
+				response {
+					trailer = 0x6300u
 					call {
 						command = hex("00B00000FF")
 						response {
-							recognizedCardType(EgkCifDefinitions.cardType)
-						}
-					}
-
-					call {
-						command = hex("00B20304FF")
-						response {
-							recognizedCardType("UnsupportedCard")
-						}
-					}
-
-					call {
-						command = hex("00B20304FF")
-						response {
-							call {
-								command = hex("00B00000FF")
-								response {
-									recognizedCardType(NpaDefinitions.cardType)
-								}
-							}
-						}
-					}
-				}.build()
-
-		val cleanedTree = tree.removeUnsupported(supportedCardTypes)
-
-		assertEquals(2, cleanedTree.size)
-
-		val firstConclusion = cleanedTree[0].responses.first().conclusion
-		assertTrue(firstConclusion is ConclusionDefinition.RecognizedCardType)
-		assertEquals(EgkCifDefinitions.cardType, firstConclusion.name)
-
-		val recursiveConclusion = cleanedTree[1].responses.first().conclusion
-		assertTrue(recursiveConclusion is ConclusionDefinition.Call)
-
-		val innerCall = recursiveConclusion.call
-		val innerConclusion = innerCall.responses.first().conclusion
-		assertTrue(innerConclusion is ConclusionDefinition.RecognizedCardType)
-		assertEquals(NpaDefinitions.cardType, innerConclusion.name)
-
-		val cardsInTree = mutableListOf<String>()
-
-		for (call in cleanedTree) {
-			for (response in call.responses) {
-				val conclusion = response.conclusion
-
-				if (conclusion is ConclusionDefinition.RecognizedCardType) {
-					cardsInTree.add(conclusion.name)
-				}
-
-				if (conclusion is ConclusionDefinition.Call) {
-					val innerResponses = conclusion.call.responses
-					for (innerResponse in innerResponses) {
-						val innerConclusion = innerResponse.conclusion
-						if (innerConclusion is ConclusionDefinition.RecognizedCardType) {
-							cardsInTree.add(innerConclusion.name)
+							recognizedCardType(NpaDefinitions.cardType)
 						}
 					}
 				}
 			}
-		}
-		assertFalse(cardsInTree.contains("UnsupportedCard"))
-	}
-}
+		}.build()
+
+@OptIn(ExperimentalUnsignedTypes::class)
+private val npaTree =
+	RecognitionTreeBuilder()
+		.apply {
+			call {
+				command = hex("00B20304FF")
+				response {
+					trailer = 0x6300u
+					call {
+						command = hex("00B00000FF")
+						response {
+							recognizedCardType(NpaDefinitions.cardType)
+						}
+					}
+				}
+			}
+		}.build()
+
+@OptIn(ExperimentalUnsignedTypes::class)
+private val npaEgKTree =
+	RecognitionTreeBuilder()
+		.apply {
+			call {
+				command = hex("00B00000FF")
+				response {
+					recognizedCardType(EgkCifDefinitions.cardType)
+				}
+			}
+			call {
+				command = hex("00B20304FF")
+				response {
+					trailer = 0x6300u
+					call {
+						command = hex("00B00000FF")
+						response {
+							recognizedCardType(NpaDefinitions.cardType)
+						}
+					}
+				}
+			}
+		}.build()

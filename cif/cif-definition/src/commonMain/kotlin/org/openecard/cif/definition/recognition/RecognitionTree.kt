@@ -2,45 +2,39 @@ package org.openecard.cif.definition.recognition
 
 typealias RecognitionTree = List<ApduCallDefinition>
 
-fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
-	val cleanedTree = mutableListOf<ApduCallDefinition>()
-
-	for (call in this) {
-		val prunedCall = pruneCall(call, supportedCardTypes)
-		if (prunedCall != null) {
-			cleanedTree.add(prunedCall)
-		}
+/**
+ * Removes all unsupported cards from this RecognitionTree.
+ */
+fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree =
+	this.mapNotNull {
+		pruneCall(it, supportedCardTypes)
 	}
-	return cleanedTree
-}
 
 private fun pruneCall(
 	call: ApduCallDefinition,
 	supportedCardTypes: Set<String>,
 ): ApduCallDefinition? {
-	val validResponses = mutableListOf<ResponseApduDefinition>()
+	val validResponses =
+		// check all responses and their subtrees
+		call.responses.mapNotNull { response ->
+			val newConclusion =
+				when (val conclusion = response.conclusion) {
+					// keep the conclusion if it refers to a supported card
+					is ConclusionDefinition.RecognizedCardType -> {
+						conclusion.takeIf { it.name in supportedCardTypes }
+					}
 
-	for (response in call.responses) {
-		val newConclusion =
-			when (val conclusion = response.conclusion) {
-				is ConclusionDefinition.RecognizedCardType -> {
-					if (conclusion.name in supportedCardTypes) {
-						conclusion
-					} else {
-						null
+					is ConclusionDefinition.Call -> {
+						// recurse into subtree
+						pruneCall(conclusion.call, supportedCardTypes)?.let {
+							ConclusionDefinition.Call(it)
+						}
 					}
 				}
 
-				is ConclusionDefinition.Call -> {
-					val prunedCall = pruneCall(conclusion.call, supportedCardTypes)
-					prunedCall?.let { ConclusionDefinition.Call(it) }
-				}
-			}
-
-		if (newConclusion != null) {
-			validResponses.add(response.copy(conclusion = newConclusion))
+			// replace new conclusion in response or return null to remove this subtree
+			newConclusion?.let { response.copy(conclusion = newConclusion) }
 		}
-	}
 
 	return if (validResponses.isNotEmpty()) {
 		call.copy(responses = validResponses.toSet())

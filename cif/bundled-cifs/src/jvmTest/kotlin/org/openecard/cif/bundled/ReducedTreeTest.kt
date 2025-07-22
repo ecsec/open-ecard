@@ -1,12 +1,12 @@
 package org.openecard.cif.bundled
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.openecard.cif.definition.recognition.ConclusionDefinition
 import org.openecard.cif.dsl.builder.recognition.RecognitionTreeBuilder
 import org.openecard.utils.common.hex
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class ReducedTreeTest {
@@ -55,15 +55,15 @@ class ReducedTreeTest {
 
 		val firstConclusion = cleanedTree[0].responses.first().conclusion
 		assertTrue(firstConclusion is ConclusionDefinition.RecognizedCardType)
-		assertEquals(EgkCifDefinitions.cardType, (firstConclusion as ConclusionDefinition.RecognizedCardType).name)
+		assertEquals(EgkCifDefinitions.cardType, firstConclusion.name)
 
 		val recursiveConclusion = cleanedTree[1].responses.first().conclusion
 		assertTrue(recursiveConclusion is ConclusionDefinition.Call)
 
-		val innerCall = (recursiveConclusion as ConclusionDefinition.Call).call
+		val innerCall = recursiveConclusion.call
 		val innerConclusion = innerCall.responses.first().conclusion
 		assertTrue(innerConclusion is ConclusionDefinition.RecognizedCardType)
-		assertEquals(NpaDefinitions.cardType, (innerConclusion as ConclusionDefinition.RecognizedCardType).name)
+		assertEquals(NpaDefinitions.cardType, innerConclusion.name)
 
 		val cardsInTree = mutableListOf<String>()
 

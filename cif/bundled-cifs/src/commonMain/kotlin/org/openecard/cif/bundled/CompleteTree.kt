@@ -369,7 +369,7 @@ object CompleteTree {
 	}
 }
 
-internal fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
+fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
 	val cleanedTree = mutableListOf<ApduCallDefinition>()
 
 	for (call in this) {

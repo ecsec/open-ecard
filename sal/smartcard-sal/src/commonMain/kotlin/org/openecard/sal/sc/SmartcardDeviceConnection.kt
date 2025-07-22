@@ -15,6 +15,7 @@ class SmartcardDeviceConnection(
 	override val session: SmartcardSalSession,
 	val channel: CardChannel,
 	val cif: CardInfoDefinition,
+	val isExclusive: Boolean,
 ) : DeviceConnection {
 	val cardType: String = cif.metadata.id
 
@@ -45,6 +46,9 @@ class SmartcardDeviceConnection(
 
 	override fun close(disposition: CardDisposition) =
 		mapSmartcardError {
+			if (isExclusive) {
+				channel.card.terminalConnection.endTransaction()
+			}
 			channel.card.terminalConnection.disconnect(disposition)
 		}
 

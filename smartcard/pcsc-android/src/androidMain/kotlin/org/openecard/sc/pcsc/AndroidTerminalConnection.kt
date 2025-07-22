@@ -43,6 +43,7 @@ class AndroidTerminalConnection(
 		disposition: CardDisposition,
 	) {
 		if (!isCardConnected) {
+			tag?.timeout = 5.seconds.inWholeMilliseconds.toInt()
 			tag?.connect()
 		}
 	}

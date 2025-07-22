@@ -84,11 +84,8 @@ class PaceProcess
 					secResp.status
 				}
 				is SecurityCommandFailure -> {
-					if (secResp.retries == 0 && pinId == PacePinId.PUK) {
-						log.info { "Password is blocked, but PUK was provided" }
-						secResp.status
-					} else if (secResp.retries == 1) {
-						log.info { "Password is suspended, continue the process anyway" }
+					val retries = secResp.retries
+					if (retries != null && retries > 0) {
 						secResp.status
 					} else {
 						// terminate with error

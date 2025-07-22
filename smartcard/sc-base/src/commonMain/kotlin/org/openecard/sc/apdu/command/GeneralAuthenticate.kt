@@ -60,8 +60,8 @@ class SecurityCommandP2(
 ) {
 	val byte: UByte by lazy {
 		val b1 = if (globalReference) 0u else 1u
-		val b2 = reserved.toUInt() and 0x11u
-		val b3 = qualifier.toUInt() and 0xF1u
+		val b2 = reserved.toUInt() and 0x03u
+		val b3 = qualifier.toUInt() and 0x1Fu
 		val result = (b1 shl 7) or (b2 shl 5) or b3
 		result.toUByte()
 	}

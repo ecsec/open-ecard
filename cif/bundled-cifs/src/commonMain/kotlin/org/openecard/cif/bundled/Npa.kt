@@ -411,18 +411,12 @@ private fun ApplicationScope.appMf() {
 			name = Mf.Dids.pin
 			scope = DidScope.GLOBAL
 
-			authAcl {
+			resetAcl {
 				acl(CardProtocol.Any) {
 					or(
 						{ activeDidState(Mf.Dids.pacePin) },
 						{ activeDidState(Mf.Dids.pacePuk) },
 					)
-				}
-			}
-
-			resetAcl {
-				acl(CardProtocol.Any) {
-					activeDidState(Mf.Dids.pin)
 				}
 			}
 

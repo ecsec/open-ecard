@@ -32,7 +32,7 @@ val NpaCif by lazy {
 	val b = CardInfoBuilder()
 
 	b.metadata {
-		id = "http://bsi.bund.de/cif/npa.xml"
+		id = NpaDefinitions.cardType
 		version = "1.0.0"
 		status = CardInfoStatus.DEVELOPMENT
 		name = "German Electronic Identity Card"
@@ -88,6 +88,8 @@ val NpaCif by lazy {
 }
 
 object NpaDefinitions {
+	val cardType = "http://bsi.bund.de/cif/npa.xml"
+
 	object Apps {
 		object Mf {
 			val name = "MF"

@@ -1,0 +1,56 @@
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+	<Header>
+		<PAOS xmlns:ns0="http://schemas.xmlsoap.org/soap/envelope/"
+			  ns0:actor="http://schemas.xmlsoap.org/soap/actor/next"
+			  xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/" ns1:mustUnderstand="1"
+			  xmlns="urn:liberty:paos:2006-08">
+			<Version>urn:liberty:paos:2006-08</Version>
+			<EndpointReference>
+				<Address>http://www.projectliberty.org/2006/01/role/paos</Address>
+				<MetaData>
+					<ServiceType>http://www.bsi.bund.de/ecard/api/1.1/PAOS/GetNextCommand</ServiceType>
+				</MetaData>
+			</EndpointReference>
+		</PAOS>
+		<ReplyTo xmlns="http://www.w3.org/2005/03/addressing">
+			<Address>http://www.projectliberty.org/2006/02/role/paos</Address>
+		</ReplyTo>
+		<MessageID xmlns="http://www.w3.org/2005/03/addressing">urn:uuid:a7d31640-75eb-459a-8999-1d38c9a277ca
+		</MessageID>
+	</Header>
+	<Body>
+		<ns3:StartPAOS xmlns="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns10="urn:oasis:names:tc:SAML:2.0:assertion"
+					   xmlns:ns11="http://www.w3.org/2001/04/xmlenc#" xmlns:ns12="http://ws.openecard.org/schema"
+					   xmlns:ns13="http://www.w3.org/2001/04/xmldsig-more#"
+					   xmlns:ns14="http://www.w3.org/2007/05/xmldsig-more#"
+					   xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" xmlns:ns3="urn:iso:std:iso-iec:24727:tech:schema"
+					   xmlns:ns4="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns5="http://uri.etsi.org/02231/v3.1.2#"
+					   xmlns:ns6="http://www.w3.org/2009/xmlenc11#"
+					   xmlns:ns7="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+					   xmlns:ns8="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns9="urn:oasis:names:tc:SAML:1.0:assertion"
+					   Profile="http://www.bsi.bund.de/ecard/api/1.1">
+			<ns3:SessionIdentifier>15311BF20D4F646874F2B4724EF8CE310E8535DF6ED72FFBBD8BF3B35BCBEA65
+			</ns3:SessionIdentifier>
+			<ns3:ConnectionHandle>
+				<ns3:ChannelHandle/>
+				<ns3:ContextHandle>B7D53A5A34C2F99F9CE380700501C22A</ns3:ContextHandle>
+				<ns3:SlotHandle>340C46B396F7D392F3797E14B669A97F</ns3:SlotHandle>
+			</ns3:ConnectionHandle>
+			<ns3:UserAgent>
+				<ns3:Name>Open eCard App</ns3:Name>
+				<ns3:VersionMajor>2</ns3:VersionMajor>
+				<ns3:VersionMinor>3</ns3:VersionMinor>
+				<ns3:VersionSubminor>13</ns3:VersionSubminor>
+			</ns3:UserAgent>
+			<ns3:SupportedAPIVersions>
+				<ns3:Major>1</ns3:Major>
+				<ns3:Minor>1</ns3:Minor>
+				<ns3:Subminor>5</ns3:Subminor>
+			</ns3:SupportedAPIVersions>
+			<ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.14.2</ns3:SupportedDIDProtocols>
+			<ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.14</ns3:SupportedDIDProtocols>
+			<ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.9</ns3:SupportedDIDProtocols>
+			<ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.25</ns3:SupportedDIDProtocols>
+		</ns3:StartPAOS>
+	</Body>
+</Envelope>

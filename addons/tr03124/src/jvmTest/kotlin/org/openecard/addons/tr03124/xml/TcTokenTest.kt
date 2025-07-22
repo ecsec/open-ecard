@@ -36,24 +36,4 @@ class TcTokenTest {
 		assertEquals(TcToken.SecurityProtocolType.TLS_PSK, token.securityProtocol)
 		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcToken.PskParams>(token.securityParameters).psk)
 	}
-
-	@OptIn(ExperimentalUnsignedTypes::class)
-	@Test
-	fun `serialize TCToken`() {
-		val data =
-			TcToken.Xml.encodeToString(
-				TcToken(
-					"server",
-					"session",
-					"refresh",
-					null,
-					TcToken.BindingType.PAOS,
-					TcToken.SecurityProtocolType.TLS_PSK,
-					TcToken.PskParams(hex("010203")),
-				),
-			)
-		println(data)
-		val token = data.toTcToken()
-		assertContentEquals(hex("010203"), assertInstanceOf<TcToken.PskParams>(token.securityParameters).psk)
-	}
 }

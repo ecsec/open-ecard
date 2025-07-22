@@ -6,6 +6,7 @@ import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @SerialName("TCTokenType")
@@ -22,17 +23,18 @@ class TcToken(
 	@SerialName("CommunicationErrorAddress")
 	@XmlElement
 	val communicationErrorAddress: String?,
+	@XmlSerialName("Binding")
 	val binding: BindingType,
+	@XmlSerialName("PathSecurity-Protocol")
 	val securityProtocol: SecurityProtocolType?,
+	@XmlSerialName("PathSecurity-Parameters")
 	val securityParameters: PskParams?,
 ) {
-	@SerialName("Binding")
 	enum class BindingType {
 		@SerialName("urn:liberty:paos:2006-08")
 		PAOS,
 	}
 
-	@SerialName("PathSecurity-Protocol")
 	enum class SecurityProtocolType {
 		@SerialName("urn:ietf:rfc:4279")
 		TLS_PSK,
@@ -44,7 +46,6 @@ class TcToken(
 	sealed interface SecurityParameters
 
 	@Serializable
-	@SerialName("PathSecurity-Parameters")
 	class PskParams
 		@OptIn(ExperimentalUnsignedTypes::class)
 		constructor(

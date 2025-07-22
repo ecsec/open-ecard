@@ -1,0 +1,25 @@
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/" xmlns:paos="urn:liberty:paos:2006-08"
+			xmlns:wsa="http://www.w3.org/2005/03/addressing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<S:Header>
+		<paos:PAOS S:actor="http://schemas.xmlsoap.org/soap/actor/next" S:mustUnderstand="1">
+			<paos:Version>urn:liberty:2006-08</paos:Version>
+			<paos:EndpointReference>
+				<paos:Address>http://www.projectliberty.org/2006/01/role/paos</paos:Address>
+			</paos:EndpointReference>
+		</paos:PAOS>
+		<wsa:MessageID>urn:uuid:f1504506-f655-44d7-9cf1-dc512feb7a83</wsa:MessageID>
+		<wsa:Action>http://www.bsi.bund.de/ecard/api/1.0/PAOS/GetNextCommand</wsa:Action>
+	</S:Header>
+	<S:Body>
+		<ns2:StartPAOSResponse xmlns="urn:oasis:names:tc:dss:1.0:core:schema"
+							   xmlns:ns2="urn:iso:std:iso-iec:24727:tech:schema"
+							   xmlns:ns3="http://www.w3.org/2000/09/xmldsig#"
+							   xmlns:ns4="urn:oasis:names:tc:SAML:1.0:assertion"
+							   xmlns:ns5="http://www.w3.org/2001/04/xmldsig-more#"
+							   xmlns:ns6="urn:oasis:names:tc:SAML:1.0:protocol">
+			<Result>
+				<ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</ResultMajor>
+			</Result>
+		</ns2:StartPAOSResponse>
+	</S:Body>
+</S:Envelope>

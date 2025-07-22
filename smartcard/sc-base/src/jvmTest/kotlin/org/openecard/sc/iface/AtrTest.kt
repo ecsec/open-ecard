@@ -1,5 +1,6 @@
 package org.openecard.sc.iface
 
+import org.openecard.utils.common.hex
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -52,5 +53,13 @@ class AtrTest {
 				fail("Error processing atr: ${it.description}", ex)
 			}
 		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `atr from historical bytes`() {
+		val histBytesOfNpa = hex("8031b8738601e0")
+		val atr = Atr.fromHistoricalBytes(histBytesOfNpa)
+		assertNotNull(atr.historicalBytes)
 	}
 }

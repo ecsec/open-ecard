@@ -10,6 +10,7 @@ import org.openecard.sc.iface.CardCapabilities
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
 import org.openecard.sc.iface.RemovedCard
+import org.openecard.sc.iface.UnsupportedCard
 import org.openecard.sc.iface.toAtr
 import kotlin.UByteArray
 
@@ -25,35 +26,9 @@ class AndroidNfcCard(
 	override val atr: Atr
 		get() {
 			val histBytesTmp = tag?.historicalBytes ?: tag?.hiLayerResponse
-			// build ATR according to PCSCv2-3, Sec. 3.1.3.2.3.1
-			return if (histBytesTmp == null) {
-				UByteArray(0).toAtr()
-			} else {
-				mutableListOf<Int>()
-					.apply {
-						// Initial Header
-						add(0x3B)
-						// T0
-						add((0x80 or (histBytesTmp.size and 0xF)))
-						// TD1
-						add(0x80)
-						// TD2
-						add(0x01)
-						// ISO14443A: The historical bytes from ATS response.
-						// ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
-						// TODO: check that the HiLayerResponse matches the requirements for ISO14443B
-						addAll(histBytesTmp.map { it.toInt() })
-
-						// TCK: Exclusive-OR of bytes T0 to Tk
-						var chkSum = 0
-						for (i in 1..<size) {
-							chkSum = chkSum xor this[i]
-						}
-						add(chkSum)
-					}.map { it.toUByte() }
-					.toUByteArray()
-					.toAtr()
-			}
+			return histBytesTmp?.let {
+				Atr.fromHistoricalBytes(histBytesTmp.toUByteArray())
+			} ?: throw UnsupportedCard()
 		}
 
 	override val protocol = CardProtocol.TCL
@@ -61,9 +36,10 @@ class AndroidNfcCard(
 
 	override val basicChannel = AndroidCardChannel(this)
 
-	override var capabilities: CardCapabilities?
-		get() = TODO("Not yet implemented")
-		set(value) {}
+	override var capabilities: CardCapabilities? = atr.historicalBytes?.cardCapabilities
+		set(value) {
+			capabilities = value
+		}
 
 	override fun openLogicalChannel(): CardChannel {
 		TODO("Not yet implemented")

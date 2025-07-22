@@ -19,7 +19,20 @@ class Atr
 		val tds: List<UByte?>,
 		val historicalBytes: HistoricalBytes?,
 		val tck: UByte?,
-	)
+	) {
+		companion object {
+			@OptIn(ExperimentalUnsignedTypes::class)
+			fun fromHistoricalBytes(histBytesTmp: UByteArray): Atr =
+				buildList {
+					// T0
+					add((histBytesTmp.size and 0xF).toUByte())
+					// ISO14443A: The historical bytes from ATS response.
+					// ISO14443B: 1-4=Application Data from ATQB, 5-7=Protocol Info Byte from ATQB, 8=Higher nibble = MBLI from ATTRIB command Lower nibble (RFU) = 0
+					// TODO: check that the HiLayerResponse matches the requirements for ISO14443B
+					addAll(histBytesTmp)
+				}.toUByteArray().toAtr(0x3Bu)
+		}
+	}
 
 /**
  * Parse the ATR.

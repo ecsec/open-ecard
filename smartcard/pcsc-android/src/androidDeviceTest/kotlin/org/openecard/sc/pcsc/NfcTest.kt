@@ -20,6 +20,7 @@ import org.openecard.sc.apdu.StatusWord
 import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.iface.TerminalStateType
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -218,6 +219,48 @@ class NfcTest {
 
 							val resp = connection.card.basicChannel.transmit(Select.selectMf().apdu)
 							assertEquals(StatusWord.OK, resp.status.type)
+						}
+				}
+				j?.join()
+			}
+		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun testAtrFromHistoricalBytes() {
+		runBlocking {
+			var j: Job? = null
+			launchActivity<TestActivity>().use {
+				it.onActivity { activity ->
+					assert(activity.factory?.nfcAvailable == true) {
+						"NFC not available"
+					}
+					assert(activity.factory?.nfcEnabled == true) {
+						"NFC not enabled"
+					}
+
+					activity.msg("Put card at device")
+					j =
+						CoroutineScope(Dispatchers.IO).launch {
+							val terminals =
+								activity.factory
+									?.load()
+
+							val androidTerminal = terminals?.androidTerminal
+
+							val connection = androidTerminal?.connect()
+							assertTrue(connection?.isCardConnected == true)
+
+							val histBytes = connection.card.tag?.historicalBytes
+							assertTrue { histBytes?.isNotEmpty() == true }
+
+							println("HISTBYTES: ${histBytes?.toHexString()}")
+
+							assertNotNull(
+								connection.card.atr.historicalBytes,
+								"Historcial Bytes in Atr must not be null",
+							)
 						}
 				}
 				j?.join()

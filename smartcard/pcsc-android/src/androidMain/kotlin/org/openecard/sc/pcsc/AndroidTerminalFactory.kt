@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.ReaderUnavailable
+import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.SmartCardStackMissing
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
@@ -63,10 +64,10 @@ class AndroidTerminalFactory(
 					},
 				)
 			} else {
-// 				throw ApduExtLengthNotSupported("APDU Extended Length is not supported.")
+				throw ReaderUnsupported("APDU Extended Length is not supported.")
 			}
 		} else {
-// 			throw NFCTagNotSupported("The tag is not supported")
+			logger.warn { "Given intent didn't carry a supported tag." }
 		}
 	}
 }

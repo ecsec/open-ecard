@@ -79,7 +79,7 @@ inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? =
 			getParcelableExtra(key) as? T
 	}
 
-class AndroidTerminals(
+class AndroidTerminals internal constructor(
 	override val factory: AndroidTerminalFactory,
 	val androidActivity: Activity,
 	val nfcAdapter: NfcAdapter?,

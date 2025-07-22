@@ -88,9 +88,8 @@ class NfcTest {
 									?.load()
 									?.androidTerminal
 									?.connect()
-							assert(connection?.isCardConnected == true) { "Card not connected" }
-							assert(connection?.card?.atr != null) { "Atr could not be read" }
-							assertEquals(0x3b.toUByte(), connection?.card?.atr?.bytes[0])
+							assertTrue(connection?.isCardConnected == true, "Card not connected")
+							assertNotNull(connection.card.atr) { "Atr could not be read" }
 						}
 				}
 

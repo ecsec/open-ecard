@@ -8,6 +8,7 @@ import android.nfc.NfcAdapter
 import android.nfc.tech.IsoDep
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
@@ -50,8 +51,7 @@ class AndroidTerminal(
 					if tag isConnected it might be lost without beeing detected yet, which will lead to errors
 					for the caller which connected, which has to handle it
 					 */
-					val isConnected = localTag.isConnected
-					if (isConnected == false) {
+					if (!localTag.isConnected) {
 						localTag.connect()
 						localTag.close()
 					}
@@ -64,7 +64,7 @@ class AndroidTerminal(
 			null -> TerminalStateType.ABSENT
 		}
 
-	override fun connectTerminalOnly() = AndroidTerminalConnection(this, false)
+	override fun connectTerminalOnly() = AndroidTerminalConnection(this)
 
 	override fun connect(
 		protocol: PreferredCardProtocol,
@@ -73,7 +73,7 @@ class AndroidTerminal(
 		if (isCardPresent()) {
 			connectTerminalOnly()
 		} else {
-			runBlocking {
+			runBlocking(Dispatchers.IO) {
 				val activityIntent: Intent =
 					Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 				val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
@@ -82,7 +82,7 @@ class AndroidTerminal(
 				deferredConnection = CompletableDeferred()
 
 				nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
-				deferredConnection?.await()!!
+				deferredConnection?.await()!!.apply { connectTag() }
 			}
 		}
 

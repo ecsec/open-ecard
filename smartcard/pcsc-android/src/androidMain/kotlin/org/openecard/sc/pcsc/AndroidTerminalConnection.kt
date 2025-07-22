@@ -4,23 +4,16 @@ import android.nfc.tech.IsoDep
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ShareMode
+import org.openecard.sc.iface.SharingViolation
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.feature.Feature
 import kotlin.time.Duration.Companion.seconds
 
 class AndroidTerminalConnection(
 	override val terminal: AndroidTerminal,
-	private val connectDirectly: Boolean = true,
 ) : TerminalConnection {
 	val tag: IsoDep?
 		get() = terminal.tag
-
-	init {
-		if (connectDirectly && !isCardConnected) {
-			tag?.timeout = 5.seconds.inWholeMilliseconds.toInt()
-			tag?.connect()
-		}
-	}
 
 	override val card = AndroidNfcCard(this)
 
@@ -37,16 +30,22 @@ class AndroidTerminalConnection(
 		tag?.close()
 	}
 
+	fun connectTag() {
+		if (!isCardConnected) {
+			mapScioError {
+				tag?.timeout = 5.seconds.inWholeMilliseconds.toInt()
+				tag?.connect()
+			}
+		} else {
+			throw SharingViolation()
+		}
+	}
+
 	override fun reconnect(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) {
-		if (!isCardConnected) {
-			tag?.timeout = 5.seconds.inWholeMilliseconds.toInt()
-			tag?.connect()
-		}
-	}
+	) = connectTag()
 
 	override fun getFeatures() = emptySet<Feature>()
 

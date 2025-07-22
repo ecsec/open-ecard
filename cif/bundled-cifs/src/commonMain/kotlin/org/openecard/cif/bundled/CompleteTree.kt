@@ -365,18 +365,11 @@ object CompleteTree {
 				}
 			}
 		}
-		b.build().removeUnsupported(supportedCardTypes)
+		b.build()
 	}
 }
 
-private val supportedCardTypes =
-	setOf(
-		EgkCifDefinitions.cardType,
-		HbaDefinitions.cardType,
-		NpaDefinitions.cardType,
-	)
-
-private fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
+internal fun RecognitionTree.removeUnsupported(supportedCardTypes: Set<String>): RecognitionTree {
 	val cleanedTree = mutableListOf<ApduCallDefinition>()
 
 	for (call in this) {

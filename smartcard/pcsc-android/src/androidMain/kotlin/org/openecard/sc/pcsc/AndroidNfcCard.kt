@@ -37,9 +37,6 @@ class AndroidNfcCard(
 	override val basicChannel = AndroidCardChannel(this)
 
 	override var capabilities: CardCapabilities? = atr.historicalBytes?.cardCapabilities
-		set(value) {
-			capabilities = value
-		}
 
 	override fun openLogicalChannel(): CardChannel {
 		TODO("Not yet implemented")

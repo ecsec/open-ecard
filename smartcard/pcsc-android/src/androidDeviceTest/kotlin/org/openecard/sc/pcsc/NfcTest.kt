@@ -24,8 +24,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-// TODO: add android device test in smartcard-sal and copy EgkPaceTest for android device
-
 class TestActivity : Activity() {
 	var factory: AndroidTerminalFactory? = null
 	var textView: TextView? = null

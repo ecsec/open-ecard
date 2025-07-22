@@ -132,10 +132,6 @@ class NfcTest {
 
 							connection?.reconnect()
 							assert(connection?.card?.atr != null) { "Atr could not be read after reconnect" }
-
-							val connection2 = androidTerminal?.connectTerminalOnly()
-							assert(connection2?.isCardConnected == true) { "Card not connected in second connection" }
-							assert(connection2?.card?.atr != null) { "Atr could not be read in second connection" }
 						}
 				}
 

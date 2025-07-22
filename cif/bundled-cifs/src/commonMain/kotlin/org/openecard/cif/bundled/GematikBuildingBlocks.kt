@@ -3,6 +3,7 @@ package org.openecard.cif.bundled
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.did.PinDidParametersScope
+import org.openecard.cif.dsl.api.did.PinDidPasswordEncodingScope
 import org.openecard.cif.dsl.api.did.isoPin
 
 object GematikBuildingBlocks {
@@ -107,4 +108,6 @@ object GematikBuildingBlocks {
 	}
 
 	internal fun PinDidParametersScope.basePinParams() = isoPin(6, 8)
+
+	internal fun PinDidPasswordEncodingScope.basePukParams() = isoPin(8, 8)
 }

@@ -3,6 +3,7 @@ package org.openecard.cif.bundled
 import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
+import org.openecard.cif.bundled.GematikBuildingBlocks.basePukParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsCupProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
@@ -66,6 +67,7 @@ import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.prk_hp_qes_r2048
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
+import org.openecard.cif.definition.did.PasswordFlags
 import org.openecard.cif.definition.did.PasswordType
 import org.openecard.cif.definition.did.SignatureGenerationInfoType
 import org.openecard.cif.definition.meta.CardInfoStatus
@@ -412,9 +414,21 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 			parameters {
 				basePinParams()
 				passwordRef = 0x01u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 
@@ -561,12 +575,22 @@ private fun ApplicationScope.appDFQES() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
+				basePinParams()
 				passwordRef = 0x01u
-				pwdType = PasswordType.ISO_9564_1
-				minLength = 6
-				maxLength = 8
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		signature {
@@ -1062,14 +1086,25 @@ private fun ApplicationScope.appDFAUTO() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 			parameters {
 				passwordRef = 0x01u
 				pwdType = PasswordType.ISO_9564_1
-				pwdFlags = setOf()
 				minLength = 5
 				maxLength = 8
 				storedLength = 8
 				padChar = 0xFFu
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD, // manufacturer-specific with PACE
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 
@@ -1082,9 +1117,21 @@ private fun ApplicationScope.appDFAUTO() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 			parameters {
-				passwordRef = 0x03u
 				basePinParams()
+				passwordRef = 0x03u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD, // manufacturer-specific with PACE
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 

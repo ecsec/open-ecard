@@ -69,6 +69,7 @@ import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Qes.Dids.prk_ch_qes_r204
 import org.openecard.cif.bundled.EgkCifDefinitions.mrPinHomePaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.basePinParams
+import org.openecard.cif.bundled.GematikBuildingBlocks.basePukParams
 import org.openecard.cif.bundled.GematikBuildingBlocks.cmsProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.paceCmsProtectedAcl
@@ -468,6 +469,9 @@ private fun ApplicationScope.appMf() {
 						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
 						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
 					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 
@@ -481,10 +485,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x02u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -497,10 +513,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x03u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -513,10 +541,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x04u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -529,10 +569,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x05u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -545,10 +597,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x07u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -561,10 +625,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x09u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -577,10 +653,22 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x0Cu
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK_AND_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 		pin {
@@ -593,10 +681,18 @@ private fun ApplicationScope.appMf() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				pinChPaceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x0Du
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITHOUT_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_PASSWORD,
+					)
 			}
 		}
 
@@ -2677,10 +2773,22 @@ private fun ApplicationScope.appDFQES() {
 			authAcl {
 				paceProtectedAcl()
 			}
+			resetAcl {
+				paceProtectedAcl()
+			}
 
 			parameters {
 				basePinParams()
 				passwordRef = 0x01u
+				pwdFlags =
+					setOf(
+						PasswordFlags.MODIFY_WITH_OLD_PASSWORD,
+						PasswordFlags.RESET_RETRY_COUNTER_WITH_UNBLOCK,
+					)
+
+				unblockingPassword {
+					basePukParams()
+				}
 			}
 		}
 

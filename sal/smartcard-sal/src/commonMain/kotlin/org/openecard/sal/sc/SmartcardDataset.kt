@@ -37,15 +37,21 @@ class SmartcardDataset(
 
 	private var type: DatasetType? = ds.type
 	private var efStructure: EfStructure? = null
-	private var fileInfo: FileInfo? = null
+
+	// set to unknown if we already know our type
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private var fileInfo: FileInfo? = type?.let { FileInfo.Unknown(UByteArray(0)) }
 
 	private val channel: CardChannel
 		get() = application.channel
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	private fun select() {
+	private fun select(forceReadFcp: Boolean = false) {
+		// determine if we need the select to read FCP
+		val readFcp = fileInfo == null || forceReadFcp
+
 		// only select when needed
-		if ((!application.device.isSelectedDataset(this) && ds.shortEf == null) || fileInfo == null) {
+		if ((!application.device.isSelectedDataset(this) && ds.shortEf == null) || readFcp) {
 			val select =
 				if (ds.path.v.size == 2) {
 					Select.selectEfIdentifier(ds.path.v.toUShort(0))
@@ -53,7 +59,7 @@ class SmartcardDataset(
 					Select.selectPathRelative(ds.path.v)
 				}
 
-			if (fileInfo == null) {
+			if (readFcp) {
 				try {
 					log.debug { "Selecting file ${ds.name} with FCP" }
 					val selectFcp = select.copy(fileControlInfo = FileControlInformation.FCP)

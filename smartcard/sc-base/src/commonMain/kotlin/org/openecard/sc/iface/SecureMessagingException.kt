@@ -5,6 +5,11 @@ sealed class SecureMessagingException(
 	cause: Throwable? = null,
 ) : Exception(msg ?: "There was an error while executing secure messaging", cause)
 
+class UnknownSecureMessagingError(
+	msg: String? = null,
+	cause: Throwable? = null,
+) : SecureMessagingException(msg ?: "Unknown secure messaging error occurred", cause)
+
 class SecureMessagingUnsupported(
 	msg: String? = null,
 	cause: Throwable? = null,

@@ -10,8 +10,11 @@ import org.openecard.sc.iface.InvalidSwData
 import org.openecard.sc.iface.MissingSmDo
 import org.openecard.sc.iface.NoSwData
 import org.openecard.sc.iface.SecureMessaging
+import org.openecard.sc.iface.SecureMessagingException
 import org.openecard.sc.iface.SecureMessagingUnsupported
+import org.openecard.sc.iface.UnknownSecureMessagingError
 import org.openecard.sc.tlv.Tlv
+import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.TlvPrimitive
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.hex
@@ -99,25 +102,39 @@ class SecureMessagingImpl(
 		if (responseApdu.matchStatus(StatusWord.SM_DO_INCORRECT)) throw InvalidSmDo()
 		if (responseApdu.matchStatus(StatusWord.SECURE_MESSAGING_UNSUPPORTED)) throw SecureMessagingUnsupported()
 
-		val protectedDos =
-			responseApdu.data
-				.toTlvBer()
-				.tlv
-				.asList()
-		val unprotectedDos = responseStages.fold(protectedDos) { last, stage -> stage.processResponse(last) }
+		try {
+			if (responseApdu.data.isEmpty()) {
+				throw MissingSmDo("Secure Messaging response does not contain any data")
+			}
 
-		// reconstruct response APDU
-		val data = unprotectedDos.find { it.tag in SmBasicTags.plain.tags }?.contentAsBytesBer ?: ubyteArrayOf()
-		var swData =
-			unprotectedDos.find { it.tag == SmBasicTags.sw.tag }?.contentAsBytesBer
-				?: if (requireSwDo) throw NoSwData() else responseApdu.sw.toUByteArray()
-		if (swData.isEmpty()) {
-			// the emtpy sw field means 9000
-			swData = hex("9000")
-		} else if (swData.size != 2) {
-			throw InvalidSwData()
+			val protectedDos =
+				responseApdu.data
+					.toTlvBer()
+					.tlv
+					.asList()
+			val unprotectedDos = responseStages.fold(protectedDos) { last, stage -> stage.processResponse(last) }
+
+			// reconstruct response APDU
+			val data = unprotectedDos.find { it.tag in SmBasicTags.plain.tags }?.contentAsBytesBer ?: ubyteArrayOf()
+			var swData =
+				unprotectedDos.find { it.tag == SmBasicTags.sw.tag }?.contentAsBytesBer
+					?: if (requireSwDo) throw NoSwData() else responseApdu.sw.toUByteArray()
+			if (swData.isEmpty()) {
+				// the emtpy sw field means 9000
+				swData = hex("9000")
+			} else if (swData.size != 2) {
+				throw InvalidSwData()
+			}
+
+			return ResponseApdu(data, swData[0], swData[1])
+		} catch (ex: TlvException) {
+			throw InvalidSmDo("Error processing DO objects", ex)
+		} catch (ex: Exception) {
+			if (ex is SecureMessagingException) {
+				throw ex
+			} else {
+				throw UnknownSecureMessagingError(cause = ex)
+			}
 		}
-
-		return ResponseApdu(data, swData[0], swData[1])
 	}
 }

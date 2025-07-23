@@ -20,17 +20,10 @@ kotlin {
 		androidHostTest.dependencies { }
 		androidDeviceTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
+			implementation(libs.bundles.test.android.kotlin)
 			implementation(libs.androidx.test.core.ktx)
 			implementation(libs.androidx.test.junit)
 			implementation(libs.androidx.test.runner)
-		}
-	}
-	configurations.filter { it.name.contains("android") }.forEach {
-		it.resolutionStrategy.eachDependency {
-			if (requested.group == "org.slf4j") {
-				useVersion("1.7.36")
-				because("newer versions lead to runtime errors on android")
-			}
 		}
 	}
 }

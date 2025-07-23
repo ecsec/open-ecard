@@ -8,12 +8,12 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import junit.framework.TestCase.fail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
@@ -25,9 +25,9 @@ import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.AndroidTerminalFactory
 import java.security.cert.CertificateFactory
+import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertNotNull
-import kotlin.test.fail
 
 // TODO: add android device test in smartcard-sal and copy EgkPaceTest for android device
 

@@ -27,7 +27,6 @@ androidx-material = "1.11.+"
 androidx-test-junit = "1.1.5"
 androidx-test-runner = "1.5.2"
 
-roboface = "1.4.0"
 jfx = "22.0.2"
 systray = "4.5"
 cxf = "4.1.0"
@@ -150,12 +149,6 @@ proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
-
-roboface-annots = { group = "org.openecard.tools", name = "roboface-annotation", version.ref = "roboface" }
-roboface-marshal = { group = "org.openecard.tools", name = "roboface-marshaller", version.ref = "roboface" }
-roboface-processor = { group = "org.openecard.tools", name = "roboface-processor", version.ref = "roboface" }
-
-xerces-imp = { group = "xerces", name = "xercesImpl", version = "2.12.2" }
 
 jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version = "0.9.6" }
 jwtkt-core = { module = "com.appstractive:jwt-kt", version.ref = "jwtkt" }

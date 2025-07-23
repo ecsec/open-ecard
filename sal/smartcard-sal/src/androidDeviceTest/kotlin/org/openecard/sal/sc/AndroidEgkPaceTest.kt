@@ -71,6 +71,8 @@ class TestActivity : Activity() {
 	}
 }
 
+const val EGK_CAN = "123123"
+
 @RunWith(AndroidJUnit4::class)
 class AndroidEgkPaceTest {
 	@OptIn(ExperimentalUnsignedTypes::class)
@@ -128,7 +130,7 @@ class AndroidEgkPaceTest {
 									when (did) {
 										is PaceDid -> {
 											assert(!did.capturePasswordInHardware())
-											runBlocking { did.establishChannel("123123", null, null) }
+											runBlocking { did.establishChannel(EGK_CAN, null, null) }
 										}
 										else -> assertFails { "Non PACE DID found" }
 									}

@@ -165,7 +165,7 @@ class SmartcardDataset(
 		val apdu =
 			// only use short ef if the file is not already selected
 			if (shortEf != null && !application.device.isSelectedDataset(this)) {
-				ReadRecord.readAllRecordsIndividual(shortEf, forceExtendedLength = extLen)
+				ReadRecord.readAllRecordsIndividual(shortEf = shortEf, forceExtendedLength = extLen)
 			} else {
 				ReadRecord.readAllRecordsIndividual(forceExtendedLength = extLen)
 			}

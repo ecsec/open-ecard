@@ -78,6 +78,7 @@ import org.openecard.cif.bundled.GematikBuildingBlocks.pinChPaceProtectedAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.pinProtectedPaceAcl
 import org.openecard.cif.definition.CardProtocol
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
+import org.openecard.cif.definition.dataset.DatasetType
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordFlags
@@ -329,6 +330,7 @@ private fun ApplicationScope.appMf() {
 				"It is also used to version variable elements of a map."
 			path = +"2F01"
 			shortEf = 0x1Du
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -343,6 +345,7 @@ private fun ApplicationScope.appMf() {
 				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
 			path = +"011C"
 			shortEf = 0x1Cu
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -359,6 +362,7 @@ private fun ApplicationScope.appMf() {
 				"public key PuK.RCA.CS.E256."
 			path = +"2F07"
 			shortEf = 0x07u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceCmsProtectedAcl()
 			}
@@ -375,6 +379,7 @@ private fun ApplicationScope.appMf() {
 				"checked by means of the public key from EF.C.CA.CS.E256."
 			path = +"2F06"
 			shortEf = 0x06u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceCmsProtectedAcl()
 			}
@@ -390,6 +395,7 @@ private fun ApplicationScope.appMf() {
 				"is adjusted when the application structure changes by deleting or creating applications."
 			path = +"2F00"
 			shortEf = 0x1Eu
+			type = DatasetType.RECORD
 			readAcl {
 				paceCmsProtectedAcl()
 			}
@@ -405,6 +411,7 @@ private fun ApplicationScope.appMf() {
 				"EF.GDO. The identification number is based on [Resolution190]."
 			path = +"2F02"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -424,6 +431,7 @@ private fun ApplicationScope.appMf() {
 				""".trimIndent()
 			path = +"2F11"
 			shortEf = 0x11u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -759,6 +767,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains information about the consents for voluntary applications."
 			path = +"D005"
 			shortEf = 0x05u
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 
@@ -786,6 +795,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains the protected insured person data. The details are described in Tab_eGK_ObjSys_035."
 			path = +"D003"
 			shortEf = 0x03u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 
@@ -814,6 +824,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains logging information about access to the eHC."
 			path = +"D006"
 			shortEf = 0x06u
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
@@ -836,6 +847,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains the cardholder's personal data."
 			path = +"D001"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 // 							CONTACTLESS:
@@ -853,6 +865,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file stores a certificate that was created as part of an online check."
 			path = +"D01C"
 			shortEf = 0x1Cu
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -867,6 +880,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains the information from EF.GVD and EF.DPE in encrypted form."
 			path = +"DA0A"
 			shortEf = 0x0Au
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -881,7 +895,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains information about the status of the data in EF.PD, EF.VD and EF.GVD."
 			path = +"D00C"
 			shortEf = 0x0Cu
-
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 // 						CONTACTLESS:
@@ -900,6 +914,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains the insured person data."
 			path = +"D002"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 // 							CONTACTLESS:
@@ -918,6 +933,7 @@ private fun ApplicationScope.appDFHCA() {
 				"This file contains information about the storage locations of the data of the voluntary applications that are not stored on the eHC."
 			path = +"D009"
 			shortEf = 0x09u
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
@@ -956,6 +972,7 @@ private fun ApplicationScope.appDFNFD() {
 			description = "This file contains an emergency data record."
 			path = +"D010"
 			shortEf = 0x10u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				neverAcl()
 // 						CONTACT:
@@ -1046,6 +1063,7 @@ private fun ApplicationScope.appDFNFD() {
 			description = "This file contains information about the status of the emergency data record."
 			path = +"D00E"
 			shortEf = 0x0Eu
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				neverAcl()
 // 						CONTACT:
@@ -1150,7 +1168,7 @@ private fun ApplicationScope.appDFDPE() {
 				"This file contains the data record with the personal declarations of the insured person."
 			path = +"D01B"
 			shortEf = 0x1Bu
-
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
@@ -1230,6 +1248,7 @@ private fun ApplicationScope.appDFDPE() {
 				"This file contains information on the status of the data record with the personal declarations."
 			path = +"D018"
 			shortEf = 0x18u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
@@ -1322,6 +1341,7 @@ private fun ApplicationScope.appDFGDD() {
 				"This file contains information about the consents to voluntary applications of health data services."
 			path = +"D013"
 			shortEf = 0x13u
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
@@ -1416,6 +1436,7 @@ private fun ApplicationScope.appDFGDD() {
 				"This file contains information on the storage locations of the data of the voluntary health data services applications that are not stored on the eHC."
 			path = +"D01A"
 			shortEf = 0x1Au
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
@@ -1523,6 +1544,7 @@ private fun ApplicationScope.appDFOSE() {
 				"This file contains a data record for the organ donation declaration."
 			path = +"E001"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
@@ -1621,7 +1643,7 @@ private fun ApplicationScope.appDFOSE() {
 				"This file contains information on the status of the organ donation declaration."
 			path = +"E002"
 			shortEf = 0x02u
-
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 					CONTACT:
@@ -1724,6 +1746,7 @@ private fun ApplicationScope.appDFAMTS() {
 				"This file contains a data set for AMTS data management."
 			path = +"E005"
 			shortEf = 0x05u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				neverAcl()
 // 						CONTACT:
@@ -1834,6 +1857,7 @@ private fun ApplicationScope.appDFAMTS() {
 				"This file contains information on the storage locations of data from the voluntary AMTS data management application that is not stored on the eHC."
 			path = +"E006"
 			shortEf = 0x06u
+			type = DatasetType.RECORD
 			readAcl {
 				mrPinHomePaceProtectedAcl()
 // 						CONTACT:
@@ -1940,6 +1964,7 @@ private fun ApplicationScope.appDFAMTS() {
 				"This file contains information on the status of the AMTS Data Management application."
 			path = +"E007"
 			shortEf = 0x07u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				neverAcl()
 // 						CONTACT:
@@ -2061,6 +2086,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUT.R2048 to PrK.CH.AUT.R2048."
 			path = +"C500"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -2077,6 +2103,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.AUTN.R2048 to PrK.CH.AUTN.R2048."
 			path = +"C509"
 			shortEf = 0x09u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				mrPinHomePaceProtectedAcl()
@@ -2139,6 +2166,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENC.R2048 to PrK.CH.ENC.R2048."
 			path = +"C200"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -2153,6 +2181,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.ENCV.R2048 to PrK.CH.ENCV.R2048."
 			path = +"C50A"
 			shortEf = 0x0Au
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				mrPinHomePaceProtectedAcl()
@@ -2215,6 +2244,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
 			path = +"C504"
 			shortEf = 0x04u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -2233,6 +2263,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains an X.509 authentication certificate for elliptic curve cryptography with the public key PuK.CH.AUT.E256 to PrK.CH.AUT.E256."
 			path = +"C50B"
 			shortEf = 0x0Bu
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				mrPinHomePaceProtectedAcl()
@@ -2296,6 +2327,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENC.E256 to PrK.CH.ENC.E256."
 			path = +"C205"
 			shortEf = 0x05u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -2310,6 +2342,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This file contains an encryption certificate for elliptic curve cryptography with the public key PuK.CH.ENCV.E256 to PrK.CH.ENCV.E256."
 			path = +"C50C"
 			shortEf = 0x0Cu
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				mrPinHomePaceProtectedAcl()
@@ -2735,6 +2768,7 @@ private fun ApplicationScope.appDFQES() {
 				"This file contains a certificate for cryptography with RSA with the public key PuK.CH.QES.R2048 to PrK.CH.QES.R2048."
 			path = +"C000"
 			shortEf = 0x10u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -2751,6 +2785,7 @@ private fun ApplicationScope.appDFQES() {
 				"This file contains a certificate for cryptography with elliptic curves with the public key PuK.CH.QES.E256 to PrK.CH.QES.E256."
 			path = +"C006"
 			shortEf = 0x06u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()

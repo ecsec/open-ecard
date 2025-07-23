@@ -65,6 +65,7 @@ import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.pinQes
 import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.prk_hp_qes_e256
 import org.openecard.cif.bundled.HbaDefinitions.Apps.Qes.Dids.prk_hp_qes_r2048
 import org.openecard.cif.definition.capabilities.CommandCodingDefinitions
+import org.openecard.cif.definition.dataset.DatasetType
 import org.openecard.cif.definition.did.DidScope
 import org.openecard.cif.definition.did.PacePinId
 import org.openecard.cif.definition.did.PasswordFlags
@@ -272,6 +273,7 @@ private fun ApplicationScope.appMf() {
 				"It is also used to version variable elements of a map."
 			path = +"2F01"
 			shortEf = 0x1Du
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -286,6 +288,7 @@ private fun ApplicationScope.appMf() {
 				"EF.CardAccess is required for the PACE protocol when using the contactless interface."
 			path = +"011C"
 			shortEf = 0x1Cu
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -301,6 +304,7 @@ private fun ApplicationScope.appMf() {
 				"is adjusted when the application structure changes by deleting or creating applications."
 			path = +"2F00"
 			shortEf = 0x1Eu
+			type = DatasetType.RECORD
 			readAcl {
 				paceCmsProtectedAcl()
 			}
@@ -316,6 +320,7 @@ private fun ApplicationScope.appMf() {
 				"EF.GDO. The identification number is based on [Resolution190]."
 			path = +"2F02"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -335,6 +340,7 @@ private fun ApplicationScope.appMf() {
 				""".trimIndent()
 			path = +"2F11"
 			shortEf = 0x11u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				alwaysAcl()
 			}
@@ -352,6 +358,7 @@ private fun ApplicationScope.appMf() {
 				"public key PuK.RCA.CS.E256."
 			path = +"2F07"
 			shortEf = 0x07u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceCmsCupProtectedAcl()
 			}
@@ -368,6 +375,7 @@ private fun ApplicationScope.appMf() {
 				"This certificate can be checked using the public key from EF.C.CA.CS.E256 (see Tab_HBA_ObjSys_011)."
 			path = +"2F06"
 			shortEf = 0x06u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceCmsCupProtectedAcl()
 			}
@@ -384,6 +392,7 @@ private fun ApplicationScope.appMf() {
 				"for batch and convenience signatures (SUK) in order to receive PIN data and the data to be signed (DTBS)."
 			path = +"2F09"
 			shortEf = 0x09u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceCmsCupProtectedAcl()
 			}
@@ -491,6 +500,7 @@ private fun ApplicationScope.appDFHPA() {
 				"is only possible after the PIN.CH has been successfully entered."
 			path = +"D001"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -519,6 +529,7 @@ private fun ApplicationScope.appDFQES() {
 				"accordance with EU Regulation No. 910/2014 (eIDAS)."
 			path = +"C000"
 			shortEf = 0x10u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -537,6 +548,7 @@ private fun ApplicationScope.appDFQES() {
 				"in accordance with EU Regulation No. 910/2014 (eIDAS)."
 			path = +"C006"
 			shortEf = 0x06u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -554,6 +566,7 @@ private fun ApplicationScope.appDFQES() {
 				"environment of the HBA in accordance with the evaluation and confirmation of the HBA as a secure signature creation device."
 			path = +"C005"
 			shortEf = 0x05u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceProtectedAcl()
@@ -657,6 +670,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"The file EF.C.HP.AUT.R2048 contains a certificate for cryptography with RSA with the public key PuK.HP.AUT.R2048."
 			path = +"C500"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -672,6 +686,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"The file EF.C.HP.ENC.R2048 contains a certificate for cryptography with RSA with the public key PuK.HP.ENC.R2048."
 			path = +"C200"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -687,6 +702,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"The file EF.C.HP.AUT.E256 contains a certificate for cryptography with elliptic curves with the public key PuK.HP.AUT.E256."
 			path = +"C506"
 			shortEf = 0x06u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -703,6 +719,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"The file EF.C.HP.ENC.E256 contains a certificate for cryptography with elliptic curves with the public key PuK.HP.ENC.E256."
 			path = +"C205"
 			shortEf = 0x05u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -718,6 +735,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This EF contains the certificate for the key PrK.HP.SIG.R2048."
 			path = +"C000"
 			shortEf = 0x10u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -733,6 +751,7 @@ private fun ApplicationScope.appDFESIGN() {
 				"This EF contains the certificate for the key PrK.HP.SIG.E256."
 			path = +"C007"
 			shortEf = 0x07u
+			type = DatasetType.TRANSPARENT
 
 			readAcl {
 				paceCmsCupProtectedAcl()
@@ -924,6 +943,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			name = cia_qes_ef_cia_ciaInfo
 			path = +"5032"
 			shortEf = 0x12u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -935,6 +955,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			name = cia_qes_efOd
 			path = +"5031"
 			shortEf = 0x11u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -946,6 +967,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			name = cia_qes_efAod
 			path = +"5034"
 			shortEf = 0x14u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -957,6 +979,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			name = cia_qes_efPrkd
 			path = +"5035"
 			shortEf = 0x15u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -968,6 +991,7 @@ private fun ApplicationScope.appDFCIAQES() {
 			name = cia_qes_efCd
 			path = +"5038"
 			shortEf = 0x16u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -991,6 +1015,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			name = cia_esign_ef_cia_ciaInfo
 			path = +"5032"
 			shortEf = 0x12u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1002,6 +1027,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			name = cia_esign_efOd
 			path = +"5031"
 			shortEf = 0x11u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1013,6 +1039,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			name = cia_esign_efAod
 			path = +"5034"
 			shortEf = 0x14u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1024,6 +1051,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			name = cia_esign_efPrkd
 			path = +"5035"
 			shortEf = 0x15u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1035,6 +1063,7 @@ private fun ApplicationScope.appDFCIAESIGN() {
 			name = cia_esign_efCd
 			path = +"5038"
 			shortEf = 0x16u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1058,6 +1087,7 @@ private fun ApplicationScope.appDFAUTO() {
 			name = ef_c_hp_auto1_r3072
 			path = +"E001"
 			shortEf = 0x01u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}
@@ -1070,6 +1100,7 @@ private fun ApplicationScope.appDFAUTO() {
 			name = ef_c_hp_auto2_r3072
 			path = +"E002"
 			shortEf = 0x02u
+			type = DatasetType.TRANSPARENT
 			readAcl {
 				paceProtectedAcl()
 			}

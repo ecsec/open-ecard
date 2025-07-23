@@ -36,11 +36,12 @@ kotlin {
 			implementation(project(":smartcard:pace"))
 			implementation(project(":cif:bundled-cifs"))
 		}
-		configurations.all {
-			resolutionStrategy.eachDependency {
+
+		configurations.filter { it.name.contains("android") }.forEach {
+			it.resolutionStrategy.eachDependency {
 				if (requested.group == "org.slf4j") {
 					useVersion("1.7.36")
-					because("i said so")
+					because("newer versions lead to runtime errors on android")
 				}
 			}
 		}

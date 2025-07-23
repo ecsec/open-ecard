@@ -28,7 +28,7 @@ kotlin {
 		}
 
 		jvmTest.dependencies {
-			implementation(libs.junit.params)
+			implementation(libs.bundles.test.jvm.kotlin)
 			implementation(project(":smartcard:pcsc-scio"))
 		}
 	}

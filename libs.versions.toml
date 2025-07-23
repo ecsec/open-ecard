@@ -52,6 +52,7 @@ ktlint-githubreporter = { module = "io.github.tobi2k:ktlint-gitlab-reporter", ve
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kt-logging" }
+kotlin-logging-android = { module = "io.github.oshai:kotlin-logging-android", version.ref = "kt-logging" }
 
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kx-co" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kx-co" }
@@ -95,6 +96,7 @@ ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref 
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.16" }
 slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.16" }
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
+slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
 
 # utilities
 annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
@@ -170,8 +172,11 @@ semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 
 [bundles]
-test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test", "mockito", "mockito-kotlin", "logback-classic"]
+test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
+test-jvm-kotlin = ["junit-params", "logback-classic"]
+test-android-kotlin = ["junit-params", "kotlin-logging-android", "slf4j-android"]
 
+test-mockito = ["mockito", "mockito-kotlin"]
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

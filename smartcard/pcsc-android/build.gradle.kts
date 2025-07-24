@@ -19,11 +19,7 @@ kotlin {
 
 		androidHostTest.dependencies { }
 		androidDeviceTest.dependencies {
-			implementation(libs.bundles.test.basics.kotlin)
-			implementation(libs.bundles.test.android.kotlin)
-			implementation(libs.androidx.test.core.ktx)
-			implementation(libs.androidx.test.junit)
-			implementation(libs.androidx.test.runner)
+			implementation(libs.bundles.test.android.kotlin.device)
 		}
 	}
 }

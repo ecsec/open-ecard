@@ -168,8 +168,14 @@ jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
 test-android-kotlin = ["junit-params", "kotlin-logging-android", "slf4j-android"]
-
 test-mockito = ["mockito", "mockito-kotlin"]
+test-android-kotlin-device = [
+	"kotlin-test", "kotlin-coroutines-test",
+	"junit-params", "kotlin-logging-android", "slf4j-android",
+	"androidx-test-core-ktx",
+	"androidx-test-junit",
+	"androidx-test-runner"
+]
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

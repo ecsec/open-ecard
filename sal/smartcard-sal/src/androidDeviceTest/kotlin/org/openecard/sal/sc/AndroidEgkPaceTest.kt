@@ -19,6 +19,7 @@ import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
+import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -28,8 +29,6 @@ import java.security.cert.CertificateFactory
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertNotNull
-
-// TODO: add android device test in smartcard-sal and copy EgkPaceTest for android device
 
 class TestActivity : Activity() {
 	var factory: AndroidTerminalFactory? = null
@@ -77,7 +76,7 @@ const val EGK_CAN = "123123"
 class AndroidEgkPaceTest {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test
-	fun `execute_pace_with_can`() {
+	fun execute_pace_with_can() {
 		runBlocking {
 			var j: Job? = null
 			launchActivity<TestActivity>().use { scenario ->
@@ -99,7 +98,7 @@ class AndroidEgkPaceTest {
 
 							assertNotNull(terminals)
 							
-							val recognition = DirectCardRecognition(CompleteTree.calls)
+							val recognition = DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(EgkCifDefinitions.cardType)))
 							val paceFactory = PaceFeatureSoftwareFactory()
 							val sal = SmartcardSal(terminals, setOf(EgkCif), recognition, paceFactory)
 

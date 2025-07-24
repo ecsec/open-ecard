@@ -9,29 +9,53 @@ import android.widget.TextView
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.time.delay
+import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openecard.sc.apdu.StatusWord
 import org.openecard.sc.apdu.command.Select
+import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.TerminalStateType
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 class TestActivity : Activity() {
 	var factory: AndroidTerminalFactory? = null
 	var textView: TextView? = null
 
+	var wasPaused = false
+	var wasResumedAfterPaused = false
+
 	fun msg(msg: String) =
 		runOnUiThread {
 			textView?.text = msg
 		}
+
+	override fun onPause() {
+		super.onPause()
+		wasPaused = true
+	}
+
+	override fun onResume() {
+		super.onResume()
+		if (wasPaused) {
+			wasResumedAfterPaused = true
+		}
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -295,6 +319,66 @@ class NfcTest {
 							androidTerminal?.connect()
 
 							assertTrue(connection?.isCardConnected == true, "Card should be connected after waitForCard")
+						}
+				}
+				j?.join()
+			}
+		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class, DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+	@Test
+	fun test_pause_and_resume_activity_before_connect() {
+		runBlocking {
+			var j: Job? = null
+			launchActivity<TestActivity>().use {
+				it.onActivity { activity ->
+					assert(activity.factory?.nfcAvailable == true) {
+						"NFC not available"
+					}
+					assert(activity.factory?.nfcEnabled == true) {
+						"NFC not enabled"
+					}
+
+					activity.msg("Pause and resume the activity - when it is back bring card to device")
+					j =
+						CoroutineScope(Dispatchers.IO).launch {
+							val terminals =
+								activity.factory
+									?.load()
+
+							val androidTerminal = terminals?.androidTerminal
+							val connection = androidTerminal?.connectTerminalOnly()
+
+							val time = 10.seconds
+
+							try {
+								withTimeout(time) {
+									val countDown =
+										launch {
+											for (i in time.toInt(DurationUnit.SECONDS) downTo 1) {
+												activity.msg(
+													"Pause and resume the activity -" +
+														" when it is back bring card to device\n $i secs left",
+												)
+												delay(1.seconds)
+											}
+										}
+									androidTerminal?.waitForCardPresent()
+									assertTrue(
+										activity.wasResumedAfterPaused,
+										"Activity was not paused and resumed.",
+									)
+									countDown.cancelAndJoin()
+									androidTerminal?.connect()
+									assertTrue(
+										connection?.isCardConnected == true,
+										"Card should be connected after waitForCard",
+									)
+								}
+							} catch (e: TimeoutCancellationException) {
+								fail("didn't connect to card until timeout")
+							}
 						}
 				}
 				j?.join()

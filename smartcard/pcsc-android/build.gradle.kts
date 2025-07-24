@@ -19,7 +19,7 @@ kotlin {
 
 		androidHostTest.dependencies { }
 		androidDeviceTest.dependencies {
-			implementation(libs.bundles.test.android.device)
+			implementation(libs.bundles.test.android.kotlin)
 		}
 	}
 }

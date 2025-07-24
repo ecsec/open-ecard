@@ -168,7 +168,7 @@ jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
 test-mockito = ["mockito", "mockito-kotlin"]
-test-android-device = [
+test-android-kotlin = [
 	"kotlin-test", "kotlin-coroutines-test",
 	"junit-params", "kotlin-logging-android", "slf4j-android",
 	"androidx-test-core-ktx",

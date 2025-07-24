@@ -2,16 +2,19 @@ package org.openecard.sc.pcsc
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Build
+import android.os.Bundle
 import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnsupported
@@ -20,9 +23,11 @@ import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalStateType
 import org.openecard.sc.iface.Terminals
 import kotlin.jvm.java
+import kotlin.time.Duration.Companion.seconds
 
 private val logger = KotlinLogging.logger { }
 
+@SuppressLint("NewApi")
 class AndroidTerminal(
 	override val terminals: Terminals,
 	override val name: String,
@@ -31,6 +36,39 @@ class AndroidTerminal(
 ) : Terminal {
 	private var deferredConnection: CompletableDeferred<Nothing?>? = null
 	var tag: IsoDep? = null
+	var needNfc = false
+
+	init {
+		androidActivity.registerActivityLifecycleCallbacks(
+			object : Application.ActivityLifecycleCallbacks {
+				override fun onActivityCreated(
+					activity: Activity,
+					savedInstanceState: Bundle?,
+				) = Unit
+
+				override fun onActivityStarted(activity: Activity) = Unit
+
+				override fun onActivityStopped(activity: Activity) = Unit
+
+				override fun onActivitySaveInstanceState(
+					activity: Activity,
+					outState: Bundle,
+				) = Unit
+
+				override fun onActivityDestroyed(activity: Activity) = Unit
+
+				override fun onActivityResumed(activity: Activity) {
+					if (needNfc) {
+						nfcOn()
+					}
+				}
+
+				override fun onActivityPaused(activity: Activity) {
+					nfcOff()
+				}
+			},
+		)
+	}
 
 	val tagIntentHandler: ((tag: Intent) -> Unit) = {
 		val isoDep = IsoDep.get(it.parcelable<Tag>(NfcAdapter.EXTRA_TAG))
@@ -49,9 +87,6 @@ class AndroidTerminal(
 	@SuppressLint("NewApi")
 	fun setNFCTag(tag: IsoDep) {
 		this.tag = tag
-
-		// TODO: Do we have to handle this here or somewhere else
-		// nfcAdapter?.disableForegroundDispatch(androidActivity)
 		deferredConnection?.complete(null)
 	}
 
@@ -99,15 +134,26 @@ class AndroidTerminal(
 		}
 
 	override suspend fun waitForCardPresent() {
+		deferredConnection = CompletableDeferred()
+		needNfc = true
+		nfcOn()
+		deferredConnection?.await()
+	}
+
+	internal fun nfcOff() {
+		androidActivity.runOnUiThread {
+			nfcAdapter?.disableForegroundDispatch(androidActivity)
+		}
+	}
+
+	internal fun nfcOn() {
 		val activityIntent: Intent =
 			Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 		val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
 		val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
-
-		deferredConnection = CompletableDeferred()
-
-		nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
-		deferredConnection?.await()
+		androidActivity.runOnUiThread {
+			nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
+		}
 	}
 
 	override suspend fun waitForCardAbsent() {

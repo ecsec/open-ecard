@@ -18,7 +18,6 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.runner.RunWith

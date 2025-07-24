@@ -77,7 +77,10 @@ class AndroidTerminals internal constructor(
 
 	override val isEstablished = true
 
-	override fun releaseContext() = Unit
+	override fun releaseContext() {
+		androidTerminal.needNfc = false
+		androidTerminal.nfcOff()
+	}
 
 	override fun list(): List<Terminal> = listOf(androidTerminal)
 

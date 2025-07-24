@@ -12,9 +12,7 @@ kotlin {
 		compileSdk = 34
 
 		withHostTestBuilder { }
-		withDeviceTestBuilder {
-// 			sourceSetTreeName = "androidDeviceTest"
-		}.configure {
+		withDeviceTestBuilder { }.configure {
 			instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 			packaging {
 				resources.excludes.add("META-INF/*")

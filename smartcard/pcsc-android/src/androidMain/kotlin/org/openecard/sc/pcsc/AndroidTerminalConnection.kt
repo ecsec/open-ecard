@@ -1,6 +1,7 @@
 package org.openecard.sc.pcsc
 
 import android.nfc.tech.IsoDep
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.CardDisposition
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.RemovedCard
@@ -9,6 +10,8 @@ import org.openecard.sc.iface.SharingViolation
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.feature.Feature
 import kotlin.time.Duration.Companion.seconds
+
+private val logger = KotlinLogging.logger { }
 
 class AndroidTerminalConnection(
 	override val terminal: AndroidTerminal,
@@ -51,7 +54,7 @@ class AndroidTerminalConnection(
 
 	override fun getFeatures() = emptySet<Feature>()
 
-	override fun beginTransaction() = Unit
+	override fun beginTransaction() = logger.debug { "Note: beginTransaction is NOP on android" }
 
-	override fun endTransaction() = Unit
+	override fun endTransaction() = logger.debug { "Note: endTransaction is NOP on android" }
 }

@@ -5,12 +5,16 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import android.os.Build
+import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.openecard.sc.iface.PreferredCardProtocol
+import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalStateType
@@ -27,6 +31,20 @@ class AndroidTerminal(
 ) : Terminal {
 	private var deferredConnection: CompletableDeferred<Nothing?>? = null
 	var tag: IsoDep? = null
+
+	val tagIntentHandler: ((tag: Intent) -> Unit) = {
+		val isoDep = IsoDep.get(it.parcelable<Tag>(NfcAdapter.EXTRA_TAG))
+
+		if (isoDep != null) {
+			if (isoDep.isExtendedLengthApduSupported) {
+				setNFCTag(isoDep)
+			} else {
+				throw ReaderUnsupported("APDU Extended Length is not supported.")
+			}
+		} else {
+			logger.warn { "Given intent didn't carry a supported tag." }
+		}
+	}
 
 	@SuppressLint("NewApi")
 	fun setNFCTag(tag: IsoDep) {
@@ -96,3 +114,11 @@ class AndroidTerminal(
 		TODO("Not yet implemented")
 	}
 }
+
+inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? =
+	when {
+		Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
+		else ->
+			@Suppress("DEPRECATION")
+			getParcelableExtra(key) as? T
+	}

@@ -53,32 +53,9 @@ class AndroidTerminalFactory(
 		}
 
 	val tagIntentHandler: ((tag: Intent) -> Unit) = {
-		val isoDep = IsoDep.get(it.parcelable<Tag>(NfcAdapter.EXTRA_TAG))
-
-		if (isoDep != null) {
-			if (isoDep.isExtendedLengthApduSupported) {
-				// set nfc tag with timeout of five seconds
-				terminals?.onTagIntent(
-					isoDep.apply {
-						timeout = 5.milliseconds.toInt(DurationUnit.MILLISECONDS)
-					},
-				)
-			} else {
-				throw ReaderUnsupported("APDU Extended Length is not supported.")
-			}
-		} else {
-			logger.warn { "Given intent didn't carry a supported tag." }
-		}
+		terminals?.androidTerminal?.tagIntentHandler(it)
 	}
 }
-
-inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? =
-	when {
-		Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
-		else ->
-			@Suppress("DEPRECATION")
-			getParcelableExtra(key) as? T
-	}
 
 class AndroidTerminals internal constructor(
 	override val factory: AndroidTerminalFactory,
@@ -105,8 +82,4 @@ class AndroidTerminals internal constructor(
 	override fun list(): List<Terminal> = listOf(androidTerminal)
 
 	override fun getTerminal(name: String): Terminal? = androidTerminal
-
-	fun onTagIntent(tag: IsoDep) {
-		androidTerminal.setNFCTag(tag)
-	}
 }

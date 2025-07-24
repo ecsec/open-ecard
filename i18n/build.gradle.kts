@@ -34,6 +34,11 @@ multiplatformResources {
 }
 
 // kover gets confused because no sources are in this project
+// we had to disable completely due to incopatibility with android-library-plugin so calling the following doesn't work
+// TODO reactivate this when https://github.com/Kotlin/kotlinx-kover/issues/747 is solved
+/*
 kover {
 	disable()
 }
+
+ */

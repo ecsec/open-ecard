@@ -29,7 +29,7 @@ kotlin {
 			implementation(project(":cif:bundled-cifs"))
 		}
 		androidDeviceTest.dependencies {
-			implementation(libs.bundles.test.android.kotlin.device)
+			implementation(libs.bundles.test.android.device)
 			implementation(project(":smartcard:pcsc-android"))
 			implementation(project(":smartcard:pace"))
 			implementation(project(":cif:bundled-cifs"))

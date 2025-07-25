@@ -6,7 +6,7 @@ import org.openecard.cif.definition.capabilities.CardCapabilitiesDefinition
 import org.openecard.cif.definition.meta.CardInfoMetadata
 
 @Serializable
-class CardInfoDefinition(
+data class CardInfoDefinition(
 	val metadata: CardInfoMetadata,
 	// TODO: CardIdentification
 	val capabilities: CardCapabilitiesDefinition?,

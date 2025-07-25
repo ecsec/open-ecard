@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 import org.openecard.cif.definition.acl.AclDefinition
 import org.openecard.utils.serialization.PrintableUByteArray
 
-// TODO: think about how to solve the translation (name) and if it is necessary at all
 @Serializable
 data class DataSetDefinition(
 	val path: PrintableUByteArray,

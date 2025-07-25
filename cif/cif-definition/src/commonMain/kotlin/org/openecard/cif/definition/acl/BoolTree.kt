@@ -12,6 +12,10 @@ data class BoolTreeAnd<T>(
 	val and: List<T>,
 )
 
+@Serializable
 sealed interface BoolTreeLeaf {
-	object True : BoolTreeLeaf
+	@Serializable
+	object True : BoolTreeLeaf {
+		override fun toString(): String = "True"
+	}
 }

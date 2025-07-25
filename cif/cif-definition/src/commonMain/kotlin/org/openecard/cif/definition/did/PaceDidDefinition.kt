@@ -18,6 +18,7 @@ data class PaceDidParameters(
 	val maxLength: Int?,
 )
 
+@Serializable
 enum class PacePinId {
 	MRZ,
 	CAN,

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import org.openecard.cif.definition.acl.AclDefinition
 
 @Serializable
-class PinDidDefinition(
+data class PinDidDefinition(
 	override val name: String,
 	override val scope: DidScope,
 	val authAcl: AclDefinition,
@@ -34,7 +34,8 @@ data class UnblockingParameters(
 	override val padChar: UByte?,
 ) : PasswordEncodingDefinition
 
-interface PasswordEncodingDefinition {
+@Serializable
+sealed interface PasswordEncodingDefinition {
 	val pwdType: PasswordType
 	val minLength: UInt
 	val maxLength: UInt?
@@ -42,6 +43,7 @@ interface PasswordEncodingDefinition {
 	val padChar: UByte?
 }
 
+@Serializable
 enum class PasswordType {
 	BCD,
 	ISO_9564_1,
@@ -50,6 +52,7 @@ enum class PasswordType {
 	HALF_NIBBLE_BCD,
 }
 
+@Serializable
 enum class PasswordFlags {
 	/**
 	 * meaning that a user-given password shall not be converted to all-uppercase before presented to the card

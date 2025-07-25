@@ -15,8 +15,9 @@ fun ULong.toTlv(tag: Tag = Tag.INTEGER_TAG): TlvPrimitive {
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
+@Throws(IllegalArgumentException::class)
 fun Tlv.toULong(tag: Tag = Tag.INTEGER_TAG): ULong {
-	require(this.tag == tag) { "The tag of the TLV ($tag) is not the expected tag." }
+	require(this.tag == tag) { "The tag of the TLV (${this.tag}) is not the expected tag." }
 	return when (this) {
 		is TlvPrimitive -> this.value.enlargeToLong().toULong(0)
 		else -> throw IllegalArgumentException("Integer TLV is not primitive")
@@ -30,10 +31,21 @@ fun UInt.toTlv(tag: Tag = Tag.INTEGER_TAG): TlvPrimitive {
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
+@Throws(IllegalArgumentException::class)
 fun Tlv.toUInt(tag: Tag = Tag.INTEGER_TAG): UInt {
-	require(this.tag == tag) { "The tag of the TLV ($tag) is not the expected tag." }
+	require(this.tag == tag) { "The tag of the TLV (${this.tag}) is not the expected tag." }
 	return when (this) {
 		is TlvPrimitive -> this.value.enlargeToInt().toUInt(0)
 		else -> throw IllegalArgumentException("Integer TLV is not primitive")
+	}
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+@Throws(IllegalArgumentException::class)
+fun Tlv.toString(tag: Tag): String {
+	require(this.tag == tag) { "The tag of the TLV (${this.tag}) is not the expected tag." }
+	return when (this) {
+		is TlvPrimitive -> this.value.toByteArray().decodeToString()
+		else -> throw IllegalArgumentException("String TLV is not primitive")
 	}
 }

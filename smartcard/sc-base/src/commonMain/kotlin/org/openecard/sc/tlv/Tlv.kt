@@ -22,6 +22,7 @@
 
 package org.openecard.sc.tlv
 
+import org.openecard.utils.common.returnIf
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 
@@ -30,7 +31,9 @@ sealed interface Tlv {
 	val sibling: Tlv?
 
 	val asConstructed: TlvConstructed? get() = this as? TlvConstructed
+	val asConstructedAsserted get() = requireNotNull(asConstructed)
 	val asPrimitive: TlvPrimitive? get() = this as? TlvPrimitive
+	val asPrimitiveAsserted get() = requireNotNull(asPrimitive)
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	val contentAsBytesBer: UByteArray
@@ -112,6 +115,16 @@ sealed interface Tlv {
 				sibling?.let { addAll(it.toSimple(withSuccessors)) }
 			}
 		}.toUByteArray()
+
+	companion object {
+		fun List<Tlv>.tagAt(
+			index: Int,
+			requiredTag: Tag,
+		): Tlv? {
+			val tlv = this[index]
+			return tlv.returnIf { it.tag == requiredTag }
+		}
+	}
 }
 
 data class TlvPrimitive

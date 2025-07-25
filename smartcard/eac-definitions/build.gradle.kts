@@ -12,6 +12,7 @@ kotlin {
 			implementation(libs.kotlin.logging)
 			api(project(":utils:common"))
 			api(project(":smartcard:sc-base"))
+			implementation(libs.kotlinx.datetime)
 			implementation(libs.kotlin.crypto.asn1.core)
 			implementation(libs.kotlin.crypto.asn1.modules)
 		}

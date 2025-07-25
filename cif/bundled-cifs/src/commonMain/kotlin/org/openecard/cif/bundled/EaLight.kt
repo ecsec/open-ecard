@@ -1,10 +1,11 @@
 package org.openecard.cif.bundled
 
-import kotlinx.datetime.Instant
 import org.openecard.cif.definition.meta.CardInfoStatus
 import org.openecard.cif.dsl.builder.CardInfoBuilder
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-@OptIn(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class, ExperimentalTime::class)
 val EaLightCif by lazy {
 	val b = CardInfoBuilder()
 

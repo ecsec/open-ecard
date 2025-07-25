@@ -41,7 +41,7 @@ class TestActivity : Activity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		factory = AndroidTerminalFactory(this)
+		factory = AndroidTerminalFactory.instance(this)
 		this.textView =
 			TextView(this@TestActivity).apply {
 				text = "running tests"

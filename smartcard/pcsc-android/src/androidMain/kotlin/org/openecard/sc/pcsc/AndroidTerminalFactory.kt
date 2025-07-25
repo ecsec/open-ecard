@@ -20,11 +20,15 @@ import kotlin.time.DurationUnit
 
 private val logger = KotlinLogging.logger {}
 
-class AndroidTerminalFactory(
+class AndroidTerminalFactory internal constructor(
 	val androidActivity: Activity,
 ) : TerminalFactory {
 	override val name: String
 		get() = "AndroidNFC"
+
+	companion object {
+		fun instance(androidActivity: Activity) = AndroidTerminalFactory(androidActivity)
+	}
 
 	private var terminals: AndroidTerminals? = null
 

@@ -1,6 +1,7 @@
 package org.openecard.utils.common
 
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 class BitSetTest {
@@ -21,5 +22,13 @@ class BitSetTest {
 				assertEquals(false, bs[i])
 			}
 		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun `test slice`() {
+		val start = bitSetOf(0x12u, 0x34u, 0x56u, 0x78u)
+		assertContentEquals(hex("07"), start.slice(31 downTo 28).toUByteArray())
+		assertContentEquals(hex("01"), start.slice(IntProgression.fromClosedRange(31, 28, -2)).toUByteArray())
 	}
 }

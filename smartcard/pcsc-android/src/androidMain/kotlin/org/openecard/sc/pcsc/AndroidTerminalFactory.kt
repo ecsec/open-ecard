@@ -4,19 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
-import android.nfc.Tag
-import android.nfc.tech.IsoDep
-import android.os.Build
-import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.sc.iface.ReaderUnavailable
-import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.SmartCardStackMissing
 import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalFactory
 import org.openecard.sc.iface.Terminals
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
 private val logger = KotlinLogging.logger {}
 
@@ -77,13 +70,20 @@ class AndroidTerminals internal constructor(
 
 	override val supportsControlCommand = false
 
-	override fun establishContext() = Unit
+	override var isEstablished = false
 
-	override val isEstablished = true
+	override fun establishContext() {
+		if (!isEstablished) {
+			androidTerminal.terminalOn()
+			isEstablished = true
+		}
+	}
 
 	override fun releaseContext() {
-		androidTerminal.needNfc = false
-		androidTerminal.nfcOff()
+		if (isEstablished) {
+			androidTerminal.terminalOff()
+			isEstablished = false
+		}
 	}
 
 	override fun list(): List<Terminal> = listOf(androidTerminal)

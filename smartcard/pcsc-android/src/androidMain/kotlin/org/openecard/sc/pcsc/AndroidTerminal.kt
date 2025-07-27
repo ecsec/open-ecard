@@ -14,7 +14,6 @@ import android.os.Parcelable
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnsupported
@@ -23,7 +22,7 @@ import org.openecard.sc.iface.Terminal
 import org.openecard.sc.iface.TerminalStateType
 import org.openecard.sc.iface.Terminals
 import kotlin.jvm.java
-import kotlin.time.Duration.Companion.seconds
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
 
@@ -34,43 +33,56 @@ class AndroidTerminal(
 	val androidActivity: Activity,
 	val nfcAdapter: NfcAdapter?,
 ) : Terminal {
-	private var deferredConnection: CompletableDeferred<Nothing?>? = null
+	private var deferredConnection: CompletableDeferred<Nothing?> = CompletableDeferred()
 	var tag: IsoDep? = null
-	var needNfc = false
+	private var waitingForTag = false
+	private val lifeCycleCallbacks =
+		object : Application.ActivityLifecycleCallbacks {
+			private var resumeNfc = false
 
-	init {
-		androidActivity.registerActivityLifecycleCallbacks(
-			object : Application.ActivityLifecycleCallbacks {
-				override fun onActivityCreated(
-					activity: Activity,
-					savedInstanceState: Bundle?,
-				) = Unit
+			override fun onActivityCreated(
+				activity: Activity,
+				savedInstanceState: Bundle?,
+			) = Unit
 
-				override fun onActivityStarted(activity: Activity) = Unit
+			override fun onActivityStarted(activity: Activity) = Unit
 
-				override fun onActivityStopped(activity: Activity) = Unit
+			override fun onActivityStopped(activity: Activity) = Unit
 
-				override fun onActivitySaveInstanceState(
-					activity: Activity,
-					outState: Bundle,
-				) = Unit
+			override fun onActivitySaveInstanceState(
+				activity: Activity,
+				outState: Bundle,
+			) = Unit
 
-				override fun onActivityDestroyed(activity: Activity) = Unit
+			override fun onActivityDestroyed(activity: Activity) = Unit
 
-				override fun onActivityResumed(activity: Activity) {
-					if (needNfc) {
-						nfcOn()
-					}
+			override fun onActivityResumed(activity: Activity) {
+				if (waitingForTag && resumeNfc) {
+					nfcTagDiscoveryOn()
+					resumeNfc = false
 				}
+			}
 
-				override fun onActivityPaused(activity: Activity) {
-					nfcOff()
+			override fun onActivityPaused(activity: Activity) {
+				if (waitingForTag) {
+					resumeNfc = true
+					nfcTagDiscoveryOff()
 				}
-			},
-		)
+			}
+		}
+
+	private val random = Random(0)
+
+	private fun registerLifeCycleCallbacks() {
+		androidActivity.registerActivityLifecycleCallbacks(lifeCycleCallbacks)
+	}
+
+	private fun unRegisterLifeCycleCallbacks() {
+		androidActivity.unregisterActivityLifecycleCallbacks(lifeCycleCallbacks)
 	}
 
 	val tagIntentHandler: ((tag: Intent) -> Unit) = {
+		waitingForTag = false
 		val isoDep = IsoDep.get(it.parcelable<Tag>(NfcAdapter.EXTRA_TAG))
 
 		if (isoDep != null) {
@@ -87,7 +99,7 @@ class AndroidTerminal(
 	@SuppressLint("NewApi")
 	fun setNFCTag(tag: IsoDep) {
 		this.tag = tag
-		deferredConnection?.complete(null)
+		deferredConnection.complete(null)
 	}
 
 	override fun isCardPresent() = getState() == TerminalStateType.PRESENT
@@ -134,26 +146,32 @@ class AndroidTerminal(
 		}
 
 	override suspend fun waitForCardPresent() {
-		deferredConnection = CompletableDeferred()
-		needNfc = true
-		nfcOn()
-		deferredConnection?.await()
+		deferredConnection.await()
 	}
 
-	internal fun nfcOff() {
-		androidActivity.runOnUiThread {
-			nfcAdapter?.disableForegroundDispatch(androidActivity)
-		}
+	internal fun terminalOn() {
+		registerLifeCycleCallbacks()
+		waitingForTag = true
+		nfcTagDiscoveryOn()
 	}
 
-	internal fun nfcOn() {
+	internal fun terminalOff() {
+		unRegisterLifeCycleCallbacks()
+		waitingForTag = false
+		nfcTagDiscoveryOff()
+	}
+
+	internal fun nfcTagDiscoveryOff() {
+		nfcAdapter?.disableForegroundDispatch(androidActivity)
+	}
+
+	internal fun nfcTagDiscoveryOn() {
 		val activityIntent: Intent =
 			Intent(androidActivity, androidActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 		val flags = if (android.os.Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
 		val pendingIntent: PendingIntent = PendingIntent.getActivity(androidActivity, 0, activityIntent, flags)
-		androidActivity.runOnUiThread {
-			nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
-		}
+
+		nfcAdapter?.enableForegroundDispatch(androidActivity, pendingIntent, null, null)
 	}
 
 	override suspend fun waitForCardAbsent() {

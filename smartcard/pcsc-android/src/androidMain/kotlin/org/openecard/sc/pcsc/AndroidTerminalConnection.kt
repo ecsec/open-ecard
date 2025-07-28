@@ -19,14 +19,22 @@ class AndroidTerminalConnection(
 	val tag: IsoDep?
 		get() = terminal.tag
 
-	override var card: AndroidNfcCard? = null
+	override var card = AndroidNfcCard(this)
 
 	override val isCardConnected
 		get() = tag?.isConnected == true
 
 	override fun disconnect(disposition: CardDisposition) {
+		when (disposition) {
+			CardDisposition.LEAVE -> {}
+			CardDisposition.RESET,
+			CardDisposition.POWER_OFF,
+			CardDisposition.EJECT,
+			-> {
+				logger.debug { "Note: $disposition is not supported on android. Using ${CardDisposition.LEAVE}. " }
+			}
+		}
 		tag?.close()
-		card = null
 	}
 
 	fun connectTag() {
@@ -39,7 +47,6 @@ class AndroidTerminalConnection(
 					mapScioError {
 						localTag.timeout = 5.seconds.inWholeMilliseconds.toInt()
 						localTag.connect()
-						card = AndroidNfcCard(this)
 					}
 				}
 			}
@@ -50,7 +57,7 @@ class AndroidTerminalConnection(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) = logger.debug { "Note: reconnect has is NOP on android." }
+	) = logger.debug { "Note: reconnect is NOP on android." }
 
 	override fun getFeatures() = emptySet<Feature>()
 

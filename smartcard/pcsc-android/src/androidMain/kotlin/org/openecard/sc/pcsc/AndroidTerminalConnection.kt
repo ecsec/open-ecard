@@ -50,14 +50,11 @@ class AndroidTerminalConnection(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) = logger.debug {
-		"Reconnecting has no effect on android." +
-			"If card has to be reset one has to physically remove it and bring it back."
-	}
+	) = logger.debug { "Note: reconnect has is NOP on android." }
 
 	override fun getFeatures() = emptySet<Feature>()
 
-	override fun beginTransaction() = logger.debug { "Note: beginTransaction is NOP on android" }
+	override fun beginTransaction() = logger.debug { "Note: beginTransaction is NOP on android." }
 
-	override fun endTransaction() = logger.debug { "Note: endTransaction is NOP on android" }
+	override fun endTransaction() = logger.debug { "Note: endTransaction is NOP on android." }
 }

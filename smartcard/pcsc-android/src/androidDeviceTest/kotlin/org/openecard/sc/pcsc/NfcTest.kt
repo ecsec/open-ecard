@@ -37,8 +37,14 @@ class TestActivity : Activity() {
 	var factory: AndroidTerminalFactory? = null
 	var textView: TextView? = null
 
+	/**
+	 * In a test below we want to check if nfc-stack is working after a user pauses and resumes the app
+	 * Since "onNewIntent" causes a pause/resume we have to make sure the we don't set this flag if resumption
+	 * was caused by "onNewIntent"
+	 */
 	var wasPaused = false
 	var wasResumedAfterPaused = false
+	var ignoreResumeByNewIntent = false
 
 	fun msg(msg: String) =
 		runOnUiThread {
@@ -52,9 +58,10 @@ class TestActivity : Activity() {
 
 	override fun onResume() {
 		super.onResume()
-		if (wasPaused) {
+		if (wasPaused && !ignoreResumeByNewIntent) {
 			wasResumedAfterPaused = true
 		}
+		ignoreResumeByNewIntent = false
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +89,7 @@ class TestActivity : Activity() {
 
 	override fun onNewIntent(intent: Intent?) {
 		super.onNewIntent(intent)
+		ignoreResumeByNewIntent = true
 		intent?.let {
 			factory?.tagIntentHandler(it)
 		}

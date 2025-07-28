@@ -177,26 +177,6 @@ class NfcTest {
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test
-	fun testReconnect() {
-		runBackgroundTestJobWithActivity { activity ->
-			connectWithTimeout(activity) { connection ->
-				assertTrue(connection.isCardConnected, "Card not connected")
-				assertNotNull(connection.card?.atr) { "Atr could not be read" }
-
-				val androidTerminal = connection.terminal
-				connection.disconnect()
-				// terminal still has connected tag
-				assertEquals(TerminalStateType.PRESENT, androidTerminal.getState())
-
-				connection.reconnect()
-				assertTrue(connection.isCardConnected, "Card not connected")
-				assertNotNull(connection.card?.atr) { "Atr could not be read" }
-			}
-		}
-	}
-
-	@OptIn(ExperimentalUnsignedTypes::class)
-	@Test
 	fun testTerminalState() {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->

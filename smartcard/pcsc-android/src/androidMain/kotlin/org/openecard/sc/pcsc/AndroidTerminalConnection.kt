@@ -24,7 +24,6 @@ class AndroidTerminalConnection(
 	override val isCardConnected
 		get() = tag?.isConnected == true
 
-	// todo was tun wir genau - leave normally
 	override fun disconnect(disposition: CardDisposition) {
 		tag?.close()
 		card = null
@@ -47,13 +46,14 @@ class AndroidTerminalConnection(
 		}
 	}
 
-	// todo this is wrongly interpreted - it is for sharemode change n stuff
-	// nop in android
 	override fun reconnect(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) = connectTag()
+	) {
+		tag?.close()
+		connectTag()
+	}
 
 	override fun getFeatures() = emptySet<Feature>()
 

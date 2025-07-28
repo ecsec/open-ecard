@@ -15,6 +15,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.openecard.sc.iface.NoSmartcard
 import org.openecard.sc.iface.PreferredCardProtocol
 import org.openecard.sc.iface.ReaderUnsupported
 import org.openecard.sc.iface.ShareMode
@@ -139,10 +140,7 @@ class AndroidTerminal(
 		if (isCardPresent()) {
 			connectTerminalOnly().apply { connectTag() }
 		} else {
-			runBlocking(Dispatchers.IO) {
-				waitForCardPresent()
-				connectTerminalOnly().apply { connectTag() }
-			}
+			throw NoSmartcard()
 		}
 
 	override suspend fun waitForCardPresent() {

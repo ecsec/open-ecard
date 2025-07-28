@@ -50,9 +50,9 @@ class AndroidTerminalConnection(
 		protocol: PreferredCardProtocol,
 		shareMode: ShareMode,
 		disposition: CardDisposition,
-	) {
-		tag?.close()
-		connectTag()
+	) = logger.debug {
+		"Reconnecting has no effect on android." +
+			"If card has to be reset one has to physically remove it and bring it back."
 	}
 
 	override fun getFeatures() = emptySet<Feature>()

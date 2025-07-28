@@ -143,6 +143,7 @@ class AndroidEgkPaceTest {
 					val sal = SmartcardSal(terminals, setOf(EgkCif), recognition, paceFactory)
 
 					val session = sal.startSession()
+					terminals.androidTerminal.waitForCardPresent()
 					val con = session.connect(terminals.androidTerminal.name)
 
 					assert(EgkCif.metadata.id == con.cardType) { "Recognized card is not an eGK" }

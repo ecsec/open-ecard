@@ -1,4 +1,3 @@
-
 plugins {
 	id("openecard.kmp-conventions")
 	id("com.android.kotlin.multiplatform.library")

@@ -1,8 +1,7 @@
 plugins {
 	kotlin("multiplatform")
 	id("openecard.ktlint-conventions")
-	// TODO: reactivate this when https://github.com/Kotlin/kotlinx-kover/issues/747 is solved
-	// id("openecard.coverage-conventions")
+	id("openecard.coverage-conventions")
 	id("dev.mokkery")
 	kotlin("plugin.serialization")
 }

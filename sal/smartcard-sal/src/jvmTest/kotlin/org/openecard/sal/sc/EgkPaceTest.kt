@@ -49,7 +49,7 @@ class EgkPaceTest {
 
 			val session = sal.startSession()
 			val con = session.connect(terminal.name)
-			Assumptions.assumeTrue(EgkCif.metadata.id == con.cardType) { "Recognized card is not an eGK" }
+			Assumptions.assumeTrue(EgkCif.metadata.id == con.deviceType) { "Recognized card is not an eGK" }
 			val mf = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.Mf.name })
 			val app = assertNotNull(con.applications.find { it.name == EgkCifDefinitions.Apps.ESign.name })
 			mf.connect()

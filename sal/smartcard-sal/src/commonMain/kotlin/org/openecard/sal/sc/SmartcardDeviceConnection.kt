@@ -17,7 +17,7 @@ class SmartcardDeviceConnection(
 	val cif: CardInfoDefinition,
 	val isExclusive: Boolean,
 ) : DeviceConnection {
-	val cardType: String = cif.metadata.id
+	override val deviceType: String = cif.metadata.id
 
 	private var _cardState: CardState = CardState(null, null, setOf())
 	val cardState: CardState

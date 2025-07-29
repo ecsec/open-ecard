@@ -6,14 +6,15 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
-@XmlSerialName("Transmit", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class TransmitRequest(
-	override val requestId: String?,
-	override val profile: String?,
+@XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+class ConnectionHandleType(
 	@SerialName("SlotHandle")
 	@XmlElement
 	val slotHandle: String?,
-	@SerialName("InputAPDUInfo")
+	@SerialName("ChannelHandle")
 	@XmlElement
-	val inputAPDUInfo: String?,
-) : RequestType
+	val channelHandle: String?,
+	@SerialName("ContextHandle")
+	@XmlElement
+	val contextHandle: String?,
+)

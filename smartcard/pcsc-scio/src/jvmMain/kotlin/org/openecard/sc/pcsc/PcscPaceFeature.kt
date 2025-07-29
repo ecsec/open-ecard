@@ -14,19 +14,23 @@ class PcscPaceFeature(
 	private val executePaceCtrlCode: Int,
 ) : PaceFeature {
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override fun getPaceCapabilities(): Set<PaceCapability> =
+	private val capabilities: Set<PaceCapability> by lazy {
 		mapScioError {
 			val commandData = PaceGetReaderCapabilitiesRequest.bytes
 			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
 			val resp = GetReaderCapabilitiesResponse.fromPaceResponse(response.toUByteArray())
 			resp.capabilities
 		}
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun getPaceCapabilities(): Set<PaceCapability> = capabilities
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override suspend fun establishChannel(req: PaceEstablishChannelRequest): PaceEstablishChannelResponse =
 		mapScioError {
 			// TODO: make cancellable
-			val commandData = req.bytes
+			val commandData = req.bytes(capabilities)
 			val response = terminalConnection.controlCommand(executePaceCtrlCode, commandData.toByteArray())
 			val resp = PaceEstablishChannelResponse.fromPaceResponse(response.toUByteArray())
 			resp

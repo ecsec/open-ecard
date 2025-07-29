@@ -9,6 +9,7 @@ plugins {
 kotlin {
 	sourceSets {
 		commonMain.dependencies {
+			implementation(libs.kotlin.logging)
 			api(project(":utils:common"))
 			api(project(":utils:serialization"))
 			api(libs.kotlin.coroutines.core)
@@ -16,10 +17,11 @@ kotlin {
 
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
+			implementation(libs.kotlin.crypto.asn1.core)
 		}
 
 		jvmTest.dependencies {
-			implementation(libs.junit.params)
+			implementation(libs.bundles.test.jvm.kotlin)
 		}
 	}
 }

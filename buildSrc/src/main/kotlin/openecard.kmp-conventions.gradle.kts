@@ -1,6 +1,10 @@
 plugins {
 	kotlin("multiplatform")
 	id("org.jlleitschuh.gradle.ktlint")
+	// TODO: reactivate this when https://github.com/Kotlin/kotlinx-kover/issues/747 is solved
+	// id("openecard.coverage-conventions")
+	id("dev.mokkery")
+	kotlin("plugin.serialization")
 }
 
 val javaToolchain: String by project

@@ -27,14 +27,15 @@ dependencies {
 	implementation(libs.plugins.compose.compiler)
 	implementation(libs.plugins.jetbrainsCompose)
 	implementation(libs.plugins.moko)
+	implementation(libs.plugins.mokkery)
 
 	implementation(libs.plugins.androidKmpLibrary)
 	implementation(libs.plugins.androidLibrary)
-	implementation(libs.robovm.gradlePlugin)
 
 	implementation(libs.jose4j)
 	implementation(libs.semver)
 	implementation(libs.jgit)
+	implementation(libs.kotlinPoet)
 }
 
 fun DependencyHandlerScope.implementation(pluginProv: Provider<PluginDependency>) {

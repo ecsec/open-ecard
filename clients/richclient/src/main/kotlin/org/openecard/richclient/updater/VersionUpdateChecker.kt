@@ -24,11 +24,15 @@ package org.openecard.richclient.updater
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.z4kn4fein.semver.Version
-import io.github.z4kn4fein.semver.toVersion
-import org.openecard.common.AppVersion.version
-import org.openecard.releases.*
+import org.openecard.build.BuildInfo
+import org.openecard.releases.ArtifactType
+import org.openecard.releases.ReleaseInfo
+import org.openecard.releases.UpdateAdvice
+import org.openecard.releases.VersionData
+import org.openecard.releases.checkVersion
+import org.openecard.releases.getUpdateData
 
-private val LOG = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 /**
  * Update checker for the Open eCard App.
@@ -40,38 +44,36 @@ private val LOG = KotlinLogging.logger {}
  * rpm: [&lt;update1&gt;, &lt;update2&gt;, ...]
  * }</pre>
  *
- * The content of the update elements is defined in [VersionUpdate].<br></br>
- * The update-list location is taken from the built in property: `release-info.location`
+ * The content of the update elements is defined in [VersionUpdateLoader].<br></br>
+ * The update-list location is taken from the built-in property: `release-info.location`
  *
  * @author Tobias Wich
  * @author Sebastian Schuberth
  */
 class VersionUpdateChecker internal constructor(
 	val installedVersion: Version,
-	private val list: Pair<ReleaseInfo, ArtifactType>
+	private val list: Pair<ReleaseInfo, ArtifactType>,
 ) {
-
 	val updateAdvice = list.first.checkVersion(installedVersion).getOrDefault(UpdateAdvice.NO_UPDATE)
 
-	fun getUpdateInfo(): Pair<VersionData, UpdateAdvice>? {
-		return when (updateAdvice) {
+	fun getUpdateInfo(): Pair<VersionData, UpdateAdvice>? =
+		when (updateAdvice) {
 			UpdateAdvice.NO_UPDATE, UpdateAdvice.MAINTAINED_NO_UPDATE -> null
 			else -> list.first.getUpdateData(installedVersion) to updateAdvice
 		}
-	}
 
-	fun getArtifactUpdateUrl(): String? {
-		return getUpdateInfo()?.let { (data, _) ->
-			data.artifacts.find { it.type == list.second }
+	fun getArtifactUpdateUrl(): String? =
+		getUpdateInfo()?.let { (data, _) ->
+			data.artifacts
+				.find { it.type == list.second }
 				?.url
 		}
-	}
 
 	companion object {
 		fun loadCurrentVersionList(): VersionUpdateChecker? {
 			val loader: VersionUpdateLoader = VersionUpdateLoader.createWithDefaults()
 			val list = loader.loadVersionUpdateList().getOrThrow()
-			return list?.let { VersionUpdateChecker(version.versionString.toVersion(), list) }
+			return list?.let { VersionUpdateChecker(BuildInfo.version, list) }
 		}
 	}
 }

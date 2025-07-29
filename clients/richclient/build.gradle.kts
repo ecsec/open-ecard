@@ -58,6 +58,7 @@ dependencies {
 	implementation(project(":wsdef:jaxb-marshaller"))
 
 	implementation(project(":releases"))
+	implementation(project(":build-info"))
 
 	implementation(libs.jose4j)
 	implementation(libs.jna.jpms)
@@ -65,6 +66,10 @@ dependencies {
 	implementation(libs.systray)
 
 	testImplementation(libs.bundles.test.basics.kotlin)
+}
+
+tasks.withType<AbstractTestTask>().configureEach {
+	failOnNoDiscoveredTests = false
 }
 
 val setAppName = "Open-eCard-App"

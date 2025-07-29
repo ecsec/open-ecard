@@ -126,8 +126,7 @@ object CardVerifiableCertificateVerifier {
 			oid == TAObjectIdentifier.id_TA_RSA_v1_5_SHA_256
 		) {
 			return MessageDigest.getInstance("SHA-256")
-		} else if (oid == TAObjectIdentifier.id_TA_ECDSA_SHA_384
-		) {
+		} else if (oid == TAObjectIdentifier.id_TA_ECDSA_SHA_384) {
 			return MessageDigest.getInstance("SHA-384")
 		} else if (oid == TAObjectIdentifier.id_TA_ECDSA_SHA_512 ||
 			oid == TAObjectIdentifier.id_TA_RSA_PSS_SHA_512 ||

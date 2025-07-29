@@ -19,8 +19,8 @@ kotlin {
 		val jvmMain by getting {
 			dependencies {
 				api(project(":crypto:crypto-common"))
-				api(libs.bc.prov)
-				api(libs.bc.tls)
+				api(libs.bc.oec.prov)
+				api(libs.bc.oec.tls)
 				api(libs.proxyvole)
 			}
 		}

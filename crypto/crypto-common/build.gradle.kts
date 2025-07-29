@@ -20,8 +20,8 @@ kotlin {
 			dependencies {
 				api(project(":common"))
 				api(project(":i18n"))
-				api(libs.bc.prov)
-				api(libs.bc.tls)
+				api(libs.bc.oec.prov)
+				api(libs.bc.oec.tls)
 			}
 		}
 		val jvmTest by getting {

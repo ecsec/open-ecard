@@ -23,8 +23,8 @@ kotlin {
 				api(project(":wsdef:wsdef-common"))
 				api(project(":wsdef:wsdef-client"))
 				implementation(project(":i18n"))
-				api(libs.bc.prov)
-				api(libs.bc.tls)
+				api(libs.bc.oec.prov)
+				api(libs.bc.oec.tls)
 				api(libs.httpcore)
 
 				implementation(libs.annotations)
@@ -32,6 +32,8 @@ kotlin {
 		}
 		val jvmTest by getting {
 			dependencies {
+				implementation(libs.bundles.test.jvm.kotlin)
+				implementation(libs.bundles.test.mockito)
 				implementation(project(":wsdef:jaxb-marshaller"))
 			}
 		}

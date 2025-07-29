@@ -7,11 +7,7 @@ typealias CardVerifiableCertificates = Collection<CardVerifiableCertificate>
 class CvcChain(
 	val path: CardVerifiableCertificates,
 ) {
-	val terminalCertificate: CardVerifiableCertificate? by lazy {
-		path.find {
-			it.chat.role.code == 0u
-		}
-	}
+	val terminalCertificate: CardVerifiableCertificate? by lazy { path.find { it.isTerminalCertificate } }
 
 	companion object {
 		fun CardVerifiableCertificates.toChain(car: PublicKeyReference): CvcChain? {

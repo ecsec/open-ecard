@@ -74,7 +74,7 @@ object GeneralAuthenticateResponse {
 	fun ResponseApdu.toAuthenticationToken(): AuthenticationToken =
 		this.toDynamicAuthenticationData().let { dos ->
 			val at =
-				dos.findTlv(GeneralAuthenticateResponseTags.authenticationToken)?.contentAsBytesBer
+				dos.findTlv(GeneralAuthenticateResponseTags.paceAuthenticationToken)?.contentAsBytesBer
 					?: throw PaceError(PaceResultCode.UNEXPECTED_TLV_RESPONSE_OBJECT, null)
 			val curCar =
 				dos.findTlv(GeneralAuthenticateResponseTags.curCar)?.contentAsBytesBer

@@ -128,7 +128,10 @@ class PaceProcess
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun generalAuthenticateKeyAgreement(cryptoStep: PaceCryptoSuite.Step3): PaceCryptoSuite.Step4 {
 			val pkPcdDo =
-				TlvPrimitive(GeneralAuthenticateCommandTags.ephemeralPublicKey, cryptoStep.getEncodedPublicKeyPcd().toPrintable())
+				TlvPrimitive(
+					GeneralAuthenticateCommandTags.paceEphemeralPublicKey,
+					cryptoStep.getEncodedPublicKeyPcd().toPrintable(),
+				)
 			val gaKeyAgree = GeneralAuthenticate.withData(listOf(pkPcdDo)).setCommandChaining(true)
 			val gaRes = gaKeyAgree.transmit(channel)
 			return when (gaRes) {

@@ -3,6 +3,7 @@ package org.openecard.sc.pace.cvc
 import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvPrimitive
+import org.openecard.utils.serialization.toPrintable
 
 data class PublicKeyReference(
 	/**
@@ -28,6 +29,9 @@ data class PublicKeyReference(
 	val sequenceNumber: String,
 ) {
 	fun joinToString(): String = "$countryCode$holderMnemonic$sequenceNumber"
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun toTlv(tag: Tag): Tlv = TlvPrimitive(tag, joinToString().encodeToByteArray().toUByteArray().toPrintable())
 
 	companion object {
 		@OptIn(ExperimentalUnsignedTypes::class)

@@ -15,6 +15,8 @@ class CardVerifiableCertificate
 		body: CardVerifiableCertificateBody,
 		val signature: UByteArray,
 	) : CardVerifiableCertificateBody by body {
+		val isTerminalCertificate by lazy { chat.role.code == 0u }
+
 		companion object {
 			@OptIn(ExperimentalUnsignedTypes::class)
 			@Throws(TlvException::class, IllegalArgumentException::class)

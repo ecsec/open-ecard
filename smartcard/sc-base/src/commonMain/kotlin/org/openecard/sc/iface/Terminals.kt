@@ -4,6 +4,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 interface Terminals {
 	val factory: TerminalFactory
+
 	val isEstablished: Boolean
 	val supportsControlCommand: Boolean
 

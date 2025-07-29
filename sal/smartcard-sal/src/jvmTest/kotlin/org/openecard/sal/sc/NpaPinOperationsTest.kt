@@ -5,7 +5,9 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.junit.jupiter.api.fail
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
+import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.cif.bundled.NpaDefinitions.Apps.Mf
+import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.iface.dids.PinDid
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -49,7 +51,7 @@ class NpaPinOperationsTest {
 					?: Assumptions.abort { "Necessary terminal not available" }
 			Assumptions.assumeTrue(terminal.isCardPresent()) { "Terminal does not contain a card" }
 
-			val recognition = DirectCardRecognition(CompleteTree.calls)
+			val recognition = DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(NpaDefinitions.cardType)))
 			val paceFactory = PaceFeatureSoftwareFactory()
 			val sal = SmartcardSal(ctx, setOf(NpaCif), recognition, paceFactory)
 

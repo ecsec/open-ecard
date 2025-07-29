@@ -8,6 +8,7 @@ import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCif
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.definition.acl.DidStateReference
+import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.iface.MissingAuthentications
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sal.sc.recognition.DirectCardRecognition
@@ -42,7 +43,7 @@ class EgkPaceTest {
 					?: Assumptions.abort { "Necessary terminal not available" }
 			Assumptions.assumeTrue(terminal.isCardPresent()) { "Terminal does not contain a card" }
 
-			val recognition = DirectCardRecognition(CompleteTree.calls)
+			val recognition = DirectCardRecognition(CompleteTree.calls.removeUnsupported(setOf(EgkCifDefinitions.cardType)))
 			val paceFactory = PaceFeatureSoftwareFactory()
 			val sal = SmartcardSal(ctx, setOf(EgkCif), recognition, paceFactory)
 

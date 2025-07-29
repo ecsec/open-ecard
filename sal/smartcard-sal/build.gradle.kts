@@ -4,6 +4,7 @@ plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
 	id("openecard.kmp-ios-conventions")
+	id("openecard.kmp-android-lib-conventions")
 }
 
 kotlin {
@@ -22,7 +23,14 @@ kotlin {
 		}
 
 		jvmTest.dependencies {
+			implementation(libs.bundles.test.jvm.kotlin)
 			implementation(project(":smartcard:pcsc-scio"))
+			implementation(project(":smartcard:pace"))
+			implementation(project(":cif:bundled-cifs"))
+		}
+		androidDeviceTest.dependencies {
+			implementation(libs.bundles.test.android.kotlin)
+			implementation(project(":smartcard:pcsc-android"))
 			implementation(project(":smartcard:pace"))
 			implementation(project(":cif:bundled-cifs"))
 		}

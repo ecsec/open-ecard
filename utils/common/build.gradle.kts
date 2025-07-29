@@ -16,7 +16,6 @@ kotlin {
 		}
 
 		jvmTest.dependencies {
-			implementation(libs.junit.params)
 		}
 	}
 }

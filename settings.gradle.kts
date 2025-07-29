@@ -19,6 +19,7 @@ include("utils:test")
 include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
 include("smartcard:eac-definitions")
+include("smartcard:pcsc-android")
 include("smartcard:pace")
 
 include("sal:sal-base")

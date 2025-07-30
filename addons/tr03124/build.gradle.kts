@@ -14,6 +14,7 @@ kotlin {
 			// api(project(":smartcard:sc-base"))
 			implementation(project(":smartcard:pace"))
 			api(project(":sal:smartcard-sal"))
+			implementation(project(":cif:bundled-cifs"))
 
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)

@@ -1,14 +1,11 @@
 package org.openecard.addons.tr03124.eac
 
-interface EacUiData {
-	val certificateDescription: Any
-	val requiredChat: Any
-	val optionalChat: Any
-	// TODO: Add more data of the process
+import org.openecard.sc.pace.cvc.AuthenticationTerminalChat
+import org.openecard.sc.pace.cvc.CertificateDescription
 
-	companion object {
-		fun build(): EacUiData {
-			TODO()
-		}
-	}
-}
+class EacUiData(
+	val certificateDescription: CertificateDescription,
+	val requiredChat: AuthenticationTerminalChat,
+	val optionalChat: AuthenticationTerminalChat,
+	// TODO: Add more data of the process
+)

@@ -5,7 +5,6 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Ignore
 class SerializationTest {
 	val xml = XML
 
@@ -23,8 +22,8 @@ class SerializationTest {
 	}
 
 	@Test
-	fun `process Eac1Input`() {
-		val original = readXml("Eac1Input")
+	fun `process Eac1Input solo`() {
+		val original = readXml("Eac1Input_solo")
 		val obj = xml.decodeFromString<Eac1Input>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
@@ -32,8 +31,8 @@ class SerializationTest {
 	}
 
 	@Test
-	fun `process Eac1Output`() {
-		val original = readXml("Eac1Output")
+	fun `process Eac1Output solo`() {
+		val original = readXml("Eac1Output_solo")
 		val obj = xml.decodeFromString<Eac1Output>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
@@ -41,8 +40,8 @@ class SerializationTest {
 	}
 
 	@Test
-	fun `process Eac2Input`() {
-		val original = readXml("Eac2Input")
+	fun `process Eac2Input solo`() {
+		val original = readXml("Eac2Input_solo")
 		val obj = xml.decodeFromString<Eac2Input>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
@@ -50,9 +49,49 @@ class SerializationTest {
 	}
 
 	@Test
+	fun `process Eac2Output solo`() {
+		val original = readXml("Eac2Output_solo")
+		val obj = xml.decodeFromString<Eac2Output>(original)
+		// TODO: add assertions
+		val ser = xml.encodeToString(obj)
+		// TODO: verify the serialized value
+	}
+
+	@Ignore
+	@Test
+	fun `process Eac1Input`() {
+		val original = readXml("Eac1Input")
+		val obj = xml.decodeFromString<DidAuthenticateRequest<Eac1Input>>(original)
+		// TODO: add assertions
+		val ser = xml.encodeToString(obj)
+		// TODO: verify the serialized value
+	}
+
+	@Ignore
+	@Test
+	fun `process Eac1Output`() {
+		val original = readXml("Eac1Output")
+		val obj = xml.decodeFromString<DidAuthenticateResponse<Eac1Output>>(original)
+		// TODO: add assertions
+		val ser = xml.encodeToString(obj)
+		// TODO: verify the serialized value
+	}
+
+	@Ignore
+	@Test
+	fun `process Eac2Input`() {
+		val original = readXml("Eac2Input")
+		val obj = xml.decodeFromString<DidAuthenticateRequest<Eac2Input>>(original)
+		// TODO: add assertions
+		val ser = xml.encodeToString(obj)
+		// TODO: verify the serialized value
+	}
+
+	@Ignore
+	@Test
 	fun `process Eac2Output`() {
 		val original = readXml("Eac2Output")
-		val obj = xml.decodeFromString<Eac2Output>(original)
+		val obj = xml.decodeFromString<DidAuthenticateResponse<Eac2Output>>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
 		// TODO: verify the serialized value
@@ -94,6 +133,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process Eac1Input SOAP`() {
 		val original = readSoap("Eac1Input")
@@ -103,6 +143,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process Eac1Output SOAP`() {
 		val original = readSoap("Eac1Output")
@@ -112,6 +153,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process Eac2Input SOAP`() {
 		val original = readSoap("Eac2Input")
@@ -121,6 +163,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process Eac2Output SOAP`() {
 		val original = readSoap("Eac2Output")
@@ -130,6 +173,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process StartPaos SOAP`() {
 		val original = readSoap("StartPaos")
@@ -139,6 +183,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process StartPaosResponse SOAP`() {
 		val original = readSoap("StartPaosResponse")
@@ -148,6 +193,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process TransmitRequest SOAP`() {
 		val original = readSoap("TransmitRequest")
@@ -157,6 +203,7 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
+	@Ignore
 	@Test
 	fun `process TransmitResponse SOAP`() {
 		val original = readSoap("TransmitResponse")

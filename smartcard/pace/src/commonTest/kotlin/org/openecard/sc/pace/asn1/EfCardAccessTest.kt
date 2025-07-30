@@ -1,6 +1,8 @@
 package org.openecard.sc.pace.asn1
 
 import org.openecard.sc.pace.asn1.EfCardAccess.Companion.toEfCardAccess
+import org.openecard.sc.pace.oid.CaObjectIdentifier
+import org.openecard.sc.pace.oid.EacObjectIdentifier
 import org.openecard.sc.pace.oid.PaceObjectIdentifier.id_PACE_ECDH_GM_AES_CBC_CMAC_128
 import org.openecard.utils.common.hex
 import kotlin.test.Test
@@ -61,6 +63,19 @@ class EfCardAccessTest {
 		assertEquals(
 			13u,
 			paceInfo?.parameterId,
+		)
+
+		val caInfo = efca.chipAuthenticationV2.first()
+		assertEquals(CaObjectIdentifier.id_CA_ECDH_AES_CBC_CMAC_128, caInfo.chipAuthenticationInfo.protocol.value)
+		assertEquals(2u, caInfo.chipAuthenticationInfo.version)
+		assertEquals(72u, caInfo.chipAuthenticationInfo.keyId)
+		assertEquals(
+			EacObjectIdentifier.STANDARDIZED_DOMAIN_PARAMETERS,
+			caInfo.chipAuthenticationDomainParameterInfo.domainParameter.algorithm.value,
+		)
+		assertEquals(
+			StandardizedDomainParameters.Curve.BrainpoolP256r1,
+			caInfo.chipAuthenticationDomainParameterInfo.standardizedDomainParameters,
 		)
 	}
 

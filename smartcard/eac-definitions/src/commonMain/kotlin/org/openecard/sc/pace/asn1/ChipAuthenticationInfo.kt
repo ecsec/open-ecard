@@ -79,6 +79,20 @@ class ChipAuthenticationDomainParameterInfo(
 	override val keyId: UInt?,
 ) : SecurityInfo(protocol),
 	CaKeyIdentifiable {
+	val isStandardizedParameter: Boolean by lazy {
+		when (domainParameter) {
+			is AlgorithmIdentifier.StandardizedDomainParametersAlgorithm -> true
+			else -> false
+		}
+	}
+
+	val standardizedDomainParameters: StandardizedDomainParameters by lazy {
+		when (val p = domainParameter) {
+			is AlgorithmIdentifier.StandardizedDomainParametersAlgorithm -> p.standardParameters
+			else -> throw IllegalStateException("ChipAuthentication does not contain standardized domain parameters")
+		}
+	}
+
 	companion object {
 		val possibleProtocols =
 			listOf(

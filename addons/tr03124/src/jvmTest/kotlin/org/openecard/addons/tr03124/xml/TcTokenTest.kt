@@ -1,7 +1,6 @@
-package org.openecard.addons.tr03124
+package org.openecard.addons.tr03124.xml
 
 import org.junit.jupiter.api.assertInstanceOf
-import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
 import org.openecard.utils.common.hex
 import kotlin.test.Test
@@ -34,6 +33,6 @@ class TcTokenTest {
 		assertEquals("https://service.example.de/ComError?7eb39f62", token.communicationErrorAddress)
 		assertEquals(TcToken.BindingType.PAOS, token.binding)
 		assertEquals(TcToken.SecurityProtocolType.TLS_PSK, token.securityProtocol)
-		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcToken.PskParams>(token.securityParameters).psk)
+		assertContentEquals(hex("4BC1A0B5"), assertInstanceOf<TcToken.PskParams>(token.securityParameters).psk.v)
 	}
 }

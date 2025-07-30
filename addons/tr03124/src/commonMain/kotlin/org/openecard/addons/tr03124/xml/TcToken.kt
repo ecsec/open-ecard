@@ -7,6 +7,7 @@ import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @SerialName("TCTokenType")
@@ -51,7 +52,7 @@ class TcToken(
 		constructor(
 			@SerialName("PSK")
 			@XmlElement
-			val psk: HexString,
+			val psk: PrintableUByteArray,
 		) : SecurityParameters
 
 	companion object {

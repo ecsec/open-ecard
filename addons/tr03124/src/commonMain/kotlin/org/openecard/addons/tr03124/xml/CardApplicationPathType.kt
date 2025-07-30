@@ -2,7 +2,6 @@ package org.openecard.addons.tr03124.xml
 
 import kotlinx.serialization.SerialName
 import nl.adaptivity.xmlutil.serialization.XmlElement
-import org.openecard.sc.iface.info.ApplicationIdentifier
 import org.openecard.utils.serialization.PrintableUByteArray
 
 sealed interface CardApplicationPathType {

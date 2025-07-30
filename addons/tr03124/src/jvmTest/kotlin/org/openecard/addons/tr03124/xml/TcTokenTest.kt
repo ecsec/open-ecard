@@ -1,8 +1,8 @@
 package org.openecard.addons.tr03124
 
-import kotlinx.serialization.encodeToString
 import org.junit.jupiter.api.assertInstanceOf
-import org.openecard.addons.tr03124.TcToken.Companion.toTcToken
+import org.openecard.addons.tr03124.xml.TcToken
+import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
 import org.openecard.utils.common.hex
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

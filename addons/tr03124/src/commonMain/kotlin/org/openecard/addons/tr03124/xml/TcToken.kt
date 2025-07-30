@@ -1,4 +1,4 @@
-package org.openecard.addons.tr03124
+package org.openecard.addons.tr03124.xml
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

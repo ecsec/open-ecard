@@ -9,14 +9,14 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 class Paos(
 	@XmlSerialName("mustUnderstand", namespace = Namespaces.SOAP.NS)
 	@XmlElement(false)
-	val mustUnderstand: Int,
+	val mustUnderstand: Boolean?,
 	@XmlSerialName("actor", namespace = Namespaces.SOAP.NS)
 	@XmlElement(false)
 	val actor: String,
 	@XmlSerialName("Version", namespace = "urn:liberty:paos:2006-08")
 	@XmlElement
-	val version: String,
+	val version: String?,
 	@XmlSerialName("EndpointReference", namespace = "urn:liberty:paos:2006-08")
 	@XmlElement
-	val endpointReference: EndpointReference,
+	val endpointReference: EndpointReference?,
 )

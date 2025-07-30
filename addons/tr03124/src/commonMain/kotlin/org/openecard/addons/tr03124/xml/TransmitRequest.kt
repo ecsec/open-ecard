@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("Transmit", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
@@ -12,8 +13,8 @@ class TransmitRequest(
 	override val profile: String?,
 	@SerialName("SlotHandle")
 	@XmlElement
-	val slotHandle: String?,
+	val slotHandle: PrintableUByteArray,
 	@SerialName("InputAPDUInfo")
 	@XmlElement
-	val inputAPDUInfo: String?,
+	val inputAPDUInfo: PrintableUByteArray,
 ) : RequestType

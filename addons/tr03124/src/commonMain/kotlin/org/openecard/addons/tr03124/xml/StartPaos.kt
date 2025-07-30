@@ -14,11 +14,17 @@ class StartPaos(
 	override val profile: String?,
 	@SerialName("SessionIdentifier")
 	@XmlElement
-	val sessionIdentifier: String?,
+	val sessionIdentifier: String,
 	@SerialName("ConnectionHandle")
 	@XmlElement
-	val connectionHandle: ConnectionHandleType?,
+	val connectionHandle: ConnectionHandleType,
 	@SerialName("UserAgent")
 	@XmlElement
-	val userAgent: String?,
+	val userAgent: UserAgentType,
+	@SerialName("SupportedAPIVersions")
+	@XmlElement
+	val supportedAPIVersions: SupportedAPIVersionsType,
+	@SerialName("SupportedDIDProtocols")
+	@XmlElement
+	val supportedDIDProtocols: String?,
 ) : RequestType

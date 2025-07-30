@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("EAC1OutputType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
@@ -13,17 +14,17 @@ class Eac1Output(
 	override val protocol: String,
 	@SerialName("CertificateHolderAuthorizationTemplate")
 	@XmlElement
-	val certificateHolderAuthorizationTemplate: String?,
+	val certificateHolderAuthorizationTemplate: PrintableUByteArray?,
 	@SerialName("CertificationAuthorityReference")
 	@XmlElement
 	val certificationAuthorityReference: String?,
 	@SerialName("EFCardAccess")
 	@XmlElement
-	val efCardAccess: String?,
+	val efCardAccess: PrintableUByteArray,
 	@SerialName("IDPICC")
 	@XmlElement
-	val idPICC: String?,
+	val idPICC: PrintableUByteArray,
 	@SerialName("Challenge")
 	@XmlElement
-	val challenge: String?,
+	val challenge: PrintableUByteArray,
 ) : AuthenticationProtocolData

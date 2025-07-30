@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("TransmitResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
@@ -15,5 +16,5 @@ class TransmitResponse(
 	override val profile: String,
 	@SerialName("OutputAPDU")
 	@XmlElement
-	val outputAPDU: String,
+	val outputAPDU: PrintableUByteArray,
 ) : ResponseType

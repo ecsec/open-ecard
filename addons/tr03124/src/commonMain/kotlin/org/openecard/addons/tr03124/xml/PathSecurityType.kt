@@ -1,19 +1,22 @@
 package org.openecard.addons.tr03124.xml
 
+import io.ktor.http.Parameters
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.cif.definition.CardProtocol
 
 @Serializable
-@XmlSerialName("EndpointReference", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
-class EndpointReference(
-	@SerialName("Address")
+@XmlSerialName("PathSecurity", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+class PathSecurityType(
+	@SerialName("Protocol")
 	@XmlElement
-	val address: String,
-	@SerialName("MetaData")
+	val pathSecurityProtocol: String?,
+	@SerialName("Parameters")
 	@XmlElement
+	@Serializable
 	@Contextual
-	val metaData: Any?,
+	val parameters: Any?,
 )

@@ -4,10 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
-import javax.naming.Name
 
 @Serializable
-@XmlSerialName("Body", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
-class Body(
-	val content: RequestResponseBaseType,
+@XmlSerialName("SlotInfo", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+class SlotInfoType(
+	@SerialName("ProtectedAuthPath")
+	@XmlElement
+	val protectedAuthPath: Boolean?,
 )

@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("EAC1InputType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
@@ -13,10 +14,10 @@ class Eac1Input(
 	override val protocol: String,
 	@SerialName("Certificate")
 	@XmlElement
-	val certificate: String?,
+	val certificate: PrintableUByteArray,
 	@SerialName("CertificateDescription")
 	@XmlElement
-	val certificateDescription: String?,
+	val certificateDescription: PrintableUByteArray,
 	@SerialName("RequiredCHAT")
 	@XmlElement
 	val requiredChat: String?,
@@ -25,5 +26,11 @@ class Eac1Input(
 	val optionalChat: String?,
 	@SerialName("AuthenticatedAuxiliaryData")
 	@XmlElement
-	val authenticatedAuxiliaryData: String?,
+	val authenticatedAuxiliaryData: PrintableUByteArray?,
+	@SerialName("TransactionInfo")
+	@XmlElement
+	val transactionInfo: String?,
+	@SerialName("AcceptedEIDType")
+	@XmlElement
+	val acceptedEIDType: String?,
 ) : AuthenticationProtocolData

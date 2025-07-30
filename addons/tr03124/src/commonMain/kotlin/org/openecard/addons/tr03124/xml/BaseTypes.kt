@@ -28,5 +28,5 @@ sealed interface ResponseType : RequestResponseBaseType {
 
 	@XmlSerialName("Profile", namespace = Namespaces.DSS.NS, prefix = Namespaces.DSS.PREFIX)
 	@XmlElement(false)
-	val profile: String?
+	val profile: String
 }

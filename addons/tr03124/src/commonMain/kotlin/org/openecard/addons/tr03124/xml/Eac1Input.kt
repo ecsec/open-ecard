@@ -20,10 +20,10 @@ class Eac1Input(
 	val certificateDescription: PrintableUByteArray,
 	@SerialName("RequiredCHAT")
 	@XmlElement
-	val requiredChat: PrintableUByteArray?,
+	val requiredCHAT: PrintableUByteArray?,
 	@SerialName("OptionalCHAT")
 	@XmlElement
-	val optionalChat: PrintableUByteArray?,
+	val optionalCHAT: PrintableUByteArray?,
 	@SerialName("AuthenticatedAuxiliaryData")
 	@XmlElement
 	val authenticatedAuxiliaryData: PrintableUByteArray?,

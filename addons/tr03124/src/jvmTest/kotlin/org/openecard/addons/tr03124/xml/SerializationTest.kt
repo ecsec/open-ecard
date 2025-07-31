@@ -5,6 +5,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class SerializationTest {
 	val xml = XML
 
@@ -25,9 +26,12 @@ class SerializationTest {
 	fun `process Eac1Input solo`() {
 		val original = readXml("Eac1Input_solo")
 		val obj = xml.decodeFromString<Eac1Input>(original)
-		// TODO: add assertions
+
+		assertEquals(7, obj.certificate.size)
+
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		println("Serialized XML:\n$ser")
+		println("First certificate hex: " + obj.certificate[0].v.toHexString())
 	}
 
 	@Test

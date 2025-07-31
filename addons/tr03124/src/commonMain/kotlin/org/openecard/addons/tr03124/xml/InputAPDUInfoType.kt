@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
-@XmlSerialName("InputAPDUInfoType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+@XmlSerialName("InputAPDUInfo", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 class InputAPDUInfoType(
 	@SerialName("InputAPDU")
 	@XmlElement

@@ -36,7 +36,12 @@ object PrintableByteArraySerializer : KSerializer<PrintableByteArray> {
 	}
 
 	@OptIn(ExperimentalStdlibApi::class)
-	override fun deserialize(decoder: Decoder): PrintableByteArray = decoder.decodeString().hexToByteArray().toPrintable()
+	override fun deserialize(decoder: Decoder): PrintableByteArray =
+		decoder
+			.decodeString()
+			.trim()
+			.hexToByteArray()
+			.toPrintable()
 }
 
 @Serializable(with = PrintableUByteArraySerializer::class)
@@ -73,7 +78,7 @@ object PrintableUByteArraySerializer : KSerializer<PrintableUByteArray> {
 	override fun deserialize(decoder: Decoder): PrintableUByteArray =
 		decoder
 			.decodeString()
-			.replace(Regex("\\s"), "")
+			.trim()
 			.hexToUByteArray()
 			.toPrintable()
 }

@@ -6,5 +6,6 @@
 	<AuthenticationToken xmlns="urn:iso:std:iso-iec:24727:tech:schema">C22F01A10CED5BD3
 	</AuthenticationToken>
 	<Nonce xmlns="urn:iso:std:iso-iec:24727:tech:schema">5AC24DE83C7D10B2</Nonce>
+	<Challenge xmlns="urn:iso:std:iso-iec:24727:tech:schema">E93CD9503D1FFFA3</Challenge>
 </ns3:EAC2OutputType>
 

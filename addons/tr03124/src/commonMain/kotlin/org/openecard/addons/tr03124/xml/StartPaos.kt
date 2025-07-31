@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("StartPAOS", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class StartPaos(
+data class StartPaos(
 	override val requestId: String?,
 	@SerialName("Profile")
 	@XmlElement(false)

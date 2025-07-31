@@ -11,7 +11,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @SerialName("TCTokenType")
-class TcToken(
+data class TcToken(
 	@SerialName("ServerAddress")
 	@XmlElement
 	val serverAddress: String,

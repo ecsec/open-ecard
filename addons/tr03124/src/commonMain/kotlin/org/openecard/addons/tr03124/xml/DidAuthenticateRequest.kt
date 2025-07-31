@@ -7,21 +7,21 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("DIDAuthenticate", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class DidAuthenticateRequest<T : AuthenticationProtocolData>(
-	@SerialName("AuthenticationProtocolData")
-	@XmlElement
-	val data: T,
+data class DidAuthenticateRequest<T : AuthenticationProtocolData>(
 	override val requestId: String?,
 	override val profile: String?,
 	@SerialName("ConnectionHandle")
 	@XmlElement
 	val connectionHandle: ConnectionHandleType,
-	@SerialName("DIDName")
-	@XmlElement
-	val didName: String,
 	@SerialName("DIDScope")
 	@XmlElement
 	val didScope: String?,
+	@SerialName("DIDName")
+	@XmlElement
+	val didName: String,
+	@SerialName("AuthenticationProtocolData")
+	@XmlElement
+	val data: T,
 	@SerialName("SAMConnectionHandle")
 	@XmlElement
 	val samConnectionHandle: ConnectionHandleType?,

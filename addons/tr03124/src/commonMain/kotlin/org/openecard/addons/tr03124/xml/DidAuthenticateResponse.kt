@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("DIDAuthenticateResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class DidAuthenticateResponse<T : AuthenticationProtocolData>(
+data class DidAuthenticateResponse<T : AuthenticationProtocolData>(
 	@SerialName("AuthenticationProtocolData")
 	@XmlElement
 	val data: T,

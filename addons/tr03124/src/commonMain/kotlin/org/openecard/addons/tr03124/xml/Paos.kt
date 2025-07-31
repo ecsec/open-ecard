@@ -6,7 +6,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("PAOS", prefix = Namespaces.SOAP.PREFIX, namespace = "urn:liberty:paos:2006-08")
-class Paos(
+data class Paos(
 	@XmlSerialName("mustUnderstand", namespace = Namespaces.SOAP.NS)
 	@XmlElement(false)
 	val mustUnderstand: Boolean?,

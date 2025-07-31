@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("SlotInfo", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class SlotInfoType(
+data class SlotInfoType(
 	@SerialName("ProtectedAuthPath")
 	@XmlElement
 	val protectedAuthPath: Boolean?,

@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("SupportedAPIVersions", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class SupportedAPIVersionsType(
+data class SupportedAPIVersionsType(
 	@SerialName("Major")
 	@XmlElement
 	val major: Int,

@@ -9,19 +9,19 @@ import org.openecard.utils.serialization.PrintableUByteArray
 @OptIn(ExperimentalUnsignedTypes::class)
 @Serializable
 @XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class ConnectionHandleType(
+data class ConnectionHandleType(
 	override val ifdName: String?,
 	override val slotIndex: UInt?,
 	override val cardApplication: PrintableUByteArray?,
-	@SerialName("SlotHandle")
-	@XmlElement
-	val slotHandle: PrintableUByteArray?,
 	@SerialName("ChannelHandle")
 	@XmlElement
 	override val channelHandle: ChannelHandleType?,
 	@SerialName("ContextHandle")
 	@XmlElement
 	override val contextHandle: PrintableUByteArray?,
+	@SerialName("SlotHandle")
+	@XmlElement
+	val slotHandle: PrintableUByteArray?,
 	@SerialName("RecognitionInfo")
 	@XmlElement
 	val recognitionInfo: RecognitionInfoType?,

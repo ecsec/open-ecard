@@ -5,6 +5,6 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("EACAdditionalInputType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class EacAdditionalInput(
+data class EacAdditionalInput(
 	override val protocol: String,
 ) : AuthenticationProtocolData

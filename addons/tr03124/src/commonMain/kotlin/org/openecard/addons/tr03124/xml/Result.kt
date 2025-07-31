@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("Result", prefix = Namespaces.DSS.PREFIX, namespace = Namespaces.DSS.NS)
-class Result(
+data class Result(
 	@SerialName("ResultMajor")
 	@XmlElement
 	val major: String,

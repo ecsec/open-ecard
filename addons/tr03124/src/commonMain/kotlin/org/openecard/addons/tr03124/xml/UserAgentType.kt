@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("UserAgent", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class UserAgentType(
+data class UserAgentType(
 	@SerialName("Name")
 	@XmlElement
 	val name: String,

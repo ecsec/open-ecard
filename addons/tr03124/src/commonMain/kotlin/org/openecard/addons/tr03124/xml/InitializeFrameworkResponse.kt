@@ -5,7 +5,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("InitializeFrameworkResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class InitializeFrameworkResponse(
+data class InitializeFrameworkResponse(
 	override val result: Result,
 	override val requestId: String?,
 	override val profile: String,

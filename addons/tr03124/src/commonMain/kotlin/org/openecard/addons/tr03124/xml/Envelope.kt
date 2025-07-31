@@ -5,7 +5,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("Envelope", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
-class Envelope(
+data class Envelope(
 	val header: Header?,
 	val body: Body,
 )

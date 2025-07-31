@@ -8,11 +8,11 @@ import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("InputAPDUInfo", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class InputAPDUInfoType(
+data class InputAPDUInfoType(
 	@SerialName("InputAPDU")
 	@XmlElement
 	val inputAPDU: PrintableUByteArray,
 	@SerialName("AcceptableStatusCode")
 	@XmlElement
-	val acceptableStatusCode: List<PrintableUByteArray>?,
+	val acceptableStatusCode: List<PrintableUByteArray> = emptyList(),
 )

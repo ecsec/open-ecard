@@ -5,6 +5,6 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("Body", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
-class Body(
+data class Body(
 	val content: RequestResponseBaseType,
 )

@@ -4,7 +4,6 @@ plugins {
 	id("openecard.kmp-lib-conventions")
 	id("openecard.kmp-jvm-conventions")
 	// id("openecard.kmp-ios-conventions")
-	kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -16,8 +15,8 @@ kotlin {
 			implementation(project(":smartcard:pace"))
 			api(project(":sal:smartcard-sal"))
 
+			implementation(libs.kotlin.serialization.core)
 			implementation(libs.ktor.serde.xml)
-// 			implementation(libs.kotlin.serialization.core)
 // 			implementation(libs.kotlin.serialization.xml)
 		}
 

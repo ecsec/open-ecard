@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("ChannelHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class ChannelHandleType(
+data class ChannelHandleType(
 	@SerialName("ProtocolTerminationPoint")
 	@XmlElement
 	val protocolTerminationPoint: String?,

@@ -8,7 +8,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("EAC2OutputType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class Eac2Output(
+data class Eac2Output(
 	@SerialName("Protocol")
 	@XmlElement(false)
 	override val protocol: String,

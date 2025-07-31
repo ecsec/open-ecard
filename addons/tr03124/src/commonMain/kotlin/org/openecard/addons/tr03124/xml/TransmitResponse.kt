@@ -8,7 +8,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
 @XmlSerialName("TransmitResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class TransmitResponse(
+data class TransmitResponse(
 	override val result: Result,
 	override val requestId: String?,
 	@SerialName("Profile")

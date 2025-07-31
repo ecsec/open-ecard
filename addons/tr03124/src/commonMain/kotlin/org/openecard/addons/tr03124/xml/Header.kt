@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("Header", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
-class Header(
+data class Header(
 	@SerialName("PAOS")
 	@XmlElement
 	val paos: Paos,

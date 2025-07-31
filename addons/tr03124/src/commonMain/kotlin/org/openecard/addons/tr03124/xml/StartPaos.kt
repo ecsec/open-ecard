@@ -26,5 +26,5 @@ class StartPaos(
 	val supportedAPIVersions: List<SupportedAPIVersionsType>,
 	@SerialName("SupportedDIDProtocols")
 	@XmlElement
-	val supportedDIDProtocols: List<String>?,
+	val supportedDIDProtocols: String?,
 ) : RequestType

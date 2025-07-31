@@ -17,7 +17,7 @@ class Eac1Output(
 	val certificateHolderAuthorizationTemplate: PrintableUByteArray?,
 	@SerialName("CertificationAuthorityReference")
 	@XmlElement
-	val certificationAuthorityReference: List<String>?,
+	val certificationAuthorityReference: String?,
 	@SerialName("EFCardAccess")
 	@XmlElement
 	val efCardAccess: PrintableUByteArray,

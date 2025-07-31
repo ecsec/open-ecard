@@ -32,5 +32,5 @@ class Eac1Input(
 	val transactionInfo: String?,
 	@SerialName("AcceptedEIDType")
 	@XmlElement
-	val acceptedEIDType: List<String>?,
+	val acceptedEIDType: String?,
 ) : AuthenticationProtocolData

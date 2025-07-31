@@ -16,5 +16,5 @@ class TransmitResponse(
 	override val profile: String,
 	@SerialName("OutputAPDU")
 	@XmlElement
-	val outputAPDU: PrintableUByteArray,
+	val outputAPDU: List<PrintableUByteArray>,
 ) : ResponseType

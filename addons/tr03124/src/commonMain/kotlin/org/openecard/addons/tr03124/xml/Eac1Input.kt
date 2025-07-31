@@ -14,16 +14,16 @@ class Eac1Input(
 	override val protocol: String,
 	@SerialName("Certificate")
 	@XmlElement
-	val certificate: PrintableUByteArray,
+	val certificate: List<PrintableUByteArray>,
 	@SerialName("CertificateDescription")
 	@XmlElement
 	val certificateDescription: PrintableUByteArray,
 	@SerialName("RequiredCHAT")
 	@XmlElement
-	val requiredChat: String?,
+	val requiredChat: PrintableUByteArray?,
 	@SerialName("OptionalCHAT")
 	@XmlElement
-	val optionalChat: String?,
+	val optionalChat: PrintableUByteArray?,
 	@SerialName("AuthenticatedAuxiliaryData")
 	@XmlElement
 	val authenticatedAuxiliaryData: PrintableUByteArray?,
@@ -32,5 +32,5 @@ class Eac1Input(
 	val transactionInfo: String?,
 	@SerialName("AcceptedEIDType")
 	@XmlElement
-	val acceptedEIDType: String?,
+	val acceptedEIDType: List<String>?,
 ) : AuthenticationProtocolData

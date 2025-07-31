@@ -21,7 +21,7 @@ class Eac2Output(
 	@SerialName("Nonce")
 	@XmlElement
 	val nonce: PrintableUByteArray,
-// 	@SerialName("EFCardAccess")
-// 	@XmlElement
-// 	val efCardAccess: PrintableUByteArray,
+	@SerialName("Challenge")
+	@XmlElement
+	val challenge: PrintableUByteArray,
 ) : AuthenticationProtocolData

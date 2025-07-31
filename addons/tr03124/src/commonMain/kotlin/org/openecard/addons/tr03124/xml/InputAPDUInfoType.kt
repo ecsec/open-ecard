@@ -7,14 +7,12 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.openecard.utils.serialization.PrintableUByteArray
 
 @Serializable
-@XmlSerialName("Transmit", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
-class TransmitRequest(
-	override val requestId: String?,
-	override val profile: String?,
-	@SerialName("SlotHandle")
+@XmlSerialName("InputAPDUInfoType", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+class InputAPDUInfoType(
+	@SerialName("InputAPDU")
 	@XmlElement
-	val slotHandle: PrintableUByteArray,
-	@SerialName("InputAPDUInfo")
+	val inputAPDU: PrintableUByteArray,
+	@SerialName("AcceptableStatusCode")
 	@XmlElement
-	val inputAPDUInfo: List<InputAPDUInfoType>,
-) : RequestType
+	val acceptableStatusCode: List<PrintableUByteArray>?,
+)

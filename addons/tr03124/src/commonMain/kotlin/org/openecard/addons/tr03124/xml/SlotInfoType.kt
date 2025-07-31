@@ -10,5 +10,5 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class SlotInfoType(
 	@SerialName("ProtectedAuthPath")
 	@XmlElement
-	val protectedAuthPath: Boolean?,
+	val protectedAuthPath: Boolean? = null,
 )

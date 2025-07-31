@@ -10,14 +10,14 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class ChannelHandleType(
 	@SerialName("ProtocolTerminationPoint")
 	@XmlElement
-	val protocolTerminationPoint: String?,
+	val protocolTerminationPoint: String? = null,
 	@SerialName("SessionIdentifier")
 	@XmlElement
-	val sessionIdentifier: String?,
+	val sessionIdentifier: String? = null,
 	@SerialName("Binding")
 	@XmlElement
-	val binding: String?,
+	val binding: String? = null,
 	@SerialName("PathSecurity")
 	@XmlElement
-	val pathSecurity: PathSecurityType?,
+	val pathSecurity: PathSecurityType? = null,
 )

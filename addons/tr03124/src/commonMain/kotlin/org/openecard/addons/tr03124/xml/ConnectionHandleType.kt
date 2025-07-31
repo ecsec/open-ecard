@@ -10,20 +10,20 @@ import org.openecard.utils.serialization.PrintableUByteArray
 @Serializable
 @XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class ConnectionHandleType(
-	override val ifdName: String?,
-	override val slotIndex: UInt?,
-	override val cardApplication: PrintableUByteArray?,
+	override val ifdName: String? = null,
+	override val slotIndex: UInt? = null,
+	override val cardApplication: PrintableUByteArray? = null,
 	@SerialName("ChannelHandle")
 	@XmlElement
-	override val channelHandle: ChannelHandleType?,
+	override val channelHandle: ChannelHandleType? = null,
 	@SerialName("ContextHandle")
 	@XmlElement
-	override val contextHandle: PrintableUByteArray?,
+	override val contextHandle: PrintableUByteArray? = null,
 	@SerialName("SlotHandle")
 	@XmlElement
-	val slotHandle: PrintableUByteArray?,
+	val slotHandle: PrintableUByteArray? = null,
 	@SerialName("RecognitionInfo")
 	@XmlElement
-	val recognitionInfo: RecognitionInfoType?,
-	val slotInfo: SlotInfoType?,
+	val recognitionInfo: RecognitionInfoType? = null,
+	val slotInfo: SlotInfoType? = null,
 ) : CardApplicationPathType

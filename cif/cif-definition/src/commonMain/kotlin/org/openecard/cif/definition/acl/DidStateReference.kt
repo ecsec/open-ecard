@@ -12,15 +12,19 @@ data class DidStateReference(
 	val stateQualifier: AclQualifier?,
 ) : BoolTreeLeaf {
 	fun matches(other: DidStateReference): Boolean {
-		val m1 = this.name == other.name
-		val m2 = this.active == other.active
+		val reference = this
+		val m1 = reference.name == other.name
+		val m2 = reference.active == other.active
 		val m3 =
-			if (this.stateQualifier == null && other.stateQualifier == null) {
+			if (reference.stateQualifier == null) {
+				// if reference does not mention a qualifier, we accept anything
 				true
-			} else if (this.stateQualifier != null && other.stateQualifier != null) {
-				this.stateQualifier.matches(other.stateQualifier)
 			} else {
-				false
+				if (other.stateQualifier == null) {
+					false
+				} else {
+					this.stateQualifier.matches(other.stateQualifier)
+				}
 			}
 		return m1 && m2 && m3
 	}

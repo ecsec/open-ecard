@@ -68,7 +68,7 @@ fun CifAclOr.reduceWithAuthenticatedDids(solvedDids: Set<DidStateReference>): Ci
 				ands.and.map { term ->
 					when (term) {
 						is DidStateReference -> {
-							if (solvedDids.any { it.matches(term) }) {
+							if (solvedDids.any { term.matches(it) }) {
 								BoolTreeLeaf.True
 							} else {
 								term

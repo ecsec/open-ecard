@@ -8,5 +8,5 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class InitializeFrameworkResponse(
 	override val result: Result,
 	override val requestId: String?,
-	override val profile: String,
+	override val profile: String?,
 ) : ResponseType

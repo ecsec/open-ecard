@@ -15,5 +15,5 @@ data class DidAuthenticateResponse<T : AuthenticationProtocolData>(
 	override val requestId: String?,
 	@SerialName("Profile")
 	@XmlElement(false)
-	override val profile: String,
+	override val profile: String?,
 ) : ResponseType

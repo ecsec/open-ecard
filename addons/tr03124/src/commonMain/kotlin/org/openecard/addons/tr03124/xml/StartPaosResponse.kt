@@ -12,5 +12,5 @@ data class StartPaosResponse(
 	override val requestId: String?,
 	@SerialName("Profile")
 	@XmlElement(false)
-	override val profile: String?,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 ) : ResponseType

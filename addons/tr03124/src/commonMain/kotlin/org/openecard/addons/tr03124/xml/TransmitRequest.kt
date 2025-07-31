@@ -10,7 +10,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 @XmlSerialName("Transmit", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class TransmitRequest(
 	override val requestId: String?,
-	override val profile: String?,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 	@SerialName("SlotHandle")
 	@XmlElement
 	val slotHandle: PrintableUByteArray,

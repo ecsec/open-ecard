@@ -447,7 +447,7 @@ class SerializationTest {
 
 	fun assertStartPaosResponseData(obj: StartPaosResponse) {
 		assertTrue(obj.requestId.isNullOrEmpty())
-		assertTrue(obj.profile.isNullOrEmpty())
+		assertEquals(ECardConstants.Profile.ECARD_1_1, obj.profile)
 		assertEquals(
 			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
 			obj.result.major,

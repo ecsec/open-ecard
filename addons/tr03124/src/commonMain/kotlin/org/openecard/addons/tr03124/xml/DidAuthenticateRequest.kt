@@ -9,7 +9,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("DIDAuthenticate", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class DidAuthenticateRequest(
 	override val requestId: String?,
-	override val profile: String?,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 	@XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 	@XmlElement
 	val connectionHandle: ConnectionHandleType,

@@ -7,5 +7,5 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("InitializeFramework", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class InitializeFrameworkRequest(
 	override val requestId: String?,
-	override val profile: String?,
+	override val profile: String? = ECardConstants.Profile.ECARD_1_1,
 ) : RequestType

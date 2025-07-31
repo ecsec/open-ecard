@@ -71,5 +71,9 @@ object PrintableUByteArraySerializer : KSerializer<PrintableUByteArray> {
 
 	@OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
 	override fun deserialize(decoder: Decoder): PrintableUByteArray =
-		decoder.decodeString().hexToUByteArray().toPrintable()
+		decoder
+			.decodeString()
+			.replace(Regex("\\s"), "")
+			.hexToUByteArray()
+			.toPrintable()
 }

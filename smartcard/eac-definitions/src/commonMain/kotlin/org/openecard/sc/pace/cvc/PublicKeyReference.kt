@@ -49,5 +49,14 @@ data class PublicKeyReference(
 				else -> throw IllegalArgumentException("PublicKeyReference TLV is not primitive")
 			}
 		}
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		fun UByteArray.toPublicKeyReference(): PublicKeyReference {
+			val data = this.toByteArray()
+			val country = data.decodeToString(0, 2)
+			val holder = data.decodeToString(2, data.size - 5)
+			val sequence = data.decodeToString(data.size - 5)
+			return PublicKeyReference(country, holder, sequence)
+		}
 	}
 }

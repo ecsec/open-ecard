@@ -13,6 +13,5 @@ data class PaceAclQualifier(
 	override fun matches(other: AclQualifier): Boolean =
 		when (other) {
 			is PaceAclQualifier -> this.chat == other.chat
-			else -> false
 		}
 }

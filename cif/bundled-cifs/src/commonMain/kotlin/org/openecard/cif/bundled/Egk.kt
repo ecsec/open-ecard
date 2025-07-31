@@ -1,6 +1,5 @@
 package org.openecard.cif.bundled
 
-import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts
 import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts.Datasets.efAmts
 import org.openecard.cif.bundled.EgkCifDefinitions.Apps.Amts.Datasets.efStatusAmts
@@ -88,8 +87,10 @@ import org.openecard.cif.dsl.api.acl.AclScope
 import org.openecard.cif.dsl.api.application.ApplicationScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-@OptIn(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class, ExperimentalTime::class)
 val EgkCif by lazy {
 	val b = CardInfoBuilder()
 

@@ -1,6 +1,5 @@
 package org.openecard.cif.bundled
 
-import kotlinx.datetime.Instant
 import org.openecard.cif.bundled.GematikBuildingBlocks.alwaysAcl
 import org.openecard.cif.bundled.GematikBuildingBlocks.neverAcl
 import org.openecard.cif.bundled.NpaDefinitions.Apps.EId
@@ -26,8 +25,10 @@ import org.openecard.cif.dsl.api.dataset.DataSetScope
 import org.openecard.cif.dsl.builder.CardInfoBuilder
 import org.openecard.cif.dsl.builder.unaryPlus
 import org.openecard.utils.serialization.PrintableUByteArray
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-@OptIn(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class, ExperimentalTime::class)
 val NpaCif by lazy {
 	val b = CardInfoBuilder()
 

@@ -1,9 +1,10 @@
 package org.openecard.cif.dsl.builder
 
-import kotlinx.datetime.Instant
 import org.openecard.cif.definition.meta.CardInfoMetadata
 import org.openecard.cif.definition.meta.CardInfoStatus
 import org.openecard.cif.dsl.api.CardInfoMetadataScope
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class CardInfoMetadataBuilder :
 	CardInfoMetadataScope,
@@ -21,11 +22,16 @@ class CardInfoMetadataBuilder :
 			_name = value
 		}
 	override var version: String? = null
+
+	@OptIn(ExperimentalTime::class)
 	override var creationDate: Instant? = null
+
+	@OptIn(ExperimentalTime::class)
 	override var modificationDate: Instant? = null
 	override var status: CardInfoStatus? = null
 	override var cardIssuer: String? = null
 
+	@OptIn(ExperimentalTime::class)
 	override fun build(): CardInfoMetadata =
 		CardInfoMetadata(
 			name = name,

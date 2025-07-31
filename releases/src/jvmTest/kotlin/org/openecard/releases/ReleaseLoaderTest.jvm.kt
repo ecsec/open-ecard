@@ -32,12 +32,13 @@ import com.github.tomakehurst.wiremock.client.WireMock.okForContentType
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.Options
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class ReleaseLoaderTest {
 	val wm = WireMockServer(Options.DYNAMIC_PORT)
@@ -52,6 +53,7 @@ class ReleaseLoaderTest {
 		wm.stop()
 	}
 
+	@OptIn(ExperimentalTime::class)
 	@Test
 	fun testLoadReleaseInfo() =
 		runBlocking {

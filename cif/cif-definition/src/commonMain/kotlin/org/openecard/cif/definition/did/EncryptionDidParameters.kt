@@ -1,7 +1,9 @@
 package org.openecard.cif.definition.did
 
+import kotlinx.serialization.Serializable
 import org.openecard.utils.serialization.PrintableUByteArray
 
+@Serializable
 data class EncryptionDidParameters(
 	override val key: KeyRefDefinition,
 	override val certificates: List<String>,

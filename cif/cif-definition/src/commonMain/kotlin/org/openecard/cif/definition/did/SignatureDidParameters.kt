@@ -15,7 +15,9 @@ data class SignatureDidParameters(
 	val sigGen: SignatureGenerationInfo,
 ) : GenericCryptoDidParameters
 
+@Serializable
 sealed interface SignatureGenerationInfo {
+	@Serializable
 	data class StandardInfo(
 		val info: List<SignatureGenerationInfoType>,
 		val hashGenInfo: HashGenerationInfoType?,
@@ -32,11 +34,13 @@ sealed interface SignatureGenerationInfo {
 		val hashAlgRef: PrintableUByteArray?,
 	) : SignatureGenerationInfo
 
+	@Serializable
 	data class TemplateInfo(
 		val info: List<TemplateApduCallDefinition>,
 	) : SignatureGenerationInfo
 }
 
+@Serializable
 enum class SignatureGenerationInfoType {
 	MSE_RESTORE,
 	MSE_HASH,
@@ -48,6 +52,7 @@ enum class SignatureGenerationInfoType {
 	INT_AUTH,
 }
 
+@Serializable
 enum class HashGenerationInfoType {
 	NOT_ON_CARD,
 	COMPLETELY_ON_CARD,

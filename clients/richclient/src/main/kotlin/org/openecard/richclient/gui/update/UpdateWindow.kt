@@ -23,6 +23,7 @@
 package org.openecard.richclient.gui.update
 
 import dev.icerock.moko.resources.format
+import dorkbox.util.SwingUtil
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -43,6 +44,8 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import javafx.util.Callback
+import jdk.swing.interop.SwingInterOpUtils
+import oecImage
 import org.openecard.common.AppVersion.name
 import org.openecard.common.OpenecardProperties
 import org.openecard.gui.swing.common.GUIDefaults
@@ -52,6 +55,7 @@ import org.openecard.releases.UpdateAdvice
 import org.openecard.richclient.updater.VersionUpdateChecker
 import java.net.URI
 import java.util.function.Consumer
+import javax.swing.SwingUtilities
 
 /**
  *
@@ -79,7 +83,7 @@ class UpdateWindow(
 			javaClass.getResource("/update.css")?.toExternalForm() ?: throw IllegalStateException("CSS file not found")
 		scene.stylesheets.add(css)
 
-		stage.icons.add(Image(GUIDefaults.getImageStream("Frame.icon", 45, 45)))
+		stage.icons.add(Image(GUIDefaults.getOecImageStream(45, 45)))
 		stage.title =
 			I18N.strings.update_tooltip_msg
 				.format(name)

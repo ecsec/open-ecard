@@ -1,0 +1,26 @@
+<ns3:StartPAOS xmlns="urn:oasis:names:tc:dss:1.0:core:schema"
+               xmlns:ns3="urn:iso:std:iso-iec:24727:tech:schema"
+               Profile="http://www.bsi.bund.de/ecard/api/1.1">
+    <ns3:SessionIdentifier>15311BF20D4F646874F2B4724EF8CE310E8535DF6ED72FFBBD8BF3B35BCBEA65
+    </ns3:SessionIdentifier>
+    <ns3:ConnectionHandle>
+        <ns3:ChannelHandle/>
+        <ns3:ContextHandle>B7D53A5A34C2F99F9CE380700501C22A</ns3:ContextHandle>
+        <ns3:SlotHandle>340C46B396F7D392F3797E14B669A97F</ns3:SlotHandle>
+    </ns3:ConnectionHandle>
+    <ns3:UserAgent>
+        <ns3:Name>Open eCard App</ns3:Name>
+        <ns3:VersionMajor>2</ns3:VersionMajor>
+        <ns3:VersionMinor>3</ns3:VersionMinor>
+        <ns3:VersionSubminor>13</ns3:VersionSubminor>
+    </ns3:UserAgent>
+    <ns3:SupportedAPIVersions>
+        <ns3:Major>1</ns3:Major>
+        <ns3:Minor>1</ns3:Minor>
+        <ns3:Subminor>5</ns3:Subminor>
+    </ns3:SupportedAPIVersions>
+    <ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.14.2</ns3:SupportedDIDProtocols>
+    <ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.14</ns3:SupportedDIDProtocols>
+    <ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.9</ns3:SupportedDIDProtocols>
+    <ns3:SupportedDIDProtocols>urn:oid:1.3.162.15480.3.0.25</ns3:SupportedDIDProtocols>
+</ns3:StartPAOS>

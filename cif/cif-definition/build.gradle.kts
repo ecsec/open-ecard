@@ -12,7 +12,6 @@ kotlin {
 		commonMain.dependencies {
 			implementation(libs.kotlin.logging)
 			api(project(":utils:serialization"))
-			api(libs.kotlinx.datetime)
 			implementation(libs.kotlin.serialization.core)
 		}
 		commonTest.dependencies {

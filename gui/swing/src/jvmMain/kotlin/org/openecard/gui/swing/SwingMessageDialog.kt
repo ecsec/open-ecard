@@ -249,7 +249,7 @@ class SwingMessageDialog : MessageDialog {
 	}
 
 	companion object {
-		private val FRAME_ICON = GUIDefaults.getImage("Frame.icon", 45, 45)!!.getImage()
+		private val FRAME_ICON = GUIDefaults.getOecImage(45, 45).getImage()
 
 		private fun convertOptionType(optionType: OptionType): Int =
 			when (optionType) {

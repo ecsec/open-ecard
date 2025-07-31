@@ -22,6 +22,7 @@
 package org.openecard.gui.swing.common
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import oecImage
 import org.openecard.common.util.FileUtils.resolveResourceAsURL
 import java.awt.Color
 import java.awt.Font
@@ -71,12 +72,22 @@ object GUIDefaults {
 		return font ?: Font(Font.SANS_SERIF, Font.PLAIN, 12)
 	}
 
+	fun getOecImage(
+		width: Int,
+		height: Int,
+	): ImageIcon = ImageIcon(oecImage(width, height))
+
+	fun getOecImageStream(
+		width: Int,
+		height: Int,
+	): InputStream = getImageStream(ImageIcon(oecImage(width, height)))
+
 	fun getImage(
 		identifier: String,
 		width: Int,
 		height: Int,
 	): ImageIcon? =
-		(getProperty(identifier) as ImageIcon?) ?.let { icon ->
+		(getProperty(identifier) as ImageIcon?)?.let { icon ->
 			if (width > -1 || height > -1) {
 				var image = icon.getImage()
 				image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)

@@ -1,0 +1,52 @@
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+	<Header>
+		<PAOS xmlns:ns0="http://schemas.xmlsoap.org/soap/envelope/"
+			  ns0:actor="http://schemas.xmlsoap.org/soap/actor/next"
+			  xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/" ns1:mustUnderstand="1"
+			  xmlns="urn:liberty:paos:2006-08">
+			<Version>urn:liberty:paos:2006-08</Version>
+			<EndpointReference>
+				<Address>http://www.projectliberty.org/2006/01/role/paos</Address>
+				<MetaData>
+					<ServiceType>http://www.bsi.bund.de/ecard/api/1.1/PAOS/GetNextCommand</ServiceType>
+				</MetaData>
+			</EndpointReference>
+		</PAOS>
+		<ReplyTo xmlns="http://www.w3.org/2005/03/addressing">
+			<Address>http://www.projectliberty.org/2006/02/role/paos</Address>
+		</ReplyTo>
+		<RelatesTo xmlns="http://www.w3.org/2005/03/addressing">urn:uuid:8206c0ec-2655-4079-9455-0d7f5159b381
+		</RelatesTo>
+		<MessageID xmlns="http://www.w3.org/2005/03/addressing">urn:uuid:f1944112-1ba9-4df4-b373-2af6dd02e27c
+		</MessageID>
+	</Header>
+	<Body>
+		<ns3:TransmitResponse xmlns="urn:oasis:names:tc:dss:1.0:core:schema"
+							  xmlns:ns10="urn:oasis:names:tc:SAML:2.0:assertion"
+							  xmlns:ns11="http://www.w3.org/2001/04/xmlenc#" xmlns:ns12="http://ws.openecard.org/schema"
+							  xmlns:ns13="http://www.w3.org/2001/04/xmldsig-more#"
+							  xmlns:ns14="http://www.w3.org/2007/05/xmldsig-more#"
+							  xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
+							  xmlns:ns3="urn:iso:std:iso-iec:24727:tech:schema"
+							  xmlns:ns4="http://www.bsi.bund.de/ecard/api/1.1"
+							  xmlns:ns5="http://uri.etsi.org/02231/v3.1.2#" xmlns:ns6="http://www.w3.org/2009/xmlenc11#"
+							  xmlns:ns7="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+							  xmlns:ns8="http://uri.etsi.org/01903/v1.3.2#"
+							  xmlns:ns9="urn:oasis:names:tc:SAML:1.0:assertion"
+							  Profile="http://www.bsi.bund.de/ecard/api/1.1">
+			<Result>
+				<ResultMajor>http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok</ResultMajor>
+			</Result>
+			<ns3:OutputAPDU>990290008E0801FDBBBFC8A3467A9000</ns3:OutputAPDU>
+			<ns3:OutputAPDU>990290008E087BD9BB3A7875D11A9000</ns3:OutputAPDU>
+			<ns3:OutputAPDU>990290008E08DA0E5D758C7A92CE9000</ns3:OutputAPDU>
+			<ns3:OutputAPDU>
+				873101C51D830FC9642E82A65CFD802A639A94917139270F6691D32C25F00A79FEABE7730A3E4468DD1FC276BD46BCDECA4C35990290008E080B3C729421D109539000
+			</ns3:OutputAPDU>
+			<ns3:OutputAPDU>990290008E086F56B6A5B86866179000</ns3:OutputAPDU>
+			<ns3:OutputAPDU>
+				8731011409047CC2043285691061D21CDC87953B03551CE70F3664D78F17E128707650B5CA5297AACF11BC0805E4CC38F374E9990290008E08F9F45DB3EE8F61189000
+			</ns3:OutputAPDU>
+		</ns3:TransmitResponse>
+	</Body>
+</Envelope>

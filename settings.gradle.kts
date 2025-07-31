@@ -62,6 +62,9 @@ include("addons:pin-management")
 include("addons:status")
 include("addons:tr03112")
 // include("addons:cardlink")
+
+include("addons:tr03124")
+
 include("clients:richclient")
 // include("clients:mobile-lib")
 // include("clients:ios-common")

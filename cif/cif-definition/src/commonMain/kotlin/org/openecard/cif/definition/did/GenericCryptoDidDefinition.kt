@@ -3,17 +3,20 @@ package org.openecard.cif.definition.did
 import kotlinx.serialization.Serializable
 import org.openecard.cif.definition.acl.AclDefinition
 
+@Serializable
 sealed interface GenericCryptoDidDefinition<T : GenericCryptoDidParameters> : DidDefinition {
 	val parameters: T
 
-	class SignatureDidDefinition(
+	@Serializable
+	data class SignatureDidDefinition(
 		override val name: String,
 		override val scope: DidScope,
 		val signAcl: AclDefinition,
 		override val parameters: SignatureDidParameters,
 	) : GenericCryptoDidDefinition<SignatureDidParameters>
 
-	class EncryptionDidDefinition(
+	@Serializable
+	data class EncryptionDidDefinition(
 		override val name: String,
 		override val scope: DidScope,
 		val encipherAcl: AclDefinition,
@@ -22,6 +25,7 @@ sealed interface GenericCryptoDidDefinition<T : GenericCryptoDidParameters> : Di
 	) : GenericCryptoDidDefinition<EncryptionDidParameters>
 }
 
+@Serializable
 sealed interface GenericCryptoDidParameters {
 	val key: KeyRefDefinition
 	val certificates: List<String>

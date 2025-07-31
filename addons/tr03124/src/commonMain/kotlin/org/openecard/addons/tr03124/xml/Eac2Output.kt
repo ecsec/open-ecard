@@ -23,5 +23,5 @@ data class Eac2Output(
 	val nonce: PrintableUByteArray,
 	@SerialName("Challenge")
 	@XmlElement
-	val challenge: PrintableUByteArray,
+	val challenge: PrintableUByteArray?,
 ) : AuthenticationProtocolData

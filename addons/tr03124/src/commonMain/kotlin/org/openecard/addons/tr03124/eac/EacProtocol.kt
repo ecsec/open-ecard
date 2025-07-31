@@ -2,12 +2,8 @@ package org.openecard.addons.tr03124.eac
 
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
-import org.openecard.addons.tr03124.TcToken
-import org.openecard.addons.tr03124.Tr03124Binding
-import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.sal.iface.DeviceUnsupported
 import org.openecard.sal.iface.SalException
-import org.openecard.sal.iface.SalSession
 import org.openecard.sal.iface.dids.PaceDid
 import org.openecard.sc.iface.feature.PaceEstablishChannelResponse
 

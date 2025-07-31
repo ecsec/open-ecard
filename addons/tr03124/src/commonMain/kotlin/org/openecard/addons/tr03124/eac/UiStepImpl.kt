@@ -2,7 +2,6 @@ package org.openecard.addons.tr03124.eac
 
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
-import org.openecard.addons.tr03124.TcToken
 import org.openecard.addons.tr03124.UserCanceled
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
@@ -11,7 +10,9 @@ import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.Eac1Output
 import org.openecard.addons.tr03124.xml.Eac2Input
 import org.openecard.addons.tr03124.xml.EacAdditionalInput
+import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.cif.definition.acl.PaceAclQualifier
 import org.openecard.sal.iface.DeviceConnection
 import org.openecard.sal.iface.DeviceUnsupported
 import org.openecard.sal.sc.SmartcardDeviceConnection
@@ -25,7 +26,11 @@ import org.openecard.sc.pace.cvc.CardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CardVerifiableCertificate.Companion.toCardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CertificateDescription
 import org.openecard.sc.pace.cvc.CertificateDescription.Companion.toCertificateDescription
+import org.openecard.sc.pace.cvc.PublicKeyReference
+import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReference
+import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
+import org.openecard.utils.serialization.toPrintable
 import java.lang.IllegalStateException
 
 internal class UiStepImpl(
@@ -37,7 +42,7 @@ internal class UiStepImpl(
 		val token: TcToken,
 		val eserviceClient: EserviceClient,
 		val eidServer: EidServerInterface,
-		val eac1InputReq: DidAuthenticateRequest<Eac1Input>,
+		val eac1InputReq: DidAuthenticateRequest,
 		val cvcs: List<CardVerifiableCertificate>,
 		val certDesc: CertificateDescription,
 		val requiredChat: AuthenticationTerminalChat,
@@ -114,16 +119,43 @@ internal class UiStepImpl(
 		val pace = getPaceDid()
 		check(pace.missingAuthAuthentications.isSolved)
 
-		val eac1Out = Eac1Output(ctx.eac1InputReq.data.protocol)
+		val efCa = paceResponse.efCardAccess.v.toEfCardAccess()
+		val ta = TerminalAuthenticationImpl(pace.application.device, efCa)
+		val ca = ChipAuthenticationImpl(pace.application.device, pace)
+
+		val challenge = ta.challenge
+		val chat =
+			checkNotNull(
+				pace
+					.toStateReference()
+					.stateQualifier
+					?.cast<PaceAclQualifier>()
+					?.chat,
+			) {
+				"PACE DID does not contain CHAT used for authentication"
+			}
+		val cars =
+			listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
+				it.v
+					.toPublicKeyReference()
+					.joinToString()
+			}
+		val idPicc = checkNotNull(paceResponse.idIcc) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+		val eac1Out =
+			Eac1Output(
+				protocol = ctx.eac1InputReq.data.protocol,
+				certificateHolderAuthorizationTemplate = chat,
+				certificationAuthorityReference = cars,
+				efCardAccess = paceResponse.efCardAccess,
+				idPICC = idPicc,
+				challenge = challenge.toPrintable(),
+			)
 		val eac2In =
 			when (val msg = ctx.eidServer.sendDidAuthResponse(eac1Out)) {
 				is Eac2Input -> msg
 				else -> throw InvalidServerData(ctx.eserviceClient, "")
 			}
 
-		val efCa = paceResponse.efCardAccess.v.toEfCardAccess()
-		val ta = TerminalAuthenticationImpl(pace.application.device, efCa)
-		val ca = ChipAuthenticationImpl(pace.application.device, pace)
 		val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In)
 
 		val outMsg = eacAuth.process()
@@ -149,7 +181,7 @@ internal class UiStepImpl(
 			token: TcToken,
 			eserviceClient: EserviceClient,
 			eidServer: EidServerInterface,
-			eac1InputReq: DidAuthenticateRequest<Eac1Input>,
+			eac1InputReq: DidAuthenticateRequest,
 		): UiStep {
 			val certsRaw: List<UByteArray> = TODO() // eac1InputReq.data.certificates
 			val certs = certsRaw.map { it.toCardVerifiableCertificate() }

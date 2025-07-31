@@ -8,7 +8,7 @@ import org.openecard.addons.tr03124.xml.RequestType
 import org.openecard.addons.tr03124.xml.ResponseType
 
 interface EidServerInterface {
-	suspend fun start(): DidAuthenticateRequest<Eac1Input>
+	suspend fun start(): DidAuthenticateRequest
 
 	/**
 	 * Cancel eID-Server connection.

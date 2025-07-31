@@ -1,6 +1,8 @@
 package org.openecard.addons.tr03124
 
 import org.openecard.addons.tr03124.xml.ECardConstants
+import org.openecard.addons.tr03124.xml.SupportedAPIVersionsType
+import org.openecard.addons.tr03124.xml.UserAgentType
 
 data class ClientInformation(
 	val userAgent: UserAgent,
@@ -24,3 +26,14 @@ data class ApiVersion(
 	val minor: Int,
 	val patch: Int?,
 )
+
+fun UserAgent.toXmlType(): UserAgentType =
+	UserAgentType(
+		name = this.name,
+		versionMajor = this.version.major,
+		versionMinor = this.version.minor,
+		versionSubminor = this.version.patch,
+	)
+
+fun ApiVersion.toXmlType(): SupportedAPIVersionsType =
+	SupportedAPIVersionsType(major = this.major, minor = this.minor, subminor = this.patch)

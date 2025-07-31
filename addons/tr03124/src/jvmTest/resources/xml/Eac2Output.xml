@@ -14,4 +14,3 @@
 		<Nonce xmlns="urn:iso:std:iso-iec:24727:tech:schema">5AC24DE83C7D10B2</Nonce>
 	</ns3:AuthenticationProtocolData>
 </ns3:DIDAuthenticateResponse>
-

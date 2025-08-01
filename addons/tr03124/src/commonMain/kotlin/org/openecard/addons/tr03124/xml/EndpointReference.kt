@@ -7,9 +7,10 @@ import nl.adaptivity.xmlutil.QNameSerializer
 import nl.adaptivity.xmlutil.serialization.SerializableElement
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.XmlValue
 
 @Serializable
-@XmlSerialName("EndpointReference", prefix = Namespaces.PAOS.PREFIX, namespace = Namespaces.PAOS.NS)
+@XmlSerialName("EndpointReference", prefix = Namespaces.WSA.PREFIX, namespace = Namespaces.WSA.NS)
 data class EndpointReference(
 	@SerialName("Address")
 	@XmlElement
@@ -19,10 +20,14 @@ data class EndpointReference(
 	@Serializable(with = QNameSerializer::class)
 	val portType: QName?,
 	@SerialName("ServiceName")
-	@XmlElement
+	val serviceName: ServiceName?,
+)
+
+@Serializable
+data class ServiceName(
+	@XmlElement(false)
+	val portName: String? = null,
+	@XmlValue
 	@Serializable(with = QNameSerializer::class)
-	val serviceName: QName?,
-// 	@SerialName("MetaData")
-// 	@XmlElement
-// 	val metaData: SerializableElement?,
+	val name: QName,
 )

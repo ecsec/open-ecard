@@ -2,6 +2,7 @@ package org.openecard.addons.tr03124.xml
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.Transient
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable

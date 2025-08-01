@@ -27,4 +27,4 @@ data class Eac1Output(
 	@SerialName("Challenge")
 	@XmlElement
 	val challenge: PrintableUByteArray,
-) : AuthenticationProtocolData
+) : AuthenticationResponseProtocolData

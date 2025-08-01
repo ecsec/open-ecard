@@ -6,7 +6,13 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 sealed interface AuthenticationProtocolData {
-	@XmlSerialName("Protocol", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
+	@XmlSerialName("Protocol")
 	@XmlElement(false)
 	val protocol: String
 }
+
+@Serializable(AuthenticationRequestProtocolDataSerializer::class)
+sealed interface AuthenticationRequestProtocolData : AuthenticationProtocolData
+
+@Serializable
+sealed interface AuthenticationResponseProtocolData : AuthenticationProtocolData

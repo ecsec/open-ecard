@@ -14,11 +14,11 @@ data class Eac2Input(
 	override val protocol: String,
 	@SerialName("Certificate")
 	@XmlElement
-	val certificate: List<PrintableUByteArray>?,
+	val certificate: List<PrintableUByteArray>,
 	@SerialName("EphemeralPublicKey")
 	@XmlElement
 	val ephemeralPublicKey: PrintableUByteArray,
 	@SerialName("Signature")
 	@XmlElement
 	val signature: PrintableUByteArray?,
-) : AuthenticationProtocolData
+) : AuthenticationRequestProtocolData

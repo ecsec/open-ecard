@@ -16,11 +16,6 @@ object Namespaces {
 		const val NS = "http://www.w3.org/XML/1998/namespace"
 	}
 
-// 	object XSD {
-// 		const val PREFIX = "xsd"
-// 		const val NS = ""
-// 	}
-
 	object XSI {
 		const val PREFIX = "xsi"
 		const val NS = "http://www.w3.org/2001/XMLSchema-instance"
@@ -29,5 +24,15 @@ object Namespaces {
 	object SOAP {
 		const val PREFIX = "soap"
 		const val NS = "http://schemas.xmlsoap.org/soap/envelope/"
+	}
+
+	object WSA {
+		const val PREFIX = "wsa"
+		const val NS = "http://www.w3.org/2005/03/addressing"
+	}
+
+	object PAOS {
+		const val PREFIX = "paos"
+		const val NS = "urn:liberty:paos:2006-08"
 	}
 }

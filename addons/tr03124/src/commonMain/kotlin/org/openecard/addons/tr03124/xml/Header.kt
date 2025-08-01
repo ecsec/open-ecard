@@ -1,6 +1,5 @@
 package org.openecard.addons.tr03124.xml
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -8,13 +7,11 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("Header", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
 data class Header(
-	@SerialName("PAOS")
-	@XmlElement
 	val paos: Paos,
-	@XmlSerialName("MessageID", namespace = "http://www.w3.org/2005/03/addressing")
+	@XmlSerialName("MessageID", prefix = Namespaces.WSA.PREFIX, namespace = Namespaces.WSA.NS)
 	@XmlElement
 	val messageID: String?,
-	@XmlSerialName("Action", namespace = "http://www.w3.org/2005/03/addressing")
+	@XmlSerialName("Action", prefix = Namespaces.WSA.PREFIX, namespace = Namespaces.WSA.NS)
 	@XmlElement
-	val action: String,
+	val action: String?,
 )

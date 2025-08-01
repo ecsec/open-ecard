@@ -9,7 +9,7 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
-@XmlSerialName("EndpointReference", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
+@XmlSerialName("EndpointReference", prefix = Namespaces.PAOS.PREFIX, namespace = Namespaces.PAOS.NS)
 data class EndpointReference(
 	@SerialName("Address")
 	@XmlElement
@@ -22,7 +22,7 @@ data class EndpointReference(
 	@XmlElement
 	@Serializable(with = QNameSerializer::class)
 	val serviceName: QName?,
-	@SerialName("MetaData")
-	@XmlElement
-	val metaData: SerializableElement?,
+// 	@SerialName("MetaData")
+// 	@XmlElement
+// 	val metaData: SerializableElement?,
 )

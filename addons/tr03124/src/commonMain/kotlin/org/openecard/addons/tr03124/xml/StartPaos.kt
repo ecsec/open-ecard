@@ -15,11 +15,11 @@ data class StartPaos(
 	@SerialName("SessionIdentifier")
 	@XmlElement
 	val sessionIdentifier: String,
-	@SerialName("ConnectionHandle")
+	@XmlSerialName("ConnectionHandle", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 	@XmlElement
 	val connectionHandle: ConnectionHandleType?,
 	@SerialName("UserAgent")
-	@XmlElement
+	@XmlSerialName("UserAgent", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 	val userAgent: UserAgentType,
 	@SerialName("SupportedAPIVersions")
 	@XmlElement

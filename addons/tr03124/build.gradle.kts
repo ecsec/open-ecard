@@ -16,8 +16,8 @@ kotlin {
 			api(project(":sal:smartcard-sal"))
 
 			implementation(libs.kotlin.serialization.core)
-			implementation(libs.ktor.serde.xml)
-// 			implementation(libs.kotlin.serialization.xml)
+			implementation(libs.kotlin.serialization.xml)
+			// implementation(libs.ktor.serde.xml)
 		}
 
 		jvmMain.dependencies {

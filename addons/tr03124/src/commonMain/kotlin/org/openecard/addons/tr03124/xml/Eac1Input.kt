@@ -33,4 +33,4 @@ data class Eac1Input(
 	@SerialName("AcceptedEIDType")
 	@XmlElement
 	val acceptedEIDType: List<String> = emptyList(),
-) : AuthenticationProtocolData
+) : AuthenticationRequestProtocolData

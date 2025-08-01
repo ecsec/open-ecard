@@ -1,5 +1,7 @@
 package org.openecard.addons.tr03124.xml
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.junit.jupiter.api.assertInstanceOf
 import org.openecard.utils.common.hex
@@ -10,7 +12,6 @@ import java.io.StringReader
 import javax.xml.namespace.NamespaceContext
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -18,7 +19,7 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class SerializationTest {
-	val xml = XML
+	val xml = eacXml
 
 	@Test
 	fun `process Result`() {
@@ -132,42 +133,39 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
+	// @Ignore
 	@Test
 	fun `process Eac1Input`() {
 		val original = readXml("Eac1Input")
-		val obj = xml.decodeFromString<DidAuthenticateRequest<Eac1Input>>(original)
-		assertEac1InputData(obj.data)
+		val obj = xml.decodeFromString<DidAuthenticateRequest>(original)
+		assertEac1InputData(assertInstanceOf<Eac1Input>(obj.data))
 		val ser = xml.encodeToString(obj)
 		assertEac1InputXml(ser, "/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac1Output`() {
 		val original = readXml("Eac1Output")
-		val obj = xml.decodeFromString<DidAuthenticateResponse<Eac1Output>>(original)
+		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac2Input`() {
 		val original = readXml("Eac2Input")
-		val obj = xml.decodeFromString<DidAuthenticateRequest<Eac2Input>>(original)
+		val obj = xml.decodeFromString<DidAuthenticateRequest>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac2Output`() {
 		val original = readXml("Eac2Output")
-		val obj = xml.decodeFromString<DidAuthenticateResponse<Eac2Output>>(original)
+		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
 		// TODO: add assertions
 		val ser = xml.encodeToString(obj)
 		// TODO: verify the serialized value
@@ -209,18 +207,16 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac1Input SOAP`() {
 		val original = readSoap("Eac1Input")
 		val obj = xml.decodeFromString<Envelope>(original)
-		assertEac1InputData(assertInstanceOf<DidAuthenticateRequest<Eac1Input>>(obj.body.content).data)
+		assertEac1InputData(assertInstanceOf(assertInstanceOf<DidAuthenticateRequest>(obj.body.content).data))
 		val ser = xml.encodeToString(obj)
 		assertEac1InputXml(ser, "/soap:Envelope/soap:Body/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac1Output SOAP`() {
 		val original = readSoap("Eac1Output")
@@ -230,7 +226,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac2Input SOAP`() {
 		val original = readSoap("Eac2Input")
@@ -240,7 +235,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process Eac2Output SOAP`() {
 		val original = readSoap("Eac2Output")
@@ -250,7 +244,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process StartPaos SOAP`() {
 		val original = readSoap("StartPaos")
@@ -260,7 +253,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process StartPaosResponse SOAP`() {
 		val original = readSoap("StartPaosResponse")
@@ -270,7 +262,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process TransmitRequest SOAP`() {
 		val original = readSoap("TransmitRequest")
@@ -280,7 +271,6 @@ class SerializationTest {
 		// TODO: verify the serialized value
 	}
 
-	@Ignore
 	@Test
 	fun `process TransmitResponse SOAP`() {
 		val original = readSoap("TransmitResponse")

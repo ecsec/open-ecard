@@ -14,7 +14,7 @@ data class Eac2Output(
 	override val protocol: String,
 	@SerialName("EFCardSecurity")
 	@XmlElement
-	val eFCardSecurity: PrintableUByteArray,
+	val efCardSecurity: PrintableUByteArray,
 	@SerialName("AuthenticationToken")
 	@XmlElement
 	val authenticationToken: PrintableUByteArray,
@@ -24,4 +24,4 @@ data class Eac2Output(
 	@SerialName("Challenge")
 	@XmlElement
 	val challenge: PrintableUByteArray?,
-) : AuthenticationProtocolData
+) : AuthenticationResponseProtocolData

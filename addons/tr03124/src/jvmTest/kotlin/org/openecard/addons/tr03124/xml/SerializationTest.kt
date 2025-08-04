@@ -461,10 +461,10 @@ class SerializationTest {
 	) {
 		val dom = parseXml(data)
 
-// 		dom.assertXpathEquals(
-// 			"$pathPrefix/iso:Result/iso:ResultMajor/text()",
-// 			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
-// 		)
+		dom.assertXpathEquals(
+			"$pathPrefix/dss:Result/dss:ResultMajor/text()",
+			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
+		)
 	}
 
 	@Test
@@ -542,10 +542,10 @@ class SerializationTest {
 			"$pathPrefix/@Profile",
 			"http://www.bsi.bund.de/ecard/api/1.1",
 		)
-// 		dom.assertXpathEquals(
-// 			"$pathPrefix/iso:Result/iso:ResultMajor/text()",
-// 			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
-// 		)
+		dom.assertXpathEquals(
+			"$pathPrefix/dss:Result/dss:ResultMajor/text()",
+			"http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok",
+		)
 
 		dom.assertXpathEquals(
 			"count($pathPrefix/iso:OutputAPDU)",
@@ -665,6 +665,7 @@ class SerializationTest {
 			init {
 				addNs("iso", "urn:iso:std:iso-iec:24727:tech:schema")
 				addNs("soap", "http://schemas.xmlsoap.org/soap/envelope/")
+				addNs("dss", "urn:oasis:names:tc:dss:1.0:core:schema")
 			}
 
 			private fun addNs(

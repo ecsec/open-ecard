@@ -305,34 +305,33 @@ class SerializationTest {
 		assertEac1InputData(assertInstanceOf<Eac1Input>(obj.data))
 		val ser = xml.encodeToString(obj)
 		assertEac1InputXml(ser, "/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
-		// TODO: verify the serialized value
 	}
 
 	@Test
 	fun `process Eac1Output`() {
 		val original = readXml("Eac1Output")
 		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
-		// TODO: add assertions
+		assertEac1OutputData(assertInstanceOf<Eac1Output>(obj.data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac1OutputXml(ser, "/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
 	@Test
 	fun `process Eac2Input`() {
 		val original = readXml("Eac2Input")
 		val obj = xml.decodeFromString<DidAuthenticateRequest>(original)
-		// TODO: add assertions
+		assertEac2InputData(assertInstanceOf<Eac2Input>(obj.data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac2InputXml(ser, "/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 	}
 
 	@Test
 	fun `process Eac2Output`() {
 		val original = readXml("Eac2Output")
 		val obj = xml.decodeFromString<DidAuthenticateResponse>(original)
-		// TODO: add assertions
+		assertEac2OutputData(assertInstanceOf<Eac2Output>(obj.data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac2OutputXml(ser, "/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
 	@Test
@@ -564,70 +563,69 @@ class SerializationTest {
 		assertEac1InputData(assertInstanceOf(assertInstanceOf<DidAuthenticateRequest>(obj.body.content).data))
 		val ser = xml.encodeToString(obj)
 		assertEac1InputXml(ser, "/soap:Envelope/soap:Body/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
-		// TODO: verify the serialized value
 	}
 
 	@Test
 	fun `process Eac1Output SOAP`() {
 		val original = readSoap("Eac1Output")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertEac1OutputData(assertInstanceOf(assertInstanceOf<DidAuthenticateResponse>(obj.body.content).data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac1OutputXml(ser, "/soap:Envelope/soap:Body/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
 	@Test
 	fun `process Eac2Input SOAP`() {
 		val original = readSoap("Eac2Input")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertEac2InputData(assertInstanceOf(assertInstanceOf<DidAuthenticateRequest>(obj.body.content).data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac2InputXml(ser, "/soap:Envelope/soap:Body/iso:DIDAuthenticate/iso:AuthenticationProtocolData")
 	}
 
 	@Test
 	fun `process Eac2Output SOAP`() {
 		val original = readSoap("Eac2Output")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertEac2OutputData(assertInstanceOf(assertInstanceOf<DidAuthenticateResponse>(obj.body.content).data))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertEac2OutputXml(ser, "/soap:Envelope/soap:Body/iso:DIDAuthenticateResponse/iso:AuthenticationProtocolData")
 	}
 
 	@Test
 	fun `process StartPaos SOAP`() {
 		val original = readSoap("StartPaos")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertStartPaosData(assertInstanceOf(assertInstanceOf<StartPaos>(obj.body.content)))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertStartPaosXml(ser, "/soap:Envelope/soap:Body/iso:StartPAOS")
 	}
 
 	@Test
 	fun `process StartPaosResponse SOAP`() {
 		val original = readSoap("StartPaosResponse")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertStartPaosResponseData(assertInstanceOf(assertInstanceOf<StartPaosResponse>(obj.body.content)))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertStartPaosResponseXml(ser, "/soap:Envelope/soap:Body/iso:StartPAOSResponse")
 	}
 
 	@Test
 	fun `process TransmitRequest SOAP`() {
 		val original = readSoap("TransmitRequest")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertTransmitRequestData(assertInstanceOf(assertInstanceOf<TransmitRequest>(obj.body.content)))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertTransmitRequestXml(ser, "/soap:Envelope/soap:Body/iso:Transmit")
 	}
 
 	@Test
 	fun `process TransmitResponse SOAP`() {
 		val original = readSoap("TransmitResponse")
 		val obj = xml.decodeFromString<Envelope>(original)
-		// TODO: add assertions
+		assertTransmitResponseData(assertInstanceOf(assertInstanceOf<TransmitResponse>(obj.body.content)))
 		val ser = xml.encodeToString(obj)
-		// TODO: verify the serialized value
+		assertTransmitResponseXml(ser, "/soap:Envelope/soap:Body/iso:TransmitResponse")
 	}
 
 	fun readXml(file: String): String = readResource("/xml/$file.xml")

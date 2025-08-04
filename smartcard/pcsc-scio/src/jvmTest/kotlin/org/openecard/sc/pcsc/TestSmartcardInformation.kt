@@ -24,7 +24,7 @@ class TestSmartcardInformation {
 
 			val infoBuilder = SmartcardInfoRetriever(channel)
 			val info = infoBuilder.retrieve()
-			val histBytes = channel.card.atr.historicalBytes
+			val histBytes = channel.card.atr().historicalBytes
 		}
 	}
 

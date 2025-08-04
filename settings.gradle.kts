@@ -19,6 +19,7 @@ include("utils:serialization")
 include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
 include("smartcard:pcsc-android")
+include("smartcard:pcsc-ios")
 include("smartcard:eac-definitions")
 include("smartcard:pace")
 

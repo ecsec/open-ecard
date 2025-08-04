@@ -4,7 +4,6 @@ import org.openecard.sal.iface.DeviceUnavailable
 import org.openecard.sal.iface.DeviceUnsupported
 import org.openecard.sal.iface.SalSession
 import org.openecard.sc.iface.CardCapabilities
-import org.openecard.sc.iface.ShareMode
 import org.openecard.sc.iface.TerminalConnection
 import org.openecard.sc.iface.info.SmartcardInfoRetriever
 import org.openecard.utils.common.generateSessionId
@@ -49,7 +48,7 @@ class SmartcardSalSession internal constructor(
 						?: throw DeviceUnsupported("The requested smartcard has no CIF available")
 
 				// determine suitable capabilites based on atr, static capabilites of by reading card information
-				var capabilities: CardCapabilities? = channel.card.capabilities
+				var capabilities: CardCapabilities? = channel.card.getCapabilities()
 				val staticCapabilities by lazy { cif.capabilities?.let { StaticCardCapabilities(it) } }
 				if (capabilities == null && sal.preferStaticCardCapabilities) {
 					capabilities = staticCapabilities
@@ -63,7 +62,7 @@ class SmartcardSalSession internal constructor(
 					capabilities = staticCapabilities
 				}
 				// update in card
-				card.capabilities = capabilities
+				card.setCapabilities = capabilities
 
 				// lock card if requested
 				if (isExclusive) {

@@ -9,10 +9,8 @@ import org.openecard.sc.iface.Card
 import org.openecard.sc.iface.CardCapabilities
 import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.CardProtocol
+import org.openecard.sc.iface.CommError
 import org.openecard.sc.iface.RemovedCard
-import org.openecard.sc.iface.UnsupportedCard
-import org.openecard.sc.iface.toAtr
-import kotlin.UByteArray
 
 private val logger = KotlinLogging.logger { }
 
@@ -23,20 +21,21 @@ class AndroidNfcCard(
 		get() = terminalConnection.tag
 
 	@OptIn(ExperimentalUnsignedTypes::class)
-	override val atr: Atr
-		get() {
-			val histBytesTmp = tag?.historicalBytes ?: tag?.hiLayerResponse
-			return histBytesTmp?.let {
-				Atr.fromHistoricalBytes(histBytesTmp.toUByteArray())
-			} ?: throw UnsupportedCard()
-		}
+	override fun atr(): Atr {
+		val histBytesTmp = tag?.historicalBytes ?: tag?.hiLayerResponse
+		return histBytesTmp?.let {
+			Atr.fromHistoricalBytes(histBytesTmp.toUByteArray())
+		} ?: throw CommError("Unsupported card or no valid historical bytes could be read.")
+	}
 
 	override val protocol = CardProtocol.TCL
 	override val isContactless = true
 
 	override val basicChannel = AndroidCardChannel(this)
 
-	override var capabilities: CardCapabilities? = atr.historicalBytes?.cardCapabilities
+	override var setCapabilities: CardCapabilities? = null
+
+	override fun getCapabilities(): CardCapabilities? = atr().historicalBytes?.cardCapabilities ?: setCapabilities
 
 	override fun openLogicalChannel(): CardChannel {
 		TODO("Not yet implemented")

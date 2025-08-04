@@ -178,7 +178,7 @@ class NfcTest {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
 				assertTrue(connection.isCardConnected, "Card not connected")
-				assertNotNull(connection.card?.atr) { "Atr could not be read" }
+				assertNotNull(connection.card.atr()) { "Atr could not be read" }
 			}
 		}
 	}
@@ -233,7 +233,7 @@ class NfcTest {
 		runBackgroundTestJobWithActivity { activity ->
 			connectWithTimeout(activity) { connection ->
 				assertNotNull(
-					connection.card?.atr?.historicalBytes,
+					connection.card.atr().historicalBytes,
 					"Historical Bytes in parsed Atr must not be null",
 				)
 			}

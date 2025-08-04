@@ -17,5 +17,7 @@ kotlin {
 
 		jvmTest.dependencies {
 		}
+		iosMain.dependencies {
+		}
 	}
 }

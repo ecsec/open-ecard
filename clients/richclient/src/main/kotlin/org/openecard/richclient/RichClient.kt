@@ -68,6 +68,7 @@ import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.recognition.RepoCifProvider
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
+import org.openecard.richclient.gui.Status
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
 import org.openecard.transport.dispatcher.MessageDispatcher
@@ -249,14 +250,14 @@ class RichClient {
 			tray!!.endSetup(env, manager!!)
 
 			// Initialize the EventManager
-			eventDispatcher!!.add(
-				tray!!.status!!,
-				EventType.TERMINAL_ADDED,
-				EventType.TERMINAL_REMOVED,
-				EventType.CARD_INSERTED,
-				EventType.CARD_RECOGNIZED,
-				EventType.CARD_REMOVED,
-			)
+// 			eventDispatcher!!.add(
+// 				tray!!.status!!,
+// 				EventType.TERMINAL_ADDED,
+// 				EventType.TERMINAL_REMOVED,
+// 				EventType.CARD_INSERTED,
+// 				EventType.CARD_RECOGNIZED,
+// 				EventType.CARD_REMOVED,
+// 			)
 
 			// Perform an EstablishContext to get a ContextHandle
 			try {

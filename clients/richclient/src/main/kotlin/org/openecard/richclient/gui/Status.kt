@@ -24,22 +24,25 @@ package org.openecard.richclient.gui
 
 import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
-import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType
 import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.openecard.addon.AddonManager
+import org.openecard.cif.bundled.CompleteTree
 import org.openecard.common.AppVersion.name
-import org.openecard.common.event.EventObject
-import org.openecard.common.event.EventType
 import org.openecard.common.interfaces.Environment
-import org.openecard.common.interfaces.EventCallback
 import org.openecard.common.util.ByteUtils
 import org.openecard.i18n.I18N
+import org.openecard.richclient.PcscCardWatcher
+import org.openecard.richclient.PcscCardWatcherCallbacks
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
 import org.openecard.richclient.updater.VersionUpdateChecker
+import org.openecard.sal.sc.recognition.DirectCardRecognition
+import org.openecard.sc.pcsc.PcscTerminalFactory
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -78,7 +81,7 @@ class Status(
 	private val env: Environment,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
-) : EventCallback {
+) {
 	private val infoMap: MutableMap<String, JPanel?> = ConcurrentSkipListMap()
 	private val cardContext: MutableMap<String, ByteArray> = ConcurrentSkipListMap()
 	private val cardIcons = HashMap<String, ImageIcon>()
@@ -213,7 +216,7 @@ class Status(
 	@Synchronized
 	private fun addInfo(
 		ifdName: String,
-		info: ConnectionHandleType.RecognitionInfo?,
+		cardType: String?,
 	) {
 		if (infoMap.containsKey(NO_TERMINAL_CONNECTED)) {
 			infoMap.remove(NO_TERMINAL_CONNECTED)
@@ -227,7 +230,7 @@ class Status(
 
 		val panel = JPanel()
 		panel.layout = FlowLayout(FlowLayout.LEFT)
-		panel.add(createInfoLabel(ifdName, info))
+		panel.add(createInfoLabel(ifdName, cardType))
 		infoMap[ifdName] = panel
 		infoView!!.add(panel)
 
@@ -239,12 +242,12 @@ class Status(
 	@Synchronized
 	private fun updateInfo(
 		ifdName: String,
-		info: ConnectionHandleType.RecognitionInfo?,
+		cardType: String?,
 	) {
 		val panel = infoMap[ifdName]
 		if (panel != null) {
 			panel.removeAll()
-			panel.add(createInfoLabel(ifdName, info))
+			panel.add(createInfoLabel(ifdName, cardType))
 			panel.repaint()
 
 			if (popup != null) {
@@ -289,15 +292,11 @@ class Status(
 		return cardIcons[cardType]
 	}
 
-	private fun getCardType(info: ConnectionHandleType.RecognitionInfo?): String {
+	private fun getCardType(info: String?): String {
 		if (info != null) {
-			val cardType = info.cardType
+			val cardType = info
 
-			return if (cardType != null) {
-				resolveCardType(cardType)
-			} else {
-				I18N.strings.richclient_status_nocard.localized()
-			}
+			return resolveCardType(cardType)
 		} else {
 			return I18N.strings.richclient_status_nocard.localized()
 		}
@@ -341,14 +340,14 @@ class Status(
 
 	private fun createInfoLabel(
 		ifdName: String? = null,
-		info: ConnectionHandleType.RecognitionInfo? = null,
+		cardType: String? = null,
 	): JLabel {
 		val label = JLabel()
 
 		if (ifdName != null) {
-			val cardType = if (info != null) info.cardType else "http://openecard.org/cif/no-card"
+			val cardType = cardType ?: "http://openecard.org/cif/no-card"
 			label.icon = getCardIcon(cardType)
-			label.text = "<html><b>" + getCardType(info) + "</b><br><i>" + ifdName + "</i></html>"
+			label.text = "<html><b>" + getCardType(cardType) + "</b><br><i>" + ifdName + "</i></html>"
 		} else {
 			// no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
 			// see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
@@ -366,59 +365,51 @@ class Status(
 		return label
 	}
 
-	@Synchronized
-	override fun signalEvent(
-		eventType: EventType,
-		eventData: EventObject,
-	) {
-		LOG.debug { "Event: $eventType" }
+	lateinit var watcher: PcscCardWatcher
 
-		val ch = eventData.handle
-		if (ch == null) {
-			LOG.error { "No handle provided in event $eventType." }
-			return
-		}
+	fun startCardWatcher() {
+		val recognizeCard =
+			DirectCardRecognition(CompleteTree.calls)
 
-		val ifdName = ch.ifdName
-		val ctx = ch.contextHandle
-		LOG.debug {
-			"ConnectionHandle: ifd=$ifdName, slot=${ByteUtils.toHexString(ch.slotHandle)}, ctx=${ByteUtils.toHexString(ctx)}"
-		}
-		val info = ch.recognitionInfo
-		if (info != null) {
-			LOG.debug { "RecognitionInfo: ${info.cardType}, ${ByteUtils.toHexString(info.cardIdentifier)}" }
-		} else {
-			LOG.debug { "RecognitionInfo: null" }
-		}
+		val scope = CoroutineScope(Dispatchers.Default)
 
-		if (isResponsibleContext(ifdName, ctx)) {
-			when (eventType) {
-				EventType.TERMINAL_ADDED -> addInfo(ifdName, info)
-				EventType.TERMINAL_REMOVED -> {
-					removeInfo(ifdName)
-					removeResponsibleContext(ifdName)
-					updateInfo(ifdName, info)
+		val factory = PcscTerminalFactory.instance
+
+		val callbacks =
+			object : PcscCardWatcherCallbacks {
+				override fun onTerminalAdded(terminalName: String) {
+					addInfo(terminalName, null)
 				}
 
-				EventType.CARD_REMOVED -> {
-					removeResponsibleContext(ifdName)
-					updateInfo(ifdName, info)
+				override fun onTerminalRemoved(terminalName: String) {
+					removeInfo(terminalName)
+					updateInfo(terminalName, null)
 				}
 
-				EventType.CARD_RECOGNIZED -> {
-					setResponsibleContext(ifdName, ctx)
-					addInfo(ifdName, info)
-					updateInfo(ifdName, info)
+				override fun onCardInserted(terminalName: String) {
+					addInfo(terminalName, null)
+					updateInfo(terminalName, null)
 				}
 
-				EventType.CARD_INSERTED -> {
-					addInfo(ifdName, info)
-					updateInfo(ifdName, info)
+				override fun onCardRecognized(
+					terminalName: String,
+					cardType: String?,
+				) {
+					addInfo(terminalName, cardType)
+					updateInfo(terminalName, cardType)
 				}
 
-				else -> {}
+				override fun onCardRemoved(terminalName: String) {
+					updateInfo(terminalName, null)
+				}
 			}
-		}
+
+		watcher = PcscCardWatcher(callbacks, scope, recognizeCard, factory)
+		watcher.start()
+	}
+
+	fun stopCardWatcher() {
+		watcher.stop()
 	}
 
 	private fun isResponsibleContext(

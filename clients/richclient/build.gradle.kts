@@ -18,6 +18,7 @@ plugins {
 	id("openecard.app-conventions")
 	alias(libs.plugins.jfx)
 	alias(libs.plugins.jpackage)
+	id("dev.mokkery")
 }
 
 javafx {
@@ -64,6 +65,9 @@ dependencies {
 	implementation(libs.jna.jpms)
 	implementation(libs.jna.jpms.platform)
 	implementation(libs.systray)
+	implementation(project(":smartcard:pcsc-scio"))
+	implementation(project(":sal:smartcard-sal"))
+	implementation(project(":cif:bundled-cifs"))
 
 	testImplementation(libs.bundles.test.basics.kotlin)
 }

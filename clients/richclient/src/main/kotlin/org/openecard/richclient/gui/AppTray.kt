@@ -123,6 +123,7 @@ class AppTray(
 	) {
 		val statusObj = Status(this, env, manager, tray == null)
 		status = statusObj
+		statusObj.startCardWatcher()
 
 		tray?.let { tray ->
 			tray.setImage(tray.getTrayIconImage(ICON_LOGO))
@@ -189,6 +190,7 @@ class AppTray(
 	 * Removes the tray icon from the tray and terminates the application.
 	 */
 	fun shutdown() {
+		status?.stopCardWatcher()
 		tray?.shutdown()
 		tray = null
 		client.teardown()

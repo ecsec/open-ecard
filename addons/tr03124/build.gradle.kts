@@ -12,7 +12,7 @@ kotlin {
 			implementation(libs.kotlin.logging)
 			// api(project(":utils:common"))
 			// api(project(":smartcard:sc-base"))
-			implementation(project(":smartcard:pace"))
+			implementation(project(":smartcard:pace-base"))
 			api(project(":sal:smartcard-sal"))
 
 			implementation(libs.kotlin.serialization.core)

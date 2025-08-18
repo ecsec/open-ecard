@@ -25,13 +25,13 @@ kotlin {
 		jvmTest.dependencies {
 			implementation(libs.bundles.test.jvm.kotlin)
 			implementation(project(":smartcard:pcsc-scio"))
-			implementation(project(":smartcard:pace"))
+			implementation(project(":smartcard:pace-base"))
 			implementation(project(":cif:bundled-cifs"))
 		}
 		androidDeviceTest.dependencies {
 			implementation(libs.bundles.test.android.kotlin)
 			implementation(project(":smartcard:pcsc-android"))
-			implementation(project(":smartcard:pace"))
+			implementation(project(":smartcard:pace-base"))
 			implementation(project(":cif:bundled-cifs"))
 		}
 	}

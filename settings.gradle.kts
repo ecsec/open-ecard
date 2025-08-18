@@ -20,7 +20,7 @@ include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
 include("smartcard:pcsc-android")
 include("smartcard:eac-definitions")
-include("smartcard:pace")
+include("smartcard:pace-base")
 
 include("sal:sal-base")
 include("sal:smartcard-sal")

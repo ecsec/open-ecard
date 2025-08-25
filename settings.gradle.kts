@@ -14,7 +14,7 @@ rootProject.name = "openecard-app"
 
 include("utils:common")
 include("utils:serialization")
-include("utils:test")
+// include("utils:test")
 
 include("smartcard:sc-base")
 include("smartcard:pcsc-scio")

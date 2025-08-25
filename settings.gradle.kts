@@ -14,13 +14,13 @@ rootProject.name = "openecard-app"
 
 include("utils:common")
 include("utils:serialization")
-include("utils:test")
+// include("utils:test")
 
 include("smartcard:sc-base")
 include("smartcard:pcsc-scio")
 include("smartcard:pcsc-android")
 include("smartcard:eac-definitions")
-include("smartcard:pace-base")
+include("smartcard:pace")
 
 include("sal:sal-base")
 include("sal:smartcard-sal")

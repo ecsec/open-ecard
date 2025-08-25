@@ -5,6 +5,7 @@ ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "13.1.+"
 kx-co = "1.10.+"
 kx-serde = "1.9.+"
+kx-serde-xml = "0.91.2"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
 compose = "1.7.0"
@@ -60,7 +61,7 @@ kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-te
 
 kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-serde" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
-kotlin-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.1" }
+kotlin-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "kx-serde-xml" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
 

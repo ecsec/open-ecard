@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 ktlint = "1.7.1"
 ktlint-githubreporter = "2.0.1"
 ktlint-plugin = "13.0.+"

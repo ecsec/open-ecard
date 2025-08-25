@@ -2,7 +2,7 @@
 kotlin = "2.2.10"
 ktlint = "1.7.1"
 ktlint-githubreporter = "2.0.1"
-ktlint-plugin = "13.0.+"
+ktlint-plugin = "13.1.+"
 kx-co = "1.10.+"
 kx-serde = "1.9.+"
 kt-logging = "7.0.+"

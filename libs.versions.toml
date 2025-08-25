@@ -145,7 +145,7 @@ bc-oec-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62"
 
 httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "4.4.16" }
 # https://github.com/akuhtz/proxy-vole
-proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.2" }
+proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
 #			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
 
 pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }

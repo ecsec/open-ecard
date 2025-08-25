@@ -31,7 +31,7 @@ androidx-test-runner = "1.7.0"
 jfx = "22.0.2"
 systray = "4.5"
 cxf = "4.1.0"
-jna = "5.16.0"
+jna = "5.17.0"
 
 semver = "2.0.0"
 jwtkt = "1.2.1"

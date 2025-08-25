@@ -14,7 +14,7 @@ kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 bouncycastle = "1.81"
 
-moko = "0.24.5"
+moko = "0.25.0"
 
 agp = "8.12.+"
 androidx-activityCompose = "1.9.+"

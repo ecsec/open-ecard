@@ -8,7 +8,7 @@ kx-serde = "1.9.+"
 kx-serde-xml = "0.91.2"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
-compose = "1.7.0"
+compose = "1.8.2"
 
 ktor = "3.2.+"
 kotlin-crypto = "0.5.0"

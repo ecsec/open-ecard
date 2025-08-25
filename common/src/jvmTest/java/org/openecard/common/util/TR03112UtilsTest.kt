@@ -21,7 +21,9 @@
  */
 package org.openecard.common.util
 
-import org.mockito.Mockito
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
 import org.openecard.bouncycastle.tls.Certificate
 import org.openecard.bouncycastle.tls.TlsServerCertificate
 import org.openecard.bouncycastle.tls.crypto.TlsCertificate
@@ -64,15 +66,18 @@ class TR03112UtilsTest {
 	@Test
 	@Throws(IOException::class)
 	fun testInCommCertificates() {
-		val mockTlsCert = Mockito.mock(TlsServerCertificate::class.java)
+		val mockTlsCert2 =
+			mock<TlsCertificate> {
+				every { encoded } returns x509Certificate
+			}
 		val mockCert =
-			Mockito.mock(
-				Certificate::class.java,
-			)
-		val mockTlsCert2 = Mockito.mock(TlsCertificate::class.java)
-		Mockito.`when`(mockTlsCert.certificate).thenReturn(mockCert)
-		Mockito.`when`(mockCert.getCertificateAt(0)).thenReturn(mockTlsCert2)
-		Mockito.`when`(mockTlsCert2.encoded).thenReturn(x509Certificate)
+			mock<Certificate> {
+				every { getCertificateAt(0) } returns mockTlsCert2
+			}
+		val mockTlsCert =
+			mock<TlsServerCertificate> {
+				every { certificate } returns mockCert
+			}
 
 		val listOfHashes = ArrayList<ByteArray?>()
 		listOfHashes.add(correctHash)

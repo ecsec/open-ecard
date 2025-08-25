@@ -21,6 +21,7 @@
  */
 package org.openecard.sal.protocol.pincompare
 
+import dev.mokkery.mock
 import iso.std.iso_iec._24727.tech.schema.CardApplicationConnect
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPath
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType
@@ -34,7 +35,6 @@ import iso.std.iso_iec._24727.tech.schema.Encipher
 import iso.std.iso_iec._24727.tech.schema.EstablishContext
 import iso.std.iso_iec._24727.tech.schema.ListIFDs
 import iso.std.iso_iec._24727.tech.schema.PinCompareMarkerType
-import org.mockito.Mockito
 import org.openecard.common.ClientEnv
 import org.openecard.common.ECardConstants
 import org.openecard.common.anytype.pin.PINCompareMarkerType
@@ -72,7 +72,7 @@ class PINCompareProtocolTest {
 	@BeforeMethod
 	@Throws(Exception::class)
 	fun setUp() {
-		val uc = Mockito.mock<UserConsent?>(UserConsent::class.java)
+		val uc = mock<UserConsent>()
 
 		env = ClientEnv()
 		env.gui = uc

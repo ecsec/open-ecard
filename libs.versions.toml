@@ -108,8 +108,6 @@ kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "k
 
 # testing
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
-mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "6.0.+" }
 awaitility = { group = "org.awaitility", name = "awaitility", version = "4.3.0" }
 wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 
@@ -169,7 +167,6 @@ jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 [bundles]
 test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
-test-mockito = ["mockito", "mockito-kotlin"]
 test-android-kotlin = [
 	"kotlin-test", "kotlin-coroutines-test",
 	"junit-params", "kotlin-logging-android", "slf4j-android",

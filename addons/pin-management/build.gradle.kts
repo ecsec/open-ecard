@@ -29,7 +29,6 @@ kotlin {
 		val jvmTest by getting {
 			dependencies {
 				implementation(libs.bundles.test.jvm.kotlin)
-				implementation(libs.bundles.test.mockito)
 				implementation(project(":sal:tiny-sal"))
 			}
 		}

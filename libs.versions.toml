@@ -148,7 +148,7 @@ httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "
 proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
 #			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
 
-pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
+pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "3.0.5" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
 

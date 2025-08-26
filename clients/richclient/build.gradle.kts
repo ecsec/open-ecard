@@ -188,7 +188,7 @@ tasks.register("packageDeb", JPackageTask::class) {
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("copyDependencies", "copyJar")
 
 	applyDefaults()
 	linuxConfigs()
@@ -203,7 +203,7 @@ tasks.register("packageRpm", JPackageTask::class) {
 	onlyIf("OS is not Linux") {
 		Platform.isLinux()
 	}
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("copyDependencies", "copyJar")
 
 	applyDefaults()
 	linuxConfigs()
@@ -316,7 +316,7 @@ tasks.register<MacSignLibrariesTask>("prepareMacBundle") {
 	onlyIf("OS is not Mac") {
 		Platform.isMac()
 	}
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("copyDependencies", "copyJar")
 
 	// skip this task if no signingId is configured
 	if (macSigningId != null) {
@@ -398,7 +398,7 @@ tasks.register("packageMsi", JPackageTask::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("build", "copyDependencies", "copyJar")
+	dependsOn("copyDependencies", "copyJar")
 
 	applyDefaults()
 	windowsConfigs()
@@ -440,7 +440,7 @@ tasks.register("packageExe", Exec::class) {
 	onlyIf("OS is not Windows") {
 		Platform.isWindows()
 	}
-	dependsOn("build", "copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
+	dependsOn("copyDependencies", "copyJar", "packageMsi", "prepareIsccFile")
 
 	workingDir(issWorkDir)
 	executable("iscc")

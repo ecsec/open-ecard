@@ -25,7 +25,7 @@ import dev.icerock.moko.resources.format
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.activation.MimeType
 import jakarta.activation.MimeTypeParseException
-import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.Loader
 import org.openecard.common.util.FileUtils.homeConfigDir
 import org.openecard.gui.definition.Document
 import org.openecard.gui.definition.OutputInfoUnit
@@ -321,7 +321,7 @@ class ToggleText(
 
 	private fun createPdfComponent(pdfData: ByteArray): JComponent {
 		try {
-			val doc = PDDocument.load(pdfData)
+			val doc = Loader.loadPDF(pdfData)
 			val pdfComp: PdfComponent =
 				object : PdfComponent(doc) {
 					// override so sizing the pdf component works properly in the gridlayout

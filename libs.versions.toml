@@ -1,20 +1,21 @@
 [versions]
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 ktlint = "1.7.1"
 ktlint-githubreporter = "2.0.1"
-ktlint-plugin = "13.0.+"
+ktlint-plugin = "13.1.+"
 kx-co = "1.10.+"
 kx-serde = "1.9.+"
+kx-serde-xml = "0.91.2"
 kt-logging = "7.0.+"
 kx-datetime = "0.7.1"
-compose = "1.7.0"
+compose = "1.8.2"
 
-ktor = "3.1.+"
+ktor = "3.2.+"
 kotlin-crypto = "0.5.0"
 kotlin-bignum = "0.3.10"
 bouncycastle = "1.81"
 
-moko = "0.24.5"
+moko = "0.25.0"
 
 agp = "8.12.+"
 androidx-activityCompose = "1.9.+"
@@ -24,21 +25,21 @@ androidx-core-ktx = "1.13.+"
 androidx-test-ktx = "1.7.+"
 androidx-espresso-core = "3.5.+"
 androidx-material = "1.11.+"
-androidx-test-junit = "1.2.1"
-androidx-test-runner = "1.6.2"
+androidx-test-junit = "1.3.0"
+androidx-test-runner = "1.7.0"
 
 jfx = "22.0.2"
 systray = "4.5"
 cxf = "4.1.0"
-jna = "5.16.0"
+jna = "5.17.0"
 
-semver = "2.0.0"
-jwtkt = "1.2.0"
+semver = "3.0.0"
+jwtkt = "1.2.1"
 
 jgit = "7.1.0.202411261347-r"
 kotlinPoet = "2.2.0"
 
-junit = "5.12.+"
+junit = "5.13.+"
 wiremock = "3.13.+"
 mokkery = "2.9.0"
 kover = "0.9.1"
@@ -60,7 +61,7 @@ kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-te
 
 kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-serde" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kx-serde" }
-kotlin-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.1" }
+kotlin-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "kx-serde-xml" }
 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kx-datetime" }
 
@@ -96,8 +97,8 @@ ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", versio
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 
 # logging
-slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.16" }
-slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.16" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version = "2.0.17" }
+slf4j-jdk14 = { group = "org.slf4j", name = "slf4j-jdk14", version = "2.0.17" }
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.+" }
 slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
 
@@ -107,9 +108,7 @@ kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "k
 
 # testing
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
-mockito = { group = "org.mockito", name = "mockito-core", version = "5.+" }
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.+" }
-awaitility = { group = "org.awaitility", name = "awaitility", version = "4.2.0" }
+awaitility = { group = "org.awaitility", name = "awaitility", version = "4.3.0" }
 wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 
 # jaxb
@@ -144,10 +143,10 @@ bc-oec-tls = { group = "org.openecard", name = "bctls-jdk15on", version = "1.62"
 
 httpcore = { group = "org.apache.httpcomponents", name = "httpcore", version = "4.4.16" }
 # https://github.com/akuhtz/proxy-vole
-proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.2" }
+proxyvole = { group = "org.bidib.com.github.markusbernhardt", name = "proxy-vole", version = "1.1.6" }
 #			nashorn", "org.javadelight", "delight-nashorn-sandbox").version("0.2.5")
 
-pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "2.0.28" }
+pdfbox = { group = "org.apache.pdfbox", name = "pdfbox", version = "3.0.5" }
 
 scio = { group = "com.github.martinpaljak", name = "apdu4j-jnasmartcardio", version = "25.03.11" }
 
@@ -168,7 +167,6 @@ jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 [bundles]
 test-basics-kotlin = ["kotlin-test", "kotlin-coroutines-test"]
 test-jvm-kotlin = ["junit-params", "logback-classic"]
-test-mockito = ["mockito", "mockito-kotlin"]
 test-android-kotlin = [
 	"kotlin-test", "kotlin-coroutines-test",
 	"junit-params", "kotlin-logging-android", "slf4j-android",
@@ -192,7 +190,6 @@ kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = 
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 kotlinKover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-shadow = { id = "com.gradleup.shadow", version = "8.3.6" }
 
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -202,7 +199,7 @@ moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko"
 mokkery = { id = "dev.mokkery", version.ref = "mokkery"}
 
 # adds job for generating reports about dependency versions
-versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
+versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
 
 cxf = { id = "io.mateo.cxf-codegen", version = "2.4.1" }
 

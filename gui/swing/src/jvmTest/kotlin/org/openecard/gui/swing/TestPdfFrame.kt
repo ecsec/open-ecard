@@ -9,7 +9,8 @@
  */
 package org.openecard.gui.swing
 
-import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.io.NonSeekableRandomAccessReadInputStream
 import org.openecard.gui.swing.components.PdfComponent
 import org.testng.annotations.Test
 import java.awt.BorderLayout
@@ -34,7 +35,7 @@ class TestPdfFrame {
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE)
 
 		val `in` = RunGUI::class.java.getResourceAsStream("/description.pdf")
-		val doc = PDDocument.load(`in`)
+		val doc = Loader.loadPDF(NonSeekableRandomAccessReadInputStream(`in`))
 		val pdfComp = PdfComponent(doc)
 		pdfComp.setCurrentPage(0)
 

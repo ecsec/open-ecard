@@ -25,11 +25,9 @@ package org.openecard.common.sal.state;
 import iso.std.iso_iec._24727.tech.schema.CardApplicationPathType;
 import iso.std.iso_iec._24727.tech.schema.CardInfoType;
 import iso.std.iso_iec._24727.tech.schema.ConnectionHandleType;
-import iso.std.iso_iec._24727.tech.schema.DIDAuthenticationStateType;
 import iso.std.iso_iec._24727.tech.schema.DIDInfoType;
 import iso.std.iso_iec._24727.tech.schema.DIDScopeType;
 import iso.std.iso_iec._24727.tech.schema.DIDStructureType;
-import iso.std.iso_iec._24727.tech.schema.SecurityConditionType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,14 +36,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import javax.annotation.Nullable;
 import org.openecard.addon.sal.SALProtocol;
 import org.openecard.common.sal.state.cif.CardApplicationWrapper;
 import org.openecard.common.sal.state.cif.CardInfoWrapper;
-import org.openecard.common.sal.state.cif.DIDInfoWrapper;
-import org.openecard.common.sal.state.cif.DataSetInfoWrapper;
 import org.openecard.common.tlv.iso7816.FCP;
-import org.openecard.common.util.ByteArrayWrapper;
 import org.openecard.common.util.HandlerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +71,7 @@ public class CardStateEntry implements Comparable<CardStateEntry> {
     private final Map<String, SALProtocol> protoObjects = new TreeMap<>();
     private FCP lastSelectedEfFCP;
 
-    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif, @Nullable String interfaceProtocol) {
+    public CardStateEntry(ConnectionHandleType handle, CardInfoType cif, String interfaceProtocol) {
 	this(handle, new CardInfoWrapper(cif, interfaceProtocol));
     }
 

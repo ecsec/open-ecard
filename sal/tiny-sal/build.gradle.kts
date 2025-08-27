@@ -21,8 +21,6 @@ kotlin {
 				api(project(":sal:sal-common"))
 				api(project(":cifs"))
 				api(project(":i18n"))
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

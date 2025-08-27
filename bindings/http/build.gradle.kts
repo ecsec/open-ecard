@@ -29,8 +29,6 @@ kotlin {
 				// 	api(libs.httpcore)
 				api(project(":addon"))
 				api(project(":i18n"))
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

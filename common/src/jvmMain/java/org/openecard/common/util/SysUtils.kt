@@ -24,7 +24,6 @@ package org.openecard.common.util
 import java.io.File
 import java.util.Locale
 import java.util.regex.Pattern
-import javax.annotation.Nonnull
 
 /**
  * Utility class for system related tasks.
@@ -121,9 +120,7 @@ object SysUtils {
 	 * @param s The text in which the variables should be expanded.
 	 * @return The expanded text.
 	 */
-	fun expandSysProps(
-		@Nonnull s: String,
-	): String {
+	fun expandSysProps(s: String): String {
 		// expand and clear unset vars
 		var s = s
 		s = expandVars(s, System.getProperties(), CURLY_VAR_SYS, true)

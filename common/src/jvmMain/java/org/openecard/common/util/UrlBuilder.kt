@@ -24,7 +24,6 @@ package org.openecard.common.util
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
-import javax.annotation.Nonnull
 import kotlin.jvm.Throws
 
 /**
@@ -124,9 +123,7 @@ class UrlBuilder {
 	 * @param scheme Value to replace.
 	 * @return A copy of the UrlBuilder with the scheme part modified.
 	 */
-	fun scheme(
-		@Nonnull scheme: String,
-	): UrlBuilder {
+	fun scheme(scheme: String): UrlBuilder {
 		val b = UrlBuilder(this)
 		b.scheme = scheme
 		return b

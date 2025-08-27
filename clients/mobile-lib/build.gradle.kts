@@ -30,8 +30,6 @@ kotlin {
 				api(project(":addons:status"))
 				api(project(":addons:genericcryptography"))
 				api(project(":ifd:ifd-protocols:pace"))
-
-				implementation(libs.annotations)
 			}
 		}
 		val jvmTest by getting {

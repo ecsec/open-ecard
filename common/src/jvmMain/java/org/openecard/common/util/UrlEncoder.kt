@@ -27,7 +27,6 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.BitSet
-import javax.annotation.Nonnull
 
 /**
  * URL encoder class supporting standard URL encoding and URL encoding of query parameters.
@@ -96,7 +95,7 @@ class UrlEncoder
 		}
 
 		private fun urlEncode(
-			@Nonnull content: String,
+			content: String,
 			safeChars: BitSet,
 			wsPlus: Boolean,
 			keepEscapes: Boolean,

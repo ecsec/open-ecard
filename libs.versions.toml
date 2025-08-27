@@ -103,7 +103,6 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version 
 slf4j-android = { group = "uk.uuid.slf4j", name = "slf4j-android", version = "2.0.+" }
 
 # utilities
-annotations = { group = "com.google.code.findbugs", name = "annotations", version = "3.0.1u2" }
 kotlinPoet = { group = "com.squareup", name = "kotlinpoet-jvm", version.ref = "kotlinPoet" }
 
 # testing

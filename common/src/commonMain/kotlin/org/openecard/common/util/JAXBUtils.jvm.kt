@@ -25,7 +25,6 @@ package org.openecard.common.util
 import org.openecard.ws.marshal.MarshallingTypeException
 import org.openecard.ws.marshal.WSMarshallerException
 import org.openecard.ws.marshal.WSMarshallerFactory.Companion.createInstance
-import javax.annotation.Nonnull
 
 /**
  *
@@ -33,11 +32,8 @@ import javax.annotation.Nonnull
  */
 object JAXBUtils {
 	@JvmStatic
-	@Nonnull
 	@Throws(MarshallingTypeException::class, WSMarshallerException::class)
-	fun <T : Any> deepCopy(
-		@Nonnull input: T,
-	): T {
+	fun <T : Any> deepCopy(input: T): T {
 		val m = createInstance()
 		val d = m.marshal(input)
 		val out = m.unmarshal(d)

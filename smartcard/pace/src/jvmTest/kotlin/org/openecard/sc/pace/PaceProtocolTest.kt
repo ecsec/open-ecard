@@ -2,9 +2,8 @@ package org.openecard.sc.pace
 
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assumptions
-import org.junit.jupiter.api.assertNotNull
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.openecard.sc.apdu.StatusWord
-import org.openecard.sc.apdu.StatusWordResult
 import org.openecard.sc.apdu.command.ReadBinary
 import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.apdu.command.transmit
@@ -16,13 +15,21 @@ import org.openecard.sc.pace.testutils.WhenPcscStack
 import org.openecard.sc.pcsc.PcscTerminalFactory
 import org.openecard.utils.common.hex
 import java.security.cert.CertificateFactory
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@EnabledIfEnvironmentVariable(named = "EGK_PACE_CAN", matches = ".*")
 @WhenPcscStack
 class PaceProtocolTest {
-	val egkCan = "123123"
+	lateinit var egkCan: String
+
+	@BeforeTest
+	fun loadCan() {
+		egkCan = System.getenv("EGK_PACE_CAN")
+	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test

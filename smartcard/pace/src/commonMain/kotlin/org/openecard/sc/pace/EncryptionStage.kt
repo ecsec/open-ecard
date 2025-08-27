@@ -67,6 +67,11 @@ class EncryptionStage(
 		}
 	}
 
+	override fun processError() {
+		// increment counter for next iteration
+		ssc++
+	}
+
 	@OptIn(ExperimentalUnsignedTypes::class)
 	override fun processResponse(dos: List<Tlv>): List<Tlv> {
 		// increment counter for next iteration

@@ -48,4 +48,10 @@ interface ResponseStage {
 	 */
 	@Throws(SecureMessagingException::class)
 	fun processResponse(dos: List<Tlv>): List<Tlv>
+
+	/**
+	 * Processes the stage with an error APDU.
+	 * Typically, this is used to advance internal counters without actually processing anything.
+	 */
+	fun processError()
 }

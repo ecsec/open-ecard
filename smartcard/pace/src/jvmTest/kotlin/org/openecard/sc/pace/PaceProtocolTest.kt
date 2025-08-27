@@ -17,7 +17,7 @@ import org.openecard.utils.common.hex
 import java.security.cert.CertificateFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertContains
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -78,7 +78,14 @@ class PaceProtocolTest {
 			val apdu = hex("00880000209C8CE4E11FE957A78D0780A110F1F97584A59037D4F0B8129C3A97BF9259826400").toCommandApdu()
 			val res = channel.transmit(apdu)
 			assertNotNull(res)
-			assertEquals(StatusWord.CONDITIONS_OF_USE_UNSATISFIED, res.status.type)
+			// test and real egk cards behave differently here
+			assertContains(
+				listOf(
+					StatusWord.CONDITIONS_OF_USE_UNSATISFIED, // real productive card
+					StatusWord.WRONG_LENGTH_UNSPECIFIED, // test card
+				),
+				res.status.type,
+			)
 		}
 	}
 }

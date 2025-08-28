@@ -8,6 +8,7 @@ import org.openecard.sc.apdu.command.ReadBinary
 import org.openecard.sc.apdu.command.Select
 import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.apdu.toCommandApdu
+import org.openecard.sc.iface.CardChannel
 import org.openecard.sc.iface.feature.PaceEstablishChannelRequest
 import org.openecard.sc.iface.feature.PacePinId
 import org.openecard.sc.iface.withContext
@@ -18,6 +19,7 @@ import java.security.cert.CertificateFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -73,19 +75,14 @@ class PaceProtocolTest {
 			val req = PaceEstablishChannelRequest(PacePinId.CAN, egkCan, null, null)
 			val response = runBlocking { paceProtocol.establishChannel(req) }
 
-			channel.transmit(hex("002241A406840109800100").toCommandApdu())
-
-			val apdu = hex("00880000209C8CE4E11FE957A78D0780A110F1F97584A59037D4F0B8129C3A97BF9259826400").toCommandApdu()
-			val res = channel.transmit(apdu)
+			channel.transmit("002241A406840109800100")
+			val res = channel.transmit("008800001880276883110000156308EC2B02380DE9940D92C96C9C204700")
 			assertNotNull(res)
 			// test and real egk cards behave differently here
-			assertContains(
-				listOf(
-					StatusWord.CONDITIONS_OF_USE_UNSATISFIED, // real productive card
-					StatusWord.WRONG_LENGTH_UNSPECIFIED, // test card
-				),
-				res.status.type,
-			)
+			assertEquals(StatusWord.OK, res.status.type)
 		}
 	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun CardChannel.transmit(apdu: String) = transmit(hex(apdu).toCommandApdu())
 }

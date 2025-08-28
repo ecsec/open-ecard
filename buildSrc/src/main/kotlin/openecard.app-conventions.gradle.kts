@@ -1,6 +1,7 @@
 plugins {
 	application
 	kotlin("jvm")
+	id("openecard.ktlint-conventions")
 }
 
 val javaToolchain: String by project

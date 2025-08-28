@@ -42,106 +42,105 @@ import javax.swing.event.ListSelectionListener
  * @author Tobias Wich
  */
 class AddonSelectionModel(
-    private val dialog: ManagementDialog,
-    private val container: JPanel
-) :
-    AbstractListModel<String>(), ListSelectionListener, WindowListener {
-    private var idxCounter: Int = 0
+	private val dialog: ManagementDialog,
+	private val container: JPanel,
+) : AbstractListModel<String>(),
+	ListSelectionListener,
+	WindowListener {
+	private var idxCounter: Int = 0
 
-    private val names: HashMap<Int, String> = HashMap()
+	private val names: HashMap<Int, String> = HashMap()
 	private val addons: HashMap<Int, AddonPanel> = HashMap()
 	private val addonClasses: HashMap<Int, Class<AddonPanel>> = HashMap()
 
 	private var lastActivePanel: AddonPanel? = null
 
 	/**
-     * Adds an add-on element to the model.
-     *
-     * @param name Name displayed in the list.
-     * @param addonPanel Panel displayed, when the item is selected.
-     */
-    @Synchronized
-    fun addElement(name: String, addonPanel: AddonPanel) {
-        if (!names.containsValue(name)) {
+	 * Adds an add-on element to the model.
+	 *
+	 * @param name Name displayed in the list.
+	 * @param addonPanel Panel displayed, when the item is selected.
+	 */
+	@Synchronized
+	fun addElement(
+		name: String,
+		addonPanel: AddonPanel,
+	) {
+		if (!names.containsValue(name)) {
 			names[idxCounter] = name
 			addons[idxCounter] = addonPanel
 			idxCounter++
-        }
-    }
+		}
+	}
 
-    override fun getSize(): Int {
-        return names.size
-    }
+	override fun getSize(): Int = names.size
 
-    override fun getElementAt(index: Int): String? {
-        return names[index]
-    }
+	override fun getElementAt(index: Int): String? = names[index]
 
-    override fun valueChanged(e: ListSelectionEvent) {
-        val source: Any = e.source
-        if (!e.valueIsAdjusting && source is JList<*>) {
-            // save last displayed component
-            saveLastDialog()
-            // load other panel if an index is selected
-            val idx: Int = source.selectedIndex
-            if (idx >= 0) {
-                val panel = getPanel(idx)
-                lastActivePanel = panel
-                container.removeAll()
-                container.add(panel, BorderLayout.CENTER)
-                // invalidate component, else it won't be redrawn
-                container.invalidate()
-                container.validate()
-                container.repaint()
-                // update icon in management panel
-                dialog.setLogo(panel.getLogo())
-            }
-        }
-    }
+	override fun valueChanged(e: ListSelectionEvent) {
+		val source: Any = e.source
+		if (!e.valueIsAdjusting && source is JList<*>) {
+			// save last displayed component
+			saveLastDialog()
+			// load other panel if an index is selected
+			val idx: Int = source.selectedIndex
+			if (idx >= 0) {
+				val panel = getPanel(idx)
+				lastActivePanel = panel
+				container.removeAll()
+				container.add(panel, BorderLayout.CENTER)
+				// invalidate component, else it won't be redrawn
+				container.invalidate()
+				container.validate()
+				container.repaint()
+				// update icon in management panel
+				dialog.setLogo(panel.getLogo())
+			}
+		}
+	}
 
-    @Synchronized
-    private fun getPanel(idx: Int): AddonPanel {
-        // TODO: load panel from class
-        return addons[idx] ?: throw IllegalArgumentException("No panel found for index $idx")
-    }
+	@Synchronized
+	private fun getPanel(idx: Int): AddonPanel {
+		// TODO: load panel from class
+		return addons[idx] ?: throw IllegalArgumentException("No panel found for index $idx")
+	}
 
-    private fun saveLastDialog() {
-        if (lastActivePanel != null) {
-            lastActivePanel!!.saveProperties()
-            lastActivePanel = null
-        }
-    }
+	private fun saveLastDialog() {
+		if (lastActivePanel != null) {
+			lastActivePanel!!.saveProperties()
+			lastActivePanel = null
+		}
+	}
 
+	override fun windowOpened(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowOpened(e: WindowEvent) {
-        // ignore
-    }
+	override fun windowClosing(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowClosing(e: WindowEvent) {
-        // ignore
-    }
+	override fun windowClosed(e: WindowEvent) {
+		saveLastDialog()
+	}
 
-    override fun windowClosed(e: WindowEvent) {
-        saveLastDialog()
-    }
+	override fun windowIconified(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowIconified(e: WindowEvent) {
-        // ignore
-    }
+	override fun windowDeiconified(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowDeiconified(e: WindowEvent) {
-        // ignore
-    }
+	override fun windowActivated(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowActivated(e: WindowEvent) {
-        // ignore
-    }
+	override fun windowDeactivated(e: WindowEvent) {
+		// ignore
+	}
 
-    override fun windowDeactivated(e: WindowEvent) {
-        // ignore
-    }
-
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

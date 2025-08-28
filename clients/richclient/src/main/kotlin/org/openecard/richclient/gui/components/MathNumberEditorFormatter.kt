@@ -32,45 +32,54 @@ import javax.swing.text.NumberFormatter
  *
  * @author Hans-Martin Haase
  */
-class MathNumberEditorFormatter(private val model: SpinnerMathNumberModel, format: NumberFormat?) : NumberFormatter() {
-    init {
-        setFormat(format)
-        setOverwriteMode(false)
-        setAllowsInvalid(true)
-        setCommitsOnValidEdit(false)
-        setValueClass(model.getValue().javaClass)
-    }
+class MathNumberEditorFormatter(
+	private val model: SpinnerMathNumberModel,
+	format: NumberFormat?,
+) : NumberFormatter() {
+	init {
+		setFormat(format)
+		overwriteMode = false
+		allowsInvalid = true
+		commitsOnValidEdit = false
+		valueClass = model.value.javaClass
+	}
 
-    /**
-     * Converts the passed in value to the passed in class. This only
-     * works if `valueClass` is one of `Integer`,
-     * `Long`, `Float`, `Double`,
-     * `Byte` or `Short` and `value`
-     * is an instanceof `Number`.
-     */
-    private fun convertValueToValueClass(value: Any, valueClass: Class<*>?): Any {
-        if (valueClass != null && (value is Number)) {
-            val numberValue: Number = value
-            if (valueClass == BigInteger::class.java) {
-                return numberValue as BigInteger
-            } else if (valueClass == BigDecimal::class.java) {
-                return numberValue as BigDecimal
-            }
-        }
-        return value
-    }
+	/**
+	 * Converts the passed in value to the passed in class. This only
+	 * works if `valueClass` is one of `Integer`,
+	 * `Long`, `Float`, `Double`,
+	 * `Byte` or `Short` and `value`
+	 * is an instanceof `Number`.
+	 */
+	private fun convertValueToValueClass(
+		value: Any,
+		valueClass: Class<*>?,
+	): Any {
+		if (valueClass != null && (value is Number)) {
+			val numberValue: Number = value
+			if (valueClass == BigInteger::class.java) {
+				return numberValue as BigInteger
+			} else if (valueClass == BigDecimal::class.java) {
+				return numberValue as BigDecimal
+			}
+		}
+		return value
+	}
 
-    /**
-     * Invokes `parseObject` on `f`, returning
-     * its value.
-     */
-    @Throws(ParseException::class)
-    fun stringToValue(text: String?, f: Format?): Any? {
-        if (f == null) {
-            return text
-        }
-        val value: Any = f.parseObject(text)
+	/**
+	 * Invokes `parseObject` on `f`, returning
+	 * its value.
+	 */
+	@Throws(ParseException::class)
+	fun stringToValue(
+		text: String?,
+		f: Format?,
+	): Any? {
+		if (f == null) {
+			return text
+		}
+		val value: Any = f.parseObject(text)
 
-        return convertValueToValueClass(value, getValueClass())
-    }
+		return convertValueToValueClass(value, getValueClass())
+	}
 }

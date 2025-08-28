@@ -35,21 +35,24 @@ import javafx.util.Callback
  * @param <T>
  */
 class FitContentTableView<T> : TableView<T>() {
-    fun makeTableFitContent() {
-        val sp = VBox()
+	fun makeTableFitContent() {
+		val sp = VBox()
 
-        sp.children.add(this)
-        val scene: Scene = Scene(sp, sp.maxWidth, sp.maxHeight)
-        // HACK to get the right width for the TableView
-        sp.applyCss()
-        sp.layout()
+		sp.children.add(this)
+		val scene: Scene = Scene(sp, sp.maxWidth, sp.maxHeight)
+		// HACK to get the right width for the TableView
+		sp.applyCss()
+		sp.layout()
 
-        when (val result = sp.children[0]) {
+		when (val result = sp.children[0]) {
 			is TableView<*> -> {
-				var width = 2.0 //border
-				width += super.getColumns().stream()
-					.mapToDouble { col: TableColumn<T, *> -> col.width }
-					.sum()
+				var width = 2.0 // border
+				width +=
+					super
+						.getColumns()
+						.stream()
+						.mapToDouble { col: TableColumn<T, *> -> col.width }
+						.sum()
 
 				val header: TableHeaderRow = super.lookup("TableHeaderRow") as TableHeaderRow
 				val headerHeight = header.boundsInParent.height
@@ -57,9 +60,9 @@ class FitContentTableView<T> : TableView<T>() {
 				super.setPrefWidth(width)
 				super.setPrefHeight(33 * (result.items.size) + headerHeight + 1)
 
-				//resize columns to fit content and prevent further resizing by the user
+				// resize columns to fit content and prevent further resizing by the user
 				super.setColumnResizePolicy(Callback { p: ResizeFeatures<*>? -> true })
 			}
 		}
-    }
+	}
 }

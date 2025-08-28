@@ -27,7 +27,7 @@ import org.openecard.addon.AddonProperties
 import org.openecard.addon.AddonPropertiesException
 import org.openecard.common.OpenecardProperties
 import java.io.IOException
-import java.util.*
+import java.util.Properties
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,88 +37,86 @@ private val logger = KotlinLogging.logger {}
  * @author Hans-Martin Haase
  */
 object SettingsFactory {
-
 	/**
 	 * Get a Settings object from a fresh Properties object obtained from OpenecardProperties.
 	 *
 	 * @return A Settings object which wraps the `pops` object.
 	 */
-    fun getInstance(): Settings {
-		return OpenecardPropertiesWrapper()
+	fun getInstance(): Settings = OpenecardPropertiesWrapper()
+
+	fun getInstance(props: Properties): Settings = NonSavingProperties(props)
+
+	/**
+	 * Get a Settings object from the given AddonProperties object.
+	 *
+	 * @param props The AddonProperties to wrap in the Settings object.
+	 * @return A Settings object which wraps the `props` object.
+	 */
+	fun getInstance(props: AddonProperties): Settings = AddonPropertiesWrapper(props)
+
+	/**
+	 * The class extends the Settings class wrapping an AddonProperties object.
+	 *
+	 * @author Hans-Martin Haase
+	 */
+	class AddonPropertiesWrapper(
+		private val props: AddonProperties,
+	) : Settings {
+		init {
+			try {
+				props.loadProperties()
+			} catch (ex: AddonPropertiesException) {
+				logger.error(ex) { "Failed to load AddonProperties." }
+			}
+		}
+
+		override fun setProperty(
+			key: String?,
+			value: String?,
+		) {
+			props.setProperty(key, value)
+		}
+
+		override fun getProperty(key: String?): String? = props.getProperty(key)
+
+		@Throws(AddonPropertiesException::class)
+		override fun store() {
+			props.saveProperties()
+		}
 	}
 
-    fun getInstance(props: Properties): Settings {
-        return NonSavingProperties(props)
-    }
+	/**
+	 * The class extends the NonSavingProperties class and wraps OpenecardProperties.
+	 *
+	 * @author Hans-Martin Haase
+	 */
+	class OpenecardPropertiesWrapper : NonSavingProperties(OpenecardProperties.properties()) {
+		@Throws(IOException::class)
+		override fun store() {
+			OpenecardProperties.writeChanges(props)
+		}
+	}
 
-    /**
-     * Get a Settings object from the given AddonProperties object.
-     *
-     * @param props The AddonProperties to wrap in the Settings object.
-     * @return A Settings object which wraps the `props` object.
-     */
-    fun getInstance(props: AddonProperties): Settings {
-        return AddonPropertiesWrapper(props)
-    }
+	/**
+	 * This class wraps a properties object but is not able to save it.
+	 *
+	 * @author Tobias Wich
+	 */
+	open class NonSavingProperties(
+		protected val props: Properties,
+	) : Settings {
+		override fun setProperty(
+			key: String?,
+			value: String?,
+		) {
+			props.setProperty(key, value)
+		}
 
+		override fun getProperty(key: String?): String? = props.getProperty(key)
 
-    /**
-     * The class extends the Settings class wrapping an AddonProperties object.
-     *
-     * @author Hans-Martin Haase
-     */
-    class AddonPropertiesWrapper(private val props: AddonProperties) : Settings {
-        init {
-            try {
-                props.loadProperties()
-            } catch (ex: AddonPropertiesException) {
-                logger.error(ex) { "Failed to load AddonProperties." }
-            }
-        }
-
-        override fun setProperty(key: String?, value: String?) {
-            props.setProperty(key, value)
-        }
-
-        override fun getProperty(key: String?): String? {
-            return props.getProperty(key)
-        }
-
-        @Throws(AddonPropertiesException::class)
-        override fun store() {
-            props.saveProperties()
-        }
-    }
-
-    /**
-     * The class extends the NonSavingProperties class and wraps OpenecardProperties.
-     *
-     * @author Hans-Martin Haase
-     */
-    class OpenecardPropertiesWrapper : NonSavingProperties(OpenecardProperties.properties()) {
-        @Throws(IOException::class)
-        override fun store() {
-            OpenecardProperties.writeChanges(props)
-        }
-    }
-
-    /**
-     * This class wraps a properties object but is not able to save it.
-     *
-     * @author Tobias Wich
-     */
-    open class NonSavingProperties(protected val props: Properties) : Settings {
-        override fun setProperty(key: String?, value: String?) {
-            props.setProperty(key, value)
-        }
-
-        override fun getProperty(key: String?): String? {
-            return props.getProperty(key)
-        }
-
-        @Throws(IOException::class)
-        override fun store() {
-            OpenecardProperties.writeChanges(props)
-        }
-    }
+		@Throws(IOException::class)
+		override fun store() {
+			OpenecardProperties.writeChanges(props)
+		}
+	}
 }

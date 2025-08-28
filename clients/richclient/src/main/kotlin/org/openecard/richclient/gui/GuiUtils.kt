@@ -31,64 +31,63 @@ import java.io.InputStream
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 
-private val LOG = KotlinLogging.logger {  }
+private val LOG = KotlinLogging.logger { }
 
 /**
  *
  * @author Johannes Schmölz
  */
 object GuiUtils {
+	private const val IMG_HEIGHT = 81
+	private const val IMG_WIDTH = 128
 
-    private const val IMG_HEIGHT = 81
-    private const val IMG_WIDTH = 128
-
-    fun getScaledCardImageIcon(imageStream: InputStream): ImageIcon {
-        var icon = ImageIcon()
-        try {
-            icon = ImageIcon(ImageIO.read(imageStream))
-            icon.image = icon.image.getScaledInstance(IMG_WIDTH, IMG_HEIGHT, Image.SCALE_SMOOTH)
-        } catch (ex: IOException) {
+	fun getScaledCardImageIcon(imageStream: InputStream): ImageIcon {
+		var icon = ImageIcon()
+		try {
+			icon = ImageIcon(ImageIO.read(imageStream))
+			icon.image = icon.image.getScaledInstance(IMG_WIDTH, IMG_HEIGHT, Image.SCALE_SMOOTH)
+		} catch (ex: IOException) {
 			LOG.error(ex) { "Failed to read image stream." }
-        }
-        return icon
-    }
+		}
+		return icon
+	}
 
-    fun getImage(name: String): Image {
-        val imgData = getImageData(name)
-        val img = Toolkit.getDefaultToolkit().createImage(imgData)
-        return img
-    }
+	fun getImage(name: String): Image {
+		val imgData = getImageData(name)
+		val img = Toolkit.getDefaultToolkit().createImage(imgData)
+		return img
+	}
 
-    private fun getImageData(name: String): ByteArray {
-        var imageUrl = GuiUtils::class.java.getResource("images/$name")
-        if (imageUrl == null) {
-            imageUrl = GuiUtils::class.java.getResource("/images/$name")
-        }
-        if (imageUrl == null) {
-			LOG.error { "Failed to find image ${name}." }
-            return ByteArray(0)
-        }
+	private fun getImageData(name: String): ByteArray {
+		var imageUrl = GuiUtils::class.java.getResource("images/$name")
+		if (imageUrl == null) {
+			imageUrl = GuiUtils::class.java.getResource("/images/$name")
+		}
+		if (imageUrl == null) {
+			LOG.error { "Failed to find image $name." }
+			return ByteArray(0)
+		}
 
-        try {
-            imageUrl.openStream().use { `in` ->
-                return getImageData(`in`)
-            }
-        } catch (ex: IOException) {
+		try {
+			imageUrl.openStream().use { `in` ->
+				return getImageData(`in`)
+			}
+		} catch (ex: IOException) {
 			LOG.error(ex) { "Failed to read image $name." }
-            return ByteArray(0)
-        }
-    }
+			return ByteArray(0)
+		}
+	}
 
-    @Throws(IOException::class)
-    private fun getImageData(`in`: InputStream): ByteArray {
-        val out = ByteArrayOutputStream(40 * 1024)
-        val buf = ByteArray(4096)
-        var numRead: Int
+	@Throws(IOException::class)
+	private fun getImageData(`in`: InputStream): ByteArray {
+		val out = ByteArrayOutputStream(40 * 1024)
+		val buf = ByteArray(4096)
+		var numRead: Int
 
-        while ((`in`.read(buf).also { numRead = it }) != -1) {
-            out.write(buf, 0, numRead)
-        }
+		while ((`in`.read(buf).also { numRead = it }) != -1) {
+			out.write(buf, 0, numRead)
+		}
 
-        return out.toByteArray()
-    }
+		return out.toByteArray()
+	}
 }

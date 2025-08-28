@@ -33,11 +33,13 @@ import java.io.IOException
  *
  * @author Tobias Wich
  */
-open class OpenecardPropertiesSettingsGroup(title: String?) : SettingsGroup(title, SettingsFactory.getInstance()) {
-    @Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
-    override fun saveProperties() {
-        super.saveProperties()
-        // reload global Open eCard properties
-        OpenecardProperties.load()
-    }
+open class OpenecardPropertiesSettingsGroup(
+	title: String?,
+) : SettingsGroup(title, SettingsFactory.getInstance()) {
+	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
+	override fun saveProperties() {
+		super.saveProperties()
+		// reload global Open eCard properties
+		OpenecardProperties.load()
+	}
 }

@@ -31,37 +31,31 @@ import javax.swing.JTextField
  *
  * @author Hans-Martin Haase
  */
-class OpenFileBrowserListener
-/**
- * Creates a new OpenFileBrowserListener object.
- *
- * @param fileTypes A semicolon separated list of accepted file types.
- * @param currentvalue A [JTextField] which registers this listener.
- */(
-    /**
-     * A semicolon separated list of accepted file types.
-     */
-    private val fileType: String,
-    /**
-     * The JTextField which is modified when a file was selected.
-     */
-    private val value: JTextField
+class OpenFileBrowserListener(
+	/**
+	 * A semicolon separated list of accepted file types.
+	 */
+	private val fileType: String,
+	/**
+	 * The JTextField which is modified when a file was selected.
+	 */
+	private val value: JTextField,
 ) : ActionListener {
-    /**
-     * Creates a new FileChooserItem and make it appear on the screen.
-     *
-     * The method creates a [FileChooserItem] and makes it visible on the screen. If the user has selected a valid
-     * file according to the restrictions stored in the `fileType` field.
-     *
-     * @param e An [ActionEvent].
-     */
-    override fun actionPerformed(e: ActionEvent) {
-        val fChooser: FileChooserItem = FileChooserItem(fileType)
-        fChooser.setVisible(true)
-        val chooserresult: Int = fChooser.showOpenDialog(null)
+	/**
+	 * Creates a new FileChooserItem and make it appear on the screen.
+	 *
+	 * The method creates a [FileChooserItem] and makes it visible on the screen. If the user has selected a valid
+	 * file according to the restrictions stored in the `fileType` field.
+	 *
+	 * @param e An [ActionEvent].
+	 */
+	override fun actionPerformed(e: ActionEvent) {
+		val fChooser: FileChooserItem = FileChooserItem(fileType)
+		fChooser.setVisible(true)
+		val chooserresult: Int = fChooser.showOpenDialog(null)
 
-        if (chooserresult == JFileChooser.APPROVE_OPTION && fChooser.getSelectedFile().isFile()) {
-            value.setText(fChooser.getSelectedFile().getPath())
-        }
-    }
+		if (chooserresult == JFileChooser.APPROVE_OPTION && fChooser.getSelectedFile().isFile()) {
+			value.setText(fChooser.getSelectedFile().getPath())
+		}
+	}
 }

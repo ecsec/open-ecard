@@ -29,4 +29,8 @@ import org.openecard.releases.UpdateAdvice
  *
  * @author Sebastian Schuberth
  */
-class VersionUpdateTableItem(val version: String, val updateType: String, val downloadLink: Hyperlink)
+class VersionUpdateTableItem(
+	val version: String,
+	val updateType: String,
+	val downloadLink: Hyperlink,
+)

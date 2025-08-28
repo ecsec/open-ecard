@@ -34,11 +34,11 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * @author Sebastian Schuberth
  */
 class MiddlewareSelectionPanel : SettingsPanel() {
-    //
-    //    public MiddlewareSelectionPanel() {
-    //	middlewares = new MiddlewareSelectionGroup();
-    //	addSettingsGroup(middlewares);
-    //    }
+	//
+	//    public MiddlewareSelectionPanel() {
+	// 	middlewares = new MiddlewareSelectionGroup();
+	// 	addSettingsGroup(middlewares);
+	//    }
 
 	companion object {
 		private const val serialVersionUID: Long = 1L

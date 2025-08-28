@@ -38,59 +38,59 @@ import java.io.IOException
  * @author Tobias Wich
  */
 object LogbackConfig {
-    private const val CFG_FILENAME = "richclient_logback.xml"
-    private var LOG: Logger? = null // loaded on demand, for reason see in load() below
+	private const val CFG_FILENAME = "richclient_logback.xml"
+	private var log: Logger? = null // loaded on demand, for reason see in load() below
 
-    @get:Throws(IOException::class)
-    val confFile: File
-        get() {
-            val cfgDir = homeConfigDir
-            val logFileStr = cfgDir.toString() + File.separator + CFG_FILENAME
-            val logFile = File(logFileStr)
-            return logFile
-        }
+	@get:Throws(IOException::class)
+	val confFile: File
+		get() {
+			val cfgDir = homeConfigDir
+			val logFileStr = cfgDir.toString() + File.separator + CFG_FILENAME
+			val logFile = File(logFileStr)
+			return logFile
+		}
 
-    /**
-     * Load Logback configuration.
-     * At first the code tries to load the file '$HOME/.openecard/richclient_logback.xml', if it does not exist, then
-     * the default config is used. The default configuration is loaded from within the richclient jar.
-     *
-     * @throws IOException If no config could be loaded.
-     * @throws SecurityException If the config dir is not writable.
-     * @throws JoranException If the config file contains invalid content.
-     */
-    @Throws(IOException::class, SecurityException::class, JoranException::class)
-    fun load() {
-        val logFile = confFile
+	/**
+	 * Load Logback configuration.
+	 * At first the code tries to load the file '$HOME/.openecard/richclient_logback.xml', if it does not exist, then
+	 * the default config is used. The default configuration is loaded from within the richclient jar.
+	 *
+	 * @throws IOException If no config could be loaded.
+	 * @throws SecurityException If the config dir is not writable.
+	 * @throws JoranException If the config file contains invalid content.
+	 */
+	@Throws(IOException::class, SecurityException::class, JoranException::class)
+	fun load() {
+		val logFile = confFile
 
-        if (logFile.canRead() && logFile.isFile) {
-            // this prevents loading the bundled config
-            System.setProperty("logback.configurationFile", logFile.absolutePath)
+		if (logFile.canRead() && logFile.isFile) {
+			// this prevents loading the bundled config
+			System.setProperty("logback.configurationFile", logFile.absolutePath)
 
-            // make sure to reload logging config
-            val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
-            ctx.reset()
-            val conf = JoranConfigurator()
-            conf.context = ctx
-            ctx.reset()
-            conf.doConfigure(logFile)
+			// make sure to reload logging config
+			val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
+			ctx.reset()
+			val conf = JoranConfigurator()
+			conf.context = ctx
+			ctx.reset()
+			conf.doConfigure(logFile)
 
-            // load logger after loading config, in order to avoid loading bundled config first
-            if (LOG == null) {
-                LOG = LoggerFactory.getLogger(LogbackConfig::class.java)
-            }
-            LOG!!.info("Configured Logback with config file from: {}", logFile)
-        } else {
-            loadDefault()
-        }
-    }
+			// load logger after loading config, in order to avoid loading bundled config first
+			if (log == null) {
+				log = LoggerFactory.getLogger(LogbackConfig::class.java)
+			}
+			log!!.info("Configured Logback with config file from: {}", logFile)
+		} else {
+			loadDefault()
+		}
+	}
 
-    @Throws(JoranException::class)
-    fun loadDefault() {
-        System.clearProperty("logback.configurationFile")
-        val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
-        ctx.reset()
-        val init = ContextInitializer(ctx)
-        init.autoConfig()
-    }
+	@Throws(JoranException::class)
+	fun loadDefault() {
+		System.clearProperty("logback.configurationFile")
+		val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
+		ctx.reset()
+		val init = ContextInitializer(ctx)
+		init.autoConfig()
+	}
 }

@@ -25,12 +25,24 @@ package org.openecard.richclient.gui.manage
 import org.openecard.addon.AddonManager
 import org.openecard.addon.manifest.AddonSpecification
 import org.openecard.i18n.I18N
-import java.awt.*
+import java.awt.Dimension
+import java.awt.FlowLayout
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.GridLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.ItemEvent
 import java.awt.event.ItemListener
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.ButtonGroup
+import javax.swing.JButton
+import javax.swing.JEditorPane
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JRadioButton
+import javax.swing.JScrollPane
+import javax.swing.ScrollPaneConstants
 
 /**
  * Implements a about panel which contains basic information about the installed addon.
@@ -58,10 +70,10 @@ class AboutPanel(
 		val basePane: JPanel = JPanel(GridBagLayout())
 		basePane.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2))
 		basePane.setLayout(GridLayout(2, 1))
-		val versionLabel: JLabel = JLabel(I18N.strings.about_version.localized() + ":")
-		val licenseLabel: JLabel = JLabel(I18N.strings.addon_about_license_type.localized() + ":")
+		val versionLabel = JLabel(I18N.strings.about_version.localized() + ":")
+		val licenseLabel = JLabel(I18N.strings.addon_about_license_type.localized() + ":")
 
-		val lc: GridBagConstraints = GridBagConstraints()
+		val lc = GridBagConstraints()
 		lc.anchor = GridBagConstraints.WEST
 		lc.gridx = 0
 		lc.gridy = 0
@@ -69,7 +81,7 @@ class AboutPanel(
 		lc.weighty = 1.0
 		basePane.add(versionLabel, lc)
 
-		val lc2: GridBagConstraints = GridBagConstraints()
+		val lc2 = GridBagConstraints()
 		lc2.anchor = GridBagConstraints.WEST
 		lc2.fill = GridBagConstraints.HORIZONTAL
 		lc2.gridwidth = GridBagConstraints.REMAINDER
@@ -79,7 +91,7 @@ class AboutPanel(
 		lc2.weighty = 1.0
 		basePane.add(JLabel(addonSpec.getVersion()))
 
-		val lc3: GridBagConstraints = GridBagConstraints()
+		val lc3 = GridBagConstraints()
 		lc3.anchor = GridBagConstraints.WEST
 		lc3.gridx = 1
 		lc3.gridy = 2
@@ -87,7 +99,7 @@ class AboutPanel(
 		lc3.weighty = 1.0
 		basePane.add(licenseLabel, lc3)
 
-		val lc4: GridBagConstraints = GridBagConstraints()
+		val lc4 = GridBagConstraints()
 		lc4.anchor = GridBagConstraints.WEST
 		lc4.fill = GridBagConstraints.HORIZONTAL
 		lc4.gridwidth = GridBagConstraints.REMAINDER
@@ -97,7 +109,7 @@ class AboutPanel(
 		lc4.weighty = 1.0
 		basePane.add(JLabel(addonSpec.license))
 
-		val c: GridBagConstraints = GridBagConstraints()
+		val c = GridBagConstraints()
 		c.fill = GridBagConstraints.HORIZONTAL
 		c.gridwidth = GridBagConstraints.REMAINDER
 		c.weightx = 1.0
@@ -113,49 +125,49 @@ class AboutPanel(
 	private fun setupBody() {
 		display = JEditorPane()
 		display!!.setContentType("text/html")
-		display!!.setText(about)
-		display!!.setEditable(false)
+		display!!.text = about
+		display!!.isEditable = false
 
 		if (about == "") {
-			display!!.setText("No about text available.")
+			display!!.text = "No about text available."
 		}
 
-		val buttonPane: JPanel = JPanel(FlowLayout(FlowLayout.LEADING))
+		val buttonPane = JPanel(FlowLayout(FlowLayout.LEADING))
 		buttonPane.setBorder(BorderFactory.createEmptyBorder())
 
 		if (license != "" && about != "") {
-			val aButton: JRadioButton = JRadioButton(I18N.strings.addon_about_about.localized())
+			val aButton = JRadioButton(I18N.strings.addon_about_about.localized())
 			aButton.addItemListener(action)
 			aButton.setSelected(true)
-			val lButton: JRadioButton = JRadioButton(I18N.strings.addon_about_license.localized())
+			val lButton = JRadioButton(I18N.strings.addon_about_license.localized())
 
-			val btnGrp: ButtonGroup = ButtonGroup()
+			val btnGrp = ButtonGroup()
 			btnGrp.add(aButton)
 			btnGrp.add(lButton)
 
 			buttonPane.add(aButton)
 			buttonPane.add(lButton)
 		} else if (license != "" && about == "") {
-			val licenseLabel2: JLabel = JLabel(I18N.strings.addon_about_license.localized())
+			val licenseLabel2 = JLabel(I18N.strings.addon_about_license.localized())
 			buttonPane.add(licenseLabel2)
 			display!!.setText(license)
 		} else if (license == "" && about != "") {
-			val aboutLabel: JLabel = JLabel(I18N.strings.addon_about_about.localized())
+			val aboutLabel = JLabel(I18N.strings.addon_about_about.localized())
 			buttonPane.add(aboutLabel)
 		}
 
-		val scrollLayout: GridBagLayout = GridBagLayout()
-		val panel: JPanel = JPanel(scrollLayout)
-		val aboutScroll: JScrollPane = JScrollPane(display)
+		val scrollLayout = GridBagLayout()
+		val panel = JPanel(scrollLayout)
+		val aboutScroll = JScrollPane(display)
 		aboutScroll.setBorder(BorderFactory.createEmptyBorder())
 		aboutScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
 		aboutScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
-		aboutScroll.setMinimumSize(Dimension(150, 100))
+		aboutScroll.minimumSize = Dimension(150, 100)
 		aboutScroll.getVerticalScrollBar().setBlockIncrement(16)
 		aboutScroll.getVerticalScrollBar().setUnitIncrement(16)
-		display!!.setMinimumSize(Dimension(150, 100))
+		display!!.minimumSize = Dimension(150, 100)
 
-		val c: GridBagConstraints = GridBagConstraints()
+		val c = GridBagConstraints()
 		c.fill = GridBagConstraints.BOTH
 		c.gridwidth = GridBagConstraints.REMAINDER
 		c.gridheight = 2
@@ -164,7 +176,7 @@ class AboutPanel(
 		c.anchor = GridBagConstraints.NORTH
 		layout.setConstraints(panel, c)
 
-		val c2: GridBagConstraints = GridBagConstraints()
+		val c2 = GridBagConstraints()
 		c2.anchor = GridBagConstraints.WEST
 		c2.fill = GridBagConstraints.NONE
 		c2.gridwidth = GridBagConstraints.REMAINDER
@@ -174,7 +186,7 @@ class AboutPanel(
 		scrollLayout.setConstraints(buttonPane, c2)
 		panel.add(buttonPane)
 
-		val c3: GridBagConstraints = GridBagConstraints()
+		val c3 = GridBagConstraints()
 		c3.anchor = GridBagConstraints.CENTER
 		c3.fill = GridBagConstraints.BOTH
 		c3.gridwidth = GridBagConstraints.REMAINDER
@@ -194,23 +206,19 @@ class AboutPanel(
 		if (!coreAddon) {
 			val panel: JPanel = JPanel(FlowLayout(FlowLayout.LEADING))
 			val uninstallButton: JButton = JButton(I18N.strings.addon_about_uninstall.localized())
-			uninstallButton.addActionListener(
-				object : ActionListener {
-					override fun actionPerformed(e: ActionEvent) {
-						manager.uninstallAddon(addonSpec)
-						// let's sleep a bit the file registry takes a bit to remove everything
-						try {
-							Thread.sleep(3000)
-						} catch (ex: InterruptedException) {
-							// ignore
-						}
-						dialog.updateGui()
-					}
-				},
-			)
+			uninstallButton.addActionListener {
+				manager.uninstallAddon(addonSpec)
+				// let's sleep a bit the file registry takes a bit to remove everything
+				try {
+					Thread.sleep(3000)
+				} catch (ex: InterruptedException) {
+					// ignore
+				}
+				dialog.updateGui()
+			}
 			panel.add(uninstallButton)
 
-			val c: GridBagConstraints = GridBagConstraints()
+			val c = GridBagConstraints()
 			c.fill = GridBagConstraints.HORIZONTAL
 			c.gridwidth = GridBagConstraints.REMAINDER
 			c.weightx = 1.0

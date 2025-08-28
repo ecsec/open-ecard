@@ -26,75 +26,89 @@ import org.openecard.gui.swing.Logo
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Insets
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.GroupLayout
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JTextArea
 
 /**
  * @author Moritz Horsch
  */
-class MessageDialog @JvmOverloads constructor(headline: String? = "", message: String? = "") :
-    JPanel() {
-    private val messageLabel = JTextArea(message)
-    private val headlineLabel = JLabel(headline)
+class MessageDialog
+	@JvmOverloads
+	constructor(
+		headline: String? = "",
+		message: String? = "",
+	) : JPanel() {
+		private val messageLabel = JTextArea(message)
+		private val headlineLabel = JLabel(headline)
 
-    init {
-        preferredSize = Dimension(425, 85)
-        initComponents()
-    }
+		init {
+			preferredSize = Dimension(425, 85)
+			initComponents()
+		}
 
-    private fun initComponents() {
-        // Config GUI components
-        headlineLabel.font = headlineLabel.font.deriveFont(Font.BOLD)
+		private fun initComponents() {
+			// Config GUI components
+			headlineLabel.font = headlineLabel.font.deriveFont(Font.BOLD)
 
-        messageLabel.margin = Insets(0, 0, 0, 0)
-        messageLabel.isEditable = false
-        messageLabel.lineWrap = true
-        messageLabel.wrapStyleWord = true
-        messageLabel.font = JButton().font
+			messageLabel.margin = Insets(0, 0, 0, 0)
+			messageLabel.isEditable = false
+			messageLabel.lineWrap = true
+			messageLabel.wrapStyleWord = true
+			messageLabel.font = JButton().font
 
-        val scrollPane = JScrollPane(messageLabel)
-        scrollPane.border = BorderFactory.createEmptyBorder()
+			val scrollPane = JScrollPane(messageLabel)
+			scrollPane.border = BorderFactory.createEmptyBorder()
 
-        val logo = Logo()
+			val logo = Logo()
 
-        // Config layout
-        val layout = GroupLayout(this)
-        setLayout(layout)
+			// Config layout
+			val layout = GroupLayout(this)
+			setLayout(layout)
 
-        layout.autoCreateGaps = true
-        layout.autoCreateContainerGaps = true
+			layout.autoCreateGaps = true
+			layout.autoCreateContainerGaps = true
 
-        layout.setHorizontalGroup(
-            layout.createSequentialGroup()
-                .addComponent(logo, 60, 60, 60)
-                .addGap(20)
-                .addGroup(
-                    layout.createParallelGroup()
-                        .addComponent(headlineLabel)
-                        .addComponent(scrollPane)
-                )
-        )
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                .addComponent(logo)
-                .addGroup(
-                    layout.createSequentialGroup()
-                        .addComponent(headlineLabel)
-                        .addComponent(scrollPane)
-                )
-        )
-    }
+			layout.setHorizontalGroup(
+				layout
+					.createSequentialGroup()
+					.addComponent(logo, 60, 60, 60)
+					.addGap(20)
+					.addGroup(
+						layout
+							.createParallelGroup()
+							.addComponent(headlineLabel)
+							.addComponent(scrollPane),
+					),
+			)
+			layout.setVerticalGroup(
+				layout
+					.createParallelGroup(GroupLayout.Alignment.CENTER)
+					.addComponent(logo)
+					.addGroup(
+						layout
+							.createSequentialGroup()
+							.addComponent(headlineLabel)
+							.addComponent(scrollPane),
+					),
+			)
+		}
 
-    fun setHeadline(headline: String?) {
-        headlineLabel.text = headline
-    }
+		fun setHeadline(headline: String?) {
+			headlineLabel.text = headline
+		}
 
-    var message: String?
-        get() = messageLabel.text
-        set(message) {
-            messageLabel.text = message
-        }
+		var message: String?
+			get() = messageLabel.text
+			set(message) {
+				messageLabel.text = message
+			}
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
-}
+		companion object {
+			private const val serialVersionUID = 1L
+		}
+	}

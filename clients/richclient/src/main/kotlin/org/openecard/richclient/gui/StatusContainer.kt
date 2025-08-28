@@ -33,10 +33,10 @@ import javax.swing.RootPaneContainer
  * @author Tobias Wich
  */
 interface StatusContainer : RootPaneContainer {
-    /**
-     * Perform a UI update of the status elemnt in the container represented by this class.+
-     *
-     * @param status The status object which needs to be redrawn.
-     */
-    fun updateContent(status: Container)
+	/**
+	 * Perform a UI update of the status elemnt in the container represented by this class.+
+	 *
+	 * @param status The status object which needs to be redrawn.
+	 */
+	fun updateContent(status: Container)
 }

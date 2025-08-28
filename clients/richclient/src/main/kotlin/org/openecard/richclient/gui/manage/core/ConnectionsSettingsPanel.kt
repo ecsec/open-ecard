@@ -35,14 +35,14 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * @author Tobias Wich
  */
 class ConnectionsSettingsPanel : SettingsPanel() {
-    private val proxy: SettingsGroup
+	private val proxy: SettingsGroup
 
-    init {
-        proxy = ConnectionSettingsGroup()
-        addSettingsGroup(proxy)
-    }
+	init {
+		proxy = ConnectionSettingsGroup()
+		addSettingsGroup(proxy)
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

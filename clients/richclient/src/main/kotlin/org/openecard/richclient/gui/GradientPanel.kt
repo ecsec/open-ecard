@@ -22,7 +22,11 @@
 
 package org.openecard.richclient.gui
 
-import java.awt.*
+import java.awt.Color
+import java.awt.GradientPaint
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.LayoutManager
 import javax.swing.JPanel
 
 /**
@@ -32,114 +36,114 @@ import javax.swing.JPanel
  * @author Johannes Schmölz
  */
 class GradientPanel : JPanel {
-    var color1: Color? = null
-    var color2: Color? = null
+	var color1: Color? = null
+	var color2: Color? = null
 
-    /**
-     * Constructor of GradientPanel class.
-     */
-    constructor() : super()
+	/**
+	 * Constructor of GradientPanel class.
+	 */
+	constructor() : super()
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param color1 color on the left
-     * @param color2 color on the right
-     */
-    constructor(color1: Color?, color2: Color?) {
-        this.color1 = color1
-        this.color2 = color2
-    }
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param color1 color on the left
+	 * @param color2 color on the right
+	 */
+	constructor(color1: Color?, color2: Color?) {
+		this.color1 = color1
+		this.color2 = color2
+	}
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param layout layout of the panel
-     */
-    constructor(layout: LayoutManager?) : super(layout)
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param layout layout of the panel
+	 */
+	constructor(layout: LayoutManager?) : super(layout)
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param layout layout of the panel
-     * @param color1 color on the left
-     * @param color2 color on the right
-     */
-    constructor(layout: LayoutManager?, color1: Color?, color2: Color?) : super(layout) {
-        this.color1 = color1
-        this.color2 = color2
-    }
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param layout layout of the panel
+	 * @param color1 color on the left
+	 * @param color2 color on the right
+	 */
+	constructor(layout: LayoutManager?, color1: Color?, color2: Color?) : super(layout) {
+		this.color1 = color1
+		this.color2 = color2
+	}
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param isDoubleBuffered set to true to enable double-buffering
-     */
-    constructor(isDoubleBuffered: Boolean) : super(isDoubleBuffered)
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param isDoubleBuffered set to true to enable double-buffering
+	 */
+	constructor(isDoubleBuffered: Boolean) : super(isDoubleBuffered)
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param isDoubleBuffered set to true to enable double-buffering
-     * @param color1 color on the left
-     * @param color2 color on the right
-     */
-    constructor(isDoubleBuffered: Boolean, color1: Color?, color2: Color?) : super(isDoubleBuffered) {
-        this.color1 = color1
-        this.color2 = color2
-    }
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param isDoubleBuffered set to true to enable double-buffering
+	 * @param color1 color on the left
+	 * @param color2 color on the right
+	 */
+	constructor(isDoubleBuffered: Boolean, color1: Color?, color2: Color?) : super(isDoubleBuffered) {
+		this.color1 = color1
+		this.color2 = color2
+	}
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param layout layout of the panel
-     * @param isDoubleBuffered set to true to enable double-buffering
-     */
-    constructor(layout: LayoutManager?, isDoubleBuffered: Boolean) : super(layout, isDoubleBuffered)
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param layout layout of the panel
+	 * @param isDoubleBuffered set to true to enable double-buffering
+	 */
+	constructor(layout: LayoutManager?, isDoubleBuffered: Boolean) : super(layout, isDoubleBuffered)
 
-    /**
-     * Constructor of GradientPanel class.
-     *
-     * @param layout layout of the panel
-     * @param isDoubleBuffered set to true to enable double-buffering
-     * @param color1 color on the left
-     * @param color2 color on the right
-     */
-    constructor(layout: LayoutManager?, isDoubleBuffered: Boolean, color1: Color?, color2: Color?) : super(
-        layout,
-        isDoubleBuffered
-    ) {
-        this.color1 = color1
-        this.color2 = color2
-    }
+	/**
+	 * Constructor of GradientPanel class.
+	 *
+	 * @param layout layout of the panel
+	 * @param isDoubleBuffered set to true to enable double-buffering
+	 * @param color1 color on the left
+	 * @param color2 color on the right
+	 */
+	constructor(layout: LayoutManager?, isDoubleBuffered: Boolean, color1: Color?, color2: Color?) : super(
+		layout,
+		isDoubleBuffered,
+	) {
+		this.color1 = color1
+		this.color2 = color2
+	}
 
-    override fun paintComponent(g: Graphics) {
-        val g2d = g.create() as Graphics2D
+	override fun paintComponent(g: Graphics) {
+		val g2d = g.create() as Graphics2D
 
-        if (color1 == null) {
-            color1 = Color.LIGHT_GRAY
-        }
+		if (color1 == null) {
+			color1 = Color.LIGHT_GRAY
+		}
 
-        if (color2 == null) {
-            color2 = Color.DARK_GRAY
-        }
+		if (color2 == null) {
+			color2 = Color.DARK_GRAY
+		}
 
-        val w = width
-        val h = height
+		val w = width
+		val h = height
 
-        // gradient from left to right
-        val gp = GradientPaint(0f, 0f, color1, w.toFloat(), 0f, color2)
+		// gradient from left to right
+		val gp = GradientPaint(0f, 0f, color1, w.toFloat(), 0f, color2)
 
-        g2d.paint = gp
-        g2d.fillRect(0, 0, w, h)
-        g2d.dispose()
+		g2d.paint = gp
+		g2d.fillRect(0, 0, w, h)
+		g2d.dispose()
 
-        // The gradient will be painted on top of the panel so that all components added to it will be hidden.
-        // In order to make them visible again paintComponent(g) must be called on the superclass.
-        super.paintComponent(g)
-    }
+		// The gradient will be painted on top of the panel so that all components added to it will be hidden.
+		// In order to make them visible again paintComponent(g) must be called on the superclass.
+		super.paintComponent(g)
+	}
 
-    companion object {
-        private const val serialVersionUID = 1L
-    }
+	companion object {
+		private const val serialVersionUID = 1L
+	}
 }

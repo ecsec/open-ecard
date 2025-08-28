@@ -31,14 +31,16 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  *
  * @author Dirk Petrautzki
  */
-class DefaultSettingsPanel(vararg groups: SettingsGroup?) : SettingsPanel() {
-    init {
-        for (group: SettingsGroup? in groups) {
-            addSettingsGroup(group!!)
-        }
-    }
+class DefaultSettingsPanel(
+	vararg groups: SettingsGroup?,
+) : SettingsPanel() {
+	init {
+		for (group: SettingsGroup? in groups) {
+			addSettingsGroup(group!!)
+		}
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

@@ -39,7 +39,6 @@ val logger = KotlinLogging.logger {}
  * @author Dirk Petrautzki
  */
 class RichClientTest {
-
 	private lateinit var tcTokenURL: URL
 	private lateinit var statusURL: URL
 	private lateinit var waitForChangeURL: URL
@@ -49,10 +48,13 @@ class RichClientTest {
 	 */
 	@BeforeTest
 	fun setUp() {
-		tcTokenURL = URL(
-			"http", "127.0.0.1", 24727,
-			"/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml"
-		)
+		tcTokenURL =
+			URL(
+				"http",
+				"127.0.0.1",
+				24727,
+				"/eID-Client?tcTokenURL=http%3A%2F%2Fopenecard-demo.vserver-001.urospace.de%2FtcToken%3Fcard-type%3Dhttp%3A%2F%2Fbsi.bund.de%2Fcif%2Fnpa.xml",
+			)
 		statusURL = URL("http", "127.0.0.1", 24727, "/getStatus")
 		waitForChangeURL = URL("http", "127.0.0.1", 24727, "/waitForChange")
 		val client = RichClient()
@@ -103,7 +105,6 @@ class RichClientTest {
 		}
 	}
 
-
 	/**
 	 * Opens the URLConnection, gets the Response and checks the ResponseCode.
 	 *
@@ -127,7 +128,5 @@ class RichClientTest {
 	 * @param code status code to be checked
 	 * @return true if successful, else false
 	 */
-	private fun checkResponseCode(code: Int): Boolean {
-		return ((code >= 200) && (code < 300))
-	}
+	private fun checkResponseCode(code: Int): Boolean = ((code >= 200) && (code < 300))
 }

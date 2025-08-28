@@ -36,7 +36,10 @@ class HyperlinkCell :
 	override fun call(arg: TableColumn<VersionUpdateTableItem, Hyperlink>): TableCell<VersionUpdateTableItem, Hyperlink> {
 		val cell: TableCell<VersionUpdateTableItem, Hyperlink> =
 			object : TableCell<VersionUpdateTableItem, Hyperlink>() {
-				override fun updateItem(item: Hyperlink, empty: Boolean) {
+				override fun updateItem(
+					item: Hyperlink,
+					empty: Boolean,
+				) {
 					graphic = item
 				}
 			}

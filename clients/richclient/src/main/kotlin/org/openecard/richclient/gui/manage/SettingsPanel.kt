@@ -40,74 +40,74 @@ import javax.swing.ScrollPaneConstants
  * @author Hans-Martin Haase
  */
 abstract class SettingsPanel : JPanel() {
-    private val groups: ArrayList<SettingsGroup> = ArrayList()
+	private val groups: ArrayList<SettingsGroup> = ArrayList()
 	private val contentPane: JPanel = JPanel()
 
-    /**
-     * Creates a panel instance.
-     */
-    init {
+	/**
+	 * Creates a panel instance.
+	 */
+	init {
 		contentPane.setLayout(GridBagLayout())
-        setLayout(GridBagLayout())
-        var c: GridBagConstraints = GridBagConstraints()
-        val scrollPane: JScrollPane = JScrollPane(contentPane)
-        scrollPane.setBorder(BorderFactory.createEmptyBorder())
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
-        scrollPane.getVerticalScrollBar().setValue(0)
-        scrollPane.getVerticalScrollBar().setBlockIncrement(16)
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16)
-        c.fill = GridBagConstraints.BOTH
-        c.gridwidth = GridBagConstraints.REMAINDER
-        c.weightx = 1.0
-        c.weighty = 1.0
-        c.anchor = GridBagConstraints.NORTHWEST
-        add(scrollPane, c)
+		setLayout(GridBagLayout())
+		var c: GridBagConstraints = GridBagConstraints()
+		val scrollPane: JScrollPane = JScrollPane(contentPane)
+		scrollPane.setBorder(BorderFactory.createEmptyBorder())
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
+		scrollPane.getVerticalScrollBar().setValue(0)
+		scrollPane.getVerticalScrollBar().setBlockIncrement(16)
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16)
+		c.fill = GridBagConstraints.BOTH
+		c.gridwidth = GridBagConstraints.REMAINDER
+		c.weightx = 1.0
+		c.weighty = 1.0
+		c.anchor = GridBagConstraints.NORTHWEST
+		add(scrollPane, c)
 
-        // create a filler which is always at the end of the panel
-        c = GridBagConstraints()
-        c.fill = GridBagConstraints.HORIZONTAL
-        c.gridwidth = GridBagConstraints.REMAINDER
-        c.weightx = 1.0
-        c.weighty = 1.0
-        c.anchor = GridBagConstraints.NORTHWEST
-        c.insets = Insets(10, 0, 0, 0)
-        contentPane.add(JPanel(), c)
-    }
+		// create a filler which is always at the end of the panel
+		c = GridBagConstraints()
+		c.fill = GridBagConstraints.HORIZONTAL
+		c.gridwidth = GridBagConstraints.REMAINDER
+		c.weightx = 1.0
+		c.weighty = 1.0
+		c.anchor = GridBagConstraints.NORTHWEST
+		c.insets = Insets(10, 0, 0, 0)
+		contentPane.add(JPanel(), c)
+	}
 
-    /**
-     * Adds a settings group to this panel.
-     *
-     * @param item The group to add to the panel.
-     */
-    protected fun addSettingsGroup(item: SettingsGroup) {
-        val c: GridBagConstraints = GridBagConstraints()
-        c.fill = GridBagConstraints.HORIZONTAL
-        c.gridwidth = GridBagConstraints.REMAINDER
-        c.weightx = 1.0
-        c.weighty = 0.0
-        c.anchor = GridBagConstraints.NORTHWEST
-        c.insets = Insets(10, 0, 0, 0)
-        contentPane.add(item, c, groups.size)
-        groups.add(item)
-    }
+	/**
+	 * Adds a settings group to this panel.
+	 *
+	 * @param item The group to add to the panel.
+	 */
+	protected fun addSettingsGroup(item: SettingsGroup) {
+		val c: GridBagConstraints = GridBagConstraints()
+		c.fill = GridBagConstraints.HORIZONTAL
+		c.gridwidth = GridBagConstraints.REMAINDER
+		c.weightx = 1.0
+		c.weighty = 0.0
+		c.anchor = GridBagConstraints.NORTHWEST
+		c.insets = Insets(10, 0, 0, 0)
+		contentPane.add(item, c, groups.size)
+		groups.add(item)
+	}
 
-    /**
-     * Saves all settings groups of this panel.
-     *
-     * @throws IOException Thrown in case the properties could not be written to the output device.
-     * @throws SecurityException Thrown in case the permission to save the properties is missing.
-     * @throws org.openecard.addon.AddonPropertiesException Thrown in case the AddonProperties object throws this
-     * exception in the store method.
-     */
-    @Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
-    fun saveProperties() {
-        for (next: SettingsGroup in groups) {
-            next.saveProperties()
-        }
-    }
+	/**
+	 * Saves all settings groups of this panel.
+	 *
+	 * @throws IOException Thrown in case the properties could not be written to the output device.
+	 * @throws SecurityException Thrown in case the permission to save the properties is missing.
+	 * @throws org.openecard.addon.AddonPropertiesException Thrown in case the AddonProperties object throws this
+	 * exception in the store method.
+	 */
+	@Throws(IOException::class, SecurityException::class, AddonPropertiesException::class)
+	fun saveProperties() {
+		for (next: SettingsGroup in groups) {
+			next.saveProperties()
+		}
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

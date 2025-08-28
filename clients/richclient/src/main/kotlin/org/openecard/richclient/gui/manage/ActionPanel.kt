@@ -36,41 +36,41 @@ import javax.swing.JPanel
  * @author Tobias Wich
  */
 class ActionPanel : JPanel() {
-    private val glue: Component
+	private val glue: Component
 
-    /**
-     * Creates a panel instance.
-     */
-    init {
-        setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
-        setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0))
+	/**
+	 * Creates a panel instance.
+	 */
+	init {
+		setLayout(BoxLayout(this, BoxLayout.Y_AXIS))
+		setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 0))
 
-        val space: Component = Box.createRigidArea(Dimension(20, 10))
-        add(space)
+		val space: Component = Box.createRigidArea(Dimension(20, 10))
+		add(space)
 
-        glue = Box.createGlue()
-        add(glue)
-    }
+		glue = Box.createGlue()
+		add(glue)
+	}
 
-    /**
-     * Adds an action entry to this panel.
-     *
-     * @param actionEntry Entry to add to the panel.
-     */
-    fun addActionEntry(actionEntry: ActionEntryPanel) {
-        remove(glue)
+	/**
+	 * Adds an action entry to this panel.
+	 *
+	 * @param actionEntry Entry to add to the panel.
+	 */
+	fun addActionEntry(actionEntry: ActionEntryPanel) {
+		remove(glue)
 
-        actionEntry.setAlignmentY(TOP_ALIGNMENT)
-        actionEntry.setAlignmentX(LEFT_ALIGNMENT)
-        add(actionEntry)
+		actionEntry.setAlignmentY(TOP_ALIGNMENT)
+		actionEntry.setAlignmentX(LEFT_ALIGNMENT)
+		add(actionEntry)
 
-        val rigidArea: Component = Box.createRigidArea(Dimension(20, 20))
-        add(rigidArea)
+		val rigidArea: Component = Box.createRigidArea(Dimension(20, 20))
+		add(rigidArea)
 
-        add(glue)
-    }
+		add(glue)
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

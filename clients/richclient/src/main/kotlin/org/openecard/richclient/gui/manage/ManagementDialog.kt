@@ -341,8 +341,7 @@ class ManagementDialog(
 		// AppExtensionActions
 		if (desc.applicationActions.isNotEmpty()) {
 			for (appExtSpec: AppExtensionSpecification in desc.applicationActions) {
-				if (appExtSpec.configDescription != null && appExtSpec.configDescription!!.entries.isNotEmpty()
-				) {
+				if (appExtSpec.configDescription != null && appExtSpec.configDescription!!.entries.isNotEmpty()) {
 					val group =
 						DefaultSettingsGroup(
 							appExtSpec.getLocalizedName(LANGUAGE_CODE) +
@@ -358,8 +357,7 @@ class ManagementDialog(
 		// Binding actions
 		if (desc.bindingActions.isNotEmpty()) {
 			for (appPluginSpec: AppPluginSpecification in desc.bindingActions) {
-				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription!!.entries.isNotEmpty()
-				) {
+				if (appPluginSpec.configDescription != null && appPluginSpec.configDescription!!.entries.isNotEmpty()) {
 					val group =
 						DefaultSettingsGroup(
 							appPluginSpec.getLocalizedName(LANGUAGE_CODE) +
@@ -375,8 +373,7 @@ class ManagementDialog(
 		// IFD Actions
 		if (desc.ifdActions.isNotEmpty()) {
 			for (protPluginSpec: ProtocolPluginSpecification in desc.ifdActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()
-				) {
+				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
 					val group =
 						DefaultSettingsGroup(
 							protPluginSpec.getLocalizedName(LANGUAGE_CODE) +
@@ -392,8 +389,7 @@ class ManagementDialog(
 		// SAL Actions
 		if (desc.salActions.isNotEmpty()) {
 			for (protPluginSpec: ProtocolPluginSpecification in desc.salActions) {
-				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()
-				) {
+				if (protPluginSpec.configDescription != null && protPluginSpec.configDescription!!.entries.isNotEmpty()) {
 					val group =
 						DefaultSettingsGroup(
 							protPluginSpec.getLocalizedName(

@@ -35,12 +35,12 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * @author Tobias Wich
  */
 class GeneralSettingsPanel : SettingsPanel() {
-    init {
-        addSettingsGroup(GeneralSettingsNotificationGroup())
-        addSettingsGroup(GeneralSettingsLegacyGroup())
-    }
+	init {
+		addSettingsGroup(GeneralSettingsNotificationGroup())
+		addSettingsGroup(GeneralSettingsLegacyGroup())
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

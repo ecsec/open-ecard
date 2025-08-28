@@ -34,14 +34,14 @@ import org.openecard.richclient.gui.manage.SettingsPanel
  * @author Tobias Wich
  */
 class LogSettingsPanel : SettingsPanel() {
-    private val logging: LogSettingsGroup
+	private val logging: LogSettingsGroup
 
-    init {
-        logging = LogSettingsGroup()
-        addSettingsGroup(logging)
-    }
+	init {
+		logging = LogSettingsGroup()
+		addSettingsGroup(logging)
+	}
 
-    companion object {
-        private const val serialVersionUID: Long = 1L
-    }
+	companion object {
+		private const val serialVersionUID: Long = 1L
+	}
 }

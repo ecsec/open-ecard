@@ -30,6 +30,7 @@ class SecureMessagingImpl(
 	val protectedLe: Boolean,
 	val protectedHeader: Boolean,
 	val requireSwDo: Boolean,
+	val enforceExtLenSmApdu: Boolean,
 ) : SecureMessaging {
 	init {
 		require(commandStages.isNotEmpty())
@@ -43,7 +44,9 @@ class SecureMessagingImpl(
 		// update header
 		val origCla = requireNotNull(requestApdu.classByteInterIndustry) { "Command APDU uses a proprietary class byte" }
 		val newCla = origCla.setSecureMessaging(smType)
-		val smRequestTemplate = requestApdu.copy(cla = newCla.byte, le = 0u)
+		// override ext length if requested
+		val forceExtLength = if (enforceExtLenSmApdu) true else requestApdu.forceExtendedLength
+		val smRequestTemplate = requestApdu.copy(cla = newCla.byte, le = 0u, forceExtendedLength = forceExtLength)
 
 		// calculate data field
 		val protectedDos =

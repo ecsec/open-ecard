@@ -63,6 +63,7 @@ class PaceProtocol
 					protectedLe = true,
 					protectedHeader = false,
 					requireSwDo = true,
+					enforceExtLenSmApdu = true,
 				)
 			// remove old and set secure messaging in channel
 			channel.removeSecureMessaging()

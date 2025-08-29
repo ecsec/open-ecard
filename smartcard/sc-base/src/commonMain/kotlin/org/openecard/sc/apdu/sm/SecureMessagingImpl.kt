@@ -30,7 +30,7 @@ class SecureMessagingImpl(
 	val protectedLe: Boolean,
 	val protectedHeader: Boolean,
 	val requireSwDo: Boolean,
-	val allowErrorWithoutDos: Boolean,
+	val enforceExtLenSmApdu: Boolean,
 ) : SecureMessaging {
 	init {
 		require(commandStages.isNotEmpty())
@@ -44,7 +44,9 @@ class SecureMessagingImpl(
 		// update header
 		val origCla = requireNotNull(requestApdu.classByteInterIndustry) { "Command APDU uses a proprietary class byte" }
 		val newCla = origCla.setSecureMessaging(smType)
-		val smRequestTemplate = requestApdu.copy(cla = newCla.byte, le = 0u)
+		// override ext length if requested
+		val forceExtLength = if (enforceExtLenSmApdu) true else requestApdu.forceExtendedLength
+		val smRequestTemplate = requestApdu.copy(cla = newCla.byte, le = 0u, forceExtendedLength = forceExtLength)
 
 		// calculate data field
 		val protectedDos =
@@ -105,14 +107,7 @@ class SecureMessagingImpl(
 
 		try {
 			if (responseApdu.data.isEmpty()) {
-				if (allowErrorWithoutDos && !responseApdu.status.isNormal) {
-					// run stages to advance cryptographic counters
-					responseStages.forEach { it.processError() }
-					// use SM APDU as protected APDU
-					return responseApdu
-				} else {
-					throw MissingSmDo("Secure Messaging response does not contain any data")
-				}
+				throw MissingSmDo("Secure Messaging response does not contain any data")
 			}
 
 			val protectedDos =

@@ -192,4 +192,4 @@ versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-version
 
 jfx = { id =  "org.openjfx.javafxplugin", version.ref = "gradle-jfx" }
 
-jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.6.0" }
+jpackage = { id = "org.panteleyev.jpackageplugin", version = "1.7.6" }

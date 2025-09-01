@@ -86,7 +86,7 @@ tasks.withType<AbstractTestTask>().configureEach {
 
 val setAppName = "Open-eCard-App"
 val setAppVendor = "ecsec GmbH"
-val setAppLicenseFile: String = projectDir.resolve("../../LICENSE.GPL").path
+val setAppLicenseFile = projectDir.resolve("../../LICENSE.GPL")
 val setAppAboutUrl = "https://openecard.org/"
 val setAppVersion =
 	VersionNumber.parse(project.version.toString()).let {
@@ -102,11 +102,7 @@ tasks.register<Copy>("copyJar") {
 }
 
 fun JPackageTask.applyDefaults() {
-	input =
-		layout.buildDirectory
-			.dir("jars")
-			.get()
-			.toString()
+	input = layout.buildDirectory.dir("jars")
 	mainJar =
 		tasks.jar
 			.get()
@@ -114,11 +110,7 @@ fun JPackageTask.applyDefaults() {
 			.get()
 	mainClass = application.mainClass.get()
 
-	destination =
-		layout.buildDirectory
-			.dir("dist")
-			.get()
-			.toString()
+	destination = layout.buildDirectory.dir("dist")
 	javaOptions =
 		listOf(
 			"-XX:-UsePerfData",
@@ -149,8 +141,8 @@ fun JPackageTask.applyDefaults() {
 // configs for the packages
 
 fun JPackageTask.linuxConfigs() {
-// 	resourceDir = layout.projectDirectory.dir("src/main/package/linux").toString()
-	icon = layout.projectDirectory.dir("src/main/package/linux/Open-eCard-App.png").toString()
+// 	resourceDir = layout.projectDirectory.dir("src/main/package/linux")
+	icon = layout.projectDirectory.file("src/main/package/linux/Open-eCard-App.png")
 	linuxDebMaintainer = "tobias.wich@ecsec.de"
 	linuxPackageName = "open-ecard-app"
 	linuxAppCategory = "utils"
@@ -160,9 +152,9 @@ fun JPackageTask.linuxConfigs() {
 }
 
 fun JPackageTask.windowsConfigs() {
-	resourceDir = layout.projectDirectory.dir("src/main/package/win").toString()
+	resourceDir = layout.projectDirectory.dir("src/main/package/win")
 
-	icon = layout.projectDirectory.dir("src/main/package/win/Open-eCard-App.ico").toString()
+	icon = layout.projectDirectory.file("src/main/package/win/Open-eCard-App.ico")
 
 	winDirChooser = true
 	winMenuGroup = "misc"
@@ -172,9 +164,9 @@ fun JPackageTask.windowsConfigs() {
 }
 
 fun JPackageTask.macConfigs() {
-	resourceDir = layout.projectDirectory.dir("src/main/package/mac").toString()
+	resourceDir = layout.projectDirectory.dir("src/main/package/mac")
 
-	icon = layout.projectDirectory.dir("src/main/package/mac/Open-eCard-App.icns").toString()
+	icon = layout.projectDirectory.file("src/main/package/mac/Open-eCard-App.icns")
 	macPackageName = "Open-eCard-App"
 	macPackageIdentifier = "org.openecard.versioncheck.MainLoader"
 
@@ -440,7 +432,7 @@ tasks.register("prepareIsccFile", Copy::class) {
 			.replace("\$vendor", setAppVendor)
 			.replace("\$appUrl", setAppAboutUrl)
 			.replace("\$identifier", setAppName)
-			.replace("\$licensePath", setAppLicenseFile)
+			.replace("\$licensePath", setAppLicenseFile.path)
 			.replace("\$outPath", "$projectDir\\build\\dist")
 			.replace("\$iconFile", iconPath)
 			.replace("\$bmpPath", bmpPath)

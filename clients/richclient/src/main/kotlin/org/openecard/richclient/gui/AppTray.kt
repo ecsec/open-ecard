@@ -28,10 +28,14 @@ import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonManager
+import org.openecard.cif.bundled.EgkCifDefinitions
+import org.openecard.cif.bundled.HbaDefinitions
+import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.common.AppVersion.name
 import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
+import org.openecard.richclient.CifDb
 import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
@@ -121,7 +125,21 @@ class AppTray(
 		env: Environment,
 		manager: AddonManager,
 	) {
-		val statusObj = Status(this, env, manager, tray == null)
+		val statusObj =
+			Status(
+				this,
+				env,
+				manager,
+				tray == null,
+				CifDb(
+					setOf(
+						NpaDefinitions.cardType,
+						EgkCifDefinitions.cardType,
+						HbaDefinitions.cardType,
+					),
+				),
+			)
+
 		status = statusObj
 		statusObj.startCardWatcher()
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+	<string name="richclient_status_npa">German Electronic Identity Card</string>
+	<string name="richclient_status_egk">Electronic eHealth Card (Germany)</string>
+	<string name="richclient_status_hba">HPC-G2</string>
+</resources>

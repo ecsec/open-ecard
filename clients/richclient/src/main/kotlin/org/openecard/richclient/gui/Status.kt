@@ -32,10 +32,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.openecard.addon.AddonManager
 import org.openecard.cif.bundled.CompleteTree
+import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.common.AppVersion.name
 import org.openecard.common.interfaces.Environment
-import org.openecard.common.util.ByteUtils
 import org.openecard.i18n.I18N
+import org.openecard.richclient.CifDb
 import org.openecard.richclient.PcscCardWatcher
 import org.openecard.richclient.PcscCardWatcherCallbacks
 import org.openecard.richclient.gui.manage.ManagementDialog
@@ -81,6 +82,7 @@ class Status(
 	private val env: Environment,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
+	private val cifDb: CifDb,
 ) {
 	private val infoMap: MutableMap<String, JPanel?> = ConcurrentSkipListMap()
 	private val cardContext: MutableMap<String, ByteArray> = ConcurrentSkipListMap()
@@ -283,59 +285,12 @@ class Status(
 
 		if (!cardIcons.containsKey(cardType)) {
 			var `is` =
-				env.recognition!!.getCardImage(cardType)
-					?: env.recognition!!.unknownCardImage
+				cifDb.getCardImage(cardType)
 			val icon = GuiUtils.getScaledCardImageIcon(`is`)
 			cardIcons[cardType] = icon
 		}
 
 		return cardIcons[cardType]
-	}
-
-	private fun getCardType(info: String?): String {
-		if (info != null) {
-			val cardType = info
-
-			return resolveCardType(cardType)
-		} else {
-			return I18N.strings.richclient_status_nocard.localized()
-		}
-	}
-
-	private fun resolveCardType(cardType: String): String {
-		if (cardType == "http://bsi.bund.de/cif/unknown") {
-			return I18N.strings.richclient_status_unknowncard.localized()
-		} else {
-			// read CardTypeName from CardInfo file
-			var cardTypeName = cardType
-			val cif = env.cifProvider!!.getCardInfo(cardType)
-
-			if (cif != null) {
-				val type = cif.cardType
-				if (type != null) {
-					var found = false
-					val languages = arrayOf(Locale.getDefault().language, "en")
-
-					// check native lang, then english
-					for (language in languages) {
-						if (found) { // stop when the inner loop terminated
-							break
-						}
-
-						val cardTypeNames = type.cardTypeName
-						for (ist in cardTypeNames) {
-							if (ist.lang.equals(language, ignoreCase = true)) {
-								cardTypeName = ist.value
-								found = true
-								break
-							}
-						}
-					}
-				}
-			}
-
-			return cardTypeName
-		}
 	}
 
 	private fun createInfoLabel(
@@ -347,7 +302,7 @@ class Status(
 		if (ifdName != null) {
 			val cardType = cardType ?: "http://openecard.org/cif/no-card"
 			label.icon = getCardIcon(cardType)
-			label.text = "<html><b>" + getCardType(cardType) + "</b><br><i>" + ifdName + "</i></html>"
+			label.text = "<html><b>" + cifDb.getCardType(cardType) + "</b><br><i>" + ifdName + "</i></html>"
 		} else {
 			// no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
 			// see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
@@ -369,7 +324,11 @@ class Status(
 
 	fun startCardWatcher() {
 		val recognizeCard =
-			DirectCardRecognition(CompleteTree.calls)
+			if (cifDb.supportedCardTypes.isNotEmpty()) {
+				DirectCardRecognition(CompleteTree.calls.removeUnsupported(cifDb.supportedCardTypes))
+			} else {
+				DirectCardRecognition(CompleteTree.calls)
+			}
 
 		val scope = CoroutineScope(Dispatchers.Default)
 
@@ -410,26 +369,6 @@ class Status(
 
 	fun stopCardWatcher() {
 		watcher.stop()
-	}
-
-	private fun isResponsibleContext(
-		ifd: String,
-		ctx: ByteArray,
-	): Boolean {
-		val isResponsible = ByteUtils.compare(ctx, cardContext.getOrDefault(ifd, ctx))
-		LOG.debug { "Event sent has responsibility=$isResponsible for this card." }
-		return isResponsible
-	}
-
-	private fun setResponsibleContext(
-		ifd: String,
-		ctx: ByteArray,
-	) {
-		cardContext[ifd] = ByteUtils.clone(ctx)!!
-	}
-
-	private fun removeResponsibleContext(ifd: String) {
-		cardContext.remove(ifd)
 	}
 
 	fun showUpdateIcon(checker: VersionUpdateChecker) {

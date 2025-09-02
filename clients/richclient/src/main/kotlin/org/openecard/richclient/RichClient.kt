@@ -68,7 +68,6 @@ import org.openecard.recognition.CardRecognitionImpl
 import org.openecard.recognition.RepoCifProvider
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
-import org.openecard.richclient.gui.Status
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
 import org.openecard.transport.dispatcher.MessageDispatcher

@@ -189,7 +189,7 @@ internal class UiStepImpl(
 			val certDesc = certDescRaw.toCertificateDescription()
 
 			// update allowed certificates in eService connection, failing when we already see a problem
-			eserviceClient.setCertificateDescription(certDesc)
+			eserviceClient.certTracker.setCertDesc(certDesc)
 
 			// find chats
 			val optChat =

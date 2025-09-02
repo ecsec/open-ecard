@@ -1,26 +1,22 @@
 package org.openecard.addons.tr03124.transport
 
+import io.ktor.client.HttpClient
 import org.openecard.addons.tr03124.xml.AuthenticationProtocolData
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
-import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.RequestType
 import org.openecard.addons.tr03124.xml.ResponseType
 import org.openecard.addons.tr03124.xml.StartPaos
-import org.openecard.addons.tr03124.xml.TcToken
-import kotlin.random.Random
 
 internal class EidServerPaos(
-	val token: TcToken,
-	val eserviceClient: EserviceClient,
+	val serverUrl: String,
+	val httpClient: HttpClient,
 	val startPaos: StartPaos,
-	private val random: Random = Random.Default,
 ) : EidServerInterface {
-	init {
-		TODO("configure server connection based on PSK, or existing eService connection")
+	private fun deliverMessage(msg: String) {
+		TODO("Implement message delivery")
 	}
 
 	override suspend fun start(): DidAuthenticateRequest {
-		TODO("connect and set certificate in eservice client")
 		TODO("Not yet implemented")
 	}
 

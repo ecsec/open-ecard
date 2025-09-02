@@ -19,13 +19,18 @@ kotlin {
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)
 			// implementation(libs.ktor.serde.xml)
+
+			implementation(libs.ktor.client.core)
 		}
 
 		jvmMain.dependencies {
+			implementation(libs.ktor.client.okhttp)
+			implementation(libs.bc.tls)
 		}
 
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
+			implementation(libs.ktor.client.cio)
 		}
 
 		jvmTest.dependencies {

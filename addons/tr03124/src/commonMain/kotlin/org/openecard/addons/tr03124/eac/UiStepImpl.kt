@@ -26,10 +26,12 @@ import org.openecard.sc.pace.cvc.CardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CardVerifiableCertificate.Companion.toCardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CertificateDescription
 import org.openecard.sc.pace.cvc.CertificateDescription.Companion.toCertificateDescription
-import org.openecard.sc.pace.cvc.PublicKeyReference
+import org.openecard.sc.pace.cvc.Chat.Companion.toChat
+import org.openecard.sc.pace.cvc.CvcChain.Companion.toChain
 import org.openecard.sc.pace.cvc.PublicKeyReference.Companion.toPublicKeyReference
 import org.openecard.sc.tlv.toTlvBer
 import org.openecard.utils.common.cast
+import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
 import java.lang.IllegalStateException
 
@@ -43,6 +45,7 @@ internal class UiStepImpl(
 		val eserviceClient: EserviceClient,
 		val eidServer: EidServerInterface,
 		val eac1InputReq: DidAuthenticateRequest,
+		val eac1Input: Eac1Input,
 		val cvcs: List<CardVerifiableCertificate>,
 		val certDesc: CertificateDescription,
 		val requiredChat: AuthenticationTerminalChat,
@@ -89,8 +92,8 @@ internal class UiStepImpl(
 	}
 
 	private fun getPinDidName(): String {
-		val didName: String = TODO() // ctx.eac1InputReq.didName
-		when (didName) {
+		val didName: String = ctx.eac1InputReq.didName
+		return when (didName) {
 			"PIN" -> NpaDefinitions.Apps.Mf.Dids.pacePin
 			"CAN" -> NpaDefinitions.Apps.Mf.Dids.paceCan
 			"PUK" -> NpaDefinitions.Apps.Mf.Dids.pacePuk
@@ -121,7 +124,7 @@ internal class UiStepImpl(
 
 		val efCa = paceResponse.efCardAccess.v.toEfCardAccess()
 		val ta = TerminalAuthenticationImpl(pace.application.device, efCa)
-		val ca = ChipAuthenticationImpl(pace.application.device, pace)
+		val ca = ChipAuthenticationImpl(pace.application.device, pace, efCa)
 
 		val challenge = ta.challenge
 		val chat =
@@ -134,18 +137,25 @@ internal class UiStepImpl(
 			) {
 				"PACE DID does not contain CHAT used for authentication"
 			}
+		val idPicc = checkNotNull(paceResponse.idIcc) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+
 		val cars =
 			listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
-				it.v
-					.toPublicKeyReference()
-					.joinToString()
+				it.v.toPublicKeyReference()
 			}
-		val idPicc = checkNotNull(paceResponse.idIcc) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+		val chain =
+			cars
+				.asSequence()
+				.map { ctx.cvcs.toChain(it) }
+				.filterNotNull()
+				.firstOrNull()
+				?: throw IllegalArgumentException("Unknown trust chain referenced by CAR")
+
 		val eac1Out =
 			Eac1Output(
 				protocol = ctx.eac1InputReq.data.protocol,
 				certificateHolderAuthorizationTemplate = chat,
-				certificationAuthorityReference = cars,
+				certificationAuthorityReference = cars.map { it.joinToString() },
 				efCardAccess = paceResponse.efCardAccess,
 				idPICC = idPicc,
 				challenge = challenge.toPrintable(),
@@ -156,7 +166,13 @@ internal class UiStepImpl(
 				else -> throw InvalidServerData(ctx.eserviceClient, "")
 			}
 
-		val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In)
+		val aad =
+			ctx.eac1Input.authenticatedAuxiliaryData
+				?.v
+				?.toTlvBer()
+				?.tlv
+
+		val eacAuth: EacAuthentication = EacAuthenticationImpl(ta, ca, eac2In, chain, aad)
 
 		val outMsg = eacAuth.process()
 		ctx.eidServer.sendDidAuthResponse(outMsg)?.let {
@@ -170,7 +186,7 @@ internal class UiStepImpl(
 			}
 		}
 
-		return EidServerStepImpl()
+		return EidServerStepImpl(ctx.eserviceClient, ctx.eidServer, pace.application.device)
 	}
 
 	companion object {
@@ -183,18 +199,18 @@ internal class UiStepImpl(
 			eidServer: EidServerInterface,
 			eac1InputReq: DidAuthenticateRequest,
 		): UiStep {
-			val certsRaw: List<UByteArray> = TODO() // eac1InputReq.data.certificates
-			val certs = certsRaw.map { it.toCardVerifiableCertificate() }
-			val certDescRaw: UByteArray = TODO() // eac1InputReq.data.certificateDescription
-			val certDesc = certDescRaw.toCertificateDescription()
+			val eac1Input: Eac1Input = eac1InputReq.data as Eac1Input
+			val certsRaw = eac1Input.certificates
+			val certs = certsRaw.map { it.v.toCardVerifiableCertificate() }
+			val certDescRaw = eac1Input.certificateDescription
+			val certDesc = certDescRaw.v.toCertificateDescription()
 
 			// update allowed certificates in eService connection, failing when we already see a problem
 			eserviceClient.certTracker.setCertDesc(certDesc)
 
 			// find chats
 			val optChat =
-				TODO()
-					// eac1InputReq.data.optionalChat
+				eac1Input.optionalChat?.toAuthenticationTerminalChat()
 					?: run {
 						// use CHAT from certificate as upper bound, if there is no optional chat specified
 						val cert =
@@ -205,8 +221,7 @@ internal class UiStepImpl(
 					}
 			// use optional chat as lower bound, when there is nothing specified
 			val reqChat =
-				TODO()
-					// eac1InputReq.data.requiredChat
+				eac1Input.requiredChat?.toAuthenticationTerminalChat()
 					?: optChat
 
 			val ctx =
@@ -217,6 +232,7 @@ internal class UiStepImpl(
 					eserviceClient,
 					eidServer,
 					eac1InputReq,
+					eac1Input,
 					certs,
 					certDesc,
 					reqChat,
@@ -226,4 +242,12 @@ internal class UiStepImpl(
 			return UiStepImpl(ctx)
 		}
 	}
+}
+
+@OptIn(ExperimentalUnsignedTypes::class)
+private fun PrintableUByteArray.toAuthenticationTerminalChat(): AuthenticationTerminalChat {
+	val chat = v.toTlvBer().tlv.toChat()
+	return requireNotNull(
+		chat.cast<AuthenticationTerminalChat>(),
+	) { "CHAT in terminal certificate is of the wrong type" }
 }

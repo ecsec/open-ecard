@@ -9,6 +9,7 @@ import org.openecard.sc.apdu.command.transmit
 import org.openecard.sc.pace.asn1.EfCardAccess
 import org.openecard.sc.pace.asn1.MseTags
 import org.openecard.sc.pace.crypto.eacCryptoUtils
+import org.openecard.sc.pace.cvc.CardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CvcChain
 import org.openecard.sc.pace.cvc.PublicKeyReference
 import org.openecard.sc.tlv.ObjectIdentifier
@@ -46,17 +47,21 @@ class TerminalAuthenticationImpl(
 		}
 	}
 
-	override fun verifyTerminalSignature() {
-		val oid: ObjectIdentifier = TODO()
-		val chr: PublicKeyReference = TODO()
-		val aad: Tlv = TODO()
+	@OptIn(ExperimentalUnsignedTypes::class)
+	override fun verifyTerminalSignature(
+		terminalCertificate: CardVerifiableCertificate,
+		terminalSignature: UByteArray,
+		pcdKey: UByteArray,
+		aad: Tlv?,
+	) {
+		val oid: ObjectIdentifier = terminalCertificate.publicKey.identifier
+		val chr: PublicKeyReference = terminalCertificate.certificateHolderReference
 
 		// calculate key
-		val pkPcd: UByteArray = TODO()
 		val caDef = efCa.chipAuthenticationV2.first()
 		val caDomainParams = caDef.chipAuthenticationDomainParameterInfo.standardizedDomainParameters
 		val eacCrypto = eacCryptoUtils()
-		val compressedKey: UByteArray = eacCrypto.compressKey(pkPcd, caDomainParams)
+		val compressedKey: UByteArray = eacCrypto.compressKey(pcdKey, caDomainParams)
 
 		val mse =
 			Mse.mseSet(
@@ -74,7 +79,6 @@ class TerminalAuthenticationImpl(
 			)
 		mse.transmit(card.channel).success()
 
-		val terminalSignature: UByteArray = TODO()
 		val extAuth = ExternalAuthenticate.withoutData(terminalSignature)
 		extAuth.transmit(card.channel).success()
 	}

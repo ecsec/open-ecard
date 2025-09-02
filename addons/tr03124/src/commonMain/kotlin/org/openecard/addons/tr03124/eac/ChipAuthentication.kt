@@ -1,7 +1,8 @@
 package org.openecard.addons.tr03124.eac
 
 interface ChipAuthentication {
-	fun authenticate(): ChipAuthenticationResult
+	@OptIn(ExperimentalUnsignedTypes::class)
+	fun authenticate(pcdKey: UByteArray): ChipAuthenticationResult
 
 	class ChipAuthenticationResult
 		@OptIn(ExperimentalUnsignedTypes::class)

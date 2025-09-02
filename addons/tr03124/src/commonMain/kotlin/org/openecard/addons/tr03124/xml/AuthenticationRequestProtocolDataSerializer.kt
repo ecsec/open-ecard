@@ -41,16 +41,16 @@ private data class AuthenticationRequestProtocolDataInternal(
 	//
 	@SerialName("Certificate")
 	@XmlElement
-	val certificate: List<PrintableUByteArray> = listOf(),
+	val certificates: List<PrintableUByteArray> = listOf(),
 	@SerialName("CertificateDescription")
 	@XmlElement
 	val certificateDescription: PrintableUByteArray? = null,
 	@SerialName("RequiredCHAT")
 	@XmlElement
-	val requiredCHAT: PrintableUByteArray? = null,
+	val requiredChat: PrintableUByteArray? = null,
 	@SerialName("OptionalCHAT")
 	@XmlElement
-	val optionalCHAT: PrintableUByteArray? = null,
+	val optionalChat: PrintableUByteArray? = null,
 	@SerialName("AuthenticatedAuxiliaryData")
 	@XmlElement
 	val authenticatedAuxiliaryData: PrintableUByteArray? = null,
@@ -59,7 +59,7 @@ private data class AuthenticationRequestProtocolDataInternal(
 	val transactionInfo: String? = null,
 	@SerialName("AcceptedEIDType")
 	@XmlElement
-	val acceptedEIDType: List<String> = emptyList(),
+	val acceptedEidType: List<String> = emptyList(),
 	//
 	// EAC2Input
 	//
@@ -87,19 +87,19 @@ private data class AuthenticationRequestProtocolDataInternal(
 			"EAC1InputType" -> {
 				Eac1Input(
 					protocol = protocol,
-					certificate = certificate,
+					certificates = certificates,
 					certificateDescription = certificateDescription.require("CertificateDescription"),
-					requiredCHAT = requiredCHAT,
-					optionalCHAT = optionalCHAT,
+					requiredChat = requiredChat,
+					optionalChat = optionalChat,
 					authenticatedAuxiliaryData = authenticatedAuxiliaryData,
 					transactionInfo = transactionInfo,
-					acceptedEIDType = acceptedEIDType,
+					acceptedEidType = acceptedEidType,
 				)
 			}
 			"EAC2InputType" -> {
 				Eac2Input(
 					protocol = protocol,
-					certificate = certificate,
+					certificates = certificates,
 					ephemeralPublicKey = ephemeralPublicKey.require("EphemeralPublicKey"),
 					signature = signature,
 				)
@@ -121,19 +121,19 @@ private data class AuthenticationRequestProtocolDataInternal(
 					AuthenticationRequestProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC1InputType"),
 						protocol = public.protocol,
-						certificate = public.certificate,
+						certificates = public.certificates,
 						certificateDescription = public.certificateDescription,
-						requiredCHAT = public.requiredCHAT,
-						optionalCHAT = public.optionalCHAT,
+						requiredChat = public.requiredChat,
+						optionalChat = public.optionalChat,
 						authenticatedAuxiliaryData = public.authenticatedAuxiliaryData,
 						transactionInfo = public.transactionInfo,
-						acceptedEIDType = public.acceptedEIDType,
+						acceptedEidType = public.acceptedEidType,
 					)
 				is Eac2Input ->
 					AuthenticationRequestProtocolDataInternal(
 						type = QName(Namespaces.ISO.NS, "EAC2InputType"),
 						protocol = public.protocol,
-						certificate = public.certificate,
+						certificates = public.certificates,
 						ephemeralPublicKey = public.ephemeralPublicKey,
 						signature = public.signature,
 					)

@@ -14,7 +14,7 @@ data class Eac2Input(
 	override val protocol: String,
 	@SerialName("Certificate")
 	@XmlElement
-	val certificate: List<PrintableUByteArray>,
+	val certificates: List<PrintableUByteArray>,
 	@SerialName("EphemeralPublicKey")
 	@XmlElement
 	val ephemeralPublicKey: PrintableUByteArray,

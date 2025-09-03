@@ -251,7 +251,8 @@ class RichClient {
 				throw e
 			}
 
-			tray!!.endSetup(terminalFactory!!, manager!!)
+			val cifDb = CifDb.Companion.Bundled
+			tray!!.endSetup(terminalFactory!!, cifDb, manager!!)
 
 			// Initialize the EventManager
 // 			eventDispatcher!!.add(

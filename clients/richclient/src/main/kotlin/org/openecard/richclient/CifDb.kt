@@ -1,15 +1,21 @@
 package org.openecard.richclient
 
 import org.openecard.cif.bundled.CompleteTree
+import org.openecard.cif.bundled.EgkCif
 import org.openecard.cif.bundled.EgkCifDefinitions
+import org.openecard.cif.bundled.HbaCif
 import org.openecard.cif.bundled.HbaDefinitions
+import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.cif.definition.CardInfoDefinition
 import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.sal.sc.recognition.DirectCardRecognition
 import java.awt.image.BufferedImage
 
 interface CifDb {
 	val supportedCardTypes: Set<String>
+		get() = supportedCifs.map { it.metadata.id }.toSet()
+	val supportedCifs: Set<CardInfoDefinition>
 
 	fun getCardRecognition(): DirectCardRecognition {
 		check(supportedCardTypes.isNotEmpty())
@@ -25,11 +31,11 @@ interface CifDb {
 		const val NO_CARD = "http://openecard.org/cif/no-card"
 
 		object Bundled : CifDb {
-			override val supportedCardTypes: Set<String> =
+			override val supportedCifs =
 				setOf(
-					NpaDefinitions.cardType,
-					EgkCifDefinitions.cardType,
-					HbaDefinitions.cardType,
+					NpaCif,
+					EgkCif,
+					HbaCif,
 				)
 
 			override fun getCardType(cardType: String): String =

@@ -120,6 +120,7 @@ class AppTray(
 	 */
 	fun endSetup(
 		terminalFactory: TerminalFactory,
+		cifDb: CifDb,
 		manager: AddonManager,
 	) {
 		val statusObj =
@@ -128,7 +129,7 @@ class AppTray(
 				terminalFactory,
 				manager,
 				tray == null,
-				CifDb.Companion.Bundled,
+				cifDb,
 			)
 
 		status = statusObj

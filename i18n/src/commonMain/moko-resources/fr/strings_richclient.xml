@@ -10,11 +10,6 @@
 	<string name="richclient_tray_message_loading">%s est en cours de chargement...</string>
 	<string name="richclient_tray_message_shutdown">%s est en train de fermer...</string>
 
-	<!-- Status window-->
-	<string name="richclient_status_nocard">Pas de carte insérée.</string>
-	<string name="richclient_status_noterminal">Aucun terminal connecté.</string>
-	<string name="richclient_status_unknowncard">Carte inconnue inséré.</string>
-
 	<!-- Client -->
 	<string name="richclient_client_startup_failed_headline">Le %s ne peut pas être démarrée.</string>
 	<string name="richclient_client_startup_failed_nocontext">Impossible d'établir le contexte. Peut-être votre service de carte à

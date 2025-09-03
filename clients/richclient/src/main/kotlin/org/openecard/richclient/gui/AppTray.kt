@@ -128,7 +128,6 @@ class AppTray(
 		val statusObj =
 			Status(
 				this,
-				env,
 				manager,
 				tray == null,
 				CifDb(

@@ -10,11 +10,6 @@
 	<string name="richclient_tray_message_loading">%s wird gestartet...</string>
 	<string name="richclient_tray_message_shutdown">%s wird heruntergefahren...</string>
 
-	<!-- Status window-->
-	<string name="richclient_status_nocard">Keine Karte eingesteckt.</string>
-	<string name="richclient_status_noterminal">Kein Kartenleser angeschlossen.</string>
-	<string name="richclient_status_unknowncard">Unbekannte Karte eingesteckt.</string>
-
 	<!-- Client -->
 	<string name="richclient_client_startup_failed_headline">Die %s konnte nicht gestartet werden.</string>
 	<string name="richclient_client_startup_failed_nocontext">Der Anwendungskontext konnte nicht erstellt werden. Vielleicht ist

@@ -37,6 +37,7 @@ import org.openecard.common.AppVersion.name
 import org.openecard.common.interfaces.Environment
 import org.openecard.i18n.I18N
 import org.openecard.richclient.CifDb
+import org.openecard.richclient.MR
 import org.openecard.richclient.PcscCardWatcher
 import org.openecard.richclient.PcscCardWatcherCallbacks
 import org.openecard.richclient.gui.manage.ManagementDialog
@@ -53,7 +54,6 @@ import java.awt.Point
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.util.Locale
 import java.util.concurrent.ConcurrentSkipListMap
 import javax.swing.BorderFactory
 import javax.swing.Box
@@ -79,14 +79,11 @@ private val LOG = KotlinLogging.logger { }
  */
 class Status(
 	private val appTray: AppTray,
-	private val env: Environment,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
 	private val cifDb: CifDb,
 ) {
-	private val infoMap: MutableMap<String, JPanel?> = ConcurrentSkipListMap()
-	private val cardContext: MutableMap<String, ByteArray> = ConcurrentSkipListMap()
-	private val cardIcons = HashMap<String, ImageIcon>()
+	private val infoMap: MutableMap<String, JPanel> = ConcurrentSkipListMap()
 	private var contentPane: JPanel? = null
 	private var infoView: JPanel? = null
 	private var noTerminal: JPanel? = null
@@ -137,7 +134,7 @@ class Status(
 		noTerminal!!.layout = FlowLayout(FlowLayout.LEFT)
 		noTerminal!!.background = Color.white
 		noTerminal!!.add(createInfoLabel())
-		infoMap[NO_TERMINAL_CONNECTED] = noTerminal
+		infoMap[NO_TERMINAL_CONNECTED] = noTerminal!!
 
 		infoView = JPanel()
 		infoView!!.layout = BoxLayout(infoView, BoxLayout.PAGE_AXIS)
@@ -266,7 +263,7 @@ class Status(
 			infoView!!.remove(panel)
 
 			if (infoMap.isEmpty()) {
-				infoMap[NO_TERMINAL_CONNECTED] = noTerminal
+				infoMap[NO_TERMINAL_CONNECTED] = noTerminal!!
 				infoView!!.add(noTerminal)
 			}
 
@@ -276,21 +273,10 @@ class Status(
 		}
 	}
 
-	@Synchronized
-	private fun getCardIcon(cardType: String?): ImageIcon? {
-		var cardType = cardType
-		if (cardType == null) {
-			cardType = "http://openecard.org/cif/no-card"
-		}
-
-		if (!cardIcons.containsKey(cardType)) {
-			var `is` =
-				cifDb.getCardImage(cardType)
-			val icon = GuiUtils.getScaledCardImageIcon(`is`)
-			cardIcons[cardType] = icon
-		}
-
-		return cardIcons[cardType]
+	private fun getCardIcon(cardType: String): ImageIcon {
+		val img = cifDb.getCardImage(cardType)
+		val icon = GuiUtils.getScaledCardImageIcon(img)
+		return icon
 	}
 
 	private fun createInfoLabel(
@@ -300,14 +286,15 @@ class Status(
 		val label = JLabel()
 
 		if (ifdName != null) {
-			val cardType = cardType ?: "http://openecard.org/cif/no-card"
+			val cardType = cardType ?: CifDb.NO_CARD
 			label.icon = getCardIcon(cardType)
 			label.text = "<html><b>" + cifDb.getCardType(cardType) + "</b><br><i>" + ifdName + "</i></html>"
 		} else {
-			// no_terminal.png is based on klaasvangend_USB_plug.svg by klaasvangend
+			// no_terminal.svg is based on klaasvangend_USB_plug.svg by klaasvangend
 			// see: http://openclipart.org/detail/3705/usb-plug-by-klaasvangend
-			label.icon = getCardIcon("http://openecard.org/cif/no-terminal")
-			label.text = "<html><i>" + I18N.strings.richclient_status_noterminal.localized() + "</i></html>"
+			val cardType = CifDb.NO_TERMINAL
+			label.icon = getCardIcon(cardType)
+			label.text = "<html><i>" + cifDb.getCardType(cardType) + "</i></html>"
 		}
 
 		label.iconTextGap = 10

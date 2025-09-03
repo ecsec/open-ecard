@@ -65,6 +65,7 @@ include("addons:tr03112")
 
 include("addons:tr03124")
 
+include("clients:richclient-res")
 include("clients:richclient")
 // include("clients:mobile-lib")
 // include("clients:ios-common")

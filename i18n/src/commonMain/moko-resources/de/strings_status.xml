@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<resources>
-	<string name="richclient_status_npa">Personalausweis</string>
-	<string name="richclient_status_egk">Elektronische Gesundheitskarte</string>
-</resources>

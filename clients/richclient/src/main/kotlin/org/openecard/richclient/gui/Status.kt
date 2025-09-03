@@ -31,20 +31,15 @@ import javafx.stage.WindowEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.openecard.addon.AddonManager
-import org.openecard.cif.bundled.CompleteTree
-import org.openecard.cif.definition.recognition.removeUnsupported
 import org.openecard.common.AppVersion.name
-import org.openecard.common.interfaces.Environment
 import org.openecard.i18n.I18N
 import org.openecard.richclient.CifDb
-import org.openecard.richclient.MR
 import org.openecard.richclient.PcscCardWatcher
 import org.openecard.richclient.PcscCardWatcherCallbacks
 import org.openecard.richclient.gui.manage.ManagementDialog
 import org.openecard.richclient.gui.update.UpdateWindow
 import org.openecard.richclient.updater.VersionUpdateChecker
-import org.openecard.sal.sc.recognition.DirectCardRecognition
-import org.openecard.sc.pcsc.PcscTerminalFactory
+import org.openecard.sc.iface.TerminalFactory
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -79,6 +74,7 @@ private val LOG = KotlinLogging.logger { }
  */
 class Status(
 	private val appTray: AppTray,
+	private val terminalFactory: TerminalFactory,
 	private val manager: AddonManager,
 	private val withControls: Boolean,
 	private val cifDb: CifDb,
@@ -310,16 +306,8 @@ class Status(
 	lateinit var watcher: PcscCardWatcher
 
 	fun startCardWatcher() {
-		val recognizeCard =
-			if (cifDb.supportedCardTypes.isNotEmpty()) {
-				DirectCardRecognition(CompleteTree.calls.removeUnsupported(cifDb.supportedCardTypes))
-			} else {
-				DirectCardRecognition(CompleteTree.calls)
-			}
-
+		val recognizeCard = cifDb.getCardRecognition()
 		val scope = CoroutineScope(Dispatchers.Default)
-
-		val factory = PcscTerminalFactory.instance
 
 		val callbacks =
 			object : PcscCardWatcherCallbacks {
@@ -350,7 +338,7 @@ class Status(
 				}
 			}
 
-		watcher = PcscCardWatcher(callbacks, scope, recognizeCard, factory)
+		watcher = PcscCardWatcher(callbacks, scope, recognizeCard, terminalFactory)
 		watcher.start()
 	}
 

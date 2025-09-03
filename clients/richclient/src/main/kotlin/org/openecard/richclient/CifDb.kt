@@ -1,35 +1,56 @@
 package org.openecard.richclient
 
+import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.EgkCifDefinitions
 import org.openecard.cif.bundled.HbaDefinitions
 import org.openecard.cif.bundled.NpaDefinitions
+import org.openecard.cif.definition.recognition.removeUnsupported
+import org.openecard.sal.sc.recognition.DirectCardRecognition
 import java.awt.image.BufferedImage
 
-class CifDb(
-	val supportedCardTypes: Set<String>,
-) {
-	fun getCardType(cardType: String): String =
-		when (cardType) {
-			NO_TERMINAL -> MR.strings.status_no_terminal.localized()
-			NO_CARD -> MR.strings.status_no_card.localized()
-			NpaDefinitions.cardType -> MR.strings.status_npa.localized()
-			EgkCifDefinitions.cardType -> MR.strings.status_egk.localized()
-			HbaDefinitions.cardType -> MR.strings.status_hba.localized()
-			else -> MR.strings.status_unknown_card.localized()
-		}
+interface CifDb {
+	val supportedCardTypes: Set<String>
 
-	fun getCardImage(cardType: String): BufferedImage =
-		when (cardType) {
-			NO_TERMINAL -> MR.images.no_terminal
-			NO_CARD -> MR.images.no_card
-			NpaDefinitions.cardType -> MR.images.npa
-			EgkCifDefinitions.cardType -> MR.images.egk
-			HbaDefinitions.cardType -> MR.images.hba
-			else -> MR.images.unknown_card
-		}.image
+	fun getCardRecognition(): DirectCardRecognition {
+		check(supportedCardTypes.isNotEmpty())
+		return DirectCardRecognition(CompleteTree.calls.removeUnsupported(supportedCardTypes))
+	}
+
+	fun getCardType(cardType: String): String
+
+	fun getCardImage(cardType: String): BufferedImage
 
 	companion object {
 		const val NO_TERMINAL = "http://openecard.org/cif/no-terminal"
 		const val NO_CARD = "http://openecard.org/cif/no-card"
+
+		object Bundled : CifDb {
+			override val supportedCardTypes: Set<String> =
+				setOf(
+					NpaDefinitions.cardType,
+					EgkCifDefinitions.cardType,
+					HbaDefinitions.cardType,
+				)
+
+			override fun getCardType(cardType: String): String =
+				when (cardType) {
+					NO_TERMINAL -> MR.strings.status_no_terminal.localized()
+					NO_CARD -> MR.strings.status_no_card.localized()
+					NpaDefinitions.cardType -> MR.strings.status_npa.localized()
+					EgkCifDefinitions.cardType -> MR.strings.status_egk.localized()
+					HbaDefinitions.cardType -> MR.strings.status_hba.localized()
+					else -> MR.strings.status_unknown_card.localized()
+				}
+
+			override fun getCardImage(cardType: String): BufferedImage =
+				when (cardType) {
+					NO_TERMINAL -> MR.images.no_terminal
+					NO_CARD -> MR.images.no_card
+					NpaDefinitions.cardType -> MR.images.npa
+					EgkCifDefinitions.cardType -> MR.images.egk
+					HbaDefinitions.cardType -> MR.images.hba
+					else -> MR.images.unknown_card
+				}.image
+		}
 	}
 }

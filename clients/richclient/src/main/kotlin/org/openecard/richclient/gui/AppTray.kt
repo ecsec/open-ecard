@@ -28,11 +28,7 @@ import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.openecard.addon.AddonManager
-import org.openecard.cif.bundled.EgkCifDefinitions
-import org.openecard.cif.bundled.HbaDefinitions
-import org.openecard.cif.bundled.NpaDefinitions
 import org.openecard.common.AppVersion.name
-import org.openecard.common.interfaces.Environment
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
 import org.openecard.richclient.CifDb
@@ -40,6 +36,7 @@ import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.sc.iface.TerminalFactory
 import java.awt.Color
 import java.awt.Container
 import java.awt.Dimension
@@ -118,25 +115,20 @@ class AppTray(
 	 * Finishes the setup process.
 	 * The loading icon is replaced with the eCard logo.
 	 *
-	 * @param env
+	 * @param terminalFactory
 	 * @param manager
 	 */
 	fun endSetup(
-		env: Environment,
+		terminalFactory: TerminalFactory,
 		manager: AddonManager,
 	) {
 		val statusObj =
 			Status(
 				this,
+				terminalFactory,
 				manager,
 				tray == null,
-				CifDb(
-					setOf(
-						NpaDefinitions.cardType,
-						EgkCifDefinitions.cardType,
-						HbaDefinitions.cardType,
-					),
-				),
+				CifDb.Companion.Bundled,
 			)
 
 		status = statusObj

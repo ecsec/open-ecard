@@ -70,6 +70,8 @@ import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
 import org.openecard.richclient.updater.VersionUpdateChecker
 import org.openecard.sal.TinySAL
+import org.openecard.sc.iface.TerminalFactory
+import org.openecard.sc.pcsc.PcscTerminalFactory
 import org.openecard.transport.dispatcher.MessageDispatcher
 import org.openecard.ws.SAL
 import java.io.IOException
@@ -100,6 +102,8 @@ class RichClient {
 
 	// Client environment
 	private var env = ClientEnv()
+
+	private var terminalFactory: TerminalFactory? = null
 
 	// Interface Device Layer (IFD)
 	private var ifd: IFD? = null
@@ -163,6 +167,7 @@ class RichClient {
 			env.recognition = recognition
 
 			// Set up the IFD
+			terminalFactory = PcscTerminalFactory.instance
 			ifd = IFD()
 			ifd!!.addProtocol(ECardConstants.Protocol.PACE, PACEProtocolFactory())
 			ifd!!.setEnvironment(env)
@@ -246,7 +251,7 @@ class RichClient {
 				throw e
 			}
 
-			tray!!.endSetup(env, manager!!)
+			tray!!.endSetup(terminalFactory!!, manager!!)
 
 			// Initialize the EventManager
 // 			eventDispatcher!!.add(
@@ -358,6 +363,7 @@ class RichClient {
 			}
 
 			// shutdown IFD
+			terminalFactory = null
 			if (ifd != null && contextHandle != null) {
 				val releaseContext = ReleaseContext()
 				releaseContext.contextHandle = contextHandle

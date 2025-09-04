@@ -35,6 +35,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.forms.submitForm
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.parameters
+import javafx.application.Application
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,7 @@ import org.openecard.gui.swing.common.GUIDefaults
 import org.openecard.i18n.I18N
 import org.openecard.richclient.gui.AppTray
 import org.openecard.richclient.gui.SettingsAndDefaultViewWrapper
+import org.openecard.richclient.javafx.FXInitializer
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CardWatcherCallback.Companion.registerWith
 import org.openecard.richclient.sc.CifDb
@@ -373,8 +375,7 @@ class RichClient {
 				"Running on ${System.getProperty("os.name")} ${System.getProperty("os.version")} ${System.getProperty("os.arch")}."
 			}
 
-			val client = RichClient()
-			client.setup()
+			Application.launch(FXInitializer::class.java)
 		}
 
 		private fun regKeyExists(

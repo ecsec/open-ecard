@@ -18,12 +18,11 @@ plugins {
 	id("openecard.app-conventions")
 	alias(libs.plugins.jfx)
 	alias(libs.plugins.jpackage)
-	id("dev.mokkery")
 }
 
 javafx {
 	version = libs.versions.jfx.get()
-	modules = listOf("javafx.controls")
+	modules = listOf("javafx.controls", "javafx.fxml")
 }
 
 application {
@@ -57,12 +56,16 @@ dependencies {
 	implementation(project(":cif:bundled-cifs"))
 	implementation(project(":smartcard:pace"))
 
+	// JavaFX
+	implementation(libs.kotlin.coroutines.javafx)
+
 	// http client
 	implementation(libs.ktor.client.core)
 	implementation(libs.ktor.client.okhttp)
 	// proxy
 	implementation(libs.proxyvole)
 
+	// testing
 	testImplementation(libs.bundles.test.basics.kotlin)
 }
 

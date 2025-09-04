@@ -27,6 +27,8 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.Separator
 import dorkbox.systemTray.SystemTray
 import io.github.oshai.kotlinlogging.KotlinLogging
+import javafx.application.Platform
+import javafx.stage.Stage
 import org.openecard.build.BuildInfo
 import org.openecard.common.util.SysUtils
 import org.openecard.i18n.I18N
@@ -34,6 +36,7 @@ import org.openecard.richclient.RichClient
 import org.openecard.richclient.gui.graphics.OecIconType
 import org.openecard.richclient.gui.graphics.oecImage
 import org.openecard.richclient.gui.manage.ManagementDialog
+import org.openecard.richclient.pinmanagement.PinManager
 import org.openecard.richclient.sc.CardWatcher
 import org.openecard.richclient.sc.CifDb
 import java.awt.Color
@@ -154,6 +157,20 @@ class AppTray(
 					},
 				),
 			)
+			tray.menu.add(
+				MenuItem(
+					"PIN Management",
+					object : ActionListener {
+						override fun actionPerformed(e: ActionEvent) {
+							Platform.runLater {
+								val stage = Stage()
+								val pinManager = PinManager(stage, cardWatcher)
+								pinManager.openManagerDialog()
+							}
+						}
+					},
+				),
+			)
 			tray.menu.add(Separator())
 			tray.menu.add(
 				MenuItem(
@@ -195,6 +212,8 @@ class AppTray(
 	 * Removes the tray icon from the tray and terminates the application.
 	 */
 	fun shutdown() {
+// 		pinManager.closeManagementDialog()
+// 		println("dialog closed from shutdown function.")
 		status?.stopCardWatcher()
 		tray?.shutdown()
 		tray = null

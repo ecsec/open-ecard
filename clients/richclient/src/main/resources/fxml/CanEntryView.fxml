@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+	  xmlns:fx="http://javafx.com/fxml"
+	  fx:controller="org.openecard.richclient.pinmanagement.controllers.CanEntryController"
+	  alignment="CENTER" spacing="10">
+	<padding>
+		<Insets top="20" right="20" bottom="20" left="20"/>
+	</padding>
+
+	<Label text="Enter your CAN"/>
+	<PasswordField fx:id="canField" promptText="Enter CAN"/>
+	<Button text="Submit" onAction="#handleSubmit"/>
+	<Label fx:id="errorLabel" styleClass="error-label"/>
+</VBox>

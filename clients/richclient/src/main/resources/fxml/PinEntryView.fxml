@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox fx:controller="org.openecard.richclient.pinmanagement.controllers.PinEntryController"
+	  xmlns:fx="http://javafx.com/fxml"
+	  alignment="CENTER" spacing="10">
+	<padding>
+		<Insets top="20" right="20" bottom="20" left="20"/>
+	</padding>
+	<Label fx:id="titleLabel"/>
+	<PasswordField fx:id="pinField" promptText="Enter PIN"/>
+	<Button text="Submit" onAction="#handleSubmit"/>
+	<Label fx:id="errorLabel" styleClass="error-label"/>
+</VBox>

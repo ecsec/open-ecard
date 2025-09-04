@@ -1,0 +1,53 @@
+.label {
+    -fx-font-size: 14px;
+}
+
+.error-label {
+    -fx-text-fill: red;
+    -fx-wrap-text: true;
+}
+
+.card-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+}
+
+.terminal-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666;
+}
+
+.card-box {
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.message-label {
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+}
+
+.card-list-title {
+    -fx-font-size: 16px;
+}
+
+.card-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+}
+
+.terminal-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666;
+}
+
+.card-box {
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+		   xmlns:fx="http://javafx.com/fxml"
+		   fx:controller="org.openecard.richclient.pinmanagement.controllers.CardSelectionViewController"
+		   stylesheets="@../styles.css"
+		   fx:id="rootPane">
+
+	<VBox fx:id="cardListLayout"
+		  alignment="CENTER"
+		  spacing="10">
+		<Label text="Select a card by clicking on it" styleClass="card-list-title"/>
+		<ScrollPane fitToWidth="true" prefHeight="320">
+			<content>
+				<ListView fx:id="cardListView"/>
+			</content>
+		</ScrollPane>
+	</VBox>
+
+</StackPane>

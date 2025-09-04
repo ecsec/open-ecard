@@ -57,6 +57,7 @@ object ECardConstants {
 	const val SOAP_ENVELOPE: String = "http://schemas.xmlsoap.org/soap/envelope/"
 	const val PAOS_VERSION_11: String = "urn:liberty:paos:2003-08"
 	const val PAOS_VERSION_20: String = "urn:liberty:paos:2006-08"
+	const val PAOS_ADDRESS = "http://www.projectliberty.org/2006/01/role/paos"
 	const val WS_ADDRESSING: String = "http://www.w3.org/2005/03/addressing"
 
 	val ecardApiVersion = ApiVersion(1, 1, 5)

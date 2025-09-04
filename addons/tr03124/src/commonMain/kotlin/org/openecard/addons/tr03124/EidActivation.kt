@@ -29,7 +29,6 @@ object EidActivation {
 		random: Random = Random.Default,
 		startPaos: StartPaos =
 			StartPaos(
-				requestId = random.generateSessionId(),
 				profile = ECardConstants.Profile.ECARD_1_1,
 				sessionIdentifier = session.sessionId,
 				connectionHandle =
@@ -44,7 +43,7 @@ object EidActivation {
 	): UiStep {
 		val certTracker = EserviceCertTracker()
 		val clientFactory = newKtorClientBuilder(certTracker)
-		val eserviceClient = EserviceClientImpl(certTracker, clientFactory)
+		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
 
 		val token = eserviceClient.fetchToken(tokenUrl)
 		val eidServer = eserviceClient.buildEidServerInterface(startPaos)

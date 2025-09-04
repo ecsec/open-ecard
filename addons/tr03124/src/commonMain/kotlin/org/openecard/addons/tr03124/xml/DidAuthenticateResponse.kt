@@ -13,7 +13,7 @@ data class DidAuthenticateResponse(
 	@Serializable(with = AuthenticationResponseProtocolDataSerializer::class)
 	val data: AuthenticationResponseProtocolData,
 	override val result: Result,
-	override val requestId: String?,
+	override val requestId: String? = null,
 	@SerialName("Profile")
 	@XmlElement(false)
 	override val profile: String? = ECardConstants.Profile.ECARD_1_1,

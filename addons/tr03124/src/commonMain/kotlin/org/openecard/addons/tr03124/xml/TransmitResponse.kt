@@ -10,7 +10,7 @@ import org.openecard.utils.serialization.PrintableUByteArray
 @XmlSerialName("TransmitResponse", prefix = Namespaces.ISO.PREFIX, namespace = Namespaces.ISO.NS)
 data class TransmitResponse(
 	override val result: Result,
-	override val requestId: String?,
+	override val requestId: String? = null,
 	@SerialName("Profile")
 	@XmlElement(false)
 	override val profile: String? = ECardConstants.Profile.ECARD_1_1,

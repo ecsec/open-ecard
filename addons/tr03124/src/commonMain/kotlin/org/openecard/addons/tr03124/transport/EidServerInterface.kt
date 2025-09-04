@@ -2,22 +2,18 @@ package org.openecard.addons.tr03124.transport
 
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.xml.AuthenticationProtocolData
+import org.openecard.addons.tr03124.xml.AuthenticationRequestProtocolData
+import org.openecard.addons.tr03124.xml.AuthenticationResponseProtocolData
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest
 import org.openecard.addons.tr03124.xml.Eac1Input
 import org.openecard.addons.tr03124.xml.RequestType
 import org.openecard.addons.tr03124.xml.ResponseType
+import org.openecard.addons.tr03124.xml.TransmitRequest
+import org.openecard.addons.tr03124.xml.TransmitResponse
 
 interface EidServerInterface {
+	@Throws(BindingException::class)
 	suspend fun start(): DidAuthenticateRequest
-
-	/**
-	 * Cancel eID-Server connection.
-	 * This method makes sure that the connection is cleaned up properly.
-	 */
-	fun cancel()
-
-	@OptIn(ExperimentalUnsignedTypes::class)
-	fun getServerCertificateHash(): UByteArray
 
 	/**
 	 * Send DID Authenticate response and handle response from server.
@@ -28,13 +24,13 @@ interface EidServerInterface {
 	 * - any other non error response, then it is saved for being returned in [getFirstDataRequest] and `null` is returned.
 	 */
 	@Throws(BindingException::class)
-	suspend fun sendDidAuthResponse(protocolData: AuthenticationProtocolData): AuthenticationProtocolData?
+	suspend fun sendDidAuthResponse(protocolData: AuthenticationResponseProtocolData): AuthenticationRequestProtocolData?
 
 	/**
 	 * Gets the first data request command after finishing the server authentication with [sendDidAuthResponse].
 	 */
 	@Throws(IllegalStateException::class)
-	fun getFirstDataRequest(): RequestType
+	fun getFirstDataRequest(): TransmitRequest
 
 	/**
 	 * Exchange a data command.
@@ -42,5 +38,5 @@ interface EidServerInterface {
 	 * [org.openecard.addons.tr03124.xml.StartPaosResponse], `null` is returned.
 	 */
 	@Throws(BindingException::class)
-	suspend fun sendDataResponse(message: ResponseType): RequestType?
+	suspend fun sendDataResponse(message: TransmitResponse): TransmitRequest?
 }

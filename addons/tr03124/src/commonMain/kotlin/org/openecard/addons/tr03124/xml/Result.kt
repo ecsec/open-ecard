@@ -13,8 +13,8 @@ data class Result(
 	val major: String,
 	@SerialName("ResultMinor")
 	@XmlElement
-	val minor: String?,
+	val minor: String? = null,
 	@XmlSerialName("ResultMessage")
 	@XmlElement
-	val message: InternationalString?,
+	val message: InternationalString? = null,
 )

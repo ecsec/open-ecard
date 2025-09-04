@@ -8,10 +8,12 @@ import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.xml.StartPaos
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
+import kotlin.random.Random
 
 internal class EserviceClientImpl(
 	override val certTracker: EserviceCertTracker,
 	private val serviceClient: KtorClientBuilder,
+	private val random: Random = Random.Default,
 ) : EserviceClient {
 	private var token: TcToken? = null
 
@@ -31,7 +33,7 @@ internal class EserviceClientImpl(
 	override fun buildEidServerInterface(startPaos: StartPaos): EidServerInterface {
 		val token = checkNotNull(token) { "Trying to build eID-Server client without fetching TCToken first" }
 		val paosClient = serviceClient.buildEidServerClient(token)
-		return EidServerPaos(token.serverAddress, paosClient, startPaos)
+		return EidServerPaos(this, token.serverAddress, paosClient, startPaos, random)
 	}
 
 	override suspend fun redirectToEservice(): BindingResponse {

@@ -2,19 +2,25 @@ package org.openecard.addons.tr03124.transport
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.serialization.kotlinx.xml.xml
 import okhttp3.OkHttpClient
 import okio.ByteString.Companion.toByteString
 import org.bchateau.pskfactories.BcPskSSLSocketFactory
 import org.bchateau.pskfactories.BcPskTlsParams
 import org.bouncycastle.tls.BasicTlsPSKIdentity
 import org.bouncycastle.tls.TlsPSKIdentity
+import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
+import org.openecard.addons.tr03124.xml.eacXml
 import java.security.cert.Certificate
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
@@ -88,12 +94,10 @@ class CertTrackingClientBuilder(
 
 	override fun buildEidServerClient(token: TcToken): HttpClient {
 		val params = token.securityParameters
-		return if (token.securityProtocol == null && params == null) {
-			buildAttachedClient()
-		} else if (token.securityProtocol == TcToken.SecurityProtocolType.TLS_PSK && params != null) {
-			buildPskClient(token.sessionIdentifier, params)
-		} else {
-			throw IllegalArgumentException("TCToken contains invalid combination of eID-Server coordinates")
+		return when (token.securityProtocol) {
+			null if params == null -> buildAttachedClient()
+			TcToken.SecurityProtocolType.TLS_PSK if params != null -> buildPskClient(token.sessionIdentifier, params)
+			else -> throw IllegalArgumentException("TCToken contains invalid combination of eID-Server coordinates")
 		}
 	}
 
@@ -125,6 +129,7 @@ class CertTrackingClientBuilder(
 							resp
 						}.build()
 			}
+			registerPaosNegotiation()
 			followRedirects = false
 		}
 
@@ -140,6 +145,7 @@ class CertTrackingClientBuilder(
 						.sslSocketFactory(SslSettings.getPskSocketFactory(session, psk), tm)
 						.build()
 			}
+			registerPaosNegotiation()
 			followRedirects = false
 		}
 }

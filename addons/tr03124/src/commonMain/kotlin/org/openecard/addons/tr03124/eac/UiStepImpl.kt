@@ -73,7 +73,6 @@ internal class UiStepImpl(
 
 	override suspend fun cancel(): BindingResponse {
 		disconnectCard()
-		ctx.eidServer.cancel()
 		return UserCanceled(ctx.eserviceClient).toResponse()
 	}
 

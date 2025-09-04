@@ -63,7 +63,7 @@ internal class EidServerStepImpl(
 					is TransmitRequest -> {
 						// check if we should cancel
 						ensureActive()
-						val nextResponse: ResponseType = processApdus(nextRequest)
+						val nextResponse = processApdus(nextRequest)
 						eidServer.sendDataResponse(nextResponse)
 					}
 					else -> {

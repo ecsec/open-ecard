@@ -18,9 +18,10 @@ kotlin {
 
 			implementation(libs.kotlin.serialization.core)
 			implementation(libs.kotlin.serialization.xml)
-			// implementation(libs.ktor.serde.xml)
 
 			implementation(libs.ktor.client.core)
+			implementation(libs.ktor.client.nego)
+			implementation(libs.ktor.serde.xml)
 		}
 
 		jvmMain.dependencies {

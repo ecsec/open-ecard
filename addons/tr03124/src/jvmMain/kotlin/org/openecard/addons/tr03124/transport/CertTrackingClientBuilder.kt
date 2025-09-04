@@ -92,6 +92,35 @@ class CertTrackingClientBuilder(
 		}
 	}
 
+	class ClientAbort : Exception()
+
+	override val checkCertClient: CertValidationClient by lazy {
+		val cl =
+			HttpClient(OkHttp) {
+				engine {
+					preconfigured =
+						httpClientBase
+							.newBuilder()
+							.addNetworkInterceptor { chain ->
+								// add network interceptor stopping before the HTTP request is made
+								throw ClientAbort()
+							}.build()
+				}
+				followRedirects = false
+			}
+
+		object : CertValidationClient {
+			override suspend fun checkCert(url: String) {
+				try {
+					val resp = cl.get(url)
+					throw IllegalStateException("HTTP request has been executed, but was not intended to be")
+				} catch (ex: ClientAbort) {
+					return
+				}
+			}
+		}
+	}
+
 	override fun buildEidServerClient(token: TcToken): HttpClient {
 		val params = token.securityParameters
 		return when (token.securityProtocol) {

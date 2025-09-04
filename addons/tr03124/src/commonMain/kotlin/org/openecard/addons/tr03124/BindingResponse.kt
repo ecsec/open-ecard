@@ -10,11 +10,11 @@ interface BindingResponse {
 
 	class ContentResponse(
 		override val status: Int,
-		val payload: Payload,
+		val payload: ContentCode,
 	) : BindingResponse
 
-	class Payload(
-		val mimeType: String,
-		val data: String,
-	)
+	enum class ContentCode {
+		TC_TOKEN_RETRIEVAL_ERROR,
+		COMMUNICATION_ERROR,
+	}
 }

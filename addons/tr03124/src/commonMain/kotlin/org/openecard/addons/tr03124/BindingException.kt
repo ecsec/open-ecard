@@ -1,20 +1,40 @@
 package org.openecard.addons.tr03124
 
+import io.ktor.http.HttpStatusCode
 import org.openecard.addons.tr03124.transport.EserviceClient
 
 sealed class BindingException(
+	msg: String,
+	cause: Throwable?,
+) : Exception(msg, cause) {
+	/**
+	 * Get the BindingResponse from this exception, so the context can be returned to the calling application.
+	 * This function might resolve the final redirect and attaches error codes to it, so there is nothing more to do
+	 * with the response.
+	 * Or it might return a content response directly to the caller.
+	 */
+	abstract suspend fun toResponse(): BindingResponse
+}
+
+sealed class AbstractBindingException(
 	protected val eserviceClient: EserviceClient,
 	msg: String,
 	cause: Throwable?,
 	val minorCode: String,
 	val errorMsg: String? = null,
-) : Exception(msg, cause) {
-	/**
-	 * Get the BindingResponse from this exception, so the context can be returned to the calling application.
-	 * This function resolves the final redirect and attaches error codes to it, so there is nothing more to do with the
-	 * response.
-	 */
-	suspend fun toResponse(): BindingResponse = eserviceClient.redirectToEservice(minorCode, errorMsg)
+) : BindingException(msg, cause) {
+	override suspend fun toResponse(): BindingResponse = eserviceClient.redirectToEservice(minorCode, errorMsg)
+}
+
+class NoTcToken(
+	msg: String,
+	cause: Throwable? = null,
+) : BindingException(msg, cause) {
+	override suspend fun toResponse(): BindingResponse =
+		BindingResponse.ContentResponse(
+			HttpStatusCode.NotFound.value,
+			BindingResponse.ContentCode.TC_TOKEN_RETRIEVAL_ERROR,
+		)
 }
 
 sealed class TrustedChannelEstablishmentError(
@@ -22,7 +42,7 @@ sealed class TrustedChannelEstablishmentError(
 	msg: String? = null,
 	cause: Throwable? = null,
 	errorMsg: String? = null,
-) : BindingException(
+) : AbstractBindingException(
 		eserviceClient,
 		msg ?: "The eID-Client failed to set up a trusted channel to the eID-Server",
 		cause,
@@ -56,13 +76,13 @@ class UserCanceled(
 	eserviceClient: EserviceClient,
 	msg: String? = null,
 	cause: Throwable? = null,
-) : BindingException(eserviceClient, msg ?: "The user aborted the authentication", cause, "cancellationByUser")
+) : AbstractBindingException(eserviceClient, msg ?: "The user aborted the authentication", cause, "cancellationByUser")
 
 sealed class ServerError(
 	eserviceClient: EserviceClient,
 	msg: String,
 	cause: Throwable? = null,
-) : BindingException(eserviceClient, msg, cause, "serverError")
+) : AbstractBindingException(eserviceClient, msg, cause, "serverError")
 
 class InvalidServerData(
 	eserviceClient: EserviceClient,
@@ -80,7 +100,7 @@ class ClientError(
 	eserviceClient: EserviceClient,
 	msg: String? = null,
 	cause: Throwable? = null,
-) : BindingException(
+) : AbstractBindingException(
 		eserviceClient,
 		msg ?: "Any error not covered by the other error codes occurred",
 		cause,

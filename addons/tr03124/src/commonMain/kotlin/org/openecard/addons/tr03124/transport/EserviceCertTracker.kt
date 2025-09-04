@@ -1,5 +1,7 @@
 package org.openecard.addons.tr03124.transport
 
+import io.ktor.http.Url
+import io.ktor.http.hostWithPort
 import org.openecard.sc.pace.cvc.CertificateDescription
 import org.openecard.utils.serialization.PrintableUByteArray
 import org.openecard.utils.serialization.toPrintable
@@ -21,6 +23,26 @@ class EserviceCertTracker {
 
 		// now that we have the reference, it's time to check it
 		allowedCommCerts.checkCertHashes(certsSeen)
+	}
+
+	fun matchesSop(
+		tokenUrl: String,
+		urlToCheck: String,
+	): Boolean {
+		// fallback to TCToken URL
+		val referenceStr = certDesc?.subjectUrl ?: tokenUrl
+		val reference = Url(referenceStr)
+		val url = Url(urlToCheck)
+
+		if (reference.protocol != url.protocol) {
+			return false
+		}
+
+		if (reference.hostWithPort != url.hostWithPort) {
+			return false
+		}
+
+		return true
 	}
 
 	@Throws(UntrustedCertificateError::class)

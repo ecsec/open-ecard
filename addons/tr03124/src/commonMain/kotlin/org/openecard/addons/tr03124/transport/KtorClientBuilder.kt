@@ -6,6 +6,7 @@ import org.openecard.addons.tr03124.xml.TcToken
 interface KtorClientBuilder {
 	val tokenClient: HttpClient
 	val redirectClient: HttpClient
+	val checkCertClient: CertValidationClient
 
 	fun buildEidServerClient(token: TcToken): HttpClient
 }

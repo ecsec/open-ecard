@@ -43,10 +43,11 @@ class AndroidTerminalFactory internal constructor(
 			!nfcEnabled ->
 				throw ReaderUnavailable("NFC is not enabled in system settings.")
 
-			else ->
+			else -> {
 				AndroidTerminals(this, androidActivity, nfcAdapter).also {
 					terminals = it
 				}
+			}
 		}
 
 	val tagIntentHandler: ((tag: Intent) -> Unit) = {
@@ -88,5 +89,5 @@ class AndroidTerminals internal constructor(
 
 	override fun list(): List<Terminal> = listOf(androidTerminal)
 
-	override fun getTerminal(name: String): Terminal? = androidTerminal
+	override fun getTerminal(name: String): Terminal = androidTerminal
 }

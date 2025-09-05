@@ -7,7 +7,13 @@ import org.openecard.addons.tr03124.xml.UserAgentType
 data class ClientInformation(
 	val userAgent: UserAgent,
 	val apiVersion: List<ApiVersion> = listOf(ECardConstants.ecardApiVersion),
-	val supportedDidProtocols: List<String> = listOf(),
+	val supportedDidProtocols: List<String> =
+		listOf(
+			// EAC
+			"urn:oid:1.3.162.15480.3.0.14.2",
+			// EAC 2
+			"urn:oid:1.3.162.15480.3.0.14",
+		),
 )
 
 data class UserAgent(

@@ -3,7 +3,6 @@ package org.openecard.sc.pace.cvc
 import org.openecard.sc.pace.cvc.TermsOfUse.Companion.toTermsOfUse
 import org.openecard.sc.tlv.Tag
 import org.openecard.sc.tlv.TagClass
-import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.findTlv
 import org.openecard.sc.tlv.toObjectIdentifier
@@ -16,6 +15,7 @@ import org.openecard.sc.tlv.toTlvBer
 class CertificateDescription
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
+		rawData: UByteArray,
 		val issuerName: String,
 		val issuerUrl: String?,
 		val subjectName: String,
@@ -24,6 +24,12 @@ class CertificateDescription
 		val redirectUrl: String?,
 		val commCertificates: Set<UByteArray>?,
 	) {
+		@OptIn(ExperimentalUnsignedTypes::class)
+		private val rawData: UByteArray = rawData.copyOf()
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val asBytes: UByteArray get() = rawData.copyOf()
+
 		companion object {
 			@OptIn(ExperimentalUnsignedTypes::class)
 			@Throws(TlvException::class, IllegalArgumentException::class, NoSuchElementException::class)
@@ -85,7 +91,7 @@ class CertificateDescription
 							commDos.map { cdo -> cdo.contentAsBytesBer }.toSet()
 						}
 
-				return CertificateDescription(issName, issUrl, subName, subUrl, tou, redirectUrl, commCerts)
+				return CertificateDescription(this, issName, issUrl, subName, subUrl, tou, redirectUrl, commCerts)
 			}
 		}
 	}

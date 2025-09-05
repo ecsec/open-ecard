@@ -140,6 +140,12 @@ class BcPskTlsParams {
 			suiteToCodeMap["TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256"] = 0xCCAD
 			suiteToCodeMap["TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256"] = 0xD001
 			suiteToCodeMap["TLS_ECDHE_PSK_WITH_AES_256_GCM_SHA384"] = 0xD002
+			// needed for OeC
+			suiteToCodeMap["TLS_RSA_PSK_WITH_AES_256_CBC_SHA"] = 0x0095
+			suiteToCodeMap["TLS_RSA_PSK_WITH_AES_256_CBC_SHA384"] = 0x00b7
+			suiteToCodeMap["TLS_RSA_PSK_WITH_AES_128_CBC_SHA256"] = 0x00b6
+			suiteToCodeMap["TLS_RSA_PSK_WITH_AES_256_GCM_SHA384"] = 0x00ad
+			suiteToCodeMap["TLS_RSA_PSK_WITH_AES_128_GCM_SHA256"] = 0x00ac
 
 			for (entry in suiteToCodeMap.entries) {
 				codeToSuiteMap[entry.value] = entry.key

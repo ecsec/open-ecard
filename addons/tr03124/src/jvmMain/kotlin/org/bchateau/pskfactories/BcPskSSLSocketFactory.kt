@@ -16,23 +16,32 @@
 package org.bchateau.pskfactories
 
 import org.bouncycastle.tls.BasicTlsPSKExternal
+import org.bouncycastle.tls.CertificateRequest
+import org.bouncycastle.tls.NameType
 import org.bouncycastle.tls.PSKTlsClient
 import org.bouncycastle.tls.ProtocolVersion
 import org.bouncycastle.tls.SecurityParameters
+import org.bouncycastle.tls.ServerName
+import org.bouncycastle.tls.TlsAuthentication
 import org.bouncycastle.tls.TlsClientProtocol
+import org.bouncycastle.tls.TlsCredentials
 import org.bouncycastle.tls.TlsPSKExternal
 import org.bouncycastle.tls.TlsPSKIdentity
+import org.bouncycastle.tls.TlsServerCertificate
 import org.bouncycastle.tls.crypto.TlsCrypto
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.IDN
 import java.net.InetAddress
 import java.net.Socket
 import java.net.UnknownHostException
+import java.nio.charset.StandardCharsets
 import java.security.Principal
 import java.security.SecureRandom
 import java.security.cert.Certificate
+import java.security.cert.CertificateFactory
 import java.util.Collections
 import java.util.Vector
 import javax.net.ssl.SSLPeerUnverifiedException
@@ -289,8 +298,31 @@ open class BcPskSSLSocketFactory(
 							externals.add(BasicTlsPSKExternal(pskIdentity.pskIdentity, secret))
 							return externals
 						}
+
+						override fun getSNIServerNames(): Vector<ServerName> = Vector(listOf(host.hostNameToServerName()))
+
+						override fun getAuthentication(): TlsAuthentication? =
+							object : TlsAuthentication {
+								override fun notifyServerCertificate(serverCert: TlsServerCertificate?) {
+									val certFac = CertificateFactory.getInstance("X.509")
+									peerCerts =
+										serverCert?.certificate?.certificateList?.map {
+											certFac.generateCertificate(it.encoded.inputStream())
+										}
+								}
+
+								override fun getClientCredentials(certificateRequest: CertificateRequest?): TlsCredentials? = null
+							}
 					},
 				)
+			}
+
+			private var peerCerts: List<Certificate>? = null
+
+			private fun String.hostNameToServerName(): ServerName {
+				var name = this
+				name = IDN.toASCII(name)
+				return ServerName(NameType.host_name, name.toByteArray(StandardCharsets.US_ASCII))
 			}
 
 			override fun getSession(): SSLSession {
@@ -345,7 +377,7 @@ open class BcPskSSLSocketFactory(
 					override fun getPacketBufferSize(): Int = MAX_SSL_PACKET_SIZE
 
 					@Throws(SSLPeerUnverifiedException::class)
-					override fun getPeerCertificates(): Array<Certificate>? = null
+					override fun getPeerCertificates(): Array<Certificate>? = peerCerts?.toTypedArray()
 
 					override fun getPeerHost(): String = host
 

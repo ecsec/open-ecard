@@ -11,11 +11,15 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.xml.xml
+import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
+import okhttp3.TlsVersion
 import okio.ByteString.Companion.toByteString
 import org.bchateau.pskfactories.BcPskSSLSocketFactory
 import org.bchateau.pskfactories.BcPskTlsParams
 import org.bouncycastle.tls.BasicTlsPSKIdentity
+import org.bouncycastle.tls.CipherSuite
+import org.bouncycastle.tls.ProtocolVersion
 import org.bouncycastle.tls.TlsPSKIdentity
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
@@ -171,7 +175,21 @@ class CertTrackingClientBuilder(
 				preconfigured =
 					httpClientBase
 						.newBuilder()
-						.sslSocketFactory(SslSettings.getPskSocketFactory(session, psk), tm)
+						.connectionSpecs(
+							listOf(
+								ConnectionSpec
+									.Builder(
+										ConnectionSpec.MODERN_TLS,
+									).tlsVersions(TlsVersion.TLS_1_2)
+									.cipherSuites(
+										"TLS_RSA_PSK_WITH_AES_256_CBC_SHA",
+										"TLS_RSA_PSK_WITH_AES_256_CBC_SHA384",
+										"TLS_RSA_PSK_WITH_AES_128_CBC_SHA256",
+										"TLS_RSA_PSK_WITH_AES_256_GCM_SHA384",
+										"TLS_RSA_PSK_WITH_AES_128_GCM_SHA256",
+									).build(),
+							),
+						).sslSocketFactory(SslSettings.getPskSocketFactory(session, psk), tm)
 						.build()
 			}
 			registerPaosNegotiation()
@@ -195,7 +213,17 @@ object SslSettings {
 		psk: TcToken.PskParams,
 	): SSLSocketFactory =
 		BcPskSSLSocketFactory(
-			BcPskTlsParams(),
+			BcPskTlsParams(
+				supportedProtocolVersions = arrayOf(ProtocolVersion.TLSv12),
+				supportedCipherSuiteCodes =
+					intArrayOf(
+						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+						CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA384,
+						CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+						CipherSuite.TLS_RSA_PSK_WITH_AES_256_GCM_SHA384,
+						CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+					),
+			),
 			BasicTlsPSKIdentity(session, psk.psk.v.toByteArray()),
 		)
 

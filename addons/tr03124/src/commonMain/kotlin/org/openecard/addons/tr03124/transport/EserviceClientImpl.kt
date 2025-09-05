@@ -1,11 +1,11 @@
 package org.openecard.addons.tr03124.transport
 
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
-import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse

@@ -4,11 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.xml.xml
 import org.openecard.addons.tr03124.InvalidServerData
@@ -69,11 +69,11 @@ internal class EidServerPaos(
 	private suspend fun deliverMessage(soapEnv: Envelope): Envelope {
 		val resp =
 			httpClient.post(serverUrl) {
+				setBody(soapEnv)
 				contentType(PaosContentType)
 				headers {
 					append("PAOS", paosHeaderValue)
 				}
-				setBody(soapEnv)
 			}
 		throwIf(!resp.status.isSuccess()) {
 			InvalidServerData(serviceClient, "Server returned with status code ${resp.status.value}")

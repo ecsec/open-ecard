@@ -36,6 +36,7 @@ kotlin {
 
 		jvmTest.dependencies {
 			implementation(libs.junit.params)
+			implementation(libs.logback.classic)
 			implementation(project(":smartcard:pcsc-scio"))
 		}
 	}

@@ -12,7 +12,7 @@ class CvcChain(
 	companion object {
 		fun CardVerifiableCertificates.toChain(car: PublicKeyReference): CvcChain? {
 			val chain = buildChain(car)
-			return chain.returnIf { isNotEmpty() }?.let { CvcChain(it) }
+			return chain.returnIf { it.isNotEmpty() }?.let { CvcChain(it) }
 		}
 
 		private fun CardVerifiableCertificates.buildChain(car: PublicKeyReference): List<CardVerifiableCertificate> {

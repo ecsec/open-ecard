@@ -27,6 +27,8 @@ class TerminalAuthenticationImpl(
 	override val challenge: UByteArray by lazy {
 		GetChallenge
 			.forAlgorithm(0u)
+			// read only 8 bytes
+			.copy(le = 8u)
 			.transmit(card.channel)
 			.success()
 			.data

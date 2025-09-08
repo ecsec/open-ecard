@@ -146,8 +146,9 @@ internal class UiStepImpl(
 				) {
 					"PACE DID does not contain CHAT used for authentication"
 				}
-			val idPicc =
-				checkNotNull(paceResponse.idIcc) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+			val idPicc = checkNotNull(paceResponse.idIcc?.v) { "PACE did not yield a ID_PICC value, which is required for EAC" }
+			// remove type byte from the key
+			val idPiccRaw = idPicc.sliceArray(1 until idPicc.size)
 
 			val cars =
 				listOfNotNull(paceResponse.carCurr, paceResponse.carPrev).map {
@@ -169,7 +170,7 @@ internal class UiStepImpl(
 					certificateHolderAuthorizationTemplate = chat,
 					certificationAuthorityReference = cars.map { it.joinToString() },
 					efCardAccess = paceResponse.efCardAccess,
-					idPICC = idPicc,
+					idPICC = idPiccRaw.toPrintable(),
 					challenge = challenge.toPrintable(),
 				)
 			val eac2In =

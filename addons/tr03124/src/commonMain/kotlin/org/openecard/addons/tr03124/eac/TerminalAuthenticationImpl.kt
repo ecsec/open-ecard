@@ -62,6 +62,8 @@ class TerminalAuthenticationImpl(
 		val caDomainParams = caDef.chipAuthenticationDomainParameterInfo.standardizedDomainParameters
 		val eacCrypto = eacCryptoUtils()
 		val compressedKey: UByteArray = eacCrypto.compressKey(pcdKey, caDomainParams)
+		// remove type byte from the key
+		val compressedKeyRaw = compressedKey.sliceArray(1 until compressedKey.size)
 
 		val mse =
 			Mse.mseSet(
@@ -72,7 +74,7 @@ class TerminalAuthenticationImpl(
 					chr.toTlv(MseTags.passwordReference),
 					TlvPrimitive(
 						Tag.forTagNumWithClass(0x91u),
-						compressedKey.toPrintable(),
+						compressedKeyRaw.toPrintable(),
 					), // TODO: see if this tag can be defined in MseTags
 					aad,
 				),

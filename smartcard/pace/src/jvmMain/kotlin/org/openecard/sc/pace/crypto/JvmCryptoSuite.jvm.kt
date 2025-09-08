@@ -113,7 +113,7 @@ internal class JvmPaceCryptoSuite(
 				encKey.toUByteArray(),
 				authResponse.curCar,
 				authResponse.prevCar,
-				iccKey.encoded,
+				iccKey.encodedCompressed,
 			)
 		}
 	}

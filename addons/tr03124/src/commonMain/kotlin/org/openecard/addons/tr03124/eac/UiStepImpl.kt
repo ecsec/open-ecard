@@ -71,7 +71,14 @@ internal class UiStepImpl(
 		}
 	}
 
-	override val guiData: EacUiData = EacUiData(ctx.certDesc, ctx.requiredChat.copy(), ctx.optionalChat.copy())
+	override val guiData: EacUiData =
+		EacUiData(
+			ctx.certDesc,
+			ctx.requiredChat.copy(),
+			ctx.optionalChat.copy(),
+			ctx.eac1Input.transactionInfo,
+			ctx.eac1Input.acceptedEidType,
+		)
 
 	override suspend fun cancel(): BindingResponse {
 		disconnectCard()

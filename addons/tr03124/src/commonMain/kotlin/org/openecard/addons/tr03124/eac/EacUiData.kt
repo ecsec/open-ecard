@@ -7,5 +7,7 @@ class EacUiData(
 	val certificateDescription: CertificateDescription,
 	val requiredChat: AuthenticationTerminalChat,
 	val optionalChat: AuthenticationTerminalChat,
+	val transactionInfo: String?,
+	val acceptedEidType: List<String>,
 	// TODO: Add more data of the process
 )

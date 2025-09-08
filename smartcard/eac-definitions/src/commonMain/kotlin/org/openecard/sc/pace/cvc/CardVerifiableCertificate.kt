@@ -1,9 +1,11 @@
 package org.openecard.sc.pace.cvc
 
 import org.openecard.sc.pace.cvc.CardVerifiableCertificateBody.Companion.toCardVerifiableCertificateBody
+import org.openecard.sc.tlv.Tlv
 import org.openecard.sc.tlv.Tlv.Companion.tagAt
 import org.openecard.sc.tlv.TlvException
 import org.openecard.sc.tlv.toTlvBer
+import org.openecard.utils.common.returnIf
 
 /**
  * Card Verifiable Certificate (CVC) data structure according to TR-03110-3, Sec. C.
@@ -11,11 +13,18 @@ import org.openecard.sc.tlv.toTlvBer
 class CardVerifiableCertificate
 	@OptIn(ExperimentalUnsignedTypes::class)
 	constructor(
-		val original: UByteArray,
+		private val original: UByteArray,
+		private val tlv: Tlv,
 		body: CardVerifiableCertificateBody,
 		val signature: UByteArray,
 	) : CardVerifiableCertificateBody by body {
 		val isTerminalCertificate by lazy { chat.role.code == 0u }
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val originalBytes: UByteArray get() = original.copyOf()
+
+		@OptIn(ExperimentalUnsignedTypes::class)
+		val bodyBytes: UByteArray get() = tlv.contentAsBytesBer.copyOf()
 
 		companion object {
 			@OptIn(ExperimentalUnsignedTypes::class)
@@ -32,7 +41,7 @@ class CardVerifiableCertificate
 					tlv.childList().tagAt(1, CvcTags.signature)?.contentAsBytesBer
 						?: throw IllegalArgumentException("CVC is missing the signature element")
 
-				return CardVerifiableCertificate(this.copyOf(), body, signature)
+				return CardVerifiableCertificate(this.copyOf(), tlv, body, signature)
 			}
 		}
 	}

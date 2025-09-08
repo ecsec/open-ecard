@@ -42,7 +42,7 @@ class TerminalAuthenticationImpl(
 					listOf(cvc.certificateAuthorityReference.toTlv(MseTags.passwordReference)),
 				)
 			mse.transmit(card.channel).success()
-			val pso = PerformSecurityOperation.verifyCertificateBer(cvc.original)
+			val pso = PerformSecurityOperation.verifyCertificateBer(cvc.bodyBytes)
 			pso.transmit(card.channel).success()
 		}
 	}

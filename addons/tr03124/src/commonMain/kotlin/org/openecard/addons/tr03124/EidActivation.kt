@@ -27,28 +27,36 @@ object EidActivation {
 		session: SmartcardSalSession,
 		terminalName: String?,
 		random: Random = Random.Default,
-		startPaos: StartPaos =
-			StartPaos(
-				profile = ECardConstants.Profile.ECARD_1_1,
-				sessionIdentifier = session.sessionId,
-				connectionHandle =
-					ConnectionHandleType(
-						contextHandle = random.nextBytes(32).toUByteArray().toPrintable(),
-						slotHandle = random.nextBytes(32).toUByteArray().toPrintable(),
-					),
-				userAgent = clientInfo.userAgent.toXmlType(),
-				supportedAPIVersions = clientInfo.apiVersion.map { it.toXmlType() },
-				supportedDIDProtocols = clientInfo.supportedDidProtocols,
-			),
+		startPaosBuilder: StartPaosBuilder =
+			object : StartPaosBuilder {
+				override fun build(session: String): StartPaos =
+					StartPaos(
+						profile = ECardConstants.Profile.ECARD_1_1,
+						sessionIdentifier = session,
+						connectionHandle =
+							ConnectionHandleType(
+								contextHandle = random.nextBytes(32).toUByteArray().toPrintable(),
+								slotHandle = random.nextBytes(32).toUByteArray().toPrintable(),
+							),
+						userAgent = clientInfo.userAgent.toXmlType(),
+						supportedAPIVersions = clientInfo.apiVersion.map { it.toXmlType() },
+						supportedDIDProtocols = clientInfo.supportedDidProtocols,
+					)
+			},
 	): UiStep {
 		val certTracker = EserviceCertTracker()
 		val clientFactory = newKtorClientBuilder(certTracker)
 		val eserviceClient = EserviceClientImpl(certTracker, clientFactory, random)
 
 		val token = eserviceClient.fetchToken(tokenUrl)
+		val startPaos = startPaosBuilder.build(token.sessionIdentifier)
 		val eidServer = eserviceClient.buildEidServerInterface(startPaos)
 		val eac1Input = eidServer.start()
 		val uiStep: UiStep = UiStepImpl.createStep(session, terminalName, token, eserviceClient, eidServer, eac1Input)
 		return uiStep
 	}
+}
+
+interface StartPaosBuilder {
+	fun build(session: String): StartPaos
 }

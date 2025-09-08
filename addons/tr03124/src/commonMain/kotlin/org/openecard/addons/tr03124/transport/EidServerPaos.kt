@@ -58,9 +58,9 @@ internal class EidServerPaos(
 
 	private fun setRemoteId(
 		remoteId: String,
-		relatesTo: String,
+		relatesTo: String?,
 	) {
-		if (curMsgId != null && relatesTo != curMsgId) {
+		if (relatesTo != null && relatesTo != curMsgId) {
 			throw InvalidServerData(serviceClient, "PAOS message ID mismatch")
 		}
 		this.remoteId = remoteId
@@ -91,8 +91,7 @@ internal class EidServerPaos(
 
 		// update remote message ID
 		val msgId = respMsg.header?.messageID ?: throw InvalidServerData(serviceClient, "No message ID in PAOS response")
-		val relatesTo =
-			respMsg.header.relatesTo ?: throw InvalidServerData(serviceClient, "No relatesTo message ID in PAOS response")
+		val relatesTo = respMsg.header.relatesTo
 		setRemoteId(msgId, relatesTo)
 
 		// TODO: validate message against xml schema

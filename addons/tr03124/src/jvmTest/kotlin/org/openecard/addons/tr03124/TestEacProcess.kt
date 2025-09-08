@@ -1,5 +1,6 @@
 package org.openecard.addons.tr03124
 
+import io.ktor.client.plugins.logging.LogLevel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assumptions
@@ -16,6 +17,7 @@ import org.openecard.sal.sc.recognition.DirectCardRecognition
 import org.openecard.sc.iface.withContextSuspend
 import org.openecard.sc.pace.PaceFeatureSoftwareFactory
 import org.openecard.sc.pcsc.PcscTerminalFactory
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -27,6 +29,22 @@ class TestEacProcess {
 	@BeforeTest
 	fun loadCan() {
 		npaPin = System.getenv("NPA_PACE_PIN")
+	}
+
+	@BeforeTest
+	fun configureLogging() {
+		Tr03124Config.httpLog = {
+			level = LogLevel.ALL
+		}
+		Tr03124Config.paosLog = {
+			level = LogLevel.ALL
+		}
+	}
+
+	@AfterTest
+	fun resetConfig() {
+		Tr03124Config.httpLog = null
+		Tr03124Config.paosLog = null
 	}
 
 	@OptIn(ExperimentalUnsignedTypes::class)

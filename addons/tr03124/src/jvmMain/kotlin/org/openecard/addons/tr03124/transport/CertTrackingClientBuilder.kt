@@ -5,6 +5,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
@@ -21,6 +23,7 @@ import org.bouncycastle.tls.BasicTlsPSKIdentity
 import org.bouncycastle.tls.CipherSuite
 import org.bouncycastle.tls.ProtocolVersion
 import org.bouncycastle.tls.TlsPSKIdentity
+import org.openecard.addons.tr03124.Tr03124Config
 import org.openecard.addons.tr03124.transport.EidServerPaos.Companion.registerPaosNegotiation
 import org.openecard.addons.tr03124.xml.TcToken
 import org.openecard.addons.tr03124.xml.TcToken.Companion.toTcToken
@@ -80,6 +83,11 @@ class CertTrackingClientBuilder(
 							resp
 						}.build()
 			}
+
+			Tr03124Config.httpLog?.let {
+				install(Logging, it)
+			}
+
 			followRedirects = true
 		}
 	}
@@ -92,6 +100,11 @@ class CertTrackingClientBuilder(
 						.newBuilder()
 						.build()
 			}
+
+			Tr03124Config.httpLog?.let {
+				install(Logging, it)
+			}
+
 			followRedirects = false
 		}
 	}
@@ -110,6 +123,11 @@ class CertTrackingClientBuilder(
 								throw ClientAbort()
 							}.build()
 				}
+
+				Tr03124Config.httpLog?.let {
+					install(Logging, it)
+				}
+
 				followRedirects = false
 			}
 
@@ -162,6 +180,11 @@ class CertTrackingClientBuilder(
 							resp
 						}.build()
 			}
+
+			Tr03124Config.paosLog?.let {
+				install(Logging, it)
+			}
+
 			registerPaosNegotiation()
 			followRedirects = false
 		}
@@ -192,6 +215,11 @@ class CertTrackingClientBuilder(
 						).sslSocketFactory(SslSettings.getPskSocketFactory(session, psk), tm)
 						.build()
 			}
+
+			Tr03124Config.paosLog?.let {
+				install(Logging, it)
+			}
+
 			registerPaosNegotiation()
 			followRedirects = false
 		}

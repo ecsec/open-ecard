@@ -3,13 +3,9 @@ package org.openecard.addons.tr03124.eac
 import org.openecard.addons.tr03124.xml.Eac2Input
 import org.openecard.addons.tr03124.xml.Eac2Output
 import org.openecard.addons.tr03124.xml.EacAdditionalInput
-import org.openecard.sc.pace.cvc.CardVerifiableCertificate.Companion.toCardVerifiableCertificate
 import org.openecard.sc.pace.cvc.CvcChain
-import org.openecard.sc.pace.cvc.CvcChain.Companion.toChain
-import org.openecard.sc.pace.cvc.PublicKeyReference
 import org.openecard.sc.tlv.Tlv
 import org.openecard.utils.serialization.toPrintable
-import java.lang.IllegalArgumentException
 
 class EacAuthenticationImpl(
 	val ta: TerminalAuthentication,

@@ -44,15 +44,17 @@ internal class EidServerStepImpl(
 	}
 
 	override suspend fun processEidServerLogic(): BindingResponse =
-		coroutineScope {
-			val res =
-				async {
-					processEidServerLogicInt()
-				}
-			processingJob = res
-			val resValue = res.await()
-			processingJob = null
-			resValue
+		runEacCatching(eserviceClient) {
+			coroutineScope {
+				val res =
+					async {
+						processEidServerLogicInt()
+					}
+				processingJob = res
+				val resValue = res.await()
+				processingJob = null
+				resValue
+			}
 		}
 
 	private suspend fun CoroutineScope.processEidServerLogicInt(): BindingResponse {

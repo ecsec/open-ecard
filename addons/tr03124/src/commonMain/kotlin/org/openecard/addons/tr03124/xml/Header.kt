@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("Header", prefix = Namespaces.SOAP.PREFIX, namespace = Namespaces.SOAP.NS)
 data class Header(
-	val paos: Paos,
+	val paos: Paos?,
 	@XmlSerialName("MessageID", prefix = Namespaces.WSA.PREFIX, namespace = Namespaces.WSA.NS)
 	@XmlElement
 	val messageID: String? = null,

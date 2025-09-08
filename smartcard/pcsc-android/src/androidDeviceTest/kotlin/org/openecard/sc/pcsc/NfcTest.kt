@@ -288,4 +288,39 @@ class NfcTest {
 			}
 		}
 	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun ensureDispatchNotSwitchOnInPausedState() {
+		runBackgroundTestJobWithActivity { activity ->
+			launch(Dispatchers.IO) {
+				// this will tell the tester to pause the activity and directly after that nfc gets on via factory
+				// this must not crash due to switching on nfc in background
+				countDown(
+					activity,
+					"Pause and resume activity",
+					checkInBetween = { !activity.wasPaused },
+				) {
+					assertTrue(
+						activity.wasPaused,
+						"Activity was not paused and resumed.",
+					)
+
+					activity.factory?.load()?.withContextSuspend { terminals ->
+						// dispatch is on through withContextSuspend
+						val countDown =
+							launch {
+								countDown(activity, "Bring card to device.") {
+									fail("Card not connected within $testTimeout")
+								}
+							}
+
+						terminals.androidTerminal.waitForCardPresent()
+						countDown.cancelAndJoin()
+						assertTrue { terminals.androidTerminal.connect().isCardConnected }
+					}
+				}
+			}
+		}
+	}
 }

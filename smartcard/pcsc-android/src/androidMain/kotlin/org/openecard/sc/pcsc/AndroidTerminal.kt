@@ -36,11 +36,34 @@ class AndroidTerminal(
 ) : Terminal {
 	private var deferredConnection: CompletableDeferred<Nothing?> = CompletableDeferred()
 	var tag: IsoDep? = null
+
+	/**
+	 * The following flags are used to manage the switching of nfc-dispatch handling on android and bind it to the
+	 * lifecycle states of the activity.
+	 * The dispatch has to be switched on to get nfc-intents delivered to the app.
+	 * If the activity gets paused, we switch it off and on again if resumed, if the sdk still wants to read a card.
+	 *
+	 * However, switching the dispatch is only allowed while the activity is in resumed state and
+	 * there is no way to request if the activity is in resumed state directly.
+	 * To get this information we add the lifecycleCallbacks enabling us to switch dispatch in correct lifecycle states.
+	 *
+	 * `waitingForTag` is set while the sdk wants to communicate with a card.
+	 * `resumeNfc` is set if during `waitingForTag` we get paused and have to switch dispatch on again onResume.
+	 *  note that, if the sdk stops waiting during paused (waitingForTag gets false),
+	 *  we also don't switch dispatch on again onResume
+	 *
+	 * There is a second place where `resumeNfc` can be set to true, which is the `terminalOn` function in the case that
+	 * an IllegalstateException is thrown, which happens if we try to switch the dispatch on while the activity is paused.
+	 * This might happen, since the `lifeCycleCallbacks` monitoring the activity state are only in effect while the sdk
+	 * wants to read a card. In the moment `terminalOn` is called, we cannot know in which state the activity is, thus
+	 * it might happen that we try to enable the dispatch during paused state. In this case we catch the thrown exception and
+	 * set the resumeNfc flag to postpone a second attempt when the activity gets resumed again.
+	 */
 	private var waitingForTag = false
+	private var resumeNfc = false
+
 	private val lifeCycleCallbacks =
 		object : Application.ActivityLifecycleCallbacks {
-			private var resumeNfc = false
-
 			override fun onActivityCreated(
 				activity: Activity,
 				savedInstanceState: Bundle?,
@@ -150,7 +173,15 @@ class AndroidTerminal(
 	internal fun terminalOn() {
 		registerLifeCycleCallbacks()
 		waitingForTag = true
-		nfcTagDiscoveryOn()
+		try {
+			nfcTagDiscoveryOn()
+		} catch (e: IllegalStateException) {
+			resumeNfc = true
+			logger.warn {
+				"Catch and ignore ${e.message} due to activity being paused." +
+					" Nfc will get switched on when resumed."
+			}
+		}
 	}
 
 	internal fun terminalOff() {

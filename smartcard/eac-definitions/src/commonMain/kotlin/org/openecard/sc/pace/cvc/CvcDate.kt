@@ -10,8 +10,17 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 data class CvcDate(
+	/**
+	 * Number of the year of this date.
+	 */
 	val year: Int,
+	/**
+	 * Number of the month of this date in the range 1 to 12.
+	 */
 	val month: Int,
+	/**
+	 * Number of the day of this date in the range 1 to 31.
+	 */
 	val day: Int,
 ) : Comparable<CvcDate> {
 	override fun compareTo(other: CvcDate): Int {
@@ -31,7 +40,7 @@ data class CvcDate(
 				is TlvPrimitive -> {
 					val date = this.value
 					val year = 2000u + (date[0] * 10u) + date[1]
-					val month = (date[2] * 10u) + date[3] - 1u
+					val month = (date[2] * 10u) + date[3]
 					val day = (date[4] * 10u) + date[5]
 					CvcDate(year.toInt(), month.toInt(), day.toInt())
 				}

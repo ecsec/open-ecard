@@ -63,12 +63,12 @@ class CvcTest {
 
 			assertEquals(2, cvc.extensions.dos.size)
 
-			assertEquals(CvcDate(2025, 6, 22), cvc.validFrom)
-			assertEquals(CvcDate(2025, 6, 23), cvc.validUntil)
-			assertFalse { Instant.parse("2025-06-21T23:59:59Z").isBetween(cvc.validFrom, cvc.validUntil) }
-			assertTrue { Instant.parse("2025-06-22T00:00:00Z").isBetween(cvc.validFrom, cvc.validUntil) }
-			assertTrue { Instant.parse("2025-06-23T23:59:59Z").isBetween(cvc.validFrom, cvc.validUntil) }
-			assertFalse { Instant.parse("2025-06-24T00:00:00Z").isBetween(cvc.validFrom, cvc.validUntil) }
+			assertEquals(CvcDate(2025, 7, 22), cvc.validFrom)
+			assertEquals(CvcDate(2025, 7, 23), cvc.validUntil)
+			assertFalse { Instant.parse("2025-07-21T23:59:59Z").isBetween(cvc.validFrom, cvc.validUntil) }
+			assertTrue { Instant.parse("2025-07-22T00:00:00Z").isBetween(cvc.validFrom, cvc.validUntil) }
+			assertTrue { Instant.parse("2025-07-23T23:59:59Z").isBetween(cvc.validFrom, cvc.validUntil) }
+			assertFalse { Instant.parse("2025-07-24T00:00:00Z").isBetween(cvc.validFrom, cvc.validUntil) }
 
 			assertIs<AuthenticationTerminalChat>(cvc.chat).let { chat ->
 				assertEquals(Chat.Role.AUTHENTICATION_TERMINAL, chat.role)

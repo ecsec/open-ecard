@@ -64,6 +64,6 @@ data class TcToken(
 				}
 			}
 
-		fun String.toTcToken(): TcToken = Xml.decodeFromString(this)
+		fun String.toTcToken(): TcToken = eacXml.decodeFromString(this)
 	}
 }

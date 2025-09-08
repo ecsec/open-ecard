@@ -77,9 +77,9 @@ class PaceProcess
 		 */
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun mseSetAt(): StatusWordResult {
-			val mse = paceMseSetAt(paceInfos, pinId, chat, certDesc)
-			val secResp = mse.transmit(channel)
-			return when (secResp) {
+			val mse = paceMseSetAt(paceInfos, pinId, chat, null)
+			// val mse = paceMseSetAt(paceInfos, pinId, chat, certDesc)
+			return when (val secResp = mse.transmit(channel)) {
 				is SecurityCommandSuccess -> {
 					secResp.status
 				}
@@ -101,8 +101,7 @@ class PaceProcess
 		@OptIn(ExperimentalUnsignedTypes::class)
 		private fun generalAuthenticateEncryptedNonce(cryptoStep: PaceCryptoSuite.Step1): PaceCryptoSuite.Step2 {
 			val ga = GeneralAuthenticate.withData().setCommandChaining(true)
-			val gaRes = ga.transmit(channel)
-			return when (gaRes) {
+			return when (val gaRes = ga.transmit(channel)) {
 				is SecurityCommandSuccess -> cryptoStep.decryptNonce(gaRes.response.toEncryptedNonce())
 				is SecurityCommandFailure -> throw PaceError(PaceResultCode.GA1_ERROR, gaRes.status)
 			}
@@ -115,8 +114,7 @@ class PaceProcess
 		private fun generalAuthenticateMapNonce(cryptoStep: PaceCryptoSuite.Step2): PaceCryptoSuite.Step3 {
 			val mapPcdDo = TlvPrimitive(GeneralAuthenticateCommandTags.mappingData, cryptoStep.mapPublicKeyPcd().toPrintable())
 			val gaMapNonce = GeneralAuthenticate.withData(listOf(mapPcdDo)).setCommandChaining(true)
-			val gaRes = gaMapNonce.transmit(channel)
-			return when (gaRes) {
+			return when (val gaRes = gaMapNonce.transmit(channel)) {
 				is SecurityCommandSuccess -> cryptoStep.mapPublicKeyIcc(gaRes.response.toMapNonce())
 				is SecurityCommandFailure -> throw PaceError(PaceResultCode.GA2_ERROR, gaRes.status)
 			}
@@ -133,8 +131,7 @@ class PaceProcess
 					cryptoStep.getEncodedPublicKeyPcd().toPrintable(),
 				)
 			val gaKeyAgree = GeneralAuthenticate.withData(listOf(pkPcdDo)).setCommandChaining(true)
-			val gaRes = gaKeyAgree.transmit(channel)
-			return when (gaRes) {
+			return when (val gaRes = gaKeyAgree.transmit(channel)) {
 				is SecurityCommandSuccess -> cryptoStep.decodePublicKeyIcc(gaRes.response.toKeyAgreement())
 				is SecurityCommandFailure -> throw PaceError(PaceResultCode.GA3_ERROR, gaRes.status)
 			}
@@ -151,8 +148,7 @@ class PaceProcess
 					cryptoStep.getAuthenticationTokenPcd().toPrintable(),
 				)
 			val gaToken = GeneralAuthenticate.withData(listOf(atPcdDo))
-			val gaRes = gaToken.transmit(channel)
-			return when (gaRes) {
+			return when (val gaRes = gaToken.transmit(channel)) {
 				is SecurityCommandSuccess -> cryptoStep.verifyTokenIcc(gaRes.response.toAuthenticationToken())
 				is SecurityCommandFailure -> throw PaceError(PaceResultCode.GA4_ERROR, gaRes.status)
 			}

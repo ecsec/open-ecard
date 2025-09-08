@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.openecard.addons.tr03124.testutils.WhenPcscStack
 import org.openecard.addons.tr03124.transport.GovernikusTestServer
+import org.openecard.addons.tr03124.transport.SkidServer
 import org.openecard.cif.bundled.CompleteTree
 import org.openecard.cif.bundled.NpaCif
 import org.openecard.cif.bundled.NpaDefinitions
@@ -50,6 +51,23 @@ class TestEacProcess {
 	@OptIn(ExperimentalUnsignedTypes::class)
 	@Test
 	fun executeEacWithGovernikusTest() {
+		executeEacTest { GovernikusTestServer().loadTcTokenUrl() }
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun executeEacWithSkidProdTest() {
+		executeEacTest { SkidServer.forProdSystem().loadTcTokenUrl() }
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	@Test
+	fun executeEacWithSkidStageTest() {
+		executeEacTest { SkidServer.forStageSystem().loadTcTokenUrl() }
+	}
+
+	@OptIn(ExperimentalUnsignedTypes::class)
+	private fun executeEacTest(tokenProvider: suspend () -> String) {
 		// use runBlocking as we want a lifelike test
 		runBlocking {
 			PcscTerminalFactory.instance.load().withContextSuspend { ctx ->
@@ -88,7 +106,7 @@ class TestEacProcess {
 
 				val clientInfo = ClientInformation(UserAgent("Open-eCard Test", UserAgent.Version(1, 0, 0)))
 
-				val tokenUrl = GovernikusTestServer().loadTcTokenUrl()
+				val tokenUrl = tokenProvider()
 
 				val session = sal.startSession()
 

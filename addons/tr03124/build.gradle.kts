@@ -33,6 +33,7 @@ kotlin {
 		commonTest.dependencies {
 			implementation(libs.bundles.test.basics.kotlin)
 			implementation(libs.ktor.client.cio)
+			implementation(libs.ktor.serde.json)
 		}
 
 		jvmTest.dependencies {

@@ -8,9 +8,11 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.yield
+import org.openecard.addons.tr03124.BindingException
 import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.UserCanceled
+import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.addons.tr03124.xml.ECardConstants
@@ -33,15 +35,17 @@ internal class EidServerStepImpl(
 ) : EidServerStep {
 	private var processingJob: Deferred<BindingResponse>? = null
 
-	override suspend fun cancel(): BindingResponse {
+	override suspend fun cancel(): BindingResponse =
 		try {
-			processingJob?.cancelAndJoin()
-		} catch (ex: CancellationException) {
-			// ignore errors of the job
+			runEacCatching(eserviceClient) {
+				processingJob?.cancelAndJoin()
+
+				processingJob = null
+				UserCanceled(eserviceClient).toResponse()
+			}
+		} catch (ex: BindingException) {
+			ex.toResponse()
 		}
-		processingJob = null
-		return UserCanceled(eserviceClient).toResponse()
-	}
 
 	override suspend fun processEidServerLogic(): BindingResponse =
 		runEacCatching(eserviceClient) {
@@ -70,7 +74,10 @@ internal class EidServerStepImpl(
 					}
 					else -> {
 						// wrong type
-						return InvalidServerData(eserviceClient, "Server sent something other than a transmit request").toResponse()
+						return InvalidServerData(
+							eserviceClient,
+							"Server sent something other than a transmit request",
+						).toResponse()
 					}
 				}
 		}

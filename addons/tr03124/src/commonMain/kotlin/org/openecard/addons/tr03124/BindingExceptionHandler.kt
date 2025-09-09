@@ -1,8 +1,6 @@
-package org.openecard.addons.tr03124.eac
+package org.openecard.addons.tr03124
 
-import io.ktor.utils.io.CancellationException
-import org.openecard.addons.tr03124.BindingException
-import org.openecard.addons.tr03124.ClientError
+import kotlinx.coroutines.CancellationException
 import org.openecard.addons.tr03124.transport.EserviceClient
 
 suspend fun <T> runEacCatching(
@@ -12,7 +10,7 @@ suspend fun <T> runEacCatching(
 	try {
 		return block()
 	} catch (ex: CancellationException) {
-		throw ex
+		throw UserCanceled(eserviceClient, cause = ex)
 	} catch (ex: BindingException) {
 		throw ex
 	} catch (ex: Exception) {

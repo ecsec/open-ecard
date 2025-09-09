@@ -5,6 +5,7 @@ import org.openecard.addons.tr03124.BindingResponse
 import org.openecard.addons.tr03124.ClientError
 import org.openecard.addons.tr03124.InvalidServerData
 import org.openecard.addons.tr03124.UserCanceled
+import org.openecard.addons.tr03124.runEacCatching
 import org.openecard.addons.tr03124.transport.EidServerInterface
 import org.openecard.addons.tr03124.transport.EserviceClient
 import org.openecard.addons.tr03124.xml.DidAuthenticateRequest

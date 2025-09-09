@@ -19,8 +19,9 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 
 class SkidServer(
-	val fsCidUrl: String = "https://service.skidentity.de/fs",
-	val brokerUrl: String = "https://service.skidentity.de/broker",
+	val idsUrl: String,
+	val fsCidUrl: String,
+	val brokerUrl: String,
 	val client: HttpClient =
 		HttpClient(CIO) {
 			install(HttpCookies)
@@ -34,7 +35,7 @@ class SkidServer(
 		},
 ) {
 	companion object {
-		fun forSystem(baseUrl: String) = SkidServer("$baseUrl/fs", "$baseUrl/broker")
+		fun forSystem(baseUrl: String) = SkidServer("$baseUrl/idm/w3", "$baseUrl/fs", "$baseUrl/broker")
 
 		fun forProdSystem() = forSystem(PROD)
 
@@ -91,7 +92,7 @@ class SkidServer(
 								</RequestedAttributes>
 								""".trim(),
 							)
-							append("auth-return-url", "https://service.skidentity.de/idm/w3/finish/")
+							append("auth-return-url", "$idsUrl/finish/")
 							append("option-group", "npa")
 						},
 				) {
